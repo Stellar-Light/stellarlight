@@ -92,7 +92,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 7. **Funding signal.** What's been funded in this area? Filter `/api/projects/search?q={keywords}&scfAwarded=1` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete:
    - (a) Which upcoming hackathon to enter (`/api/hackathons?status=upcoming`).
-   - (b) Whether an **open RFP** (currently fundable) matches the idea (`/api/rfps?status=open&q={keywords}`). Open RFPs are ready to be built — winners get SCF grant funding. **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
+   - (b) Whether an **open RFP** (brief still soliciting — check `meta.scfRound` for whether the SCF submission window is open today) matches the idea (`/api/rfps?status=open&q={keywords}`). Open RFPs are ready to be built — winners get SCF grant funding. **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at `https://stellarlight.xyz/ideas` via "Suggest a Need" — community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
    - (c) Which SDK skill to install next from `skills.stellar.org`.
 
 ## Specialized workflows
@@ -138,7 +138,7 @@ Triggered by *"who should audit my contract"*, *"find me an auditor"*, *"which a
 
 Triggered by *"which RFP should I go for"*, *"compare the open RFPs"*, *"rank the RFPs for my team"*. Fit is relative to the team — never rank in a vacuum.
 
-1. **Get the field.** `/api/rfps?status=open` — every currently fundable brief. If the user hasn't said what their team is good at, ask one question: *"what's your team's edge — Rust/Soroban, frontend/dapp, payments infra, data?"*
+1. **Get the field.** `/api/rfps?status=open` — every brief still soliciting (the live SCF submission window is in `meta.scfRound`, and open-brief does not by itself mean the window accepts submissions today). If the user hasn't said what their team is good at, ask one question: *"what's your team's edge — Rust/Soroban, frontend/dapp, payments infra, data?"*
 2. **Competition density per RFP.** For each open RFP: `/api/projects/search?q={rfp topic}&limit=10` — how many existing projects could credibly pivot to claim it. An RFP with 6 adjacent funded teams is a different bet than one with zero.
 3. **Crowdedness context.** `/api/clusters?dimension=types` for the lane each RFP sits in.
 4. **Score each RFP** on four axes: team-skill fit, competition density, scope realism for the quarter timeline, award size vs effort.

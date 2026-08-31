@@ -210,9 +210,16 @@ async function answeredElsewhere(query: string): Promise<string | null> {
 	// Partners belongs here too: service providers live on /api/partners BY
 	// DESIGN (the projects meta hint says so), so a provider name like
 	// `finclusive` replayed against the projects endpoint read as a directory
-	// coverage gap while the corpus served it all along. Partners q-matching is
-	// strict (probed 2026-08-31: zorblend/crdt/warmancer → 0 rows, finclusive
-	// → its row), so this can't suppress a real gap with a loose neighbour.
+	// coverage gap while the corpus served it all along.
+	//
+	// HONESTY BOUND (cross-vendor audit 2026-08-31): partners q-scoring is
+	// partial/OR keyword overlap — bare junk tokens return 0 rows (probed:
+	// zorblend/crdt/warmancer), but a multi-token query containing one common
+	// word ("payments", "wallet") returns overlap rows, so this leg CAN
+	// suppress a multi-token gap with a loose neighbour. The mode filter below
+	// is the guard we have: semantic AND weak-filler pages (all-stopword
+	// queries served with an advisory) never count as answers. Anything
+	// sharper needs a matchMode the partners route doesn't yet serve.
 	for (const [surface, path] of [
 		["repos", "/api/repos/search"],
 		["research", "/api/research"],
@@ -230,9 +237,16 @@ async function answeredElsewhere(query: string): Promise<string | null> {
 			const d: any = await res.json();
 			const rows: unknown[] =
 				d?.repos ?? d?.results ?? d?.research ?? d?.partners ?? d?.items ?? [];
-			// Semantic neighbours are not answers — the same rule this engine
-			// already applies to the projects endpoint.
-			if (Array.isArray(rows) && rows.length > 0 && d?.meta?.matchMode !== "semantic")
+			// Neighbour/filler pages are not answers — semantic (the rule this
+			// engine already applies to the projects endpoint) and weak (the
+			// partners route's all-stopword filler mode) both fail the test.
+			const mode = d?.meta?.matchMode;
+			if (
+				Array.isArray(rows) &&
+				rows.length > 0 &&
+				mode !== "semantic" &&
+				mode !== "weak"
+			)
 				return surface;
 		} catch {}
 	}

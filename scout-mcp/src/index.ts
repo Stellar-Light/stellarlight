@@ -564,7 +564,7 @@ server.registerTool(
 	{
 		title: "Explain a Stellar repo's internals (deep code answer)",
 		description:
-			"Source-grounded ANSWER to a deep code question about a Stellar internal — routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls), then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. Not for discovering which repos/projects exist → use search_repos / search_projects.",
+			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. Not for discovering which repos/projects exist → use search_repos / search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -594,13 +594,13 @@ server.registerTool(
 	{
 		title: "List Stellar RFPs (SCF-funded sponsor briefs)",
 		description:
-			"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use search_research.",
+			"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use search_research.",
 		inputSchema: {
 			status: z
 				.enum(["open", "closed"])
 				.optional()
 				.describe(
-					"Open RFPs are fundable for the current SCF quarter; closed are prior rounds.",
+					"open = the sponsor brief is still soliciting (NOT proof the SCF submission window is open today — check meta.scfRound); closed = prior rounds.",
 				),
 			quarter: z
 				.string()
@@ -816,7 +816,7 @@ server.registerTool(
 	{
 		title: "Search Stellar ecosystem partners (audit firms, anchors, infra)",
 		description:
-			"The curated ecosystem partner directory — vetted service providers a builder hires or integrates: audit firms, anchors & on/off-ramps, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor in <region>'. Not for a built product/project → use search_projects.",
+			"The curated Stellar ecosystem partner directory — vetted service providers a builder hires or integrates: audit firms, anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor or ramp in <region>'. Not for a built product/project → use search_projects.",
 		inputSchema: {
 			type: z
 				.string()

@@ -177,24 +177,42 @@ export function parseRoundVerdicts(html: string): {
 	// resolved embed matched as id "r" beside "recpWygA3kmg3NsZx", summing #44
 	// to exactly 2× the page's own Total awarded). A fragment id is always a
 	// PREFIX of the full id (the regex needs the literal `"id":"` before the
-	// capture, which only survives on the head side of the split). So: a card
-	// whose id is a proper prefix of another same-polarity card's id, with the
-	// same round and award type, is that card's other embed — merge, never sum.
+	// capture, which only survives on the head side of the split).
+	//
+	// Audit hardening (2026-08-31): a bare fragment like "r" prefixes EVERY
+	// Airtable rec-id, so with two same-round/type awarded cards the fragment
+	// of the larger could merge into the SMALLER host and Math.max-inflate its
+	// budget — reproduced: 15,000 + 124,600 + frag("r", 124,600) summed the
+	// round to 249,200 while the count gate read 2 = 2 and passed. So a
+	// fragment merges ONLY into a budget-AGREEING host (equal, or the budget
+	// missing on one side); with no agreeing host it still proves round
+	// MEMBERSHIP (its verdict is real) but contributes no count and no budget
+	// — a fragment is never its own card.
+	const isFragmentOf = (card: Card, other: Card) =>
+		other !== card &&
+		other.isAward === card.isAward &&
+		other.id.length > card.id.length &&
+		other.id.startsWith(card.id) &&
+		other.roundNum === card.roundNum &&
+		(other.awardType === card.awardType ||
+			other.awardType === null ||
+			card.awardType === null);
+	const allCards = [...cardByKey.values()];
 	const cards: Card[] = [];
-	for (const card of cardByKey.values()) {
-		const host = [...cardByKey.values()].find(
-			(other) =>
-				other !== card &&
-				other.isAward === card.isAward &&
-				other.id.length > card.id.length &&
-				other.id.startsWith(card.id) &&
-				other.roundNum === card.roundNum &&
-				(other.awardType === card.awardType ||
-					other.awardType === null ||
-					card.awardType === null),
-		);
-		if (host) mergeInto(host, card);
-		else cards.push(card);
+	const membershipOnly: Card[] = [];
+	for (const card of allCards) {
+		const hosts = allCards.filter((o) => isFragmentOf(card, o));
+		if (!hosts.length) {
+			cards.push(card);
+			continue;
+		}
+		const agreeing =
+			hosts.find(
+				(h) => h.budgetUSD !== null && h.budgetUSD === card.budgetUSD,
+			) ??
+			hosts.find((h) => h.budgetUSD === null || card.budgetUSD === null);
+		if (agreeing) mergeInto(agreeing, card);
+		else membershipOnly.push(card);
 	}
 	const awarded = new Set<string>();
 	const negative = new Set<string>();
@@ -203,6 +221,11 @@ export function parseRoundVerdicts(html: string): {
 	for (const c of cards) {
 		submissions++;
 		if (c.isAward) awardedAnyCount++;
+	}
+	// Membership reads cards AND host-less fragments: a fragment's verdict is
+	// real even when its budget can't be attributed, and dropping its round
+	// would turn a dedup guard into a membership hole.
+	for (const c of [...cards, ...membershipOnly]) {
 		if (c.roundNum === null) continue;
 		const round = String(c.roundNum);
 		if (c.isAward) awarded.add(round);
@@ -233,18 +256,51 @@ export function parseRoundVerdicts(html: string): {
 		}
 	}
 	// Reconciliation against the page's OWN rendered counter ("Awarded
-	// Submissions: N"). If our deduped awarded-card count still disagrees, the
-	// parse is unreliable for award DETAIL on this page — null every round's
-	// budget/type rather than serve a summed guess (membership stays: the
-	// verdict sets dedupe by round and fix-scf-rounds has its own guards).
-	const counter = html.match(
-		/Awarded Submissions<\/div><div[^>]*>(\d+)</,
-	)?.[1];
-	if (counter !== undefined && Number(counter) !== awardedAnyCount) {
+	// Submissions: N") — polarity matters: only an OVER-count nulls. Parsing
+	// MORE awarded cards than the page claims means duplication slipped the
+	// dedup, so budgets/types are unreliable — null them, never guess
+	// (membership stays: the verdict sets dedupe by round and fix-scf-rounds
+	// has its own guards). Parsing FEWER is expected whenever the site's
+	// counter includes cards we deliberately treat as neutral (Ready for
+	// Payment / Information Collection) — never-accuse must not become
+	// never-report. Whitespace-tolerant so minor markup drift doesn't silently
+	// disarm the gate.
+	const nullAwardDetail = () => {
 		for (const rec of awardByRound.values()) {
 			rec.budgetUSD = null;
 			rec.awardType = null;
 		}
+	};
+	const counter = html.match(
+		/Awarded Submissions\s*<\/div>\s*<div[^>]*>\s*(\d+)\s*</,
+	)?.[1];
+	if (counter !== undefined && awardedAnyCount > Number(counter))
+		nullAwardDetail();
+	// Second, independent gate: the page's rendered "Total awarded" dollar
+	// figure. Budgets summing ABOVE it (past display-rounding slack — $124.6K
+	// rounds to the nearest 0.1K) means some budget was attributed twice or to
+	// the wrong card, the class the count gate provably cannot see (a
+	// wrong-host merge keeps the count intact). Under-total is normal: rounds
+	// with unparseable budgets are nulled, and the page's total can exceed the
+	// per-round records.
+	const totalM = html.match(
+		/Total awarded\s*<\/div>\s*<div[^>]*>\s*\$([\d.,]+)\s*([KM])?/i,
+	);
+	if (totalM) {
+		const base = Number(totalM[1].replace(/,/g, ""));
+		const mult =
+			totalM[2]?.toUpperCase() === "M"
+				? 1e6
+				: totalM[2]?.toUpperCase() === "K"
+					? 1e3
+					: 1;
+		const rendered = base * mult;
+		const budgetSum = [...awardByRound.values()].reduce(
+			(s, r) => s + (r.budgetUSD ?? 0),
+			0,
+		);
+		const slack = mult / 2 + rendered * 0.01;
+		if (rendered > 0 && budgetSum > rendered + slack) nullAwardDetail();
 	}
 	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };

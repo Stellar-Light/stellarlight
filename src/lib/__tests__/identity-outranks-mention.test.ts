@@ -252,3 +252,20 @@ describe("single short token is still the query's subject (dd P-PHRASE)", () => 
 		expect(q("DD", "dd", "best dd on stellar")).toBeLessThan(3);
 	});
 });
+
+// Cross-vendor audit 2026-08-31: the single-token rescue was re-promoting
+// GENERICITY-dropped tokens, not just length-dropped ones — "what is sol"
+// scored 3 against a row named Sol, bypassing the vocabulary's own note that
+// sol is never a lone anchor (Solana ambiguity).
+describe("generic lone tokens stay category mentions (audit fix)", () => {
+	const q = (name: string, slug: string, question: string) =>
+		nameMatchScore(name, slug, question, null, tokenize(question));
+
+	it("a genericity-dropped lone token does not promote", () => {
+		expect(q("Sol", "sol", "what is sol")).toBeLessThan(3);
+		expect(q("Token", "token", "what is token")).toBeLessThan(3);
+	});
+	it("a length-dropped lone token still promotes (the dd fix stands)", () => {
+		expect(q("DD", "dd", "what is DD")).toBe(3);
+	});
+});

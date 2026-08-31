@@ -27,6 +27,7 @@ import {
 	parseFields,
 	pickFields,
 	strictBoolParam,
+	triStateBoolParam,
 	unknownParamWarning,
 } from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
@@ -252,13 +253,9 @@ export async function GET(req: NextRequest) {
 	// false — an unfiltered 200 the caller read as "filter applied". Garbage
 	// values now 400 with the accepted forms, matching the type/ramps pattern.
 	// Tri-state: absent (and `?accepting=` with no value) means NO filter —
-	// distinct from an explicit 0/false. strictBoolParam maps null to false,
-	// which made "omitted" and "=0" indistinguishable and left the parameter a
-	// single-value enum engine E rightly called undecidable from outside.
-	const acceptingRaw = sp.get("accepting");
-	const acceptingParsed = acceptingRaw
-		? strictBoolParam(acceptingRaw)
-		: undefined;
+	// distinct from an explicit 0/false (the shared helper carries the full
+	// rationale and its unit tests).
+	const acceptingParsed = triStateBoolParam(sp.get("accepting"));
 	const allParsed = strictBoolParam(sp.get("all"));
 	for (const [name, parsed] of [
 		["accepting", acceptingParsed],

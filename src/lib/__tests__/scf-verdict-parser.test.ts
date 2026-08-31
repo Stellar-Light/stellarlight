@@ -241,3 +241,70 @@ describe("parseRoundVerdicts awards (sls-058)", () => {
 		]);
 	});
 });
+
+// Cross-vendor audit 2026-08-31: the wrong-host class. A bare fragment like
+// "r" prefixes EVERY Airtable rec-id, so with two same-round/type awarded
+// cards the fragment of the larger merged into the SMALLER host and
+// Math.max-inflated its budget — while the count gate read 2 = 2 and passed.
+describe("fragment hardening (wrong-host + reconciliation gates)", () => {
+	it("a fragment merges only into a budget-AGREEING host, never inflates the other card", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #31","awardType":"Build","budget":15000}\n' +
+				'{"id":"recBBBBBBBBBBBBBB","status":"Awarded","roundName":"SCF #31","awardType":"Build","budget":124600}\n' +
+				'{"id":"r","status":"Awarded","roundName":"SCF #31","awardType":"Build","budget":124600}\n' +
+				'<div class="mb-2">Awarded Submissions</div><div class="font-schabo">2</div>\n' +
+				'<div class="mb-2">Total awarded</div><div class="font-schabo">$139.6K</div>',
+		);
+		expect(v.awards).toEqual([
+			{ round: 31, budgetUSD: 139600, awardType: "Build" },
+		]);
+		expect(v.awardedAnyCount).toBe(2);
+	});
+
+	it("a short-id card with no prefix-host in its round stays a real card", () => {
+		// "re" prefixes recAAAA… but the rounds differ, so it is nobody's
+		// fragment twin — it keeps its own count, budget, and membership.
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #30","awardType":"Build","budget":50000}\n' +
+				'{"id":"re","status":"Awarded","roundName":"SCF #29","awardType":"Build","budget":75000}',
+		);
+		expect([...v.awarded].sort()).toEqual(["29", "30"]);
+		expect(v.awardedAnyCount).toBe(2);
+	});
+
+	it("a same-round fragment with a budget-DISAGREEING host proves membership only", () => {
+		// Fragment "r" (budget 99999) prefixes the host but their budgets
+		// disagree and neither is null → no merge, no own card: membership
+		// stays, count and budget exclude it.
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #30","awardType":"Build","budget":50000}\n' +
+				'{"id":"r","status":"Awarded","roundName":"SCF #30","awardType":"Build","budget":99999}',
+		);
+		expect([...v.awarded]).toEqual(["30"]);
+		expect(v.awardedAnyCount).toBe(1);
+		expect(v.awards).toEqual([
+			{ round: 30, budgetUSD: 50000, awardType: "Build" },
+		]);
+	});
+
+	it("count reconciliation nulls only on OVER-count; a page counting neutral cards keeps budgets", () => {
+		const under = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #44","awardType":"Build","budget":120000}\n' +
+				'<div class="mb-2">Awarded Submissions</div><div class="font-schabo">2</div>',
+		);
+		expect(under.awards).toEqual([
+			{ round: 44, budgetUSD: 120000, awardType: "Build" },
+		]);
+	});
+
+	it("the rendered Total-awarded dollar gate nulls budgets that sum past display slack", () => {
+		const v = parseRoundVerdicts(
+			'{"id":"recAAAAAAAAAAAAAA","status":"Awarded","roundName":"SCF #36","awardType":"Build","budget":85000}\n' +
+				'{"id":"recCCCCCCCCCCCCCC","status":"Awarded","roundName":"SCF #36","awardType":"Build","budget":85000}\n' +
+				'<div class="mb-2">Total awarded</div><div class="font-schabo">$85.0K</div>',
+		);
+		expect(v.awards).toEqual([{ round: 36, budgetUSD: null, awardType: null }]);
+		// membership untouched by the nulling
+		expect([...v.awarded]).toEqual(["36"]);
+	});
+});
