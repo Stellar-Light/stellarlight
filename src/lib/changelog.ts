@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-08-31",
 		surfaces: ["api"],
+		version: "spec@1.9.12",
+		type: "changed",
+		summary:
+			"getPartners `accepting` is a two-valued filter: 1 = only accepting partners, 0 = only NOT-accepting (today the honest empty set). `meta.filters.accepting` echoes the applied value, null when omitted.",
+		detail:
+			"Closes the oldest open contract finding (engine E, ambiguous-contract, open since 07-22): `accepting` was a single-value enum whose only value returned pages byte-identical to the bare call — every published partner currently accepts clients — so a caller could not tell a live filter from an inert parameter. The filter was live all along; the contract was undecidable from outside. accepting=0 selects the complement, making the parameter self-proving (the two values return different pages the moment either subset is non-empty), and the meta echo distinguishes explicit 0 from omitted (previously both read `false`). Rows with no acceptingClients verdict match neither filter — unknown is not claimable either way.",
+	},
+	{
+		date: "2026-08-31",
+		surfaces: ["api"],
 		version: "spec@1.9.11",
 		type: "changed",
 		summary:

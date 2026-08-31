@@ -3170,8 +3170,8 @@ export interface operations {
                 region?: string;
                 /** @description Filter by fiat-ramp capability: `on-ramp` (fiat → Stellar), `off-ramp` (Stellar → fiat), or `on-ramp,off-ramp` to require both. Unknown values return 400 with `validRamps`. Combine with `region`/`q` for corridor lookups (e.g. ramps=on-ramp&q=mexico). */
                 ramps?: string;
-                /** @description Set to 1 to return only partners currently accepting new clients */
-                accepting?: "1";
+                /** @description 1 = only partners currently accepting new clients; 0 = only partners NOT accepting (an empty page here is the honest answer when every published partner accepts). Omit for no filter. `meta.filters.accepting` echoes the applied value, null when omitted. */
+                accepting?: "1" | "0";
                 /** @description Set to 1 to bypass the directory quality bar. By default results include only complete, non-archived profiles (tagline + a contact path), pilot partners first; all=1 returns every published partner including placeholder-thin profiles. */
                 all?: "1";
                 /** @description Keyword query (free text) */

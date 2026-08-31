@@ -251,7 +251,14 @@ export async function GET(req: NextRequest) {
 	// `?accepting=__bogus__` / `?all=__bogus__` used to coerce silently to
 	// false — an unfiltered 200 the caller read as "filter applied". Garbage
 	// values now 400 with the accepted forms, matching the type/ramps pattern.
-	const acceptingParsed = strictBoolParam(sp.get("accepting"));
+	// Tri-state: absent (and `?accepting=` with no value) means NO filter —
+	// distinct from an explicit 0/false. strictBoolParam maps null to false,
+	// which made "omitted" and "=0" indistinguishable and left the parameter a
+	// single-value enum engine E rightly called undecidable from outside.
+	const acceptingRaw = sp.get("accepting");
+	const acceptingParsed = acceptingRaw
+		? strictBoolParam(acceptingRaw)
+		: undefined;
 	const allParsed = strictBoolParam(sp.get("all"));
 	for (const [name, parsed] of [
 		["accepting", acceptingParsed],
@@ -270,7 +277,6 @@ export async function GET(req: NextRequest) {
 			);
 		}
 	}
-	const accepting = acceptingParsed === true;
 	const all = allParsed === true;
 	const q = sp.get("q")?.toLowerCase().trim();
 	const limit = clampLimit(sp.get("limit"), 50, 100);
@@ -317,7 +323,16 @@ export async function GET(req: NextRequest) {
 			if (region) where.regions = { contains: region };
 			if (rampList.length)
 				where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
-			if (accepting) where.acceptingClients = { equals: true };
+			// engine-e ambiguous-contract (open since 07-22): with every published
+			// partner currently accepting clients, accepting=1 returned pages
+			// byte-identical to the bare call — live filter, single-value enum,
+			// undecidable from outside. accepting=0 now selects the complement
+			// (only NOT-accepting partners; today the honest empty set), so the
+			// two values return different pages and the parameter proves itself.
+			if (acceptingParsed === true)
+				where.acceptingClients = { equals: true };
+			else if (acceptingParsed === false)
+				where.acceptingClients = { equals: false };
 
 			const result = await payload.find({
 				collection: "partner-accounts",
@@ -390,7 +405,16 @@ export async function GET(req: NextRequest) {
 		req,
 		endpoint: "/api/partners",
 		query: q,
-		filters: { type, sector, region, ramps, accepting, all, limit, offset },
+		filters: {
+			type,
+			sector,
+			region,
+			ramps,
+			accepting: typeof acceptingParsed === "boolean" ? acceptingParsed : null,
+			all,
+			limit,
+			offset,
+		},
 		resultCount: partners.length,
 	});
 
@@ -405,7 +429,10 @@ export async function GET(req: NextRequest) {
 					sector,
 					region,
 					ramps: ramps ?? null,
-					accepting,
+					// null = not sent, matching the sibling filters — a bare `false`
+					// here couldn't distinguish "omitted" from "explicit =0".
+					accepting:
+						typeof acceptingParsed === "boolean" ? acceptingParsed : null,
 					all,
 					q: q ?? null,
 					limit,
