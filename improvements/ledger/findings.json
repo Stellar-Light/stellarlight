@@ -695,8 +695,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T03:34:29Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "engine-a-recall:stellarx-ph-in-top-3-for-stellarx-ph-on-stellar",
@@ -3763,8 +3764,9 @@
 		"severity": "low",
 		"firstSeen": "2026-07-22T23:05:10.466Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-30T14:26:24Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "raven-routing:what-wallets-support-stellar",
@@ -3800,7 +3802,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -3825,7 +3827,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -3850,7 +3852,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -4778,8 +4780,9 @@
 		"severity": "low",
 		"firstSeen": "2026-08-13T07:14:54.914Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T12:03:45.437Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-gap-compare-hackathons",
@@ -4946,8 +4949,9 @@
 		"severity": "low",
 		"firstSeen": "2026-08-14T07:10:16.228Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T12:03:45.437Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-drift:status-endpoints-lists-api-vet-idea",
@@ -5152,9 +5156,9 @@
 		"failureMode": "battery-coverage-weak",
 		"severity": "low",
 		"firstSeen": "2026-08-16T06:14:44.031Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T12:03:45.437Z"
+		"evidenceAt": "2026-08-31T23:32:10.379Z"
 	},
 	{
 		"id": "nightly-battery:battery-q-tool-leaderboard-open-issues",
@@ -5244,8 +5248,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-17T06:31:45.685Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-30T14:26:24Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "engine-d-demand:etesia",
@@ -5869,7 +5874,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -6028,8 +6033,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T03:34:29Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "engine-a-recall:acta-team-did-stellar-in-top-5-for-its-own-symbo",
@@ -6040,8 +6046,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-28T16:32:08.442Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T03:34:29Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "engine-d-demand:what-is-orbitmintx",
@@ -6143,8 +6150,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-28T22:37:38.494Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-30T14:26:24Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "engine-d-demand:subfy",
@@ -6168,8 +6176,9 @@
 		"severity": "high",
 		"firstSeen": "2026-08-31T01:50:05.267Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-30T14:26:24Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-upesa",
@@ -6179,9 +6188,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-pagcrypto",
@@ -6191,9 +6200,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-crebit",
@@ -6203,9 +6212,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-yolat",
@@ -6215,9 +6224,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-etesia",
@@ -6228,8 +6237,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-account-demolisher",
@@ -6240,8 +6250,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-sendana",
@@ -6251,9 +6262,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-sorted",
@@ -6263,9 +6274,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-kutana",
@@ -6275,9 +6286,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-janus",
@@ -6287,9 +6298,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-roberto-sanz-criptomonedas",
@@ -6299,9 +6310,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-komet",
@@ -6312,8 +6323,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-crediolabs-ai",
@@ -6324,8 +6336,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-loop",
@@ -6336,8 +6349,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-inferera",
@@ -6347,9 +6361,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-simbolik",
@@ -6359,9 +6373,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-the-aha-company",
@@ -6371,9 +6385,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-womenbiz",
@@ -6383,9 +6397,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-verseprop",
@@ -6395,9 +6409,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-ichi",
@@ -6407,9 +6421,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-fairblock",
@@ -6419,9 +6433,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-coala-pay",
@@ -6431,9 +6445,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-dfs-labs",
@@ -6443,9 +6457,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-nouns-builder-protocol",
@@ -6455,9 +6469,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-vrf-soroban",
@@ -6468,8 +6482,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-policywright",
@@ -6480,8 +6495,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
 		"lastSeen": "2026-08-31T23:07:47.416Z",
-		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"status": "cleared",
+		"evidenceAt": "2026-08-31T23:32:18.023Z",
+		"clearedAt": "2026-08-31T23:32:18.023Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-soroban-decompiler",
@@ -6491,9 +6507,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "nightly-completeness:scfroundawards-empty-escala",
@@ -6503,9 +6519,9 @@
 		"failureMode": "completeness-residual",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T12:03:52.595Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
-		"evidenceAt": "2026-08-31T11:52:58.726Z"
+		"evidenceAt": "2026-08-31T23:22:26.151Z"
 	},
 	{
 		"id": "raven-routing:freighter",
@@ -6515,8 +6531,176 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T19:51:18.114Z",
-		"lastSeen": "2026-08-31T23:07:47.416Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
+	},
+	{
+		"id": "engine-a-recall:crediolabs-ai-in-top-3-for-its-own-name",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "crediolabs-ai in top-3 for its own name",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:crediolabs-ai-in-top-3-for-is-crediolabs-ai-live",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "crediolabs-ai in top-3 for 'is CredioLabs.AI live'",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:komet-in-top-10-of-36-matches-its-own-supportedn",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "komet in top-10 of 36 matches (its own supportedNetworks implies 'Stellar security')",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:3-of-the-7-records-implying-stellar-payments-in-",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "≥3 of the 7 records implying 'Stellar payments' in top-10",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:fabiansanchezd-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "FabianSanchezD retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:ensareness-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "EnsarEness retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:eneskeremaydin-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "EnesKeremAYDIN retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:whiterrabbit-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "whiterrabbit retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:leonardoevmacc-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "leonardoevmacc retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:suhanjk-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "SuhanJK retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:murat48-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "murat48 retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "engine-a-recall:umutkdev-retrievable-by-own-username",
+		"source": "engine-a-recall",
+		"surface": "retrieval",
+		"probe": "UmutKDev retrievable by own username",
+		"failureMode": "recall-miss",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "scf-crosscheck:kutana",
+		"source": "scf-crosscheck",
+		"surface": "scf",
+		"probe": "kutana",
+		"failureMode": "scf-round-overclaim",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
+	},
+	{
+		"id": "scf-crosscheck:sendana",
+		"source": "scf-crosscheck",
+		"surface": "scf",
+		"probe": "sendana",
+		"failureMode": "scf-round-overclaim",
+		"severity": "medium",
+		"firstSeen": "2026-08-31T23:32:18.023Z",
+		"lastSeen": "2026-08-31T23:32:18.023Z",
+		"status": "open",
+		"evidenceAt": "2026-08-31T23:17:55Z"
 	}
 ]

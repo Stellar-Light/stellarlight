@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-31T11:52:58.726Z",
+	"generatedAt": "2026-08-31T23:22:26.151Z",
 	"detector": "record-completeness",
 	"failures": [
 		{
@@ -17,14 +17,6 @@
 		{
 			"probe": "scfRoundAwards empty: yolat",
 			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: etesia",
-			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: account-demolisher",
-			"note": "rounds=[29,41,44]"
 		},
 		{
 			"probe": "scfRoundAwards empty: sendana",
@@ -45,18 +37,6 @@
 		{
 			"probe": "scfRoundAwards empty: roberto-sanz-criptomonedas",
 			"note": "rounds=[22,24]"
-		},
-		{
-			"probe": "scfRoundAwards empty: komet",
-			"note": "rounds=[28,30]"
-		},
-		{
-			"probe": "scfRoundAwards empty: crediolabs-ai",
-			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: loop",
-			"note": "rounds=[40]"
 		},
 		{
 			"probe": "scfRoundAwards empty: inferera",
@@ -97,14 +77,6 @@
 		{
 			"probe": "scfRoundAwards empty: nouns-builder-protocol",
 			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: vrf-soroban",
-			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: policywright",
-			"note": "rounds=[42,44]"
 		},
 		{
 			"probe": "scfRoundAwards empty: soroban-decompiler",

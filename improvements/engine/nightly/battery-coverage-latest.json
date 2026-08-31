@@ -1,17 +1,7 @@
 {
-	"generatedAt": "2026-08-31T12:03:45.437Z",
+	"generatedAt": "2026-08-31T23:32:10.379Z",
 	"detector": "battery-coverage",
 	"failures": [
-		{
-			"probe": "battery:q-edge-doc-category-filter-empty",
-			"note": "top 0.58 < 0.6 via research/confidence for \"How should category-scoped docs search report a query that has corpus-wide match\" (edge-behavior); best: https://developers.stellar.org/docs/data/apis/horizon/api-reference/errors",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-soroban-sdk-cve",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Are there known security advisories in the soroban-sdk I should make sure I've p\" (soroban); best: reflector-network/reflector-contract",
-			"surface": "corpus"
-		},
 		{
 			"probe": "battery:q-tool-indexer-repos-discovery",
 			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
