@@ -1,15 +1,9 @@
 {
-	"asOf": "2026-08-31T15:24:35.409Z",
+	"asOf": "2026-08-31T15:47:20.844Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 72,
+	"checked": 71,
 	"healthy": 71,
-	"broken": [
-		{
-			"file": "consumption-guard.yml",
-			"state": "failing",
-			"why": "2 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
-		}
-	],
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -169,22 +163,22 @@
 			"file": "consumption-guard.yml",
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
-			"state": "failing",
-			"lastSuccessAt": "2026-08-31T04:11:43Z",
+			"state": "ok",
+			"lastSuccessAt": "2026-08-31T15:41:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 6,
-			"why": "2 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
+			"runs": 9,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "contract-gate.yml",
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:45:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 7,
+			"runs": 9,
 			"why": "last green 0d ago"
 		},
 		{
@@ -203,10 +197,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:05:25Z",
+			"lastSuccessAt": "2026-08-31T15:32:30Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 17,
+			"runs": 19,
 			"why": "last green 0d ago"
 		},
 		{
@@ -258,10 +252,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:45:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 96,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -511,11 +505,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:41:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 77,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
+			"runs": 80,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -533,7 +527,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:45:18Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 1,
@@ -593,17 +587,6 @@
 			"graceDays": 21,
 			"runs": 1,
 			"why": "last green 5d ago"
-		},
-		{
-			"file": "raven-eval-parity.yml",
-			"name": "raven-eval-parity",
-			"cron": "30 7 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:16:48Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 1,
-			"why": "last green 0d ago"
 		},
 		{
 			"file": "recent-api-usage.yml",
@@ -775,7 +758,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:45:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -797,7 +780,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T15:11:18Z",
+			"lastSuccessAt": "2026-08-31T15:41:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
