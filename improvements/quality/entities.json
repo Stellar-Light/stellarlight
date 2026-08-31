@@ -1,13 +1,6 @@
 {
- "generatedAt": "2026-08-30T13:10:17.592Z",
+ "generatedAt": "2026-08-31T03:59:58.471Z",
  "surfaces": [
-  {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 28,
-   "clearedFindings": 282,
-   "verifiedFindings": 0
-  },
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
@@ -16,17 +9,24 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "directory",
-   "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 8,
-   "clearedFindings": 53,
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 4,
+   "clearedFindings": 307,
    "verifiedFindings": 0
   },
   {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
-   "openFindings": 3,
-   "clearedFindings": 15,
+   "openFindings": 4,
+   "clearedFindings": 14,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "directory",
+   "means": "the project rows themselves, fields, types, provenance",
+   "openFindings": 2,
+   "clearedFindings": 59,
    "verifiedFindings": 0
   },
   {
@@ -53,29 +53,29 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 460,
-  "open": 56,
-  "cleared": 397,
+  "total": 461,
+  "open": 27,
+  "cleared": 427,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 26,
-    "cleared": 236,
+    "open": 3,
+    "cleared": 259,
     "verified": 0,
     "surface": "retrieval"
    },
    {
     "mode": "coverage-gap",
-    "open": 8,
-    "cleared": 53,
+    "open": 2,
+    "cleared": 59,
     "verified": 0,
     "surface": "directory"
    },
    {
     "mode": "demand-miss",
-    "open": 2,
-    "cleared": 44,
+    "open": 1,
+    "cleared": 46,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -88,8 +88,8 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 3,
-    "cleared": 15,
+    "open": 4,
+    "cleared": 14,
     "verified": 0,
     "surface": "corpus"
    },
@@ -153,15 +153,15 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 22
+    "count": 13
    },
    {
     "bucket": "8–30d",
-    "count": 9
+    "count": 5
    },
    {
     "bucket": "31–60d",
-    "count": 25
+    "count": 9
    },
    {
     "bucket": ">60d",
@@ -170,77 +170,77 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "battery:q-ti-java-sdk-wallet-feebump",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-08-29"
-   },
-   {
-    "probe": "openx402",
-    "surface": "directory",
-    "failureMode": "coverage-gap",
-    "clearedAt": "2026-08-28"
-   },
-   {
-    "probe": "for-yield",
-    "surface": "directory",
-    "failureMode": "coverage-gap",
-    "clearedAt": "2026-08-28"
-   },
-   {
-    "probe": "tempa",
-    "surface": "directory",
-    "failureMode": "coverage-gap",
-    "clearedAt": "2026-08-28"
-   },
-   {
-    "probe": "planbok",
+    "probe": "the-starship-soroban in top-3 for 'is The Starship Soroban live'",
     "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-08-28"
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
    },
    {
-    "probe": "e-fectivo",
+    "probe": "rise-in in top-3 for 'tell me about Rise In'",
     "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-08-28"
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
    },
    {
-    "probe": "what disbursement or payout providers can i integrate on stellar?",
-    "surface": "directory",
-    "failureMode": "coverage-gap",
-    "clearedAt": "2026-08-28"
-   },
-   {
-    "probe": "vigente",
+    "probe": "stellar-global in top-3 for 'is Stellar Global live'",
     "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-08-28"
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
+   },
+   {
+    "probe": "dex-tools in top-3 for 'tell me about Dex Tools'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
+   },
+   {
+    "probe": "block-by-block in top-3 for 'is Block by Block live'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
+   },
+   {
+    "probe": "stellar-update in top-3 for 'tell me about Stellar Update'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
+   },
+   {
+    "probe": "ios-stellar-sdk in top-3 for 'iOS Stellar SDK on stellar'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
+   },
+   {
+    "probe": "stellar-c-sdk in top-3 for 'what is Stellar C SDK'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-08-31"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 168,
-    "repeats": 168,
+    "newFindings": 169,
+    "repeats": 169,
     "ratePct": 100
    },
    "lifetime": {
-    "newFindings": 460,
-    "repeats": 454,
+    "newFindings": 461,
+    "repeats": 455,
     "ratePct": 98.7
    },
    "byClass": [
     {
      "class": "identity",
      "total": 287,
-     "open": 42,
+     "open": 19,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "taxonomy-coverage",
-     "total": 107,
-     "open": 10,
+     "total": 108,
+     "open": 3,
      "firstSeen": "2026-07-22"
     },
     {
@@ -252,7 +252,7 @@
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 3,
+     "open": 4,
      "firstSeen": "2026-07-23"
     },
     {
@@ -9578,19 +9578,19 @@
   ]
  },
  "repos": {
-  "read": 12961,
-  "population": 12961,
+  "read": 12962,
+  "population": 12962,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 12961,
+  "sampled": 12962,
   "coverage": {
    "curatedIndex": {
-    "repos": 2943,
+    "repos": 2944,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2163,
-    "depthPct": 73
+    "withCodeDepth": 2165,
+    "depthPct": 74
    },
    "tail": {
     "repos": 10018,
@@ -9598,7 +9598,7 @@
     "withCodeDepth": 4716
    },
    "knowledgeNotes": {
-    "pool": 284,
+    "pool": 285,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
     "withNotes": 28
    },
@@ -9609,23 +9609,23 @@
    }
   },
   "curatedShape": {
-   "repos": 2943,
+   "repos": 2944,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 357
+     "count": 356
     },
     {
      "bucket": "10–19",
-     "count": 910
+     "count": 913
     },
     {
      "bucket": "20–29",
-     "count": 488
+     "count": 483
     },
     {
      "bucket": "30–39",
-     "count": 478
+     "count": 479
     },
     {
      "bucket": "40–49",
@@ -9633,19 +9633,19 @@
     },
     {
      "bucket": "50–59",
-     "count": 243
+     "count": 245
     },
     {
      "bucket": "60–69",
-     "count": 178
+     "count": 179
     },
     {
      "bucket": "70–79",
-     "count": 83
+     "count": 82
     },
     {
      "bucket": "80–89",
-     "count": 23
+     "count": 24
     },
     {
      "bucket": "90–99",
@@ -9655,15 +9655,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1204
+     "count": 1203
     },
     {
      "label": "slowing",
-     "count": 902
+     "count": 903
     },
     {
      "label": "active",
-     "count": 743
+     "count": 744
     },
     {
      "label": "unknown",
@@ -9677,7 +9677,7 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1056
+     "count": 1057
     },
     {
      "label": "Rust",
@@ -9718,7 +9718,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 6879,
+  "withCodeDepth": 6881,
   "withNotes": 265,
   "withMainnet": 76,
   "top": [
@@ -9879,6 +9879,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "SentinelFi/stellar-metamask-snap",
+    "repoScore": 80,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "TypeScript",
+    "projectSlug": "sentinel",
+    "notes": 0,
+    "codeDepth": 100,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "armandocodecr/latam-ramp-kit",
     "repoScore": 80,
     "tier": "community",
@@ -9972,7 +9985,7 @@
    {
     "fullName": "Creit-Tech/xBull-Wallet",
     "repoScore": 80,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "dormant",
     "language": "TypeScript",
@@ -9985,7 +9998,7 @@
    {
     "fullName": "stellar/freighter",
     "repoScore": 80,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "active",
     "language": "TypeScript",
@@ -10154,7 +10167,7 @@
    {
     "fullName": "StellarCN/py-stellar-base",
     "repoScore": 79,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "active",
     "language": "Python",
@@ -10167,7 +10180,7 @@
    {
     "fullName": "Shamba-Records-Limited/microvault",
     "repoScore": 79,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "active",
     "language": "Go",
@@ -10224,19 +10237,6 @@
     "activity": "active",
     "language": "TypeScript",
     "projectSlug": "mpp-router",
-    "notes": 0,
-    "codeDepth": 96,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "mpprouter/stellar-agent-wallet-skill",
-    "repoScore": 77,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "stellar-agent-wallet-skill",
     "notes": 0,
     "codeDepth": 96,
     "deployable": false,
@@ -10782,13 +10782,13 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "28 of 284 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "28 of 285 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "26 open recall-miss findings",
+   "measurement": "3 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
@@ -10805,7 +10805,7 @@
     "id": "s:engine-d-demand",
     "label": "engine-d-demand",
     "column": 0,
-    "value": 107
+    "value": 108
    },
    {
     "id": "s:raven-routing",
@@ -10859,7 +10859,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 310
+    "value": 311
    },
    {
     "id": "f:directory",
@@ -10901,13 +10901,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 397
+    "value": 427
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 56
+    "value": 27
    },
    {
     "id": "o:verified",
@@ -10929,14 +10929,14 @@
     "target": 17,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 282
+    "value": 307
    },
    {
     "source": 1,
     "target": 10,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
-    "value": 46
+    "value": 47
    },
    {
     "source": 0,
@@ -10950,7 +10950,7 @@
     "target": 18,
     "sourceId": "f:retrieval",
     "targetId": "o:open",
-    "value": 28
+    "value": 4
    },
    {
     "source": 5,
@@ -11034,7 +11034,7 @@
     "target": 17,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 53
+    "value": 59
    },
    {
     "source": 3,
@@ -11062,14 +11062,14 @@
     "target": 17,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 15
+    "value": 14
    },
    {
     "source": 14,
     "target": 18,
     "sourceId": "f:corpus",
     "targetId": "o:open",
-    "value": 3
+    "value": 4
    },
    {
     "source": 7,
@@ -11083,7 +11083,7 @@
     "target": 18,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 8
+    "value": 2
    }
   ]
  },
@@ -11120,13 +11120,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12696,
-    "of": 12961,
+    "missing": 12697,
+    "of": 12962,
     "share": 98,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 259,
+    "examplePoolSize": 260,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11193,13 +11193,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6082,
-    "of": 12961,
+    "missing": 6081,
+    "of": 12962,
     "share": 46.9,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6082,
+    "examplePoolSize": 6081,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
