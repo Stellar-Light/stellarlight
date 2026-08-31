@@ -41,6 +41,14 @@ jobs:
       - name: Every computed value must reach a serving path
         run: pnpm exec tsx scripts/check-consumption.ts
 
+      # scripts/** is outside the main tsconfig, so the repo's `tsc --noEmit`
+      # is clean while the scripts that write to prod are unchecked. Two broken
+      # scripts shipped that way on 2026-08-30 behind a green CI run. Ratcheted
+      # against a frozen baseline so the existing 63 errors do not block, and
+      # nothing new lands.
+      - name: No new type errors in scripts/
+        run: pnpm exec tsx scripts/check-scripts-types.ts
+
       # Fable's audit finding #4: check-curated-canonical.ts was written to
       # "exit 1 so a lane can gate on it" — and no lane existed. The curated
       # list breaks on GitHub's clock (renames, casing), which no local change

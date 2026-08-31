@@ -9,6 +9,7 @@
  */
 
 import consumption from "../../improvements/audits/consumption-latest.json";
+import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
@@ -398,6 +399,48 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			severity: "high",
 			artifact: "improvements/audits/workflow-health-latest.json",
 			passing: workflowHealth.broken.length === 0,
+		}),
+
+		// The scripts that write to production, type-checked at last.
+		//
+		// tsconfig excludes scripts/**, so the repo's own `tsc --noEmit` reports
+		// a clean tree while ~200 node-side scripts go unchecked — including
+		// enrich-repos, which writes repo grades to the live database. Two
+		// broken scripts shipped in consecutive commits on 2026-08-30, each a
+		// one-line mistake a compiler catches for free, behind a CI run that was
+		// green on every other lane.
+		//
+		// The number here is DEBT, not health: 63 errors that predate the guard,
+		// frozen by identity so nothing new can land and a fixed one cannot be
+		// traded for a fresh one elsewhere. It should only ever go down.
+		g({
+			key: "scripts-types",
+			title: "Type errors in scripts/",
+			promise:
+				"The scripts that write to the production database are type-checked, and the backlog of known errors only shrinks.",
+			measure: {
+				value: scriptsTypes.total,
+				of: scriptsTypes.baselined,
+				unit: "errors",
+			},
+			sub: `${scriptsTypes.total} type errors in scripts/, ${scriptsTypes.baselined} of them baselined — new ones fail the build`,
+			details: [
+				...(scriptsTypes.added.length
+					? [`NEW (blocking): ${scriptsTypes.added.join("; ")}`]
+					: []),
+				...(scriptsTypes.fixed.length
+					? [
+							`fixed but still baselined — re-run with --update: ${scriptsTypes.fixed.join("; ")}`,
+						]
+					: []),
+				"identity is file + error code + message, without line numbers, so an unrelated edit above an error does not read as a regression",
+				"a count of 0 here means the ratchet is finished and the guard can become a plain tsc gate",
+			],
+			asOf: scriptsTypes.asOf.slice(0, 10),
+			cadence: "on-deploy",
+			severity: "medium",
+			artifact: "improvements/audits/scripts-types-latest.json",
+			passing: scriptsTypes.added.length === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The
