@@ -39,19 +39,42 @@ function signature(line: string): string | null {
 function run(): string[] {
 	let out = "";
 	try {
+		// `pnpm exec`, not `npx`: every other script in this repo is invoked that
+		// way, and it resolves the workspace's own typescript rather than
+		// whatever npx decides to fetch. `--pretty false` pins the output format
+		// the parser below depends on — colourised, boxed output would match the
+		// regex zero times.
 		out = execFileSync(
-			"npx",
-			["tsc", "--noEmit", "-p", "tsconfig.scripts.json"],
+			"pnpm",
+			["exec", "tsc", "--noEmit", "--pretty", "false", "-p", "tsconfig.scripts.json"],
 			{ encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 64e6 },
 		);
 	} catch (e: any) {
 		// tsc exits non-zero when it finds errors; the report is on stdout.
 		out = `${e?.stdout ?? ""}${e?.stderr ?? ""}`;
 	}
-	return out
-		.split("\n")
+	const lines = out.split("\n");
+	const parsed = lines
 		.map(signature)
 		.filter((s): s is string => !!s);
+	// A PARSE FAILURE MUST NOT LOOK LIKE SUCCESS.
+	//
+	// If tsc's output format ever drifts from what `signature()` expects — a
+	// pretty-printer default, a colour flag, a version change — this returns an
+	// empty list. Empty means every baselined error "no longer occurs", so the
+	// guard would report 63 fixes and demand a baseline it cannot justify, or,
+	// worse, report GREEN on a tree full of errors. The tell is unambiguous:
+	// output that clearly contains errors but parsed to none.
+	if (parsed.length === 0 && /error TS\d+/.test(out)) {
+		console.error(
+			"INCONCLUSIVE: tsc reported errors this parser could not read. Output format has drifted:",
+		);
+		console.error(
+			lines.filter((l) => l.includes("error TS")).slice(0, 3).join("\n"),
+		);
+		process.exit(2);
+	}
+	return parsed;
 }
 
 const found = run();
@@ -83,6 +106,16 @@ const known = new Set(baseline.errors);
 
 const added = unique.filter((s) => !known.has(s));
 const fixed = [...known].filter((s) => !unique.includes(s));
+
+// Same guard from the other side. Going from 63 known errors to zero in one
+// run is not plausible as a real result; it is what a broken invocation looks
+// like — tsc failing to start, the config not resolving, an empty file list.
+if (known.size > 0 && unique.length === 0) {
+	console.error(
+		`INCONCLUSIVE: ${known.size} baselined errors and tsc reported none at all. That is a broken invocation, not a clean tree — check that tsconfig.scripts.json resolves and tsc ran.`,
+	);
+	process.exit(2);
+}
 
 if (JSON_OUT) {
 	writeFileSync(
