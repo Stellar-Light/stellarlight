@@ -796,7 +796,13 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bescrows?\b|\bmilestone/,
 		repos: [
 			"Trustless-Work/trustlesswork-smart-contract-stellar",
-			"devasignhq/soroban-escrow",
+			// Was devasignhq/soroban-escrow, which 404s as of 2026-08-31 —
+			// deleted or renamed WITHOUT a redirect, so the curated guard's
+			// rescan could only ever record `error`. The org's live successor
+			// is bounty-escrow: verified by reading its Cargo.toml (package
+			// devasign_task_escrow, soroban-sdk =23.5.3, cdylib) — a real
+			// Soroban escrow contract, not a name coincidence.
+			"devasignhq/bounty-escrow",
 		],
 	},
 	// cross-chain bridges. Verified in-index 2026-07-06 (descriptions confirm each

@@ -1,35 +1,9 @@
 {
-  "asOf": "2026-08-30T19:49:29.825Z",
+  "asOf": "2026-08-31T04:19:38.008Z",
   "source": "scripts/check-curated-canonical.ts",
   "curatedTotal": 44,
-  "scanned": 39,
+  "scanned": 44,
   "absent": [],
-  "unscanned": [
-    {
-      "name": "devasignhq/soroban-escrow",
-      "state": "error",
-      "stars": 0
-    },
-    {
-      "name": "soroswap/spacewalk-implementation",
-      "state": "pending",
-      "stars": 0
-    },
-    {
-      "name": "diadata-org/soroban-oracle-feeders",
-      "state": "pending",
-      "stars": 0
-    },
-    {
-      "name": "Argo-Navis-Dev/php-anchor-sdk",
-      "state": "pending",
-      "stars": 6
-    },
-    {
-      "name": "luanlabs/fluxity-interface",
-      "state": "pending",
-      "stars": 0
-    }
-  ],
-  "findings": 5
+  "unscanned": [],
+  "findings": 0
 }

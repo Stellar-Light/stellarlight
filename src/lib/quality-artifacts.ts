@@ -318,7 +318,16 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			details: [
 				`${curatedCanonical.absent.length} absent (curated name matches no row)`,
 				`${curatedCanonical.unscanned.length} indexed but no code signals — invisible to code-evidence ranking and to the tier gate`,
-				...curatedCanonical.unscanned
+				// The JSON import types an empty array as never[], so a green
+				// artifact — [] for the first time on 2026-08-31 — broke the build
+				// while a red one compiled. Explicit element type, not a cast.
+				...(
+					curatedCanonical.unscanned as Array<{
+						name: string;
+						state: string;
+						stars: number;
+					}>
+				)
 					.slice(0, 4)
 					.map((u) => `${u.name} (${u.state}, ${u.stars}★)`),
 			],
