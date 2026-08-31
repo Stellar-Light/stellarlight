@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-31T15:23:02.275Z",
+ "generatedAt": "2026-08-31T19:57:33.380Z",
  "surfaces": [
   {
    "surface": "directory",
@@ -11,8 +11,8 @@
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
-   "openFindings": 16,
-   "clearedFindings": 7,
+   "openFindings": 5,
+   "clearedFindings": 19,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 489,
-  "open": 54,
-  "cleared": 428,
+  "total": 490,
+  "open": 43,
+  "cleared": 440,
   "verified": 7,
   "byFailureMode": [
    {
@@ -109,15 +109,15 @@
    },
    {
     "mode": "demand-routing-miss",
-    "open": 7,
-    "cleared": 6,
+    "open": 0,
+    "cleared": 13,
     "verified": 0,
     "surface": "consumer"
    },
    {
     "mode": "routing-miss",
-    "open": 9,
-    "cleared": 1,
+    "open": 5,
+    "cleared": 6,
     "verified": 0,
     "surface": "consumer"
    },
@@ -160,7 +160,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 41
+    "count": 34
    },
    {
     "bucket": "8–30d",
@@ -168,7 +168,7 @@
    },
    {
     "bucket": "31–60d",
-    "count": 9
+    "count": 5
    },
    {
     "bucket": ">60d",
@@ -177,71 +177,71 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "battery:q-tool-leaderboard-open-issues",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
+    "probe": "what wallets support Stellar",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "the-starship-soroban in top-3 for 'is The Starship Soroban live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "on and off ramps for Stellar payments",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "rise-in in top-3 for 'tell me about Rise In'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "passkey-kit",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "stellar-global in top-3 for 'is Stellar Global live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "octoplace",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "dex-tools in top-3 for 'tell me about Dex Tools'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "how do I write a Soroban smart contract in Rust",
+    "surface": "consumer",
+    "failureMode": "routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "block-by-block in top-3 for 'is Block by Block live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "openx402",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "stellar-update in top-3 for 'tell me about Stellar Update'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "hypertron",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "ios-stellar-sdk in top-3 for 'iOS Stellar SDK on stellar'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
+    "probe": "planbok",
+    "surface": "consumer",
+    "failureMode": "demand-routing-miss",
     "clearedAt": "2026-08-31"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 197,
-    "repeats": 196,
-    "ratePct": 99.5
+    "newFindings": 198,
+    "repeats": 198,
+    "ratePct": 100
    },
    "lifetime": {
-    "newFindings": 489,
-    "repeats": 482,
-    "ratePct": 98.6
+    "newFindings": 490,
+    "repeats": 484,
+    "ratePct": 98.8
    },
    "byClass": [
     {
      "class": "identity",
-     "total": 287,
-     "open": 19,
+     "total": 288,
+     "open": 8,
      "firstSeen": "2026-07-22"
     },
     {
@@ -251,10 +251,10 @@
      "firstSeen": "2026-07-22"
     },
     {
-     "class": "unclassified",
-     "total": 28,
+     "class": "evidence-population",
+     "total": 38,
      "open": 28,
-     "firstSeen": "2026-08-31"
+     "firstSeen": "2026-07-22"
     },
     {
      "class": "contract-completeness",
@@ -273,25 +273,46 @@
      "total": 14,
      "open": 0,
      "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "evidence-population",
-     "total": 10,
-     "open": 0,
-     "firstSeen": "2026-07-22"
     }
    ]
   }
  },
  "projects": {
-  "read": 979,
-  "population": 1053,
-  "servedPopulation": 979,
+  "read": 983,
+  "population": 1056,
+  "servedPopulation": 983,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 979,
+  "sampled": 983,
   "scatter": [
+   {
+    "slug": "study-stellar-sdk-soroban",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "west-african-ambassadors",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
+    "status": "Inactive"
+   },
+   {
+    "slug": "docking-zone",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
+    "status": "Inactive"
+   },
    {
     "slug": "upesa",
     "prominence": 0,
@@ -6428,6 +6449,13 @@
     "status": "Live"
    },
    {
+    "slug": "communidao",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
+   },
+   {
     "slug": "command-robotics",
     "prominence": 0,
     "factsPresent": 4,
@@ -9027,7 +9055,7 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 907
+    "count": 911
    },
    {
     "network": "mainnet",
@@ -9049,7 +9077,7 @@
    },
    {
     "basis": "human-verified",
-    "count": 111
+    "count": 115
    },
    {
     "basis": "onchain-activity",
@@ -9065,7 +9093,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 901,
+  "weakestTotal": 904,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9747,23 +9775,23 @@
    },
    {
     "field": "linked",
-    "count": 7
+    "count": 10
    }
   ]
  },
  "repos": {
-  "read": 12962,
-  "population": 12962,
+  "read": 12964,
+  "population": 12964,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 12962,
+  "sampled": 12964,
   "coverage": {
    "curatedIndex": {
-    "repos": 2944,
+    "repos": 2946,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2169,
+    "withCodeDepth": 2171,
     "depthPct": 74
    },
    "tail": {
@@ -9777,37 +9805,37 @@
     "withNotes": 16
    },
    "mainnetJoin": {
-    "pool": 3350,
+    "pool": 3351,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 76
    }
   },
   "curatedShape": {
-   "repos": 2944,
+   "repos": 2946,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 648
+     "count": 646
     },
     {
      "bucket": "10–19",
-     "count": 642
+     "count": 636
     },
     {
      "bucket": "20–29",
-     "count": 596
+     "count": 598
     },
     {
      "bucket": "30–39",
-     "count": 466
+     "count": 467
     },
     {
      "bucket": "40–49",
-     "count": 189
+     "count": 194
     },
     {
      "bucket": "50–59",
-     "count": 197
+     "count": 199
     },
     {
      "bucket": "60–69",
@@ -9837,7 +9865,7 @@
     },
     {
      "label": "active",
-     "count": 741
+     "count": 743
     },
     {
      "label": "unknown",
@@ -9851,7 +9879,7 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1058
+     "count": 1060
     },
     {
      "label": "Rust",
@@ -9892,7 +9920,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 6885,
+  "withCodeDepth": 6887,
   "withNotes": 265,
   "withMainnet": 76,
   "top": [
@@ -10356,7 +10384,7 @@
     "repoScore": 70,
     "tier": "community",
     "source": "project-link",
-    "activity": "active",
+    "activity": "slowing",
     "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
@@ -10944,13 +10972,13 @@
   {
    "area": "project status",
    "limit": "86% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "842 of 979 rows (census)",
+   "measurement": "842 of 983 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "59 of 979 sampled rows untyped",
+   "measurement": "59 of 983 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -10991,7 +11019,7 @@
     "id": "s:raven-routing",
     "label": "raven-routing",
     "column": 0,
-    "value": 23
+    "value": 24
    },
    {
     "id": "s:nightly-drift",
@@ -11057,7 +11085,7 @@
     "id": "f:consumer",
     "label": "consumer",
     "column": 1,
-    "value": 23
+    "value": 24
    },
    {
     "id": "f:corpus",
@@ -11081,13 +11109,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 428
+    "value": 440
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 54
+    "value": 43
    },
    {
     "id": "o:verified",
@@ -11172,21 +11200,21 @@
     "target": 14,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
-    "value": 23
-   },
-   {
-    "source": 14,
-    "target": 19,
-    "sourceId": "f:consumer",
-    "targetId": "o:open",
-    "value": 16
+    "value": 24
    },
    {
     "source": 14,
     "target": 18,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
-    "value": 7
+    "value": 19
+   },
+   {
+    "source": 14,
+    "target": 19,
+    "sourceId": "f:consumer",
+    "targetId": "o:open",
+    "value": 5
    },
    {
     "source": 10,
@@ -11280,8 +11308,8 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 3288,
-    "of": 3350,
+    "missing": 3289,
+    "of": 3351,
     "share": 98.1,
     "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
@@ -11307,8 +11335,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12697,
-    "of": 12962,
+    "missing": 12699,
+    "of": 12964,
     "share": 98,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11334,9 +11362,9 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 907,
-    "of": 979,
-    "share": 92.6,
+    "missing": 911,
+    "of": 983,
+    "share": 92.7,
     "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
@@ -11354,8 +11382,8 @@
     "entity": "project",
     "field": "strongBasis",
     "missing": 855,
-    "of": 979,
-    "share": 87.3,
+    "of": 983,
+    "share": 87,
     "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
@@ -11381,7 +11409,7 @@
     "entity": "repo",
     "field": "code depth reading",
     "missing": 6077,
-    "of": 12962,
+    "of": 12964,
     "share": 46.9,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
@@ -11408,7 +11436,7 @@
     "entity": "project",
     "field": "typed",
     "missing": 59,
-    "of": 979,
+    "of": 983,
     "share": 6,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
@@ -11435,7 +11463,7 @@
     "entity": "project",
     "field": "sourced",
     "missing": 55,
-    "of": 979,
+    "of": 983,
     "share": 5.6,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
