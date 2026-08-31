@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-31T20:37:36.749Z",
+ "generatedAt": "2026-08-31T21:35:13.022Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -60,6 +60,13 @@
     "title": "A value wearing provenance that does not cover it (2026-08-31)",
     "lessonCount": null,
     "bytes": 4956
+   },
+   {
+    "file": "improvements/lessons/2026-08-31-consumer-view-and-two-auditor-day.md",
+    "date": "2026-08-31",
+    "title": "The consumer's view, and the two-auditor loop (2026-08-31)",
+    "lessonCount": 5,
+    "bytes": 4533
    },
    {
     "file": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
