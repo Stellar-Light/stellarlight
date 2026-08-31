@@ -65,7 +65,7 @@ function fileChangedAt(file: string): number {
 		).trim();
 		return iso ? Date.parse(iso) : 0;
 	} catch {
-		return 0; // shallow clone or no git — fall back to judging all runs
+		return 0; // caller treats 0 as "cannot tell" and refuses to judge
 	}
 }
 
@@ -186,12 +186,48 @@ async function firstFailedStep(jobRunId: number): Promise<string | null> {
 	return null;
 }
 
+/** Refuse to run in a shallow checkout.
+ *
+ * Every judgement in this file is relative to when a workflow file last
+ * changed: which runs count as evidence about the current version, whether a
+ * newly-added lane has had a chance to fire, whether a green has aged out.
+ *
+ * In a shallow clone `git log -1 -- <path>` does not fail — it returns the
+ * date of the single commit fetched, so EVERY file looks like it changed
+ * moments ago, every lane is inside its grace window, and the sweep reports
+ * the whole repo healthy. That is the worst possible failure for this
+ * particular guard: a false green from a lane whose entire job is to catch
+ * guards that only look like they are working.
+ *
+ * workflow-health.yml sets fetch-depth: 0, so this is unreachable today — but
+ * that correctness argument lives in a different file and would not survive
+ * this script being invoked from a second lane. Cheap to assert here. */
+function assertFullHistory(): void {
+	try {
+		const shallow = execFileSync(
+			"git",
+			["rev-parse", "--is-shallow-repository"],
+			{ encoding: "utf8" },
+		).trim();
+		if (shallow === "true") {
+			console.error(
+				"INCONCLUSIVE: shallow checkout. Every workflow file would date to the single fetched commit, so every lane would look freshly edited and the sweep would report the repo healthy. Use `fetch-depth: 0`.",
+			);
+			process.exit(2);
+		}
+	} catch {
+		// not a git repo at all — fileChangedAt returns 0 and the per-file check
+		// below refuses to judge, which is the same answer by another route.
+	}
+}
+
 async function main() {
 	if (!TOKEN)
 		console.error(
 			"note: no GITHUB_TOKEN — running unauthenticated, expect rate limits",
 		);
 
+	assertFullHistory();
 	const files = readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f));
 	// One call for the whole list beats one per file, and it also tells us
 	// GitHub's own id and state for each workflow.
@@ -246,13 +282,21 @@ async function main() {
 				].filter((x): x is string => typeof x === "string")
 			: [];
 
+		const changedAt = fileChangedAt(file);
+		if (!changedAt) {
+			console.error(
+				`INCONCLUSIVE: git could not date .github/workflows/${file}. Every judgement here is relative to when the file last changed.`,
+			);
+			process.exit(2);
+		}
+
 		const meta = byPath.get(`workflows/${file}`);
 		if (!meta) {
 			if (!automatic) continue;
 			// A lane added minutes ago has not had a chance yet. Same grace the
 			// no-runs case gets — without it, every PR that adds a workflow
 			// reports that workflow as broken.
-			if (Date.now() - fileChangedAt(file) < grace * 86_400_000) continue;
+			if (Date.now() - changedAt < grace * 86_400_000) continue;
 			rows.push({
 				file,
 				name: doc.name ?? file,
@@ -276,7 +320,7 @@ async function main() {
 		const runs: any[] =
 			(await gh(`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=100`))
 				.workflow_runs ?? [];
-		const since = fileChangedAt(file);
+		const since = changedAt;
 		// CONCLUSIVE means the lane reached a verdict of its own. A run someone
 		// CANCELLED is a person changing their mind, and reading it as a failure
 		// put seed-blog-posts.yml on the board for a run a human stopped on
