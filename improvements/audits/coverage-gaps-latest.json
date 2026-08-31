@@ -3,63 +3,10 @@
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 500,
-    "absent": 7,
-    "served": 493,
-    "absentWithRoundBadge": 7,
-    "sample": [
-      {
-        "scfSlug": "dockingzone-a18",
-        "rounds": [
-          "37",
-          "35"
-        ],
-        "url": "https://communityfund.stellar.org/project/dockingzone-a18"
-      },
-      {
-        "scfSlug": "soroban-contract-source-verification-service-bax",
-        "rounds": [
-          "44"
-        ],
-        "url": "https://communityfund.stellar.org/project/soroban-contract-source-verification-service-bax"
-      },
-      {
-        "scfSlug": "rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
-        "rounds": [
-          "41"
-        ],
-        "url": "https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh"
-      },
-      {
-        "scfSlug": "communidao-9pm",
-        "rounds": [
-          "14",
-          "20",
-          "16"
-        ],
-        "url": "https://communityfund.stellar.org/project/communidao-9pm"
-      },
-      {
-        "scfSlug": "west-african-ambassadors-waa-syb",
-        "rounds": [
-          "29"
-        ],
-        "url": "https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb"
-      },
-      {
-        "scfSlug": "study-stellar-sdk-soroban-b3d",
-        "rounds": [
-          "27"
-        ],
-        "url": "https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d"
-      },
-      {
-        "scfSlug": "enerdao-r84",
-        "rounds": [
-          "24"
-        ],
-        "url": "https://communityfund.stellar.org/project/enerdao-r84"
-      }
-    ]
+    "absent": 0,
+    "served": 500,
+    "absentWithRoundBadge": 0,
+    "sample": []
   },
   "defillama": {
     "stellarListed": 42,
@@ -93,6 +40,11 @@
       "domain": "ctx.com"
     },
     {
+      "scf": "soroban-contract-source-verification-service-bax",
+      "slug": "stellar-expert",
+      "domain": "human-review: stellar-expert/soroban-build-workflow (the reproducible-buil"
+    },
+    {
       "scf": "soroban-disassembler-working-title-ply",
       "slug": "inference",
       "domain": "inferara.com"
@@ -101,6 +53,11 @@
       "scf": "prices-api-rfp-ctx-1vo",
       "slug": "ctx",
       "domain": "ctx.com"
+    },
+    {
+      "scf": "rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
+      "slug": "soroban-decompiler",
+      "domain": "human-review: same author (salaheldinsoliman); the row exists and is scann"
     },
     {
       "scf": "advanced-debugging-for-soroban-contracts-5sr",
@@ -148,11 +105,6 @@
       "domain": "pagcrypto.finance"
     },
     {
-      "scf": "fxdao-xov",
-      "slug": "gbpx",
-      "domain": "fxdao.io"
-    },
-    {
       "scf": "post-quantum-secure-wallets-for-stellar-97o",
       "slug": "soundness",
       "domain": "soundness.xyz"
@@ -168,42 +120,6 @@
       "domain": "jsr.io/@creit-tech/stellar-router-sdk"
     }
   ],
-  "reviewedAbsent": [
-    {
-      "scfSlug": "dockingzone-a18",
-      "verdict": "wound-down \u2014 served as an Inactive row (docking-zone)",
-      "evidence": "DNS dead; last Wayback capture 2025-11-09"
-    },
-    {
-      "scfSlug": "soroban-contract-source-verification-service-bax",
-      "verdict": "unidentifiable \u2014 cannot honestly create a row",
-      "evidence": "the submission's own website field points back at the SCF handbook; no product identity to serve"
-    },
-    {
-      "scfSlug": "rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
-      "verdict": "served under soroban-decompiler; page carries no product link for the matcher",
-      "evidence": "same author (salaheldinsoliman); the row exists and is scanned"
-    },
-    {
-      "scfSlug": "communidao-9pm",
-      "verdict": "wound-down \u2014 served as an Inactive row (communidao)",
-      "evidence": "site 502; GitHub org has zero public repos; last award 2023"
-    },
-    {
-      "scfSlug": "west-african-ambassadors-waa-syb",
-      "verdict": "community program, not a product \u2014 no row",
-      "evidence": "ambassador program submission; nothing to serve as a project"
-    },
-    {
-      "scfSlug": "study-stellar-sdk-soroban-b3d",
-      "verdict": "study/education submission, no product identity \u2014 no row",
-      "evidence": "no website or repo on the SCF page beyond the program itself"
-    },
-    {
-      "scfSlug": "enerdao-r84",
-      "verdict": "served \u2014 row exists, un-drafted to Development this run",
-      "evidence": "https://www.enerdao.org/ up, repo silent \u2014 review's own verdict"
-    }
-  ],
+  "reviewedAbsent": [],
   "unreviewedAbsent": 0
 }
