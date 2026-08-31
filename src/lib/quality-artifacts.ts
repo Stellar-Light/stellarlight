@@ -783,10 +783,21 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					"Every quality detector's findings land in one tracked backlog by surface. A backlog is fine; a HIGH-severity finding neglected past 30 days is the failure, that's this row's red line.",
 				measure: { value: L.open, of: L.total, unit: "findings" },
 				value: `${L.open} open`,
-				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${Math.round(L.closingRate * 100)}% closed`,
+				// "90% closed" was the most misleading number on this page. 413 of
+				// 461 findings are closed and SEVEN of them were verified; the
+				// other 406 are `cleared`, which means only that a detector
+				// stopped reporting them. Spot-checked 2026-08-31: engine-d's
+				// kutana, etesia and octopos are all cleared and all still return
+				// semantic-mode no-match on the live API, with SCF round badges.
+				// Nobody asked again, so the ledger called it closed.
+				//
+				// The qualifier belongs in the headline, not one line below it in
+				// the details where it already sat and changed nothing.
+				sub: `${L.highOpen} high · ${L.inWave} in a wave · ${L.closed} closed, ${L.verified} of them verified`,
 				details: [
 					`open by surface: ${surfaces}`,
 					`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
+					`auto-cleared is NOT fixed: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31 — kutana, etesia and octopos are cleared and still absent from the directory, each carrying SCF round badges.`,
 					L.staleHighOpen > 0
 						? `${L.staleHighOpen} high-severity finding(s) stale >30d, work them down`
 						: "no high-severity finding neglected past 30 days",

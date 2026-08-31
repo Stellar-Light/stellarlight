@@ -291,7 +291,17 @@ measured, not inferred.
    ranking -> getLeaderboard) shipped; the cut needs a measured before/after.
    Note the inverse pathology in the same system: listContracts fails by
    term CONCENTRATION, searchProjects by DILUTION.
-7. **The mid-sentence acronym hole.** Proper-noun promotion takes any
+7. **Re-probe the auto-cleared.** 413 of 461 findings are closed and SEVEN
+   were verified; the other 406 are `cleared`, which means only that a
+   detector stopped reporting them. Spot-checked 2026-08-31: engine-d's
+   `kutana`, `etesia` and `octopos` are all cleared, all still return
+   semantic-mode no-match on the live API, and all carry SCF round badges.
+   Nobody asked again, so the ledger called it closed. The board no longer
+   says "90% closed" — it says "413 closed, 7 of them verified" — but the
+   honest number is a stopgap for the real lane: sample the cleared set,
+   re-probe it, and publish the resurrection rate. Until that exists, the
+   closure statistic measures question frequency, not repair.
+8. **The mid-sentence acronym hole.** Proper-noun promotion takes any
    capitalised 3+-char word, so "best DEX on stellar" hands rank 1 to a
    project named DEX — the same mention-vs-identity error the lowercase
    guards prevent, surviving where the category word is conventionally
