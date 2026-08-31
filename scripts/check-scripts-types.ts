@@ -29,12 +29,31 @@ const UPDATE = process.argv.includes("--update");
 const JSON_OUT = process.argv.includes("--json");
 const ARTIFACT = "improvements/audits/scripts-types-latest.json";
 
-/** file + TS code + message, without positions. */
+/** file + TS code + message, without positions.
+ *
+ * The "... N more ..." elision in an inferred structural type carries a MEMBER
+ * COUNT, and three baseline entries embed one — enrich-repos.ts's TS2339 on a
+ * 15-field object literal among them. Adding one field to that object turns
+ * "... 7 more ..." into "... 8 more ...", so the old signature lands in `fixed`
+ * and the new one in `added`, and a PR that introduced no error at all goes RED
+ * naming a pre-existing one. Normalised away: the count is incidental to the
+ * error's identity. */
 function signature(line: string): string | null {
 	const m = /^(.+?)\(\d+,\d+\): (error TS\d+): (.*)$/.exec(line.trim());
 	if (!m) return null;
-	return `${m[1]} :: ${m[2]} :: ${m[3]}`;
+	const msg = (m[3] as string).replace(/\.\.\. \d+ more \.\.\./g, "... N more ...");
+	return `${m[1]} :: ${m[2]} :: ${msg}`;
 }
+
+/** Apply the same message normalisations to a STORED signature.
+ *
+ * A change to `signature()` rewrites every affected entry, which the
+ * growth check would read as new errors — the ratchet blocking its own
+ * format migration. Normalising both sides compares like with like, and it
+ * needs no escape hatch, which is the point: a hatch that lets the baseline
+ * grow is the ratchet gone. */
+const renorm = (sig: string): string =>
+	sig.replace(/\.\.\. \d+ more \.\.\./g, "... N more ...");
 
 function run(): string[] {
 	let out = "";
@@ -79,8 +98,33 @@ function run(): string[] {
 
 const found = run();
 const unique = [...new Set(found)].sort();
+/** How many times each signature occurs. Set-dedup alone made a SECOND
+ * occurrence of an already-baselined error free: two `Cannot find name
+ * 'BUILT_BY_FIXES'` lines in curation-maps.ts collapse to one signature, so a
+ * fresh instance of the exact bug class this guard was built for — an undefined
+ * identifier in a prod-writing script — would land green as long as that file
+ * already had one. Counts are compared, not just membership. */
+const counts = new Map<string, number>();
+for (const f of found) counts.set(f, (counts.get(f) ?? 0) + 1);
 
 if (UPDATE) {
+	// A RATCHET ONLY TURNS ONE WAY, and until now nothing enforced that: a PR
+	// could introduce five errors, run --update, commit the bigger baseline, and
+	// go green with a JSON diff as the only defence. Refuse to write a baseline
+	// that adds signatures; removing them is the whole point.
+	if (existsSync(BASELINE)) {
+		const prev: { errors?: string[] } = JSON.parse(
+			readFileSync(BASELINE, "utf8"),
+		);
+		const before = new Set((prev.errors ?? []).map(renorm));
+		const growth = unique.filter((x) => !before.has(x));
+		if (growth.length > 0) {
+			console.error(
+				`REFUSED: --update would ADD ${growth.length} signature(s) to the baseline. The ratchet only removes. Fix these instead:\n${growth.map((g) => `  ${g}`).join("\n")}`,
+			);
+			process.exit(1);
+		}
+	}
 	writeFileSync(
 		BASELINE,
 		`${JSON.stringify(
@@ -90,6 +134,9 @@ if (UPDATE) {
 				updatedAt: new Date().toISOString(),
 				count: unique.length,
 				errors: unique,
+				occurrences: Object.fromEntries(
+					unique.map((u) => [u, counts.get(u) ?? 1]),
+				),
 			},
 			null,
 			"\t",
@@ -99,12 +146,29 @@ if (UPDATE) {
 	process.exit(0);
 }
 
-const baseline: { errors: string[] } = existsSync(BASELINE)
-	? JSON.parse(readFileSync(BASELINE, "utf8"))
-	: { errors: [] };
-const known = new Set(baseline.errors);
+// A MISSING BASELINE IS NOT AN EMPTY ONE. Defaulting to `{errors: []}` also
+// disabled the broken-invocation guard below (which requires known.size > 0),
+// so a dropped baseline plus a failed tsc invocation printed "GREEN: no new
+// type errors, 0 baselined" and exited 0. The baseline file is exactly what a
+// bad merge loses.
+if (!existsSync(BASELINE)) {
+	console.error(
+		`INCONCLUSIVE: ${BASELINE} is missing. Without it there is nothing to compare against — restore it, or regenerate with --update if that is genuinely intended.`,
+	);
+	process.exit(2);
+}
+const baseline: { errors: string[]; occurrences?: Record<string, number> } =
+	JSON.parse(readFileSync(BASELINE, "utf8"));
+const known = new Set(baseline.errors.map(renorm));
+const knownCounts: Record<string, number> = Object.fromEntries(
+	Object.entries(baseline.occurrences ?? {}).map(([k, v]) => [renorm(k), v]),
+);
 
 const added = unique.filter((s) => !known.has(s));
+/** A baselined error that now occurs MORE often than it did. */
+const multiplied = unique.filter(
+	(s) => known.has(s) && (counts.get(s) ?? 1) > (knownCounts[s] ?? 1),
+);
 const fixed = [...known].filter((s) => !unique.includes(s));
 
 // Same guard from the other side. Going from 63 known errors to zero in one
@@ -141,16 +205,28 @@ if (fixed.length)
 		`${fixed.length} baselined error(s) no longer occur — run with --update and commit:\n${fixed.map((s) => `  - ${s}`).join("\n")}`,
 	);
 
-if (added.length) {
-	console.error(
-		`\nRED: ${added.length} NEW type error(s) in scripts/:\n${added.map((s) => `  ${s}`).join("\n")}`,
-	);
+if (added.length || multiplied.length) {
+	if (added.length)
+		console.error(
+			`\nRED: ${added.length} NEW type error(s) in scripts/:\n${added.map((s) => `  ${s}`).join("\n")}`,
+		);
+	if (multiplied.length)
+		console.error(
+			`\nRED: ${multiplied.length} baselined error(s) now occur MORE often — a fresh instance of an error already on the list:\n${multiplied
+				.map(
+					(s) => `  ${knownCounts[s] ?? 1} -> ${counts.get(s) ?? 1}  ${s}`,
+				)
+				.join("\n")}`,
+		);
 	process.exit(1);
 }
 
-console.log(
-	`GREEN: no new type errors in scripts/. ${unique.length} baselined error(s) carried as debt.`,
-);
+// Printed only when the run is actually green. `fixed` exits 1 below, and a
+// red step whose last log line reads GREEN is how a gate loses its audience.
+if (!fixed.length)
+	console.log(
+		`GREEN: no new type errors in scripts/. ${unique.length} baselined error(s) carried as debt.`,
+	);
 // A shrunk baseline is a real change to a committed file; failing here is what
 // keeps the ratchet honest, since a silently-stale baseline hides regressions
 // behind an old excuse.

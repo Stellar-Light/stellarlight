@@ -69,11 +69,36 @@ function fileChangedAt(file: string): number {
 	}
 }
 
+/** When any file this lane WATCHES last changed.
+ *
+ * A push-triggered lane fires when its paths change and not otherwise, so
+ * "last green 58 days ago" says nothing until you know whether anything it
+ * watches moved in those 58 days. sync-scout-mcp.yml watches `scout-mcp/**`,
+ * nobody has touched it, and the lane was correctly silent — reported as STALE
+ * because the fixed 45-day window took no account of that. The comment above
+ * graceDays already named this problem and then judged on the window anyway.
+ *
+ * Returns null when the lane has no path filter (then the window is all we
+ * have) or when git cannot answer. */
+function watchedPathsChangedAt(paths: string[]): number | null {
+	if (paths.length === 0) return null;
+	try {
+		const iso = execFileSync(
+			"git",
+			["log", "-1", "--format=%cI", "--", ...paths],
+			{ encoding: "utf8" },
+		).trim();
+		return iso ? Date.parse(iso) : null;
+	} catch {
+		return null;
+	}
+}
+
 type Row = {
 	file: string;
 	name: string;
 	cron: string | null;
-	state: "ok" | "never-ran" | "always-red" | "stale";
+	state: "ok" | "never-ran" | "always-red" | "failing" | "stale";
 	lastSuccessAt: string | null;
 	ageDays: number | null;
 	graceDays: number;
@@ -130,8 +155,26 @@ async function sameBlob(file: string, sha: string): Promise<boolean> {
 
 /** The steps every lane runs before its own logic. Failing inside this prefix
  * means the lane never got to say anything. */
-const SETUP = /checkout|action-setup|setup-node|setup-python|pnpm install|npm ci/i;
+// `install` on its own, not just "pnpm install": seven lanes give the step an
+// explicit name that the auto-generated form never produces — "Install
+// dependencies", "Install deps", "Install duckdb". Missing them classified a
+// broken install as a detector doing its job, which is exactly the failure this
+// file exists to catch, on dedup-projects.yml — the lane used as its own
+// worked example.
+const SETUP = /checkout|action-setup|setup-node|setup-python|install|npm ci/i;
 const isSetupStep = (name: string) => SETUP.test(name);
+
+/** Did this run actually produce jobs? Distinguishes "Actions refused the
+ * workflow file" (no jobs, a real finding) from "we could not read the jobs"
+ * (retention, a transient error — not evidence of anything). */
+async function runHadJobs(jobRunId: number): Promise<boolean> {
+	try {
+		const jobs = await gh(`/repos/${REPO}/actions/runs/${jobRunId}/jobs`);
+		return Array.isArray(jobs?.jobs) && jobs.jobs.length === 0;
+	} catch {
+		return false; // could not tell — do not report
+	}
+}
 
 async function firstFailedStep(jobRunId: number): Promise<string | null> {
 	try {
@@ -152,8 +195,19 @@ async function main() {
 	const files = readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f));
 	// One call for the whole list beats one per file, and it also tells us
 	// GitHub's own id and state for each workflow.
+	const list = await gh(`/repos/${REPO}/actions/workflows?per_page=100`);
 	const known: Array<{ id: number; path: string; name: string; state: string }> =
-		(await gh(`/repos/${REPO}/actions/workflows?per_page=100`)).workflows ?? [];
+		list.workflows ?? [];
+	// 88 workflow files today, and this endpoint also returns entries for files
+	// deleted from the default branch. Past 100 the overflow simply would not be
+	// in the map, and every one of those lanes would be reported "GitHub does
+	// not know this workflow" — a partial read rendered as a confident verdict.
+	if ((list.total_count ?? 0) > known.length) {
+		console.error(
+			`INCONCLUSIVE: GitHub reports ${list.total_count} workflows and this page carried ${known.length}. Paginate before trusting a verdict.`,
+		);
+		process.exit(2);
+	}
 	const byPath = new Map(known.map((w) => [w.path.replace(/^\.github\//, ""), w]));
 
 	const rows: Row[] = [];
@@ -182,6 +236,15 @@ async function main() {
 		// done, and reporting it as broken is how a board teaches people to skip
 		// it. Judged only on whether it works WHEN dispatched, never on age.
 		const automatic = !!(cron || on.push || on.pull_request || on.repository_dispatch);
+		// The path filters this lane watches, if it is push-triggered by paths.
+		const watched: string[] = !cron
+			? [
+					...(Array.isArray(on.push?.paths) ? on.push.paths : []),
+					...(Array.isArray(on.pull_request?.paths)
+						? on.pull_request.paths
+						: []),
+				].filter((x): x is string => typeof x === "string")
+			: [];
 
 		const meta = byPath.get(`workflows/${file}`);
 		if (!meta) {
@@ -206,8 +269,12 @@ async function main() {
 		// `disabled_manually` is a person's decision, not a defect.
 		if (meta.state !== "active") continue;
 
+		// 100, not 30. The header promises that red-latest with an older green is
+		// not a failure, and a window narrower than a lane's run rate breaks that
+		// promise silently: contract-gate and tests fire on every push to main
+		// with no path filter, so 30 runs can be a single busy day.
 		const runs: any[] =
-			(await gh(`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=30`))
+			(await gh(`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=100`))
 				.workflow_runs ?? [];
 		const since = fileChangedAt(file);
 		const conclusive = runs.filter(
@@ -261,6 +328,12 @@ async function main() {
 			// broken infrastructure; one that dies later is doing its job.
 			const step = await firstFailedStep(latest.id);
 			if (step && !isSetupStep(step)) continue;
+			// No identifiable failing step has TWO causes and they are opposite:
+			// a run that produced no jobs (how Actions reports a file it refused
+			// to parse — a real finding), or a jobs lookup that failed, e.g. a run
+			// past job-log retention. Only the first is evidence. `stepsSeen` is
+			// false only when the lookup itself came back empty or errored.
+			if (!step && !(await runHadJobs(latest.id))) continue;
 			// No identifiable failing step means the run produced no jobs at all —
 			// how Actions reports a file it refused to parse. Real when the file on
 			// disk is the one that failed, which sameBlob has just confirmed.
@@ -280,19 +353,47 @@ async function main() {
 		const age = Math.floor(
 			(Date.now() - Date.parse(success.created_at)) / 86_400_000,
 		);
-		const stale = automatic && age > grace;
+		// A path-filtered lane is judged against its own trigger: if nothing it
+		// watches has changed since its last green, it has not gone stale — it
+		// has had nothing to do.
+		const lastTrigger = watchedPathsChangedAt(watched);
+		const hadWorkSince =
+			lastTrigger === null || lastTrigger > Date.parse(success.created_at);
+		// FAILING is not STALE, and conflating them buries the actionable case.
+		// sync-scout-mcp has an old green and five failures after it: calling
+		// that "last green 58d ago" describes the symptom and hides the fact
+		// that it has been trying and losing every time since.
+		const failedSinceGreen = conclusive.filter(
+			(r) =>
+				r.conclusion !== "success" &&
+				Date.parse(r.created_at) > Date.parse(success.created_at),
+		);
+		const failing = failedSinceGreen.length > 0;
+		const stale = automatic && age > grace && hadWorkSince && !failing;
 		rows.push({
 			file,
 			name: meta.name,
 			cron,
-			state: stale ? "stale" : "ok",
+			state: failing ? "failing" : stale ? "stale" : "ok",
 			lastSuccessAt: success.created_at,
 			ageDays: age,
 			graceDays: grace,
 			runs: conclusive.length,
-			why: stale
-				? `last green ${age}d ago, past its ${grace}d window${cron ? ` (cron "${cron}")` : ""}`
-				: `last green ${age}d ago${automatic ? "" : " (manual tool — age not judged)"}`,
+			why: failing
+				? `${failedSinceGreen.length} failed run(s) since its last green ${age}d ago — it is trying and losing, not idle${
+						(await firstFailedStep(failedSinceGreen[0].id))
+							? `; dies at "${await firstFailedStep(failedSinceGreen[0].id)}"`
+							: ""
+					}`
+				: stale
+					? `last green ${age}d ago, past its ${grace}d window${cron ? ` (cron "${cron}")` : ""}`
+					: `last green ${age}d ago${
+							automatic
+								? watched.length && !hadWorkSince
+									? ` (nothing under ${watched.join(", ")} has changed since — nothing to do, not stale)`
+									: ""
+								: " (manual tool — age not judged)"
+						}`,
 		});
 	}
 
@@ -331,11 +432,23 @@ async function main() {
 	if (broken.length > 0) {
 		if (!JSON_OUT)
 			console.error(`RED: ${broken.length} lanes are armed but not working.`);
-		process.exit(1);
+		// --json EXITS 0 ON PURPOSE. The workflow runs this twice: once with
+		// --json to write the artifact, once without to turn a finding into a
+		// red. Exiting 1 here killed the job at the first step, skipping the
+		// commit — so the moment this lane found anything, /quality would freeze
+		// on the last committed snapshot forever, and a frozen board is
+		// indistinguishable from a healthy one. The artifact is the measurement;
+		// the verdict is the second run's job.
+		process.exit(JSON_OUT ? 0 : 1);
 	}
 }
 
 main().catch((e) => {
-	console.error("FATAL:", e?.message ?? e);
-	process.exit(1);
+	// The two heaviest call sites — the workflow list and the per-workflow runs
+	// query — are ~95% of the requests and do not catch. A 403, a 429, or one
+	// transient 500 on run 40 of 77 used to land here and exit 1, turning a
+	// sweep that measured NOTHING into a red board. Same rule as everywhere
+	// else in this file: no measurement, no verdict.
+	console.error("INCONCLUSIVE (sweep did not complete):", e?.message ?? e);
+	process.exit(2);
 });

@@ -225,6 +225,12 @@ async function main() {
 			rounds: e.rounds,
 			url: e.url,
 		})),
+		// The FULL list, uncapped. `sample` is 40 rows of detail and that is
+		// fine for reading, but a consumer that wants to JOIN against this list
+		// cannot use a truncated one — report-coverage-gaps.ts needs to ask "is
+		// this DefiLlama protocol also on the SCF absent list", and FxDAO sits at
+		// position 42. Slugs are cheap; the cap was only ever about detail rows.
+		absentSlugs: absent.map((e) => e.scfSlug),
 	};
 	if (OUT_FILE) {
 		writeFileSync(OUT_FILE, JSON.stringify(report, null, 1));

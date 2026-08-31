@@ -473,6 +473,15 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					.map(
 						(x) => `absent: ${x.scfSlug} (round ${(x.rounds || []).join(",")})`,
 					),
+				// Two independent rosters agreeing is a stronger signal than either
+				// lane's own threshold. Rendered only when non-empty, so it costs
+				// nothing on a quiet week.
+				...((coverageGaps as { corroboratedAbsent?: Array<{ name: string; slug: string }> })
+					.corroboratedAbsent ?? []
+				).map(
+					(c) =>
+						`corroborated by BOTH rosters — ${c.name} (${c.slug}) is on the SCF absent list AND listed by DefiLlama on Stellar, below the TVL floor that hid it`,
+				),
 			],
 			asOf: coverageGaps.asOf.slice(0, 10),
 			cadence: "weekly",

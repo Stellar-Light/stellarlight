@@ -1,13 +1,23 @@
 {
-	"asOf": "2026-08-31T01:44:04.926Z",
+	"asOf": "2026-08-31T02:45:20.848Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 77,
-	"healthy": 76,
+	"checked": 78,
+	"healthy": 75,
 	"broken": [
 		{
+			"file": "raven-eval-parity.yml",
+			"state": "failing",
+			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Truth battery (guard D — rotating probes, curated answer key)\""
+		},
+		{
+			"file": "seed-blog-posts.yml",
+			"state": "failing",
+			"why": "1 failed run(s) since its last green 16d ago — it is trying and losing, not idle"
+		},
+		{
 			"file": "sync-scout-mcp.yml",
-			"state": "stale",
-			"why": "last green 58d ago, past its 45d window"
+			"state": "failing",
+			"why": "19 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Push scout-mcp/ to Stellar-Light/scout-mcp\""
 		}
 	],
 	"rows": [
@@ -177,6 +187,17 @@
 			"why": "last green 29d ago"
 		},
 		{
+			"file": "consumption-guard.yml",
+			"name": "consumption-guard",
+			"cron": "23 6 * * 1",
+			"state": "ok",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
+			"ageDays": 0,
+			"graceDays": 21,
+			"runs": 13,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "content-freshness.yml",
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
@@ -184,7 +205,7 @@
 			"lastSuccessAt": "2026-08-30T17:37:15Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 52,
 			"why": "last green 0d ago"
 		},
 		{
@@ -192,10 +213,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T01:31:16Z",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -258,10 +279,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T01:31:16Z",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 30,
+			"runs": 86,
 			"why": "last green 0d ago"
 		},
 		{
@@ -360,7 +381,7 @@
 			"lastSuccessAt": "2026-08-30T19:46:03Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 20,
+			"runs": 26,
 			"why": "last green 0d ago"
 		},
 		{
@@ -435,10 +456,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 8,
+			"ageDays": 9,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 8d ago (manual tool — age not judged)"
+			"why": "last green 9d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -492,7 +513,7 @@
 			"lastSuccessAt": "2026-08-30T23:52:06Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -533,11 +554,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T01:27:18Z",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 29,
-			"why": "last green 0d ago"
+			"runs": 82,
+			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -555,10 +576,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-08-30T13:44:46Z",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -591,7 +612,7 @@
 			"lastSuccessAt": "2026-08-28T21:34:31Z",
 			"ageDays": 2,
 			"graceDays": 45,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 2d ago"
 		},
 		{
@@ -614,7 +635,7 @@
 			"ageDays": 6,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 6d ago"
+			"why": "last green 6d ago (nothing under api-client/package.json, scout-mcp/package.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "raven-category-battery.yml",
@@ -631,12 +652,12 @@
 			"file": "raven-eval-parity.yml",
 			"name": "raven-eval-parity",
 			"cron": "30 7 * * *",
-			"state": "ok",
+			"state": "failing",
 			"lastSuccessAt": "2026-08-29T13:17:50Z",
 			"ageDays": 1,
 			"graceDays": 4,
 			"runs": 3,
-			"why": "last green 1d ago"
+			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Truth battery (guard D — rotating probes, curated answer key)\""
 		},
 		{
 			"file": "recent-api-usage.yml",
@@ -657,7 +678,7 @@
 			"lastSuccessAt": "2026-08-30T18:20:56Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 57,
 			"why": "last green 0d ago"
 		},
 		{
@@ -679,7 +700,7 @@
 			"lastSuccessAt": "2026-08-30T21:13:30Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 50,
 			"why": "last green 0d ago"
 		},
 		{
@@ -690,19 +711,19 @@
 			"lastSuccessAt": "2026-08-30T22:24:37Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
 			"file": "seed-blog-posts.yml",
 			"name": "Publish ecosystem reports",
 			"cron": null,
-			"state": "ok",
+			"state": "failing",
 			"lastSuccessAt": "2026-08-14T23:41:25Z",
 			"ageDays": 16,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "1 failed run(s) since its last green 16d ago — it is trying and losing, not idle"
 		},
 		{
 			"file": "seed-i3-mock.yml",
@@ -800,19 +821,19 @@
 			"lastSuccessAt": "2026-08-30T12:21:01Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
+			"runs": 43,
 			"why": "last green 0d ago"
 		},
 		{
 			"file": "sync-scout-mcp.yml",
 			"name": "Sync scout-mcp to distribution repo",
 			"cron": null,
-			"state": "stale",
+			"state": "failing",
 			"lastSuccessAt": "2026-07-03T16:18:33Z",
 			"ageDays": 58,
 			"graceDays": 45,
 			"runs": 29,
-			"why": "last green 58d ago, past its 45d window"
+			"why": "19 failed run(s) since its last green 58d ago — it is trying and losing, not idle; dies at \"Push scout-mcp/ to Stellar-Light/scout-mcp\""
 		},
 		{
 			"file": "sync-scout-skill.yml",
@@ -820,20 +841,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T02:07:06Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 13,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T01:31:16Z",
+			"lastSuccessAt": "2026-08-31T02:31:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -855,7 +876,7 @@
 			"lastSuccessAt": "2026-08-28T20:50:12Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 30,
+			"runs": 100,
 			"why": "last green 2d ago"
 		}
 	]

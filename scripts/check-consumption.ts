@@ -135,10 +135,22 @@ function filesUnder(paths: string[]): string[] {
 	}
 }
 
+/** This file names all nine fields in its own CHECKS array, so scanning
+ * `scripts/` counts it as a writer of every one of them. `triageTags` measured
+ * written=6 with this file among the six.
+ *
+ * The consequence is the gate blocking its own remedy: delete a dead field from
+ * the schema and from every script, and writtenIn is still 1 — this file's
+ * string literal — while read stays 0, so the field is reported DEAD and the
+ * PR that removes it goes red. Same root cause as the comment bug this guard
+ * already fixed, one layer up: a checker must not be evidence about itself. */
+const SELF = "scripts/check-consumption.ts";
+
 /** Number of files whose CODE (not comments) references the field. */
 function grepCount(pattern: string, paths: string[]): number {
 	let n = 0;
 	for (const f of filesUnder(paths)) {
+		if (f === SELF) continue;
 		try {
 			const code = stripComments(readFileSync(f, "utf8"));
 			if (code.includes(pattern)) n++;
@@ -175,6 +187,19 @@ async function main() {
 		});
 	}
 
+	// MEASUREMENT FAILURE IS NOT A CLEAN TREE. `filesUnder` returns [] when
+	// `git ls-files` errors or the cwd is not the repo root, which makes every
+	// count 0 — and `dead` is then empty only because of the `writtenIn > 0`
+	// filter below, so the run prints GREEN and exits 0 having read nothing.
+	// Today a stale KNOWN_DEAD entry happens to catch it via `revived`; once the
+	// ratchet empties, which is the stated goal, that accident disappears.
+	const scanned = filesUnder(["src"]).length;
+	if (scanned === 0) {
+		console.error(
+			"INCONCLUSIVE: scanned 0 files under src/. `git ls-files` failed or this is not the repo root — no fields were measured, so no verdict.",
+		);
+		process.exit(2);
+	}
 	const dead = results.filter((r) => !r.consumed && r.writtenIn > 0);
 
 	const artifact = {

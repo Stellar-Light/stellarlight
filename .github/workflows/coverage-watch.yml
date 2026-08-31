@@ -146,6 +146,11 @@ jobs:
                     "sample": scf.get('sample', [])[:10]},
             "defillama": {"stellarListed": dl['stellarListed'], "matched": dl['matched'],
                           "missing": len(dl.get('missing', [])), "belowFloor": dl.get('belowFloor')},
+            # Protocols BOTH external rosters list and we do not hold. Carried
+            # through explicitly: this transform selects fields by name, so a new
+            # finding that is not named here reaches no consumer, which is the
+            # exact class this repo keeps re-learning.
+            "corroboratedAbsent": g.get('corroboratedAbsent', []),
             "summary": g.get('summary'),
           }, open('improvements/audits/coverage-gaps-latest.json', 'w'), indent=2)
           PY
