@@ -1,27 +1,27 @@
 {
-	"generatedAt": "2026-08-31T03:03:49.031Z",
+	"generatedAt": "2026-08-31T03:34:47.831Z",
 	"total": 461,
-	"open": 54,
-	"closed": 407,
+	"open": 27,
+	"closed": 434,
 	"verified": 7,
-	"cleared": 400,
-	"clearedByReprobe": 182,
+	"cleared": 427,
+	"clearedByReprobe": 209,
 	"clearedOnSilence": 218,
-	"closingRate": 0.88,
+	"closingRate": 0.94,
 	"oldestOpenDays": 39,
 	"inWave": 0,
 	"highOpen": 1,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
-			"surface": "retrieval",
-			"open": 31,
-			"total": 311
-		},
-		{
 			"surface": "consumer",
 			"open": 16,
 			"total": 23
+		},
+		{
+			"surface": "retrieval",
+			"open": 4,
+			"total": 311
 		},
 		{
 			"surface": "corpus",
@@ -60,27 +60,6 @@
 			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:the-starship-soroban-in-top-3-for-is-the-starshi",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "the-starship-soroban in top-3 for 'is The Starship Soroban live'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:rise-in-in-top-3-for-tell-me-about-rise-in",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "rise-in in top-3 for 'tell me about Rise In'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:stellar-global-in-top-3-for-is-stellar-global-li",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "stellar-global in top-3 for 'is Stellar Global live'",
-			"severity": "medium"
-		},
-		{
 			"id": "engine-a-recall:dd-in-top-3-for-what-is-dd",
 			"surface": "retrieval",
 			"source": "engine-a-recall",
@@ -88,24 +67,45 @@
 			"severity": "medium"
 		},
 		{
-			"id": "engine-a-recall:dex-tools-in-top-3-for-tell-me-about-dex-tools",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "dex-tools in top-3 for 'tell me about Dex Tools'",
+			"id": "raven-routing:what-wallets-support-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "what wallets support Stellar",
 			"severity": "medium"
 		},
 		{
-			"id": "engine-a-recall:block-by-block-in-top-3-for-is-block-by-block-li",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "block-by-block in top-3 for 'is Block by Block live'",
+			"id": "raven-routing:on-and-off-ramps-for-stellar-payments",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "on and off ramps for Stellar payments",
 			"severity": "medium"
 		},
 		{
-			"id": "engine-a-recall:stellar-update-in-top-3-for-tell-me-about-stella",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "stellar-update in top-3 for 'tell me about Stellar Update'",
+			"id": "raven-routing:top-stellar-projects-by-github-activity",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "top Stellar projects by GitHub activity",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:passkey-kit",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "passkey-kit",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:reflector-oracle-on-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "reflector oracle on Stellar",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:octoplace",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "octoplace",
 			"severity": "medium"
 		}
 	]
