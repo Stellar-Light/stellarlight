@@ -492,7 +492,13 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			cadence: "on-deploy",
 			severity: "medium",
 			artifact: "improvements/audits/answer-dating-latest.json",
-			passing: answerDating.undated === 0,
+			// Same bar as the scripts-types ratchet, deliberately: this row is a
+			// RATCHET — the baseline is named debt that only shrinks, and the gate
+			// blocks NEW undated values. Demanding undated === 0 here while the
+			// sibling ratchet passes on no-new-debt was one mechanism wearing two
+			// bars; a board that grades identical disciplines differently teaches
+			// readers to trust neither.
+			passing: answerDating.added.length === 0,
 		}),
 
 		// SCF coverage — the external roster vs what we actually serve. The

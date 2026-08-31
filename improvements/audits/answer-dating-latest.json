@@ -1,8 +1,10 @@
 {
-	"asOf": "2026-08-31T04:51:57.446Z",
+	"asOf": "2026-08-31T15:35:00.921Z",
 	"source": "scripts/check-answer-dating.ts",
 	"valuesChecked": 80,
 	"undated": 34,
+	"added": [],
+	"fixed": [],
 	"findings": [
 		{
 			"op": "getQualityReport",

@@ -255,11 +255,26 @@ function main() {
 		return true;
 	});
 
+	// The ratchet verdict BELONGS IN THE ARTIFACT. The board's row gates on
+	// "no NEW undated values" — the same bar as the scripts-types ratchet — and
+	// without added/fixed here it had to gate on undated === 0 instead, grading
+	// two identical disciplines with two different bars.
+	const keyOf = (f: Finding) => `${f.op} :: ${f.where}.${f.value}`;
+	const baselineSet = new Set<string>(
+		existsSync(BASELINE)
+			? ((JSON.parse(readFileSync(BASELINE, "utf8")) as { undated?: string[] })
+					.undated ?? [])
+			: [],
+	);
 	const artifact = {
 		asOf: new Date().toISOString(),
 		source: "scripts/check-answer-dating.ts",
 		valuesChecked,
 		undated: unique.length,
+		added: unique.map(keyOf).filter((k) => !baselineSet.has(k)),
+		fixed: [...baselineSet].filter(
+			(k) => !unique.some((f) => keyOf(f) === k),
+		),
 		findings: unique,
 	};
 
