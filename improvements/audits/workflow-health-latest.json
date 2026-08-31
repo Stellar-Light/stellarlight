@@ -1,15 +1,9 @@
 {
-	"asOf": "2026-08-31T23:42:02.866Z",
+	"asOf": "2026-08-31T23:56:06.044Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 77,
+	"checked": 76,
 	"healthy": 76,
-	"broken": [
-		{
-			"file": "workflow-health.yml",
-			"state": "always-red",
-			"why": "2 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
-		}
-	],
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -203,10 +197,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T23:20:06Z",
+			"lastSuccessAt": "2026-08-31T23:54:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 55,
+			"runs": 57,
 			"why": "last green 0d ago"
 		},
 		{
@@ -808,7 +802,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-08-31T23:20:07Z",
+			"lastSuccessAt": "2026-08-31T23:54:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -846,17 +840,6 @@
 			"graceDays": 21,
 			"runs": 100,
 			"why": "last green 0d ago"
-		},
-		{
-			"file": "workflow-health.yml",
-			"name": "workflow-health",
-			"cron": "41 6 * * 1",
-			"state": "always-red",
-			"lastSuccessAt": null,
-			"ageDays": null,
-			"graceDays": 21,
-			"runs": 2,
-			"why": "2 runs since this file was last edited, zero successes — dies at \"Mirror drift (scout-mcp)\", not a declared signal step"
 		}
 	]
 }
