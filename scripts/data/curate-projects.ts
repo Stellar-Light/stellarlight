@@ -1519,7 +1519,16 @@ async function main() {
 			overrideAccess: true,
 		});
 		if (r.docs[0]) {
-			console.log(`  ${seed.slug}: exists, skip`);
+			// Diagnostic (2026-08-31): fxdao and enerdao "existed" while the
+			// public API served neither — a bare skip hides WHAT exists. Print
+			// the blocking row's status and name, so a hidden Draft (the dedup
+			// lane's hiding mechanism) is visible in the log instead of reading
+			// as an already-served project.
+			// biome-ignore lint/suspicious/noExplicitAny: diagnostic read
+			const blocking = r.docs[0] as any;
+			console.log(
+				`  ${seed.slug}: exists, skip (status=${blocking?.status}, name=${blocking?.name})`,
+			);
 			continue;
 		}
 		console.log(
