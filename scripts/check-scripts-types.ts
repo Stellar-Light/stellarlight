@@ -29,20 +29,36 @@ const UPDATE = process.argv.includes("--update");
 const JSON_OUT = process.argv.includes("--json");
 const ARTIFACT = "improvements/audits/scripts-types-latest.json";
 
-/** file + TS code + message, without positions.
+/** Strip the presentation incidentals tsc embeds in a message, so identity
+ * survives them:
  *
- * The "... N more ..." elision in an inferred structural type carries a MEMBER
- * COUNT, and three baseline entries embed one — enrich-repos.ts's TS2339 on a
- * 15-field object literal among them. Adding one field to that object turns
- * "... 7 more ..." into "... 8 more ...", so the old signature lands in `fixed`
- * and the new one in `added`, and a PR that introduced no error at all goes RED
- * naming a pre-existing one. Normalised away: the count is incidental to the
- * error's identity. */
+ *  - The "... N more ..." elision in an inferred structural type carries a
+ *    MEMBER COUNT, and three baseline entries embed one — enrich-repos.ts's
+ *    TS2339 on a 15-field object literal among them. Adding one field to that
+ *    object turns "... 7 more ..." into "... 8 more ...", so the old signature
+ *    lands in `fixed` and the new one in `added`, and a PR that introduced no
+ *    error at all goes RED naming a pre-existing one.
+ *  - Literal-union member ORDER (`"createdAt" | "sizes"` vs `"sizes" |
+ *    "createdAt"`) tracks tsc's internal type-id allocation, which shifts
+ *    with unrelated edits and across fresh node_modules — observed 2026-08-31
+ *    on curate-projects.ts's TS2322: same error, same tsc 5.7.3, opposite
+ *    order, read as one fixed + one new. Unions are sorted into one canonical
+ *    order; within a single run tsc prints them consistently, so two errors
+ *    this collapses would already share a signature.
+ *
+ * Both are incidental to the error's identity. */
+const normalizeMsg = (s: string): string =>
+	s
+		.replace(/\.\.\. \d+ more \.\.\./g, "... N more ...")
+		.replace(/"[^"]*"(?: \| "[^"]*")+/g, (u) =>
+			u.split(" | ").sort().join(" | "),
+		);
+
+/** file + TS code + message, without positions. */
 function signature(line: string): string | null {
 	const m = /^(.+?)\(\d+,\d+\): (error TS\d+): (.*)$/.exec(line.trim());
 	if (!m) return null;
-	const msg = (m[3] as string).replace(/\.\.\. \d+ more \.\.\./g, "... N more ...");
-	return `${m[1]} :: ${m[2]} :: ${msg}`;
+	return `${m[1]} :: ${m[2]} :: ${normalizeMsg(m[3] as string)}`;
 }
 
 /** Apply the same message normalisations to a STORED signature.
@@ -52,8 +68,7 @@ function signature(line: string): string | null {
  * format migration. Normalising both sides compares like with like, and it
  * needs no escape hatch, which is the point: a hatch that lets the baseline
  * grow is the ratchet gone. */
-const renorm = (sig: string): string =>
-	sig.replace(/\.\.\. \d+ more \.\.\./g, "... N more ...");
+const renorm = normalizeMsg;
 
 function run(): string[] {
 	let out = "";
@@ -79,18 +94,22 @@ function run(): string[] {
 	// A PARSE FAILURE MUST NOT LOOK LIKE SUCCESS.
 	//
 	// If tsc's output format ever drifts from what `signature()` expects — a
-	// pretty-printer default, a colour flag, a version change — this returns an
-	// empty list. Empty means every baselined error "no longer occurs", so the
-	// guard would report 63 fixes and demand a baseline it cannot justify, or,
-	// worse, report GREEN on a tree full of errors. The tell is unambiguous:
-	// output that clearly contains errors but parsed to none.
-	if (parsed.length === 0 && /error TS\d+/.test(out)) {
+	// pretty-printer default, a colour flag, a version change — errors drop out
+	// of `parsed` silently. Dropped means the baselined error "no longer
+	// occurs", so the guard would report fixes it cannot justify, or, worse,
+	// report GREEN on a tree full of errors. The original guard only fired when
+	// EVERY line failed to parse; a MIXED old/new format (some lines parse,
+	// some don't) sailed through with the unparsed errors invisibly "fixed".
+	// The tell is per-line: any line that carries `error TS` but did not parse
+	// is a shortfall, and a shortfall is inconclusive — never a result.
+	const unparsed = lines.filter(
+		(l) => /error TS\d+/.test(l) && signature(l) === null,
+	);
+	if (unparsed.length > 0) {
 		console.error(
-			"INCONCLUSIVE: tsc reported errors this parser could not read. Output format has drifted:",
+			`INCONCLUSIVE: ${unparsed.length} line(s) contain "error TS" but this parser could not read them. Output format has drifted:`,
 		);
-		console.error(
-			lines.filter((l) => l.includes("error TS")).slice(0, 3).join("\n"),
-		);
+		console.error(unparsed.slice(0, 3).join("\n"));
 		process.exit(2);
 	}
 	return parsed;
@@ -113,14 +132,34 @@ if (UPDATE) {
 	// go green with a JSON diff as the only defence. Refuse to write a baseline
 	// that adds signatures; removing them is the whole point.
 	if (existsSync(BASELINE)) {
-		const prev: { errors?: string[] } = JSON.parse(
-			readFileSync(BASELINE, "utf8"),
-		);
+		const prev: { errors?: string[]; occurrences?: Record<string, number> } =
+			JSON.parse(readFileSync(BASELINE, "utf8"));
 		const before = new Set((prev.errors ?? []).map(renorm));
 		const growth = unique.filter((x) => !before.has(x));
 		if (growth.length > 0) {
 			console.error(
 				`REFUSED: --update would ADD ${growth.length} signature(s) to the baseline. The ratchet only removes. Fix these instead:\n${growth.map((g) => `  ${g}`).join("\n")}`,
+			);
+			process.exit(1);
+		}
+		// Counts ratchet too. Refusing new SIGNATURES but writing whatever
+		// occurrence counts this run measured left --update as the loophole for
+		// the exact class the occurrence map was added to catch: a SECOND
+		// instance of an already-baselined error (another `Cannot find name
+		// 'BUILT_BY_FIXES'` in the same file) is invisible to the signature set,
+		// so --update would commit the higher count and CI goes green on a fresh
+		// bug. Decreases are the point of the ratchet and stay allowed.
+		const prevCounts: Record<string, number> = Object.fromEntries(
+			Object.entries(prev.occurrences ?? {}).map(([k, v]) => [renorm(k), v]),
+		);
+		const swelled = unique.filter(
+			(x) => (counts.get(x) ?? 1) > (prevCounts[x] ?? 1),
+		);
+		if (swelled.length > 0) {
+			console.error(
+				`REFUSED: --update would INCREASE the occurrence count of ${swelled.length} baselined signature(s) — a fresh instance of a known error. The ratchet only removes. Fix these instead:\n${swelled
+					.map((s) => `  ${prevCounts[s] ?? 1} -> ${counts.get(s) ?? 1}  ${s}`)
+					.join("\n")}`,
 			);
 			process.exit(1);
 		}
