@@ -515,7 +515,12 @@ async function main() {
 					// signal — a human named this repo THE answer for a concept —
 					// so it must reach the grader, or the canonical repos lose
 					// the very lift the gate was designed to preserve for them.
-					curatedCanonical: CURATED.has(fullName.toLowerCase()),
+					// `info.nameWithOwner` over `full`: after a rename the curated
+					// list names the canonical repo, and the block just above has
+					// already converged the row onto it.
+					curatedCanonical: CURATED.has(
+						(info.nameWithOwner ?? full).toLowerCase(),
+					),
 				})
 			: { score: 0, label: "low" as const };
 

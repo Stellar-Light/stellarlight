@@ -20,6 +20,7 @@
  *
  *   RAVEN_MCP=… RAVEN_TOKEN=… pnpm exec tsx scripts/eval/raven-honest-absence.ts [--gate]
  */
+import { NONSENSE_PROBES } from "./battery-banks";
 
 const RAVEN_URL = process.env.RAVEN_MCP ?? "https://agents.stellar.buzz/mcp";
 const TOKEN = process.env.RAVEN_TOKEN;

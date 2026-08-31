@@ -35,6 +35,7 @@ const OUT = "improvements/audits/workflow-health-latest.json";
 const DIR = join(process.cwd(), ".github/workflows");
 const REPO = process.env.GITHUB_REPOSITORY ?? "Stellar-Light/stellarlight";
 const TOKEN = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? "";
+let rateLimited = false;
 
 /** How long a lane may go without a green run before it is stale. A cron says
  * its own answer; anything else is judged on a generous fixed window, because a
@@ -88,6 +89,14 @@ async function gh(path: string): Promise<any> {
 			...(TOKEN ? { authorization: `Bearer ${TOKEN}` } : {}),
 		},
 	});
+	if (res.status === 403 || res.status === 429) {
+		// Rate limit. NOT evidence about any lane — and the honest thing is to
+		// stop, because a partially-answered sweep that reports the unanswered
+		// half as broken is worse than no sweep. Cost a false ALWAYS-RED on
+		// dedup-projects the first time it happened.
+		rateLimited = true;
+		throw new Error(`ratelimit ${path}`);
+	}
 	if (!res.ok) throw new Error(`${res.status} ${path}`);
 	return res.json();
 }
@@ -106,8 +115,16 @@ async function sameBlob(file: string, sha: string): Promise<boolean> {
 			`/repos/${REPO}/contents/.github/workflows/${file}?ref=${sha}`,
 		);
 		return !!theirs?.sha && theirs.sha === mine;
-	} catch {
-		return true; // can't tell — report it and let a human look
+	} catch (e: any) {
+		const msg = String(e?.message ?? "");
+		// A 404 on the ref means the commit is no longer reachable — the branch
+		// was deleted or force-pushed away. That is not "cannot tell": an
+		// unreachable commit is one nobody can fix and nobody will run again.
+		// dedup-projects.yml's whole red history sits on such a branch.
+		if (msg.startsWith("404")) return false;
+		// Rate-limited: we learned nothing, so claim nothing.
+		if (msg.startsWith("ratelimit")) return false;
+		return true; // genuinely unknown — report it and let a human look
 	}
 }
 
@@ -150,8 +167,9 @@ async function main() {
 			continue;
 		}
 		// `on:` parses as the boolean true under YAML 1.1 — a footgun this repo
-		// has hit before, so read both spellings.
-		const on = doc.on ?? doc[true] ?? {};
+		// has hit before, so read both spellings. JS coerces the key to the
+		// string "true", which is also the only spelling TypeScript will index.
+		const on = doc.on ?? doc.true ?? {};
 		const sched = on.schedule;
 		const cron: string | null = Array.isArray(sched)
 			? (sched[0]?.cron ?? null)
@@ -168,6 +186,10 @@ async function main() {
 		const meta = byPath.get(`workflows/${file}`);
 		if (!meta) {
 			if (!automatic) continue;
+			// A lane added minutes ago has not had a chance yet. Same grace the
+			// no-runs case gets — without it, every PR that adds a workflow
+			// reports that workflow as broken.
+			if (Date.now() - fileChangedAt(file) < grace * 86_400_000) continue;
 			rows.push({
 				file,
 				name: doc.name ?? file,
@@ -239,6 +261,9 @@ async function main() {
 			// broken infrastructure; one that dies later is doing its job.
 			const step = await firstFailedStep(latest.id);
 			if (step && !isSetupStep(step)) continue;
+			// No identifiable failing step means the run produced no jobs at all —
+			// how Actions reports a file it refused to parse. Real when the file on
+			// disk is the one that failed, which sameBlob has just confirmed.
 			rows.push({
 				file,
 				name: meta.name,
@@ -272,6 +297,14 @@ async function main() {
 	}
 
 	const broken = rows.filter((r) => r.state !== "ok");
+	// A sweep that ran out of API budget did not measure the repo; publishing
+	// its partial count as the board's number would quietly overstate health.
+	if (rateLimited) {
+		console.error(
+			"INCONCLUSIVE: GitHub rate limit hit mid-sweep — no artifact written, no verdict.",
+		);
+		process.exit(2);
+	}
 	const artifact = {
 		asOf: new Date().toISOString(),
 		source: "scripts/check-workflow-health.ts",
