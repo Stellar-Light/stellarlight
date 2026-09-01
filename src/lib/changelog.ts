@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-01",
 		surfaces: ["api"],
+		version: "spec@1.9.17",
+		type: "changed",
+		summary:
+			"Routing metadata only, no schema change: searchResearch's x-routing now carries protocol-history and incident vocabulary (upgrade history P19→latest, why a version shipped, the Protocol 24 state-archival bug), and getChanges / getChangelog / getPartner / matchPartners gain x-routing blocks — they had none.",
+		detail:
+			"The upstream card change Raven's research-lane routing trigger (T1) asks for: their lexical index flattens x-routing into keywords, and protocol-history questions never reached searchResearch because none of that vocabulary was on the card. Descriptions are untouched (routing-surface ≤600 holds); keywords are multi-word phrases, never a bare 'protocol'.",
+	},
+	{
+		date: "2026-09-01",
+		surfaces: ["api"],
 		version: "spec@1.9.16",
 		type: "fixed",
 		summary:
