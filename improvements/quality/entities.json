@@ -1,13 +1,6 @@
 {
- "generatedAt": "2026-09-01T12:42:32.984Z",
+ "generatedAt": "2026-09-01T21:13:35.863Z",
  "surfaces": [
-  {
-   "surface": "directory",
-   "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 10,
-   "clearedFindings": 79,
-   "verifiedFindings": 0
-  },
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
@@ -16,10 +9,10 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
+   "surface": "directory",
+   "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 1,
-   "clearedFindings": 17,
+   "clearedFindings": 88,
    "verifiedFindings": 0
   },
   {
@@ -49,13 +42,20 @@
    "openFindings": 0,
    "clearedFindings": 5,
    "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 0,
+   "clearedFindings": 18,
+   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
   "total": 519,
-  "open": 16,
-  "cleared": 496,
+  "open": 6,
+  "cleared": 506,
   "verified": 7,
   "byFailureMode": [
    {
@@ -81,8 +81,8 @@
    },
    {
     "mode": "completeness-residual",
-    "open": 10,
-    "cleared": 18,
+    "open": 1,
+    "cleared": 27,
     "verified": 0,
     "surface": "directory"
    },
@@ -95,8 +95,8 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 1,
-    "cleared": 17,
+    "open": 0,
+    "cleared": 18,
     "verified": 0,
     "surface": "corpus"
    },
@@ -167,11 +167,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 12
+    "count": 3
    },
    {
     "bucket": "8–30d",
-    "count": 1
+    "count": 0
    },
    {
     "bucket": "31–60d",
@@ -184,49 +184,49 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "scfRoundAwards empty: upesa",
+    "probe": "battery:q-tool-indexer-repos-discovery",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "scfRoundAwards empty: inferera",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: pagcrypto",
+    "probe": "scfRoundAwards empty: simbolik",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: crebit",
+    "probe": "scfRoundAwards empty: the-aha-company",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: yolat",
+    "probe": "scfRoundAwards empty: womenbiz",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: sendana",
+    "probe": "scfRoundAwards empty: ichi",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: sorted",
+    "probe": "scfRoundAwards empty: fairblock",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
    },
    {
-    "probe": "scfRoundAwards empty: kutana",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: janus",
+    "probe": "scfRoundAwards empty: dfs-labs",
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
@@ -260,7 +260,7 @@
     {
      "class": "evidence-population",
      "total": 39,
-     "open": 10,
+     "open": 1,
      "firstSeen": "2026-07-22"
     },
     {
@@ -272,7 +272,7 @@
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 1,
+     "open": 0,
      "firstSeen": "2026-07-23"
     },
     {
@@ -292,7 +292,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1079,
+  "population": 1084,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -2395,9 +2395,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -9142,6 +9143,22 @@
     ]
    },
    {
+    "slug": "pyth",
+    "name": "Pyth",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
     "slug": "raum-network",
     "name": "Raum Network",
     "status": "Development",
@@ -9629,24 +9646,6 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "alchemy",
-    "name": "Alchemy",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "RPC",
-     "Indexer"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
@@ -9664,7 +9663,7 @@
    },
    {
     "field": "typed",
-    "count": 2
+    "count": 3
    },
    {
     "field": "linked",
@@ -9684,8 +9683,8 @@
    "curatedIndex": {
     "repos": 3111,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2172,
-    "depthPct": 70
+    "withCodeDepth": 2299,
+    "depthPct": 74
    },
    "tail": {
     "repos": 10018,
@@ -9698,9 +9697,9 @@
     "withNotes": 28
    },
    "mainnetJoin": {
-    "pool": 3353,
+    "pool": 3410,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 76
+    "joined": 80
    }
   },
   "curatedShape": {
@@ -9750,15 +9749,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1206
+     "count": 1208
     },
     {
      "label": "slowing",
-     "count": 907
+     "count": 906
     },
     {
      "label": "active",
-     "count": 740
+     "count": 739
     },
     {
      "label": "unknown",
@@ -9813,9 +9812,9 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 6890,
+  "withCodeDepth": 7017,
   "withNotes": 278,
-  "withMainnet": 76,
+  "withMainnet": 80,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -10348,8 +10347,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 83,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10361,8 +10360,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 79,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10374,7 +10373,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 69,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10413,8 +10412,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 45,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10426,8 +10425,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 89,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10439,8 +10438,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 35,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10452,8 +10451,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 24,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10465,7 +10464,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10478,7 +10477,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10491,7 +10490,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 30,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10504,7 +10503,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 30,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10517,7 +10516,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10530,7 +10529,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10543,7 +10542,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10556,7 +10555,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10569,7 +10568,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10582,8 +10581,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 63,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10595,7 +10594,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10608,8 +10607,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 71,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10621,8 +10620,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 35,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10634,8 +10633,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 89,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10647,8 +10646,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 23,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10673,7 +10672,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 53,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10686,7 +10685,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 60,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10699,8 +10698,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 78,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10712,7 +10711,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 98,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10725,8 +10724,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 88,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10751,7 +10750,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 77,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10764,8 +10763,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 51,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10777,8 +10776,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 78,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10790,7 +10789,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10816,7 +10815,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 24,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10842,8 +10841,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 65,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10855,8 +10854,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 38,
+    "deployable": true,
     "mainnetJoined": false
    }
   ]
@@ -10871,7 +10870,7 @@
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "2 of 984 sampled rows untyped",
+   "measurement": "3 of 984 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11002,13 +11001,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 496
+    "value": 506
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 16
+    "value": 6
    },
    {
     "id": "o:verified",
@@ -11128,7 +11127,7 @@
     "target": 19,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 79
+    "value": 88
    },
    {
     "source": 4,
@@ -11149,7 +11148,7 @@
     "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 17
+    "value": 18
    },
    {
     "source": 8,
@@ -11157,13 +11156,6 @@
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
-   },
-   {
-    "source": 16,
-    "target": 20,
-    "sourceId": "f:corpus",
-    "targetId": "o:open",
-    "value": 1
    },
    {
     "source": 2,
@@ -11177,7 +11169,7 @@
     "target": 20,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 10
+    "value": 1
    },
    {
     "source": 9,
@@ -11224,7 +11216,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3043 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3100 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11293,28 +11285,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6239,
+    "missing": 6112,
     "of": 13129,
-    "share": 47.5,
+    "share": 46.6,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6239,
+    "examplePoolSize": 6112,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "LFGBanditLabs/quipay-contracts",
-     "leocagli/stellar-rwa-holder-cap",
-     "leocagli/stellar-x402-paywall-kit",
      "leocagli/pontepay",
      "leocagli/tralalero-contracts",
-     "leocagli/Open-Stellar",
-     "leocagli/open-stellar-passport",
-     "legasicrypto/stellar-zk-private-audit",
-     "lauurnce/soroban-allowance-tracker",
-     "kuyawa/DonateStellar",
-     "kuyawa/StellarWatch",
-     "kuyawa/Galactica"
+     "KingFRANKHOOD/soroban-sql-sync",
+     "KB2410/ai-wallet-manager",
+     "KaruG1999/ocean_request",
+     "karagozemin/frontend-app",
+     "kalepail/stellar-mpp-demo",
+     "kalepail/quarterly-ascension",
+     "justmert/sora",
+     "JulioMh/dogstar-bridge-stellar",
+     "JOHED-Velca/CycleBuddy-stellar",
+     "JFWooten4/TAD3-core"
     ]
    },
    {
@@ -11347,16 +11339,17 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 2,
+    "missing": 3,
     "of": 984,
-    "share": 0.2,
+    "share": 0.3,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 2,
+    "examplePoolSize": 3,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
+     "pyth",
      "boundless-bounties",
      "deb"
     ]
