@@ -542,3 +542,32 @@ describe("centralized exchanges are a category (Playbook battery)", () => {
 		expect(intentTypesFor(["cex"]).has("Exchange")).toBe(true);
 	});
 });
+
+// engine-A P-KNOWN/P-PHRASE (crediolabs-ai): a dotted name must find itself.
+// The query rebuild appends the joined form; the haystack must carry it.
+describe("dotted/punctuated names carry their joined identity in the haystack", () => {
+	const row = {
+		name: "CredioLabs.AI",
+		slug: "crediolabs-ai",
+		shortDescription: "policy builder",
+	} as Parameters<typeof buildHaystack>[0];
+
+	it("haystack contains the canon-joined name and slug", () => {
+		const hay = buildHaystack(row);
+		expect(hay).toContain("crediolabsai");
+	});
+
+	it("the joined query token hits the row (both probe shapes' discriminator)", () => {
+		const hay = buildHaystack(row);
+		expect(hitsAnyToken(hay, ["crediolabsai"])).toBe(true);
+	});
+
+	it("plain names gain no duplicate noise", () => {
+		const hay = buildHaystack({
+			name: "Beans",
+			slug: "beans",
+			shortDescription: "payments",
+		} as Parameters<typeof buildHaystack>[0]);
+		expect(hay.split("beans").length - 1).toBeLessThanOrEqual(3);
+	});
+});
