@@ -1,0 +1,528 @@
+{
+	"consumer": "raven",
+	"label": "Raven (agents.stellar.buzz)",
+	"buckets": [
+		"other"
+	],
+	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
+	"generatedAt": "2026-09-01T12:35:43.948Z",
+	"window": {
+		"since": "2026-08-02T12:35:43.948Z",
+		"days": 30
+	},
+	"totals": {
+		"calls": 21832,
+		"activeDays": 31,
+		"endpoints": 29,
+		"distinctReplayableQueries": 8154
+	},
+	"byEndpoint": [
+		{
+			"endpoint": "/api/projects/search",
+			"calls": 8271,
+			"zeroResultCalls": 24,
+			"avgResultCount": 9.8
+		},
+		{
+			"endpoint": "/api/research",
+			"calls": 5123,
+			"zeroResultCalls": 46,
+			"avgResultCount": 7.7
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"calls": 2151,
+			"zeroResultCalls": 187,
+			"avgResultCount": 11.1
+		},
+		{
+			"endpoint": "/api/hackathons/builds",
+			"calls": 1501,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/analyze",
+			"calls": 612,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/rfps",
+			"calls": 563,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners",
+			"calls": 493,
+			"zeroResultCalls": 92,
+			"avgResultCount": 4.4
+		},
+		{
+			"endpoint": "/api/builders",
+			"calls": 447,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/explain",
+			"calls": 362,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/leaderboard",
+			"calls": 329,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/clusters",
+			"calls": 310,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/vet-idea",
+			"calls": 303,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons",
+			"calls": 300,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/skills",
+			"calls": 173,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/audits",
+			"calls": 115,
+			"zeroResultCalls": 35,
+			"avgResultCount": 9.3
+		},
+		{
+			"endpoint": "/api/repos/trust",
+			"calls": 114,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/scf-pitch",
+			"calls": 103,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/stablecoins",
+			"calls": 100,
+			"zeroResultCalls": 0,
+			"avgResultCount": 16.4
+		},
+		{
+			"endpoint": "/api/hackathons/[slug]",
+			"calls": 90,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/contracts",
+			"calls": 86,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathon-brief",
+			"calls": 78,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/changes",
+			"calls": 72,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/people",
+			"calls": 46,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/match",
+			"calls": 34,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/[slug]",
+			"calls": 25,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/compare",
+			"calls": 18,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/projects/resolve",
+			"calls": 6,
+			"zeroResultCalls": 3,
+			"avgResultCount": 0.5
+		},
+		{
+			"endpoint": "/api/verify",
+			"calls": 4,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/quality",
+			"calls": 3,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		}
+	],
+	"topQueriesReplayed": [
+		{
+			"endpoint": "/api/research",
+			"query": "test",
+			"hits": 165,
+			"lastSeen": "2026-09-01T10:30:40.054Z",
+			"today": {
+				"status": "weak",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.4,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "test",
+			"hits": 164,
+			"lastSeen": "2026-09-01T10:30:38.631Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "wallet",
+			"hits": 158,
+			"lastSeen": "2026-09-01T10:29:39.722Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "blend",
+			"hits": 141,
+			"lastSeen": "2026-09-01T02:43:44.234Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "stellar",
+			"hits": 136,
+			"lastSeen": "2026-09-01T10:29:41.113Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.5,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "lending",
+			"hits": 127,
+			"lastSeen": "2026-09-01T02:43:43.876Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "infrastructure",
+			"hits": 127,
+			"lastSeen": "2026-09-01T02:43:43.798Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "liquidity award",
+			"hits": 126,
+			"lastSeen": "2026-09-01T02:43:43.916Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.65,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "build award budget cap",
+			"hits": 126,
+			"lastSeen": "2026-09-01T02:43:43.872Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.64,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "growth program",
+			"hits": 126,
+			"lastSeen": "2026-09-01T02:43:01.085Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.84,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "neural quorum governance",
+			"hits": 123,
+			"lastSeen": "2026-09-01T02:43:44.001Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.85,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "oracle",
+			"hits": 99,
+			"lastSeen": "2026-09-01T10:29:40.444Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "soroswap",
+			"hits": 52,
+			"lastSeen": "2026-08-31T02:09:23.276Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "soroswap",
+			"hits": 42,
+			"lastSeen": "2026-09-01T04:55:37.643Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/partners",
+			"query": "smart contract audit firms for soroban",
+			"hits": 39,
+			"lastSeen": "2026-09-01T04:55:56.367Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": "scored",
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "stellar",
+			"hits": 38,
+			"lastSeen": "2026-09-01T04:56:11.700Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "allbridge",
+			"hits": 38,
+			"lastSeen": "2026-08-31T20:09:46.857Z",
+			"today": {
+				"status": "ok",
+				"returned": 4,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "freighter",
+			"hits": 37,
+			"lastSeen": "2026-08-31T15:18:20.920Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": "strict",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "phoenix",
+			"hits": 35,
+			"lastSeen": "2026-08-30T13:09:18.340Z",
+			"today": {
+				"status": "ok",
+				"returned": 6,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "strupey",
+			"hits": 32,
+			"lastSeen": "2026-09-01T04:56:09.047Z",
+			"today": {
+				"status": "ok",
+				"returned": 1,
+				"matchMode": "corrected",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"query": "oracle price feed",
+			"hits": 32,
+			"lastSeen": "2026-09-01T04:55:36.048Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "strict",
+				"topConfidence": null,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "tell me about the blend protocol on stellar — is it safe to build on?",
+			"hits": 32,
+			"lastSeen": "2026-09-01T04:55:26.008Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "which sep should an anchor implement for hosted deposits and withdrawals, and how does authenticatio",
+			"hits": 32,
+			"lastSeen": "2026-09-01T04:55:24.578Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.93,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"query": "lobstr",
+			"hits": 31,
+			"lastSeen": "2026-09-01T04:56:14.917Z",
+			"today": {
+				"status": "ok",
+				"returned": 4,
+				"matchMode": "strict",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "v-sor-app-vul-003",
+			"hits": 31,
+			"lastSeen": "2026-09-01T04:56:02.745Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.77,
+				"advisoryNote": null
+			}
+		}
+	],
+	"replaySummary": {
+		"graded": 25,
+		"ok": 24,
+		"okRate": 96
+	},
+	"contractChangesInWindow": 100
+}
