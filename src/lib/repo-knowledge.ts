@@ -26,6 +26,15 @@ export interface KnowledgeNote {
 	 * verdicts about someone's repo). Serve-side filters enforce this.
 	 */
 	visibility?: "public" | "internal";
+	/**
+	 * Hand-authored natural-language trigger phrases (sls-080 round 2: the
+	 * upstream monitor asks "…highest supported protocol version…" — no
+	 * code-shaped identifier, so the identifier path can never fire for it).
+	 * A trigger fires when EVERY one of its words appears as a whole word in
+	 * the question. Authoring discipline: ≥2 words, distinctive of THIS fact
+	 * — never a phrase some other question about the repo would contain.
+	 */
+	triggers?: string[];
 }
 
 /**
@@ -258,6 +267,11 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	"stellar/stellar-horizon": [
 		{
 			note: "Horizon's protocol ceiling: MaxSupportedProtocolVersion = 28 (a uint32 constant defined in internal/ingest/main.go) (verified 2026-09-01 at master AND at scanned ref 82660510 — https://github.com/stellar/stellar-horizon/blob/master/internal/ingest/main.go). Horizon split out of the stellar/go monorepo; the monorepo's frozen copy still carries pre-split values, so cite THIS repo for current Horizon constants.",
+			triggers: [
+				"max supported protocol version",
+				"maximum supported protocol version",
+				"highest supported protocol version",
+			],
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -396,11 +410,27 @@ export function findDirectAnswerNote(
 				.filter((w) => w.length >= 8),
 		);
 	const qIdents = identsOf(q);
-	if (!qIdents.size) return null;
+	if (qIdents.size) {
+		for (const n of notes) {
+			if (n.visibility === "internal") continue;
+			const nIdents = identsOf(n.note.replace(/https?:\/\/\S+/g, " "));
+			for (const t of qIdents) if (nIdents.has(t)) return n;
+		}
+	}
+	// Trigger-phrase path (sls-080 round 2): the upstream probe asks the
+	// question in plain English — "which Horizon ingestion constant pins the
+	// highest supported protocol version" — which carries no identifier, so
+	// the path above can never serve the note and DeepWiki's stale value wins.
+	// Triggers are curated IN THIS FILE, never derived from input, and match
+	// on whole-word sets (the infix trap stays dead: every trigger word must
+	// appear as its own word in the question).
+	const qWords = new Set(q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
 	for (const n of notes) {
 		if (n.visibility === "internal") continue;
-		const nIdents = identsOf(n.note.replace(/https?:\/\/\S+/g, " "));
-		for (const t of qIdents) if (nIdents.has(t)) return n;
+		for (const t of n.triggers ?? []) {
+			const words = t.toLowerCase().split(/\s+/).filter(Boolean);
+			if (words.length >= 2 && words.every((w) => qWords.has(w))) return n;
+		}
 	}
 	return null;
 }

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-01",
 		surfaces: ["api"],
+		version: "spec@1.9.16",
+		type: "fixed",
+		summary:
+			"explainRepo knowledge notes now answer plain-English phrasings via hand-authored trigger phrases (sls-080 round 2: the upstream monitor asks 'highest supported protocol version' with no identifier, so the identifier-only matcher fell through to DeepWiki's stale 25).",
+		detail:
+			"A trigger fires only when every one of its words appears as a whole word in the question; phrases are curated in-repo per note, never derived from input, so the hijack surface closed in 1.9.15 stays closed. First covered note: stellar/stellar-horizon MaxSupportedProtocolVersion = 28.",
+	},
+	{
+		date: "2026-09-01",
+		surfaces: ["api"],
 		version: "spec@1.9.15",
 		type: "fixed",
 		summary:
