@@ -75,12 +75,59 @@ export function createGh(token: string): Gh {
 	};
 }
 
+/** Per-repo accounting: REST calls spend the shared 5,000/hr pool the wave
+ * budget guards; raw.githubusercontent.com fetches do not. */
+export interface BlobAccount {
+	api: number;
+	raw: number;
+}
+
+/** The raw-content URL for a blob at a pinned ref — path segments encoded,
+ * separators kept. Exported so the shape can be checked without a network. */
+export function rawUrl(
+	owner: string,
+	name: string,
+	ref: string,
+	path: string,
+): string {
+	const enc = path.split("/").map(encodeURIComponent).join("/");
+	return `https://raw.githubusercontent.com/${owner}/${name}/${ref}/${enc}`;
+}
+
+/**
+ * Read one blob. raw.githubusercontent.com FIRST — it serves public files
+ * at a pinned commit without touching the REST pool — and the git/blobs API
+ * only when raw declines (private/blocked repo, odd path, transient), so
+ * nothing that worked before stops working. 2026-09-01: a wave's cost was
+ * ~14 REST calls per repo, ~9 of them blob reads; the pool-aware budget
+ * (4,600 calls) capped a full 500-repo wave at ~330 repos. With blobs off
+ * the pool a wave costs ~5 calls per repo and the tail converges.
+ */
 async function fetchBlob(
 	gh: Gh,
 	owner: string,
 	name: string,
 	sha: string,
+	path: string,
+	ref: string,
+	acct: BlobAccount,
 ): Promise<string | null> {
+	try {
+		const res = await fetch(rawUrl(owner, name, ref, path), {
+			headers: { "user-agent": "sl-code-scan" },
+			signal: AbortSignal.timeout(20_000),
+		});
+		if (res.ok) {
+			acct.raw++;
+			const len = Number(res.headers.get("content-length") ?? 0);
+			if (len > 400_000) return null; // oversize → unreadable (never a positive proof)
+			const text = await res.text();
+			return text.length > 400_000 ? null : text;
+		}
+	} catch {
+		// fall through to the API path
+	}
+	acct.api++;
 	const res = await gh(`/repos/${owner}/${name}/git/blobs/${sha}`);
 	if (!res.ok) return null;
 	const j = await res.json();
@@ -301,7 +348,10 @@ export interface RepoCodeResult {
 		tagCount: number;
 		nameLooksTemplate: boolean;
 	};
+	/** REST blob calls made for this repo (the ones that spend the pool). */
 	pathsFetched: number;
+	/** Blobs served by raw.githubusercontent.com (free of the REST pool). */
+	rawFetched: number;
 	contractCrates: number;
 }
 
@@ -382,8 +432,10 @@ export async function fetchRepoCode(
 	);
 	const cargoText = new Map<string, string>();
 	const cargoIsSoroban = new Map<string, boolean>();
+	const blobRef = scannedRef ?? branch;
+	const acct: BlobAccount = { api: 0, raw: 0 };
 	for (const c of cargos.slice(0, 40)) {
-		const txt = await fetchBlob(gh, owner, name, c.sha);
+		const txt = await fetchBlob(gh, owner, name, c.sha, c.path, blobRef, acct);
 		cargoText.set(c.path, txt ?? "");
 		cargoIsSoroban.set(c.path, /soroban[-_]sdk/i.test(txt ?? ""));
 	}
@@ -400,7 +452,9 @@ export async function fetchRepoCode(
 		...sel.langSources,
 	]) {
 		const sha = shaByPath.get(p);
-		const txt = sha ? await fetchBlob(gh, owner, name, sha) : null;
+		const txt = sha
+			? await fetchBlob(gh, owner, name, sha, p, blobRef, acct)
+			: null;
 		blobs.push({ path: p, text: txt });
 	}
 	const contractCrateDirs = cargos
@@ -409,7 +463,15 @@ export async function fetchRepoCode(
 
 	const readmeEntry = tree.find((e) => /^readme\.md$/i.test(e.path));
 	const readmeText = readmeEntry
-		? await fetchBlob(gh, owner, name, readmeEntry.sha)
+		? await fetchBlob(
+				gh,
+				owner,
+				name,
+				readmeEntry.sha,
+				readmeEntry.path,
+				blobRef,
+				acct,
+			)
 		: null;
 	const mainnetContractId = await verifyMainnetContract(readmeText);
 	const tagsRes = await (
@@ -469,11 +531,11 @@ export async function fetchRepoCode(
 		// finding 4: the cargo-relevance scan fetches up to 40 manifest blobs
 		// BEFORE selection — count what was actually fetched, or the call-budget
 		// guard under-counts and a wave can blow the token allowance.
-		pathsFetched:
-			Math.min(cargos.length, 40) +
-			sel.sources.length +
-			sel.tests.length +
-			sel.jsSources.length,
+		// finding 4 (2026-08): count what was actually fetched, or the
+		// call-budget guard under-counts. Now only REST blob calls count —
+		// raw.githubusercontent reads never touch the pool the guard protects.
+		pathsFetched: acct.api,
+		rawFetched: acct.raw,
 		contractCrates: contractCrateDirs.length,
 	};
 }
