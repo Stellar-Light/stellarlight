@@ -28,6 +28,11 @@ import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
+import {
+	domainOf,
+	fetchText,
+	parseStellarToml,
+} from "../enrich-partners-toml";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 
@@ -297,8 +302,61 @@ async function run() {
 		}
 	}
 
+	// stellar.toml auto-join (P4 evidence expansion, lane 2b — pays three gap-
+	// matrix rows at once: onchain evidence → strongBasis upgrades → deployment
+	// evidence): anchor/stablecoin-class rows publish their issuer accounts in
+	// their OWN domain's /.well-known/stellar.toml, so the join is precise by
+	// construction — the operator's own machine record names the asset. Only
+	// fills an EMPTY asset slot (every other source outranks); a currency block
+	// without a well-formed G-address contributes nothing; an unreachable or
+	// HTML soft-404 toml is a skip, never a guess. First (code, issuer) pair is
+	// taken as the canonical asset; the rest are logged so the dry run shows
+	// what a multi-asset issuer holds. The stellar.expert fetch downstream
+	// validates the issuer exists before anything is written.
+	let tomlDerived = 0;
+	{
+		const candidates = await payload.find({
+			collection: "projects",
+			where: {
+				or: [
+					{ types: { contains: "Anchor" } },
+					{ types: { contains: "Stablecoin" } },
+				],
+			},
+			limit: 2000,
+			depth: 0,
+			select: { slug: true, links: true, name: true },
+		});
+		const rows = candidates.docs as unknown as Array<{
+			slug?: string;
+			name?: string;
+			links?: { website?: string | null } | null;
+		}>;
+		console.log(`  toml join: ${rows.length} anchor/stablecoin-class rows`);
+		for (const p of rows) {
+			if (!p.slug) continue;
+			const existing = bySlug.get(p.slug);
+			if (existing?.asset) continue; // a stronger source already keyed it
+			const dom = p.links?.website ? domainOf(p.links.website) : null;
+			if (!dom) continue;
+			const text = await fetchText(`https://${dom}/.well-known/stellar.toml`);
+			await sleep(150); // be polite across many small operators
+			if (!text) continue;
+			const toml = parseStellarToml(text);
+			if (!toml.currencies.length) continue;
+			const [primary, ...rest] = toml.currencies;
+			const entry = existing ?? { contracts: [] };
+			entry.asset = { code: primary.code, issuer: primary.issuer };
+			bySlug.set(p.slug, entry);
+			tomlDerived += 1;
+			console.log(
+				`  toml ${dom} → ${p.slug}: ${primary.code}-${primary.issuer.slice(0, 6)}…${rest.length ? ` (+${rest.length} more: ${rest.map((c) => c.code).join(", ")})` : ""}`,
+			);
+		}
+	}
+
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset + ${registryDerived} registry → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
 	);
 
 	let updated = 0;
