@@ -1,11 +1,18 @@
 {
- "generatedAt": "2026-08-31T19:57:33.380Z",
+ "generatedAt": "2026-09-01T00:13:52.070Z",
  "surfaces": [
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 30,
-   "clearedFindings": 59,
+   "openFindings": 21,
+   "clearedFindings": 68,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 12,
+   "clearedFindings": 311,
    "verifiedFindings": 0
   },
   {
@@ -16,32 +23,25 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 4,
-   "clearedFindings": 307,
+   "surface": "scf",
+   "means": "SCF round and award data",
+   "openFindings": 2,
+   "clearedFindings": 14,
    "verifiedFindings": 0
   },
   {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
-   "openFindings": 3,
-   "clearedFindings": 15,
+   "openFindings": 1,
+   "clearedFindings": 17,
    "verifiedFindings": 0
   },
   {
    "surface": "contract",
    "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 1,
-   "clearedFindings": 22,
-   "verifiedFindings": 7
-  },
-  {
-   "surface": "scf",
-   "means": "SCF round and award data",
    "openFindings": 0,
-   "clearedFindings": 14,
-   "verifiedFindings": 0
+   "clearedFindings": 23,
+   "verifiedFindings": 7
   },
   {
    "surface": "code",
@@ -53,36 +53,36 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 490,
-  "open": 43,
-  "cleared": 440,
+  "total": 504,
+  "open": 41,
+  "cleared": 456,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 3,
-    "cleared": 259,
+    "open": 12,
+    "cleared": 262,
     "verified": 0,
     "surface": "retrieval"
    },
    {
     "mode": "coverage-gap",
-    "open": 2,
-    "cleared": 59,
+    "open": 0,
+    "cleared": 61,
     "verified": 0,
     "surface": "directory"
    },
    {
     "mode": "demand-miss",
-    "open": 1,
-    "cleared": 46,
+    "open": 0,
+    "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
    },
    {
     "mode": "completeness-residual",
-    "open": 28,
-    "cleared": 0,
+    "open": 21,
+    "cleared": 7,
     "verified": 0,
     "surface": "directory"
    },
@@ -95,14 +95,14 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 3,
-    "cleared": 15,
+    "open": 1,
+    "cleared": 17,
     "verified": 0,
     "surface": "corpus"
    },
    {
     "mode": "scf-round-overclaim",
-    "open": 0,
+    "open": 2,
     "cleared": 14,
     "verified": 0,
     "surface": "scf"
@@ -144,8 +144,8 @@
    },
    {
     "mode": "ambiguous-contract",
-    "open": 1,
-    "cleared": 0,
+    "open": 0,
+    "cleared": 1,
     "verified": 0,
     "surface": "contract"
    },
@@ -160,15 +160,15 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 34
+    "count": 37
    },
    {
     "bucket": "8–30d",
-    "count": 4
+    "count": 1
    },
    {
     "bucket": "31–60d",
-    "count": 5
+    "count": 3
    },
    {
     "bucket": ">60d",
@@ -177,115 +177,122 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "what wallets support Stellar",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "dd in top-3 for 'what is DD'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "on and off ramps for Stellar payments",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "GET /api/partners · accepting",
+    "surface": "contract",
+    "failureMode": "ambiguous-contract",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "passkey-kit",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "battery:q-edge-doc-category-filter-empty",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "octoplace",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "battery:q-soroban-sdk-cve",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "how do I write a Soroban smart contract in Rust",
-    "surface": "consumer",
-    "failureMode": "routing-miss",
+    "probe": "crdt",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "openx402",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "ping in top-13 of 52 matches (its own coverage.countries implies 'Argentina anchor')",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "hypertron",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "ACTA-Team/did-stellar in top-5 for its own symbol 'contractErrorCodeFromNumber'",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
     "clearedAt": "2026-08-31"
    },
    {
-    "probe": "planbok",
-    "surface": "consumer",
-    "failureMode": "demand-routing-miss",
+    "probe": "finclusive",
+    "surface": "directory",
+    "failureMode": "coverage-gap",
     "clearedAt": "2026-08-31"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 198,
-    "repeats": 198,
+    "newFindings": 212,
+    "repeats": 212,
     "ratePct": 100
    },
    "lifetime": {
-    "newFindings": 490,
-    "repeats": 484,
+    "newFindings": 504,
+    "repeats": 498,
     "ratePct": 98.8
    },
    "byClass": [
     {
      "class": "identity",
-     "total": 288,
-     "open": 8,
+     "total": 300,
+     "open": 17,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "taxonomy-coverage",
      "total": 108,
-     "open": 3,
+     "open": 0,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "evidence-population",
      "total": 38,
-     "open": 28,
+     "open": 21,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "contract-completeness",
      "total": 23,
-     "open": 1,
+     "open": 0,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 3,
+     "open": 1,
      "firstSeen": "2026-07-23"
     },
     {
      "class": "cross-surface-consistency",
-     "total": 14,
-     "open": 0,
+     "total": 16,
+     "open": 2,
      "firstSeen": "2026-07-22"
     }
    ]
   }
  },
  "projects": {
-  "read": 983,
-  "population": 1056,
-  "servedPopulation": 983,
+  "read": 984,
+  "population": 1057,
+  "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 983,
+  "sampled": 984,
   "scatter": [
+   {
+    "slug": "hypertron",
+    "prominence": 0,
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Development"
+   },
    {
     "slug": "study-stellar-sdk-soroban",
     "prominence": 0,
@@ -547,10 +554,9 @@
    {
     "slug": "stellarpay-x402",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Development"
    },
@@ -816,20 +822,18 @@
    {
     "slug": "smart-treasury",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "sikadesk",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -854,50 +858,45 @@
    {
     "slug": "paycashless",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "pathpulse-ai",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "offer-hub",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "muney",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "lusty",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -922,20 +921,18 @@
    {
     "slug": "for-yield",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "chainless",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -978,10 +975,9 @@
    {
     "slug": "amulets",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1038,10 +1034,9 @@
    {
     "slug": "stellar-defi-hub",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1270,10 +1265,8 @@
    {
     "slug": "scopuly",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1405,10 +1398,9 @@
    {
     "slug": "wellspring",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1505,20 +1497,18 @@
    {
     "slug": "refractor",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "providencia-onchain",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1606,20 +1596,18 @@
    {
     "slug": "investar",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "fundable",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1662,10 +1650,9 @@
    {
     "slug": "blockroll",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1681,10 +1668,9 @@
    {
     "slug": "stellarx-ph",
     "prominence": 0,
-    "factsPresent": 2,
+    "factsPresent": 3,
     "missing": [
      "strongBasis",
-     "typed",
      "linked"
     ],
     "status": "Live"
@@ -1782,20 +1768,18 @@
    {
     "slug": "cushion",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "acta",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -1829,10 +1813,9 @@
    {
     "slug": "xccy",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2101,10 +2084,9 @@
    {
     "slug": "squid-router",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2138,10 +2120,8 @@
    {
     "slug": "zenex",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "typed"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Pre-Release"
    },
    {
@@ -2183,10 +2163,8 @@
    {
     "slug": "velo",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2210,19 +2188,16 @@
    {
     "slug": "upshift",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "turbolong",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2256,10 +2231,8 @@
    {
     "slug": "sushi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2283,10 +2256,9 @@
    {
     "slug": "soropg",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2338,30 +2310,27 @@
    {
     "slug": "scaffold-stellar",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "sava",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "rumble-fish",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2377,10 +2346,9 @@
    {
     "slug": "rehive",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2405,49 +2373,43 @@
    {
     "slug": "rails",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "privy",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "pluto-loans",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "typed"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
     "slug": "piggy-wallet",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2463,20 +2425,18 @@
    {
     "slug": "paywit",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "pagfinance",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2501,30 +2461,26 @@
    {
     "slug": "novatti",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "noir",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "noether",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "typed"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Pre-Release"
    },
    {
@@ -2539,10 +2495,9 @@
    {
     "slug": "nectar-network",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2558,10 +2513,9 @@
    {
     "slug": "microvault",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2577,10 +2531,9 @@
    {
     "slug": "merkl",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2630,30 +2583,27 @@
    {
     "slug": "k2-lend",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "ibis",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
    {
     "slug": "huma",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2669,10 +2619,9 @@
    {
     "slug": "hatom-protocol",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2760,10 +2709,9 @@
    {
     "slug": "cryptomate",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2797,10 +2745,9 @@
    {
     "slug": "coinme",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2887,10 +2834,9 @@
    {
     "slug": "backyard",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2906,10 +2852,9 @@
    {
     "slug": "automated-finance",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -2952,10 +2897,9 @@
    {
     "slug": "the-aha-company",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -3007,10 +2951,9 @@
    {
     "slug": "xlmsh",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -3497,10 +3440,8 @@
    {
     "slug": "templar-protocol",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3844,10 +3785,9 @@
    {
     "slug": "stellar-razor-and-blazor-suite",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -3908,10 +3848,9 @@
    {
     "slug": "stellar-development-foundation",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -4035,10 +3974,8 @@
    {
     "slug": "spiko",
     "prominence": 78,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4107,10 +4044,9 @@
    {
     "slug": "sorosorcerer",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "sourced",
-     "typed"
+     "sourced"
     ],
     "status": "Inactive"
    },
@@ -5408,10 +5344,9 @@
    {
     "slug": "ledgerstax",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -6270,10 +6205,8 @@
    {
     "slug": "defindex",
     "prominence": 78,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7425,19 +7358,15 @@
    {
     "slug": "gyen",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "audd",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7562,19 +7491,15 @@
    {
     "slug": "etherfuse",
     "prominence": 78,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "excellar",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7874,10 +7799,8 @@
    {
     "slug": "mykobo",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8243,11 +8166,8 @@
    {
     "slug": "anclap",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -9008,10 +8928,8 @@
    {
     "slug": "soroswap",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -9035,10 +8953,8 @@
    {
     "slug": "aquarius",
     "prominence": 85,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -9051,15 +8967,15 @@
     "status": "Live"
    }
   ],
-  "meanScore": 80,
+  "meanScore": 82,
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 911
+    "count": 907
    },
    {
     "network": "mainnet",
-    "count": 70
+    "count": 75
    },
    {
     "network": "testnet",
@@ -9069,19 +8985,19 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 685
+    "count": 672
    },
    {
     "basis": "source-inherited",
-    "count": 157
+    "count": 155
    },
    {
     "basis": "human-verified",
-    "count": 115
+    "count": 116
    },
    {
     "basis": "onchain-activity",
-    "count": 13
+    "count": 28
    },
    {
     "basis": "unverified",
@@ -9093,77 +9009,9 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 904,
+  "weakestTotal": 886,
   "weakestTruncated": true,
   "weakest": [
-   {
-    "slug": "stellarx-ph",
-    "name": "StellarX PH",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 40,
-    "factsPresent": 2,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed",
-     "linked"
-    ]
-   },
-   {
-    "slug": "acta",
-    "name": "ACTA",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "mainnet",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "amulets",
-    "name": "Amulets",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "anclap",
-    "name": "Anclap",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "mainnet",
-    "types": [
-     "Anchor",
-     "Stablecoin"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
    {
     "slug": "ars",
     "name": "ARS",
@@ -9180,22 +9028,6 @@
     "missing": [
      "strongBasis",
      "sourced"
-    ]
-   },
-   {
-    "slug": "automated-finance",
-    "name": "Automated Finance",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
     ]
    },
    {
@@ -9217,108 +9049,12 @@
     ]
    },
    {
-    "slug": "backyard",
-    "name": "Backyard",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "blockroll",
-    "name": "Blockroll",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
     "slug": "boundless-bounties",
     "name": "Boundless (Bounties)",
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "mainnet",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "chainless",
-    "name": "Chainless",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "coinme",
-    "name": "Coinme",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "cryptomate",
-    "name": "CryptoMate",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "cushion",
-    "name": "Cushion",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
     "types": [],
     "score": 60,
     "factsPresent": 3,
@@ -9363,134 +9099,6 @@
     ]
    },
    {
-    "slug": "for-yield",
-    "name": "For Yield",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "fundable",
-    "name": "Fundable",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "hatom-protocol",
-    "name": "Hatom Protocol",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "huma",
-    "name": "Huma",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "mainnet",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "ibis",
-    "name": "Ibis",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "investar",
-    "name": "InveStar",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "k2-lend",
-    "name": "K2 Lend",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "ledgerstax",
-    "name": "LedgersTax",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
     "slug": "lul",
     "name": "Lul",
     "status": "Live",
@@ -9509,22 +9117,6 @@
     ]
    },
    {
-    "slug": "lusty",
-    "name": "Lusty",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
     "slug": "mbrl",
     "name": "MBRL",
     "status": "Live",
@@ -9540,54 +9132,6 @@
     "missing": [
      "strongBasis",
      "sourced"
-    ]
-   },
-   {
-    "slug": "merkl",
-    "name": "Merkl",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "microvault",
-    "name": "Microvault",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "muney",
-    "name": "Muney",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
     ]
    },
    {
@@ -9610,44 +9154,49 @@
     ]
    },
    {
-    "slug": "nectar-network",
-    "name": "Nectar Network",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
-    "slug": "noir",
-    "name": "Noir",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
-    ]
-   },
-   {
     "slug": "normal",
     "name": "Normal",
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "mainnet",
+    "types": [
+     "Stablecoin",
+     "Yield"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "pen",
+    "name": "PEN",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Stablecoin"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "raum-network",
+    "name": "Raum Network",
+    "status": "Development",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
     "types": [
      "DEX"
     ],
@@ -9660,106 +9209,517 @@
     ]
    },
    {
-    "slug": "novatti",
-    "name": "Novatti",
+    "slug": "relax",
+    "name": "Relax",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "SDK"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "linked"
     ]
    },
    {
-    "slug": "offer-hub",
-    "name": "Offer Hub",
+    "slug": "sendit",
+    "name": "Sendit",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "Payments"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "linked"
     ]
    },
    {
-    "slug": "pagfinance",
-    "name": "PagFinance",
+    "slug": "stellar-pulse",
+    "name": "Stellar Pulse",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "Analytics"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "sourced"
     ]
    },
    {
-    "slug": "pathpulse-ai",
-    "name": "PathPulse AI",
+    "slug": "stellarx-ph",
+    "name": "StellarX PH",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "Education"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "linked"
     ]
    },
    {
-    "slug": "paycashless",
-    "name": "Paycashless",
+    "slug": "the-starship-soroban",
+    "name": "The Starship Soroban",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "Education"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "linked"
     ]
    },
    {
-    "slug": "paywit",
-    "name": "Paywit",
+    "slug": "timed-transactions-api",
+    "name": "Timed Transactions API",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
-    "types": [],
+    "types": [
+     "Payments"
+    ],
     "score": 60,
     "factsPresent": 3,
     "factsTotal": 5,
     "missing": [
      "strongBasis",
-     "typed"
+     "linked"
+    ]
+   },
+   {
+    "slug": "transfermole",
+    "name": "TransferMole",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "wallet-guru",
+    "name": "Wallet Guru",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments",
+     "Anchor"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
+    ]
+   },
+   {
+    "slug": "wally",
+    "name": "Wally",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
+   {
+    "slug": "blend",
+    "name": "Blend",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 90,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Lending"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "kale",
+    "name": "Kale",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 90,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Gaming"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "moneygram",
+    "name": "Moneygram",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 90,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Anchor"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "allbridge",
+    "name": "Allbridge",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 88,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Bridge"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "go-stellar-sdk",
+    "name": "Go Stellar SDK",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 88,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "hubble",
+    "name": "Hubble",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 88,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Analytics",
+     "Indexer"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "idos",
+    "name": "idOS",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 88,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "ondo",
+    "name": "Ondo",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 85,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "RWA"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "python-stellar-sdk",
+    "name": "Python Stellar SDK",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 85,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "reclaim",
+    "name": "Reclaim",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 85,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security",
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "axelar",
+    "name": "Axelar",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 84,
+    "deploymentNetwork": "mainnet",
+    "types": [
+     "Bridge"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "bitso",
+    "name": "Bitso",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 84,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Anchor"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "dia",
+    "name": "DIA",
+    "status": "Live",
+    "statusBasis": "operator-announcement",
+    "prominence": 84,
+    "deploymentNetwork": "testnet",
+    "types": [
+     "Oracle"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "quicknode",
+    "name": "QuickNode",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 84,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "validation-cloud",
+    "name": "Validation Cloud",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 84,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "chaincerts",
+    "name": "Chaincerts",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 82,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "nodies",
+    "name": "Nodies",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 82,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "albedo",
+    "name": "Albedo",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Wallet"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "alchemy",
+    "name": "Alchemy",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC",
+     "Indexer"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "beamable",
+    "name": "Beamable",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Gaming",
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
     ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 855
+    "count": 840
    },
    {
     "field": "dated",
@@ -9767,11 +9727,11 @@
    },
    {
     "field": "sourced",
-    "count": 55
+    "count": 54
    },
    {
     "field": "typed",
-    "count": 59
+    "count": 2
    },
    {
     "field": "linked",
@@ -9802,7 +9762,7 @@
    "knowledgeNotes": {
     "pool": 206,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 16
+    "withNotes": 17
    },
    "mainnetJoin": {
     "pool": 3351,
@@ -9861,11 +9821,11 @@
     },
     {
      "label": "slowing",
-     "count": 905
+     "count": 906
     },
     {
      "label": "active",
-     "count": 743
+     "count": 742
     },
     {
      "label": "unknown",
@@ -9921,7 +9881,7 @@
    "languageOther": 48
   },
   "withCodeDepth": 6887,
-  "withNotes": 265,
+  "withNotes": 266,
   "withMainnet": 76,
   "top": [
    {
@@ -10971,26 +10931,26 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "86% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "842 of 983 rows (census)",
+   "limit": "84% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "827 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "59 of 983 sampled rows untyped",
+   "measurement": "2 of 984 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "16 of 206 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "17 of 206 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "3 open recall-miss findings",
+   "measurement": "12 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
@@ -11001,7 +10961,7 @@
     "id": "s:engine-a-recall",
     "label": "engine-a-recall",
     "column": 0,
-    "value": 262
+    "value": 274
    },
    {
     "id": "s:engine-d-demand",
@@ -11037,7 +10997,7 @@
     "id": "s:scf-crosscheck",
     "label": "scf-crosscheck",
     "column": 0,
-    "value": 14
+    "value": 16
    },
    {
     "id": "s:engine-e-contract",
@@ -11067,7 +11027,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 311
+    "value": 323
    },
    {
     "id": "f:directory",
@@ -11097,7 +11057,7 @@
     "id": "f:scf",
     "label": "scf",
     "column": 1,
-    "value": 14
+    "value": 16
    },
    {
     "id": "f:code",
@@ -11109,13 +11069,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 440
+    "value": 456
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 43
+    "value": 41
    },
    {
     "id": "o:verified",
@@ -11137,7 +11097,7 @@
     "target": 18,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 307
+    "value": 311
    },
    {
     "source": 1,
@@ -11151,21 +11111,14 @@
     "target": 11,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
-    "value": 262
-   },
-   {
-    "source": 11,
-    "target": 19,
-    "sourceId": "f:retrieval",
-    "targetId": "o:open",
-    "value": 4
+    "value": 274
    },
    {
     "source": 6,
     "target": 16,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
-    "value": 14
+    "value": 16
    },
    {
     "source": 16,
@@ -11190,10 +11143,10 @@
    },
    {
     "source": 13,
-    "target": 19,
+    "target": 18,
     "sourceId": "f:contract",
-    "targetId": "o:open",
-    "value": 1
+    "targetId": "o:cleared",
+    "value": 23
    },
    {
     "source": 3,
@@ -11242,20 +11195,13 @@
     "target": 18,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 59
+    "value": 68
    },
    {
     "source": 4,
     "target": 13,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
-    "value": 22
-   },
-   {
-    "source": 13,
-    "target": 18,
-    "sourceId": "f:contract",
-    "targetId": "o:cleared",
     "value": 22
    },
    {
@@ -11270,14 +11216,7 @@
     "target": 18,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 15
-   },
-   {
-    "source": 15,
-    "target": 19,
-    "sourceId": "f:corpus",
-    "targetId": "o:open",
-    "value": 3
+    "value": 17
    },
    {
     "source": 8,
@@ -11287,11 +11226,11 @@
     "value": 3
    },
    {
-    "source": 12,
+    "source": 15,
     "target": 19,
-    "sourceId": "f:directory",
+    "sourceId": "f:corpus",
     "targetId": "o:open",
-    "value": 30
+    "value": 1
    },
    {
     "source": 2,
@@ -11299,6 +11238,27 @@
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 28
+   },
+   {
+    "source": 12,
+    "target": 19,
+    "sourceId": "f:directory",
+    "targetId": "o:open",
+    "value": 21
+   },
+   {
+    "source": 11,
+    "target": 19,
+    "sourceId": "f:retrieval",
+    "targetId": "o:open",
+    "value": 12
+   },
+   {
+    "source": 16,
+    "target": 19,
+    "sourceId": "f:scf",
+    "targetId": "o:open",
+    "value": 2
    }
   ]
  },
@@ -11335,13 +11295,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12699,
+    "missing": 12698,
     "of": 12964,
-    "share": 98,
+    "share": 97.9,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 193,
+    "examplePoolSize": 192,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11362,18 +11322,17 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 911,
-    "of": 983,
-    "share": 92.7,
+    "missing": 907,
+    "of": 984,
+    "share": 92.2,
     "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
-    "examplePoolSize": 4,
+    "examplePoolSize": 3,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
      "wisdomtree",
-     "spiko",
      "redswan",
      "spacewalk"
     ]
@@ -11381,19 +11340,18 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 855,
-    "of": 983,
-    "share": 87,
+    "missing": 840,
+    "of": 984,
+    "share": 85.4,
     "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 59,
+    "examplePoolSize": 54,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
      "moneygram",
      "blend",
-     "soroswap",
      "kale",
      "hubble",
      "go-stellar-sdk",
@@ -11402,7 +11360,8 @@
      "ondo",
      "reclaim",
      "python-stellar-sdk",
-     "aquarius"
+     "validation-cloud",
+     "quicknode"
     ]
    },
    {
@@ -11434,41 +11393,14 @@
    },
    {
     "entity": "project",
-    "field": "typed",
-    "missing": 59,
-    "of": 983,
-    "share": 6,
-    "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
-    "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
-    "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 59,
-    "exampleCap": 12,
-    "exampleTruncated": true,
-    "examples": [
-     "stellarpay-x402",
-     "smart-treasury",
-     "sikadesk",
-     "paycashless",
-     "pathpulse-ai",
-     "offer-hub",
-     "muney",
-     "lusty",
-     "for-yield",
-     "chainless",
-     "amulets",
-     "stellar-defi-hub"
-    ]
-   },
-   {
-    "entity": "project",
     "field": "sourced",
-    "missing": 55,
-    "of": 983,
-    "share": 5.6,
+    "missing": 54,
+    "of": 984,
+    "share": 5.5,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 55,
+    "examplePoolSize": 54,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11484,6 +11416,23 @@
      "sorosorcerer",
      "sorobuilder",
      "soroban-assistant"
+    ]
+   },
+   {
+    "entity": "project",
+    "field": "typed",
+    "missing": 2,
+    "of": 984,
+    "share": 0.2,
+    "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
+    "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
+    "exampleSource": "highest-prominence rows carrying no type",
+    "examplePoolSize": 2,
+    "exampleCap": 12,
+    "exampleTruncated": false,
+    "examples": [
+     "boundless-bounties",
+     "deb"
     ]
    }
   ]

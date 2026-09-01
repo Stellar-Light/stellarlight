@@ -1,20 +1,44 @@
 {
- "generatedAt": "2026-08-31T15:18:40.507Z",
+ "generatedAt": "2026-09-01T00:13:46.451Z",
  "population": {
-  "openRecallMisses": 3,
+  "openRecallMisses": 12,
   "replayableOpenRecallMisses": 1,
-  "unclassified": 2,
+  "unclassified": 11,
   "unclassifiedExamples": [
    {
-    "id": "engine-a-recall:ping-in-top-13-of-52-matches-its-own-coverage-co",
-    "probe": "ping in top-13 of 52 matches (its own coverage.countries implies 'Argentina anchor')"
+    "id": "engine-a-recall:crediolabs-ai-in-top-3-for-its-own-name",
+    "probe": "crediolabs-ai in top-3 for its own name"
    },
    {
-    "id": "engine-a-recall:acta-team-did-stellar-in-top-5-for-its-own-symbo",
-    "probe": "ACTA-Team/did-stellar in top-5 for its own symbol 'contractErrorCodeFromNumber'"
+    "id": "engine-a-recall:komet-in-top-10-of-36-matches-its-own-supportedn",
+    "probe": "komet in top-10 of 36 matches (its own supportedNetworks implies 'Stellar security')"
+   },
+   {
+    "id": "engine-a-recall:3-of-the-7-records-implying-stellar-payments-in-",
+    "probe": "≥3 of the 7 records implying 'Stellar payments' in top-10"
+   },
+   {
+    "id": "engine-a-recall:fabiansanchezd-retrievable-by-own-username",
+    "probe": "FabianSanchezD retrievable by own username"
+   },
+   {
+    "id": "engine-a-recall:ensareness-retrievable-by-own-username",
+    "probe": "EnsarEness retrievable by own username"
+   },
+   {
+    "id": "engine-a-recall:eneskeremaydin-retrievable-by-own-username",
+    "probe": "EnesKeremAYDIN retrievable by own username"
+   },
+   {
+    "id": "engine-a-recall:whiterrabbit-retrievable-by-own-username",
+    "probe": "whiterrabbit retrievable by own username"
+   },
+   {
+    "id": "engine-a-recall:leonardoevmacc-retrievable-by-own-username",
+    "probe": "leonardoevmacc retrievable by own username"
    }
   ],
-  "coveragePct": 33,
+  "coveragePct": 8,
   "sampled": 1,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
@@ -45,7 +69,7 @@
    "count": 1,
    "share": 100,
    "examples": [
-    "dd"
+    "crediolabs-ai"
    ]
   },
   {

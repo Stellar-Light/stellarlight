@@ -1,12 +1,12 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-08-31T15:18:53.037Z",
+ "generatedAt": "2026-09-01T00:14:00.167Z",
  "stage": 1,
  "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 33406422183,
-  "at": "2026-08-31T15:05:25Z",
+  "id": 33445532222,
+  "at": "2026-08-31T22:17:38Z",
   "event": "workflow_dispatch",
   "conclusion": "success"
  },
@@ -57,10 +57,6 @@
    "network": "mainnet"
   },
   {
-   "slug": "scopuly",
-   "network": "mainnet"
-  },
-  {
    "slug": "sodax",
    "network": "mainnet"
   },
@@ -90,6 +86,12 @@
   }
  ],
  "upgrades": [],
- "corrections": [],
+ "corrections": [
+  {
+   "slug": "scopuly",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  }
+ ],
  "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
 }
