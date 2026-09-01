@@ -1582,6 +1582,34 @@ export const spec: OpenAPISpec = {
 		"/api/changes": {
 			get: {
 				operationId: "getChanges",
+				"x-routing": {
+					purpose:
+						"Which directory rows changed since a timestamp — a reconciliation feed for cached or remembered claims.",
+					keywords: [
+						"what changed",
+						"changed since",
+						"change feed",
+						"delta since",
+						"diff since",
+						"reconcile cache",
+						"stale memory",
+						"rows moved",
+						"updated since",
+						"recent updates to the directory",
+					],
+					useWhen: [
+						"you hold cached or remembered Scout facts and want only the rows that moved since a time",
+						"reconciling agent memory or an institutional cache against the live directory",
+					],
+					exampleQuestions: [
+						"Which projects changed status since last Tuesday?",
+						"What moved in the directory since my last sync?",
+					],
+					notFor: [
+						"what changed in the API or MCP surface -> getChangelog",
+						"searching or browsing projects -> searchProjects",
+					],
+				},
 				tags: ["Discovery"],
 				summary: "Change feed: which rows moved since a given time",
 				description:
@@ -1713,6 +1741,34 @@ export const spec: OpenAPISpec = {
 		"/api/changelog": {
 			get: {
 				operationId: "getChangelog",
+				"x-routing": {
+					purpose:
+						"What changed in the Scout API, MCP tools, and client — the contract-level changelog.",
+					keywords: [
+						"changelog",
+						"api changelog",
+						"release notes for scout",
+						"api changes",
+						"what changed in the api",
+						"new endpoint",
+						"removed endpoint",
+						"breaking change",
+						"spec version",
+						"mcp tool changes",
+					],
+					useWhen: [
+						"you cached the API or MCP surface earlier and want to know what moved before relying on it",
+						"which spec version added or changed an endpoint, tool, parameter or enum",
+					],
+					exampleQuestions: [
+						"What changed in the Scout API recently?",
+						"Did any MCP tools get added or removed this month?",
+					],
+					notFor: [
+						"which DATA rows changed -> getChanges",
+						"Stellar protocol upgrade history -> searchResearch",
+					],
+				},
 				tags: ["Discovery"],
 				summary: "Recent changes to the API, MCP tools, and client",
 				description:
@@ -3271,6 +3327,31 @@ export const spec: OpenAPISpec = {
 		"/api/partners/{slug}": {
 			get: {
 				operationId: "getPartner",
+				"x-routing": {
+					purpose:
+						"The full public profile of one partner, by slug.",
+					keywords: [
+						"partner profile",
+						"partner details",
+						"partner by slug",
+						"this partner",
+						"partner contact",
+						"partner services",
+						"partner regions",
+						"partner freshness",
+					],
+					useWhen: [
+						"you already know the partner's slug (from getPartners) and need the full profile — services, sectors, regions, docs, contact, freshness",
+					],
+					exampleQuestions: [
+						"Show me the full profile for partner X",
+						"What services and regions does partner X cover?",
+					],
+					notFor: [
+						"discovering or listing partners -> getPartners",
+						"ranking partners against a need -> matchPartners",
+					],
+				},
 				tags: ["Partners"],
 				summary: "Get one partner's full profile",
 				description:
@@ -3414,6 +3495,33 @@ export const spec: OpenAPISpec = {
 		"/api/partners/match": {
 			post: {
 				operationId: "matchPartners",
+				"x-routing": {
+					purpose:
+						"Rank published partners against a plain-language builder need, each with a one-line reason.",
+					keywords: [
+						"which partner should I use",
+						"best partner for",
+						"match partners",
+						"partner recommendation",
+						"find a partner for",
+						"who can help me with",
+						"rank partners",
+						"provider for my use case",
+						"off-ramp provider for",
+						"which provider fits",
+					],
+					useWhen: [
+						"a builder describes a need in plain language (corridor, SEP, service) and wants the published partners ranked by fit",
+					],
+					exampleQuestions: [
+						"Which partner is the best fit for a USDC off-ramp in Mexico with SEP-24?",
+						"Who should I work with for KYC in Brazil?",
+					],
+					notFor: [
+						"browsing all partners -> getPartners",
+						"one known partner's profile -> getPartner",
+					],
+				},
 				tags: ["Partners"],
 				summary: "AI-rank partners against a plain-language need",
 				description:
@@ -5469,6 +5577,33 @@ export const spec: OpenAPISpec = {
 						"release.yml",
 						"stellar lab",
 						"stellar.expert",
+						// RAVEN T1 (2026-09-01): their research-lane routing box is spent after,
+						// three verified FAILs and reopens only on "an upstream card change" — this,
+						// is that change. Their failing cases are protocol-history and incident,
+						// questions ("why did Protocol 24 ship so soon after 23, and what was the,
+						// state-archival bug?"; "walk me through the upgrade history P19→latest").,
+						// Specific multi-word phrases, never bare "protocol": a bare term would,
+						// match every 2-token protocol query at 100% coverage (the sls-078 class).,
+						"protocol upgrade history",
+						"protocol version history",
+						"upgrade timeline",
+						"protocol 19",
+						"protocol 20",
+						"protocol 21",
+						"protocol 22",
+						"protocol 23",
+						"protocol 24",
+						"why was protocol shipped",
+						"why did protocol ship",
+						"shipped so soon after",
+						"state-archival bug",
+						"state archival incident",
+						"whisk",
+						"network upgrade",
+						"release notes",
+						"headline feature",
+						"root cause",
+						"incident timeline",
 					],
 					useWhen: [
 						"SDF organizational questions (enterprise fund, mandate, leadership, structure)",
@@ -5480,6 +5615,7 @@ export const spec: OpenAPISpec = {
 						"SDF org/mission/legal structure; protocol history (SCP whitepaper, authors); ecosystem programs (ambassadors, regional chapters, bootcamps)",
 						"Soroban security incidents (reentrancy, sdk advisories/CVEs, DoS); ecosystem history (Protocol 20 mainnet launch, XLM initial supply, UNHCR aid, Enterprise Fund)",
 						"making an issued asset tradable/visible on exchanges, wallets, explorers, aggregators; contract source verification (release.yml, Stellar Lab vs stellar.expert); fact-checking a claim about Stellar",
+						"protocol upgrade HISTORY and WHY a version shipped (Protocol 19 → latest, each release's headline feature, timelines); incidents and post-mortems of network upgrades (e.g. the Protocol 24 state-archival bug) — history and causes, not how-a-feature-works docs",
 					],
 					notFor: [
 						"what products exist or their funding/status -> searchProjects",
@@ -5492,6 +5628,8 @@ export const spec: OpenAPISpec = {
 						"Has there been a reentrancy incident on Soroban?",
 						"How do I apply for an SCF Build Award?",
 						"How do I make my issued asset visible on exchanges and explorers?",
+						"Why did Stellar ship Protocol 24 so soon after Protocol 23, and what was the state-archival bug?",
+						"Walk me through Stellar's protocol upgrade history from Protocol 19 to the latest version, with each release's headline feature.",
 					],
 				},
 				parameters: [
