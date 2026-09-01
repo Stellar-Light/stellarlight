@@ -1,5 +1,18 @@
 {
-	"generatedAt": "2026-09-01T04:26:13.532Z",
+	"generatedAt": "2026-09-01T04:43:42.171Z",
 	"detector": "verify-claims",
-	"failures": []
+	"failures": [
+		{
+			"probe": "https://stellarlight.xyz",
+			"note": "HTTP network-error [public/skills/stellar-developer-activity.md]"
+		},
+		{
+			"probe": "https://stellarlight.xyz/leaderboard",
+			"note": "HTTP network-error [public/skills/stellar-developer-activity.md]"
+		},
+		{
+			"probe": "https://stellarlight.xyz/hackathons",
+			"note": "HTTP 500 [public/skills/references/api-reference.md]"
+		}
+	]
 }
