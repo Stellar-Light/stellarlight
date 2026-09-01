@@ -159,8 +159,16 @@ const SCF_SUBMISSION_LINKS: Record<
 	womenbiz: { rounds: [29], evidence: "https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v" },
 	fastbuka: { rounds: [35, 38, 44], evidence: "https://communityfund.stellar.org/project/choppaddi-vmf" },
 	untangled: { rounds: [41], evidence: "https://communityfund.stellar.org/project/octopos-g6i" },
-	"coala-pay": { rounds: [22, 31], evidence: "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j" },
-	escala: { rounds: [42, 43, 44], evidence: "https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi" },
+	// coala-pay is MULTI-PAGE (2026-09-01 verification): r22 ($50k) verified
+	// on anticipatory-aid-on-soroban-f7j, r35 ($60k) verified on
+	// coala-pay-billy-wallet-9mi, r31 unverdicted on both pages (kept —
+	// never accuse on silence). Deliberately NOT slug-joined; the union
+	// merge below is what records the verified rounds.
+	"coala-pay": { rounds: [22, 31, 35], evidence: "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j" },
+	// escala corrected 2026-09-01 (badge-inheritance class, caught at
+	// linkage verification): the page marks #42/#43 "Not Awarded"; the award
+	// is #44 ($70k Build).
+	escala: { rounds: [44], evidence: "https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi" },
 	lobster: { rounds: [42], evidence: "https://communityfund.stellar.org/project/institutional-liquidity-infrastructure-for-stellar-k5c" },
 	"dfs-labs": { rounds: [24], evidence: "https://communityfund.stellar.org/project/stellar-surge-1gh" },
 	ichi: { rounds: [26], evidence: "https://communityfund.stellar.org/project/solo-labs-iy1" },
