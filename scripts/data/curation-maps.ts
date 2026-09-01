@@ -514,10 +514,18 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Standalone Comet venue is no longer maintained (only org repo last pushed 2024-05-02); its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
 	},
+	// venalabs history: July 2026 flip to Inactive was a human-verified PIVOT
+	// verdict ("no Stellar/Soroban/course content remains"). Re-verified
+	// 2026-09-01 during the retracted-receipts triage: the live page now
+	// carries Stellar again ("networks with a strong identity such as
+	// Stellar or XRPL … dedicated courses", 21 mentions) — the pivot verdict
+	// no longer describes the site, and the owner called the flip back.
 	venalabs: {
-		from: "Live",
-		to: "Inactive",
-		note: "Pivoted away from Stellar education to an airdrop-farming platform (site verified 2026-07-11 — no Stellar/Soroban/course content remains).",
+		from: "Inactive",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl: "https://venalabs.com/en/landing",
 	},
 	helix: { from: "Live", to: "Development" },
 	warpdrive: { from: "Live", to: "Development" },
@@ -961,6 +969,9 @@ export const PROMINENCE_SET: Record<string, number> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// Case-mangled at seed (audit C2): github.io paths are case-sensitive;
+	// the stored all-lowercase path 404s while the real page serves.
+	chaincred: "https://prince29chouhan.github.io/ChainCred_landing/",
 	// Gap-matrix sourced pass 2026-08-29: row had no website; asgcard.dev is
 	// the operator's live product site (full landing, no pre-launch markers).
 	asgcard: "https://asgcard.dev",
@@ -3344,6 +3355,13 @@ export const DEPLOYMENT_VERIFIED: Record<
  * here (their source is the site-liveness lane's own evidence).
  */
 export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
+	// Re-triage 2026-09-01 (the two retracted rows whose death has since
+	// become directly observable): both domains now fail to connect at all —
+	// an unreachable origin IS the observed-dead evidence the July zombie-200
+	// pages could not provide. whalestack cites the successor brand's own
+	// domain, not the coinqvest redirect that confused the first receipt.
+	"pactta": "https://pactta.com/",
+	"whalestack": "https://whalestack.com/",
 	"aerochain": "https://aerochain.wingleet.com/redoc",
 	"apay": "https://apay.io/",
 	"arcturus": "https://arcturus-gpt.com/",
@@ -3401,4 +3419,16 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 	"the-blue-marble": "https://thebluemarble.io/",
 	"venalabs": "https://venalabs.com/",
 	"whalestack": "https://coinqvest.com/",
+};
+
+/**
+ * Hijacked-domain link removal (owner call 2026-09-01): the recorded domain
+ * was taken over after the project shut down and now serves unrelated (and
+ * unsafe-to-recommend) content — the July STATUS_FIX note already said "do
+ * not follow the historical link"; this removes it. Keyed to the exact
+ * hijacked value so a later legitimate relink can never be clobbered.
+ */
+export const WEBSITE_REMOVE: Record<string, string> = {
+	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
+	"the-blue-marble": "https://thebluemarble.io/",
 };

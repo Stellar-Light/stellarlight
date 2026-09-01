@@ -30,6 +30,7 @@ import {
 	TYPES_ADD,
 	TYPES_SET,
 	WEBSITE_FIXES,
+	WEBSITE_REMOVE,
 } from "./curation-maps";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -2035,6 +2036,41 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { links: { ...(d.links ?? {}), website } },
+		});
+	}
+
+	console.log("\n── Website removals (hijacked domains, value-keyed) ──");
+	for (const [slug, hijacked] of Object.entries(WEBSITE_REMOVE)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const norm = (u: string) =>
+			(u ?? "").replace(/^(https?:\/\/)www\./, "$1").replace(/\/+$/, "");
+		if (!d.links?.website) {
+			console.log(`  ${slug}: website already empty, skip`);
+			continue;
+		}
+		if (norm(d.links.website) !== norm(hijacked)) {
+			console.log(
+				`  ${slug}: website is ${d.links.website}, not the recorded hijacked value — skip (relinked since)`,
+			);
+			continue;
+		}
+		console.log(`  ${slug}: website REMOVED (was ${d.links.website} — hijacked)`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), website: null } },
 		});
 	}
 
