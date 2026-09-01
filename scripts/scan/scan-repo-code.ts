@@ -239,8 +239,46 @@ async function main() {
 		// hot small repos ahead of changed canonical SDKs — the 34/48 stale gap.)
 		// Payload `where` can't compare two fields → fetch the scanned pool small
 		// and filter in memory, same as the --stale-first branch.
-		const [unscanned, scannedPool] = await Promise.all([
-			payload.find({
+		const scannedPoolP = RESCAN
+			? // --rescan makes `where` include scanned repos already — skip the
+				// second pool so nothing double-counts.
+				Promise.resolve({ docs: [] })
+			: payload.find({
+					collection: "repos",
+					where: {
+						and: [
+							...(LANG !== "all"
+								? [{ primaryLanguage: { equals: LANG } }]
+								: []),
+							{ codeScanState: { equals: "scanned" } },
+						],
+					},
+					limit: 3000,
+					depth: 0,
+					context: { internal: true },
+					select: {
+						fullName: true,
+						repoScore: true,
+						isFork: true,
+						isArchived: true,
+						codeScanState: true,
+						lastCommitAt: true,
+						codeScannedAt: true,
+						triageTags: true,
+					},
+				});
+		// Page through the unscanned pool until the wave is FULL of scannable
+		// repos. A single over-fetch (LIMIT*2, sorted -repoScore) stopped
+		// advancing once the head of that order was mostly triaged: on
+		// 2026-09-01 three waves scanned 166, 9 and 4 repos with ~4,600 calls
+		// unspent each while 6,008 were eligible — the window never moved past
+		// the 834–996 triaged rows sitting at the top. Bounded at 12 pages
+		// (12×LIMIT*2 rows of a tiny select) so a fully-triaged pool still ends.
+		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+		const unscannedDocs: any[] = [];
+		let unscannedTotal = 0;
+		for (let page = 1; page <= 12; page++) {
+			const res = await payload.find({
 				collection: "repos",
 				where,
 				// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
@@ -249,9 +287,8 @@ async function main() {
 				// (Comma-separated STRING — the array form is silently ignored by
 				// the Payload find; verified live 2026-07-11.)
 				sort: "-repoScore,-lastCommitAt",
-				// Over-fetch so triage skips can't shrink the wave (tail waves
-				// hit pockets where a large share of the pool is triaged-dead).
 				limit: LIMIT * 2,
+				page,
 				depth: 0,
 				context: { internal: true },
 				select: {
@@ -263,36 +300,14 @@ async function main() {
 					lastCommitAt: true,
 					triageTags: true,
 				},
-			}),
-			// --rescan makes `where` include scanned repos already — skip the
-			// second pool so nothing double-counts.
-			RESCAN
-				? Promise.resolve({ docs: [] })
-				: payload.find({
-						collection: "repos",
-						where: {
-							and: [
-								...(LANG !== "all"
-									? [{ primaryLanguage: { equals: LANG } }]
-									: []),
-								{ codeScanState: { equals: "scanned" } },
-							],
-						},
-						limit: 3000,
-						depth: 0,
-						context: { internal: true },
-						select: {
-							fullName: true,
-							repoScore: true,
-							isFork: true,
-							isArchived: true,
-							codeScanState: true,
-							lastCommitAt: true,
-							codeScannedAt: true,
-							triageTags: true,
-						},
-					}),
-		]);
+			});
+			unscannedTotal = res.totalDocs;
+			// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+			unscannedDocs.push(...(res.docs as any[]));
+			if (unscannedDocs.filter(notTriaged).length >= LIMIT || !res.hasNextPage)
+				break;
+		}
+		const scannedPool = await scannedPoolP;
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 		const staleAll = (scannedPool.docs as any[]).filter(
 			(d) =>
@@ -307,11 +322,11 @@ async function main() {
 				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
 		);
 		const stale = staleAll.filter(notTriaged);
-		const unscannedKept = (unscanned.docs as any[]).filter(notTriaged);
+		const unscannedKept = unscannedDocs.filter(notTriaged);
 		skippedTriaged +=
 			staleAll.length -
 			stale.length +
-			((unscanned.docs as any[]).length - unscannedKept.length);
+			(unscannedDocs.length - unscannedKept.length);
 		docs = [...unscannedKept, ...stale]
 			.sort(
 				(a, b) =>
@@ -321,7 +336,7 @@ async function main() {
 					),
 			)
 			.slice(0, LIMIT);
-		eligible = unscanned.totalDocs + stale.length;
+		eligible = unscannedTotal + stale.length;
 		// totalDocs counts triaged rows the filter drops — the log line below
 		// reports the skip so a shrinking pool is visible, not silent.
 		if (stale.length)
