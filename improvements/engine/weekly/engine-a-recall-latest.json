@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-08-31T23:17:55Z",
+  "generatedAt": "2026-09-01T03:33:27Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 983,
+      "ok": 982,
       "total": 984,
-      "rate": 99.9,
+      "rate": 99.8,
       "floor": 90,
       "status": "OK "
     },
@@ -28,17 +28,17 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 983,
+      "ok": 962,
       "total": 984,
-      "rate": 99.9,
+      "rate": 97.8,
       "floor": 60,
       "status": "OK "
     },
     {
       "bucket": "P-ATTR",
-      "ok": 55,
+      "ok": 56,
       "total": 63,
-      "rate": 87.3,
+      "rate": 88.9,
       "floor": 70,
       "status": "OK "
     },
@@ -52,9 +52,9 @@
     },
     {
       "bucket": "B-USER",
-      "ok": 92,
+      "ok": 98,
       "total": 100,
-      "rate": 92,
+      "rate": 98,
       "floor": 85,
       "status": "OK "
     },
@@ -70,24 +70,171 @@
   "failures": [
     {
       "bucket": "P-KNOWN",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=CredioLabs.AI&limit=3",
-      "expected": "crediolabs-ai in top-3 for its own name",
-      "observed": "untangled, ortege, dd"
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Blade&limit=3",
+      "expected": "blade in top-3 for its own name",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-KNOWN",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Every%20Finance&limit=3",
+      "expected": "every-finance in top-3 for its own name",
+      "observed": "empty"
     },
     {
       "bucket": "P-PHRASE",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20CredioLabs.AI%20live&limit=3",
-      "expected": "crediolabs-ai in top-3 for 'is CredioLabs.AI live'",
-      "observed": "crossmint, xbid-ai, webacy-inc"
+      "area": "Protocol/Contract",
+      "probe": "is Normal live",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=is%20Normal%20live&limit=3"
     },
     {
-      "bucket": "P-ATTR",
-      "area": "supportedNetworks",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Stellar%20security&limit=10",
-      "expected": "komet in top-10 of 36 matches (its own supportedNetworks implies 'Stellar security')",
-      "observed": "fordefi, stellar-security-portal, trustline, inferera, team-finance"
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20Every%20Finance&limit=3",
+      "expected": "every-finance in top-3 for 'what is Every Finance'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "Autowhale on stellar",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=Autowhale%20on%20stellar&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "Excellar on stellar",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=Excellar%20on%20stellar&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20The%20Strategists%20live&limit=3",
+      "expected": "the-strategists in top-3 for 'is The Strategists live'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "is VRF-Soroban live",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=is%20VRF-Soroban%20live&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=x402%20on%20stellar&limit=3",
+      "expected": "x402 in top-3 for 'x402 on stellar'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "is Lusty live",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=is%20Lusty%20live&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "tell me about SAFU",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=tell%20me%20about%20SAFU&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "is Remi live",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=is%20Remi%20live&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "tell me about DeFa by InvoiceMate",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=tell%20me%20about%20DeFa%20by%20InvoiceMate&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "Sentora on stellar",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=Sentora%20on%20stellar&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "USDM1 on stellar",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=USDM1%20on%20stellar&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "what is PagFinance",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=what%20is%20PagFinance&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20ZET&limit=3",
+      "expected": "zet in top-3 for 'tell me about ZET'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=is%20Mystic%20live&limit=3",
+      "expected": "mystic in top-3 for 'is Mystic live'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20HiYield&limit=3",
+      "expected": "hiyield in top-3 for 'what is HiYield'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=FX%20Swap%20on%20stellar&limit=3",
+      "expected": "fx-swap in top-3 for 'FX Swap on stellar'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%20Truway&limit=3",
+      "expected": "truway-yield in top-3 for 'what is Truway'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Stellar%20Memory&limit=3",
+      "expected": "stellar-memory in top-3 for 'tell me about Stellar Memory'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "OpenZeppelin Stellar Privacy Wallet on stellar",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=OpenZeppelin%20Stellar%20Privacy%20Wallet%20on%20stellar&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Protocol/Contract",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=tell%20me%20about%20Sextant&limit=3",
+      "expected": "sextant-agent in top-3 for 'tell me about Sextant'",
+      "observed": "empty"
     },
     {
       "bucket": "P-ATTR",
@@ -141,57 +288,15 @@
     {
       "bucket": "B-USER",
       "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=FabianSanchezD",
-      "expected": "FabianSanchezD retrievable by own username",
+      "probe": "https://stellarlight.xyz/api/builders?q=samogera",
+      "expected": "samogera retrievable by own username",
       "observed": "0 rows, absent"
     },
     {
       "bucket": "B-USER",
       "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=EnsarEness",
-      "expected": "EnsarEness retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=EnesKeremAYDIN",
-      "expected": "EnesKeremAYDIN retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=whiterrabbit",
-      "expected": "whiterrabbit retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=leonardoevmacc",
-      "expected": "leonardoevmacc retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=SuhanJK",
-      "expected": "SuhanJK retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=murat48",
-      "expected": "murat48 retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=UmutKDev",
-      "expected": "UmutKDev retrievable by own username",
+      "probe": "https://stellarlight.xyz/api/builders?q=Malika7188",
+      "expected": "Malika7188 retrievable by own username",
       "observed": "0 rows, absent"
     }
   ],

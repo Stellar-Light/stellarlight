@@ -1,7 +1,7 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-08-31T23:17:55Z",
-  "specVersion": "1.9.13",
+  "generatedAt": "2026-09-01T03:33:27Z",
+  "specVersion": "1.9.16",
   "frame": {
     "ops": 37,
     "paramsProbed": 24,

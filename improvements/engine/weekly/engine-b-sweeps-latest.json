@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 36,
+    "count": 35,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -30,12 +30,6 @@
         "slug": "boundless",
         "field": "supportedNetworks",
         "prose": "ethereum",
-        "missing": "evm"
-      },
-      {
-        "slug": "agnostic",
-        "field": "supportedNetworks",
-        "prose": "evm",
         "missing": "evm"
       },
       {
@@ -151,14 +145,20 @@
         "field": "supportedNetworks",
         "prose": "polygon",
         "missing": "evm"
+      },
+      {
+        "slug": "automated-finance",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
       "shortDescription": "99% (198/200)",
-      "types": "100% (200/200)",
-      "supportedNetworks": "49% (97/200)",
+      "types": "100% (199/200)",
+      "supportedNetworks": "48% (96/200)",
       "logoUrl": "78% (155/200)"
     },
     "Tooling": {
@@ -169,7 +169,7 @@
     "User-Facing App": {
       "shortDescription": "99% (391/395)",
       "types": "99% (393/395)",
-      "supportedNetworks": "61% (239/395)",
+      "supportedNetworks": "60% (238/395)",
       "logoUrl": "86% (338/395)"
     },
     "Asset": {
@@ -181,7 +181,7 @@
     "Protocol/Contract": {
       "shortDescription": "100% (155/155)",
       "types": "100% (155/155)",
-      "supportedNetworks": "71% (110/155)",
+      "supportedNetworks": "70% (109/155)",
       "logoUrl": "81% (125/155)",
       "tvlUSD": "9% (14/155)"
     },
@@ -314,7 +314,7 @@
   },
   "s4_staleness": {
     "liveNoDatedSignal": 411,
-    "liveStale365": 144,
+    "liveStale365": 145,
     "sample": [
       {
         "slug": "nodies",
@@ -458,6 +458,6 @@
       }
     ]
   },
-  "generatedAt": "2026-08-31T23:17:55Z",
+  "generatedAt": "2026-09-01T03:33:27Z",
   "evalKey": "engine-b-sweeps"
 }
