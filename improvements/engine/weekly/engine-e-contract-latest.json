@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-09-01T03:33:27Z",
+  "generatedAt": "2026-09-01T04:24:07Z",
   "specVersion": "1.9.16",
   "frame": {
     "ops": 37,
     "paramsProbed": 24,
-    "fieldsChecked": 835,
+    "fieldsChecked": 872,
     "postChecked": 5,
     "skipped": [
       "GET /api/verify ?type (baseline 400)",
@@ -91,6 +91,16 @@
       "op": "GET /api/projects/search",
       "field": "projects[].placementRank",
       "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "codeReferences[].ciPresent",
+      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "codeReferences[].testsPresent",
+      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/search",
