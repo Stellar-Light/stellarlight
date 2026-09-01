@@ -111,3 +111,10 @@ main().catch((e) => {
 	console.error("Eval crashed:", e);
 	process.exit(2);
 });
+
+// Global-scope collision guard: with no import/export, tsc puts this file
+// in the shared global scope where every script's main/BASE/PROBES collide —
+// and WHICH file draws the error depends on enumeration order, which differs
+// macOS vs linux (the baseline divergence of 2026-09-01). export{} makes it a
+// module; tsx runtime behavior is unchanged.
+export {};
