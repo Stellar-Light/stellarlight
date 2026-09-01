@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-01",
 		surfaces: ["api"],
+		version: "spec@1.9.18",
+		type: "added",
+		summary:
+			"explainRepo returns knowledgeNotes — every public dated fact held for the routed repo — alongside any answer, and routes plain-English questions by curated trigger phrase (routedVia 'knowledge-trigger') before the lexical index votes.",
+		detail:
+			"P5 batch 3 brought the registry to 54 repos of dated facts (deprecations, renames, registry names, advisories), but an identifier question ('stellar/stellar-cli') returned only the DeepWiki walkthrough — notes were dropped unless one directly answered — and 'soroban cli renamed' routed to tupui/soroban-cli-python by name while the rename note lived on stellar/stellar-cli. Notes now ride every answer as knowledgeNotes (internal notes never leave; trigger phrases are not exposed), and a trigger that names exactly one repo routes there; ambiguous triggers fall through to search.",
+	},
+	{
+		date: "2026-09-01",
+		surfaces: ["api"],
 		version: "spec@1.9.17",
 		type: "changed",
 		summary:
@@ -128,7 +138,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"explainRepo serves `answerAsOf` beside `answerSource`. It is NULL for every DeepWiki answer — DeepWiki exposes no index date, so the age of that answer is unknown and we will not infer one from the code scan.",
 		detail:
-			"Raven reported (issue #1134, three independent reproductions) that explainRepo answered `MaxSupportedProtocolVersion = 25` for stellar/stellar-horizon while the source at our own codeVerified.scannedRef (82660510) defines 28; re-verified here against raw.githubusercontent at that ref and at 2abda012, both 28. The stale number is DeepWiki's index. OUR defect was that the response carried three timestamps — meta.generatedAt, codeVerified.scannedAt, repoMeta.lastCommitAt — every one describing the source scan and none dating the answer, so a consumer reading scannedAt beside answerSource 'deepwiki' would reasonably conclude the answer was as fresh as the scan. `answerAsOf` is now explicit: null on the deepwiki path (an admission, since DeepWikiAnswer carries only {repo, answer, searchUrl} and the MCP envelope exposes no index date — inventing a timestamp would make an unknown look measured), and populated from scannedAt on the stellarlight-code-scan path, where the answer IS the scan. A meta.warnings entry names the three fields that do NOT date the answer, because an absent field is easy to skim past. The spec says the same and tells readers not to substitute the scan dates. Not done, and deliberately: verifying numeric constants in an answer against scannedRef content would need per-request source fetches, which is a different and much larger change than making the dating honest." ,
+			"Raven reported (issue #1134, three independent reproductions) that explainRepo answered `MaxSupportedProtocolVersion = 25` for stellar/stellar-horizon while the source at our own codeVerified.scannedRef (82660510) defines 28; re-verified here against raw.githubusercontent at that ref and at 2abda012, both 28. The stale number is DeepWiki's index. OUR defect was that the response carried three timestamps — meta.generatedAt, codeVerified.scannedAt, repoMeta.lastCommitAt — every one describing the source scan and none dating the answer, so a consumer reading scannedAt beside answerSource 'deepwiki' would reasonably conclude the answer was as fresh as the scan. `answerAsOf` is now explicit: null on the deepwiki path (an admission, since DeepWikiAnswer carries only {repo, answer, searchUrl} and the MCP envelope exposes no index date — inventing a timestamp would make an unknown look measured), and populated from scannedAt on the stellarlight-code-scan path, where the answer IS the scan. A meta.warnings entry names the three fields that do NOT date the answer, because an absent field is easy to skim past. The spec says the same and tells readers not to substitute the scan dates. Not done, and deliberately: verifying numeric constants in an answer against scannedRef content would need per-request source fetches, which is a different and much larger change than making the dating honest.",
 	},
 	{
 		date: "2026-08-31",
@@ -138,7 +148,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"getPartners and searchProjects both declared ramp vocabulary with no tiebreaker; the split is now stated on both sides — rampTypes (direction, corridor) is a partner fact, the larger anchor roster is a directory fact.",
 		detail:
-			"\"on and off ramps for Stellar payments\" was contested by construction: getPartners keywords carried on-ramp/off-ramp/ramps/anchors, searchProjects carried anchors and on/off-ramps, and neither notFor named the other. The un-brokered overlap was the defect, not the route taken. The split follows the data — 29 anchor-typed partners of which 9 have rampTypes populated, against 42 type=Anchor projects — so getPartners useWhen now claims the case it uniquely serves (which anchors on-ramp vs off-ramp, in which corridor) and searchProjects notFor points ramp direction and corridor questions at it. Routing metadata only.",
+			'"on and off ramps for Stellar payments" was contested by construction: getPartners keywords carried on-ramp/off-ramp/ramps/anchors, searchProjects carried anchors and on/off-ramps, and neither notFor named the other. The un-brokered overlap was the defect, not the route taken. The split follows the data — 29 anchor-typed partners of which 9 have rampTypes populated, against 42 type=Anchor projects — so getPartners useWhen now claims the case it uniquely serves (which anchors on-ramp vs off-ramp, in which corridor) and searchProjects notFor points ramp direction and corridor questions at it. Routing metadata only.',
 	},
 	{
 		date: "2026-08-31",

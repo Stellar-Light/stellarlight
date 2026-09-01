@@ -455,8 +455,14 @@ export const spec: OpenAPISpec = {
 												openDefinition: { type: "string" },
 												projectRows: { type: "integer" },
 												meanRowEvidence: { type: "integer" },
-												safeToRelyOn: { type: "array", items: { type: "string" } },
-												doNotRelyOn: { type: "array", items: { type: "string" } },
+												safeToRelyOn: {
+													type: "array",
+													items: { type: "string" },
+												},
+												doNotRelyOn: {
+													type: "array",
+													items: { type: "string" },
+												},
 											},
 										},
 										northStar: {
@@ -607,7 +613,12 @@ export const spec: OpenAPISpec = {
 															path: { type: "string" },
 															contractProbe: {
 																type: "string",
-																enum: ["clean", "violations", "skipped", "unmeasured"],
+																enum: [
+																	"clean",
+																	"violations",
+																	"skipped",
+																	"unmeasured",
+																],
 															},
 															skipReason: { type: "string", nullable: true },
 															violations: {
@@ -2287,7 +2298,7 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit | canonical | search. null when nothing routed.",
+												"How the repo was chosen: explicit | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
 										},
 										repoMeta: {
 											type: "object",
@@ -2401,6 +2412,27 @@ export const spec: OpenAPISpec = {
 											nullable: true,
 											description:
 												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — day-granular, serialized as that day's 00:00:00Z — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
+										},
+										knowledgeNotes: {
+											type: "array",
+											description:
+												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo — deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories — whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date.",
+											items: {
+												type: "object",
+												required: ["note", "source", "asOf"],
+												properties: {
+													note: { type: "string" },
+													source: {
+														type: "string",
+														description:
+															"'curated' (hand-verified) or 'derived:audit'.",
+													},
+													asOf: {
+														type: "string",
+														description: "YYYY-MM-DD the fact was verified.",
+													},
+												},
+											},
 										},
 										answered: {
 											type: "boolean",
@@ -3328,8 +3360,7 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "getPartner",
 				"x-routing": {
-					purpose:
-						"The full public profile of one partner, by slug.",
+					purpose: "The full public profile of one partner, by slug.",
 					keywords: [
 						"partner profile",
 						"partner details",
@@ -5981,7 +6012,8 @@ export const spec: OpenAPISpec = {
 												targetUser: {
 													type: "array",
 													items: { type: "string" },
-													description: "Audiences it serves: dev / founder / agent.",
+													description:
+														"Audiences it serves: dev / founder / agent.",
 												},
 												tags: { type: "array", items: { type: "string" } },
 												kind: {
@@ -6285,7 +6317,10 @@ export const spec: OpenAPISpec = {
 														properties: {
 															fullName: { type: "string" },
 															projectSlug: { type: "string", nullable: true },
-															sorobanSdkVersion: { type: "string", nullable: true },
+															sorobanSdkVersion: {
+																type: "string",
+																nullable: true,
+															},
 														},
 													},
 												},

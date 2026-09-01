@@ -675,15 +675,50 @@ export function findDirectAnswerNote(
 	// Triggers are curated IN THIS FILE, never derived from input, and match
 	// on whole-word sets (the infix trap stays dead: every trigger word must
 	// appear as its own word in the question).
-	const qWords = new Set(q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
+	const qWords = new Set(
+		q
+			.toLowerCase()
+			.split(/[^a-z0-9]+/)
+			.filter(Boolean),
+	);
 	for (const n of notes) {
 		if (n.visibility === "internal") continue;
-		for (const t of n.triggers ?? []) {
-			const words = t.toLowerCase().split(/\s+/).filter(Boolean);
-			if (words.length >= 2 && words.every((w) => qWords.has(w))) return n;
-		}
+		if ((n.triggers ?? []).some((t) => triggerFires(t, qWords))) return n;
 	}
 	return null;
+}
+
+/** Every word of the trigger appears as its own word in the question (≥2). */
+function triggerFires(trigger: string, qWords: Set<string>): boolean {
+	const words = trigger.toLowerCase().split(/\s+/).filter(Boolean);
+	return words.length >= 2 && words.every((w) => qWords.has(w));
+}
+
+/**
+ * Route a plain-English question to the ONE repo whose curated trigger
+ * phrases fire on it — before the lexical index gets a vote. On 2026-09-01
+ * "soroban cli renamed" routed to tupui/soroban-cli-python by name while the
+ * rename fact lived on stellar/stellar-cli's note, so the trigger path inside
+ * findDirectAnswerNote never ran. Exactly one repo or nothing: an ambiguous
+ * trigger is a curation defect, not a routing decision, and falls through.
+ */
+export function findRepoByTrigger(q: string): string | null {
+	const qWords = new Set(
+		q
+			.toLowerCase()
+			.split(/[^a-z0-9]+/)
+			.filter(Boolean),
+	);
+	const hits = new Set<string>();
+	for (const [repo, notes] of Object.entries(REPO_KNOWLEDGE_NOTES)) {
+		for (const n of notes) {
+			if (n.visibility === "internal") continue;
+			if ((n.triggers ?? []).some((t) => triggerFires(t, qWords))) {
+				hits.add(repo);
+			}
+		}
+	}
+	return hits.size === 1 ? [...hits][0] : null;
 }
 
 export function buildKnowledgeNotes(
