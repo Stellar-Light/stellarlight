@@ -1,13 +1,13 @@
 {
-	"generatedAt": "2026-09-01T03:46:07.049Z",
+	"generatedAt": "2026-09-01T04:36:26.383Z",
 	"total": 514,
-	"open": 43,
-	"closed": 471,
+	"open": 27,
+	"closed": 487,
 	"verified": 7,
-	"cleared": 464,
-	"clearedByReprobe": 206,
-	"clearedOnSilence": 258,
-	"closingRate": 0.92,
+	"cleared": 480,
+	"clearedByReprobe": 216,
+	"clearedOnSilence": 264,
+	"closingRate": 0.95,
 	"oldestOpenDays": 40,
 	"inWave": 0,
 	"highOpen": 0,
@@ -19,11 +19,6 @@
 			"total": 89
 		},
 		{
-			"surface": "retrieval",
-			"open": 16,
-			"total": 333
-		},
-		{
 			"surface": "consumer",
 			"open": 5,
 			"total": 24
@@ -32,6 +27,11 @@
 			"surface": "corpus",
 			"open": 1,
 			"total": 18
+		},
+		{
+			"surface": "retrieval",
+			"open": 0,
+			"total": 333
 		},
 		{
 			"surface": "code",
@@ -52,34 +52,6 @@
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
-		{
-			"id": "engine-a-recall:mystic-in-top-3-for-is-mystic-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "mystic in top-3 for 'is Mystic live'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:hiyield-in-top-3-for-what-is-hiyield",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "hiyield in top-3 for 'what is HiYield'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:the-strategists-in-top-3-for-is-the-strategists-",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "the-strategists in top-3 for 'is The Strategists live'",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:response",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "response",
-			"severity": "medium"
-		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
@@ -102,10 +74,38 @@
 			"severity": "medium"
 		},
 		{
-			"id": "engine-a-recall:x402-in-top-3-for-x402-on-stellar",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "x402 in top-3 for 'x402 on stellar'",
+			"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "how does the Blend lending pool calculate interest rates in the code",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-upesa",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: upesa",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-pagcrypto",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: pagcrypto",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-crebit",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: crebit",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-yolat",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: yolat",
 			"severity": "medium"
 		}
 	]
