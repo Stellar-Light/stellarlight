@@ -42,6 +42,257 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 3 (2026-09-01): 25 repos / 34 notes, next tier by repoScore
+	// (SDKs, tooling, core infra, widely-used contracts first) — every fact
+	// verified live on the asOf date against the registry / API / README the
+	// note cites. Six repos here are the CURRENT home of a renamed or moved
+	// path (soroban-tools, soroban-cli, soroban-rpc, kalepail/passkey-kit,
+	// stellar/java-stellar-sdk, ericmt-98/micopay-protocol): each redirect was
+	// resolved through the GitHub API, not assumed. Rename DATES are not
+	// stated anywhere we read, so no note claims one. 13 further candidates
+	// (hackathon demos with only tags, plus the allbridge-io / allbridge-public
+	// same-named pair) yielded nothing durable and are deliberately absent.
+	"stellar/js-stellar-base": [
+		{
+			note: "DEPRECATED on npm: every version of @stellar/stellar-base (24 versions, last 15.0.0 on 2026-03-30) carries the deprecation 'This package is now rolled into @stellar/stellar-sdk'; the README (2026-09) says future updates incl. protocol releases ship only in @stellar/stellar-sdk, which re-exports this package's full API — switch the dependency. https://www.npmjs.com/package/@stellar/stellar-base",
+			triggers: ["stellar base deprecated", "stellar base still maintained"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Repo is NOT archived (still pushed 2026-08-31) but its last tagged release is v15.0.0 (2026-03-30); the SDK absorbed it at @stellar/stellar-sdk v16.0.0 (see the stellar/js-stellar-sdk note) — resolve base-library questions to stellar/js-stellar-sdk. https://github.com/stellar/js-stellar-base/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/typescript-wallet-sdk": [
+		{
+			note: "Monorepo publishing THREE npm packages, all at 4.0.1 (2026-08-21): @stellar/typescript-wallet-sdk (first published 2023-05-18), @stellar/typescript-wallet-sdk-km (key manager, 2024-03-26) and @stellar/typescript-wallet-sdk-soroban (2024-05-20); names verified in the repo's @stellar/*/package.json (the npm entries carry no repository field). https://www.npmjs.com/package/@stellar/typescript-wallet-sdk",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "v4.0.0 (2026-08-13) is a breaking major: @stellar/stellar-sdk 15.0.1 → 16.2.0 and the Node minimum raised 20 → 22 (engines node>=22); every pre-4.0.0 version is marked deprecated on npm ('Versions below 4.0.0 are no longer maintained. Please upgrade to v4.0.0+'). https://github.com/stellar/typescript-wallet-sdk/releases/tag/v4.0.0",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"lightsail-network/java-stellar-sdk": [
+		{
+			note: "Moved out of the stellar org: github.com/stellar/java-stellar-sdk redirects here (GitHub API resolves the old path to lightsail-network/java-stellar-sdk, 2026-09-01). Maven Central coordinates network.lightsail:stellar-sdk — 34 versions from 0.43.1 (2024-03-31) to 5.0.0 (2026-09-01); Javadoc at javadoc.io/doc/network.lightsail/stellar-sdk. https://central.sonatype.com/artifact/network.lightsail/stellar-sdk",
+			triggers: ["java stellar sdk moved", "java sdk maven coordinates"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "5.0.0 (2026-09-01) is the Protocol 28 major with a breaking auth default: CAP-71 ADDRESS_V2 credentials on build and simulate (opt-outs: credentialsType SOROBAN_CREDENTIALS_ADDRESS, useUpgradedAuth=false); adds CAP-85 external executable refs. Android needs companion lightsail-network/java-stellar-sdk-android-spi (also 5.0.0). https://github.com/lightsail-network/java-stellar-sdk/releases/tag/5.0.0",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-cli": [
+		{
+			note: "Two old GitHub paths redirect here — stellar/soroban-tools and stellar/soroban-cli both resolve to stellar/stellar-cli (GitHub API, 2026-09-01). On crates.io it ships as BOTH stellar-cli (28.0.0, 2026-08-26; first published 2023-10-26) and legacy-named soroban-cli (same 28.0.0; since 2022-07-28, ~174k downloads), both with repository = this repo. https://crates.io/crates/stellar-cli",
+			triggers: ["soroban cli renamed", "soroban tools renamed"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Install paths per README: install.sh (`curl -fsSL https://github.com/stellar/stellar-cli/raw/main/install.sh | sh`; --install-deps adds the Rust toolchain + wasm32v1-none target), Homebrew `brew install stellar-cli` (formula at 28.0.0), or `cargo install --locked stellar-cli`; latest release v28.0.0 (2026-08-26). https://github.com/stellar/stellar-cli/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-rpc": [
+		{
+			note: "Renamed from stellar/soroban-rpc — the old GitHub path redirects here (API resolves it to stellar/stellar-rpc, 2026-09-01); the Docker Hub image moved too: stellar/stellar-rpc (updated 2026-08-27) is current while stellar/soroban-rpc is frozen at 2025-01-31. Latest release v28.0.1 (2026-08-27); v28.0.0 2026-08-17, v27.0.0 2026-06-11. https://github.com/stellar/stellar-rpc/releases",
+			triggers: ["soroban rpc renamed", "soroban rpc docker image"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/quickstart": [
+		{
+			note: "Docker Hub image stellar/quickstart (~1.11M pulls, 2026-09-01); no GitHub releases — floating tags latest (mainnet-stable), testing (RCs, mainnet+testnet), futurenet, nightly, nightly-next, plus an immutable per-commit tag v<version>-b<build>.<attempt>-<tag>. README marks it development-only, not for production. https://github.com/stellar/quickstart#tags",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Bundles stellar-core, stellar-rpc, stellar-horizon, friendbot, Lab and galexie behind one port (Horizon :8000/, RPC /rpc, Lab /lab, Friendbot /friendbot); run via `stellar container start` (stellar-cli), `docker run -p 8000:8000 stellar/quickstart --local`, or as a GitHub Action `uses: stellar/quickstart@main` (action.yml in repo root). https://github.com/stellar/quickstart",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-core": [
+		{
+			note: "Release train (2026-09-01): v28.0.1 2026-09-01, v28.0.0 2026-08-13, v27.1.0 2026-06-25, v27.0.0 2026-06-05, v26.1.0 2026-05-15; Docker Hub image stellar/stellar-core (~1.22M pulls). https://github.com/stellar/stellar-core/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Two repository security advisories (as of 2026-09-01; re-check the live feed): GHSA-mgx8-frjx-x33m / CVE-2024-32985, medium, 2024-05-09 — remote P2P crash, fixed in v20.4.0; GHSA-3p8h-7v82-ffvq, low, 2025-01-29 — memo mutability with Soroban auth signatures (auth entries not bound to the tx memo), fixed in 22.0.0. https://github.com/stellar/stellar-core/security/advisories",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/rs-soroban-env": [
+		{
+			note: "Ships on crates.io as soroban-env-host and soroban-env-common (both 28.0.2, 2026-08-17; first published 2022-07-28; ~1.67M downloads each), repository = this repo. Recent tags: v28.0.0 2026-07-31, v27.0.1 and v26.1.4 2026-07-20. https://crates.io/crates/soroban-env-host",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "One repository advisory (as of 2026-09-01): GHSA-pm4j-7r4q-ccg8, low, 2026-03-06 — the muxed-address<->ScVal conversion flag could stick after a failed storage-key conversion, causing spurious contract failures (transaction rolls back; no state corruption); soroban-env-host <26.0.0 affected, fixed in 26.0.0. https://github.com/stellar/rs-soroban-env/security/advisories/GHSA-pm4j-7r4q-ccg8",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/passkey-kit": [
+		{
+			note: "Moved from kalepail/passkey-kit (496 stars there; archived; README 'This repository has moved… all tags were carried over'); stellar/passkey-kit was created 2026-07-30, so its own star count understates adoption. npm passkey-kit (0.17.0, 2026-09-01; first published 2024-06-06; 126 versions) now points its repository at stellar/passkey-kit. https://www.npmjs.com/package/passkey-kit",
+			triggers: ["passkey kit moved", "kalepail passkey kit"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "README security status (relay it): unaudited — the smart-wallet contract, SDKs and relayer proxy have had no independent audit; for context rules, thresholds and spending limits it points to the sibling stellar/smart-account-kit built on the audited OpenZeppelin stellar-contracts. Exports PasskeyKit (browser) and PasskeyServer (holds the relayer secret). https://github.com/stellar/passkey-kit",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"creit-tech/stellar-wallets-kit": [
+		{
+			note: "Published under two scopes: npm @creit.tech/stellar-wallets-kit (2.6.0, 2026-08-28; first published 2024-01-12) and JSR @creit-tech/stellar-wallets-kit (2.6.0; on JSR since 2024-11-02, linked to this repo) — the README's install path is now the JSR one (`npx jsr add @creit-tech/stellar-wallets-kit`). Docs at stellarwalletskit.dev; MIT. https://jsr.io/@creit-tech/stellar-wallets-kit",
+			triggers: ["wallets kit package", "wallets kit jsr", "wallets kit npm"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"blend-capital/blend-contracts": [
+		{
+			note: "This is the Blend V1 contract repo — last release v1.0.0 (2024-05-01; per-contract wasm: pool, pool-factory, backstop, emitter), last push 2024-07-29, not archived. V2 contracts live in the separate repo blend-capital/blend-contracts-v2 (v2.0.0, 2025-04-14) with docs in blend-capital/docs-v2; companions blend-sdk-js, blend-utils, blend-contract-sdk. AGPL-3.0. https://github.com/blend-capital/blend-contracts-v2",
+			triggers: ["blend v2 contracts"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"coinfabrik/scout-audit": [
+		{
+			note: "Crate name differs from the repo: cargo-scout-audit (0.3.16, 2026-02-13; first published 2023-06-30; ~36k downloads; repository = this repo) — `cargo install cargo-scout-audit`, then `cargo scout-audit` (html/md/pdf/json/sarif output). GitHub Releases are stale (latest v0.2.10, 2024-04-25; tags reach v0.2.19) — read the version from crates.io. https://crates.io/crates/cargo-scout-audit",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Soroban-specific detector docs live in the companion repo CoinFabrik/scout-soroban (last push 2024-11-07), which installs the same cargo-scout-audit crate; the README lists a VS Code extension (CoinFabrik.scout-audit) and a GitHub Action. This repo last pushed 2026-04-24. https://github.com/CoinFabrik/scout-soroban",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/go": [
+		{
+			note: "ARCHIVED (GitHub archived:true; last push 2025-12-10). README header: 'REPOSITORY DEPRECATED — This repository has been moved to github.com/stellar/go-stellar-sdk', migration guide MIGRATION.md; services split to stellar/stellar-horizon, stellar/stellar-galexie and stellar/friendbot (see the stellar/go-stellar-sdk note). https://github.com/stellar/go",
+			triggers: ["stellar go archived", "stellar go monorepo"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api repos/stellar/go → archived:true, pushed_at 2025-12-10; raw README.md master lines 13-17.
+	"stellar/freighter-mobile": [
+		{
+			note: "Shipped to both stores — Google Play id org.stellar.freighterwallet and App Store id6743947720 (README badges); tagged releases every 1–3 weeks (v1.19.27 2026-06-17, v1.22.27 2026-08-10, v1.24.28 2026-08-29, v1.25.28 2026-09-01). Dev prerequisites Node ≥22.12 (stellar-sdk 17 ESM), Yarn 4.10. https://github.com/stellar/freighter-mobile/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api releases?per_page=6; raw README.md main lines 2-3 (store URLs) and prerequisites block.
+	"stellar/stellar-mpp-sdk": [
+		{
+			note: "npm name is @stellar/mpp (0.7.1, 2026-07-02; first published 2026-03-30; repository = this repo; Node ≥22, ESM). Stellar method for the Machine Payments Protocol (mpp.dev): 'charge' mode implements draft-stellar-charge-00 via SEP-41 transfers, plus optional one-way payment channels; v0.7 migration guide at docs/migrating-to-v0.7.md. https://www.npmjs.com/package/@stellar/mpp",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: raw package.json main (name @stellar/mpp, engines node>=22, type module); registry.npmjs.org/@stellar%2Fmpp; README head.
+	"reflector-network/reflector-contract": [
+		{
+			note: "Cargo workspace of three crates (oracle, pulse-contract, beam-contract); per-contract releases: v6.0.1 for ReflectorPulse and ReflectorBeam (2026-07-23), v6.0.0 (2026-03-09), older v4.x reflector-oracle wasm (2024-05). Audit PDFs in audits/ (OtterSec 2024 public feed; Code4rena 2025 beam+pulse). README: Pulse = free 5-minute feeds, Beam = paid, faster. https://github.com/reflector-network/reflector-contract/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: default branch master; raw Cargo.toml members; gh api releases?per_page=6; gh api contents/audits; README lines 29-30.
+	"stellar/anchor-platform": [
+		{
+			note: "Releases every 1–3 weeks: 4.7.1 (2026-08-26), 4.7.0 (2026-08-20), 4.6.2 (2026-08-03), 4.6.1 (2026-07-20); Docker Hub image stellar/anchor-platform (~936k pulls, updated 2026-09-01). https://github.com/stellar/anchor-platform/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api releases?per_page=4; hub.docker.com/v2/repositories/stellar/anchor-platform/ (pull_count 936473).
+	"stellar/stellar-disbursement-platform-backend": [
+		{
+			note: "Latest release 7.0.0 (2026-08-19; 6.6.1 2026-06-24, 6.6.0 2026-06-18, 6.5.0 2026-05-05); Docker Hub image stellar/stellar-disbursement-platform-backend (~34.6k pulls, updated 2026-08-27); the UI is the companion repo stellar/stellar-disbursement-platform-frontend. https://github.com/stellar/stellar-disbursement-platform-backend/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api releases?per_page=4; hub.docker.com pull_count 34584; frontend repo present in the census list (score 50).
+	"tupui/soroban-cli-python": [
+		{
+			note: "PyPI name is simply `soroban` (`pip install soroban`): 0.9.1 uploaded 2024-11-12, first release 0.1.0 2024-02-25, 15 releases, Python ≥3.10, project URLs point at this repo. The repo has commits after the last PyPI upload (pushed 2026-08-01) with no newer tag (latest tag v0.9.1). BSD-3-Clause. https://pypi.org/project/soroban/",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: pypi.org/pypi/soroban/json (version, releases, requires_python, project_urls); gh api tags; README `pip install soroban`.
+	"acta-team/did-stellar": [
+		{
+			note: "npm @acta-team/did-stellar (0.1.2, 2026-07-27; first published 2026-05-26; repository = this repo, directory packages/resolver) — did:stellar v0.1 TypeScript SDK (DIF did-resolver compatible) plus a hosted resolver at did.acta.build; repo tag v0.1.3 exists with no matching npm version or GitHub release as of 2026-09-01. https://www.npmjs.com/package/@acta-team/did-stellar",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: registry.npmjs.org/@acta-team%2Fdid-stellar; gh api tags (v0.1.3,v0.1.2,v0.1.0) + releases (v0.1.2, v0.1.0); repo homepage did.acta.build.
+	"sentinelfi/stellar-metamask-snap": [
+		{
+			note: "Published to npm 2026-08-27 as two packages, both 0.1.0 with repository = this repo: stellar-soroban-snap (the MetaMask Snap) and stellar-soroban-snap-connector; root package.json: SEP-0005 key derivation + SEP-43 signing API + companion dapp. Tags v0.1.0, pre-audit, phase-5-prep; repo has an audits/ dir and SECURITY.md. https://www.npmjs.com/package/stellar-soroban-snap",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: packages/{snap,connector}/package.json names; registry.npmjs.org for both (created 2026-08-27T16:17Z); gh api contents/ + tags.
+	"kalepail/kale-sc": [
+		{
+			note: "README publishes the live addresses — MAINNET contract CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA (the same README table carries the asset issuer, the SAC and the TESTNET equivalents) — and states the contract is unaudited ('a meme coin'). README parameters: 500 KALE/minute, 5% emission decay per ~30 days, ~500M cap; site kalefarm.xyz; no tagged releases. https://github.com/kalepail/KALE-sc",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: raw README.md main (table + CAUTION block); gh api repos (homepage kalefarm.xyz, releases/latest 404).
+	"consulting-manao/tansu": [
+		{
+			note: "Repo description says development happens on Radicle (radicle.network node rad:zssaAF91kxuquZmZCV2SiK2FNX6s), not GitHub. README publishes the MAINNET contract CDXINK2T3P46M4LWK35FVIXXHJ2XHAS4FOVCGVPJ63YV5OVTM24IY5BI (TESTNET address in the same README), plus an SCF 28/30/41 badge; latest contracts release v2.0.2 (2026-05-12); site tansu.dev. https://github.com/Consulting-Manao/tansu",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api repos (description, homepage); raw README.md main badges; gh api releases?per_page=3.
+	"ericmt-98/micopay-protocol": [
+		{
+			note: "Repo moved: ericmt-98/micopay-protocol now lives at Micopay/micopay-protocol (old path redirects; GitHub API resolves it, 2026-09-01) — cite the new org. MIT; app at app.micopay.xyz. https://github.com/Micopay/micopay-protocol",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api repos/ericmt-98/micopay-protocol → full_name Micopay/micopay-protocol, license MIT, homepage app.micopay.xyz.
+	"stellar/laboratory": [
+		{
+			note: "No tags or GitHub releases; the main branch deploys continuously to lab.stellar.org (README: the deployed commit hash is shown bottom-right of the landing page). Next.js; Node ≥22.22.0, pnpm ≥10.15.1. https://github.com/stellar/laboratory",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	// verified: gh api tags (empty) + releases/latest 404; README Overview + Prerequisites.
 	// ── P5 batch 2 (2026-09-01): next tier by repoScore, same discipline —
 	// every fact verified live on the asOf date; the stellar/go archive +
 	// go-stellar-sdk succession re-verified independently before landing
