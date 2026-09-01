@@ -367,15 +367,13 @@ async function checkUrl(url: string): Promise<CheckResult> {
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
 	try {
-		let res = await fetch(url, {
-			method: "HEAD",
-			redirect: "manual",
-			headers: {
-				"User-Agent": USER_AGENT,
-				Accept: "*/*",
-			},
-			signal: controller.signal,
-		});
+		const hop = (method: "HEAD" | "GET", u: string) =>
+			fetch(u, {
+				method,
+				redirect: "manual",
+				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
+				signal: controller.signal,
+			});
 		// A SAME-SITE redirect is a hop, not an outcome. nodies.app answers
 		// 308 -> https://www.nodies.app/ which serves 200 — a perfectly live
 		// site — but "redirect" never stamps lastSuccessAt (link-history.ts),
@@ -387,39 +385,42 @@ async function checkUrl(url: string): Promise<CheckResult> {
 		// hijack detector depends on seeing it (45 found in the 08-21 sweep).
 		const sameSite = (a: string, b: string) =>
 			a.replace(/^www\./, "") === b.replace(/^www\./, "");
-		let hops = 0;
-		let cur = url;
-		while (
-			res.status >= 300 &&
-			res.status < 400 &&
-			hops < 3 &&
-			res.headers.get("location")
-		) {
-			// resolve against the CURRENT hop — a relative Location on hop 2+
-			// must not resolve against the original URL
-			const next = new URL(res.headers.get("location") as string, cur);
-			if (!sameSite(new URL(url).hostname, next.hostname)) break;
-			hops++;
-			cur = next.href;
-			res = await fetch(cur, {
-				method: "HEAD",
-				redirect: "manual",
-				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
-				signal: controller.signal,
-			});
-		}
+		const followSameSite = async (
+			first: Response,
+			method: "HEAD" | "GET",
+		): Promise<Response> => {
+			let res = first;
+			let hops = 0;
+			let cur = url;
+			while (
+				res.status >= 300 &&
+				res.status < 400 &&
+				hops < 3 &&
+				res.headers.get("location")
+			) {
+				// resolve against the CURRENT hop — a relative Location on hop 2+
+				// must not resolve against the original URL
+				const next = new URL(res.headers.get("location") as string, cur);
+				if (!sameSite(new URL(url).hostname, next.hostname)) break;
+				hops++;
+				cur = next.href;
+				res = await hop(method, cur);
+			}
+			return res;
+		};
+		let res = await followSameSite(await hop("HEAD", url), "HEAD");
 
 		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
 		// Retry with GET if HEAD says it's broken — but not through a bot wall,
-		// where a second request just burns the target's rate limit.
+		// where a second request just burns the target's rate limit. The GET
+		// must walk same-site hops too: lulpay.com answers HEAD 405 with no
+		// Location, then GET 301 -> www.lulpay.com -> 200. Judging the bare GET
+		// stamped "redirect" — never a success — on every HEAD-rejecting,
+		// canonicalizing host (2026-09-01 no-check triage: lul, lulpay,
+		// loto-punto, venerez). Falling through (instead of returning here)
+		// also lets a GET 200 reach the page-verdict read below.
 		if (res.status >= 400 && res.status < 500 && !isBotWall(res.status)) {
-			const getRes = await fetch(url, {
-				method: "GET",
-				redirect: "manual",
-				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
-				signal: controller.signal,
-			});
-			return summarize(getRes, url);
+			res = await followSameSite(await hop("GET", url), "GET");
 		}
 
 		const base = summarize(res, url);

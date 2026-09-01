@@ -1026,6 +1026,65 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	stellarbeat: "https://radar.withobsrvr.com/",
 	// xycLoans WebApp live at https://main.xycloans.app/ with docs.xycloans.app live and the xycloo GitHub org pushing as recently as 2026-07; only the recorded ap…
 	xycloans: "https://main.xycloans.app/",
+	// No-check triage 2026-09-01 (basis lane, 171 weak rows with no successful
+	// check): each row's recorded host 301s to a NEW host, so the checker
+	// stops at the offsite hop and the row never earns a success. Every target
+	// below was fetched the same day — HTTP 200 and a page title naming the
+	// brand (quoted). Same-org moves only: takeover / parked / dead targets
+	// stay OUT of this map and wait for an owner verdict.
+	// agnostic.dev → agnostic.tech ("Agnostic — Data & AI Infrastructure")
+	agnostic: "https://agnostic.tech/",
+	// 57blocks.io → 57blocks.com ("Home · 57Blocks"); three rows share it
+	autoaction: "https://57blocks.com/",
+	"soroban-resource-usage-reporter": "https://57blocks.com/",
+	"soroban-timelock-contract": "https://57blocks.com/",
+	// ax.al → axal.com ("Axal: High Yield Savings")
+	axal: "https://axal.com/",
+	// useblaze.app → blaze.money ("Blaze | Money Without Borders")
+	blaze: "https://blaze.money/",
+	// cantina.xyz → cantina.security ("Cantina | Agentic Security Platform")
+	cantina: "https://www.cantina.security/",
+	// centiiv.com → centiiv.io ("Centiiv", h1 "Global payments")
+	centiiv: "https://www.centiiv.io/",
+	// dfslab.net → dfs.vc/lab.html ("DFS — Lab")
+	"dfs-labs": "https://www.dfs.vc/lab.html",
+	// encode.club → encodeclub.com ("Encode Club")
+	"encode-club": "https://www.encodeclub.com/",
+	// pagcrypto.finance → pag.finance ("PagFinance")
+	pagcrypto: "https://pag.finance/",
+	// plutope.io → plutope.com (200, untitled SPA shell)
+	plutope: "https://plutope.com/",
+	// tagocash.com → tago.cash ("TagoCash")
+	"tago-cash": "https://tago.cash/",
+	// apex 301s to the blog ("Tellus Cooperative")
+	"tellus-cooperative": "https://blog.telluscoop.com/",
+	// traceeapp.com → traceegroup.com ("tracee | Digital assets and AI
+	// consulting")
+	tracee: "https://traceegroup.com/",
+	// thisisvank.com → vank.co ("Cuenta multimoneda para empresas — VANK")
+	vank: "https://vank.co/",
+	// mywalletguru.com → walletguru.com ("Wallet Guru: Streaming Payment
+	// Platform")
+	"wallet-guru": "https://www.walletguru.com/",
+	// discord.gg short link → canonical invite URL ("WEB3DEV")
+	web3dev: "https://discord.com/invite/web3dev",
+	// wirexpaychain.com → wirexapp.com ("Wirex | Crypto Wallet, Cards &
+	// Payments")
+	"wirex-pay": "https://www.wirexapp.com/",
+	// zig3.io → zig3.org ("Zig3V2")
+	zig3v2: "https://zig3.org/",
+	// saw.galois.com → Galois docs ("SAW: The Software Analysis Workbench")
+	saw: "https://tools.galois.com/saw",
+	// apex → stellar.rgstry.xyz ("Stellar Registry")
+	"stellar-registry": "https://stellar.rgstry.xyz/",
+	// mowblox.com → devtrak.build ("Devtrak" — the slug's own brand)
+	devtrak: "https://devtrak.build/",
+	// thexbank.io → txbfi.com ("TXBFI | Your money, your control")
+	thexbank: "https://txbfi.com/",
+	// dd.xyz → dapp.webacy.com (dd.xyz is Webacy's product; "Webacy / Home")
+	dd: "https://dapp.webacy.com/",
+	// /protocol path 404s; the root serves "Home | Normal"
+	normal: "https://www.normalfinance.io/",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
@@ -3431,4 +3490,8 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 export const WEBSITE_REMOVE: Record<string, string> = {
 	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
 	"the-blue-marble": "https://thebluemarble.io/",
+	// Same hijacked domain on a second row (slug "blue-marble", Inactive): the
+	// 2026-09-01 owner call covers the domain, not the slug. Both rows point
+	// at diviandecor.com / casino spam now; neither should link out.
+	"blue-marble": "https://thebluemarble.io/",
 };
