@@ -24,6 +24,7 @@ import {
 	PROMINENCE_SET,
 	SEEDS,
 	STATUS_FIX,
+	STATUS_SOURCE_BACKFILL,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
@@ -1263,6 +1264,38 @@ async function main() {
 	}
 
 	// ── raven#8 / sls-018: additive types for multi-product projects ──
+	// ── statusSourceUrl backfill: fill-only-if-empty, verdict untouched ──
+	console.log("\n── Status source backfill (fill-only-if-empty) ──");
+	for (const [slug, srcUrl] of Object.entries(STATUS_SOURCE_BACKFILL)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.statusSourceUrl) {
+			console.log(`  ${slug}: already sourced, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: statusSourceUrl ← ${srcUrl}`);
+		if (EXECUTE) {
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: { statusSourceUrl: srcUrl },
+				context: { internal: true },
+				overrideAccess: true,
+			});
+		}
+	}
+
 	console.log("\n── Types add (merge, never remove) ──");
 	for (const [slug, addTypes] of Object.entries(TYPES_ADD)) {
 		const r = await payload.find({
