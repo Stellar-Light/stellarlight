@@ -116,34 +116,75 @@ function evidenceFor(
  * no recent trade stays weak honestly (payment-only rails will earn their
  * upgrade through A when the deltas arrive).
  */
-async function horizonEvidence(
-	r: Row,
-): Promise<{ kind: "horizon-trade"; asOf: string; url: string; note: string } | null> {
-	const o = r.onchain;
-	if (!o?.assetCode || !o.issuer) return null;
-	const type =
-		o.assetCode.length <= 4 ? "credit_alphanum4" : "credit_alphanum12";
-	const u = `https://horizon.stellar.org/trades?base_asset_type=${type}&base_asset_code=${encodeURIComponent(o.assetCode)}&base_asset_issuer=${o.issuer}&order=desc&limit=1`;
+async function horizonJson(
+	u: string,
+): Promise<Record<string, unknown> | null> {
 	try {
 		const res = await fetch(u, {
 			headers: { "User-Agent": "stellarlight-basis-upgrade" },
 			signal: AbortSignal.timeout(15_000),
 		});
+		// A 400 here is OUR query being malformed, and it must be VISIBLE:
+		// the first version filtered /trades by a lone base asset (Horizon
+		// requires a pair), 400'd on every call, and the silent catch made a
+		// broken probe indistinguishable from a quiet result.
+		if (res.status === 400)
+			console.log(`    ✗ Horizon 400 (bad query): ${u.slice(0, 110)}`);
 		if (!res.ok) return null;
-		const d = (await res.json()) as {
-			_embedded?: { records?: Array<{ ledger_close_time?: string }> };
-		};
-		const t = d._embedded?.records?.[0]?.ledger_close_time;
-		if (!t || days(t) > MAX_MOVEMENT_AGE_DAYS) return null;
-		return {
-			kind: "horizon-trade",
-			asOf: t,
-			url: `https://stellar.expert/explorer/public/asset/${o.assetCode}-${o.issuer}`,
-			note: `last trade ${t.slice(0, 10)} (Horizon)`,
-		};
+		return (await res.json()) as Record<string, unknown>;
 	} catch {
 		return null;
 	}
+}
+
+async function horizonEvidence(
+	r: Row,
+): Promise<{ kind: string; asOf: string; url: string; note: string } | null> {
+	const o = r.onchain;
+	if (!o?.assetCode || !o.issuer) return null;
+	const expertUrl = `https://stellar.expert/explorer/public/asset/${o.assetCode}-${o.issuer}`;
+	// 1. Issuer-account payments — mints/burns/redemptions touch the issuer,
+	//    the truest "this issued asset is in use" signal, and a single-account
+	//    query Horizon actually supports.
+	const pay = await horizonJson(
+		`https://horizon.stellar.org/accounts/${o.issuer}/payments?order=desc&limit=1`,
+	);
+	const payRec = (
+		pay?._embedded as
+			| { records?: Array<{ created_at?: string }> }
+			| undefined
+	)?.records?.[0];
+	if (payRec?.created_at && days(payRec.created_at) <= MAX_MOVEMENT_AGE_DAYS)
+		return {
+			kind: "issuer-payment",
+			asOf: payRec.created_at,
+			url: expertUrl,
+			note: `issuer payment ${payRec.created_at.slice(0, 10)} (Horizon)`,
+		};
+	// 2. DEX trade against XLM — /trades requires a PAIR, so probe the
+	//    dominant one. Misses exotic pairs; those rows stay weak honestly
+	//    until the weekly deltas arrive.
+	const type =
+		o.assetCode.length <= 4 ? "credit_alphanum4" : "credit_alphanum12";
+	const tr = await horizonJson(
+		`https://horizon.stellar.org/trades?base_asset_type=${type}&base_asset_code=${encodeURIComponent(o.assetCode)}&base_asset_issuer=${o.issuer}&counter_asset_type=native&order=desc&limit=1`,
+	);
+	const trRec = (
+		tr?._embedded as
+			| { records?: Array<{ ledger_close_time?: string }> }
+			| undefined
+	)?.records?.[0];
+	if (
+		trRec?.ledger_close_time &&
+		days(trRec.ledger_close_time) <= MAX_MOVEMENT_AGE_DAYS
+	)
+		return {
+			kind: "horizon-trade",
+			asOf: trRec.ledger_close_time,
+			url: expertUrl,
+			note: `last XLM-pair trade ${trRec.ledger_close_time.slice(0, 10)} (Horizon)`,
+		};
+	return null;
 }
 
 async function main() {
