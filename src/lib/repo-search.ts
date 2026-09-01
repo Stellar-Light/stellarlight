@@ -830,14 +830,29 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
+/**
+ * A query that IS a fully-qualified repo name (`owner/name`, nothing else) is
+ * the most explicit routing signal there is — it names the repo, not a
+ * concept. 2026-09-01: `q=stellar/stellar-etl` wordy-split into "etl" and the
+ * concept map sent it to stellar-ledger-data-indexer, so the row's own
+ * knowledge notes never surfaced. Returns the name, or null for anything
+ * that is not exactly one owner/name token.
+ */
+export function explicitRepoName(q: string): string | null {
+	const m = q.trim().match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
+	return m ? `${m[1]}/${m[2]}` : null;
+}
+
 export function canonicalFor(q: string): string[] {
 	// An IDENTIFIER is not a concept phrase: a single-word camelCase/snake_case
 	// query (`contractErrorCodeFromNumber`) wordy-splits into concept
 	// vocabulary ("error code") and floated stellar-core above the repo that
 	// DEFINES the symbol. Concept mapping reads phrases people type; an
 	// identifier belongs to the symbol index, so it maps to nothing here.
+	// The same holds for a bare owner/name — see explicitRepoName.
 	const w = q.trim();
 	if (w && !/\s/.test(w) && /[a-z][A-Z]|_/.test(w)) return [];
+	if (explicitRepoName(w)) return [];
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const c of CANONICAL) {
@@ -1681,7 +1696,7 @@ export async function searchRepos(
 				// wrong inference), and tierChangedAt is what dates `tier` for the
 				// answer-dating contract. Null until the CTL has judged the row.
 				tierReason: Array.isArray((r as { tierReason?: unknown }).tierReason)
-					? ((r as unknown as { tierReason: string[] }).tierReason)
+					? (r as unknown as { tierReason: string[] }).tierReason
 					: null,
 				tierChangedAt:
 					(r as { tierChangedAt?: string | null }).tierChangedAt ?? null,
