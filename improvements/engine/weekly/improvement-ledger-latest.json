@@ -1,32 +1,27 @@
 {
-	"generatedAt": "2026-09-01T10:41:10.542Z",
+	"generatedAt": "2026-09-01T16:25:49.473Z",
 	"total": 519,
-	"open": 16,
-	"closed": 503,
+	"open": 6,
+	"closed": 513,
 	"verified": 7,
-	"cleared": 496,
+	"cleared": 506,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 280,
-	"closingRate": 0.97,
-	"oldestOpenDays": 40,
+	"clearedOnSilence": 290,
+	"closingRate": 0.99,
+	"oldestOpenDays": 41,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
-		{
-			"surface": "directory",
-			"open": 10,
-			"total": 89
-		},
 		{
 			"surface": "consumer",
 			"open": 5,
 			"total": 24
 		},
 		{
-			"surface": "corpus",
+			"surface": "directory",
 			"open": 1,
-			"total": 18
+			"total": 89
 		},
 		{
 			"surface": "retrieval",
@@ -47,6 +42,11 @@
 			"surface": "contract",
 			"open": 0,
 			"total": 34
+		},
+		{
+			"surface": "corpus",
+			"open": 0,
+			"total": 18
 		}
 	],
 	"unverifiedOpen": 0,
@@ -81,31 +81,17 @@
 			"severity": "medium"
 		},
 		{
-			"id": "nightly-completeness:scfroundawards-empty-inferera",
+			"id": "nightly-completeness:scfroundawards-empty-coala-pay",
 			"surface": "directory",
 			"source": "nightly-completeness",
-			"probe": "scfRoundAwards empty: inferera",
+			"probe": "scfRoundAwards empty: coala-pay",
 			"severity": "medium"
 		},
 		{
-			"id": "nightly-completeness:scfroundawards-empty-simbolik",
-			"surface": "directory",
-			"source": "nightly-completeness",
-			"probe": "scfRoundAwards empty: simbolik",
-			"severity": "medium"
-		},
-		{
-			"id": "nightly-completeness:scfroundawards-empty-the-aha-company",
-			"surface": "directory",
-			"source": "nightly-completeness",
-			"probe": "scfRoundAwards empty: the-aha-company",
-			"severity": "medium"
-		},
-		{
-			"id": "nightly-completeness:scfroundawards-empty-womenbiz",
-			"surface": "directory",
-			"source": "nightly-completeness",
-			"probe": "scfRoundAwards empty: womenbiz",
+			"id": "raven-routing:freighter",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "freighter",
 			"severity": "medium"
 		}
 	]

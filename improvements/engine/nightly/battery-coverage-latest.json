@@ -1,11 +1,5 @@
 {
-	"generatedAt": "2026-09-01T10:41:02.351Z",
+	"generatedAt": "2026-09-01T16:25:43.051Z",
 	"detector": "battery-coverage",
-	"failures": [
-		{
-			"probe": "battery:q-tool-indexer-repos-discovery",
-			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Find me open-source GitHub repos for indexing Soroban contract events or buildin\" (tooling-infra); best: reflector-network/reflector-contract",
-			"surface": "corpus"
-		}
-	]
+	"failures": []
 }

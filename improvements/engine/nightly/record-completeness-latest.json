@@ -1,46 +1,10 @@
 {
-	"generatedAt": "2026-09-01T10:30:53.860Z",
+	"generatedAt": "2026-09-01T16:16:10.018Z",
 	"detector": "record-completeness",
 	"failures": [
 		{
-			"probe": "scfRoundAwards empty: inferera",
-			"note": "rounds=[41]"
-		},
-		{
-			"probe": "scfRoundAwards empty: simbolik",
-			"note": "rounds=[41]"
-		},
-		{
-			"probe": "scfRoundAwards empty: the-aha-company",
-			"note": "rounds=[41]"
-		},
-		{
-			"probe": "scfRoundAwards empty: womenbiz",
-			"note": "rounds=[29]"
-		},
-		{
-			"probe": "scfRoundAwards empty: ichi",
-			"note": "rounds=[26]"
-		},
-		{
-			"probe": "scfRoundAwards empty: fairblock",
-			"note": "rounds=[40]"
-		},
-		{
 			"probe": "scfRoundAwards empty: coala-pay",
-			"note": "rounds=[22,31]"
-		},
-		{
-			"probe": "scfRoundAwards empty: dfs-labs",
-			"note": "rounds=[24]"
-		},
-		{
-			"probe": "scfRoundAwards empty: soroban-decompiler",
-			"note": "rounds=[41]"
-		},
-		{
-			"probe": "scfRoundAwards empty: escala",
-			"note": "rounds=[42,43,44]"
+			"note": "rounds=[22,31,35]"
 		}
 	]
 }
