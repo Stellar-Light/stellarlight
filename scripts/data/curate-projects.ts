@@ -137,10 +137,14 @@ const SCF_SUBMISSION_LINKS: Record<
 	yolat: { rounds: [44], evidence: "https://communityfund.stellar.org/project/yolat-bl5" },
 	crebit: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril" },
 	pagcrypto: { rounds: [42], evidence: "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu" },
-	upesa: { rounds: [41, 42], evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq" },
+	// upesa/verseprop rounds corrected 2026-09-01 (same badge-inheritance
+	// class as kutana/sendana, caught at slug-override verification): the
+	// pages affirmatively verdict upesa #41 and verseprop #31/#32 "Not
+	// Awarded"; the awards are #42 and #33 ("Awarded" cards, $86k / $112,020).
+	upesa: { rounds: [42], evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq" },
 	fxdao: { rounds: [13], evidence: "https://communityfund.stellar.org/project/fxdao-xov" },
 	// the duplicates whose rounds the review read off their SCF pages
-	verseprop: { rounds: [31, 32, 33], evidence: "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1" },
+	verseprop: { rounds: [33], evidence: "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1" },
 	ctx: { rounds: [19, 41], evidence: "https://communityfund.stellar.org/project/prices-api-rfp-ctx-1vo" },
 	inferera: { rounds: [41], evidence: "https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply" },
 	simbolik: { rounds: [41], evidence: "https://communityfund.stellar.org/project/advanced-debugging-for-soroban-contracts-5sr" },
@@ -1616,7 +1620,12 @@ async function main() {
 			try {
 				await payload.create({
 					collection: "projects",
-					data: seed,
+					// biome-ignore lint/suspicious/noExplicitAny: the seed literals'
+					// inferred union produced a types-ratchet signature that CHURNED
+					// on every map edit (the baselined message is length-truncated,
+					// so upstream string-length changes moved its tail) — closed with
+					// the site cast the sibling prod writers already use.
+					data: seed as any,
 					overrideAccess: true,
 				});
 				console.log(`  created: ${seed.slug}`);
