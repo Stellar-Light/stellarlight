@@ -32,7 +32,7 @@ import {
 	domainOf,
 	fetchText,
 	parseStellarToml,
-} from "../enrich-partners-toml";
+} from "../lib/stellar-toml";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 
