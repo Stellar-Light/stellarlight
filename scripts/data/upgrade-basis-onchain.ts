@@ -236,7 +236,10 @@ async function horizonEvidence(
  * link-checks on its next pass, and the corrected evidence C may re-upgrade
  * any of them honestly. DELETE this map after one executed run.
  */
-const AUDIT_REVERTS: Record<string, string> = {
+const AUDIT_REVERTS: Record<
+	string,
+	"site-liveness" | "source-inherited" | "unverified"
+> = {
 	ylds: "site-liveness",
 	stellarport: "site-liveness",
 	mxne: "site-liveness",
