@@ -26,6 +26,26 @@ if (!TOKEN) {
 	process.exit(1);
 }
 const GATE = process.argv.includes("--gate");
+// Our own API, asked directly when Raven's client rejects a probe — a value
+// we serve that their pinned catalog predates is lag on their side, not a
+// surface disagreement (2026-09-01: catalog pinned at 1.9.1, `type=Yield`
+// shipped in 1.9.13 → every wave "rejected" Yield while the API served 8 rows).
+const BASE = process.env.STELLARLIGHT_BASE ?? "https://stellarlight.xyz";
+const UA =
+	"Mozilla/5.0 stellar-light-consistency/1.0 (+https://stellarlight.xyz)";
+async function servedDirectly(type: string): Promise<boolean> {
+	try {
+		const res = await fetch(
+			`${BASE}/api/projects/search?type=${encodeURIComponent(type)}&limit=1`,
+			{ headers: { "User-Agent": UA }, signal: AbortSignal.timeout(15_000) },
+		);
+		if (!res.ok) return false;
+		const j = (await res.json()) as { projects?: unknown[] };
+		return (j.projects ?? []).length > 0;
+	} catch {
+		return false;
+	}
+}
 
 let rpcId = 0;
 async function rpc(method: string, params: unknown): Promise<unknown> {
@@ -162,7 +182,7 @@ for (const t of names) {
   if (n <= 0) empties.push(t + (n < 0 ? " (rejected)" : " (0 rows)"));
 }
 return { aCount: names.length, bCount: names.length - empties.length,
-  aSample: names.slice(0,4), bSample: empties.slice(0,4) };`,
+  aSample: names.slice(0,4), bSample: empties.slice(0,4), bEmpties: empties };`,
 	},
 	{
 		key: "typed-rows-are-reachable",
@@ -179,10 +199,11 @@ const types = [...new Set(rows.flatMap(p => p.types ?? []))].slice(0, 6);
 const unreachable = [];
 for (const t of types) {
   const r = await scout.searchProjects({ type: t, limit: 1 });
-  if (!r.ok || (r.data.projects ?? []).length === 0) unreachable.push(t);
+  if (!r.ok || (r.data.projects ?? []).length === 0)
+    unreachable.push(t + (r.ok ? " (0 rows)" : " (rejected)"));
 }
 return { aCount: types.length, bCount: types.length - unreachable.length,
-  aSample: types.slice(0,4), bSample: unreachable.slice(0,4) };`,
+  aSample: types.slice(0,4), bSample: unreachable.slice(0,4), bEmpties: unreachable };`,
 	},
 	{
 		key: "partners-vs-directory-audit",
@@ -208,6 +229,8 @@ type Counts = {
 	bCount: number;
 	aSample: string[];
 	bSample: string[];
+	/** countPair cases: every unreachable member, suffixed (rejected) / (0 rows). */
+	bEmpties?: string[];
 };
 
 const rows: Array<{ c: Case; r: Counts | null; err?: string }> = [];
@@ -244,8 +267,20 @@ for (const { c, r, err } of rows) {
 		c.key === "typed-rows-are-reachable";
 	const overlapPair = c.a.startsWith("vetIdea");
 	const overlap = r.aSample.filter((x) => r.bSample.includes(x)).length;
+	// A member Raven's client REJECTED but our API serves is catalog lag on
+	// their side (their pinned spec predates the enum value). Report it,
+	// don't gate on it — the gate is for answers that disagree, not catalogs
+	// that have not re-baselined yet.
+	const lagged: string[] = [];
+	if (countPair) {
+		for (const s of r.bEmpties ?? r.bSample) {
+			if (!/ \(rejected\)$/.test(s)) continue;
+			const t = s.replace(/ \(rejected\)$/, "");
+			if (await servedDirectly(t)) lagged.push(t);
+		}
+	}
 	const disagree = countPair
-		? r.aCount !== r.bCount
+		? r.aCount !== r.bCount + lagged.length
 		: overlapPair
 			? r.aCount > 0 && r.bCount > 0 && overlap === 0
 			: (r.aCount === 0) !== (r.bCount === 0);
@@ -253,6 +288,10 @@ for (const { c, r, err } of rows) {
 	console.log(`\n  ${disagree ? "DISAGREE" : "ok      "} ${c.key}   "${c.q}"`);
 	console.log(`         ${c.a}: ${r.aCount}  ${JSON.stringify(r.aSample)}`);
 	console.log(`         ${c.b}: ${r.bCount}  ${JSON.stringify(r.bSample)}`);
+	if (lagged.length)
+		console.log(
+			`         catalog-lag: ${JSON.stringify(lagged)} — rejected by Raven's pinned catalog, served by ${BASE} directly; not counted as a disagreement`,
+		);
 	if (disagree)
 		console.log(
 			overlapPair && r.aCount > 0 && r.bCount > 0
