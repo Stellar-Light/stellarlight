@@ -158,7 +158,7 @@ service runs at Stage 3+ by default and humans do product, not repair.
   requires N intervention-free weeks before auto-merge opens for bounded
   lanes; the count starts now, at zero.
 
-- **P4. Basis strength at scale.** `status: not started`
+- **P4. Basis strength at scale.** `status: in progress`
   The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
   on the weakest honest bases (site-liveness, source-inherited). P3 proved
   one bounded lane (operator-toml); P4 runs the basis-upgrade lanes across
@@ -173,8 +173,30 @@ service runs at Stage 3+ by default and humans do product, not repair.
   ratchet is that share, which may only FALL; done when weak bases are
   under 50% of rows. The untyped count is published in knownLimitations;
   done at 0.
+  *Shipped so far:* 2026-08-31→09-01 — the basis-upgrade lanes exist and
+  have run against the population: evidence A (asset movement deltas
+  between two dated stellar.expert readings), B (DeFiLlama TVL ≤14d) and
+  C (Horizon, same day — issuer payments asset-matched over 20 records,
+  XLM-pair trade fallback), every probe trinary (hit / checked-empty /
+  could-not-check reaches the summary and the exit code). 35 rows now rest
+  on onchain-activity; a two-auditor pass (agent + Grok) reverted 4
+  uncorrected-probe upgrades, one of which re-earned its upgrade the same
+  run under the corrected rule. Asset keys joined from the stablecoin
+  registry (12) and operators' own stellar.toml (7) so deltas compound
+  weekly. Death receipts: 42 stamped, 8 retracted after audit (a live-200
+  page cannot stand as "observed dead"), 2 re-stamped once their domains
+  went hard-dead. Untyped 59→2 (both honest residuals). Weak share
+  86%→84% (830 of 984 served rows).
+  *Remaining:* the done bar is weak bases under 50%. 144 weak rows have a
+  website that never answered a successful check — their reason is now
+  printed as an owner triage table (relink / Inactive / leave), and that
+  is human work, not a lane. operator-announcement is a basis value on 3
+  rows: a corpus-announcement lane (dated SDF/operator launch posts →
+  basis + receipt) is the unbuilt lever with the most headroom. The
+  XLM-denominated channel deposit has no USD ceiling until a price source
+  that path may depend on exists.
 
-- **P5. The knowledge layer consumers keep asking for.** `status: not started`
+- **P5. The knowledge layer consumers keep asking for.** `status: in progress`
   The consumer-measured gap, not a wishlist: knowledgeNotes exist on 16 of
   206 curated-pool repos; supersededBy/deprecatedAt exist nowhere;
   contracts join rows only where the P3 lane reached; builder/org identity
@@ -187,6 +209,23 @@ service runs at Stage 3+ by default and humans do product, not repair.
   as floors that may only RISE. Every fact carries the date that covers
   IT: the answer-dating guard already enforces the dating contract, so an
   undated note never counts toward the floor.
+  *Shipped so far:* 2026-09-01 — the curated knowledgeNotes registry grew
+  16→~29 repos, every note dated and source-cited, including the
+  supersession facts consumers actually ask for as prose (stellar/go →
+  go-stellar-sdk, the Horizon monorepo split, the js-sdk deprecation
+  chain, protocol ceilings). explainRepo now answers from a dated note
+  ahead of an undated DeepWiki walkthrough (`answerSource:
+  "knowledge-note"`, `answerAsOf` RFC 3339), matched by exact identifier
+  or by hand-authored trigger phrases; the matcher was hijack-hardened
+  (citation URLs and bare domains can no longer route a note). sls-080
+  closed on the consumer's own probe and independently re-verified by
+  Raven on 2026-09-01.
+  *Remaining:* supersededBy / deprecatedAt still exist nowhere as FIELDS —
+  the facts live in note prose, which a consumer must read rather than
+  join on. Contracts as first-class joined entities only where the P3 lane
+  reached (11 of the 308 expected-tier repos). Builder/org identity is
+  still thinner than project identity. 12,851 indexed repos carry no note
+  — the long tail is by design, the curated pool is the floor that rises.
 
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from
