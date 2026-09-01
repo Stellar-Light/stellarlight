@@ -155,10 +155,35 @@ export function parseRoundVerdicts(html: string): {
 				: (prev.budgetUSD ?? next.budgetUSD);
 		prev.awardType = prev.awardType ?? next.awardType;
 	};
+	// Neutral/in-flight cards verdict nothing, but the page-counter
+	// reconciliation below needs to SEE them (dedup by id, max budget across
+	// the double embeds — same discipline as verdict cards).
+	const neutralByKey = new Map<
+		string,
+		{ id: string; roundNum: number | null; budgetUSD: number | null; awardType: string | null }
+	>();
 	for (const m of txt.matchAll(re)) {
 		const status = m[2];
 		const isAward = status === "Awarded";
-		if (!isAward && !isNegativeVerdict(status)) continue; // neutral — verdicts nothing
+		if (!isAward && !isNegativeVerdict(status)) {
+			const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
+			const nc = {
+				id: m[1],
+				roundNum: num ? Number(num) : null,
+				budgetUSD: m[5] ? Number(m[5]) : null,
+				awardType: m[4] || null,
+			};
+			const prev = neutralByKey.get(nc.id);
+			if (!prev) neutralByKey.set(nc.id, nc);
+			else {
+				prev.budgetUSD =
+					prev.budgetUSD !== null && nc.budgetUSD !== null
+						? Math.max(prev.budgetUSD, nc.budgetUSD)
+						: (prev.budgetUSD ?? nc.budgetUSD);
+				prev.awardType = prev.awardType ?? nc.awardType;
+			}
+			continue; // neutral — verdicts nothing
+		}
 		const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
 		const card: Card = {
 			id: m[1],
@@ -314,6 +339,39 @@ export function parseRoundVerdicts(html: string): {
 		);
 		const slack = mult / 2 + rendered * 0.01;
 		if (rendered > 0 && budgetSum > rendered + slack) nullAwardDetail();
+	}
+	// Page-counter reconciliation (2026-09-01, the kutana/janus class): 21
+	// awarded rows served roundAwards [] because their single awarded
+	// submission sits in a NEUTRAL pipeline status ("Information Collection")
+	// the verdict reader rightly refuses to call Awarded. When the page's OWN
+	// summary fields pin the award to one submission EXACTLY — awarded:true, a
+	// numeric lastAwardedRound holding exactly ONE neutral submission whose
+	// budget equals totalAwarded to the dollar, and zero Awarded cards
+	// anywhere — the award record is the page's own assertion, not an
+	// inference. Any ambiguity (a second submission in the round, a split-id
+	// fragment, a total that no single budget matches) skips: empty stays
+	// honest. `submissions`/`awardedAnyCount` are deliberately untouched —
+	// the reconcile adds award knowledge, never accusation evidence, so the
+	// never-accuse and no-resurrect guards keep their meaning.
+	if (awardedAnyCount === 0 && awardByRound.size === 0) {
+		const pageAward = /"awarded":true,"lastAwardedRound":(\d+)/.exec(txt);
+		const pageTotal = /"totalAwarded":(\d+)/.exec(txt);
+		if (pageAward && pageTotal) {
+			const r = Number(pageAward[1]);
+			const total = Number(pageTotal[1]);
+			const inRound = [...neutralByKey.values()].filter(
+				(c) => c.roundNum === r,
+			);
+			if (total > 0 && inRound.length === 1 && inRound[0].budgetUSD === total) {
+				awarded.add(String(r));
+				notAwarded.delete(String(r));
+				awardByRound.set(r, {
+					round: r,
+					budgetUSD: total,
+					awardType: inRound[0].awardType,
+				});
+			}
+		}
 	}
 	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
