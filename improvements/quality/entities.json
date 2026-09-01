@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-01T21:13:35.863Z",
+ "generatedAt": "2026-09-01T22:14:53.283Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -2395,10 +2395,9 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -5002,10 +5001,9 @@
    {
     "slug": "normal",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -5220,10 +5218,9 @@
    {
     "slug": "lul",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -7561,10 +7558,9 @@
    {
     "slug": "wallet-guru",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "sourced"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8915,11 +8911,11 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 667
+    "count": 694
    },
    {
     "basis": "source-inherited",
-    "count": 153
+    "count": 125
    },
    {
     "basis": "human-verified",
@@ -8931,7 +8927,7 @@
    },
    {
     "basis": "unverified",
-    "count": 10
+    "count": 11
    },
    {
     "basis": "operator-announcement",
@@ -9069,24 +9065,6 @@
     ]
    },
    {
-    "slug": "lul",
-    "name": "Lul",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
     "slug": "mbrl",
     "name": "MBRL",
     "status": "Live",
@@ -9121,41 +9099,6 @@
     "missing": [
      "strongBasis",
      "sourced"
-    ]
-   },
-   {
-    "slug": "normal",
-    "name": "Normal",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "mainnet",
-    "types": [
-     "Stablecoin",
-     "Yield"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
-    "slug": "pyth",
-    "name": "Pyth",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
     ]
    },
    {
@@ -9293,25 +9236,6 @@
     "deploymentNetwork": "unknown",
     "types": [
      "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
-    "slug": "wallet-guru",
-    "name": "Wallet Guru",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Payments",
-     "Anchor"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -9646,6 +9570,76 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "alchemy",
+    "name": "Alchemy",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC",
+     "Indexer"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "beamable",
+    "name": "Beamable",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Gaming",
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "blockdaemon",
+    "name": "Blockdaemon",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "RPC"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "dfns",
+    "name": "DFNS",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "unknown",
+    "types": [
+     "Security"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
@@ -9659,11 +9653,11 @@
    },
    {
     "field": "sourced",
-    "count": 18
+    "count": 15
    },
    {
     "field": "typed",
-    "count": 3
+    "count": 2
    },
    {
     "field": "linked",
@@ -10864,13 +10858,13 @@
   {
    "area": "project status",
    "limit": "83% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "820 of 984 rows (census)",
+   "measurement": "819 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "3 of 984 sampled rows untyped",
+   "measurement": "2 of 984 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11312,13 +11306,13 @@
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 18,
+    "missing": 15,
     "of": 984,
-    "share": 1.8,
+    "share": 1.5,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 18,
+    "examplePoolSize": 15,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11329,27 +11323,26 @@
      "the-blue-marble",
      "scam-flagging-system",
      "raum-network",
-     "normal",
-     "lul",
      "localcoin",
      "chaincred",
-     "b4b"
+     "b4b",
+     "autowhale",
+     "mbrl"
     ]
    },
    {
     "entity": "project",
     "field": "typed",
-    "missing": 3,
+    "missing": 2,
     "of": 984,
-    "share": 0.3,
+    "share": 0.2,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 3,
+    "examplePoolSize": 2,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
-     "pyth",
      "boundless-bounties",
      "deb"
     ]
