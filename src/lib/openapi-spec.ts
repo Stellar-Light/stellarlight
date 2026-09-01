@@ -2337,14 +2337,14 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"Where the answer text came from ('deepwiki' | 'stellarlight-code-scan'); null when no answer was produced — cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf.",
+												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced — cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it — where they disagree, the dated fact wins.",
 										},
 										answerAsOf: {
 											type: "string",
 											format: "date-time",
 											nullable: true,
 											description:
-												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated only for answerSource 'stellarlight-code-scan', where the answer IS the scan and scannedAt dates it. When null, verify any specific value against repoUrl at scannedRef.",
+												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
 										},
 										answered: {
 											type: "boolean",

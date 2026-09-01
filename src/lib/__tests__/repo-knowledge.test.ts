@@ -1,6 +1,10 @@
 /** buildKnowledgeNotes — facts with sources, exact joins, never guesses. */
 import { describe, expect, it } from "vitest";
-import { type AuditRecord, buildKnowledgeNotes } from "../repo-knowledge";
+import {
+	type AuditRecord,
+	buildKnowledgeNotes,
+	findDirectAnswerNote,
+} from "../repo-knowledge";
 
 const audits = new Map<string, AuditRecord[]>([
 	[
@@ -103,5 +107,47 @@ describe("code-truth signals in notes", () => {
 	it("no usage note without codeInUse", () => {
 		const notes = buildKnowledgeNotes("x/y", null, new Map(), {});
 		expect(notes.find((n) => n.source === "derived:usage")).toBeUndefined();
+	});
+});
+
+// sls-080: a curated dated fact leads the answer only when the query names
+// the exact identifier the note carries — tight by design.
+describe("findDirectAnswerNote", () => {
+	const notes = [
+		{
+			note: "Horizon's protocol ceiling: MaxSupportedProtocolVersion uint32 = 28, defined in internal/ingest/main.go.",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	];
+
+	it("matches a camelCase identifier in the question", () => {
+		expect(
+			findDirectAnswerNote(
+				"what is the MaxSupportedProtocolVersion in stellar horizon",
+				notes,
+			)?.asOf,
+		).toBe("2026-09-01");
+	});
+
+	it("never matches generic prose questions", () => {
+		expect(
+			findDirectAnswerNote("how does horizon ingest ledger data", notes),
+		).toBeNull();
+		expect(findDirectAnswerNote("what protocol version is supported", notes)).toBeNull();
+	});
+
+	it("short or non-identifier tokens never qualify", () => {
+		expect(findDirectAnswerNote("what is mainGo", notes)).toBeNull();
+	});
+
+	it("internal notes never become answers", () => {
+		const internal = [{ ...notes[0], visibility: "internal" as const }];
+		expect(
+			findDirectAnswerNote(
+				"what is the MaxSupportedProtocolVersion here",
+				internal,
+			),
+		).toBeNull();
 	});
 });

@@ -699,8 +699,13 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 			"stellar/rs-soroban-sdk",
 		],
 	},
-	// Horizon (the real implementation lives in stellar/go)
-	{ test: /\bhorizon\b/, repos: ["stellar/go", "stellar/stellar-horizon"] },
+	// Horizon SPLIT OUT of the stellar/go monorepo into stellar/stellar-horizon
+	// — the split repo is where the living code (and constants like
+	// MaxSupportedProtocolVersion = 28) now moves, while the monorepo's frozen
+	// copy answers with era-of-the-split values (sls-080/#1134: DeepWiki on
+	// stellar/go said 22–25 for a constant the split repo defines as 28).
+	// Order matters: canonicalFor takes repos[0].
+	{ test: /\bhorizon\b/, repos: ["stellar/stellar-horizon", "stellar/go"] },
 	// RPC
 	{
 		test: /\b(soroban[\s-]*)?rpc\b/,
