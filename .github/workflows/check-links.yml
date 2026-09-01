@@ -21,10 +21,15 @@ name: Curator Agent — Link health check
 
 on:
   schedule:
-    # Weekly (Mon 02:00 UTC) — was daily, but at ~18 min/run this single job
-    # burned ~540 Actions-min/month (a quarter of the private-repo free tier)
-    # for a signal that moves on a weeks cadence (link rot). 2026-07-16.
-    - cron: "0 2 * * 1"
+    # Daily again (2026-09-01). It went weekly on 2026-07-16 because ~18
+    # min/run burned ~540 Actions-min/month of the PRIVATE-repo free tier.
+    # The repo is public now (Actions minutes are free on public repos) and a
+    # full run took 7 min today. Weekly also starved the status-basis lane:
+    # a relink or a checker fix only earns a row its evidence when this
+    # runs, and consecutiveFailures is only meaningful when it ticks daily
+    # (the header's original reasoning). The checker is HEAD-first and reads
+    # at most 64 KB per URL.
+    - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
