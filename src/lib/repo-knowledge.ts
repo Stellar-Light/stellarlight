@@ -42,6 +42,379 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 4 (2026-09-01): 40 repos / 42 notes, next tier by repoScore —
+	// SDKs across languages (KMP, iOS/macOS, Flutter, Java Android SPI, PHP
+	// anchor, Swift wallet, web/android kits), XDR/RPC crates, SDF infra images
+	// and apt packages, protocol/docs repos, wallets, and archived/renamed
+	// paths (kotlin-wallet-sdk, wallet-backend-client, kalepail/*,
+	// devasignhq/soroban-contract). Every fact verified live on the asOf date
+	// against the registry / API / README the note cites; no rename or
+	// archive DATE is claimed anywhere. Kept out on purpose: our own
+	// stellar-light/stellar-pay (self-curation is an owner call) and
+	// xycloo/rs-zephyr-toolkit (crates.io carries no repository field for
+	// zephyr-sdk — the registry↔repo link is indirect). ~43 further
+	// candidates yielded nothing durable and are absent by name in the
+	// batch notes.
+	"soneso/kmp-stellar-sdk": [
+		{
+			note: 'Kotlin Multiplatform SDK on Maven Central as com.soneso.stellar:stellar-sdk — 1.12.0 (GitHub release v1.12.0, 2026-08-26; the Maven entry links back to this repo; Apache-2.0). README install: implementation("com.soneso.stellar:stellar-sdk:1.12.0"), Gradle 9.0+. https://central.sonatype.com/artifact/com.soneso.stellar/stellar-sdk',
+			triggers: ["kotlin multiplatform sdk maven", "kmp sdk maven coordinates"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"soneso/stellar-ios-mac-sdk": [
+		{
+			note: 'Install is Swift Package Manager only per README (product name stellarsdk): .package(name: "stellarsdk", url: "git@github.com:Soneso/stellar-ios-mac-sdk.git", from: "3.10.0"); requires iOS 15+, macOS 12+, Xcode 16+ (Swift 6 toolchain; Swift 5 or 6 language mode). Latest release 3.10.0 (2026-08-25), after 3.9.0 and 3.8.1. https://github.com/Soneso/stellar-ios-mac-sdk/releases',
+			triggers: ["ios sdk swift package", "stellarsdk swift package"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"soneso/stellar_flutter_sdk": [
+		{
+			note: "pub.dev package stellar_flutter_sdk — 3.6.0 (2026-08-24; 118 versions since 0.7.8 on 2020-06-23; the pub.dev homepage points at this repo; MIT). Requires Dart SDK >=3.8.0 <4.0.0 and Flutter >=3.32.0; iOS deployment target 15.0+ (smart-account passkey calls need iOS 16 at runtime, else return not-supported). https://pub.dev/packages/stellar_flutter_sdk",
+			triggers: ["flutter sdk pub package", "flutter sdk dart version"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/kotlin-wallet-sdk": [
+		{
+			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and deprecated — README banner: 'This SDK is deprecated and no longer maintained… There is no direct Kotlin/Java successor.' Maven Central org.stellar:wallet-sdk is frozen at 3.0.0 (GitHub release 2026-04-28) with the same DEPRECATED notice; README sends JVM users to the lower-level Java SDK (implement SEP-1/10/12/24/30 yourself) and wallet-SDK users to TypeScript, Flutter (Soneso/stellar_wallet_flutter_sdk) or Swift. https://github.com/stellar/kotlin-wallet-sdk",
+			triggers: [
+				"kotlin wallet sdk deprecated",
+				"kotlin wallet sdk archived",
+				"kotlin wallet sdk successor",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/wallet-backend-client": [
+		{
+			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and never published: the README's `npm install @stellar/wallet-backend-client` does not resolve — registry.npmjs.org returns Not found for that name (2026-09-01). README also declares the repo 'not currently under active development' and out of scope for Stellar's HackerOne program. https://github.com/stellar/wallet-backend-client",
+			triggers: ["wallet backend client npm", "wallet backend client archived"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"lightsail-network/java-stellar-sdk-android-spi": [
+		{
+			note: "Android companion of lightsail-network/java-stellar-sdk: Maven Central network.lightsail:stellar-sdk-android-spi — 5.0.0 (published 2026-09-01, same day as the SDK's 5.0.0; Apache-2.0; the Maven entry links back to this repo). Versions track the SDK (tags 4.0.0, 4.0.1, 5.0.0). https://central.sonatype.com/artifact/network.lightsail/stellar-sdk-android-spi",
+			triggers: ["android spi maven", "java sdk android spi"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"argo-navis-dev/php-anchor-sdk": [
+		{
+			note: "Packagist name argonavis/php-anchor-sdk (from composer.json) — 0.10.0 (2025-11-09; 11 versions since 0.1.0 on 2023-12-25; Packagist source points at this repo; Apache-2.0). Latest GitHub release 0.10.0 (2025-11-09); repo last pushed 2026-03-29. https://packagist.org/packages/argonavis/php-anchor-sdk",
+			triggers: ["php anchor sdk composer", "php anchor sdk packagist"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/js-xdr": [
+		{
+			note: "npm name is @stellar/js-xdr — 5.0.0 (2026-08-20; scoped package first published 2023-11-20). The old unscoped js-xdr is deprecated on npm ('This package has moved to @stellar/js-xdr!') and frozen at 3.1.2 (2024-07-18). It is a runtime XDR codec, not a generator: the SDK's bindings are produced by tools/xdrgen/generate.mjs in stellar/js-stellar-sdk. https://www.npmjs.com/package/@stellar/js-xdr",
+			triggers: ["js xdr deprecated", "xdr npm package"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/rs-stellar-xdr": [
+		{
+			note: "crates.io name stellar-xdr — 28.0.0 (2026-07-30; first published 2022-07-29; 41 versions; ~2.15M downloads; crate repository field points here). Support policy (README): only the most recent major gets bug fixes and features; critical security backports to older majors are best-effort. CLI build: `cargo install --locked stellar-xdr --version ... --features cli`. https://crates.io/crates/stellar-xdr",
+			triggers: ["stellar xdr crate", "rust xdr crate"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Security advisory (as of 2026-09-01 — re-check the live feed, this is dated): CVE-2026-29795 / GHSA-x57h-xx53-v53w, medium, published 2026-03-04 — StringM::from_str bypasses max length validation; affects stellar-xdr <= 25.0.0, patched in 25.0.1. https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-x57h-xx53-v53w",
+			triggers: ["stellar xdr advisory", "stellar xdr cve"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/rs-stellar-rpc-client": [
+		{
+			note: "crates.io name stellar-rpc-client (first published 2024-03-05; 30 versions; ~225k downloads; repository field points here). On 2026-09-01 the newest upload is pre-release 28.0.0-rc.1 (2026-08-25) while max stable is 27.0.0 — matching the latest non-prerelease GitHub release v27.0.0 (2026-06-17). README is a 4-line stub pointing at developers.stellar.org/docs. https://crates.io/crates/stellar-rpc-client",
+			triggers: ["stellar rpc client crate", "rust rpc client crate"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/xdrgen": [
+		{
+			note: "README notice (2026-09-01): 'Generators are no longer maintained in this repository' — the Python, Java and Rust generators moved out next to the XDR libraries they generate (PRs #221, #226); C#, Elixir and Ruby generators were deleted and survive only at commit 2efacde612445d97e0548131ed699e8130bdeb7b; the Go generator still lives here. New generators should use xdrgen as a library. RubyGems xdrgen is frozen at 0.1.1 (2021-08-20; 3 versions since 2020-01-23). https://github.com/stellar/xdrgen#readme",
+			triggers: ["xdrgen generators moved", "xdrgen gem"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-xdr": [
+		{
+			note: "Canonical .x XDR definitions; one GitHub release per protocol — v28.0 (2026-08-27), v27.0, v26.0. Branch model (README): all changes land on main; curr = current protocol, next = definitions that only take effect at the next protocol boundary, wrapped in per-feature #ifdef flags (e.g. CAP73_SAC_CREATE_ACCOUNTS); 'when in doubt just make the changes only in the next branch'. https://github.com/stellar/stellar-xdr#making-modifications",
+			triggers: ["xdr curr next", "xdr next branch"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-cli-docker": [
+		{
+			note: 'Source of Docker Hub image docker.io/stellar/stellar-cli (~39.8k pulls, 2026-09-01): version tags plus pinned-toolchain manifest tags like 28.0.0-rust1.98.0-slim-trixie with -amd64/-arm64 per-arch variants and a -0 build suffix; :latest updated 2026-08-26; GitHub release v28.0.0-0 (2026-08-26). Doubles as a SEP-58 reproducible-build image: `docker run --rm -v "$PWD:/source" docker.io/stellar/stellar-cli:latest contract build --locked`. https://hub.docker.com/r/stellar/stellar-cli/tags',
+			triggers: [
+				"stellar cli docker image",
+				"stellar cli docker tag",
+				"sep 58 image",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-galexie": [
+		{
+			note: "Split out of the stellar/go monorepo (see the go-stellar-sdk note); releases are tagged galexie-vX — galexie-v28.0.1 (2026-08-27), galexie-v28.0.0 (2026-08-14). Docker Hub image stellar/stellar-galexie (tags 28.0.1, 28.0.0, latest; ~3.5k pulls, 2026-09-01). The README's docs link developers.stellar.org/docs/data/galexie now redirects to /docs/data/indexers/build-your-own/galexie. https://hub.docker.com/r/stellar/stellar-galexie/tags",
+			triggers: ["galexie docker image", "galexie release"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-etl": [
+		{
+			note: "Runs from Docker Hub image stellar/stellar-etl (README: `docker pull stellar/stellar-etl:latest`; ~138.6k pulls). Hub tags are commit SHAs and :latest was last updated 2026-03-10 although the repo was pushed 2026-08-27 — pin by SHA or build from source (Go 1.23+; captive-core needs stellar-core v20.0.0+). GitHub releases run to v2.8.23 (2026-06-23). https://hub.docker.com/r/stellar/stellar-etl/tags",
+			triggers: ["stellar etl docker", "stellar etl image"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-anchor-tests": [
+		{
+			note: "npm package is @stellar/anchor-tests (the monorepo's @stellar/anchor-tests workspace) — 0.6.22 (2026-06-05; 46 versions since 2021-06-11; repository points here). The README's hosted UI anchor-tests.stellar.org did NOT resolve on 2026-09-01 (DNS NXDOMAIN, checked twice; stellar-demo-wallet's README links it too) — run the CLI/UI locally. https://www.npmjs.com/package/@stellar/anchor-tests",
+			triggers: [
+				"anchor tests npm",
+				"anchor tests hosted",
+				"anchor validator site",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-protocol": [
+		{
+			note: "Home of CAPs and SEPs: accepted CAPs live in core/ as cap-XXXX.md (process in core/README.md), accepted SEPs in ecosystem/ as sep-XXXX.md (process in ecosystem/README.md), media under contents/{cap|sep}-XXXX/, templates cap-template.md and sep-template.md at the root; default branch master, e.g. https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md. No releases or tags — cite by path + commit. https://github.com/stellar/stellar-protocol#repository-structure",
+			triggers: [
+				"where are seps",
+				"cap sep repository",
+				"sep markdown location",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-docs": [
+		{
+			note: "Source of developers.stellar.org (Docusaurus; Node 24+, pnpm). Agent-facing bundles are live: https://developers.stellar.org/llms.txt is a hand-curated static/llms.txt (docusaurus.config.ts sets generateLLMsTxt:false — 'keep our curated static/llms.txt untouched'; ~15 KB) and llms-full.txt is generated by docusaurus-plugin-llms (~4.4 MB on 2026-09-01) — point AI tools there instead of crawling the MDX. https://github.com/stellar/stellar-docs/blob/main/docusaurus.config.ts",
+			triggers: ["stellar docs llms", "developer docs llms", "docs llms txt"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/packages": [
+		{
+			note: "SDF's Debian/Ubuntu repo: https://apt.stellar.org (key A136B5A6 at https://apt.stellar.org/SDF.asc; `deb https://apt.stellar.org $(lsb_release -cs) stable` or testing; Ubuntu LTS only). Verified 2026-09-01: noble stable carries stellar-core 28.0.1-3508.947aad841.noble, stellar-horizon 28.0.1-561, stellar-rpc, stellar-archivist(-rs), stellar-core-postgres/-prometheus-exporter/-utils; jammy adds stellar-soroban-rpc. The README's 'Ubuntu 16.04' line is stale. https://github.com/stellar/packages/blob/master/docs/adding-the-sdf-stable-repository-to-your-system.md",
+			triggers: [
+				"apt stellar core",
+				"debian package stellar core",
+				"ubuntu package horizon",
+				"apt stellar org",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"chatch/stellarexplorer": [
+		{
+			note: "Hosted at https://steexp.com (public), https://testnet.steexp.com and https://futurenet.steexp.com (README; steexp.com answered 200 on 2026-09-01). Releases are tagged vX.Y.Z-app — latest v3.1.3-app (2026-07-06). The npm package `stellarexplorer` (1.0.8, 2018-08-13) is deprecated by its author as 'not a library to be shared but a site' — do not install it. https://github.com/chatch/stellarexplorer/releases",
+			triggers: ["steexp source code", "stellarexplorer npm"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"rabetofficial/rabet-extension": [
+		{
+			note: "Browser-extension wallet (GPL-3.0; site rabet.io). Latest GitHub release V1.8.0 (2025-12-23; package.json version 1.8.0); repo last pushed 2025-12-23. The repo's homepage field is the Chrome Web Store listing https://chrome.google.com/webstore/detail/rabet/hgmoaheomcjnaheggkfafnjilfcefbmo. https://github.com/rabetofficial/rabet-extension/releases",
+			triggers: [
+				"rabet latest version",
+				"rabet chrome web store",
+				"rabet extension release",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"lobstrco/vault-android": [
+		{
+			note: "Android source of LOBSTR Vault (multisig signer app; GPL-3.0; Kotlin). No GitHub releases or tags — builds ship through the stores the README links: Google Play id com.lobstr.stellar.vault (https://play.google.com/store/apps/details?id=com.lobstr.stellar.vault) and App Store id1452248529 (https://itunes.apple.com/app/lobstr-vault/id1452248529). Repo last pushed 2026-07-15. https://github.com/Lobstrco/vault-android",
+			triggers: [
+				"lobstr vault play store",
+				"lobstr vault app store",
+				"lobstr vault source",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"daccred/attestprotocol": [
+		{
+			note: "npm packages @attestprotocol/sdk, @attestprotocol/stellar-sdk and @attestprotocol/cli — all 2.0.2, last published 2025-11-09; their repository field names github.com/daccred/attest.so, which the GitHub API resolves to daccred/attestprotocol (renamed). The monorepo's packages/ already carry unpublished 2.0.3 / 3.0.0, so npm lags the repo. https://www.npmjs.com/package/@attestprotocol/stellar-sdk",
+			triggers: ["attest protocol npm", "attestprotocol package"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Deployed Stellar contract IDs per README (2026-09-01): mainnet Protocol v2 (current) CAMZUXDEMJ4BDEA2FCTXPRQW3VPEJLFOV5IB3NKKJB2G4CV7ANHNSF2N, v1 (legacy) CBUUI7WKGOTPCLXBPCHTKB5GNATWM4WAH4KMADY6GFCXOCNVF5OCW2WI; testnet v2 CA2QET2KOUGAECEVYQEQT3SLDDZRUMAQHI7MMDTFVJY62WTHUTERAUCD, v1 CBFE5YSUHCRYEYEOLNN2RJAWMQ2PW525KTJ6TPWPNS5XLIREZQ3NA4KP. https://github.com/daccred/attestprotocol#readme",
+			triggers: [
+				"attestprotocol contract id",
+				"attest protocol contract address",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"kalepail/passkey-kit": [
+		{
+			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31; 496 stars) — README: 'This repository has moved… Development of passkey-kit now happens at stellar/passkey-kit… all tags were carried over.' Resolve every passkey-kit question to stellar/passkey-kit; npm passkey-kit's repository field already points there. https://github.com/stellar/passkey-kit",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"kalepail/smart-account-kit": [
+		{
+			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31) — README: 'This repository has moved. Development continues at github.com/stellar/smart-account-kit… no further commits, releases, issues, or pull requests will be accepted.' Resolve to stellar/smart-account-kit (npm smart-account-kit). https://github.com/stellar/smart-account-kit",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"blend-capital/blend-contract-sdk": [
+		{
+			note: "Companion of blend-capital/blend-contracts: crates.io blend-contract-sdk (WASM exports of the Blend contracts for use with soroban-sdk) — 2.25.0 (2026-01-26; 11 versions since 0.1.0 on 2024-04-09; ~27k downloads; crate repository points here; MIT). Latest GitHub release v2.25.0 (2026-01-26). https://crates.io/crates/blend-contract-sdk",
+			triggers: ["blend contract sdk crate", "blend sdk crates"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"devasignhq/soroban-contract": [
+		{
+			note: "RENAMED: github.com/devasignhq/soroban-contract redirects to devasignhq/bounty-escrow (GitHub API resolves the old path, 2026-09-01; the README's license badge still names soroban-contract). Bounty-escrow Soroban contract; single release v1.0.0 (2026-06-05); README deploy flow targets testnet. https://github.com/devasignhq/bounty-escrow",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-design-system": [
+		{
+			note: "npm @stellar/design-system — 4.0.2 (2026-07-28; 76 versions since 2020-12-09; repository points here). Releases are cut by publishing a GitHub release whose tag matches the npm version (v4.0.2 latest); README documents the bump → tag → release workflow. https://www.npmjs.com/package/@stellar/design-system",
+			triggers: ["design system npm", "stellar design system package"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"trezor/trezor-firmware": [
+		{
+			note: "Stellar support lives in two places in the monorepo (2026-09-01): Trezor Core at core/src/apps/stellar (README: all operations except Inflation; files incl. sign_tx.py and sign_soroban_authorization.py, which handles the StellarSignSorobanAuthorization message) and legacy firmware at legacy/firmware/stellar.c (no Soroban code). No Stellar-specific releases — firmware tags cover the whole repo. https://github.com/trezor/trezor-firmware/tree/main/core/src/apps/stellar",
+			triggers: ["trezor soroban", "trezor stellar support"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/wallet-backend": [
+		{
+			note: "No GitHub releases or tags (2026-09-01). Docker Hub image stellar/wallet-backend exists but is stale: only `testing` / testing-2025-05-13-fde7cfa tags, last updated 2025-05-13, while the repo was pushed 2026-09-01 — build from source or use the README's docker compose quickstart (`docker compose up db stellar-rpc-testnet api-testnet ingest-testnet`). https://hub.docker.com/r/stellar/wallet-backend/tags",
+			triggers: ["wallet backend docker image"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/stellar-disbursement-platform-frontend": [
+		{
+			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-01). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
+			triggers: [
+				"sdp frontend docker",
+				"disbursement platform frontend release",
+			],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/soroban-examples": [
+		{
+			note: "Release tags track the soroban-sdk major they build against: v23.0.0 (2025-09-08, 'Update examples to use SDK v23'), v22.0.1 (2024-12-09), v22.0.0, v21.6.0 — no v24+ tag as of 2026-09-01 although the repo is still pushed (2026-08-30). Contracts build to target/wasm32v1-none/release/*.wasm with the Stellar CLI. https://github.com/stellar/soroban-examples/releases",
+			triggers: ["soroban examples sdk version", "soroban examples release"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"bluxcc/core": [
+		{
+			note: "npm @bluxcc/core — 0.3.2 (2026-09-01; 47 versions since 2025-09-23; repository points here). Licensed BUSL on npm (README section 'License & Usage Restrictions'); install `npm i @bluxcc/core`; site blux.cc. https://www.npmjs.com/package/@bluxcc/core",
+			triggers: ["blux npm package", "blux core license"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar-broker/client": [
+		{
+			note: "npm @stellar-broker/client — 0.7.0 (2026-07-16; 22 versions since 2024-08-15; repository points here; MIT); companion contract repo stellar-broker/router-contract; service site stellar.broker. https://www.npmjs.com/package/@stellar-broker/client",
+			triggers: ["stellarbroker client npm", "stellar broker npm"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"rahul-soshte/rs-soroban-client": [
+		{
+			note: 'Community (non-SDF) Rust client for Stellar RPC: crates.io soroban-client — 0.5.9 (2026-08-26; 46 versions since 0.1.0 on 2023-06-25; ~68.6k downloads; crate repository points here; Apache-2.0). README dependency line: soroban-client = "0.5.9". Not the same as SDF\'s stellar-rpc-client crate. https://crates.io/crates/soroban-client',
+			triggers: ["soroban client crate", "soroban client rust"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"ericmt-98/micopay-mvp": [
+		{
+			note: "Same repo as ericmt-98/micopay-protocol: github.com/ericmt-98/micopay-mvp redirects to Micopay/micopay-protocol (GitHub API, 2026-09-01) — treat both old paths as one project and cite the Micopay org. https://github.com/Micopay/micopay-protocol",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"soneso/stellar-swift-wallet-sdk": [
+		{
+			note: "Swift wallet SDK layered on Soneso/stellar-ios-mac-sdk (adding it via Xcode's Add Package Dependencies pulls both stellar-wallet-sdk and stellarsdk; `import stellar_wallet_sdk`). Latest release 0.9.4 (2026-08-25); still pre-1.0. README lists SEP-1/6/7/9/10/12/24/30 support. https://github.com/Soneso/stellar-swift-wallet-sdk/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"horizontalsystems/stellar-web-sdk": [
+		{
+			note: "npm stellar-web-sdk — 0.1.2 (2026-08-12; 3 versions, all 2026-08-12; repository points here; MIT). README install: `npm install stellar-web-sdk @stellar/stellar-sdk` (peer dependency on @stellar/stellar-sdk). No GitHub releases or tags. https://www.npmjs.com/package/stellar-web-sdk",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"horizontalsystems/stellar-kit-android": [
+		{
+			note: "Not on Maven Central — distributed via JitPack as com.github.horizontalsystems:stellar-kit-android:<version> where <version> is the first 7 characters of a commit hash (README; JitPack's build list confirms hash builds). No GitHub releases or tags; Android 8.0+/Kotlin 2.0+; the client used by Unstoppable Wallet (horizontalsystems/unstoppable-wallet-android). https://github.com/horizontalsystems/stellar-kit-android#installation",
+			triggers: ["stellarkit android jitpack", "stellar kit android install"],
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"reflector-network/reflector-subscription-contract": [
+		{
+			note: "Companion of reflector-network/reflector-contract (Soroban contract for Reflector subscriptions management; crate name reflector-subscriptions, NOT published to crates.io). Latest release v1.0.2 (2024-11-19; tag v1.0.2_reflector-subscriptions_cli22.0.0); repo last pushed 2025-10-20. https://github.com/reflector-network/reflector-subscription-contract/releases",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
 	// ── P5 batch 3 (2026-09-01): 25 repos / 34 notes, next tier by repoScore
 	// (SDKs, tooling, core infra, widely-used contracts first) — every fact
 	// verified live on the asOf date against the registry / API / README the
