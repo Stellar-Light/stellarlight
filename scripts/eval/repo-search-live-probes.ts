@@ -38,6 +38,8 @@ const PROBES: Array<{ q: string; anyOf: string[] }> = [
 	{ q: "soroswap", anyOf: ["soroswap/core", "soroswap/aggregator"] },
 	{ q: "blend lending protocol", anyOf: ["blend-capital/blend-contracts"] },
 	{ q: "passkey smart wallet", anyOf: ["kalepail/passkey-kit"] },
+	// Horizon split out of the monorepo (2026-09-01): the living repo is the
+	// primary answer; the archived monorepo stays acceptable while it floats.
 	{ q: "horizon api server", anyOf: ["stellar/go", "stellar/stellar-horizon"] },
 	{ q: "stellar core consensus", anyOf: ["stellar/stellar-core"] },
 ];
