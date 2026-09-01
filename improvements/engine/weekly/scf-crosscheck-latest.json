@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T03:33:27Z",
+  "generatedAt": "2026-09-01T04:24:07Z",
   "frame": {
     "scf": 500,
     "directory": 984,
@@ -79,13 +79,12 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "sorted",
-      "name": "Sorted",
+      "slug": "janus",
+      "name": "Janus",
       "ourRounds": [
-        "44",
         "45"
       ],
-      "url": "https://communityfund.stellar.org/project/sorted-jqh",
+      "url": "https://communityfund.stellar.org/project/janus-m2t",
       "officialAwardedRounds": [],
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
@@ -98,6 +97,17 @@
       "url": "https://communityfund.stellar.org/project/kutana-9ti",
       "officialAwardedRounds": [],
       "reason": "no submission verdict found for round(s) #45"
+    },
+    {
+      "slug": "sorted",
+      "name": "Sorted",
+      "ourRounds": [
+        "44",
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/sorted-jqh",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "sendana",
@@ -122,16 +132,6 @@
         "44"
       ],
       "reason": "no submission verdict found for round(s) #29 #41"
-    },
-    {
-      "slug": "janus",
-      "name": "Janus",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/janus-m2t",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "nouns-builder-protocol",

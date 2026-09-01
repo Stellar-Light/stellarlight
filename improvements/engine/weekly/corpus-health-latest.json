@@ -23,7 +23,7 @@
     "lumenloop-research": {
       "chunks": 476,
       "datedPct": 100,
-      "newestAgeDays": 3,
+      "newestAgeDays": 4,
       "undated": false,
       "stalled": false
     },
@@ -133,6 +133,6 @@
       "boilerplateOverlap": 33
     }
   },
-  "generatedAt": "2026-09-01T03:33:27Z",
+  "generatedAt": "2026-09-01T04:24:08Z",
   "evalKey": "corpus-health"
 }
