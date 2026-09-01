@@ -568,7 +568,23 @@ export function buildHaystack(p: MatchableProject): string {
 	// hyphenated form and its space-split words are included so "gate-io" and
 	// "gate io" phrasings match.
 	const slug = p.slug ? `${p.slug} ${p.slug.replace(/-/g, " ")}` : "";
-	return `${p.name ?? ""} ${slug} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
+	// Dotted/punctuated names are the joined-form's blind side (engine-A
+	// P-KNOWN + P-PHRASE, crediolabs-ai): the query rebuild appends
+	// "crediolabsai" for q="CredioLabs.AI", but no haystack field carried that
+	// form — the name word-splits at the dot — so the record missed its OWN
+	// name and both probes fell to semantic neighbours, while every fragment
+	// query hit. Carry the canon-joined name and slug as identity vocabulary,
+	// the same move the slug line above makes for hyphens. Same class covers
+	// coins.ph, arka.fund, stellars.finance and every future dotted seed.
+	const joinedName = (p.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+	const joinedSlug = (p.slug ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+	// Only forms the hay doesn't already carry verbatim — a plain name's
+	// joined form IS the name, and re-adding it would just pad occurrences.
+	const baseForms = new Set([(p.name ?? "").toLowerCase(), p.slug ?? ""]);
+	const joinedForms = [...new Set([joinedName, joinedSlug])]
+		.filter((j) => j.length > 2 && !baseForms.has(j))
+		.join(" ");
+	return `${p.name ?? ""} ${slug} ${joinedForms} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
 }
 
 // Negation guard (2026-07-11 audit): substring matching means "custodial"
