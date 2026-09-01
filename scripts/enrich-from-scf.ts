@@ -270,6 +270,22 @@ async function main() {
 		// page reproduces the finding's exact round + budget before mapping.
 		// vottun disambiguated by evidence: the developer-platform page carries
 		// the r27 award; the wirex-vottun page does not.
+		// Seed-review linkage (2026-09-01): four rows from the 2026-08-31
+		// absence review whose SCF page titles are submission-named, so the
+		// name matcher can never join them — the review's own evidence URLs
+		// carry the page slugs. Each page-verified via parseRoundVerdicts
+		// before mapping: pagcrypto r42/$96k · upesa r42/$86k (its stored r41
+		// is NOT page-awarded — linkage lets the crosscheck adjudicate it) ·
+		// roberto-sanz r22/$9k + r24/$30k · verseprop r33/$112,020 (stored
+		// r31/r32 not page-awarded — same adjudication path). Coala Pay
+		// deliberately NOT mapped: the only listed page ("Billy Wallet")
+		// shows r35/$60k vs our stored [22,31] — likely multiple pages per
+		// project; a wrong single-page join would mis-scope totals.
+		"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu":
+			"pagcrypto",
+		"liquid-by-upesa-dvq": "upesa",
+		"social-podcast-ini": "roberto-sanz-criptomonedas",
+		"a-real-estate-tokenization-platform-ss1": "verseprop",
 		"allbridge-core-3lc": "allbridge",
 		"obsrvr-prism-fvl": "obsrvr",
 		"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
