@@ -4,6 +4,7 @@ import {
 	type AuditRecord,
 	buildKnowledgeNotes,
 	findDirectAnswerNote,
+	findRepoByTrigger,
 	REPO_KNOWLEDGE_NOTES,
 } from "../repo-knowledge";
 
@@ -137,7 +138,9 @@ describe("findDirectAnswerNote", () => {
 		expect(
 			findDirectAnswerNote("how does horizon ingest ledger data", notes),
 		).toBeNull();
-		expect(findDirectAnswerNote("what protocol version is supported", notes)).toBeNull();
+		expect(
+			findDirectAnswerNote("what protocol version is supported", notes),
+		).toBeNull();
 	});
 
 	it("short or non-identifier tokens never qualify", () => {
@@ -184,7 +187,10 @@ describe("findDirectAnswerNote hijack resistance", () => {
 
 	it("bare domains are not identifiers", () => {
 		expect(
-			findDirectAnswerNote("is stellar-horizon.com the official site?", horizonNote),
+			findDirectAnswerNote(
+				"is stellar-horizon.com the official site?",
+				horizonNote,
+			),
 		).toBeNull();
 	});
 
@@ -231,10 +237,8 @@ describe("findDirectAnswerNote trigger phrases", () => {
 
 	it("natural max/maximum phrasings reach the note", () => {
 		expect(
-			findDirectAnswerNote(
-				"what is the max supported protocol version",
-				real,
-			)?.note,
+			findDirectAnswerNote("what is the max supported protocol version", real)
+				?.note,
 		).toContain("= 28");
 		expect(
 			findDirectAnswerNote(
@@ -252,7 +256,10 @@ describe("findDirectAnswerNote trigger phrases", () => {
 			findDirectAnswerNote("how does horizon check protocol versions", real),
 		).toBeNull();
 		expect(
-			findDirectAnswerNote("max_supported throughput of horizon ingestion?", real),
+			findDirectAnswerNote(
+				"max_supported throughput of horizon ingestion?",
+				real,
+			),
 		).toBeNull();
 	});
 
@@ -263,5 +270,21 @@ describe("findDirectAnswerNote trigger phrases", () => {
 				real,
 			),
 		).toBeNull();
+	});
+});
+
+describe("findRepoByTrigger", () => {
+	it("routes a plain-English question to the ONE repo whose trigger fires", () => {
+		expect(findRepoByTrigger("was the soroban cli renamed?")).toBe(
+			"stellar/stellar-cli",
+		);
+		expect(findRepoByTrigger("where did the java stellar sdk moved to")).toBe(
+			"lightsail-network/java-stellar-sdk",
+		);
+	});
+
+	it("no trigger, or a single shared word, routes nothing", () => {
+		expect(findRepoByTrigger("what is soroban")).toBeNull();
+		expect(findRepoByTrigger("renamed")).toBeNull();
 	});
 });

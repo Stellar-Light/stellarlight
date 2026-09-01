@@ -2787,7 +2787,7 @@ export interface operations {
                         };
                         q?: string;
                         repo?: string | null;
-                        /** @description How the repo was chosen: explicit | canonical | search. null when nothing routed. */
+                        /** @description How the repo was chosen: explicit | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
                         routedVia?: string | null;
                         /** @description Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
@@ -2838,6 +2838,14 @@ export interface operations {
                          * @description When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — day-granular, serialized as that day's 00:00:00Z — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.
                          */
                         answerAsOf?: string | null;
+                        /** @description Every public, curated, dated, source-cited fact StellarLight holds for the routed repo — deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories — whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. */
+                        knowledgeNotes?: {
+                            note: string;
+                            /** @description 'curated' (hand-verified) or 'derived:audit'. */
+                            source: string;
+                            /** @description YYYY-MM-DD the fact was verified. */
+                            asOf: string;
+                        }[];
                         /** @description Always present, including when routedVia is null (then false). */
                         answered?: boolean;
                         /** @description Other authoritative repos for this concept. Always present ([] when none). */

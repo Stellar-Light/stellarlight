@@ -21,6 +21,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	findDirectAnswerNote,
+	findRepoByTrigger,
 	REPO_KNOWLEDGE_NOTES,
 } from "@/lib/repo-knowledge";
 import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
@@ -48,13 +49,22 @@ export async function GET(req: NextRequest) {
 
 	// Route to the authoritative repo: curated canonical map first (concept →
 	// SDF repo), then the graded index as a fallback for non-canonical topics.
-	let routedVia: "explicit" | "canonical" | "search" = "explicit";
+	let routedVia: "explicit" | "canonical" | "knowledge-trigger" | "search" =
+		"explicit";
 	let nearMisses: string[] = [];
 	const canon = canonicalFor(q);
 	if (!repo) {
+		const viaTrigger = canon.length ? null : findRepoByTrigger(q);
 		if (canon.length) {
 			repo = canon[0];
 			routedVia = "canonical";
+		} else if (viaTrigger) {
+			// A curated trigger phrase names the repo that holds the dated fact —
+			// before the lexical index votes ("soroban cli renamed" went to
+			// tupui/soroban-cli-python by name while the rename note lived on
+			// stellar/stellar-cli, 2026-09-01).
+			repo = viaTrigger;
+			routedVia = "knowledge-trigger";
 		} else {
 			const payload = await getPayloadSafe();
 			const { repos } = await searchRepos(payload, q, { limit: 1 });
@@ -329,7 +339,7 @@ export async function GET(req: NextRequest) {
 								],
 							}
 						: {}),
-				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer — read them even when answerSource is 'deepwiki'.",
 			},
 			q,
 			repo,
@@ -343,6 +353,13 @@ export async function GET(req: NextRequest) {
 			alternateRepos: canon.filter(
 				(r) => r.toLowerCase() !== repo.toLowerCase(),
 			),
+			// Every public dated fact we hold for this repo, whether or not one
+			// of them led the answer — a DeepWiki walkthrough never says that a
+			// package is deprecated or a path was renamed. Internal notes never
+			// leave; triggers are routing hints, not content.
+			knowledgeNotes: curatedNotes
+				.filter((n) => n.visibility !== "internal")
+				.map(({ note, source, asOf }) => ({ note, source, asOf })),
 			answer: finalAnswer,
 			answered: !!finalAnswer,
 			// Provenance, always explicit: a DeepWiki mechanism walkthrough vs our
@@ -382,11 +399,11 @@ export async function GET(req: NextRequest) {
 				? // Audit C6: notes date to the DAY of verification; the contract
 					// declares date-time, so a bare date is serialized as that day's
 					// start in UTC — conservative, and stated in the spec.
-					(directNote?.asOf
-						? directNote.asOf.length === 10
-							? `${directNote.asOf}T00:00:00Z`
-							: directNote.asOf
-						: null)
+					directNote?.asOf
+					? directNote.asOf.length === 10
+						? `${directNote.asOf}T00:00:00Z`
+						: directNote.asOf
+					: null
 				: dwAnswer
 					? null
 					: scanAnswer
