@@ -120,9 +120,16 @@ const SCF_SUBMISSION_LINKS: Record<
 	komet: { rounds: [28, 30], evidence: "https://communityfund.stellar.org/project/komet-formal-verification-o0s" },
 	"roberto-sanz-criptomonedas": { rounds: [22, 24], evidence: "https://communityfund.stellar.org/project/social-podcast-ini" },
 	janus: { rounds: [45], evidence: "https://communityfund.stellar.org/project/janus-m2t" },
-	kutana: { rounds: [38, 39, 43, 44, 45], evidence: "https://communityfund.stellar.org/project/kutana-9ti" },
+	// kutana/sendana rounds corrected 2026-09-01 (crosscheck roundsOverstated,
+	// verified by hand against the pages' per-submission verdicts): the review
+	// read the top badge list, which includes NOT-awarded submission rounds —
+	// the documented buildAwardRounds trap, entered through the manual lane.
+	// kutana: #38/#39/#43/#44 submissions read "Not Awarded"/"Panel Review
+	// Failed"; the #45 submission ($97k budget = the page's totalAwarded,
+	// totalPaid $9.7k) is the award. Same shape for sendana ($100k/#45).
+	kutana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/kutana-9ti" },
 	sorted: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/sorted-jqh" },
-	sendana: { rounds: [40, 44, 45], evidence: "https://communityfund.stellar.org/project/sendana-axa" },
+	sendana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/sendana-axa" },
 	"account-demolisher": { rounds: [29, 41, 44], evidence: "https://communityfund.stellar.org/project/account-demolisher-bfe" },
 	etesia: { rounds: [44], evidence: "https://communityfund.stellar.org/project/etesia-rgj" },
 	"nouns-builder-protocol": { rounds: [44], evidence: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7" },
