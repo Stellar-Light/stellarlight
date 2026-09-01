@@ -24,10 +24,12 @@ describe("buildKnowledgeNotes", () => {
 			"blend",
 			audits,
 		);
-		expect(notes).toHaveLength(1);
-		expect(notes[0].source).toBe("derived:audit");
-		expect(notes[0].note).toContain("2 security audit reports");
-		expect(notes[0].note).toContain("OtterSec, 2025-09-15");
+		// The registry may also carry curated notes for this repo (P5 batch 3
+		// does) — assert the DERIVED note, not the total.
+		const derived = notes.filter((n) => n.source === "derived:audit");
+		expect(derived).toHaveLength(1);
+		expect(derived[0].note).toContain("2 security audit reports");
+		expect(derived[0].note).toContain("OtterSec, 2025-09-15");
 	});
 
 	it("no project or no audits → no derived note, never a guess", () => {
