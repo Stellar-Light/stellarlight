@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-08-31T23:22:26.151Z",
+	"generatedAt": "2026-09-01T03:36:31.903Z",
 	"detector": "record-completeness",
 	"failures": [
 		{
@@ -20,7 +20,7 @@
 		},
 		{
 			"probe": "scfRoundAwards empty: sendana",
-			"note": "rounds=[40,44,45]"
+			"note": "rounds=[45]"
 		},
 		{
 			"probe": "scfRoundAwards empty: sorted",
@@ -28,7 +28,7 @@
 		},
 		{
 			"probe": "scfRoundAwards empty: kutana",
-			"note": "rounds=[38,39,43,44,45]"
+			"note": "rounds=[45]"
 		},
 		{
 			"probe": "scfRoundAwards empty: janus",
