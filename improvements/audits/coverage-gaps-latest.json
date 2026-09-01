@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-08-31T04:04:10.197Z",
+  "asOf": "2026-09-01T12:51:08.839Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 500,
@@ -15,14 +15,6 @@
     "belowFloor": 2
   },
   "corroboratedAbsent": [],
-  "summary": {
-    "missingDefillama": 0,
-    "missingScf": 47,
-    "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 0,
-    "staleOrEmptyResearchSources": 1,
-    "refreshUnmeasurableSources": 3
-  },
   "domainMatched": [
     {
       "scf": "a-real-estate-tokenization-platform-ss1",
@@ -121,5 +113,13 @@
     }
   ],
   "reviewedAbsent": [],
-  "unreviewedAbsent": 0
+  "unreviewedAbsent": 0,
+  "summary": {
+    "missingDefillama": 0,
+    "missingScf": 0,
+    "partnerDocsWithoutOwnContent": 3,
+    "staleCollections": 0,
+    "staleOrEmptyResearchSources": 1,
+    "refreshUnmeasurableSources": 3
+  }
 }
