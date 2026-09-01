@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-01T12:42:33.570Z",
+ "generatedAt": "2026-09-01T21:08:46.712Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -38,18 +38,18 @@
   {
    "id": "P4",
    "title": "Basis strength at scale",
-   "state": "not-started",
+   "state": "in-progress",
    "evidence": null,
-   "shippedSoFar": null,
-   "remaining": null
+   "shippedSoFar": "2026-08-31→09-01 — the basis-upgrade lanes exist and have run against the population: evidence A (asset movement deltas between two dated stellar.expert readings), B (DeFiLlama TVL ≤14d) and C (Horizon, same day — issuer payments asset-matched over 20 records, XLM-pair trade fallback), every probe trinary (hit / checked-empty / could-not-check reaches the summary and the exit code). 35 rows now rest on onchain-activity; a two-auditor pass (agent + Grok) reverted 4 uncorrected-probe upgrades, one of which re-earned its upgrade the same run under the corrected rule. Asset keys joined from the stablecoin registry (12) and operators' own stellar.toml (7) so deltas compound weekly. Death receipts: 42 stamped, 8 retracted after audit (a live-200 page cannot stand as \"observed dead\"), 2 re-stamped once their domains went hard-dead. Untyped 59→2 (both honest residuals). Weak share 86%→84% (830 of 984 served rows).",
+   "remaining": "the done bar is weak bases under 50%. 144 weak rows have a website that never answered a successful check — their reason is now printed as an owner triage table (relink / Inactive / leave), and that is human work, not a lane. operator-announcement is a basis value on 3 rows: a corpus-announcement lane (dated SDF/operator launch posts → basis + receipt) is the unbuilt lever with the most headroom. The XLM-denominated channel deposit has no USD ceiling until a price source that path may depend on exists."
   },
   {
    "id": "P5",
    "title": "The knowledge layer consumers keep asking for",
-   "state": "not-started",
+   "state": "in-progress",
    "evidence": null,
-   "shippedSoFar": null,
-   "remaining": null
+   "shippedSoFar": "2026-09-01 — the curated knowledgeNotes registry grew 16→~29 repos, every note dated and source-cited, including the supersession facts consumers actually ask for as prose (stellar/go → go-stellar-sdk, the Horizon monorepo split, the js-sdk deprecation chain, protocol ceilings). explainRepo now answers from a dated note ahead of an undated DeepWiki walkthrough (answerSource: \"knowledge-note\", answerAsOf RFC 3339), matched by exact identifier or by hand-authored trigger phrases; the matcher was hijack-hardened (citation URLs and bare domains can no longer route a note). sls-080 closed on the consumer's own probe and independently re-verified by Raven on 2026-09-01.",
+   "remaining": "supersededBy / deprecatedAt still exist nowhere as FIELDS — the facts live in note prose, which a consumer must read rather than join on. Contracts as first-class joined entities only where the P3 lane reached (11 of the 308 expected-tier repos). Builder/org identity is still thinner than project identity. 12,851 indexed repos carry no note — the long tail is by design, the curated pool is the floor that rises."
   }
  ],
  "library": {
