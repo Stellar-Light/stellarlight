@@ -4,6 +4,7 @@ import {
 	type AuditRecord,
 	buildKnowledgeNotes,
 	findDirectAnswerNote,
+	REPO_KNOWLEDGE_NOTES,
 } from "../repo-knowledge";
 
 const audits = new Map<string, AuditRecord[]>([
@@ -207,5 +208,58 @@ describe("findDirectAnswerNote hijack resistance", () => {
 				horizonNote,
 			)?.asOf,
 		).toBe("2026-09-01");
+	});
+});
+
+// sls-080 round 2: the upstream monitor's probe is PLAIN ENGLISH — no
+// identifier — so the note must reach it through its curated trigger
+// phrases. Pinned against the REAL registry entry (the served contract),
+// with the monitor's exact sentence.
+describe("findDirectAnswerNote trigger phrases", () => {
+	const real = REPO_KNOWLEDGE_NOTES["stellar/stellar-horizon"];
+
+	it("the upstream monitor's exact phrasing reaches the note", () => {
+		expect(
+			findDirectAnswerNote(
+				"Which Horizon ingestion constant pins the highest supported protocol version, and what is its value?",
+				real,
+			)?.note,
+		).toContain("= 28");
+	});
+
+	it("natural max/maximum phrasings reach the note", () => {
+		expect(
+			findDirectAnswerNote(
+				"what is the max supported protocol version",
+				real,
+			)?.note,
+		).toContain("= 28");
+		expect(
+			findDirectAnswerNote(
+				"maximum supported protocol version of horizon?",
+				real,
+			)?.note,
+		).toContain("= 28");
+	});
+
+	it("vague or partial phrasings still fall through to DeepWiki", () => {
+		expect(
+			findDirectAnswerNote("what protocol version is supported", real),
+		).toBeNull();
+		expect(
+			findDirectAnswerNote("how does horizon check protocol versions", real),
+		).toBeNull();
+		expect(
+			findDirectAnswerNote("max_supported throughput of horizon ingestion?", real),
+		).toBeNull();
+	});
+
+	it("trigger words must ALL appear — scattered overlap never fires", () => {
+		expect(
+			findDirectAnswerNote(
+				"is the highest ledger version the supported one?",
+				real,
+			),
+		).toBeNull();
 	});
 });

@@ -123,6 +123,11 @@ function evidenceFor(
 // summaries and exit codes reach guards.
 let probesAttempted = 0;
 let probeErrors = 0;
+// Horizon answers "this pair has never traded" / "no such account" with a
+// 404 — that is a CHECKED-EMPTY, not a could-not-check (verified 2026-09-01:
+// a USDC/XLM control returns 200+records, never-traded pairs 404). Counting
+// them as errors made an all-never-traded run exit 2 claiming an outage.
+let probeNotFound = 0;
 async function horizonJson(
 	u: string,
 ): Promise<
@@ -135,6 +140,10 @@ async function horizonJson(
 			headers: { "User-Agent": "stellarlight-basis-upgrade" },
 			signal: AbortSignal.timeout(15_000),
 		});
+		if (res.status === 404) {
+			probeNotFound += 1;
+			return { ok: false, reason: "not-found" };
+		}
 		if (!res.ok) {
 			probeErrors += 1;
 			console.log(
@@ -225,54 +234,15 @@ async function horizonEvidence(
 	return null;
 }
 
-/**
- * One-time audit reverts (C3, verified per-row 2026-09-01): these four rows
- * were upgraded by the UNCORRECTED issuer-payment probe — their issuers had
- * recent payments, but not in the row's own asset (brale.xyz operates several
- * assets; dust and cross-asset ops counted). Verified against the corrected
- * asset-matched rule: no qualifying payment in the last 20 records. Reverted
- * to the weak basis they held before tonight (from the run log), with
- * asOf/sourceUrl nulled — the site-liveness lane re-evidences them from
- * link-checks on its next pass, and the corrected evidence C may re-upgrade
- * any of them honestly. DELETE this map after one executed run.
- */
-const AUDIT_REVERTS: Record<
-	string,
-	"site-liveness" | "source-inherited" | "unverified"
-> = {
-	ylds: "site-liveness",
-	stellarport: "site-liveness",
-	mxne: "site-liveness",
-	brale: "site-liveness",
-};
+// The one-time AUDIT_REVERTS map (C3, four rows upgraded by the uncorrected
+// issuer-payment probe) executed on 2026-09-01 (run 33464175432: ylds /
+// stellarport / mxne / brale → site-liveness; stellarport then re-earned
+// onchain-activity in the same run via a same-day XLM-pair trade) and was
+// deleted as designed — left in place it would have reverted that legitimate
+// re-upgrade on any later run.
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
-	for (const [slug, priorBasis] of Object.entries(AUDIT_REVERTS)) {
-		const r = await payload.find({
-			collection: "projects",
-			where: { slug: { equals: slug } },
-			limit: 1,
-			depth: 0,
-			select: { slug: true, statusBasis: true },
-		});
-		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-		const d = r.docs[0] as any;
-		if (!d || d.statusBasis !== "onchain-activity") continue;
-		console.log(
-			`AUDIT REVERT ${slug}: onchain-activity → ${priorBasis} (uncorrected-probe upgrade)`,
-		);
-		if (EXECUTE)
-			await payload.update({
-				collection: "projects",
-				id: d.id,
-				data: {
-					statusBasis: priorBasis,
-					statusAsOf: null,
-					statusSourceUrl: null,
-				},
-			});
-	}
 	const all = await payload.find({
 		collection: "projects",
 		where: { status: { equals: "Live" } },
@@ -349,7 +319,7 @@ async function main() {
 	// run must not exit green pretending it checked.
 	if (probesAttempted > 0)
 		console.log(
-			`probes: ${probesAttempted} attempted · ${probeErrors} could-not-check`,
+			`probes: ${probesAttempted} attempted · ${probeNotFound} not-found (checked-empty) · ${probeErrors} could-not-check`,
 		);
 	if (probesAttempted > 0 && probeErrors === probesAttempted) {
 		console.error(
