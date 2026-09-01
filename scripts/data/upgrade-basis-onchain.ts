@@ -225,8 +225,51 @@ async function horizonEvidence(
 	return null;
 }
 
+/**
+ * One-time audit reverts (C3, verified per-row 2026-09-01): these four rows
+ * were upgraded by the UNCORRECTED issuer-payment probe — their issuers had
+ * recent payments, but not in the row's own asset (brale.xyz operates several
+ * assets; dust and cross-asset ops counted). Verified against the corrected
+ * asset-matched rule: no qualifying payment in the last 20 records. Reverted
+ * to the weak basis they held before tonight (from the run log), with
+ * asOf/sourceUrl nulled — the site-liveness lane re-evidences them from
+ * link-checks on its next pass, and the corrected evidence C may re-upgrade
+ * any of them honestly. DELETE this map after one executed run.
+ */
+const AUDIT_REVERTS: Record<string, string> = {
+	ylds: "site-liveness",
+	stellarport: "site-liveness",
+	mxne: "site-liveness",
+	brale: "site-liveness",
+};
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
+	for (const [slug, priorBasis] of Object.entries(AUDIT_REVERTS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			select: { slug: true, statusBasis: true },
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		const d = r.docs[0] as any;
+		if (!d || d.statusBasis !== "onchain-activity") continue;
+		console.log(
+			`AUDIT REVERT ${slug}: onchain-activity → ${priorBasis} (uncorrected-probe upgrade)`,
+		);
+		if (EXECUTE)
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: {
+					statusBasis: priorBasis,
+					statusAsOf: null,
+					statusSourceUrl: null,
+				},
+			});
+	}
 	const all = await payload.find({
 		collection: "projects",
 		where: { status: { equals: "Live" } },
