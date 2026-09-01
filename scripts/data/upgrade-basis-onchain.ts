@@ -116,24 +116,39 @@ function evidenceFor(
  * no recent trade stays weak honestly (payment-only rails will earn their
  * upgrade through A when the deltas arrive).
  */
+// The trinary probe invariant (audit C4, second recurrence of the class in
+// two days): a probe outcome is hit / checked-empty / COULD-NOT-CHECK, and
+// could-not-check must be a DISTINCT value that reaches the run summary and
+// the exit code — a log line reaches humans who happen to be reading;
+// summaries and exit codes reach guards.
+let probesAttempted = 0;
+let probeErrors = 0;
 async function horizonJson(
 	u: string,
-): Promise<Record<string, unknown> | null> {
+): Promise<
+	| { ok: true; data: Record<string, unknown> }
+	| { ok: false; reason: string }
+> {
+	probesAttempted += 1;
 	try {
 		const res = await fetch(u, {
 			headers: { "User-Agent": "stellarlight-basis-upgrade" },
 			signal: AbortSignal.timeout(15_000),
 		});
-		// A 400 here is OUR query being malformed, and it must be VISIBLE:
-		// the first version filtered /trades by a lone base asset (Horizon
-		// requires a pair), 400'd on every call, and the silent catch made a
-		// broken probe indistinguishable from a quiet result.
-		if (res.status === 400)
-			console.log(`    ✗ Horizon 400 (bad query): ${u.slice(0, 110)}`);
-		if (!res.ok) return null;
-		return (await res.json()) as Record<string, unknown>;
-	} catch {
-		return null;
+		if (!res.ok) {
+			probeErrors += 1;
+			console.log(
+				`    ✗ Horizon ${res.status}${res.status === 400 ? " (bad query)" : ""}: ${u.slice(0, 110)}`,
+			);
+			return { ok: false, reason: `http-${res.status}` };
+		}
+		return { ok: true, data: (await res.json()) as Record<string, unknown> };
+	} catch (e) {
+		probeErrors += 1;
+		console.log(
+			`    ✗ Horizon unreachable (${(e as Error).name}): ${u.slice(0, 110)}`,
+		);
+		return { ok: false, reason: "network" };
 	}
 }
 
@@ -143,23 +158,44 @@ async function horizonEvidence(
 	const o = r.onchain;
 	if (!o?.assetCode || !o.issuer) return null;
 	const expertUrl = `https://stellar.expert/explorer/public/asset/${o.assetCode}-${o.issuer}`;
-	// 1. Issuer-account payments — mints/burns/redemptions touch the issuer,
-	//    the truest "this issued asset is in use" signal, and a single-account
-	//    query Horizon actually supports.
+	// 1. Issuer-account payments — but ONLY payments in THIS asset (audit C3:
+	//    the first version read a bare timestamp off ANY payment touching the
+	//    issuer, so one stroop of dust — or the operator's unrelated XLM ops —
+	//    minted "recent activity" for the asset). A payment whose asset_code +
+	//    asset_issuer match the row's asset is real movement of the thing the
+	//    basis is about; twenty records of lookback keeps the dust window
+	//    honest without paging forever.
 	const pay = await horizonJson(
-		`https://horizon.stellar.org/accounts/${o.issuer}/payments?order=desc&limit=1`,
+		`https://horizon.stellar.org/accounts/${o.issuer}/payments?order=desc&limit=20`,
 	);
-	const payRec = (
-		pay?._embedded as
-			| { records?: Array<{ created_at?: string }> }
-			| undefined
-	)?.records?.[0];
-	if (payRec?.created_at && days(payRec.created_at) <= MAX_MOVEMENT_AGE_DAYS)
+	const payRecs = pay.ok
+		? ((
+				pay.data._embedded as
+					| {
+							records?: Array<{
+								created_at?: string;
+								asset_code?: string;
+								asset_issuer?: string;
+								type?: string;
+							}>;
+					  }
+					| undefined
+			)?.records ?? [])
+		: [];
+	const assetPay = payRecs.find(
+		(rec) =>
+			rec.type === "payment" &&
+			rec.asset_code === o.assetCode &&
+			rec.asset_issuer === o.issuer &&
+			rec.created_at &&
+			days(rec.created_at) <= MAX_MOVEMENT_AGE_DAYS,
+	);
+	if (assetPay?.created_at)
 		return {
 			kind: "issuer-payment",
-			asOf: payRec.created_at,
+			asOf: assetPay.created_at,
 			url: expertUrl,
-			note: `issuer payment ${payRec.created_at.slice(0, 10)} (Horizon)`,
+			note: `issuer payment in ${o.assetCode} ${assetPay.created_at.slice(0, 10)} (Horizon)`,
 		};
 	// 2. DEX trade against XLM — /trades requires a PAIR, so probe the
 	//    dominant one. Misses exotic pairs; those rows stay weak honestly
@@ -169,11 +205,13 @@ async function horizonEvidence(
 	const tr = await horizonJson(
 		`https://horizon.stellar.org/trades?base_asset_type=${type}&base_asset_code=${encodeURIComponent(o.assetCode)}&base_asset_issuer=${o.issuer}&counter_asset_type=native&order=desc&limit=1`,
 	);
-	const trRec = (
-		tr?._embedded as
-			| { records?: Array<{ ledger_close_time?: string }> }
-			| undefined
-	)?.records?.[0];
+	const trRec = tr.ok
+		? (
+				tr.data._embedded as
+					| { records?: Array<{ ledger_close_time?: string }> }
+					| undefined
+			)?.records?.[0]
+		: undefined;
 	if (
 		trRec?.ledger_close_time &&
 		days(trRec.ledger_close_time) <= MAX_MOVEMENT_AGE_DAYS
@@ -187,8 +225,54 @@ async function horizonEvidence(
 	return null;
 }
 
+/**
+ * One-time audit reverts (C3, verified per-row 2026-09-01): these four rows
+ * were upgraded by the UNCORRECTED issuer-payment probe — their issuers had
+ * recent payments, but not in the row's own asset (brale.xyz operates several
+ * assets; dust and cross-asset ops counted). Verified against the corrected
+ * asset-matched rule: no qualifying payment in the last 20 records. Reverted
+ * to the weak basis they held before tonight (from the run log), with
+ * asOf/sourceUrl nulled — the site-liveness lane re-evidences them from
+ * link-checks on its next pass, and the corrected evidence C may re-upgrade
+ * any of them honestly. DELETE this map after one executed run.
+ */
+const AUDIT_REVERTS: Record<
+	string,
+	"site-liveness" | "source-inherited" | "unverified"
+> = {
+	ylds: "site-liveness",
+	stellarport: "site-liveness",
+	mxne: "site-liveness",
+	brale: "site-liveness",
+};
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
+	for (const [slug, priorBasis] of Object.entries(AUDIT_REVERTS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			select: { slug: true, statusBasis: true },
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		const d = r.docs[0] as any;
+		if (!d || d.statusBasis !== "onchain-activity") continue;
+		console.log(
+			`AUDIT REVERT ${slug}: onchain-activity → ${priorBasis} (uncorrected-probe upgrade)`,
+		);
+		if (EXECUTE)
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: {
+					statusBasis: priorBasis,
+					statusAsOf: null,
+					statusSourceUrl: null,
+				},
+			});
+	}
 	const all = await payload.find({
 		collection: "projects",
 		where: { status: { equals: "Live" } },
@@ -260,6 +344,19 @@ async function main() {
 	console.log(
 		`\nwrote ${wrote} — ${after.totalDocs} rows now carry basis=onchain-activity`,
 	);
+	// Trinary invariant: could-not-check reaches the summary AND the exit
+	// code. All-probes-failed is an outage reading, not a quiet market — the
+	// run must not exit green pretending it checked.
+	if (probesAttempted > 0)
+		console.log(
+			`probes: ${probesAttempted} attempted · ${probeErrors} could-not-check`,
+		);
+	if (probesAttempted > 0 && probeErrors === probesAttempted) {
+		console.error(
+			"every Horizon probe failed — this run CHECKED NOTHING on the C path; exiting 2 (inconclusive), not green",
+		);
+		process.exit(2);
+	}
 	process.exit(after.totalDocs >= wrote ? 0 : 1);
 }
 

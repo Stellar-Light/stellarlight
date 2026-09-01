@@ -151,3 +151,61 @@ describe("findDirectAnswerNote", () => {
 		).toBeNull();
 	});
 });
+
+// Audit C1 (2026-09-01): three reproduced hijacks of the note matcher, each
+// pinned dead. A note must lead ONLY when the question names its identifier.
+describe("findDirectAnswerNote hijack resistance", () => {
+	const horizonNote = [
+		{
+			note: "Horizon protocol ceiling: MaxSupportedProtocolVersion = 28 (a uint32 constant defined in internal/ingest/main.go) — https://github.com/stellar/stellar-horizon/blob/master/internal/ingest/main.go",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	];
+	const advisoryNote = [
+		{
+			note: "One advisory: mnemonic phrase readable via private API, fixed in 5.3.1 — https://github.com/stellar/freighter/security/advisories/GHSA-vqr6-hwg2-775w",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	];
+
+	it("citation URLs never make a note match (github.com question ≠ advisory)", () => {
+		expect(
+			findDirectAnswerNote(
+				"how do I report a bug on github.com for freighter?",
+				advisoryNote,
+			),
+		).toBeNull();
+	});
+
+	it("bare domains are not identifiers", () => {
+		expect(
+			findDirectAnswerNote("is stellar-horizon.com the official site?", horizonNote),
+		).toBeNull();
+	});
+
+	it("infix fragments never match squashed paths (internal_ingest ≠ internal/ingest)", () => {
+		expect(
+			findDirectAnswerNote(
+				"how do I configure internal_ingest workers?",
+				horizonNote,
+			),
+		).toBeNull();
+		expect(
+			findDirectAnswerNote(
+				"max_supported throughput of horizon ingestion?",
+				horizonNote,
+			),
+		).toBeNull();
+	});
+
+	it("the exact identifier still matches (the sls-080 case survives the hardening)", () => {
+		expect(
+			findDirectAnswerNote(
+				"what is the MaxSupportedProtocolVersion in stellar horizon",
+				horizonNote,
+			)?.asOf,
+		).toBe("2026-09-01");
+	});
+});

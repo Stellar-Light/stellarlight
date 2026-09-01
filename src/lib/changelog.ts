@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-01",
 		surfaces: ["api"],
+		version: "spec@1.9.15",
+		type: "fixed",
+		summary:
+			"explainRepo knowledge-note hardening: citation URLs and bare domains can no longer route a note onto an unrelated question (exact identifier-set matching, never substring), and answerAsOf serializes the note's day-granular date as RFC3339.",
+		detail:
+			"Independent audit reproduced three hijacks of the day-old knowledge-note precedence: a question quoting github.com led with a security-advisory note because the note's citation URL was matchable; bare registrable domains passed the dotted-identifier shape; and canon-squashing the whole note let infix fragments (internal_ingest) match file paths (internal/ingest/main.go). Matching is now exact equality between identifier token sets extracted from both sides with the same regex — URLs stripped, bare lowercase domains dropped, substring containment gone — with the three reproduced hijacks pinned as tests. answerAsOf for note answers previously emitted a bare YYYY-MM-DD where the contract declares date-time; it now serializes as that day's 00:00:00Z with the day granularity stated in the spec.",
+	},
+	{
+		date: "2026-09-01",
+		surfaces: ["api"],
 		version: "spec@1.9.14",
 		type: "fixed",
 		summary:

@@ -82,7 +82,29 @@ export async function fetchText(url: string): Promise<string | null> {
 			redirect: "follow",
 		});
 		if (!res.ok) return null;
-		return await res.text();
+		// Origin-lock (audit N1/S1): a lapsed or parked domain redirecting
+		// off-origin must never serve "its" stellar.toml — a SEP-1 claim
+		// belongs to the origin that was asked. www ↔ apex is the same
+		// operator; anything else is not.
+		try {
+			const strip = (h: string) => h.replace(/^www\./, "");
+			if (strip(new URL(res.url).host) !== strip(new URL(url).host))
+				return null;
+		} catch {
+			return null;
+		}
+		const text = await res.text();
+		// Content sniff: an HTML parking page is not a toml, and the callers'
+		// "soft-404 is a skip" claim was only true if someone checked. First
+		// meaningful line must look like a toml table or KEY assignment.
+		const first =
+			text
+				.split(/\r?\n/)
+				.find((l) => l.trim() && !l.trim().startsWith("#"))
+				?.trim() ?? "";
+		if (first.startsWith("<") || !/^(\[|[A-Za-z0-9_]+\s*=)/.test(first))
+			return null;
+		return text;
 	} catch {
 		return null;
 	}

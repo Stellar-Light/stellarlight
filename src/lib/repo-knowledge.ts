@@ -372,18 +372,35 @@ export function findDirectAnswerNote(
 	q: string,
 	notes: KnowledgeNote[],
 ): KnowledgeNote | null {
+	// Audit hardening (2026-09-01, three reproduced hijacks): (1) citation
+	// URLs inside notes were matchable, so any question quoting github.com/
+	// npmjs.com led whichever note first cited one — URLs are stripped before
+	// anything matches; (2) bare registrable domains pass the dotted-token
+	// shape but are not identifiers — dropped; (3) canon-squashing the whole
+	// note let "internal_ingest" infix-match "internal/ingest/main.go" —
+	// matching is now EXACT equality between identifier token sets extracted
+	// from both sides with the same regex, never substring containment.
 	const canon = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-	const idents = (q.match(/[A-Za-z][A-Za-z0-9_.]*[A-Za-z0-9]/g) ?? [])
-		.filter(
-			(w) => /[a-z][A-Z]/.test(w) || /_/.test(w) || /^[a-z]+\.[a-z]+/i.test(w),
-		)
-		.map(canon)
-		.filter((w) => w.length >= 8);
-	if (!idents.length) return null;
+	const IDENT_RE = /[A-Za-z][A-Za-z0-9_.]*[A-Za-z0-9]/g;
+	const isIdentShape = (w: string) =>
+		/[a-z][A-Z]/.test(w) || /_/.test(w) || /^[a-z]+\.[a-z]+/i.test(w);
+	const isBareDomain = (w: string) =>
+		/^[a-z0-9][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)*\.[a-z]{2,}$/i.test(w) &&
+		!/[A-Z].*[a-z]|[a-z].*[A-Z]/.test(w.replace(/\..*$/, "")) &&
+		!w.includes("_");
+	const identsOf = (text: string) =>
+		new Set(
+			(text.match(IDENT_RE) ?? [])
+				.filter((w) => isIdentShape(w) && !isBareDomain(w))
+				.map(canon)
+				.filter((w) => w.length >= 8),
+		);
+	const qIdents = identsOf(q);
+	if (!qIdents.size) return null;
 	for (const n of notes) {
 		if (n.visibility === "internal") continue;
-		const hay = canon(n.note);
-		if (idents.some((t) => hay.includes(t))) return n;
+		const nIdents = identsOf(n.note.replace(/https?:\/\/\S+/g, " "));
+		for (const t of qIdents) if (nIdents.has(t)) return n;
 	}
 	return null;
 }

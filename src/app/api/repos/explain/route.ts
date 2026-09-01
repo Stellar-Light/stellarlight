@@ -294,9 +294,15 @@ export async function GET(req: NextRequest) {
 	// didn't.
 	const curatedNotes = REPO_KNOWLEDGE_NOTES[repo.toLowerCase()] ?? [];
 	const directNote = findDirectAnswerNote(q, curatedNotes);
+	// Audit N2: the walkthrough is NOT concatenated into the dated answer —
+	// #1168 existed because a naive parser reads the wrong number out of
+	// mixed text, and gluing DeepWiki's lagging 22–25 under a note dated
+	// answerAsOf rebuilt exactly that trap inside one field. The dated answer
+	// carries only the dated fact; the walkthrough stays reachable at
+	// sources.deepWikiUrl and is named, not embedded.
 	const noteAnswer = directNote
 		? dwAnswer
-			? `${directNote.note}\n\n— DeepWiki walkthrough below may LAG the dated fact above; where they disagree, the dated fact wins:\n\n${dwAnswer}`
+			? `${directNote.note}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl — an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
 			: directNote.note
 		: null;
 	const finalAnswer = noteAnswer ?? dwAnswer ?? scanAnswer;
@@ -313,7 +319,7 @@ export async function GET(req: NextRequest) {
 				...(noteAnswer
 					? {
 							warnings: [
-								"The answer LEADS with a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. Any DeepWiki narrative appended below it is an undated index that can lag or contradict the dated fact — where they disagree, the dated fact wins.",
+								"The answer IS a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. The DeepWiki walkthrough is deliberately NOT embedded in this dated answer — it is an undated index that can lag or contradict the dated fact; reach it via sources.deepWikiUrl, and where they disagree, the dated fact wins.",
 							],
 						}
 					: dwAnswer
@@ -373,7 +379,14 @@ export async function GET(req: NextRequest) {
 			// measured. The scan-derived path CAN be dated, because there the
 			// answer IS the scan.
 			answerAsOf: noteAnswer
-				? (directNote?.asOf ?? null)
+				? // Audit C6: notes date to the DAY of verification; the contract
+					// declares date-time, so a bare date is serialized as that day's
+					// start in UTC — conservative, and stated in the spec.
+					(directNote?.asOf
+						? directNote.asOf.length === 10
+							? `${directNote.asOf}T00:00:00Z`
+							: directNote.asOf
+						: null)
 				: dwAnswer
 					? null
 					: scanAnswer
