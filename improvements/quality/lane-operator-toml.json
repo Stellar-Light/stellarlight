@@ -1,6 +1,6 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-09-01T03:49:44.321Z",
+ "generatedAt": "2026-09-01T04:56:45.966Z",
  "stage": 1,
  "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
@@ -46,57 +46,6 @@
   }
  ],
  "upgrades": [],
- "corrections": [
-  {
-   "slug": "ars",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "coopstable-v2-yield-sharing-stablecoin",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "eurckobo",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "eurs",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "mxne",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "pen",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "stellarport",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "usdy",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "ylds",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  },
-  {
-   "slug": "zusd",
-   "was": "operator-toml/mainnet",
-   "now": "onchain-activity/mainnet"
-  }
- ],
+ "corrections": [],
  "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
 }
