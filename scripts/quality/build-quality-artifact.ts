@@ -762,6 +762,18 @@ const gapRow = <T>(r: {
 
 const byProminence = <T extends { prominence?: number | null }>(rows: T[]) =>
 	[...rows].sort((a, b) => (b.prominence ?? 0) - (a.prominence ?? 0));
+	// Expected tier for the contract-join gap (see the row's comment): a
+	// mainnet join is a reasonable ask only where the repo shows real
+	// signal. Forks are negligible here (15 of 3,351) and the frame does
+	// not carry the flag; archived rows are cut via activity.
+	const expectedContractRepos = repos.filter(
+		(r) =>
+			r.deployable &&
+			r.activity !== "archived" &&
+			(r.projectSlug || (r.repoScore ?? 0) >= 60),
+		);
+	const lowSignalDeployable =
+		repos.filter((r) => r.deployable).length - expectedContractRepos.length;
 const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 	[...rows].sort((a, b) => (b.repoScore ?? 0) - (a.repoScore ?? 0));
 
@@ -874,22 +886,25 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 		gapRow({
 			entity: "repo",
 			field: "mainnet contract join",
-			// A join is only conceivable for a deployable contract, so the gap
-			// is deployable-but-unjoined — not "all repos without a join", which
-			// swept SDKs and frontends into a gap they can never close.
-			all: repos.filter((r) => r.deployable && !r.mainnetJoined),
-			of: repos.filter((r) => r.deployable).length,
+			// A join is only conceivable for a deployable contract — and only
+			// EXPECTED where the repo shows real signal: linked to a directory
+			// project, or scored >= 60, and not archived. The measured truth
+			// behind this cut (operator challenge, 2026-09-01): 86% of the
+			// 3,351 scanner-deployable repos sit under repoScore 30 — hackathon
+			// demos, tutorials, experiments — where a missing mainnet join is
+			// the NORMAL state of a demo, not a gap (the optional-absent
+			// doctrine). The excluded tail is COUNTED in whyItMatters, never
+			// silently dropped.
+			all: expectedContractRepos.filter((r) => !r.mainnetJoined),
+			of: expectedContractRepos.length,
 			pick: (r) => r.fullName,
 			pool: {
 				rows: byRepoScore(
-					repos.filter(
-						(r) => r.deployable && !r.mainnetJoined && (r.repoScore ?? 0) >= 70,
-					),
+					expectedContractRepos.filter((r) => !r.mainnetJoined),
 				),
-				why: "deployable contracts with repoScore >= 70 only",
+				why: "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
 			},
-			whyItMatters:
-				"Without a verified contract join we can say code exists, never that it is USED on mainnet.",
+			whyItMatters: `Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — ${lowSignalDeployable} further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.`,
 			closedBy:
 				"Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
 		}),
