@@ -55,7 +55,14 @@ jobs:
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             pnpm openapi:lint 2>&1 | tee lint.log
           else
-            pnpm exec spectral lint specs/openapi.json --ruleset .spectral.yaml --fail-severity=error 2>&1 | tee lint.log
+            # The committed snapshot is pretty-printed (~12.7k lines). Spectral
+            # parses JSON through its YAML parser, and above ~11k lines the
+            # parser's diagnostic list overflows the call stack ("Maximum call
+            # stack size exceeded") before a single rule runs — reproduced on
+            # 2026-09-01 at the 1.9.17 bump, and on main's own 1.9.16 snapshot
+            # locally. The live URL never hit it because the API serves one
+            # line. So lint a minified copy: same bytes of meaning, no cliff.
+            pnpm openapi:lint:snapshot 2>&1 | tee lint.log
           fi
       - name: Track the signal (rolling issue)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
