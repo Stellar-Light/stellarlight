@@ -84,6 +84,25 @@ describe("networkProbeQuery", () => {
 		).toBeNull();
 	});
 
+	it("capitalized 'Stellar' is still the home chain (the komet degenerate-probe class)", () => {
+		// Seed waves store "Stellar"; a case-sensitive exclusion emitted
+		// "Stellar security" — the whole-directory probe the contract forbids.
+		expect(
+			networkProbeQuery({
+				slug: "komet",
+				types: ["Security"],
+				supportedNetworks: ["Stellar"],
+			}),
+		).toBeNull();
+		expect(
+			networkProbeQuery({
+				slug: "x",
+				types: ["Bridge"],
+				supportedNetworks: ["Stellar", "EVM"],
+			}),
+		).toBe("evm bridge");
+	});
+
 	it("returns null — not a bare chain — when no discriminator exists", () => {
 		expect(
 			networkProbeQuery({
