@@ -281,6 +281,26 @@ async function main() {
 		// deliberately NOT mapped: the only listed page ("Billy Wallet")
 		// shows r35/$60k vs our stored [22,31] — likely multiple pages per
 		// project; a wrong single-page join would mis-scope totals.
+		// Legacy-award linkage wave 2 (2026-09-01): the remaining nine
+		// no-linkage rows' page slugs were sitting in the seed-review map's
+		// own evidence URLs all along. Every page verified via
+		// parseRoundVerdicts before mapping; eight agree exactly with stored
+		// rounds, escala's page marks #42/#43 "Not Awarded" (award = #44/$70k
+		// — map corrected in the same change). Coala Pay stays deliberately
+		// UNJOINED: it is a real multi-page project (r22 on
+		// anticipatory-aid-on-soroban-f7j, r35 on coala-pay-billy-wallet-9mi,
+		// r31 unverdicted on both) and a single-slug join would let the
+		// exact-replace drop the unverdicted round.
+		"stellar-women-bootcamp-r5v": "womenbiz",
+		"embedded-collective-investment-via-soroban-syi": "escala",
+		"confidential-transfers-and-balances-hdt": "fairblock",
+		"solo-labs-iy1": "ichi",
+		"soroban-disassembler-working-title-ply": "inferera",
+		"advanced-debugging-for-soroban-contracts-5sr": "simbolik",
+		"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh":
+			"soroban-decompiler",
+		"stellar-surge-1gh": "dfs-labs",
+		"smart-account-onboarding-8yr": "the-aha-company",
 		"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu":
 			"pagcrypto",
 		"liquid-by-upesa-dvq": "upesa",
