@@ -1,12 +1,12 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-09-01T00:14:00.167Z",
+ "generatedAt": "2026-09-01T03:49:44.321Z",
  "stage": 1,
  "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 33445532222,
-  "at": "2026-08-31T22:17:38Z",
+  "id": 33464172914,
+  "at": "2026-09-01T02:52:43Z",
   "event": "workflow_dispatch",
   "conclusion": "success"
  },
@@ -17,23 +17,7 @@
    "network": "mainnet"
   },
   {
-   "slug": "ars",
-   "network": "mainnet"
-  },
-  {
-   "slug": "coopstable-v2-yield-sharing-stablecoin",
-   "network": "mainnet"
-  },
-  {
    "slug": "estrela",
-   "network": "mainnet"
-  },
-  {
-   "slug": "eurckobo",
-   "network": "mainnet"
-  },
-  {
-   "slug": "eurs",
    "network": "mainnet"
   },
   {
@@ -41,15 +25,7 @@
    "network": "mainnet"
   },
   {
-   "slug": "mxne",
-   "network": "mainnet"
-  },
-  {
    "slug": "normal",
-   "network": "mainnet"
-  },
-  {
-   "slug": "pen",
    "network": "mainnet"
   },
   {
@@ -65,30 +41,59 @@
    "network": "mainnet"
   },
   {
-   "slug": "stellarport",
-   "network": "mainnet"
-  },
-  {
-   "slug": "usdy",
-   "network": "mainnet"
-  },
-  {
    "slug": "xlmeme",
-   "network": "mainnet"
-  },
-  {
-   "slug": "ylds",
-   "network": "mainnet"
-  },
-  {
-   "slug": "zusd",
    "network": "mainnet"
   }
  ],
  "upgrades": [],
  "corrections": [
   {
-   "slug": "scopuly",
+   "slug": "ars",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "coopstable-v2-yield-sharing-stablecoin",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "eurckobo",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "eurs",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "mxne",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "pen",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "stellarport",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "usdy",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "ylds",
+   "was": "operator-toml/mainnet",
+   "now": "onchain-activity/mainnet"
+  },
+  {
+   "slug": "zusd",
    "was": "operator-toml/mainnet",
    "now": "onchain-activity/mainnet"
   }

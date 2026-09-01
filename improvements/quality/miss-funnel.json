@@ -1,45 +1,37 @@
 {
- "generatedAt": "2026-09-01T00:13:46.451Z",
+ "generatedAt": "2026-09-01T03:49:27.836Z",
  "population": {
-  "openRecallMisses": 12,
-  "replayableOpenRecallMisses": 1,
-  "unclassified": 11,
+  "openRecallMisses": 16,
+  "replayableOpenRecallMisses": 10,
+  "unclassified": 6,
   "unclassifiedExamples": [
    {
-    "id": "engine-a-recall:crediolabs-ai-in-top-3-for-its-own-name",
-    "probe": "crediolabs-ai in top-3 for its own name"
-   },
-   {
-    "id": "engine-a-recall:komet-in-top-10-of-36-matches-its-own-supportedn",
-    "probe": "komet in top-10 of 36 matches (its own supportedNetworks implies 'Stellar security')"
+    "id": "engine-a-recall:response",
+    "probe": "response"
    },
    {
     "id": "engine-a-recall:3-of-the-7-records-implying-stellar-payments-in-",
     "probe": "≥3 of the 7 records implying 'Stellar payments' in top-10"
    },
    {
-    "id": "engine-a-recall:fabiansanchezd-retrievable-by-own-username",
-    "probe": "FabianSanchezD retrievable by own username"
+    "id": "engine-a-recall:blade-in-top-3-for-its-own-name",
+    "probe": "blade in top-3 for its own name"
    },
    {
-    "id": "engine-a-recall:ensareness-retrievable-by-own-username",
-    "probe": "EnsarEness retrievable by own username"
+    "id": "engine-a-recall:every-finance-in-top-3-for-its-own-name",
+    "probe": "every-finance in top-3 for its own name"
    },
    {
-    "id": "engine-a-recall:eneskeremaydin-retrievable-by-own-username",
-    "probe": "EnesKeremAYDIN retrievable by own username"
+    "id": "engine-a-recall:samogera-retrievable-by-own-username",
+    "probe": "samogera retrievable by own username"
    },
    {
-    "id": "engine-a-recall:whiterrabbit-retrievable-by-own-username",
-    "probe": "whiterrabbit retrievable by own username"
-   },
-   {
-    "id": "engine-a-recall:leonardoevmacc-retrievable-by-own-username",
-    "probe": "leonardoevmacc retrievable by own username"
+    "id": "engine-a-recall:malika7188-retrievable-by-own-username",
+    "probe": "Malika7188 retrievable by own username"
    }
   ],
-  "coveragePct": 8,
-  "sampled": 1,
+  "coveragePct": 63,
+  "sampled": 10,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
  "stages": [
@@ -48,9 +40,18 @@
    "label": "no longer reproduces",
    "owner": "ledger",
    "note": "Fixed since the finding was filed, these should clear on the next detector run, and their presence in the open count is staleness, not debt.",
-   "count": 0,
-   "share": 0,
-   "examples": []
+   "count": 10,
+   "share": 100,
+   "examples": [
+    "mystic",
+    "hiyield",
+    "the-strategists",
+    "x402",
+    "every-finance",
+    "zet",
+    "fx-swap",
+    "truway-yield"
+   ]
   },
   {
    "stage": "ranking",
@@ -66,11 +67,9 @@
    "label": "not returned for the query at all",
    "owner": "admission / matching",
    "note": "The tier ladder never admitted the row for this phrasing, though its exact name resolves. Vocabulary, anchors, and synonym work live here.",
-   "count": 1,
-   "share": 100,
-   "examples": [
-    "crediolabs-ai"
-   ]
+   "count": 0,
+   "share": 0,
+   "examples": []
   },
   {
    "stage": "identity",
