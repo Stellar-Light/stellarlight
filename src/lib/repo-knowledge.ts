@@ -33,6 +33,18 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// Verified 2026-09-01 from source at BOTH master and the scanned ref
+	// (raw.githubusercontent.com, internal/ingest/main.go:38) — the constant
+	// the #1 consumer's sls-080 probe reads. Horizon SPLIT out of stellar/go;
+	// the monorepo's frozen copy answers with pre-split values (DeepWiki said
+	// 22–25), which is exactly why this dated fact must lead the answer.
+	"stellar/stellar-horizon": [
+		{
+			note: "Horizon's protocol ceiling: MaxSupportedProtocolVersion uint32 = 28, defined in internal/ingest/main.go (verified 2026-09-01 at master AND at scanned ref 82660510 — https://github.com/stellar/stellar-horizon/blob/master/internal/ingest/main.go). Horizon split out of the stellar/go monorepo; the monorepo's frozen copy still carries pre-split values, so cite THIS repo for current Horizon constants.",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
 	// Verified 2026-08-31 against the GitHub Advisory Database (gh api
 	// /advisories/<ghsa>): three repository advisories, severities and patched
 	// versions confirmed from the records themselves. Dated facts, not a
@@ -127,6 +139,36 @@ export interface RepoSignals {
 		subinvocationsDelta?: number | null;
 		asOf?: string | null;
 	} | null;
+}
+
+/**
+ * A curated note DIRECTLY answers a question when the query carries a
+ * specific identifier — a camelCase / snake_case / dotted single token of
+ * ≥8 chars, the shape of a constant or symbol name — that appears verbatim
+ * (canon-squashed) in the note text. Deliberately TIGHT: generic prose
+ * questions never match, so a note can only outrank a DeepWiki walkthrough
+ * when it names the exact thing asked about (sls-080: a dated, source-cited
+ * fact beats an undated third-party index that contradicts the scanned ref).
+ * Public notes only — internal curation memos never become answers.
+ */
+export function findDirectAnswerNote(
+	q: string,
+	notes: KnowledgeNote[],
+): KnowledgeNote | null {
+	const canon = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+	const idents = (q.match(/[A-Za-z][A-Za-z0-9_.]*[A-Za-z0-9]/g) ?? [])
+		.filter(
+			(w) => /[a-z][A-Z]/.test(w) || /_/.test(w) || /^[a-z]+\.[a-z]+/i.test(w),
+		)
+		.map(canon)
+		.filter((w) => w.length >= 8);
+	if (!idents.length) return null;
+	for (const n of notes) {
+		if (n.visibility === "internal") continue;
+		const hay = canon(n.note);
+		if (idents.some((t) => hay.includes(t))) return n;
+	}
+	return null;
 }
 
 export function buildKnowledgeNotes(

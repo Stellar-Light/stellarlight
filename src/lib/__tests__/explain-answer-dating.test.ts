@@ -30,44 +30,53 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 		expect(ROUTE).toMatch(/\banswerAsOf:/);
 	});
 
+	// The ternary grew a third arm (sls-080: a curated dated note LEADS when it
+	// names the exact identifier asked about). The #1134 semantics must SURVIVE
+	// the growth: deepwiki still yields null, the scan arm still dates only from
+	// the scan — and the new note arm dates only from the note's own asOf.
+	const TERNARY =
+		/answerAsOf:\s*noteAnswer\s*\?\s*([^:]+):\s*dwAnswer\s*\?\s*([^:]+):\s*scanAnswer\s*\?\s*([^:]+):\s*null/.exec(
+			ROUTE.replace(/\n/g, " "),
+		);
+
 	it("answerAsOf is null on the deepwiki path — an admission, not a guess", () => {
-		// The deepwiki branch must yield null. Written as a source assertion
-		// because a fabricated timestamp here would be worse than the original
-		// defect: it makes an unknown look measured.
-		const m = /answerAsOf:\s*dwAnswer\s*\?\s*([^:]+)\s*:/.exec(ROUTE);
-		expect(m, "answerAsOf must branch on dwAnswer").toBeTruthy();
-		expect((m?.[1] ?? "").trim()).toBe("null");
+		// A fabricated timestamp here would be worse than the original defect:
+		// it makes an unknown look measured.
+		expect(TERNARY, "the three-armed answerAsOf ternary must be present").toBeTruthy();
+		expect((TERNARY?.[2] ?? "").trim()).toBe("null");
 	});
 
-	it("the scan arm dates from the scan and nothing else", () => {
-		// The audit's point: the first four tests constrained only the deepwiki
-		// arm, so `dwAnswer ? null : (repoMeta?.lastCommitAt ?? null)` — dating
-		// scan answers with the precise wrong timestamp #1134 was about — passed
-		// every one. Pin the whole ternary.
-		const m = /answerAsOf:\s*dwAnswer\s*\?\s*null\s*:\s*([^,\n]+)[,\n]/.exec(
-			ROUTE,
-		);
-		expect(m, "the full answerAsOf ternary must be present").toBeTruthy();
-		const scanArm = (m?.[1] ?? "").trim();
+	it("the scan arm dates from the scan, the note arm from the note, and nothing else", () => {
+		// The audit's point stands: constrain EVERY arm, or the precise wrong
+		// timestamp #1134 was about sneaks in through an unpinned one.
+		const noteArm = (TERNARY?.[1] ?? "").trim();
+		const scanArm = (TERNARY?.[3] ?? "").trim();
+		expect(noteArm).toMatch(/directNote\?\.asOf/);
+		expect(noteArm).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
 		expect(scanArm).toMatch(/scannedAt/);
 		expect(scanArm).not.toMatch(/lastCommitAt|generatedAt/);
 	});
 
 	it("never dates a deepwiki answer from the scan", () => {
-		// scannedAt may appear (the scan path legitimately uses it) but must not
-		// be reachable from the deepwiki branch. Anchor on the dwAnswer ternary:
-		// the unroutable envelope now carries a literal `answerAsOf: null` earlier
-		// in the file, which would otherwise be the first (wrong) match.
-		const line = /answerAsOf:\s*dwAnswer[^\n]*\n?[^\n]*/.exec(ROUTE)?.[0] ?? "";
-		const dwBranch = line.split(":")[1] ?? "";
-		expect(dwBranch).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
+		// The deepwiki arm must not be able to reach any scan date.
+		const dwArm = (TERNARY?.[2] ?? "MISSING").trim();
+		expect(dwArm).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
+		expect(dwArm).not.toBe("MISSING");
 	});
 
-	it("warns which dates do NOT cover the answer", () => {
-		const w = /warnings: \[\s*"([^"]+)"/.exec(ROUTE)?.[1] ?? "";
-		expect(w).toMatch(/answerAsOf is null/);
+	it("warns which dates do NOT cover the answer, on both answer paths", () => {
+		const warnings = [...ROUTE.matchAll(/warnings: \[\s*"([^"]+)"/g)].map(
+			(m) => m[1],
+		);
+		const dwWarning = warnings.find((w) => /answerAsOf is null/.test(w));
+		expect(dwWarning, "the deepwiki-path warning must survive").toBeTruthy();
 		for (const field of ["scannedAt", "scannedRef", "lastCommitAt"])
-			expect(w, `the warning must name ${field}`).toContain(field);
+			expect(dwWarning, `the warning must name ${field}`).toContain(field);
+		// The note path states its precedence rule instead: the dated fact leads
+		// and an appended walkthrough can lag it.
+		const noteWarning = warnings.find((w) => /knowledge-note/.test(w));
+		expect(noteWarning, "the note-path warning must exist").toBeTruthy();
+		expect(noteWarning).toMatch(/dated fact/);
 	});
 
 	it("the contract declares answerAsOf and says why it is null", () => {

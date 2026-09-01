@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-01",
+		surfaces: ["api"],
+		version: "spec@1.9.14",
+		type: "fixed",
+		summary:
+			"explainRepo: curated dated facts now LEAD answers that name the exact identifier asked about (answerSource 'knowledge-note', dated by answerAsOf) — and horizon questions route to stellar/stellar-horizon, the split repo where the living code moves.",
+		detail:
+			"Closes the value half of the consumer's sls-080/#1134 (the dating half shipped in 1.9.8): DeepWiki's undated index answered MaxSupportedProtocolVersion = 22–25 for a constant the source defines as 28 at our own scanned ref. Two root causes fixed. (1) Routing: Horizon split out of the stellar/go monorepo; the canonical map still sent horizon questions to the monorepo, whose frozen copy answers with pre-split values — stellar/stellar-horizon now leads the canonical entry. (2) Precedence: when a curated knowledge note directly names the identifier asked about (tight camelCase/snake/dotted match, ≥8 chars, public notes only), the note leads the answer with its verification date as answerAsOf, and any DeepWiki walkthrough is appended underneath labeled as possibly lagging — a dated, source-cited fact we verified beats an undated index we didn't. The stellar/stellar-horizon note carries the constant verified 2026-09-01 from source at master AND the scanned ref.",
+	},
+	{
 		date: "2026-08-31",
 		surfaces: ["api"],
 		version: "spec@1.9.13",

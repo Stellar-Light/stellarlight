@@ -19,6 +19,10 @@ import { askDeepWiki } from "@/lib/deepwiki";
 import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	findDirectAnswerNote,
+	REPO_KNOWLEDGE_NOTES,
+} from "@/lib/repo-knowledge";
 import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
@@ -280,7 +284,22 @@ export async function GET(req: NextRequest) {
 		);
 		scanAnswer = bits.join(" ");
 	}
-	const finalAnswer = dwAnswer ?? scanAnswer;
+	// sls-080 (the consumer's roadmap blocker): DeepWiki's index can contradict
+	// the scanned source on the exact constant asked about — it answered 22–25
+	// for a value stellar/stellar-horizon defines as 28 at our own scannedRef.
+	// When a CURATED, DATED, source-cited note directly answers the question
+	// (tight identifier match — see findDirectAnswerNote), the note LEADS and
+	// carries the dating; the DeepWiki walkthrough stays underneath, labeled as
+	// possibly lagging. A dated fact we verified beats an undated index we
+	// didn't.
+	const curatedNotes = REPO_KNOWLEDGE_NOTES[repo.toLowerCase()] ?? [];
+	const directNote = findDirectAnswerNote(q, curatedNotes);
+	const noteAnswer = directNote
+		? dwAnswer
+			? `${directNote.note}\n\n— DeepWiki walkthrough below may LAG the dated fact above; where they disagree, the dated fact wins:\n\n${dwAnswer}`
+			: directNote.note
+		: null;
+	const finalAnswer = noteAnswer ?? dwAnswer ?? scanAnswer;
 
 	return NextResponse.json(
 		{
@@ -291,14 +310,20 @@ export async function GET(req: NextRequest) {
 				// Say it in `warnings` too, not only in the field. An absent
 				// `answerAsOf` is easy to skim past; a warning naming the three
 				// fields that do NOT date the answer is not.
-				...(dwAnswer
+				...(noteAnswer
 					? {
 							warnings: [
-								"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer — a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+								"The answer LEADS with a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. Any DeepWiki narrative appended below it is an undated index that can lag or contradict the dated fact — where they disagree, the dated fact wins.",
 							],
 						}
-					: {}),
-				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
+					: dwAnswer
+						? {
+								warnings: [
+									"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer — a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+								],
+							}
+						: {}),
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
 			},
 			q,
 			repo,
@@ -317,11 +342,13 @@ export async function GET(req: NextRequest) {
 			// Provenance, always explicit: a DeepWiki mechanism walkthrough vs our
 			// own source scan. They answer different depths — never let a consumer
 			// mistake scan-derived facts for a code walkthrough (or vice versa).
-			answerSource: dwAnswer
-				? "deepwiki"
-				: scanAnswer
-					? "stellarlight-code-scan"
-					: null,
+			answerSource: noteAnswer
+				? "knowledge-note"
+				: dwAnswer
+					? "deepwiki"
+					: scanAnswer
+						? "stellarlight-code-scan"
+						: null,
 			// WHEN THE ANSWER WAS TRUE — which is not when we fetched it, and not
 			// when we scanned the code.
 			//
@@ -345,7 +372,13 @@ export async function GET(req: NextRequest) {
 			// be worse than the original defect: it would make the unknown look
 			// measured. The scan-derived path CAN be dated, because there the
 			// answer IS the scan.
-			answerAsOf: dwAnswer ? null : scanAnswer ? (codeVerified?.scannedAt ?? null) : null,
+			answerAsOf: noteAnswer
+				? (directNote?.asOf ?? null)
+				: dwAnswer
+					? null
+					: scanAnswer
+						? (codeVerified?.scannedAt ?? null)
+						: null,
 			sources: {
 				repoUrl: `https://github.com/${repo}`,
 				deepWikiUrl: `https://deepwiki.com/${repo}`,
