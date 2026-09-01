@@ -96,6 +96,7 @@ async function main() {
 				lastChecked: true,
 				pageVerdict: true,
 				pageTitle: true,
+				redirectTo: true,
 			},
 		}),
 	]);
@@ -103,9 +104,12 @@ async function main() {
 	type Check = {
 		url?: string;
 		status?: string;
+		statusCode?: number | null;
 		lastSuccessAt?: string | null;
+		lastChecked?: string | null;
 		pageVerdict?: string | null;
 		pageTitle?: string | null;
+		redirectTo?: string | null;
 	};
 	const live: Check[] = (checks.docs as Check[]).filter(
 		(c) => c.url && c.lastSuccessAt,
@@ -170,9 +174,17 @@ async function main() {
 	let staleEvidence = 0;
 	let strongerBasis = 0;
 
+	const noCheckRows: Array<{
+		slug: string;
+		status: string;
+		site: string;
+		why: string;
+		lastChecked: string;
+	}> = [];
 	for (const p of projects.docs as Array<{
 		id: string;
 		slug: string;
+		status?: string | null;
 		statusBasis?: string | null;
 		links?: { website?: string | null } | null;
 	}>) {
@@ -194,6 +206,22 @@ async function main() {
 		const check = byTarget.get(key);
 		if (!check?.lastSuccessAt) {
 			noCheck++;
+			// The rows no machine lane can ever upgrade. Their latest check (any
+			// outcome) says WHY — dead, redirected off-origin, never probed — and
+			// that reason is the owner's triage input: relink, verdict Inactive,
+			// or leave. A bare count hid 144 of these for a week.
+			const latest = allByTarget.get(key);
+			noCheckRows.push({
+				slug: p.slug,
+				status: p.status ?? "?",
+				site,
+				why: !latest
+					? "never-checked"
+					: latest.redirectTo
+						? `redirect → ${latest.redirectTo}`
+						: `${latest.status ?? "?"}${latest.statusCode ? ` ${latest.statusCode}` : ""}${latest.pageVerdict ? ` (${latest.pageVerdict})` : ""}`,
+				lastChecked: latest?.lastChecked?.slice(0, 10) ?? "-",
+			});
 			continue;
 		}
 		if (days(check.lastSuccessAt) > MAX_EVIDENCE_AGE_DAYS) {
@@ -231,6 +259,18 @@ async function main() {
 	console.log(
 		`check too old (>${MAX_EVIDENCE_AGE_DAYS}d), left weak : ${staleEvidence}`,
 	);
+	if (noCheckRows.length) {
+		console.log(
+			`\n── ${noCheckRows.length} weak rows with NO successful check — owner triage (relink / Inactive / leave) ──`,
+		);
+		noCheckRows.sort(
+			(a, b) => a.why.localeCompare(b.why) || a.slug.localeCompare(b.slug),
+		);
+		for (const r of noCheckRows)
+			console.log(
+				`  ${r.slug.padEnd(28)} ${r.status.padEnd(12)} ${r.lastChecked}  ${r.why.padEnd(44)} ${r.site}`,
+			);
+	}
 	console.log(`\n→ ${upgrade.length} rows gain basis=site-liveness\n`);
 	for (const u of upgrade.slice(0, 8)) {
 		console.log(`   ${u.slug.padEnd(24)} ${u.asOf.slice(0, 10)}  ${u.url}`);
