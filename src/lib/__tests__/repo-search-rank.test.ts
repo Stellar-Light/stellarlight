@@ -988,3 +988,72 @@ describe("knowledgeNotes are description-strength match evidence", () => {
 		expect(repos[0]?.fullName).toBe("stellar/rs-soroban-sdk");
 	});
 });
+
+// battery q-tool-indexer (issue #1184, standing red since 2026-08-16): the
+// referee's 16-token natural question ranked an ORACLE #1. Three compounding
+// causes, each pinned here: surface-meta filler (github/repos/building) fed
+// the coverage multiplier on junk rows; "indexing" never folded to "indexer";
+// and "contract" granted reflector-CONTRACT identity credit via its name, so
+// the inUse tier floated it over every actual indexer.
+describe("battery q-tool-indexer — long natural indexer-discovery question", () => {
+	const BATTERY_Q =
+		"Find me open-source GitHub repos for indexing Soroban contract events or building a Stellar indexer.";
+	const oracle = doc({
+		fullName: "reflector-network/reflector-contract",
+		description:
+			"Reflector oracle smart contracts for Soroban — price feeds published on-chain",
+		topics: ["oracle", "soroban"],
+		codeScanState: "scanned",
+		stellarProof: "soroban-sdk",
+		repoScore: 90,
+		stars: 60,
+	});
+	const junk = doc({
+		fullName: "LabsCrypt/flowfi",
+		description:
+			"Open source GitHub repo for building payment flows on Stellar with events",
+		repoScore: 55,
+		stars: 5,
+	});
+	const golden = doc({
+		fullName: "stellar/stellar-ledger-data-indexer",
+		description:
+			"Indexer for Stellar ledger data — extracts and indexes contract events",
+		topics: ["indexer"],
+		codeScanState: "scanned",
+		stellarProof: "soroban-sdk",
+		repoScore: 80,
+		stars: 40,
+	});
+
+	it("the indexer repo leads; the oracle does not ride its name's 'contract' to #1", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([oracle, junk, golden]),
+			BATTERY_Q,
+			{ limit: 3 },
+		);
+		// The battery contract is the LEAD: the row whose name is the answer
+		// outranks the oracle that used to ride its "-contract" name token.
+		// No opinion on #2/#3 — in this 3-doc fixture the scanned oracle
+		// legitimately beats the junk row (the #1053 canonicality lesson).
+		expect(repos[0].fullName).toBe("stellar/stellar-ledger-data-indexer");
+	});
+
+	it("'indexing' reaches rows that only say 'indexer'", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([junk, golden]),
+			"indexing soroban events",
+			{ limit: 2 },
+		);
+		expect(repos[0].fullName).toBe("stellar/stellar-ledger-data-indexer");
+	});
+
+	it("identity preserved: 'reflector contract' still leads with the oracle", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([oracle, junk, golden]),
+			"reflector contract",
+			{ limit: 2 },
+		);
+		expect(repos[0].fullName).toBe("reflector-network/reflector-contract");
+	});
+});
