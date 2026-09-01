@@ -1,43 +1,7 @@
 {
-	"generatedAt": "2026-09-01T04:43:51.803Z",
+	"generatedAt": "2026-09-01T10:30:53.860Z",
 	"detector": "record-completeness",
 	"failures": [
-		{
-			"probe": "scfRoundAwards empty: upesa",
-			"note": "rounds=[41,42]"
-		},
-		{
-			"probe": "scfRoundAwards empty: pagcrypto",
-			"note": "rounds=[42]"
-		},
-		{
-			"probe": "scfRoundAwards empty: crebit",
-			"note": "rounds=[44,45]"
-		},
-		{
-			"probe": "scfRoundAwards empty: yolat",
-			"note": "rounds=[44]"
-		},
-		{
-			"probe": "scfRoundAwards empty: sendana",
-			"note": "rounds=[45]"
-		},
-		{
-			"probe": "scfRoundAwards empty: sorted",
-			"note": "rounds=[44,45]"
-		},
-		{
-			"probe": "scfRoundAwards empty: kutana",
-			"note": "rounds=[45]"
-		},
-		{
-			"probe": "scfRoundAwards empty: janus",
-			"note": "rounds=[45]"
-		},
-		{
-			"probe": "scfRoundAwards empty: roberto-sanz-criptomonedas",
-			"note": "rounds=[22,24]"
-		},
 		{
 			"probe": "scfRoundAwards empty: inferera",
 			"note": "rounds=[41]"
@@ -55,10 +19,6 @@
 			"note": "rounds=[29]"
 		},
 		{
-			"probe": "scfRoundAwards empty: verseprop",
-			"note": "rounds=[31,32,33]"
-		},
-		{
 			"probe": "scfRoundAwards empty: ichi",
 			"note": "rounds=[26]"
 		},
@@ -73,10 +33,6 @@
 		{
 			"probe": "scfRoundAwards empty: dfs-labs",
 			"note": "rounds=[24]"
-		},
-		{
-			"probe": "scfRoundAwards empty: nouns-builder-protocol",
-			"note": "rounds=[44]"
 		},
 		{
 			"probe": "scfRoundAwards empty: soroban-decompiler",

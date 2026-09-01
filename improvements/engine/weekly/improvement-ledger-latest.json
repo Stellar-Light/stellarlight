@@ -1,37 +1,27 @@
 {
-	"generatedAt": "2026-09-01T04:53:42.457Z",
+	"generatedAt": "2026-09-01T10:41:10.542Z",
 	"total": 519,
-	"open": 32,
-	"closed": 487,
+	"open": 16,
+	"closed": 503,
 	"verified": 7,
-	"cleared": 480,
+	"cleared": 496,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 264,
-	"closingRate": 0.94,
+	"clearedOnSilence": 280,
+	"closingRate": 0.97,
 	"oldestOpenDays": 40,
 	"inWave": 0,
-	"highOpen": 5,
+	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "directory",
-			"open": 21,
+			"open": 10,
 			"total": 89
 		},
 		{
 			"surface": "consumer",
 			"open": 5,
 			"total": 24
-		},
-		{
-			"surface": "contract",
-			"open": 4,
-			"total": 34
-		},
-		{
-			"surface": "code",
-			"open": 1,
-			"total": 5
 		},
 		{
 			"surface": "corpus",
@@ -44,49 +34,24 @@
 			"total": 333
 		},
 		{
+			"surface": "code",
+			"open": 0,
+			"total": 5
+		},
+		{
 			"surface": "scf",
 			"open": 0,
 			"total": 16
+		},
+		{
+			"surface": "contract",
+			"open": 0,
+			"total": 34
 		}
 	],
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
-		{
-			"id": "nightly-field-population:repos-codeverified-contractinterface-soroban-abi",
-			"surface": "code",
-			"source": "nightly-field-population",
-			"probe": "repos.codeVerified.contractInterface (Soroban ABI, 2026-08-08)",
-			"severity": "high"
-		},
-		{
-			"id": "nightly-drift:api-repos-search-q-oracle-limit-3-200-in-12s",
-			"surface": "contract",
-			"source": "nightly-drift",
-			"probe": "/api/repos/search?q=oracle&limit=3 → 200 in <12s",
-			"severity": "high"
-		},
-		{
-			"id": "nightly-claims:https-stellarlight-xyz",
-			"surface": "contract",
-			"source": "nightly-claims",
-			"probe": "https://stellarlight.xyz",
-			"severity": "high"
-		},
-		{
-			"id": "nightly-claims:https-stellarlight-xyz-leaderboard",
-			"surface": "contract",
-			"source": "nightly-claims",
-			"probe": "https://stellarlight.xyz/leaderboard",
-			"severity": "high"
-		},
-		{
-			"id": "nightly-claims:https-stellarlight-xyz-hackathons",
-			"surface": "contract",
-			"source": "nightly-claims",
-			"probe": "https://stellarlight.xyz/hackathons",
-			"severity": "high"
-		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
@@ -106,6 +71,41 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "jobs bounties and freelance work for Stellar contributors",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "how does the Blend lending pool calculate interest rates in the code",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-inferera",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: inferera",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-simbolik",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: simbolik",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-the-aha-company",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: the-aha-company",
+			"severity": "medium"
+		},
+		{
+			"id": "nightly-completeness:scfroundawards-empty-womenbiz",
+			"surface": "directory",
+			"source": "nightly-completeness",
+			"probe": "scfRoundAwards empty: womenbiz",
 			"severity": "medium"
 		}
 	]

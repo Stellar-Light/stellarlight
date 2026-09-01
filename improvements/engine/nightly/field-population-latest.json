@@ -1,11 +1,5 @@
 {
-	"generatedAt": "2026-09-01T04:42:29.028Z",
+	"generatedAt": "2026-09-01T10:29:50.321Z",
 	"detector": "field-population",
-	"failures": [
-		{
-			"probe": "repos.codeVerified.contractInterface (Soroban ABI, 2026-08-08)",
-			"note": "fetch failed: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
-			"surface": "code"
-		}
-	]
+	"failures": []
 }
