@@ -3334,3 +3334,56 @@ export const DEPLOYMENT_VERIFIED: Record<
 		note: "operator announcement 2026-03-04: 'bringing institutional-grade oracle infrastructure to the Stellar mainnet', 10 feeds live; their monorepo chain-configs declares stellar-mainnet (isMainnet:true, mainnet RPCs); SEP-40 feeds in production for Centrifuge RWAs",
 	},
 };
+
+/**
+ * statusSourceUrl backfill for human-verified Inactive rows (gap-matrix
+ * 'sourced', 2026-09-01): the verdicts were made by observing these sites
+ * dead/parked/repurposed — the observed URL IS the re-checkable source a
+ * caller can visit (statusAsOf already dates the verdict). Fill-only-if-
+ * empty; never touches status/basis/asOf; Live rows are deliberately NOT
+ * here (their source is the site-liveness lane's own evidence).
+ */
+export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
+	"aerochain": "https://aerochain.wingleet.com/redoc",
+	"apay": "https://apay.io/",
+	"arcturus": "https://arcturus-gpt.com/",
+	"b4b": "https://b4b.app/",
+	"benkiko": "https://benkiko.xyz/",
+	"blip": "https://blip.watch/",
+	"borderdollar": "https://borderdollar.co/",
+	"brl": "https://ntokens.com/blog/brl-anchor-stellar",
+	"canfy": "https://canfy.net/",
+	"chaincred": "https://prince29chouhan.github.io/chaincred_landing",
+	"cosmiclink": "https://cosmic.link/",
+	"cosmicvote": "https://cosmic.vote/",
+	"cryptocannoneer": "https://blockshangerous.com/cryptocannoneer",
+	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi",
+	"equilibre": "https://equilibre.io/",
+	"forge": "https://forgerpc.com/",
+	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
+	"localcoin": "https://localcoin.us/",
+	"lumenaut": "https://pool.lumenaut.net/",
+	"lumens-for-charity": "https://lumensforcharity.tech/",
+	"mimoto": "https://github.com/nkoorty/mimoto",
+	"mxlet": "https://xlet.io/",
+	"opensolar": "https://openx.solar/",
+	"pactta": "https://pactta.com/",
+	"paygo-crypto": "https://paygocrypto.io/",
+	"quidroo": "https://quidroo.com/",
+	"rigel": "https://rigel.link/",
+	"scam-flagging-system": "https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
+	"skeeper": "https://skeeper.xyz/",
+	"snnac": "https://snnac.me/",
+	"soroban-assistant": "https://soroban-assistant.herokuapp.com/",
+	"sorobanide": "https://sorobanide.com/",
+	"sorobuilder": "https://sorobuilder.com/",
+	"sorosorcerer": "https://sorosorcerer.com/",
+	"sorscan": "https://sorscan.org/",
+	"stellar-update": "https://stellarupdate.com/",
+	"stellarstrides": "https://stellarstrides.xyz/",
+	"swplug": "https://swplug.com/",
+	"the-blue-marble": "https://thebluemarble.io/",
+	"typiqo": "https://typiqo.it/",
+	"venalabs": "https://venalabs.com/",
+	"whalestack": "https://coinqvest.com/",
+};

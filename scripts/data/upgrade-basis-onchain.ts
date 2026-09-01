@@ -44,6 +44,7 @@ const MAX_MOVEMENT_AGE_DAYS = 45; // enrich-onchain runs weekly; 45d = generous 
 const MAX_TVL_AGE_DAYS = 14; // the DeFiLlama refresh is scheduled ~daily
 
 const WEAK = new Set(["site-liveness", "source-inherited", "unverified"]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const days = (iso: string) => (Date.now() - Date.parse(iso)) / 86_400_000;
 
 interface Row {
@@ -105,6 +106,46 @@ function evidenceFor(
 	return null;
 }
 
+/**
+ * Evidence C — HORIZON RECENT ACTIVITY, the "now" path. Movement deltas (A)
+ * need two weekly stellar.expert readings, so a freshly-joined asset key sits
+ * a week from its first possible upgrade. Horizon can attest activity TODAY:
+ * the asset's most recent trade, dated by ledger close time — a direct,
+ * citable on-chain observation (two parties moved value). Probed only for
+ * weak rows that hold an asset key and passed neither A nor B; an asset with
+ * no recent trade stays weak honestly (payment-only rails will earn their
+ * upgrade through A when the deltas arrive).
+ */
+async function horizonEvidence(
+	r: Row,
+): Promise<{ kind: "horizon-trade"; asOf: string; url: string; note: string } | null> {
+	const o = r.onchain;
+	if (!o?.assetCode || !o.issuer) return null;
+	const type =
+		o.assetCode.length <= 4 ? "credit_alphanum4" : "credit_alphanum12";
+	const u = `https://horizon.stellar.org/trades?base_asset_type=${type}&base_asset_code=${encodeURIComponent(o.assetCode)}&base_asset_issuer=${o.issuer}&order=desc&limit=1`;
+	try {
+		const res = await fetch(u, {
+			headers: { "User-Agent": "stellarlight-basis-upgrade" },
+			signal: AbortSignal.timeout(15_000),
+		});
+		if (!res.ok) return null;
+		const d = (await res.json()) as {
+			_embedded?: { records?: Array<{ ledger_close_time?: string }> };
+		};
+		const t = d._embedded?.records?.[0]?.ledger_close_time;
+		if (!t || days(t) > MAX_MOVEMENT_AGE_DAYS) return null;
+		return {
+			kind: "horizon-trade",
+			asOf: t,
+			url: `https://stellar.expert/explorer/public/asset/${o.assetCode}-${o.issuer}`,
+			note: `last trade ${t.slice(0, 10)} (Horizon)`,
+		};
+	} catch {
+		return null;
+	}
+}
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	const all = await payload.find({
@@ -128,11 +169,15 @@ async function main() {
 	const weak = rows.filter(
 		(r) => !r.statusBasis || WEAK.has(r.statusBasis),
 	);
-	const plan = weak
-		.map((r) => ({ r, ev: evidenceFor(r) }))
-		.filter((x): x is { r: Row; ev: NonNullable<ReturnType<typeof evidenceFor>> } =>
-			Boolean(x.ev),
-		);
+	const plan: Array<{
+		r: Row;
+		ev: { kind: string; asOf: string; url: string; note: string };
+	}> = [];
+	for (const r of weak) {
+		const ev = evidenceFor(r) ?? (await horizonEvidence(r));
+		if (ev) plan.push({ r, ev });
+		if (!evidenceFor(r) && r.onchain?.assetCode) await sleep(300); // Horizon politeness
+	}
 
 	console.log(
 		`Live rows: ${rows.length} · weak-basis: ${weak.length} · upgradeable on held evidence: ${plan.length}\n`,
