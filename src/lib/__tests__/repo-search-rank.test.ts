@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { flagshipsFor, searchRepos } from "../repo-search";
+import {
+	canonicalFor,
+	explicitRepoName,
+	flagshipsFor,
+	searchRepos,
+} from "../repo-search";
 
 /** F4 (audit root #4): stellarness ranks above raw keyword score. */
 
@@ -945,9 +950,9 @@ describe("ecosystem words are not identity when specific anchors exist", () => {
 	it("soroban-only zone hit loses identity; the specific hit keeps it", async () => {
 		const { repoAnchorIdentity } = await import("../repo-search");
 		const tokens = ["soroban", "event", "indexer"];
-		expect(repoAnchorIdentity(tokens, ["reflector oracle soroban contract"])).toBe(
-			false,
-		);
+		expect(
+			repoAnchorIdentity(tokens, ["reflector oracle soroban contract"]),
+		).toBe(false);
 		expect(
 			repoAnchorIdentity(tokens, ["contract event indexer for stellar"]),
 		).toBe(true);
@@ -1067,5 +1072,21 @@ describe("battery q-tool-indexer — long natural indexer-discovery question", (
 			{ limit: 2 },
 		);
 		expect(repos[0].fullName).toBe("reflector-network/reflector-contract");
+	});
+});
+
+describe("explicitRepoName", () => {
+	it("a bare owner/name is explicit routing; a sentence is not", () => {
+		expect(explicitRepoName("stellar/stellar-etl")).toBe("stellar/stellar-etl");
+		expect(explicitRepoName("  Creit-Tech/Stellar-Wallets-Kit ")).toBe(
+			"Creit-Tech/Stellar-Wallets-Kit",
+		);
+		expect(explicitRepoName("how does stellar/stellar-etl ingest")).toBeNull();
+		expect(explicitRepoName("etl pipeline for ledger data")).toBeNull();
+	});
+
+	it("the concept map maps a bare owner/name to nothing", () => {
+		expect(canonicalFor("stellar/stellar-etl")).toEqual([]);
+		expect(canonicalFor("etl pipeline").length).toBeGreaterThan(0);
 	});
 });

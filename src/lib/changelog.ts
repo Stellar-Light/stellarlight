@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-01",
 		surfaces: ["api"],
+		version: "spec@1.9.19",
+		type: "fixed",
+		summary:
+			"explainRepo: a bare owner/name in q routes explicitly (routedVia 'explicit'), outranking the concept map — 'stellar/stellar-etl' had wordy-split into 'etl' and routed to stellar-ledger-data-indexer, so the named repo's own knowledge notes never surfaced.",
+		detail:
+			"Same behaviour as passing ?repo=. Only a query that is exactly one owner/name token qualifies; a sentence that mentions a repo still routes by trigger phrase, concept map, then index. canonicalFor treats a bare owner/name like a code identifier (maps to nothing). Description-only change to routedVia in the spec.",
+	},
+	{
+		date: "2026-09-01",
+		surfaces: ["api"],
 		version: "spec@1.9.18",
 		type: "added",
 		summary:

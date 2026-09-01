@@ -2298,7 +2298,7 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name — that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
 										},
 										repoMeta: {
 											type: "object",

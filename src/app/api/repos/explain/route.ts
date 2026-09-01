@@ -24,7 +24,12 @@ import {
 	findRepoByTrigger,
 	REPO_KNOWLEDGE_NOTES,
 } from "@/lib/repo-knowledge";
-import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
+import {
+	canonicalFor,
+	contentTokens,
+	explicitRepoName,
+	searchRepos,
+} from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -53,6 +58,15 @@ export async function GET(req: NextRequest) {
 		"explicit";
 	let nearMisses: string[] = [];
 	const canon = canonicalFor(q);
+	if (!repo) {
+		// A bare owner/name IS the routing — the same as passing ?repo=. Before
+		// the concept map: "stellar/stellar-etl" wordy-split into "etl" and
+		// went to stellar-ledger-data-indexer (2026-09-01).
+		const named = explicitRepoName(q);
+		if (named) {
+			repo = named;
+		}
+	}
 	if (!repo) {
 		const viaTrigger = canon.length ? null : findRepoByTrigger(q);
 		if (canon.length) {

@@ -2787,7 +2787,7 @@ export interface operations {
                         };
                         q?: string;
                         repo?: string | null;
-                        /** @description How the repo was chosen: explicit | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
+                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name — that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
                         routedVia?: string | null;
                         /** @description Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
