@@ -57,11 +57,21 @@ export function probeDiscriminator(p: ProbeRecord): string {
  * record, it is a probe about the whole chain, and grading one record against
  * it is what defect (1) above was. */
 export function networkProbeQuery(p: ProbeRecord): string | null {
-	const net = (p.supportedNetworks ?? []).find((n) => n && n !== "stellar");
+	// Case-insensitive exclusion (2026-09-01): the seed waves store the value
+	// as "Stellar", which slipped past `n !== "stellar"` and emitted the
+	// degenerate whole-directory probe this function's contract forbids
+	// ("Stellar security" graded komet against 36 matches; "Stellar payments"
+	// spawned a 7-record set probe) — home-chain membership is not a
+	// discriminating attribute, whatever its casing.
+	const net = (p.supportedNetworks ?? []).find(
+		(n) => n && n.toLowerCase() !== "stellar",
+	);
 	if (!net) return null;
 	const discriminator = probeDiscriminator(p);
 	if (!discriminator) return null;
-	return `${net} ${discriminator}`;
+	// Lowercase the emitted chain so cased data ("EVM") and lowercase data
+	// produce the same probe string — probes are identities across sweeps.
+	return `${net.toLowerCase()} ${discriminator}`;
 }
 
 /** How deep a record may sit and still count as retrieved, given how many
