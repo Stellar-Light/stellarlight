@@ -3347,13 +3347,11 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	"aerochain": "https://aerochain.wingleet.com/redoc",
 	"apay": "https://apay.io/",
 	"arcturus": "https://arcturus-gpt.com/",
-	"b4b": "https://b4b.app/",
 	"benkiko": "https://benkiko.xyz/",
 	"blip": "https://blip.watch/",
 	"borderdollar": "https://borderdollar.co/",
 	"brl": "https://ntokens.com/blog/brl-anchor-stellar",
 	"canfy": "https://canfy.net/",
-	"chaincred": "https://prince29chouhan.github.io/chaincred_landing",
 	"cosmiclink": "https://cosmic.link/",
 	"cosmicvote": "https://cosmic.vote/",
 	"cryptocannoneer": "https://blockshangerous.com/cryptocannoneer",
@@ -3361,17 +3359,14 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	"equilibre": "https://equilibre.io/",
 	"forge": "https://forgerpc.com/",
 	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
-	"localcoin": "https://localcoin.us/",
 	"lumenaut": "https://pool.lumenaut.net/",
 	"lumens-for-charity": "https://lumensforcharity.tech/",
 	"mimoto": "https://github.com/nkoorty/mimoto",
 	"mxlet": "https://xlet.io/",
 	"opensolar": "https://openx.solar/",
-	"pactta": "https://pactta.com/",
 	"paygo-crypto": "https://paygocrypto.io/",
 	"quidroo": "https://quidroo.com/",
 	"rigel": "https://rigel.link/",
-	"scam-flagging-system": "https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
 	"skeeper": "https://skeeper.xyz/",
 	"snnac": "https://snnac.me/",
 	"soroban-assistant": "https://soroban-assistant.herokuapp.com/",
@@ -3382,8 +3377,28 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	"stellar-update": "https://stellarupdate.com/",
 	"stellarstrides": "https://stellarstrides.xyz/",
 	"swplug": "https://swplug.com/",
-	"the-blue-marble": "https://thebluemarble.io/",
 	"typiqo": "https://typiqo.it/",
+};
+
+/**
+ * RETRACTED receipts (audit C2 + HEAD sweep 2026-09-01): these stamped
+ * statusSourceUrl values must be NULLED, not kept — six of the URLs answer
+ * HTTP 200 today (a live page cannot stand as 'observed dead' evidence,
+ * even where the Inactive verdict itself still holds: zombie landing pages
+ * and a redirect-to-successor among them), chaincred's URL was
+ * case-mangled (the real ChainCred_landing page 200s), and the
+ * scam-flagging-system sheets id was case-normalized into a URL nobody
+ * ever observed. The verdicts stay; the evidence slots reopen for real
+ * receipts at re-triage. Keyed to the exact mangled value so the retract
+ * can never clobber a later, legitimate source.
+ */
+export const STATUS_SOURCE_RETRACT: Record<string, string> = {
+	"b4b": "https://b4b.app/",
+	"chaincred": "https://prince29chouhan.github.io/chaincred_landing",
+	"localcoin": "https://localcoin.us/",
+	"pactta": "https://pactta.com/",
+	"scam-flagging-system": "https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
+	"the-blue-marble": "https://thebluemarble.io/",
 	"venalabs": "https://venalabs.com/",
 	"whalestack": "https://coinqvest.com/",
 };

@@ -25,6 +25,7 @@ import {
 	SEEDS,
 	STATUS_FIX,
 	STATUS_SOURCE_BACKFILL,
+	STATUS_SOURCE_RETRACT,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
@@ -1263,7 +1264,35 @@ async function main() {
 		});
 	}
 
-	// ── raven#8 / sls-018: additive types for multi-product projects ──
+	// ── statusSourceUrl retract: null EXACTLY the mangled/contradicted value ──
+	console.log("\n── Status source retract (audit C2) ──");
+	for (const [slug, badUrl] of Object.entries(STATUS_SOURCE_RETRACT)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) continue;
+		if (d.statusSourceUrl !== badUrl) {
+			console.log(`  ${slug}: current source is not the retracted value, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: statusSourceUrl NULLED (was ${badUrl})`);
+		if (EXECUTE) {
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: { statusSourceUrl: null },
+				context: { internal: true },
+				overrideAccess: true,
+			});
+		}
+	}
+
 	// ── statusSourceUrl backfill: fill-only-if-empty, verdict untouched ──
 	console.log("\n── Status source backfill (fill-only-if-empty) ──");
 	for (const [slug, srcUrl] of Object.entries(STATUS_SOURCE_BACKFILL)) {
@@ -1284,6 +1313,13 @@ async function main() {
 			console.log(`  ${slug}: already sourced, skip`);
 			continue;
 		}
+		// Audit C5: the map is FOR human-verified Inactive rows — a row that has
+		// since flipped to Live must never get a dead-site URL stamped as its
+		// status receipt.
+		if (d.status !== "Inactive") {
+			console.log(`  ${slug}: status is ${d.status}, not Inactive — skip`);
+			continue;
+		}
 		console.log(`  ${slug}: statusSourceUrl ← ${srcUrl}`);
 		if (EXECUTE) {
 			await payload.update({
@@ -1296,6 +1332,7 @@ async function main() {
 		}
 	}
 
+	// ── raven#8 / sls-018: additive types for multi-product projects ──
 	console.log("\n── Types add (merge, never remove) ──");
 	for (const [slug, addTypes] of Object.entries(TYPES_ADD)) {
 		const r = await payload.find({

@@ -373,7 +373,14 @@ export async function GET(req: NextRequest) {
 			// measured. The scan-derived path CAN be dated, because there the
 			// answer IS the scan.
 			answerAsOf: noteAnswer
-				? (directNote?.asOf ?? null)
+				? // Audit C6: notes date to the DAY of verification; the contract
+					// declares date-time, so a bare date is serialized as that day's
+					// start in UTC — conservative, and stated in the spec.
+					(directNote?.asOf
+						? directNote.asOf.length === 10
+							? `${directNote.asOf}T00:00:00Z`
+							: directNote.asOf
+						: null)
 				: dwAnswer
 					? null
 					: scanAnswer

@@ -30,27 +30,27 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 		expect(ROUTE).toMatch(/\banswerAsOf:/);
 	});
 
-	// The ternary grew a third arm (sls-080: a curated dated note LEADS when it
-	// names the exact identifier asked about). The #1134 semantics must SURVIVE
-	// the growth: deepwiki still yields null, the scan arm still dates only from
-	// the scan — and the new note arm dates only from the note's own asOf.
-	const TERNARY =
-		/answerAsOf:\s*noteAnswer\s*\?\s*([^:]+):\s*dwAnswer\s*\?\s*([^:]+):\s*scanAnswer\s*\?\s*([^:]+):\s*null/.exec(
-			ROUTE.replace(/\n/g, " "),
-		);
+	// The answerAsOf expression now has three arms and the note arm carries
+	// its own nested date-time serialization (audit C6), so positional regex
+	// groups are too brittle — slice the flattened expression by its branch
+	// keywords and assert each arm's CONTENT. The #1134 semantics must
+	// survive every growth: deepwiki stays null, scan dates only from the
+	// scan, note dates only from the note.
+	const FLAT = ROUTE.replace(/\s+/g, " ");
+	const exprStart = FLAT.indexOf("answerAsOf: noteAnswer ?");
+	const dwSplit = FLAT.indexOf(": dwAnswer ?", exprStart);
+	const scanSplit = FLAT.indexOf(": scanAnswer ?", dwSplit);
+	const exprEnd = FLAT.indexOf(": null,", scanSplit);
+	const noteArm = FLAT.slice(exprStart, dwSplit);
+	const dwArm = FLAT.slice(dwSplit, scanSplit);
+	const scanArm = FLAT.slice(scanSplit, exprEnd);
 
 	it("answerAsOf is null on the deepwiki path — an admission, not a guess", () => {
-		// A fabricated timestamp here would be worse than the original defect:
-		// it makes an unknown look measured.
-		expect(TERNARY, "the three-armed answerAsOf ternary must be present").toBeTruthy();
-		expect((TERNARY?.[2] ?? "").trim()).toBe("null");
+		expect(exprStart, "the three-armed answerAsOf expression must exist").toBeGreaterThan(-1);
+		expect(dwArm.replace(": dwAnswer ?", "").trim()).toMatch(/^null$/);
 	});
 
 	it("the scan arm dates from the scan, the note arm from the note, and nothing else", () => {
-		// The audit's point stands: constrain EVERY arm, or the precise wrong
-		// timestamp #1134 was about sneaks in through an unpinned one.
-		const noteArm = (TERNARY?.[1] ?? "").trim();
-		const scanArm = (TERNARY?.[3] ?? "").trim();
 		expect(noteArm).toMatch(/directNote\?\.asOf/);
 		expect(noteArm).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
 		expect(scanArm).toMatch(/scannedAt/);
@@ -58,10 +58,7 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 	});
 
 	it("never dates a deepwiki answer from the scan", () => {
-		// The deepwiki arm must not be able to reach any scan date.
-		const dwArm = (TERNARY?.[2] ?? "MISSING").trim();
-		expect(dwArm).not.toMatch(/scannedAt|lastCommitAt|generatedAt/);
-		expect(dwArm).not.toBe("MISSING");
+		expect(dwArm).not.toMatch(/scannedAt|lastCommitAt|generatedAt|asOf/);
 	});
 
 	it("warns which dates do NOT cover the answer, on both answer paths", () => {
