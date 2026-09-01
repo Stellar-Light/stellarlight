@@ -1,18 +1,11 @@
 {
- "generatedAt": "2026-09-01T03:49:33.476Z",
+ "generatedAt": "2026-09-01T04:56:38.872Z",
  "surfaces": [
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 21,
    "clearedFindings": 68,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 6,
-   "clearedFindings": 327,
    "verifiedFindings": 0
   },
   {
@@ -23,10 +16,31 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "contract",
+   "means": "the OpenAPI contract and its generated artifacts",
+   "openFindings": 4,
+   "clearedFindings": 23,
+   "verifiedFindings": 7
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 1,
+   "clearedFindings": 4,
+   "verifiedFindings": 0
+  },
+  {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
    "openFindings": 1,
    "clearedFindings": 17,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 0,
+   "clearedFindings": 333,
    "verifiedFindings": 0
   },
   {
@@ -35,33 +49,19 @@
    "openFindings": 0,
    "clearedFindings": 16,
    "verifiedFindings": 0
-  },
-  {
-   "surface": "contract",
-   "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 0,
-   "clearedFindings": 23,
-   "verifiedFindings": 7
-  },
-  {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 0,
-   "clearedFindings": 4,
-   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 514,
-  "open": 33,
-  "cleared": 474,
+  "total": 519,
+  "open": 32,
+  "cleared": 480,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 6,
-    "cleared": 278,
+    "open": 0,
+    "cleared": 284,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -88,7 +88,7 @@
    },
    {
     "mode": "api-drift",
-    "open": 0,
+    "open": 1,
     "cleared": 22,
     "verified": 0,
     "surface": "contract"
@@ -130,10 +130,17 @@
    },
    {
     "mode": "population-miss",
-    "open": 0,
+    "open": 1,
     "cleared": 3,
     "verified": 0,
     "surface": "code"
+   },
+   {
+    "mode": "claim-blocker",
+    "open": 3,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "contract"
    },
    {
     "mode": "golden-fail",
@@ -168,7 +175,7 @@
    },
    {
     "bucket": "31–60d",
-    "count": 4
+    "count": 3
    },
    {
     "bucket": ">60d",
@@ -176,6 +183,42 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "response",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "≥3 of the 7 records implying 'Stellar payments' in top-10",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "blade in top-3 for its own name",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "every-finance in top-3 for its own name",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "samogera retrievable by own username",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "Malika7188 retrievable by own username",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-01"
+   },
    {
     "probe": "mystic in top-3 for 'is Mystic live'",
     "surface": "retrieval",
@@ -187,61 +230,25 @@
     "surface": "retrieval",
     "failureMode": "recall-miss",
     "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "the-strategists in top-3 for 'is The Strategists live'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "x402 in top-3 for 'x402 on stellar'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "every-finance in top-3 for 'what is Every Finance'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "zet in top-3 for 'tell me about ZET'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "fx-swap in top-3 for 'FX Swap on stellar'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "truway-yield in top-3 for 'what is Truway'",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-01"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 222,
-    "repeats": 222,
-    "ratePct": 100
+    "newFindings": 227,
+    "repeats": 226,
+    "ratePct": 99.6
    },
    "lifetime": {
-    "newFindings": 514,
-    "repeats": 508,
-    "ratePct": 98.8
+    "newFindings": 519,
+    "repeats": 512,
+    "ratePct": 98.7
    },
    "byClass": [
     {
      "class": "identity",
      "total": 310,
-     "open": 11,
+     "open": 5,
      "firstSeen": "2026-07-22"
     },
     {
@@ -252,14 +259,14 @@
     },
     {
      "class": "evidence-population",
-     "total": 38,
-     "open": 21,
+     "total": 39,
+     "open": 22,
      "firstSeen": "2026-07-22"
     },
     {
      "class": "contract-completeness",
-     "total": 23,
-     "open": 0,
+     "total": 24,
+     "open": 1,
      "firstSeen": "2026-07-22"
     },
     {
@@ -273,6 +280,12 @@
      "total": 16,
      "open": 0,
      "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "unclassified",
+     "total": 3,
+     "open": 3,
+     "firstSeen": "2026-09-01"
     }
    ]
   }
@@ -9746,11 +9759,11 @@
     },
     {
      "label": "slowing",
-     "count": 905
+     "count": 907
     },
     {
      "label": "active",
-     "count": 743
+     "count": 741
     },
     {
      "label": "unknown",
@@ -10871,12 +10884,6 @@
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
    "measurement": "28 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
-  },
-  {
-   "area": "known-item recall",
-   "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "6 open recall-miss findings",
-   "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
  "flow": {
@@ -10910,7 +10917,7 @@
     "id": "s:nightly-drift",
     "label": "nightly-drift",
     "column": 0,
-    "value": 22
+    "value": 23
    },
    {
     "id": "s:nightly-battery",
@@ -10933,6 +10940,12 @@
    {
     "id": "s:nightly-field-population",
     "label": "nightly-field-population",
+    "column": 0,
+    "value": 4
+   },
+   {
+    "id": "s:nightly-claims",
+    "label": "nightly-claims",
     "column": 0,
     "value": 3
    },
@@ -10964,7 +10977,7 @@
     "id": "f:contract",
     "label": "contract",
     "column": 1,
-    "value": 30
+    "value": 34
    },
    {
     "id": "f:consumer",
@@ -10988,19 +11001,19 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 4
+    "value": 5
    },
    {
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 474
+    "value": 480
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 33
+    "value": 32
    },
    {
     "id": "o:verified",
@@ -11011,172 +11024,186 @@
   ],
   "links": [
    {
-    "source": 9,
-    "target": 11,
+    "source": 10,
+    "target": 12,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
     "value": 2
    },
    {
-    "source": 11,
-    "target": 18,
+    "source": 12,
+    "target": 19,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 327
+    "value": 333
    },
    {
     "source": 1,
-    "target": 11,
+    "target": 12,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
     "value": 47
    },
    {
     "source": 0,
-    "target": 11,
+    "target": 12,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
     "value": 284
    },
    {
-    "source": 11,
-    "target": 19,
-    "sourceId": "f:retrieval",
-    "targetId": "o:open",
-    "value": 6
-   },
-   {
     "source": 6,
-    "target": 16,
+    "target": 17,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 16
    },
    {
-    "source": 16,
-    "target": 18,
+    "source": 17,
+    "target": 19,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 16
    },
    {
     "source": 7,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 13,
-    "target": 20,
+    "source": 14,
+    "target": 21,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 13,
-    "target": 18,
+    "source": 14,
+    "target": 19,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 23
    },
    {
     "source": 3,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 24
    },
    {
-    "source": 14,
-    "target": 18,
+    "source": 15,
+    "target": 19,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 14,
-    "target": 19,
+    "source": 15,
+    "target": 20,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 5
    },
    {
-    "source": 10,
-    "target": 17,
+    "source": 11,
+    "target": 18,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 17,
-    "target": 18,
+    "source": 18,
+    "target": 19,
     "sourceId": "f:code",
     "targetId": "o:cleared",
     "value": 4
    },
    {
     "source": 1,
-    "target": 12,
+    "target": 13,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
     "value": 61
    },
    {
-    "source": 12,
-    "target": 18,
+    "source": 13,
+    "target": 19,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
     "value": 68
    },
    {
     "source": 4,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
-    "value": 22
+    "value": 23
    },
    {
     "source": 5,
-    "target": 15,
+    "target": 16,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 15,
-    "target": 18,
+    "source": 16,
+    "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 17
    },
    {
     "source": 8,
-    "target": 17,
+    "target": 18,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
-    "value": 3
+    "value": 4
    },
    {
-    "source": 15,
-    "target": 19,
+    "source": 16,
+    "target": 20,
     "sourceId": "f:corpus",
     "targetId": "o:open",
     "value": 1
    },
    {
     "source": 2,
-    "target": 12,
+    "target": 13,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 28
    },
    {
-    "source": 12,
-    "target": 19,
+    "source": 13,
+    "target": 20,
     "sourceId": "f:directory",
     "targetId": "o:open",
     "value": 21
+   },
+   {
+    "source": 14,
+    "target": 20,
+    "sourceId": "f:contract",
+    "targetId": "o:open",
+    "value": 4
+   },
+   {
+    "source": 18,
+    "target": 20,
+    "sourceId": "f:code",
+    "targetId": "o:open",
+    "value": 1
+   },
+   {
+    "source": 9,
+    "target": 14,
+    "sourceId": "s:nightly-claims",
+    "targetId": "f:contract",
+    "value": 3
    }
   ]
  },

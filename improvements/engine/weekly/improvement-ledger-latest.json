@@ -1,16 +1,16 @@
 {
-	"generatedAt": "2026-09-01T03:46:07.049Z",
-	"total": 514,
-	"open": 43,
-	"closed": 471,
+	"generatedAt": "2026-09-01T04:53:42.457Z",
+	"total": 519,
+	"open": 32,
+	"closed": 487,
 	"verified": 7,
-	"cleared": 464,
-	"clearedByReprobe": 206,
-	"clearedOnSilence": 258,
-	"closingRate": 0.92,
+	"cleared": 480,
+	"clearedByReprobe": 216,
+	"clearedOnSilence": 264,
+	"closingRate": 0.94,
 	"oldestOpenDays": 40,
 	"inWave": 0,
-	"highOpen": 0,
+	"highOpen": 5,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
@@ -19,14 +19,19 @@
 			"total": 89
 		},
 		{
-			"surface": "retrieval",
-			"open": 16,
-			"total": 333
-		},
-		{
 			"surface": "consumer",
 			"open": 5,
 			"total": 24
+		},
+		{
+			"surface": "contract",
+			"open": 4,
+			"total": 34
+		},
+		{
+			"surface": "code",
+			"open": 1,
+			"total": 5
 		},
 		{
 			"surface": "corpus",
@@ -34,51 +39,53 @@
 			"total": 18
 		},
 		{
-			"surface": "code",
+			"surface": "retrieval",
 			"open": 0,
-			"total": 4
+			"total": 333
 		},
 		{
 			"surface": "scf",
 			"open": 0,
 			"total": 16
-		},
-		{
-			"surface": "contract",
-			"open": 0,
-			"total": 30
 		}
 	],
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
 		{
-			"id": "engine-a-recall:mystic-in-top-3-for-is-mystic-live",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "mystic in top-3 for 'is Mystic live'",
-			"severity": "medium"
+			"id": "nightly-field-population:repos-codeverified-contractinterface-soroban-abi",
+			"surface": "code",
+			"source": "nightly-field-population",
+			"probe": "repos.codeVerified.contractInterface (Soroban ABI, 2026-08-08)",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:hiyield-in-top-3-for-what-is-hiyield",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "hiyield in top-3 for 'what is HiYield'",
-			"severity": "medium"
+			"id": "nightly-drift:api-repos-search-q-oracle-limit-3-200-in-12s",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "/api/repos/search?q=oracle&limit=3 → 200 in <12s",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:the-strategists-in-top-3-for-is-the-strategists-",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "the-strategists in top-3 for 'is The Strategists live'",
-			"severity": "medium"
+			"id": "nightly-claims:https-stellarlight-xyz",
+			"surface": "contract",
+			"source": "nightly-claims",
+			"probe": "https://stellarlight.xyz",
+			"severity": "high"
 		},
 		{
-			"id": "engine-a-recall:response",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "response",
-			"severity": "medium"
+			"id": "nightly-claims:https-stellarlight-xyz-leaderboard",
+			"surface": "contract",
+			"source": "nightly-claims",
+			"probe": "https://stellarlight.xyz/leaderboard",
+			"severity": "high"
+		},
+		{
+			"id": "nightly-claims:https-stellarlight-xyz-hackathons",
+			"surface": "contract",
+			"source": "nightly-claims",
+			"probe": "https://stellarlight.xyz/hackathons",
+			"severity": "high"
 		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
@@ -99,13 +106,6 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "jobs bounties and freelance work for Stellar contributors",
-			"severity": "medium"
-		},
-		{
-			"id": "engine-a-recall:x402-in-top-3-for-x402-on-stellar",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "x402 in top-3 for 'x402 on stellar'",
 			"severity": "medium"
 		}
 	]
