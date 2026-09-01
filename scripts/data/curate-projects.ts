@@ -129,13 +129,19 @@ const SCF_SUBMISSION_LINKS: Record<
 	// Failed"; the #45 submission ($97k budget = the page's totalAwarded,
 	// totalPaid $9.7k) is the award. Same shape for sendana ($100k/#45).
 	kutana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/kutana-9ti" },
-	sorted: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/sorted-jqh" },
+	// sorted/crebit corrected 2026-09-01 (post-enrich sweep of the same
+	// badge-inheritance class): crebit #44 is affirmatively "Not Awarded";
+	// sorted #44 is neutral Pre-Screen but the page's own arithmetic proves
+	// it contributed nothing (totalAwarded $150k equals the #45 budget
+	// alone). Both awards are #45; enrich already wrote the rows — these
+	// entries just stop the union-merge from resurrecting the dead rounds.
+	sorted: { rounds: [45], evidence: "https://communityfund.stellar.org/project/sorted-jqh" },
 	sendana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/sendana-axa" },
 	"account-demolisher": { rounds: [29, 41, 44], evidence: "https://communityfund.stellar.org/project/account-demolisher-bfe" },
 	etesia: { rounds: [44], evidence: "https://communityfund.stellar.org/project/etesia-rgj" },
 	"nouns-builder-protocol": { rounds: [44], evidence: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7" },
 	yolat: { rounds: [44], evidence: "https://communityfund.stellar.org/project/yolat-bl5" },
-	crebit: { rounds: [44, 45], evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril" },
+	crebit: { rounds: [45], evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril" },
 	pagcrypto: { rounds: [42], evidence: "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu" },
 	// upesa/verseprop rounds corrected 2026-09-01 (same badge-inheritance
 	// class as kutana/sendana, caught at slug-override verification): the
