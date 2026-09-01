@@ -339,6 +339,18 @@ export const INTENT_TYPE: Record<string, string> = {
 	// Truth battery 2026-08-27: the oracle vertical existed only as prose.
 	oracle: "Oracle",
 	oracles: "Oracle",
+	// Guard-D 2026-09-01: "smart contract audit firms for Soroban" ranked
+	// redstone-finance (an Oracle) #2 — its lifecycle note says "audited by
+	// Veridise", and a passive audited-by mention ranked as if the project
+	// WERE an auditor. Auditor questions are category questions; the category
+	// is Security. NOTE: the F2 stemmer folds "audited" → "audit" upstream,
+	// so property-questions ("is X audited?") also carry the category — fine,
+	// because intent admission is additive recall and identity matches
+	// dominate the ranking of the named X.
+	audit: "Security",
+	audits: "Security",
+	auditor: "Security",
+	auditors: "Security",
 	// P4 untyped census 2026-08-31: the yield/asset-management vertical had no
 	// enum member — "yield vaults on Stellar" browsed nothing while defindex,
 	// cushion and the vault cohort sat untyped or approximated as Lending.

@@ -149,6 +149,20 @@ describe("Beacon Q3 class — chain vocabulary + filler tokens", () => {
 	});
 });
 
+describe("guard-D 2026-09-01 — auditor questions are Security-category questions", () => {
+	it("'audit firms' carries Security intent; passive audited-by rows are not the vertical", () => {
+		const intent = intentTypesFor(tokenize("smart contract audit firms for Soroban"));
+		expect(intent.has("Security")).toBe(true);
+		// The F2 stemmer folds "audited" → "audit" before intent runs, so even
+		// property-questions carry the category — additive recall only; the
+		// named subject's identity match still dominates its ranking.
+		expect(intentTypesFor(tokenize("is redstone finance audited")).has("Security")).toBe(true);
+	});
+	it("singular 'auditor' folds to the same category", () => {
+		expect(intentTypesFor(tokenize("soroban auditor")).has("Security")).toBe(true);
+	});
+});
+
 describe("review finding 1 — corridor-discriminating admission", () => {
 	const mexTokens = tokenize("mexico on-ramp");
 	const intent = intentTypesFor(mexTokens);
