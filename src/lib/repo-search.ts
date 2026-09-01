@@ -772,7 +772,11 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	},
 	{ test: /\b(rust|soroban)\s*sdk\b/, repos: ["stellar/rs-soroban-sdk"] },
 	{ test: /\bpython\s*sdk\b/, repos: ["StellarCN/py-stellar-base"] },
-	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go"] },
+	// stellar/go is ARCHIVED (verified 2026-09-01): the SDK moved to
+	// stellar/go-stellar-sdk (new module path, semver reset) and the services
+	// split to their own repos. The living repo leads; the archived monorepo
+	// stays second for historical questions about pre-split code.
+	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go-stellar-sdk", "stellar/go"] },
 ];
 
 // Canonical repos for a query, priority order, deduped. Empty when the query

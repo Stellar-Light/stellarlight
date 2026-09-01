@@ -33,6 +33,109 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 2 (2026-09-01): next tier by repoScore, same discipline —
+	// every fact verified live on the asOf date; the stellar/go archive +
+	// go-stellar-sdk succession re-verified independently before landing
+	// (gh api: archived:true / successor pushed same-day). Three dead-link
+	// repos are recorded as exactly that — a 404 verified today is a dated
+	// fact, not a verdict about the project.
+	"stellar/go-stellar-sdk": [
+		{
+			note: "Successor of the stellar/go monorepo: since October 2025 it holds only SDK packages (txnbuild, horizonclient, rpcclient, ingest, xdr); stellar/go is archived and redirects here (https://github.com/stellar/go). Module path github.com/stellar/go-stellar-sdk \u2014 rename imports from github.com/stellar/go/.., no breaking API changes (https://github.com/stellar/go/blob/master/MIGRATION.md).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Services were split out of this repo: Horizon -> stellar/stellar-horizon, Galexie -> stellar/stellar-galexie, Friendbot -> stellar/friendbot; Ticker, Keystore and Federation Server were deprecated and removed at tag stellar-go-2025-10-29_10-56-50 (README 'Relocated'/'Deprecated Services': https://github.com/stellar/go-stellar-sdk#relocated).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Versioning reset to Go module semver: v0.1.0 (2025-12-11) through v0.7.3 (2026-08-24); the last monorepo-style tag was horizonclient-v24.0.0 (2025-10-21). Pre-1.0, so minor bumps may break (https://github.com/stellar/go-stellar-sdk/releases).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"hyperledger-solang/solang": [
+		{
+			note: "Org moved twice: hyperledger-labs/solang -> hyperledger/solang -> hyperledger-solang/solang; both old GitHub paths redirect to the current repo (https://github.com/hyperledger/solang resolves to hyperledger-solang/solang as of 2026-09).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Soroban/Stellar target landed in v0.3.4 (2025-06-29): SAC support, cross-contract calls, Soroban authorization framework and storage types; latest release v0.3.5 (2026-07-07) (https://github.com/hyperledger-solang/solang/releases/tag/v0.3.4).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+		{
+			note: "Distribution: bundled in the Solana Tools Suite v1.16.3+ (no separate install for Solana) and a Brew cask `brew install hyperledger/solang/solang`; companion crate solang-parser on crates.io (0.3.5, ~8.1M downloads) (https://crates.io/crates/solang-parser).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar/freighter-backend": [
+		{
+			note: "TypeScript indexer/backend for the Freighter wallet extension. A next-generation Go rewrite exists at stellar/freighter-backend-v2 ('Freighter's next generation of backend system written in Go', active but no tagged releases as of 2026-09), while this v1 still ships releases (v1.9.1, 2026-05-11) (https://github.com/stellar/freighter-backend-v2).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"diadata-org/soroban-oracle-feeders": [
+		{
+			note: "Off-chain half of DIA's Soroban oracle stack: a Turborepo monorepo of data-feeder scripts (Node 20/Yarn, docker-compose deploy) that push prices to DIA's on-chain Soroban oracle contracts kept in the companion repo diadata-org/soroban-oracles (contracts last pushed 2024-08-09) (https://github.com/diadata-org/soroban-oracles).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"stellar-light/confidential-agent-commerce": [
+		{
+			note: "Repo transferred out of the Stellar-Light org: it now lives at theboycoder/confidential-agent-commerce and the old Stellar-Light URL redirects there (GitHub API resolves the old path to the new full_name as of 2026-09-01) (https://github.com/theboycoder/confidential-agent-commerce).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"solomonadzape95/tilt": [
+		{
+			note: "Repo renamed: solomonadzape95/tilt is now solomonadzape95/crypt (old URL redirects). Project is branded 'API Safety Net' \u2014 a parametric SLA escrow on Soroban paying USDC to subscribers on API downtime, built for the Boundless x Trustless Work Hackathon (https://github.com/solomonadzape95/crypt).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"blockchain-oracle/xlmtools": [
+		{
+			note: "Published on npm as two packages: @xlmtools/mcp (single-bin MCP stdio server, 0.1.0-0.1.5, first published 2026-04-12) and @xlmtools/cli (bin `xlm`, exports createMcpServer(), up to 0.2.3, first published 2026-04-11) (https://www.npmjs.com/package/@xlmtools/mcp, https://www.npmjs.com/package/@xlmtools/cli).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"e1eng/agentboard": [
+		{
+			note: "Repo name is not the project name: agentBoard ships 'Signal Vault', an x402 puzzle arena where agents pay USDC per guess to crack a hidden 8-integer vector on Stellar testnet; live at signalvault.eleng.xyz (README: https://github.com/E1eng/agentBoard).",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"noetherdex/noether": [
+		{
+			note: "Repo no longer accessible: https://github.com/NoetherDEX/noether returns HTTP 404 (deleted or made private) as of 2026-09-01; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"0xnana/searchpay": [
+		{
+			note: "Repo no longer accessible: https://github.com/0xNana/SearchPay returns HTTP 404 (deleted or made private) as of 2026-09-01; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
+	"alfa117/mongliagent": [
+		{
+			note: "Repo no longer accessible: https://github.com/ALFA117/MongliAgent returns HTTP 404 (deleted or made private) as of 2026-09-01; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-01",
+		},
+	],
 	// ── P5 batch (2026-09-01): 17 facts across 12 repos, each verified
 	// live against npm/PyPI registries, gh releases/advisories APIs, or the
 	// repo's own README on the asOf date (agent-researched, human-reviewed).
