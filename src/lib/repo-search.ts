@@ -331,6 +331,11 @@ const REPO_SYNONYM_OVERLAY: Record<string, string[]> = {
 	zkp: ["zkp", "proof"],
 	wallet: ["wallet", "keypair", "signer", "passkey"],
 	sdk: ["sdk", "client"],
+	// battery q-tool-indexer: the natural phrasing says "indexing"; the
+	// corpus rows say "indexer"/"index" — plural-stripping alone never folds
+	// them, so the query's second intent token contributed nothing.
+	indexing: ["indexing", "indexer", "index"],
+	indexer: ["indexer", "indexing"],
 	stablecoin: ["stablecoin", "anchor"],
 };
 
@@ -448,7 +453,13 @@ export function repoAnchorIdentity(tokens: string[], zones: string[]): boolean {
 	// contracts above every actual indexer (battery q-tool-indexer case:
 	// reflector at score 5 outranked SoroTrail at 20.8). A query that is ONLY
 	// ecosystem words keeps them — there is nothing more specific to be.
-	const specific = all.filter((t) => t !== "stellar" && t !== "soroban");
+	// "contract(s)" joined 2026-09-01 (battery q-tool-indexer, issue #1184):
+	// in a Soroban corpus the word confers no identity when anything more
+	// specific is present — "indexing Soroban contract events" was granting
+	// reflector-CONTRACT identity credit via its NAME, and the inUse tier
+	// then floated the oracle to #1 for an indexer-discovery question.
+	const ECOSYSTEM = new Set(["stellar", "soroban", "contract", "contracts"]);
+	const specific = all.filter((t) => !ECOSYSTEM.has(t));
 	const anchors = specific.length ? specific : all;
 	return anchors.some((t) =>
 		termsForToken(t).some((v) => zones.some((z) => positiveIdentityHit(z, v))),
@@ -558,6 +569,8 @@ const STOPWORDS = new Set<string>([
 	"whom",
 	"whether",
 	// generic NL-question verbs (no domain words)
+	"find",
+	"finding",
 	"work",
 	"works",
 	"working",
@@ -566,6 +579,10 @@ const STOPWORDS = new Set<string>([
 	"used",
 	"using",
 	"build",
+	// inflection gap caught by battery q-tool-indexer (2026-09-01): "build"
+	// was stopped but "…or building a Stellar indexer" scored, feeding the
+	// coverage multiplier on junk rows.
+	"building",
 	"explain",
 	"describe",
 	"tell",
@@ -595,6 +612,20 @@ const STOPWORDS = new Set<string>([
 	// ~10/15 verticals in the sweep. Hyphenated names ("stellar-core",
 	// "js-stellar-sdk") are single tokens and are NOT affected — only the bare word.
 	"stellar",
+	// Surface-meta words (battery q-tool-indexer, 2026-09-01): every repo row
+	// IS an open-source GitHub repository, so "github"/"repo(s)" carry the
+	// same ~zero discriminating signal as the bare "stellar" — in the
+	// referee's 16-token question ("Find me open-source GitHub repos for…")
+	// they fed the coverage multiplier and floated rows matching six filler
+	// words over the row whose NAME is the answer. Shared with project
+	// search deliberately: probed live there too, the tokens only retrieved
+	// incidental "available on GitHub" prose mentions (rabet, a wallet, led
+	// q=github), never a github-tooling project.
+	"github",
+	"repo",
+	"repos",
+	"repository",
+	"repositories",
 	// "protocol" — same failure mode as "stellar": a generic token that name-matches
 	// any "*-protocol" repo at weight 5. "swap protocol" surfaced ZKLiquid-protocol
 	// + stellar/stellar-protocol (a governance-discussion repo); "oracle protocol"
