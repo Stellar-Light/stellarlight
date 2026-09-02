@@ -290,7 +290,7 @@ export function tradeLinks(code: string, issuer: string) {
 /* ─── AMM venues (Soroban) ───────────────────────────────────────────────── */
 
 export interface VenueLiquidity {
-	name: "SDEX" | "Aquarius" | "Soroswap" | "Phoenix";
+	name: "SDEX" | "Aquarius" | "Soroswap" | "Phoenix" | "Sushi";
 	/** Pools on this venue that hold the asset. */
 	poolCount: number;
 	/** How many of those we actually read reserves from. */
@@ -306,6 +306,44 @@ export interface VenueLiquidity {
 const XLM_SAC = "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA";
 const SOROSWAP_FACTORY =
 	"CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2";
+
+/**
+ * Sushi runs a Uniswap-v3-style deployment on Soroban: one factory, and a
+ * pool per (token_a, token_b, fee) triple. It has no open pool index and its
+ * pools expose no reserves getter, so this venue is read in two steps —
+ * ask the factory for each hub pair at each live fee tier, then read the
+ * balances straight out of the pool contracts' instance storage.
+ *
+ * Probed 2026-09-02: `get_pool(a, b, fee)` returns the pool address or null;
+ * the factory exposes no tier list, so the tiers below are the ones observed
+ * to hold pools (USDT0/USDC at 500, XLM/USDC at 500 and 3000).
+ */
+const SUSHI_FACTORY =
+	"CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF";
+const SUSHI_FEE_TIERS = [100, 500, 3000] as const;
+
+/**
+ * Pairs are probed against these hubs rather than the whole registry: a v3
+ * pool needs BOTH sides to be worth holding, and 37 registry assets times
+ * three tiers is 111 simulations for a page render. Sushi's Stellar
+ * liquidity today sits against XLM and the major dollar/euro tokens, so
+ * these four find it; add a hub when a real pool is found outside them.
+ */
+const SUSHI_HUBS: Array<{ label: string; id: string }> = [
+	{ label: "XLM", id: XLM_SAC },
+	{
+		label: "USDC",
+		id: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+	},
+	{
+		label: "USDT0",
+		id: "CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF",
+	},
+	{
+		label: "EURC",
+		id: "CCLZD7VBOC2URNA27BVJPB35F2MHTFDWBMV3HP3EIJVLUXM3UJKZL3VV",
+	},
+];
 const RPC_URL = "https://mainnet.sorobanrpc.com";
 const SEVEN = 10_000_000;
 
@@ -640,6 +678,120 @@ async function soroswapLiquidity(
 }
 
 /**
+ * Sushi liquidity for one asset: which hub pools exist, and how much of THIS
+ * asset sits in them. Returns null when the venue could not be read at all —
+ * "we could not look" is never reported as zero liquidity.
+ */
+async function sushiLiquidity(
+	code: string,
+	issuer: string,
+	priceUSD: number | null,
+): Promise<VenueLiquidity | null> {
+	const mine = sacContractId(code, issuer);
+	if (!mine) return null;
+	try {
+		const sdk = await import("@stellar/stellar-sdk");
+		const hubs = SUSHI_HUBS.filter((h) => h.id !== mine);
+		const probes: Array<{ hub: string; fee: number }> = [];
+		for (const h of hubs)
+			for (const fee of SUSHI_FEE_TIERS) probes.push({ hub: h.id, fee });
+
+		const found = await mapLimited(probes, 4, async (probe) => {
+			try {
+				const pool = (await simulateCall(
+					SUSHI_FACTORY,
+					"get_pool",
+					new sdk.Address(mine).toScVal(),
+					new sdk.Address(probe.hub).toScVal(),
+					sdk.xdr.ScVal.scvU32(probe.fee),
+				)) as string | null;
+				if (!pool) return null;
+				const label =
+					SUSHI_HUBS.find((h) => h.id === probe.hub)?.label ?? "pool";
+				return { pool, label, fee: probe.fee };
+			} catch {
+				return null;
+			}
+		});
+		const pools = found.filter(
+			(p): p is { pool: string; label: string; fee: number } => !!p,
+		);
+		if (pools.length === 0)
+			return {
+				name: "Sushi",
+				poolCount: 0,
+				measuredPools: 0,
+				assetPooled: 0,
+				assetPooledUSD: priceUSD != null ? 0 : null,
+				largest: null,
+				url: "https://www.sushi.com/stellar/explore/pools",
+			};
+
+		// One batched ledger read for every pool found — the balances live in
+		// instance storage under "bline", the token order under "params".
+		const server = new sdk.rpc.Server(RPC_URL);
+		const entries = await server.getLedgerEntries(
+			...pools.map((p) => new sdk.Contract(p.pool).getFootprint()),
+		);
+		const byId = new Map<string, { amount: number }>();
+		for (const e of entries.entries) {
+			try {
+				const cd = e.val.contractData();
+				const id = sdk.Address.fromScAddress(cd.contract()).toString();
+				const storage = cd.val().instance().storage() ?? [];
+				let token0: string | null = null;
+				let b0: number | null = null;
+				let b1: number | null = null;
+				for (const kv of storage) {
+					const key = sdk.scValToNative(kv.key());
+					if (key === "params") {
+						const v = sdk.scValToNative(kv.val()) as { token0?: string };
+						token0 = v?.token0 ?? null;
+					} else if (key === "bline") {
+						const v = sdk.scValToNative(kv.val()) as {
+							balance0?: bigint | number;
+							balance1?: bigint | number;
+						};
+						b0 = Number(v?.balance0 ?? 0) / SEVEN;
+						b1 = Number(v?.balance1 ?? 0) / SEVEN;
+					}
+				}
+				if (token0 == null || b0 == null || b1 == null) continue;
+				byId.set(id, { amount: token0 === mine ? b0 : b1 });
+			} catch {
+				// one unreadable pool must not lose the others
+			}
+		}
+
+		const measured = pools
+			.map((p) => ({ ...p, amount: byId.get(p.pool)?.amount }))
+			.filter(
+				(
+					p,
+				): p is { pool: string; label: string; fee: number; amount: number } =>
+					typeof p.amount === "number" && Number.isFinite(p.amount),
+			);
+		const assetPooled = measured.reduce((s, p) => s + p.amount, 0);
+		const largest = [...measured].sort((a, b) => b.amount - a.amount)[0];
+		return {
+			name: "Sushi",
+			poolCount: pools.length,
+			measuredPools: measured.length,
+			assetPooled,
+			assetPooledUSD: priceUSD != null ? assetPooled * priceUSD : null,
+			largest: largest
+				? { counter: largest.label, assetAmount: largest.amount }
+				: null,
+			url: largest
+				? `https://www.sushi.com/stellar/pool/${largest.pool}`
+				: "https://www.sushi.com/stellar/explore/pools",
+		};
+	} catch {
+		return null;
+	}
+}
+
+/**
  * Per-venue liquidity for the asset: SDEX (Horizon), Aquarius (index + RPC),
  * Soroswap (factory + RPC). Same measurement rule as fetchLiquidity — the
  * asset's OWN side of each pool, valued at its own price; never whole-pool
@@ -663,8 +815,14 @@ export async function fetchVenues(
 	if (indexed) {
 		// The indexer returns no SDEX pools, so Horizon still supplies that
 		// venue and the two are merged.
-		const sdexOnly = await fetchLiquidity(code, issuer, priceUSD);
+		// The indexer covers soroswap/phoenix/aqua only, so SDEX (Horizon) and
+		// Sushi (its own factory) are read alongside it and merged.
+		const [sdexOnly, sushi] = await Promise.all([
+			fetchLiquidity(code, issuer, priceUSD),
+			sushiLiquidity(code, issuer, priceUSD),
+		]);
 		const venues = [...indexed];
+		if (sushi && sushi.poolCount > 0) venues.push(sushi);
 		if (sdexOnly) {
 			const largest = sdexOnly.topPools[0];
 			venues.push({
@@ -680,13 +838,18 @@ export async function fetchVenues(
 			});
 		}
 		venues.sort((a, b) => b.assetPooled - a.assetPooled);
-		return { venues, unreadable: sdexOnly ? [] : ["SDEX"], notIndexed: [] };
+		const unreadable = [
+			...(sdexOnly ? [] : ["SDEX"]),
+			...(sushi ? [] : ["Sushi"]),
+		];
+		return { venues, unreadable, notIndexed: [] };
 	}
 
-	const [sdex, aqua, soro] = await Promise.all([
+	const [sdex, aqua, soro, sushi] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
 		aquariusLiquidity(code, issuer, priceUSD),
 		soroswapLiquidity(code, issuer, priceUSD),
+		sushiLiquidity(code, issuer, priceUSD),
 	]);
 	const venues: VenueLiquidity[] = [];
 	const unreadable: string[] = [];
@@ -708,6 +871,9 @@ export async function fetchVenues(
 	else unreadable.push("Aquarius");
 	if (soro) venues.push(soro);
 	else unreadable.push("Soroswap");
+	if (sushi) {
+		if (sushi.poolCount > 0) venues.push(sushi);
+	} else unreadable.push("Sushi");
 	venues.sort((a, b) => b.assetPooled - a.assetPooled);
-	return { venues, unreadable, notIndexed: ["Phoenix", "Sushi"] };
+	return { venues, unreadable, notIndexed: ["Phoenix"] };
 }

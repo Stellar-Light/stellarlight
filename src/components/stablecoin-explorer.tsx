@@ -1635,15 +1635,25 @@ export function StablecoinExplorer({
 												<div className="text-sm font-medium mb-4">
 													Liquidity Pools
 												</div>
-												{defi?.liquidity == null ? (
+												{/* The gate is the VENUE total, not Horizon's classic
+												    pool count. Gating on Horizon told a USDT0 reader
+												    "no pool holds this asset" while a Soroban venue
+												    held 2.5M of it and the asset's own page linked
+												    that pool — Horizon indexes classic AMM pools only,
+												    and cannot see a contract pool. */}
+												{defi?.liquidity == null &&
+												(defi?.venues?.venues ?? []).length === 0 ? (
 													<p className="text-xs text-muted-foreground">
 														Horizon&apos;s pool index was unreachable. That
 														means we could not look — not that{" "}
 														{selectedCoin.ticker} has no pools.
 													</p>
-												) : defi.liquidity.poolCount === 0 ? (
+												) : (defi?.venues?.venues ?? []).every(
+														(v) => v.poolCount === 0,
+													) && (defi?.liquidity?.poolCount ?? 0) === 0 ? (
 													<p className="text-xs text-muted-foreground">
-														No Stellar AMM pool currently holds this asset.
+														No pool we index — classic AMM, Aquarius, Soroswap
+														or Sushi — currently holds this asset.
 													</p>
 												) : (
 													<>
