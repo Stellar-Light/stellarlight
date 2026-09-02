@@ -35,6 +35,7 @@ export interface StoreRow {
 	marketCapUSD?: number | null;
 	holders?: number | null;
 	volume24hUSD?: number | null;
+	paymentsCount24h?: number | null;
 	supplyChange7d?: number | null;
 	logoUrl?: string | null;
 	basis?: string | null;
@@ -71,8 +72,16 @@ export interface StablecoinRow {
 	priceUSD: number | null;
 	/** Trustline holder count. */
 	holders: number | null;
-	/** 24h transfer volume in USD. */
+	/** 24h on-chain TRADE volume in USD (SDEX) — falls back to a 7-day average
+	 *  when the 24h figure is absent. NOT payment/transfer volume; see
+	 *  paymentsCount24h for the payments-side signal we can actually measure. */
 	volume24hUSD: number | null;
+	/** Count (not a dollar amount) of payment operations in the last ~24h —
+	 *  mint, redemption and peer-to-peer payments undifferentiated, and NOT
+	 *  adjusted for CEX/DeFi/infrastructure activity. Stellar Expert's
+	 *  lifetime payments counter, diffed against our own snapshot from ~1 day
+	 *  back. Null until that history exists, same rule as supplyChange7d. */
+	paymentsCount24h: number | null;
 	/** Percent change in supply vs our snapshot ~7 days back. Null until two
 	 *  snapshots exist — never 0 for "no data". Was a display string ("-5.80%")
 	 *  while proxying the retired service; a number since 2026-08-19. */
@@ -124,6 +133,7 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		priceUSD: num(d.priceUSD),
 		holders: num(d.holders),
 		volume24hUSD: num(d.volume24hUSD),
+		paymentsCount24h: num(d.paymentsCount24h),
 		supplyChange7d: num(d.supplyChange7d),
 		basis: basis as StablecoinRow["basis"],
 		note: d.note ?? null,

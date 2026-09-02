@@ -1167,9 +1167,17 @@ export interface Stablecoin {
    */
   holders?: number | null;
   /**
-   * 24h on-chain volume in USD; falls back to 7d/7 when the 24h figure is absent (an estimate — see basis).
+   * 24h on-chain TRADE volume in USD (SDEX), not payments; falls back to 7d/7 when the 24h figure is absent (an estimate — see basis).
    */
   volume24hUSD?: number | null;
+  /**
+   * Stellar Expert's lifetime count of payment operations for this asset (not SDEX trades, not an amount). Internal bookkeeping — refresh-stablecoins.ts diffs it against yesterday's snapshot into paymentsCount24h below; not comparable across assets on its own.
+   */
+  paymentsCountLifetime?: number | null;
+  /**
+   * Count of payment operations in the last ~24h (delta of paymentsCountLifetime vs the closest snapshot ~1 day back). A COUNT, not a dollar amount — includes mint, redemption and peer-to-peer payments undifferentiated; not adjusted for CEX/DeFi/infrastructure activity the way a figure like Allium's 'adjusted transfers' is. Null until two snapshots roughly a day apart exist.
+   */
+  paymentsCount24h?: number | null;
   /**
    * Percent change vs the snapshot ~7 days ago. Null until two snapshots exist — never 0 for 'no data'.
    */
@@ -1220,6 +1228,10 @@ export interface StablecoinSnapshot {
   marketCapUSD?: number | null;
   holders?: number | null;
   volume24hUSD?: number | null;
+  /**
+   * Stellar Expert's lifetime payment-op counter on this day — the raw value the CURRENT row's paymentsCount24h is diffed from, same role supply plays for supplyChange7d.
+   */
+  paymentsCountLifetime?: number | null;
   /**
    * Provenance of THIS day's point. A chart should not silently mix live and static points.
    */
@@ -3125,6 +3137,8 @@ export interface StablecoinsSelect<T extends boolean = true> {
   marketCapUSD?: T;
   holders?: T;
   volume24hUSD?: T;
+  paymentsCountLifetime?: T;
+  paymentsCount24h?: T;
   supplyChange7d?: T;
   logoUrl?: T;
   logoSource?: T;
@@ -3150,6 +3164,7 @@ export interface StablecoinSnapshotsSelect<T extends boolean = true> {
   marketCapUSD?: T;
   holders?: T;
   volume24hUSD?: T;
+  paymentsCountLifetime?: T;
   basis?: T;
   measuredAt?: T;
   source?: T;

@@ -103,7 +103,23 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"24h on-chain volume in USD; falls back to 7d/7 when the 24h figure is absent (an estimate — see basis).",
+					"24h on-chain TRADE volume in USD (SDEX), not payments; falls back to 7d/7 when the 24h figure is absent (an estimate — see basis).",
+			},
+		},
+		{
+			name: "paymentsCountLifetime",
+			type: "number",
+			admin: {
+				description:
+					"Stellar Expert's lifetime count of payment operations for this asset (not SDEX trades, not an amount). Internal bookkeeping — refresh-stablecoins.ts diffs it against yesterday's snapshot into paymentsCount24h below; not comparable across assets on its own.",
+			},
+		},
+		{
+			name: "paymentsCount24h",
+			type: "number",
+			admin: {
+				description:
+					"Count of payment operations in the last ~24h (delta of paymentsCountLifetime vs the closest snapshot ~1 day back). A COUNT, not a dollar amount — includes mint, redemption and peer-to-peer payments undifferentiated; not adjusted for CEX/DeFi/infrastructure activity the way a figure like Allium's 'adjusted transfers' is. Null until two snapshots roughly a day apart exist.",
 			},
 		},
 		{
