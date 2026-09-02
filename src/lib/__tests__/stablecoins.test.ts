@@ -88,10 +88,24 @@ describe("storeRowToApi", () => {
 		expect(r.marketCapUSD).toBeNull();
 		expect(r.holders).toBeNull();
 		expect(r.supplyChange7d).toBeNull();
+		// No snapshot ~1 day back yet (fresh asset, or a fresh install) — a
+		// missing payments-count history is null, not a claim of zero activity.
+		expect(r.paymentsCount24h).toBeNull();
 	});
 
 	it("a stored NaN never reaches the wire as NaN", () => {
 		expect(storeRowToApi({ code: "X", supply: Number.NaN }).supply).toBeNull();
+	});
+
+	it("carries paymentsCount24h — a COUNT of payments, not a dollar volume", () => {
+		const r = storeRowToApi({
+			code: "USDC",
+			peg: "USD",
+			volume24hUSD: 46_000_000, // SDEX trade volume — a different metric
+			paymentsCount24h: 206_467,
+		});
+		expect(r.paymentsCount24h).toBe(206_467);
+		expect(r.volume24hUSD).toBe(46_000_000);
 	});
 });
 

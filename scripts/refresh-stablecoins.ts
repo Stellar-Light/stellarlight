@@ -47,11 +47,47 @@ function pctChange(now: number | null, then: number | null): number | null {
 	return Number((((now - then) / then) * 100).toFixed(2));
 }
 
+/** Raw count delta vs the closest snapshot ~1 day back. Null unless both
+ *  exist, and null (never negative) if the counter went backwards — that's
+ *  an upstream rebase/correction, not a real count of payments. */
+function countDelta(now: number | null, then: number | null): number | null {
+	if (now == null || then == null) return null;
+	const delta = now - then;
+	return delta >= 0 ? delta : null;
+}
+
 async function main() {
 	console.log(
 		`Stablecoin refresh — ${EXECUTE ? "EXECUTE" : "DRY RUN (no writes)"}\n`,
 	);
 	const payload = await getPayload({ config: await configPromise });
+
+	/** Closest stablecoin-snapshots row at or before `cutoff` for one asset, or
+	 *  undefined if the series doesn't reach back that far yet (fresh install
+	 *  or a gap). Shared by the 7-day supply-change and ~24h payments-count
+	 *  deltas below — same query shape, different lookback. */
+	async function snapshotOnOrBefore(assetId: string, cutoff: Date) {
+		try {
+			const prior = await payload.find({
+				collection: "stablecoin-snapshots",
+				where: {
+					and: [
+						{ assetId: { equals: assetId } },
+						{ day: { less_than_equal: utcDay(cutoff) } },
+					],
+				},
+				sort: "-day",
+				limit: 1,
+				depth: 0,
+			});
+			return prior.docs[0] as
+				| { supply?: number; paymentsCountLifetime?: number }
+				| undefined;
+		} catch {
+			// No series yet on a fresh install — treated as "no prior snapshot".
+			return undefined;
+		}
+	}
 
 	const measured = await measureRegistry(STABLECOIN_REGISTRY);
 	const day = utcDay(new Date());
@@ -61,27 +97,21 @@ async function main() {
 	const problems: string[] = [];
 
 	for (const m of measured) {
-		// ── 7-day change, from our own series ──
-		const weekAgo = new Date(Date.now() - 7 * 864e5);
-		let change7d: number | null = null;
-		try {
-			const prior = await payload.find({
-				collection: "stablecoin-snapshots",
-				where: {
-					and: [
-						{ assetId: { equals: m.id } },
-						{ day: { less_than_equal: utcDay(weekAgo) } },
-					],
-				},
-				sort: "-day",
-				limit: 1,
-				depth: 0,
-			});
-			const then = (prior.docs[0] as { supply?: number } | undefined)?.supply;
-			change7d = pctChange(m.supply, then ?? null);
-		} catch {
-			// No series yet on a fresh install — null, never 0.
-		}
+		// ── 7-day supply change, and ~24h payments-count change, from our own series ──
+		const weekAgoSnap = await snapshotOnOrBefore(
+			m.id,
+			new Date(Date.now() - 7 * 864e5),
+		);
+		const change7d = pctChange(m.supply, weekAgoSnap?.supply ?? null);
+
+		const yesterdaySnap = await snapshotOnOrBefore(
+			m.id,
+			new Date(Date.now() - 1 * 864e5),
+		);
+		const paymentsCount24h = countDelta(
+			m.paymentsCountLifetime,
+			yesterdaySnap?.paymentsCountLifetime ?? null,
+		);
 
 		const existing = await payload.find({
 			collection: "stablecoins",
@@ -120,6 +150,13 @@ async function main() {
 			marketCapUSD: keep(m.marketCapUSD, prev?.marketCapUSD),
 			holders: keep(m.holders, prev?.holders),
 			volume24hUSD: keep(m.volume24hUSD, prev?.volume24hUSD),
+			paymentsCountLifetime: keep(
+				m.paymentsCountLifetime,
+				prev?.paymentsCountLifetime,
+			),
+			// Derived fresh from history each run, like supplyChange7d — never
+			// kept forward from a previous run when it can't be computed now.
+			paymentsCount24h,
 			supplyChange7d: change7d,
 			logoUrl: m.logoUrl,
 			logoSource: m.logoSource,
@@ -158,6 +195,7 @@ async function main() {
 				marketCapUSD: m.marketCapUSD,
 				holders: m.holders,
 				volume24hUSD: m.volume24hUSD,
+				paymentsCountLifetime: m.paymentsCountLifetime,
 				basis: m.basis,
 				measuredAt: m.measuredAt,
 				source: "stellarlight",
