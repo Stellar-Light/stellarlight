@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T17:09:28.409Z",
+ "generatedAt": "2026-09-02T18:08:07.931Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -12,7 +12,7 @@
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
    "openFindings": 0,
-   "clearedFindings": 333,
+   "clearedFindings": 335,
    "verifiedFindings": 0
   },
   {
@@ -33,7 +33,7 @@
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
    "openFindings": 0,
-   "clearedFindings": 5,
+   "clearedFindings": 10,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
-  "total": 519,
+  "total": 526,
   "open": 5,
-  "cleared": 507,
+  "cleared": 514,
   "verified": 7,
   "byFailureMode": [
    {
@@ -129,6 +129,20 @@
     "surface": "contract"
    },
    {
+    "mode": "note-stale",
+    "open": 0,
+    "cleared": 5,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
+    "mode": "golden-fail",
+    "open": 0,
+    "cleared": 4,
+    "verified": 0,
+    "surface": "retrieval"
+   },
+   {
     "mode": "population-miss",
     "open": 0,
     "cleared": 4,
@@ -141,13 +155,6 @@
     "cleared": 3,
     "verified": 0,
     "surface": "contract"
-   },
-   {
-    "mode": "golden-fail",
-    "open": 0,
-    "cleared": 2,
-    "verified": 0,
-    "surface": "retrieval"
    },
    {
     "mode": "ambiguous-contract",
@@ -184,70 +191,70 @@
   ],
   "recentlyCleared": [
    {
+    "probe": "repos-streaming-payments",
+    "surface": "retrieval",
+    "failureMode": "golden-fail",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "repos-escrow",
+    "surface": "retrieval",
+    "failureMode": "golden-fail",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "note-stale:lightsail-network/stellar-contract-bindings:pypi:stellar-contract-bindings",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-02"
+   },
+   {
     "probe": "battery:q-tool-leaderboard-open-issues",
     "surface": "corpus",
     "failureMode": "battery-coverage-weak",
     "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "scfRoundAwards empty: coala-pay",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "battery:q-tool-indexer-repos-discovery",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: inferera",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: simbolik",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: the-aha-company",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: womenbiz",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: ichi",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 227,
-    "repeats": 226,
+    "newFindings": 234,
+    "repeats": 233,
     "ratePct": 99.6
    },
    "lifetime": {
-    "newFindings": 519,
-    "repeats": 512,
+    "newFindings": 526,
+    "repeats": 519,
     "ratePct": 98.7
    },
    "byClass": [
     {
      "class": "identity",
-     "total": 310,
+     "total": 312,
      "open": 5,
      "firstSeen": "2026-07-22"
     },
@@ -283,7 +290,7 @@
     },
     {
      "class": "unclassified",
-     "total": 3,
+     "total": 8,
      "open": 0,
      "firstSeen": "2026-09-01"
     }
@@ -9777,7 +9784,7 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 6523
+    "withCodeDepth": 6662
    },
    "knowledgeNotes": {
     "pool": 408,
@@ -9851,9 +9858,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 4581,
+    "pool": 4664,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 112
+    "joined": 114
    }
   },
   "curatedShape": {
@@ -9966,9 +9973,9 @@
    ],
    "languageOther": 49
   },
-  "withCodeDepth": 8822,
-  "withNotes": 470,
-  "withMainnet": 112,
+  "withCodeDepth": 8961,
+  "withNotes": 496,
+  "withMainnet": 114,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -11086,6 +11093,18 @@
     "value": 8
    },
    {
+    "id": "s:nightly-note-freshness",
+    "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 5
+   },
+   {
+    "id": "s:golden-eval",
+    "label": "golden-eval",
+    "column": 0,
+    "value": 4
+   },
+   {
     "id": "s:nightly-field-population",
     "label": "nightly-field-population",
     "column": 0,
@@ -11098,12 +11117,6 @@
     "value": 3
    },
    {
-    "id": "s:golden-eval",
-    "label": "golden-eval",
-    "column": 0,
-    "value": 2
-   },
-   {
     "id": "s:raven-loop",
     "label": "raven-loop",
     "column": 0,
@@ -11113,7 +11126,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 333
+    "value": 335
    },
    {
     "id": "f:directory",
@@ -11149,13 +11162,13 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 5
+    "value": 10
    },
    {
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 507
+    "value": 514
    },
    {
     "id": "o:open",
@@ -11172,158 +11185,165 @@
   ],
   "links": [
    {
-    "source": 10,
-    "target": 12,
+    "source": 9,
+    "target": 13,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
-    "value": 2
+    "value": 4
    },
    {
-    "source": 12,
-    "target": 19,
+    "source": 13,
+    "target": 20,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 333
+    "value": 335
    },
    {
     "source": 1,
-    "target": 12,
+    "target": 13,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
     "value": 47
    },
    {
     "source": 0,
-    "target": 12,
+    "target": 13,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
     "value": 284
    },
    {
     "source": 6,
-    "target": 17,
+    "target": 18,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 16
    },
    {
-    "source": 17,
-    "target": 19,
+    "source": 18,
+    "target": 20,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 16
    },
    {
     "source": 7,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 14,
-    "target": 21,
+    "source": 15,
+    "target": 22,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 14,
-    "target": 19,
+    "source": 15,
+    "target": 20,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 27
    },
    {
     "source": 3,
-    "target": 15,
+    "target": 16,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 24
    },
    {
-    "source": 15,
-    "target": 19,
+    "source": 16,
+    "target": 20,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 15,
-    "target": 20,
+    "source": 16,
+    "target": 21,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 5
    },
    {
-    "source": 11,
-    "target": 18,
+    "source": 12,
+    "target": 19,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 18,
-    "target": 19,
+    "source": 19,
+    "target": 20,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 5
+    "value": 10
    },
    {
     "source": 1,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
     "value": 61
    },
    {
-    "source": 13,
-    "target": 19,
+    "source": 14,
+    "target": 20,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
     "value": 89
    },
    {
     "source": 4,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 23
    },
    {
     "source": 5,
-    "target": 16,
+    "target": 17,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 16,
-    "target": 19,
+    "source": 17,
+    "target": 20,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 18
    },
    {
-    "source": 8,
-    "target": 18,
+    "source": 10,
+    "target": 19,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
    },
    {
     "source": 2,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 28
    },
    {
-    "source": 9,
-    "target": 14,
+    "source": 11,
+    "target": 15,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
     "value": 3
+   },
+   {
+    "source": 8,
+    "target": 19,
+    "sourceId": "s:nightly-note-freshness",
+    "targetId": "f:code",
+    "value": 5
    }
   ]
  },
@@ -11333,9 +11353,9 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12659,
+    "missing": 12633,
     "of": 13129,
-    "share": 96.4,
+    "share": 96.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
@@ -11363,7 +11383,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 4271 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 4354 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11432,13 +11452,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 4307,
+    "missing": 4168,
     "of": 13129,
-    "share": 32.8,
+    "share": 31.7,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 4307,
+    "examplePoolSize": 4168,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
