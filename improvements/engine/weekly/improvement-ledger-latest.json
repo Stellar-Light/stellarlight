@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-09-01T16:25:49.473Z",
+	"generatedAt": "2026-09-02T10:07:31.758Z",
 	"total": 519,
-	"open": 6,
-	"closed": 513,
+	"open": 7,
+	"closed": 512,
 	"verified": 7,
-	"cleared": 506,
+	"cleared": 505,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 290,
+	"clearedOnSilence": 289,
 	"closingRate": 0.99,
 	"oldestOpenDays": 41,
 	"inWave": 0,
@@ -22,6 +22,11 @@
 			"surface": "directory",
 			"open": 1,
 			"total": 89
+		},
+		{
+			"surface": "corpus",
+			"open": 1,
+			"total": 18
 		},
 		{
 			"surface": "retrieval",
@@ -42,11 +47,6 @@
 			"surface": "contract",
 			"open": 0,
 			"total": 34
-		},
-		{
-			"surface": "corpus",
-			"open": 0,
-			"total": 18
 		}
 	],
 	"unverifiedOpen": 0,
@@ -93,6 +93,13 @@
 			"source": "raven-routing",
 			"probe": "freighter",
 			"severity": "medium"
+		},
+		{
+			"id": "nightly-battery:battery-q-tool-leaderboard-open-issues",
+			"surface": "corpus",
+			"source": "nightly-battery",
+			"probe": "battery:q-tool-leaderboard-open-issues",
+			"severity": "low"
 		}
 	]
 }

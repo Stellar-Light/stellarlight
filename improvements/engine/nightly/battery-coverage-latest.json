@@ -1,5 +1,11 @@
 {
-	"generatedAt": "2026-09-01T16:25:43.051Z",
+	"generatedAt": "2026-09-02T10:07:25.217Z",
 	"detector": "battery-coverage",
-	"failures": []
+	"failures": [
+		{
+			"probe": "battery:q-tool-leaderboard-open-issues",
+			"note": "top 0.30 < 0.6 via repos/lexical-anchor@top3 for \"Which Stellar projects have the most open issues right now — rank them so I can \" (tooling-infra); best: water-credits/water-credits-contracts",
+			"surface": "corpus"
+		}
+	]
 }

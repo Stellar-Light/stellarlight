@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7757698893547058,
+      "topScore": 0.7752761244773865,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -369,7 +369,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8104166388511658,
+      "topScore": 0.8105792999267578,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -765,7 +765,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6709254384040833,
+      "topScore": 0.6715497970581055,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -819,7 +819,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8588099479675293,
+      "topScore": 0.8588693141937256,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8220105767250061,
+      "topScore": 0.8228741884231567,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -909,7 +909,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7427352070808411,
+      "topScore": 0.7419469356536865,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-01T16:15:41Z"
+  "generatedAt": "2026-09-02T09:56:59Z"
 }
