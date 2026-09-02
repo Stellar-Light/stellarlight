@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T02:59:15.619Z",
+ "generatedAt": "2026-09-02T12:16:23.556Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -13,6 +13,13 @@
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 1,
    "clearedFindings": 88,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 1,
+   "clearedFindings": 17,
    "verifiedFindings": 0
   },
   {
@@ -42,20 +49,13 @@
    "openFindings": 0,
    "clearedFindings": 5,
    "verifiedFindings": 0
-  },
-  {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 0,
-   "clearedFindings": 18,
-   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
   "total": 519,
-  "open": 6,
-  "cleared": 506,
+  "open": 7,
+  "cleared": 505,
   "verified": 7,
   "byFailureMode": [
    {
@@ -95,8 +95,8 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 0,
-    "cleared": 18,
+    "open": 1,
+    "cleared": 17,
     "verified": 0,
     "surface": "corpus"
    },
@@ -171,7 +171,7 @@
    },
    {
     "bucket": "8–30d",
-    "count": 0
+    "count": 1
    },
    {
     "bucket": "31–60d",
@@ -272,7 +272,7 @@
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 0,
+     "open": 1,
      "firstSeen": "2026-07-23"
     },
     {
@@ -292,7 +292,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1087,
+  "population": 1088,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -8916,7 +8916,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 125
+    "count": 127
    },
    {
     "basis": "human-verified",
@@ -8928,7 +8928,7 @@
    },
    {
     "basis": "unverified",
-    "count": 11
+    "count": 9
    },
    {
     "basis": "operator-announcement",
@@ -9683,22 +9683,20 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 5670
+    "withCodeDepth": 6145
    },
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 92,
+    "withNotes": 93,
     "triaged": 115,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
-    "missing": [
-     "daccred/attestprotocol"
-    ]
+    "missing": []
    },
    "mainnetJoin": {
-    "pool": 4046,
+    "pool": 4367,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 99
+    "joined": 106
    }
   },
   "curatedShape": {
@@ -9748,19 +9746,19 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1209
+     "count": 1247
     },
     {
      "label": "slowing",
-     "count": 905
+     "count": 938
     },
     {
      "label": "active",
-     "count": 739
+     "count": 802
     },
     {
      "label": "unknown",
-     "count": 224
+     "count": 90
     },
     {
      "label": "archived",
@@ -9770,27 +9768,27 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1061
+     "count": 1106
     },
     {
      "label": "unknown",
-     "count": 573
+     "count": 450
     },
     {
      "label": "Rust",
-     "count": 417
+     "count": 448
     },
     {
      "label": "JavaScript",
-     "count": 330
+     "count": 350
     },
     {
      "label": "Go",
-     "count": 108
+     "count": 109
     },
     {
      "label": "Python",
-     "count": 104
+     "count": 105
     },
     {
      "label": "Solidity",
@@ -9798,22 +9796,22 @@
     },
     {
      "label": "HTML",
-     "count": 81
+     "count": 85
     },
     {
      "label": "Shell",
-     "count": 37
+     "count": 40
     },
     {
      "label": "PHP",
      "count": 24
     }
    ],
-   "languageOther": 48
+   "languageOther": 49
   },
-  "withCodeDepth": 7969,
-  "withNotes": 450,
-  "withMainnet": 99,
+  "withCodeDepth": 8444,
+  "withNotes": 452,
+  "withMainnet": 106,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -10342,8 +10340,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 83,
@@ -10355,8 +10353,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 79,
@@ -10368,8 +10366,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 69,
@@ -10407,8 +10405,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 45,
@@ -10420,8 +10418,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Circom",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 89,
@@ -10433,8 +10431,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 35,
@@ -10446,8 +10444,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 24,
@@ -10459,7 +10457,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "dormant",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10472,8 +10470,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Swift",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10485,8 +10483,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Swift",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 30,
@@ -10498,8 +10496,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Swift",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 30,
@@ -10511,8 +10509,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "HTML",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10524,8 +10522,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "HTML",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10537,8 +10535,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10550,8 +10548,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "C",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10563,8 +10561,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10576,8 +10574,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 63,
@@ -10589,7 +10587,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "active",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10602,8 +10600,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 71,
@@ -10615,8 +10613,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 35,
@@ -10628,8 +10626,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Makefile",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 89,
@@ -10641,8 +10639,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 23,
@@ -10667,8 +10665,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 53,
@@ -10680,8 +10678,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 60,
@@ -10693,8 +10691,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 78,
@@ -10706,8 +10704,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 98,
@@ -10719,8 +10717,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 88,
@@ -10745,8 +10743,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 77,
@@ -10758,8 +10756,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Python",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 51,
@@ -10771,8 +10769,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 78,
@@ -10784,7 +10782,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10810,8 +10808,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "HTML",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 24,
@@ -10836,8 +10834,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 65,
@@ -10849,8 +10847,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 38,
@@ -10863,7 +10861,7 @@
   {
    "area": "project status",
    "limit": "83% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "819 of 984 rows (census)",
+   "measurement": "821 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10875,7 +10873,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "92 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "93 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11000,13 +10998,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 506
+    "value": 505
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 6
+    "value": 7
    },
    {
     "id": "o:verified",
@@ -11147,7 +11145,7 @@
     "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 18
+    "value": 17
    },
    {
     "source": 8,
@@ -11155,6 +11153,13 @@
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
+   },
+   {
+    "source": 16,
+    "target": 20,
+    "sourceId": "f:corpus",
+    "targetId": "o:open",
+    "value": 1
    },
    {
     "source": 2,
@@ -11185,13 +11190,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12679,
+    "missing": 12677,
     "of": 13129,
     "share": 96.6,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 118,
+    "examplePoolSize": 117,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11215,7 +11220,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3736 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 4057 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11284,13 +11289,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 5160,
+    "missing": 4685,
     "of": 13129,
-    "share": 39.3,
+    "share": 35.7,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 5160,
+    "examplePoolSize": 4685,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
