@@ -18,7 +18,13 @@ on:
     # repos. Unified re-scan policy 2026-08-08: never-scanned AND pushed-since-
     # scan compete on the same -repoScore key. Revert to daily 03:00 once the
     # backlog converges (scanned ≈ eligible).
-    - cron: "0 */2 * * *"
+    # :17, not :00 (2026-09-02): top-of-hour is GitHub's most congested
+    # schedule minute and this cron was the casualty — the 14:00Z slot ran at
+    # 14:31Z, 18:00Z at 19:12Z, 22:00Z at 22:23Z, and the 00:00Z and 02:00Z
+    # slots had not started 9 minutes past while an hourly canary at :31 kept
+    # firing. GitHub documents that scheduled runs are delayed or dropped
+    # under load; an off-peak minute is the only lever we hold.
+    - cron: "17 */2 * * *"
   workflow_dispatch:
     inputs:
       execute:
