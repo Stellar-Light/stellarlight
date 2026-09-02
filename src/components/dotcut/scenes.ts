@@ -144,20 +144,28 @@ export const PALETTES: [string, string][] = [
 	["#ffc2e2", "#c81d77"],
 	["#c7d2fe", "#4338ca"],
 	["#fde68a", "#b45309"],
-	// 6-11: the stablecoins-header banner's own palettes (4 token marks + 2
-	// neutrals for the currency-symbol scenes). This banner sits directly on
-	// the page (near-black) next to cards at #1A1A1A — a bright circle colour
-	// reads as a pasted-in light slab, not as part of that surface. Both
-	// halves of every pair here stay dark and close in value (circle ~15-23%
-	// luminance, ground ~6-8%): a ~12-16pt gap keeps the carved mark visible
-	// without the whole field lighting up. Contrast belongs to the mark, not
-	// the banner.
-	["#2A3F37", "#0D1512"], // USDT0 — muted Tether mint
-	["#28344A", "#0C1018"], // USDC — muted Circle blue
-	["#2C3A52", "#0D1119"], // EURC — muted Circle blue (euro variant)
-	["#2E2E48", "#0F0F1A"], // PYUSD — muted indigo
-	["#2A2A2A", "#0D0D0D"], // neutral — currency-symbol scenes
-	["#2E2E2E", "#0F0F0F"], // neutral — currency-symbol scenes
+	// 6-12: the stablecoins-header banner's own palettes. An earlier pass
+	// here made BOTH halves of every pair dark and close in value (circle
+	// ~15-23% luminance, ground ~6-8%) to keep the banner from reading as a
+	// bright slab against the page's near-black surface — but a pair that
+	// close in value reads as a flat grey rectangle, not a carved mark. The
+	// spec is explicit that the contrast belongs *inside* the pair: "the
+	// circle colour and background colour are always a matched pair so the
+	// glyph keeps reading as negative space" — matched doesn't mean matched
+	// in VALUE. Background stays near-black here (~5-7% luminance, darker
+	// than the page's own #1A1A1A cards, so the banner still sits inside the
+	// surface, not on top of it) while the circle colour is bold and
+	// saturated (~55-70% luminance) — a ~45-60pt gap per pair, the "genuine
+	// two-tone" the spec calls for. Each pair keeps one hue family so it
+	// still reads as matched, just a characterful match rather than a
+	// muted one.
+	["#2FD98A", "#0A1712"], // usdt0 — vivid mint (Tether) / near-black green
+	["#3E7BFA", "#070B16"], // rings — vivid blue / near-black navy
+	["#FF5D5D", "#160707"], // columns — coral / near-black red
+	["#A56EFF", "#0E0716"], // checker — violet / near-black violet
+	["#2DE0C7", "#051312"], // boxes — cyan-teal / near-black teal
+	["#FF63B0", "#160611"], // bars — hot pink / near-black magenta
+	["#F5B942", "#171006"], // $ — gold / near-black amber
 ];
 
 export function rasterize(
