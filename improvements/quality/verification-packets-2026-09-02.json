@@ -1,0 +1,2328 @@
+{
+ "generatedAt": "2026-09-02T17:19:04.774Z",
+ "population": 755,
+ "offset": 0,
+ "limit": 60,
+ "packets": [
+  {
+   "slug": "moneygram",
+   "name": "Moneygram",
+   "prominence": 90,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://moneygram.com/"
+   },
+   "site": {
+    "url": "https://moneygram.com/",
+    "finalUrl": "https://www.moneygram.com/us/en",
+    "status": 200,
+    "title": "Send International Money Transfers Online from the U.S. | MoneyGram",
+    "description": "Send money online, on your Apple or Android phone or at a MoneyGram® location. Cash wire transfers online to bank account or mobile wallet using our app, internationally or within The United States.",
+    "namesProduct": "moneygram",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2022-06-24T18:10:10.000Z",
+    "newestRelease": null,
+    "archived": 1
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/tools/ramps/moneygram",
+    "title": "MoneyGram Ramps"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"moneygram\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "go-stellar-sdk",
+   "name": "Go Stellar SDK",
+   "prominence": 88,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/stellar/go-stellar-sdk"
+   },
+   "site": {
+    "url": "https://github.com/stellar/go-stellar-sdk",
+    "finalUrl": "https://github.com/stellar/go-stellar-sdk",
+    "status": 200,
+    "title": "GitHub - stellar/go-stellar-sdk: Stellar's Go SDK · GitHub",
+    "description": "Stellar's Go SDK. Contribute to stellar/go-stellar-sdk development by creating an account on GitHub.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-08-31T22:28:55.000Z",
+    "newestRelease": "2026-08-24T07:51:20.000Z",
+    "archived": 1
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 2d ago, release 9d ago)"
+  },
+  {
+   "slug": "hubble",
+   "name": "Hubble",
+   "prominence": 88,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://developers.stellar.org/docs/data/analytics/hubble"
+   },
+   "site": {
+    "url": "https://developers.stellar.org/docs/data/analytics/hubble",
+    "finalUrl": "https://developers.stellar.org/docs/data/analytics/hubble",
+    "status": 200,
+    "title": "Hubble | Stellar Docs",
+    "description": "What is Hubble?",
+    "namesProduct": "hubble",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/analytics/hubble/analyst-guide",
+    "title": "Analyst Guide"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"hubble\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "idos",
+   "name": "idOS",
+   "prominence": 88,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://idos.network/"
+   },
+   "site": {
+    "url": "https://idos.network/",
+    "finalUrl": "https://www.idos.network/",
+    "status": 200,
+    "title": "idOS - The identity layer of web3",
+    "description": "The identity layer for the stablecoin economy.",
+    "namesProduct": "idos",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 15,
+    "newestCommit": "2026-07-20T16:23:47.000Z",
+    "newestRelease": "2025-10-23T09:58:18.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     31
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/identity-operating-system-idos-nqg"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"idos\"; commit 44d ago, release 314d ago"
+  },
+  {
+   "slug": "python-stellar-sdk",
+   "name": "Python Stellar SDK",
+   "prominence": 85,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/stellarcn/py-stellar-base"
+   },
+   "site": {
+    "url": "https://github.com/stellarcn/py-stellar-base",
+    "finalUrl": "https://github.com/stellarcn/py-stellar-base",
+    "status": 200,
+    "title": "GitHub - StellarCN/py-stellar-base: Stellar client library for the Python language · GitHub",
+    "description": "Stellar client library for the Python language . Contribute to StellarCN/py-stellar-base development by creating an account on GitHub.",
+    "namesProduct": "python",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-09-02T02:40:53.000Z",
+    "newestRelease": "2026-08-28T01:11:56.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     1
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/python-stellar-sdk-kmx"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"python\"; commit 1d ago, release 6d ago"
+  },
+  {
+   "slug": "reclaim",
+   "name": "Reclaim",
+   "prominence": 85,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://reclaimprotocol.org/"
+   },
+   "site": {
+    "url": "https://reclaimprotocol.org/",
+    "finalUrl": "https://www.reclaimprotocol.org/",
+    "status": 200,
+    "title": "Global Verification from $0.10 at Scale | Reclaim Protocol",
+    "description": "Verify education, current employment and loyalty status globally for $1 or less, with Enterprise rates from $0.10. Start with 25 free verifications every month.",
+    "namesProduct": "reclaim",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2026-02-25T04:58:00.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"reclaim\" but freshest signal is 190d old"
+  },
+  {
+   "slug": "bitso",
+   "name": "Bitso",
+   "prominence": 84,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://bitso.com/"
+   },
+   "site": {
+    "url": "https://bitso.com/",
+    "finalUrl": "https://bitso.com/",
+    "status": 200,
+    "title": "Crypto and Stock Investing App | Buy, Sell & Earn | Bitso",
+    "description": "Invest in crypto, bitcoin, ethereum, and global stocks. Earn yields, send, and receive money securely with Bitso. Join millions, growing their money with one powerful app.",
+    "namesProduct": "bitso",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-06-11T00:00:00.000Z",
+    "url": "https://lumenloop.com/news/bitso-adds-stellar-usdc-support",
+    "title": "Bitso Adds Stellar USDC Support"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"bitso\"; corpus mention 84d ago"
+  },
+  {
+   "slug": "quicknode",
+   "name": "QuickNode",
+   "prominence": 84,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://quicknode.com/docs/stellar"
+   },
+   "site": {
+    "url": "https://quicknode.com/docs/stellar",
+    "finalUrl": "https://www.quicknode.com/docs/stellar",
+    "status": 200,
+    "title": "Stellar RPC | Quicknode Docs",
+    "description": null,
+    "namesProduct": "quicknode",
+    "prelaunch": "Testnet"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/horizon/providers",
+    "title": "Providers"
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"Testnet\""
+  },
+  {
+   "slug": "validation-cloud",
+   "name": "Validation Cloud",
+   "prominence": 84,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://validationcloud.io/stellar"
+   },
+   "site": {
+    "url": "https://validationcloud.io/stellar",
+    "finalUrl": "https://www.validationcloud.io/stellar",
+    "status": 200,
+    "title": "High Performance Stellar RPC & Horizon Nodes | Build on Stellar with Validation Cloud",
+    "description": "Start building on the Stellar Network. High performance, secure Stellar nodes on Validation Cloud’s Node API. Choose from Soroban mainnet, testnet, or Stellar Horizon nodes.",
+    "namesProduct": "validation cloud",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+    "title": "Providers"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"validation cloud\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "chaincerts",
+   "name": "Chaincerts",
+   "prominence": 82,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://chaincerts.co/"
+   },
+   "site": {
+    "url": "https://chaincerts.co/",
+    "finalUrl": "https://chaincerts.co/",
+    "status": 200,
+    "title": "Chaincerts: smart contracts-backed credentials",
+    "description": "Chaincerts is a secure and reliable way to issue, store, and verify your credentials, with complete control over your data and privacy beyond compare.",
+    "namesProduct": "chaincerts",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 6,
+    "newestCommit": "2026-06-03T00:03:57.000Z",
+    "newestRelease": "2026-06-03T00:06:00.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2023-03-23T00:00:00.000Z",
+    "url": "https://stellar.org/blog/developers/building-on-soroban-three-teams-journeys-smart-contracts",
+    "title": "Building on Soroban: Three Teams' Journeys with Smart Contracts"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"chaincerts\"; commit 92d ago, release 92d ago"
+  },
+  {
+   "slug": "nodies",
+   "name": "Nodies",
+   "prominence": 82,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://nodies.app/"
+   },
+   "site": {
+    "url": "https://nodies.app/",
+    "finalUrl": "https://www.nodies.app/",
+    "status": 200,
+    "title": "Nodies - Web3 Infrastructure Platform",
+    "description": "Power your decentralized applications with our secure and scalable blockchain infrastructure. Our service offers seamless access to multiple blockchain networks, allowing you to focus on app development without worrying about managing infrastructure.",
+    "namesProduct": "nodies",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 6,
+    "newestCommit": "2025-03-03T21:18:44.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     30
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/nodies-bn0"
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/horizon/providers",
+    "title": "Providers"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"nodies\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "albedo",
+   "name": "Albedo",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://albedo.link/"
+   },
+   "site": {
+    "url": "https://albedo.link/",
+    "finalUrl": "https://albedo.link/",
+    "status": 200,
+    "title": "Albedo",
+    "description": null,
+    "namesProduct": "albedo",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-31T12:48:01.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"albedo\"; commit 2d ago"
+  },
+  {
+   "slug": "alchemy",
+   "name": "Alchemy",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://alchemy.com/"
+   },
+   "site": {
+    "url": "https://alchemy.com/",
+    "finalUrl": "https://www.alchemy.com/",
+    "status": 200,
+    "title": "Alchemy | Blockchain infrastructure for developers",
+    "description": "Build and scale apps onchain with Alchemy&#x27;s RPC APIs, data APIs, and developer tools across 100+ blockchains. Get started for free.",
+    "namesProduct": "alchemy",
+    "prelaunch": "testnet"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/indexers",
+    "title": "Indexers Overview"
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"testnet\""
+  },
+  {
+   "slug": "beamable",
+   "name": "Beamable",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://beamable.com/"
+   },
+   "site": {
+    "url": "https://beamable.com/",
+    "finalUrl": "https://beamable.com/",
+    "status": 200,
+    "title": "Beamable - Game Server and LiveOps Platform for Web2/Web3",
+    "description": "One line of code is all you need to build your own custom server logic via microservices along with a world of LiveOps tools and live services.",
+    "namesProduct": "beamable",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-01-22T11:55:08.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     38
+    ],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"beamable\" but freshest signal is 223d old"
+  },
+  {
+   "slug": "blockdaemon",
+   "name": "Blockdaemon",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://blockdaemon.com/"
+   },
+   "site": {
+    "url": "https://blockdaemon.com/",
+    "finalUrl": "https://www.blockdaemon.com/",
+    "status": 200,
+    "title": "Blockdaemon | Built for Financial institutions",
+    "description": "Trusted by 400+ institutions to launch, secure, and scale digital asset products across custody, tokenization, staking, payments, and settlement.",
+    "namesProduct": "blockdaemon",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 20,
+    "newestCommit": "2025-09-25T14:57:45.000Z",
+    "newestRelease": "2024-11-07T16:19:26.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2023-12-06T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/block-by-block-with-denelle-dixon-trust-disruption-and-navigating-the-decentralized-frontier-ft-konstantin-richter-ceo-of-blockdaemon",
+    "title": "block by block | Trust, Disruption & Navigating the Decentralized Frontier with Konstantin Richter"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"blockdaemon\" but freshest signal is 342d old"
+  },
+  {
+   "slug": "dfns",
+   "name": "DFNS",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://dfns.co/"
+   },
+   "site": {
+    "url": "https://dfns.co/",
+    "finalUrl": "https://dfns.co/",
+    "status": 200,
+    "title": "DFNS — Core Banking Platform for Digital Assets",
+    "description": "400+ banks, fintechs, and institutions run wallets, custody, payments, and tokenization onchain on DFNS. 100+ networks. SOC 2 Type II.",
+    "namesProduct": "dfns",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 16,
+    "newestCommit": "2026-08-27T13:03:01.000Z",
+    "newestRelease": "2026-08-14T21:13:21.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     25
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dfns-iop"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"dfns\"; commit 6d ago, release 19d ago"
+  },
+  {
+   "slug": "didstellar",
+   "name": "DID:STELLAR",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://mavennet.com/"
+   },
+   "site": {
+    "url": "https://mavennet.com/",
+    "finalUrl": "https://www.mavennet.com/",
+    "status": 200,
+    "title": "Revolution Through Digital Technology — Mavennet",
+    "description": "Mavennet is a digital consulting & venture studio company that offers strategy, technology, design and data management capabilities. We specialize in Data Management, Digital Identity, Blockchain and AI.",
+    "namesProduct": "did:stellar",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "obsrvr",
+   "name": "Obsrvr",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://withobsrvr.com/"
+   },
+   "site": {
+    "url": "https://withobsrvr.com/",
+    "finalUrl": "https://www.withobsrvr.com/",
+    "status": 200,
+    "title": "Obsrvr — Structured data infrastructure for Stellar and Soroban",
+    "description": null,
+    "namesProduct": "obsrvr",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 22,
+    "newestCommit": "2026-08-24T21:42:30.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/obsrvr-prism-fvl"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"obsrvr\"; commit 9d ago"
+  },
+  {
+   "slug": "stellar-php-sdk",
+   "name": "Stellar PHP SDK",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/soneso/stellar-php-sdk"
+   },
+   "site": {
+    "url": "https://github.com/soneso/stellar-php-sdk",
+    "finalUrl": "https://github.com/soneso/stellar-php-sdk",
+    "status": 200,
+    "title": "GitHub - Soneso/stellar-php-sdk: The Soneso open source Stellar SDK for PHP provides APIs to build and sign transactions, connect and query Horizon. · GitHub",
+    "description": "The Soneso open source Stellar SDK for PHP provides APIs to build and sign transactions, connect and query Horizon. - Soneso/stellar-php-sdk",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-09-01T09:10:19.000Z",
+    "newestRelease": "2026-08-24T14:34:23.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     8
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/stellar-php-sdk-utm"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 1d ago, release 9d ago)"
+  },
+  {
+   "slug": "yellow-card",
+   "name": "Yellow Card",
+   "prominence": 80,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://yellowcard.io/"
+   },
+   "site": {
+    "url": "https://yellowcard.io/",
+    "finalUrl": "https://yellowcard.io/",
+    "status": 200,
+    "title": "Stablecoin Payments Infrastructure - Yellow Card",
+    "description": "Yellow Card is a licensed stablecoin payments infrastructure provider powering global money movement across USD and 50+ local currencies. Talk to us.",
+    "namesProduct": "yellow card",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-02-19T08:32:52.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2024-02-13T00:00:00.000Z",
+    "url": "https://lumenloop.com/news/yellow-card-introduces-usdc-stellar-lightning-fast-cross",
+    "title": "Yellow Card introduces USDC on Stellar for Lightning-Fast Cross-Border Transactions"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"yellow card\" but freshest signal is 195d old"
+  },
+  {
+   "slug": "kmp-stellar-sdk",
+   "name": "KMP Stellar SDK",
+   "prominence": 78,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/soneso/kmp-stellar-sdk"
+   },
+   "site": {
+    "url": "https://github.com/soneso/kmp-stellar-sdk",
+    "finalUrl": "https://github.com/soneso/kmp-stellar-sdk",
+    "status": 200,
+    "title": "GitHub - Soneso/kmp-stellar-sdk: The Kotlin Multiplatform Stellar SDK provides APIs to build transactions and connect to Horizon and Stellar RPC Server. · GitHub",
+    "description": "The Kotlin Multiplatform Stellar SDK provides APIs to build transactions and connect to Horizon and Stellar RPC Server. - Soneso/kmp-stellar-sdk",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-26T11:25:13.000Z",
+    "newestRelease": "2026-08-26T11:19:16.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/kmp-stellar-sdk-23m"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 7d ago, release 7d ago)"
+  },
+  {
+   "slug": "rabet",
+   "name": "Rabet",
+   "prominence": 78,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://rabet.io/"
+   },
+   "site": {
+    "url": "https://rabet.io/",
+    "finalUrl": "https://rabet.io/",
+    "status": 200,
+    "title": "Rabet - An open-source wallet for Stellar",
+    "description": "Rabet is a free and open-source Stellar browser extension wallet which you can manage your assets and interact with Stellar apps.",
+    "namesProduct": "rabet",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2025-12-23T14:10:10.000Z",
+    "newestRelease": "2025-12-23T14:10:21.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/tools/developer-tools/wallets",
+    "title": "Wallet Integration"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"rabet\"; release 253d ago, corpus mention 2d ago"
+  },
+  {
+   "slug": "scorechain",
+   "name": "Scorechain",
+   "prominence": 78,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://scorechain.com/"
+   },
+   "site": {
+    "url": "https://scorechain.com/",
+    "finalUrl": "https://www.scorechain.com/",
+    "status": 200,
+    "title": "Crypto AML Compliance & Blockchain Analytics Platform | Scorechain",
+    "description": "Scorechain is your trusted crypto compliance partner, offering advanced blockchain analytics, risk scoring, and KYT solutions to help VASPs, banks, and regulators navigate crypto with confidence. Unlock transparency. Mitigate risk. Stay compliant.",
+    "namesProduct": "scorechain",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     36
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/ssc-scorechain-stellar-compliance-vr7"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "stellar-quickstart",
+   "name": "Stellar Quickstart",
+   "prominence": 78,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/stellar/quickstart"
+   },
+   "site": {
+    "url": "https://github.com/stellar/quickstart",
+    "finalUrl": "https://github.com/stellar/quickstart",
+    "status": 200,
+    "title": "GitHub - stellar/quickstart: Home of the stellar/quickstart docker image for development and testing · GitHub",
+    "description": "Home of the stellar/quickstart docker image for development and testing - stellar/quickstart",
+    "namesProduct": "quickstart",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-09-02T00:35:19.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"quickstart\"; commit 1d ago"
+  },
+  {
+   "slug": "vesseo",
+   "name": "Vesseo",
+   "prominence": 78,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-07-20T00:00:00.000Z",
+    "sourceUrl": "https://vesseoapp.com/"
+   },
+   "site": {
+    "url": "https://vesseoapp.com/",
+    "finalUrl": "https://vesseoapp.com/",
+    "status": 200,
+    "title": "Vesseo | Get paid globally. Spend locally",
+    "description": "Vesseo is your all-in-one digital wallet to hold, send, receive, and use USDc easily. Get a U.S. account in your name, pay bills, access yield, and manage your digital dollars — all from your phone.",
+    "namesProduct": "vesseo",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2023-04-17T00:00:00.000Z",
+    "url": "https://stellar.org/blog/developers/making-international-remittances-easy-with-pay-by-phone",
+    "title": "Making International Remittances Easy with Pay by Phone"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "fonbnk",
+   "name": "Fonbnk",
+   "prominence": 76,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://fonbnk.com/"
+   },
+   "site": {
+    "url": "https://fonbnk.com/",
+    "finalUrl": "https://fonbnk.com/",
+    "status": 200,
+    "title": "Fonbnk — Stablecoin payments for global commerce",
+    "description": null,
+    "namesProduct": "fonbnk",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 6,
+    "newestCommit": "2024-11-14T11:46:55.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2021-09-23T00:00:00.000Z",
+    "url": "https://stellar.org/blog/ecosystem/from-cross-border-payments-to-unified-wallets-african-startups-are-building-the-future-of-finance",
+    "title": "From Cross-Border Payments to Unified Wallets, African Startups are Building the Future of Finance"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "nownodes",
+   "name": "NOWNodes",
+   "prominence": 76,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://nownodes.io/"
+   },
+   "site": {
+    "url": "https://nownodes.io/",
+    "finalUrl": "https://nownodes.io/",
+    "status": 200,
+    "title": "NOWNodes — Blockchain Nodes & RPC API for 125+ Networks",
+    "description": "Access to blockchain nodes for 125+ networks and everything you need for Web3 development — WebSocket, Webhooks, JSON-RPC, gRPC, and Data API. 99.95% uptime.",
+    "namesProduct": "nownodes",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2020-04-30T17:03:52.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     19
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/nownodes-y5v"
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+    "title": "Providers"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"nownodes\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "java-stellar-sdk",
+   "name": "Java Stellar SDK",
+   "prominence": 75,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/lightsail-network/java-stellar-sdk"
+   },
+   "site": {
+    "url": "https://github.com/lightsail-network/java-stellar-sdk",
+    "finalUrl": "https://github.com/lightsail-network/java-stellar-sdk",
+    "status": 200,
+    "title": "GitHub - lightsail-network/java-stellar-sdk: The Java Stellar SDK library provides APIs to build transactions and connect to Horizon and Stellar RPC Server. · GitHub",
+    "description": "The Java Stellar SDK library provides APIs to build transactions and connect to Horizon and Stellar RPC Server. - lightsail-network/java-stellar-sdk",
+    "namesProduct": "java stellar sdk",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-09-01T09:51:03.000Z",
+    "newestRelease": "2026-09-01T09:59:31.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"java stellar sdk\"; commit 1d ago, release 1d ago"
+  },
+  {
+   "slug": "gatewayfm",
+   "name": "Gateway.fm",
+   "prominence": 74,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://gateway.fm/"
+   },
+   "site": {
+    "url": "https://gateway.fm/",
+    "finalUrl": "https://gateway.fm/",
+    "status": 200,
+    "title": "Institutional infrastructure orchestration",
+    "description": "Gateway is the institutional infrastructure orchestrator for sovereign onchain finance: one platform, selected providers, integrations, and an explicit operating boundary.",
+    "namesProduct": "gateway.fm",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 16,
+    "newestCommit": "2026-09-01T17:17:37.000Z",
+    "newestRelease": "2026-08-27T08:27:50.000Z",
+    "archived": 2
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     16
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/gatewayfm-noq"
+   },
+   "corpus": {
+    "date": "2026-06-14T00:00:00.000Z",
+    "url": "https://github.com/lumenloop/awesome-stellar-community-fund/blob/main/docs/scf-history.md",
+    "title": "SCF History: Versions, Award Types, and Program Evolution"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"gateway.fm\"; commit 1d ago, release 6d ago, corpus mention 81d ago"
+  },
+  {
+   "slug": "stellarbroker",
+   "name": "StellarBroker",
+   "prominence": 74,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://stellar.broker/"
+   },
+   "site": {
+    "url": "https://stellar.broker/",
+    "finalUrl": "https://stellar.broker/",
+    "status": 200,
+    "title": "StellarBroker - Multi-source liquidity swap router for Stellar, providing access to AMMs and Stellar DEX",
+    "description": "StellarBroker",
+    "namesProduct": "stellarbroker",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 4,
+    "newestCommit": "2026-07-26T15:19:25.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     33
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/stellarbroker-abg"
+   },
+   "corpus": {
+    "date": "2025-04-27T15:00:00.000Z",
+    "url": "https://stellarsecurityportal.com/report/46",
+    "title": "StellarBroker — Runtime Verification (Security Audit Report for StellarBroker)"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"stellarbroker\"; commit 38d ago"
+  },
+  {
+   "slug": "ultra-stellar",
+   "name": "Ultra Stellar",
+   "prominence": 74,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://ultrastellar.com/"
+   },
+   "site": {
+    "url": "https://ultrastellar.com/",
+    "finalUrl": "https://ultrastellar.com/",
+    "status": 200,
+    "title": "Ultra Stellar",
+    "description": "Ultra Stellar is building leading products and services on Stellar - an open network for storing and moving money.",
+    "namesProduct": "ultra stellar",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2025-11-18T10:00:00.000Z",
+    "url": "https://lumenloop.com/news/wirex-stellar-go-live-dual-stablecoin-visa-settlement-usdc-3",
+    "title": "Wirex and Stellar Go Live with Dual-Stablecoin Visa Settlement in USDC and EURC for 7 Million+ Users"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"ultra stellar\" but freshest signal is 288d old"
+  },
+  {
+   "slug": "bitgo",
+   "name": "BitGo",
+   "prominence": 72,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://bitgo.com/"
+   },
+   "site": {
+    "url": "https://bitgo.com/",
+    "finalUrl": "https://bitgo.com/",
+    "status": 200,
+    "title": "Digital Asset Bank & Infrastructure for Institutions | BitGo",
+    "description": "Accelerating the transition of the financial system to the digital asset economy with best-in-class custody, staking, trading, stablecoins, and everything in between.",
+    "namesProduct": "bitgo",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2021-04-22T00:00:00.000Z",
+    "url": "https://lumenloop.com/news/leading-crypto-custodian-bitgo-now-supports-stellar-usdc",
+    "title": "Leading Crypto Custodian BitGo Now Supports Stellar USDC"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "stellar-disbursement-platform-sdp",
+   "name": "Stellar Disbursement Platform (SDP)",
+   "prominence": 72,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://stellar.org/products-and-tools/disbursement-platform"
+   },
+   "site": {
+    "url": "https://stellar.org/products-and-tools/disbursement-platform",
+    "finalUrl": "https://stellar.org/products-and-tools/disbursement-platform",
+    "status": 200,
+    "title": "Stellar | Stellar Disbursement Platform",
+    "description": "An open-source bulk payment solution to power your global disbursement needs.  Meet payroll, invoice suppliers, pay workers, and more.",
+    "namesProduct": "disbursement",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/platforms/stellar-disbursement-platform",
+    "title": "Stellar Disbursement Platform Introduction"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"disbursement\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "streamingfast",
+   "name": "StreamingFast",
+   "prominence": 72,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://streamingfast.io/"
+   },
+   "site": {
+    "url": "https://streamingfast.io/",
+    "finalUrl": "https://www.streamingfast.io/",
+    "status": 200,
+    "title": "Chain data at extreme speeds and awesome composability | StreamingFast",
+    "description": "StreamingFast is a core developer on The Graph, integrating Firehose and Substreams into all blockchains. Process whole networks in 5 minutes with extreme-speed blockchain data tools.",
+    "namesProduct": "streamingfast",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-08-28T14:40:44.000Z",
+    "newestRelease": "2026-08-28T14:46:52.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     31
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/streamingfast-core-dev-team-at-the-graph-ffp"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"streamingfast\"; commit 5d ago, release 5d ago"
+  },
+  {
+   "slug": "beans",
+   "name": "Beans",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://beansapp.com/"
+   },
+   "site": {
+    "url": "https://beansapp.com/",
+    "finalUrl": "https://www.beansapp.com/",
+    "status": 200,
+    "title": "Instant, free & safe international money transfers | Beans App",
+    "description": "With Beans, send and receive money worldwide instantly and without fees. Manage your finances easily with our user-friendly App.",
+    "namesProduct": "beans",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 8,
+    "newestCommit": "2026-09-01T09:23:15.000Z",
+    "newestRelease": "2026-09-01T09:23:03.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     10,
+     15,
+     21,
+     29
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/beans-app-noa"
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/platforms/stellar-disbursement-platform/admin-guide/user-interface/dashboard-home",
+    "title": "Dashboard Home"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"beans\"; commit 1d ago, release 1d ago, corpus mention 2d ago"
+  },
+  {
+   "slug": "felix-pago",
+   "name": "Felix Pago",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://felixpago.com/"
+   },
+   "site": {
+    "url": "https://felixpago.com/",
+    "finalUrl": "https://www.felixpago.com/",
+    "status": 200,
+    "title": "Envía Dinero a Latinoamérica por WhatsApp | Félix",
+    "description": "Envía dinero a 10 países de Latinoamérica con tan solo un mensaje de WhatsApp. ¡Sin apps, sin filas, 100% seguro y con atención 24/7!",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "infstones",
+   "name": "InfStones",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://infstones.com/"
+   },
+   "site": {
+    "url": "https://infstones.com/",
+    "finalUrl": "https://infstones.com/",
+    "status": 200,
+    "title": "InfStones - The Ultimate Blockchain Infrastructure Services Platform",
+    "description": "Enterprise-grade Node Management, Non-custodial Staking, and Scalable APIs to Power the Next Generation of Web3 Development",
+    "namesProduct": "infstones",
+    "prelaunch": "Testnet"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26,
+     29
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/infstones-a0l"
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+    "title": "Providers"
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"Testnet\""
+  },
+  {
+   "slug": "lightsail-network-quasar",
+   "name": "Lightsail Network (Quasar)",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://quasar.lightsail.network/"
+   },
+   "site": {
+    "url": "https://quasar.lightsail.network/",
+    "finalUrl": "https://quasar.lightsail.network/",
+    "status": 200,
+    "title": "Quasar - Stellar RPC & Data Services by Lightsail Network",
+    "description": null,
+    "namesProduct": "lightsail",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "net-stellar-sdk",
+   "name": ".NET Stellar SDK",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/Beans-BV/dotnet-stellar-sdk"
+   },
+   "site": {
+    "url": "https://github.com/Beans-BV/dotnet-stellar-sdk",
+    "finalUrl": "https://github.com/Beans-BV/dotnet-stellar-sdk",
+    "status": 200,
+    "title": "GitHub - Beans-BV/dotnet-stellar-sdk: Stellar API SDK for .NET 8 · GitHub",
+    "description": "Stellar API SDK for .NET 8. Contribute to Beans-BV/dotnet-stellar-sdk development by creating an account on GitHub.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-28T08:25:54.000Z",
+    "newestRelease": "2026-06-07T15:22:32.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 5d ago, release 87d ago)"
+  },
+  {
+   "slug": "redswan",
+   "name": "RedSwan",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://redswan.io/"
+   },
+   "site": {
+    "url": "https://redswan.io/",
+    "finalUrl": "https://redswan.io/",
+    "status": 200,
+    "title": "RedSwan Digital Real Estate - Tokenized Commercial Real Estate",
+    "description": "RedSwan is a world leader in commercial real estate tokenization with $9B+ in digital assets, SEC/FINRA approval, and global investment access.",
+    "namesProduct": "redswan",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2025-12-19T00:00:00.000Z",
+    "url": "https://stellar.org/blog/ecosystem/tokenizing-real-estate-with-redswan",
+    "title": "Tokenizing Real Estate with RedSwan"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"redswan\" but freshest signal is 258d old"
+  },
+  {
+   "slug": "solar-wallet",
+   "name": "Solar Wallet",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://solarwallet.io/"
+   },
+   "site": {
+    "url": "https://solarwallet.io/",
+    "finalUrl": "https://solarwallet.io/",
+    "status": 200,
+    "title": "Simple and Secure Stellar Wallet | Solar Wallet",
+    "description": "Solar wallet - Blazingly fast, business-friendly, multi-signature Stellar wallet. 100% free and open source. Download the desktop app or install on Android or iOS.",
+    "namesProduct": "solar wallet",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 17,
+    "newestCommit": "2021-04-21T11:58:51.000Z",
+    "newestRelease": "2020-11-24T09:16:45.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "space-and-time",
+   "name": "Space and Time",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://spaceandtime.io/"
+   },
+   "site": {
+    "url": "https://spaceandtime.io/",
+    "finalUrl": "https://www.spaceandtime.io/",
+    "status": 200,
+    "title": "Space and Time | The Data Blockchain Securing Onchain Finance",
+    "description": "The data blockchain securing onchain finance. Powering tokenized assets, stablecoins, global markets, and DeFi.",
+    "namesProduct": "space and time",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-01-28T17:54:15.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"space and time\" but freshest signal is 217d old"
+  },
+  {
+   "slug": "spacewalk",
+   "name": "Spacewalk",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://pendulumchain.org/spacewalk"
+   },
+   "site": {
+    "url": "https://pendulumchain.org/spacewalk",
+    "finalUrl": "https://www.pendulumchain.org/spacewalk",
+    "status": 200,
+    "title": "Spacewalk",
+    "description": "Spacewalk is the trustless bridge connecting Stellar and Polkadot, built on Pendulum.",
+    "namesProduct": "spacewalk",
+    "prelaunch": "Testnet"
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2026-03-19T11:21:00.000Z",
+    "newestRelease": "2025-06-11T10:20:23.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2024-09-16T17:25:55.000Z",
+    "url": "https://lumenloop.com/news/next-frontier-unlocking-potential-non-usd-stablecoins",
+    "title": "The Next Frontier: Unlocking the Potential of Non-USD Stablecoins with OnChain FX"
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"Testnet\""
+  },
+  {
+   "slug": "typescript-wallet-sdk",
+   "name": "TypeScript Wallet SDK",
+   "prominence": 70,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/stellar/typescript-wallet-sdk"
+   },
+   "site": {
+    "url": "https://github.com/stellar/typescript-wallet-sdk",
+    "finalUrl": "https://github.com/stellar/typescript-wallet-sdk",
+    "status": 200,
+    "title": "GitHub - stellar/typescript-wallet-sdk: Typescript Wallet SDK to build Stellar wallets · GitHub",
+    "description": "Typescript Wallet SDK to build Stellar wallets. Contribute to stellar/typescript-wallet-sdk development by creating an account on GitHub.",
+    "namesProduct": "typescript wallet sdk",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-21T02:37:09.000Z",
+    "newestRelease": "2026-08-21T02:58:54.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"typescript wallet sdk\"; commit 13d ago, release 13d ago"
+  },
+  {
+   "slug": "chipper",
+   "name": "Chipper",
+   "prominence": 68,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://chippercash.com/"
+   },
+   "site": {
+    "url": "https://chippercash.com/",
+    "finalUrl": "https://www.chippercash.com/",
+    "status": 200,
+    "title": "Move Your Money Freely",
+    "description": "Join over 5 million people securely sending and receiving money with Chipper Cash. Great app to send and receive money across a number of countries, highly recommended as a money transfer alternative.",
+    "namesProduct": "chipper",
+    "prelaunch": "coming soon"
+   },
+   "code": {
+    "repos": 8,
+    "newestCommit": "2023-11-14T12:15:12.000Z",
+    "newestRelease": "2019-04-17T14:58:53.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-06-03T02:15:30.183Z",
+    "url": "https://lumenloop.com/research/stellar-ama-recap-dtcc-rwas-privacy-next",
+    "title": "Stellar AMA Recap: DTCC, RWAs, Privacy & What's Next"
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"coming soon\""
+  },
+  {
+   "slug": "katagames",
+   "name": "Kata.Games",
+   "prominence": 68,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://kata.games/"
+   },
+   "site": {
+    "url": "https://kata.games/",
+    "finalUrl": "https://kata.games/",
+    "status": 200,
+    "title": "Kata.Games - Revolutionary Gaming Platform",
+    "description": null,
+    "namesProduct": "kata.games",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-08-30T11:31:08.000Z",
+    "newestRelease": "2024-05-03T05:46:49.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "zettablock",
+   "name": "ZettaBlock",
+   "prominence": 68,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://zettablock.com/"
+   },
+   "site": {
+    "url": "https://zettablock.com/",
+    "finalUrl": "https://zettablock.com/",
+    "status": 200,
+    "title": "ZettaBlock - A unified platform for open and trustfree AI development.",
+    "description": "Our state-of-the-art architecture enables developers to collaboratively train and manage AI models with governance and ownership semantics, empowering an accessible ecosystem of models and datasets.",
+    "namesProduct": "zettablock",
+    "prelaunch": "Coming Soon"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"Coming Soon\""
+  },
+  {
+   "slug": "decaf",
+   "name": "Decaf",
+   "prominence": 66,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-07-23T00:00:00.000Z",
+    "sourceUrl": "https://decaf.so/"
+   },
+   "site": {
+    "url": "https://decaf.so/",
+    "finalUrl": "https://www.decaf.so/en",
+    "status": 200,
+    "title": "Decaf",
+    "description": "Send money over WhatsApp and withdraw it to a bank account.",
+    "namesProduct": "decaf",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2024-07-02T13:54:21.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     17
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/decaf-pay-w41"
+   },
+   "corpus": {
+    "date": "2024-08-06T00:00:00.000Z",
+    "url": "https://stellar.org/blog/ecosystem/decentralife-fernanda-orduna-rangel-decaf",
+    "title": "Decentralife: A Decade of Building Better with Fernanda Orduna Rangel, Decaf"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "nebulavrf",
+   "name": "NebulaVRF",
+   "prominence": 66,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://notliveyet.com/"
+   },
+   "site": {
+    "url": "https://notliveyet.com/",
+    "finalUrl": "https://notliveyet.com/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2026-02-14T13:38:14.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     34
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/nebulavrf-uve"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product"
+  },
+  {
+   "slug": "stellar-unity-developer-kit",
+   "name": "Stellar Unity Developer Kit",
+   "prominence": 66,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://scryingst.one/"
+   },
+   "site": {
+    "url": "https://scryingst.one/",
+    "finalUrl": "https://scryingst.one/",
+    "status": 200,
+    "title": "Scrying Stone Creative",
+    "description": "A web3 creative agency bringing ideas to life.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-30T18:10:35.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     40
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/stellar-unity-developer-kit-ipv"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 3d ago)"
+  },
+  {
+   "slug": "cyberbrawl",
+   "name": "Cyberbrawl",
+   "prominence": 62,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cyberbrawl.io/"
+   },
+   "site": {
+    "url": "https://cyberbrawl.io/",
+    "finalUrl": "https://cyberbrawl.io/",
+    "status": 200,
+    "title": "Cyber Brawl",
+    "description": "Fast-paced card battles for everyone—instant action, endless fun.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "ledger",
+   "name": "Ledger",
+   "prominence": 62,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://ledger.com/"
+   },
+   "site": {
+    "url": "https://ledger.com/",
+    "finalUrl": "https://www.ledger.com/",
+    "status": 200,
+    "title": "Ledger Crypto Wallet - Security for DeFi & Web3",
+    "description": "Secure your crypto assets such as Bitcoin, Ethereum, XRP, Monero, and more. Give yourself peace of mind by knowing that your cryptocurrencies are safe",
+    "namesProduct": "ledger",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-08-31T15:02:36.000Z",
+    "newestRelease": "2026-08-24T09:37:29.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/apis/horizon/api-reference/retrieve-a-ledger",
+    "title": "Retrieve a Ledger"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"ledger\"; commit 2d ago, release 9d ago, corpus mention 2d ago"
+  },
+  {
+   "slug": "onfinality",
+   "name": "OnFinality",
+   "prominence": 62,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://onfinality.io/en/networks/stellar"
+   },
+   "site": {
+    "url": "https://onfinality.io/en/networks/stellar",
+    "finalUrl": "https://onfinality.io/en/networks/stellar",
+    "status": 200,
+    "title": "Stellar API, RPC Service & Dedicated Nodes",
+    "description": "Stellar infrastructure for Substrate teams: RPC access, archive data, and node options where supported.",
+    "namesProduct": "onfinality",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/data/indexers",
+    "title": "Indexers Overview"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"onfinality\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "trezor",
+   "name": "Trezor",
+   "prominence": 62,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://trezor.io/"
+   },
+   "site": {
+    "url": "https://trezor.io/",
+    "finalUrl": "https://trezor.io/",
+    "status": 200,
+    "title": "Trezor Hardware Wallet (Official) | Bitcoin & Crypto Security | Trezor",
+    "description": "The safest cold storage wallets for crypto security and financial independence. Easily use, store, and protect Bitcoins.",
+    "namesProduct": "trezor",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/build/apps/application-design-considerations",
+    "title": "Application Design Considerations"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"trezor\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "bitget-wallet",
+   "name": "Bitget Wallet",
+   "prominence": 60,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://web3.bitget.com/"
+   },
+   "site": {
+    "url": "https://web3.bitget.com/",
+    "finalUrl": "https://web3.bitget.com/",
+    "status": 200,
+    "title": "Bitget Wallet - Best Crypto Wallet for Web3, DeFi, Safe & Fast",
+    "description": "Everyday finance,powered by crypto. Join 100M users for a simple, secure, seamless experience in managing, trading, and growing your digital assets.",
+    "namesProduct": "bitget wallet",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-03-12T14:43:23.000Z",
+    "url": "https://lumenloop.com/news/bitget-wallet-expand-global-stablecoin-payments-stellar",
+    "title": "Bitget Wallet to Expand Global Stablecoin Payments on Stellar"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"bitget wallet\"; corpus mention 174d ago"
+  },
+  {
+   "slug": "fordefi",
+   "name": "Fordefi",
+   "prominence": 60,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://fordefi.com/"
+   },
+   "site": {
+    "url": "https://fordefi.com/",
+    "finalUrl": "https://fordefi.com/",
+    "status": 200,
+    "title": "FORDEFI - Institutional MPC Wallet",
+    "description": "Fordefi’s comprehensive MPC wallet platform and web3 gateway enables you to securely self-custody your private keys, seamlessly connect to thousands of dApps across any blockchain, protect your workflows with granular policies, and manage your digital asset operations all-in-one place.",
+    "namesProduct": "fordefi",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-06-03T03:17:36.816Z",
+    "url": "https://lumenloop.com/research/upshift-brings-multi-chain-vault-infrastructure-stellar",
+    "title": "Upshift Brings Multi-Chain Vault Infrastructure to Stellar"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"fordefi\"; corpus mention 92d ago"
+  },
+  {
+   "slug": "hot-wallet",
+   "name": "HOT Wallet",
+   "prominence": 60,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://hot-labs.org/"
+   },
+   "site": {
+    "url": "https://hot-labs.org/",
+    "finalUrl": "https://hot-labs.org/",
+    "status": 200,
+    "title": "HOT Protocol | HOT Labs | Chain abstraction",
+    "description": "HOT Protocol is a Chain Signature Protocol. Mine HOT and then use it to pay multi-chain gas. Bridge crypto in seconds using HOT OMNI bridge. Interact with MPC Wallet to make your crypto journey secure.",
+    "namesProduct": "hot wallet",
+    "prelaunch": "coming soon"
+   },
+   "code": {
+    "repos": 12,
+    "newestCommit": "2026-07-06T20:07:18.000Z",
+    "newestRelease": "2026-01-28T17:13:48.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"coming soon\""
+  },
+  {
+   "slug": "klever",
+   "name": "Klever",
+   "prominence": 60,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://klever.io/"
+   },
+   "site": {
+    "url": "https://klever.io/",
+    "finalUrl": "https://klever.io/",
+    "status": 200,
+    "title": "Home - Klever • All in One Crypto Hot and Cold Wallet",
+    "description": null,
+    "namesProduct": "klever",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-09-01T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/build/agentic-payments/x402",
+    "title": "x402 on Stellar"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"klever\"; corpus mention 2d ago"
+  },
+  {
+   "slug": "open-gamefi-sdk",
+   "name": "Open GameFi SDK",
+   "prominence": 60,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/yanis7774/stellar-gamefi-integration/tree/main"
+   },
+   "site": {
+    "url": "https://github.com/yanis7774/stellar-gamefi-integration/tree/main",
+    "finalUrl": "https://github.com/yanis7774/stellar-gamefi-integration/tree/main",
+    "status": 200,
+    "title": "GitHub - yanis7774/Stellar-GameFi-integration: Stellar GameFi integration to Colyseus.js, Decentraland, Other Platforms · GitHub",
+    "description": "Stellar GameFi integration to Colyseus.js, Decentraland, Other Platforms - yanis7774/Stellar-GameFi-integration",
+    "namesProduct": "gamefi",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-03-21T01:36:42.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "walletconnect",
+   "name": "WalletConnect",
+   "prominence": 58,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://walletconnect.network/"
+   },
+   "site": {
+    "url": "https://walletconnect.network/",
+    "finalUrl": "https://walletconnect.network/",
+    "status": 200,
+    "title": "WalletConnect: The Connectivity Layer for the Financial Internet",
+    "description": "Essential decentralized infrastructure moving billions in value monthly. Powered by 20+ world-class node operators, 700+ wallets, 70K+ apps, and millions of users.",
+    "namesProduct": "walletconnect",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  }
+ ]
+}
