@@ -2453,7 +2453,14 @@
 						"soroswap",
 						"scf-funded",
 						"live",
-						"inactive"
+						"inactive",
+						"oracle provider",
+						"oracle project",
+						"oracle on stellar",
+						"which oracle",
+						"price oracle",
+						"oracles on stellar",
+						"find an oracle"
 					],
 					"useWhen": [
 						"who has built / has anyone built / is there a live or SCF-funded project for X",
@@ -2743,7 +2750,20 @@
 						"sdk internals",
 						"implementation",
 						"defined",
-						"deepwiki"
+						"deepwiki",
+						"how does it calculate",
+						"calculate",
+						"in the code",
+						"how is it implemented",
+						"where in the code",
+						"interest rate model",
+						"how does the contract",
+						"algorithm",
+						"formula",
+						"mechanism",
+						"code walkthrough",
+						"explain the code",
+						"how does the code"
 					],
 					"useWhen": [
 						"'where is X defined / how does Y work' for a Stellar internal (error/result codes, consensus/SCP, ledger, XDR, a SEP's implementation)",
@@ -5201,7 +5221,15 @@
 						"paid work",
 						"where can I earn",
 						"get paid to build",
-						"contract work"
+						"contract work",
+						"freelance work",
+						"work for contributors",
+						"jobs for stellar developers",
+						"bounties for developers",
+						"contributor opportunities",
+						"earn by contributing",
+						"paid work for contributors",
+						"freelance work for stellar contributors"
 					],
 					"useWhen": [
 						"what RFPs/bounties/grants match my idea / are open",
@@ -7555,8 +7583,6 @@
 						"incident",
 						"post-mortem",
 						"oracle manipulation",
-						"yieldblox oracle manipulation incident",
-						"reflector oracle manipulation incident",
 						"reentrancy",
 						"soroban-sdk security advisories",
 						"cve",
@@ -8932,7 +8958,16 @@
 						"biggest stablecoin",
 						"largest stablecoin",
 						"asset supply",
-						"token holders"
+						"token holders",
+						"github activity",
+						"by github activity",
+						"projects by github activity",
+						"developer activity ranking",
+						"ranked by commits",
+						"most active projects",
+						"top stellar projects",
+						"activity leaderboard",
+						"ranked by activity"
 					],
 					"useWhen": [
 						"which projects have open issues / the biggest issue backlog",
