@@ -4,11 +4,16 @@ import {
 	computeSeriesPathPoints,
 	seriesPathFromPoints,
 } from "@/components/charts/series-path-utils";
+import { buildYScalesFromDomains } from "@/components/charts/y-axis-scales";
+import { niceYDomain } from "@/components/charts/y-domain-utils";
 import {
 	capSeriesWithOther,
 	issuerLeaderboard,
+	measuredDayCount,
+	type SeriesRow,
 	stackedBands,
 	toShare,
+	windowed,
 } from "../stablecoin-series";
 import { rankStablecoins, type StoreRow, storeRowToApi } from "../stablecoins";
 
@@ -302,5 +307,108 @@ describe("issuerLeaderboard exclusions", () => {
 		const out = issuerLeaderboard(rows);
 		expect(out[0].totalMarketCapUSD).toBe(331e6);
 		expect(out[1].tokens).toEqual(["USDZ"]);
+	});
+});
+
+describe("measuredDayCount (thin-window detection)", () => {
+	it("counts a row as measured when any ticker has a number", () => {
+		const rows: SeriesRow[] = [
+			{ _date: "2026-09-01", USDC: 100 },
+			{ _date: "2026-09-02" }, // nothing measured that day
+			{ _date: "2026-09-03", EURC: 5 },
+		];
+		expect(measuredDayCount(rows)).toBe(2);
+	});
+
+	it("an empty series measures 0 days", () => {
+		expect(measuredDayCount([])).toBe(0);
+	});
+});
+
+describe("windowed() never truncates below what's real", () => {
+	it("returns every available row when fewer exist than the requested timeframe", () => {
+		// "1Y" asks for 365 rows; only 3 exist — the panel must show all 3,
+		// not pretend there's a full year and draw 362 phantom gaps.
+		const rows = [
+			{ _date: "2026-01-01", USDC: 1 },
+			{ _date: "2026-01-02", USDC: 2 },
+			{ _date: "2026-01-03", USDC: 3 },
+		];
+		expect(windowed(rows, "1Y")).toEqual(rows);
+	});
+});
+
+describe("log y-axis (Holders by Token) — kit-level support", () => {
+	it("niceYDomain never rounds a log domain's floor down to (or through) 0", () => {
+		const [min, max] = niceYDomain([83, 2_603_000], "log");
+		expect(min).toBeGreaterThan(0);
+		expect(max).toBeGreaterThan(min);
+	});
+
+	it("a linear domain is unaffected by log support (default behaviour unchanged)", () => {
+		const [min, max] = niceYDomain([0, 97]);
+		expect(min).toBe(0);
+		expect(max).toBeGreaterThanOrEqual(97);
+	});
+
+	it("buildYScalesFromDomains(scaleType: 'log') is genuinely logarithmic — equal RATIOS map to equal pixel steps", () => {
+		const scales = buildYScalesFromDomains({
+			lines: [{ dataKey: "USDC", stroke: "#fff", strokeWidth: 2 }],
+			innerHeight: 300,
+			domainsByAxis: { left: [1, 1_000_000] },
+			scaleType: "log",
+		});
+		const scale = scales.left;
+		// 10→100 and 100→1000 are both ×10. A log scale spaces equal
+		// multiples equally; a linear scale would not.
+		const step1 = (scale(10) ?? 0) - (scale(100) ?? 0);
+		const step2 = (scale(100) ?? 0) - (scale(1000) ?? 0);
+		expect(Math.abs(step1 - step2)).toBeLessThan(0.01);
+	});
+});
+
+describe("log-scale zero clamp — never silently coerced into an undefined log domain", () => {
+	it("clamps a measured 0 to the scale's own domain floor instead of asking the scale to log(0)", () => {
+		const domain = [10, 1000]; // a strictly-positive, log-style domain
+		const calls: number[] = [];
+		const yScale = Object.assign(
+			(v: number) => {
+				calls.push(v);
+				return 100 - v;
+			},
+			{ domain: () => domain },
+		);
+		const points = computeSeriesPathPoints(
+			[{ date: "2026-09-01", X: 0 }],
+			(d) => new Date(d.date as string),
+			() => 0,
+			yScale,
+			"X",
+		);
+		// The scale is never asked to evaluate the raw 0 — only the domain's
+		// own floor (10) or higher.
+		expect(calls).toEqual([10]);
+		// A real 0 measurement is still a measurement, not an absence.
+		expect(points[0].defined).toBe(true);
+	});
+
+	it("a value already inside the domain passes through untouched", () => {
+		const domain = [10, 1000];
+		const calls: number[] = [];
+		const yScale = Object.assign(
+			(v: number) => {
+				calls.push(v);
+				return 0;
+			},
+			{ domain: () => domain },
+		);
+		computeSeriesPathPoints(
+			[{ date: "2026-09-01", X: 500 }],
+			(d) => new Date(d.date as string),
+			() => 0,
+			yScale,
+			"X",
+		);
+		expect(calls).toEqual([500]);
 	});
 });

@@ -218,12 +218,18 @@ export function Area({
   const resolvedStroke =
     stroke || (isPatternFill ? chartCssVars.linePrimary : fill);
 
+  // Same reasoning as Line: a log y-scale's domain never includes 0, so a
+  // real measurement of exactly 0 is clamped to the axis floor rather than
+  // handed to the scale raw. No-op on a linear scale (domain floor is 0).
+  const yDomainFloor = (yScale.domain()[0] as number | undefined) ?? 0;
   const getY = useCallback(
     (d: Record<string, unknown>) => {
       const value = d[dataKey];
-      return typeof value === "number" ? (yScale(value) ?? 0) : 0;
+      return typeof value === "number"
+        ? (yScale(Math.max(value, yDomainFloor)) ?? 0)
+        : 0;
     },
-    [dataKey, yScale]
+    [dataKey, yScale, yDomainFloor]
   );
   // Same rule as Line: an unmeasured day is absent, not 0. `defined` breaks
   // the fill/stroke at the gap instead of dropping them to the baseline.

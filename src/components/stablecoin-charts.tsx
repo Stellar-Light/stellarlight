@@ -11,14 +11,22 @@
  * y=-15 in a 300px panel). Monotone stays inside the data's own range.
  *
  * Two of these panels were rebuilt 2026-09-02 to fix three separate reading
- * defects (see the PR): a measurement gap was drawn as a collapse to 0 (fixed
- * in the chart kit — `Line`/`Area` now break the path at a gap instead of
- * anchoring it to a fake point, see `series-path-utils.ts`); nothing was
- * labelled (added a legend + up to 4 direct end-labels + a formatted y-axis
- * on both multi-series panels); and the two multi-series panels were the
- * wrong chart form for their data (market share is now a 100% stacked area,
- * and holders drops its order-of-magnitude-dominant ticker into its own
- * small panel instead of pinning everything else to the baseline).
+ * defects (see PR #1243): a measurement gap was drawn as a collapse to 0
+ * (fixed in the chart kit — `Line`/`Area` now break the path at a gap
+ * instead of anchoring it to a fake point, see `series-path-utils.ts`);
+ * nothing was labelled (added a legend + up to 4 direct end-labels + a
+ * formatted y-axis on both multi-series panels); and the two multi-series
+ * panels were the wrong chart form for their data (market share is a 100%
+ * stacked area).
+ *
+ * Follow-up the same day: "Holders by Token" first shipped as a split panel
+ * (dominant ticker alone, the rest on their own linear axis) to solve the
+ * order-of-magnitude problem — but that broke comparison, since a reader
+ * can only ever hover one half at a time. It is back to ONE chart on a log
+ * y-axis instead (see y-axis-scales.ts / y-domain-utils.ts /
+ * time-series-chart-shell.tsx for the kit-level log-scale support this
+ * needed). Also added: an honest "not enough measured days yet" state per
+ * panel, instead of drawing a couple of dates as if they were a trend.
  *
  * Palette is theirs verbatim (#262626 cards on #2F2F2F borders, #F5F5F5
  * titles, #999999 descriptions) so this block sits in the page exactly as it
@@ -39,6 +47,7 @@ import {
 	capSeriesWithOther,
 	colorFor,
 	type IssuerLeader,
+	measuredDayCount,
 	type SeriesRow,
 	stackedBands,
 	TIMEFRAMES,
@@ -67,8 +76,18 @@ const CARD =
 
 /** Top N series drawn + labelled on a multi-series panel; the rest fold into
  * a real "Other" sum. Matches the house cap of "5 or 6 top series plus an
- * explicit Other" — see Defect 2. */
+ * explicit Other" — see Defect 2 (PR #1243). */
 const TOP_N = 5;
+
+/**
+ * A window needs at least this many REAL measured days before it is drawn
+ * as a chart — below it, a couple of dots dressed up as a trend is worse
+ * than saying plainly there isn't enough history yet. A judgment call, not
+ * a measured constant: 2 is explicitly too few (a straight line between two
+ * points implies a rate of change that one gap can't support), so this
+ * gives a bit of margin above that rather than sitting right on the edge.
+ */
+const MIN_MEASURED_DAYS = 5;
 
 const fmtValue = (v: number) =>
 	v >= 1e9
@@ -93,18 +112,26 @@ const fmtCurrency = (v: number) =>
 function Panel({
 	title,
 	description,
+	titleBadge,
 	children,
 }: {
 	title: string;
 	description: string;
+	/** Small pill next to the title — used for "Log scale", which must be
+	 * impossible to miss: a reader who doesn't see it misreads every gap
+	 * between gridlines as an equal step, not a ×10. */
+	titleBadge?: React.ReactNode;
 	children: React.ReactNode;
 }) {
 	return (
 		<div className={CARD}>
 			<div className="p-6 pb-3">
-				<h3 className="text-[#F5F5F5] text-base font-semibold tracking-tight">
-					{title}
-				</h3>
+				<div className="flex items-center gap-2">
+					<h3 className="text-[#F5F5F5] text-base font-semibold tracking-tight">
+						{title}
+					</h3>
+					{titleBadge}
+				</div>
 				<p className="text-[#999999] text-xs mt-1">{description}</p>
 			</div>
 			<div className="px-6 pb-4 flex-1">{children}</div>
@@ -112,11 +139,25 @@ function Panel({
 	);
 }
 
-/** A series shorter than two points cannot be drawn as a line — say so. */
-function TooShort() {
+/** A window with too few real measured days to be an honest trend — say so
+ * plainly instead of drawing a line between two dots (or a naked single
+ * one). `height` matches whatever chart this replaces so the panel doesn't
+ * jump size depending on which state it's in. */
+function ThinData({
+	measuredDays,
+	height = 300,
+}: {
+	measuredDays: number;
+	height?: number;
+}) {
 	return (
-		<div className="h-[300px] flex items-center justify-center text-xs text-[#999999]">
-			Collecting data...
+		<div
+			className="flex items-center justify-center text-xs text-[#999999] text-center px-6"
+			style={{ height }}
+		>
+			{measuredDays === 0
+				? "No measurements in this window yet."
+				: `Only ${measuredDays} measured day${measuredDays === 1 ? "" : "s"} in this window — not enough yet for an honest trend.`}
 		</div>
 	);
 }
@@ -139,6 +180,17 @@ function Legend({ items }: { items: Array<{ color: string; label: string }> }) {
 				</span>
 			))}
 		</div>
+	);
+}
+
+function LogScaleBadge() {
+	return (
+		<span
+			className="text-[9px] uppercase tracking-wide text-[#999999] border border-[#3A3A3A] rounded px-1.5 py-0.5 leading-none"
+			title="Y-axis is logarithmic: equal gaps between gridlines are equal MULTIPLES (×10), not equal amounts."
+		>
+			Log scale
+		</span>
 	);
 }
 
@@ -174,6 +226,7 @@ export function StablecoinCharts({
 		() => new Map(share.map((r) => [String(r._date), r])),
 		[share],
 	);
+	const shareMeasuredDays = useMemo(() => measuredDayCount(share), [share]);
 
 	// A part-to-whole series that always sums to 100 is a share chart, not 8
 	// overlapping lines (Defect 3) — 100% stacked area, top N + a real
@@ -196,33 +249,20 @@ export function StablecoinCharts({
 	);
 
 	// Holders spans orders of magnitude (USDC's trustline count dwarfs
-	// everyone else's), which pins every other line to the baseline on a
-	// linear axis (Defect 3). Break the biggest series into its own small
-	// panel instead of adding a log-scale axis to the shared kit for one
-	// chart — a log axis is also just harder to read at a glance, and the
-	// dominant ticker changing over time (not always USDC) is handled for
-	// free since this picks it by value, not by name.
-	const dominantHolderTicker = useMemo(() => tickersIn(holders)[0], [holders]);
-	const restHolders = useMemo(() => {
-		if (!dominantHolderTicker) return holders;
-		return holders.map((row) => {
-			const next: SeriesRow = { _date: row._date };
-			for (const [k, v] of Object.entries(row))
-				if (k !== "_date" && k !== dominantHolderTicker) next[k] = v;
-			return next;
-		});
-	}, [holders, dominantHolderTicker]);
-	const allRestHolderTickers = useMemo(
-		() => tickersIn(restHolders),
-		[restHolders],
+	// everyone else's). A split panel (dominant ticker alone, the rest on
+	// their own linear axis) solved the squashing but broke comparison — the
+	// reader could only ever hover one half. Log y-axis instead: everyone
+	// stays in ONE chart with ONE shared hover. See y-axis-scales.ts.
+	const holdersMeasuredDays = useMemo(
+		() => measuredDayCount(holders),
+		[holders],
 	);
-	const restByDate = useMemo(
-		() => new Map(restHolders.map((r) => [String(r._date), r])),
-		[restHolders],
-	);
+	// The chart draws `holdersCapped` (top N + a real "Other" sum per day),
+	// not raw `holders` — a drawn <Line dataKey="Other"> has nowhere to read
+	// an "Other" value from unless the row itself carries one.
 	const { rows: holdersCapped, tickers: holderTickers } = useMemo(
-		() => capSeriesWithOther(restHolders, TOP_N),
-		[restHolders],
+		() => capSeriesWithOther(holders, TOP_N),
+		[holders],
 	);
 
 	/** Top rows of a hovered point, biggest first — the explorer capped at 8. */
@@ -241,6 +281,25 @@ export function StablecoinCharts({
 				label: e.key,
 				value: format(e.value),
 			}));
+
+	/**
+	 * Every series the Holders chart actually draws, in that fixed order —
+	 * not sorted or filtered by value like `topRows`. Log-scale non-negotiable:
+	 * a drawn series that wasn't measured on the hovered day says so instead
+	 * of silently vanishing from the list, which would read as "this token
+	 * doesn't exist" rather than "not measured today". `point` is a
+	 * `holdersCapped` row (that's what the chart's `data` is), so `Other` is
+	 * already the real per-day sum — no need to recompute it here.
+	 */
+	const holderTooltipRows = (point: Record<string, unknown>) =>
+		holderTickers.map((t) => {
+			const v = point[t];
+			return {
+				color: colorFor(t),
+				label: t,
+				value: typeof v === "number" ? fmtValue(v) : "not measured",
+			};
+		});
 
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -268,8 +327,8 @@ export function StablecoinCharts({
 					title="Total Stablecoin Holders"
 					description="Aggregate unique wallet addresses over time"
 				>
-					{totals.length < 2 ? (
-						<TooShort />
+					{measuredDayCount(totals) < MIN_MEASURED_DAYS ? (
+						<ThinData measuredDays={measuredDayCount(totals)} />
 					) : (
 						<LineChart
 							data={totals as Record<string, unknown>[]}
@@ -308,8 +367,8 @@ export function StablecoinCharts({
 					title="Stablecoin Market Share by Token"
 					description={`Share of measured market cap — top ${TOP_N} assets plus Other, stacked to 100%`}
 				>
-					{share.length < 2 ? (
-						<TooShort />
+					{shareMeasuredDays < MIN_MEASURED_DAYS ? (
+						<ThinData measuredDays={shareMeasuredDays} height={280} />
 					) : (
 						<div className="flex flex-col">
 							<AreaChart
@@ -376,58 +435,21 @@ export function StablecoinCharts({
 			<div className="col-span-full lg:col-span-6">
 				<Panel
 					title="Holders by Token"
-					description={
-						dominantHolderTicker
-							? `Accounts holding a trustline — ${dominantHolderTicker} shown on its own scale below, dwarfs the rest on a linear axis`
-							: "Accounts holding a trustline in each asset"
-					}
+					description="Accounts holding a trustline in each asset — log scale, since the biggest token's count can be 1,000x the smallest"
+					titleBadge={<LogScaleBadge />}
 				>
-					{holders.length < 2 ? (
-						<TooShort />
+					{holdersMeasuredDays < MIN_MEASURED_DAYS ? (
+						<ThinData measuredDays={holdersMeasuredDays} />
 					) : (
 						<div className="flex flex-col">
-							{dominantHolderTicker ? (
-								<div className="mb-2">
-									<div className="text-[10px] text-[#999999] mb-1">
-										{dominantHolderTicker}
-									</div>
-									<LineChart
-										data={holders as Record<string, unknown>[]}
-										xDataKey="_date"
-										margin={{ top: 4, right: 16, bottom: 4, left: 56 }}
-										animationDuration={900}
-										className="h-[60px]"
-										aspectRatio="unset"
-									>
-										<Line
-											dataKey={dominantHolderTicker}
-											stroke={colorFor(dominantHolderTicker)}
-											strokeWidth={2}
-											curve={curveMonotoneX}
-											fadeEdges={false}
-										/>
-										<ChartTooltip
-											showDatePill
-											rows={(p) => [
-												{
-													color: colorFor(dominantHolderTicker),
-													label: dominantHolderTicker,
-													value: fmtValue(
-														(p[dominantHolderTicker] as number) || 0,
-													),
-												},
-											]}
-										/>
-									</LineChart>
-								</div>
-							) : null}
 							<LineChart
 								data={holdersCapped as Record<string, unknown>[]}
 								xDataKey="_date"
 								margin={LABELED_MARGIN}
 								animationDuration={900}
-								className="h-[210px]"
+								className="h-[300px]"
 								aspectRatio="unset"
+								yScaleType="log"
 							>
 								<Grid horizontal strokeOpacity={0.2} />
 								<YAxis formatValue={fmtValue} numTicks={5} />
@@ -450,16 +472,7 @@ export function StablecoinCharts({
 									/>
 								))}
 								<XAxis numTicks={5} />
-								<ChartTooltip
-									showDatePill
-									rows={(p) =>
-										topRows(
-											restByDate.get(String(p._date)) ?? p,
-											allRestHolderTickers,
-											fmtValue,
-										)
-									}
-								/>
+								<ChartTooltip showDatePill rows={holderTooltipRows} />
 							</LineChart>
 							<Legend
 								items={holderTickers.map((t) => ({

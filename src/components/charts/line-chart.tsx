@@ -25,6 +25,7 @@ import {
 } from "./chart-phase";
 import { Line, type LineProps } from "./line";
 import { TimeSeriesChartInner } from "./time-series-chart-shell";
+import type { YScaleType } from "./y-axis-scales";
 
 export interface LineChartProps {
   /** Data array - each item should have a date field and numeric values */
@@ -57,6 +58,9 @@ export interface LineChartProps {
   xDomainSlotCount?: number;
   /** Tween y-domain when brush changes the visible x-range. Default: false */
   tweenYDomainOnXDomainChange?: boolean;
+  /** Linear by default. `"log"` when one series is orders of magnitude
+   * bigger than the rest of the drawn lines — see y-axis-scales.ts. */
+  yScaleType?: YScaleType;
   /** Inline container styles (e.g. fixed height for brush strip). */
   style?: CSSProperties;
   /** Fires when the internal chart phase changes (e.g. OG capture readiness). */
@@ -154,6 +158,7 @@ interface ChartInnerProps {
   xDomain?: [Date, Date];
   xDomainSlotCount?: number;
   tweenYDomainOnXDomainChange?: boolean;
+  yScaleType?: YScaleType;
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement | null>;
   onPhaseChange: (phase: ChartPhase) => void;
@@ -176,6 +181,7 @@ function ChartInner({
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange,
+  yScaleType,
   children,
   containerRef,
   onPhaseChange,
@@ -204,6 +210,7 @@ function ChartInner({
       xDomainSlotCount={xDomainSlotCount}
       yDomainTween={yDomainTween}
       yDomainTweenDuration={yDomainTweenDuration}
+      yScaleType={yScaleType}
     >
       {children}
     </TimeSeriesChartInner>
@@ -227,6 +234,7 @@ export function LineChart({
   xDomain,
   xDomainSlotCount,
   tweenYDomainOnXDomainChange = false,
+  yScaleType,
   style,
   onPhaseChange,
   children,
@@ -283,6 +291,7 @@ export function LineChart({
             xDomainSlotCount={xDomainSlotCount}
             yDomainTween={yDomainTween}
             yDomainTweenDuration={yDomainTweenDuration}
+            yScaleType={yScaleType}
           >
             {children}
           </ChartInner>

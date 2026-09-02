@@ -15,6 +15,25 @@ import {
 
 const Y_AXIS_POSITION_TWEEN_MS = DEFAULT_Y_DOMAIN_TWEEN_MS;
 
+/**
+ * A log scale's `.ticks()` can return every 1-9 multiple within each decade
+ * once the domain spans only a few of them (measured: a Holders-by-Token
+ * axis from ~hundreds to ~10M came back with 28 tick values — 10K, 20K,
+ * 30K, ... 90K, 100K, 200K, ... crowded into one axis). Keep only the clean
+ * powers of the scale's base (1, 10, 100, 1K, ...) — the conventional way
+ * to label a log axis, and the one where "equal gap = ×10" stays legible at
+ * a glance instead of getting lost among sub-ticks.
+ */
+function filterToPowerTicks(values: number[], base: number): number[] {
+  const logBase = Math.log(base);
+  const powers = values.filter((v) => {
+    if (v <= 0) return false;
+    const exponent = Math.log(v) / logBase;
+    return Math.abs(exponent - Math.round(exponent)) < 1e-6;
+  });
+  return powers.length > 0 ? powers : values;
+}
+
 export interface YAxisProps {
   /** Scale group id (Recharts `yAxisId`). Default: `"left"`. */
   yAxisId?: string | number;
@@ -104,7 +123,11 @@ const YAxisInner = memo(function YAxisInner({
   const axisId = normalizeYAxisId(yAxisId);
 
   const ticks = useMemo(() => {
-    const tickValues = yScale.ticks(resolveYAxisTickCount(numTicks));
+    const rawTickValues = yScale.ticks(resolveYAxisTickCount(numTicks));
+    const scaleBase = (yScale as { base?: () => number }).base;
+    const tickValues = scaleBase
+      ? filterToPowerTicks(rawTickValues, scaleBase())
+      : rawTickValues;
     return tickValues.map((value) => {
       const y = (yScale(value) ?? 0) + margin.top;
       return {
