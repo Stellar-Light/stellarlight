@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-09-02T10:07:31.758Z",
+	"generatedAt": "2026-09-02T17:01:10.944Z",
 	"total": 519,
-	"open": 7,
-	"closed": 512,
+	"open": 5,
+	"closed": 514,
 	"verified": 7,
-	"cleared": 505,
+	"cleared": 507,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 289,
+	"clearedOnSilence": 291,
 	"closingRate": 0.99,
-	"oldestOpenDays": 41,
+	"oldestOpenDays": 42,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
@@ -17,16 +17,6 @@
 			"surface": "consumer",
 			"open": 5,
 			"total": 24
-		},
-		{
-			"surface": "directory",
-			"open": 1,
-			"total": 89
-		},
-		{
-			"surface": "corpus",
-			"open": 1,
-			"total": 18
 		},
 		{
 			"surface": "retrieval",
@@ -39,6 +29,11 @@
 			"total": 5
 		},
 		{
+			"surface": "directory",
+			"open": 0,
+			"total": 89
+		},
+		{
 			"surface": "scf",
 			"open": 0,
 			"total": 16
@@ -47,6 +42,11 @@
 			"surface": "contract",
 			"open": 0,
 			"total": 34
+		},
+		{
+			"surface": "corpus",
+			"open": 0,
+			"total": 18
 		}
 	],
 	"unverifiedOpen": 0,
@@ -81,25 +81,11 @@
 			"severity": "medium"
 		},
 		{
-			"id": "nightly-completeness:scfroundawards-empty-coala-pay",
-			"surface": "directory",
-			"source": "nightly-completeness",
-			"probe": "scfRoundAwards empty: coala-pay",
-			"severity": "medium"
-		},
-		{
 			"id": "raven-routing:freighter",
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "freighter",
 			"severity": "medium"
-		},
-		{
-			"id": "nightly-battery:battery-q-tool-leaderboard-open-issues",
-			"surface": "corpus",
-			"source": "nightly-battery",
-			"probe": "battery:q-tool-leaderboard-open-issues",
-			"severity": "low"
 		}
 	]
 }
