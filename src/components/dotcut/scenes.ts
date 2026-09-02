@@ -305,12 +305,20 @@ function imageSize(img: CanvasImageSource): { w: number; h: number } {
 	return { w: 0, h: 0 };
 }
 
-// Same footprint-fill fraction for every glyph this file rasterises,
-// whether it ends up carved as one big hole (rasterizeImage) or cropped
-// into a small repeated tile (rasterizeImageTile / rasterizeTextTile) —
-// centred, aspect preserved, sized to command its box rather than survive
-// it.
+// Footprint-fill fraction for the one big hole-mode carve (rasterizeImage):
+// centred, aspect preserved, sized to command the grid rather than survive
+// it, with room left around it so the carve doesn't touch the grid edge.
 const MARK_FILL = 0.82;
+
+// Tile mode's own fill fraction, close to 1: a tile's "room to breathe"
+// comes from tileAcross's own 1-row outer margin and the gap between
+// instances, not from shrinking the glyph inside its own box too — the
+// reference this mode reproduces has the mark filling nearly the full
+// height, "only a thin margin above and below," so MARK_FILL's more
+// conservative fraction (tuned for a lone glyph carved into a full grid
+// it needs to not touch the edge of) would just add a second, unwanted
+// layer of padding on top of that margin.
+const TILE_FILL = 0.98;
 
 /**
  * Which pixels of an already-drawn raster are "ink" (positive polarity: 1 =
@@ -450,7 +458,7 @@ function rasterizeImageTile(
 	const box = glyphBBox(image);
 	if (!box) return null;
 
-	const dh = tileRows * MARK_FILL;
+	const dh = tileRows * TILE_FILL;
 	const dw = dh * (box.w / box.h);
 	const tileCols = Math.max(1, Math.round(dw));
 
@@ -540,7 +548,7 @@ function rasterizeTextTile(
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	let m = ctx.measureText(text);
 	const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
-	size *= (tileRows * MARK_FILL) / gh;
+	size *= (tileRows * TILE_FILL) / gh;
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	m = ctx.measureText(text);
 
