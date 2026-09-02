@@ -1,0 +1,30 @@
+name: Note freshness
+
+# Re-verifies the registry facts cited in public REPO_KNOWLEDGE_NOTES
+# (npm / crates.io / PyPI / pub.dev / Packagist / Maven Central / Docker Hub
+# identities with a version) against the live registries, read-only. A note
+# whose cited version has been superseded since its asOf is filed as a
+# `note-freshness` finding (scripts/nightly-findings.ts) — the board's
+# "notes stale" signal. Never writes to the DB; no secrets.
+
+on:
+  schedule:
+    # Weekly, Monday 05:23 UTC — off the top of the hour, this repo's crons
+    # at :00 get dropped (see check-links.yml, 2026-09-02).
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions: { contents: read }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/check-note-freshness.ts
