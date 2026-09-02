@@ -182,6 +182,10 @@ export async function GET(req: NextRequest) {
 				scoreDefinition:
 					"Per row, the count of five BINARY evidence facts present, times 20: a strong provenance basis, a status date, a source URL, at least one type, and at least one link. Scores therefore land only on 0/20/40/60/80/100, and factsPresent is published beside each row so the score can be checked. A low score names what is missing rather than judging the project.",
 				statusBasisMix: e.projects.basisMix,
+				/** weak rows split by whether ANY on-chain footprint exists — the ceiling of the strong-basis row is people, not lanes */
+				strongBasisSplit: e.projects.strongBasisSplit,
+				/** deployment-unknown rows split by whether the question applies to the row's product type */
+				deploymentSplit: e.projects.deploymentSplit,
 				strongBases: [
 					"human-verified",
 					"onchain-activity",

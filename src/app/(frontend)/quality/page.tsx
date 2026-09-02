@@ -26,9 +26,9 @@ import {
 import {
 	evidenceUrl,
 	getEntities,
-	getLanes,
 	getExternalFindings,
 	getGuardRows,
+	getLanes,
 	getMissFunnel,
 	getNorthStar,
 	getProgress,
@@ -485,7 +485,10 @@ export default function QualityPage() {
 				className="mb-6"
 			>
 				{getLanes().map((lane) => (
-					<div key={lane.lane} className="flex flex-wrap items-end gap-x-8 gap-y-4">
+					<div
+						key={lane.lane}
+						className="flex flex-wrap items-end gap-x-8 gap-y-4"
+					>
 						<Stat
 							label={`Lane: ${lane.lane}`}
 							value={`${lane.stamps.length} stamps`}
@@ -516,8 +519,8 @@ export default function QualityPage() {
 					Weeks are counted only from successful scheduled runs, and the counter
 					is derived daily from the lane&apos;s live write-set diffed against
 					the committed snapshot — a quiet failure reads as a red week, never a
-					clean one. A stamp a human upgrades to human-verified stays clean;
-					a stamp a human removes or changes resets the count to zero.
+					clean one. A stamp a human upgrades to human-verified stays clean; a
+					stamp a human removes or changes resets the count to zero.
 				</p>
 			</Card>
 
@@ -570,9 +573,8 @@ export default function QualityPage() {
 						A repeat is a finding whose class (identity, taxonomy coverage,
 						contract completeness…) already had a prior finding — the measure of
 						whether fixes land on the class or just the instance. Steady state
-						is the 30-day rate at zero: new findings only ever open new
-						classes. This number is expected to start ugly; publishing it is
-						the point.
+						is the 30-day rate at zero: new findings only ever open new classes.
+						This number is expected to start ugly; publishing it is the point.
 					</p>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -945,6 +947,24 @@ export default function QualityPage() {
 						intent="Deployable contracts with a PROVEN on-chain attribution. Strict by design: absence is absence of a join, never proof of disuse."
 					/>
 				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mb-3">
+					Notes pool, honestly split: of{" "}
+					{entities.repos.coverage.knowledgeNotes.pool.toLocaleString("en-US")}{" "}
+					pool repos,{" "}
+					{entities.repos.coverage.knowledgeNotes.withNotes.toLocaleString(
+						"en-US",
+					)}{" "}
+					carry dated facts,{" "}
+					{(entities.repos.coverage.knowledgeNotes.triaged ?? 0).toLocaleString(
+						"en-US",
+					)}{" "}
+					were examined and yielded nothing durable (judged, recorded
+					internally), and{" "}
+					{(
+						entities.repos.coverage.knowledgeNotes.missing?.length ?? 0
+					).toLocaleString("en-US")}{" "}
+					are still unexamined. A judged repo is not a gap.
+				</p>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mb-6">
 					Plus the Electric Capital tail:{" "}
 					{entities.repos.coverage.tail.withCodeDepth.toLocaleString("en-US")}{" "}
