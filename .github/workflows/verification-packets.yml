@@ -1,0 +1,55 @@
+name: Verification packets
+
+# Evidence bundles for bulk human verification of app-only weak-basis Live
+# rows (the quality board's strongBasis row). READ-ONLY against the data:
+# the script reads the public API and each project's website, proposes a
+# verdict per row, and this job commits the packet files back to the branch
+# it ran on. No DB secrets — nothing here can write a status. Applying an
+# approval is a curated STATUS_FIX row (see the packet's header).
+#
+# Dispatch-only, on purpose: a packet is for a human sitting down to review,
+# not a nightly artifact that piles up unread.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Rows per packet (prominence desc)"
+        type: number
+        default: 60
+      offset:
+        description: "Skip the first N rows — page through later batches"
+        type: number
+        default: 0
+
+concurrency:
+  group: verification-packets-${{ github.ref }}
+  cancel-in-progress: false
+permissions: { contents: write }
+
+jobs:
+  packets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build packets (network only, no DB)
+        run: pnpm exec tsx scripts/data/verification-packets.ts --limit ${{ inputs.limit || 60 }} --offset ${{ inputs.offset || 0 }}
+
+      # Same commit step as raven-eval-parity.yml, targeting the branch this
+      # run was dispatched on rather than main.
+      - name: Commit packets to the branch
+        run: |
+          git config user.name "stellarlight-quality-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/quality/verification-packets-*
+          git diff --cached --quiet && exit 0
+          git commit -m "data(quality): verification packets ${{ inputs.offset || 0 }}+${{ inputs.limit || 60 }} [skip ci]"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
