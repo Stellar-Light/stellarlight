@@ -288,3 +288,14 @@ describe("findRepoByTrigger", () => {
 		expect(findRepoByTrigger("renamed")).toBeNull();
 	});
 });
+
+describe("pool triage verdicts", () => {
+	it("expand to INTERNAL notes only — a verdict is never served as an answer", () => {
+		const entry = REPO_KNOWLEDGE_NOTES["402md/agentcard"];
+		expect(entry?.length).toBeGreaterThan(0);
+		expect(entry?.every((n) => n.visibility === "internal")).toBe(true);
+		expect(
+			findDirectAnswerNote("agentcard hackathon demo testnet", entry ?? []),
+		).toBeNull();
+	});
+});

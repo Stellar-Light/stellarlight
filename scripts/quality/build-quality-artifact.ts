@@ -10,6 +10,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { REPO_KNOWLEDGE_NOTES } from "../../src/lib/repo-knowledge";
 import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
 const UA = { "User-Agent": "stellarlight-quality-artifact" };
@@ -289,6 +290,15 @@ const activityOf = (r: Repo): string | null => {
 	return days <= 90 ? "active" : days <= 365 ? "slowing" : "dormant";
 };
 
+/** Registry entry exists and carries ONLY internal notes (a triage verdict). */
+const triagedOnly = (r: { fullName: string }) => {
+	const notes = REPO_KNOWLEDGE_NOTES[r.fullName.toLowerCase()];
+	return (
+		Array.isArray(notes) &&
+		notes.length > 0 &&
+		notes.every((n) => n.visibility === "internal")
+	);
+};
 const repos = [...repoSeen.values()].map((r) => ({
 	fullName: r.fullName,
 	repoScore: r.repoScore ?? null,
@@ -506,14 +516,23 @@ const out = {
 					poolMeans:
 						"curated-index rows with repoScore >= 60, the set curation actually targets",
 					withNotes: notesPool.filter((r) => r.notes > 0).length,
-					// The pool members still WITHOUT a note, by name — the exact
-					// worklist for the next curation batch. Batches 3–6 (2026-09-01)
-					// picked "next tier by repoScore across API search" and grew the
-					// registry 29 → 176 while the pool moved 41 → 47: most of that
-					// tier sits outside the pool. Name the gap so the next batch
-					// aims at it.
+					// JUDGED, not unexamined: pool rows that carry only INTERNAL
+					// registry notes (pool triage verdicts — examined, nothing
+					// durable found). Rows serve those as zero public notes, so
+					// they read from the code registry here, never from the DB.
+					triaged: notesPool.filter(
+						(r) => r.notes === 0 && triagedOnly(r),
+					).length,
+					triagedMeans:
+						"examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
+					// The pool members still WITHOUT a note or a verdict, by name —
+					// the exact worklist for the next curation batch. Batches 3–6
+					// (2026-09-01) picked "next tier by repoScore across API search"
+					// and grew the registry 29 → 176 while the pool moved 41 → 47:
+					// most of that tier sits outside the pool. Name the gap so the
+					// next batch aims at it.
 					missing: notesPool
-						.filter((r) => r.notes === 0)
+						.filter((r) => r.notes === 0 && !triagedOnly(r))
 						.map((r) => r.fullName)
 						.sort(),
 				},
