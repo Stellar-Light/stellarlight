@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-02T17:19:47.393Z",
+	"asOf": "2026-09-02T17:22:43.498Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 83,
 	"healthy": 83,
@@ -22,10 +22,10 @@
 			"cron": "17 13 * * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T17:19:06Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 4,
 			"runs": 3,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "apply-content-pass.yml",
@@ -164,10 +164,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:17:26Z",
+			"lastSuccessAt": "2026-09-02T17:19:44Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 98,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -186,7 +186,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:17:26Z",
+			"lastSuccessAt": "2026-09-02T17:19:44Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 98,
@@ -560,11 +560,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:13:30Z",
+			"lastSuccessAt": "2026-09-02T17:17:26Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 78,
-			"why": "last green 0d ago"
+			"runs": 79,
+			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -857,10 +857,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:17:58Z",
+			"lastSuccessAt": "2026-09-02T17:21:11Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
