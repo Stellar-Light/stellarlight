@@ -308,9 +308,11 @@ export function StablecoinExplorer({
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hoveredMcap, setHoveredMcap] = useState<number | null>(null);
 	const [hoveredHolders, setHoveredHolders] = useState<number | null>(null);
-	// Activity window. "All" by default: the store now holds the imported
-	// history back to 2025-11-28, and a fixed 30-day slice hid every bit of it.
-	const [range, setRange] = useState<"30D" | "90D" | "ALL">("ALL");
+	// Activity window. 30D by default (owner call, 2026-09-02): the recent
+	// month is what a reader checks first, and "All" compresses ten months of
+	// bars until a week's movement is invisible. The full history is one click
+	// away and still reaches back to 2025-11-28.
+	const [range, setRange] = useState<"30D" | "90D" | "ALL">("30D");
 	// Push/pull on the range toggle: widening the window pushes the old bars
 	// left and pulls the new ones in from the right; narrowing goes the other
 	// way, so a range switch reads as movement through time, not a repaint.
@@ -598,10 +600,18 @@ export function StablecoinExplorer({
 					<Card>
 						<CardContent className="p-6">
 							<div className="text-sm text-muted-foreground mb-2">
-								24h Volume
+								24h DEX volume
 							</div>
 							<div className="text-3xl font-semibold tabular-nums">
 								{totalVolume24h > 0 ? displayUSD(totalVolume24h) : "N/A"}
+							</div>
+							{/* Stellar Expert reports traded volume, not payments: this is
+							    a 7-day trade average, and it is ~99% USDC. Transfer volume
+							    (what a payments dashboard means by "volume") is an order of
+							    magnitude larger and we do not measure it — so the label
+							    says which one this is rather than inviting the comparison. */}
+							<div className="text-[11px] text-muted-foreground mt-1">
+								Traded on-chain, 7-day average
 							</div>
 						</CardContent>
 					</Card>

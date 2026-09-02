@@ -77,6 +77,29 @@ export function totalPerDay(
 	});
 }
 
+/**
+ * Percent-of-day share per token.
+ *
+ * A "market share" panel that plots absolute market cap is not a share chart:
+ * on a linear axis USDC's hundreds of millions flatten every other token onto
+ * the baseline, and the reader cannot see the split the title promises. The
+ * denominator is the sum of tokens MEASURED that day — a token absent that day
+ * stays absent rather than counting as 0, so a measurement gap never reads as
+ * a share collapse.
+ */
+export function toShare(rows: SeriesRow[]): SeriesRow[] {
+	return rows.map((row) => {
+		let total = 0;
+		for (const [k, v] of Object.entries(row))
+			if (k !== "_date" && typeof v === "number") total += v;
+		const out: SeriesRow = { _date: row._date };
+		if (total <= 0) return out;
+		for (const [k, v] of Object.entries(row))
+			if (k !== "_date" && typeof v === "number") out[k] = (v / total) * 100;
+		return out;
+	});
+}
+
 /** The last N days of a series. */
 export function windowed(rows: SeriesRow[], tf: Timeframe): SeriesRow[] {
 	return rows.slice(-DAYS[tf]);
