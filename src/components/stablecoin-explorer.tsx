@@ -36,6 +36,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Bar } from "@/components/charts/bar";
 import { BarChart } from "@/components/charts/bar-chart";
 import { ChartTooltip } from "@/components/charts/tooltip";
+import { DotCutBanner } from "@/components/dotcut/dot-cut";
 import { StablecoinCharts } from "@/components/stablecoin-charts";
 import {
 	ISSUER_LOGOS,
@@ -522,8 +523,15 @@ export function StablecoinExplorer({
 
 	return (
 		<div className="container mx-auto p-6 space-y-6 max-w-7xl">
+			{/* ── Dot-cut banner ───────────────────────────────────────────── */}
+			<DotCutBanner />
+
 			{/* ── Hero + top-stablecoins rail ─────────────────────────────── */}
-			<div className="mb-12 mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+			{/* !mt-0 beats the container's space-y-6 (which, now that the banner
+			    is the first child, would otherwise add its own 1.5rem on top of
+			    this section's own spacing) — without it the banner pushes the
+			    Stablecoin Overview tiles below the fold on a laptop viewport. */}
+			<div className="mb-12 !mt-0 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 				<div>
 					<h1 className="reveal-wipe text-5xl md:text-6xl font-semibold text-[#E5E5E5] leading-tight">
 						Stellar Stablecoins
