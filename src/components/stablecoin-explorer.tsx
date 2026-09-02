@@ -44,6 +44,7 @@ import {
 	VenueLogo,
 } from "@/components/stablecoin-logos";
 import { StablecoinNewsDock } from "@/components/stablecoin-news-dock";
+import { StablecoinSpotlight } from "@/components/stablecoin-spotlight";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	Drawer,
@@ -588,6 +589,22 @@ export function StablecoinExplorer({
 					<div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#1A1A1A] to-transparent pointer-events-none z-[5]" />
 				</div>
 			</div>
+
+			{/* ── Spotlight: USDT0's launch, from its own measured row ── */}
+			{(() => {
+				const row = coins.find((c) => c.ticker === "USDT0");
+				if (!row || row.holdersRaw == null || row.supplyRaw == null)
+					return null;
+				return (
+					<StablecoinSpotlight
+						ticker="USDT0"
+						lead="Now tracking USDT0"
+						body="Tether's omnichain USDT went live on Stellar on 2 September 2026, and already holds"
+						highlight={`${displaySupply(row.supplyRaw)} USDT0 across ${row.holdersRaw.toLocaleString("en-US")} holders`}
+						href={`/stablecoins/${row.id}`}
+					/>
+				);
+			})()}
 
 			{/* ── Overview tiles ──────────────────────────────────────────── */}
 			<div className="mb-8">
