@@ -165,7 +165,15 @@ export const PALETTES: [string, string][] = [
 	["#A56EFF", "#0E0716"], // checker — violet / near-black violet
 	["#2DE0C7", "#051312"], // boxes — cyan-teal / near-black teal
 	["#FF63B0", "#160611"], // bars — hot pink / near-black magenta
-	["#F5B942", "#171006"], // $ — gold / near-black amber
+	["#F5B942", "#171006"], // $ — gold / near-black amber (currently unused)
+	// 13-15: usdc/eurc/pyusd, added back once the banner had enough rows for
+	// their carves to read (see dot-cut.tsx). The 7 pairs above are
+	// untouched — these three are new slots, same style (near-black ground,
+	// bold saturated circle), picked to stay distinct from the hues already
+	// in the cycle rather than matching each token's real brand colour.
+	["#2E8FFF", "#05111C"], // usdc — azure blue / near-black navy
+	["#FF9F40", "#1A0F04"], // eurc — amber orange / near-black brown
+	["#7C6CFF", "#0C0A1E"], // pyusd — indigo violet / near-black indigo
 ];
 
 export function rasterize(

@@ -2,19 +2,20 @@
 
 /**
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
- * touching circles that carves negative space out of the field. Mostly
+ * touching circles that carves negative space out of the field. Five
  * full-bleed patterns (rings/columns/checker/boxes/bars, the whole surface
- * reorganising) with two contained marks (the USDT0 logo and $) so each one
- * lands as an event rather than blending into a steady scroll of small
- * figures. Framework-free Canvas 2D + rAF, driven entirely by `DotCut`
- * (./engine.ts); this component only loads the one logo, builds the scene
- * list, and wires lifecycle.
+ * reorganising) with the four token logos (USDT0/USDC/EURC/PYUSD) spread
+ * out between them as the contained marks, so each one lands as an event
+ * rather than blending into a steady scroll of small figures. Framework-free
+ * Canvas 2D + rAF, driven entirely by `DotCut` (./engine.ts); this component
+ * only loads the logos, builds the scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
 import { DotCut } from "./engine";
 import type { Scene } from "./scenes";
 
+const LOGO_SLUGS = ["usdt0", "usdc", "eurc", "pyusd"] as const;
 const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
 
 // Must match engine.ts's own inset margin (pitch derivation) — see resize().
@@ -37,12 +38,12 @@ const GRID_MARGIN = 0.75;
 // stops this component from exploding back to a fine mesh if it's ever
 // dropped into a wider, unconstrained host.
 //
-// Fewer, bigger cells means fewer rows, which means every scene had to be
-// re-proven at the new grid — see the scene list below for which marks
-// survive being carved at ~42 cols and why the cycle leans back on
-// full-bleed patterns rather than a row of small figures (verified via
-// ASCII/visual dumps of the real rasterize() output — see this PR's
-// description).
+// Fewer, bigger cells means fewer rows for a given height — and a mark
+// needs rows, not cols, to read (see the host `className` at the bottom of
+// this file for the row math). CELL_PX itself stays exactly what it was:
+// 42 cols is the density the owner called perfect, and this file doesn't
+// trade it away for a shorter banner — see this PR's description for the
+// ASCII proof, scene by scene.
 const CELL_PX = 28.5;
 const MAX_COLS = 50;
 
@@ -70,6 +71,15 @@ function colsForCellSize(w: number): number {
  * `drawImage` accepts a loaded image without an explicit decode, so waiting on
  * `load` costs nothing and works whether or not the document is visible.
  */
+function loadImage(src: string): Promise<HTMLImageElement> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.onload = () => resolve(img);
+		img.onerror = () =>
+			reject(new Error(`dot-cut: image failed to load — ${src}`));
+		img.src = src;
+	});
+}
 
 export function DotCutBanner() {
 	const hostRef = useRef<HTMLDivElement>(null);
@@ -94,21 +104,45 @@ export function DotCutBanner() {
 			else if (visible) engine.start();
 		};
 
-		Promise.resolve()
-			.then(() => {
+		Promise.all(
+			LOGO_SLUGS.map((slug) => loadImage(`/stablecoins/logos/${slug}.png`)),
+		)
+			.then(([usdt0, usdc, eurc, pyusd]) => {
 				if (cancelled) return;
 
-				// Full-bleed patterns only. A contained mark needs roughly a dozen
-				// cells of height to read, and this banner is nearly four times
-				// wider than tall — at the ~42-circle density the owner asked for
-				// that leaves nine rows, where the T came out as a six-cell blob
-				// and the "$" was no better (both measured from their rasterised
-				// masks, alongside three logos already dropped for the same
-				// reason). A mark that does not read is not a mark, so the cycle
-				// is the five surface reorganisations, which do read at this size.
-				// Restoring a figure means more ROWS: ~24 of them, i.e. a banner
-				// around 670px tall at this cell size.
+				// Rows, not cell size, is what a contained mark needs — and it
+				// needs more than "a dozen" turned out to require in practice.
+				// usdc/eurc/pyusd lean on thin ring-bracket/outline strokes that
+				// stay scattered noise clear through 22 rows and are still
+				// fragmented at 28; they don't resolve into their real shape
+				// (a ring with the currency sign inside, for usdc/eurc) until
+				// somewhere in the low 30s. usdt0's mark is its own separate
+				// case: it's built from a checkered block pattern, not solid
+				// strokes, so it reads as a clean "T" at very low rows *and* at
+				// 32 (the checkering itself resolves cleanly there too) — the
+				// only range where it doesn't work is the 12-22ish middle,
+				// which this banner is skipping over entirely anyway. 32 rows
+				// is the smallest count where all four hold up (verified —
+				// every mask in this PR's description, cropped from the real
+				// rasterize() output, not eyeballed off a render).
+				//
+				// cols stays 42 — CELL_PX above is untouched — so the only
+				// lever is height: 32 rows at this pitch needs a 949px-tall
+				// host (see the `h-[949px]` on the div below; the resize() math
+				// this depends on lives in engine.ts).
+				//
+				// Five patterns, four marks, spread apart rather than
+				// clustered — a contained figure is only an "event" if it's
+				// surrounded by full-bleed reorganisation, not by more figures.
 				const scenes: Scene[] = [
+					{
+						kind: "image",
+						image: usdt0,
+						label: "usdt0",
+						transition: "wipe",
+						palette: 6,
+						style: "swell",
+					},
 					{
 						kind: "rings",
 						label: "rings",
@@ -124,6 +158,14 @@ export function DotCutBanner() {
 						style: "streak",
 					},
 					{
+						kind: "image",
+						image: usdc,
+						label: "usdc",
+						transition: "scatter",
+						palette: 13,
+						style: "streak",
+					},
+					{
 						kind: "checker",
 						label: "checker",
 						transition: "scatter",
@@ -131,10 +173,26 @@ export function DotCutBanner() {
 						style: "swell",
 					},
 					{
+						kind: "image",
+						image: eurc,
+						label: "eurc",
+						transition: "collapse",
+						palette: 14,
+						style: "drift",
+					},
+					{
 						kind: "boxes",
 						label: "boxes",
 						transition: "collapse",
 						palette: 10,
+						style: "grain",
+					},
+					{
+						kind: "image",
+						image: pyusd,
+						label: "pyusd",
+						transition: "ripple",
+						palette: 15,
 						style: "grain",
 					},
 					{
@@ -221,7 +279,7 @@ export function DotCutBanner() {
 			aria-hidden="true"
 			onPointerMove={onPointerMove}
 			onPointerLeave={onPointerLeave}
-			className="mb-8 h-56 w-full overflow-hidden rounded-xl bg-[#1A1A1A] md:h-80"
+			className="mb-8 h-56 w-full overflow-hidden rounded-xl bg-[#1A1A1A] md:h-[949px]"
 		/>
 	);
 }
