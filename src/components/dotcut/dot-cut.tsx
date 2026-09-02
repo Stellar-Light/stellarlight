@@ -70,15 +70,6 @@ function colsForCellSize(w: number): number {
  * `drawImage` accepts a loaded image without an explicit decode, so waiting on
  * `load` costs nothing and works whether or not the document is visible.
  */
-function loadImage(src: string): Promise<HTMLImageElement> {
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		img.onload = () => resolve(img);
-		img.onerror = () =>
-			reject(new Error(`dot-cut: image failed to load — ${src}`));
-		img.src = src;
-	});
-}
 
 export function DotCutBanner() {
 	const hostRef = useRef<HTMLDivElement>(null);
@@ -103,53 +94,27 @@ export function DotCutBanner() {
 			else if (visible) engine.start();
 		};
 
-		loadImage("/stablecoins/logos/usdt0.png")
-			.then((usdt0) => {
+		Promise.resolve()
+			.then(() => {
 				if (cancelled) return;
 
-				// Two contained marks on five full-bleed patterns — the spec's own
-				// composition: "one letter and five full-bleed patterns... the
-				// single letter is the only contained figure in the cycle, which
-				// is what gives it weight: surrounded by five moments where the
-				// whole surface reorganises, one centred shape lands as an event
-				// rather than another slide." An earlier pass here swapped every
-				// pattern for a token logo or currency symbol, which is the
-				// opposite move: eight small figures in a row is the monotony the
-				// spec warns about, not the cycle it describes. rings/checker
-				// were dropped at the time for "carving nothing" — true at the
-				// tiny cell sizes this banner shipped at (a checkerboard whose
-				// squares are barely a circle wide doesn't read as a
-				// checkerboard), not a defect in the pattern math itself, so
-				// they're restored now that cells are big enough to show them
-				// (verified — see this PR's ASCII/visual dumps of all five).
-				// usdt0 and $ are the two contained marks, spaced apart in the
-				// cycle so each still lands as its own event; of the original 8
-				// image/symbol scenes only these two plus €/£/¥ survive being
-				// carved at ~42 cols at all (usdc/eurc/pyusd's thin arc/outline
-				// strokes fragment into noise, verified up to 22 rows), and
-				// €/£/¥ are cut here on top of that per the spec's own
-				// "only one or two contained marks" — not because they fail.
-				// Each scene's `style` axis (linear/radial/random) deliberately
-				// differs from its `transition` axis, and the five pattern
-				// scenes reuse the exact transition/style pairing the generic
-				// `SCENES` default (above) already assigns each pattern kind —
-				// see engine.ts's cellMotion / styleField for what each
-				// transition and style actually is.
+				// Full-bleed patterns only. A contained mark needs roughly a dozen
+				// cells of height to read, and this banner is nearly four times
+				// wider than tall — at the ~42-circle density the owner asked for
+				// that leaves nine rows, where the T came out as a six-cell blob
+				// and the "$" was no better (both measured from their rasterised
+				// masks, alongside three logos already dropped for the same
+				// reason). A mark that does not read is not a mark, so the cycle
+				// is the five surface reorganisations, which do read at this size.
+				// Restoring a figure means more ROWS: ~24 of them, i.e. a banner
+				// around 670px tall at this cell size.
 				const scenes: Scene[] = [
-					{
-						kind: "image",
-						image: usdt0,
-						label: "usdt0",
-						transition: "wipe",
-						palette: 6,
-						style: "swell",
-					},
 					{
 						kind: "rings",
 						label: "rings",
-						transition: "ripple",
+						transition: "wipe",
 						palette: 7,
-						style: "grain",
+						style: "swell",
 					},
 					{
 						kind: "columns",
@@ -164,14 +129,6 @@ export function DotCutBanner() {
 						transition: "scatter",
 						palette: 9,
 						style: "swell",
-					},
-					{
-						kind: "text",
-						value: "$",
-						label: "usd",
-						transition: "ripple",
-						palette: 12,
-						style: "grain",
 					},
 					{
 						kind: "boxes",
