@@ -3,13 +3,19 @@
 /**
  * The four analytics panels from the explorer this page replaces: total
  * holders, market share by token, active addresses by token, and the issuer
- * leaderboard — under one 14D/30D/90D/1Y range control.
+ * leaderboard — under one 14D/30D/90D/1Y range control (30D by default).
+ *
+ * Lines use curveMonotoneX, not the kit's default curveNatural: a natural
+ * spline overshoots between sharply different points, and on these series it
+ * drew strokes above and below the plot area (measured 2026-09-02 — paths at
+ * y=-15 in a 300px panel). Monotone stays inside the data's own range.
  *
  * Palette is theirs verbatim (#262626 cards on #2F2F2F borders, #F5F5F5
  * titles, #999999 descriptions) so this block sits in the page exactly as it
  * did there.
  */
 
+import { curveMonotoneX } from "@visx/curve";
 import { useMemo, useState } from "react";
 import { Grid } from "@/components/charts/grid";
 import { Line, LineChart } from "@/components/charts/line-chart";
@@ -23,6 +29,7 @@ import {
 	TIMEFRAMES,
 	type Timeframe,
 	tickersIn,
+	toShare,
 	windowed,
 } from "@/lib/stablecoin-series";
 
@@ -47,6 +54,8 @@ const fmtValue = (v: number) =>
 			: v >= 1e3
 				? `${(v / 1e3).toFixed(1)}K`
 				: v.toFixed(0);
+
+const fmtPct = (v: number) => `${v.toFixed(v >= 10 ? 1 : 2)}%`;
 
 const fmtCurrency = (v: number) =>
 	v >= 1e9
@@ -95,7 +104,7 @@ export function StablecoinCharts({
 	issuers,
 	onIssuerClick,
 }: Props) {
-	const [timeframe, setTimeframe] = useState<Timeframe>("14D");
+	const [timeframe, setTimeframe] = useState<Timeframe>("30D");
 
 	const mcap = useMemo(
 		() => windowed(marketCapByToken, timeframe),
@@ -110,11 +119,19 @@ export function StablecoinCharts({
 		[totalHolders, timeframe],
 	);
 
-	const mcapTickers = useMemo(() => tickersIn(mcap).slice(0, 16), [mcap]);
+	// Share, not absolute market cap — see toShare(). Bounded 0-100, so every
+	// token is legible on the same axis instead of pinned to the baseline.
+	const share = useMemo(() => toShare(mcap), [mcap]);
+
+	// Eight series is the readable ceiling on one axis (past that the palette
+	// repeats and the lines are indistinguishable). Ordered biggest-last-value
+	// first, so what is dropped is the tail, and the tooltip still lists it.
+	const shareTickers = useMemo(() => tickersIn(share).slice(0, 8), [share]);
 	const holderTickers = useMemo(
-		() => tickersIn(holders).slice(0, 16),
+		() => tickersIn(holders).slice(0, 8),
 		[holders],
 	);
+	const allHolderTickers = useMemo(() => tickersIn(holders), [holders]);
 
 	/** Top rows of a hovered point, biggest first — the explorer capped at 8. */
 	const topRows = (
@@ -175,6 +192,7 @@ export function StablecoinCharts({
 								dataKey="total"
 								stroke="hsl(200, 75%, 60%)"
 								strokeWidth={2}
+								curve={curveMonotoneX}
 								fadeEdges={false}
 							/>
 							<XAxis numTicks={5} />
@@ -196,13 +214,13 @@ export function StablecoinCharts({
 			<div className="col-span-full lg:col-span-6">
 				<Panel
 					title="Stablecoin Market Share by Token"
-					description="Market share breakdown by individual asset"
+					description="Share of measured market cap, by asset"
 				>
-					{mcap.length < 2 ? (
+					{share.length < 2 ? (
 						<TooShort />
 					) : (
 						<LineChart
-							data={mcap as Record<string, unknown>[]}
+							data={share as Record<string, unknown>[]}
 							xDataKey="_date"
 							margin={CHART_MARGIN}
 							animationDuration={900}
@@ -210,19 +228,20 @@ export function StablecoinCharts({
 							aspectRatio="unset"
 						>
 							<Grid horizontal strokeOpacity={0.2} />
-							{mcapTickers.map((k) => (
+							{shareTickers.map((k) => (
 								<Line
 									key={k}
 									dataKey={k}
 									stroke={colorFor(k)}
 									strokeWidth={2}
+									curve={curveMonotoneX}
 									fadeEdges={false}
 								/>
 							))}
 							<XAxis numTicks={5} />
 							<ChartTooltip
 								showDatePill
-								rows={(p) => topRows(p, mcapTickers, fmtCurrency)}
+								rows={(p) => topRows(p, shareTickers, fmtPct)}
 							/>
 						</LineChart>
 					)}
@@ -231,8 +250,8 @@ export function StablecoinCharts({
 
 			<div className="col-span-full lg:col-span-6">
 				<Panel
-					title="Stablecoin Active Addresses by Token"
-					description="Unique wallet counts over time"
+					title="Holders by Token"
+					description="Accounts holding a trustline in each asset"
 				>
 					{holders.length < 2 ? (
 						<TooShort />
@@ -252,13 +271,14 @@ export function StablecoinCharts({
 									dataKey={k}
 									stroke={colorFor(k)}
 									strokeWidth={2}
+									curve={curveMonotoneX}
 									fadeEdges={false}
 								/>
 							))}
 							<XAxis numTicks={5} />
 							<ChartTooltip
 								showDatePill
-								rows={(p) => topRows(p, holderTickers, fmtValue)}
+								rows={(p) => topRows(p, allHolderTickers, fmtValue)}
 							/>
 						</LineChart>
 					)}

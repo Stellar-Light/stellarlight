@@ -29,7 +29,10 @@ export type StablecoinPeg =
 	| "PEN"
 	| "NGN"
 	| "CLP"
-	| "UAH";
+	| "UAH"
+	| "SGD"
+	| "AED"
+	| "CAD";
 
 export interface StablecoinAsset {
 	/** Stellar asset code as issued on mainnet. */
@@ -64,6 +67,88 @@ export interface StablecoinAsset {
 }
 
 export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
+	// ── Coverage audit 2026-09-02 (vs Allium's Stellar stablecoin dashboard) ──
+	// Allium names assets in its by-asset charts that this registry did not
+	// carry. Each was put through the same full chain as every row here: the
+	// operator's own SEP-1 toml declares code + issuer, the ISSUER account's
+	// home_domain points back at that domain, and Stellar Expert reports live
+	// supply. Two of Allium's names FAILED that chain and are deliberately
+	// absent: EURCV (issuer home_domain xmintstellar.org does not resolve —
+	// the fake-issuer-farm pattern; SocGen's real EURCV is not on Stellar) and
+	// BRZ (issuer home_domain stellar.brztoken.io serves 530/TLS errors, so
+	// the chain could not be closed today — 2B supply against 86 trustlines
+	// stays unverified rather than published).
+	{
+		// MoneyGram's own USD token, distinct from the USDC it settles in.
+		// toml ORG_NAME "MoneyGram Payment Systems, Inc."; 351 trustlines,
+		// ~25.2M issued, 45 lifetime payments (checked 2026-09-02).
+		code: "MGUSD",
+		issuer: "GAIUGZZZSL47BKH27SUDZESZELFJDPE2UM52RACOSFJ7BIVBGKUEJSUZ",
+		domain: "mgusd.moneygram.com",
+		company: "MoneyGram",
+		peg: "USD",
+	},
+	// Currency One (toml ORG_NAME "Kinesis Money Panama S.A.", currency.one) —
+	// eight fiat tokens declared in one toml, each issuer's home_domain
+	// pointing back at currency.one. Supply is real but holders are few (4-43
+	// trustlines each, ~296M units total): institutional issuance, not retail
+	// float. The rows carry their own holder counts, so the reader sees that.
+	{
+		code: "C1USD",
+		issuer: "GDCDFF6ZZP3HVODSVJYAN6IRNGWGPLVFKH23RY2OFHFGGVCGBXSDPKTU",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "USD",
+	},
+	{
+		code: "C1GBP",
+		issuer: "GBH6CRMD6ROENY43SOVZFEYJVFVCVFN6HM3DRLLUT3EKMVBBO2I5ASSE",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "GBP",
+	},
+	{
+		code: "C1EUR",
+		issuer: "GCCMR4S7PMLKM2UXJDHXTK6WBJLSB2NAO4SQNWB4YMXL5JXS5U67GX3O",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "EUR",
+	},
+	{
+		code: "C1AUD",
+		issuer: "GDG3E67KFAFKNVLQ4N46C2T6X2T3LKUYLOROY6KB3ZGXDXUPGRA6ZRLK",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "AUD",
+	},
+	{
+		code: "C1CAD",
+		issuer: "GDJNFIHUZR63TXP4EVVC7XRK3F4N4WEVIZSK35GUUVNTHDBOM6J2VLOE",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "CAD",
+	},
+	{
+		code: "C1CHF",
+		issuer: "GDVQ56KPS6WZJKTDI3BQOKOQXIPMQ4FSIVDOJBI36HBZHZDVW6FHYYOA",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "CHF",
+	},
+	{
+		code: "C1AED",
+		issuer: "GD7VYLR62RQDXIJ7OYYQAS7663PNUI7X3MWB442S2L7YCDE3A7Q6TKCQ",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "AED",
+	},
+	{
+		code: "C1SGD",
+		issuer: "GB6CWDUN7IQTPHFMV2ZL5WLWXKCGXETRKO5NQLHJ7YIJYBV5N5I2DGHP",
+		domain: "currency.one",
+		company: "Currency One",
+		peg: "SGD",
+	},
 	{
 		code: "USDC",
 		issuer: "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",

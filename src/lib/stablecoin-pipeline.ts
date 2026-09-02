@@ -168,6 +168,9 @@ const FX_VS = [
 	"mxn",
 	"zar",
 	"ngn",
+	"sgd",
+	"aed",
+	"cad",
 ] as const;
 
 let fxCache: { rates: Record<string, number>; at: number } | null = null;

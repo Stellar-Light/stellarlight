@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+	docToEntry,
 	type FeedEntry,
 	mergeNews,
 	parseFeed,
 	relativeTime,
 	selectStablecoinNews,
+	sourceLabel,
 } from "../stablecoin-news";
 
 const day = (d: string) => `2026-08-${d}T12:00:00.000Z`;
@@ -174,5 +176,47 @@ describe("relativeTime", () => {
 	it("is empty for a missing date rather than guessing", () => {
 		expect(relativeTime(null, now)).toBe("");
 		expect(relativeTime("not-a-date", now)).toBe("");
+	});
+});
+
+describe("multi-publisher dock (2026-09-02)", () => {
+	const sdf = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T09:00:00.000Z",
+		content: "Built on LayerZero's OFT interoperability standard…",
+		source: "sdf-blog",
+	};
+
+	it("carries an SDF stablecoin launch and credits SDF, not Lumen Loop", () => {
+		const entry = docToEntry(sdf);
+		expect(entry).not.toBeNull();
+		const [item] = selectStablecoinNews([entry as FeedEntry]);
+		expect(item.title).toBe("USDT0 is now live on Stellar");
+		expect(item.source).toBe("sdf-blog");
+		expect(sourceLabel(item.source)).toBe("Stellar Development Foundation");
+		expect(item.matched).toContain("usdt0");
+	});
+
+	it("still keeps SDF's non-stablecoin output off the dock", () => {
+		const entry = docToEntry({
+			...sdf,
+			title: "Protocol 27 upgrade guide",
+			url: "https://stellar.org/blog/foundation-news/protocol-27",
+		});
+		expect(selectStablecoinNews([entry as FeedEntry])).toEqual([]);
+	});
+
+	it("defaults an entry with no source to the RSS feed", () => {
+		const [item] = selectStablecoinNews([
+			{
+				title: "USDC on Stellar",
+				url: "https://lumenloop.com/x",
+				publishedAt: "2026-09-01T00:00:00.000Z",
+				description: "",
+			},
+		]);
+		expect(item.source).toBe("lumenloop");
+		expect(sourceLabel(item.source)).toBe("Lumen Loop");
 	});
 });

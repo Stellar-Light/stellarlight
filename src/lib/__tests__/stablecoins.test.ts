@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { toShare } from "../stablecoin-series";
 import { rankStablecoins, type StoreRow, storeRowToApi } from "../stablecoins";
 
 // Real rows as our own `stablecoins` collection stores them, values captured
@@ -114,5 +115,33 @@ describe("rankStablecoins — USD market cap is the comparable order", () => {
 		const noMcap = storeRowToApi({ code: "ZZZ", peg: "USD" });
 		const ranked = rankStablecoins([noMcap, storeRowToApi(USDC)], "marketcap");
 		expect(ranked[ranked.length - 1].ticker).toBe("ZZZ");
+	});
+});
+
+describe("toShare (market-share panel)", () => {
+	it("turns per-token values into percent of that day's measured total", () => {
+		const rows = toShare([
+			{ _date: "2026-09-01", USDC: 75, EURC: 25 },
+			{ _date: "2026-09-02", USDC: 60, EURC: 20, USDT0: 20 },
+		]);
+		expect(rows[0]).toEqual({ _date: "2026-09-01", USDC: 75, EURC: 25 });
+		expect(rows[1]).toEqual({
+			_date: "2026-09-02",
+			USDC: 60,
+			EURC: 20,
+			USDT0: 20,
+		});
+	});
+
+	it("leaves an unmeasured token absent — never 0 — so a gap is not a collapse", () => {
+		const [row] = toShare([{ _date: "2026-09-02", USDC: 100 }]);
+		expect(row.EURC).toBeUndefined();
+		expect(Object.keys(row)).toEqual(["_date", "USDC"]);
+	});
+
+	it("emits a date-only row when nothing was measured", () => {
+		expect(toShare([{ _date: "2026-09-02" }])).toEqual([
+			{ _date: "2026-09-02" },
+		]);
 	});
 });
