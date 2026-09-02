@@ -125,6 +125,7 @@ class RateLimitedError extends Error {
 async function fetchJson(
 	url: string,
 	{ retries = 3, timeoutMs = 10_000 } = {},
+	// biome-ignore lint/suspicious/noExplicitAny: shared by three external APIs (Horizon, Stellar Expert, CoinGecko), each a different raw JSON shape
 ): Promise<any | null> {
 	for (let i = 0; i < retries; i++) {
 		try {
@@ -354,7 +355,7 @@ export async function measureStablecoin(
 		id: stablecoinId(asset),
 		code: asset.code,
 		issuer: asset.issuer,
-		name: asset.code,
+		name: asset.name ?? asset.code,
 		company: asset.company,
 		domain: asset.domain,
 		website: `https://${asset.domain}`,
@@ -362,6 +363,11 @@ export async function measureStablecoin(
 		country: PEG_COUNTRY[asset.peg] ?? "Global",
 		assetType: asset.assetType ?? null,
 		measuredAt: now,
+		// A curated caveat straight from the operator's own words, e.g. "not a
+		// stablecoin, not tradable" — overridden below by an urgent measurement
+		// note (unmeasured / rate-limited / hand-checked), which a reader needs
+		// to see first, but otherwise carried straight to the row.
+		note: asset.note,
 	};
 
 	// Logo first — cheap, cached, and useful even on an unmeasured row.

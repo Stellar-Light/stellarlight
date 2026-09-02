@@ -43,6 +43,8 @@ export interface StablecoinAsset {
 	domain: string;
 	/** Issuing company, as it should be attributed. */
 	company: string;
+	/** Display name from the issuer's own toml, when it differs from the code. */
+	name?: string;
 	peg: StablecoinPeg;
 	/** Logo when the domain's TOML has none (or serves a broken one). */
 	fallbackImageUrl?: string;
@@ -50,6 +52,13 @@ export interface StablecoinAsset {
 	useCountryFlag?: boolean;
 	/** Extra qualifier — e.g. USDY is yield-bearing, not a pure peg. */
 	assetType?: string;
+	/**
+	 * A caveat the operator states about itself, carried verbatim from their
+	 * own toml/docs — never our inference. Surfaces on the row's `note` field
+	 * alongside (not instead of) a measurement problem, which still wins if
+	 * the fetch itself failed.
+	 */
+	note?: string;
 	/**
 	 * Horizon's /assets index omits a few live assets. Skipping validation
 	 * keeps a real asset in the list rather than dropping it on a false
@@ -414,10 +423,28 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	// 2,000,000,000 authorized across 85 holders — real issuer, but minted
 	// supply at that scale next to 85 holders would rank it second by market
 	// cap on a page about circulating value. It needs a circulating-supply
-	// source before it can sit beside USDC. EURCV / USDM1 / EURAU are Soroban
-	// CONTRACT tokens (no classic issuer), which this registry cannot express
-	// yet. KTB, MEX, NZDSC, CETESZ are live but effectively unissued (<40
-	// holders, ~0 supply).
+	// source before it can sit beside USDC. EURCV / EURAU are Soroban CONTRACT
+	// tokens (no classic issuer), which this registry cannot express yet.
+	// KTB, MEX, NZDSC, CETESZ are live but effectively unissued (<40 holders,
+	// ~0 supply).
+	//
+	// USDM1 (GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC):
+	// re-checked 2026-09-02, and the "Soroban contract, no classic issuer"
+	// reasoning above does NOT apply to it — it IS a normal classic asset
+	// (Horizon returns an ordinary G-account; Stellar Expert's classic
+	// asset/{code}-{issuer} endpoint reports it fully: supply, 28 trustlines,
+	// 512 funded). Excluded anyway, for two independent reasons: (1) the
+	// issuer account sets NO home_domain on Horizon at all, so the
+	// toml-reversal chain every other row here passes has nothing to check
+	// against; (2) the operator itself — the Republic of the Marshall
+	// Islands, per Stellar's own press release — describes it as "the first
+	// digital sovereign debt instrument issued natively on a blockchain," a
+	// dollar-denominated sovereign bond "backed one-to-one by short-dated
+	// U.S. Treasuries" for a Universal Basic Income disbursement (SDF +
+	// Crossmint, live Nov 2025). That is the same NOT-A-FIAT-PEG-STABLECOIN
+	// shape as USTRY above (Coverage sweep 2026-09-02) — a yield-bearing bond,
+	// not a reserve claim on fiat — so it stays out on both the chain and the
+	// inclusion rule, same as every other candidate in this block.
 	{
 		// 181,426 holders · 6,405,270 ZARZ authorized (Horizon, 2026-08-22).
 		// Issuer from zeam-money's own stellar.toml.
@@ -465,12 +492,34 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	},
 	{
 		// 831 holders · 330,238 UAH authorized (Horizon, 2026-08-22).
-		// Issuer from transparent-network's own stellar.toml.
+		//
+		// Researched 2026-09-02 against primary sources: the issuer account's
+		// own `home_domain` on Horizon is dcm.systems, NOT prozora.network —
+		// prozora.network (the ORG_URL / public brand site) serves no toml at
+		// all (its /.well-known/stellar.toml 404s), while dcm.systems/.well-
+		// known/stellar.toml is live and declares this exact code + issuer.
+		// `domain` corrected to the host that actually passes the same
+		// home_domain-reversal check every other row here is held to; this
+		// also gives the row a real logo instead of the flag fallback, since
+		// that toml's CURRENCIES block carries one.
+		//
+		// name and note are that toml's own words, not our inference. Its
+		// ORG_NAME confirms "Transparent Network" (no change). Its CURRENCIES
+		// entry: name="TPN UAH"; desc says UAH "is a digital representation
+		// (identifier) of the hryvnia on the bank accounts in transactions
+		// between network financial institutions and customers" and, in the
+		// operator's own words, "UAH is not a stablecoin; the token is not
+		// tradable and is available only for authorized accounts of
+		// participating financial institutions and customer's accounts."
+		// No reserve/backing claim beyond that is made anywhere in the toml,
+		// so none is recorded here.
 		code: "UAH",
 		issuer: "GCJI3CP2NL6NWSCHM36XBQYCBHOTVVZWEXZALWON34KAYUGF6GEVNRTS",
-		domain: "prozora.network",
+		domain: "dcm.systems",
 		company: "Transparent Network",
+		name: "TPN UAH",
 		peg: "UAH",
+		note: `Operator's own toml: "UAH is not a stablecoin; the token is not tradable and is available only for authorized accounts of participating financial institutions and customer's accounts." It represents hryvnia held in participating banks' accounts, for interbank/institutional settlement — not a retail-redeemable reserve token.`,
 	},
 	{
 		// 69 holders · 98,859 GBPZ authorized (Horizon, 2026-08-22).
@@ -488,7 +537,14 @@ export function stablecoinId(a: Pick<StablecoinAsset, "code" | "issuer">) {
 	return `${a.code}-${a.issuer.slice(0, 8)}`;
 }
 
-/** ISO-3166 alpha-2 for the peg's home, for flag rendering. */
+/**
+ * ISO-3166 alpha-2 for the peg's home, for flag rendering.
+ *
+ * Every member of `StablecoinPeg` above must have an entry here, or a real
+ * row silently renders the "Global" globe instead of its own flag (sls: CLP
+ * and UAH both did this — 2026-09-02). Add the country the same time you add
+ * the peg to the union, not after.
+ */
 export const PEG_COUNTRY: Record<string, string> = {
 	USD: "US",
 	EUR: "EU",
@@ -502,4 +558,9 @@ export const PEG_COUNTRY: Record<string, string> = {
 	MXN: "MX",
 	PEN: "PE",
 	NGN: "NG",
+	CLP: "CL",
+	UAH: "UA",
+	SGD: "SG",
+	AED: "AE",
+	CAD: "CA",
 };

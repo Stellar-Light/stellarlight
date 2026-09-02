@@ -104,7 +104,14 @@ export function displayHoldersCompact(n: number | null | undefined): string {
 	return n.toLocaleString("en-US");
 }
 
-/** ISO-3166 alpha-2 (or "Global") → flag URL + human label, as the explorer had it. */
+/**
+ * ISO-3166 alpha-2 (or "Global") → flag URL + human label, as the explorer
+ * had it.
+ *
+ * Must carry an entry for every code `PEG_COUNTRY` (stablecoin-registry.ts)
+ * can produce, or `countryInfo` below falls through to `Global` for a peg
+ * that DOES have a country — the same failure mode from the other side.
+ */
 export const COUNTRY_INFO: Record<string, { flag: string; label: string }> = {
 	US: { flag: flagUrl("us"), label: "United States" },
 	EU: { flag: flagUrl("eu"), label: "Europe" },
@@ -118,6 +125,11 @@ export const COUNTRY_INFO: Record<string, { flag: string; label: string }> = {
 	MX: { flag: flagUrl("mx"), label: "Mexico" },
 	ZA: { flag: flagUrl("za"), label: "South Africa" },
 	NG: { flag: flagUrl("ng"), label: "Nigeria" },
+	CL: { flag: flagUrl("cl"), label: "Chile" },
+	UA: { flag: flagUrl("ua"), label: "Ukraine" },
+	SG: { flag: flagUrl("sg"), label: "Singapore" },
+	AE: { flag: flagUrl("ae"), label: "United Arab Emirates" },
+	CA: { flag: flagUrl("ca"), label: "Canada" },
 	Global: { flag: flagUrl("un"), label: "Global" },
 };
 
