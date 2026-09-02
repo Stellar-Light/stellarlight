@@ -7,6 +7,13 @@ export interface SeriesPathPoint {
   x: number;
   y: number;
   key: string;
+  /**
+   * False when the source datum has no number at `dataKey` (measured-gap,
+   * not a 0). `seriesPathFromPoints` skips these via d3's `line.defined()`
+   * so the path breaks and resumes, instead of drawing a fake point at
+   * `y = 0` that reads as a collapse to the baseline.
+   */
+  defined: boolean;
 }
 
 export function computeSeriesPathPoints(
@@ -19,10 +26,12 @@ export function computeSeriesPathPoints(
   return data.map((datum, index) => {
     const xValue = xAccessor(datum);
     const yValue = datum[dataKey];
+    const defined = typeof yValue === "number";
     return {
       x: xScale(xValue) ?? 0,
-      y: typeof yValue === "number" ? (yScale(yValue) ?? 0) : 0,
+      y: defined ? (yScale(yValue as number) ?? 0) : 0,
       key: String(xValue.getTime?.() ?? index),
+      defined,
     };
   });
 }
@@ -48,6 +57,9 @@ export function interpolateSeriesPathPoints(
         key: target.key,
         x: source.x + (target.x - source.x) * progress,
         y: source.y + (target.y - source.y) * progress,
+        // Definedness is a fact about this date's data, not a tween-able
+        // number — always take the freshly-computed target's answer.
+        defined: target.defined,
       };
     }
 
@@ -63,6 +75,7 @@ export function interpolateSeriesPathPoints(
       key: target.key,
       x: anchor.x + (target.x - anchor.x) * progress,
       y: anchor.y + (target.y - anchor.y) * progress,
+      defined: target.defined,
     };
   });
 }
@@ -78,6 +91,7 @@ export function seriesPathFromPoints(
   const generator = d3Line<SeriesPathPoint>()
     .x((point) => point.x)
     .y((point) => point.y)
+    .defined((point) => point.defined)
     .curve(curve);
 
   return generator(points) ?? "";

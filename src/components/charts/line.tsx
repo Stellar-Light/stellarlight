@@ -99,6 +99,7 @@ function LineSeriesStroke({
   animatedPathD,
   curve,
   getY,
+  isDefined,
   pathRef,
   renderData,
   strokeWidth,
@@ -110,6 +111,7 @@ function LineSeriesStroke({
   animatedPathD: string;
   curve: CurveFactory;
   getY: (datum: Record<string, unknown>) => number;
+  isDefined: (datum: Record<string, unknown>) => boolean;
   pathRef: RefObject<SVGPathElement | null>;
   renderData: Record<string, unknown>[];
   strokeWidth: number;
@@ -135,6 +137,7 @@ function LineSeriesStroke({
     <LinePath
       curve={curve}
       data={renderData}
+      defined={isDefined}
       innerRef={pathRef}
       stroke={visibleStroke}
       strokeLinecap="round"
@@ -300,6 +303,13 @@ export function Line({
     },
     [dataKey, yScale]
   );
+  // A day this series wasn't measured is absent, not 0 — see the module note
+  // on `stablecoin-series.ts`'s pivotByToken. `defined` (below) tells the
+  // path generator to break and resume instead of drawing a point at 0.
+  const isDefined = useCallback(
+    (d: Record<string, unknown>) => typeof d[dataKey] === "number",
+    [dataKey]
+  );
 
   const hasDashTail = resolveDashTailBounds(dashFromIndex, data.length);
   const fadeSides = resolveFadeSides(fadeEdges);
@@ -342,6 +352,7 @@ export function Line({
           animatedPathD={animatedPathD}
           curve={curve}
           getY={getY}
+          isDefined={isDefined}
           pathRef={pathRef}
           renderData={renderData}
           strokeWidth={strokeWidth}

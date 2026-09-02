@@ -118,6 +118,70 @@ export function tickersIn(rows: SeriesRow[]): string[] {
 	});
 }
 
+/**
+ * Cap a pivoted series to its `n` biggest tickers (by {@link tickersIn}'s
+ * ordering) and fold the rest into a real "Other" sum per day — a sum, not a
+ * leftover. A day where every folded ticker is absent stays absent for
+ * `Other` too, so a measurement gap can't get rounded down into a fake 0
+ * (same rule `toShare`'s denominator already follows).
+ */
+export function capSeriesWithOther(
+	rows: SeriesRow[],
+	n: number,
+): { rows: SeriesRow[]; tickers: string[] } {
+	const ranked = tickersIn(rows);
+	if (ranked.length <= n) return { rows, tickers: ranked };
+	const top = ranked.slice(0, n);
+	const topSet = new Set(top);
+	const out = rows.map((row) => {
+		const next: SeriesRow = { _date: row._date };
+		let otherSum = 0;
+		let otherSeen = false;
+		for (const [k, v] of Object.entries(row)) {
+			if (k === "_date" || typeof v !== "number") continue;
+			if (topSet.has(k)) {
+				next[k] = v;
+			} else {
+				otherSum += v;
+				otherSeen = true;
+			}
+		}
+		if (otherSeen) next.Other = otherSum;
+		return next;
+	});
+	return { rows: out, tickers: [...top, "Other"] };
+}
+
+/**
+ * Turn a capped share series into cumulative stack heights for a 100%
+ * stacked area: `tickers[i]`'s output value is the running sum through
+ * `tickers[0..i]`, so `<Area dataKey={tickers[i]}>` painted in *reverse*
+ * order (biggest cumulative first, so each later/smaller shape opaquely
+ * covers the one under it) renders exactly ticker `i`'s own band.
+ *
+ * A ticker absent on a day contributes 0 to the running sum here — and
+ * that is NOT the "gap drawn as zero" mistake the line panels had. A stack
+ * is only ever a share of what was actually measured that day (`toShare`
+ * already builds its denominator the same way), so a token missing from
+ * the roster that day genuinely has no band yet: zero width, not a false
+ * reading of its value.
+ */
+export function stackedBands(
+	rows: SeriesRow[],
+	tickers: string[],
+): SeriesRow[] {
+	return rows.map((row) => {
+		const next: SeriesRow = { _date: row._date };
+		let running = 0;
+		for (const t of tickers) {
+			const v = row[t];
+			running += typeof v === "number" ? v : 0;
+			next[t] = running;
+		}
+		return next;
+	});
+}
+
 export interface IssuerLeader {
 	company: string;
 	/** Issuer's domain from the first of its assets — for a logo and a link. */
@@ -192,7 +256,12 @@ export const TOKEN_COLORS: Record<string, string> = {
 	NGNC: "hsl(100, 70%, 55%)",
 };
 
+/** Neutral grey for the "Other" aggregate — never a real token, so it must
+ * never land on a hue a real token could also hash to. */
+const OTHER_COLOR = "hsl(0, 0%, 52%)";
+
 export function colorFor(ticker: string): string {
+	if (ticker === "Other") return OTHER_COLOR;
 	if (TOKEN_COLORS[ticker]) return TOKEN_COLORS[ticker];
 	// Deterministic fallback so a new asset keeps one colour across renders.
 	let h = 0;

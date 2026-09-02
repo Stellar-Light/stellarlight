@@ -225,6 +225,12 @@ export function Area({
     },
     [dataKey, yScale]
   );
+  // Same rule as Line: an unmeasured day is absent, not 0. `defined` breaks
+  // the fill/stroke at the gap instead of dropping them to the baseline.
+  const isDefined = useCallback(
+    (d: Record<string, unknown>) => typeof d[dataKey] === "number",
+    [dataKey]
+  );
 
   const hasDashTail = resolveDashTailBounds(dashFromIndex, data.length);
   // The stroke gradient is only emitted when at least one edge fades, so fall
@@ -250,6 +256,7 @@ export function Area({
         <AreaClosed
           curve={curve}
           data={renderData}
+          defined={isDefined}
           fill={areaFill}
           x={(d) => xScale(xAccessor(d)) ?? 0}
           y={getY}
@@ -262,6 +269,7 @@ export function Area({
           <LinePath
             curve={curve}
             data={renderData}
+            defined={isDefined}
             innerRef={pathRef}
             stroke={visibleStroke}
             strokeLinecap="round"
