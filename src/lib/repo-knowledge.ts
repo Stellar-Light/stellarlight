@@ -42,6 +42,300 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 7 (2026-09-02): 34 repos / 35 notes — the first batch aimed at
+	// the board's notes POOL itself (curated-index repos with repoScore ≥ 60
+	// and no note; entities.json → repos.coverage.knowledgeNotes.missing),
+	// not at "the next tier by repoScore". All 149 pool repos were worked:
+	// 34 carry a durable fact (registry identities that link back — Soneso
+	// PHP SDK, @airgap/stellar, Keybase, Noir, Rango; README-published
+	// mainnet contract IDs confirmed on stellar.expert; hosted products; six
+	// path moves resolved through the API; three repos that now return 404,
+	// dated; one author-declared shutdown). The other 115 yielded nothing
+	// durable and are named with reasons in the batch notes: 72 hackathon
+	// demos with tags only, 16 stub READMEs, 10 README-claimed packages that
+	// are unpublished or do not link back, 10 with no registry or tags, 5
+	// testnet-only products, 2 not Stellar repos at all — roughly half the
+	// un-noted pool is April-2026 x402/MPP and ZK-gaming hackathon output
+	// and is un-curatable by design. No rename or archive date is claimed;
+	// no pool repo carries GitHub's archive banner. Research used 9 API calls.
+	"soneso/stellar-php-sdk": [
+		{
+			note: "Packagist package soneso/stellar-php-sdk — 1.13.0 (2026-08-24; 87 versions since 0.0.1 on 2021-12-29; repository → this repo; Apache-2.0), matching GitHub release 1.13.0 'v1.13.0 Protocol 28 (CAP-85) support and ADDRESS_V2 defaults' (2026-08-24). README install: `composer require soneso/stellar-php-sdk`, PHP 8.0+. https://packagist.org/packages/soneso/stellar-php-sdk",
+			triggers: ["php sdk composer", "stellar php sdk install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"airgap-it/airgap-coin-lib": [
+		{
+			note: "npm @airgap/stellar — 0.13.47 (2026-07-28; 46 versions since 2025-05-15; repository → this monorepo; MIT), the Stellar protocol module of AirGap's coinlib, published alongside @airgap/coinlib-core 0.13.47 (541 versions since 2020-12-17, same repo). 0.13.47 is also the newest of 82 git tags; no GitHub releases. https://www.npmjs.com/package/@airgap/stellar",
+			triggers: ["airgap stellar npm", "airgap coinlib stellar module"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"airgap-it/airgap-vault": [
+		{
+			note: "Latest GitHub release v3.34.4 (2026-03-26; 71 tags). package.json at HEAD depends on @airgap/stellar 0.13.46 — the Stellar module published from sibling airgap-it/airgap-coin-lib. README 'Download': Google Play id it.airgap.vault and App Store id1417126841; the offline key-holder half of the pair with airgap-it/airgap-wallet. https://github.com/airgap-it/airgap-vault/releases/tag/v3.34.4",
+			triggers: ["airgap vault release", "airgap vault stellar support"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"airgap-it/airgap-wallet": [
+		{
+			note: "Latest GitHub release v3.34.4 (2026-03-26; 97 tags), cut the same day as airgap-vault v3.34.4. package.json at HEAD depends on @airgap/stellar 0.13.46 (from sibling airgap-it/airgap-coin-lib). README 'Download': Google Play id it.airgap.wallet and App Store id1420996542; the online, public-data half of the AirGap pair. https://github.com/airgap-it/airgap-wallet/releases/tag/v3.34.4",
+			triggers: ["airgap wallet release", "airgap wallet stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"keybase/client": [
+		{
+			note: "Latest GitHub release v6.6.3 (2026-06-03; 190 tags). Docker Hub image keybaseio/client ('Official Keybase CLI client distribution'; last updated 2026-06-05; nightly-* tags; standard/slim/alpine/node/python variants defined in packaging/linux/docker/README.md, which names this repo for issues). Stellar wallet code lives under go/stellar (https://github.com/keybase/client/tree/master/go/stellar). https://hub.docker.com/r/keybaseio/client",
+			triggers: ["keybase docker image", "keybase stellar wallet code"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"noir-lang/noir": [
+		{
+			note: "npm @noir-lang/noir_js 1.0.0-beta.26 (2026-07-30; 655 versions since 2023-09-15; repository → this repo, directory tooling/noir_js; MIT OR Apache-2.0) and @noir-lang/noir_wasm 1.0.0-beta.26 (745 versions; compiler/wasm). Latest non-nightly GitHub release v1.0.0-beta.26 (2026-07-30); a nightly-YYYY-MM-DD release is cut daily (nightly-2026-09-01); Cargo workspace version 1.0.0-beta.26. https://www.npmjs.com/package/@noir-lang/noir_js",
+			triggers: ["noir latest version", "noir js npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "55 published GitHub security advisories (unique GHSA ids across the six advisory pages, read 2026-09-02); newest GHSA-v2q4-prvf-7h73 'Incorrect conditional mutable reference assignment in Brillig' (Moderate, 2026-06-09); a batch of eight on 2026-05-19 incl. High GHSA-j4p3-qjx6-rmvx 'Load Store Forwarding incorrectly eliminates stores'. https://github.com/noir-lang/noir/security/advisories",
+			triggers: ["noir security advisories", "noir compiler vulnerabilities"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"rango-exchange/rango-sdk": [
+		{
+			note: "npm rango-sdk 0.5.0 and rango-sdk-basic 0.5.0 (both 2026-05-18; 109 / 110 versions since 2022-02-10 / 2022-05-08; repository → this monorepo; GPL-3.0), matching GitHub release rango-sdk-basic@0.5.0 (2026-05-18); releases are per-package tags (rango-sdk@, rango-sdk-basic@, rango-types@). README install: `npm install rango-sdk-basic --save` or `npm install rango-sdk --save`. https://www.npmjs.com/package/rango-sdk",
+			triggers: ["rango sdk npm", "rango sdk install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"rango-exchange/rango-client": [
+		{
+			note: "Monorepo of the Rango widget and wallets library (README: wallets/, queue-manager/, widget/); releases are per-package tags — widget-embedded@0.63.0 and provider-freighter@0.4.0 both on 2026-08-18 (3,386 tags). Stellar support is the wallets/provider-freighter package (package.json name @rango-dev/provider-freighter; Freighter wallet). https://github.com/rango-exchange/rango-client/releases/tag/provider-freighter%400.4.0",
+			triggers: ["rango freighter provider", "rango widget release"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"akanimoh12/stellar-ipredict": [
+		{
+			note: "README 'Deployed Contracts (Stellar Mainnet)': Prediction Market CDGNPRYTFDXJLWZE4YDKZXW4IEN2RLPSE4N7VM5HJ7NLPL2QC45GIXI5, IPREDICT Token CAYL4TKNRMXAX5ZLQGFEZ6XOC2QHTCTN5QC2SB5BEEHLVO6SDU2UBLRH, Referral Registry CAGJVX6EXMCKKWDJCQFIEJ34CZTHZOGLWJM6KQTGDEXEO723CJZ5773H, Leaderboard CCWWOQSDSO3XXLCMA6A2HYRUFYVNUJZ2HPAMFQSPOB4JWYIBY2HWVTOB — all four exist on pubnet per stellar.expert (created 2026-06-02). Frontend https://ipredict-stellar.vercel.app (200 on 2026-09-02). https://github.com/Akanimoh12/Stellar-iPredict",
+			triggers: ["ipredict contract address", "ipredict mainnet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"sandragcarrillo/nexus4agents": [
+		{
+			note: "README 'Deployed Contracts — Mainnet': NexusRegistry CCR4Y2DLRJCQPGQJ2UNVZEOFANZEJC5NK6X6VGLP7PCVYTAQ54G4XSL2 and NexusPool CAWAYAYBUJUTTBTNLFOZ5S7AF3COO526WAZXJ6EHR45NJ6ZQ546K4B6O (both exist on pubnet per stellar.expert, created 2026-04-11), plus a testnet pair; one backend serves both networks (mainnet under a /mainnet/ prefix). Live app https://nexus4agents.vercel.app/ (200 on 2026-09-02). https://github.com/sandragcarrillo/nexus4agents",
+			triggers: ["nexus registry contract", "nexus4agents mainnet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"vinaystwt/xmpp": [
+		{
+			note: "npm @vinaystwt/xmpp-core 0.2.0 and @vinaystwt/xmpp-mcp 0.2.0 (both 2026-04-04; 3 versions each; repository → this repo; MIT) — the README's 'Public Packages' (`npm install @vinaystwt/xmpp-core @vinaystwt/xmpp-mcp`): gateway client / route planning, and an MCP server factory. README links its DoraHacks submission (Stellar Agents x402 + Stripe MPP hackathon). https://www.npmjs.com/package/@vinaystwt/xmpp-core",
+			triggers: ["xmpp npm package", "xmpp core mcp install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"martinvibes/sentinelshield": [
+		{
+			note: "npm sentinelshield-stellar — 0.1.0 (2026-04-11; single version; repository → this repo; MIT; bins sentinelshield and sentinelshield-stellar), the README's `npm install sentinelshield-stellar`. README banner: 'currently live on Stellar Testnet while we finish a security audit … Mainnet is coming'; 'Built for the Stellar agentic payments hackathon'. https://www.npmjs.com/package/sentinelshield-stellar",
+			triggers: ["sentinelshield npm", "sentinelshield mainnet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"daraijaola/runbox": [
+		{
+			note: "npm runbox-client — 1.0.0 (2026-04-11; single version; repository → this repo; MIT), the README's `npm install runbox-client` SDK; GitHub release v1.0.0 the same day (the only tag). README also documents an MCP server (`npm install -g runbox-mcp`) and a Soroban spending-cap contract on testnet. https://www.npmjs.com/package/runbox-client",
+			triggers: ["runbox client npm", "runbox sdk install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"fxjrin/defi-copilot": [
+		{
+			note: "npm defi-copilot-mcp — 1.3.1 (2026-04-12; 7 versions since 2026-04-11; repository → this repo; MIT; bin defi-copilot-mcp), the README's MCP server: `claude mcp add defi-copilot -- npx -y defi-copilot-mcp` (default STELLAR_NETWORK=testnet). The repo's package.json is named defi-copilot; the published npm name is defi-copilot-mcp. GitHub tags v1.0.0–v1.1.1. https://www.npmjs.com/package/defi-copilot-mcp",
+			triggers: ["defi copilot mcp", "defi copilot npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"ggoldani/agent-passport": [
+		{
+			note: "npm @ggoldani/agent-passport-sdk 0.1.0 and @ggoldani/agent-passport-mcp 0.1.0 (both 2026-05-06; single versions; repository → this repo; MIT; MCP bin agent-passport-mcp) — the README's two install paths (app SDK vs MCP for Claude/Cursor); README examples target Soroban testnet RPC. https://www.npmjs.com/package/@ggoldani/agent-passport-sdk",
+			triggers: ["agent passport sdk", "agentpassport mcp install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lumenwipe/lumenwipe": [
+		{
+			note: "README: non-custodial web app to close a Stellar account and recover locked XLM (API builds unsigned txs, the browser signs), hosted at https://lumenwipe.com with docs at https://docs.lumenwipe.com (both 200 on 2026-09-02); status line: 'the classic account wind-down runs today on testnet and mainnet. Soroban & DeFi protocol exits … are in active development'. Apache-2.0. https://github.com/LumenWipe/lumenwipe",
+			triggers: ["lumenwipe close account", "lumenwipe hosted app"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"bytemaster333/account-demolisher": [
+		{
+			note: "README: 'Live at https://demolisher.app/' (200 on 2026-09-02) — closes Stellar accounts: classic entries, Soroban DeFi positions on Blend, Aquarius, Soroswap and FxDAO, balance conversion to XLM, CEX destinations via a mediator account, multisig signature collection, and a SEP-41 allowance viewer; security model at https://docs.demolisher.app/docs/developers/security/model (200). Node 22. https://github.com/bytemaster333/account-demolisher",
+			triggers: ["account demolisher app", "demolisher close stellar account"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"carstenjacobsen/x402-testing-tool": [
+		{
+			note: "README: hosted at https://x402test.org (200 on 2026-09-02) — a Server Simulator (create a simulated x402-paywalled endpoint: method, path, network e.g. Stellar Testnet, asset, amount, receiving address) and a Client Simulator (send a request, get 402, build the payment, resubmit); wallet support 'currently only the Freighter wallet'. https://github.com/carstenjacobsen/x402-testing-tool",
+			triggers: ["x402 testing tool", "x402test simulator"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lobster-protocol/stellar-integrations": [
+		{
+			note: "README: React dashboard for the Soroban contracts of sibling https://github.com/Lobster-Protocol/Stellar ('our 2025 Build Award'; 200 on 2026-09-02), deployed on testnet; live at https://stellar-instit.lobster-protocol.com (200). Routing proofs run on mainnet through Stellar Broker (@stellar-broker/client), custody via DFNS, wallets via @creit-tech/stellar-wallets-kit v2 from JSR. https://github.com/Lobster-Protocol/stellar-integrations",
+			triggers: ["lobster stellar dashboard", "lobster protocol build award"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lum-agg/stellar-dex-agg": [
+		{
+			note: "GitHub releases 'LumAgg 0.2.1' (tag swap-api-v0.2.1, 2026-08-07) and 'LumAgg 0.2.0' (2026-08-02); four swap-api-v* tags; Apache-2.0. README: routes swaps across Soroswap, Aquarius (xy=k, stable, CLMM), Phoenix, Sushi V3 and Comet, with optional comparison against Classic DEX path payments; docs/scf-resubmission-budget.md is described as 'SCF #44 resubmission — $80k tranche deliverables'. https://github.com/Lum-Agg/stellar-dex-agg/releases",
+			triggers: ["lumagg release", "lumagg dex sources"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"moonlight-protocol/local-dev": [
+		{
+			note: "README 'Repos' names the Moonlight stack as nine sibling repos under github.com/Moonlight-Protocol — provider-platform, provider-console, council-platform, council-console, pay-platform, moonlight-pay, network-dashboard-platform, network-dashboard, ui (five spot-checked, all 200 on 2026-09-02) — run together by up.sh on a local Stellar network via Docker. Single release stellar-cli-v0.1.0 (2026-03-10). https://github.com/Moonlight-Protocol/local-dev",
+			triggers: ["moonlight repos", "moonlight local stack"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"kindfi-org/kindfi": [
+		{
+			note: "README monorepo map: apps/web (Next.js), apps/contract (Soroban, Rust), apps/indexer (SubQuery), services/supabase, services/ai, packages/lib, packages/drizzle; developer guide (architecture, code-style, OSS contribution guide) at https://kindfis-organization.gitbook.io/development (200 on 2026-09-02); escrows via Trustless Work. No releases or tags. https://github.com/kindfi-org/kindfi",
+			triggers: ["kindfi developer guide", "kindfi monorepo layout"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"sentinelfi/sentinel_soroban_v3": [
+		{
+			note: "README: parametric flight-delay insurance on Soroban; documentation at https://sentinelfi.github.io/sentinel_soroban_v3/ and a testnet playground at https://sentinel-soroban-v3.vercel.app/ (both 200 on 2026-09-02); six contracts deployed on Stellar TESTNET with addresses in deployments/testnet.json (`make deploy-testnet`); governance jobs on Supabase. https://github.com/SentinelFi/sentinel_soroban_v3",
+			triggers: [
+				"sentinel flight insurance docs",
+				"sentinelfi testnet playground",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"gladiusclub/gladius-backend": [
+		{
+			note: "README: Firebase / Cloud Firestore backend with custodial Stellar wallets (keys in Google Cloud KMS); its docs link https://gladius-2.gitbook.io/backend redirects to https://gladiusclub.gitbook.io/docs/backend (200 on 2026-09-02). package.json is named gladius-contracts and points at sibling https://github.com/GladiusClub/gladius-contracts (200). https://github.com/GladiusClub/gladius-backend",
+			triggers: ["gladius backend docs", "gladius contracts repo"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"midasbal/lumina-scan": [
+		{
+			note: "README headline (read 2026-09-02): 'shutting this down. built it for a hackathon, no real future for it. maybe later' — the author's own status for this x402/MPP security-scanner submission (testnet USDC; demo at lumina-scan.vercel.app). No releases or tags. https://github.com/midasbal/lumina-scan",
+			triggers: ["lumina scan status", "lumina scan shut down"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"ebubechi-ihediwa/verix": [
+		{
+			note: "MOVED: github.com/ebubechi-ihediwa/Verix redirects to github.com/verixhq/Verix (HTTP 301; GitHub API resolves the old path, 2026-09-02). Releases v0.1.0-foundation (2026-06-24) and v0.2.0-beta-ready (2026-06-26). README status table: 'Soroban Contracts (code) — Written, deployment pending', 'On-Chain Receipt Anchoring — Stub'; cites a 'Best Technical Integration' hackathon award. https://github.com/verixhq/Verix",
+			triggers: ["verix repo moved", "verix soroban status"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"leomanza/near-shade-coordination": [
+		{
+			note: "RENAMED: github.com/leomanza/near-shade-coordination redirects to github.com/leomanza/delibera.xyz (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'Delibera — Privacy-Preserving Multi-Agent DAO Coordination on NEAR'; the Stellar part is a 'Stellar Hacks: Agents hackathon entry' — x402 USDC payments on Stellar for a deliberation oracle settled on NEAR. https://github.com/leomanza/delibera.xyz",
+			triggers: ["delibera repo renamed", "near shade coordination stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"leojay-net/stellar-agent-flow": [
+		{
+			note: "MOVED: github.com/leojay-net/Stellar-Agent-Flow redirects to github.com/Pridex-Org/Stellar-Agent-Flow (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'AgentFlow (Stellar Edition)' — a node-canvas orchestrator for Stellar agents (Next.js + React Flow); package.json name agentflow, private; no releases or tags. https://github.com/Pridex-Org/Stellar-Agent-Flow",
+			triggers: ["agentflow stellar repo moved"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"t0k1dev/vendly": [
+		{
+			note: "MOVED: github.com/t0k1dev/vendly redirects to github.com/tokidev-ai/vendly (HTTP 301; GitHub API resolves the old path, 2026-09-02). The README at the new path is the unmodified create-next-app boilerplate; package.json name web 0.1.0, private; no releases or tags. https://github.com/tokidev-ai/vendly",
+			triggers: ["vendly repo moved"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"treblelegacy/x402-agents-stellar-project": [
+		{
+			note: "MOVED: github.com/TrebleLegacy/x402-agents-stellar-project redirects to github.com/pwsaragossy/x402-agents-stellar-project (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'x402 Agentic Payments — Stellar Hackathon Submission' with a 'Project Status & Mocked Data (Hackathon Transparency)' section listing what is simulated; no releases or tags. https://github.com/pwsaragossy/x402-agents-stellar-project",
+			triggers: ["x402 agents stellar project moved"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"trustless-oss/trustless-oss": [
+		{
+			note: "MOVED here: github.com/ryzen-xp/Trustless-OSS redirects to github.com/Trustless-OSS/Trustless-OSS (HTTP 301; GitHub API resolves the old path, 2026-09-02; repo created 2026-05-10) — the README's CI badges and clone URL still name ryzen-xp/Trustless-OSS. README: on-chain bounties for OSS contributors — fund a Stellar USDC escrow, attach rewards to issues, pay out when the linked PR merges. https://github.com/Trustless-OSS/Trustless-OSS",
+			triggers: ["trustless oss repo moved", "trustless oss bounties"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"nsuccess/agentmarket": [
+		{
+			note: "Repo no longer accessible: https://github.com/Nsuccess/AgentMarket returns HTTP 404 (deleted or made private; the GitHub API answers 404 as well) as of 2026-09-02; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"big14way/stellar-agent-gateway": [
+		{
+			note: "Repo no longer accessible: https://github.com/big14way/stellar-agent-gateway returns HTTP 404 (deleted or made private; the GitHub API answers 404 as well) as of 2026-09-02; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"envexx/lument-trust": [
+		{
+			note: "Repo no longer accessible: https://github.com/envexx/Lument-Trust returns HTTP 404 (deleted or made private; the GitHub API answers 404 as well) as of 2026-09-02; census metadata is the surviving record.",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
 	// ── P5 batch 6 (2026-09-02): 36 repos / 39 notes — the tier below batch 5.
 	// 877 unseen repos were screened, ~70 had any signal beyond metadata, and
 	// these are the ones with a durable, registry- or banner-backed fact:
