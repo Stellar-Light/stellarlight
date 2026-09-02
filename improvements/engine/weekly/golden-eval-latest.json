@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8353481292724609,
+      "topScore": 0.8357760310173035,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8034659624099731,
+      "topScore": 0.8033704161643982,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8236995935440063,
+      "topScore": 0.8238480091094971,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7766534090042114,
+      "topScore": 0.777192234992981,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -527,37 +527,41 @@
       "id": "repos-streaming-payments",
       "category": "code-references",
       "mode": "repos",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "fluxity|tide|paystreme|stream"
+      ],
       "forbiddenHits": [],
-      "topScore": 47,
+      "topScore": null,
       "urlOk": null,
-      "scoreOk": true,
+      "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "luanlabs/fluxity-v1-core"
+      "sample": "ERROR: 500 https://stellarlight.xyz/api/repos/search?q=streaming%20payments&limit=5"
     },
     {
       "id": "repos-escrow",
       "category": "code-references",
       "mode": "repos",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "escrow|vault|trustless|microvault"
+      ],
       "forbiddenHits": [],
-      "topScore": 63,
+      "topScore": null,
       "urlOk": null,
-      "scoreOk": true,
+      "scoreOk": false,
       "top1Ok": null,
       "uniqueOk": null,
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Trustless-Work/trustlesswork-smart-contract-stellar"
+      "sample": "—"
     },
     {
       "id": "repos-soroswap",
@@ -675,7 +679,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.685237467288971,
+      "topScore": 0.6851571202278137,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -747,7 +751,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7343152761459351,
+      "topScore": 0.7336044311523438,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +805,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535137176513672,
+      "topScore": 0.8532983064651489,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +960,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-02T16:49:42Z"
+  "generatedAt": "2026-09-02T17:32:18Z"
 }
