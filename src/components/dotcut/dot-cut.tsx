@@ -35,10 +35,29 @@ function colsForRows(w: number, h: number, targetRows: number): number {
 	return Math.max(42, Math.round(cols));
 }
 
+/**
+ * Resolve on `load`, not `decode()`.
+ *
+ * `HTMLImageElement.decode()` ties its promise to the rendering pipeline, so
+ * in a BACKGROUND TAB it can stall indefinitely — the promise never settles,
+ * the engine is never constructed, and the strip stays permanently blank even
+ * after the reader focuses the tab, because nothing retries. Opening a page in
+ * a background tab is completely ordinary (a middle-click, a restored
+ * session), so this was a real blank-banner path, not a test-environment
+ * quirk: measured on production, the host element existed with zero children
+ * while the same image loaded fine via `onload` in the same hidden document.
+ *
+ * `drawImage` accepts a loaded image without an explicit decode, so waiting on
+ * `load` costs nothing and works whether or not the document is visible.
+ */
 function loadImage(src: string): Promise<HTMLImageElement> {
-	const img = new Image();
-	img.src = src;
-	return img.decode().then(() => img);
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.onload = () => resolve(img);
+		img.onerror = () =>
+			reject(new Error(`dot-cut: image failed to load — ${src}`));
+		img.src = src;
+	});
 }
 
 export function DotCutBanner() {
