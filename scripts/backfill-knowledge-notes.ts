@@ -42,7 +42,10 @@ async function main(): Promise<number> {
 		const res = await payload.find({
 			collection: "repos",
 			where: { fullName: { like: key } },
-			limit: 5,
+			// substring match: a short key like stellar/go also matches
+			// stellar/go-stellar-sdk and every fork — leave room so the exact
+			// row is never pushed past the page and reported 'missing'
+			limit: 50,
 			depth: 0,
 			context: { internal: true },
 		});
