@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-02T02:15:46.022Z",
+	"asOf": "2026-09-02T02:31:49.227Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 79,
-	"healthy": 79,
+	"checked": 78,
+	"healthy": 78,
 	"broken": [],
 	"rows": [
 		{
@@ -175,10 +175,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T02:13:25Z",
+			"lastSuccessAt": "2026-09-02T02:26:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -440,10 +440,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 10,
+			"ageDays": 11,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 10d ago (manual tool — age not judged)"
+			"why": "last green 11d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -824,7 +824,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T02:13:25Z",
+			"lastSuccessAt": "2026-09-02T02:30:11Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -842,17 +842,6 @@
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "upgrade-status-basis.yml",
-			"name": "Upgrade status basis from link health",
-			"cron": "0 4 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-01T21:55:12Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 15,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "verify-claims.yml",
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
@@ -868,10 +857,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-01T21:17:01Z",
+			"lastSuccessAt": "2026-09-02T02:13:25Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 3,
+			"runs": 4,
 			"why": "last green 0d ago"
 		}
 	]
