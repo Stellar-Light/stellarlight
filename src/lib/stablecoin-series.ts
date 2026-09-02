@@ -200,6 +200,15 @@ export interface IssuerLeader {
  * supply. An issuer whose total includes a hand-checked or unmeasured row is
  * flagged rather than silently blended in.
  */
+/**
+ * Issuers kept out of the Top Issuers ranking. Owner call, 2026-09-02:
+ * Montelibero's EURMTL and USDM are a community DAO's own tokens, and ranking
+ * them beside regulated payment issuers reads as a comparison the list is not
+ * making. The ASSETS stay in the table with their own measurements — this
+ * removes them from a curated ranking, not from the data.
+ */
+const LEADERBOARD_EXCLUDED = new Set(["Montelibero"]);
+
 export function issuerLeaderboard(
 	rows: Array<{
 		company?: string | null;
@@ -212,7 +221,7 @@ export function issuerLeaderboard(
 	const by = new Map<string, IssuerLeader>();
 	for (const r of rows) {
 		const company = (r.company ?? "").trim();
-		if (!company) continue;
+		if (!company || LEADERBOARD_EXCLUDED.has(company)) continue;
 		const e = by.get(company) ?? {
 			company,
 			domain: r.issuerDomain?.trim() || null,

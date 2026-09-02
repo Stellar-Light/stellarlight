@@ -6,6 +6,7 @@ import {
 } from "@/components/charts/series-path-utils";
 import {
 	capSeriesWithOther,
+	issuerLeaderboard,
 	stackedBands,
 	toShare,
 } from "../stablecoin-series";
@@ -262,5 +263,30 @@ describe("stackedBands (100% stacked market-share area)", () => {
 		// at USDC's own top — not the "gap drawn as 0" mistake, because a
 		// stack is only ever a share of what was actually measured that day.
 		expect(rows[0]).toEqual({ _date: "2026-09-01", USDC: 100, EURC: 100 });
+	});
+});
+
+describe("issuerLeaderboard exclusions", () => {
+	const rows = [
+		{ company: "Circle", ticker: "USDC", marketCapRaw: 331e6, basis: "live" },
+		{
+			company: "Montelibero",
+			ticker: "EURMTL",
+			marketCapRaw: 3.8e6,
+			basis: "live",
+		},
+		{ company: "Montelibero", ticker: "USDM", marketCapRaw: 0, basis: "live" },
+		{ company: "Zeam", ticker: "USDZ", marketCapRaw: 0.31e6, basis: "live" },
+	];
+
+	it("keeps an excluded issuer out of the ranking entirely", () => {
+		const out = issuerLeaderboard(rows);
+		expect(out.map((r) => r.company)).toEqual(["Circle", "Zeam"]);
+	});
+
+	it("does not disturb the other issuers' totals", () => {
+		const out = issuerLeaderboard(rows);
+		expect(out[0].totalMarketCapUSD).toBe(331e6);
+		expect(out[1].tokens).toEqual(["USDZ"]);
 	});
 });
