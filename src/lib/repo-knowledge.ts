@@ -42,6 +42,181 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 8 (2026-09-02): 18 repos / 21 notes — the band BELOW the pool,
+	// curated-index repos with repoScore 50–59 (156 in the band; 98 examined
+	// after registry keys, earlier rejects and rows already carrying notes).
+	// Registry identities that link back (@x402/stellar + PyPI x402,
+	// @lobstrco/signer-extension-api, @x402xlm/start, a Docker Hub image),
+	// README-published MAINNET contract IDs confirmed on stellar.expert with
+	// creation dates (hitz-gravity, contracts-acta, stellar8004, a2a-protocol),
+	// one archive dated only by GitHub's banner (soroswap/frontend), three
+	// path moves resolved by 301, one hosted product with releases, five dated
+	// 404s. The other 80 yielded nothing durable and are recorded as internal
+	// triage verdicts (BAND_50_59_TRIAGE_2026_09_02) so the board can tell
+	// judged from unexamined when the pool widens to this band: 46 hackathon
+	// demos / ZK games, 15 testnet-only or registry-less products, 5 not
+	// Stellar repos, 5 with a registry identity but no Stellar fact in their
+	// docs, 5 README-claimed packages unpublished or not linking back, 4
+	// tag-only. Research used 16 GitHub API calls.
+	"x402-foundation/x402": [
+		{
+			note: "npm @x402/stellar — 2.24.0 (2026-08-27; 18 versions since 2026-03-10; repository → this repo; Apache-2.0), the 'x402 Payment Protocol Stellar Implementation' (depends on @stellar/stellar-sdk ^16 and @x402/core ~2.24.0); the README's SDK install line lists it among the chain packages next to @x402/core 2.24.0. Git tags are per package (npm-@x402/stellar@v2.24.0). https://www.npmjs.com/package/@x402/stellar",
+			triggers: ["x402 stellar npm", "x402 stellar package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "PyPI x402 — 2.21.0 (2026-08-27; 32 releases; Repository → this repo; MIT; tag pypi-x402@v2.21.0) is the Python SDK; npm @x402/core 2.24.0 (27 versions since 2025-12-10) and the older unscoped npm x402 1.2.0 (2026-04-16; 34 versions since 2025-02-20) both link back here. No single latest GitHub release — 570 per-package tags. https://pypi.org/project/x402/",
+			triggers: ["x402 python sdk"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"soroswap/frontend": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02; the same day as soroswap/spacewalk-implementation and phoenix-zephyr-indexer). Repo description: 'OLD Soroswap.Finance Frontend for Soroswap AMM, Soroswap Aggregator & Spacewalk Bridge Implementation'; last push 2025-08-24; no tags or releases; the README still points at soroswap.finance. https://github.com/soroswap/frontend",
+			triggers: ["soroswap frontend archived"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lobstrco/lobstr-browser-extension": [
+		{
+			note: "npm @lobstrco/signer-extension-api — 2.1.0 (2026-07-24; 3 versions since 2024-03-27; repository → this repo; Apache-2.0), the client SDK in this monorepo's @lobstrco/signer-extension-api workspace (same 2.1.0 at HEAD). README: the LOBSTR signer extension lets dapps connect to the Stellar network and sign with the LOBSTR mobile wallet. No tags or releases. https://www.npmjs.com/package/@lobstrco/signer-extension-api",
+			triggers: ["lobstr signer extension npm", "lobstr extension api package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"community-exchange-network/komunitin": [
+		{
+			note: "MOVED: github.com/komunitin/komunitin — the clone URL in this repo's own README — redirects here (HTTP 301, 2026-09-02). README: Komunitin 'Open System for Exchange Communities'; its accounting service is 'the decentralized backend for the accounting API based on the Stellar blockchain' (accounting/); live demo at demo.komunitin.org, docs at docs.komunitin.org. No tags. https://github.com/community-exchange-network/komunitin",
+			triggers: ["komunitin repo moved", "komunitin accounting stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"skyhitz/hitz-gravity": [
+		{
+			note: "README 'Mainnet': HITZ Gravity Token (Soroban SEP-41, soroban-sdk 25) at CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU, WASM hash befa64d9…5b08, max supply 100,000,000 HITZ — stellar.expert (public) shows the contract created 2026-04-25 with the same wasm prefix; the 'Validated Source' is GitHub release v1.0.0 (2026-04-29). Powers skyhitz.io. https://stellar.expert/explorer/public/contract/CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU",
+			triggers: ["hitz token contract", "skyhitz gravity token"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"acta-team/contracts-acta": [
+		{
+			note: "README 'Mainnet Deployments' + docs/deployments/mainnet.md (deployed 2026-06-30): did-stellar-registry 0.2.0 = CD6LSWW5ZSXOO5WAIHKQLQ262TW7BPI37PNEVMMA273BAPC65NN2AYXQ; vc-vault-factory 0.1.0 = CCWNZ6UMUXCDOVP2TWOPVLI4KP4VY4YF7VKPN6XLYVHNFAT24NDB33CX (vc-vault 0.4.0 instances are deployed by the factory from template WASM 2bd0323a…); factory fee 1 USDC per credential. Both IDs exist on stellar.expert (public), created 2026-06-30. https://github.com/ACTA-Team/contracts-acta#mainnet-deployments",
+			triggers: ["acta mainnet contracts", "acta vault factory contract"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "Latest GitHub release mainnet-v1.0.0 'Mainnet launch - 2026-06-30' (2026-06-30); contract releases are per-crate tags (vc-vault-v0.4.0 2026-06-23, did-stellar-registry-v0.2.0, vc-vault-factory-v0.1.0; 7 tags). Cargo workspace 0.21.0 with repository → this repo. The did:stellar TypeScript resolver/SDK is the sibling acta-team/did-stellar. https://github.com/ACTA-Team/contracts-acta/releases",
+			triggers: ["acta contracts release"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"rohan911438/a2a-protocol": [
+		{
+			note: "README 'Mainnet': escrow contract CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3 on Stellar Mainnet (Public) — stellar.expert (public) shows it created 2026-08-08. The README self-describes as 'a hackathon project' (Team Brotherhood) with a live frontend at a2aprotocol.netlify.app; the A2AT token is 'Proposed, Not Yet Implemented'. No tags or releases. https://stellar.expert/explorer/public/contract/CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3",
+			triggers: ["a2a protocol escrow contract"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"progax01/stellar8004": [
+		{
+			note: "AgenticOcean — README 'Smart Contracts — Mainnet': VaultFactory CAXYXFBO26RSBU2HRNPDWOQ7M2WITX67E7PI543WHDDMM5F7U4WQOUXM, AgentRegistry CDKHR3UUKCKXJ6CRKWKUZI3SKWAAKJMU6TGHRBM2VJJBCKEO6ETH55AU, ReputationRegistry CB6B4EBQ3JXLGUWF5WGMQV63PL3K2WQP5LMEL2BZDIDTEPCIC5BDH6ZB, ValidationRegistry CDX65CKW2NZQZK5U7DQRK6KVOBI4PTLQVGHYAEQ7OPPY2KRCDUAS2AL5 — all four on stellar.expert (public), created 2026-02-23 by one deployer. Live demo agenticocean.solbinary.com. https://github.com/progax01/stellar8004#smart-contracts--mainnet",
+			triggers: ["agenticocean contracts", "agenticocean mainnet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "README 'Published SDKs' names npm @agenticocean/vault 0.1.1, @agenticocean/x402-stellar 1.0.1 and @agenticocean/defi-agent 0.3.1 (all 2026-02-23) — but none of the three registry entries points at this repo (vault and defi-agent carry no repository field; x402-stellar names a different path, stellaragent402/stellaragent402), so cite this README, not npm, for identity. https://www.npmjs.com/package/@agenticocean/vault",
+			triggers: ["agenticocean npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"asgcompute/xlmx402earn": [
+		{
+			note: "npm @x402xlm/start — 1.3.3 (2026-04-11; 7 versions since 2026-04-09; repository → this repo; Apache-2.0), the `npx @x402xlm/start` quick-start skill the README badges ('Quick-start skill for AI agents to earn XLM on the Stellar testnet'); GitHub release v1.0.0 'Hackathon Submission' (2026-04-10; Stellar Hacks: Agents); hosted at stellar-agent-earn.vercel.app. Testnet product. https://www.npmjs.com/package/@x402xlm/start",
+			triggers: ["x402xlm start package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"inferara/soroban-security-portal": [
+		{
+			note: "README 'Container Images': Docker Hub georgii4inferara/soroban-security-portal (API — the hub description is this repo's URL), soroban-security-portal-ui and sorobansecurityportal (Helm), all tagged 1.0.129 on 2026-08-26. The portal is hosted at stellarsecurityportal.com, listed on Tansu (project 'securityportal') and funded by the SCF + Stellar Public Good Program (README badge). No tags. https://hub.docker.com/r/georgii4inferara/soroban-security-portal",
+			triggers: [
+				"security portal docker image",
+				"stellar security portal hosted",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"litemint/litemint": [
+		{
+			note: "README: app.litemint.com is 'a bespoke, open-source, non-custodial Stellar wallet built for gamers and digital collectors' (BIP-39, SLIP-0010/SEP-0005 derivation, SDEX trading, NFTs); its build guide downloads source from GitHub releases — latest v1.3.2 (2021-01-28; 9 tags). The npm package litemint (1.0.1, 2018) points at github.com/FredericRezeau/litemint, a separate repo, not this one. https://github.com/litemint/litemint/releases",
+			triggers: ["litemint wallet release", "litemint web wallet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"normalfinance/stellar-v1": [
+		{
+			note: "RENAMED: github.com/normalfinance/lsp — the path still in this repo's package.json repository field — redirects here (HTTP 301, 2026-09-02). README 'Normal Stellar v1': USDC-backed synthetic-asset protocol (Cargo workspace 1.0.0, contracts/* + modules/*); git tags 1.0.0 (2026-01-26) and pre-fee-change, no GitHub releases (API, 2026-09-02); docs at docs.normalfinance.io. https://github.com/normalfinance/stellar-v1",
+			triggers: ["normal finance lsp repo", "normal stellar v1 renamed"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"devasignhq/bounty-escrow": [
+		{
+			note: "Current path of devasignhq/soroban-contract (old path → HTTP 301 here, 2026-09-02; the README's badges still name soroban-contract; the registry also carries that old key). Single GitHub release v1.0.0 'Initial Release' (2026-06-05; 1 tag); Cargo package devasign_task_escrow 0.1.0; README deploy flow targets testnet and derives the mainnet USDC SAC from Circle's issuer GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN. https://github.com/devasignhq/bounty-escrow",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"devasignhq/soroban-escrow": [
+		{
+			note: "No longer accessible: github.com/devasignhq/soroban-escrow returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-07-21. The owner's public escrow contract repo is devasignhq/bounty-escrow (see that note). https://github.com/devasignhq/soroban-escrow",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"0xbhoomi/agentmesh": [
+		{
+			note: "No longer accessible: github.com/0xbhoomi/agentmesh returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-12 (an April-2026 agents-hackathon row). https://github.com/0xbhoomi/agentmesh",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"gdalabs/autorepay-stellar": [
+		{
+			note: "No longer accessible: github.com/gdalabs/autorepay-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-11 (an April-2026 agents-hackathon row). https://github.com/gdalabs/autorepay-stellar",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"thesupermanish/superpage-stellar": [
+		{
+			note: "No longer accessible: github.com/TheSupermanish/superpage-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-13 (an April-2026 agents-hackathon row). https://github.com/TheSupermanish/superpage-stellar",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"yieldback-cash/amm": [
+		{
+			note: "No longer accessible: github.com/yieldback-cash/amm returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-10. Sibling yieldback-cash/* rows were triaged in batch 5. https://github.com/yieldback-cash/amm",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
 	// ── P5 batch 7 (2026-09-02): 34 repos / 35 notes — the first batch aimed at
 	// the board's notes POOL itself (curated-index repos with repoScore ≥ 60
 	// and no note; entities.json → repos.coverage.knowledgeNotes.missing),
@@ -2058,6 +2233,145 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
  * memos. Re-examine a row when it gains a registry package or a mainnet
  * deployment. Keys are lowercase owner/name.
  */
+/**
+ * Batch-8 triage verdicts for the 50–59 band (2026-09-02): the 80 examined
+ * repos that yielded nothing durable, each with the reason. Same contract as
+ * POOL_TRIAGE_2026_09_02 — INTERNAL notes, never served, counted by the board
+ * as "judged" rather than "unexamined". Re-examine on a registry package,
+ * a mainnet deployment, or a project link.
+ */
+const BAND_50_59_TRIAGE_2026_09_02: Record<string, string> = {
+	"0xshobha/stellar": "hackathon demo, no registry (2.3 KB README)",
+	"acta-team/contracts-acta-spikes":
+		"experimental spikes by its own README; no tags (facts live on contracts-acta)",
+	"alouzious/hive": "hackathon demo, testnet only (mainnet on roadmap)",
+	"alphatechini/stellar-autotask": "hackathon demo, no manifest",
+	"ange-r/xioma-agent":
+		"hackathon demo, testnet only ('Testnet only' in README)",
+	"aryansaxenaa/clausekit":
+		"hackathon demo, testnet only (Trustless Work hackathon)",
+	"aswinwebdev/forge402": "hackathon demo, testnet only",
+	"atharvawaghchoure/agentrep": "hackathon demo, testnet only (testnet ID)",
+	"betap987/agent-vault-v2": "hackathon demo, testnet only (testnet IDs)",
+	"bholdguy/ara-crystal-machine-economy":
+		"hackathon demo, testnet only (Replit-hosted)",
+	"bitfalt/ecoproof":
+		"hackathon demo, testnet only (Trustless Work hackathon; private package)",
+	"blockdaemon/agave-snapshot-gossip-client":
+		"not a Stellar repo (Solana/Agave tool; 0 Stellar mentions)",
+	"blockful/trustful-stellar-v1":
+		"testnet-only contracts; no registry, no tags (last push 2025-03)",
+	"boxkit-labs/flare": "testnet; APK sideload only, not in stores",
+	"btc-wine/terwa-rwa-vault":
+		"docs-only README; testnet; no registry (terwa.io presale platform)",
+	"calimero-network/core":
+		"registry identity but README states no Stellar fact (crates link back; 0 Stellar mentions)",
+	"chatpay-go-labs-oficial/chatpay-tallent-ai": "hackathon demo, no registry",
+	"chucklam/x402-you.com": "hackathon demo, no registry (2.4 KB README)",
+	"coinspect/learn-evm-attacks":
+		"not a Stellar repo (EVM attack catalogue; 0 Stellar mentions)",
+	"david1984tk/bimex":
+		"hackathon-style app; testnet IDs; the 'pilot project' doc it points to for mainnet addresses holds none",
+	"deegalabs/stellar-402-spendguard":
+		"hackathon submission; 'Testnet only' by README (v0.1.0 2026-04-07)",
+	"deonorla/continuum":
+		"hackathon demo, testnet only (npm name 'continuum' belongs to another project)",
+	"emmy123222/stellar-search":
+		"hackathon demo, testnet default (16 stars; no registry)",
+	"enerdao/mvp_smart_contract": "2024 MVP contract; no registry, no tags",
+	"everyfinance/smart-contracts-stellar":
+		"testnet-only contracts; no registry (6 testnet IDs)",
+	"flamki/stellarmind": "hackathon demo, no registry",
+	"fxdao/fxdao-sc": "1-byte README; CLI-generated tags only (workspace 22.0.7)",
+	"giveth/giveth-dapps-v2":
+		"release-only; README states no Stellar fact (v3.54; stellar-sdk only in package.json)",
+	"hamdyx2202/stellarpayagent": "hackathon demo, testnet only",
+	"handilusa/ferrule": "hackathon demo, testnet only (testnet IDs)",
+	"ianvinasmoke24/centurion-pay": "hackathon demo, testnet only",
+	"inferara/inference":
+		"registry identity but README states no Stellar fact (VS Code ext + v0.0.5; 0 Stellar mentions)",
+	"janneh2000/stellarshield-ai":
+		"hackathon demo, no registry (mainnet on roadmap)",
+	"jaredjuarez/guacamole-app":
+		"hackathon demo, no manifest (Vite template README)",
+	"jennyt3/ai-bora--stellar": "hackathon demo, testnet only (testnet IDs)",
+	"jnrspaco/stellarscope": "hackathon demo, no registry",
+	"karagozemin/fortexa":
+		"hackathon demo, testnet only ('built for testnet validation')",
+	"keoyle52/agentmart": "hackathon demo; mainnet claim without IDs or registry",
+	"klarqqs/zap402":
+		"package.json repository → 404 path (Nursca/zap402); testnet only",
+	"laina-defi/laina":
+		"no registry, no tags; README has no addresses (hosted URL only in metadata)",
+	"lviffy/aaek":
+		"README-claimed npm package unpublished (@aaek/sdk; testnet ID)",
+	"mariaelisaaraya/shield-stellar":
+		"hackathon demo, testnet only (testnet IDs)",
+	"mistakili/stellar-agents": "hackathon demo, no registry (Replit-hosted)",
+	"mugglepay/mugglepay":
+		"not a Stellar repo (crypto payment gateway; 0 Stellar mentions)",
+	"nathanofzion/zi-playground":
+		"private app; mainnet is a checklist, not a deployment",
+	"nicofains1/spendguard": "hackathon demo, testnet only",
+	"nihal-pandey-2302/autonomics-core": "hackathon demo, testnet only",
+	"nimrid/x402-shopify-commerce": "hackathon demo, no registry",
+	"nitish-d-great/stellarread": "hackathon demo, testnet only",
+	"normalfinance/normal-index-v1":
+		"package.json name unpublished; tag only (@normalfinance/normal-index-v1; 1 tag)",
+	"nova-registry-agent/nova-backend":
+		"hackathon demo, testnet only (testnet IDs)",
+	"nsdbroficial/aegis402": "hackathon demo, testnet only (testnet ID)",
+	"offer-hub/offer-hub":
+		"release-only; private package; no hosted URL (v1.0.1 2026-02-18; Airtm + Trustless Work orchestrator)",
+	"offer-hub/offer-hub-monorepo":
+		"private monorepo; no tags; hosted URL only in metadata (same README header as OFFER-HUB/OFFER-HUB)",
+	"official-jumpa/jumpa-website":
+		"website repo; no registry, no tags (sibling of triaged official-jumpa/jumpa)",
+	"oppia-software-labs/zkarcade":
+		"hackathon ZK game, testnet only (testnet ID)",
+	"paltalabs/defindex-rescue": "ops scripts; no registry, no tags",
+	"perun-network/perun-soroban-token":
+		"no README; crate unpublished; last push 2024-07",
+	"phibao/agent-net":
+		"hackathon demo, testnet only ('hardcoded to Stellar testnet')",
+	"pyved-solution/pyved-engine":
+		"registry identity but README states no Stellar fact (PyPI links back; Stellar only as SDF sponsor logo)",
+	"rango-exchange/explorer":
+		"hosted site only; README states no Stellar fact (explorer.rango.exchange; 0 Stellar mentions)",
+	"rarible/protocol-contracts":
+		"not a Stellar repo (EVM NFT contracts; 0 Stellar mentions)",
+	"raunet234/solva-mcp": "hackathon demo, testnet only",
+	"sadik-tofik/gigpay": "hackathon demo, no registry (2.5 KB README)",
+	"samfresh-ai/task-mesh":
+		"hackathon demo, testnet only (publish=false; testnet IDs)",
+	"sebwingleet/aerochain-stellar":
+		"no registry, no tags, no addresses (last push 2025-06)",
+	"secbytex03/paymint": "hackathon demo, testnet only",
+	"smart-treasury-account-sta/smart-contracts":
+		"POC contracts; no registry, no tags (sibling of triaged STA dapp)",
+	"socket-fi/socketfi-account-indexer":
+		"private package; no registry, no tags (sibling of triaged Socket-Fi rows)",
+	"stellar-oxide-gateway/stellar-oxide-gateway":
+		"testnet-only by its own README ('Current Working Paths: USDC on Stellar testnet'); no registry",
+	"sumitraikwar18/paywall.ai":
+		"hackathon demo, testnet only ('Testnet only' in README)",
+	"swiftexwallet/swiftex":
+		"release-only; no registry/store identity (1.0.5 2026-07-03; APK sideload build only)",
+	"tacticalnoot/smol-fe-hackathon":
+		"hackathon fork of smol-fe; hosted URL only (noot.smol.xyz; no tags, no registry)",
+	"thegivehub/smartcontracts":
+		"no registry, no tags; 1.2 KB README (last push 2025-10)",
+	"towa-hi/zk":
+		"hackathon ZK game, testnet only (stellar-game-studio template)",
+	"vjb/stellar-chaos-swarm": "hackathon demo, testnet only (testnet ID)",
+	"web3isco/signalforge-agent": "hackathon demo, no registry (3 KB README)",
+	"xavio2495/stexio":
+		"README-claimed npm packages unpublished (stexio, @stexio/js-sdk, stexio-proxy)",
+	"xbull-corp/guess-the-xbull": "hackathon ZK game, testnet only (testnet ID)",
+	"zbagdzevicius/tokentails":
+		"not a Stellar repo (commercially licensed; 0 Stellar mentions)",
+};
+
 const POOL_TRIAGE_2026_09_02: Record<string, string> = {
 	"402md/agentcard": "hackathon demo, testnet only",
 	"abdulwahabalm/paygent": "hackathon demo, no registry",
@@ -2185,6 +2499,14 @@ const POOL_TRIAGE_2026_09_02: Record<string, string> = {
 for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
 	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
 		note: `Pool triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		source: "curated",
+		asOf: "2026-09-02",
+		visibility: "internal",
+	});
+}
+for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
+	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+		note: `Band 50–59 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
 		visibility: "internal",
