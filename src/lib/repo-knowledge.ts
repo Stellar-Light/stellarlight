@@ -802,7 +802,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/stellar-contract-bindings": [
 		{
-			note: "PyPI package stellar-contract-bindings — 0.5.0b0 (2025-08-23; 7 releases, all betas; project URLs point here). README: `pip install stellar-contract-bindings`; generates Soroban bindings for Python, Java, Flutter/Dart, PHP, Swift/iOS and Kotlin Multiplatform (TypeScript/Rust are left to stellar-cli); hosted generator https://stellar-contract-bindings.fly.dev/ (200 on 2026-09-02). https://pypi.org/project/stellar-contract-bindings/",
+			note: "PyPI package stellar-contract-bindings — 0.6.0b0 (2026-09-02; all releases betas; project URLs point here). README: `pip install stellar-contract-bindings`; generates Soroban bindings for Python, Java, Flutter/Dart, PHP, Swift/iOS and Kotlin Multiplatform (TypeScript/Rust are left to stellar-cli); hosted generator https://stellar-contract-bindings.fly.dev/ (200 on 2026-09-02). https://pypi.org/project/stellar-contract-bindings/",
 			triggers: [
 				"contract bindings python",
 				"soroban bindings java flutter",
@@ -1194,10 +1194,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/react": [
 		{
-			note: "npm @bluxcc/react — 0.3.2 (2026-09-01; 55 versions since 2025-02-03). Its npm repository field still names github.com/bluxcc/blux, which now returns HTTP 301 to bluxcc/react (2026-09-01) — this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. https://www.npmjs.com/package/@bluxcc/react",
+			note: "npm @bluxcc/react — 0.3.3 (2026-09-02; published since 2025-02-03). Its npm repository field still names github.com/bluxcc/blux, which now returns HTTP 301 to bluxcc/react (2026-09-01) — this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. https://www.npmjs.com/package/@bluxcc/react",
 			triggers: ["blux react package", "bluxcc blux repo moved"],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-02",
 		},
 	],
 	"chatch/stellar-hd-wallet": [
@@ -1824,13 +1824,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-disbursement-platform-frontend": [
 		{
-			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-01). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
+			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-02). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
 			triggers: [
 				"sdp frontend docker",
 				"disbursement platform frontend release",
 			],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-02",
 		},
 	],
 	"stellar/soroban-examples": [
@@ -1843,10 +1843,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/core": [
 		{
-			note: "npm @bluxcc/core — 0.3.2 (2026-09-01; 47 versions since 2025-09-23; repository points here). Licensed BUSL on npm (README section 'License & Usage Restrictions'); install `npm i @bluxcc/core`; site blux.cc. https://www.npmjs.com/package/@bluxcc/core",
+			note: "npm @bluxcc/core — 0.3.3 (2026-09-02; published since 2025-09-23; repository points here). Licensed BUSL on npm (README section 'License & Usage Restrictions'); install `npm i @bluxcc/core`; site blux.cc. https://www.npmjs.com/package/@bluxcc/core",
 			triggers: ["blux npm package", "blux core license"],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-02",
 		},
 	],
 	"stellar-broker/client": [
@@ -2008,10 +2008,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/passkey-kit": [
 		{
-			note: "Moved from kalepail/passkey-kit (496 stars there; archived; README 'This repository has moved… all tags were carried over'); stellar/passkey-kit was created 2026-07-30, so its own star count understates adoption. npm passkey-kit (0.17.0, 2026-09-01; first published 2024-06-06; 126 versions) now points its repository at stellar/passkey-kit. https://www.npmjs.com/package/passkey-kit",
+			note: "Moved from kalepail/passkey-kit (496 stars there; archived; README 'This repository has moved… all tags were carried over'); stellar/passkey-kit was created 2026-07-30, so its own star count understates adoption. npm passkey-kit (0.17.1, 2026-09-02; first published 2024-06-06; 126 versions) now points its repository at stellar/passkey-kit. https://www.npmjs.com/package/passkey-kit",
 			triggers: ["passkey kit moved", "kalepail passkey kit"],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-02",
 		},
 		{
 			note: "README security status (relay it): unaudited — the smart-wallet contract, SDKs and relayer proxy have had no independent audit; for context rules, thresholds and spending limits it points to the sibling stellar/smart-account-kit built on the audited OpenZeppelin stellar-contracts. Exports PasskeyKit (browser) and PasskeyServer (holds the relayer secret). https://github.com/stellar/passkey-kit",
