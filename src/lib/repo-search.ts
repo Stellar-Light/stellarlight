@@ -13,7 +13,13 @@ import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
-import { activityStateOf, type RepoActivityState } from "./repo-grade";
+import {
+	activityStateOf,
+	type RepoActivityState,
+	type RepoKind,
+	type RepoKindBasis,
+	repoKindOf,
+} from "./repo-grade";
 import {
 	anchorTokens,
 	CORE_SYNONYMS,
@@ -121,6 +127,13 @@ export interface RepoResult {
 	 * observation about a KNOWN commit date; `unknown` means we hold no date —
 	 * never read it as dead (repo-stale ≠ defunct). */
 	activityState: RepoActivityState;
+	/** What KIND of repo this is, derived at read time from the row's own
+	 * signals — first match wins: archived → fork → hackathon (judged) →
+	 * template-or-tutorial (name) → contract (served
+	 * codeVerified.isDeployableContract) → application (linked directory
+	 * product) → code. kindBasis names the deciding signal. */
+	kind: RepoKind;
+	kindBasis: RepoKindBasis;
 	/** Velocity + release snapshot from the last enrich pass (asOf dates it):
 	 * commits90d = default-branch commits in the 90 days before asOf; null =
 	 * not yet captured for this repo, never zero. */
@@ -1717,6 +1730,19 @@ export async function searchRepos(
 								? "mentioned"
 								: "none") as RepoResult["stellarEvidence"],
 				codeVerified: codeVerifiedOf(r),
+			}))
+			// kind is a function of the SERVED row — the same signals a consumer
+			// already sees, so the label can be audited against them.
+			.map((row) => ({
+				...row,
+				...repoKindOf({
+					isArchived: row.isArchived,
+					isFork: row.isFork,
+					judgedHackathon: row.judgedHackathon,
+					name: row.fullName,
+					isDeployableContract: row.codeVerified?.isDeployableContract,
+					projectSlug: row.project?.slug,
+				}),
 			}));
 		// Guard B / honest absence: a row that matched NO query token is a
 		// neighbour, not a hit. searchProjects already says so via matchMode +

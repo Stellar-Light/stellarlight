@@ -17,6 +17,7 @@ import {
 	type Blob as SigBlob,
 	type StellarProof,
 } from "../../src/lib/code-signals";
+import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
 
 export interface TreeEntry {
 	path: string;
@@ -391,9 +392,6 @@ export async function verifyMainnetContract(
 	return null;
 }
 
-const TEMPLATE_NAME =
-	/(hello[-_]?world|template|boilerplate|scaffold|quickstart|starter|example|tutorial)/i;
-
 /** Fetch a repo's code + derive everything the scoring/tiering needs. Read-only. */
 export async function fetchRepoCode(
 	gh: Gh,
@@ -526,7 +524,7 @@ export async function fetchRepoCode(
 			stars: meta.stargazers_count ?? 0,
 			diskUsageKb: typeof meta.size === "number" ? meta.size : null,
 			tagCount,
-			nameLooksTemplate: TEMPLATE_NAME.test(name),
+			nameLooksTemplate: TEMPLATE_NAME_RE.test(name),
 		},
 		// finding 4: the cargo-relevance scan fetches up to 40 manifest blobs
 		// BEFORE selection — count what was actually fetched, or the call-budget

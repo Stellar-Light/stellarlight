@@ -1371,6 +1371,13 @@ export interface components {
              * @enum {string}
              */
             activityState?: "active" | "maintained" | "dormant" | "archived" | "unknown";
+            /**
+             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
+             * @enum {string}
+             */
+            kind?: "archived" | "fork" | "template-or-tutorial" | "contract" | "application" | "hackathon" | "code";
+            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
+            kindBasis?: string;
             /** @description Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here). */
             activitySignals?: {
                 commits90d?: number | null;
@@ -2796,6 +2803,13 @@ export interface operations {
                             stars?: number | null;
                             isArchived?: boolean;
                             repoScoreLabel?: string | null;
+                            /**
+                             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
+                             * @enum {string}
+                             */
+                            kind?: "archived" | "fork" | "template-or-tutorial" | "contract" | "application" | "hackathon" | "code";
+                            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
+                            kindBasis?: string;
                         } | null;
                         /** @description Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
                         codeVerified?: {

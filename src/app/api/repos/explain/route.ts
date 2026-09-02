@@ -20,6 +20,11 @@ import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
+	type RepoKind,
+	type RepoKindBasis,
+	repoKindOf,
+} from "@/lib/repo-grade";
+import {
 	findDirectAnswerNote,
 	findRepoByTrigger,
 	REPO_KNOWLEDGE_NOTES,
@@ -149,6 +154,8 @@ export async function GET(req: NextRequest) {
 		stars: number | null;
 		isArchived: boolean;
 		repoScoreLabel: string | null;
+		kind: RepoKind;
+		kindBasis: RepoKindBasis;
 	} | null = null;
 	// Code-verified truth from analyzing the routed repo's ACTUAL source — leads
 	// the answer so an agent knows whether it's real, current, deployable Soroban
@@ -192,6 +199,10 @@ export async function GET(req: NextRequest) {
 					stars: true,
 					isArchived: true,
 					repoScoreLabel: true,
+					// kind's inputs — a select that omits one silently yields undefined
+					isFork: true,
+					judgedHackathon: true,
+					projectSlug: true,
 					stellarProof: true,
 					codeDepth: true,
 					isDeployableContract: true,
@@ -216,12 +227,6 @@ export async function GET(req: NextRequest) {
 					repo.toLowerCase(),
 			) as unknown as Record<string, unknown> | undefined;
 			if (d) {
-				repoMeta = {
-					lastCommitAt: (d.lastCommitAt as string) ?? null,
-					stars: (d.stars as number) ?? null,
-					isArchived: !!d.isArchived,
-					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
-				};
 				if (d.codeScanState === "scanned" && d.stellarProof) {
 					codeVerified = {
 						stellarProof: d.stellarProof as string,
@@ -273,6 +278,23 @@ export async function GET(req: NextRequest) {
 								: null,
 					};
 				}
+				repoMeta = {
+					lastCommitAt: (d.lastCommitAt as string) ?? null,
+					stars: (d.stars as number) ?? null,
+					isArchived: !!d.isArchived,
+					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
+					// the same signals the search row serves; contract only when
+					// the SERVED codeVerified flag says so (infra pin applied,
+					// unscanned = not a contract)
+					...repoKindOf({
+						isArchived: !!d.isArchived,
+						isFork: !!d.isFork,
+						judgedHackathon: (d.judgedHackathon as string) ?? null,
+						name: repo,
+						isDeployableContract: codeVerified?.isDeployableContract,
+						projectSlug: (d.projectSlug as string) ?? null,
+					}),
+				};
 			}
 		}
 	} catch {

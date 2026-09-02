@@ -95,6 +95,84 @@ export function activityStateOf(
 	return "dormant";
 }
 
+/**
+ * What KIND of repo a row is — derived at read time from signals the row
+ * already serves, never stored, so a consumer can tell a hackathon demo from
+ * a shipped product without re-deriving it from six fields. First match wins;
+ * kindBasis names the deciding signal so the label can be weighed
+ * (nameLooksTemplate is the one heuristic — everything else is a stored fact).
+ */
+export type RepoKind =
+	| "archived"
+	| "fork"
+	| "hackathon"
+	| "template-or-tutorial"
+	| "contract"
+	| "application"
+	| "code";
+
+/** Precedence order. */
+export const REPO_KINDS: readonly RepoKind[] = [
+	"archived",
+	"fork",
+	"template-or-tutorial",
+	"contract",
+	"application",
+	"hackathon",
+	"code",
+];
+
+export type RepoKindBasis =
+	| "isArchived"
+	| "isFork"
+	| "judgedHackathon"
+	| "nameLooksTemplate"
+	| "isDeployableContract"
+	| "projectSlug"
+	| "none";
+
+/** The code scanner's own template/scaffold name test (scripts/scan/fetch-repo-code.ts
+ * imports it) — one regex, so the served label and the scaffoldClone flag agree. */
+export const TEMPLATE_NAME_RE =
+	/(hello[-_]?world|template|boilerplate|scaffold|quickstart|starter|example|tutorial)/i;
+
+/** Tests only the segment after the last "/" — an owner called example-org must not count. */
+export function nameLooksTemplate(name: string | null | undefined): boolean {
+	return TEMPLATE_NAME_RE.test(name?.split("/").pop() ?? "");
+}
+
+export interface RepoKindInput {
+	isArchived?: boolean | null;
+	isFork?: boolean | null;
+	judgedHackathon?: string | null;
+	/** short name or owner/name */
+	name?: string | null;
+	/** the SERVED codeVerified.isDeployableContract (infra pin applied); unscanned = not a contract */
+	isDeployableContract?: boolean | null;
+	/** linked directory product */
+	projectSlug?: string | null;
+}
+
+export function repoKindOf(input: RepoKindInput): {
+	kind: RepoKind;
+	kindBasis: RepoKindBasis;
+} {
+	if (input.isArchived) return { kind: "archived", kindBasis: "isArchived" };
+	if (input.isFork) return { kind: "fork", kindBasis: "isFork" };
+	if (nameLooksTemplate(input.name))
+		return { kind: "template-or-tutorial", kindBasis: "nameLooksTemplate" };
+	if (input.isDeployableContract)
+		return { kind: "contract", kindBasis: "isDeployableContract" };
+	if (input.projectSlug)
+		return { kind: "application", kindBasis: "projectSlug" };
+	// A judged hackathon entry that is neither a deployable contract nor a
+	// listed product. One that BECAME a directory product is an application
+	// above — the product link outranks where the code was first submitted.
+	if (input.judgedHackathon)
+		return { kind: "hackathon", kindBasis: "judgedHackathon" };
+	return { kind: "code", kindBasis: "none" };
+}
+
 // 1.0 within ~90 days, linearly decaying to 0 by ~2 years stale.
 function freshnessOf(lastCommitAt?: string | Date | null): number {
 	if (!lastCommitAt) return 0;

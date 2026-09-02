@@ -10,6 +10,7 @@
  * same PR, run `pnpm contract:write`, and add a changelog entry — CI fails
  * otherwise.
  */
+import { REPO_KINDS } from "./repo-grade";
 import { API_VERSION } from "./version";
 
 const SITE_URL = "https://stellarlight.xyz";
@@ -97,6 +98,21 @@ const SCF_FUNDING_BAR_SCHEMA = {
 		fundedProjects: { type: "integer" },
 		totalAwardedUSD: { type: "number" },
 		basis: { type: "string" },
+	},
+};
+
+/** Derived repo-kind label + its basis — shared by the Repo row and explainRepo.repoMeta. */
+const REPO_KIND_PROPS = {
+	kind: {
+		type: "string",
+		enum: [...REPO_KINDS],
+		description:
+			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
+	},
+	kindBasis: {
+		type: "string",
+		description:
+			"The signal that decided kind, so the label can be weighed: isArchived | isFork | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
 	},
 };
 
@@ -2314,6 +2330,7 @@ export const spec: OpenAPISpec = {
 												stars: { type: "integer", nullable: true },
 												isArchived: { type: "boolean" },
 												repoScoreLabel: { type: "string", nullable: true },
+												...REPO_KIND_PROPS,
 											},
 										},
 										codeVerified: {
@@ -8592,6 +8609,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.",
 					},
+					...REPO_KIND_PROPS,
 					activitySignals: {
 						type: "object",
 						nullable: true,

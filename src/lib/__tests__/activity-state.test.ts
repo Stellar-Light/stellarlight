@@ -72,6 +72,13 @@ describe("searchRepos activity filter + row field", () => {
 		expect(states["quiet/wallet"]).toBe("dormant");
 		expect(states["gone/wallet"]).toBe("archived");
 
+		// kind rides the same row, derived from the signals it already serves
+		const kinds = Object.fromEntries(
+			all.repos.map((r) => [r.fullName, `${r.kind}:${r.kindBasis}`]),
+		);
+		expect(kinds["gone/wallet"]).toBe("archived:isArchived");
+		expect(kinds["live/wallet"]).toBe("code:none");
+
 		const onlyActive = await searchRepos(
 			mockPayload([fresh, old, dead]),
 			"wallet",

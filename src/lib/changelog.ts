@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-02",
+		surfaces: ["api"],
+		version: "spec@1.9.20",
+		type: "added",
+		summary:
+			"Every repo row (searchRepos, and the Repo shape searchProjects inlines) and explainRepo.repoMeta carry `kind` — archived | fork | hackathon | template-or-tutorial | contract | application | code — plus `kindBasis`, the signal that decided it.",
+		detail:
+			"Consumers treated every repo row alike: a hackathon demo, a fork of a template and a shipped product all read as 'a repo', because the telling signals (isArchived, isFork, judgedHackathon, a template-looking name, codeVerified.isDeployableContract, the project link) were scattered across the row. kind is DERIVED at read time from those stored signals — first match wins in that order; nothing new is stored or researched — and kindBasis names the deciding signal so the label can be weighed (nameLooksTemplate is the one heuristic, the rest are facts). No kind filter param yet.",
+	},
+	{
 		date: "2026-09-01",
 		surfaces: ["api"],
 		version: "spec@1.9.19",
