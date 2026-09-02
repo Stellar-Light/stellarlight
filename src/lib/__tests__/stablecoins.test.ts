@@ -1,5 +1,14 @@
+import { curveLinear } from "d3-shape";
 import { describe, expect, it } from "vitest";
-import { toShare } from "../stablecoin-series";
+import {
+	computeSeriesPathPoints,
+	seriesPathFromPoints,
+} from "@/components/charts/series-path-utils";
+import {
+	capSeriesWithOther,
+	stackedBands,
+	toShare,
+} from "../stablecoin-series";
 import { rankStablecoins, type StoreRow, storeRowToApi } from "../stablecoins";
 
 // Real rows as our own `stablecoins` collection stores them, values captured
@@ -143,5 +152,115 @@ describe("toShare (market-share panel)", () => {
 		expect(toShare([{ _date: "2026-09-02" }])).toEqual([
 			{ _date: "2026-09-02" },
 		]);
+	});
+});
+
+describe("chart kit gap rendering (series-path-utils) — the sudden-drops bug", () => {
+	// range [100, 0]: domain value 0 -> pixel 100 (bottom/baseline), value 10
+	// -> pixel 0 (top). The old bug hard-coded a gap's pixel to 0 regardless
+	// of scale — this test only needs the gap to never draw a real vertex.
+	const xAccessor = (d: Record<string, unknown>) => new Date(d.date as string);
+	const xScale = (d: Date) => d.getTime() / 1e10;
+	const yScale = (v: number) => 100 - v * 10;
+	// Two real points on each side of one gap — enough for a visible line
+	// segment on each side, so "broken in two" is distinguishable from
+	// "two isolated dots".
+	const rows = [
+		{ date: "2026-09-01", USDC: 5 },
+		{ date: "2026-09-02", USDC: 5.5 },
+		{ date: "2026-09-03" }, // not measured — must stay a gap, never 0
+		{ date: "2026-09-04", USDC: 6 },
+		{ date: "2026-09-05", USDC: 6.2 },
+	];
+
+	it("marks a missing value undefined rather than the zero pixel", () => {
+		const points = computeSeriesPathPoints(
+			rows,
+			xAccessor,
+			xScale,
+			yScale,
+			"USDC",
+		);
+		expect(points.map((p) => p.defined)).toEqual([
+			true,
+			true,
+			false,
+			true,
+			true,
+		]);
+	});
+
+	it("breaks the path into two subpaths instead of drawing through the gap", () => {
+		const points = computeSeriesPathPoints(
+			rows,
+			xAccessor,
+			xScale,
+			yScale,
+			"USDC",
+		);
+		const d = seriesPathFromPoints(points, curveLinear);
+		// A continuous line through a fake gap-point (the bug) is one M
+		// followed by four L's. A correctly-broken line is two independent
+		// two-point segments: one M + one L on each side of the gap.
+		expect(d.match(/M/g)?.length).toBe(2);
+		expect(d.match(/L/g)?.length).toBe(2);
+	});
+});
+
+describe("capSeriesWithOther (market-share and holders panels)", () => {
+	it("passes tickers under the cap through untouched, no Other key", () => {
+		const { rows, tickers } = capSeriesWithOther(
+			[{ _date: "2026-09-01", USDC: 90, EURC: 10 }],
+			5,
+		);
+		expect(tickers).toEqual(["USDC", "EURC"]);
+		expect(rows[0]).toEqual({ _date: "2026-09-01", USDC: 90, EURC: 10 });
+	});
+
+	it("folds everything past the cap into a real Other sum", () => {
+		const { rows, tickers } = capSeriesWithOther(
+			[{ _date: "2026-09-01", A: 40, B: 30, C: 15, D: 10, E: 5 }],
+			2,
+		);
+		expect(tickers).toEqual(["A", "B", "Other"]);
+		expect(rows[0]).toEqual({ _date: "2026-09-01", A: 40, B: 30, Other: 30 });
+	});
+
+	it("leaves Other absent, not 0, on a day none of the folded tickers were measured", () => {
+		const { rows } = capSeriesWithOther(
+			[
+				{ _date: "2026-09-01", A: 40, B: 30, C: 10 },
+				{ _date: "2026-09-02", A: 40, B: 30 }, // C unmeasured this day
+			],
+			2,
+		);
+		expect(rows[1].Other).toBeUndefined();
+		expect(Object.keys(rows[1])).toEqual(["_date", "A", "B"]);
+	});
+});
+
+describe("stackedBands (100% stacked market-share area)", () => {
+	it("turns per-ticker shares into a running cumulative total", () => {
+		const rows = stackedBands(
+			[{ _date: "2026-09-01", USDC: 60, EURC: 25, Other: 15 }],
+			["USDC", "EURC", "Other"],
+		);
+		expect(rows[0]).toEqual({
+			_date: "2026-09-01",
+			USDC: 60,
+			EURC: 85,
+			Other: 100,
+		});
+	});
+
+	it("an absent ticker contributes 0 to the stack — a real 0-width band, not a rendering gap", () => {
+		const rows = stackedBands(
+			[{ _date: "2026-09-01", USDC: 100 }],
+			["USDC", "EURC"],
+		);
+		// EURC wasn't part of that day's measured 100%, so its band is flat
+		// at USDC's own top — not the "gap drawn as 0" mistake, because a
+		// stack is only ever a share of what was actually measured that day.
+		expect(rows[0]).toEqual({ _date: "2026-09-01", USDC: 100, EURC: 100 });
 	});
 });
