@@ -279,14 +279,22 @@ function imageSize(img: CanvasImageSource): { w: number; h: number } {
  * Carve an image-backed scene into a cols×rows mask. These marks are a
  * coloured disc with a white glyph inside (USDT0 = white T on green, USDC /
  * EURC = white glyph on blue, PYUSD similar) — so "opaque pixel" is not
- * "ink": that would carve a plain filled circle and lose the glyph.
+ * "ink": that would carve a plain filled circle and lose the glyph. The
+ * glyph is always the ink: among alpha > 0.5 pixels, whichever are brighter
+ * than the midpoint of the luminance range. The disc itself is never carved
+ * — the mark has to read as a hole punched in the surface, not as the
+ * surface punched into a big hole with the mark left standing inside it.
  *
- * Instead: consider only pixels with alpha > 0.5 (drop the transparent
- * margin), take the luminance range across them, and call ink whatever is
- * above the midpoint (the bright glyph, by construction of these marks). If
- * that reads as too little or too much of the grid, flip polarity once. If
- * neither polarity is legible, leave the lattice intact rather than ship an
- * empty or nearly-full carve.
+ * The sanity check only ever REJECTS, it never inverts: coverage is judged
+ * against the mark's own opaque footprint (not the whole grid — this banner
+ * is far wider than tall, so the mark is already a small fraction of the
+ * grid before its glyph is a fraction of that again; checking against the
+ * whole grid meant the glyph could never clear the floor, and the old code
+ * silently flipped to carving the disc instead — exactly the "plain filled
+ * circle" failure this function exists to avoid). If the glyph covers too
+ * little or too much of the mark's own pixels to read as a legible shape,
+ * leave the lattice intact rather than ship an empty, nearly-full, or
+ * inside-out carve.
  */
 function rasterizeImage(
 	image: CanvasImageSource,
@@ -311,10 +319,12 @@ function rasterizeImage(
 	const alpha = new Float32Array(n);
 	let lo = 255;
 	let hi = 0;
+	let opaque = 0;
 	for (let i = 0; i < n; i++) {
 		const a = data[i * 4 + 3] / 255;
 		alpha[i] = a;
 		if (a <= 0.5) continue;
+		opaque++;
 		const l =
 			0.2126 * data[i * 4] +
 			0.7152 * data[i * 4 + 1] +
@@ -323,29 +333,21 @@ function rasterizeImage(
 		if (l < lo) lo = l;
 		if (l > hi) hi = l;
 	}
-	if (hi <= lo) return out; // no opaque pixels at all — leave the lattice intact
+	if (opaque === 0 || hi <= lo) return out; // nothing opaque — leave the lattice intact
 
 	const mid = (lo + hi) / 2;
-	const carve = (inkAboveMid: boolean) => {
-		const mask = new Uint8Array(n).fill(1);
-		let count = 0;
-		for (let i = 0; i < n; i++) {
-			if (alpha[i] <= 0.5) continue;
-			const isInk = inkAboveMid ? lum[i] > mid : lum[i] <= mid;
-			if (isInk) {
-				mask[i] = 0;
-				count++;
-			}
+	const mask = new Uint8Array(n).fill(1);
+	let ink = 0;
+	for (let i = 0; i < n; i++) {
+		if (alpha[i] <= 0.5) continue;
+		if (lum[i] > mid) {
+			mask[i] = 0;
+			ink++;
 		}
-		return { mask, coverage: count / n };
-	};
-	const sane = (c: number) => c >= 0.03 && c <= 0.55;
+	}
 
-	const bright = carve(true);
-	if (sane(bright.coverage)) return bright.mask;
-
-	const dark = carve(false);
-	if (sane(dark.coverage)) return dark.mask;
+	const coverage = ink / opaque;
+	if (coverage >= 0.03 && coverage <= 0.55) return mask;
 
 	return out;
 }
