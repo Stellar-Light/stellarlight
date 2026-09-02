@@ -8,6 +8,16 @@ export interface Scene {
 	transition: TransitionKind;
 	palette: number;
 	style?: StyleKind;
+	/**
+	 * Tile this text/image mark repeatedly across the grid as small,
+	 * STANDING (positive) circles on an otherwise empty field, instead of
+	 * carving one large hole into a solid one. This is the inverse of the
+	 * default polarity: a single big glyph fights this banner's own
+	 * proportions (far wider than tall) for legibility, but a small glyph
+	 * repeated across the width doesn't need the aspect ratio to cooperate
+	 * — see rasterize()'s tile-mode path below.
+	 */
+	tile?: boolean;
 }
 
 export type TransitionKind =
@@ -166,6 +176,7 @@ export const PALETTES: [string, string][] = [
 	["#2DE0C7", "#051312"], // boxes — cyan-teal / near-black teal
 	["#FF63B0", "#160611"], // bars — hot pink / near-black magenta
 	["#F5B942", "#171006"], // $ — gold / near-black amber
+	["#4FC3F7", "#03131A"], // € — sky blue / near-black teal-blue
 ];
 
 export function rasterize(
@@ -234,6 +245,8 @@ export function rasterize(
 		return out;
 	}
 
+	if (scene.tile) return rasterizeTiled(scene, cols, rows, fontFamily, out);
+
 	const cv = document.createElement("canvas");
 	cv.width = cols;
 	cv.height = rows;
@@ -292,46 +305,37 @@ function imageSize(img: CanvasImageSource): { w: number; h: number } {
 	return { w: 0, h: 0 };
 }
 
+// Same footprint-fill fraction for every glyph this file rasterises,
+// whether it ends up carved as one big hole (rasterizeImage) or cropped
+// into a small repeated tile (rasterizeImageTile / rasterizeTextTile) —
+// centred, aspect preserved, sized to command its box rather than survive
+// it.
+const MARK_FILL = 0.82;
+
 /**
- * Carve an image-backed scene into a cols×rows mask. These marks are a
- * coloured disc with a white glyph inside (USDT0 = white T on green, USDC /
- * EURC = white glyph on blue, PYUSD similar) — so "opaque pixel" is not
- * "ink": that would carve a plain filled circle and lose the glyph. The
- * glyph is always the ink: among alpha > 0.5 pixels, whichever are brighter
- * than the midpoint of the luminance range. The disc itself is never carved
- * — the mark has to read as a hole punched in the surface, not as the
- * surface punched into a big hole with the mark left standing inside it.
+ * Which pixels of an already-drawn raster are "ink" (positive polarity: 1 =
+ * ink) as opposed to disc/background — shared by the hole-mode carve and
+ * the tile-mode rasterisers below. These marks are a coloured disc/square
+ * with a lighter glyph inside (USDT0 = white T on green, USDC / EURC =
+ * white glyph on blue, PYUSD similar), so "opaque pixel" is not "ink": that
+ * would flag the whole disc and lose the glyph. The glyph is always the
+ * ink: among alpha > 0.5 pixels, whichever are brighter than the midpoint
+ * of the luminance range.
  *
- * The sanity check only ever REJECTS, it never inverts: coverage is judged
- * against the mark's own opaque footprint (not the whole grid — this banner
- * is far wider than tall, so the mark is already a small fraction of the
- * grid before its glyph is a fraction of that again; checking against the
- * whole grid meant the glyph could never clear the floor, and the old code
- * silently flipped to carving the disc instead — exactly the "plain filled
- * circle" failure this function exists to avoid). If the glyph covers too
- * little or too much of the mark's own pixels to read as a legible shape,
- * leave the lattice intact rather than ship an empty, nearly-full, or
- * inside-out carve.
+ * The sanity check only ever REJECTS (null), it never inverts: coverage is
+ * judged against the mark's own opaque footprint, not the raster as a
+ * whole — checking against the whole raster meant the glyph could never
+ * clear the floor on a banner far wider than tall, and silently carving the
+ * disc instead (a "plain filled circle") is exactly the failure this
+ * exists to avoid. If the glyph covers too little or too much of the
+ * mark's own pixels to read as a legible shape, callers leave their
+ * lattice/tile intact rather than ship an empty, nearly-full, or
+ * inside-out result.
  */
-function rasterizeImage(
-	image: CanvasImageSource,
-	ctx: CanvasRenderingContext2D,
-	cols: number,
-	rows: number,
-	out: Uint8Array<ArrayBuffer>,
-): Uint8Array<ArrayBuffer> {
-	const { w: iw, h: ih } = imageSize(image);
-	if (!iw || !ih) return out;
-
-	// ~82% of grid height, centred, aspect preserved — same footprint rule
-	// as the text glyph, sized to command the banner rather than survive it.
-	const dh = rows * 0.82;
-	const dw = iw * (dh / ih);
-	ctx.clearRect(0, 0, cols, rows);
-	ctx.drawImage(image, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
-
-	const { data } = ctx.getImageData(0, 0, cols, rows);
-	const n = cols * rows;
+export function glyphInkMask(
+	data: Uint8ClampedArray,
+	n: number,
+): Uint8Array | null {
 	const lum = new Float32Array(n);
 	const alpha = new Float32Array(n);
 	let lo = 255;
@@ -350,22 +354,266 @@ function rasterizeImage(
 		if (l < lo) lo = l;
 		if (l > hi) hi = l;
 	}
-	if (opaque === 0 || hi <= lo) return out; // nothing opaque — leave the lattice intact
+	if (opaque === 0 || hi <= lo) return null;
 
 	const mid = (lo + hi) / 2;
-	const mask = new Uint8Array(n).fill(1);
+	const mask = new Uint8Array(n);
 	let ink = 0;
 	for (let i = 0; i < n; i++) {
 		if (alpha[i] <= 0.5) continue;
 		if (lum[i] > mid) {
-			mask[i] = 0;
+			mask[i] = 1;
 			ink++;
 		}
 	}
 
 	const coverage = ink / opaque;
-	if (coverage >= 0.03 && coverage <= 0.55) return mask;
+	return coverage >= 0.03 && coverage <= 0.55 ? mask : null;
+}
 
+/**
+ * Carve an image-backed scene into a cols×rows mask, glyph-as-hole: the
+ * disc itself is never carved — the mark has to read as a hole punched in
+ * the surface, not as the surface punched into a big hole with the mark
+ * left standing inside it.
+ */
+function rasterizeImage(
+	image: CanvasImageSource,
+	ctx: CanvasRenderingContext2D,
+	cols: number,
+	rows: number,
+	out: Uint8Array<ArrayBuffer>,
+): Uint8Array<ArrayBuffer> {
+	const { w: iw, h: ih } = imageSize(image);
+	if (!iw || !ih) return out;
+
+	const dh = rows * MARK_FILL;
+	const dw = iw * (dh / ih);
+	ctx.clearRect(0, 0, cols, rows);
+	ctx.drawImage(image, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
+
+	const { data } = ctx.getImageData(0, 0, cols, rows);
+	const ink = glyphInkMask(data, cols * rows);
+	if (!ink) return out; // nothing legible — leave the lattice intact
+
+	const mask = new Uint8Array(cols * rows).fill(1);
+	for (let i = 0; i < mask.length; i++) if (ink[i]) mask[i] = 0;
+	return mask;
+}
+
+/**
+ * Dispatch a tile-mode scene (Scene.tile) to its text/image rasteriser and
+ * repeat the result across the grid. Same refusal contract as every other
+ * carve in this file: anything that doesn't produce a legible small glyph
+ * leaves the solid lattice (`out`) intact rather than ship a broken or
+ * empty banner for a cycle.
+ */
+function rasterizeTiled(
+	scene: Scene,
+	cols: number,
+	rows: number,
+	fontFamily: string,
+	out: Uint8Array<ArrayBuffer>,
+): Uint8Array<ArrayBuffer> {
+	// Leave a row of margin top and bottom where there's room to spare —
+	// tiny grids (well below this banner's real ~9 rows) get the full
+	// height instead, on the theory that a cramped mark beats no margin at
+	// all only once there's truly nothing to give up.
+	const tileRows = rows > 6 ? rows - 2 : rows;
+	if (tileRows < 4) return out; // not enough rows to say anything
+
+	const tile =
+		scene.kind === "image" && scene.image
+			? rasterizeImageTile(scene.image, tileRows)
+			: scene.kind === "text"
+				? rasterizeTextTile((scene.value ?? "").trim(), tileRows, fontFamily)
+				: null;
+	if (!tile) return out;
+
+	return tileAcross(tile, cols, rows) ?? out;
+}
+
+/**
+ * Crop an image scene down to just its own glyph (glyphBBox) and rasterise
+ * THAT into a small tileRows-tall raster, ink = 1 (this scene's mark stands
+ * as circles — see Scene.tile). The source PNGs are a coloured square/disc
+ * with a lot of flat colour around a much smaller mark; sizing against the
+ * full image the way the hole-mode carve above does (which has a whole
+ * grid of rows to spend) would spend most of a small tile's few pixels on
+ * that flat margin instead of the shape. Cropping to the mark's own
+ * bounding box first means every pixel of the tile is doing work.
+ */
+function rasterizeImageTile(
+	image: CanvasImageSource,
+	tileRows: number,
+): { mask: Uint8Array; cols: number; rows: number } | null {
+	const box = glyphBBox(image);
+	if (!box) return null;
+
+	const dh = tileRows * MARK_FILL;
+	const dw = dh * (box.w / box.h);
+	const tileCols = Math.max(1, Math.round(dw));
+
+	const cv = document.createElement("canvas");
+	cv.width = tileCols;
+	cv.height = tileRows;
+	const ctx = cv.getContext("2d", { willReadFrequently: true });
+	if (!ctx) return null;
+	ctx.drawImage(
+		image,
+		box.x,
+		box.y,
+		box.w,
+		box.h,
+		(tileCols - dw) / 2,
+		(tileRows - dh) / 2,
+		dw,
+		dh,
+	);
+
+	const { data } = ctx.getImageData(0, 0, tileCols, tileRows);
+	const ink = glyphInkMask(data, tileCols * tileRows);
+	if (!ink) return null;
+	return { mask: ink, cols: tileCols, rows: tileRows };
+}
+
+/**
+ * Bounding box of a glyph-bearing image's own ink (same disc-vs-glyph
+ * luminance split as glyphInkMask), at the image's native resolution, so
+ * rasterizeImageTile can crop to it instead of carrying the mark's own
+ * flat-colour padding into a tile that has few pixels to spare.
+ */
+function glyphBBox(
+	image: CanvasImageSource,
+): { x: number; y: number; w: number; h: number } | null {
+	const { w: iw, h: ih } = imageSize(image);
+	if (!iw || !ih) return null;
+
+	const cv = document.createElement("canvas");
+	cv.width = iw;
+	cv.height = ih;
+	const ctx = cv.getContext("2d", { willReadFrequently: true });
+	if (!ctx) return null;
+	ctx.drawImage(image, 0, 0);
+
+	const { data } = ctx.getImageData(0, 0, iw, ih);
+	const ink = glyphInkMask(data, iw * ih);
+	if (!ink) return null;
+
+	let minX = iw;
+	let minY = ih;
+	let maxX = -1;
+	let maxY = -1;
+	for (let y = 0; y < ih; y++) {
+		for (let x = 0; x < iw; x++) {
+			if (!ink[y * iw + x]) continue;
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+		}
+	}
+	if (maxX < minX) return null;
+	return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+}
+
+/**
+ * Rasterise a short text glyph (a currency symbol) into a small
+ * tileRows-tall raster, ink = 1 — the text-mode sibling of
+ * rasterizeImageTile. No disc to crop away here (just black background,
+ * white glyph), so this measures and fits directly instead of
+ * bbox-cropping first — the same two-pass measure-then-fit the full-grid
+ * "text" branch above uses, just fit to a tile box instead of the grid.
+ */
+function rasterizeTextTile(
+	text: string,
+	tileRows: number,
+	fontFamily: string,
+): { mask: Uint8Array; cols: number; rows: number } | null {
+	if (!text) return null;
+
+	const cv = document.createElement("canvas");
+	const ctx = cv.getContext("2d", { willReadFrequently: true });
+	if (!ctx) return null;
+
+	let size = tileRows;
+	ctx.font = `600 ${size}px ${fontFamily}`;
+	let m = ctx.measureText(text);
+	const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
+	size *= (tileRows * MARK_FILL) / gh;
+	ctx.font = `600 ${size}px ${fontFamily}`;
+	m = ctx.measureText(text);
+
+	// Padded a bit wider than the measured glyph so strokes don't touch the
+	// tile's own edge — the gap tileAcross puts between repeats is separate
+	// from this, an inset within one tile's own box.
+	const tileCols = Math.max(1, Math.round(m.width * 1.3));
+	cv.width = tileCols;
+	cv.height = tileRows;
+	// Resizing the canvas resets context state, so the font has to be set
+	// again after cv.width/height are assigned above.
+	ctx.font = `600 ${size}px ${fontFamily}`;
+	ctx.fillStyle = "#000";
+	ctx.fillRect(0, 0, tileCols, tileRows);
+	ctx.fillStyle = "#fff";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	ctx.fillText(text, tileCols / 2, tileRows / 2 + tileRows * 0.02);
+
+	const { data } = ctx.getImageData(0, 0, tileCols, tileRows);
+	const mask = new Uint8Array(tileCols * tileRows);
+	let ink = 0;
+	for (let i = 0; i < mask.length; i++) {
+		if (data[i * 4] > 110) {
+			mask[i] = 1;
+			ink++;
+		}
+	}
+	return ink > 0 ? { mask, cols: tileCols, rows: tileRows } : null;
+}
+
+/**
+ * Repeat a small glyph tile across the full cols×rows grid as a single
+ * horizontal row of copies, evenly spaced and vertically centred — the
+ * composition this scene mode reproduces: several copies of the same mark
+ * marching across the width on an otherwise empty field, rather than one
+ * hole carved into a solid one (see Scene.tile). How many copies fit is
+ * derived from the real grid width, not fixed — a narrower host just shows
+ * fewer.
+ */
+export function tileAcross(
+	tile: { mask: Uint8Array; cols: number; rows: number },
+	cols: number,
+	rows: number,
+): Uint8Array<ArrayBuffer> | null {
+	const { mask, cols: tCols, rows: tRows } = tile;
+	// floor (not round): for an odd leftover this puts the extra row of
+	// margin on the bottom rather than rounding it onto the top, and it
+	// keeps a by-1-too-tall tile refused below rather than rounding -0.5
+	// up to a startY of 0 and silently clipping the tile's own bottom row.
+	const startY = Math.floor((rows - tRows) / 2);
+	if (startY < 0) return null;
+
+	const gap = Math.max(2, Math.round(tCols * 0.6));
+	const period = tCols + gap;
+	const count = Math.max(1, Math.floor((cols + gap) / period));
+	const totalW = count * tCols + (count - 1) * gap;
+	const startX = Math.round((cols - totalW) / 2);
+
+	const out = new Uint8Array(new ArrayBuffer(cols * rows));
+	for (let n = 0; n < count; n++) {
+		const ox = startX + n * period;
+		for (let ty = 0; ty < tRows; ty++) {
+			const y = startY + ty;
+			if (y < 0 || y >= rows) continue;
+			const base = ty * tCols;
+			for (let tx = 0; tx < tCols; tx++) {
+				if (!mask[base + tx]) continue;
+				const x = ox + tx;
+				if (x >= 0 && x < cols) out[y * cols + x] = 1;
+			}
+		}
+	}
 	return out;
 }
 
