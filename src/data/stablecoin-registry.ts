@@ -325,6 +325,83 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		peg: "USD",
 		assetType: "Yield Stablecoin",
 	},
+	// ── Coverage sweep 2026-09-02 (Stellar Expert fiat-code sweep) ─────────
+	// A follow-up sweep of Stellar Expert for fiat-coded assets not yet
+	// carried here, run through the same chain as the Allium audit above:
+	// operator's own SEP-1 toml declares code + issuer, the ISSUER account's
+	// home_domain points back at that domain, Stellar Expert reports live
+	// supply + trustlines. 4 of 14 candidates passed; the other 10 did not,
+	// for four different reasons:
+	//
+	// SELF-DECLARED TEST: kbtrading.org's own toml marks IDRT, KRW and XCHF
+	// status="test" (its ORG_DESCRIPTION calls IDRT/XCHF "pilot mode" and
+	// doesn't mention KRW at all) — domain and issuer both check out, but the
+	// operator does not represent these as production.
+	//
+	// NOT A FIAT-PEG STABLECOIN: USTRY is Etherfuse's tokenized US Treasury
+	// Notes "Stablebond" (toml anchor_asset_type="bond") — a yield-bearing
+	// bond, not a reserve claim on fiat. sUSD's own toml says it is "not
+	// redeemable or directly asset-backed, instead it tracks the price of
+	// USD" — synthetic, no reserve claim. yUSDC's own toml calls it "an
+	// interest earning USDC tethered token" redeemable 1:1 for USDC — a
+	// yield wrapper on an asset already carried here (USDC), not an
+	// independent stablecoin.
+	//
+	// CHAIN DID NOT CLOSE: EURT's issuer sets home_domain to eurt.exchange,
+	// which does not resolve (no DNS). USD (the 100B-supply/98,918-trustline
+	// one — distinct from AnchorUSD's much smaller "USD") sets no
+	// home_domain at all. USDCAllow's issuer sets home_domain to circle.com,
+	// but circle.com's own stellar.toml does not declare this issuer or
+	// code — it has nothing to do with the real Circle USDC/EURC issuer
+	// already in this registry.
+	//
+	// NOT A STABLECOIN: SCOP (scopuly.com) is Scopuly's exchange/utility
+	// token — a regex false positive from "COP" matching inside "SCOP", not
+	// a fiat peg.
+	{
+		// Zeam's USD sibling to the ZARZ/GBPZ rows already here. toml status
+		// "live"; redeemable for fiat USD via the Zeam app (checked
+		// 2026-09-02: 181,060 trustlines, ~310,000 issued).
+		code: "USDZ",
+		issuer: "GAKTLPC4ZV37SSCITQ5IS5AQ4WPF4CF4VZJQPPAROSGXMYOATF5U6XPR",
+		domain: "zeam.money",
+		company: "Zeam",
+		peg: "USD",
+	},
+	{
+		// 100%-reserve EUR token; MTL Foundation undertakes 1:1 redemption to
+		// bearers in Montenegro (checked 2026-09-02: 4,676 trustlines,
+		// ~3.31M issued).
+		code: "EURMTL",
+		issuer: "GACKTN5DAZGWXRWB2WLM6OPBDHAMT6SJNGLJZPQMEZBUR4JUGBX2UK7V",
+		domain: "mtl.montelibero.org",
+		company: "Montelibero",
+		peg: "EUR",
+	},
+	{
+		// Montelibero's USD stablecoin — issuer commits to redeem 1:1 for
+		// USDC within 24h of a request, rather than direct bank fiat. A
+		// different asset from Mountain Protocol's Ethereum "USDM"; identity
+		// here is this issuer (checked 2026-09-02: 2,563 trustlines, ~255.7k
+		// issued).
+		code: "USDM",
+		issuer: "GDHDC4GBNPMENZAOBB4NCQ25TGZPDRK6ZGWUGSI22TVFATOLRPSUUSDM",
+		domain: "mtl.montelibero.org",
+		company: "Montelibero",
+		peg: "USD",
+	},
+	{
+		// Permissioned reserve-backed USD token for institutions; toml
+		// declares anchor_asset_type "fiat" and status "live". A DIFFERENT
+		// USDV (Velo Labs, velo.org, ~2.2M supply/128 trustlines) also
+		// exists — this row is the valtorum.com one, matched on domain as
+		// well as code (checked 2026-09-02: 18 trustlines, 1.1M issued).
+		code: "USDV",
+		issuer: "GBLAJOKBIIT7P32BJQFCSRJVOE2SXHI4D5ZGLFJ4DLMFJXI2NN6R37G5",
+		domain: "valtorum.com",
+		company: "Valtorum",
+		peg: "USD",
+	},
 	// ── Coverage audit 2026-08-22 ──────────────────────────────────────────
 	// Found by checking Horizon, CoinGecko's stablecoin category and every
 	// partner stellar.toml we hold against this list. Each issuer below comes
