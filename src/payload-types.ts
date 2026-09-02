@@ -1184,9 +1184,9 @@ export interface Stablecoin {
   supplyChange7d?: number | null;
   logoUrl?: string | null;
   /**
-   * Where the logo came from; toml = the issuer's own
+   * Where the logo came from; toml = the issuer's own per-currency image, toml-org = the same toml's org-level mark (no per-currency image, but the org one resolves)
    */
-  logoSource?: ('toml' | 'fallback' | 'country-flag' | 'none') | null;
+  logoSource?: ('toml' | 'toml-org' | 'fallback' | 'country-flag' | 'none') | null;
   /**
    * How this row's numbers were obtained. Never present curated-static or unmeasured as a live measurement.
    */

@@ -135,9 +135,10 @@ export const Stablecoins: CollectionConfig = {
 		{
 			name: "logoSource",
 			type: "select",
-			options: ["toml", "fallback", "country-flag", "none"],
+			options: ["toml", "toml-org", "fallback", "country-flag", "none"],
 			admin: {
-				description: "Where the logo came from; toml = the issuer's own",
+				description:
+					"Where the logo came from; toml = the issuer's own per-currency image, toml-org = the same toml's org-level mark (no per-currency image, but the org one resolves)",
 			},
 		},
 

@@ -107,6 +107,26 @@ describe("storeRowToApi", () => {
 		expect(storeRowToApi({ code: "X", supply: Number.NaN }).supply).toBeNull();
 	});
 
+	it("carries logoUrl and logoSource — dropped entirely before this fix", () => {
+		// The bug: storeRowToApi renamed measuredAt to updatedAt but never
+		// carried logoUrl/logoSource at all, so every row read as logo-less to
+		// anything reading /api/stablecoins directly, even on rows the pipeline
+		// had resolved a real image for.
+		const r = storeRowToApi({
+			code: "USDT0",
+			logoUrl: "https://stellar.myfilebase.com/ipfs/abc",
+			logoSource: "toml",
+		});
+		expect(r.logoUrl).toBe("https://stellar.myfilebase.com/ipfs/abc");
+		expect(r.logoSource).toBe("toml");
+	});
+
+	it("logoUrl/logoSource are null, not undefined, when nothing resolved", () => {
+		const r = storeRowToApi({ code: "ZZZ" });
+		expect(r.logoUrl).toBeNull();
+		expect(r.logoSource).toBeNull();
+	});
+
 	it("carries paymentsCount24h — a COUNT of payments, not a dollar volume", () => {
 		const r = storeRowToApi({
 			code: "USDC",

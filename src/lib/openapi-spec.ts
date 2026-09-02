@@ -9631,6 +9631,22 @@ export const spec: OpenAPISpec = {
 						description:
 							"Plain-words reason a row is curated-static or unmeasured. Null for live rows.",
 					},
+					logoUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag) — absence is not itself an error.",
+					},
+					logoSource: {
+						type: "string",
+						nullable: true,
+						// NOT `null` in the enum — a null enum member crashes spectral
+						// ("Cannot read properties of null (reading 'enum')");
+						// `nullable: true` already carries it.
+						enum: ["toml", "toml-org", "fallback", "country-flag", "none"],
+						description:
+							"Provenance of logoUrl. toml = the issuer's own per-currency image. toml-org = the same toml's org-level mark, used when no per-currency image exists but the org one resolves. fallback = a hand-curated override. country-flag = the peg's flag IS the intended mark, not a stand-in. none = nothing resolved, logoUrl is null.",
+					},
 					verified: {
 						type: "boolean",
 						description:
