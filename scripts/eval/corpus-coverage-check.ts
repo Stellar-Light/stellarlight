@@ -165,6 +165,10 @@ async function run() {
 }
 
 run().catch((e) => {
+	// Exit 2, not 1. A crash here (an Atlas TLS blip, a network wobble) means
+	// COULD NOT CHECK, which is a different claim from "a guarded page is
+	// missing" — a caller that gates on this must be able to tell them apart,
+	// or every transient outage reads as data loss.
 	console.error("FATAL:", e);
-	process.exit(1);
+	process.exit(2);
 });

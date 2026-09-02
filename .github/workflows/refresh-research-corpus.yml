@@ -158,3 +158,41 @@ jobs:
         if: inputs.source == '' || inputs.source == 'ec-developer-report'
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute
+
+      # Every ingest above is continue-on-error, so ONE source failing cannot
+      # block the rest. The cost of that isolation is that a step which died
+      # mid-run still reports success: on 2026-09-02 the developers.stellar.org
+      # ingest hit a transient Atlas TLS error, printed FATAL, and the run went
+      # green with the day's new pages missing from the corpus. Nothing noticed
+      # until a consumer asked for one of them.
+      #
+      # So the run now asserts its own END STATE rather than trusting its steps:
+      # every page in CANONICAL_PAGES must be present with its signature text
+      # intact. This step does NOT continue on error — a corpus that lost a
+      # guarded page reds the run.
+      - name: Verify the corpus still holds every canonical page
+        if: inputs.source == ''
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        # Exit 1 = a guarded page is genuinely missing → red. Exit 2 = we could
+        # not look (no DATABASE_URI, or the connection died); retry once, and
+        # if it still cannot look, say so and pass — "could not check" must not
+        # be published as "data lost".
+        run: |
+          set +e
+          for attempt in 1 2; do
+            pnpm exec tsx scripts/eval/corpus-coverage-check.ts
+            code=$?
+            [ "$code" = "2" ] || break
+            echo "::warning::coverage check could not read the corpus (attempt $attempt)"
+            sleep 30
+          done
+          if [ "$code" = "1" ]; then
+            echo "::error::the corpus is missing a canonical page — see the rows above"
+            exit 1
+          fi
+          if [ "$code" = "2" ]; then
+            echo "::warning::coverage could not be verified this run (corpus unreachable)"
+          fi
+          exit 0
