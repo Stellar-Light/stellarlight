@@ -3916,3 +3916,16 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 	// parked domain page
 	stellarauth: "https://stellarauth.com/",
 };
+
+/** Project logos to upload (fill-if-empty). `file` is a path committed under
+ * public/ so the mark ships with the site AND the curate lane reads it from
+ * the checkout — no off-origin fetch at execute time. Owner-supplied marks
+ * only; never scrape a favicon into this map. */
+export const LOGO_FIXES: Record<string, { file: string; note: string }> = {
+	// 2026-09-02: owner supplied the flat square USDT0 mark (white pixel T on
+	// #00805A); the issuer's toml image is the round-coin variant.
+	usdt0: {
+		file: "public/stablecoins/logos/usdt0.png",
+		note: "owner-supplied square USDT0 mark, 2026-09-02",
+	},
+};
