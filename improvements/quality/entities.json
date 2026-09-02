@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T02:43:20.352Z",
+ "generatedAt": "2026-09-02T02:59:15.619Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -9688,52 +9688,11 @@
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 51,
+    "withNotes": 92,
     "triaged": 115,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
-     "0xNana/SearchPay",
-     "ALFA117/MongliAgent",
-     "Akanimoh12/Stellar-iPredict",
-     "Blockchain-Oracle/xlmtools",
-     "Bosun-Josh121/clevercon",
-     "E1eng/agentBoard",
-     "GladiusClub/gladius-backend",
-     "Lobster-Protocol/stellar-integrations",
-     "Lum-Agg/stellar-dex-agg",
-     "LumenWipe/lumenwipe",
-     "Moonlight-Protocol/local-dev",
-     "NoetherDEX/noether",
-     "Nsuccess/AgentMarket",
-     "SentinelFi/sentinel_soroban_v3",
-     "Soneso/stellar-php-sdk",
-     "Stellar-Light/confidential-agent-commerce",
-     "TrebleLegacy/x402-agents-stellar-project",
-     "Trustless-OSS/Trustless-OSS",
-     "Vinaystwt/xMPP",
-     "airgap-it/airgap-coin-lib",
-     "airgap-it/airgap-vault",
-     "airgap-it/airgap-wallet",
-     "big14way/stellar-agent-gateway",
-     "bytemaster333/account-demolisher",
-     "carstenjacobsen/x402-testing-tool",
-     "daraijaola/runbox",
-     "davidmaronio/StellarPay402",
-     "ebubechi-ihediwa/Verix",
-     "envexx/Lument-Trust",
-     "fxjrin/defi-copilot",
-     "ggoldani/agent-passport",
-     "keybase/client",
-     "kindfi-org/kindfi",
-     "leojay-net/Stellar-Agent-Flow",
-     "leomanza/near-shade-coordination",
-     "martinvibes/SentinelShield",
-     "midasbal/lumina-scan",
-     "noir-lang/noir",
-     "rango-exchange/rango-client",
-     "rango-exchange/rango-sdk",
-     "sandragcarrillo/nexus4agents",
-     "t0k1dev/vendly"
+     "daccred/attestprotocol"
     ]
    },
    "mainnetJoin": {
@@ -9853,7 +9812,7 @@
    "languageOther": 48
   },
   "withCodeDepth": 7969,
-  "withNotes": 399,
+  "withNotes": 450,
   "withMainnet": 99,
   "top": [
    {
@@ -9877,7 +9836,7 @@
     "activity": "active",
     "language": "TypeScript",
     "projectSlug": null,
-    "notes": 0,
+    "notes": 1,
     "codeDepth": 81,
     "deployable": true,
     "mainnetJoined": false
@@ -9890,7 +9849,7 @@
     "activity": "slowing",
     "language": "TypeScript",
     "projectSlug": null,
-    "notes": 0,
+    "notes": 1,
     "codeDepth": 69,
     "deployable": true,
     "mainnetJoined": false
@@ -10228,7 +10187,7 @@
     "activity": "active",
     "language": "TypeScript",
     "projectSlug": "stellar-light",
-    "notes": 0,
+    "notes": 1,
     "codeDepth": 91,
     "deployable": false,
     "mainnetJoined": false
@@ -10293,7 +10252,7 @@
     "activity": "active",
     "language": "TypeScript",
     "projectSlug": "noether",
-    "notes": 0,
+    "notes": 1,
     "codeDepth": 87,
     "deployable": true,
     "mainnetJoined": false
@@ -10916,7 +10875,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "51 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "92 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11226,19 +11185,17 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12730,
+    "missing": 12679,
     "of": 13129,
-    "share": 97,
+    "share": 96.6,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 159,
+    "examplePoolSize": 118,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
      "Andy00L/x402-autopilot",
-     "Bosun-Josh121/clevercon",
-     "davidmaronio/StellarPay402",
      "velikanghost/heekowave",
      "thewoodfish/AgentCompute",
      "402md/agentcard",
@@ -11247,7 +11204,9 @@
      "Klorenn/Cosmic-Coder-",
      "Bosun-Josh121/conductor",
      "Marcos-sxt/le_coup",
-     "theyuvan/zk-THRONE"
+     "theyuvan/zk-THRONE",
+     "KaranSinghBisht/veilgrid",
+     "pedro-gattai/ZKachi"
     ]
    },
    {
