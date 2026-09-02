@@ -2046,6 +2046,151 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 };
 
+/**
+ * Pool triage verdicts (INTERNAL — never served). The quality board's notes
+ * pool is the curated-index repos with repoScore >= 60. On 2026-09-02 every
+ * pool repo without a note was examined for a durable, source-citable fact
+ * (registry identity that links back, rename/archive, release line, a
+ * README-published mainnet ID); these 115 yielded nothing, for the reason
+ * recorded. Recording the verdict lets the board tell JUDGED from
+ * UNEXAMINED (coverage.knowledgeNotes.triaged) without publishing an
+ * opinion about anyone's repo — the same discipline as the batch-1 internal
+ * memos. Re-examine a row when it gains a registry package or a mainnet
+ * deployment. Keys are lowercase owner/name.
+ */
+const POOL_TRIAGE_2026_09_02: Record<string, string> = {
+	"402md/agentcard": "hackathon demo, testnet only",
+	"abdulwahabalm/paygent": "hackathon demo, no registry",
+	"abroad-finance/abroad": "deploy-* tags only; no registry",
+	"acta-team/give-interactuar": "no registry, no tags, no hosted URL",
+	"alternun-development/alternun-ui": "UI shell, no registry/tags",
+	"andy00l/x402-autopilot": "hackathon demo, testnet only",
+	"arihaan/stellar-sara": "hackathon demo, no registry",
+	"arnavmehta7/agenflow-protocol": "hackathon demo, 2 KB README",
+	"ashfrancis/chickenz": "hackathon ZK game, testnet only",
+	"asmodey-afk/stellar-agent-rep": "hackathon submission, no registry",
+	"asterizm-protocol/asterizm-contracts-stellar":
+		"testnet-only contracts; no registry, no tags",
+	"ayushsaklani-min/agentstell": "npm packages don't link back (see D)",
+	"bahmez/heistduel": "hackathon ZK game, no registry",
+	"blockdaemon/solana-accountsdb-plugin-kafka":
+		"not a Stellar repo (Solana geyser plugin)",
+	"bosun-josh121/conductor": "hackathon demo, no registry",
+	"buendia-builders/ocean_request": "hackathon demo, testnet only",
+	"cassxbt/starlane": "hackathon demo, testnet only",
+	"catmcgee/stellar-poker-cosnarks": "hackathon ZK game, testnet only",
+	"christabel337/agentex": "hackathon demo, no registry",
+	"cijethecreator/stellar-tickets": "companion repo 404; IDs without network",
+	"cyberverse2/gopadi": "app scaffold, no registry/tags",
+	"darthclyn/paygent-stellar": "hackathon demo, no manifest",
+	"davz7/mananaseguro": "hackathon demo, no registry",
+	"devasignhq/agent": "no registry, no tags, no hosted URL",
+	"dmustapha/verdikt": "hackathon demo, testnet only",
+	"dprof-in-tech/stipend": "hackathon-style app, no registry",
+	"emanuel250yt/stellarorchestra": "README claims npm package not published",
+	"emperorsixpacks/-bear-protocol": "hackathon demo; IDs without network",
+	"endernakamoto/walt": "hackathon pitch, no registry",
+	"eq-lab/pipeline": "no README; one v0.0.1 tag",
+	"eras256/milechain": "hackathon demo, testnet escrow",
+	"foundermafstat/nft-dnd-stellar": "hackathon ZK game, testnet only",
+	"franklivania/caushun": "hackathon demo, no registry",
+	"fundable-protocol/fundable-soroban-contracts":
+		"alpha tags only, publish=false (see D)",
+	"fundable-protocol/stellar_client_os":
+		"testnet client; package.json repo \u2192 404 path",
+	"futurehelp/query402-api": "hackathon backend; npm name unpublished",
+	"gbangbolaoluwagbemiga/kairos": "hackathon demo, testnet only",
+	"gyan0890/shieldex": "hackathon demo ('[Hackathon Name]' placeholder)",
+	"harystyleseze/careguard": "hackathon demo; npm name unpublished",
+	"heylmstoned/prism-stellar-earn": "SCF submission summary; no registry",
+	"hoops-finance/calypso-x402": "hackathon demo, no registry",
+	"hoops-finance/cometswap": "1 KB stub, no registry",
+	"jennycruzy/geotruth": "hackathon demo, testnet only",
+	"kaksv/uber-for-agents": "hackathon demo, no registry",
+	"kaleababayneh/zstellar-wordle": "hackathon ZK game; hosted demo only",
+	"karansinghbisht/veilgrid": "hackathon ZK game, testnet only",
+	"kaxeck/nextforge": "hackathon demo, testnet only",
+	"klorenn/cosmic-coder-": "hackathon ZK game, testnet only",
+	"klorenn/phase": "hackathon-style app, no registry",
+	"legasicrypto/agent-credit-rail": "hackathon demo, no registry",
+	"leticarolina/watchdog": "hackathon demo; tags only",
+	"liquidsfi/liquidsfi-oracle-web": "60-byte stub README, no registry",
+	"liquidsfi/liquidsfi-web-app": "Vite template README, no registry",
+	"liquidsfi/zkliquid-home": "Vite template README, no registry",
+	"liquidsfi/zkliquid-protocol": "60-byte stub README, no registry",
+	"loquit-doru/stellar-tokensentry": "README claims npm package not published",
+	"lumens-news/news": "no registry/tags; site gave no response",
+	"makindeahmed2110/telos": "no README, no tags",
+	"mallikaakash/agentsense": "README claims npm package not published",
+	"manoahlinks/mindvault": "hackathon demo, testnet only",
+	"marcos-sxt/le_coup": "hackathon ZK game, no registry",
+	"maxsouth-dev/payloop": "hackathon demo, no registry",
+	"mikemoulder/ero": "hackathon demo, no registry",
+	"miracle656/veil": "hosted docs shell only; no registry (see D)",
+	"mokwathedeveloper/agent-paywall-router": "hackathon demo, testnet only",
+	"mr-574rk/mesh402": "hackathon demo, testnet only",
+	"mrtimonm/stellar-x-402": "hackathon demo; ID without network",
+	"murat48/zktexasholdem": "hackathon ZK game, testnet only",
+	"myles181/hagglenet": "hackathon backend, no registry",
+	"nickthelegend/fund402": "3 KB README, no registry",
+	"nickyunstoppable/veilstar-brawl": "hackathon ZK game, testnet only",
+	"nikhilraikwar/authora": "hackathon demo, testnet only",
+	"nikhilraikwar/cubeathon": "hackathon ZK game, testnet only",
+	"nirmalplays/stellar-x402": "no manifest, no registry",
+	"nuelose/cardentic": "hackathon demo, no registry",
+	"official-jumpa/jumpa": "npm name belongs to another project",
+	"officially-aditya/taskflow-x402": "hackathon demo, testnet only",
+	"olivmath/stealth-battleship": "hackathon ZK game, testnet only",
+	"oni7u7/kivo": "no README, no tags",
+	"oppia-software-labs/sentinel": "MVP-target README; no registry/tags",
+	"oshioke-salaki/agent-tontine": "hackathon demo, no registry",
+	"oyingrace/agent_loom": "hackathon experiment, no registry",
+	"paltalabs/etherfuse-privy-wallet": "testnet/sandbox MVP; no registry",
+	"pedro-gattai/zkachi": "hackathon ZK game, no registry",
+	"pedro-pelicioni/court-of-shadows": "hackathon ZK game, no registry",
+	"peridotfinance/peridot-soroban": "testnet vault demo; one unrelated tag",
+	"phamdat721101/signal": "not a Stellar repo (Uniswap v4 / Somnia)",
+	"rizwanmoulvi/agent-got-card-x402": "hackathon demo, 4 KB README",
+	"sampath-04/hivepayai": "hackathon demo, testnet only",
+	"sandman-sh/credence": "hackathon demo, testnet only",
+	"shadow-ash/payloop": "testnet contract only; no registry",
+	"shreshtthh/agentguard": "hackathon demo, no registry",
+	"shreshtthh/zk-seep": "hackathon ZK game, testnet only",
+	"simplex-t/sunvasi": "no README, no tags",
+	"simplytokenized/soroban-smart-contracts":
+		"only third-party (Reflector) contract IDs",
+	"siriuslattice/stellarmcp": "npm package lacks repository field (see D)",
+	"smart-treasury-account-sta/dapp": "testnet dApp, no registry",
+	"socket-fi/socketfi-app": "stub README; package.json repo \u2192 404 path",
+	"socket-fi/socketfi-website": "stub README, no registry",
+	"softalpha0/agent-bazaar": "hackathon demo; npm name unpublished",
+	"spinachfi/spinach": "1.7 KB README, no registry",
+	"stellar-light/stellar-pay": "self-curation is an owner call (fact in D)",
+	"stellarcarbon/hackmeridian": "210-byte hackathon stub",
+	"stellarzerolab/neurochain-dsl-stellar":
+		"crate not on crates.io; hackathon package",
+	"tasfia-17/stellar-mcp": "package.json name not on npm; hackathon",
+	"thewoodfish/agentcompute": "npm entry lacks repository field; testnet",
+	"theyuvan/zk-throne": "hackathon ZK game, testnet only",
+	"tkcollective/x402-research-skill":
+		"PyPI package links to a 404 sibling (see D)",
+	"toanbm/stellar-trader": "hackathon demo, testnet; npm name unpublished",
+	"ts-mfon/stellar-agent-api-bazaar": "hackathon demo, testnet only",
+	"uzochukwuv/eleventts-stellar-mcp": "hackathon MCP demo, private package",
+	"velikanghost/heekowave": "hackathon demo, no registry",
+	"wuododhis/agentic_stellar": "hackathon-style app, no registry",
+	"yonkoo11/beacon": "hackathon demo, no registry",
+	"zhekinmaksim/orbitsafe": "hackathon demo, testnet by design",
+};
+for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
+	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+		note: `Pool triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		source: "curated",
+		asOf: "2026-09-02",
+		visibility: "internal",
+	});
+}
+
 export interface AuditRecord {
 	projectSlug: string | null;
 	auditor: string | null;
