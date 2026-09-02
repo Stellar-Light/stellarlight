@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T02:01:07.799Z",
+ "generatedAt": "2026-09-02T02:09:27.723Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -292,7 +292,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1086,
+  "population": 1087,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9688,7 +9688,7 @@
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 47,
+    "withNotes": 51,
     "missing": [
      "0xNana/SearchPay",
      "402md/agentcard",
@@ -9787,7 +9787,6 @@
      "bytemaster333/account-demolisher",
      "carstenjacobsen/x402-testing-tool",
      "catmcgee/stellar-poker-cosnarks",
-     "daccred/attestprotocol",
      "daraijaola/runbox",
      "davidmaronio/StellarPay402",
      "davz7/MananaSeguro",
@@ -9798,15 +9797,12 @@
      "enderNakamoto/walt",
      "envexx/Lument-Trust",
      "eq-lab/pipeline",
-     "ericmt-98/micopay-protocol",
      "foundermafstat/nft-dnd-stellar",
      "futurehelp/query402-api",
      "fxjrin/defi-copilot",
      "ggoldani/agent-passport",
      "gyan0890/shieldex",
      "harystyleseze/careguard",
-     "hot-dao/kit",
-     "hyperledger-solang/solang",
      "kaksv/uber-for-agents",
      "kaleababayneh/zstellar-wordle",
      "keybase/client",
@@ -9970,7 +9966,7 @@
    "languageOther": 48
   },
   "withCodeDepth": 7489,
-  "withNotes": 327,
+  "withNotes": 399,
   "withMainnet": 93,
   "top": [
    {
@@ -10423,7 +10419,7 @@
     "activity": "active",
     "language": "Rust",
     "projectSlug": "solang",
-    "notes": 0,
+    "notes": 3,
     "codeDepth": 57,
     "deployable": true,
     "mainnetJoined": false
@@ -11033,7 +11029,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "47 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "51 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11343,13 +11339,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12802,
+    "missing": 12730,
     "of": 13129,
-    "share": 97.5,
+    "share": 97,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 164,
+    "examplePoolSize": 159,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
