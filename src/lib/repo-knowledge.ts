@@ -42,6 +42,244 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 9 (2026-09-02): 26 repos / 27 notes — the 40–49 band (181
+	// curated-index rows, 96 examined after registry keys, earlier rejects and
+	// rows already carrying a derived audit note). Registry identities that
+	// link back (NuGet stellar-dotnet-sdk, hex stellar_sdk/stellar_base, Go
+	// firehose-stellar, xBull wallet-connect, BlindPay's node/mcp/go/swift
+	// SDKs, asgcard, dfns-sdk-python), Ledger's app-stellar release scheme,
+	// four renames resolved by 301, an in-repo Halborn audit PDF confirmed via
+	// the API, products whose GitHub releases are the download channel, two
+	// dated 404s. Held to the bar: four repos whose only registry identity
+	// does NOT link back to the repo (hot-dao/omni-sdk, tenk-dao/smartdeploy,
+	// xycloo/rs-zephyr-toolkit, lockb0x-llc/pakana-…) are recorded as triage
+	// verdicts instead. Every README contract ID in this band was checked on
+	// stellar.expert — none is a mainnet deployment. 66 further repos yielded
+	// nothing durable (26 not Stellar at all; 19 README-only; 17 hackathon /
+	// testnet / fork) and sit in BAND_40_49_TRIAGE_2026_09_02. 3 API calls.
+	"ledgerhq/app-stellar": [
+		{
+			note: "The Ledger hardware-wallet app for Stellar — Cargo package `stellar` 6.0.3 at HEAD; README: transaction signing on Nano X, Nano S+, Nano Gen5, Stax and Flex (ledger_app.toml devices: nanox, nanos+, stax, flex, apex_p). Releases are per-device tags carrying the app version: stax_1.10.0_6.0.3_sdk_v26.0.2 and flex_1.6.0_6.0.3_sdk_v26.0.2 (2026-04-22), nanox_2.7.0_6.0.3_sdk_v26.0.2 (2026-04-21); 388 tags. https://github.com/LedgerHQ/app-stellar/releases",
+			triggers: ["ledger stellar app version", "ledger nano stellar app"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"beans-bv/dotnet-stellar-sdk": [
+		{
+			note: "NuGet stellar-dotnet-sdk — 15.1.0 (2026-06-07; 95 versions since 2.0.0 on 2018-05-31; the current 15.x entries list this repo as project URL while the 2021 7.2.x entries list elucidsoft/dotnet-stellar-sdk); companion package stellar-dotnet-sdk-xdr 15.1.0. README: 'Stellar API SDK for .NET', a port of the Java SDK (lightsail-network) with SEPs ported from Soneso's Flutter SDK; latest pre-release 16.0.0-beta (2026-06-25). https://www.nuget.org/packages/stellar-dotnet-sdk",
+			triggers: ["dotnet stellar sdk nuget", "stellar dotnet sdk"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"kommitters/stellar_sdk": [
+		{
+			note: "Hex stellar_sdk — 0.23.0 (2026-06-03; 45 releases since 2021-08-18; GitHub link → this repo; MIT), the Elixir SDK for Stellar. CHANGELOG 0.23.0 (02.06.2026): Protocol 22/23/26 support, stellar_base ~> 0.17.0, CreateContractArgsV2 (CAP-0058); the previous release 0.22.0 was 2024-08-16. Low-level XDR companion: kommitters/stellar_base. https://hex.pm/packages/stellar_sdk",
+			triggers: ["elixir stellar sdk", "stellar sdk hex package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"kommitters/stellar_base": [
+		{
+			note: "Hex stellar_base — 0.17.0 (2026-06-03; 42 releases since 2021-08-12; GitHub link → this repo; MIT): 'low-level elixir library to read, write, hash, and sign XDR primitive constructs'. CHANGELOG 0.17.0 (02.06.2026): Protocol 22/23/26, TransactionMetaV4, Quorum Freeze (CAP-0077), contract constructors (CAP-0058), muxed SCAddress (CAP-0079); the previous release 0.16.0 was 2024-07-23. Consumed by kommitters/stellar_sdk. https://hex.pm/packages/stellar_base",
+			triggers: ["elixir stellar xdr library"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"streamingfast/firehose-stellar": [
+		{
+			note: "Go module github.com/streamingfast/firehose-stellar — v1.2.1 (2026-08-28; 10 tags; Go proxy origin → this repo). CHANGELOG: v1.2.1 requires stellar-core >= 28.0.1-3508 (SDF's fix for the August 2026 critical security advisory); v1.2.0 (2026-08-25) Protocol 28 (CAP-0083/CAP-0085); v1.1.0 (2026-06-18) Protocol 27 + the captive-core fetcher. A release is a tag push built by release.yml (binaries, images, Homebrew formula). https://github.com/streamingfast/firehose-stellar/blob/HEAD/CHANGELOG.md",
+			triggers: ["firehose stellar release", "firehose stellar version"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "README (2026-09-02): 'Captive-core is the supported backend going forward. The RPC poller is kept for compatibility but is no longer actively developed — new deployments should use captive-core.' `firestellar fetch captive-core` is the recommended path; `firestellar fetch rpc` (Stellar RPC endpoint) is legacy, maintenance-only. https://github.com/streamingfast/firehose-stellar#readme",
+			triggers: [
+				"firehose stellar backend",
+				"firehose stellar captive core",
+				"firehose stellar rpc poller",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"creit-tech/xbull-wallet-connect": [
+		{
+			note: "npm @creit.tech/xbull-wallet-connect — 0.4.0 (2025-08-13; 2 versions since 2024-09-15; repository → this repo): 'connect your website with xBull Wallet in both extension and webapp version'. The README's install line is `npm i --save @creit.tech/xbull-wallet-connect` but it recommends installing from GitHub by version tag ('we use Github instead of NPM'); GitHub releases 0.1.0…0.4.0 (4 tags; 0.4.0 on 2025-08-13). https://www.npmjs.com/package/@creit.tech/xbull-wallet-connect",
+			triggers: [
+				"xbull wallet connect package",
+				"connect website xbull wallet",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lobstrco/stellar-identicon-js": [
+		{
+			note: "npm stellar-identicon-js — 1.0.0 (2019-09-19; 2 versions since 2019-09-18; repository → this repo; ISC): canvas identicons derived from a Stellar public key. README: the Python twin Lobstrco/stellar-identicon-py yields the same image for the same address by default, and LOBSTR's hosted service id.lobstr.co/<G…>.png serves 210×210 PNGs generated by the Python version behind CloudFront. No tags. https://www.npmjs.com/package/stellar-identicon-js",
+			triggers: ["stellar identicon library", "identicon from stellar address"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"beans-bv/beans-merchant-sdk-javascript": [
+		{
+			note: "npm beans-merchant-sdk — 5.0.0 (2025-10-29; 11 versions since 2024-01-30; MIT; repository → github.com/Beans-BV/merchant_sdk_javascript, which redirects here — HTTP 301, 2026-09-02). README 'Beans Merchant JavaScript SDK': QR-code payment requests and on/off-ramp integration with the Beans app on Stellar; GitHub releases 1.0.0…5.0.0 (20 tags; 3.0.0–5.0.0 all published 2025-10-29). Sibling SDK: Beans-BV/beans-merchant-sdk-dart. https://www.npmjs.com/package/beans-merchant-sdk",
+			triggers: ["beans merchant sdk npm", "beans merchant javascript"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"xcapit/openzktool": [
+		{
+			note: "RENAMED: github.com/xcapit/stellar-privacy-poc — the path in this repo's package.json (npm name stellar-privacy-sdk 0.1.0-poc) — redirects here (HTTP 301, 2026-09-02); the README badges still point at fboiero/stellar-privacy-poc, which returns 404. README 'OpenZKTool — Privacy infrastructure for Stellar Soroban using Zero-Knowledge Proofs', Status: Proof of Concept (Groth16/BN254 verifier for Soroban), AGPL-3.0; no tags or releases. https://github.com/xcapit/openzktool",
+			triggers: ["openzktool repo renamed", "stellar privacy poc repo"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"sorobanhooks/freighter": [
+		{
+			note: "RENAMED: this path redirects to github.com/sorobanhooks/aptopia-wallet (HTTP 301, 2026-09-02), a fork of stellar/freighter (GitHub 'forked from' banner). README 'Aptopia': 'non-custodial smart wallet on the Stellar testnet' built as a Freighter fork with yield vaults, a trading agent, x402 pay-per-call data and an OpenZeppelin Smart Account — 'Mainnet is gated on audit + funding — this codebase targets Stellar testnet only.' No tags. https://github.com/sorobanhooks/aptopia-wallet",
+			triggers: ["aptopia wallet repo", "sorobanhooks freighter fork"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"coinfabrik/scout-soroban": [
+		{
+			note: "README install line `cargo install cargo-scout-audit` — crates.io cargo-scout-audit 0.3.16 (2026-02-13; 39 versions since 2023-06-30) lists repository github.com/coinfabrik/scout-audit, not this repo: the maintained analyzer (ink!, Soroban, Substrate) lives in CoinFabrik/scout-audit; this Soroban-specific repo (last push 2024-07-31; no tags) hosts the docs site. Companions: VS Code extension CoinFabrik.scout-audit, GitHub Action coinfabrik/scout-actions@v3; SCF-funded. https://crates.io/crates/cargo-scout-audit",
+			triggers: [
+				"scout soroban install",
+				"soroban static analysis tool",
+				"scout audit crate",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"coinfabrik/scout-actions": [
+		{
+			note: "GitHub Marketplace action 'Run Scout Action' (`uses: coinfabrik/scout-actions@v3`; action.yml name 'Scout Security Analysis' — 'Runs Scout security analysis on Rust projects and reports findings'); latest release v3.2 (2025-01-31; 22 tags). README: Scout assists ink!, Soroban and Substrate developers; the analyzer itself is CoinFabrik/scout-audit (crate cargo-scout-audit). https://github.com/marketplace/actions/run-scout-action",
+			triggers: ["scout github action", "soroban security github action"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"dfns/dfns-sdk-python": [
+		{
+			note: "PyPI dfns-sdk — 0.0.2 (2026-05-08; 4 releases since 2026-01-12; Repository → this repo), the Dfns Python SDK (GitHub release v0.0.2 the same day; 4 tags). Dfns' docs list Stellar among supported networks — 'Network-specific features, signature kinds, supported assets, and integration requirements for Stellar wallets on the DFNS platform' (docs.dfns.co/networks/stellar), with Stellar sign and broadcast API references. https://pypi.org/project/dfns-sdk/",
+			triggers: ["dfns python sdk", "dfns stellar wallets"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"blindpaylabs/blindpay-node": [
+		{
+			note: "npm @blindpay/node — 5.3.1 (2026-08-07; 42 versions since 2025-09-27; repository → this repo; MIT), 'Official Node.js SDK for Blindpay API - Stablecoin API for global payments'; GitHub release v5.3.1 the same day (8 tags). BlindPay's own changelog dates its 'Stellar Integration' to 2025-05-09 and a 'Stellar Wallet Rotation and Testnet USDB Fix' to 2026-05-15. https://www.npmjs.com/package/@blindpay/node",
+			triggers: ["blindpay node sdk", "blindpay stellar integration"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"blindpaylabs/blindpay-mcp": [
+		{
+			note: "npm @blindpay/mcp — 1.7.1 (2026-08-08; 16 versions since 2026-01-05; repository → this repo; MIT), 'Official MCP Server for BlindPay API - Stablecoin API for global payments'; GitHub release v1.7.1 the same day (13 tags). Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://www.npmjs.com/package/@blindpay/mcp",
+			triggers: ["blindpay mcp server"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"blindpaylabs/blindpay-go": [
+		{
+			note: "Go module github.com/blindpaylabs/blindpay-go — v1.19.0 (2026-08-04; Go proxy origin → this repo; 20 tags, four of them cut on 2026-08-04), 'Blindpay's Golang SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://pkg.go.dev/github.com/blindpaylabs/blindpay-go",
+			triggers: ["blindpay go sdk"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"blindpaylabs/blindpay-swift": [
+		{
+			note: "Swift package distributed by git tag (Package.swift: package blindpay-swift, product BlindPay) — latest release v4.5.1 (2026-08-07; 27 tags; v4.4.0 and v4.5.0 on 2026-08-04), 'BlindPay's Swift SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://github.com/blindpaylabs/blindpay-swift/releases",
+			triggers: ["blindpay swift sdk"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"asgcompute/asgcard-public": [
+		{
+			note: "npm @asgcard/sdk 1.1.5, @asgcard/cli 0.7.8 and @asgcard/mcp-server 0.6.3 (all 2026-04-08; 15/26/14 versions since 2026-03-10/13; MIT) each list repository → this repo. README 'ASG Card': agent-first virtual MasterCards paid 'via Stellar x402 (USDC) or Stripe Machine Payments Protocol', hosted at asgcard.dev; the README's license link points at ASGCompute/asgcard, which returns 404 (private). No tags. https://www.npmjs.com/package/@asgcard/sdk",
+			triggers: ["asg card sdk", "asgcard npm packages"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"normalfinance/normal-stellar-amm": [
+		{
+			note: "GitHub releases: v1.0.0 (2025-11-06) plus per-contract tags of the same day (e.g. v1.0.0_contracts_pool_plane_pool-plane_cli22.8.1; 11 tags). README 'Audits': 'Summer 2025 x Halborn' — audits/ holds 'Normal x Halborn - Summer 2025 Audit.pdf' and THREAT.MD (GitHub API, 2026-09-02). Cargo workspace contracts/* + modules/*; sibling protocol repo normalfinance/stellar-v1 (renamed from lsp). https://github.com/normalfinance/normal-stellar-amm/releases",
+			triggers: ["normal stellar amm audit", "normal amm halborn"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"satoshipay/solar": [
+		{
+			note: "Solar Wallet — README: 'User-friendly Stellar wallet, featuring multi-signature, custom assets management and more. Runs on Mac OS, Windows, Linux, Android and iOS'; binaries ship via GitHub releases — latest v0.28.1 (2022-06-03; 85 tags; v0.28.0 2021-10-27); keys encrypted with PBKDF2-SHA256 + xsalsa20-poly1305; solarwallet.io still links these downloads (2026-09-02). Last push 2022-06-03. https://github.com/satoshipay/solar/releases",
+			triggers: ["solar wallet release", "satoshipay solar wallet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellarterm/stellarterm-desktop-client": [
+		{
+			note: "README: 'the StellarTerm client now in a desktop app format' — downloads via GitHub releases; latest 'StellarTerm Desktop Client v2220' (2023-02-21; 20 tags; previous v1956 2021-06-22, v1768 2020-05-29). The web client is the sibling stellarterm/stellarterm. https://github.com/stellarterm/stellarterm-desktop-client/releases",
+			triggers: ["stellarterm desktop download", "stellarterm desktop release"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lobstrco/vault-ios": [
+		{
+			note: "Source of the LOBSTR Vault iOS app — README links App Store id1452248529 ('LOBSTR Vault - Multi-signature security on the Stellar network'; local key storage; signs for one or more Stellar accounts; N-of-N across devices); single GitHub release 1.3.2 (2020-05-07; 2 tags); last push 2025-02-12. Android sibling: Lobstrco/vault-android. https://apps.apple.com/app/lobstr-vault/id1452248529",
+			triggers: ["lobstr vault ios source", "lobstr vault app store"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"bigger-tech/simple-stellar-signer": [
+		{
+			note: "MOVED: github.com/PlutoDAO/simple-stellar-signer — the path the README's docs links still use — redirects here (HTTP 301, 2026-09-02). README 'Simple Signer': embeddable login + transaction signing for Stellar supporting xBull, Albedo, Freighter, Rabet, WalletConnect, LOBSTR and Ledger, with hosted instances named as sign.bigger.systems (+ -testnet, -futurenet). No tags; last push 2025-03-14. https://github.com/bigger-tech/simple-stellar-signer",
+			triggers: ["simple stellar signer repo", "plutodao simple signer"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"devasignhq/apps": [
+		{
+			note: "No longer accessible: github.com/devasignhq/apps returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-07-31 (description: monorepo of the DevAsign Maintainer and Contributor apps, app.devasign.com). The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/apps",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"devasignhq/devasign-api": [
+		{
+			note: "No longer accessible: github.com/devasignhq/devasign-api returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-06-19 and a release v1.1.0 dated 2026-06-26. The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/devasign-api",
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stanbar/stellot": [
+		{
+			note: "GitHub releases: 0.0.1 'Draft for SCF' (2020-03-21), 0.1.0 'IEEE Access' (2020-09-22), 0.2.0 'draft' (2023-10-27; 3 tags). README 'Stellot† on Soroban': a PhD-thesis proof-of-concept of the Stellot† receipt-free e-voting protocol (Feldman VSS/DKG, Shamir threshold decryption, hash nullifiers) with the election contract in contracts/election; live at stellot.com ('Threshold E-Voting on Soroban', 2026-09-02). https://github.com/stanbar/stellot/releases",
+			triggers: ["stellot voting soroban", "stellot releases"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
 	// ── P5 batch 8 (2026-09-02): 18 repos / 21 notes — the band BELOW the pool,
 	// curated-index repos with repoScore 50–59 (156 in the band; 98 examined
 	// after registry keys, earlier rejects and rows already carrying notes).
@@ -2240,6 +2478,138 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
  * as "judged" rather than "unexamined". Re-examine on a registry package,
  * a mainnet deployment, or a project link.
  */
+/**
+ * Batch-9 triage verdicts for the 40–49 band (2026-09-02): examined repos
+ * that yielded nothing durable, each with the reason — INTERNAL, never
+ * served, counted by the board as "judged" if the pool ever widens here.
+ */
+const BAND_40_49_TRIAGE_2026_09_02: Record<string, string> = {
+	"alternun-development/alternun":
+		"daily version tags (v1.1.80 2026-09-01; 906 tags) but 0 Stellar mentions in README, docs.alternun.io or alternun.io",
+	"alternun-development/alternun-admin-ui":
+		"private UI shell; 0 Stellar mentions; no tags",
+	"alternun-development/alternun-sc-staking":
+		"README contract ID CDJRRYST…YB2V not found on public or testnet stellar.expert; no tags",
+	"apay-io/apay-bot":
+		"1 KB README; package.json name unpublished; last push 2020",
+	"bigger-tech/flow":
+		"package.json placeholder repository; npm n8n-nodes-stellar 0.1.1 belongs to another repo (joaquinsoza → yripper/n8n-nodes-stellar)",
+	"bingtellar/blink-build":
+		"testnet only (both README IDs created on testnet 2026-03-25)",
+	"blockdaemon/agave-snapshot-uploader":
+		"not a Stellar repo (Solana snapshot uploader)",
+	"blockdaemon/pyth-exporter":
+		"not a Stellar repo (Solana/Pyth exporter; Go module origin gitlab.com/Blockdaemon/solana/pyth_exporter)",
+	"blockroll-tech/nuban-bank-prediction":
+		"not a Stellar repo (npm nuban-prediction 1.2.0 has no repository field; Nigerian bank lookup)",
+	"blockroll-tech/open-assets":
+		"not a Stellar repo (logo/asset library; 0 Stellar mentions)",
+	"btq-ag/btq-core":
+		"not a Stellar repo (own L1 reference node; v0.5.0-testnet)",
+	"chainpatrol/discord-bot":
+		"not a Stellar repo (private Discord bot; 0 Stellar mentions)",
+	"chainpatrol/docs": "not a Stellar repo (docs site; 0 Stellar mentions)",
+	"cityofzion/neon-wallet-desktop":
+		"not a Stellar repo (NEO/Ethereum wallet by its README; 0 Stellar mentions; v3.11.0 2026-06-17)",
+	"coinspect/wallet-security-framework":
+		"no Stellar fact in README (wallet security checklist; 0 mentions)",
+	"dappradar/nft-sales-adapters":
+		"no Stellar adapter in src/adapters (69 entries, none named stellar/soroban); 353-byte README",
+	"defarm-repo/soroban-value-chain":
+		"PoC by its own README; no tags; last push 2025-04",
+	"dextools-io/aggregator-widget":
+		"not a Stellar repo (widget docs; 0 Stellar mentions)",
+	"dextools-io/chart-widget":
+		"not a Stellar repo (widget docs; 0 Stellar mentions)",
+	"dfns/dfns-solutions": "recipes/examples; no registry, no tags",
+	"dfns/trusted-dealer":
+		"not Stellar-specific (CGGMP key import/export; crates `publish = false`; key-import/v0.5.0 2026-08-12)",
+	"dogstarcoin/auction-soroban-sc": "no tags, IDs or registry; last push 2023",
+	"drips-network/app":
+		"not a Stellar repo (EVM funding dapp; 0 Stellar mentions)",
+	"drips-network/contracts":
+		"not a Stellar repo (EVM contracts; per-chain tags v2_*_update_3)",
+	"flashbacknetwork/flashonstellar":
+		"tags only (0.3.1v2 2024-12-10; 4 tags); no IDs or registry",
+	"flutterwave/node-v3":
+		"npm flutterwave-node-v3 1.4.1 (2026-06-17; old path Flutterwave/Flutterwave-node-v3 → 301) but 0 Stellar mentions",
+	"flutterwave/php-v3":
+		"packagist flutterwavedev/flutterwave-v3 1.2.1 (2026-08-04; repo links back) but 0 Stellar mentions",
+	"flutterwave/python-v2":
+		"PyPI rave_python 1.5.0 (2026-06-15; homepage Flutterwave/rave-python → 301) but 0 Stellar mentions",
+	"flutterwave/react-v3":
+		"npm flutterwave-react-v3 1.3.3 (2026-02-11; old path Flutterwave/Flutterwave-React-v3 → 301) but 0 Stellar mentions",
+	"francoperez03/stellar-enclave":
+		"fork of NethermindEth/stellar-private-payments (GitHub banner); hackathon, four testnet IDs (2026-04-11)",
+	"gateway-fm/open-privacy-suite":
+		"not a Stellar repo (Ethereum privacy suite; v0.13.0-rc.3)",
+	"gateway-fm/ops-explorer":
+		"not a Stellar repo (Ethereum explorer; v0.9.0-rc.2)",
+	"gateway-fm/oz-policy-builder":
+		"README-only so far (no tags; crates unpublished; SCF milestone repo, push 2026-09-01)",
+	"grantchain/grantfox":
+		"private package; 0 Stellar mentions in README; no tags",
+	"hot-dao/omni-sdk":
+		"registry entry (@hot-labs/omni-sdk) does not link back to the repo",
+	"idos-network/idos-schema": "179-byte README; no tags; 0 Stellar mentions",
+	"indexed-xyz/docs": "docs site only (297-byte README; 0 Stellar mentions)",
+	"inferara/inferara.com": "company website source (119-byte README)",
+	"innookeke/veritask": "hackathon demo, testnet only (private package)",
+	"julianclatro/stellar-game-studio":
+		"fork of jamesbachini/Stellar-Game-Studio (GitHub banner); testnet ID (2026-02-04)",
+	"ledgerhq/lumen":
+		"not a Stellar repo (Ledger Design System; 'lumen' name collision; npm @ledgerhq/lumen-ui-react 0.1.56)",
+	"linkioafrica/wavy_soroban_contract":
+		"67-byte README; Cargo 0.0.0; last push 2024",
+	"lobstrco/fraudulent-assets": "README-only data list; no tags",
+	"lockb0x-llc/pakana-stellar-razor-components":
+		"NuGet entry carries no repository link",
+	"luanlabs/fluxity-interface":
+		"hosted app (app.fluxity.finance) but no releases, registry or IDs",
+	"luanlabs/fluxity-v1-core":
+		"Cargo fluxity-v1-core 0.2.0 unpublished; no tags",
+	"metagov/daostar":
+		"no Stellar fact in README (DAO standards; v1.0.0 2024-08-28; npm name unpublished)",
+	"mks044/reapp-poc": "proof of concept; private workspace; testnet",
+	"nrxschool/stellar-bootcamp": "course material; 980-byte README; no tags",
+	"offer-hub/protocol-offer-hub":
+		"hackathon-style Soroban contract; no tags, IDs or registry",
+	"offer-hub/x402":
+		"hackathon demo; package.json name 'metered' collides with an unrelated npm package (metered-org)",
+	"rango-exchange/rango-contracts-v2":
+		"not a Stellar repo (Solidity/hardhat; 311-byte README)",
+	"runtimeverification/simbolik-vscode":
+		"not a Stellar repo (Solidity debugger extension v15.0.1)",
+	"sentinelfi/core": "draft contracts workspace; no tags or IDs",
+	"sentinelfi/flight": "private UI; testnet only",
+	"sentinelfi/soroban_vault":
+		"'draft implementation intended for testing purposes only' (README); its 'Mainnet contract address' CCW67TSZ…MI75 is the USDC asset contract and CAS3J7GY…OWMA the XLM one (both created 2024-02-21 by the SAC deployer)",
+	"shogun444/agroshield": "hackathon-style app, testnet only",
+	"skyhitz/api":
+		"252-byte README; npm name skyhitz-api unpublished; last push 2020",
+	"skyhitz/cloudflare-graphql": "private worker backend; no IDs or tags",
+	"socket-fi/socketfi-dapp-v1":
+		"private package; 1.6 KB README; last push 2024",
+	"soundnesslabs/soundness-layer":
+		"not a Stellar repo (Sui/Walrus verification layer)",
+	"stackman27/soo": "no README, no tags",
+	"streamcharge/apicharge":
+		"issue-tracker repo by its own README ('use this repo to log issues and request features'); no tags",
+	"tenk-dao/smartdeploy":
+		"crates.io entries (smartdeploy-*) carry no repository field",
+	"vaquita-fi/vaquita-eth-global":
+		"ETHGlobal hackathon build; 0 Stellar mentions in README",
+	"warp-driver/hodlers-app":
+		"tech-demo submission by its own README; no IDs or tags",
+	"xycloo/onchain-stellar-complaints": "no README, no tags",
+	"xycloo/rs-zephyr-toolkit":
+		"crates.io entries carry no repository field — link is indirect",
+	"yieldback-cash/market-indexer":
+		"no README; package.json name ybc-indexer unpublished",
+	"yieldback-cash/ybc-contracts":
+		"no tags or IDs (siblings triaged in batches 5 and 8)",
+};
+
 const BAND_50_59_TRIAGE_2026_09_02: Record<string, string> = {
 	"0xshobha/stellar": "hackathon demo, no registry (2.3 KB README)",
 	"acta-team/contracts-acta-spikes":
@@ -2507,6 +2877,14 @@ for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
 for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
 	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
 		note: `Band 50–59 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		source: "curated",
+		asOf: "2026-09-02",
+		visibility: "internal",
+	});
+}
+for (const [key, why] of Object.entries(BAND_40_49_TRIAGE_2026_09_02)) {
+	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+		note: `Band 40–49 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
 		visibility: "internal",
