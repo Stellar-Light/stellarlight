@@ -2,11 +2,11 @@
 
 /**
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
- * touching circles that carves each token's mark as negative space, and
- * reorganises through two full-bleed patterns between logos so a mark lands
- * as an event rather than blending into a steady scroll. Framework-free
- * Canvas 2D + rAF, driven entirely by `DotCut` (./engine.ts); this component
- * only loads the logos, builds the scene list, and wires lifecycle.
+ * touching circles that carves each token's mark (or a currency symbol) as
+ * negative space, cycling between them so a mark lands as an event rather
+ * than blending into a steady scroll. Framework-free Canvas 2D + rAF, driven
+ * entirely by `DotCut` (./engine.ts); this component only loads the logos,
+ * builds the scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
@@ -14,17 +14,21 @@ import { DotCut } from "./engine";
 import type { Scene } from "./scenes";
 
 const LOGO_SLUGS = ["usdt0", "usdc", "eurc", "pyusd"] as const;
+const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
 
 // Must match engine.ts's own inset margin (pitch derivation) — see resize().
 const GRID_MARGIN = 0.75;
-// The engine's default cols=42 assumes a roughly square container. This
-// banner is a full-width, short strip (~6:1 at desktop): at 42 cols that
-// starves the grid to ~5 rows, which is too little vertical resolution for a
-// logo's internal glyph to survive downsampling — verified empirically
-// against the real marks, coverage collapsed to 0 (the fallback-to-intact-
-// lattice path) for several of them. Solving for a fixed row count instead
-// keeps every mark legible regardless of the banner's actual aspect ratio.
-const TARGET_ROWS = 20;
+// On production this banner renders at ~545×160 CSS px — a ~3.4:1 strip, far
+// wider than tall. A mark sized to ~58% of grid HEIGHT is only a handful of
+// cells tall at a low row count, which is too coarse for a logo or currency
+// symbol to survive downsampling: at the previous TARGET_ROWS=20 (72×20 at
+// that size) a "$" carved down to an unreadable diagonal squiggle. Solving
+// for a much higher row count fixes this directly — the fix is resolution,
+// not a smaller/differently-shaped mark. Verified by hand at 70: every mark
+// this component uses reads clearly in an ASCII dump of the actual carved
+// mask at production size (see this PR's description). Cols follow from the
+// container's own aspect ratio, so pitch stays fine enough at any width.
+const TARGET_ROWS = 70;
 
 function colsForRows(w: number, h: number, targetRows: number): number {
 	const cols = (w * (targetRows + 2 * GRID_MARGIN)) / h - 2 * GRID_MARGIN;
@@ -65,11 +69,15 @@ export function DotCutBanner() {
 			.then(([usdt0, usdc, eurc, pyusd]) => {
 				if (cancelled) return;
 
-				// Four token marks + two full-bleed patterns, so the field visibly
-				// reorganises between logos rather than reading as a steady scroll.
-				// Each scene's `style` axis (linear/radial/random) deliberately
-				// differs from its `transition` axis — see engine.ts's cellMotion /
-				// styleField for what each transition and style actually is.
+				// Four token marks interleaved with four currency symbols — no
+				// filler pattern scenes (rings/checker carved nothing, so they read
+				// as noise between the marks). Symbols are picked for surviving a
+				// coarse grid: bold, closed, high-contrast glyphs only (the dollar,
+				// euro, pound and yen signs) — most lowercase, arrows and
+				// punctuation dissolve at this cell count. Each scene's `style`
+				// axis (linear/radial/random) deliberately differs from its
+				// `transition` axis — see engine.ts's cellMotion / styleField for
+				// what each transition and style actually is.
 				const scenes: Scene[] = [
 					{
 						kind: "image",
@@ -79,7 +87,14 @@ export function DotCutBanner() {
 						palette: 6,
 						style: "swell",
 					},
-					{ kind: "rings", transition: "ripple", palette: 10, style: "grain" },
+					{
+						kind: "text",
+						value: "$",
+						label: "usd",
+						transition: "ripple",
+						palette: 10,
+						style: "grain",
+					},
 					{
 						kind: "image",
 						image: usdc,
@@ -87,6 +102,14 @@ export function DotCutBanner() {
 						transition: "scatter",
 						palette: 7,
 						style: "streak",
+					},
+					{
+						kind: "text",
+						value: "€",
+						label: "eur",
+						transition: "columns",
+						palette: 11,
+						style: "swell",
 					},
 					{
 						kind: "image",
@@ -97,9 +120,11 @@ export function DotCutBanner() {
 						style: "drift",
 					},
 					{
-						kind: "checker",
-						transition: "columns",
-						palette: 11,
+						kind: "text",
+						value: "£",
+						label: "gbp",
+						transition: "wipe",
+						palette: 10,
 						style: "grain",
 					},
 					{
@@ -110,13 +135,17 @@ export function DotCutBanner() {
 						palette: 9,
 						style: "streak",
 					},
+					{
+						kind: "text",
+						value: "¥",
+						label: "jpy",
+						transition: "scatter",
+						palette: 11,
+						style: "drift",
+					},
 				];
 
-				const engine = new DotCut(
-					host,
-					scenes,
-					"ui-sans-serif, system-ui, sans-serif",
-				);
+				const engine = new DotCut(host, scenes, FONT_FAMILY);
 				engineRef.current = engine;
 				if (!engine.ok) return;
 				engine.setParams({
