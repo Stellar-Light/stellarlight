@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T00:45:18.657Z",
+ "generatedAt": "2026-09-02T01:43:36.497Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -292,7 +292,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1084,
+  "population": 1086,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9688,7 +9688,7 @@
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 41
+    "withNotes": 47
    },
    "mainnetJoin": {
     "pool": 3723,
@@ -9709,11 +9709,11 @@
     },
     {
      "bucket": "20–29",
-     "count": 599
+     "count": 598
     },
     {
      "bucket": "30–39",
-     "count": 466
+     "count": 467
     },
     {
      "bucket": "40–49",
@@ -9807,7 +9807,7 @@
    "languageOther": 48
   },
   "withCodeDepth": 7489,
-  "withNotes": 303,
+  "withNotes": 327,
   "withMainnet": 93,
   "top": [
    {
@@ -10870,7 +10870,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "41 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "47 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11180,13 +11180,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12826,
+    "missing": 12802,
     "of": 13129,
-    "share": 97.7,
+    "share": 97.5,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 170,
+    "examplePoolSize": 164,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
