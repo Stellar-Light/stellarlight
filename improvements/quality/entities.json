@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T16:34:13.134Z",
+ "generatedAt": "2026-09-02T17:02:08.595Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -292,7 +292,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1088,
+  "population": 1090,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -8902,6 +8902,12 @@
     "count": 2
    }
   ],
+  "strongBasisSplit": {
+   "weakLiveRows": 821,
+   "onchainEligible": 41,
+   "appOnly": 780,
+   "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification."
+  },
   "basisMix": [
    {
     "basis": "site-liveness",
@@ -8939,6 +8945,7 @@
     "statusBasis": "site-liveness",
     "prominence": 72,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Stablecoin"
     ],
@@ -8958,6 +8965,7 @@
     "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Stablecoin"
     ],
@@ -8977,6 +8985,7 @@
     "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Stablecoin",
      "RWA"
@@ -8997,6 +9006,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "SDK"
     ],
@@ -9015,6 +9025,7 @@
     "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [],
     "score": 60,
     "factsPresent": 3,
@@ -9031,6 +9042,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [],
     "score": 60,
     "factsPresent": 3,
@@ -9047,6 +9059,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Analytics"
     ],
@@ -9065,6 +9078,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments",
      "DEX"
@@ -9084,6 +9098,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Education"
     ],
@@ -9102,6 +9117,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Stablecoin"
     ],
@@ -9120,6 +9136,7 @@
     "statusBasis": "unverified",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Security",
      "Lending"
@@ -9139,6 +9156,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "DEX"
     ],
@@ -9157,6 +9175,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "SDK"
     ],
@@ -9175,6 +9194,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9193,6 +9213,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "SDK"
     ],
@@ -9211,6 +9232,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Wallet"
     ],
@@ -9229,6 +9251,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Analytics"
     ],
@@ -9247,6 +9270,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Education"
     ],
@@ -9265,6 +9289,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9283,6 +9308,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Education"
     ],
@@ -9301,6 +9327,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Education"
     ],
@@ -9319,6 +9346,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9337,6 +9365,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9355,6 +9384,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Social Impact",
      "RWA"
@@ -9374,6 +9404,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9392,6 +9423,7 @@
     "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Payments"
     ],
@@ -9410,6 +9442,7 @@
     "statusBasis": "site-liveness",
     "prominence": 90,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Lending"
     ],
@@ -9427,6 +9460,7 @@
     "statusBasis": "site-liveness",
     "prominence": 90,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Gaming"
     ],
@@ -9444,6 +9478,7 @@
     "statusBasis": "site-liveness",
     "prominence": 90,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Anchor"
     ],
@@ -9461,6 +9496,7 @@
     "statusBasis": "site-liveness",
     "prominence": 88,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Bridge"
     ],
@@ -9478,6 +9514,7 @@
     "statusBasis": "site-liveness",
     "prominence": 88,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "SDK"
     ],
@@ -9495,6 +9532,7 @@
     "statusBasis": "site-liveness",
     "prominence": 88,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Analytics",
      "Indexer"
@@ -9513,6 +9551,7 @@
     "statusBasis": "site-liveness",
     "prominence": 88,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Security"
     ],
@@ -9530,6 +9569,7 @@
     "statusBasis": "site-liveness",
     "prominence": 85,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "RWA"
     ],
@@ -9547,6 +9587,7 @@
     "statusBasis": "site-liveness",
     "prominence": 85,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "SDK"
     ],
@@ -9564,6 +9605,7 @@
     "statusBasis": "site-liveness",
     "prominence": 85,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Security",
      "SDK"
@@ -9582,6 +9624,7 @@
     "statusBasis": "site-liveness",
     "prominence": 84,
     "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Bridge"
     ],
@@ -9599,6 +9642,7 @@
     "statusBasis": "site-liveness",
     "prominence": 84,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "Anchor"
     ],
@@ -9616,6 +9660,7 @@
     "statusBasis": "operator-announcement",
     "prominence": 84,
     "deploymentNetwork": "testnet",
+    "hasOnchainFootprint": true,
     "types": [
      "Oracle"
     ],
@@ -9633,6 +9678,7 @@
     "statusBasis": "site-liveness",
     "prominence": 84,
     "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
     "types": [
      "RPC"
     ],
@@ -9688,12 +9734,75 @@
     "withCodeDepth": 6523
    },
    "knowledgeNotes": {
-    "pool": 208,
-    "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 93,
-    "triaged": 115,
+    "pool": 408,
+    "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
+    "withNotes": 151,
+    "triaged": 195,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
-    "missing": []
+    "missing": [
+     "0xyudz/MagentiX",
+     "7maylord/erebus",
+     "ACTA-Team/brazil-regional-kit",
+     "Airswiftio/SCF",
+     "Chidubemkingsley/ProofEscrow",
+     "ELLA0VICTOR/sentryx402",
+     "Edgadafi/dispersor-nomina-alebrije",
+     "Elegidokawai2/Hackaton--Ajolote-en-ingles-",
+     "Eras256/Nirium",
+     "Gabrululu/Propulsor",
+     "GatoGroZero/devengo",
+     "Glayzz/agentmarket-pro",
+     "Godbrand0/argent",
+     "Inferara/inference-language-spec",
+     "JWattjr/x4tella-mvp",
+     "Jennivarl/AutoX420",
+     "Jennivarl/underworld",
+     "JoseLuisMirRo/settler",
+     "MarxMad/Agenticx402",
+     "Moonlight-Protocol/soroban-core",
+     "Nectar-Network/nectar",
+     "OscarGauss/fan-match",
+     "RodolfoNV/PROYECTO-RBJ",
+     "Sam-Rytech/Automata-V2",
+     "ShadowFirmware/Safelytics",
+     "ShivRaiGithub/Genesis402",
+     "Techkeyy/the-signaler",
+     "Unique-coder/stellarbrief",
+     "WebSoroban/backend-ide",
+     "XCCY-Labs/xccy-soroban",
+     "aliveevie/sentinelmesh",
+     "blockdaemon/solana-cluster",
+     "chinesepowered/hack-stellaragents",
+     "comzzy-comzzy/datavend",
+     "cushyon/Stellar_migration",
+     "dfns/dfns-sdk-ts",
+     "dfns/terraform-provider-tunnel",
+     "diegoveme/Macetero",
+     "divineudoka12/Zerixs",
+     "dogstarapps/arka.fund",
+     "dpinones/liars-dice",
+     "emdevelopa/Stellar_Payment_API",
+     "emrekayat/Query402",
+     "idos-network/idos-sdk-js",
+     "isaac-richie/stellarpulse",
+     "methu-ship/toll",
+     "nallely-lopez/RizoDAO",
+     "nice-bills/stipend",
+     "official-jumpa/jumpa-web-app",
+     "orbitkit-fun/stellar-agent-kit",
+     "panditdhamdhere/Payflow",
+     "penguinpecker/ko402",
+     "pragya-shar/quilltip",
+     "rtomas/soundstake",
+     "shariqazeem/kyvernlabs",
+     "soomtochukwu/TradeFlow",
+     "stallionsassemble/stallion-contract",
+     "stellarcarbon/sorocarbon",
+     "stellarchain/soroban-auditor",
+     "towa-hi/StellarUnityDevToolkit",
+     "warp-driver/Phoenix-Blend-Pool",
+     "zzzbedream/Cortex402"
+    ]
    },
    "mainnetJoin": {
     "pool": 4581,
@@ -9812,7 +9921,7 @@
    "languageOther": 49
   },
   "withCodeDepth": 8822,
-  "withNotes": 452,
+  "withNotes": 470,
   "withMainnet": 112,
   "top": [
    {
@@ -10875,7 +10984,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "93 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "151 of 408 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11192,9 +11301,9 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12677,
+    "missing": 12659,
     "of": 13129,
-    "share": 96.6,
+    "share": 96.4,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
@@ -11267,7 +11376,7 @@
     "missing": 821,
     "of": 984,
     "share": 83.4,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 41 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 780 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 54,
