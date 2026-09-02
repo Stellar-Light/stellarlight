@@ -184,6 +184,8 @@ export async function GET(req: NextRequest) {
 				limit: 5,
 				depth: 0,
 				select: {
+					// the exact-name filter below reads fullName — it must be selected
+					fullName: true,
 					lastCommitAt: true,
 					stars: true,
 					isArchived: true,
