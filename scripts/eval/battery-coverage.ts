@@ -61,6 +61,7 @@ type Route =
 	| { kind: "projects"; basis: "confidence" }
 	| { kind: "repos"; basis: "lexical-anchor@top3" }
 	| { kind: "hackathons"; basis: "presence" }
+	| { kind: "leaderboard"; basis: "presence" }
 	| { kind: "skip-lumenloop" }
 	| { kind: "skip-other" };
 
@@ -74,6 +75,13 @@ function routeOf(surfaces: string[]): Route {
 		return { kind: "research", basis: "confidence" };
 	if (s.includes("scout.searchProjects"))
 		return { kind: "projects", basis: "confidence" };
+	// getLeaderboard outranks searchRepos: a ranking question ("which projects
+	// have the most open issues — rank them") is answered by the leaderboard
+	// rows (github.openIssuesTotal), and grading it on repo-search lexical
+	// anchors mis-graded q-tool-leaderboard-open-issues for 17 days (the
+	// battery-coverage-weak residual since 2026-08-16).
+	if (s.includes("scout.getLeaderboard"))
+		return { kind: "leaderboard", basis: "presence" };
 	if (s.includes("scout.searchRepos"))
 		return { kind: "repos", basis: "lexical-anchor@top3" };
 	if (s.includes("scout.getHackathons"))
@@ -251,6 +259,42 @@ async function main() {
 				if (!body) throw new Error("rate-limited after retry");
 				score = anchorScore(question, body.repos ?? []);
 				best = body.repos?.[0]?.fullName ?? "none";
+			} else if (route.kind === "leaderboard") {
+				// A ranking question is answered by the leaderboard rows themselves:
+				// the fact the case asks for (open-issue counts, ranked) is
+				// github.openIssuesTotal on each row. Presence of that field on a
+				// served roster IS coverage; lexical anchors on repo search never
+				// were (q-tool-leaderboard-open-issues sat weak from 2026-08-16).
+				const body = (await probeJson(`${BASE}/api/leaderboard?limit=25`)) as {
+					rows?: Array<{
+						slug?: string;
+						github?: { openIssuesTotal?: number };
+					}>;
+					leaderboard?: Array<{
+						slug?: string;
+						github?: { openIssuesTotal?: number };
+					}>;
+					projects?: Array<{
+						slug?: string;
+						github?: { openIssuesTotal?: number };
+					}>;
+					items?: Array<{
+						slug?: string;
+						github?: { openIssuesTotal?: number };
+					}>;
+				} | null;
+				if (!body) throw new Error("rate-limited after retry");
+				const rows =
+					body.rows ?? body.leaderboard ?? body.projects ?? body.items ?? [];
+				const ranked = rows.filter(
+					(r) => typeof r.github?.openIssuesTotal === "number",
+				);
+				// Presence: a served, ranked roster answers "is there a leaderboard /
+				// who ranks"; a question about open issues additionally needs the
+				// per-row count the ranking would be built from.
+				const asksIssues = /\bissues?\b/i.test(question);
+				score = rows.length >= 3 && (!asksIssues || ranked.length >= 3) ? 1 : 0;
+				best = `${ranked.length}/${rows.length} leaderboard row(s)${asksIssues ? " carry openIssuesTotal" : ""}`;
 			} else {
 				// A natural-language question never matches an event NAME via ?q=
 				// (the first sweep scored every hackathon case 0.00 while the
