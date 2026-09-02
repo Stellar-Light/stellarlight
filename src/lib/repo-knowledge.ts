@@ -42,6 +42,347 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 6 (2026-09-02): 36 repos / 39 notes — the tier below batch 5.
+	// 877 unseen repos were screened, ~70 had any signal beyond metadata, and
+	// these are the ones with a durable, registry- or banner-backed fact:
+	// Albedo, stellar-scaffold, Loam (7 crates, frontend now redirects to
+	// stellar-scaffold/ui), lightsail contract-bindings + strledger,
+	// OpenZeppelin monitor / keystore / adapters / upgrader plugin, the quorum
+	// analyzer, eight ARCHIVED repos dated only by GitHub's banner with old
+	// stellar/ paths resolved by redirect, and a handful of live products
+	// with full mainnet contract IDs (stellar-8004, ohloss). Kept out:
+	// pendulum-chain/vortex (Stellar mentioned once in an SDK README), and
+	// two "X is not on npm / host answered 522 today" clauses — negatives
+	// and transients age badly. ~45 further candidates yielded nothing
+	// durable and are named in the batch notes (several are not Stellar
+	// projects at all: StellarStation satellites, an EVM indexer, Pi
+	// Network). Research used 0 GitHub API calls.
+	"stellar-expert/albedo": [
+		{
+			note: "npm package @albedo-link/intent — 0.13.0 (2025-06-13; 17 versions since 2020-07-14; repository field → stellar-expert/albedo; MIT), built from this monorepo's intent/ directory; the README (README.MD, uppercase, on default branch master) installs it with `npm i -S @albedo-link/intent`. No GitHub releases. https://www.npmjs.com/package/@albedo-link/intent",
+			triggers: ["albedo npm package", "albedo intent library"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "README: the frontend/ directory is the albedo.link site and browser-extension UI; hosted at https://albedo.link (200 on 2026-09-02) with a demo playground at https://albedo.link/demo and a no-code payment-request generator at https://albedo.link/playground#payment-request; SEP-0007 'web+stellar' links are handled automatically. https://github.com/stellar-expert/albedo",
+			triggers: ["albedo hosted url", "albedo demo playground"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-scaffold/cli": [
+		{
+			note: "crates.io stellar-scaffold-cli — 0.0.27 (2026-08-13; 30 versions since 2025-05-12; repository → this repo's crates/stellar-scaffold-cli) plus stellar-build 0.0.7 (2026-06-30; 8 versions; same repo). README install: `cargo install --locked stellar-scaffold-cli`. Latest GitHub release stellar-scaffold-cli-v0.0.27 (2026-08-13); workspace pins soroban-sdk 27.0.0-rc.1 and stellar-xdr =27.0.0. https://crates.io/crates/stellar-scaffold-cli",
+			triggers: ["scaffold stellar install", "stellar scaffold crate"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"loambuild/loam": [
+		{
+			note: "crates.io: loam-cli 0.14.4, loam-sdk 0.6.16, loam-soroban-sdk 0.6.16, loam-sdk-macro 0.8.6, loam-subcontract-core 0.7.9, loam-subcontract-ft 0.7.2 (all last published 2025-01-22) and loam-build 0.7.3 (2024-08-05); each entry links back to this repo's crates/ tree. Latest GitHub release loam-subcontract-ft-v0.7.2 (2025-01-22); workspace pins soroban-sdk 22.0.0-rc.3; not archived. https://crates.io/crates/loam-cli",
+			triggers: ["loam sdk crates", "loam cli crate"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "README names a third component, 'Loam Frontend' at github.com/loambuild/frontend — that path now 301-redirects to github.com/stellar-scaffold/ui (checked 2026-09-02), the Scaffold Stellar UI repo; the README itself never mentions Scaffold Stellar and no rename date is stated anywhere we read. https://github.com/loambuild/loam",
+			triggers: ["loam frontend repo", "loam scaffold stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lightsail-network/stellar-contract-bindings": [
+		{
+			note: "PyPI package stellar-contract-bindings — 0.5.0b0 (2025-08-23; 7 releases, all betas; project URLs point here). README: `pip install stellar-contract-bindings`; generates Soroban bindings for Python, Java, Flutter/Dart, PHP, Swift/iOS and Kotlin Multiplatform (TypeScript/Rust are left to stellar-cli); hosted generator https://stellar-contract-bindings.fly.dev/ (200 on 2026-09-02). https://pypi.org/project/stellar-contract-bindings/",
+			triggers: [
+				"contract bindings python",
+				"soroban bindings java flutter",
+				"generate bindings kotlin swift",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lightsail-network/strledger": [
+		{
+			note: "PyPI package strledger — 0.10.1 (2025-09-01; 19 releases; homepage/repository fields point here), matching GitHub release v0.10.1 (2025-09-01). README: `pip install -U strledger`; Python bindings + CLI for the Ledger hardware-wallet Stellar app (get-address, app-info, signing), pairing with the StellarCN py-stellar-base SDK. https://pypi.org/project/strledger/",
+			triggers: ["ledger stellar python", "strledger install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"openzeppelin/openzeppelin-monitor": [
+		{
+			note: "Docker image openzeppelin/openzeppelin-monitor (Docker Hub, registered 2025-04-04): tags v1.6.0 / 1.6.0 / latest pushed 2026-07-16, matching GitHub release v1.6.0 (2026-07-15) and Cargo.toml 1.6.0; not on crates.io. README 'Supported Networks': EVM-compatible, Stellar, Solana, Midnight (partial); depends on stellar-xdr 23.0.0. Sibling of openzeppelin-relayer. https://hub.docker.com/r/openzeppelin/openzeppelin-monitor",
+			triggers: [
+				"openzeppelin monitor docker",
+				"openzeppelin monitor stellar support",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"openzeppelin/oz-keystore": [
+		{
+			note: "crates.io oz-keystore — 0.1.4 (2025-05-01; 5 versions since 2025-01-20; repository → this repo). README: unified keystore library — encrypted-JSON local keystore and HashiCorp Vault backends — for EVM, Stellar and Solana keys, with examples local-keystore-to-stellar-wallet and hashicorp-vault-to-stellar-wallet. No GitHub releases. https://crates.io/crates/oz-keystore",
+			triggers: ["openzeppelin keystore crate", "oz keystore stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"openzeppelin/openzeppelin-adapters": [
+		{
+			note: "npm @openzeppelin/adapter-stellar — 4.0.1 (2026-08-21; 12 versions since 2026-03-24; repository → this monorepo, directory packages/adapter-stellar; AGPL-3.0). README: full Soroban adapter for Stellar public/test networks, wallet integration via Stellar Wallets Kit, SAC detection. Releases are per-package tags, e.g. @openzeppelin/adapter-stellar@4.0.1. https://www.npmjs.com/package/@openzeppelin/adapter-stellar",
+			triggers: ["openzeppelin adapter stellar", "openzeppelin adapters npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"openzeppelin/stellar-upgrader-cli": [
+		{
+			note: "Stellar CLI plugin installed from source only — README: git clone, `cargo install --path .`, then binary `stellar-upgrader` shows in `stellar plugins --list`; Cargo.toml (stellar-upgrader 0.1.0) still has the placeholder repository 'github.com/your-username/stellar-upgrader'. The crates.io crate stellar-upgrader (1.1.4, publisher interoplabs-ci, no repository field) is a different project. https://github.com/OpenZeppelin/stellar-upgrader-cli",
+			triggers: [
+				"stellar upgrader plugin install",
+				"openzeppelin upgrader cli",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar/stellar-quorum-analyzer": [
+		{
+			note: "SAT-solver library for FBAS quorum-intersection checks (SCP); README: 'Primary: Integrated with stellar-core'. stellar-core consumes it as a git dependency — src/rust/Cargo.toml has [dependencies.stellar-quorum-analyzer] version 0.1.0, git = this repo, rev 502a354eb9a31cf86098be84aa1b3081767fa3c7 (read 2026-09-02); not on crates.io, no releases; pins stellar-xdr =27.0.0. https://github.com/stellar/stellar-quorum-analyzer",
+			triggers: ["quorum analyzer stellar core", "quorum intersection library"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar/stellar-turrets": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jan 8, 2026' (read 2026-09-02). README: Stellar Turrets reference implementation (Cloudflare Workers + AWS Lambda); its API-docs link https://tyvdh.github.io/stellar-turrets/ returns 404. The original tyvdh/stellar-turrets path now redirects to kalepail/stellar-turrets, itself archived ('Jan 15, 2022'). https://github.com/stellar/stellar-turrets",
+			triggers: [
+				"stellar turrets archived",
+				"turrets reference implementation",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-deprecated/transfer-server-validator": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Dec 15, 2021' (read 2026-09-02); github.com/stellar/transfer-server-validator redirects here. README: Jest suite for SEP-6/24/31 transfer servers at https://anchor-validator.stellar.org — now a 301 to https://anchor-tests.stellar.org/ (the stellar/stellar-anchor-tests UI; no HTTP response on 2026-09-02). https://github.com/stellar-deprecated/transfer-server-validator",
+			triggers: ["transfer server validator", "anchor validator deprecated"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-deprecated/sep24-demo-client": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep24-demo-client redirects here. README: 'Stellar SEP24 Demo Client has been deprecated' — functionality integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client. https://github.com/stellar-deprecated/sep24-demo-client",
+			triggers: ["sep24 demo client", "sep-24 demo deprecated"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-deprecated/sep31-demo-client": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep31-demo-client redirects here. README: 'Stellar SEP31 Demo Client is now Deprecated' — integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client, the same as the SEP-24 client's. https://github.com/stellar-deprecated/sep31-demo-client",
+			triggers: ["sep31 demo client", "sep-31 demo deprecated"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-deprecated/auth-required-tokens-manager": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 1, 2024' (read 2026-09-02); github.com/stellar/auth-required-tokens-manager redirects here. README: web app to manage TESTNET auth-required tokens and generate SEP-7 QR codes for payment / path-payment operations; package.json name is stellar-react-starter. https://github.com/stellar-deprecated/auth-required-tokens-manager",
+			triggers: ["auth required tokens manager"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar-deprecated/network-explorer": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 16, 2019' (read 2026-09-02); github.com/stellar/network-explorer redirects here. README line 1: 'This tool is no longer maintained. Take a look at the laboratory instead' (github.com/stellar/laboratory, live). https://github.com/stellar-deprecated/network-explorer",
+			triggers: ["stellar network explorer archived"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"stellar/core-node-admin-panel": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jun 6, 2024' (read 2026-09-02). README 'Proposal': a UI admin toolset for validator operators to judge node health and risks, run as a proxy server + front-end against a stellar-core instance (`npm run dev`); package.json name stellar-node-admin, private. https://github.com/stellar/core-node-admin-panel",
+			triggers: ["core node admin panel"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"lobstrco/stellar-core-parallel-catchup-py": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jun 22, 2026' (read 2026-09-02). readme.md (lowercase filename): 'Fast Stellar Core Catch Up' — Python scripts that run a full validator's history catch-up as parallel ledger-range jobs ('less than a day' on a powerful server vs. 'more than a month' serially); CircleCI badge. https://github.com/Lobstrco/stellar-core-parallel-catchup-py",
+			triggers: ["parallel catchup stellar core", "lobstr catchup script"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"justmert/soropass": [
+		{
+			note: "npm @soropass/core — 0.3.1 (2026-09-01; 6 versions since 2026-08-10) and @soropass/ui 0.3.0 (2026-09-01; 1 version), both with repository → justmert/soropass; peer dependency @stellar/stellar-sdk. All contract addresses in the README are testnet. https://www.npmjs.com/package/@soropass/core",
+			triggers: ["soropass npm", "soropass passkey package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"sergical/blockchain-wallet-validator": [
+		{
+			note: "npm blockchain-wallet-validator — 1.2.1 (2025-12-23; 7 versions since 2024-12-17; repository → sergical/blockchain-wallet-validator), matching GitHub release v1.2.1. README lists Stellar among validated networks (Base32 G… public keys, e.g. GBQMXVTR5HQNRGXPR4ZPBOZR7VQXOQMEQMZWIVLIW2MYBXC2HQWZZ4VJ) and says releases go out via npm trusted publishers (GitHub Actions OIDC). https://www.npmjs.com/package/blockchain-wallet-validator",
+			triggers: [
+				"validate stellar address library",
+				"wallet address validator npm",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"raceeyxo/use-stellar": [
+		{
+			note: "npm use-stellar — 0.1.5 (2026-08-24; 4 versions since 2026-06-03). The registry's repository field names github.com/israelolrunfemi/use-stellar, which 301-redirects to RaceeyXo/use-stellar (checked 2026-09-02). README: React hooks for wallet connection, balances and tx submission; @stellar/stellar-sdk is bundled as a regular dependency, not a peer dependency. https://www.npmjs.com/package/use-stellar",
+			triggers: ["use-stellar react hooks", "stellar react hooks package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"defarm-repo/defarm-sdk-ts": [
+		{
+			note: "npm @defarm/sdk — 0.2.1 (2026-08-22; 9 versions since 2026-02-22; repository → defarm-repo/defarm-sdk-ts; ships a `defarm` CLI bin; MIT). README: client-side sealing ('blind envelopes') for DeFarm livestock/item records, each DFID 'anchored on a public network (Stellar) + IPFS'; the pure-crypto core (src/core) is the auditable surface. No GitHub releases. https://www.npmjs.com/package/@defarm/sdk",
+			triggers: ["defarm sdk npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"trionlabs/stellar-8004": [
+		{
+			note: "README 'Contracts' table, MAINNET: Identity Registry CBGPDCJIHQ32G42BE7F2CIT3YW6XRN5ED6GQJHCRZSNAYH6TGMCL6X35, Reputation Registry CBOIAIMMWAXI57OATLX6BWVDQLCC4YU55HV6MZXFRP6CBSGAMXSTEPPA, Validation Registry CBT6WWEVEPT2UFGFGVJJ7ELYGLQAGRYSVGDTGMCJTRWXOH27MWUO7UJG ('single source of truth': webapp/packages/sdk/src/core/config.ts). Explorer https://stellar8004.com (200 on 2026-09-02). https://github.com/trionlabs/stellar-8004",
+			triggers: [
+				"8004 mainnet contract addresses",
+				"stellar 8004 identity registry",
+				"agent registry stellar mainnet",
+			],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+		{
+			note: "npm @trionlabs/stellar8004 — 0.0.11 (2026-04-13; 2 versions; repository → trionlabs/stellar-8004): the TypeScript SDK for the three 8004 registries (identity, reputation, validation). No GitHub releases; workspace pins soroban-sdk 25. https://www.npmjs.com/package/@trionlabs/stellar8004",
+			triggers: ["stellar8004 npm", "8004 sdk package"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"kalepail/ohloss": [
+		{
+			note: "README 'Mainnet Deployment' — 'Status: Live on mainnet'; current contract CBOM2KGQDK4TMTIULH2UJWNLWEIXG47IM2RND4UDGM7KK5EQUQDFOVAY (CHITSHEET.md marks it NEW; the OLD contract was CAHPLVEDW2HWY2EOTCTECDK5ZRHAB5FLER3WGHQ5OPFMBMMFJSTBRJZU). Workspace pins soroban-sdk 23.1.0; no releases or tags. https://github.com/kalepail/ohloss",
+			triggers: ["ohloss contract address", "ohloss mainnet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"xoxno/rs-lending-xlm": [
+		{
+			note: "README: over-collateralized money market on Soroban (central pool, per-market accounting, spokes as risk regimes, timelocked governance), licensed PolyForm Noncommercial 1.0.0 — 'Commercial use requires a written agreement with XOXNO'. Workspace pins soroban-sdk =27.0.6; no releases or tags; the README lists no deployed addresses ('resolve deployed addresses from the active network configuration'). https://github.com/XOXNO/rs-lending-xlm",
+			triggers: ["xoxno lending license", "xoxno lending stellar"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"kalepail/superpeach": [
+		{
+			note: "README: passkey-powered multi-signer Stellar smart-wallet example — two sites in one repo (a 'Super Signer' site and an example dapp); demos hosted at https://superpeach.xyz/ plus https://minipeach-a.pages.dev/ and minipeach-b.pages.dev (superpeach.xyz and minipeach-a returned 200 on 2026-09-02). package.json is private; no releases. https://github.com/kalepail/superpeach",
+			triggers: ["superpeach demo", "super peach passkey wallet"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"jamesbachini/soroban-playground": [
+		{
+			note: "README: online IDE for Soroban contracts, 'Available at https://soropg.com'; builds and tests run in a sandboxed Docker container behind a Rust app; ships soroban-sdk, sep-41-token and the OpenZeppelin stellar-* crates by default. Cargo package Soroban-Playground 0.8.1; no releases. https://github.com/jamesbachini/Soroban-Playground",
+			triggers: ["soroban playground online ide", "soroban playground hosted"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"brozorec/smart-account-sign": [
+		{
+			note: "README: two Stellar CLI plugins for OpenZeppelin smart accounts — stellar-smart-account and stellar-passkey — installed from source (`cargo install --locked --path stellar-smart-account` / `--path stellar-passkey`, then `stellar plugins --list`); neither crate is on crates.io (2026-09-02). Stated limitation: Delegated signers are not supported (External signers only). https://github.com/brozorec/smart-account-sign",
+			triggers: ["smart account cli plugin", "stellar passkey plugin install"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"script3/fee-vault": [
+		{
+			note: "Blend fee-vault contract. Latest GitHub release v1.0.0_fee-vault_cli22.0.1 (2025-05-06; 3 tags on the page); Cargo `publish = false` (not on crates.io); pins soroban-sdk 22.0.7. A separate repo script3/fee-vault-v2 exists (ERC4626-like share vault with optional signer gating and take / capped / fixed-rate configs; no releases as of 2026-09-02). https://github.com/script3/fee-vault/releases",
+			triggers: ["blend fee vault release", "fee vault v2 repo"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"script3/fee-vault-v2": [
+		{
+			note: "README: Blend fee vault as an ERC4626-like share vault holding a pool's b_tokens, optional `signer` gating on entry, three admin configurations (take rate, capped rate, fixed rate). Cargo fee-vault-v2 1.0.0 `publish = false`, soroban-sdk 22.0.8; NO releases or tags as of 2026-09-02 (the V1 repo script3/fee-vault has v1.0.0_fee-vault_cli22.0.1, 2025-05-06). https://github.com/script3/fee-vault-v2",
+			triggers: ["fee vault v2 configurations", "blend fee vault signer"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"soroswap/spacewalk-implementation": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). README (114 bytes): 'Implementation of the Skywalk bridge between Pendulum (Polkadot) and Stellar / Soroban' (sic — the repo name says Spacewalk); no manifest, releases or tags. https://github.com/soroswap/spacewalk-implementation",
+			triggers: ["soroswap spacewalk archived"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"soroswap/phoenix-zephyr-indexer": [
+		{
+			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). No README; Cargo package zephyr-phoenix 0.1.0 pinning soroban-sdk 20.2.0 — a Zephyr indexer program for Phoenix; no releases or tags. https://github.com/soroswap/phoenix-zephyr-indexer",
+			triggers: ["phoenix zephyr indexer archived"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"bp-ventures/sep30-docs": [
+		{
+			note: "README: documentation for BP Ventures' SEP-30 (recovery signer) implementation, with a hosted playground at https://sep30-demo.bpventures.us/ and API docs at https://sep30-demo.bpventures.us/docs#/ (both 200 on 2026-09-02); links the SEP-30 spec and SDF's recoverysigner blog post. Docs-only repo: no code, releases or packages. https://github.com/bp-ventures/sep30-docs",
+			triggers: ["bp ventures sep-30 playground", "sep30 recovery signer demo"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"yripper/stellarpay": [
+		{
+			note: "npm @stellarpay-sdk/core, @stellarpay-sdk/client and @stellarpay-sdk/mcp — all 0.1.0 (2026-08-04; a single version each; repository → yripper/stellarpay). README: built for the Stellar hackathon (Agentic Payments track) and 'everything below is testnet' — one middleware for x402 + MPP charge/channel paywalls. https://www.npmjs.com/package/@stellarpay-sdk/core",
+			triggers: ["stellarpay sdk npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"berkingurcan/stellar-agent-search": [
+		{
+			note: "npm stellar-agent-search — 0.1.0 (2026-07-30; 2 versions; repository → berkingurcan/stellar-agent-search; bin stellar-agent-search). README: read-only MCP server + CLI over the trionlabs/stellar-8004 registry contracts on mainnet, pinning the @trionlabs/stellar8004 SDK for signed writes; 'adds no contracts'. https://www.npmjs.com/package/stellar-agent-search",
+			triggers: ["stellar agent search mcp", "8004 agent discovery mcp"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
+	"zenith-protocols/zenith-sdk": [
+		{
+			note: "npm @zenith-protocols/zenith-sdk — 0.0.1 (2025-10-21; the only published version; repository → zenith-protocols/zenith-sdk), while package.json at HEAD says 2.0.0 (unpublished as of 2026-09-02). README: `npm install @zenith-protocols/zenith-sdk`; testnet + mainnet network constants for the Zenith vault/trading contracts. https://www.npmjs.com/package/@zenith-protocols/zenith-sdk",
+			triggers: ["zenith sdk npm"],
+			source: "curated",
+			asOf: "2026-09-02",
+		},
+	],
 	// ── P5 batch 5 (2026-09-01): 46 repos / 49 notes, next tier by repoScore —
 	// DeFi/infra contract suites (OpenZeppelin stellar-contracts + relayer,
 	// Soroswap, Phoenix, Blend V2, Rozo, DOB, SEP-41, Perun), SDKs and
