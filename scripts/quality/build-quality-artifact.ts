@@ -189,6 +189,20 @@ type Project = {
 // eval lanes independently found 544 vs 550 for "rows on a weak basis"
 // because two call sites disagreed about operator-announcement and
 // unverified. Membership is now explicit and shared.
+// Deployment is a meaningful question only for products whose value IS
+// on-chain (the same list the deployment-evidence gap row pools on). For an
+// SDK, a wallet, a security firm or an analytics site, "unknown" is the
+// correct answer, not a gap.
+const ONCHAIN_PRODUCT_TYPES = [
+	"DEX",
+	"DeFi",
+	"Lending",
+	"Derivatives",
+	"Oracle",
+	"Bridge",
+	"Stablecoin",
+	"RWA",
+];
 const STRONG_BASES = [
 	"human-verified",
 	"onchain-activity",
@@ -248,6 +262,9 @@ const projects = [...seen.values()].map((p) => ({
 		(Array.isArray(p.onchain?.contracts) && p.onchain.contracts.length > 0) ||
 		p.deployment?.network === "mainnet" ||
 		p.deployment?.network === "testnet",
+	deploymentApplies: (p.types ?? []).some((t) =>
+		ONCHAIN_PRODUCT_TYPES.includes(t),
+	),
 	types: p.types ?? [],
 	...projectQuality(p),
 }));
@@ -447,6 +464,17 @@ const out = {
 				.map(([network, count]) => ({ network, count }))
 				.sort((a, b) => b.count - a.count);
 		})(),
+		deploymentSplit: {
+			unknown: projects.filter((p) => p.deploymentNetwork === "unknown").length,
+			applicableUnknown: projects.filter(
+				(p) => p.deploymentNetwork === "unknown" && p.deploymentApplies,
+			).length,
+			notApplicable: projects.filter(
+				(p) => p.deploymentNetwork === "unknown" && !p.deploymentApplies,
+			).length,
+			means:
+				"rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer.",
+		},
 		strongBasisSplit: {
 			weakLiveRows: projects.filter((p) => !isStrongBasis(p.statusBasis))
 				.length,
@@ -912,8 +940,7 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 				),
 				why: "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
 			},
-			whyItMatters:
-				"sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
+			whyItMatters: `sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the ${projects.filter((p) => p.deploymentNetwork === "unknown").length} unknown rows, ${projects.filter((p) => p.deploymentNetwork === "unknown" && p.deploymentApplies).length} are on-chain product types where the question applies and an agent will ask it; the other ${projects.filter((p) => p.deploymentNetwork === "unknown" && !p.deploymentApplies).length} are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.`,
 			closedBy:
 				"Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
 		}),
