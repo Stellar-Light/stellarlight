@@ -58,6 +58,26 @@
 		--chart-segment-background: rgba(253, 218, 36, 0.1);
 		--chart-segment-line: rgba(253, 218, 36, 0.3);
 
+		/* The tooltip panel referenced --chart-tooltip-background, which was
+		   never defined — so the panel resolved to NO background and kept only
+		   its backdrop blur. Bright series colours bled straight through it and
+		   the numbers were unreadable on a busy chart. Near-opaque so the
+		   readout always wins over whatever it covers, with the marker border
+		   for an edge. */
+		--chart-tooltip-background: rgba(23, 23, 23, 0.96);
+		--chart-tooltip-border: #2F2F2F;
+		--chart-tooltip-foreground: #E5E5E5;
+
+		/* The scatter/terminal-marker palette (--chart-1 … --chart-5) and the
+		   brush border were referenced by the kit and equally undefined; an
+		   undefined stroke paints nothing at all. */
+		--chart-1: #FDDA24;
+		--chart-2: #4EA8DE;
+		--chart-3: #56C596;
+		--chart-4: #E5747C;
+		--chart-5: #B79CED;
+		--chart-brush-border: #2F2F2F;
+
 		/* --font-sans/serif/mono are set by next/font on <html> (layout.tsx) —
 		   the single source. Declaring them here shadowed those variables at
 		   equal specificity, and the unquoted "Source Serif 4" (identifier

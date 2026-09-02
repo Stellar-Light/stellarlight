@@ -176,7 +176,9 @@ function TooltipBoxInner({
   const transformOrigin = isFlipped ? "right top" : "left top";
 
   const panelClassName = cn(
-    "min-w-[140px] overflow-hidden rounded-lg text-chart-tooltip-foreground shadow-lg",
+    // A visible border matters as much as the fill here: the panel floats over
+    // coloured series, and an edge is what separates the readout from them.
+    "min-w-[140px] overflow-hidden rounded-lg border border-[var(--chart-tooltip-border)] text-chart-tooltip-foreground shadow-lg",
     panelStyle?.backgroundColor === undefined &&
       backgroundColor === chartCssVars.tooltipBackground &&
       "bg-chart-tooltip-background",
