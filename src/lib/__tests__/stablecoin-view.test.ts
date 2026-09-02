@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	aggregateDaily,
+	countryInfo,
 	formatPct,
 	formatSupply,
 	formatUSD,
@@ -37,6 +38,50 @@ describe("formatters", () => {
 		expect(pegFlag("EUR")).toBe("🇪🇺");
 		expect(pegFlag("ZZZ")).toBe("");
 		expect(pegFlag(null)).toBe("");
+	});
+});
+
+describe("countryInfo", () => {
+	// CLP and UAH both fell through to the "Global" globe instead of their
+	// own flag because PEG_COUNTRY had no entry for either peg — every peg
+	// the registry can carry needs one, not just the ones some row happens to
+	// use today.
+	it("resolves the pegs added 2026-09-02 to their own flag, not Global", () => {
+		expect(countryInfo(null, "CLP").label).toBe("Chile");
+		expect(countryInfo(null, "UAH").label).toBe("Ukraine");
+		expect(countryInfo(null, "SGD").label).toBe("Singapore");
+		expect(countryInfo(null, "AED").label).toBe("United Arab Emirates");
+		expect(countryInfo(null, "CAD").label).toBe("Canada");
+	});
+
+	it("is case-insensitive on the peg", () => {
+		expect(countryInfo(null, "clp").label).toBe("Chile");
+	});
+
+	it("prefers a stored country over the peg-derived one", () => {
+		// PEN's own row is genuinely Peru; a differently-pegged row must never
+		// borrow it just because both resolve through the same fallback chain.
+		expect(countryInfo("PE", "CLP").label).toBe("Peru");
+	});
+
+	it("falls back to Global for a peg with no mapped country, never throws", () => {
+		expect(countryInfo(null, "ZZZ").label).toBe("Global");
+		expect(countryInfo(undefined, undefined).label).toBe("Global");
+	});
+
+	it("falls back to the peg when the stored country isn't a recognized code", () => {
+		expect(countryInfo("not-a-code", "UAH").label).toBe("Ukraine");
+	});
+
+	it("honors an explicitly stored Global over a peg that does have a country", () => {
+		// The literal shape of the CLPX/UAH bug: ingest had already written the
+		// string "Global" into the row (PEG_COUNTRY[peg] ?? "Global", before
+		// CLP/UAH had entries). "Global" IS a recognized COUNTRY_INFO key, so
+		// it wins over the now-fixed peg fallback — adding the table entries
+		// fixes the NEXT ingest, not rows already holding a stale "Global";
+		// those self-heal when the pipeline recomputes and overwrites `country`
+		// on its next run (unconditional, no `keep()` guard on that field).
+		expect(countryInfo("Global", "CLP").label).toBe("Global");
 	});
 });
 
