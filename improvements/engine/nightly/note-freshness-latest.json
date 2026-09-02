@@ -1,31 +1,5 @@
 {
-	"generatedAt": "2026-09-02T17:42:44.576Z",
+	"generatedAt": "2026-09-02T17:58:26.788Z",
 	"detector": "note-freshness",
-	"failures": [
-		{
-			"probe": "note-stale:lightsail-network/stellar-contract-bindings:pypi:stellar-contract-bindings",
-			"note": "note (asOf 2026-09-02) cites 0.5.0b0; registry latest is 0.6.0b0 (published 2026-09-02)",
-			"surface": "code"
-		},
-		{
-			"probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
-			"note": "note (asOf 2026-09-01) cites 0.3.2; registry latest is 0.3.3 (published 2026-09-02)",
-			"surface": "code"
-		},
-		{
-			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-01) cites 2026-09-01; registry latest is 2026-09-02 (published 2026-09-02)",
-			"surface": "code"
-		},
-		{
-			"probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
-			"note": "note (asOf 2026-09-01) cites 0.3.2; registry latest is 0.3.3 (published 2026-09-02)",
-			"surface": "code"
-		},
-		{
-			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
-			"note": "note (asOf 2026-09-01) cites 0.17.0; registry latest is 0.17.1 (published 2026-09-01)",
-			"surface": "code"
-		}
-	]
+	"failures": []
 }

@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8033704161643982,
+      "topScore": 0.8034659624099731,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296414017677307,
+      "topScore": 0.829795241355896,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -527,41 +527,37 @@
       "id": "repos-streaming-payments",
       "category": "code-references",
       "mode": "repos",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "fluxity|tide|paystreme|stream"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 47,
       "urlOk": null,
-      "scoreOk": null,
+      "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "ERROR: 500 https://stellarlight.xyz/api/repos/search?q=streaming%20payments&limit=5"
+      "sample": "luanlabs/fluxity-v1-core"
     },
     {
       "id": "repos-escrow",
       "category": "code-references",
       "mode": "repos",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "escrow|vault|trustless|microvault"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 63,
       "urlOk": null,
-      "scoreOk": false,
+      "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "—"
+      "sample": "Trustless-Work/trustlesswork-smart-contract-stellar"
     },
     {
       "id": "repos-soroswap",
@@ -960,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-02T17:32:18Z"
+  "generatedAt": "2026-09-02T17:48:21Z"
 }
