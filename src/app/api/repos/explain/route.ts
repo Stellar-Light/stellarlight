@@ -173,10 +173,15 @@ export async function GET(req: NextRequest) {
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
+			// Registry keys and `q`-typed names arrive lowercase; rows keep
+			// GitHub's casing and Mongo `equals` is case-sensitive, so a
+			// knowledge-trigger or explicit route to "creit-tech/…" found no row
+			// and served repoMeta/codeVerified as null. `like` is case-insensitive;
+			// the exact-name filter keeps a sibling from matching.
 			const found = await payload.find({
 				collection: "repos",
-				where: { fullName: { equals: repo } },
-				limit: 1,
+				where: { fullName: { like: repo } },
+				limit: 5,
 				depth: 0,
 				select: {
 					lastCommitAt: true,
@@ -201,7 +206,11 @@ export async function GET(req: NextRequest) {
 					successorRepo: true,
 				},
 			});
-			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
+			const d = found.docs.find(
+				(x) =>
+					String((x as { fullName?: string }).fullName ?? "").toLowerCase() ===
+					repo.toLowerCase(),
+			) as unknown as Record<string, unknown> | undefined;
 			if (d) {
 				repoMeta = {
 					lastCommitAt: (d.lastCommitAt as string) ?? null,

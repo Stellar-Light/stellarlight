@@ -33,15 +33,23 @@ async function main(): Promise<number> {
 	let mismatches = 0;
 
 	for (const key of Object.keys(REPO_KNOWLEDGE_NOTES)) {
+		// Registry keys are lowercase; rows keep GitHub's casing
+		// (0xNana/SearchPay, Creit-Tech/…). Mongo `equals` is case-sensitive, so
+		// every mixed-case repo reported "missing row" and was never stamped —
+		// 131 of 325 keys on 2026-09-02, including batch-1 rows the board had
+		// listed as un-noted for weeks. `like` is a case-insensitive substring
+		// match; the exact-key filter below keeps it from grabbing a sibling.
 		const res = await payload.find({
 			collection: "repos",
-			where: { fullName: { equals: key } },
-			limit: 1,
+			where: { fullName: { like: key } },
+			limit: 5,
 			depth: 0,
 			context: { internal: true },
 		});
-		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-		const d = res.docs[0] as any;
+		const d = (res.docs as Array<{ fullName?: string }>).find(
+			(x) => String(x.fullName ?? "").toLowerCase() === key,
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		) as any;
 		if (!d) {
 			console.log(`  missing row: ${key}`);
 			missing += 1;
