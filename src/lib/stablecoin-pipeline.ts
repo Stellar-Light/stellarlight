@@ -3,8 +3,9 @@
  * Replit-hosted service so the data survives that host being shut down.
  *
  * Per asset in the registry: confirm it exists on Horizon, read supply +
- * holders + 24h volume from Stellar Expert, price it, and pull its logo from
- * the issuer's own stellar.toml. Every number is dated.
+ * holders + 24h trade volume + lifetime payment-op count from Stellar
+ * Expert, price it, and pull its logo from the issuer's own stellar.toml.
+ * Every number is dated.
  *
  * FAIL-OPEN is the rule, inherited from the original and kept deliberately:
  * one asset's fetch failing must never empty the list, and a missing metric
@@ -14,9 +15,36 @@
  *
  * Sources, all public, no keys:
  *   Horizon        — asset existence on mainnet
- *   Stellar Expert — supply, trustline holders, 24h/7d volume
+ *   Stellar Expert — supply, trustline holders, 24h/7d TRADE volume, lifetime
+ *                    payment-op count
  *   CoinGecko      — live FX for every peg, via the XLM cross
  *   <domain>/.well-known/stellar.toml — the issuer's own logo
+ *
+ * NOT a source here: real dollar-denominated PAYMENT (transfer) volume, as
+ * opposed to the SDEX trade volume this file already reports. Researched
+ * 2026-09-02 against the $612M raw / $171.59M adjusted 24h figures Allium's
+ * Stellar dashboard reports:
+ *   - Horizon's own root document (GET https://horizon.stellar.org/) shows
+ *     neither `payments` nor `operations` accepts an asset filter in its
+ *     link template — only `trades`/`trade_aggregations` do, and those are
+ *     SDEX trades, not payments. Paging either collection unfiltered to find
+ *     one asset's payments is a full-ledger scan, not a cron job.
+ *   - Stellar Expert's `payments` and `trades` fields are LIFETIME COUNTS —
+ *     its own UI labels them "Total payments count" / "Total trades count" —
+ *     not amounts, and not scoped to any period. Twelve candidate
+ *     history/stats/volume paths were probed against its public API; all
+ *     404, except `/holders` (unrelated).
+ *   - The canonical source for this exact metric is SDF's own Hubble
+ *     warehouse (BigQuery, `crypto-stellar.crypto_stellar.*`), which needs a
+ *     GCP project with a billing account on file, the BigQuery API enabled,
+ *     and either a service-account key or OAuth login — none of which this
+ *     repo has. Dune has decoded Stellar tables too, but every Dune API call
+ *     (even free-tier) needs an API key we don't have either.
+ * `paymentsCountLifetime` below is the honest fallback: a real, free,
+ * zero-marginal-cost COUNT of payment operations (not SDEX trades, and not
+ * adjusted for mint/CEX/DeFi the way Allium's figure is) — pulled off the
+ * same Expert call this file already makes for supply/holders. See the PR
+ * that added it for the full source-by-source table.
  */
 
 import {
@@ -50,6 +78,13 @@ export interface MeasuredStablecoin {
 	priceUSD: number | null;
 	holders: number | null;
 	volume24hUSD: number | null;
+	/** Lifetime count of payment operations Stellar Expert has indexed for
+	 *  this asset ("Total payments count" in its own UI) — a COUNT, not an
+	 *  amount, and not scoped to any period on its own. Not comparable
+	 *  across assets of different ages; `refresh-stablecoins.ts` diffs it
+	 *  against yesterday's snapshot into the period metric that IS
+	 *  comparable, `paymentsCount24h`. */
+	paymentsCountLifetime: number | null;
 	logoUrl: string | null;
 	logoSource: "toml" | "fallback" | "country-flag" | "none";
 	/** How each figure was obtained — a consumer can weigh a stale row. */
@@ -136,21 +171,35 @@ async function existsOnHorizon(code: string, issuer: string): Promise<boolean> {
 	}
 }
 
+/**
+ * One Stellar Expert call, three fields off it: supply, trustline-holder
+ * count, and — new 2026-09-02 — the lifetime payment-operation counter
+ * (`paymentsCountLifetime`) that `refresh-stablecoins.ts` diffs against
+ * yesterday's snapshot to derive `paymentsCount24h`. Free: it's the same
+ * response body this function already fetched.
+ */
 async function supplyAndHolders(
 	code: string,
 	issuer: string,
 	suffix = "",
-): Promise<{ supply: number | null; holders: number | null }> {
+): Promise<{
+	supply: number | null;
+	holders: number | null;
+	paymentsCountLifetime: number | null;
+}> {
 	const data = await fetchJson(`${EXPERT}/asset/${code}-${issuer}${suffix}`);
-	if (!data) return { supply: null, holders: null };
+	if (!data)
+		return { supply: null, holders: null, paymentsCountLifetime: null };
 	const supply = data.supply != null ? Number(data.supply) / STROOP : null;
 	const holders =
 		typeof data.trustlines === "object"
 			? (data.trustlines?.total ?? null)
 			: (data.trustlines ?? null);
+	const payments = Number(data.payments);
 	return {
 		supply: Number.isFinite(supply) ? supply : null,
 		holders: Number.isFinite(Number(holders)) ? Number(holders) : null,
+		paymentsCountLifetime: Number.isFinite(payments) ? payments : null,
 	};
 }
 
@@ -346,6 +395,7 @@ export async function measureStablecoin(
 			marketCapUSD: price == null ? null : asset.hardcodedData.supply * price,
 			holders: asset.hardcodedData.holders,
 			volume24hUSD: null,
+			paymentsCountLifetime: null,
 			logoUrl,
 			logoSource,
 			basis: "curated-static",
@@ -364,6 +414,7 @@ export async function measureStablecoin(
 					priceUSD: null,
 					holders: null,
 					volume24hUSD: null,
+					paymentsCountLifetime: null,
 					logoUrl,
 					logoSource,
 					basis: "unmeasured",
@@ -372,7 +423,7 @@ export async function measureStablecoin(
 			}
 		}
 
-		const { supply, holders } = await supplyAndHolders(
+		const { supply, holders, paymentsCountLifetime } = await supplyAndHolders(
 			asset.code,
 			asset.issuer,
 			asset.stellarExpertSuffix ?? "",
@@ -392,6 +443,7 @@ export async function measureStablecoin(
 			marketCapUSD: supply != null && price != null ? supply * price : null,
 			holders,
 			volume24hUSD: vol,
+			paymentsCountLifetime,
 			logoUrl,
 			logoSource,
 			basis: supply == null ? "unmeasured" : "live",
@@ -409,6 +461,7 @@ export async function measureStablecoin(
 			priceUSD: null,
 			holders: null,
 			volume24hUSD: null,
+			paymentsCountLifetime: null,
 			logoUrl,
 			logoSource,
 			basis: "unmeasured",

@@ -52,6 +52,14 @@ export const StablecoinSnapshots: CollectionConfig = {
 		{ name: "marketCapUSD", type: "number" },
 		{ name: "holders", type: "number" },
 		{ name: "volume24hUSD", type: "number" },
+		{
+			name: "paymentsCountLifetime",
+			type: "number",
+			admin: {
+				description:
+					"Stellar Expert's lifetime payment-op counter on this day — the raw value the CURRENT row's paymentsCount24h is diffed from, same role supply plays for supplyChange7d.",
+			},
+		},
 
 		{
 			name: "basis",
