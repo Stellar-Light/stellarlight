@@ -176,6 +176,10 @@ type Project = {
 	availability?: unknown[];
 	prominence?: number;
 	deployment?: { network?: string | null; basis?: string | null } | null;
+	onchain?: {
+		assetCode?: string | null;
+		contracts?: unknown[] | null;
+	} | null;
 };
 
 /** Per-row quality = how much EVIDENCE stands behind what we publish about it.
@@ -239,6 +243,11 @@ const projects = [...seen.values()].map((p) => ({
 	statusBasis: p.statusBasis ?? null,
 	prominence: typeof p.prominence === "number" ? p.prominence : 0,
 	deploymentNetwork: p.deployment?.network ?? "unknown",
+	hasOnchainFootprint:
+		!!p.onchain?.assetCode ||
+		(Array.isArray(p.onchain?.contracts) && p.onchain.contracts.length > 0) ||
+		p.deployment?.network === "mainnet" ||
+		p.deployment?.network === "testnet",
 	types: p.types ?? [],
 	...projectQuality(p),
 }));
@@ -438,6 +447,18 @@ const out = {
 				.map(([network, count]) => ({ network, count }))
 				.sort((a, b) => b.count - a.count);
 		})(),
+		strongBasisSplit: {
+			weakLiveRows: projects.filter((p) => !isStrongBasis(p.statusBasis))
+				.length,
+			onchainEligible: projects.filter(
+				(p) => !isStrongBasis(p.statusBasis) && p.hasOnchainFootprint,
+			).length,
+			appOnly: projects.filter(
+				(p) => !isStrongBasis(p.statusBasis) && !p.hasOnchainFootprint,
+			).length,
+			means:
+				"weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification.",
+		},
 		basisMix: [...basisMix.entries()]
 			.map(([basis, count]) => ({ basis, count }))
 			.sort((a, b) => b.count - a.count),
@@ -492,7 +513,10 @@ const out = {
 			// notes coverage is measured against the CURATION POOL (the gap
 			// matrix's own target: curated rows with repoScore >= 60), because
 			// nobody intends to hand-curate ten thousand tail repos.
-			const notesPool = curated.filter((r) => (r.repoScore ?? 0) >= 60);
+			// 2026-09-02: widened from >= 60 to >= 50. The >= 60 pool is fully
+			// examined (with-notes + judged = pool); the 50–59 band is the next
+			// set consumers reach, and batch 8 examined it the same way.
+			const notesPool = curated.filter((r) => (r.repoScore ?? 0) >= 50);
 			// a mainnet join is only conceivable for deployable contracts
 			const deployable = repos.filter((r) => r.deployable);
 			return {
@@ -514,15 +538,14 @@ const out = {
 				knowledgeNotes: {
 					pool: notesPool.length,
 					poolMeans:
-						"curated-index rows with repoScore >= 60, the set curation actually targets",
+						"curated-index rows with repoScore >= 50, the set curation actually targets",
 					withNotes: notesPool.filter((r) => r.notes > 0).length,
 					// JUDGED, not unexamined: pool rows that carry only INTERNAL
 					// registry notes (pool triage verdicts — examined, nothing
 					// durable found). Rows serve those as zero public notes, so
 					// they read from the code registry here, never from the DB.
-					triaged: notesPool.filter(
-						(r) => r.notes === 0 && triagedOnly(r),
-					).length,
+					triaged: notesPool.filter((r) => r.notes === 0 && triagedOnly(r))
+						.length,
 					triagedMeans:
 						"examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
 					// The pool members still WITHOUT a note or a verdict, by name —
@@ -641,7 +664,7 @@ if (notesCov.withNotes < notesCov.pool)
 		area: "repo knowledge notes",
 		limit:
 			"Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-		measurement: `${notesCov.withNotes} of ${notesCov.pool} rows in the curation pool (curated index, repoScore >= 60)`,
+		measurement: `${notesCov.withNotes} of ${notesCov.pool} rows in the curation pool (curated index, repoScore >= 50)`,
 		instead:
 			"Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields.",
 	});
@@ -791,18 +814,18 @@ const gapRow = <T>(r: {
 
 const byProminence = <T extends { prominence?: number | null }>(rows: T[]) =>
 	[...rows].sort((a, b) => (b.prominence ?? 0) - (a.prominence ?? 0));
-	// Expected tier for the contract-join gap (see the row's comment): a
-	// mainnet join is a reasonable ask only where the repo shows real
-	// signal. Forks are negligible here (15 of 3,351) and the frame does
-	// not carry the flag; archived rows are cut via activity.
-	const expectedContractRepos = repos.filter(
-		(r) =>
-			r.deployable &&
-			r.activity !== "archived" &&
-			(r.projectSlug || (r.repoScore ?? 0) >= 60),
-		);
-	const lowSignalDeployable =
-		repos.filter((r) => r.deployable).length - expectedContractRepos.length;
+// Expected tier for the contract-join gap (see the row's comment): a
+// mainnet join is a reasonable ask only where the repo shows real
+// signal. Forks are negligible here (15 of 3,351) and the frame does
+// not carry the flag; archived rows are cut via activity.
+const expectedContractRepos = repos.filter(
+	(r) =>
+		r.deployable &&
+		r.activity !== "archived" &&
+		(r.projectSlug || (r.repoScore ?? 0) >= 60),
+);
+const lowSignalDeployable =
+	repos.filter((r) => r.deployable).length - expectedContractRepos.length;
 const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 	[...rows].sort((a, b) => (b.repoScore ?? 0) - (a.repoScore ?? 0));
 
@@ -852,8 +875,7 @@ const byRepoScore = <T extends { repoScore?: number | null }>(rows: T[]) =>
 				),
 				why: "prominence >= 70 only, the rows a consumer is most likely to hit",
 			},
-			whyItMatters:
-				"site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product.",
+			whyItMatters: `site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, ${projects.filter((p) => !isStrongBasis(p.statusBasis) && p.hasOnchainFootprint).length} hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other ${projects.filter((p) => !isStrongBasis(p.statusBasis) && !p.hasOnchainFootprint).length} are app-only and can only move through human verification — the ceiling of this row is people, not lanes.`,
 			closedBy:
 				"Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
 		}),

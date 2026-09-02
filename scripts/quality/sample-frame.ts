@@ -60,6 +60,10 @@ export type CensusProject = {
 	prominence?: number;
 	canonicalSlug?: string | null;
 	deployment?: { network?: string | null; basis?: string | null } | null;
+	onchain?: {
+		assetCode?: string | null;
+		contracts?: unknown[] | null;
+	} | null;
 };
 
 export type CensusRepo = {
@@ -95,6 +99,7 @@ export const censusProjects = (origin = "https://stellarlight.xyz") =>
 			"prominence",
 			"canonicalSlug",
 			"deployment",
+			"onchain",
 		],
 		origin,
 	);
