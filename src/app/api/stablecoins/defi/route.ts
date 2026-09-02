@@ -16,7 +16,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
-	blendListing,
+	blendListings,
 	fetchLiquidity,
 	fetchVenues,
 	sacContractId,
@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
 	const priceUSD = price != null && Number.isFinite(price) ? price : null;
 
 	// Independent sources — one being slow or down must not blank the other.
-	const [liquidity, blend, venues] = await Promise.all([
+	const [liquidity, blendPools, venues] = await Promise.all([
 		fetchLiquidity(code, issuer, priceUSD),
-		blendListing(code),
+		blendListings(code),
 		fetchVenues(code, issuer, priceUSD),
 	]);
 
@@ -66,7 +66,10 @@ export async function GET(req: NextRequest) {
 					"contract is the Stellar Asset Contract id derived deterministically from (code, issuer) on the public network — no lookup, correct even if nobody has wrapped the asset yet. blend is a committed pool registry — presence means a Blend pool lists the asset — with supply/borrow APY read live from the pool's reserve over Soroban RPC, as a percent (4.31 = 4.31%). A null APY means the pool state could not be read, NEVER that the rate is zero; the listing itself still stands. liquidity counts Stellar AMM pools holding this exact asset from Horizon's liquidity-pool index; `assetPooled` is units of THIS asset (its own peg) and `assetPooledUSD` values only that side — it is NOT whole-pool TVL, because the counter-asset of each pool has no price we measure. liquidity: null means Horizon was unreachable, NEVER that the asset has no pools.",
 			},
 			contract: sacContractId(code, issuer),
-			blend,
+			// `blend` stays the single deepest pool so existing consumers keep
+			// working; `blendPools` is every pool that lists the asset.
+			blend: blendPools[0] ?? null,
+			blendPools,
 			liquidity,
 			// Per-venue view (SDEX, Aquarius, Soroswap), same asset-side rule.
 			// `unreadable` = could not look; `notIndexed` = no readable index yet.

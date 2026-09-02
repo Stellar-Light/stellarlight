@@ -27,7 +27,12 @@ import configPromise from "../src/payload.config";
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
 const limitArg = args.find((a) => a.startsWith("--limit="));
-const limit = limitArg ? Number(limitArg.split("=")[1]) : 500;
+// 2026-09-02: the sitemap listed 568 blog URLs and the default cap was 500,
+// so the USDT0 launch announcement — published that morning — never entered
+// the corpus, and /stablecoins' news dock had nothing to say about its own
+// subject. Discovery merges a Set, so the cut is arbitrary, not oldest-first.
+// Dedup is a hash per chunk, so a bigger cap costs almost nothing.
+const limit = limitArg ? Number(limitArg.split("=")[1]) : 1200;
 
 const BASE = "https://stellar.org";
 
