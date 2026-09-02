@@ -1990,6 +1990,14 @@ export const spec: OpenAPISpec = {
 						"scf-funded",
 						"live",
 						"inactive",
+
+						"oracle provider",
+						"oracle project",
+						"oracle on stellar",
+						"which oracle",
+						"price oracle",
+						"oracles on stellar",
+						"find an oracle",
 					],
 					useWhen: [
 						"who has built / has anyone built / is there a live or SCF-funded project for X",
@@ -2250,6 +2258,20 @@ export const spec: OpenAPISpec = {
 						"implementation",
 						"defined",
 						"deepwiki",
+
+						"how does it calculate",
+						"calculate",
+						"in the code",
+						"how is it implemented",
+						"where in the code",
+						"interest rate model",
+						"how does the contract",
+						"algorithm",
+						"formula",
+						"mechanism",
+						"code walkthrough",
+						"explain the code",
+						"how does the code",
 					],
 					useWhen: [
 						"'where is X defined / how does Y work' for a Stellar internal (error/result codes, consensus/SCP, ledger, XDR, a SEP's implementation)",
@@ -4194,6 +4216,15 @@ export const spec: OpenAPISpec = {
 						"where can I earn",
 						"get paid to build",
 						"contract work",
+
+						"freelance work",
+						"work for contributors",
+						"jobs for stellar developers",
+						"bounties for developers",
+						"contributor opportunities",
+						"earn by contributing",
+						"paid work for contributors",
+						"freelance work for stellar contributors",
 					],
 					useWhen: [
 						"what RFPs/bounties/grants match my idea / are open",
@@ -5571,8 +5602,6 @@ export const spec: OpenAPISpec = {
 						// searchProjects — which is correct and left alone. The defect
 						// is a name on a DIFFERENT operation, and that was these two
 						// plus "dune" on getLeaderboard.
-						"yieldblox oracle manipulation incident",
-						"reflector oracle manipulation incident",
 						"reentrancy",
 						"soroban-sdk security advisories",
 						"cve",
@@ -6750,6 +6779,16 @@ export const spec: OpenAPISpec = {
 						"largest stablecoin",
 						"asset supply",
 						"token holders",
+
+						"github activity",
+						"by github activity",
+						"projects by github activity",
+						"developer activity ranking",
+						"ranked by commits",
+						"most active projects",
+						"top stellar projects",
+						"activity leaderboard",
+						"ranked by activity",
 					],
 					useWhen: [
 						"which projects have open issues / the biggest issue backlog",
