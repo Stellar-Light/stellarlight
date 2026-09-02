@@ -15,3 +15,8 @@ export const PROJECT_LOGOS: Record<string, string> = {
 	// 2026-09-02, owner-supplied: the flat square USDT0 mark.
 	USDT0: "/stablecoins/logos/usdt0.png",
 };
+
+/** The static mark for a project name, if we ship one. */
+export function projectLogo(name?: string | null): string | undefined {
+	return name ? PROJECT_LOGOS[name] : undefined;
+}

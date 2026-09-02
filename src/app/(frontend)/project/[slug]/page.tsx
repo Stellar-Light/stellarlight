@@ -18,6 +18,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EntityCard from "@/components/entity-card";
 import { ProjectLogo } from "@/components/project-logo";
+import { projectLogo } from "@/data/project-logos";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import ShareButton from "@/components/share-button";
 import { Badge } from "@/components/ui/badge";
@@ -367,7 +368,7 @@ export default async function ProjectDetailPage({
 							{/* First Row - Logo and Title/Tags */}
 							<div className="flex flex-col md:flex-row items-start gap-4">
 								{/* Logo */}
-								{project.logo ? (
+								{project.logo || projectLogo(project.name) ? (
 									<div className="relative flex-shrink-0">
 										<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#FDDA24]/20 via-transparent to-transparent blur-xl opacity-50" />
 										<ProjectLogo
