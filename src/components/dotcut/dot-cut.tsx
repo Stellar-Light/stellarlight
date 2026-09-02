@@ -2,13 +2,14 @@
 
 /**
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
- * touching circles that carves negative space out of the field. Mostly
+ * touching circles that carves negative space out of the field. Five
  * full-bleed patterns (rings/columns/checker/boxes/bars, the whole surface
- * reorganising) with two contained marks (the USDT0 logo and $) so each one
- * lands as an event rather than blending into a steady scroll of small
- * figures. Framework-free Canvas 2D + rAF, driven entirely by `DotCut`
- * (./engine.ts); this component only loads the one logo, builds the scene
- * list, and wires lifecycle.
+ * reorganising) alternate with three tiled marks (the USDT0 logo, $, €) —
+ * each mark repeats several times across the width as small standing
+ * circles (Scene.tile) rather than one hole carved into a solid field, so
+ * it reads without the banner needing extra rows. Framework-free Canvas 2D
+ * + rAF, driven entirely by `DotCut` (./engine.ts); this component only
+ * loads the one logo, builds the scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
@@ -39,10 +40,9 @@ const GRID_MARGIN = 0.75;
 //
 // Fewer, bigger cells means fewer rows, which means every scene had to be
 // re-proven at the new grid — see the scene list below for which marks
-// survive being carved at ~42 cols and why the cycle leans back on
-// full-bleed patterns rather than a row of small figures (verified via
-// ASCII/visual dumps of the real rasterize() output — see this PR's
-// description).
+// survive at ~42 cols and in what form (tiled small vs. one big carve),
+// verified via ASCII dumps of the real rasterize() output at this exact
+// grid — see this PR's description.
 const CELL_PX = 28.5;
 const MAX_COLS = 50;
 
@@ -70,6 +70,15 @@ function colsForCellSize(w: number): number {
  * `drawImage` accepts a loaded image without an explicit decode, so waiting on
  * `load` costs nothing and works whether or not the document is visible.
  */
+function loadImage(src: string): Promise<HTMLImageElement> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.onload = () => resolve(img);
+		img.onerror = () =>
+			reject(new Error(`dot-cut: image failed to load — ${src}`));
+		img.src = src;
+	});
+}
 
 export function DotCutBanner() {
 	const hostRef = useRef<HTMLDivElement>(null);
@@ -94,21 +103,41 @@ export function DotCutBanner() {
 			else if (visible) engine.start();
 		};
 
-		Promise.resolve()
-			.then(() => {
+		loadImage("/stablecoins/logos/usdt0.png")
+			.then((usdt0) => {
 				if (cancelled) return;
 
-				// Full-bleed patterns only. A contained mark needs roughly a dozen
-				// cells of height to read, and this banner is nearly four times
-				// wider than tall — at the ~42-circle density the owner asked for
-				// that leaves nine rows, where the T came out as a six-cell blob
-				// and the "$" was no better (both measured from their rasterised
-				// masks, alongside three logos already dropped for the same
-				// reason). A mark that does not read is not a mark, so the cycle
-				// is the five surface reorganisations, which do read at this size.
-				// Restoring a figure means more ROWS: ~24 of them, i.e. a banner
-				// around 670px tall at this cell size.
+				// A single big glyph loses to this banner's own proportions: at
+				// the ~42-circle density the owner asked for, the strip is nearly
+				// four times wider than tall, which left nine rows — not enough
+				// for one contained mark to read (T came out a six-cell blob, "$"
+				// no better; usdc/eurc/pyusd fared worse still). Rather than grow
+				// the banner to buy one glyph more rows, each mark here is tiled
+				// (Scene.tile) as several small copies marching across the WIDTH
+				// instead: standing (positive) circles on an empty field, not a
+				// hole carved into a solid one. A small tile only needs ~7 rows to
+				// read, so this ships at the SAME 320px/9-row banner the five
+				// patterns already used — verified against the real rasterize()
+				// output at this exact grid, see this PR's description.
+				//
+				// usdt0's blocky pixel-art T survives the crop to ~5x7 cleanly.
+				// $ and € are bold enough closed forms to read tiled just as
+				// small. usdc and eurc stayed out: their thin ring-plus-glyph
+				// strokes read as scattered noise at every tile size tested, up
+				// to and including sizes well past this banner's height budget —
+				// the same failure mode a single big carve of them hit before.
+				// pyusd's double-bar accent is likewise noise below a tile size
+				// this banner has no room for.
 				const scenes: Scene[] = [
+					{
+						kind: "image",
+						image: usdt0,
+						label: "usdt0",
+						transition: "wipe",
+						palette: 6,
+						style: "grain",
+						tile: true,
+					},
 					{
 						kind: "rings",
 						label: "rings",
@@ -117,11 +146,29 @@ export function DotCutBanner() {
 						style: "swell",
 					},
 					{
+						kind: "text",
+						value: "$",
+						label: "usd",
+						transition: "ripple",
+						palette: 12,
+						style: "swell",
+						tile: true,
+					},
+					{
 						kind: "columns",
 						label: "columns",
 						transition: "columns",
 						palette: 8,
 						style: "streak",
+					},
+					{
+						kind: "text",
+						value: "€",
+						label: "eur",
+						transition: "scatter",
+						palette: 13,
+						style: "grain",
+						tile: true,
 					},
 					{
 						kind: "checker",
