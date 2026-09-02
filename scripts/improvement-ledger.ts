@@ -18,7 +18,6 @@
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { isFabricatedProbe } from "./eval/battery-banks";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -33,6 +32,7 @@ import {
 	upsertFindings,
 	type WaveManifest,
 } from "../src/lib/improvement-ledger";
+import { isFabricatedProbe } from "./eval/battery-banks";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEEKLY = join(ROOT, "improvements/engine/weekly");
@@ -294,6 +294,22 @@ const SPECS: SourceSpec[] = [
 // exactly like the weeklies. All share the artifact shape
 // { generatedAt, detector, failures: [{probe, note?, surface?, known?}] }.
 const NIGHTLY_SPECS: SourceSpec[] = [
+	{
+		source: "nightly-note-freshness",
+		file: "note-freshness-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "code",
+				mode: "note-stale",
+				// Low: the note was true on its asOf date; the registry moved since.
+				// Closes when the note is re-verified (asOf advanced) or removed.
+				severity: "low",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
 	{
 		source: "nightly-drift",
 		file: "api-drift-latest.json",

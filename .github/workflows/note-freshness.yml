@@ -8,10 +8,6 @@ name: Note freshness
 # "notes stale" signal. Never writes to the DB; no secrets.
 
 on:
-  schedule:
-    # Weekly, Monday 05:23 UTC — off the top of the hour, this repo's crons
-    # at :00 get dropped (see check-links.yml, 2026-09-02).
-    - cron: "23 5 * * 1"
   workflow_dispatch:
 
 permissions: { contents: read }

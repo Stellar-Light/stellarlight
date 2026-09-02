@@ -86,6 +86,12 @@ jobs:
         env: { FINDINGS_DIR: improvements/engine/nightly }
         shell: bash
         run: pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
+      - name: Note freshness (registry facts re-verified after asOf)
+        id: notefresh
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        shell: bash
+        run: pnpm exec tsx scripts/check-note-freshness.ts 2>&1 | tee /tmp/notefresh.log
 
       # The one detector here that reads the DB rather than the public API:
       # it needs overrideAccess to count the TRUE corpus, so a future access
