@@ -1,25 +1,11 @@
 {
- "generatedAt": "2026-09-02T17:02:08.595Z",
+ "generatedAt": "2026-09-02T17:09:28.409Z",
  "surfaces": [
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
    "openFindings": 5,
    "clearedFindings": 19,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "directory",
-   "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 1,
-   "clearedFindings": 88,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 1,
-   "clearedFindings": 17,
    "verifiedFindings": 0
   },
   {
@@ -49,13 +35,27 @@
    "openFindings": 0,
    "clearedFindings": 5,
    "verifiedFindings": 0
+  },
+  {
+   "surface": "directory",
+   "means": "the project rows themselves, fields, types, provenance",
+   "openFindings": 0,
+   "clearedFindings": 89,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 0,
+   "clearedFindings": 18,
+   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
   "total": 519,
-  "open": 7,
-  "cleared": 505,
+  "open": 5,
+  "cleared": 507,
   "verified": 7,
   "byFailureMode": [
    {
@@ -81,8 +81,8 @@
    },
    {
     "mode": "completeness-residual",
-    "open": 1,
-    "cleared": 27,
+    "open": 0,
+    "cleared": 28,
     "verified": 0,
     "surface": "directory"
    },
@@ -95,8 +95,8 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 1,
-    "cleared": 17,
+    "open": 0,
+    "cleared": 18,
     "verified": 0,
     "surface": "corpus"
    },
@@ -167,11 +167,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 3
+    "count": 2
    },
    {
     "bucket": "8–30d",
-    "count": 1
+    "count": 0
    },
    {
     "bucket": "31–60d",
@@ -183,6 +183,18 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "battery:q-tool-leaderboard-open-issues",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "scfRoundAwards empty: coala-pay",
+    "surface": "directory",
+    "failureMode": "completeness-residual",
+    "clearedAt": "2026-09-02"
+   },
    {
     "probe": "battery:q-tool-indexer-repos-discovery",
     "surface": "corpus",
@@ -218,18 +230,6 @@
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: fairblock",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: dfs-labs",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
    }
   ],
   "closure": {
@@ -260,7 +260,7 @@
     {
      "class": "evidence-population",
      "total": 39,
-     "open": 1,
+     "open": 0,
      "firstSeen": "2026-07-22"
     },
     {
@@ -272,7 +272,7 @@
     {
      "class": "meta-eval",
      "total": 19,
-     "open": 1,
+     "open": 0,
      "firstSeen": "2026-07-23"
     },
     {
@@ -8902,6 +8902,12 @@
     "count": 2
    }
   ],
+  "deploymentSplit": {
+   "unknown": 903,
+   "applicableUnknown": 199,
+   "notApplicable": 704,
+   "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
+  },
   "strongBasisSplit": {
    "weakLiveRows": 821,
    "onchainEligible": 41,
@@ -8946,6 +8952,7 @@
     "prominence": 72,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Stablecoin"
     ],
@@ -8966,6 +8973,7 @@
     "prominence": 0,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Stablecoin"
     ],
@@ -8986,6 +8994,7 @@
     "prominence": 0,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Stablecoin",
      "RWA"
@@ -9007,6 +9016,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "SDK"
     ],
@@ -9026,6 +9036,7 @@
     "prominence": 0,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": false,
     "types": [],
     "score": 60,
     "factsPresent": 3,
@@ -9043,6 +9054,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [],
     "score": 60,
     "factsPresent": 3,
@@ -9060,6 +9072,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Analytics"
     ],
@@ -9079,6 +9092,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": true,
     "types": [
      "Payments",
      "DEX"
@@ -9099,6 +9113,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Education"
     ],
@@ -9118,6 +9133,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": true,
     "types": [
      "Stablecoin"
     ],
@@ -9137,6 +9153,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": true,
     "types": [
      "Security",
      "Lending"
@@ -9157,6 +9174,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": true,
     "types": [
      "DEX"
     ],
@@ -9176,6 +9194,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "SDK"
     ],
@@ -9195,6 +9214,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9214,6 +9234,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "SDK"
     ],
@@ -9233,6 +9254,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Wallet"
     ],
@@ -9252,6 +9274,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Analytics"
     ],
@@ -9271,6 +9294,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Education"
     ],
@@ -9290,6 +9314,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9309,6 +9334,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Education"
     ],
@@ -9328,6 +9354,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Education"
     ],
@@ -9347,6 +9374,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9366,6 +9394,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9385,6 +9414,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": true,
     "types": [
      "Social Impact",
      "RWA"
@@ -9405,6 +9435,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9424,6 +9455,7 @@
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Payments"
     ],
@@ -9443,6 +9475,7 @@
     "prominence": 90,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Lending"
     ],
@@ -9461,6 +9494,7 @@
     "prominence": 90,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": false,
     "types": [
      "Gaming"
     ],
@@ -9479,6 +9513,7 @@
     "prominence": 90,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Anchor"
     ],
@@ -9497,6 +9532,7 @@
     "prominence": 88,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Bridge"
     ],
@@ -9515,6 +9551,7 @@
     "prominence": 88,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "SDK"
     ],
@@ -9533,6 +9570,7 @@
     "prominence": 88,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Analytics",
      "Indexer"
@@ -9552,6 +9590,7 @@
     "prominence": 88,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Security"
     ],
@@ -9570,6 +9609,7 @@
     "prominence": 85,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "RWA"
     ],
@@ -9588,6 +9628,7 @@
     "prominence": 85,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "SDK"
     ],
@@ -9606,6 +9647,7 @@
     "prominence": 85,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Security",
      "SDK"
@@ -9625,6 +9667,7 @@
     "prominence": 84,
     "deploymentNetwork": "mainnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Bridge"
     ],
@@ -9643,6 +9686,7 @@
     "prominence": 84,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "Anchor"
     ],
@@ -9661,6 +9705,7 @@
     "prominence": 84,
     "deploymentNetwork": "testnet",
     "hasOnchainFootprint": true,
+    "deploymentApplies": true,
     "types": [
      "Oracle"
     ],
@@ -9679,6 +9724,7 @@
     "prominence": 84,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
+    "deploymentApplies": false,
     "types": [
      "RPC"
     ],
@@ -11109,13 +11155,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 505
+    "value": 507
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 7
+    "value": 5
    },
    {
     "id": "o:verified",
@@ -11235,7 +11281,7 @@
     "target": 19,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 88
+    "value": 89
    },
    {
     "source": 4,
@@ -11256,7 +11302,7 @@
     "target": 19,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 17
+    "value": 18
    },
    {
     "source": 8,
@@ -11266,25 +11312,11 @@
     "value": 4
    },
    {
-    "source": 16,
-    "target": 20,
-    "sourceId": "f:corpus",
-    "targetId": "o:open",
-    "value": 1
-   },
-   {
     "source": 2,
     "target": 13,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 28
-   },
-   {
-    "source": 13,
-    "target": 20,
-    "sourceId": "f:directory",
-    "targetId": "o:open",
-    "value": 1
    },
    {
     "source": 9,
@@ -11358,7 +11390,7 @@
     "missing": 903,
     "of": 984,
     "share": 91.8,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. An unknown here is honest, but every prominent Live row without a deployment fact is a question an agent cannot answer.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 704 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
