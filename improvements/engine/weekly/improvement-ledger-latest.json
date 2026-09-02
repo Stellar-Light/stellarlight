@@ -1,23 +1,18 @@
 {
-	"generatedAt": "2026-09-02T17:42:51.017Z",
+	"generatedAt": "2026-09-02T17:58:35.037Z",
 	"total": 526,
-	"open": 12,
-	"closed": 514,
+	"open": 5,
+	"closed": 521,
 	"verified": 7,
-	"cleared": 507,
+	"cleared": 514,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 291,
-	"closingRate": 0.98,
+	"clearedOnSilence": 298,
+	"closingRate": 0.99,
 	"oldestOpenDays": 42,
 	"inWave": 0,
-	"highOpen": 2,
+	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
-		{
-			"surface": "code",
-			"open": 5,
-			"total": 10
-		},
 		{
 			"surface": "consumer",
 			"open": 5,
@@ -25,8 +20,13 @@
 		},
 		{
 			"surface": "retrieval",
-			"open": 2,
+			"open": 0,
 			"total": 335
+		},
+		{
+			"surface": "code",
+			"open": 0,
+			"total": 10
 		},
 		{
 			"surface": "directory",
@@ -52,20 +52,6 @@
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
-		{
-			"id": "golden-eval:repos-streaming-payments",
-			"surface": "retrieval",
-			"source": "golden-eval",
-			"probe": "repos-streaming-payments",
-			"severity": "high"
-		},
-		{
-			"id": "golden-eval:repos-escrow",
-			"surface": "retrieval",
-			"source": "golden-eval",
-			"probe": "repos-escrow",
-			"severity": "high"
-		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
@@ -100,13 +86,6 @@
 			"source": "raven-routing",
 			"probe": "freighter",
 			"severity": "medium"
-		},
-		{
-			"id": "nightly-note-freshness:note-stale-lightsail-network-stellar-contract-bi",
-			"surface": "code",
-			"source": "nightly-note-freshness",
-			"probe": "note-stale:lightsail-network/stellar-contract-bindings:pypi:stellar-contract-bindings",
-			"severity": "low"
 		}
 	]
 }

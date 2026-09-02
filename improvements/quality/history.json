@@ -71,16 +71,16 @@
  },
  {
   "date": "2026-09-02",
-  "batteryPass": 39,
-  "batteryFail": 2,
+  "batteryPass": 65,
+  "batteryFail": 0,
   "batteryErrors": null,
-  "parityPass": null,
+  "parityPass": 51,
   "openMaps": 0,
   "honestyDebt": 0,
-  "sampled": null,
-  "population": null,
-  "liveRows": null,
-  "liveNoSource": null,
-  "humanVerified": null
+  "sampled": 1090,
+  "population": 1090,
+  "liveRows": 863,
+  "liveNoSource": 8,
+  "humanVerified": 130
  }
 ]

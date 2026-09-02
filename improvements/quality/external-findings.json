@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T17:09:36.079Z",
+ "generatedAt": "2026-09-02T18:08:14.920Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
