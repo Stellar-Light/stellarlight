@@ -214,7 +214,20 @@ async function renderReachability() {
 			// grep for the not-found copy: Next embeds the not-found boundary
 			// in every page's RSC payload, so that string is present on
 			// perfectly good pages too (first run of this probe: 4 false reds).
-			const h1 = page.body.match(/<h1[^>]*>([^<]*)<\/h1>/i)?.[1]?.trim() ?? "";
+			// The page HTML-escapes the name: "Study Stellar SDK & Soroban" renders
+			// as "…SDK &amp; Soroban", and comparing the raw <h1> to doc.name kept
+			// the canary red for a day on the one Inactive row whose name has an
+			// ampersand (2026-09-02). Decode the entities the escaper emits.
+			const decode = (t: string) =>
+				t
+					.replace(/&amp;/g, "&")
+					.replace(/&lt;/g, "<")
+					.replace(/&gt;/g, ">")
+					.replace(/&quot;/g, '"')
+					.replace(/&#(?:39|x27);/g, "'");
+			const h1 = decode(
+				page.body.match(/<h1[^>]*>([^<]*)<\/h1>/i)?.[1]?.trim() ?? "",
+			);
 			const name = String(doc.name ?? "").trim();
 			if (page.status !== 200)
 				bad(
