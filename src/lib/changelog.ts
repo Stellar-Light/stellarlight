@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-02",
 		surfaces: ["api"],
+		version: "spec@1.9.21",
+		type: "changed",
+		summary:
+			"Routing metadata only: getLeaderboard, getRfps, explainRepo and searchProjects gain distinctive multi-word keywords for ranking-by-activity, contributor jobs/bounties, code-mechanism and oracle-product questions; two product-named keywords leave searchResearch.",
+		detail:
+			"Four of the five open through-Raven routing cases misrouted on our own card: ties resolved by operation order (searchProjects/getLeaderboard, getBuilders/getRfps), a research keyword carrying a product name ('reflector oracle manipulation incident') hijacking a name query, and explainRepo lacking 'how does it calculate / in the code' vocabulary. Scored locally after: getLeaderboard 1.000, searchProjects 0.667 (top), getRfps 1.000, explainRepo 0.429. Descriptions and schemas unchanged.",
+	},
+	{
+		date: "2026-09-02",
+		surfaces: ["api"],
 		version: "spec@1.9.20",
 		type: "added",
 		summary:
