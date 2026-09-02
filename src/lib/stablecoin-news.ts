@@ -26,6 +26,10 @@ const STRONG = [
 	"pyusd",
 	"usdy",
 	"usdglo",
+	// 2026-09-02: USDT0's Stellar launch was announced by SDF and matched
+	// nothing here — the dock's whole subject had arrived and it stayed quiet.
+	"usdt0",
+	"usdt",
 	"tokenized dollar",
 	"tokenised dollar",
 	"yield-bearing",
@@ -48,6 +52,8 @@ export interface FeedEntry {
 	url: string;
 	publishedAt: string | null;
 	description: string;
+	/** Publisher id. Defaults to the RSS feed when absent. */
+	source?: string;
 }
 
 function decode(s: string): string {
@@ -129,7 +135,9 @@ export function selectStablecoinNews(
 				title: decode(e.title),
 				url: e.url,
 				publishedAt: e.publishedAt,
-				source: "lumenloop",
+				// The dock reads more than one publisher now — an SDF post must
+				// not be credited to Lumen Loop.
+				source: e.source ?? "lumenloop",
 				matched: titleHits,
 			});
 	}
@@ -154,8 +162,14 @@ export async function fetchFeedEntries(): Promise<FeedEntry[]> {
 	}
 }
 
-/** Corpus source ids that carry dated editorial writing. */
-export const NEWS_SOURCES = ["lumenloop-research"];
+/**
+ * Corpus source ids that carry dated editorial writing.
+ *
+ * sdf-blog joined 2026-09-02: the Foundation announces the launches this page
+ * is about (USDT0's went out that morning), and the keyword rule below is what
+ * keeps the rest of its output — protocol releases, grants — off the dock.
+ */
+export const NEWS_SOURCES = ["lumenloop-research", "sdf-blog"];
 
 /** Normalize an ingested research chunk into the same shape as a feed entry. */
 export function docToEntry(d: {
@@ -163,6 +177,7 @@ export function docToEntry(d: {
 	url?: string | null;
 	content?: string | null;
 	publishedAt?: string | null;
+	source?: string | null;
 }): FeedEntry | null {
 	if (!d.url || !d.title) return null;
 	return {
@@ -170,6 +185,7 @@ export function docToEntry(d: {
 		url: d.url,
 		publishedAt: d.publishedAt ?? null,
 		description: d.content ?? "",
+		source: d.source ?? undefined,
 	};
 }
 
@@ -209,6 +225,12 @@ export function relativeTime(iso: string | null, now = Date.now()): string {
 	return `${Math.floor(months / 12)}y ago`;
 }
 
+const SOURCE_LABELS: Record<string, string> = {
+	lumenloop: "Lumen Loop",
+	"lumenloop-research": "Lumen Loop",
+	"sdf-blog": "Stellar Development Foundation",
+};
+
 export function sourceLabel(source: string): string {
-	return source === "lumenloop" ? "Lumen Loop" : source;
+	return SOURCE_LABELS[source] ?? source;
 }

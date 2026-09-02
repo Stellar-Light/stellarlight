@@ -109,6 +109,7 @@ export default async function StablecoinsPage() {
 						url: true,
 						content: true,
 						publishedAt: true,
+						source: true,
 					},
 				}),
 			]);
