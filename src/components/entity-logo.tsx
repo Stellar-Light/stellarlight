@@ -3,6 +3,7 @@
 import { Building2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { PROJECT_LOGOS } from "@/data/project-logos";
 
 interface EntityLogoProps {
 	logo?:
@@ -25,12 +26,14 @@ export function EntityLogo({
 }: EntityLogoProps) {
 	const [logoError, setLogoError] = useState(false);
 
-	// Get logo URL - handle both string ID and populated object
-	let logoUrl = "/logo.png"; // Default fallback
+	// Get logo URL - handle both string ID and populated object.
+	// A static owner-supplied mark (PROJECT_LOGOS) stands in for rows with no
+	// media row — see src/data/project-logos.ts for why those can't come from CI.
+	let logoUrl = PROJECT_LOGOS[name] ?? "/logo.png"; // Default fallback
 	if (logo && !logoError) {
 		if (typeof logo === "string") {
 			// If it's just an ID, use fallback (should be populated in queries)
-			logoUrl = "/logo.png";
+			logoUrl = PROJECT_LOGOS[name] ?? "/logo.png";
 		} else if (logo.url) {
 			logoUrl = logo.url;
 		} else if (logo.filename) {
@@ -56,7 +59,7 @@ export function EntityLogo({
 
 	return (
 		<Image
-			src={logoError ? "/logo.png" : logoUrl}
+			src={logoError ? (PROJECT_LOGOS[name] ?? "/logo.png") : logoUrl}
 			alt={`${name} logo`}
 			width={size}
 			height={size}
