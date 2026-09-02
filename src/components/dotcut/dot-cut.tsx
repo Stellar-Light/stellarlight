@@ -18,21 +18,28 @@ const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
 
 // Must match engine.ts's own inset margin (pitch derivation) — see resize().
 const GRID_MARGIN = 0.75;
-// On production this banner renders at ~545×160 CSS px — a ~3.4:1 strip, far
-// wider than tall. A mark sized to ~58% of grid HEIGHT is only a handful of
-// cells tall at a low row count, which is too coarse for a logo or currency
-// symbol to survive downsampling: at the previous TARGET_ROWS=20 (72×20 at
-// that size) a "$" carved down to an unreadable diagonal squiggle. Solving
-// for a much higher row count fixes this directly — the fix is resolution,
-// not a smaller/differently-shaped mark. Verified by hand at 70: every mark
-// this component uses reads clearly in an ASCII dump of the actual carved
-// mask at production size (see this PR's description). Cols follow from the
-// container's own aspect ratio, so pitch stays fine enough at any width.
-const TARGET_ROWS = 70;
+// Grid density is driven by a target CELL SIZE, not a target row count.
+// Deriving cols from a fixed row count (the previous approach) means cell
+// count explodes with width — at a typical 1400px-wide banner that was 480
+// cols x 70 rows = 33,600 cells at a 2.9px pitch: three pixels per circle,
+// the concave diamonds between four touching circles (the whole texture
+// this piece is built on) sub-pixel and invisible, and ~2ms/frame of
+// arc/trig work repainting a mesh nobody can actually resolve. 8px is picked
+// for how it looks — big enough that those diamonds read as circles, not a
+// fine halftone — while still leaving enough rows at this banner's height
+// for a mark to survive downsampling (verified — see this PR). MAX_COLS
+// caps a very wide viewport at roughly the 1400px reference case, so an
+// ultrawide monitor can't blow the cell count back up just by being wide.
+const CELL_PX = 8;
+const MAX_COLS = 180;
 
-function colsForRows(w: number, h: number, targetRows: number): number {
-	const cols = (w * (targetRows + 2 * GRID_MARGIN)) / h - 2 * GRID_MARGIN;
-	return Math.max(42, Math.round(cols));
+function colsForCellSize(w: number): number {
+	const cols = w / CELL_PX - 2 * GRID_MARGIN;
+	// Floor guards a host measured at 0 width (e.g. read before layout has
+	// run) from handing the engine a negative cols — which its own internal
+	// floor would silently accept as 6, turning the mesh into a handful of
+	// giant circles instead of ever getting a real resize to recompute from.
+	return Math.max(42, Math.min(MAX_COLS, Math.round(cols)));
 }
 
 /**
@@ -70,6 +77,7 @@ export function DotCutBanner() {
 
 		let cancelled = false;
 		let io: IntersectionObserver | null = null;
+		let ro: ResizeObserver | null = null;
 		let visible = true;
 		const reduceMotion = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
@@ -167,9 +175,24 @@ export function DotCutBanner() {
 				const engine = new DotCut(host, scenes, FONT_FAMILY);
 				engineRef.current = engine;
 				if (!engine.ok) return;
-				engine.setParams({
-					cols: colsForRows(host.clientWidth, host.clientHeight, TARGET_ROWS),
+
+				// A one-shot `setParams` at construction time raced the host's
+				// layout: `clientWidth` can still read 0 here (measured on a fresh
+				// load, not just under test), which locked cols at this function's
+				// own floor and never got a second chance to correct itself once
+				// the container actually resized — the engine's own internal
+				// resize() re-derives `cols` from `params.cols` on every resize, but
+				// never recomputes what that policy value should BE. Recomputing it
+				// on every observed resize (including the first, which
+				// ResizeObserver always fires once with the current size) fixes
+				// both: an initial 0-width read self-corrects on the next callback,
+				// and a real width change (e.g. the user resizing the window)
+				// keeps the cell size right instead of freezing whatever cols was
+				// picked on mount.
+				ro = new ResizeObserver(() => {
+					engine.setParams({ cols: colsForCellSize(host.clientWidth) });
 				});
+				ro.observe(host);
 
 				if (reduceMotion) {
 					engine.renderStill();
@@ -195,6 +218,7 @@ export function DotCutBanner() {
 		return () => {
 			cancelled = true;
 			io?.disconnect();
+			ro?.disconnect();
 			document.removeEventListener("visibilitychange", onVisibilityChange);
 			engineRef.current?.destroy();
 			engineRef.current = null;
@@ -223,7 +247,7 @@ export function DotCutBanner() {
 			aria-hidden="true"
 			onPointerMove={onPointerMove}
 			onPointerLeave={onPointerLeave}
-			className="h-40 w-full overflow-hidden rounded-xl bg-[#1A1A1A] md:h-52"
+			className="mb-8 h-56 w-full overflow-hidden rounded-xl bg-[#1A1A1A] md:h-80"
 		/>
 	);
 }

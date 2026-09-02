@@ -70,6 +70,14 @@ export class DotCut {
 	private prevPalette = 0;
 	private prevScene = 0;
 
+	// True when the on-screen pixels already match the settled state — hold
+	// phase, palette done blending, nothing pending. Cleared by anything that
+	// invalidates that (pointer move, resize, a fresh scene target) and
+	// consumed by the next paint. Lets the hold phase (the spec calls it
+	// "completely still") skip rebuilding the arc/bore path and repainting
+	// identical pixels every frame — the single biggest cost at a wide grid.
+	private dirty = true;
+
 	private pointer: { x: number; y: number } | null = null;
 	private raf = 0;
 	private last = 0;
@@ -132,6 +140,7 @@ export class DotCut {
 		const w = this.host.clientWidth;
 		const h = this.host.clientHeight;
 		if (!w || !h) return;
+		this.dirty = true;
 
 		this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 		this.canvas.width = Math.round(w * this.dpr);
@@ -171,6 +180,7 @@ export class DotCut {
 
 	setPointer(p: { x: number; y: number } | null) {
 		this.pointer = p;
+		this.dirty = true;
 	}
 
 	advance() {
@@ -187,7 +197,11 @@ export class DotCut {
 		this.applyScene(this.scenes[this.sceneIdx], false);
 	}
 
-	private step(dt: number) {
+	// Cheap, O(1) clock bookkeeping — timing and phase transitions only. Runs
+	// every frame regardless of whether anything is going to be repainted, so
+	// hold still times out and morphs still start on schedule while the
+	// field is otherwise idling.
+	private advanceClock(dt: number) {
 		this.phaseT += dt * 1000;
 
 		if (this.phase === "hold" && this.phaseT >= this.params.hold) {
@@ -197,6 +211,18 @@ export class DotCut {
 			this.phaseT = 0;
 		}
 
+		this.paletteMix = Math.min(1, this.paletteMix + dt * 2.2);
+		this.styleT =
+			this.phase === "morph"
+				? Math.min(1, this.styleT + dt / (this.params.morph / 1000))
+				: 1;
+	}
+
+	// O(cells) — per-cell interpolation plus styleField's trig. Both are
+	// provably constant once phase is "hold" and styleT/paletteMix have
+	// settled (p and t both pin at 1, so every cell's eased/eased-style value
+	// stops changing) — that's exactly the case draw() skips this in.
+	private updateCells() {
 		const p =
 			this.phase === "morph" ? Math.min(1, this.phaseT / this.params.morph) : 1;
 		const n = this.cols * this.rows;
@@ -212,12 +238,6 @@ export class DotCut {
 			this.dir[i] = this.target[i] > this.from[i] ? 1 : -1;
 		}
 
-		this.paletteMix = Math.min(1, this.paletteMix + dt * 2.2);
-
-		this.styleT =
-			this.phase === "morph"
-				? Math.min(1, this.styleT + dt / (this.params.morph / 1000))
-				: 1;
 		styleField(
 			this.scenes[this.sceneIdx],
 			this.cols,
@@ -231,7 +251,19 @@ export class DotCut {
 	private draw(dt: number) {
 		const ctx = this.ctx;
 		if (!ctx) return;
-		this.step(dt);
+
+		this.advanceClock(dt);
+
+		// The spec calls the hold phase "completely still" — once the morph is
+		// done, the palette has finished blending, and nothing (pointer,
+		// resize, a fresh target) marked the frame dirty, the canvas already
+		// shows the settled state pixel for pixel. Skip rebuilding the
+		// arc/bore path and repainting it; let the loop idle instead.
+		const needsPaint =
+			this.phase === "morph" || this.paletteMix < 1 || this.dirty;
+		if (!needsPaint) return;
+		this.dirty = false;
+		this.updateCells();
 
 		const W = this.canvas.width;
 		const H = this.canvas.height;
@@ -308,6 +340,7 @@ export class DotCut {
 		this.phase = "hold";
 		this.phaseT = 0;
 		this.paletteMix = 1;
+		this.dirty = true;
 		this.applyScene(this.scenes[this.sceneIdx], true);
 		this.draw(0);
 	}
