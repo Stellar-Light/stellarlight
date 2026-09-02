@@ -181,7 +181,9 @@ export async function GET(req: NextRequest) {
 			const found = await payload.find({
 				collection: "repos",
 				where: { fullName: { like: repo } },
-				limit: 5,
+				// substring match — a short name (stellar/go) also matches its
+				// forks and siblings; leave room so the exact row is on the page
+				limit: 50,
 				depth: 0,
 				select: {
 					// the exact-name filter below reads fullName — it must be selected
