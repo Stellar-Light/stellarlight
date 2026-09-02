@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-01T22:14:53.283Z",
+ "generatedAt": "2026-09-02T00:45:18.657Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -9683,17 +9683,17 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 4718
+    "withCodeDepth": 5190
    },
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
-    "withNotes": 28
+    "withNotes": 41
    },
    "mainnetJoin": {
-    "pool": 3410,
+    "pool": 3723,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 80
+    "joined": 93
    }
   },
   "curatedShape": {
@@ -9701,7 +9701,7 @@
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 810
+     "count": 811
     },
     {
      "bucket": "10–19",
@@ -9709,7 +9709,7 @@
     },
     {
      "bucket": "20–29",
-     "count": 600
+     "count": 599
     },
     {
      "bucket": "30–39",
@@ -9717,11 +9717,11 @@
     },
     {
      "bucket": "40–49",
-     "count": 192
+     "count": 191
     },
     {
      "bucket": "50–59",
-     "count": 199
+     "count": 200
     },
     {
      "bucket": "60–69",
@@ -9743,11 +9743,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1208
+     "count": 1209
     },
     {
      "label": "slowing",
-     "count": 906
+     "count": 905
     },
     {
      "label": "active",
@@ -9793,7 +9793,7 @@
     },
     {
      "label": "HTML",
-     "count": 82
+     "count": 81
     },
     {
      "label": "Shell",
@@ -9806,9 +9806,9 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 7017,
-  "withNotes": 278,
-  "withMainnet": 80,
+  "withCodeDepth": 7489,
+  "withNotes": 303,
+  "withMainnet": 93,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -10130,7 +10130,7 @@
     "activity": "active",
     "language": "JavaScript",
     "projectSlug": "stellar-development-foundation",
-    "notes": 0,
+    "notes": 2,
     "codeDepth": 92,
     "deployable": false,
     "mainnetJoined": false
@@ -10149,6 +10149,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar/go-stellar-sdk",
+    "repoScore": 75,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Go",
+    "projectSlug": "go-stellar-sdk",
+    "notes": 3,
+    "codeDepth": 93,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "NikhilRaikwar/Cubeathon",
     "repoScore": 74,
     "tier": "community",
@@ -10158,19 +10171,6 @@
     "projectSlug": null,
     "notes": 0,
     "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/go-stellar-sdk",
-    "repoScore": 74,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "Go",
-    "projectSlug": "go-stellar-sdk",
-    "notes": 0,
-    "codeDepth": 93,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10286,7 +10286,7 @@
     "activity": "slowing",
     "language": "TypeScript",
     "projectSlug": "dia",
-    "notes": 0,
+    "notes": 1,
     "codeDepth": 86,
     "deployable": false,
     "mainnetJoined": false
@@ -10870,7 +10870,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "28 of 208 rows in the curation pool (curated index, repoScore >= 60)",
+   "measurement": "41 of 208 rows in the curation pool (curated index, repoScore >= 60)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11180,13 +11180,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12851,
+    "missing": 12826,
     "of": 13129,
-    "share": 97.9,
+    "share": 97.7,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 183,
+    "examplePoolSize": 170,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11210,7 +11210,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3100 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3413 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11279,13 +11279,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 6112,
+    "missing": 5640,
     "of": 13129,
-    "share": 46.6,
+    "share": 43,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 6112,
+    "examplePoolSize": 5640,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
