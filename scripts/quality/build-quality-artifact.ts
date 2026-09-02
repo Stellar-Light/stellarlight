@@ -506,6 +506,16 @@ const out = {
 					poolMeans:
 						"curated-index rows with repoScore >= 60, the set curation actually targets",
 					withNotes: notesPool.filter((r) => r.notes > 0).length,
+					// The pool members still WITHOUT a note, by name — the exact
+					// worklist for the next curation batch. Batches 3–6 (2026-09-01)
+					// picked "next tier by repoScore across API search" and grew the
+					// registry 29 → 176 while the pool moved 41 → 47: most of that
+					// tier sits outside the pool. Name the gap so the next batch
+					// aims at it.
+					missing: notesPool
+						.filter((r) => r.notes === 0)
+						.map((r) => r.fullName)
+						.sort(),
 				},
 				mainnetJoin: {
 					pool: deployable.length,
