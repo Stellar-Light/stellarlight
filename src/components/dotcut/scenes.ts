@@ -144,15 +144,20 @@ export const PALETTES: [string, string][] = [
 	["#ffc2e2", "#c81d77"],
 	["#c7d2fe", "#4338ca"],
 	["#fde68a", "#b45309"],
-	// 6-9: token brand colour vs. a near-black ground (site bg/card tone),
-	// for the stablecoins-header scenes — kept calm, not saturated.
-	["#5FE3B3", "#101613"], // USDT0 — Tether mint
-	["#6FA8F5", "#101318"], // USDC — Circle blue
-	["#8FB0F2", "#111319"], // EURC — Circle blue (euro variant)
-	["#9FB4F0", "#12131c"], // PYUSD — PayPal blue
-	// 10-11: neutral pairs for the full-bleed pattern scenes between logos.
-	["#9AA0A6", "#141414"],
-	["#B7BEC7", "#161616"],
+	// 6-11: the stablecoins-header banner's own palettes (4 token marks + 2
+	// neutrals for the currency-symbol scenes). This banner sits directly on
+	// the page (near-black) next to cards at #1A1A1A — a bright circle colour
+	// reads as a pasted-in light slab, not as part of that surface. Both
+	// halves of every pair here stay dark and close in value (circle ~15-23%
+	// luminance, ground ~6-8%): a ~12-16pt gap keeps the carved mark visible
+	// without the whole field lighting up. Contrast belongs to the mark, not
+	// the banner.
+	["#2A3F37", "#0D1512"], // USDT0 — muted Tether mint
+	["#28344A", "#0C1018"], // USDC — muted Circle blue
+	["#2C3A52", "#0D1119"], // EURC — muted Circle blue (euro variant)
+	["#2E2E48", "#0F0F1A"], // PYUSD — muted indigo
+	["#2A2A2A", "#0D0D0D"], // neutral — currency-symbol scenes
+	["#2E2E2E", "#0F0F0F"], // neutral — currency-symbol scenes
 ];
 
 export function rasterize(
@@ -239,16 +244,20 @@ export function rasterize(
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 
-	let size = rows * 0.8;
+	// Sized to command the banner, not just survive it: on a very wide strip
+	// a mark sized off height alone reads as a small island in a lot of dead
+	// texture. Start the size guess above the height target (below, the
+	// shrink-only logic here can never grow past a low initial guess).
+	let size = rows * 1.0;
 	ctx.font = `600 ${size}px ${fontFamily}`;
-	const maxW = cols * 0.36;
+	const maxW = cols * 0.6;
 	const m = ctx.measureText(text);
 	if (m.width > maxW) {
 		size *= maxW / m.width;
 		ctx.font = `600 ${size}px ${fontFamily}`;
 	}
 
-	const maxH = rows * 0.58;
+	const maxH = rows * 0.82;
 	const mm = ctx.measureText(text);
 	const gh = mm.actualBoundingBoxAscent + mm.actualBoundingBoxDescent;
 	if (gh > maxH) {
@@ -306,9 +315,9 @@ function rasterizeImage(
 	const { w: iw, h: ih } = imageSize(image);
 	if (!iw || !ih) return out;
 
-	// ~58% of grid height, centred, aspect preserved — same footprint rule
-	// as the text glyph.
-	const dh = rows * 0.58;
+	// ~82% of grid height, centred, aspect preserved — same footprint rule
+	// as the text glyph, sized to command the banner rather than survive it.
+	const dh = rows * 0.82;
 	const dw = iw * (dh / ih);
 	ctx.clearRect(0, 0, cols, rows);
 	ctx.drawImage(image, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
