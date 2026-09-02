@@ -1852,6 +1852,13 @@ export interface components {
             basis?: "live" | "curated-static" | "unmeasured" | null;
             /** @description Plain-words reason a row is curated-static or unmeasured. Null for live rows. */
             note?: string | null;
+            /** @description The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag) — absence is not itself an error. */
+            logoUrl?: string | null;
+            /**
+             * @description Provenance of logoUrl. toml = the issuer's own per-currency image. toml-org = the same toml's org-level mark, used when no per-currency image exists but the org one resolves. fallback = a hand-curated override. country-flag = the peg's flag IS the intended mark, not a stand-in. none = nothing resolved, logoUrl is null.
+             * @enum {string|null}
+             */
+            logoSource?: "toml" | "toml-org" | "fallback" | "country-flag" | "none" | null;
             /** @description True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal. */
             verified?: boolean;
             /**

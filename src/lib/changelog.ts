@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-02",
 		surfaces: ["api"],
+		version: "spec@1.9.22",
+		type: "added",
+		summary:
+			"getStablecoins rows gain `logoUrl` and `logoSource` — the issuer's mark, when one resolves, and where it came from (toml, toml-org, fallback, country-flag, none).",
+		detail:
+			"The pipeline has resolved these since launch; the public shape just never carried them (storeRowToApi renamed measuredAt to updatedAt but dropped logoUrl/logoSource outright), so every row read as logo-less to anything reading /api/stablecoins directly, even though the site's own listing page — which reads the stored doc rather than the public shape — rendered real logos the whole time. Also new: `toml-org`, a `logoSource` for a toml's org-level mark used when no per-currency image exists, stored only after a HEAD check confirms it actually serves an image (APS Money's own ORG_LOGO 404s, so its rows correctly stay on the country-flag fallback rather than a broken link).",
+	},
+	{
+		date: "2026-09-02",
+		surfaces: ["api"],
 		version: "spec@1.9.21",
 		type: "changed",
 		summary:

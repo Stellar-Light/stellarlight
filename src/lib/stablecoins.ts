@@ -38,6 +38,7 @@ export interface StoreRow {
 	paymentsCount24h?: number | null;
 	supplyChange7d?: number | null;
 	logoUrl?: string | null;
+	logoSource?: string | null;
 	basis?: string | null;
 	measuredAt?: string | null;
 	note?: string | null;
@@ -86,6 +87,16 @@ export interface StablecoinRow {
 	 *  snapshots exist — never 0 for "no data". Was a display string ("-5.80%")
 	 *  while proxying the retired service; a number since 2026-08-19. */
 	supplyChange7d: number | null;
+	/** The issuer's own mark, when one resolves. Null = render your own
+	 *  fallback (e.g. a peg flag) — absence here is not itself an error. */
+	logoUrl: string | null;
+	/** Provenance of `logoUrl`: toml = the issuer's own per-currency image;
+	 *  toml-org = the same toml's org-level mark, used when no per-currency
+	 *  image exists; fallback = a hand-curated override; country-flag = the
+	 *  peg's flag is the intended mark, not a stand-in; none = nothing
+	 *  resolved. Null only when logoUrl itself is null for a pre-migration
+	 *  row. */
+	logoSource: string | null;
 	/** How these numbers were obtained. Never present curated-static or
 	 *  unmeasured as a live measurement. */
 	basis: "live" | "curated-static" | "unmeasured" | null;
@@ -135,6 +146,8 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		volume24hUSD: num(d.volume24hUSD),
 		paymentsCount24h: num(d.paymentsCount24h),
 		supplyChange7d: num(d.supplyChange7d),
+		logoUrl: d.logoUrl ?? null,
+		logoSource: d.logoSource ?? null,
 		basis: basis as StablecoinRow["basis"],
 		note: d.note ?? null,
 		verified: true,

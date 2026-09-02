@@ -86,7 +86,7 @@ export interface MeasuredStablecoin {
 	 *  comparable, `paymentsCount24h`. */
 	paymentsCountLifetime: number | null;
 	logoUrl: string | null;
-	logoSource: "toml" | "fallback" | "country-flag" | "none";
+	logoSource: "toml" | "toml-org" | "fallback" | "country-flag" | "none";
 	/** How each figure was obtained — a consumer can weigh a stale row. */
 	basis: "live" | "curated-static" | "unmeasured";
 	measuredAt: string;
@@ -346,6 +346,42 @@ function logoFromToml(
 	return null;
 }
 
+/**
+ * The issuer's own org-level mark (`[DOCUMENTATION] ORG_LOGO`), for an asset
+ * whose toml declares no PER-CURRENCY image (e.g. APS Money's 13 currencies
+ * share one toml and none carries an `image=`). One level less specific than
+ * `logoFromToml` — a company mark standing in for a coin mark — so it is
+ * exported as a distinct `logoSource` ("toml-org"), never folded into "toml".
+ */
+export function orgLogoFromToml(toml: string, domain: string): string | null {
+	const img = toml.match(/^\s*ORG_LOGO\s*=\s*["']([^"']+)/im)?.[1];
+	if (!img) return null;
+	return img.startsWith("http") ? img : `https://${domain}${img}`;
+}
+
+/**
+ * Confirm a candidate logo URL actually serves an image before we store it.
+ * sls: APS Money's own declared ORG_LOGO 404s — a broken image is worse than
+ * the flag fallback it would replace, so nothing here gets stored unverified.
+ * HEAD-only (no body fetched); any non-2xx, a non-image content-type, or a
+ * network failure all count as "does not resolve" — fail closed on this
+ * specific check, consistent with the pipeline failing OPEN overall (an
+ * asset never disappears; this candidate logo just doesn't get used).
+ */
+async function urlResolves(url: string): Promise<boolean> {
+	try {
+		const res = await fetch(url, {
+			method: "HEAD",
+			signal: AbortSignal.timeout(6000),
+		});
+		return (
+			res.ok && (res.headers.get("content-type") ?? "").startsWith("image/")
+		);
+	} catch {
+		return false;
+	}
+}
+
 /** Measure one asset. Never throws: a failure comes back as an unmeasured row. */
 export async function measureStablecoin(
 	asset: StablecoinAsset,
@@ -387,6 +423,17 @@ export async function measureStablecoin(
 		} else if (asset.fallbackImageUrl) {
 			logoUrl = asset.fallbackImageUrl;
 			logoSource = "fallback";
+		} else {
+			// Same toml, no per-currency image — try its org-level mark instead,
+			// but only once it's confirmed to actually serve an image. APS
+			// Money's own ORG_LOGO 404s, so this correctly leaves APSUSDM/
+			// APSEURM on "none" (→ the flag fallback) rather than storing a
+			// broken link.
+			const orgLogo = toml ? orgLogoFromToml(toml, asset.domain) : null;
+			if (orgLogo && (await urlResolves(orgLogo))) {
+				logoUrl = orgLogo;
+				logoSource = "toml-org";
+			}
 		}
 	}
 
