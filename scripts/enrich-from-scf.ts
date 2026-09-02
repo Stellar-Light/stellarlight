@@ -258,6 +258,13 @@ async function main() {
 	// SCF slug (stable), mapped to OUR slug. Each pair verified 2026-08-07
 	// against the SCF page + our record before adding; never guessed.
 	const SCF_SLUG_OVERRIDES: Record<string, string> = {
+		// nightly-completeness residual since 2026-08-31: coala-pay is awarded
+		// (rounds 22, 31, 35 — see SCF_SUBMISSION_LINKS in curate-projects.ts)
+		// but both SCF pages are submission-named, so no round award was ever
+		// populated. r22 page-verified on anticipatory-aid-on-soroban-f7j, r35 on
+		// coala-pay-billy-wallet-9mi (2026-09-01).
+		"anticipatory-aid-on-soroban-f7j": "coala-pay",
+		"coala-pay-billy-wallet-9mi": "coala-pay",
 		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
 		"coinsph-stellar-remittances-qwo": "coins-ph",
 		"identity-operating-system-idos-nqg": "idos",

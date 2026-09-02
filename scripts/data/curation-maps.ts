@@ -9,7 +9,6 @@
  */
 const ASOF_SEED = "2026-08-31";
 
-
 export type StatusBasis =
 	| "operator-announcement"
 	| "site-liveness"
@@ -39,6 +38,103 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner call 2026-09-02 ("fix those"): dead-domain and takeover rows.
+	// Flipped only with TWO independent signals (a dead or taken-over domain
+	// PLUS no linked code or code dead for 18+ months) and never for an
+	// SCF-funded project (bebop, haciendo-stellar, onboarding-club and
+	// trustedplastic are funded — their dead links are removed above, status
+	// left for a human). Live rows with a dead domain but ACTIVE code
+	// (clickpesa-debt-fund, freelii, keizai, stellar-ai-agent-kit, transfuse)
+	// keep their status: the product may have moved. from-guarded, retires
+	// once applied.
+	aurapay: {
+		from: "Live",
+		to: "Inactive",
+		note: "somosaurapay.com is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	lettuce: {
+		from: "Live",
+		to: "Inactive",
+		note: "lettucepay.io is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	nicetrade: {
+		from: "Live",
+		to: "Inactive",
+		note: "nicetrade.co is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	prophe: {
+		from: "Live",
+		to: "Inactive",
+		note: "prophe.xyz is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	"sgf-solutions": {
+		from: "Live",
+		to: "Inactive",
+		note: "sgfsolutions.io is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	sorobix: {
+		from: "Live",
+		to: "Inactive",
+		note: "sorobix.xyz is NXDOMAIN on two public resolvers and the last commit across its 5 repos is 2023-11-28 (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	techfiesta: {
+		from: "Live",
+		to: "Inactive",
+		note: "techfiesta.dev is NXDOMAIN on two public resolvers and the last commit across its 5 repos is 2024-03-13 (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	"stellar-battle": {
+		from: "Live",
+		to: "Inactive",
+		note: "stellarbattle.com redirects to a HugeDomains sale page; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl:
+			"https://www.hugedomains.com/domain_profile.cfm?d=stellarbattle.com",
+		basis: "human-verified",
+	},
+	"stocken-capital": {
+		from: "Live",
+		to: "Inactive",
+		note: "stockencapital.com now serves gambling spam ('Login Bandar Togel'); the product is gone (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	stellarauth: {
+		from: "Live",
+		to: "Inactive",
+		note: "stellarauth.com is a parked domain page; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	soracle: {
+		from: "Live",
+		to: "Inactive",
+		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl: "https://posted.app/",
+		basis: "human-verified",
+	},
+	sora: {
+		from: "Live",
+		to: "Inactive",
+		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl: "https://posted.app/",
+		basis: "human-verified",
+	},
 	// Owner call 2026-08-29 ("remove this? why is this even added?"): a
 	// name-only husk from the March lumenloop bulk seed — NO links, empty
 	// description, category/types incoherent, serving Live on an unverified
@@ -827,7 +923,8 @@ export const STATUS_FIX: Record<
 		from: "Live",
 		to: "Live",
 		asOf: "2026-08-29",
-		sourceUrl: "https://developers.circle.com/cctp/references/stellar-contracts",
+		sourceUrl:
+			"https://developers.circle.com/cctp/references/stellar-contracts",
 		basis: "human-verified",
 		note: "Circle's own reference lists live Stellar MAINNET CCTP contracts (receipt improvements/receipts/circle-2026-08-29.json); USDC issuance on Stellar is Circle-operated.",
 	},
@@ -2565,7 +2662,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Cashback and discounted gift-card payments app settling on Stellar.",
+		shortDescription:
+			"Cashback and discounted gift-card payments app settling on Stellar.",
 		links: { website: "https://loopfinance.io/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2579,7 +2677,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["AI", "Security"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "OpenZeppelin Accounts policy builder — an MCP server and Claude skill for composing smart-account policies (by the Untangled team; distinct product).",
+		shortDescription:
+			"OpenZeppelin Accounts policy builder — an MCP server and Claude skill for composing smart-account policies (by the Untangled team; distinct product).",
 		links: { website: "https://crediolabs.ai/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2593,7 +2692,8 @@ export const SEEDS: Array<{
 		status: "Development",
 		types: ["AI", "Security"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "AI least-privilege policy synthesizer for OpenZeppelin smart accounts on Stellar.",
+		shortDescription:
+			"AI least-privilege policy synthesizer for OpenZeppelin smart accounts on Stellar.",
 		links: { github: "https://github.com/kunaldrall29/policywright" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2607,12 +2707,14 @@ export const SEEDS: Array<{
 		status: "Development",
 		types: ["Infrastructure"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "ECVRF plus Drand verifiable randomness for Soroban contracts.",
-		links: {  },
+		shortDescription:
+			"ECVRF plus Drand verifiable randomness for Soroban contracts.",
+		links: {},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
-		statusSourceUrl: "https://communityfund.stellar.org/project/vrf-soroban-8yl",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/vrf-soroban-8yl",
 	},
 	{
 		slug: "komet",
@@ -2621,7 +2723,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Security"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Runtime Verification's formal-verification tool for Soroban smart contracts (K framework).",
+		shortDescription:
+			"Runtime Verification's formal-verification tool for Soroban smart contracts (K framework).",
 		links: { github: "https://github.com/runtimeverification/komet" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2635,7 +2738,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Education"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Spanish-language YouTube and podcast education channel covering Stellar (26.5k subscribers).",
+		shortDescription:
+			"Spanish-language YouTube and podcast education channel covering Stellar (26.5k subscribers).",
 		links: { website: "https://www.youtube.com/@RobertoSanzCriptomonedas" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2649,7 +2753,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Freight-forwarder B2B payments platform (Hamburg) settling on Stellar.",
+		shortDescription:
+			"Freight-forwarder B2B payments platform (Hamburg) settling on Stellar.",
 		links: { website: "https://janus.solutions/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2663,7 +2768,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "StashPay cross-border payments for Ghana (GHS corridors) on Stellar; five SCF award rounds.",
+		shortDescription:
+			"StashPay cross-border payments for Ghana (GHS corridors) on Stellar; five SCF award rounds.",
 		links: { website: "https://www.kutanapay.com/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2691,7 +2797,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Stablecoin banking for Global-South freelancers on Stellar.",
+		shortDescription:
+			"Stablecoin banking for Global-South freelancers on Stellar.",
 		links: { website: "http://www.usesendana.com" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2719,7 +2826,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["RWA"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Risk-parity, all-weather-style crypto portfolio product on Stellar.",
+		shortDescription:
+			"Risk-parity, all-weather-style crypto portfolio product on Stellar.",
 		links: { website: "https://www.etesiar.com/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2733,12 +2841,14 @@ export const SEEDS: Array<{
 		status: "Development",
 		types: ["Infrastructure", "NFT"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Builder DAO port of the on-chain Nouns DAO and auction protocol to Stellar.",
+		shortDescription:
+			"Builder DAO port of the on-chain Nouns DAO and auction protocol to Stellar.",
 		links: { website: "https://nouns.build" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
-		statusSourceUrl: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
 	},
 	{
 		slug: "yolat",
@@ -2747,7 +2857,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "African remittance rails on Stellar, by the ex-Venture Garden Group team.",
+		shortDescription:
+			"African remittance rails on Stellar, by the ex-Venture Garden Group team.",
 		links: { website: "https://www.yolat.com" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2775,7 +2886,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Stablecoin", "Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Regulated BRL settlement token (BRLP) for FX and institutional payments on Stellar.",
+		shortDescription:
+			"Regulated BRL settlement token (BRLP) for FX and institutional payments on Stellar.",
 		links: { website: "https://pagcrypto.finance/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2789,7 +2901,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Anchor", "Payments"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Liquid by Upesa: anchor-based cross-border liquidity and payouts for African SMEs.",
+		shortDescription:
+			"Liquid by Upesa: anchor-based cross-border liquidity and payouts for African SMEs.",
 		links: { website: "https://upesa.app/" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2817,7 +2930,8 @@ export const SEEDS: Array<{
 		status: "Live",
 		types: ["Stablecoin", "Lending"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "Soroban-native decentralized stablecoin protocol (USDx and currency vaults).",
+		shortDescription:
+			"Soroban-native decentralized stablecoin protocol (USDx and currency vaults).",
 		links: { website: "https://fxdao.io" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
@@ -2834,8 +2948,9 @@ export const SEEDS: Array<{
 		status: "Inactive",
 		types: ["Gaming"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "SCF-funded gaming project (round 18 era). Wound down: docking.zone DNS is dead; last Wayback capture 2025-11-09.",
-		links: {  },
+		shortDescription:
+			"SCF-funded gaming project (round 18 era). Wound down: docking.zone DNS is dead; last Wayback capture 2025-11-09.",
+		links: {},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
@@ -2848,8 +2963,9 @@ export const SEEDS: Array<{
 		status: "Inactive",
 		types: ["Infrastructure"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "SCF-funded DAO tooling. Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023.",
-		links: {  },
+		shortDescription:
+			"SCF-funded DAO tooling. Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023.",
+		links: {},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
@@ -2866,12 +2982,14 @@ export const SEEDS: Array<{
 		status: "Inactive",
 		types: ["Education", "Social Impact"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "SCF-funded ambassador program empowering West African builders through blockchain education, collaboration and adoption. Completed cohort program (also known as WAA).",
-		links: {  },
+		shortDescription:
+			"SCF-funded ambassador program empowering West African builders through blockchain education, collaboration and adoption. Completed cohort program (also known as WAA).",
+		links: {},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
-		statusSourceUrl: "https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb",
 	},
 	{
 		slug: "study-stellar-sdk-soroban",
@@ -2880,15 +2998,15 @@ export const SEEDS: Array<{
 		status: "Inactive",
 		types: ["Education"],
 		supportedNetworks: ["Stellar"],
-		shortDescription: "SCF-funded study-group program: six Stellar SDK and Soroban sessions teaching Spanish-speaking students. Completed cohort.",
-		links: {  },
+		shortDescription:
+			"SCF-funded study-group program: six Stellar SDK and Soroban sessions teaching Spanish-speaking students. Completed cohort.",
+		links: {},
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
 		statusBasis: "human-verified",
-		statusSourceUrl: "https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
 	},
-
-
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3373,7 +3491,8 @@ export const DEPLOYMENT_VERIFIED: Record<
 	},
 	"circle-cctp-cross-chain-transfer-protocol": {
 		network: "mainnet",
-		sourceUrl: "https://developers.circle.com/cctp/references/stellar-contracts",
+		sourceUrl:
+			"https://developers.circle.com/cctp/references/stellar-contracts",
 		note: "Circle's own reference lists Stellar MAINNET TokenMessengerMinter CAE2G5Z7… + MessageTransmitter CACMENFF…; both live on public since 2026-04-16 (the quickstart page's ids are testnet - do not cite those)",
 	},
 	stellarterm: {
@@ -3384,7 +3503,7 @@ export const DEPLOYMENT_VERIFIED: Record<
 	"stellars-finance": {
 		network: "testnet",
 		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
-		note: "mainnet config present but empty (4x address:\"\"); testnet fully populated",
+		note: 'mainnet config present but empty (4x address:""); testnet fully populated',
 	},
 	// ── 2026-08-29 gap-matrix pass: the 6-row deployment pool. Two evidenced,
 	// four stay honestly unknown (receipts improvements/receipts/<slug>-2026-08-29.json):
@@ -3394,7 +3513,8 @@ export const DEPLOYMENT_VERIFIED: Record<
 	// spacewalk — bridge operates from Pendulum; no Stellar-side artifact located.
 	dia: {
 		network: "testnet",
-		sourceUrl: "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		sourceUrl:
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
 		note: "Stellar's own oracle-providers reference lists DIA with a TESTNET contract only (CAEDPEZD…); no mainnet address documented anywhere",
 	},
 	"redstone-finance": {
@@ -3419,42 +3539,42 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	// an unreachable origin IS the observed-dead evidence the July zombie-200
 	// pages could not provide. whalestack cites the successor brand's own
 	// domain, not the coinqvest redirect that confused the first receipt.
-	"pactta": "https://pactta.com/",
-	"whalestack": "https://whalestack.com/",
-	"aerochain": "https://aerochain.wingleet.com/redoc",
-	"apay": "https://apay.io/",
-	"arcturus": "https://arcturus-gpt.com/",
-	"benkiko": "https://benkiko.xyz/",
-	"blip": "https://blip.watch/",
-	"borderdollar": "https://borderdollar.co/",
-	"brl": "https://ntokens.com/blog/brl-anchor-stellar",
-	"canfy": "https://canfy.net/",
-	"cosmiclink": "https://cosmic.link/",
-	"cosmicvote": "https://cosmic.vote/",
-	"cryptocannoneer": "https://blockshangerous.com/cryptocannoneer",
+	pactta: "https://pactta.com/",
+	whalestack: "https://whalestack.com/",
+	aerochain: "https://aerochain.wingleet.com/redoc",
+	apay: "https://apay.io/",
+	arcturus: "https://arcturus-gpt.com/",
+	benkiko: "https://benkiko.xyz/",
+	blip: "https://blip.watch/",
+	borderdollar: "https://borderdollar.co/",
+	brl: "https://ntokens.com/blog/brl-anchor-stellar",
+	canfy: "https://canfy.net/",
+	cosmiclink: "https://cosmic.link/",
+	cosmicvote: "https://cosmic.vote/",
+	cryptocannoneer: "https://blockshangerous.com/cryptocannoneer",
 	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi",
-	"equilibre": "https://equilibre.io/",
-	"forge": "https://forgerpc.com/",
+	equilibre: "https://equilibre.io/",
+	forge: "https://forgerpc.com/",
 	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
-	"lumenaut": "https://pool.lumenaut.net/",
+	lumenaut: "https://pool.lumenaut.net/",
 	"lumens-for-charity": "https://lumensforcharity.tech/",
-	"mimoto": "https://github.com/nkoorty/mimoto",
-	"mxlet": "https://xlet.io/",
-	"opensolar": "https://openx.solar/",
+	mimoto: "https://github.com/nkoorty/mimoto",
+	mxlet: "https://xlet.io/",
+	opensolar: "https://openx.solar/",
 	"paygo-crypto": "https://paygocrypto.io/",
-	"quidroo": "https://quidroo.com/",
-	"rigel": "https://rigel.link/",
-	"skeeper": "https://skeeper.xyz/",
-	"snnac": "https://snnac.me/",
+	quidroo: "https://quidroo.com/",
+	rigel: "https://rigel.link/",
+	skeeper: "https://skeeper.xyz/",
+	snnac: "https://snnac.me/",
 	"soroban-assistant": "https://soroban-assistant.herokuapp.com/",
-	"sorobanide": "https://sorobanide.com/",
-	"sorobuilder": "https://sorobuilder.com/",
-	"sorosorcerer": "https://sorosorcerer.com/",
-	"sorscan": "https://sorscan.org/",
+	sorobanide: "https://sorobanide.com/",
+	sorobuilder: "https://sorobuilder.com/",
+	sorosorcerer: "https://sorosorcerer.com/",
+	sorscan: "https://sorscan.org/",
 	"stellar-update": "https://stellarupdate.com/",
-	"stellarstrides": "https://stellarstrides.xyz/",
-	"swplug": "https://swplug.com/",
-	"typiqo": "https://typiqo.it/",
+	stellarstrides: "https://stellarstrides.xyz/",
+	swplug: "https://swplug.com/",
+	typiqo: "https://typiqo.it/",
 };
 
 /**
@@ -3470,14 +3590,15 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
  * can never clobber a later, legitimate source.
  */
 export const STATUS_SOURCE_RETRACT: Record<string, string> = {
-	"b4b": "https://b4b.app/",
-	"chaincred": "https://prince29chouhan.github.io/chaincred_landing",
-	"localcoin": "https://localcoin.us/",
-	"pactta": "https://pactta.com/",
-	"scam-flagging-system": "https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
+	b4b: "https://b4b.app/",
+	chaincred: "https://prince29chouhan.github.io/chaincred_landing",
+	localcoin: "https://localcoin.us/",
+	pactta: "https://pactta.com/",
+	"scam-flagging-system":
+		"https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
 	"the-blue-marble": "https://thebluemarble.io/",
-	"venalabs": "https://venalabs.com/",
-	"whalestack": "https://coinqvest.com/",
+	venalabs: "https://venalabs.com/",
+	whalestack: "https://coinqvest.com/",
 };
 
 /**
@@ -3494,4 +3615,68 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 	// 2026-09-01 owner call covers the domain, not the slug. Both rows point
 	// at diviandecor.com / casino spam now; neither should link out.
 	"blue-marble": "https://thebluemarble.io/",
+	// ── Owner call 2026-09-02 ("fix those") on the no-check triage lists. Each
+	// link below is dead or no longer the project's: value-keyed to the exact
+	// stored URL so a later legitimate relink is never clobbered. Status is
+	// handled separately in STATUS_FIX and only where a second, independent
+	// signal exists; a dead link alone never flips a status.
+	// NXDOMAIN on both 1.1.1.1 and 8.8.8.8 (2026-09-02):
+	aurapay: "https://somosaurapay.com/",
+	"aura-pay": "https://somosaurapay.com/",
+	"clickpesa-debt-fund": "https://clickpesadebtfund.com/",
+	"elio-dao": "https://elio-dao.org/",
+	freelii: "https://freelii.app/",
+	"haciendo-stellar": "https://haciendostellar.com/",
+	instantdao: "https://instantdao.io/",
+	keizai: "https://keizai.dev/",
+	lettuce: "https://lettucepay.io/",
+	multiclique: "https://multiclique.org/",
+	nicetrade: "https://nicetrade.co/",
+	"onboarding-club": "https://onboarding.club/",
+	prophe: "https://prophe.xyz/",
+	"sgf-solutions": "https://sgfsolutions.io/",
+	sorobix: "https://sorobix.xyz/",
+	"stellar-ai-agent-kit": "https://stellarsandbox.dev/",
+	techfiesta: "https://techfiesta.dev/",
+	transfuse: "https://transfuse.network/",
+	trustedplastic: "https://recyclable.credit/",
+	// Registered but serving no address on either resolver (2026-09-02):
+	"raum-network": "https://dex.raum.network/",
+	sorobuild: "https://adapptable.dev/",
+	sorostarter: "https://sorostarter.com/",
+	spatium: "https://spatium.net/",
+	teachmedefi: "https://teachmedefi.de/",
+	transfermole: "https://transfermole.com/",
+	wirecash: "https://wirecash.com/",
+	// Domain taken over, for sale, or dead (fetched 2026-09-01/02):
+	// redirects to expireddomains.com
+	bebop: "https://bebop.cash/",
+	// redirects to a HugeDomains sale page
+	"stellar-battle": "https://stellarbattle.com/",
+	// redirects to zero-gpt.io
+	"planet-pay": "https://planetpay.io/",
+	// redirects to zynta.com
+	globachain: "https://globachain.com/",
+	// redirects to persadaposnews.id
+	grip: "https://trygrip.co/",
+	// redirects to diariodelagro.cl
+	uils: "https://uils.la/",
+	// redirects to modnalasta.com
+	blocknify: "https://blocknify.com/",
+	// redirects to geo.ai
+	synced: "https://synced.to/",
+	// Wix 'ConnectYourDomain' error page
+	"art-club": "https://artclubcard.com/",
+	// 404 on GitHub Pages
+	derisk: "https://derisk.carmine.finance/",
+	// redirects into a GitBook editor URL
+	icanproveit: "https://tims-personal-organization.gitbook.io/icanproveit",
+	// serves gambling spam ('Login Bandar Togel')
+	"stocken-capital": "https://stockencapital.com/",
+	// posted.app is listed for sale at Porkbun
+	soracle: "https://posted.app/",
+	// posted.app is listed for sale at Porkbun
+	sora: "https://posted.app/",
+	// parked domain page
+	stellarauth: "https://stellarauth.com/",
 };
