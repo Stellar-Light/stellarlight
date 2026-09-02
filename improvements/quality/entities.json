@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T02:11:32.526Z",
+ "generatedAt": "2026-09-02T02:43:20.352Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -2395,9 +2395,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -9102,6 +9103,22 @@
     ]
    },
    {
+    "slug": "pyth",
+    "name": "Pyth",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
     "slug": "raum-network",
     "name": "Raum Network",
     "status": "Development",
@@ -9623,23 +9640,6 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "dfns",
-    "name": "DFNS",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "types": [
-     "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
@@ -9657,7 +9657,7 @@
    },
    {
     "field": "typed",
-    "count": 2
+    "count": 3
    },
    {
     "field": "linked",
@@ -9683,176 +9683,63 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 5190
+    "withCodeDepth": 5670
    },
    "knowledgeNotes": {
     "pool": 208,
     "poolMeans": "curated-index rows with repoScore >= 60, the set curation actually targets",
     "withNotes": 51,
+    "triaged": 115,
+    "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
      "0xNana/SearchPay",
-     "402md/agentcard",
-     "ACTA-Team/GIVE-Interactuar",
      "ALFA117/MongliAgent",
      "Akanimoh12/Stellar-iPredict",
-     "Andy00L/x402-autopilot",
-     "Arihaan/stellar-sara",
-     "Asterizm-Protocol/asterizm-contracts-stellar",
      "Blockchain-Oracle/xlmtools",
      "Bosun-Josh121/clevercon",
-     "Bosun-Josh121/conductor",
-     "BuenDia-Builders/ocean_request",
-     "Cassxbt/Starlane",
-     "Christabel337/Agentex",
-     "CijeTheCreator/stellar-tickets",
-     "CyberVerse2/gopadi",
-     "DarthClyn/Paygent-Stellar",
-     "Dprof-in-tech/stipend",
      "E1eng/agentBoard",
-     "Emanuel250YT/StellarOrchestra",
-     "Eras256/MileChain",
-     "Franklivania/caushun",
-     "Fundable-Protocol/Fundable-Soroban-Contracts",
-     "Fundable-Protocol/stellar_client_os",
-     "Gbangbolaoluwagbemiga/Kairos",
      "GladiusClub/gladius-backend",
-     "HeylmStoned/prism-stellar-earn",
-     "Hoops-Finance/calypso-x402",
-     "Hoops-Finance/cometswap",
-     "Jennycruzy/geotruth",
-     "KaranSinghBisht/veilgrid",
-     "Kaxeck/Nextforge",
-     "Klorenn/Cosmic-Coder-",
-     "Klorenn/Phase",
-     "LiquidsFi/Liquidsfi-oracle-web",
-     "LiquidsFi/ZKLiquid-home",
-     "LiquidsFi/ZKLiquid-protocol",
-     "LiquidsFi/liquidsfi-web-app",
      "Lobster-Protocol/stellar-integrations",
      "Lum-Agg/stellar-dex-agg",
      "LumenWipe/lumenwipe",
-     "MakindeAhmed2110/telos",
-     "Marcos-sxt/le_coup",
-     "MikeMoulder/ero",
-     "Miracle656/veil",
      "Moonlight-Protocol/local-dev",
-     "MrTimonM/stellar-x-402",
-     "Myles181/HaggleNet",
-     "NikhilRaikwar/Authora",
-     "NikhilRaikwar/Cubeathon",
      "NoetherDEX/noether",
      "Nsuccess/AgentMarket",
-     "NueloSE/cardentic",
-     "Officially-aditya/taskflow-x402",
-     "Oni7u7/Kivo",
-     "Oppia-Software-Labs/sentinel",
-     "Oshioke-Salaki/Agent-Tontine",
-     "PeridotFinance/Peridot-Soroban",
-     "Sampath-04/HivePayAI",
      "SentinelFi/sentinel_soroban_v3",
-     "Shadow-Ash/PayLoop",
-     "Shreshtthh/Zk-Seep",
-     "Shreshtthh/agentguard",
-     "SimplyTokenized/soroban-smart-contracts",
-     "Smart-Treasury-Account-STA/dApp",
-     "Socket-Fi/socketfi-app",
-     "Socket-Fi/socketfi-website",
      "Soneso/stellar-php-sdk",
-     "SpinachFi/spinach",
      "Stellar-Light/confidential-agent-commerce",
-     "Stellar-Light/stellar-pay",
-     "TKCollective/x402-research-skill",
-     "TS-mfon/stellar-agent-api-bazaar",
-     "Tasfia-17/stellar-mcp",
-     "ToanBm/stellar-trader",
      "TrebleLegacy/x402-agents-stellar-project",
      "Trustless-OSS/Trustless-OSS",
      "Vinaystwt/xMPP",
-     "WuodOdhis/agentic_stellar",
-     "Yonkoo11/beacon",
-     "Zhekinmaksim/OrbitSafe",
-     "abdulwahabalm/paygent",
-     "abroad-finance/abroad",
      "airgap-it/airgap-coin-lib",
      "airgap-it/airgap-vault",
      "airgap-it/airgap-wallet",
-     "alternun-development/alternun-ui",
-     "arnavmehta7/agenflow-protocol",
-     "ashfrancis/chickenz",
-     "asmodey-afk/stellar-agent-rep",
-     "ayushsaklani-min/agentstell",
-     "bahmez/heistDuel",
      "big14way/stellar-agent-gateway",
-     "blockdaemon/solana-accountsdb-plugin-kafka",
      "bytemaster333/account-demolisher",
      "carstenjacobsen/x402-testing-tool",
-     "catmcgee/stellar-poker-cosnarks",
      "daraijaola/runbox",
      "davidmaronio/StellarPay402",
-     "davz7/MananaSeguro",
-     "devasignhq/agent",
-     "dmustapha/verdikt",
      "ebubechi-ihediwa/Verix",
-     "emperorsixpacks/-bear-protocol",
-     "enderNakamoto/walt",
      "envexx/Lument-Trust",
-     "eq-lab/pipeline",
-     "foundermafstat/nft-dnd-stellar",
-     "futurehelp/query402-api",
      "fxjrin/defi-copilot",
      "ggoldani/agent-passport",
-     "gyan0890/shieldex",
-     "harystyleseze/careguard",
-     "kaksv/uber-for-agents",
-     "kaleababayneh/zstellar-wordle",
      "keybase/client",
      "kindfi-org/kindfi",
-     "legasicrypto/agent-credit-rail",
      "leojay-net/Stellar-Agent-Flow",
      "leomanza/near-shade-coordination",
-     "leticarolina/watchdog",
-     "loquit-doru/stellar-tokensentry",
-     "lumens-news/news",
-     "mallikaakash/AgentSense",
-     "manoahLinks/mindVault",
      "martinvibes/SentinelShield",
-     "maxsouth-dev/payloop",
      "midasbal/lumina-scan",
-     "mokwathedeveloper/Agent-Paywall-Router",
-     "mr-574rk/mesh402",
-     "murat48/zktexasholdem",
-     "nickthelegend/fund402",
-     "nickyunstoppable/Veilstar-Brawl",
-     "nirmalplays/Stellar-x402",
      "noir-lang/noir",
-     "official-jumpa/jumpa",
-     "olivmath/stealth-battleship",
-     "oyingrace/agent_loom",
-     "paltalabs/etherfuse-privy-wallet",
-     "pedro-gattai/ZKachi",
-     "pedro-pelicioni/court-of-shadows",
-     "phamdat721101/signal",
      "rango-exchange/rango-client",
      "rango-exchange/rango-sdk",
-     "rizwanmoulvi/agent-got-card-x402",
-     "sandman-sh/credence",
      "sandragcarrillo/nexus4agents",
-     "simplex-t/sunvasi",
-     "siriuslattice/stellarmcp",
-     "softalpha0/agent-bazaar",
-     "stellarcarbon/hackmeridian",
-     "stellarzerolab/Neurochain-DSL-Stellar",
-     "t0k1dev/vendly",
-     "thewoodfish/AgentCompute",
-     "theyuvan/zk-THRONE",
-     "uzochukwuV/Eleventts-stellar-mcp",
-     "velikanghost/heekowave"
+     "t0k1dev/vendly"
     ]
    },
    "mainnetJoin": {
-    "pool": 3723,
+    "pool": 4046,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 93
+    "joined": 99
    }
   },
   "curatedShape": {
@@ -9965,9 +9852,9 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 7489,
+  "withCodeDepth": 7969,
   "withNotes": 399,
-  "withMainnet": 93,
+  "withMainnet": 99,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -11023,7 +10910,7 @@
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "2 of 984 sampled rows untyped",
+   "measurement": "3 of 984 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11369,7 +11256,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3413 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 3736 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11438,13 +11325,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 5640,
+    "missing": 5160,
     "of": 13129,
-    "share": 43,
+    "share": 39.3,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 5640,
+    "examplePoolSize": 5160,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11492,16 +11379,17 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 2,
+    "missing": 3,
     "of": 984,
-    "share": 0.2,
+    "share": 0.3,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 2,
+    "examplePoolSize": 3,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
+     "pyth",
      "boundless-bounties",
      "deb"
     ]
