@@ -2,18 +2,19 @@
 
 /**
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
- * touching circles that carves each token's mark (or a currency symbol) as
- * negative space, cycling between them so a mark lands as an event rather
- * than blending into a steady scroll. Framework-free Canvas 2D + rAF, driven
- * entirely by `DotCut` (./engine.ts); this component only loads the logos,
- * builds the scene list, and wires lifecycle.
+ * touching circles that carves negative space out of the field. Mostly
+ * full-bleed patterns (rings/columns/checker/boxes/bars, the whole surface
+ * reorganising) with two contained marks (the USDT0 logo and $) so each one
+ * lands as an event rather than blending into a steady scroll of small
+ * figures. Framework-free Canvas 2D + rAF, driven entirely by `DotCut`
+ * (./engine.ts); this component only loads the one logo, builds the scene
+ * list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
 import { DotCut } from "./engine";
 import type { Scene } from "./scenes";
 
-const LOGO_SLUGS = ["usdt0", "usdc", "eurc", "pyusd"] as const;
 const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
 
 // Must match engine.ts's own inset margin (pitch derivation) — see resize().
@@ -24,14 +25,26 @@ const GRID_MARGIN = 0.75;
 // cols x 70 rows = 33,600 cells at a 2.9px pitch: three pixels per circle,
 // the concave diamonds between four touching circles (the whole texture
 // this piece is built on) sub-pixel and invisible, and ~2ms/frame of
-// arc/trig work repainting a mesh nobody can actually resolve. 8px is picked
-// for how it looks — big enough that those diamonds read as circles, not a
-// fine halftone — while still leaving enough rows at this banner's height
-// for a mark to survive downsampling (verified — see this PR). MAX_COLS
-// caps a very wide viewport at roughly the 1400px reference case, so an
-// ultrawide monitor can't blow the cell count back up just by being wide.
-const CELL_PX = 8;
-const MAX_COLS = 180;
+// arc/trig work repainting a mesh nobody can actually resolve.
+//
+// 8px fixed that, but overcorrected the other way: the owner's ask was the
+// original spec's density back — "~42 circles across, on a square lattice at
+// EXACTLY the pitch, so neighbours meet" — which at this banner's real
+// container width (~1232px, capped by `max-w-7xl` on the page) is ~28.5px,
+// not 8px. CELL_PX now targets that directly. MAX_COLS is a defensive cap,
+// not the load-bearing constraint it was at 8px: the container can't exceed
+// ~1232px (max-w-7xl), so cols never approaches it in practice — it just
+// stops this component from exploding back to a fine mesh if it's ever
+// dropped into a wider, unconstrained host.
+//
+// Fewer, bigger cells means fewer rows, which means every scene had to be
+// re-proven at the new grid — see the scene list below for which marks
+// survive being carved at ~42 cols and why the cycle leans back on
+// full-bleed patterns rather than a row of small figures (verified via
+// ASCII/visual dumps of the real rasterize() output — see this PR's
+// description).
+const CELL_PX = 28.5;
+const MAX_COLS = 50;
 
 function colsForCellSize(w: number): number {
 	const cols = w / CELL_PX - 2 * GRID_MARGIN;
@@ -90,21 +103,38 @@ export function DotCutBanner() {
 			else if (visible) engine.start();
 		};
 
-		Promise.all(
-			LOGO_SLUGS.map((slug) => loadImage(`/stablecoins/logos/${slug}.png`)),
-		)
-			.then(([usdt0, usdc, eurc, pyusd]) => {
+		loadImage("/stablecoins/logos/usdt0.png")
+			.then((usdt0) => {
 				if (cancelled) return;
 
-				// Four token marks interleaved with four currency symbols — no
-				// filler pattern scenes (rings/checker carved nothing, so they read
-				// as noise between the marks). Symbols are picked for surviving a
-				// coarse grid: bold, closed, high-contrast glyphs only (the dollar,
-				// euro, pound and yen signs) — most lowercase, arrows and
-				// punctuation dissolve at this cell count. Each scene's `style`
-				// axis (linear/radial/random) deliberately differs from its
-				// `transition` axis — see engine.ts's cellMotion / styleField for
-				// what each transition and style actually is.
+				// Two contained marks on five full-bleed patterns — the spec's own
+				// composition: "one letter and five full-bleed patterns... the
+				// single letter is the only contained figure in the cycle, which
+				// is what gives it weight: surrounded by five moments where the
+				// whole surface reorganises, one centred shape lands as an event
+				// rather than another slide." An earlier pass here swapped every
+				// pattern for a token logo or currency symbol, which is the
+				// opposite move: eight small figures in a row is the monotony the
+				// spec warns about, not the cycle it describes. rings/checker
+				// were dropped at the time for "carving nothing" — true at the
+				// tiny cell sizes this banner shipped at (a checkerboard whose
+				// squares are barely a circle wide doesn't read as a
+				// checkerboard), not a defect in the pattern math itself, so
+				// they're restored now that cells are big enough to show them
+				// (verified — see this PR's ASCII/visual dumps of all five).
+				// usdt0 and $ are the two contained marks, spaced apart in the
+				// cycle so each still lands as its own event; of the original 8
+				// image/symbol scenes only these two plus €/£/¥ survive being
+				// carved at ~42 cols at all (usdc/eurc/pyusd's thin arc/outline
+				// strokes fragment into noise, verified up to 22 rows), and
+				// €/£/¥ are cut here on top of that per the spec's own
+				// "only one or two contained marks" — not because they fail.
+				// Each scene's `style` axis (linear/radial/random) deliberately
+				// differs from its `transition` axis, and the five pattern
+				// scenes reuse the exact transition/style pairing the generic
+				// `SCENES` default (above) already assigns each pattern kind —
+				// see engine.ts's cellMotion / styleField for what each
+				// transition and style actually is.
 				const scenes: Scene[] = [
 					{
 						kind: "image",
@@ -115,58 +145,45 @@ export function DotCutBanner() {
 						style: "swell",
 					},
 					{
+						kind: "rings",
+						label: "rings",
+						transition: "ripple",
+						palette: 7,
+						style: "grain",
+					},
+					{
+						kind: "columns",
+						label: "columns",
+						transition: "columns",
+						palette: 8,
+						style: "streak",
+					},
+					{
+						kind: "checker",
+						label: "checker",
+						transition: "scatter",
+						palette: 9,
+						style: "swell",
+					},
+					{
 						kind: "text",
 						value: "$",
 						label: "usd",
 						transition: "ripple",
+						palette: 12,
+						style: "grain",
+					},
+					{
+						kind: "boxes",
+						label: "boxes",
+						transition: "collapse",
 						palette: 10,
 						style: "grain",
 					},
 					{
-						kind: "image",
-						image: usdc,
-						label: "usdc",
-						transition: "scatter",
-						palette: 7,
-						style: "streak",
-					},
-					{
-						kind: "text",
-						value: "€",
-						label: "eur",
-						transition: "columns",
-						palette: 11,
-						style: "swell",
-					},
-					{
-						kind: "image",
-						image: eurc,
-						label: "eurc",
-						transition: "collapse",
-						palette: 8,
-						style: "drift",
-					},
-					{
-						kind: "text",
-						value: "£",
-						label: "gbp",
+						kind: "bars",
+						label: "bars",
 						transition: "wipe",
-						palette: 10,
-						style: "grain",
-					},
-					{
-						kind: "image",
-						image: pyusd,
-						label: "pyusd",
-						transition: "collapse",
-						palette: 9,
-						style: "streak",
-					},
-					{
-						kind: "text",
-						value: "¥",
-						label: "jpy",
-						transition: "scatter",
 						palette: 11,
 						style: "drift",
 					},
