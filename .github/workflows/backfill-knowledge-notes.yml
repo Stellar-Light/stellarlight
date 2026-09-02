@@ -13,7 +13,7 @@ on:
     # morning, so the board's notes-pool metric (which reads the ROWS) sat at
     # 47/208 with ~80 stamped-in-code rows uncounted. Scheduled runs execute:
     # the pass is registry → rows, zero GitHub calls, every write read back.
-    - cron: "0 3 * * *"
+    - cron: "23 3 * * *" # off the top of the hour, see check-links.yml (2026-09-02)
   workflow_dispatch:
     inputs:
       execute:

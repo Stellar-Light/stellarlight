@@ -15,7 +15,15 @@ name: Upgrade status basis from link health
 on:
   schedule:
     # Mondays 04:00 UTC — two hours after the link sweep.
-    - cron: "0 4 * * 1"
+    # Daily at :23 (2026-09-02), was weekly Monday 04:00. The link check is
+
+    # daily again and the checker/relink fixes only turn into evidence when
+
+    # THIS lane runs: today it needed a manual dispatch to move 56 rows to
+
+    # site-liveness. Read-only until :23 so the 02:23Z link check has landed.
+
+    - cron: "23 4 * * *"
   workflow_dispatch:
     inputs:
       execute:

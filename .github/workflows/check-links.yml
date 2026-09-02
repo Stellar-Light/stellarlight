@@ -29,7 +29,11 @@ on:
     # runs, and consecutiveFailures is only meaningful when it ticks daily
     # (the header's original reasoning). The checker is HEAD-first and reads
     # at most 64 KB per URL.
-    - cron: "0 2 * * *"
+    # :23, not :00 (2026-09-02): the first daily slot at 02:00Z never fired —
+    # top-of-hour is GitHub's most congested schedule minute (the scan cron
+    # lost its 00:00Z and 02:00Z slots the same night). Off-peak minutes are
+    # the only lever we hold.
+    - cron: "23 2 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
