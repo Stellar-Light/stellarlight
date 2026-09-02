@@ -33,6 +33,17 @@ export const TOKEN_LOGOS: Record<string, string> = {
 	USDT0: "/stablecoins/logos/usdt0.png",
 };
 
+/**
+ * Issuers whose asset domain is a SUBDOMAIN that serves no favicon.
+ * MoneyGram publishes MGUSD's toml at mgusd.moneygram.com, and the icon
+ * service 404s that host while moneygram.com resolves — so without this the
+ * Top Issuers row for a real, verified issuer falls to a letter tile.
+ */
+const ISSUER_ICON_DOMAINS: Record<string, string> = {
+	MoneyGram: "moneygram.com",
+	"Currency One": "currency.one",
+};
+
 /** Favicon for an issuer domain — the last resort before a letter tile. */
 export function faviconFor(domain: string | null | undefined): string | null {
 	const d = (domain ?? "")
@@ -58,7 +69,8 @@ export function IssuerLogo({
 	domain?: string | null;
 	size?: keyof typeof SIZES;
 }) {
-	const src = ISSUER_LOGOS[company] ?? faviconFor(domain);
+	const src =
+		ISSUER_LOGOS[company] ?? faviconFor(ISSUER_ICON_DOMAINS[company] ?? domain);
 	if (src)
 		return (
 			<div
