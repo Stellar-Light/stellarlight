@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-02T02:12:33.125Z",
+	"asOf": "2026-09-02T02:15:46.022Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 80,
-	"healthy": 80,
+	"checked": 79,
+	"healthy": 79,
 	"broken": [],
 	"rows": [
 		{
@@ -175,7 +175,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T02:10:38Z",
+			"lastSuccessAt": "2026-09-02T02:13:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -688,17 +688,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "scan-repo-code.yml",
-			"name": "Scan repo code (signals-only)",
-			"cron": "0 */2 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-02T00:08:17Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 97,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "seed-blog-posts.yml",
 			"name": "Publish ecosystem reports",
 			"cron": null,
@@ -835,7 +824,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T02:10:38Z",
+			"lastSuccessAt": "2026-09-02T02:13:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
