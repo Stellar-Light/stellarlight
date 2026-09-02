@@ -20,7 +20,11 @@ populating goes visibly red.
 Plus repo-level intel written by enrich: `activityState` (derived
 archived/active/dormant tag), `activitySignals` (commits90d, releases, PRs —
 null = not-captured, never zero), `knowledgeNotes` (dated curated facts +
-derived audit crosslinks — see `src/lib/repo-knowledge.ts`).
+derived audit crosslinks — see `src/lib/repo-knowledge.ts`), and `kind` +
+`kindBasis` (spec 1.9.20: what the repo IS, derived at read time from stored
+signals, first match wins — archived, fork, template-or-tutorial, contract,
+application, hackathon, code; `kindBasis` names the deciding signal so a
+consumer can weigh the label — see `repoKindOf` in `src/lib/repo-grade.ts`).
 
 ## In-repo docs → the research corpus
 
