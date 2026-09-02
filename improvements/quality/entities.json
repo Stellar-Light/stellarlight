@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-02T18:21:02.733Z",
+ "generatedAt": "2026-09-02T19:20:33.549Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -2380,10 +2380,9 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8858,8 +8857,8 @@
   ],
   "deploymentSplit": {
    "unknown": 903,
-   "applicableUnknown": 195,
-   "notApplicable": 708,
+   "applicableUnknown": 199,
+   "notApplicable": 704,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongBasisSplit": {
@@ -9118,24 +9117,6 @@
     "missing": [
      "strongBasis",
      "sourced"
-    ]
-   },
-   {
-    "slug": "pyth",
-    "name": "Pyth",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "typed"
     ]
    },
    {
@@ -9688,6 +9669,25 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "phoenix",
+    "name": "Phoenix",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 80,
+    "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
+    "deploymentApplies": true,
+    "types": [
+     "DEX"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
@@ -9705,7 +9705,7 @@
    },
    {
     "field": "typed",
-    "count": 3
+    "count": 2
    },
    {
     "field": "linked",
@@ -9731,7 +9731,7 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 6817
+    "withCodeDepth": 6964
    },
    "knowledgeNotes": {
     "pool": 408,
@@ -9805,9 +9805,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 4732,
+    "pool": 4837,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 117
+    "joined": 123
    }
   },
   "curatedShape": {
@@ -9857,11 +9857,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1247
+     "count": 1248
     },
     {
      "label": "slowing",
-     "count": 940
+     "count": 939
     },
     {
      "label": "active",
@@ -9920,9 +9920,9 @@
    ],
    "languageOther": 49
   },
-  "withCodeDepth": 9116,
+  "withCodeDepth": 9263,
   "withNotes": 496,
-  "withMainnet": 117,
+  "withMainnet": 123,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -10978,7 +10978,7 @@
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "3 of 984 sampled rows untyped",
+   "measurement": "2 of 984 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11330,7 +11330,7 @@
     "missing": 297,
     "of": 310,
     "share": 95.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 4422 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 4527 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 297,
@@ -11357,7 +11357,7 @@
     "missing": 903,
     "of": 984,
     "share": 91.8,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 195 are on-chain product types where the question applies and an agent will ask it; the other 708 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 704 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11399,13 +11399,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 4013,
+    "missing": 3866,
     "of": 13129,
-    "share": 30.6,
+    "share": 29.4,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 4013,
+    "examplePoolSize": 3866,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11453,17 +11453,16 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 3,
+    "missing": 2,
     "of": 984,
-    "share": 0.3,
+    "share": 0.2,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 3,
+    "examplePoolSize": 2,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
-     "pyth",
      "boundless-bounties",
      "deb"
     ]
