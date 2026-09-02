@@ -59,6 +59,34 @@ export interface MeasuredStablecoin {
 	note?: string;
 }
 
+/** What a 429-exhausted `fetchJson` throws — distinct from the plain `null`
+ *  a 404 returns. Collapsing them into the same `null` is exactly the bug
+ *  that made BRL, APSUSDM, APSEURM and their batch-mates read "Supply
+ *  unavailable" on every refresh when the real story was "the batch ahead of
+ *  them had already spent Stellar Expert's rate-limit bucket" (found
+ *  2026-09-02: each fetches fine standalone). A rate limit is "could not
+ *  check"; a 404 is "checked, not there" — see
+ *  reference_trinary_probe_invariant in project memory. */
+export const RATE_LIMIT_MARK = "rate-limited (429)";
+class RateLimitedError extends Error {
+	constructor(url: string, retries: number) {
+		// fetchJson is shared by Horizon, Stellar Expert and CoinGecko calls, so
+		// name the actual host rather than assuming which one — the only path
+		// that currently turns this into a stored row note is the Stellar
+		// Expert one (supplyAndHolders), but this stays correct if that changes.
+		let host = "upstream";
+		try {
+			host = new URL(url).hostname;
+		} catch {
+			// keep the "upstream" fallback
+		}
+		super(
+			`${host} ${RATE_LIMIT_MARK} after ${retries} attempt${retries === 1 ? "" : "s"} — not evidence the asset is gone`,
+		);
+		this.name = "RateLimitedError";
+	}
+}
+
 async function fetchJson(
 	url: string,
 	{ retries = 3, timeoutMs = 10_000 } = {},
@@ -85,7 +113,10 @@ async function fetchJson(
 			await sleep(Math.min(1000 * 2 ** i, 8000));
 		}
 	}
-	return null;
+	// Every attempt landed here via the 429 branch (any other outcome above
+	// returns or re-throws before the loop ends) — so this is specifically
+	// "we got rate-limited every time", never "we don't know why it failed".
+	throw new RateLimitedError(url, retries);
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -386,22 +417,74 @@ export async function measureStablecoin(
 	}
 }
 
-/**
- * Measure the whole registry with bounded concurrency.
- *
- * Serial-ish on purpose: Stellar Expert rate-limits, and the original burned
- * retries fighting it. Four at a time with a small stagger is well inside the
- * limit and finishes the 23-asset set in well under a minute.
- */
-export async function measureRegistry(
+async function measureBatch(
 	assets: StablecoinAsset[],
-	{ concurrency = 4 }: { concurrency?: number } = {},
+	concurrency: number,
+	staggerMs: number,
 ): Promise<MeasuredStablecoin[]> {
 	const out: MeasuredStablecoin[] = [];
 	for (let i = 0; i < assets.length; i += concurrency) {
 		const batch = assets.slice(i, i + concurrency);
 		out.push(...(await Promise.all(batch.map(measureStablecoin))));
-		if (i + concurrency < assets.length) await sleep(400);
+		if (i + concurrency < assets.length) await sleep(staggerMs);
 	}
+	return out;
+}
+
+/**
+ * Measure the whole registry with bounded concurrency, then mop up whatever
+ * Stellar Expert rate-limited in one slower retry pass.
+ *
+ * This comment used to say "four at a time... finishes the 23-asset set in
+ * well under a minute". The roster is 41 now (2026-09-02) and keeps growing
+ * (23 → 37 → 41 inside one day), and the growth is exactly what broke it:
+ * concurrency 4 with a 400ms stagger, two Stellar Expert calls per asset,
+ * burns through Stellar Expert's (undocumented) rate limit by the tail of a
+ * 41-asset run. Nine rows — APSUSDM, APSEURM, AUDD, ZARZ, BRL, USDV, USDM,
+ * UAH, CLPX — came back "unmeasured" on the run right before this fix, not
+ * because anything is wrong with those assets (each fetches fine standalone)
+ * but because the batches ahead of them had already spent the bucket. Two of
+ * them (USDV, USDM) had never been measured at all, so they sat on the
+ * dashboard with an em dash where their supply should be.
+ *
+ * To be clear about what was NOT wrong: nulled fields stored as null and
+ * `basis: "unmeasured"` correctly — nothing was published as a false zero.
+ * This is an availability fix, not a correctness fix.
+ *
+ * Lower concurrency and a longer stagger reduce how hard the first pass
+ * bursts; the second pass is the actual fix — it only re-asks the rows that
+ * came back rate-limited (never the rows Horizon or curated-static already
+ * resolved), after a pause long enough for the bucket to plausibly refill,
+ * one at a time.
+ *
+ * ponytail: concurrency/staggerMs/the 15s cooldown are a heuristic tuned
+ * against a limit Stellar Expert does not publish, not a measured one — if
+ * the roster keeps growing and rows still come back unmeasured after the
+ * second pass, drop concurrency further or widen the stagger before reaching
+ * for anything smarter (a token-bucket client, a request queue).
+ */
+export async function measureRegistry(
+	assets: StablecoinAsset[],
+	{
+		concurrency = 3,
+		staggerMs = 700,
+	}: { concurrency?: number; staggerMs?: number } = {},
+): Promise<MeasuredStablecoin[]> {
+	const out = await measureBatch(assets, concurrency, staggerMs);
+
+	const retryAt = out
+		.map((m, i) => (m.note?.includes(RATE_LIMIT_MARK) ? i : -1))
+		.filter((i) => i >= 0);
+	if (retryAt.length === 0) return out;
+
+	await sleep(15_000);
+	const retried = await measureBatch(
+		retryAt.map((i) => assets[i]),
+		1,
+		1000,
+	);
+	retryAt.forEach((origIndex, j) => {
+		out[origIndex] = retried[j];
+	});
 	return out;
 }

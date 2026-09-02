@@ -29,11 +29,17 @@ import { STABLECOIN_REGISTRY } from "../src/data/stablecoin-registry";
 import {
 	type MeasuredStablecoin,
 	measureRegistry,
+	RATE_LIMIT_MARK,
 } from "../src/lib/stablecoin-pipeline";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const utcDay = (d: Date) => d.toISOString().slice(0, 10);
+
+// ponytail: flat heuristic, not derived from anything — revisit if the
+// registry (41 assets as of 2026-09-02) grows enough that a couple of
+// genuinely-transient 429s becomes the expected steady state.
+const RATE_LIMIT_EXIT_THRESHOLD = 3;
 
 /** Percent change vs the closest snapshot ~7 days back. Null unless both exist. */
 function pctChange(now: number | null, then: number | null): number | null {
@@ -223,12 +229,33 @@ async function main() {
 		for (const p of problems) console.log(`  · ${p}`);
 	}
 
+	// measureRegistry already ran a slower retry pass over anything Stellar
+	// Expert rate-limited. A row still showing that mark after the retry means
+	// the pacing itself is behind the roster's growth again — worth a red
+	// build, not a silent "unmeasured" that looks the same as a genuinely new
+	// or delisted asset.
+	const stillRateLimited = measured.filter((m) =>
+		m.note?.includes(RATE_LIMIT_MARK),
+	);
+	if (stillRateLimited.length) {
+		console.log(
+			`\n${stillRateLimited.length} row(s) still rate-limited after the retry pass:`,
+		);
+		for (const m of stillRateLimited) console.log(`  · ${m.id}`);
+	}
+	const rateLimitFailure = stillRateLimited.length > RATE_LIMIT_EXIT_THRESHOLD;
+
 	if (!EXECUTE) {
 		console.log(
 			`\nDRY RUN — would upsert ${measured.length} stablecoins and ${measured.length} snapshots for ${day}.`,
 		);
 		console.log("Re-run with --execute to write.");
-		process.exit(0);
+		if (rateLimitFailure) {
+			console.error(
+				`${stillRateLimited.length} rows exceed the rate-limit threshold (${RATE_LIMIT_EXIT_THRESHOLD}) — would be a failing run.`,
+			);
+		}
+		process.exit(rateLimitFailure ? 1 : 0);
 	}
 
 	// ── read-back: payload.update silently drops unknown keys, so prove it ──
@@ -266,7 +293,7 @@ async function main() {
 			? `read-back verified: ${byId.size} rows carry basis + measuredAt`
 			: `read-back FAILED on ${mismatches} rows`,
 	);
-	process.exit(mismatches === 0 ? 0 : 1);
+	process.exit(mismatches === 0 && !rateLimitFailure ? 0 : 1);
 }
 
 /** Note when a row kept a previous value because this run couldn't measure it. */
