@@ -1,10 +1,20 @@
-import { scaleLinear } from "@visx/scale";
+import { scaleLinear, scaleLog } from "@visx/scale";
 import type { LineConfig } from "./chart-context";
 
 /** Default axis id when `yAxisId` is omitted (Recharts-style `0` / primary left axis). */
 export const DEFAULT_Y_AXIS_ID = "left";
 
 export type YAxisOrientation = "left" | "right";
+
+/**
+ * Linear by default everywhere. `"log"` is opt-in per chart (House patch,
+ * stellarlight: Holders by Token — one series can be orders of magnitude
+ * bigger than the rest, and a log axis is the honest way to keep all of them
+ * on one chart instead of pinning everyone else to the baseline). A log
+ * domain can never include 0 — see `resolveTimeSeriesYDomain`'s log branch
+ * in time-series-chart-shell.tsx for how the floor is chosen.
+ */
+export type YScaleType = "linear" | "log";
 
 export function normalizeYAxisId(id?: string | number): string {
   if (id == null || id === "") {
@@ -80,27 +90,30 @@ export function buildYScalesFromDomains({
   lines,
   innerHeight,
   domainsByAxis,
+  scaleType = "linear",
 }: {
   lines: LineConfig[];
   innerHeight: number;
   domainsByAxis: Record<string, [number, number]>;
+  scaleType?: YScaleType;
 }): Record<string, YScale> {
   const groups = groupLinesByYAxisId(lines);
   const scales: Record<string, YScale> = {};
+  const build = scaleType === "log" ? scaleLog : scaleLinear;
 
   for (const [axisId] of groups) {
     const domain =
       domainsByAxis[axisId] ??
       domainsByAxis[DEFAULT_Y_AXIS_ID] ??
       ([0, 100] as [number, number]);
-    scales[axisId] = scaleLinear({
+    scales[axisId] = build({
       range: [innerHeight, 0],
       domain,
     });
   }
 
   if (!scales[DEFAULT_Y_AXIS_ID]) {
-    scales[DEFAULT_Y_AXIS_ID] = scaleLinear({
+    scales[DEFAULT_Y_AXIS_ID] = build({
       range: [innerHeight, 0],
       domain: domainsByAxis[DEFAULT_Y_AXIS_ID] ?? [0, 100],
     });

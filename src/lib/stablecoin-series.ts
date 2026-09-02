@@ -105,6 +105,23 @@ export function windowed(rows: SeriesRow[], tf: Timeframe): SeriesRow[] {
 	return rows.slice(-DAYS[tf]);
 }
 
+/**
+ * How many rows in a series actually carry at least one real measurement
+ * (any key besides `_date`). `pivotByToken`/`totalPerDay` only ever emit a
+ * row when something was measured that day, so for most series this equals
+ * `rows.length` — but a panel that windows or caps its series can end up
+ * with a stretch of rows that are technically present yet contribute nothing
+ * to look at. Used to tell an honest "not enough history yet" message from
+ * a chart that would otherwise draw a line between two dots.
+ */
+export function measuredDayCount(rows: SeriesRow[]): number {
+	return rows.filter((row) =>
+		Object.entries(row).some(
+			([k, v]) => k !== "_date" && typeof v === "number",
+		),
+	).length;
+}
+
 /** Every ticker that appears in a series, biggest last-value first. */
 export function tickersIn(rows: SeriesRow[]): string[] {
 	const last = rows[rows.length - 1] ?? {};

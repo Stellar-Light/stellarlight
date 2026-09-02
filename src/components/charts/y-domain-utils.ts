@@ -1,13 +1,29 @@
-import { scaleLinear } from "@visx/scale";
+import { scaleLinear, scaleLog } from "@visx/scale";
 import type { LineConfig } from "./chart-context";
 import { type ChartPhase, Y_DOMAIN_TWEEN_SKIP_THRESHOLD } from "./chart-phase";
-import { groupLinesByYAxisId, normalizeYAxisId } from "./y-axis-scales";
+import {
+  groupLinesByYAxisId,
+  normalizeYAxisId,
+  type YScaleType,
+} from "./y-axis-scales";
 
 export type YDomain = [number, number];
 
-/** Apply visx `nice()` to raw domain endpoints for stable grid ticks. */
-export function niceYDomain(domain: YDomain): YDomain {
-  const scale = scaleLinear({ domain, range: [0, 1], nice: true });
+/**
+ * Apply visx `nice()` to raw domain endpoints for stable grid ticks.
+ *
+ * `scaleType` matters here, not just at render time: `scaleLinear(...).nice()`
+ * rounds toward round linear numbers, which for a log domain can round the
+ * floor down to 0 — invalid for a log scale (log(0) is undefined) and exactly
+ * the "silently coerced" failure mode a log axis must avoid. `scaleLog(...).nice()`
+ * rounds to nice powers instead and never crosses 0.
+ */
+export function niceYDomain(
+  domain: YDomain,
+  scaleType: YScaleType = "linear"
+): YDomain {
+  const build = scaleType === "log" ? scaleLog : scaleLinear;
+  const scale = build({ domain, range: [0, 1], nice: true });
   const niceDomain = scale.domain();
   return [niceDomain[0] ?? domain[0], niceDomain[1] ?? domain[1]];
 }
@@ -77,20 +93,27 @@ export function resolveAnimatedYDestinationDomains(
 export function computeYDomainsByAxis({
   lines,
   resolveDomain,
+  scaleType = "linear",
 }: {
   lines: LineConfig[];
   resolveDomain: (dataKeys: string[]) => YDomain;
+  scaleType?: YScaleType;
 }): Record<string, YDomain> {
   const groups = groupLinesByYAxisId(lines);
   const domains: Record<string, YDomain> = {};
 
   for (const [axisId, axisLines] of groups) {
     const dataKeys = axisLines.map((line) => line.dataKey);
-    domains[normalizeYAxisId(axisId)] = niceYDomain(resolveDomain(dataKeys));
+    domains[normalizeYAxisId(axisId)] = niceYDomain(
+      resolveDomain(dataKeys),
+      scaleType
+    );
   }
 
   if (!domains.left) {
-    domains.left = niceYDomain([0, 100]);
+    // Fallback for a chart with no lines yet — [0, 100] is invalid for a log
+    // domain (0 has no logarithm), so use a strictly-positive stand-in.
+    domains.left = niceYDomain(scaleType === "log" ? [1, 100] : [0, 100], scaleType);
   }
 
   return domains;

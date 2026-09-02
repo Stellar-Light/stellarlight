@@ -68,6 +68,7 @@ import {
 	DEFAULT_Y_AXIS_ID,
 	getPrimaryYScale,
 	groupLinesByYAxisId,
+	type YScaleType,
 } from "./y-axis-scales";
 import { computeYDomainsByAxis } from "./y-domain-utils";
 
@@ -99,13 +100,53 @@ function collectNumericExtents(
 	return { minValue, maxValue };
 }
 
+/**
+ * Same scan as {@link collectNumericExtents}, but `minValue` only considers
+ * strictly-positive values. House patch (stellarlight): a log domain can
+ * never include 0 (log(0) is undefined) — if a real measurement of exactly 0
+ * set the floor, the whole axis would collapse toward it instead of fitting
+ * the data that actually varies. A 0 (or absent) point still renders — see
+ * the domain-floor clamp in line.tsx/area.tsx/series-path-utils.ts — it is
+ * just never allowed to WIDEN the visible range for everyone else.
+ */
+function collectPositiveNumericExtents(
+	data: Record<string, unknown>[],
+	dataKeys: string[],
+) {
+	let minValue = Number.POSITIVE_INFINITY;
+	let maxValue = Number.NEGATIVE_INFINITY;
+
+	for (const d of data) {
+		for (const key of dataKeys) {
+			const value = d[key];
+			if (typeof value !== "number") continue;
+			if (value > maxValue) maxValue = value;
+			if (value > 0 && value < minValue) minValue = value;
+		}
+	}
+
+	if (minValue === Number.POSITIVE_INFINITY) minValue = 1;
+	if (maxValue === Number.NEGATIVE_INFINITY) maxValue = 100;
+	return { minValue, maxValue };
+}
+
 function resolveTimeSeriesYDomain(
 	data: Record<string, unknown>[],
 	dataKeys: string[],
 	yScaleDomainMax: number | undefined,
+	scaleType: YScaleType = "linear",
 ): [number, number] {
 	if (yScaleDomainMax != null && yScaleDomainMax > 0) {
 		return [0, yScaleDomainMax * 1.1];
+	}
+
+	if (scaleType === "log") {
+		const { minValue, maxValue } = collectPositiveNumericExtents(
+			data,
+			dataKeys,
+		);
+		const safeMax = maxValue > minValue ? maxValue : minValue * 10;
+		return [minValue, safeMax * 1.1];
 	}
 
 	const { minValue, maxValue } = collectNumericExtents(data, dataKeys);
@@ -153,6 +194,9 @@ export interface TimeSeriesChartInnerProps {
 	composedStackGap?: number;
 	/** When set, drives the y-axis max instead of scanning `lines` (e.g. stacked bar totals). */
 	yScaleDomainMax?: number;
+	/** Linear by default. `"log"` when one series is orders of magnitude
+	 * bigger than the rest — see y-axis-scales.ts. */
+	yScaleType?: YScaleType;
 	/** House patch (stellarlight): inset the x range so edge data points pull
 	 * inside the plot. The default range [0, innerWidth] centers the first and
 	 * last points ON the plot edges, which makes edge bars overhang into the
@@ -204,6 +248,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 	composedStackOffsets,
 	composedStackGap,
 	yScaleDomainMax,
+	yScaleType = "linear",
 	xRangeInset = 0,
 	chartStatus = DEFAULT_CHART_STATUS,
 	loadingLabel,
@@ -227,9 +272,14 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 				usesDefaultOnly && yScaleDomainMax != null
 					? yScaleDomainMax
 					: undefined;
-			return resolveTimeSeriesYDomain(sourceData, dataKeys, domainMax);
+			return resolveTimeSeriesYDomain(
+				sourceData,
+				dataKeys,
+				domainMax,
+				yScaleType,
+			);
 		},
-		[lines, yScaleDomainMax],
+		[lines, yScaleDomainMax, yScaleType],
 	);
 
 	const skeletonData = useMemo(() => {
@@ -345,8 +395,9 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 			computeYDomainsByAxis({
 				lines,
 				resolveDomain: (dataKeys) => resolveYDomain(skeletonData, dataKeys),
+				scaleType: yScaleType,
 			}),
-		[lines, resolveYDomain, skeletonData],
+		[lines, resolveYDomain, skeletonData, yScaleType],
 	);
 
 	const yDomainTargetByAxis = useMemo(() => {
@@ -354,6 +405,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 			lines,
 			resolveDomain: (dataKeys) =>
 				resolveYDomain(xDomain ? visiblePlotData : data, dataKeys),
+			scaleType: yScaleType,
 		});
 		if (projectionConfigs.length === 0) {
 			return base;
@@ -383,6 +435,7 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 		resolveYDomain,
 		visiblePlotData,
 		xDomain,
+		yScaleType,
 	]);
 
 	const animatedYDomainsByAxis = useAnimatedYDomains({
@@ -404,8 +457,9 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
 				domainsByAxis: yDomainsForScales,
 				innerHeight,
 				lines,
+				scaleType: yScaleType,
 			}),
-		[yDomainsForScales, innerHeight, lines],
+		[yDomainsForScales, innerHeight, lines, yScaleType],
 	);
 
 	const yScale = getPrimaryYScale(

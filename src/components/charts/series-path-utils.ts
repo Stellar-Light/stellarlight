@@ -23,13 +23,21 @@ export function computeSeriesPathPoints(
   yScale: (value: number) => number | undefined,
   dataKey: string
 ): SeriesPathPoint[] {
+  // A log y-scale's domain never includes 0 (log(0) is undefined) — clamp a
+  // measured value to the axis's own floor instead of handing it to the
+  // scale raw. Same cast-for-.domain() idiom `xScaleDomain` uses just above
+  // in use-animated-series-path.ts; `yScale` is typed as a plain function
+  // here but the object visx hands us also carries `.domain()`.
+  const scaleWithDomain = yScale as { domain?: () => number[] };
+  const yDomainFloor = scaleWithDomain.domain?.()[0] ?? 0;
+
   return data.map((datum, index) => {
     const xValue = xAccessor(datum);
     const yValue = datum[dataKey];
     const defined = typeof yValue === "number";
     return {
       x: xScale(xValue) ?? 0,
-      y: defined ? (yScale(yValue as number) ?? 0) : 0,
+      y: defined ? (yScale(Math.max(yValue as number, yDomainFloor)) ?? 0) : 0,
       key: String(xValue.getTime?.() ?? index),
       defined,
     };

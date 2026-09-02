@@ -296,12 +296,20 @@ export function Line({
   const reactId = useId();
   const gradientId = `line-gradient-${dataKey}-${reactId}`;
 
+  // A log y-scale's domain never includes 0 (log(0) is undefined) — a real
+  // measurement of exactly 0 (or a big linear/log scale mismatch) is clamped
+  // to the axis's own floor rather than handed to the scale raw. This is a
+  // measured value rendered at the smallest the axis can show, not the
+  // "absent" gap below — `defined`/`isDefined` (below) is what stays absent.
+  const yDomainFloor = (yScale.domain()[0] as number | undefined) ?? 0;
   const getY = useCallback(
     (d: Record<string, unknown>) => {
       const value = d[dataKey];
-      return typeof value === "number" ? (yScale(value) ?? 0) : 0;
+      return typeof value === "number"
+        ? (yScale(Math.max(value, yDomainFloor)) ?? 0)
+        : 0;
     },
-    [dataKey, yScale]
+    [dataKey, yScale, yDomainFloor]
   );
   // A day this series wasn't measured is absent, not 0 — see the module note
   // on `stablecoin-series.ts`'s pivotByToken. `defined` (below) tells the
