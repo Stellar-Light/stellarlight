@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-02T17:22:43.498Z",
+	"asOf": "2026-09-02T17:29:08.451Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 83,
-	"healthy": 83,
+	"checked": 82,
+	"healthy": 82,
 	"broken": [],
 	"rows": [
 		{
@@ -164,10 +164,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:19:44Z",
+			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -186,10 +186,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:19:44Z",
+			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 98,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -274,10 +274,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-01T23:42:08Z",
+			"lastSuccessAt": "2026-09-02T17:17:26Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 98,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -560,21 +560,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:17:26Z",
+			"lastSuccessAt": "2026-09-02T17:22:44Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 79,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
-		},
-		{
-			"file": "nightly-health.yml",
-			"name": "Nightly health (detectors → issue)",
-			"cron": "45 5 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-02T16:47:51Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 22,
 			"why": "last green 0d ago"
 		},
 		{
@@ -582,10 +571,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:17:26Z",
+			"lastSuccessAt": "2026-09-02T17:25:58Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 9,
+			"runs": 12,
 			"why": "last green 0d ago"
 		},
 		{
@@ -857,10 +846,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T17:21:11Z",
+			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -912,10 +901,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T02:30:11Z",
+			"lastSuccessAt": "2026-09-02T17:19:44Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 5,
+			"runs": 6,
 			"why": "last green 0d ago"
 		}
 	]
