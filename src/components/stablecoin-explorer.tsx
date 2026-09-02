@@ -41,6 +41,7 @@ import {
 	ISSUER_LOGOS,
 	IssuerLogo,
 	TOKEN_LOGOS,
+	VenueLogo,
 } from "@/components/stablecoin-logos";
 import { StablecoinNewsDock } from "@/components/stablecoin-news-dock";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,14 +100,19 @@ export interface CoinView {
 	priceRaw: number | null;
 }
 
+interface BlendPoolRow {
+	poolId: string;
+	poolName: string;
+	poolUrl: string;
+	supplyAPY: number | null;
+	borrowAPY: number | null;
+}
+
 interface DefiContext {
 	contract: string | null;
-	blend: {
-		poolName: string;
-		poolUrl: string;
-		supplyAPY: number | null;
-		borrowAPY: number | null;
-	} | null;
+	blend: BlendPoolRow | null;
+	/** Every Blend pool that lists the asset, deepest first. */
+	blendPools?: BlendPoolRow[];
 	liquidity: {
 		poolCount: number;
 		assetPooled: number;
@@ -1571,30 +1577,45 @@ export function StablecoinExplorer({
 										</div>
 									) : (
 										<div className="space-y-3">
-											{defi?.blend && (
+											{(
+												defi?.blendPools ?? (defi?.blend ? [defi.blend] : [])
+											).map((pool) => (
 												<a
-													href={defi.blend.poolUrl}
+													key={pool.poolId}
+													href={pool.poolUrl}
 													target="_blank"
 													rel="noopener noreferrer"
 													className="flex items-center gap-3 p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
 												>
-													<div className="flex-1">
-														<div className="text-sm font-medium">
-															Lend {selectedCoin.ticker} on Blend
+													<VenueLogo name={pool.poolName} />
+													<div className="flex-1 min-w-0">
+														<div className="flex items-center gap-2 flex-wrap">
+															<span className="text-sm font-medium">
+																Lend {selectedCoin.ticker} on Blend
+															</span>
+															{/* A null APY is "we could not read the pool",
+															    never 0% — the badge is simply absent. */}
+															{pool.supplyAPY != null && (
+																<span className="text-xs font-medium tabular-nums px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">
+																	{pool.supplyAPY.toFixed(2)}% APY
+																</span>
+															)}
 														</div>
 														<p className="text-xs text-muted-foreground mt-0.5">
-															{defi.blend.poolName} ·{" "}
-															{defi.blend.supplyAPY == null
-																? "live rates not wired yet"
-																: `${defi.blend.supplyAPY.toFixed(2)}% supply APY`}
+															{pool.poolName}
+															{pool.supplyAPY == null
+																? " · rates unreadable right now"
+																: pool.borrowAPY == null
+																	? ""
+																	: ` · Borrow APY: ${pool.borrowAPY.toFixed(2)}%`}
 														</p>
 													</div>
-													<ExternalLink className="h-4 w-4" />
+													<ExternalLink className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
 												</a>
-											)}
+											))}
 
 											<div className="bg-muted rounded-lg p-4">
-												<div className="text-sm font-medium mb-3">
+												<div className="text-sm font-medium mb-4">
 													Liquidity Pools
 												</div>
 												{defi?.liquidity == null ? (
@@ -1630,30 +1651,32 @@ export function StablecoinExplorer({
 															);
 															return (
 																<>
-																	<div className="flex items-center gap-6 pb-3 mb-3 border-b border-border">
+																	<div className="grid grid-cols-3 gap-4 pb-4 mb-3 border-b border-border">
 																		<div>
 																			<div className="text-xs text-muted-foreground mb-1">
-																				Pooled
+																				Total Value Locked
 																			</div>
-																			<div className="text-lg font-semibold tabular-nums">
-																				{displaySupply(pooled)}{" "}
-																				{selectedCoin.ticker}
-																			</div>
-																		</div>
-																		<div>
-																			<div className="text-xs text-muted-foreground mb-1">
-																				Value
-																			</div>
-																			<div className="text-lg font-semibold tabular-nums">
+																			<div className="text-xl font-semibold tabular-nums">
 																				{displayUSD(pooledUSD)}
 																			</div>
 																		</div>
 																		<div>
 																			<div className="text-xs text-muted-foreground mb-1">
-																				Pools
+																				Total Pools
 																			</div>
-																			<div className="text-lg font-semibold tabular-nums">
+																			<div className="text-xl font-semibold tabular-nums">
 																				{pools}
+																			</div>
+																		</div>
+																		<div>
+																			<div className="text-xs text-muted-foreground mb-1">
+																				Pooled
+																			</div>
+																			<div className="text-xl font-semibold tabular-nums">
+																				{displaySupply(pooled)}{" "}
+																				<span className="text-sm font-normal text-muted-foreground">
+																					{selectedCoin.ticker}
+																				</span>
 																			</div>
 																		</div>
 																	</div>
@@ -1664,9 +1687,10 @@ export function StablecoinExplorer({
 																				href={r.url}
 																				target="_blank"
 																				rel="noopener noreferrer"
-																				className="flex items-center justify-between gap-3 text-sm rounded-md px-2 py-1.5 -mx-2 hover:bg-white/[0.04] transition-colors"
+																				className="flex items-center justify-between gap-3 text-sm rounded-md px-2 py-2 -mx-2 hover:bg-white/[0.04] transition-colors"
 																			>
-																				<div className="flex items-center gap-2 min-w-0">
+																				<div className="flex items-center gap-2.5 min-w-0">
+																					<VenueLogo name={r.name} />
 																					<span className="font-medium">
 																						{r.name}
 																					</span>

@@ -42,7 +42,12 @@ export function faviconFor(domain: string | null | undefined): string | null {
 	return d ? `https://icons.duckduckgo.com/ip3/${d}.ico` : null;
 }
 
-const SIZES = { sm: "w-6 h-6", md: "w-10 h-10", lg: "w-14 h-14" } as const;
+const SIZES = {
+	sm: "w-6 h-6",
+	tile: "w-9 h-9",
+	md: "w-10 h-10",
+	lg: "w-14 h-14",
+} as const;
 
 export function IssuerLogo({
 	company,
@@ -76,6 +81,60 @@ export function IssuerLogo({
 		>
 			<span className="text-[#999999] text-xs font-medium">
 				{company.charAt(0)}
+			</span>
+		</div>
+	);
+}
+
+/**
+ * DeFi venue marks. Blend, Aquarius and Soroswap serve a real favicon, so the
+ * shared favicon helper is enough — no invented brand art. SDEX is the network
+ * itself and ships as a local asset; Phoenix serves no favicon, so it falls
+ * through to the letter tile rather than showing a broken image.
+ */
+const VENUE_DOMAINS: Record<string, string> = {
+	Blend: "blend.capital",
+	"Fixed Pool": "blend.capital",
+	"YieldBlox Pool": "blend.capital",
+	Aquarius: "aqua.network",
+	Aqua: "aqua.network",
+	Soroswap: "soroswap.finance",
+};
+
+const VENUE_ASSETS: Record<string, string> = {
+	SDEX: "/stellar-xlm-logo.png",
+};
+
+export function VenueLogo({
+	name,
+	size = "tile",
+}: {
+	name: string;
+	size?: keyof typeof SIZES;
+}) {
+	const src = VENUE_ASSETS[name] ?? faviconFor(VENUE_DOMAINS[name]);
+	if (src)
+		return (
+			<div
+				className={`${SIZES[size]} flex-shrink-0 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center`}
+			>
+				{/* biome-ignore lint/performance/noImgElement: bundled or venue-hosted mark */}
+				<img
+					src={src}
+					alt={name}
+					className="w-full h-full object-contain"
+					onError={(e) => {
+						(e.currentTarget as HTMLImageElement).style.display = "none";
+					}}
+				/>
+			</div>
+		);
+	return (
+		<div
+			className={`${SIZES[size]} flex-shrink-0 rounded-lg bg-[#262626] flex items-center justify-center`}
+		>
+			<span className="text-[#999999] text-xs font-medium">
+				{name.charAt(0)}
 			</span>
 		</div>
 	);

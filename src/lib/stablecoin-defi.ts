@@ -44,6 +44,21 @@ interface BlendPool {
  */
 const BLEND_POOLS: BlendPool[] = [
 	{
+		// Blend's Fixed Pool — $187.8M supplied against YieldBlox's $229.6k
+		// (mainnet.blend.capital, read 2026-09-02), and the pool contract's own
+		// instance storage names it "Fixed". It is listed FIRST because for an
+		// asset both pools carry, the deep pool is the honest default; the
+		// drawer still shows every pool that lists the asset.
+		poolId: "CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD",
+		name: "Fixed Pool",
+		// Reserves per Blend's own dashboard for this pool: XLM, USDC, EURC.
+		// XLM is not a stablecoin, so it has no row here.
+		assets: {
+			USDC: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+			EURC: "CCLZD7VBOC2URNA27BVJPB35F2MHTFDWBMV3HP3EIJVLUXM3UJKZL3VV",
+		},
+	},
+	{
 		poolId: "CCCCIQSDILITHMM7PBSLVDT5MISSY7R26MNZXCX4H7J5JQ5FPIYOGYFS",
 		name: "YieldBlox Pool",
 		assets: {
@@ -56,6 +71,7 @@ const BLEND_POOLS: BlendPool[] = [
 ];
 
 export interface BlendListing {
+	poolId: string;
 	poolName: string;
 	poolUrl: string;
 	/** Percent, e.g. 4.31. Null = the pool state could not be read, NOT 0%. */
@@ -63,13 +79,14 @@ export interface BlendListing {
 	borrowAPY: number | null;
 }
 
-/** The pool that lists a ticker, plus that ticker's reserve contract. */
-function poolFor(ticker: string) {
+/** Every pool that lists a ticker, in registry order (deepest pool first). */
+function poolsFor(ticker: string) {
+	const out: Array<{ pool: BlendPool; assetId: string }> = [];
 	for (const pool of BLEND_POOLS) {
 		const assetId = pool.assets[ticker];
-		if (assetId) return { pool, assetId };
+		if (assetId) out.push({ pool, assetId });
 	}
-	return null;
+	return out;
 }
 
 /** Daily compounding, the convention Blend's own UI quotes. */
@@ -89,11 +106,28 @@ function aprToApy(apr: number): number {
 export async function blendListing(
 	ticker: string,
 ): Promise<BlendListing | null> {
-	const match = poolFor(ticker);
-	if (!match) return null;
-	const { pool, assetId } = match;
+	return (await blendListings(ticker))[0] ?? null;
+}
 
+/**
+ * Every Blend pool that lists the ticker, deepest first. Rates are read per
+ * pool and independently: one pool failing to load leaves that row's APYs null
+ * while the others still carry theirs.
+ */
+export async function blendListings(ticker: string): Promise<BlendListing[]> {
+	const matches = poolsFor(ticker);
+	if (matches.length === 0) return [];
+	return (
+		await Promise.all(matches.map((m) => readPool(m.pool, m.assetId)))
+	).filter((l): l is BlendListing => l !== null);
+}
+
+async function readPool(
+	pool: BlendPool,
+	assetId: string,
+): Promise<BlendListing | null> {
 	const listing: BlendListing = {
+		poolId: pool.poolId,
 		poolName: pool.name,
 		poolUrl: `https://blend.xlm.sh/supply/?poolId=${pool.poolId}&assetId=${assetId}`,
 		supplyAPY: null,
