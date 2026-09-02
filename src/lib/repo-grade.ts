@@ -115,10 +115,10 @@ export type RepoKind =
 export const REPO_KINDS: readonly RepoKind[] = [
 	"archived",
 	"fork",
-	"hackathon",
 	"template-or-tutorial",
 	"contract",
 	"application",
+	"hackathon",
 	"code",
 ];
 
@@ -159,14 +159,17 @@ export function repoKindOf(input: RepoKindInput): {
 } {
 	if (input.isArchived) return { kind: "archived", kindBasis: "isArchived" };
 	if (input.isFork) return { kind: "fork", kindBasis: "isFork" };
-	if (input.judgedHackathon)
-		return { kind: "hackathon", kindBasis: "judgedHackathon" };
 	if (nameLooksTemplate(input.name))
 		return { kind: "template-or-tutorial", kindBasis: "nameLooksTemplate" };
 	if (input.isDeployableContract)
 		return { kind: "contract", kindBasis: "isDeployableContract" };
 	if (input.projectSlug)
 		return { kind: "application", kindBasis: "projectSlug" };
+	// A judged hackathon entry that is neither a deployable contract nor a
+	// listed product. One that BECAME a directory product is an application
+	// above — the product link outranks where the code was first submitted.
+	if (input.judgedHackathon)
+		return { kind: "hackathon", kindBasis: "judgedHackathon" };
 	return { kind: "code", kindBasis: "none" };
 }
 

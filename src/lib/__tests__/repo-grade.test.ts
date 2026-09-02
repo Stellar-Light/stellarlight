@@ -31,15 +31,30 @@ describe("repoKindOf precedence (first match wins)", () => {
 		});
 	});
 
-	it("a judged hackathon submission beats the name heuristic", () => {
-		expect(repoKindOf({ ...all, isArchived: false, isFork: false })).toEqual({
-			kind: "hackathon",
-			kindBasis: "judgedHackathon",
-		});
+	it("the name heuristic beats a judged hackathon submission", () => {
+		expect(
+			repoKindOf({ judgedHackathon: "meridian-2026", name: "hello-world" }),
+		).toEqual({ kind: "template-or-tutorial", kindBasis: "nameLooksTemplate" });
 		// an empty string is no hackathon
 		expect(repoKindOf({ judgedHackathon: "", name: "wallet" }).kind).toBe(
 			"code",
 		);
+	});
+
+	it("a judged hackathon entry that became a listed product is an application", () => {
+		expect(
+			repoKindOf({ judgedHackathon: "meridian-2026", projectSlug: "wallet-x" }),
+		).toEqual({ kind: "application", kindBasis: "projectSlug" });
+		expect(
+			repoKindOf({
+				judgedHackathon: "meridian-2026",
+				isDeployableContract: true,
+			}),
+		).toEqual({ kind: "contract", kindBasis: "isDeployableContract" });
+		expect(repoKindOf({ judgedHackathon: "meridian-2026" })).toEqual({
+			kind: "hackathon",
+			kindBasis: "judgedHackathon",
+		});
 	});
 
 	it("a template-looking name beats a deployable contract", () => {
@@ -85,10 +100,10 @@ describe("repoKindOf precedence (first match wins)", () => {
 		expect(REPO_KINDS).toEqual([
 			"archived",
 			"fork",
-			"hackathon",
 			"template-or-tutorial",
 			"contract",
 			"application",
+			"hackathon",
 			"code",
 		]);
 	});

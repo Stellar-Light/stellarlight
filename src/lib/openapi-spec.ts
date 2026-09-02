@@ -107,7 +107,7 @@ const REPO_KIND_PROPS = {
 		type: "string",
 		enum: [...REPO_KINDS],
 		description:
-			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; judgedHackathon → hackathon (a judged hackathon submission, a demo until other evidence says otherwise); a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
+			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
 	},
 	kindBasis: {
 		type: "string",
