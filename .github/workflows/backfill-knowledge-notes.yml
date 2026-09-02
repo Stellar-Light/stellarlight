@@ -6,7 +6,14 @@ name: Backfill knowledge notes
 # default; inspect the tag distribution, then execute.
 
 on:
-
+  schedule:
+    # Daily 03:00 UTC (2026-09-02). Dispatch-only meant the registry and the
+    # repo rows drifted apart: batches 3–6 grew src/lib/repo-knowledge.ts
+    # 29 → 176 repos on 2026-09-01 while this lane last ran at 02:21Z that
+    # morning, so the board's notes-pool metric (which reads the ROWS) sat at
+    # 47/208 with ~80 stamped-in-code rows uncounted. Scheduled runs execute:
+    # the pass is registry → rows, zero GitHub calls, every write read back.
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       execute:
@@ -38,4 +45,4 @@ jobs:
 
       - name: Manual backfill (dispatch)
         if: github.event_name == 'workflow_dispatch'
-        run: pnpm exec tsx scripts/backfill-knowledge-notes.ts ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/backfill-knowledge-notes.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
