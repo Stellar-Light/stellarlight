@@ -114,11 +114,27 @@ export function parseFeed(xml: string): FeedEntry[] {
  * Undated entries are dropped: a feed without dates invites the reader to
  * assume "recent", the one thing it cannot promise.
  */
+/** Publisher precedence when two sources carry the SAME headline. */
+const SOURCE_RANK: Record<string, number> = { "sdf-blog": 2 };
+const rank = (source: string) => SOURCE_RANK[source] ?? 1;
+
+/** Same story, different publisher: compare headlines, not URLs. */
+const titleKey = (t: string) =>
+	t
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, " ")
+		.trim();
+
 export function selectStablecoinNews(
 	entries: FeedEntry[],
 	limit = 8,
 ): NewsItem[] {
 	const byUrl = new Map<string, NewsItem>();
+	// An aggregator and the original publisher both carried a launch under the
+	// same headline, and URL dedup let both through — the dock showed "USDT0 is
+	// now live on Stellar" twice (2026-09-02). Keep one row, and prefer whoever
+	// actually announced it.
+	const byTitle = new Map<string, string>();
 
 	for (const e of entries) {
 		if (!e.publishedAt) continue;
@@ -127,7 +143,16 @@ export function selectStablecoinNews(
 		const titleHits = STRONG.filter((t) => title.includes(t));
 		if (titleHits.length === 0) continue;
 
-		if (!byUrl.has(e.url))
+		const key = titleKey(e.title);
+		const seenUrl = byTitle.get(key);
+		if (seenUrl) {
+			const seen = byUrl.get(seenUrl);
+			if (seen && rank(e.source ?? "lumenloop") > rank(seen.source))
+				byUrl.delete(seenUrl);
+			else continue;
+		}
+		if (!byUrl.has(e.url)) {
+			byTitle.set(key, e.url);
 			byUrl.set(e.url, {
 				// Decode HERE, not in the parser: corpus titles arrive straight
 				// from the DB and never pass through parseFeed, which is how
@@ -140,6 +165,7 @@ export function selectStablecoinNews(
 				source: e.source ?? "lumenloop",
 				matched: titleHits,
 			});
+		}
 	}
 
 	return [...byUrl.values()]

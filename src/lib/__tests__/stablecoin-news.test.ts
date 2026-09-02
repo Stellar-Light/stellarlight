@@ -220,3 +220,42 @@ describe("multi-publisher dock (2026-09-02)", () => {
 		expect(sourceLabel(item.source)).toBe("Lumen Loop");
 	});
 });
+
+describe("same headline from two publishers (2026-09-02)", () => {
+	const aggregator: FeedEntry = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://lumenloop.com/news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T10:00:00.000Z",
+		description: "",
+	};
+	const publisher: FeedEntry = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T09:00:00.000Z",
+		description: "",
+		source: "sdf-blog",
+	};
+
+	it("keeps one row and credits the publisher who announced it", () => {
+		const out = selectStablecoinNews([aggregator, publisher]);
+		expect(out).toHaveLength(1);
+		expect(out[0].source).toBe("sdf-blog");
+	});
+
+	it("is order-independent", () => {
+		const out = selectStablecoinNews([publisher, aggregator]);
+		expect(out).toHaveLength(1);
+		expect(out[0].source).toBe("sdf-blog");
+	});
+
+	it("keeps genuinely different headlines about the same launch", () => {
+		const out = selectStablecoinNews([
+			publisher,
+			{
+				...aggregator,
+				title: "USDT0 Goes Live on Stellar, Connecting Dollar Liquidity",
+			},
+		]);
+		expect(out).toHaveLength(2);
+	});
+});
