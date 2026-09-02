@@ -490,37 +490,16 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "APS Money",
 		peg: "EUR",
 	},
-	{
-		// 831 holders · 330,238 UAH authorized (Horizon, 2026-08-22).
-		//
-		// Researched 2026-09-02 against primary sources: the issuer account's
-		// own `home_domain` on Horizon is dcm.systems, NOT prozora.network —
-		// prozora.network (the ORG_URL / public brand site) serves no toml at
-		// all (its /.well-known/stellar.toml 404s), while dcm.systems/.well-
-		// known/stellar.toml is live and declares this exact code + issuer.
-		// `domain` corrected to the host that actually passes the same
-		// home_domain-reversal check every other row here is held to; this
-		// also gives the row a real logo instead of the flag fallback, since
-		// that toml's CURRENCIES block carries one.
-		//
-		// name and note are that toml's own words, not our inference. Its
-		// ORG_NAME confirms "Transparent Network" (no change). Its CURRENCIES
-		// entry: name="TPN UAH"; desc says UAH "is a digital representation
-		// (identifier) of the hryvnia on the bank accounts in transactions
-		// between network financial institutions and customers" and, in the
-		// operator's own words, "UAH is not a stablecoin; the token is not
-		// tradable and is available only for authorized accounts of
-		// participating financial institutions and customer's accounts."
-		// No reserve/backing claim beyond that is made anywhere in the toml,
-		// so none is recorded here.
-		code: "UAH",
-		issuer: "GCJI3CP2NL6NWSCHM36XBQYCBHOTVVZWEXZALWON34KAYUGF6GEVNRTS",
-		domain: "dcm.systems",
-		company: "Transparent Network",
-		name: "TPN UAH",
-		peg: "UAH",
-		note: `Operator's own toml: "UAH is not a stablecoin; the token is not tradable and is available only for authorized accounts of participating financial institutions and customer's accounts." It represents hryvnia held in participating banks' accounts, for interbank/institutional settlement — not a retail-redeemable reserve token.`,
-	},
+	// UAH — REMOVED 2026-09-02 (owner decision), and the reason is the
+	// operator's own words rather than our judgement. Transparent Network's
+	// toml at dcm.systems says of this asset: "UAH is not a stablecoin; the
+	// token is not tradable and is available only for authorized accounts of
+	// participating financial institutions." A registry of fiat-pegged
+	// stablecoins should not carry an asset whose issuer says it is neither
+	// a stablecoin nor tradable — the same rule that keeps out wrappers,
+	// synthetics and bonds. Dropping it here stops the measurement; the next
+	// refresh stamps `retiredAt` on the stored row, which preserves its
+	// history and never claims the issuer stopped issuing it.
 	{
 		// 69 holders · 98,859 GBPZ authorized (Horizon, 2026-08-22).
 		// Issuer from zeam-money's own stellar.toml.
