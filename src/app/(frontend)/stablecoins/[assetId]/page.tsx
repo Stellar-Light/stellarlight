@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StablecoinHistoryChart } from "@/components/stablecoin-history-chart";
 import { Card, CardContent } from "@/components/ui/card";
+import { STABLECOIN_MARKETS } from "@/data/stablecoin-markets";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	formatCount,
@@ -113,6 +114,10 @@ export default async function StablecoinDetailPage({
 	const data = await load(assetId);
 	if (!data) notFound();
 	const { row, history } = data;
+	// Curated venues, keyed by code+issuer (a ticker alone is not an identity).
+	const markets = row.issuer
+		? (STABLECOIN_MARKETS[`${row.ticker}-${row.issuer}`] ?? [])
+		: [];
 
 	const measuredLabel = row.updatedAt
 		? `${new Date(row.updatedAt).toLocaleString("en-US", {
@@ -293,6 +298,34 @@ export default async function StablecoinDetailPage({
 									</a>
 								)}
 							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{markets.length > 0 && (
+					<Card className="border border-border/50 bg-card mb-6">
+						<CardContent className="py-5">
+							<h2 className="text-base font-semibold text-foreground mb-3">
+								Markets
+							</h2>
+							<div className="flex flex-wrap gap-2">
+								{markets.map((m) => (
+									<a
+										key={m.url}
+										href={m.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border/50 hover:bg-white/[0.07] transition-colors"
+									>
+										{m.venue}: {m.label} <ExternalLink className="w-3 h-3" />
+									</a>
+								))}
+							</div>
+							<p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+								{markets
+									.map((m) => `${m.venue}: ${m.verified} (as of ${m.asOf}).`)
+									.join(" ")}
+							</p>
 						</CardContent>
 					</Card>
 				)}

@@ -3337,6 +3337,9 @@ export const DESCRIPTION_FIXES: Record<string, string> = {
 // so consumers hop straight to the living source.
 export const DOCS_LINKS: Record<string, string> = {
 	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
+	// 2026-09-02, owner-requested: SDF's developer launch page for USDT0 —
+	// asset + issuer, SAC and OFT contract IDs, LayerZero endpoint ID.
+	usdt0: "https://developers.stellar.org/launch/usdt0",
 };
 
 // sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
@@ -3746,6 +3749,15 @@ export const DEPLOYMENT_VERIFIED: Record<
 		sourceUrl:
 			"https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
 		note: "operator announcement 2026-03-04: 'bringing institutional-grade oracle infrastructure to the Stellar mainnet', 10 feeds live; their monorepo chain-configs declares stellar-mainnet (isMainnet:true, mainnet RPCs); SEP-40 feeds in production for Centrifuge RWAs",
+	},
+	// 2026-09-02, owner-requested: SDF's developer launch page publishes the
+	// mainnet asset (USDT0:GATISXX6…), the SAC (CBSJZEIO…) and the OFT
+	// contract (CBOWOLFS…). Horizon already showed the asset live
+	// (onchain-activity) — the two artifacts agree; the page is the citable one.
+	usdt0: {
+		network: "mainnet",
+		sourceUrl: "https://developers.stellar.org/launch/usdt0",
+		note: "SDF developer launch page 2026-09-02: USDT0 issued by GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q; SAC CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF; OFT CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6 (LayerZero OFT standard, operated by Everdawn Labs). Announcement: https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
 	},
 };
 

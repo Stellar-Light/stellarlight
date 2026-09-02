@@ -969,3 +969,27 @@ describe("meeting title synthesis", () => {
 		expect(out[0].title).toBe("2026-01-01");
 	});
 });
+
+describe("USDT0 launch anchor (RESEARCH_ANCHORS usdt0-launch)", () => {
+	const URLS = [
+		"https://developers.stellar.org/docs/tokens/usdt0-layerzero",
+		"https://developers.stellar.org/launch/usdt0",
+		"https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+	];
+	it("fires on USDT vocabulary with Stellar/contract context", () => {
+		for (const q of [
+			"is USDT on Stellar?",
+			"usdt0 contract address",
+			"tether live on stellar",
+			"USDT0 SAC",
+		]) {
+			expect(anchorDocUrls(q), `query: ${q}`).toEqual(URLS);
+		}
+	});
+	it("stays out of bridge asks, generic stablecoin asks, and bare names", () => {
+		for (const u of URLS)
+			expect(anchorDocUrls("how do I bridge USDC to stellar")).not.toContain(u);
+		expect(anchorDocUrls("stablecoins on stellar")).toEqual([]);
+		expect(anchorDocUrls("tether")).toEqual([]);
+	});
+});
