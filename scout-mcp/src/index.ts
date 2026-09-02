@@ -503,7 +503,7 @@ server.registerTool(
 	{
 		title: "Search the Stellar GitHub repo / code-reference index",
 		description:
-			"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: code-depth + freshness + traction + ecosystem authority), each with a `codeVerified` block once scanned: `contractInterface[]` (the Soroban ABI as full pub-fn signatures), `targetProtocol`+`protocolCaps[]` (which protocol the SDK pin targets and the CAPs defining it — advisory), `stellarDeps[]` (ecosystem dependencies from manifests — querying a package name like 'passkey-kit' surfaces its DEPENDENTS), `sdkCapabilities[]` (incl. `x402`/`mpp` agent-payment tags), symbols, version status. Rows also carry `activityState` (derived liveness), `activitySignals` (commits90d/releases; null = not captured), and `knowledgeNotes[]` (dated curated facts). Use for 'show me the code/repos for X', 'find a Soroban implementation of X', or 'which repos use package Y'. Not for products/companies and their funding/status → use search_projects.",
+			"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: code-depth + freshness + traction + ecosystem authority), each with a `codeVerified` block once scanned: `contractInterface[]` (the Soroban ABI as full pub-fn signatures), `targetProtocol`+`protocolCaps[]` (which protocol the SDK pin targets and the CAPs defining it — advisory), `stellarDeps[]` (ecosystem dependencies from manifests — querying a package name like 'passkey-kit' surfaces its DEPENDENTS), `sdkCapabilities[]` (incl. `x402`/`mpp` agent-payment tags), symbols, version status. Rows also carry `activityState` (derived liveness), `activitySignals` (commits90d/releases; null = not captured), `knowledgeNotes[]` (dated curated facts), and `kind` + `kindBasis` (what the repo IS — archived | fork | template-or-tutorial | contract | application | hackathon | code — derived at read time; weigh a hackathon demo, a fork and a shipped product differently). Use for 'show me the code/repos for X', 'find a Soroban implementation of X', or 'which repos use package Y'. Not for products/companies and their funding/status → use search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -564,7 +564,7 @@ server.registerTool(
 	{
 		title: "Explain a Stellar repo's internals (deep code answer)",
 		description:
-			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. Not for discovering which repos/projects exist → use search_repos / search_projects.",
+			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. The answer carries `knowledgeNotes` (dated curated facts, present even when a DeepWiki walkthrough leads) and `repoMeta.kind` (what the repo IS). Not for discovering which repos/projects exist → use search_repos / search_projects.",
 		inputSchema: {
 			q: z
 				.string()
