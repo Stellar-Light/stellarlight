@@ -599,6 +599,26 @@ export const RESEARCH_ANCHORS: Array<{
 			"https://stellarsecurityportal.com/report/4",
 		],
 	},
+	{
+		// USDT0 launch (2026-09-02): "is USDT on Stellar" / "usdt0 contract
+		// address" asks land on generic stablecoin pages — the launch page
+		// (asset, SAC + OFT contract IDs) and the announcement never carry the
+		// asker's vocabulary ("tether", "usdt"). Pin them for USDT-vocabulary
+		// intent with Stellar/contract context.
+		id: "usdt0-launch",
+		intent: /\busdt0?\b|\btether\b/i,
+		context:
+			/\bstellar\b|\bsoroban\b|\blive\b|\blaunch(?:ed)?\b|\bcontracts?\b|\bissuer\b|\blayerzero\b|\boft\b|\bsac\b/i,
+		urls: [
+			// Verified in-corpus 2026-09-01 (dev-docs page).
+			"https://developers.stellar.org/docs/tokens/usdt0-layerzero",
+			// Not in the dev-docs sitemap — ingest-developers-docs.ts EXTRA_PAGES
+			// carries it (2026-09-02). The announcement lands with the next
+			// 06:00Z blog refresh (sitemap position 128 of 568, under the cap).
+			"https://developers.stellar.org/launch/usdt0",
+			"https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		],
+	},
 ];
 
 /** Anchor-doc URLs for a query — empty unless an intent class fires. */

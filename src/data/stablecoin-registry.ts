@@ -72,17 +72,20 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		peg: "USD",
 	},
 	{
-		// Tether's omnichain USDT (LayerZero burn-and-mint, 1:1 backed), live
-		// on Stellar 2026-08 — Horizon-verified 2026-08-29: 5,434 authorized
-		// trustlines, ~52,140 issued. The issuer publishes NO home_domain (the
-		// address is published on usdt0.to/ecosystem/stellar instead), so
-		// toml-chain checks won't confirm this one — the operator page is the
-		// anchor. Owner-flagged same day.
+		// Tether's omnichain USDT (LayerZero OFT burn-and-mint, 1:1 backed).
+		// On-chain since 2026-08 (Horizon-verified 2026-08-29: 5,434 authorized
+		// trustlines, ~52,140 issued); officially launched 2026-09-02 (SDF
+		// announcement + developers.stellar.org/launch/usdt0: SAC CBSJZEIO…,
+		// OFT CBOWOLFS…). Since launch day usdt0.to serves a SEP-1 toml
+		// (ORG Everdawn Labs Limited) whose currency image is the round coin
+		// on IPFS — that wins the logo when it loads; the fallback below is
+		// the owner-supplied square mark bundled with the site.
 		code: "USDT0",
 		issuer: "GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
 		domain: "usdt0.to",
 		company: "Tether (USDT0)",
 		peg: "USD",
+		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/usdt0.png",
 	},
 	{
 		code: "PYUSD",

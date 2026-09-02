@@ -138,7 +138,14 @@ async function run() {
 	}
 
 	console.log("Listing sitemap…");
-	const allUrls = await fetchSitemapUrls(SITEMAP, BASE);
+	// Pages the sitemap omits but the corpus must hold. /launch/* (asset
+	// launch pages: asset, issuer, contract IDs) is absent from the sitemap
+	// and has no index page (checked 2026-09-02) — listed explicitly and
+	// sorted first so a cap never drops them.
+	const EXTRA_PAGES = ["https://developers.stellar.org/launch/usdt0"];
+	const allUrls = [
+		...new Set([...EXTRA_PAGES, ...(await fetchSitemapUrls(SITEMAP, BASE))]),
+	];
 	// F5a (audit root #5): junk URLs (author archives, pagination, tag indexes)
 	// were burning the page cap AND ingesting as dupe/nav chunks; and the blind
 	// slice cut ~400 real /docs pages (tokens, validators, learn) — vector
@@ -150,7 +157,8 @@ async function run() {
 	// shared pattern (never crawled elsewhere) — kept as a local extra.
 	const JUNK_URL = /\/search(\?|$)/i;
 	const kept = allUrls.filter((u) => !JUNK_URL.test(u) && !JUNK_URL_RE.test(u));
-	const prio = (u: string) => (u.includes("/docs/") ? 0 : 1);
+	const prio = (u: string) =>
+		EXTRA_PAGES.includes(u) ? -1 : u.includes("/docs/") ? 0 : 1;
 	kept.sort((a, b) => prio(a) - prio(b) || a.localeCompare(b));
 	const urls = kept.slice(0, limit);
 	console.log(

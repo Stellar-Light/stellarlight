@@ -52,6 +52,7 @@ describe("CANONICAL_PAGES registry", () => {
 					"ingest-sdf-org.ts",
 					"ingest-security-program.ts",
 					"ingest-sdf-blog.ts",
+					"ingest-developers-docs.ts",
 				].includes(p.ingestedBy),
 				p.id,
 			).toBe(true);

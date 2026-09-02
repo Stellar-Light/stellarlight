@@ -13,6 +13,8 @@
  * fabrication.
  */
 import "../load-env";
+import { existsSync, readFileSync } from "node:fs";
+import { extname, resolve } from "node:path";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 import {
@@ -20,6 +22,7 @@ import {
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
 	GITHUB_REPOS_ADD,
+	LOGO_FIXES,
 	NAME_FIXES,
 	PROMINENCE_SET,
 	SEEDS,
@@ -2541,6 +2544,61 @@ async function main() {
 			slug,
 			data: { links: { ...(d.links ?? {}), docs: docsUrl } },
 		});
+	}
+
+	// Logos: fill-if-empty from a file committed under public/ (LOGO_FIXES).
+	// The media row is created only on --execute; the dry run proves the
+	// file exists and prints the plan. R2 env must be present in the
+	// workflow or the upload lands on the runner's disk (curate-projects.yml).
+	console.log("\n── Logos (fill-if-empty, file under public/) ──");
+	const MIME: Record<string, string> = {
+		".png": "image/png",
+		".jpg": "image/jpeg",
+		".jpeg": "image/jpeg",
+		".svg": "image/svg+xml",
+		".webp": "image/webp",
+	};
+	for (const [slug, fix] of Object.entries(LOGO_FIXES)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.logo) {
+			console.log(`  ${slug}: logo already set, skip`);
+			continue;
+		}
+		const abs = resolve(process.cwd(), fix.file);
+		const mimetype = MIME[extname(abs).toLowerCase()];
+		if (!existsSync(abs) || !mimetype) {
+			console.error(`  ${slug}: FILE MISSING or unknown type — ${fix.file}`);
+			process.exitCode = 1;
+			continue;
+		}
+		const data = readFileSync(abs);
+		console.log(
+			`  ${slug}: logo ← ${fix.file} (${(data.length / 1024).toFixed(1)} KB; ${fix.note})`,
+		);
+		if (!EXECUTE) continue;
+		const media = await payload.create({
+			collection: "media",
+			data: { alt: `${d.name ?? slug} logo` },
+			file: {
+				data,
+				name: `${slug}-logo${extname(abs).toLowerCase()}`,
+				mimetype,
+				size: data.length,
+			},
+		});
+		writes.push({ id: d.id, slug, data: { logo: media.id } });
 	}
 
 	console.log(`\n${writes.length} write(s) planned.`);

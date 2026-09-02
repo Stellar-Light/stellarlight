@@ -15,6 +15,7 @@ export const ISSUER_LOGOS: Record<string, string> = {
 	Stasis: "/stablecoins/logos/stasis.png",
 	"Novatti Group": "/stablecoins/logos/novatti.png",
 	"Ondo Finance": "/stablecoins/logos/ondo.png",
+	"Tether (USDT0)": "/stablecoins/logos/usdt0.png",
 };
 
 export const TOKEN_LOGOS: Record<string, string> = {
@@ -26,6 +27,10 @@ export const TOKEN_LOGOS: Record<string, string> = {
 	EURC: "/stablecoins/logos/eurc.png",
 	PYUSD: "/stablecoins/logos/pyusd.png",
 	USDY: "/stablecoins/logos/usdy.png",
+	// 2026-09-02, owner-supplied: the flat square USDT0 mark. The issuer's
+	// toml image (the round coin, on IPFS) still wins when it loads; this is
+	// the bundled fallback when it does not.
+	USDT0: "/stablecoins/logos/usdt0.png",
 };
 
 /** Favicon for an issuer domain — the last resort before a letter tile. */
