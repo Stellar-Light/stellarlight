@@ -99,7 +99,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7906394004821777,
+      "topScore": 0.7911257743835449,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.829795241355896,
+      "topScore": 0.8296414017677307,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -575,7 +575,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "soroswap/core"
+      "sample": "soroswap/poc-soroswap-indexer"
     },
     {
       "id": "bridge-evm-to-stellar",
@@ -747,7 +747,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7336044311523438,
+      "topScore": 0.7343152761459351,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8532983064651489,
+      "topScore": 0.8535137176513672,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-02T17:48:21Z"
+  "generatedAt": "2026-09-03T10:07:23Z"
 }
