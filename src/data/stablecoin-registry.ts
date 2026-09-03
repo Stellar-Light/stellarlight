@@ -481,15 +481,16 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "CLPX",
 		peg: "CLP",
 	},
-	{
-		// 6,993 holders · 84,984 BRL authorized (Horizon, 2026-08-22).
-		// Issuer from ntokens's own stellar.toml.
-		code: "BRL",
-		issuer: "GDVKY2GU2DRXWTBEYJJWSFXIGBZV6AZNBVVSUHEPZI54LIS6BA7DVVSP",
-		domain: "ntokens.com",
-		company: "nTokens",
-		peg: "BRL",
-	},
+	// BRL (nTokens) — REMOVED 2026-09-03, on the issuer's own notice. Their
+	// site now leads with "Critical Information: BRL Discontinued": per terms
+	// set at issuance in 2019 and restated since June 2024, withdrawal to
+	// fiat reais is "not ensured after Jan 1st 2026" and remaining balances
+	// on Stellar are "subject to administrative costs, clawbacks and
+	// unilateral" action. An asset its own issuer has discontinued, and will
+	// not redeem, is not a stablecoin this registry should carry — the same
+	// rule that retired UAH. Dropping the entry stops the measurement; the
+	// next refresh stamps `retiredAt`, which keeps the history.
+	// (Settle Network's BRLT, a different issuer, is unaffected.)
 	{
 		// 1,801 holders · 161,220,533 APSUSDM authorized (Horizon, 2026-08-22).
 		// Issuer from aps-money's own stellar.toml.
