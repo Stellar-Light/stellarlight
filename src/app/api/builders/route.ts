@@ -487,6 +487,34 @@ export async function GET(req: NextRequest) {
 					const a = activity.get(b.githubUsername.toLowerCase());
 					b.onStellar = a ? onStellarBlock(a) : emptyOnStellar();
 				}
+				// Order by the activity we just joined. The DB sort is
+				// `-is_featured`, and onStellar is computed AFTER it, so until
+				// now the roster came back featured-first then effectively
+				// arbitrary: a builder with 833 commits in 90 days sat below
+				// three with zero, one of whose last commit was a year old
+				// (observed 2026-09-03). This endpoint is for finding someone
+				// to recruit or collaborate with — it never promised a ranking,
+				// but showing an inactive profile above an active one serves
+				// that badly when the evidence to order by is already in hand.
+				// Featured profiles keep their place at the top; a builder whose
+				// activity could not be computed (onStellar null) sorts last
+				// rather than being treated as a zero.
+				const rank = (b: (typeof builders)[number]) => {
+					const o = b.onStellar;
+					if (!o) return [-1, -1, -1] as const;
+					return [
+						o.commits90d ?? 0,
+						o.contributedCommits12m ?? 0,
+						o.lastCommitAt ? Date.parse(o.lastCommitAt) || 0 : 0,
+					] as const;
+				};
+				builders.sort((x, y) => {
+					if (!!y.isFeatured !== !!x.isFeatured)
+						return y.isFeatured ? 1 : -1;
+					const a = rank(x);
+					const b2 = rank(y);
+					return b2[0] - a[0] || b2[1] - a[1] || b2[2] - a[2];
+				});
 			} catch {
 				// leave onStellar null — "could not compute", not "nothing"
 			}
