@@ -147,38 +147,37 @@ export function styleField(
 	}
 }
 
-export const PALETTES: [string, string][] = [
-	["#8aa9ff", "#1f45f5"],
-	["#ffd166", "#e5484d"],
-	["#b8f2c9", "#0f8a5f"],
-	["#ffc2e2", "#c81d77"],
-	["#c7d2fe", "#4338ca"],
-	["#fde68a", "#b45309"],
-	// 6-12: the stablecoins-header banner's own palettes. An earlier pass
-	// here made BOTH halves of every pair dark and close in value (circle
-	// ~15-23% luminance, ground ~6-8%) to keep the banner from reading as a
-	// bright slab against the page's near-black surface — but a pair that
-	// close in value reads as a flat grey rectangle, not a carved mark. The
-	// spec is explicit that the contrast belongs *inside* the pair: "the
-	// circle colour and background colour are always a matched pair so the
-	// glyph keeps reading as negative space" — matched doesn't mean matched
-	// in VALUE. Background stays near-black here (~5-7% luminance, darker
-	// than the page's own #1A1A1A cards, so the banner still sits inside the
-	// surface, not on top of it) while the circle colour is bold and
-	// saturated (~55-70% luminance) — a ~45-60pt gap per pair, the "genuine
-	// two-tone" the spec calls for. Each pair keeps one hue family so it
-	// still reads as matched, just a characterful match rather than a
-	// muted one.
-	["#2FD98A", "#0A1712"], // usdt0 — vivid mint (Tether) / near-black green
-	["#3E7BFA", "#070B16"], // rings — vivid blue / near-black navy
-	["#FF5D5D", "#160707"], // columns — coral / near-black red
-	["#A56EFF", "#0E0716"], // checker — violet / near-black violet
-	["#2DE0C7", "#051312"], // boxes — cyan-teal / near-black teal
-	["#FF63B0", "#160611"], // bars — hot pink / near-black magenta
-	["#F5B942", "#171006"], // $ — gold / near-black amber
-	["#4FC3F7", "#03131A"], // € — sky blue / near-black teal-blue
-	["#2775CA", "#050B14"], // usdc — Circle cobalt / near-black navy
-	["#6C5CE7", "#0D0918"], // pyusd — indigo / near-black violet
+// CIRCLE colour only, one per scene — the ground used to be a second half
+// of every entry here (a per-scene dark colour, mixed the same way as the
+// circle on every transition), but that made the banner read as its own
+// dark rectangle pasted onto the page rather than circles living directly
+// on it: the page background is `#171717`, the banner's own darkest
+// grounds were close but not exact, and close-but-not-exact still shows a
+// seam. The ground is now a single colour for every scene — the page's own
+// background, read once at runtime from its `--background` custom
+// property (see engine.ts's `groundColor`) rather than duplicated here —
+// so there is no seam to get close to. The colour rhythm across a scene
+// change now comes entirely from the circles.
+export const PALETTES: string[] = [
+	"#8aa9ff",
+	"#ffd166",
+	"#b8f2c9",
+	"#ffc2e2",
+	"#c7d2fe",
+	"#fde68a",
+	// 6-15: the stablecoins-header banner's own palette, one bold, saturated
+	// circle colour per scene (~55-70% luminance, "genuine two-tone" against
+	// the now-fixed dark ground) so each scene still reads as its own event.
+	"#2FD98A", // usdt0 — vivid mint (Tether)
+	"#3E7BFA", // rings — vivid blue
+	"#FF5D5D", // columns — coral
+	"#A56EFF", // checker — violet
+	"#EDEFF5", // stellar — near-white silver, the mark's own common dark-UI treatment (index 10 was "boxes"; freed when that pattern scene was dropped for stellar, reused rather than left dead)
+	"#FF63B0", // bars — hot pink
+	"#F5B942", // $ — gold
+	"#4FC3F7", // € — sky blue
+	"#2775CA", // usdc — Circle cobalt
+	"#6C5CE7", // pyusd — indigo
 ];
 
 export function rasterize(
@@ -325,22 +324,36 @@ const TILE_FILL = 0.98;
 /**
  * Which pixels of an already-drawn raster are "ink" (positive polarity: 1 =
  * ink) as opposed to disc/background — shared by the hole-mode carve and
- * the tile-mode rasterisers below. These marks are a coloured disc/square
- * with a lighter glyph inside (USDT0 = white T on green, USDC / EURC =
- * white glyph on blue, PYUSD similar), so "opaque pixel" is not "ink": that
- * would flag the whole disc and lose the glyph. The glyph is always the
- * ink: among alpha > 0.5 pixels, whichever are brighter than the midpoint
- * of the luminance range.
+ * the tile-mode rasterisers below. Two kinds of source image, two ink
+ * rules:
  *
- * The sanity check only ever REJECTS (null), it never inverts: coverage is
- * judged against the mark's own opaque footprint, not the raster as a
- * whole — checking against the whole raster meant the glyph could never
- * clear the floor on a banner far wider than tall, and silently carving the
- * disc instead (a "plain filled circle") is exactly the failure this
- * exists to avoid. If the glyph covers too little or too much of the
- * mark's own pixels to read as a legible shape, callers leave their
- * lattice/tile intact rather than ship an empty, nearly-full, or
- * inside-out result.
+ * Most of these marks are a coloured disc/square with a lighter glyph
+ * inside (USDT0 = white T on green, USDC / EURC = white glyph on blue,
+ * PYUSD similar), so "opaque pixel" is not "ink": that would flag the
+ * whole disc and lose the glyph. For those, the glyph is the ink: among
+ * alpha > 0.5 pixels, whichever are brighter than the midpoint of the
+ * luminance range — which only works because the disc and the glyph are
+ * two different shades to split.
+ *
+ * A single-colour mark on transparency (e.g. Stellar's logo: solid black
+ * strokes, nothing else drawn) has no such split — every opaque pixel is
+ * close to the same shade, so a luminance midpoint has nothing meaningful
+ * to divide and would carve anti-aliasing noise instead of the shape (empty
+ * or inverted, never the mark). Detected by near-zero luminance spread
+ * among the opaque pixels; the ink there is the opaque region itself.
+ *
+ * The sanity check only ever REJECTS (null), it never inverts. For the
+ * disc-and-glyph case, coverage is judged against the mark's own opaque
+ * footprint, not the raster as a whole — checking against the whole raster
+ * meant the glyph could never clear the floor on a banner far wider than
+ * tall, and silently carving the disc instead (a "plain filled circle") is
+ * exactly the failure this exists to avoid. For the single-colour case
+ * there is no separate footprint to check ink against (ink IS the opaque
+ * region), so coverage there is judged against the whole raster instead —
+ * still the same question, "is this a legible minority shape, not empty
+ * and not everything." Either way: too little or too much to read as a
+ * legible shape, and callers leave their lattice/tile intact rather than
+ * ship an empty, nearly-full, or inside-out result.
  */
 export function glyphInkMask(
 	data: Uint8ClampedArray,
@@ -364,7 +377,15 @@ export function glyphInkMask(
 		if (l < lo) lo = l;
 		if (l > hi) hi = l;
 	}
-	if (opaque === 0 || hi <= lo) return null;
+	if (opaque === 0) return null;
+
+	if (hi - lo < 20) {
+		// Single-colour-on-transparency: ink is the opaque region itself.
+		const mask = new Uint8Array(n);
+		for (let i = 0; i < n; i++) mask[i] = alpha[i] > 0.5 ? 1 : 0;
+		const coverage = opaque / n;
+		return coverage >= 0.03 && coverage <= 0.55 ? mask : null;
+	}
 
 	const mid = (lo + hi) / 2;
 	const mask = new Uint8Array(n);

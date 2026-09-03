@@ -2,14 +2,16 @@
 
 /**
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
- * touching circles that carves negative space out of the field. Five
- * full-bleed patterns (rings/columns/checker/boxes/bars, the whole surface
- * reorganising) alternate with five tiled marks (the USDT0/USDC/PYUSD
- * logos, $, €) — each mark repeats several times across the width as small
- * standing circles (Scene.tile) rather than one hole carved into a solid
- * field. Framework-free Canvas 2D + rAF, driven entirely by `DotCut`
- * (./engine.ts); this component only loads the three logos, builds the
- * scene list, and wires lifecycle.
+ * touching circles that carves negative space out of the field, its own
+ * ground colour matched exactly to the page background (see engine.ts's
+ * groundColor) so the circles read as living directly on the page, not as
+ * a panel. Four full-bleed patterns (rings/columns/checker/bars, the whole
+ * surface reorganising) alternate with six tiled marks (the USDT0/USDC/
+ * PYUSD/Stellar logos, $, €) — each mark repeats several times across the
+ * width as small standing circles (Scene.tile) rather than one hole carved
+ * into a solid field. Framework-free Canvas 2D + rAF, driven entirely by
+ * `DotCut` (./engine.ts); this component only loads the four logos, builds
+ * the scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
@@ -118,32 +120,35 @@ export function DotCutBanner() {
 			loadImage("/stablecoins/logos/usdt0.png"),
 			loadImage("/stablecoins/logos/usdc.png"),
 			loadImage("/stablecoins/logos/pyusd.png"),
+			loadImage("/stellar-xlm-logo.png"),
 		])
-			.then(([usdt0, usdc, pyusd]) => {
+			.then(([usdt0, usdc, pyusd, stellar]) => {
 				if (cancelled) return;
 
 				// Each mark is tiled (Scene.tile) as several small copies marching
 				// across the width — standing (positive) circles on an empty
 				// field, not a hole carved into a solid one — rather than one big
 				// glyph fighting this banner's own proportions (nearly 4x wider
-				// than tall). At 9 rows (this banner's height before this PR) a
-				// tile got 7 rows: usdt0/$/€ read fine there, but the owner's
-				// live read was "still hard to tell" on desktop specifically
-				// (mobile, which lands on far more rows at the same cell size —
-				// see CELL_PX's comment above — was already fine). 7 rows of
-				// detail in a frame 4x wider than tall means each instance reads
-				// as small relative to the whole, and usdc/eurc/pyusd's thinner
-				// strokes didn't have enough resolution to read at all.
+				// than tall). See CELL_PX's comment above for why 19px cells (15
+				// rows, ~13 per tile) is what makes usdt0/usdc/pyusd/$/€ read on
+				// desktop, not just mobile.
 				//
-				// CELL_PX now buys rows instead: 15 at this banner's real width,
-				// ~13 per tile. Re-tested every mark at that size against the
-				// real rasterize() output (see this PR's description for the
-				// masks): usdc's ring-plus-glyph now resolves to a legible
-				// asymmetric squiggle and pyusd's loop-and-descender reads as a
-				// "P" — both back in the cycle. eurc stayed a symmetric blob with
-				// no feature that reads as "€" specifically, so it stays out;
-				// the € text scene already covers that currency without it.
+				// Stellar joins that mark set, replacing "boxes" (one of the five
+				// abstract patterns — rings/columns/checker/boxes/bars keeps four
+				// of five, the cycle staying roughly the same length). 6 marks
+				// and 4 patterns can't fully avoid ever having two marks adjacent
+				// in one cycle (6 > 4), so the two unavoidable pairs below are
+				// each a logo next to a currency symbol, not two logos back to
+				// back, and the new stellar scene itself sits between two
+				// patterns so it still lands as its own event.
 				const scenes: Scene[] = [
+					{
+						kind: "rings",
+						label: "rings",
+						transition: "wipe",
+						palette: 7,
+						style: "swell",
+					},
 					{
 						kind: "image",
 						image: usdt0,
@@ -152,13 +157,6 @@ export function DotCutBanner() {
 						palette: 6,
 						style: "grain",
 						tile: true,
-					},
-					{
-						kind: "rings",
-						label: "rings",
-						transition: "wipe",
-						palette: 7,
-						style: "swell",
 					},
 					{
 						kind: "text",
@@ -186,13 +184,6 @@ export function DotCutBanner() {
 						tile: true,
 					},
 					{
-						kind: "checker",
-						label: "checker",
-						transition: "scatter",
-						palette: 9,
-						style: "swell",
-					},
-					{
 						kind: "image",
 						image: usdc,
 						label: "usdc",
@@ -202,11 +193,11 @@ export function DotCutBanner() {
 						tile: true,
 					},
 					{
-						kind: "boxes",
-						label: "boxes",
-						transition: "collapse",
-						palette: 10,
-						style: "grain",
+						kind: "checker",
+						label: "checker",
+						transition: "scatter",
+						palette: 9,
+						style: "swell",
 					},
 					{
 						kind: "image",
@@ -223,6 +214,15 @@ export function DotCutBanner() {
 						transition: "wipe",
 						palette: 11,
 						style: "drift",
+					},
+					{
+						kind: "image",
+						image: stellar,
+						label: "stellar",
+						transition: "collapse",
+						palette: 10,
+						style: "grain",
+						tile: true,
 					},
 				];
 
@@ -295,13 +295,18 @@ export function DotCutBanner() {
 		engineRef.current?.setPointer(null);
 	};
 
+	// The host stays transparent, not a card colour: the canvas paints its
+	// own ground to match the page background exactly (see engine.ts's
+	// groundColor), so painting a second, different colour here would still
+	// show through as a rounded-corner card edge even once the canvas
+	// itself blends in.
 	return (
 		<div
 			ref={hostRef}
 			aria-hidden="true"
 			onPointerMove={onPointerMove}
 			onPointerLeave={onPointerLeave}
-			className="mb-8 h-56 w-full overflow-hidden rounded-xl bg-[#1A1A1A] md:h-80"
+			className="mb-8 h-56 w-full overflow-hidden rounded-xl bg-transparent md:h-80"
 		/>
 	);
 }
