@@ -20,6 +20,22 @@ function rgba(
 	return data;
 }
 
+// Builds a flat RGBA buffer for a SINGLE-COLOUR mark on transparency (e.g.
+// Stellar's logo: solid black strokes, nothing else drawn) — every pixel in
+// `opaque` gets the same near-black shade (no luminance spread to split),
+// everything else is fully transparent.
+function rgbaMono(n: number, opaque: Set<number>): Uint8ClampedArray {
+	const data = new Uint8ClampedArray(n * 4);
+	for (let i = 0; i < n; i++) {
+		const v = opaque.has(i) ? 8 : 0; // near-black, same shade everywhere
+		data[i * 4] = v;
+		data[i * 4 + 1] = v;
+		data[i * 4 + 2] = v;
+		data[i * 4 + 3] = opaque.has(i) ? 255 : 0;
+	}
+	return data;
+}
+
 describe("glyphInkMask", () => {
 	it("returns null when nothing is opaque", () => {
 		const n = 10;
@@ -49,6 +65,31 @@ describe("glyphInkMask", () => {
 		const n = 100;
 		const bright = new Set(Array.from({ length: 90 }, (_, i) => i)); // 90%
 		const mask = glyphInkMask(rgba(n, bright), n);
+		expect(mask).toBeNull();
+	});
+
+	// Single-colour-on-transparency (Stellar's logo: solid black, no
+	// second shade to split) — the bug the coordinator flagged: the
+	// disc-vs-glyph luminance split has nothing to divide here, so it must
+	// fall back to alpha-based ink instead of coming out empty or inverted.
+	it("uses alpha, not luminance, when opaque pixels have no luminance spread", () => {
+		const n = 10;
+		const opaque = new Set([2, 3, 4, 5]); // 40% of the raster
+		const mask = glyphInkMask(rgbaMono(n, opaque), n);
+		expect(mask).not.toBeNull();
+		expect(Array.from(mask ?? [])).toEqual([0, 0, 1, 1, 1, 1, 0, 0, 0, 0]);
+	});
+
+	it("rejects a single-colour mark whose opaque region is too small a fraction of the raster", () => {
+		const n = 100;
+		const mask = glyphInkMask(rgbaMono(n, new Set([0])), n); // 1%
+		expect(mask).toBeNull();
+	});
+
+	it("rejects a single-colour mark whose opaque region covers most of the raster", () => {
+		const n = 100;
+		const opaque = new Set(Array.from({ length: 90 }, (_, i) => i)); // 90%
+		const mask = glyphInkMask(rgbaMono(n, opaque), n);
 		expect(mask).toBeNull();
 	});
 });

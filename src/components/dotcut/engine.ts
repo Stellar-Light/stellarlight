@@ -88,6 +88,19 @@ export class DotCut {
 	private fontFamily = "sans-serif";
 	private scenes: Scene[];
 
+	// The canvas ground colour, read once from the page's own `--background`
+	// custom property (the same token `bg-background` resolves to
+	// everywhere else in the app — see globals.css's `@layer base` and
+	// tailwind.config's `background: "var(--background)"`) rather than
+	// hardcoded here, so the banner can never drift from the page colour it
+	// sits on. A canvas fillStyle can't reference `var(--background)`
+	// directly (custom properties only resolve in the CSS cascade, not in
+	// Canvas 2D), so this resolves it once via getComputedStyle instead —
+	// the fallback only fires if that property is somehow missing (e.g. a
+	// future rename here without updating this file), not a second copy of
+	// the real value.
+	private groundColor = "#171717";
+
 	constructor(
 		host: HTMLElement,
 		scenes: Scene[] = SCENES,
@@ -96,6 +109,8 @@ export class DotCut {
 		this.host = host;
 		this.scenes = scenes.length > 0 ? scenes : SCENES;
 		if (fontFamily) this.fontFamily = fontFamily;
+		const bg = getComputedStyle(host).getPropertyValue("--background").trim();
+		if (bg) this.groundColor = bg;
 		this.canvas = document.createElement("canvas");
 		this.canvas.style.cssText = "display:block;width:100%;height:100%";
 		host.appendChild(this.canvas);
@@ -270,13 +285,15 @@ export class DotCut {
 		const s = this.dpr;
 		const scene = this.scenes[this.sceneIdx];
 
-		const [cA, bA] = PALETTES[this.prevPalette % PALETTES.length];
-		const [cB, bB] = PALETTES[scene.palette % PALETTES.length];
+		const cA = PALETTES[this.prevPalette % PALETTES.length];
+		const cB = PALETTES[scene.palette % PALETTES.length];
 		const m = easeInOut(this.paletteMix);
 		const circle = mixHex(cA, cB, m);
-		const back = mixHex(bA, bB, m);
 
-		ctx.fillStyle = back;
+		// The ground never changes between scenes — it's always the page
+		// background (see groundColor's own comment) — so the colour rhythm
+		// across a scene change comes entirely from the circles.
+		ctx.fillStyle = this.groundColor;
 		ctx.fillRect(0, 0, W, H);
 
 		const pitch = this.pitch * s;
