@@ -3,6 +3,7 @@ import {
 	type CoinView,
 	StablecoinExplorer,
 } from "@/components/stablecoin-explorer";
+import { ReconciliationNote } from "@/components/stablecoin-reconciliation-note";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	docToEntry,
@@ -11,6 +12,7 @@ import {
 	NEWS_SOURCES,
 	type NewsItem,
 } from "@/lib/stablecoin-news";
+import { reconcileWithDefiLlama } from "@/lib/stablecoin-reconciliation";
 import {
 	issuerLeaderboard,
 	pivotByToken,
@@ -157,6 +159,13 @@ export default async function StablecoinsPage() {
 	// Per-token supply — the issuer drawer's 30-day supply-change chart.
 	const supplyByToken = pivotByToken(snapDocs, "supply");
 	const issuers = issuerLeaderboard(coins);
+	// Our headline is larger than every other Stellar tracker's. Rather than
+	// leave a reader to assume that means we are wrong, show where the
+	// difference comes from — computed live, and null when their endpoint is
+	// unreachable so the page never carries a stale comparison.
+	const reconciliation = await reconcileWithDefiLlama(
+		coins.map((c) => ({ ticker: c.ticker, supply: c.supplyRaw })),
+	);
 
 	return (
 		<div className="min-h-screen bg-background pt-16">
@@ -180,6 +189,11 @@ export default async function StablecoinsPage() {
 				issuers={issuers}
 				news={news}
 			/>
+			{reconciliation && (
+				<div className="container mx-auto max-w-7xl px-6 pb-12">
+					<ReconciliationNote data={reconciliation} />
+				</div>
+			)}
 		</div>
 	);
 }
