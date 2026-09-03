@@ -164,6 +164,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "circle.com",
 		company: "Circle",
 		peg: "USD",
+		// Circle's toml serves no usable currency image, so the API served
+		// logoUrl: null for the biggest coin on the page. The explorer already
+		// covers it client-side with a bundled mark; this pins the same mark so
+		// API consumers get it too. Verified 200 image/png.
+		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/usdc.png",
 	},
 	{
 		// Tether's omnichain USDT (LayerZero OFT burn-and-mint, 1:1 backed).
@@ -196,6 +201,11 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "circle.com",
 		company: "Circle",
 		peg: "EUR",
+		// Circle's toml serves no usable currency image, so the API served
+		// logoUrl: null for the biggest coin on the page. The explorer already
+		// covers it client-side with a bundled mark; this pins the same mark so
+		// API consumers get it too. Verified 200 image/png.
+		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/eurc.png",
 	},
 	{
 		code: "ZUSD",
