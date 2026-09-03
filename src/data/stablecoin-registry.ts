@@ -327,6 +327,27 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 			"https://stellar.myfilebase.com/ipfs/QmWcALoB3itEx487drMWRjseqKR837NLhSsQcMAGBVeBxt",
 	},
 	{
+		// Found by the DeFiLlama reconciliation (2026-09-03) — they carried it
+		// and we did not. Chain closes: issuer home_domain = www.ylds.com, and
+		// that toml declares this exact code+issuer under ORG_NAME "Figure
+		// Certificate Company", is_asset_anchored with anchor_asset_type
+		// "fiat". Its own description: "the first SEC-registered,
+		// yield-bearing stablecoin". Same shape as USDY below — a yield
+		// instrument rather than a pure peg — and labelled as such.
+		//
+		// TWO DECOYS on this code, both rejected: a second YLDS issuer
+		// (GBAQLB2Z…) claims 8.6 BILLION supply on 2 trustlines with
+		// home_domain stellarxlm.online — a fake-issuer farm, the same pattern
+		// that got WisdomTree and Spiko excluded. Identity here is (code,
+		// issuer); the ticker alone would have picked the wrong one.
+		code: "YLDS",
+		issuer: "GAC7MOPTQLQUM3KC24AW4GHS3RLF72LPEZO54AH7EZ6TSMGRB5SOAVH3",
+		domain: "www.ylds.com",
+		company: "Figure Certificate Company",
+		peg: "USD",
+		assetType: "Yield Stablecoin",
+	},
+	{
 		code: "USDY",
 		issuer: "GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6",
 		domain: "ondo.finance",
@@ -463,8 +484,22 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	// 2,000,000,000 authorized across 85 holders — real issuer, but minted
 	// supply at that scale next to 85 holders would rank it second by market
 	// cap on a page about circulating value. It needs a circulating-supply
-	// source before it can sit beside USDC. EURCV / EURAU are Soroban CONTRACT
-	// tokens (no classic issuer), which this registry cannot express yet.
+	// source before it can sit beside USDC. EURAU is a Soroban CONTRACT token
+	// (no classic issuer), which this registry cannot express yet.
+	//
+	// EURCV — re-checked 2026-09-03 after DeFiLlama's list showed them
+	// carrying it. The earlier "Soroban contract" reasoning was wrong: there
+	// are THREE classic EURCV issuers on Stellar, and the problem is telling
+	// them apart. The largest claims 2.99 BILLION euro on 18 trustlines with
+	// home_domain xmintstellar.org (a domain that does not resolve) — a
+	// fake-issuer farm. A third holds zero. The plausible one (GCEYGIVO…,
+	// ~15.03M, close to DeFiLlama's figure) publishes NO home_domain, and SG
+	// Forge's own site does not mention Stellar or publish any issuer address,
+	// so nothing ties that account to Société Générale except a third party's
+	// say-so. Carrying it would mean asserting an identity we cannot check on
+	// a code that demonstrably has impostors — exactly the failure the
+	// (code, issuer) rule exists to prevent. Stays out until SG Forge (or an
+	// SDF announcement) publishes the address.
 	// KTB, MEX, NZDSC, CETESZ are live but effectively unissued (<40 holders,
 	// ~0 supply).
 	//
