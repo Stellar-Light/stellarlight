@@ -262,6 +262,21 @@ async function main() {
 	console.log(
 		`\n${measured.length} assets — ${live} live, ${measured.length - live} static/unmeasured`,
 	);
+	// Where each row's logo came from. The first YLDS refresh served no logo
+	// while the same code resolved it locally, and nothing in this log said
+	// so — a runner-side toml/CDN failure should be visible here, not days
+	// later as a blank tile.
+	const bySource = new Map<string, number>();
+	for (const m of measured)
+		bySource.set(m.logoSource, (bySource.get(m.logoSource) ?? 0) + 1);
+	const noLogo = measured
+		.filter((m) => m.logoSource === "none")
+		.map((m) => m.code);
+	console.log(
+		`logos — ${[...bySource].map(([k, v]) => `${k} ${v}`).join(" · ")}${
+			noLogo.length ? ` · none: ${noLogo.join(", ")}` : ""
+		}`,
+	);
 	if (problems.length) {
 		console.log("\nrows needing attention:");
 		for (const p of problems) console.log(`  · ${p}`);
