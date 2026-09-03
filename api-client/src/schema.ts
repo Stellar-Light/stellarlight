@@ -1041,7 +1041,8 @@ export interface components {
             } | null;
             /** @description Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds. */
             feedbackSignal?: {
-                votes?: number;
+                /** @description Community votes on the submission, or null — the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises. */
+                votes?: number | null;
                 worked?: number;
                 score?: number | null;
                 asOf?: string;
@@ -1324,8 +1325,10 @@ export interface components {
                 /** @description Project blurb from the submission (markdown stripped). */
                 description?: string | null;
                 track?: string | null;
-                /** @description Official award title (e.g. '$10,000 XLM Prize'). */
+                /** @description Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`). */
                 award?: string | null;
+                /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing. */
+                prizeUsd?: number | null;
                 isWinner?: boolean;
                 githubUrl?: string | null;
                 demoUrl?: string | null;

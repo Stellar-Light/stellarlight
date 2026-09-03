@@ -214,7 +214,9 @@ export interface DoraHacksSubmission {
 	hackathonPlacement: string | null; // e.g. "1st Place" / "Winners" — null if not a winner
 	award: string | null; // e.g. "Blend Composability Award"
 	isWinner: boolean;
-	voteCount: number;
+	/** null when the source does not expose votes — NOT zero. The v1 hub API
+	 *  stopped serving vote counts; publishing 0 asserted a measurement. */
+	voteCount: number | null;
 	url: string;
 	source: "dorahacks";
 }
@@ -328,8 +330,10 @@ export async function fetchHackathonSubmissions(
 					hackathonPlacement: prize ? prize.placement : null,
 					award: prize?.award ?? null,
 					isWinner: !!prize,
-					// vote counts are no longer exposed by the v1 hub API
-					voteCount: 0,
+					// The v1 hub API no longer exposes vote counts. This used to be
+					// 0, which reads as "nobody voted" rather than "we cannot
+					// see votes" — every submission on the surface claimed zero.
+					voteCount: null,
 					url: `https://dorahacks.io/buidl/${b.id}`,
 					source: "dorahacks",
 				});
