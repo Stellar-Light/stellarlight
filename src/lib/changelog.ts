@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-02",
 		surfaces: ["api"],
+		version: "spec@1.9.23",
+		type: "added",
+		summary:
+			"New partner type `asset-issuer` — a company that mints/issues an asset on Stellar but runs no fiat ramp of its own, distinct from `anchor` (which takes fiat in and pays fiat out, typically via SEP-6/24). `?type=asset-issuer` on /api/partners.",
+		detail:
+			"`anchor` had become a catch-all: 27 of 44 partners carried it, including tokenized-fund issuers with no deposit/withdrawal capability (e.g. a global asset manager issuing a tokenized money-market fund, shown as an on/off-ramp on its own public profile). An audit of all 27 reclassified the ones whose own words — tagline, description, or published stellar.toml (SEPs/rampTypes) — show pure issuance with no ramp: franklin-templeton, gmo-zcom-trust, audd → `asset-issuer`; anchor-coca-wallet → `wallet` (the type already existed); anchor-blox-global → `infrastructure` (its own site disclaims taking deposits or converting fiat). Rows with a real, evidenced ramp stayed `anchor` even where genuinely also an issuer (etherfuse, clpx, finclusive, zeam-money, aps-money, and the existing MoneyGram/Bitso/Yellow Card cohort) — SEP-6/24 or a curator-verified proprietary ramp API outweighs a mint-sounding tagline.",
+	},
+	{
+		date: "2026-09-02",
+		surfaces: ["api"],
 		version: "spec@1.9.22",
 		type: "added",
 		summary:

@@ -1455,6 +1455,7 @@ const TYPE_PLURAL: Record<string, string> = {
 	"audit-firm": "audit firms",
 	legal: "legal partners",
 	agency: "agencies",
+	"asset-issuer": "asset issuers",
 	other: "partners",
 };
 

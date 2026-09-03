@@ -107,6 +107,7 @@ const PARTNER_TYPES = [
 	"audit-firm",
 	"legal",
 	"agency",
+	"asset-issuer",
 	"other",
 ];
 

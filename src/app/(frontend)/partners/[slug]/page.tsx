@@ -111,6 +111,7 @@ const TYPE_BLURB: Record<string, string> = {
 	"audit-firm": "Smart-contract security audits",
 	legal: "Legal & compliance",
 	agency: "Development agency",
+	"asset-issuer": "Issues an asset on Stellar",
 };
 
 /**

@@ -859,7 +859,7 @@ export interface components {
             slug?: string;
             name?: string;
             /** @enum {string} */
-            partnerType?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+            partnerType?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
             /** @description Founding pilot-cohort partner (sorts first in unqueried lists). */
             pilot?: boolean;
             tagline?: string | null;
@@ -3192,7 +3192,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by partner type */
-                type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+                type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
                 /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
                 sector?: string;
                 /** @description Filter by region served (global, latam, africa, …) */
@@ -3521,7 +3521,7 @@ export interface operations {
                         reply?: string | null;
                         /** @description mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific. */
                         fields?: {
-                            /** @description One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | other. Null when genuinely unclear from the transcript. */
+                            /** @description One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | asset-issuer | other. Null when genuinely unclear from the transcript. */
                             partnerType?: string | null;
                             tagline?: string | null;
                             description?: string | null;
@@ -3586,7 +3586,7 @@ export interface operations {
                     /** @description Profile fields (typically the /api/partners/onboard extract output). Unknown keys are ignored; enum-checked keys (partnerType, sectors, regions, pricingModel) fall back / are dropped rather than erroring. */
                     fields?: {
                         /** @enum {string} */
-                        partnerType?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "other";
+                        partnerType?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
                         tagline?: string;
                         description?: string;
                         /** @description Lowercase hyphenated service tags the matchmaker matches on. */

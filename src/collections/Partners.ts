@@ -63,6 +63,14 @@ const PARTNER_TYPES = [
 	{ label: "Audit firm", value: "audit-firm" },
 	{ label: "Legal / Compliance", value: "legal" },
 	{ label: "Agency / Dev shop", value: "agency" },
+	// "anchor" had become the catch-all for anything that mints a token on
+	// Stellar — a real anchor takes fiat in and pays fiat out (SEP-6/24
+	// deposit+withdrawal); an issuer mints an asset and stops there. 2026-09-02
+	// audit of the 27 anchor-typed rows found 3 pure issuers with nowhere
+	// honest to land (franklin-templeton/BENJI, gmo-zcom-trust/GYEN+ZUSD,
+	// audd) — own tagline is issuance, stellar.toml fetched with no SEPs, no
+	// rampTypes.
+	{ label: "Asset Issuer", value: "asset-issuer" },
 	{ label: "Other", value: "other" },
 ] as const;
 

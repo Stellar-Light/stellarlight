@@ -15,6 +15,7 @@ export const PARTNER_TYPE_LABELS: Record<string, string> = {
 	"audit-firm": "Audit firm",
 	legal: "Legal",
 	agency: "Agency",
+	"asset-issuer": "Asset Issuer",
 	other: "Other",
 };
 
@@ -85,6 +86,9 @@ export const COMPLEMENTARY_TYPES: Record<string, string[]> = {
 	"audit-firm": ["protocol", "infrastructure", "tooling"],
 	legal: ["anchor", "on-off-ramp", "protocol"],
 	agency: ["tooling", "infrastructure", "audit-firm"],
+	// An issuer needs a ramp to get its asset in/out of fiat, audit + legal to
+	// get it trusted, and a wallet to distribute it.
+	"asset-issuer": ["anchor", "audit-firm", "legal", "wallet"],
 	other: ["infrastructure", "audit-firm", "tooling"],
 };
 
@@ -99,6 +103,7 @@ export const PARTNER_TYPE_PLURAL: Record<string, string> = {
 	"audit-firm": "audit firms",
 	legal: "legal partners",
 	agency: "agencies",
+	"asset-issuer": "asset issuers",
 	other: "partners",
 };
 
