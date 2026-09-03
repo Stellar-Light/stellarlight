@@ -83,9 +83,17 @@ jobs:
       - name: Battery coverage (raven's eval questions vs our corpus)
         id: battery
         continue-on-error: true
-        env: { FINDINGS_DIR: improvements/engine/nightly }
+        env: { FINDINGS_DIR: improvements/engine/nightly, GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
         shell: bash
-        run: pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
+        run: |
+          set +e
+          pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
+          RC=${PIPESTATUS[0]}
+          # 2 = could not look (rate limit / outage reading their repo). That is
+          # not evidence about their battery, so it must not be reported as a
+          # red finding — it says so in the log and the step passes.
+          if [ "$RC" = "2" ]; then echo "battery-coverage: could not check — not counted as red"; exit 0; fi
+          exit $RC
       - name: Note freshness (registry facts re-verified after asOf)
         id: notefresh
         continue-on-error: true

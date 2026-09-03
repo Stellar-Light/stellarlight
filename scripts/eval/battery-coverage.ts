@@ -28,6 +28,17 @@ const BATTERY = "eval/qa/corpus/battery";
 /** Below this top-confidence, our corpus is considered weak on the topic. */
 const WEAK_FLOOR = 0.6;
 const UA = { "User-Agent": "stellarlight-battery-coverage" };
+/** The tree read is the only GitHub API call here. Unauthenticated it gets 60
+ *  requests an hour per IP, which a busy runner exhausts — and the 403 that
+ *  follows read as a coverage FAILURE rather than what it is. Send the token
+ *  the workflow already has when there is one. */
+const GH_AUTH: Record<string, string> = process.env.GITHUB_TOKEN
+	? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+	: {};
+
+/** Exit code for "could not look", kept distinct from a real finding (1) so a
+ *  rate limit or an outage never counts as evidence about their battery. */
+const EXIT_COULD_NOT_CHECK = 2;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** One paced, rate-limit-aware GET. A throttled probe is an ERROR, never a
@@ -147,11 +158,20 @@ function anchorScore(
 	return toks.some((t) => !STOP.has(t) && hay.includes(t)) ? 0.75 : 0.3;
 }
 
+class CouldNotCheck extends Error {}
+
 async function listCasePaths(): Promise<string[]> {
 	const res = await fetch(
 		`https://api.github.com/repos/${RAVEN}/git/trees/main?recursive=1`,
-		{ headers: { Accept: "application/vnd.github+json", ...UA } },
+		{ headers: { Accept: "application/vnd.github+json", ...UA, ...GH_AUTH } },
 	);
+	// 403/429 is us being rate-limited or refused — an outage. 404 means the
+	// repo or branch moved. Neither is a statement about their coverage, and
+	// both used to exit 1 and be reported as a red finding.
+	if (res.status === 403 || res.status === 429 || res.status >= 500)
+		throw new CouldNotCheck(
+			`GitHub returned ${res.status} for the battery tree — rate limit or outage, not a coverage result`,
+		);
 	if (!res.ok) throw new Error(`tree fetch ${res.status}`);
 	const tree = (await res.json()) as {
 		tree?: Array<{ path: string; type: string }>;
@@ -357,6 +377,12 @@ async function main() {
 }
 
 main().catch((e) => {
+	if (e instanceof CouldNotCheck) {
+		// Say which it is IN THE LOG, so a reader of the run does not have to
+		// infer it from an exit code.
+		console.error(`COULD NOT CHECK: ${e.message}`);
+		process.exit(EXIT_COULD_NOT_CHECK);
+	}
 	console.error("Fatal:", e);
 	process.exit(1);
 });
