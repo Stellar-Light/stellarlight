@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { glyphInkMask, tileAcross } from "./scenes";
+import { glyphInkMask, type Scene, styleField, tileAcross } from "./scenes";
 
 // Builds a flat RGBA buffer: `bright` pixel indices get white (ink
 // candidate), everything else black, all fully opaque unless `alpha0`
@@ -95,43 +95,114 @@ describe("glyphInkMask", () => {
 });
 
 describe("tileAcross", () => {
-	const tile = { mask: new Uint8Array([1, 1, 1, 1]), cols: 2, rows: 2 };
+	// 3x2, fully inked (6 "on" cells) — a stand-in for one already-blitted
+	// SLOT_W x SLOT_H stamp.
+	const tile = { mask: new Uint8Array([1, 1, 1, 1, 1, 1]), cols: 3, rows: 2 };
 
 	it("refuses a tile taller than the grid has rows for", () => {
 		expect(tileAcross(tile, 20, 1)).toBeNull();
 	});
 
-	it("repeats the tile across the width, centred, with the right total ink count", () => {
+	it("refuses a tile wider than the grid has columns for", () => {
+		expect(tileAcross(tile, 2, 20)).toBeNull();
+	});
+
+	it("tiles in both directions and fills the grid exactly when it divides evenly", () => {
+		// cols=18=6*3, rows=8=4*2 — no leftover, no margin.
+		const cols = 18;
+		const rows = 8;
+		const out = tileAcross(tile, cols, rows);
+		expect(out).not.toBeNull();
+		if (!out) return;
+		const totalOn = out.reduce((a, b) => a + b, 0);
+		expect(totalOn).toBe(6 * 4 * 6); // 6x4 instances, 6 ink cells each
+		expect(out.every((v) => v === 1)).toBe(true); // fully inked tile, exact fit — every cell on
+	});
+
+	it("tiles in both directions, centred, with margin when it doesn't divide evenly", () => {
+		// cols=20 (6 instances of width 3 = 18, 1 margin each side),
+		// rows=9 (4 instances of height 2 = 8, floor(1/2)=0 top margin,
+		// the leftover 1 row goes to the bottom — see tileAcross's own
+		// floor-not-round comment).
 		const cols = 20;
-		const rows = 6;
+		const rows = 9;
 		const out = tileAcross(tile, cols, rows);
 		expect(out).not.toBeNull();
 		if (!out) return;
 
-		// gap=2, period=4, count=floor((20+2)/4)=5, totalW=18, startX=1 —
-		// tiles land at x=1,5,9,13,17, each 2 cols wide.
+		const instCols = 6;
+		const instRows = 4;
 		const totalOn = out.reduce((a, b) => a + b, 0);
-		expect(totalOn).toBe(5 * 4); // 5 copies of a fully-inked 2x2 tile
+		expect(totalOn).toBe(instCols * instRows * 6);
 
-		const startY = 2; // floor((6-2)/2)
-		for (const ox of [1, 5, 9, 13, 17]) {
-			expect(out[startY * cols + ox]).toBe(1);
-			expect(out[startY * cols + ox + 1]).toBe(1);
-			expect(out[(startY + 1) * cols + ox]).toBe(1);
+		// Left/right margin columns stay empty on every row.
+		for (let y = 0; y < rows; y++) {
+			expect(out[y * cols + 0]).toBe(0);
+			expect(out[y * cols + 19]).toBe(0);
 		}
-		// Margin rows above/below the tile stay empty.
-		expect(out.slice(0, cols).every((v) => v === 0)).toBe(true);
-		expect(out.slice(5 * cols, 6 * cols).every((v) => v === 0)).toBe(true);
-		// Gap column between the first two tiles stays empty.
-		expect(out[startY * cols + 3]).toBe(0);
+		// Top margin row (startY=0 here) is the first instance row itself —
+		// row 8 (the leftover row, floored to the bottom) stays empty.
+		expect(out.slice(8 * cols, 9 * cols).every((v) => v === 0)).toBe(true);
+		// First instance lands at (1,0).
+		expect(out[0 * cols + 1]).toBe(1);
+		expect(out[0 * cols + 3]).toBe(1); // gap column before the next instance
 	});
 
-	it("only ever adds cells for the tile's own ink (a hollow tile leaves gaps)", () => {
-		const hollow = { mask: new Uint8Array([1, 0, 0, 1]), cols: 2, rows: 2 };
-		const out = tileAcross(hollow, 20, 6);
+	it("every instance is byte-identical (same source array, integer offsets only)", () => {
+		const hollow = {
+			mask: new Uint8Array([1, 0, 1, 0, 1, 0]),
+			cols: 3,
+			rows: 2,
+		};
+		const cols = 18;
+		const rows = 8;
+		const out = tileAcross(hollow, cols, rows);
 		expect(out).not.toBeNull();
 		if (!out) return;
-		const totalOn = out.reduce((a, b) => a + b, 0);
-		expect(totalOn).toBe(5 * 2); // 2 ink cells per tile, 5 tiles
+		const blocks: string[] = [];
+		for (let cy = 0; cy < 4; cy++) {
+			for (let cx = 0; cx < 6; cx++) {
+				let s = "";
+				for (let ty = 0; ty < 2; ty++) {
+					for (let tx = 0; tx < 3; tx++) {
+						s += out[(cy * 2 + ty) * cols + (cx * 3 + tx)];
+					}
+				}
+				blocks.push(s);
+			}
+		}
+		expect(blocks.every((b) => b === blocks[0])).toBe(true);
+	});
+});
+
+describe("styleField", () => {
+	const scene: Scene = {
+		kind: "text",
+		transition: "wipe",
+		palette: 0,
+		style: "swell",
+	};
+
+	it("repeats the texture with the given period (every tile copy renders identically)", () => {
+		const cols = 9;
+		const rows = 4;
+		const period = { w: 3, h: 2 };
+		const out = new Float32Array(cols * rows);
+		// prev omitted -> from===to internally, isolating stateOf's own
+		// periodicity from the transition-morph interpolation.
+		styleField(scene, cols, rows, 1, out, undefined, period);
+
+		const v00 = out[0 * cols + 0];
+		expect(out[0 * cols + 3]).toBeCloseTo(v00, 5); // one period across
+		expect(out[0 * cols + 6]).toBeCloseTo(v00, 5); // two periods across
+		expect(out[2 * cols + 0]).toBeCloseTo(v00, 5); // one period down
+	});
+
+	it("does not repeat by that period without one (proves period isn't a no-op)", () => {
+		const cols = 9;
+		const rows = 4;
+		const out = new Float32Array(cols * rows);
+		styleField(scene, cols, rows, 1, out, undefined);
+		expect(out[0 * cols + 3]).not.toBeCloseTo(out[0 * cols + 0], 2);
 	});
 });

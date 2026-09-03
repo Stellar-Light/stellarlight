@@ -81,10 +81,24 @@ export function styleField(
 	t: number,
 	out: Float32Array,
 	prev?: Scene,
+	period?: { w: number; h: number },
 ) {
-	const cx = (cols - 1) / 2;
-	const cy = (rows - 1) / 2;
-	const maxR = Math.hypot(cols, rows) / 2;
+	// Tiled mark scenes (Scene.tile) repeat the same small glyph at several
+	// positions — see tileAcross. Without `period`, this style texture is
+	// computed from each cell's ABSOLUTE grid position, which varies wildly
+	// between one copy and the next (a cell near the grid's centre gets a
+	// very different "swell" depth than the same relative cell in a copy
+	// near the edge) — the mask is identical per copy, but the ring/bore
+	// texture drawn on top of it was not, so two copies of the same mark
+	// could render as different WEIGHTS (mostly solid vs. mostly hollow
+	// circles) even with identical outlines. `period` wraps the coordinates
+	// used below to the size of one tile slot, so the texture repeats with
+	// the same period the mask does, and every copy renders identically.
+	const pcols = period?.w ?? cols;
+	const prows = period?.h ?? rows;
+	const cx = (pcols - 1) / 2;
+	const cy = (prows - 1) / 2;
+	const maxR = Math.hypot(pcols, prows) / 2;
 	const FLIP = 0.32;
 
 	const stateOf = (
@@ -123,23 +137,26 @@ export function styleField(
 
 	for (let y = 0; y < rows; y++) {
 		for (let x = 0; x < cols; x++) {
+			const px = period ? x % pcols : x;
+			const py = period ? y % prows : y;
 			let order = 0;
 			switch (scene.style) {
 				case "drift":
-					order = (x / cols) * 0.75 + Math.sin(y * 0.5) * 0.12 + 0.12;
+					order = (px / pcols) * 0.75 + Math.sin(py * 0.5) * 0.12 + 0.12;
 					break;
 				case "grain":
-					order = (x / cols) * 0.55 + (y / rows) * 0.25 + hash2(x, y) * 0.2;
+					order =
+						(px / pcols) * 0.55 + (py / prows) * 0.25 + hash2(px, py) * 0.2;
 					break;
 				case "swell":
-					order = Math.hypot(x - cx, y - cy) / maxR;
+					order = Math.hypot(px - cx, py - cy) / maxR;
 					break;
 				case "streak":
-					order = (x / cols) * 0.8 + (y / rows) * 0.2;
+					order = (px / pcols) * 0.8 + (py / prows) * 0.2;
 					break;
 			}
-			const from = stateOf(prev?.style ?? scene.style, x, y);
-			const to = stateOf(scene.style, x, y);
+			const from = stateOf(prev?.style ?? scene.style, px, py);
+			const to = stateOf(scene.style, px, py);
 			const u = Math.min(1, Math.max(0, (t - order * (1 - FLIP)) / FLIP));
 			const eased = u * u * (3 - 2 * u);
 			out[y * cols + x] = from + (to - from) * eased;
@@ -165,7 +182,7 @@ export const PALETTES: string[] = [
 	"#ffc2e2",
 	"#c7d2fe",
 	"#fde68a",
-	// 6-15: the stablecoins-header banner's own palette, one bold, saturated
+	// 6-14: the stablecoins-header banner's own palette, one bold, saturated
 	// circle colour per scene (~55-70% luminance, "genuine two-tone" against
 	// the now-fixed dark ground) so each scene still reads as its own event.
 	"#2FD98A", // usdt0 — vivid mint (Tether)
@@ -176,8 +193,11 @@ export const PALETTES: string[] = [
 	"#FF63B0", // bars — hot pink
 	"#F5B942", // $ — gold
 	"#4FC3F7", // € — sky blue
-	"#2775CA", // usdc — Circle cobalt
-	"#6C5CE7", // pyusd — indigo
+	"#6C5CE7", // pyusd — indigo (index 14 was usdc, dropped this pass — its
+	// inner $ never cleared the legibility bar even at this file's largest
+	// tested slot, and it's height-bound, not width-bound, so a bigger slot
+	// couldn't have helped; see the PR for the masks this call was made
+	// from. Slot freed, not left dead — nothing new needed it this round.)
 ];
 
 export function rasterize(
@@ -311,15 +331,33 @@ function imageSize(img: CanvasImageSource): { w: number; h: number } {
 // it, with room left around it so the carve doesn't touch the grid edge.
 const MARK_FILL = 0.82;
 
-// Tile mode's own fill fraction, close to 1: a tile's "room to breathe"
-// comes from tileAcross's own 1-row outer margin and the gap between
-// instances, not from shrinking the glyph inside its own box too — the
-// reference this mode reproduces has the mark filling nearly the full
-// height, "only a thin margin above and below," so MARK_FILL's more
-// conservative fraction (tuned for a lone glyph carved into a full grid
-// it needs to not touch the edge of) would just add a second, unwanted
-// layer of padding on top of that margin.
-const TILE_FILL = 0.98;
+// Every tiled mark scene places instances in a grid of fixed-size slots —
+// SLOT_W x SLOT_H cells each — instead of sizing the slot to whatever the
+// glyph's own rasterised width happened to be. That older approach made
+// the instance COUNT an accident of each glyph's aspect ratio (a wide
+// glyph like € fit fewer copies than a narrow one, so the count visibly
+// jumped between scenes) and undersized every glyph relative to what a
+// consistent slot can actually hold. SLOT_H is bounded hard by this
+// banner's own height (15 rows at the current 19px cells) — 13 leaves the
+// same one row of margin top and bottom this file has used since #1261.
+// SLOT_W has more room: tested 18-31 cells against every mark (see the PR
+// that introduced this — masks don't lie), and going past 21 bought
+// nothing further for any mark that wasn't already HEIGHT-bound (a wider
+// slot just adds unused side margin for those), so 21 is the smallest
+// width already doing all the useful work — and it still fits 3 copies
+// across the real desktop width.
+export const SLOT_W = 21;
+export const SLOT_H = 13;
+
+// Fraction of the slot each glyph may use, per axis — the remainder is
+// outer margin (height) or the gap between instances (width). FILL_H
+// mirrors the old TILE_FILL (nearly the full slot height — breathing room
+// comes from the grid of slots itself, not a second shrink inside one).
+// FILL_W is more generous than the old inter-tile gap ratio on purpose:
+// most of this pass's legibility gain came from letting width-bound
+// glyphs (€ especially) use more of their slot, not from a bigger gap.
+const FILL_H = 0.98;
+const FILL_W = 0.85;
 
 /**
  * Which pixels of an already-drawn raster are "ink" (positive polarity: 1 =
@@ -434,10 +472,10 @@ function rasterizeImage(
 
 /**
  * Dispatch a tile-mode scene (Scene.tile) to its text/image rasteriser and
- * repeat the result across the grid. Same refusal contract as every other
- * carve in this file: anything that doesn't produce a legible small glyph
- * leaves the solid lattice (`out`) intact rather than ship a broken or
- * empty banner for a cycle.
+ * repeat the result across the grid in both directions — see tileAcross.
+ * Same refusal contract as every other carve in this file: anything that
+ * doesn't produce a legible small glyph leaves the solid lattice (`out`)
+ * intact rather than ship a broken or empty banner for a cycle.
  */
 function rasterizeTiled(
 	scene: Scene,
@@ -446,19 +484,13 @@ function rasterizeTiled(
 	fontFamily: string,
 	out: Uint8Array<ArrayBuffer>,
 ): Uint8Array<ArrayBuffer> {
-	// Leave a row of margin top and bottom where there's room to spare —
-	// tiny grids (well below this banner's real ~15 rows at its current
-	// desktop cell size, or ~28 on mobile) get the full height instead, on
-	// the theory that a cramped mark beats no margin at all only once
-	// there's truly nothing to give up.
-	const tileRows = rows > 6 ? rows - 2 : rows;
-	if (tileRows < 4) return out; // not enough rows to say anything
+	if (cols < SLOT_W || rows < SLOT_H) return out; // grid too small for even one slot
 
 	const tile =
 		scene.kind === "image" && scene.image
-			? rasterizeImageTile(scene.image, tileRows)
+			? rasterizeImageTile(scene.image)
 			: scene.kind === "text"
-				? rasterizeTextTile((scene.value ?? "").trim(), tileRows, fontFamily)
+				? rasterizeTextTile((scene.value ?? "").trim(), fontFamily)
 				: null;
 	if (!tile) return out;
 
@@ -467,46 +499,76 @@ function rasterizeTiled(
 
 /**
  * Crop an image scene down to just its own glyph (glyphBBox) and rasterise
- * THAT into a small tileRows-tall raster, ink = 1 (this scene's mark stands
- * as circles — see Scene.tile). The source PNGs are a coloured square/disc
- * with a lot of flat colour around a much smaller mark; sizing against the
- * full image the way the hole-mode carve above does (which has a whole
- * grid of rows to spend) would spend most of a small tile's few pixels on
- * that flat margin instead of the shape. Cropping to the mark's own
- * bounding box first means every pixel of the tile is doing work.
+ * THAT to fit within one SLOT_W x SLOT_H slot, ink = 1 (this scene's mark
+ * stands as circles — see Scene.tile). Sized to the slot's height first
+ * (FILL_H, aspect preserved) and only shrunk further if that would
+ * overflow the slot's own width budget (FILL_W) — most marks are
+ * height-bound and never hit that second constraint; wide ones (€, the
+ * widest glyph this file rasterises) are exactly why it exists. The
+ * source PNGs are also a coloured square/disc with a lot of flat colour
+ * around a much smaller mark; cropping to glyphBBox first (rather than
+ * sizing against the full image) means every pixel of the small raster
+ * below is doing work.
  */
 function rasterizeImageTile(
 	image: CanvasImageSource,
-	tileRows: number,
 ): { mask: Uint8Array; cols: number; rows: number } | null {
 	const box = glyphBBox(image);
 	if (!box) return null;
 
-	const dh = tileRows * TILE_FILL;
-	const dw = dh * (box.w / box.h);
-	const tileCols = Math.max(1, Math.round(dw));
+	let dh = SLOT_H * FILL_H;
+	let dw = dh * (box.w / box.h);
+	const maxW = SLOT_W * FILL_W;
+	if (dw > maxW) {
+		const scale = maxW / dw;
+		dw *= scale;
+		dh *= scale;
+	}
+	const gCols = Math.max(1, Math.round(dw));
+	const gRows = Math.max(1, Math.round(dh));
 
 	const cv = document.createElement("canvas");
-	cv.width = tileCols;
-	cv.height = tileRows;
+	cv.width = gCols;
+	cv.height = gRows;
 	const ctx = cv.getContext("2d", { willReadFrequently: true });
 	if (!ctx) return null;
-	ctx.drawImage(
-		image,
-		box.x,
-		box.y,
-		box.w,
-		box.h,
-		(tileCols - dw) / 2,
-		(tileRows - dh) / 2,
-		dw,
-		dh,
-	);
+	ctx.drawImage(image, box.x, box.y, box.w, box.h, 0, 0, gCols, gRows);
 
-	const { data } = ctx.getImageData(0, 0, tileCols, tileRows);
-	const ink = glyphInkMask(data, tileCols * tileRows);
+	const { data } = ctx.getImageData(0, 0, gCols, gRows);
+	const ink = glyphInkMask(data, gCols * gRows);
 	if (!ink) return null;
-	return { mask: ink, cols: tileCols, rows: tileRows };
+	return blitIntoSlot(ink, gCols, gRows);
+}
+
+/**
+ * Centre a small, already-thresholded glyph ink mask inside one SLOT_W x
+ * SLOT_H slot — the fixed-size unit tileAcross repeats across the grid.
+ * Every mark scene blits into the same slot size, and tileAcross places
+ * copies at exact integer multiples of it, so the copies are
+ * pixel-identical by construction: there is no independent
+ * re-rasterisation or rounding at each position that could make one land
+ * differently.
+ */
+function blitIntoSlot(
+	glyph: Uint8Array,
+	gCols: number,
+	gRows: number,
+): { mask: Uint8Array; cols: number; rows: number } {
+	const dx = Math.floor((SLOT_W - gCols) / 2);
+	const dy = Math.floor((SLOT_H - gRows) / 2);
+	const mask = new Uint8Array(SLOT_W * SLOT_H);
+	for (let y = 0; y < gRows; y++) {
+		const oy = dy + y;
+		if (oy < 0 || oy >= SLOT_H) continue;
+		const gBase = y * gCols;
+		const oBase = oy * SLOT_W;
+		for (let x = 0; x < gCols; x++) {
+			if (!glyph[gBase + x]) continue;
+			const ox = dx + x;
+			if (ox >= 0 && ox < SLOT_W) mask[oBase + ox] = 1;
+		}
+	}
+	return { mask, cols: SLOT_W, rows: SLOT_H };
 }
 
 /**
@@ -550,16 +612,14 @@ function glyphBBox(
 }
 
 /**
- * Rasterise a short text glyph (a currency symbol) into a small
- * tileRows-tall raster, ink = 1 — the text-mode sibling of
- * rasterizeImageTile. No disc to crop away here (just black background,
- * white glyph), so this measures and fits directly instead of
- * bbox-cropping first — the same two-pass measure-then-fit the full-grid
- * "text" branch above uses, just fit to a tile box instead of the grid.
+ * Rasterise a short text glyph (a currency symbol) to fit within one slot,
+ * ink = 1 — the text-mode sibling of rasterizeImageTile. Same two-axis fit
+ * (height first via FILL_H, width capped by FILL_W) and the same
+ * measure-then-fit two-pass the full-grid "text" branch above uses; no
+ * disc to crop away here, so this measures and fits directly.
  */
 function rasterizeTextTile(
 	text: string,
-	tileRows: number,
 	fontFamily: string,
 ): { mask: Uint8Array; cols: number; rows: number } | null {
 	if (!text) return null;
@@ -568,32 +628,42 @@ function rasterizeTextTile(
 	const ctx = cv.getContext("2d", { willReadFrequently: true });
 	if (!ctx) return null;
 
-	let size = tileRows;
+	let size = SLOT_H;
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	let m = ctx.measureText(text);
-	const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
-	size *= (tileRows * TILE_FILL) / gh;
+	const gh0 = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
+	size *= (SLOT_H * FILL_H) / gh0;
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	m = ctx.measureText(text);
 
-	// Padded a bit wider than the measured glyph so strokes don't touch the
-	// tile's own edge — the gap tileAcross puts between repeats is separate
-	// from this, an inset within one tile's own box.
-	const tileCols = Math.max(1, Math.round(m.width * 1.3));
-	cv.width = tileCols;
-	cv.height = tileRows;
+	const maxW = SLOT_W * FILL_W;
+	if (m.width > maxW) {
+		size *= maxW / m.width;
+		ctx.font = `600 ${size}px ${fontFamily}`;
+		m = ctx.measureText(text);
+	}
+
+	// Padded a bit wider/taller than the measured glyph so strokes don't
+	// touch this tight crop's own edge — the gap between repeats is a
+	// separate concern, handled by tileAcross once this is blitted into a
+	// full slot.
+	const gCols = Math.max(1, Math.round(m.width * 1.25));
+	const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
+	const gRows = Math.max(1, Math.round(gh * 1.15));
+	cv.width = gCols;
+	cv.height = gRows;
 	// Resizing the canvas resets context state, so the font has to be set
 	// again after cv.width/height are assigned above.
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	ctx.fillStyle = "#000";
-	ctx.fillRect(0, 0, tileCols, tileRows);
+	ctx.fillRect(0, 0, gCols, gRows);
 	ctx.fillStyle = "#fff";
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
-	ctx.fillText(text, tileCols / 2, tileRows / 2 + tileRows * 0.02);
+	ctx.fillText(text, gCols / 2, gRows / 2 + gRows * 0.02);
 
-	const { data } = ctx.getImageData(0, 0, tileCols, tileRows);
-	const mask = new Uint8Array(tileCols * tileRows);
+	const { data } = ctx.getImageData(0, 0, gCols, gRows);
+	const mask = new Uint8Array(gCols * gRows);
 	let ink = 0;
 	for (let i = 0; i < mask.length; i++) {
 		if (data[i * 4] > 110) {
@@ -601,17 +671,21 @@ function rasterizeTextTile(
 			ink++;
 		}
 	}
-	return ink > 0 ? { mask, cols: tileCols, rows: tileRows } : null;
+	if (ink === 0) return null;
+	return blitIntoSlot(mask, gCols, gRows);
 }
 
 /**
- * Repeat a small glyph tile across the full cols×rows grid as a single
- * horizontal row of copies, evenly spaced and vertically centred — the
- * composition this scene mode reproduces: several copies of the same mark
- * marching across the width on an otherwise empty field, rather than one
- * hole carved into a solid one (see Scene.tile). How many copies fit is
- * derived from the real grid width, not fixed — a narrower host just shows
- * fewer.
+ * Repeat a fixed SLOT_W x SLOT_H stamp across the grid in BOTH directions —
+ * however many whole slots fit each way, evenly spaced, centred as one
+ * block (see Scene.tile). Desktop (wide, short) works out to several
+ * columns and one row; mobile (much closer to square, and taller in
+ * proportion) works out to several columns AND several rows — the same
+ * formula either way, so a future container size just gets whatever it
+ * geometrically fits instead of needing another special case. Every
+ * instance is the exact same source array at an integer-multiple offset,
+ * so copies are pixel-identical: no independent re-rasterisation, no
+ * rounding that could make one land differently.
  */
 export function tileAcross(
 	tile: { mask: Uint8Array; cols: number; rows: number },
@@ -619,30 +693,30 @@ export function tileAcross(
 	rows: number,
 ): Uint8Array<ArrayBuffer> | null {
 	const { mask, cols: tCols, rows: tRows } = tile;
-	// floor (not round): for an odd leftover this puts the extra row of
-	// margin on the bottom rather than rounding it onto the top, and it
-	// keeps a by-1-too-tall tile refused below rather than rounding -0.5
-	// up to a startY of 0 and silently clipping the tile's own bottom row.
-	const startY = Math.floor((rows - tRows) / 2);
-	if (startY < 0) return null;
-
-	const gap = Math.max(2, Math.round(tCols * 0.6));
-	const period = tCols + gap;
-	const count = Math.max(1, Math.floor((cols + gap) / period));
-	const totalW = count * tCols + (count - 1) * gap;
-	const startX = Math.round((cols - totalW) / 2);
+	const instCols = Math.max(1, Math.floor(cols / tCols));
+	const instRows = Math.max(1, Math.floor(rows / tRows));
+	const totalW = instCols * tCols;
+	const totalH = instRows * tRows;
+	// floor (not round): keeps a too-large stamp refused below rather than
+	// rounding a negative half-width up to a startX/Y of 0 and silently
+	// clipping the outermost instance's own far edge.
+	const startX = Math.floor((cols - totalW) / 2);
+	const startY = Math.floor((rows - totalH) / 2);
+	if (startX < 0 || startY < 0) return null;
 
 	const out = new Uint8Array(new ArrayBuffer(cols * rows));
-	for (let n = 0; n < count; n++) {
-		const ox = startX + n * period;
-		for (let ty = 0; ty < tRows; ty++) {
-			const y = startY + ty;
-			if (y < 0 || y >= rows) continue;
-			const base = ty * tCols;
-			for (let tx = 0; tx < tCols; tx++) {
-				if (!mask[base + tx]) continue;
-				const x = ox + tx;
-				if (x >= 0 && x < cols) out[y * cols + x] = 1;
+	for (let cy = 0; cy < instRows; cy++) {
+		const oy0 = startY + cy * tRows;
+		for (let cx = 0; cx < instCols; cx++) {
+			const ox0 = startX + cx * tCols;
+			for (let ty = 0; ty < tRows; ty++) {
+				const y = oy0 + ty;
+				if (y < 0 || y >= rows) continue;
+				const base = ty * tCols;
+				const rowOff = y * cols;
+				for (let tx = 0; tx < tCols; tx++) {
+					if (mask[base + tx]) out[rowOff + ox0 + tx] = 1;
+				}
 			}
 		}
 	}
