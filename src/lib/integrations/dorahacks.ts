@@ -289,8 +289,16 @@ export async function fetchHackathonSubmissions(
 	try {
 		const winners = await fetchWinnerPrizeMap(hackathon.uname);
 		let page = 1;
-		// Hard page cap — DoraHacks events are at most a few hundred submissions.
-		for (let i = 0; i < 6; i++) {
+		let reportedTotal: number | null = null;
+		// The cap is a runaway guard, NOT a size assumption. It used to be 6
+		// pages on the reasoning that "DoraHacks events are at most a few
+		// hundred submissions" — but we ask for page_size=100 and DoraHacks
+		// serves 50 regardless, so six pages was 300 rows, not 600. Stellar
+		// Hacks: Real-World ZK has 345, and we published 300 with no hint that
+		// anything was missing (found 2026-09-03 by checking our count against
+		// DoraHacks' own). A truncated read that reports a count is the same
+		// failure as an empty array asserting emptiness.
+		for (let i = 0; i < 40; i++) {
 			const url = `${DORAHACKS_API_BASE}/hackathons/${hackathon.id}/buidls?page=${page}&page_size=100`;
 			const res = await fetch(url, {
 				headers: DORA_BROWSER_HEADERS,
@@ -299,6 +307,9 @@ export async function fetchHackathonSubmissions(
 			if (!res.ok) break;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const data: any = await res.json();
+			// DoraHacks reports the true total on every page — keep it so the
+			// end of the loop can PROVE it read everything rather than assume.
+			if (typeof data?.count === "number") reportedTotal = data.count;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const results: any[] = Array.isArray(data?.results) ? data.results : [];
 			for (const s of results) {
@@ -341,6 +352,12 @@ export async function fetchHackathonSubmissions(
 			if (!data?.next) break;
 			page += 1;
 		}
+		// Say so when the read was short. Silence here is what let a 13%
+		// under-count ship as though it were the whole set.
+		if (reportedTotal !== null && out.length < reportedTotal)
+			console.error(
+				`DoraHacks ${hackathon.uname}: read ${out.length} of ${reportedTotal} submissions — TRUNCATED (page cap hit). The published count will be short.`,
+			);
 	} catch (err) {
 		console.error(
 			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
