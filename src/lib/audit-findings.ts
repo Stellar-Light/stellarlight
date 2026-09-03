@@ -58,26 +58,63 @@ function veridise(md: string): FindingsExtract | null {
 }
 
 function certora(md: string): FindingsExtract | null {
-	// Findings-table rows: "M-01 Mutable bridge fees ... Medium Fixed".
-	// The severity word must agree with the ID's prefix letter — a mismatch
-	// means we're reading prose, not the table.
-	const rows = md.matchAll(
-		/^([CHMLI])-(\d{2})\b[^\n]*?\b(Critical|High|Medium|Low|Informational)\b/gim,
+	// Two independent views of the same finding set, cross-checked against
+	// each other — this grammar had NO round-trip, so it silently published
+	// whatever subset its regex happened to match. Blend v2 (report 40) shipped
+	// as 6 findings {high:1, medium:2, low:3} when the report enumerates 10:
+	// H-01/H-02, M-01/M-02, L-01..L-03, I-01..I-03. It lost H-01 because PDF
+	// reflow wrapped that row's severity word onto the next line, and lost every
+	// Informational because the table writes "Info", not "Informational".
+	//
+	//   contents — "H-01. The protocol is vulnerable to ...........  7"
+	//   table    — "H-02 Users can create nearly unfillable auctions High Fixed"
+	//
+	// Severity comes from the ID prefix (the report's own scheme). The table is
+	// the corroboration: every listed finding must appear in it, and any
+	// severity word it does carry must agree. Disagreement means we are reading
+	// prose rather than the report's structure -> null, never a subset.
+	const contents = new Set(
+		[...md.matchAll(/^\s*([CHMLI])-(\d{2})\./gim)].map(
+			(m) => `${m[1].toUpperCase()}-${m[2]}`,
+		),
 	);
-	const byId = new Map<string, string>();
-	for (const r of rows) {
-		const id = `${r[1].toUpperCase()}-${r[2]}`;
-		const sev = r[3].toLowerCase();
-		if (PREFIX_SEVERITY[r[1].toUpperCase()] !== sev) return null;
-		const prev = byId.get(id);
-		if (prev && prev !== sev) return null;
-		byId.set(id, sev);
+
+	const SEVERITY_WORD = /\b(Critical|High|Medium|Low|Informational|Info)\b/i;
+	const inTable = new Set<string>();
+	for (const m of md.matchAll(/^\s*([CHMLI])-(\d{2})\b([^\n]*)$/gim)) {
+		const id = `${m[1].toUpperCase()}-${m[2]}`;
+		const rest = m[3] ?? "";
+		// The contents line ends in a dot-leader + page number; the table row
+		// does not. Skip the contents view here so the two stay independent.
+		if (/\.{4,}/.test(rest)) continue;
+		inTable.add(id);
+		const word = rest.match(SEVERITY_WORD)?.[1]?.toLowerCase();
+		if (!word) continue;
+		const sev = word === "info" ? "informational" : word;
+		if (PREFIX_SEVERITY[m[1].toUpperCase()] !== sev) return null;
 	}
-	if (byId.size < 2) return null;
+	// The contents list is authoritative when the report has one, since PDF
+	// reflow can break a single table row's line start (Blend v2's H-01) and
+	// demanding perfect table fidelity would discard a report we can read
+	// correctly. The round-trip then runs table -> contents: the table must
+	// introduce NO finding the contents never listed, and the two must overlap
+	// enough to prove we found the table rather than stray prose. An excerpt
+	// with no contents list falls back to the table alone, where the
+	// prefix<->severity agreement checked above is the only guarantee.
+	const enumerated = contents.size >= 2 ? contents : inTable;
+	if (contents.size >= 2) {
+		for (const id of inTable) if (!contents.has(id)) return null;
+		const overlap = [...inTable].filter((id) => contents.has(id)).length;
+		if (overlap < Math.ceil(contents.size / 2)) return null;
+	}
+	if (enumerated.size < 2) return null;
+
 	const severityCounts: Record<string, number> = {};
-	for (const sev of byId.values())
+	for (const id of enumerated) {
+		const sev = PREFIX_SEVERITY[id[0]];
 		severityCounts[sev] = (severityCounts[sev] ?? 0) + 1;
-	return { findingsTotal: byId.size, severityCounts };
+	}
+	return { findingsTotal: enumerated.size, severityCounts };
 }
 
 function code4rena(md: string): FindingsExtract | null {
