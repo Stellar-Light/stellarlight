@@ -304,16 +304,25 @@ const tomlCache = new Map<string, { text: string | null; at: number }>();
 async function issuerToml(domain: string): Promise<string | null> {
 	const hit = tomlCache.get(domain);
 	if (hit && Date.now() - hit.at < 24 * 3600_000) return hit.text;
-	try {
-		const res = await fetch(`https://${domain}/.well-known/stellar.toml`, {
-			signal: AbortSignal.timeout(8000),
-		});
-		const text = res.ok ? await res.text() : null;
-		tomlCache.set(domain, { text, at: Date.now() });
-		return text;
-	} catch {
-		return hit?.text ?? null;
+	// Retried like every other fetch in this file (fetchJson gets three
+	// attempts). This one had a single try, so one transient TLS/DNS blip on
+	// the runner silently cost a row its logo for a whole six-hour cycle —
+	// the first YLDS refresh served none while the same code resolved it
+	// locally, and the next run resolved it fine. Only a thrown fetch is
+	// retried; a real 404 is an answer and is cached as one.
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			const res = await fetch(`https://${domain}/.well-known/stellar.toml`, {
+				signal: AbortSignal.timeout(8000),
+			});
+			const text = res.ok ? await res.text() : null;
+			tomlCache.set(domain, { text, at: Date.now() });
+			return text;
+		} catch {
+			if (attempt < 2) await sleep(1000 * 2 ** attempt);
+		}
 	}
+	return hit?.text ?? null;
 }
 
 /**
