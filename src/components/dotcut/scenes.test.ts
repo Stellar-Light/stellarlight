@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { glyphInkMask, type Scene, styleField, tileAcross } from "./scenes";
+import {
+	glyphInkMask,
+	type Scene,
+	SLOT_H,
+	SLOT_W,
+	slotHeightFor,
+	styleField,
+	tileAcross,
+} from "./scenes";
 
 // Builds a flat RGBA buffer: `bright` pixel indices get white (ink
 // candidate), everything else black, all fully opaque unless `alpha0`
@@ -204,5 +212,30 @@ describe("styleField", () => {
 		const out = new Float32Array(cols * rows);
 		styleField(scene, cols, rows, 1, out, undefined);
 		expect(out[0 * cols + 3]).not.toBeCloseTo(out[0 * cols + 0], 2);
+	});
+});
+
+describe("slotHeightFor — a tall grid grows the slot, it does not stack marks", () => {
+	it("leaves the desktop grid alone", () => {
+		// 15 rows at 19px cells: one row of slots is all that fits anyway.
+		expect(slotHeightFor(15)).toBe(SLOT_H);
+	});
+
+	it("grows the slot on mobile's tall grid, so only ONE row of slots fits", () => {
+		// Mobile measures ~42x28. Two rows of the DESKTOP slot fit (28 >= 26),
+		// and that 2x2 is exactly what the owner rejected: "they're like 4 of
+		// them they're stacked on top of each other".
+		const slotH = slotHeightFor(28);
+		expect(slotH).toBe(26);
+		expect(Math.floor(28 / slotH)).toBe(1);
+	});
+
+	it("still fits two copies across at mobile width", () => {
+		expect(Math.floor(42 / SLOT_W)).toBe(2);
+	});
+
+	it("never returns a slot shorter than the desktop one", () => {
+		for (const rows of [1, 5, 13, 14, 25, 26, 27, 40, 120])
+			expect(slotHeightFor(rows)).toBeGreaterThanOrEqual(SLOT_H);
 	});
 });
