@@ -177,6 +177,8 @@ export const PALETTES: [string, string][] = [
 	["#FF63B0", "#160611"], // bars — hot pink / near-black magenta
 	["#F5B942", "#171006"], // $ — gold / near-black amber
 	["#4FC3F7", "#03131A"], // € — sky blue / near-black teal-blue
+	["#2775CA", "#050B14"], // usdc — Circle cobalt / near-black navy
+	["#6C5CE7", "#0D0918"], // pyusd — indigo / near-black violet
 ];
 
 export function rasterize(
@@ -424,9 +426,10 @@ function rasterizeTiled(
 	out: Uint8Array<ArrayBuffer>,
 ): Uint8Array<ArrayBuffer> {
 	// Leave a row of margin top and bottom where there's room to spare —
-	// tiny grids (well below this banner's real ~9 rows) get the full
-	// height instead, on the theory that a cramped mark beats no margin at
-	// all only once there's truly nothing to give up.
+	// tiny grids (well below this banner's real ~15 rows at its current
+	// desktop cell size, or ~28 on mobile) get the full height instead, on
+	// the theory that a cramped mark beats no margin at all only once
+	// there's truly nothing to give up.
 	const tileRows = rows > 6 ? rows - 2 : rows;
 	if (tileRows < 4) return out; // not enough rows to say anything
 
