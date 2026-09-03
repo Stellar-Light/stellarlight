@@ -196,7 +196,7 @@ interface Props {
 	/** Per-token daily series behind the four analytics panels. */
 	marketCapByToken: SeriesRow[];
 	holdersByToken: SeriesRow[];
-	totalHoldersSeries: SeriesRow[];
+	totalMarketCapSeries: SeriesRow[];
 	/** Per-token daily supply — the issuer drawer's 30-day history. */
 	supplyByToken: SeriesRow[];
 	issuers: IssuerLeader[];
@@ -338,7 +338,7 @@ export function StablecoinExplorer({
 	totalHolders,
 	marketCapByToken,
 	holdersByToken,
-	totalHoldersSeries,
+	totalMarketCapSeries,
 	supplyByToken,
 	issuers,
 	news,
@@ -817,7 +817,7 @@ export function StablecoinExplorer({
 					onIssuerClick={setSelectedIssuer}
 					marketCapByToken={marketCapByToken}
 					holdersByToken={holdersByToken}
-					totalHolders={totalHoldersSeries}
+					totalMarketCap={totalMarketCapSeries}
 					issuers={issuers}
 				/>
 			</div>

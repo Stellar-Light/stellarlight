@@ -15,7 +15,6 @@ import {
 	issuerLeaderboard,
 	pivotByToken,
 	type TokenSnapshot,
-	totalPerDay,
 } from "@/lib/stablecoin-series";
 import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
 import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
@@ -145,7 +144,16 @@ export default async function StablecoinsPage() {
 	const snapDocs = (rawSnapshots ?? []) as TokenSnapshot[];
 	const marketCapByToken = pivotByToken(snapDocs, "marketCapUSD");
 	const holdersByToken = pivotByToken(snapDocs, "holders");
-	const totalHoldersSeries = totalPerDay(snapDocs, "holders");
+	// Total market cap over time. Built from `series.points` rather than
+	// totalPerDay() because those rows carry `assetsCounted` — the number of
+	// assets measured that day. A total that steps up because WE started
+	// tracking more assets is not the market growing, and the reader has to be
+	// able to tell the difference, so the count travels with the value.
+	const totalMarketCapSeries = allDays.map((p) => ({
+		_date: p.date,
+		total: p.marketCapUSD,
+		assets: p.assetsCounted,
+	}));
 	// Per-token supply — the issuer drawer's 30-day supply-change chart.
 	const supplyByToken = pivotByToken(snapDocs, "supply");
 	const issuers = issuerLeaderboard(coins);
@@ -167,7 +175,7 @@ export default async function StablecoinsPage() {
 				totalHolders={totalHolders}
 				marketCapByToken={marketCapByToken}
 				holdersByToken={holdersByToken}
-				totalHoldersSeries={totalHoldersSeries}
+				totalMarketCapSeries={totalMarketCapSeries}
 				supplyByToken={supplyByToken}
 				issuers={issuers}
 				news={news}
