@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-03T12:14:32.365Z",
+ "generatedAt": "2026-09-03T22:08:46.570Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -299,7 +299,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1095,
+  "population": 1097,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9699,13 +9699,13 @@
    "curatedIndex": {
     "repos": 3111,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2874,
-    "depthPct": 92
+    "withCodeDepth": 2912,
+    "depthPct": 94
    },
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7797
+    "withCodeDepth": 7935
    },
    "knowledgeNotes": {
     "pool": 408,
@@ -9779,9 +9779,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5594,
+    "pool": 5659,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 135
+    "joined": 137
    }
   },
   "curatedShape": {
@@ -9831,15 +9831,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1249
+     "count": 1254
     },
     {
      "label": "slowing",
-     "count": 940
+     "count": 937
     },
     {
      "label": "active",
-     "count": 798
+     "count": 796
     },
     {
      "label": "unknown",
@@ -9894,9 +9894,9 @@
    ],
    "languageOther": 49
   },
-  "withCodeDepth": 10671,
+  "withCodeDepth": 10847,
   "withNotes": 496,
-  "withMainnet": 135,
+  "withMainnet": 137,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -11301,13 +11301,13 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 376,
-    "of": 391,
+    "missing": 380,
+    "of": 395,
     "share": 96.2,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5203 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5264 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 376,
+    "examplePoolSize": 380,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11373,13 +11373,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2458,
+    "missing": 2282,
     "of": 13129,
-    "share": 18.7,
+    "share": 17.4,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2458,
+    "examplePoolSize": 2282,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
