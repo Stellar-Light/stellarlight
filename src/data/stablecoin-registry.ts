@@ -345,6 +345,15 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		// for a basic-income programme, backed 1:1 by short-dated US Treasuries
 		// per SDF's launch announcement.
 		//
+		// Domain corrected 2026-09-03: the row first shipped with "usdm.io",
+		// which I had not checked — it does not resolve at all. The real site
+		// is usdm1.com, which describes the instrument in its own words as a
+		// "sovereign-issued, US dollar-denominated, Treasury-backed financial
+		// instrument", a Brady-style bond under New York law, serving as the
+		// disbursement channel for a nationwide basic-income programme. It
+		// serves NO stellar.toml (404), so the logo below is their own
+		// brandmark from that site rather than a toml-declared image.
+		//
 		// TWO THINGS A READER SHOULD KNOW, both verified 2026-09-02 and both
 		// the reason it is labelled rather than presented as a plain
 		// stablecoin. First, the issuer account publishes NO `home_domain`, so
@@ -357,11 +366,13 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		// (90%). Both facts stay true of the row until re-measured.
 		code: "USDM1",
 		issuer: "GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
-		domain: "usdm.io",
+		domain: "usdm1.com",
 		company: "Republic of the Marshall Islands",
 		peg: "USD",
 		assetType: "Treasury-Backed",
-		note: "Sovereign token for a basic-income programme, backed 1:1 by short-dated US Treasuries (SDF launch announcement). The issuer publishes no home_domain, so identity rests on that announcement rather than a self-declared stellar.toml; ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
+		fallbackImageUrl:
+			"https://cdn.prod.website-files.com/68d09a463613af43eb102966/6a69289f7e793aeb116fdd79_usdm1-brandmark-avatar.png",
+		note: "Sovereign token for a basic-income programme, backed by short-dated US Treasuries; its own site calls it a sovereign Brady-style bond under New York law, not a fiat-redemption claim. The issuer publishes no home_domain and usdm1.com serves no stellar.toml, so identity rests on SDF's launch announcement; ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
 	},
 	// ── Coverage sweep 2026-09-02 (Stellar Expert fiat-code sweep) ─────────
 	// A follow-up sweep of Stellar Expert for fiat-coded assets not yet
