@@ -2212,6 +2212,7 @@ export interface PartnerAccount {
     | 'audit-firm'
     | 'legal'
     | 'agency'
+    | 'asset-issuer'
     | 'other';
   /**
    * One line a builder sees first (≤140 chars).

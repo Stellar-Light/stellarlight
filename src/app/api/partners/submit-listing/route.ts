@@ -43,6 +43,7 @@ const PARTNER_TYPES = [
 	"audit-firm",
 	"legal",
 	"agency",
+	"asset-issuer",
 	"other",
 ] as const;
 type PartnerType = (typeof PARTNER_TYPES)[number];

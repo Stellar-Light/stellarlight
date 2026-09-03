@@ -30,6 +30,13 @@ export const PARTNER_TYPES = [
 	"audit-firm",
 	"legal",
 	"agency",
+	// "anchor" had become a catch-all for anything that mints a token — a real
+	// anchor takes fiat in and pays fiat out (SEP-6/24 deposit+withdrawal); an
+	// issuer mints an asset with no ramp of its own. 2026-09-02 audit (27
+	// anchor-typed rows) found 3 pure issuers (franklin-templeton, gmo-zcom-trust,
+	// audd — tomlFetchedAt set, seps:[], no rampTypes: no ramp, own words are
+	// pure issuance) with nowhere honest to put them.
+	"asset-issuer",
 	"other",
 ] as const;
 

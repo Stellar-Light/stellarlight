@@ -3303,10 +3303,12 @@ export const spec: OpenAPISpec = {
 						// anchors here, anchors / on-off-ramps there — with nothing in
 						// either notFor to break the tie, so "on and off ramps for
 						// Stellar payments" was contested by construction. The split
-						// follows the data: 29 anchor-typed partners here, 9 of them
-						// with rampTypes populated, against 42 type=Anchor projects in
-						// the directory. Direction and corridor are the facts only this
-						// side holds; the roster is larger on the other.
+						// follows the data: 24 anchor-typed partners here (2026-09-02
+						// audit moved 5 non-ramp rows off "anchor" — 3 asset-issuer, 1
+						// wallet, 1 infrastructure), 9 of them with rampTypes populated,
+						// against 42 type=Anchor projects in the directory. Direction and
+						// corridor are the facts only this side holds; the roster is
+						// larger on the other.
 						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
 					],
 					notFor: [
@@ -3336,6 +3338,7 @@ export const spec: OpenAPISpec = {
 								"audit-firm",
 								"legal",
 								"agency",
+								"asset-issuer",
 								"other",
 							],
 						},
@@ -3960,7 +3963,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | other. Null when genuinely unclear from the transcript.",
+														"One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | asset-issuer | other. Null when genuinely unclear from the transcript.",
 												},
 												tagline: { type: "string", nullable: true },
 												description: { type: "string", nullable: true },
@@ -4068,6 +4071,7 @@ export const spec: OpenAPISpec = {
 													"audit-firm",
 													"legal",
 													"agency",
+													"asset-issuer",
 													"other",
 												],
 											},
@@ -7628,6 +7632,7 @@ export const spec: OpenAPISpec = {
 							"audit-firm",
 							"legal",
 							"agency",
+							"asset-issuer",
 							"other",
 						],
 					},
