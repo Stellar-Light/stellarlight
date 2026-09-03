@@ -349,6 +349,26 @@ const MARK_FILL = 0.82;
 export const SLOT_W = 21;
 export const SLOT_H = 13;
 
+/**
+ * The slot height to use for a given grid.
+ *
+ * `SLOT_H` is sized for the DESKTOP banner (15 rows at 19px cells), where one
+ * row of slots is all that fits. Mobile's grid is much taller in proportion
+ * (~42x28), and the first attempt at filling it stacked a SECOND row of
+ * marks — four copies, two above two. The owner's verdict: "they're like 4 of
+ * them they're stacked on top of each other either cut it to 2 or remove the
+ * whole thing". He is right; four small marks in a narrow frame is busier
+ * than the emptiness a single mark left behind.
+ *
+ * So a tall grid grows the SLOT rather than adding instances: two copies side
+ * by side, each using the full height. The glyph still scales to whichever
+ * axis binds first (FILL_W/FILL_H below), so on mobile it ends up
+ * width-bound and centred in the taller slot — bigger mark, same count.
+ */
+export function slotHeightFor(rows: number): number {
+	return rows >= 2 * SLOT_H ? Math.max(SLOT_H, rows - 2) : SLOT_H;
+}
+
 // Fraction of the slot each glyph may use, per axis — the remainder is
 // outer margin (height) or the gap between instances (width). FILL_H
 // mirrors the old TILE_FILL (nearly the full slot height — breathing room
@@ -486,11 +506,15 @@ function rasterizeTiled(
 ): Uint8Array<ArrayBuffer> {
 	if (cols < SLOT_W || rows < SLOT_H) return out; // grid too small for even one slot
 
+	// A tall grid grows the slot instead of stacking a second row of marks
+	// (slotHeightFor) — mobile ends up two copies side by side, each using the
+	// full height, rather than four small ones in a 2x2.
+	const slotH = slotHeightFor(rows);
 	const tile =
 		scene.kind === "image" && scene.image
-			? rasterizeImageTile(scene.image)
+			? rasterizeImageTile(scene.image, slotH)
 			: scene.kind === "text"
-				? rasterizeTextTile((scene.value ?? "").trim(), fontFamily)
+				? rasterizeTextTile((scene.value ?? "").trim(), fontFamily, slotH)
 				: null;
 	if (!tile) return out;
 
@@ -512,11 +536,12 @@ function rasterizeTiled(
  */
 function rasterizeImageTile(
 	image: CanvasImageSource,
+	slotH: number = SLOT_H,
 ): { mask: Uint8Array; cols: number; rows: number } | null {
 	const box = glyphBBox(image);
 	if (!box) return null;
 
-	let dh = SLOT_H * FILL_H;
+	let dh = slotH * FILL_H;
 	let dw = dh * (box.w / box.h);
 	const maxW = SLOT_W * FILL_W;
 	if (dw > maxW) {
@@ -537,7 +562,7 @@ function rasterizeImageTile(
 	const { data } = ctx.getImageData(0, 0, gCols, gRows);
 	const ink = glyphInkMask(data, gCols * gRows);
 	if (!ink) return null;
-	return blitIntoSlot(ink, gCols, gRows);
+	return blitIntoSlot(ink, gCols, gRows, slotH);
 }
 
 /**
@@ -553,13 +578,14 @@ function blitIntoSlot(
 	glyph: Uint8Array,
 	gCols: number,
 	gRows: number,
+	slotH: number,
 ): { mask: Uint8Array; cols: number; rows: number } {
 	const dx = Math.floor((SLOT_W - gCols) / 2);
-	const dy = Math.floor((SLOT_H - gRows) / 2);
-	const mask = new Uint8Array(SLOT_W * SLOT_H);
+	const dy = Math.floor((slotH - gRows) / 2);
+	const mask = new Uint8Array(SLOT_W * slotH);
 	for (let y = 0; y < gRows; y++) {
 		const oy = dy + y;
-		if (oy < 0 || oy >= SLOT_H) continue;
+		if (oy < 0 || oy >= slotH) continue;
 		const gBase = y * gCols;
 		const oBase = oy * SLOT_W;
 		for (let x = 0; x < gCols; x++) {
@@ -568,7 +594,7 @@ function blitIntoSlot(
 			if (ox >= 0 && ox < SLOT_W) mask[oBase + ox] = 1;
 		}
 	}
-	return { mask, cols: SLOT_W, rows: SLOT_H };
+	return { mask, cols: SLOT_W, rows: slotH };
 }
 
 /**
@@ -621,6 +647,7 @@ function glyphBBox(
 function rasterizeTextTile(
 	text: string,
 	fontFamily: string,
+	slotH: number = SLOT_H,
 ): { mask: Uint8Array; cols: number; rows: number } | null {
 	if (!text) return null;
 
@@ -628,11 +655,11 @@ function rasterizeTextTile(
 	const ctx = cv.getContext("2d", { willReadFrequently: true });
 	if (!ctx) return null;
 
-	let size = SLOT_H;
+	let size = slotH;
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	let m = ctx.measureText(text);
 	const gh0 = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent || size;
-	size *= (SLOT_H * FILL_H) / gh0;
+	size *= (slotH * FILL_H) / gh0;
 	ctx.font = `600 ${size}px ${fontFamily}`;
 	m = ctx.measureText(text);
 
@@ -672,7 +699,7 @@ function rasterizeTextTile(
 		}
 	}
 	if (ink === 0) return null;
-	return blitIntoSlot(mask, gCols, gRows);
+	return blitIntoSlot(mask, gCols, gRows, slotH);
 }
 
 /**
