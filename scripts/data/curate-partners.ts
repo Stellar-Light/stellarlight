@@ -33,6 +33,13 @@ const OWNER_CONFIRMED_DEAD: string[] = [
 	// built on Interledger / Open Payments, NOT Stellar — dropped from the
 	// Stellar anchor directory (not dead, just not Stellar). Owner-confirmed 2026-07-06.
 	"anchor-wallet-guru",
+	// their own site leads with "Critical Information: BRL Discontinued" —
+	// per terms set at issuance in 2019 and restated since June 2024,
+	// withdrawal to fiat reais is "not ensured after Jan 1st 2026" and
+	// remaining BRL balances on Stellar are "subject to administrative costs,
+	// clawbacks". The directory was presenting them as a fresh, verified
+	// BRL on/off ramp. Owner-confirmed 2026-09-03.
+	"ntokens",
 ];
 // Slugs of the pilot cohort (the select partners Anke tests with) —
 // owner-confirmed 2026-07-06: the original pilot trio.
