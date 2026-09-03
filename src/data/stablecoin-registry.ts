@@ -334,6 +334,35 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		peg: "USD",
 		assetType: "Yield Stablecoin",
 	},
+	{
+		// Owner-requested twice, and it belongs here for consistency: this is
+		// the same SHAPE as USDY directly above — a token backed by short-dated
+		// US Treasuries rather than a fiat reserve — and we already carry that
+		// one. (The 2026-09-02 sweep excluded it as "a bond, not a peg" while
+		// USDY sat in the roster; that was the inconsistency, not this row.)
+		//
+		// What it is: the Republic of the Marshall Islands' own token, issued
+		// for a basic-income programme, backed 1:1 by short-dated US Treasuries
+		// per SDF's launch announcement.
+		//
+		// TWO THINGS A READER SHOULD KNOW, both verified 2026-09-02 and both
+		// the reason it is labelled rather than presented as a plain
+		// stablecoin. First, the issuer account publishes NO `home_domain`, so
+		// the toml→Horizon→home_domain reversal every other row here passes
+		// cannot be run: identity rests on SDF's published announcement naming
+		// this exact issuer, which is weaker evidence than a self-declared
+		// toml, and `domain` below is the programme's site rather than a
+		// verified anchor. Second, it is small and concentrated: ~1.11M issued
+		// across 28 trustlines, with a single account holding ~995k of it
+		// (90%). Both facts stay true of the row until re-measured.
+		code: "USDM1",
+		issuer: "GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
+		domain: "usdm.io",
+		company: "Republic of the Marshall Islands",
+		peg: "USD",
+		assetType: "Treasury-Backed",
+		note: "Sovereign token for a basic-income programme, backed 1:1 by short-dated US Treasuries (SDF launch announcement). The issuer publishes no home_domain, so identity rests on that announcement rather than a self-declared stellar.toml; ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
+	},
 	// ── Coverage sweep 2026-09-02 (Stellar Expert fiat-code sweep) ─────────
 	// A follow-up sweep of Stellar Expert for fiat-coded assets not yet
 	// carried here, run through the same chain as the Allium audit above:
@@ -428,23 +457,12 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 	// KTB, MEX, NZDSC, CETESZ are live but effectively unissued (<40 holders,
 	// ~0 supply).
 	//
-	// USDM1 (GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC):
-	// re-checked 2026-09-02, and the "Soroban contract, no classic issuer"
-	// reasoning above does NOT apply to it — it IS a normal classic asset
-	// (Horizon returns an ordinary G-account; Stellar Expert's classic
-	// asset/{code}-{issuer} endpoint reports it fully: supply, 28 trustlines,
-	// 512 funded). Excluded anyway, for two independent reasons: (1) the
-	// issuer account sets NO home_domain on Horizon at all, so the
-	// toml-reversal chain every other row here passes has nothing to check
-	// against; (2) the operator itself — the Republic of the Marshall
-	// Islands, per Stellar's own press release — describes it as "the first
-	// digital sovereign debt instrument issued natively on a blockchain," a
-	// dollar-denominated sovereign bond "backed one-to-one by short-dated
-	// U.S. Treasuries" for a Universal Basic Income disbursement (SDF +
-	// Crossmint, live Nov 2025). That is the same NOT-A-FIAT-PEG-STABLECOIN
-	// shape as USTRY above (Coverage sweep 2026-09-02) — a yield-bearing bond,
-	// not a reserve claim on fiat — so it stays out on both the chain and the
-	// inclusion rule, same as every other candidate in this block.
+	// USDM1: NOW CARRIED (see its row above). This block used to exclude it
+	// as "a bond, not a fiat peg" — but USDY, a Treasury-backed yield token
+	// of the same shape, was already in the roster, so the rule was being
+	// applied to one and not the other. The row above carries it WITH the two
+	// facts that make it unusual: no home_domain published by the issuer, and
+	// ~90% of supply in a single account.
 	{
 		// 181,426 holders · 6,405,270 ZARZ authorized (Horizon, 2026-08-22).
 		// Issuer from zeam-money's own stellar.toml.
