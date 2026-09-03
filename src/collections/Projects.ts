@@ -798,10 +798,30 @@ export const Projects: CollectionConfig = {
 					type: "array",
 					admin: {
 						description:
-							"Per-awarded-round official record: round number, published submission budget (USD), award type",
+							"Per-award official record: round number (null for awards SCF does not number, e.g. a Liquidity Award), the award's own name, published submission budget (USD), award type",
 					},
 					fields: [
-						{ name: "round", type: "number", required: true },
+						{
+							// Was required, which made a real award unstorable: SCF
+							// grants Liquidity Awards outside the numbered rounds
+							// ("Liquidity Award - '24 Q1"), so Blend's $50,000 —
+							// status Awarded on SCF's own page — had nowhere to live
+							// and surfaced as money with scfAwardedRounds: [].
+							name: "round",
+							type: "number",
+							admin: {
+								description:
+									"SCF round number, or empty for an award SCF does not number — read awardName for those",
+							},
+						},
+						{
+							name: "awardName",
+							type: "text",
+							admin: {
+								description:
+									"The award's own name as SCF publishes it (e.g. \"Liquidity Award - '24 Q1\"); the only identity a non-numbered award has",
+							},
+						},
 						{
 							name: "amountUSD",
 							type: "number",

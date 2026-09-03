@@ -119,7 +119,14 @@ export function parseRoundVerdicts(html: string): {
 	 * award confirmed but no parseable budget — never guessed. Reconciling
 	 * basis for the page's own totalAwarded, which can still exceed it. */
 	awards: Array<{
-		round: number;
+		/** null for an award SCF does not number — read awardName. */
+		round: number | null;
+		/** The award's own name, e.g. "Liquidity Award - '24 Q1". Present ONLY
+		 *  on non-numbered awards, where it is the award's only identity — a
+		 *  numbered award is identified by its round, so the key is absent
+		 *  there rather than carrying a null nobody reads. The API layer
+		 *  normalises both shapes to an explicit awardName. */
+		awardName?: string;
 		budgetUSD: number | null;
 		awardType: string | null;
 	}>;
@@ -144,6 +151,7 @@ export function parseRoundVerdicts(html: string): {
 		id: string;
 		isAward: boolean;
 		roundNum: number | null;
+		roundName: string | null;
 		budgetUSD: number | null;
 		awardType: string | null;
 	}
@@ -189,6 +197,7 @@ export function parseRoundVerdicts(html: string): {
 			id: m[1],
 			isAward,
 			roundNum: num ? Number(num) : null,
+			roundName: m[3] || null,
 			budgetUSD: isAward && m[5] ? Number(m[5]) : null,
 			awardType: isAward && m[4] ? m[4] : null,
 		};
@@ -373,7 +382,47 @@ export function parseRoundVerdicts(html: string): {
 			}
 		}
 	}
-	const awards = [...awardByRound.values()].sort((a, b) => a.round - b.round);
+	// Awards SCF does not number. "Liquidity Award - '24 Q1" carries no SCF #N,
+	// so it maps onto no numeric round and was dropped entirely — Blend's
+	// $50,000, status Awarded on SCF's own page, surfaced as money beside an
+	// empty scfAwardedRounds with nothing to explain it. The round SETS stay
+	// numeric-only on purpose (the never-accuse and no-resurrect guards read
+	// them), so this adds award RECORDS and changes no verdict.
+	const namedAwards = new Map<
+		string,
+		{
+			round: null;
+			awardName: string;
+			budgetUSD: number | null;
+			awardType: string | null;
+		}
+	>();
+	for (const c of cards) {
+		if (!c.isAward || c.roundNum !== null || !c.roundName) continue;
+		const prev = namedAwards.get(c.roundName);
+		if (!prev) {
+			namedAwards.set(c.roundName, {
+				round: null,
+				awardName: c.roundName,
+				budgetUSD: c.budgetUSD,
+				awardType: c.awardType,
+			});
+		} else {
+			// Same summing rule as the numeric fold: a budget-less card nulls
+			// the award, because a partial sum lies.
+			prev.budgetUSD =
+				prev.budgetUSD !== null && c.budgetUSD !== null
+					? prev.budgetUSD + c.budgetUSD
+					: null;
+			prev.awardType = prev.awardType ?? c.awardType;
+		}
+	}
+	const awards = [
+		...[...awardByRound.values()].sort((a, b) => a.round - b.round),
+		...[...namedAwards.values()].sort((a, b) =>
+			a.awardName.localeCompare(b.awardName),
+		),
+	];
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
 }
 

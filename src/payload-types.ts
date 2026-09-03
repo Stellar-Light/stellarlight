@@ -603,11 +603,18 @@ export interface Project {
      */
     awardedRounds?: number[] | null;
     /**
-     * Per-awarded-round official record: round number, published submission budget (USD), award type
+     * Per-award official record: round number (null for awards SCF does not number, e.g. a Liquidity Award), the award's own name, published submission budget (USD), award type
      */
     roundAwards?:
       | {
-          round: number;
+          /**
+           * SCF round number, or empty for an award SCF does not number — read awardName for those
+           */
+          round?: number | null;
+          /**
+           * The award's own name as SCF publishes it (e.g. "Liquidity Award - '24 Q1"); the only identity a non-numbered award has
+           */
+          awardName?: string | null;
           /**
            * Published submission budget for the round; empty = award confirmed, budget not published
            */
@@ -2952,6 +2959,7 @@ export interface ProjectsSelect<T extends boolean = true> {
           | T
           | {
               round?: T;
+              awardName?: T;
               amountUSD?: T;
               awardType?: T;
               id?: T;

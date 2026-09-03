@@ -266,18 +266,24 @@ function pickScfRoundAwards(
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 	scf: any,
 ): Array<{
-	round: number;
+	round: number | null;
+	awardName: string | null;
 	amountUSD: number | null;
 	awardType: string | null;
 }> {
 	const rows = Array.isArray(scf?.roundAwards) ? scf.roundAwards : [];
 	return (
 		rows
+			// A row needs an identity — a number OR a name. The filter used to
+			// demand a numeric round, which silently dropped every award SCF
+			// does not number (Blend's "Liquidity Award - '24 Q1", $50,000,
+			// Awarded), leaving the money with nothing to explain it.
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-			.filter((r: any) => typeof r?.round === "number")
+			.filter((r: any) => typeof r?.round === "number" || !!r?.awardName)
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 			.map((r: any) => ({
-				round: r.round,
+				round: typeof r.round === "number" ? r.round : null,
+				awardName: typeof r.awardName === "string" ? r.awardName : null,
 				amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
 				awardType: typeof r.awardType === "string" ? r.awardType : null,
 			}))
@@ -377,7 +383,8 @@ interface ProjectRow {
 		note: string | null;
 	}> | null;
 	scfRoundAwards: Array<{
-		round: number;
+		round: number | null;
+		awardName: string | null;
 		amountUSD: number | null;
 		awardType: string | null;
 	}>;
