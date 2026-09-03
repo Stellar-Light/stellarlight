@@ -115,7 +115,16 @@ const VENUE_DOMAINS: Record<string, string> = {
 
 const VENUE_ASSETS: Record<string, string> = {
 	SDEX: "/stellar-xlm-logo.png",
+	Sushi: "/defi/sushi.png",
 };
+
+/**
+ * Marks that are dark ink on transparency. The venue tile is dark, so these
+ * vanish into it — the Stellar mark rendered as an empty black square until
+ * this existed. They get a light backing, which is how the brand ships the
+ * mark anyway.
+ */
+const VENUE_MARKS_NEED_LIGHT_BACKING = new Set(["SDEX"]);
 
 export function VenueLogo({
 	name,
@@ -128,7 +137,9 @@ export function VenueLogo({
 	if (src)
 		return (
 			<div
-				className={`${SIZES[size]} flex-shrink-0 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center`}
+				className={`${SIZES[size]} flex-shrink-0 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center ${
+					VENUE_MARKS_NEED_LIGHT_BACKING.has(name) ? "bg-white p-1" : "bg-white/5"
+				}`}
 			>
 				{/* biome-ignore lint/performance/noImgElement: bundled or venue-hosted mark */}
 				<img

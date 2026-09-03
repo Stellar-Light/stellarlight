@@ -102,6 +102,44 @@ export interface CoinView {
 	priceRaw: number | null;
 }
 
+/**
+ * DeFi context is fetched per asset when a drawer opens. The endpoint answers
+ * in well under a second, but the round trip still lands AFTER the drawer is
+ * already on screen, so the section reads as slow. Two cheap fixes: remember
+ * what we already fetched for this page view, so reopening a row is instant,
+ * and start the fetch on HOVER, so by the time the row is clicked the answer
+ * is usually already here.
+ *
+ * Scoped to the module, not React state: it must survive the drawer closing.
+ */
+const defiCache = new Map<string, Promise<DefiContext | null>>();
+
+function fetchDefi(
+	ticker: string,
+	issuer: string,
+	price: number | null,
+): Promise<DefiContext | null> {
+	const key = `${ticker}-${issuer}-${price ?? ""}`;
+	const hit = defiCache.get(key);
+	if (hit) return hit;
+	const q = new URLSearchParams({
+		code: ticker,
+		issuer,
+		...(price != null ? { price: String(price) } : {}),
+	});
+	const p = fetch(`/api/stablecoins/defi?${q}`)
+		.then((r) => (r.ok ? (r.json() as Promise<DefiContext>) : null))
+		.catch(() => null)
+		// A failed lookup must not be remembered as an answer — drop it so the
+		// next open retries rather than showing a permanent "unreachable".
+		.then((d) => {
+			if (d == null) defiCache.delete(key);
+			return d;
+		});
+	defiCache.set(key, p);
+	return p;
+}
+
 interface BlendPoolRow {
 	poolId: string;
 	poolName: string;
@@ -470,15 +508,11 @@ export function StablecoinExplorer({
 		}
 		let live = true;
 		setDefiLoading(true);
-		const q = new URLSearchParams({
-			code: selectedCoin.ticker,
-			issuer: selectedCoin.issuerCode,
-			...(selectedCoin.priceRaw != null
-				? { price: String(selectedCoin.priceRaw) }
-				: {}),
-		});
-		fetch(`/api/stablecoins/defi?${q}`)
-			.then((r) => (r.ok ? r.json() : null))
+		fetchDefi(
+			selectedCoin.ticker,
+			selectedCoin.issuerCode,
+			selectedCoin.priceRaw ?? null,
+		)
 			.then((d) => live && setDefi(d))
 			.catch(() => live && setDefi(null))
 			.finally(() => live && setDefiLoading(false));
