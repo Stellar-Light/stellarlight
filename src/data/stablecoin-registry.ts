@@ -346,6 +346,14 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "Figure Certificate Company",
 		peg: "USD",
 		assetType: "Yield Stablecoin",
+		// The mark the owner chose (2026-09-03) is the same one the toml
+		// declares — Figure's purple circle icon. The toml path resolves it
+		// locally, but the first live refresh served no logo for this row, so
+		// it is pinned here too: the toml still wins when it loads, and this
+		// guarantees the mark when that fetch fails on the runner. Verified
+		// 200 image/svg+xml with the pipeline's own user agent.
+		fallbackImageUrl:
+			"https://cdn.figure.com/frontend-markets/apps/ylds-marketing/ylds-circle-icon.svg",
 	},
 	{
 		code: "USDY",
