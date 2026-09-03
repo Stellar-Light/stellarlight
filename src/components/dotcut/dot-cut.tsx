@@ -6,12 +6,14 @@
  * ground colour matched exactly to the page background (see engine.ts's
  * groundColor) so the circles read as living directly on the page, not as
  * a panel. Four full-bleed patterns (rings/columns/checker/bars, the whole
- * surface reorganising) alternate with six tiled marks (the USDT0/USDC/
- * PYUSD/Stellar logos, $, €) — each mark repeats several times across the
- * width as small standing circles (Scene.tile) rather than one hole carved
- * into a solid field. Framework-free Canvas 2D + rAF, driven entirely by
- * `DotCut` (./engine.ts); this component only loads the four logos, builds
- * the scene list, and wires lifecycle.
+ * surface reorganising) alternate with five tiled marks (the USDT0/PYUSD/
+ * Stellar logos, $, €) — each mark repeats as a grid of copies (Scene.tile)
+ * across a fixed SLOT_W x SLOT_H slot rather than one hole carved into a
+ * solid field, so the arrangement is identical scene to scene and scales
+ * from the wide desktop strip to mobile's much squarer grid without a
+ * special case (see scenes.ts's tileAcross). Framework-free Canvas 2D +
+ * rAF, driven entirely by `DotCut` (./engine.ts); this component only
+ * loads the three logos, builds the scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
@@ -118,29 +120,34 @@ export function DotCutBanner() {
 
 		Promise.all([
 			loadImage("/stablecoins/logos/usdt0.png"),
-			loadImage("/stablecoins/logos/usdc.png"),
 			loadImage("/stablecoins/logos/pyusd.png"),
 			loadImage("/stellar-xlm-logo.png"),
 		])
-			.then(([usdt0, usdc, pyusd, stellar]) => {
+			.then(([usdt0, pyusd, stellar]) => {
 				if (cancelled) return;
 
-				// Each mark is tiled (Scene.tile) as several small copies marching
-				// across the width — standing (positive) circles on an empty
-				// field, not a hole carved into a solid one — rather than one big
-				// glyph fighting this banner's own proportions (nearly 4x wider
-				// than tall). See CELL_PX's comment above for why 19px cells (15
-				// rows, ~13 per tile) is what makes usdt0/usdc/pyusd/$/€ read on
-				// desktop, not just mobile.
+				// Each mark is tiled (Scene.tile) as a grid of copies — standing
+				// (positive) circles on an empty field, not a hole carved into a
+				// solid one — rather than one big glyph fighting this banner's own
+				// proportions. Every mark scene stamps the exact same SLOT_W x
+				// SLOT_H slot (scenes.ts), so the arrangement is identical scene to
+				// scene: however many whole slots fit the real grid, in both
+				// directions. That falls out to 3 across x 1 down on this desktop
+				// strip (wide, short) and a fuller grid on mobile (much closer to
+				// square) — see scenes.ts's tileAcross for why one formula covers
+				// both without a mobile special case.
 				//
-				// Stellar joins that mark set, replacing "boxes" (one of the five
-				// abstract patterns — rings/columns/checker/boxes/bars keeps four
-				// of five, the cycle staying roughly the same length). 6 marks
-				// and 4 patterns can't fully avoid ever having two marks adjacent
-				// in one cycle (6 > 4), so the two unavoidable pairs below are
-				// each a logo next to a currency symbol, not two logos back to
-				// back, and the new stellar scene itself sits between two
-				// patterns so it still lands as its own event.
+				// usdc dropped this pass: its ring reads, but the $ inside it never
+				// cleared "a stranger names it" even at this file's largest tested
+				// slot — height-bound, not width-bound, so a bigger slot couldn't
+				// have helped, and thickening its already-thin PNG stroke (tried a
+				// generic dilate) blurred every OTHER mark's own negative-space
+				// detail worse than it helped this one. Five unmistakable marks
+				// beats six where one is mush — see this PR's masks.
+				//
+				// 5 marks and 4 patterns can't fully avoid ever having two marks
+				// adjacent in one cycle (5 > 4), so the one unavoidable pair below
+				// is a logo next to a currency symbol, not two logos back to back.
 				const scenes: Scene[] = [
 					{
 						kind: "rings",
@@ -184,15 +191,6 @@ export function DotCutBanner() {
 						tile: true,
 					},
 					{
-						kind: "image",
-						image: usdc,
-						label: "usdc",
-						transition: "ripple",
-						palette: 14,
-						style: "grain",
-						tile: true,
-					},
-					{
 						kind: "checker",
 						label: "checker",
 						transition: "scatter",
@@ -204,7 +202,7 @@ export function DotCutBanner() {
 						image: pyusd,
 						label: "pyusd",
 						transition: "wipe",
-						palette: 15,
+						palette: 14,
 						style: "swell",
 						tile: true,
 					},

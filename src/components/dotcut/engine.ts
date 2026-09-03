@@ -5,6 +5,8 @@ import {
 	rasterize,
 	SCENES,
 	type Scene,
+	SLOT_H,
+	SLOT_W,
 	styleField,
 } from "./scenes";
 
@@ -253,13 +255,22 @@ export class DotCut {
 			this.dir[i] = this.target[i] > this.from[i] ? 1 : -1;
 		}
 
+		// Tiled scenes repeat the same small glyph at several grid positions
+		// (see scenes.ts's tileAcross) — wrapping the style texture to that
+		// same SLOT_W x SLOT_H period keeps it identical per copy too, not
+		// just the ink mask. Without this, two copies of the same mark could
+		// render at different ring/bore WEIGHTS (mostly solid vs. mostly
+		// hollow circles) purely because they sit at different absolute grid
+		// positions — see styleField's own comment for why.
+		const scene = this.scenes[this.sceneIdx];
 		styleField(
-			this.scenes[this.sceneIdx],
+			scene,
 			this.cols,
 			this.rows,
 			this.styleT,
 			this.bore,
 			this.scenes[this.prevScene],
+			scene.tile ? { w: SLOT_W, h: SLOT_H } : undefined,
 		);
 	}
 
