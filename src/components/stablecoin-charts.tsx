@@ -61,7 +61,9 @@ interface Props {
 	/** One row per day: { _date, TICKER: value }. */
 	marketCapByToken: SeriesRow[];
 	holdersByToken: SeriesRow[];
-	totalHolders: SeriesRow[];
+	/** Total measured market cap per day; each row also carries `assets`, the
+	 *  number of assets counted that day. */
+	totalMarketCap: SeriesRow[];
 	issuers: IssuerLeader[];
 	onIssuerClick?: (issuer: IssuerLeader) => void;
 }
@@ -197,7 +199,7 @@ function LogScaleBadge() {
 export function StablecoinCharts({
 	marketCapByToken,
 	holdersByToken,
-	totalHolders,
+	totalMarketCap,
 	issuers,
 	onIssuerClick,
 }: Props) {
@@ -211,9 +213,9 @@ export function StablecoinCharts({
 		() => windowed(holdersByToken, timeframe),
 		[holdersByToken, timeframe],
 	);
-	const totals = useMemo(
-		() => windowed(totalHolders, timeframe),
-		[totalHolders, timeframe],
+	const mcapTotals = useMemo(
+		() => windowed(totalMarketCap, timeframe),
+		[totalMarketCap, timeframe],
 	);
 
 	// Share, not absolute market cap — see toShare(). Bounded 0-100, so every
@@ -324,14 +326,14 @@ export function StablecoinCharts({
 
 			<div className="col-span-full lg:col-span-6">
 				<Panel
-					title="Total Stablecoin Holders"
-					description="Aggregate unique wallet addresses over time"
+					title="Total Stablecoin Market Cap"
+					description="Measured supply × peg price, summed across every asset measured that day. The tooltip gives the asset count — a step in the line when that count jumps is our coverage widening, not the market moving."
 				>
-					{measuredDayCount(totals) < MIN_MEASURED_DAYS ? (
-						<ThinData measuredDays={measuredDayCount(totals)} />
+					{measuredDayCount(mcapTotals) < MIN_MEASURED_DAYS ? (
+						<ThinData measuredDays={measuredDayCount(mcapTotals)} />
 					) : (
 						<LineChart
-							data={totals as Record<string, unknown>[]}
+							data={mcapTotals as Record<string, unknown>[]}
 							xDataKey="_date"
 							margin={CHART_MARGIN}
 							animationDuration={900}
@@ -352,9 +354,21 @@ export function StablecoinCharts({
 								rows={(p) => [
 									{
 										color: "hsl(200, 75%, 60%)",
-										label: "Total Holders",
-										value: fmtValue(p.total as number),
+										label: "Total market cap",
+										value: `$${fmtValue(p.total as number)}`,
 									},
+									// Coverage travels with the value: a jump in the
+									// total means nothing until you know whether the
+									// asset count jumped with it.
+									...(typeof p.assets === "number"
+										? [
+												{
+													color: "hsl(200, 20%, 45%)",
+													label: "Assets measured",
+													value: String(p.assets),
+												},
+											]
+										: []),
 								]}
 							/>
 						</LineChart>
