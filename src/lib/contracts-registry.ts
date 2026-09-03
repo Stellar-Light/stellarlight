@@ -21,6 +21,7 @@ export interface ContractRow {
 	/** Verified mainnet contract id (C…), null when membership came via
 	 * usage attribution without a specific id in the repo's README. */
 	contractId: string | null;
+	contractBasis: string | null;
 	repo: { fullName: string; url: string | null };
 	project: { slug: string; name: string | null } | null;
 	stellarProof: string | null;
@@ -120,6 +121,9 @@ export async function buildContractsRegistry(
 		const ciu = d.codeInUse;
 		return {
 			contractId: d.mainnetContractId ? String(d.mainnetContractId) : null,
+			contractBasis: d.mainnetContractBasis
+				? String(d.mainnetContractBasis)
+				: null,
 			repo: { fullName: String(d.fullName), url: d.url ? String(d.url) : null },
 			project: d.projectSlug
 				? {

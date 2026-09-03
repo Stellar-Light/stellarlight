@@ -25,6 +25,7 @@ export const TRUST_SIGNALS = [
 	"deep-code",
 	"live-on-mainnet",
 	"verified-contract-id",
+	"publishes-contract-id",
 	"audited",
 	"multi-audited",
 	"code-changed-since-audit",
@@ -55,6 +56,7 @@ export interface TrustReport {
 		interfaceSize: number;
 		contractInterface: string[];
 		mainnetContractId: string | null;
+		mainnetContractBasis?: string | null;
 	};
 	usage: {
 		contracts: number;
@@ -175,7 +177,16 @@ export async function buildTrustReport(
 	if (typeof d.codeDepth === "number" && d.codeDepth >= 0.5)
 		signals.push("deep-code");
 	if ((usage?.contracts ?? 0) >= 1) signals.push("live-on-mainnet");
-	if (d.mainnetContractId) signals.push("verified-contract-id");
+	// "verified" has to mean verified. A resolvable address only proves the
+	// contract exists; self-validated is the only basis under which stellar.expert
+	// independently attributes it to THIS repo. Anything weaker publishes an
+	// address, which is a real but different claim.
+	if (d.mainnetContractId)
+		signals.push(
+			d.mainnetContractBasis === "self-validated"
+				? "verified-contract-id"
+				: "publishes-contract-id",
+		);
 	if ((audits?.count ?? 0) >= 1) signals.push("audited");
 	if ((audits?.count ?? 0) >= 3) signals.push("multi-audited");
 	if (auditDrift) signals.push("code-changed-since-audit");

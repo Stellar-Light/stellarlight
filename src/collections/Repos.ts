@@ -407,7 +407,22 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)",
+					"README contract id resolved live on Stellar mainnet via stellar.expert, with shared token contracts and other projects' contracts excluded (scanner)",
+			},
+		},
+		{
+			// WHOSE contract it is — the thing mainnetContractId alone never said.
+			// "published" means we ruled out the two provable ways it isn't this
+			// repo's, not that we proved it is; only "self-validated" earns the
+			// verified-contract-id trust signal.
+			name: "mainnetContractBasis",
+			type: "select",
+			options: ["self-validated", "published"],
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Ownership evidence for mainnetContractId (self-validated = stellar.expert names this repo)",
 			},
 		},
 		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from

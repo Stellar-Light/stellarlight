@@ -32,6 +32,7 @@ export interface DepthScalars {
 	 * stellar.expert (fetch layer; null = none found or unverifiable). Unfakeable
 	 * positive evidence — an address string alone is cheap, a live contract isn't. */
 	mainnetContractId?: string | null;
+	mainnetContractBasis?: "self-validated" | "published" | null;
 	isFork?: boolean;
 	parentFullName?: string | null; // fork parent (owner/name)
 	commitCount?: number | null;

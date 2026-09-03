@@ -4278,7 +4278,7 @@ export interface operations {
                                 predecessors?: string[];
                             };
                             /** @description Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven. */
-                            signals?: ("scanned" | "deep-code" | "live-on-mainnet" | "verified-contract-id" | "audited" | "multi-audited" | "code-changed-since-audit" | "actively-maintained" | "archived" | "superseded")[];
+                            signals?: ("scanned" | "deep-code" | "live-on-mainnet" | "verified-contract-id" | "publishes-contract-id" | "audited" | "multi-audited" | "code-changed-since-audit" | "actively-maintained" | "archived" | "superseded")[];
                         };
                     };
                 };
@@ -4345,8 +4345,13 @@ export interface operations {
                             note?: string;
                         };
                         contracts?: {
-                            /** @description Verified mainnet contract id (C…); null when membership came via usage attribution without a specific id. */
+                            /** @description Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded; null when membership came via usage attribution without a specific id. Read `contractBasis` before treating it as the repo's own deployment. */
                             contractId?: string | null;
+                            /**
+                             * @description Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. null = recorded before the basis was tracked.
+                             * @enum {string|null}
+                             */
+                            contractBasis?: "self-validated" | "published" | null;
                             repo?: {
                                 fullName?: string;
                                 url?: string | null;

@@ -5109,6 +5109,7 @@ export const spec: OpenAPISpec = {
 															"deep-code",
 															"live-on-mainnet",
 															"verified-contract-id",
+															"publishes-contract-id",
 															"audited",
 															"multi-audited",
 															"code-changed-since-audit",
@@ -5271,7 +5272,14 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"Verified mainnet contract id (C…); null when membership came via usage attribution without a specific id.",
+															"Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded; null when membership came via usage attribution without a specific id. Read `contractBasis` before treating it as the repo's own deployment.",
+													},
+													contractBasis: {
+														type: "string",
+														nullable: true,
+														enum: ["self-validated", "published"],
+														description:
+															"Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. null = recorded before the basis was tracked.",
 													},
 													repo: {
 														type: "object",

@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-03",
+		surfaces: ["api"],
+		version: "spec@1.9.24",
+		type: "changed",
+		summary:
+			"Contract rows gain `contractBasis`, and the `verified-contract-id` trust signal now fires only when a contract is provably the repo's own. A weaker `publishes-contract-id` signal covers the rest. Some `contractId` values are removed outright.",
+		detail:
+			"`mainnetContractId` was set from any address in a repo's README that stellar.expert could resolve — which proves the contract exists and nothing about whose it is. A README naming the USDC SAC as a config value, or the Reflector oracle it reads prices from, had that address stamped in as the repo's own deployment and published under a signal called `verified-contract-id`. Audited over all 137 live rows on 2026-09-03: 19 were shared token contracts (XLM/USDC/BLND) and 8 were contracts stellar.expert independently attributes to a different repo (reflector-network, blend-capital, consulting-manao) — 27 provably wrong against 4 provably right; 50 more could not be checked in that pass (rate-limited) and were left untouched. Two provable exclusions now apply at scan time and to the stored rows: an address carrying an `asset` is a Stellar Asset Contract, shared by everyone who mentions it; an address whose stellar.expert source validation names a different repository is not this repo's. What survives carries `contractBasis`: `self-validated` (stellar.expert's validation names THIS repo) or `published` (the repo publishes it and neither exclusion applies, but nothing proves ownership). Only `self-validated` earns `verified-contract-id`; `published` now reports `publishes-contract-id`, which is a true claim about the same fact. A rate-limited lookup is treated as could-not-check throughout and never as a negative.",
+	},
+	{
 		date: "2026-09-02",
 		surfaces: ["api"],
 		version: "spec@1.9.23",
