@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-09-03T10:17:23.678Z",
+	"generatedAt": "2026-09-03T22:08:36.621Z",
 	"total": 526,
-	"open": 5,
-	"closed": 521,
+	"open": 8,
+	"closed": 518,
 	"verified": 7,
-	"cleared": 514,
+	"cleared": 511,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 298,
-	"closingRate": 0.99,
-	"oldestOpenDays": 42,
+	"clearedOnSilence": 295,
+	"closingRate": 0.98,
+	"oldestOpenDays": 43,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
@@ -19,14 +19,14 @@
 			"total": 24
 		},
 		{
+			"surface": "code",
+			"open": 3,
+			"total": 10
+		},
+		{
 			"surface": "retrieval",
 			"open": 0,
 			"total": 335
-		},
-		{
-			"surface": "code",
-			"open": 0,
-			"total": 10
 		},
 		{
 			"surface": "directory",
@@ -86,6 +86,27 @@
 			"source": "raven-routing",
 			"probe": "freighter",
 			"severity": "medium"
+		},
+		{
+			"id": "nightly-note-freshness:note-stale-bluxcc-react-npm-bluxcc-react",
+			"surface": "code",
+			"source": "nightly-note-freshness",
+			"probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
+			"severity": "low"
+		},
+		{
+			"id": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+			"surface": "code",
+			"source": "nightly-note-freshness",
+			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+			"severity": "low"
+		},
+		{
+			"id": "nightly-note-freshness:note-stale-bluxcc-core-npm-bluxcc-core",
+			"surface": "code",
+			"source": "nightly-note-freshness",
+			"probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
+			"severity": "low"
 		}
 	]
 }

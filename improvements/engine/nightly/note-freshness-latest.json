@@ -1,5 +1,21 @@
 {
-	"generatedAt": "2026-09-03T10:17:17.760Z",
+	"generatedAt": "2026-09-03T22:08:28.420Z",
 	"detector": "note-freshness",
-	"failures": []
+	"failures": [
+		{
+			"probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
+			"note": "note (asOf 2026-09-02) cites 0.3.3; registry latest is 0.3.5 (published 2026-09-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
+			"note": "note (asOf 2026-09-02) cites 0.3.3; registry latest is 0.3.4 (published 2026-09-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-disbursement-platform-backend:docker:stellar/stellar-disbursement-platform-backend",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-03 (published 2026-09-03)",
+			"surface": "code"
+		}
+	]
 }
