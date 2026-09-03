@@ -4,12 +4,12 @@
  * Canvas "dot-cut" banner for the /stablecoins header — a dense mesh of
  * touching circles that carves negative space out of the field. Five
  * full-bleed patterns (rings/columns/checker/boxes/bars, the whole surface
- * reorganising) alternate with three tiled marks (the USDT0 logo, $, €) —
- * each mark repeats several times across the width as small standing
- * circles (Scene.tile) rather than one hole carved into a solid field, so
- * it reads without the banner needing extra rows. Framework-free Canvas 2D
- * + rAF, driven entirely by `DotCut` (./engine.ts); this component only
- * loads the one logo, builds the scene list, and wires lifecycle.
+ * reorganising) alternate with five tiled marks (the USDT0/USDC/PYUSD
+ * logos, $, €) — each mark repeats several times across the width as small
+ * standing circles (Scene.tile) rather than one hole carved into a solid
+ * field. Framework-free Canvas 2D + rAF, driven entirely by `DotCut`
+ * (./engine.ts); this component only loads the three logos, builds the
+ * scene list, and wires lifecycle.
  */
 
 import { useEffect, useRef } from "react";
@@ -21,30 +21,33 @@ const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
 // Must match engine.ts's own inset margin (pitch derivation) — see resize().
 const GRID_MARGIN = 0.75;
 // Grid density is driven by a target CELL SIZE, not a target row count.
-// Deriving cols from a fixed row count (the previous approach) means cell
+// Deriving cols from a fixed row count (an earlier approach) means cell
 // count explodes with width — at a typical 1400px-wide banner that was 480
 // cols x 70 rows = 33,600 cells at a 2.9px pitch: three pixels per circle,
 // the concave diamonds between four touching circles (the whole texture
 // this piece is built on) sub-pixel and invisible, and ~2ms/frame of
-// arc/trig work repainting a mesh nobody can actually resolve.
+// arc/trig work repainting a mesh nobody can actually resolve. 8px fixed
+// that, but overcorrected the other way; 28.5px (this banner's real
+// container width, ~1232px capped by `max-w-7xl`, divided into ~42
+// columns) read cleanly but at only 9 rows tall, a tiled mark had 7 rows
+// to work with — plenty for the mark itself to read, but each instance
+// stayed small relative to a frame nearly 4x wider than tall ("still hard
+// to tell" on desktop, even though the same tiles read fine on mobile,
+// where a narrower host and the same cell size mean far more rows — see
+// the floor comment below).
 //
-// 8px fixed that, but overcorrected the other way: the owner's ask was the
-// original spec's density back — "~42 circles across, on a square lattice at
-// EXACTLY the pitch, so neighbours meet" — which at this banner's real
-// container width (~1232px, capped by `max-w-7xl` on the page) is ~28.5px,
-// not 8px. CELL_PX now targets that directly. MAX_COLS is a defensive cap,
-// not the load-bearing constraint it was at 8px: the container can't exceed
-// ~1232px (max-w-7xl), so cols never approaches it in practice — it just
-// stops this component from exploding back to a fine mesh if it's ever
-// dropped into a wider, unconstrained host.
-//
-// Fewer, bigger cells means fewer rows, which means every scene had to be
-// re-proven at the new grid — see the scene list below for which marks
-// survive at ~42 cols and in what form (tiled small vs. one big carve),
-// verified via ASCII dumps of the real rasterize() output at this exact
-// grid — see this PR's description.
-const CELL_PX = 28.5;
-const MAX_COLS = 50;
+// CELL_PX=19 buys ROWS, which is what a tile's detail is actually made of:
+// 15 rows instead of 9, so each tile renders at ~13 rows of glyph instead
+// of 7 — roughly double. Circles stay comfortably above the mush floor
+// (18-22px was the tested range; below it the concave-diamond texture
+// degrades the way it did at 8px, above it the marks had less detail to
+// work with — see this PR's description for the masks this was picked
+// from). MAX_COLS is a defensive cap on total cell count for a
+// hypothetical much wider host, not a load-bearing constraint at this
+// banner's real ~1232px width (natural cols there is ~63, comfortably
+// under it).
+const CELL_PX = 19;
+const MAX_COLS = 80;
 
 function colsForCellSize(w: number): number {
 	const cols = w / CELL_PX - 2 * GRID_MARGIN;
@@ -52,6 +55,14 @@ function colsForCellSize(w: number): number {
 	// run) from handing the engine a negative cols — which its own internal
 	// floor would silently accept as 6, turning the mesh into a handful of
 	// giant circles instead of ever getting a real resize to recompute from.
+	// It also happens to be the operative value on mobile: at that host's
+	// real ~327px width the naturally-computed cols is well under 42 at any
+	// CELL_PX in the range this file has used, so mobile has been rendering
+	// at cols=42 (not a value CELL_PX controls) all along — pitch there
+	// works out to ~7.5px, well under CELL_PX, and rows to ~28, which is why
+	// mobile's tiles already had plenty of rows to read before this change
+	// and are completely unaffected by it (verified: colsForCellSize(327)
+	// returns 42 both before and after this PR's CELL_PX change).
 	return Math.max(42, Math.min(MAX_COLS, Math.round(cols)));
 }
 
@@ -103,31 +114,35 @@ export function DotCutBanner() {
 			else if (visible) engine.start();
 		};
 
-		loadImage("/stablecoins/logos/usdt0.png")
-			.then((usdt0) => {
+		Promise.all([
+			loadImage("/stablecoins/logos/usdt0.png"),
+			loadImage("/stablecoins/logos/usdc.png"),
+			loadImage("/stablecoins/logos/pyusd.png"),
+		])
+			.then(([usdt0, usdc, pyusd]) => {
 				if (cancelled) return;
 
-				// A single big glyph loses to this banner's own proportions: at
-				// the ~42-circle density the owner asked for, the strip is nearly
-				// four times wider than tall, which left nine rows — not enough
-				// for one contained mark to read (T came out a six-cell blob, "$"
-				// no better; usdc/eurc/pyusd fared worse still). Rather than grow
-				// the banner to buy one glyph more rows, each mark here is tiled
-				// (Scene.tile) as several small copies marching across the WIDTH
-				// instead: standing (positive) circles on an empty field, not a
-				// hole carved into a solid one. A small tile only needs ~7 rows to
-				// read, so this ships at the SAME 320px/9-row banner the five
-				// patterns already used — verified against the real rasterize()
-				// output at this exact grid, see this PR's description.
+				// Each mark is tiled (Scene.tile) as several small copies marching
+				// across the width — standing (positive) circles on an empty
+				// field, not a hole carved into a solid one — rather than one big
+				// glyph fighting this banner's own proportions (nearly 4x wider
+				// than tall). At 9 rows (this banner's height before this PR) a
+				// tile got 7 rows: usdt0/$/€ read fine there, but the owner's
+				// live read was "still hard to tell" on desktop specifically
+				// (mobile, which lands on far more rows at the same cell size —
+				// see CELL_PX's comment above — was already fine). 7 rows of
+				// detail in a frame 4x wider than tall means each instance reads
+				// as small relative to the whole, and usdc/eurc/pyusd's thinner
+				// strokes didn't have enough resolution to read at all.
 				//
-				// usdt0's blocky pixel-art T survives the crop to ~5x7 cleanly.
-				// $ and € are bold enough closed forms to read tiled just as
-				// small. usdc and eurc stayed out: their thin ring-plus-glyph
-				// strokes read as scattered noise at every tile size tested, up
-				// to and including sizes well past this banner's height budget —
-				// the same failure mode a single big carve of them hit before.
-				// pyusd's double-bar accent is likewise noise below a tile size
-				// this banner has no room for.
+				// CELL_PX now buys rows instead: 15 at this banner's real width,
+				// ~13 per tile. Re-tested every mark at that size against the
+				// real rasterize() output (see this PR's description for the
+				// masks): usdc's ring-plus-glyph now resolves to a legible
+				// asymmetric squiggle and pyusd's loop-and-descender reads as a
+				// "P" — both back in the cycle. eurc stayed a symmetric blob with
+				// no feature that reads as "€" specifically, so it stays out;
+				// the € text scene already covers that currency without it.
 				const scenes: Scene[] = [
 					{
 						kind: "image",
@@ -178,11 +193,29 @@ export function DotCutBanner() {
 						style: "swell",
 					},
 					{
+						kind: "image",
+						image: usdc,
+						label: "usdc",
+						transition: "ripple",
+						palette: 14,
+						style: "grain",
+						tile: true,
+					},
+					{
 						kind: "boxes",
 						label: "boxes",
 						transition: "collapse",
 						palette: 10,
 						style: "grain",
+					},
+					{
+						kind: "image",
+						image: pyusd,
+						label: "pyusd",
+						transition: "wipe",
+						palette: 15,
+						style: "swell",
+						tile: true,
 					},
 					{
 						kind: "bars",
