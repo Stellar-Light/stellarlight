@@ -89,7 +89,7 @@ export interface VetIdeaReport {
 		/** How relevance was established: vertical (typed membership) |
 		 * scored (anchor token matched) | weak (generic words only — the rows
 		 * are neighbours, not evidence a competitor exists). */
-		matchMode?: "vertical" | "scored" | "weak";
+		matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
 		matchModeLabel?: string;
 		repos: Array<{
 			fullName: string;
@@ -103,6 +103,8 @@ export interface VetIdeaReport {
 			name: string | null;
 			status: string | null;
 			types: string[];
+			/** How this row qualified: typed membership, or its own terms. */
+			via?: "vertical" | "scored";
 		}>;
 	};
 	maturity: {
@@ -148,7 +150,8 @@ export async function buildVetIdea(
 	// caller can weigh it. "vertical" = typed membership; "scored" = an anchor
 	// token matched; "weak" = only generic words matched (neighbours, NOT
 	// evidence a competitor exists).
-	let competitorMatch: "vertical" | "scored" | "weak" = "weak";
+	let competitorMatch: "vertical" | "vertical+scored" | "scored" | "weak" =
+		"weak";
 	// Directory projects: active, in the detected vertical (types membership —
 	// `in` + JS post-filter, never `contains` on hasMany). Falls back to a
 	// name/description token pass when no vertical mapped.
@@ -161,12 +164,16 @@ export async function buildVetIdea(
 	// set and use the SAME matcher, so the two surfaces cannot disagree.
 	const pres = await payload.find({
 		collection: "projects",
-		where: {
-			and: [
-				{ status: { in: [...ACTIVE_PROJECT_STATUSES] } },
-				...(vertical ? [{ types: { in: [vertical] } }] : []),
-			],
-		},
+		// The vertical is NOT applied as a filter here. It used to be, and that
+		// made a whole class of idea unanswerable: "a dashboard that tracks
+		// every stablecoin" detects vertical=Stablecoin, and the filter then
+		// allowed ONLY projects typed Stablecoin — so it returned stablecoin
+		// ISSUERS (Sava, PYUSD, Stablecorp) as competitors to a dashboard, and
+		// could never surface the analytics products that actually compete,
+		// including this directory's own stablecoin dashboard. Membership is
+		// one route to relevance, not the boundary of it; the union is built
+		// below and each row says which route it took.
+		where: { and: [{ status: { in: [...ACTIVE_PROJECT_STATUSES] } }] },
 		limit: 0, // 0 = no cap: a truncated window silently loses real matches
 		depth: 0,
 		select: {
@@ -190,21 +197,36 @@ export async function buildVetIdea(
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 	let projDocs = pres.docs as any[];
+	// Score EVERY active row once, with the directory's own matcher, so the
+	// two routes below are comparable and a row can qualify by either.
+	const allTokens = tokenize(q);
+	const allAnchors = anchorTokens(allTokens);
+	if (allTokens.length)
+		for (const p of projDocs) {
+			const hay = buildHaystack(p);
+			p.__rel = scoreTokens(hay, allTokens);
+			p.__anchor = allAnchors.length ? scoreTokens(hay, allAnchors) : 0;
+		}
+
 	if (vertical) {
-		projDocs = projDocs.filter(
-			(p) => Array.isArray(p.types) && p.types.includes(vertical),
-		);
+		const inVertical = (p: { types?: unknown }) =>
+			Array.isArray(p.types) && p.types.includes(vertical);
+		// Route A: typed membership of the detected vertical.
+		// Route B: any active row that scores on a NON-GENERIC anchor token —
+		// this is what lets a dashboard, an explorer or an analytics tool
+		// compete with an idea whose noun happens to name a product type.
+		projDocs = projDocs.filter((p) => inVertical(p) || (p.__anchor ?? 0) > 0);
+		for (const p of projDocs)
+			p.__via = inVertical(p) ? "vertical" : "scored";
 		// Score the vertical path TOO. Membership decides who is eligible; it
 		// does not decide who leads. Without this, __rel is undefined for every
 		// row and the display sort falls through to ALPHABETICAL — which is why
 		// "a non-custodial wallet for Stellar" answered airgap, akuna, albedo
 		// instead of the wallets anyone means. Found by the cross-surface guard
 		// after the same defect was fixed on the fallback path.
-		const vTokens = tokenize(q);
-		if (vTokens.length)
-			for (const p of projDocs)
-				p.__rel = scoreTokens(buildHaystack(p), vTokens);
-		competitorMatch = "vertical";
+		competitorMatch = projDocs.some((p) => p.__via === "scored")
+			? "vertical+scored"
+			: "vertical";
 	} else {
 		// No vertical mapped: rank with the directory's own matcher (synonym
 		// expansion, negation guards, structured fields) instead of a naive
@@ -289,6 +311,10 @@ export async function buildVetIdea(
 		name: p.name ? String(p.name) : null,
 		status: p.status ? String(p.status) : null,
 		types: Array.isArray(p.types) ? p.types.map(String) : [],
+		// Which route put this row here — membership of the vertical, or its
+		// own terms. A reader weighing "is this really a competitor" needs to
+		// know which, and it is cheap to say.
+		via: (p.__via as "vertical" | "scored" | undefined) ?? undefined,
 	}));
 	let liveOnMainnetRepos = 0;
 	if (competitorRepos.length) {
@@ -402,9 +428,11 @@ export async function buildVetIdea(
 			matchModeLabel:
 				competitorMatch === "vertical"
 					? "typed members of the idea's vertical"
-					: competitorMatch === "scored"
-						? "matched the idea's own terms"
-						: "only generic words matched — nearest rows, not evidence a competitor exists",
+					: competitorMatch === "vertical+scored"
+						? "typed members of the idea's vertical, plus rows that matched the idea's own terms — a product ABOUT a vertical competes with tools, not only with members of that vertical"
+						: competitorMatch === "scored"
+							? "matched the idea's own terms"
+							: "only generic words matched — nearest rows, not evidence a competitor exists",
 		},
 		maturity: {
 			auditedProjects,
