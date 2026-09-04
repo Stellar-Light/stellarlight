@@ -1,14 +1,14 @@
 {
-	"generatedAt": "2026-09-04T02:14:33.581Z",
-	"total": 526,
+	"generatedAt": "2026-09-04T10:09:03.857Z",
+	"total": 527,
 	"open": 5,
-	"refreshQueue": 3,
-	"closed": 518,
+	"refreshQueue": 1,
+	"closed": 521,
 	"verified": 7,
-	"cleared": 511,
+	"cleared": 514,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 295,
-	"closingRate": 0.98,
+	"clearedOnSilence": 298,
+	"closingRate": 0.99,
 	"oldestOpenDays": 43,
 	"inWave": 0,
 	"highOpen": 0,
@@ -27,7 +27,7 @@
 		{
 			"surface": "code",
 			"open": 0,
-			"total": 10
+			"total": 11
 		},
 		{
 			"surface": "directory",
