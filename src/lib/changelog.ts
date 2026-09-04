@@ -33,12 +33,22 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-04",
 		surfaces: ["api"],
+		version: "spec@1.9.32",
+		type: "fixed",
+		summary:
+			"getRwaAssets meta.counts.issuers no longer counts a missing issuer entity as an issuer; the 1.9.31 entry overstated deployed-no-supply rows as four — it is one.",
+		detail:
+			"Live read after the 1.9.31 deploy: meta.counts.byState served deployed-no-supply=1 (chfSAFO) while the changelog said four. The other three zero-supply contracts (eurUSTBL, eurUKTBL, FOCGX) were read on-chain during verification but are not rwa.xyz-listed, so they were never registry rows; the number was written from the verification notes rather than from the served registry. The entry text is corrected. Separately, meta.counts.issuers used the set of issuerEntity values including null — 16 Brazilian receivables tokens carry no issuer entity — so it reported 53 where 52 named issuers exist; null is excluded now. The lesson is the same one this project keeps relearning: read the served number before publishing it.",
+	},
+	{
+		date: "2026-09-04",
+		surfaces: ["api"],
 		version: "spec@1.9.31",
 		type: "added",
 		summary:
 			"New `getRwaAssets` (/api/rwa): 97 tokenized real-world assets on Stellar, each re-verified on-chain, and the `products` array on project rows is now fed by it (sls-023).",
 		detail:
-			"sls-023 (filed 2026-07-10, recurred six times) asked for product-level deployment records distinct from entity status — a Live project row never established that a product is issued on Stellar today, and `products` was populated on 1 of 61 RWA rows. The registry holds every RWA token rwa.xyz lists on Stellar (97 tokens, 52 issuers) with the six facts asked for: product name and issuer, network, state, dated evidence, evidence URL, verification level. Each row was verified from the entity OUTWARD — the issuer's own stellar.toml naming the (code, issuer) and the issuer's home_domain pointing back — never from the asset code inward, because BENJI alone has 22 issuers on mainnet and five embed the brand in a scam subdomain. Soroban tokens (35 rows, including all nine of Spiko's, the largest RWA issuer on Stellar at $1.56B) were read from the contract itself via RPC: Horizon's /assets never lists them, which is how a code-inward check reports the network's biggest RWA issuer as absent. state=deployed-no-supply marks four contracts that exist with zero supply and zero events; they are served on /api/rwa but never as a live product on a project row. rwa.xyz's USD value is carried as its own field beside supply and holders, so a $500M row with one holder and eight events reads as a valuation, not activity. Coverage is a curated registry: absence means untracked, never not-on-Stellar.",
+			"sls-023 (filed 2026-07-10, recurred six times) asked for product-level deployment records distinct from entity status — a Live project row never established that a product is issued on Stellar today, and `products` was populated on 1 of 61 RWA rows. The registry holds every RWA token rwa.xyz lists on Stellar (97 tokens, 52 issuers) with the six facts asked for: product name and issuer, network, state, dated evidence, evidence URL, verification level. Each row was verified from the entity OUTWARD — the issuer's own stellar.toml naming the (code, issuer) and the issuer's home_domain pointing back — never from the asset code inward, because BENJI alone has 22 issuers on mainnet and five embed the brand in a scam subdomain. Soroban tokens (35 rows, including all nine of Spiko's, the largest RWA issuer on Stellar at $1.56B) were read from the contract itself via RPC: Horizon's /assets never lists them, which is how a code-inward check reports the network's biggest RWA issuer as absent. state=deployed-no-supply marks a contract that exists with zero supply and zero events (chfSAFO today); it is served on /api/rwa but never as a live product on a project row. Three more zero-supply contracts were read on-chain (eurUSTBL, eurUKTBL, FOCGX) but are not rwa.xyz-listed and so are not registry rows. rwa.xyz's USD value is carried as its own field beside supply and holders, so a $500M row with one holder and eight events reads as a valuation, not activity. Coverage is a curated registry: absence means untracked, never not-on-Stellar.",
 	},
 	{
 		date: "2026-09-04",

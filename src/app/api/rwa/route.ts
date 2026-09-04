@@ -80,7 +80,11 @@ export async function GET(req: NextRequest) {
 		byLevel[r.verificationLevel] = (byLevel[r.verificationLevel] ?? 0) + 1;
 		byState[r.state] = (byState[r.state] ?? 0) + 1;
 	}
-	const issuers = new Set(RWA_REGISTRY.map((r) => r.issuerEntity)).size;
+	// Named issuers only: 16 Brazilian receivables rows carry no issuer entity,
+	// and a null is not an issuer.
+	const issuers = new Set(
+		RWA_REGISTRY.map((r) => r.issuerEntity).filter((x): x is string => !!x),
+	).size;
 
 	logApiHit({
 		req,
