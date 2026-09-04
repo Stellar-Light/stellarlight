@@ -32,46 +32,49 @@ const MAX_EVIDENCE_AGE_DAYS = 90;
 /** A person's verdict is never overwritten by a probe. */
 const NEVER_OVERWRITE = new Set(["human-verified", "onchain-activity"]);
 
-type Ev = { kind: string; detail: string };
+/** `url` cites the exact thing observed — the asset or the specific contract
+ *  whose delta moved. A citation that points somewhere else is not evidence. */
+type Ev = { kind: string; detail: string; url: string | null };
 
 /** What moved in the snapshot window, or null when nothing did. */
 // biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 function evidenceOf(onchain: any): Ev | null {
 	const num = (v: unknown) => (typeof v === "number" ? v : 0);
+	const assetUrl =
+		onchain?.assetCode && onchain?.issuer
+			? `https://stellar.expert/explorer/public/asset/${onchain.assetCode}-${onchain.issuer}`
+			: null;
 	if (num(onchain?.assetPaymentsDelta) > 0)
 		return {
 			kind: "asset-payments",
 			detail: `${onchain.assetPaymentsDelta} payments of ${onchain.assetCode} in the window`,
+			url: assetUrl,
 		};
 	if (num(onchain?.assetHoldersDelta) !== 0)
 		return {
 			kind: "asset-holders",
 			detail: `holders moved by ${onchain.assetHoldersDelta} (${onchain.assetCode})`,
+			url: assetUrl,
 		};
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 	for (const c of (onchain?.contracts ?? []) as any[]) {
+		const cUrl = c?.address
+			? `https://stellar.expert/explorer/public/contract/${c.address}`
+			: null;
 		if (num(c?.subinvocationsDelta) > 0)
 			return {
 				kind: "contract-subinvocations",
 				detail: `${c.subinvocationsDelta} subinvocations on ${String(c.address).slice(0, 10)}…`,
+				url: cUrl,
 			};
 		if (num(c?.eventsDelta) > 0)
 			return {
 				kind: "contract-events",
 				detail: `${c.eventsDelta} events on ${String(c.address).slice(0, 10)}…`,
+				url: cUrl,
 			};
 	}
 	return null;
-}
-
-// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-function sourceUrl(onchain: any): string | null {
-	if (onchain?.assetCode && onchain?.issuer)
-		return `https://stellar.expert/explorer/public/asset/${onchain.assetCode}-${onchain.issuer}`;
-	const addr = onchain?.contracts?.[0]?.address;
-	return addr
-		? `https://stellar.expert/explorer/public/contract/${addr}`
-		: null;
 }
 
 (async () => {
@@ -133,9 +136,8 @@ function sourceUrl(onchain: any): string | null {
 				data: {
 					statusBasis: "onchain-activity",
 					statusAsOf: new Date(asOf).toISOString(),
-					...(sourceUrl(d.onchain)
-						? { statusSourceUrl: sourceUrl(d.onchain) }
-						: {}),
+					// cite what was actually observed, not contracts[0]
+					...(ev.url ? { statusSourceUrl: ev.url } : {}),
 				},
 				context: { internal: true },
 			});
