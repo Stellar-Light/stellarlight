@@ -7211,6 +7211,284 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/rwa": {
+			get: {
+				operationId: "getRwaAssets",
+				tags: ["Ecosystem"],
+				summary: "Tokenized real-world assets verified on Stellar",
+				description:
+					"Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon, Soroban tokens from the contract's own name/symbol/total_supply via RPC. Rows carry state (live | deployed-no-supply), verificationLevel, evidenceUrl and verifiedAt. The product-level fact a project row cannot carry: which products are actually issued on Stellar today. Curated registry — absence means untracked, never 'not on Stellar'.",
+				"x-routing": {
+					purpose:
+						"Which real-world-asset tokens (tokenized funds, treasuries, bonds, real estate, gold) are actually issued on Stellar, by whom, with on-chain evidence and a verification level.",
+					keywords: [
+						"rwa",
+						"real world asset",
+						"real-world assets",
+						"tokenized",
+						"tokenized fund",
+						"tokenized treasury",
+						"tokenized real estate",
+						"money market fund",
+						"t-bills",
+						"benji",
+						"wisdomtree",
+						"spiko",
+						"etherfuse",
+						"stablebond",
+						"franklin templeton",
+						"issued on stellar",
+						"live on stellar",
+					],
+					useWhen: [
+						"which RWA / tokenized funds / treasuries / bonds / real estate are live on Stellar, and who issues them",
+						"is product X (BENJI, WisdomTree GOLD, Spiko USTBL, Etherfuse CETES) actually issued on Stellar today — with the contract or issuer and evidence",
+						"the largest RWA tokens or issuers on Stellar by rwa.xyz value",
+					],
+					notFor: [
+						"fiat stablecoin market caps, pegs, supply -> getStablecoins",
+						"an issuer's company profile, funding or repos -> searchProjects",
+						"how to issue an asset or build a tokenization contract -> stellarDocs / skills",
+					],
+					exampleQuestions: [
+						"Which real world assets are live on Stellar?",
+						"Is Franklin Templeton's BENJI actually issued on Stellar?",
+						"What tokenized treasury funds exist on Stellar and who issues them?",
+						"What is the biggest RWA token on Stellar?",
+					],
+				},
+				parameters: [
+					{
+						name: "state",
+						in: "query",
+						description:
+							"Filter by product state. live = issued with supply and activity; deployed-no-supply = the contract exists with zero supply and zero events (deployed, never used — NOT a live product); not-found = registry row no longer resolves on mainnet.",
+						schema: {
+							type: "string",
+							enum: ["live", "deployed-no-supply", "not-found"],
+						},
+					},
+					{
+						name: "level",
+						in: "query",
+						description: "Filter by verificationLevel (see methodology).",
+						schema: {
+							type: "string",
+							enum: [
+								"toml-bidirectional",
+								"entity-toml",
+								"contract-metadata",
+								"on-chain-home-domain",
+								"on-chain-only",
+							],
+						},
+					},
+					{
+						name: "kind",
+						in: "query",
+						description:
+							"classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets).",
+						schema: { type: "string", enum: ["classic", "soroban"] },
+					},
+					{
+						name: "project",
+						in: "query",
+						description:
+							"Directory project slug — the rows that feed that project's `products`.",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Max rows (default 100, max 100).",
+						schema: { type: "integer", default: 100, maximum: 100 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Verified RWA tokens, sorted by rwa.xyz USD value (rows without one last).",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "assets"],
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												registryAsOf: {
+													type: "string",
+													description:
+														"Date every row was last re-verified on-chain.",
+												},
+												filters: {
+													type: "object",
+													description:
+														"The filters this response was computed under; null = not applied.",
+													properties: {
+														state: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														level: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														kind: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														project: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														limit: {
+															type: "integer",
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+													},
+												},
+												counts: {
+													type: "object",
+													properties: {
+														registry: { type: "integer" },
+														issuers: { type: "integer" },
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+														byLevel: {
+															type: "object",
+															additionalProperties: { type: "integer" },
+														},
+														byState: {
+															type: "object",
+															additionalProperties: { type: "integer" },
+														},
+													},
+												},
+												coverage: {
+													type: "object",
+													properties: {
+														basis: { type: "string" },
+														note: { type: "string" },
+													},
+												},
+												methodology: { type: "string" },
+											},
+										},
+										assets: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+														description:
+															"`CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity — a ticker alone identifies nothing.",
+													},
+													kind: {
+														type: "string",
+														enum: ["classic", "soroban"],
+													},
+													name: { type: "string" },
+													symbol: { type: "string" },
+													issuerEntity: { type: "string", nullable: true },
+													projectSlug: {
+														type: "string",
+														nullable: true,
+														description:
+															"Directory project this row joins onto (feeds its `products`); null = the issuer has no project row.",
+													},
+													code: { type: "string", nullable: true },
+													issuer: {
+														type: "string",
+														nullable: true,
+														description: "Mainnet issuer account (classic).",
+													},
+													contract: {
+														type: "string",
+														nullable: true,
+														description: "Contract id (Soroban).",
+													},
+													productKind: {
+														type: "string",
+														enum: ["rwa-asset", "stablecoin"],
+													},
+													assetClass: {
+														type: "string",
+														nullable: true,
+														description:
+															"rwa.xyz asset class (US Treasury Debt, Real Estate, Commodities, ...).",
+													},
+													network: { type: "string", enum: ["mainnet"] },
+													state: {
+														type: "string",
+														enum: ["live", "deployed-no-supply", "not-found"],
+													},
+													launchedAt: {
+														type: "string",
+														nullable: true,
+														description:
+															"Contract creation date (Soroban). null for classic assets — Horizon does not date issuance.",
+													},
+													verifiedAt: { type: "string" },
+													evidenceUrl: {
+														type: "string",
+														description:
+															"Where to re-verify: the issuer's stellar.toml, or the asset/contract on stellar.expert.",
+													},
+													verificationLevel: {
+														type: "string",
+														enum: [
+															"toml-bidirectional",
+															"entity-toml",
+															"contract-metadata",
+															"on-chain-home-domain",
+															"on-chain-only",
+														],
+													},
+													basisNote: { type: "string", nullable: true },
+													decimals: { type: "integer", nullable: true },
+													totalSupply: {
+														type: "number",
+														nullable: true,
+														description:
+															"Read from the contract's total_supply() (Soroban); null where no such function. Classic supply is served by Horizon/stellar.expert, not here.",
+													},
+													horizonNote: { type: "string", nullable: true },
+													rwaxyzValueUsd: {
+														type: "number",
+														nullable: true,
+														description:
+															"rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders.",
+													},
+													rwaxyzHolders: { type: "integer", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Unknown query parameter, or an invalid state/level/kind value; the body names the valid values.",
+					},
+				},
+			},
+		},
 		"/api/stablecoins": {
 			get: {
 				operationId: "getStablecoins",
@@ -8097,7 +8375,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Curated on ~2 projects today, so null is overwhelmingly the common case. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa, 97 tokens re-verified on-chain 2026-09-04) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows; only registry rows in state=live are served here (a deployed contract with zero supply is not a live product). Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
 						items: {
 							type: "object",
 							properties: {
