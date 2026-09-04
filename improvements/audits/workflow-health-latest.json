@@ -1,18 +1,13 @@
 {
-	"asOf": "2026-09-04T03:46:50.187Z",
+	"asOf": "2026-09-04T21:26:26.632Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 86,
-	"healthy": 84,
+	"checked": 87,
+	"healthy": 86,
 	"broken": [
-		{
-			"file": "api-drift.yml",
-			"state": "failing",
-			"why": "2 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Field-population guard (values arrive, not just shape)\""
-		},
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "5 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "6 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -21,22 +16,22 @@
 			"name": "Aggregate feedback votes (nightly)",
 			"cron": "40 3 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T08:17:30Z",
+			"lastSuccessAt": "2026-09-04T08:13:23Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 23,
+			"runs": 24,
 			"why": "last green 0d ago"
 		},
 		{
 			"file": "api-drift.yml",
 			"name": "API drift guard",
 			"cron": "17 13 * * *",
-			"state": "failing",
-			"lastSuccessAt": "2026-09-01T17:19:06Z",
-			"ageDays": 2,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T16:51:51Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 4,
-			"why": "2 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Field-population guard (values arrive, not just shape)\""
+			"runs": 5,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "apply-content-pass.yml",
@@ -77,10 +72,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-24T15:08:53Z",
-			"ageDays": 41,
+			"ageDays": 42,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 41d ago (manual tool — age not judged)"
+			"why": "last green 42d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -109,10 +104,10 @@
 			"name": "Backfill knowledge notes",
 			"cron": "23 3 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T08:07:37Z",
+			"lastSuccessAt": "2026-09-04T08:02:28Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 8,
+			"runs": 9,
 			"why": "last green 0d ago"
 		},
 		{
@@ -121,10 +116,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:59:48Z",
-			"ageDays": 60,
+			"ageDays": 61,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 60d ago (manual tool — age not judged)"
+			"why": "last green 61d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-project-github.yml",
@@ -132,10 +127,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-19T20:47:56Z",
-			"ageDays": 76,
+			"ageDays": 77,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 76d ago (manual tool — age not judged)"
+			"why": "last green 77d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-provenance.yml",
@@ -153,10 +148,10 @@
 			"name": "Backfill triage tags",
 			"cron": "0 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T08:36:25Z",
+			"lastSuccessAt": "2026-09-04T08:31:17Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 23,
+			"runs": 24,
 			"why": "last green 0d ago"
 		},
 		{
@@ -182,6 +177,17 @@
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "basis-from-repo.yml",
+			"name": "Award repo-activity basis (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T03:45:51Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 2,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "calibrate-semantic.yml",
 			"name": "Calibrate semantic floor (read-only)",
 			"cron": null,
@@ -197,10 +203,10 @@
 			"name": "Curator Agent — Link health check",
 			"cron": "23 2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T07:13:19Z",
+			"lastSuccessAt": "2026-09-04T07:16:25Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -209,31 +215,20 @@
 			"cron": "20 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T12:35:15Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 75,
 			"runs": 4,
-			"why": "last green 2d ago"
-		},
-		{
-			"file": "consumption-guard.yml",
-			"name": "consumption-guard",
-			"cron": "23 6 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:44:45Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 100,
-			"why": "last green 0d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "content-freshness.yml",
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T17:04:17Z",
+			"lastSuccessAt": "2026-09-04T16:53:25Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 9,
+			"runs": 10,
 			"why": "last green 0d ago"
 		},
 		{
@@ -241,7 +236,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:44:45Z",
+			"lastSuccessAt": "2026-09-04T21:24:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -253,10 +248,10 @@
 			"cron": "0 8 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T12:50:12Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 75,
 			"runs": 1,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "curate-partners.yml",
@@ -275,10 +270,10 @@
 			"cron": "30 7 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T18:20:53Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
 			"runs": 38,
-			"why": "last green 1d ago"
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -297,10 +292,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-23T16:55:15Z",
-			"ageDays": 42,
+			"ageDays": 43,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 42d ago (manual tool — age not judged)"
+			"why": "last green 43d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "dedupe-repos.yml",
@@ -308,10 +303,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T04:04:32Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 6d ago (manual tool — age not judged)"
+			"why": "last green 7d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "deepwiki-calibrate.yml",
@@ -319,10 +314,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T04:05:47Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 3d ago (manual tool — age not judged)"
+			"why": "last green 4d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "depth-eval.yml",
@@ -341,10 +336,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-31T16:59:53Z",
-			"ageDays": 34,
+			"ageDays": 35,
 			"graceDays": 45,
 			"runs": 7,
-			"why": "last green 34d ago (manual tool — age not judged)"
+			"why": "last green 35d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "engine-c-health.yml",
@@ -352,10 +347,10 @@
 			"cron": "0 9 * * 0",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T04:13:43Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "enrich-builder-repos.yml",
@@ -363,20 +358,20 @@
 			"cron": "0 5 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T09:49:06Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 21,
 			"runs": 5,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "enrich-builders.yml",
 			"name": "Enrich builder profiles (GitHub)",
 			"cron": "30 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T11:29:01Z",
+			"lastSuccessAt": "2026-09-04T11:32:00Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 20,
+			"runs": 21,
 			"why": "last green 0d ago"
 		},
 		{
@@ -385,10 +380,10 @@
 			"cron": "0 6 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T11:28:41Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 21,
 			"runs": 29,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "enrich-partner-onchain.yml",
@@ -396,10 +391,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-20T17:18:49Z",
-			"ageDays": 45,
+			"ageDays": 46,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 45d ago (manual tool — age not judged)"
+			"why": "last green 46d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-partners.yml",
@@ -407,20 +402,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-12T20:00:16Z",
-			"ageDays": 22,
+			"ageDays": 23,
 			"graceDays": 45,
 			"runs": 13,
-			"why": "last green 22d ago (manual tool — age not judged)"
+			"why": "last green 23d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-repo-activity.yml",
 			"name": "Enrich repo activity (unenriched lane)",
 			"cron": "20 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T08:57:39Z",
+			"lastSuccessAt": "2026-09-04T08:52:30Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 18,
+			"runs": 19,
 			"why": "last green 0d ago"
 		},
 		{
@@ -451,10 +446,10 @@
 			"cron": "0 5 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T11:30:30Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "fix-dev-docs-titles.yml",
@@ -462,10 +457,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-18T20:48:32Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-research-titles.yml",
@@ -473,10 +468,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T18:27:15Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 6d ago (manual tool — age not judged)"
+			"why": "last green 7d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-scf-rounds.yml",
@@ -517,10 +512,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-19T16:02:36Z",
-			"ageDays": 76,
+			"ageDays": 77,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 76d ago (manual tool — age not judged)"
+			"why": "last green 77d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-ec-taxonomy.yml",
@@ -528,10 +523,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T20:55:47Z",
-			"ageDays": 20,
+			"ageDays": 21,
 			"graceDays": 45,
 			"runs": 9,
-			"why": "last green 20d ago (manual tool — age not judged)"
+			"why": "last green 21d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "link-canonical-slug.yml",
@@ -539,10 +534,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:46:08Z",
-			"ageDays": 60,
+			"ageDays": 61,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 60d ago (manual tool — age not judged)"
+			"why": "last green 61d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "link-partner-projects.yml",
@@ -550,20 +545,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-20T17:34:17Z",
-			"ageDays": 45,
+			"ageDays": 46,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 45d ago (manual tool — age not judged)"
+			"why": "last green 46d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "live-canary.yml",
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:24:30Z",
+			"lastSuccessAt": "2026-09-04T21:02:19Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 21,
+			"runs": 26,
 			"why": "last green 0d ago"
 		},
 		{
@@ -572,10 +567,10 @@
 			"cron": "0 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T12:29:31Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 75,
 			"runs": 1,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "mark-defunct.yml",
@@ -594,10 +589,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T04:18:43Z",
-			"ageDays": 60,
+			"ageDays": 61,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 60d ago (manual tool — age not judged)"
+			"why": "last green 61d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "migrate-research-url-host.yml",
@@ -605,20 +600,31 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T16:42:16Z",
-			"ageDays": 60,
+			"ageDays": 61,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 60d ago (manual tool — age not judged)"
+			"why": "last green 61d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "next-build-gate.yml",
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:41:33Z",
+			"lastSuccessAt": "2026-09-04T20:48:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
+			"why": "last green 0d ago"
+		},
+		{
+			"file": "nightly-health.yml",
+			"name": "Nightly health (detectors → issue)",
+			"cron": "45 5 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T09:57:11Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -626,10 +632,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:44:45Z",
+			"lastSuccessAt": "2026-09-04T20:51:43Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 38,
+			"runs": 43,
 			"why": "last green 0d ago"
 		},
 		{
@@ -638,10 +644,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-07T17:38:28Z",
-			"ageDays": 58,
+			"ageDays": 59,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 58d ago (manual tool — age not judged)"
+			"why": "last green 59d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "patch-rozo.yml",
@@ -659,11 +665,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:49:15Z",
+			"lastSuccessAt": "2026-09-04T20:51:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 26,
-			"why": "last green 0d ago"
+			"runs": 29,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -693,10 +699,10 @@
 			"cron": "0 6 * * 3",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T10:13:15Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 1d ago"
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "raven-eval-parity.yml",
@@ -704,10 +710,10 @@
 			"cron": "30 7 * * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T19:17:47Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 4,
-			"runs": 23,
-			"why": "last green 1d ago"
+			"runs": 24,
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "recent-api-usage.yml",
@@ -715,20 +721,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-18T17:02:54Z",
-			"ageDays": 77,
+			"ageDays": 78,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 77d ago (manual tool — age not judged)"
+			"why": "last green 78d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "refresh-ec-snapshot.yml",
 			"name": "Refresh Electric Capital developer snapshot",
 			"cron": "0 15 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T18:16:23Z",
+			"lastSuccessAt": "2026-09-04T17:57:56Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 61,
+			"runs": 62,
 			"why": "last green 0d ago"
 		},
 		{
@@ -736,10 +742,10 @@
 			"name": "Refresh Scout research corpus",
 			"cron": "0 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T10:33:04Z",
+			"lastSuccessAt": "2026-09-04T10:23:44Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -747,10 +753,10 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T21:07:29Z",
+			"lastSuccessAt": "2026-09-04T20:49:45Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 83,
+			"runs": 87,
 			"why": "last green 0d ago"
 		},
 		{
@@ -758,10 +764,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:09:09Z",
+			"lastSuccessAt": "2026-09-04T20:49:41Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 11,
+			"runs": 15,
 			"why": "last green 0d ago"
 		},
 		{
@@ -814,10 +820,10 @@
 			"cron": "0 13 * * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T19:28:33Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 4,
-			"runs": 4,
-			"why": "last green 3d ago"
+			"runs": 5,
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "set-project-status.yml",
@@ -825,10 +831,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:46:07Z",
-			"ageDays": 60,
+			"ageDays": 61,
 			"graceDays": 45,
 			"runs": 10,
-			"why": "last green 60d ago (manual tool — age not judged)"
+			"why": "last green 61d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "set-prominence.yml",
@@ -858,20 +864,20 @@
 			"cron": "30 7 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T12:39:06Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "sync-lumenloop.yml",
 			"name": "Sync Lumenloop ecosystem projects",
 			"cron": "0 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T11:48:07Z",
+			"lastSuccessAt": "2026-09-04T11:49:37Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 42,
+			"runs": 43,
 			"why": "last green 0d ago"
 		},
 		{
@@ -891,17 +897,17 @@
 			"cron": "30 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T12:38:58Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 75,
 			"runs": 1,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:44:45Z",
+			"lastSuccessAt": "2026-09-04T21:24:40Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -913,20 +919,20 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T16:18:45Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"why": "last green 2d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
 			"name": "Upgrade status basis from link health",
 			"cron": "23 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T09:01:02Z",
+			"lastSuccessAt": "2026-09-04T08:55:12Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 3,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -935,17 +941,17 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T17:18:15Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"why": "last green 2d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "verify-claims.yml",
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:41:33Z",
+			"lastSuccessAt": "2026-09-04T20:39:59Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -957,10 +963,10 @@
 			"cron": "41 6 * * 1",
 			"state": "failing",
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 12,
-			"why": "5 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 13,
+			"why": "6 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
