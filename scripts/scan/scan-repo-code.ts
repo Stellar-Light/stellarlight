@@ -539,6 +539,8 @@ async function main() {
 						codeDomains,
 						scannedRef: r.scannedRef,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
+						mainnetContractBasis:
+							r.depthInput.scalars.mainnetContractBasis ?? null,
 					},
 					nowIso,
 				);

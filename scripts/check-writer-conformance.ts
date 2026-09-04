@@ -162,6 +162,8 @@ const C4_ALLOW: Record<string, string> = {
 	versionStatus:
 		"enum with honest 'unknown'; blend pin exercises it via protocolCaps (2026-08-12)",
 	mainnetContractId: "verified-on-chain only, sparse by design (2026-08-12)",
+	mainnetContractBasis:
+		"set only where mainnetContractId survives, so exactly as sparse as it is; served on /api/contracts as contractBasis and read by the trust signal (2026-09-03)",
 };
 const writeShape = read("scripts/scan/write-shape.ts");
 const okStart = writeShape.indexOf(

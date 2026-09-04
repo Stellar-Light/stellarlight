@@ -35,6 +35,7 @@ export interface SignalsInput {
 	codeDomains: string[];
 	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
 	mainnetContractId: string | null;
+	mainnetContractBasis?: "self-validated" | "published" | null;
 	/** Commit SHA the facts were computed at (provenance pin). */
 	scannedRef: string | null;
 }
@@ -89,6 +90,7 @@ export function signalsToWrite(
 		codeDomains: s.codeDomains,
 		scannedRef: s.scannedRef,
 		mainnetContractId: s.mainnetContractId,
+		mainnetContractBasis: s.mainnetContractBasis ?? null,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,
 		codeScannedAt: nowIso,

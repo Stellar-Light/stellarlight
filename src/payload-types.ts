@@ -995,9 +995,13 @@ export interface Repo {
    */
   scannedRef?: string | null;
   /**
-   * README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)
+   * README contract id resolved live on Stellar mainnet via stellar.expert, with shared token contracts and other projects' contracts excluded (scanner)
    */
   mainnetContractId?: string | null;
+  /**
+   * Ownership evidence for mainnetContractId (self-validated = stellar.expert names this repo)
+   */
+  mainnetContractBasis?: ('self-validated' | 'published') | null;
   /**
    * Alive but no code-proof — soft-excluded, never archived
    */
@@ -3066,6 +3070,7 @@ export interface ReposSelect<T extends boolean = true> {
   codeDomains?: T;
   scannedRef?: T;
   mainnetContractId?: T;
+  mainnetContractBasis?: T;
   unverifiedStellar?: T;
   codeScanState?: T;
   codeScanError?: T;

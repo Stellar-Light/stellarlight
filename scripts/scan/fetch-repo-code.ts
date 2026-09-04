@@ -361,13 +361,44 @@ export interface RepoCodeResult {
  * null (never penalizes). Guards: only strkey-shaped ids are probed, and the
  * response must ECHO the requested id — the bare /contract/ endpoint answers
  * 200 with a LIST, so status alone would false-verify an empty/garbage id. */
+export type MainnetContract = {
+	id: string;
+	/** How we know the address belongs to THIS repo.
+	 *  self-validated — stellar.expert's own source validation names this repo.
+	 *  published      — the repo publishes it and we ruled out the two ways it
+	 *                   provably isn't theirs, but nothing proves it is. */
+	basis: "self-validated" | "published";
+};
+
+/** Resolve the mainnet contract a repo actually OWNS from the ids in its README.
+ *
+ * This used to accept any id that stellar.expert could resolve, which only ever
+ * proved the address exists — not whose it is. A README that names the USDC SAC
+ * as a config value, or the Reflector oracle it reads prices from, got that
+ * address stamped in as the repo's own deployment and then published as the
+ * `verified-contract-id` trust signal. Measured 2026-09-03 over the 137 live
+ * rows: 19 were shared token contracts (XLM/USDC/BLND) and 8 were contracts
+ * stellar.expert independently attributes to a DIFFERENT repo — 27 provably
+ * wrong against 4 provably right.
+ *
+ * Two exclusions are provable, so we apply them:
+ *   - `asset` present  => a Stellar Asset Contract. A network token wrapper is
+ *     shared by everyone who mentions it and is never a repo's own contract.
+ *   - `validation.repository` naming someone else => provably not this repo's.
+ * What survives is ranked: a self-validated match wins over a merely published
+ * one, so a repo that ships a verifiable contract is never represented by an
+ * unproven sibling id.
+ */
 export async function verifyMainnetContract(
 	readmeText: string | null,
-): Promise<string | null> {
+	repoFullName?: string | null,
+): Promise<MainnetContract | null> {
 	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].slice(
 		0,
 		3,
 	);
+	const own = (repoFullName ?? "").toLowerCase();
+	let fallback: MainnetContract | null = null;
 	for (const id of ids) {
 		try {
 			const ctrl = new AbortController();
@@ -379,17 +410,45 @@ export async function verifyMainnetContract(
 					signal: ctrl.signal,
 				},
 			);
-			if (!res.ok) continue;
+			// A 429/5xx means we could not look, not that the id is bad. Half of
+			// a 137-row audit came back 429 on a burst — treating that as a
+			// negative would silently promote a worse candidate id in its place.
+			if (res.status === 429 || res.status >= 500) {
+				clearTimeout(t);
+				return null;
+			}
+			if (!res.ok) {
+				clearTimeout(t);
+				continue;
+			}
 			// finding 6: clearing on header-arrival left the BODY read unbounded
 			// (undici default 300s) — a stalling stellar.expert could hang a wave.
-			const j = (await res.json()) as { contract?: string };
+			const j = (await res.json()) as {
+				contract?: string;
+				asset?: string;
+				validation?: { repository?: string };
+			};
 			clearTimeout(t);
-			if (j?.contract === id) return id;
+			if (j?.contract !== id) continue;
+			if (j.asset) continue;
+			const repo = j.validation?.repository;
+			if (repo) {
+				const named = repo
+					.replace(/\.git$/, "")
+					.replace(/\/+$/, "")
+					.split("/")
+					.slice(-2)
+					.join("/")
+					.toLowerCase();
+				if (!own || named !== own) continue;
+				return { id, basis: "self-validated" };
+			}
+			fallback ??= { id, basis: "published" };
 		} catch {
 			// fail-open: unverifiable is not unverified-negative
 		}
 	}
-	return null;
+	return fallback;
 }
 
 /** Fetch a repo's code + derive everything the scoring/tiering needs. Read-only. */
@@ -471,7 +530,9 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
-	const mainnetContractId = await verifyMainnetContract(readmeText);
+	const mainnetContract = await verifyMainnetContract(readmeText, full);
+	const mainnetContractId = mainnetContract?.id ?? null;
+	const mainnetContractBasis = mainnetContract?.basis ?? null;
 	const tagsRes = await (
 		await gh(`/repos/${owner}/${name}/tags?per_page=100`)
 	).json();
@@ -499,6 +560,7 @@ export async function fetchRepoCode(
 		contractCrateDirs: contractCrateDirs.length ? contractCrateDirs : ["."],
 		scalars: {
 			mainnetContractId,
+			mainnetContractBasis,
 			isFork: !!meta.fork,
 			parentFullName: meta.parent?.full_name ?? null,
 			releaseCount: 0,
