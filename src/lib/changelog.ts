@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-03",
 		surfaces: ["api"],
+		version: "spec@1.9.25",
+		type: "changed",
+		summary:
+			"Routing vocabulary now covers how builders actually phrase questions, not just how we do — `Stellar Community Fund` alongside `SCF`, `total value locked` alongside `TVL`, `smart contract audit` alongside `security audit`.",
+		detail:
+			"Ran the catalog through Raven as four different askers: someone brand new to Stellar, someone who has shipped a toy app, a working protocol dev, and an SDF-level analyst. Our operations were the top hit for 12 of 32 questions, and the gradient tracked expertise exactly — 1/8 for the newcomer, 2/8 for the near-beginner, 5/8 and 4/8 for the two experts. The cause is vocabulary, not capability: we write the routing surface in our own words, and under a coverage gate a word we never say is a question we never see. listAudits covered 0.25 of \"which projects had a smart contract audit published in the last year\" — we say `security audit`, never `smart contract audit` — so a registry of 58 real audit reports lost that question to a how-to-write-contracts skill. analyzeEcosystem covered 0.57 of \"how much has the Stellar Community Fund awarded in total\" because we only ever write the acronym. Both now cover 1.00 and win their probe. The additions are narrow and intent-scoped rather than broad, since over-broad keywords get an operation excluded outright. Seven builder-phrased win-probes are now asserted in routing-surface-check, along with a neighbour guard: the audit-corpus question and the hire-an-auditor question share nearly every token, so widening the first must never outrank getPartners on the second. Probes another of our own operations answers just as well are deliberately not asserted — a guard that forces one of two correct answers measures nothing. Takes effect for agents only once Raven re-crawls the catalog.",
+	},
+	{
+		date: "2026-09-03",
+		surfaces: ["api"],
 		version: "spec@1.9.24",
 		type: "changed",
 		summary:

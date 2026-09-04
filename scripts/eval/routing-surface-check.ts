@@ -192,6 +192,27 @@ const WIN_PROBES: Array<[string, string]> = [
 	["which leaderboard projects have open issues", "getLeaderboard"],
 	["what is the SDF enterprise fund and its mandate", "searchResearch"],
 	["who are experienced Rust Soroban devs", "getBuilders"],
+	// Builder-phrased probes (2026-09-03). Ran the catalog through Raven as
+	// four different askers — someone brand new to Stellar, someone who has
+	// built a toy app, a working protocol dev, and an SDF-level analyst. Our
+	// operations were the top hit for 12 of 32 questions, and the gradient
+	// tracked expertise exactly: 1/8 for the newcomer, 2/8, then 5/8 and 4/8.
+	// The cause is vocabulary, not capability — we write our routing surface
+	// in OUR words. We say "SCF", a newcomer says "Stellar Community Fund";
+	// we say "TVL", they say "total value locked"; we say "security audit",
+	// they say "smart contract audit". Under a coverage gate, a word we never
+	// say is a question we never see. Each probe below is a question we hold
+	// a real answer to and lost anyway. Probes another of our own operations
+	// answers just as well (getClusters for whitespace, searchProjects for "is
+	// it dead", getLeaderboard for TVL) are deliberately NOT asserted here —
+	// a guard that forces one of two correct answers measures nothing.
+	[
+		"which projects had a smart contract audit published in the last year",
+		"listAudits",
+	],
+	["how much has the Stellar Community Fund awarded in total", "analyzeEcosystem"],
+	["how does Blend calculate interest accrual", "explainRepo"],
+	["which Stellar wallets support Soroban contracts", "searchProjects"],
 ];
 for (const [probe, expectOp] of WIN_PROBES) {
 	const qTokens = contentTokens(probe);
@@ -217,6 +238,36 @@ for (const [probe, expectOp] of WIN_PROBES) {
 	if (top.operationId !== expectOp) {
 		fail(
 			`win-probe "${probe}" x-routing max is ${top.operationId}, expected ${expectOp}`,
+		);
+	}
+}
+
+// ── Neighbour guard: widening one op must not swallow its nearest sibling.
+// "Which projects had an audit published" (listAudits — a corpus question)
+// and "who can audit my Soroban contract" (getPartners — a hiring question)
+// share nearly every token, so vocabulary added to the first lands on the
+// second for free. This asserts only the relation the widening put at risk;
+// which op is top overall is a separate, pre-existing question.
+const NOT_ABOVE: Array<[string, string, string]> = [
+	["who can audit my Soroban contract", "listAudits", "getPartners"],
+];
+for (const [probe, widened, sibling] of NOT_ABOVE) {
+	const qTokens = contentTokens(probe);
+	const cov = (id: string) => {
+		const op = ops.find((o) => o.operationId === id);
+		return op && qTokens.length
+			? qTokens.filter((t) => op.routingText.includes(t)).length /
+					qTokens.length
+			: 0;
+	};
+	const w = cov(widened);
+	const sib = cov(sibling);
+	console.log(
+		`not-above "${probe}" → ${widened} ${w.toFixed(3)} vs ${sibling} ${sib.toFixed(3)}`,
+	);
+	if (w > sib) {
+		fail(
+			`${widened} (${w.toFixed(3)}) now outranks ${sibling} (${sib.toFixed(3)}) on "${probe}" — the widening captured a sibling's question`,
 		);
 	}
 }
