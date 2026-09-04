@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-04",
 		surfaces: ["api"],
+		version: "spec@1.9.30",
+		type: "added",
+		summary:
+			"New statusBasis tier `repo-activity` — the project's own indexed repository committed inside a dated window, which is what liveness means for a library or SDK.",
+		detail:
+			"A website probe is the wrong instrument for a library: driving a page says nothing about whether an SDK is alive. What answers that is whether the source moved, and those commit dates are already indexed. repo-activity records the newest commit in the project's own repositories, joined on the exact projectSlug, and cites that repository. It is deliberately NOT awarded to deployed products — there a commit shows the team is working, not that the service is running, and conflating the two is how a dead product with a tidy repo would read as Live. The window is 365 days, generous because a stable SDK legitimately goes quiet for months; the award records the real commit date either way, so a consumer can apply a stricter bar than ours. A repository quiet for longer is reported and left exactly as it was, never demoted: quiet is not dead, and only a human-verified list may say otherwise.",
+	},
+	{
+		date: "2026-09-04",
+		surfaces: ["api"],
 		version: "spec@1.9.29",
 		type: "added",
 		summary:

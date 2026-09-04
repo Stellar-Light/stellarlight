@@ -1,0 +1,39 @@
+name: Award repo-activity basis (manual)
+
+# For a library or SDK, liveness is the source moving — driving a website says
+# nothing about whether a package is alive. This awards repo-activity from the
+# commit dates we already index, joined on the EXACT projectSlug.
+#
+# Not awarded to deployed products: there a commit shows the team is working,
+# not that the service runs. A repo quiet for over a year is reported, never
+# demoted. Dry-run by default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: basis-from-repo
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  award:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Award (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/basis-from-repo.ts ${{ inputs.execute && '--execute' || '' }}
