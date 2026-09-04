@@ -13,6 +13,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { mergeProducts } from "@/lib/rwa-products";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
@@ -179,7 +180,7 @@ async function semanticProjectRows(
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			scfRoundAwards: pickScfRoundAwards(p.scf),
-			products: pickProducts(p.products),
+			products: mergeProducts(pickProducts(p.products), p.slug),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
 			...deriveNetworks(p),
@@ -1437,7 +1438,7 @@ export async function GET(req: NextRequest) {
 					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(p.scf),
-					products: pickProducts(p.products),
+					products: mergeProducts(pickProducts(p.products), p.slug),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -2077,7 +2078,7 @@ export async function GET(req: NextRequest) {
 					),
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(c.scf),
-					products: pickProducts(c.products),
+					products: mergeProducts(pickProducts(c.products), c.slug),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],

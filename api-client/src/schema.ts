@@ -714,6 +714,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rwa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tokenized real-world assets verified on Stellar
+         * @description Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon, Soroban tokens from the contract's own name/symbol/total_supply via RPC. Rows carry state (live | deployed-no-supply), verificationLevel, evidenceUrl and verifiedAt. The product-level fact a project row cannot carry: which products are actually issued on Stellar today. Curated registry — absence means untracked, never 'not on Stellar'.
+         */
+        get: operations["getRwaAssets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stablecoins": {
         parameters: {
             query?: never;
@@ -1071,7 +1091,7 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty — check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Curated on ~2 projects today, so null is overwhelmingly the common case. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa, 97 tokens re-verified on-chain 2026-09-04) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows; only registry rows in state=live are served here (a deployed contract with zero supply is not a live product). Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -5119,6 +5139,121 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
+            };
+        };
+    };
+    getRwaAssets: {
+        parameters: {
+            query?: {
+                /** @description Filter by product state. live = issued with supply and activity; deployed-no-supply = the contract exists with zero supply and zero events (deployed, never used — NOT a live product); not-found = registry row no longer resolves on mainnet. */
+                state?: "live" | "deployed-no-supply" | "not-found";
+                /** @description Filter by verificationLevel (see methodology). */
+                level?: "toml-bidirectional" | "entity-toml" | "contract-metadata" | "on-chain-home-domain" | "on-chain-only";
+                /** @description classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets). */
+                kind?: "classic" | "soroban";
+                /** @description Directory project slug — the rows that feed that project's `products`. */
+                project?: string;
+                /** @description Max rows (default 100, max 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Verified RWA tokens, sorted by rwa.xyz USD value (rows without one last). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description Date every row was last re-verified on-chain. */
+                            registryAsOf?: string;
+                            /** @description The filters this response was computed under; null = not applied. */
+                            filters?: {
+                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                state?: string | null;
+                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                level?: string | null;
+                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                kind?: string | null;
+                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                project?: string | null;
+                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                limit?: number;
+                            };
+                            counts?: {
+                                registry?: number;
+                                issuers?: number;
+                                matched?: number;
+                                returned?: number;
+                                byLevel?: {
+                                    [key: string]: number;
+                                };
+                                byState?: {
+                                    [key: string]: number;
+                                };
+                            };
+                            coverage?: {
+                                basis?: string;
+                                note?: string;
+                            };
+                            methodology?: string;
+                        };
+                        assets: {
+                            /** @description `CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity — a ticker alone identifies nothing. */
+                            id?: string;
+                            /** @enum {string} */
+                            kind?: "classic" | "soroban";
+                            name?: string;
+                            symbol?: string;
+                            issuerEntity?: string | null;
+                            /** @description Directory project this row joins onto (feeds its `products`); null = the issuer has no project row. */
+                            projectSlug?: string | null;
+                            code?: string | null;
+                            /** @description Mainnet issuer account (classic). */
+                            issuer?: string | null;
+                            /** @description Contract id (Soroban). */
+                            contract?: string | null;
+                            /** @enum {string} */
+                            productKind?: "rwa-asset" | "stablecoin";
+                            /** @description rwa.xyz asset class (US Treasury Debt, Real Estate, Commodities, ...). */
+                            assetClass?: string | null;
+                            /** @enum {string} */
+                            network?: "mainnet";
+                            /** @enum {string} */
+                            state?: "live" | "deployed-no-supply" | "not-found";
+                            /** @description Contract creation date (Soroban). null for classic assets — Horizon does not date issuance. */
+                            launchedAt?: string | null;
+                            verifiedAt?: string;
+                            /** @description Where to re-verify: the issuer's stellar.toml, or the asset/contract on stellar.expert. */
+                            evidenceUrl?: string;
+                            /** @enum {string} */
+                            verificationLevel?: "toml-bidirectional" | "entity-toml" | "contract-metadata" | "on-chain-home-domain" | "on-chain-only";
+                            basisNote?: string | null;
+                            decimals?: number | null;
+                            /** @description Read from the contract's total_supply() (Soroban); null where no such function. Classic supply is served by Horizon/stellar.expert, not here. */
+                            totalSupply?: number | null;
+                            horizonNote?: string | null;
+                            /** @description rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders. */
+                            rwaxyzValueUsd?: number | null;
+                            rwaxyzHolders?: number | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Unknown query parameter, or an invalid state/level/kind value; the body names the valid values. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
