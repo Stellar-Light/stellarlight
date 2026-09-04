@@ -4718,7 +4718,15 @@ export interface operations {
                         };
                         /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
                         toolchain?: {
+                            /** @description Repos in the corpus carrying a soroban-sdk version — the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this. */
                             scannedRepos?: number;
+                            /** @description How many repos byVersionStatus was actually computed over. Equal to scannedRepos when measurementComplete is true; smaller when the scan hit its cap. THIS is the denominator for any rate. */
+                            measuredRepos?: number;
+                            /** @description false = the buckets describe only part of the population; a rate taken against scannedRepos would understate every status. */
+                            measurementComplete?: boolean;
+                            deprecatedTotal?: number;
+                            /** @description true = deprecatedRepos is a capped sample (50) and shorter than deprecatedTotal; never read its length as the count. */
+                            deprecatedListTruncated?: boolean;
                             byVersionStatus?: {
                                 [key: string]: number;
                             };

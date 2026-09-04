@@ -619,10 +619,19 @@ export async function GET(req: NextRequest) {
 	// engineering-practice snapshot. Commit-side, as-of the last scans.
 	if (includeToolchain && payload) {
 		try {
+			// The cap was 2000 while scannedRepos reported totalDocs (5616 on
+			// 2026-09-03), so the buckets summed to exactly the limit under a
+			// headline nearly 3x larger. "107 deprecated of 5616" reads as 1.9%
+			// when the measured rate is 5.4% - a 2.8x understatement of the one
+			// question this rollup exists to answer. The select is six small
+			// fields, so the corpus fits; measuredRepos below reports what was
+			// actually counted either way, so a future overflow states itself
+			// instead of quietly deflating the rate.
+			const TOOLCHAIN_SCAN_CAP = 20000;
 			const scanned = await payload.find({
 				collection: "repos",
 				where: { sorobanSdkVersion: { exists: true } },
-				limit: 2000,
+				limit: TOOLCHAIN_SCAN_CAP,
 				depth: 0,
 				overrideAccess: true,
 				select: {
@@ -660,11 +669,20 @@ export async function GET(req: NextRequest) {
 						sorobanSdkVersion: r.sorobanSdkVersion ?? null,
 					});
 			}
+			const measuredRepos = (scanned.docs as unknown[]).length;
 			result.toolchain = {
 				scannedRepos: scanned.totalDocs,
+				// The denominator the buckets below were actually computed over.
+				// Rates must divide by THIS, not by scannedRepos: the two are equal
+				// only when nothing was truncated.
+				measuredRepos,
+				measurementComplete: measuredRepos >= scanned.totalDocs,
 				byVersionStatus: byStatus,
 				deprecatedRepos: deprecated,
 				deprecatedTotal: byStatus.deprecated ?? 0,
+				// deprecatedRepos is a sample capped at 50; deprecatedTotal is the
+				// real count, so the roster length is never mistaken for it.
+				deprecatedListTruncated: (byStatus.deprecated ?? 0) > deprecated.length,
 				engineeringPractice: {
 					reposWithPracticeFacts: practiceKnown,
 					ciPresent: ciCount,

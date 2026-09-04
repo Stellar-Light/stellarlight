@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-03",
 		surfaces: ["api"],
+		version: "spec@1.9.28",
+		type: "changed",
+		summary:
+			"analyze?dimension=toolchain reported a 5,616-repo headline over buckets computed from only 2,000. It now measures the whole corpus and states its own denominator (`measuredRepos`, `measurementComplete`, `deprecatedListTruncated`).",
+		detail:
+			"The toolchain query capped at 2000 rows while `scannedRepos` reported totalDocs, so byVersionStatus summed to exactly the cap (1826 supported + 43 current + 107 deprecated + 24 unknown = 2000) beneath a headline of 5616. Anyone computing the deprecated rate the obvious way got 107/5616 = 1.9% when the measured rate was 107/2000 = 5.4% — a 2.8x understatement of precisely the question this rollup exists to answer (who is on an unsupported toolchain). The scan now covers the corpus, and the response states the denominator it actually used: measuredRepos is what the buckets were computed over, measurementComplete says whether that is the whole population, and deprecatedListTruncated says whether deprecatedRepos (capped at 50) is shorter than deprecatedTotal so the roster length is never mistaken for the count. A future overflow now states itself instead of quietly deflating every rate.",
+	},
+	{
+		date: "2026-09-03",
+		surfaces: ["api"],
 		version: "spec@1.9.27",
 		type: "changed",
 		summary:
