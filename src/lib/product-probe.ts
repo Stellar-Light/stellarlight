@@ -24,9 +24,40 @@ const MARKERS: Array<{ re: RegExp; kind: string }> = [
 	{ re: /\bC[A-Z2-7]{55}\b/, kind: "contract-id" },
 ];
 
-/** Pages that answered but are not a product. */
-const PLACEHOLDER =
-	/domain (?:is )?for sale|buy this domain|parked (?:free )?(?:by|at)|coming soon|under construction|site not found|default web page|it works!|welcome to nginx|account suspended/i;
+/** Unambiguous: these phrases only appear when there is no product at all. */
+const PLACEHOLDER_HARD =
+	/domain (?:is )?for sale|buy this domain|parked (?:free )?(?:by|at)|this domain (?:is|has been) registered|default web page|welcome to nginx|apache2 (?:ubuntu |debian )?default page|account suspended|site not found/i;
+
+/** Ambiguous ALONE: a shipping product routinely labels an unreleased section
+ *  "Coming Soon". sendana's real product page says
+ *  "Businesses — Coming Soon" and was wrongly read as parked. These count only
+ *  on a page with almost no other content, i.e. an actual splash. */
+const PLACEHOLDER_SOFT = /coming soon|under construction|launching soon/i;
+
+/** Visible text length below which a page is a splash, not a product. */
+const SPLASH_TEXT_CHARS = 1200;
+
+/** Rough visible-text length: strip script/style, then tags. */
+function visibleTextLength(html: string): number {
+	return html
+		.replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/\s+/g, " ")
+		.trim().length;
+}
+
+/** A page that answered but is not a product — or null when it is one. */
+export function placeholderReason(html: string): string | null {
+	const hard = html.match(PLACEHOLDER_HARD);
+	if (hard) return `parked page ("${hard[0].toLowerCase()}")`;
+	const soft = html.match(PLACEHOLDER_SOFT);
+	if (soft) {
+		const len = visibleTextLength(html);
+		if (len < SPLASH_TEXT_CHARS)
+			return `splash page ("${soft[0].toLowerCase()}", ${len} chars of text)`;
+	}
+	return null;
+}
 
 export interface ProbeResult {
 	/** null = no Stellar evidence found (NOT proof there is none). */
@@ -101,10 +132,11 @@ export async function probeProduct(
 			url: null,
 			couldNotCheck: true,
 		};
-	if (PLACEHOLDER.test(page.body))
+	const parked = placeholderReason(page.body);
+	if (parked)
 		return {
 			kind: null,
-			detail: "placeholder/parked page — answered, but is not a product",
+			detail: `${parked} — answered, but is not a product`,
 			url: rawUrl,
 			couldNotCheck: false,
 		};
