@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-09-04T21:22:33.110Z",
+  "base": "https://stellarlight.xyz",
+  "checked": 13,
+  "pass": 13,
+  "fail": 0,
+  "couldNotCheck": 0,
+  "results": [
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "hackmeridian-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "stellar-builders-camp-jaipur-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "stellar-builder-summit-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "stellar-hacks-zk",
+      "status": "pass",
+      "sum": 345,
+      "total": 345
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "stellar-pulso-hackathon",
+      "status": "pass",
+      "sum": 70,
+      "total": 70
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "stellar-journey-to-mastery-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "build-on-stellar-philippines-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon outcomes sum to totalSubmissions",
+      "scope": "apac-stellar-hackathon-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "rwa byState / byLevel sum to registry",
+      "scope": "byState",
+      "status": "pass",
+      "sum": 97,
+      "total": 97
+    },
+    {
+      "name": "rwa byState / byLevel sum to registry",
+      "scope": "byLevel",
+      "status": "pass",
+      "sum": 97,
+      "total": 97
+    },
+    {
+      "name": "toolchain version buckets sum to measuredRepos",
+      "scope": "byVersionStatus",
+      "status": "pass",
+      "sum": 5617,
+      "total": 5617
+    },
+    {
+      "name": "stablecoin byBasis sums to returned",
+      "scope": "byBasis",
+      "status": "pass",
+      "sum": 1,
+      "total": 1
+    },
+    {
+      "name": "quality findings open + refreshQueue + cleared + verified = total",
+      "scope": "findings",
+      "status": "pass",
+      "sum": 527,
+      "total": 527
+    }
+  ]
+}
