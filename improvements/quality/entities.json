@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-04T00:06:59.535Z",
+ "generatedAt": "2026-09-04T02:14:39.639Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -52,9 +52,10 @@
   }
  ],
  "findings": {
-  "states": "open + cleared + verified = total, disjoint",
+  "states": "open + refreshQueue + cleared + verified = total, disjoint. `open` is the DEFECT backlog; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect). Kept apart because 118 of 290 notes cite a version and upstream publishes continuously, so folding them in means `open` can never reach zero.",
   "total": 526,
-  "open": 8,
+  "open": 5,
+  "refreshQueue": 3,
   "cleared": 511,
   "verified": 7,
   "byFailureMode": [
@@ -9775,7 +9776,7 @@
    "mainnetJoin": {
     "pool": 5659,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 137
+    "joined": 106
    }
   },
   "curatedShape": {
@@ -9890,7 +9891,7 @@
   },
   "withCodeDepth": 10847,
   "withNotes": 496,
-  "withMainnet": 137,
+  "withMainnet": 106,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -11274,6 +11275,33 @@
   "rows": [
    {
     "entity": "repo",
+    "field": "mainnet contract join",
+    "missing": 381,
+    "of": 395,
+    "share": 96.5,
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5264 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
+    "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
+    "examplePoolSize": 381,
+    "exampleCap": 12,
+    "exampleTruncated": true,
+    "examples": [
+     "Andy00L/x402-autopilot",
+     "Bosun-Josh121/clevercon",
+     "davidmaronio/StellarPay402",
+     "ritik4ever/lodestar",
+     "velikanghost/heekowave",
+     "402md/agentcard",
+     "ashfrancis/chickenz",
+     "fredericrezeau/xray-games",
+     "catmcgee/stellar-poker-cosnarks",
+     "Klorenn/Cosmic-Coder-",
+     "Shamba-Records-Limited/microvault",
+     "theyuvan/zk-THRONE"
+    ]
+   },
+   {
+    "entity": "repo",
     "field": "knowledgeNotes",
     "missing": 12633,
     "of": 13129,
@@ -11297,33 +11325,6 @@
      "theyuvan/zk-THRONE",
      "KaranSinghBisht/veilgrid",
      "pedro-gattai/ZKachi"
-    ]
-   },
-   {
-    "entity": "repo",
-    "field": "mainnet contract join",
-    "missing": 380,
-    "of": 395,
-    "share": 96.2,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5264 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
-    "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
-    "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 380,
-    "exampleCap": 12,
-    "exampleTruncated": true,
-    "examples": [
-     "Andy00L/x402-autopilot",
-     "Bosun-Josh121/clevercon",
-     "davidmaronio/StellarPay402",
-     "ritik4ever/lodestar",
-     "velikanghost/heekowave",
-     "402md/agentcard",
-     "ashfrancis/chickenz",
-     "fredericrezeau/xray-games",
-     "catmcgee/stellar-poker-cosnarks",
-     "Klorenn/Cosmic-Coder-",
-     "Shamba-Records-Limited/microvault",
-     "theyuvan/zk-THRONE"
     ]
    },
    {

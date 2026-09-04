@@ -3803,7 +3803,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -3828,7 +3828,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -3853,7 +3853,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -5875,7 +5875,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -6553,7 +6553,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T19:51:18.114Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-08-31T23:07:08.334Z"
 	},
@@ -6987,7 +6987,7 @@
 		"failureMode": "note-stale",
 		"severity": "low",
 		"firstSeen": "2026-09-02T17:42:51.016Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-09-03T22:08:28.420Z",
 		"reopenedAt": "2026-09-03T22:08:36.619Z"
@@ -7000,7 +7000,7 @@
 		"failureMode": "note-stale",
 		"severity": "low",
 		"firstSeen": "2026-09-02T17:42:51.016Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-09-03T22:08:28.420Z",
 		"reopenedAt": "2026-09-03T22:08:36.619Z"
@@ -7013,7 +7013,7 @@
 		"failureMode": "note-stale",
 		"severity": "low",
 		"firstSeen": "2026-09-02T17:42:51.016Z",
-		"lastSeen": "2026-09-03T22:08:36.619Z",
+		"lastSeen": "2026-09-04T02:14:33.581Z",
 		"status": "open",
 		"evidenceAt": "2026-09-03T22:08:28.420Z",
 		"reopenedAt": "2026-09-03T22:08:36.619Z"

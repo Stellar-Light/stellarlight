@@ -244,6 +244,10 @@ export interface LedgerSummary {
 	 * `days: null` = the detector has never stamped its artifact.
 	 */
 	quietSources: Array<{ source: string; open: number; days: number | null }>;
+	/** Open rows that are a refresh, not a defect (see MAINTENANCE_MODES).
+	 *  Counted separately so `open` stays a backlog someone can burn down;
+	 *  never folded into it and never dropped. */
+	refreshQueue: number;
 	/** The current top of the ranked backlog (probe + surface + source). */
 	topOpen: Array<{
 		id: string;
@@ -254,6 +258,28 @@ export interface LedgerSummary {
 	}>;
 }
 
+/**
+ * Failure modes that are a REFRESH QUEUE, not a defect backlog.
+ *
+ * A curated note saying "npm @bluxcc/react — 0.3.3 (asOf 2026-09-02)" is not
+ * wrong when 0.3.5 ships: it is a dated claim that was true on its date, which
+ * is the honesty rule this codebase applies everywhere else. What it needs is
+ * a refresh, not a fix.
+ *
+ * 118 of 290 public notes cite a version, and upstream publishes continuously
+ * — x402 shipped three releases in a day, bluxcc two in two days. Counting
+ * that as an open finding means `open` can never reach zero no matter how much
+ * real work is done, and a backlog that always shows red is one nobody reads.
+ * So these are tracked in their own counter, never hidden: `refreshQueue`
+ * carries them, `open` means defects we can actually act on.
+ */
+export const MAINTENANCE_MODES = new Set(["note-stale"]);
+
+export const isMaintenance = (f: Finding) => MAINTENANCE_MODES.has(f.failureMode);
+
+/** An open row that is a real defect — excludes the refresh queue. */
+export const isOpenDefect = (f: Finding) => isOpen(f) && !isMaintenance(f);
+
 /** Reduce the full ledger to the numbers /quality and the weekly row render. */
 export function summarizeLedger(
 	findings: Finding[],
@@ -261,7 +287,8 @@ export function summarizeLedger(
 	topN = 8,
 ): LedgerSummary {
 	const total = findings.length;
-	const open = findings.filter(isOpen).length;
+	const open = findings.filter(isOpenDefect).length;
+	const refreshQueue = findings.filter((f) => isOpen(f) && isMaintenance(f)).length;
 	const verified = findings.filter((f) => f.status === "verified").length;
 	const clearedRows = findings.filter((f) => f.status === "cleared");
 	const cleared = clearedRows.length;
@@ -280,7 +307,7 @@ export function summarizeLedger(
 	let highOpen = 0;
 	let staleHighOpen = 0;
 	for (const f of findings) {
-		if (!isOpen(f)) continue;
+		if (!isOpenDefect(f)) continue;
 		oldestOpenDays = Math.max(oldestOpenDays, ageDays(f.firstSeen, now));
 		if (f.severity === "high") {
 			highOpen++;
@@ -292,7 +319,7 @@ export function summarizeLedger(
 		const rows = findings.filter((f) => f.surface === surface);
 		return {
 			surface,
-			open: rows.filter(isOpen).length,
+			open: rows.filter(isOpenDefect).length,
 			total: rows.length,
 		};
 	})
@@ -328,7 +355,9 @@ export function summarizeLedger(
 				(a.days ?? Number.MAX_SAFE_INTEGER),
 		);
 
-	const topOpen = rankFindings(findings, now)
+	// The ranked backlog is defects only — a refresh-queue row outranking real
+	// work would put "npm published 0.3.5" at the top of the board.
+	const topOpen = rankFindings(findings.filter((f) => !isMaintenance(f)), now)
 		.slice(0, topN)
 		.map((f) => ({
 			id: f.id,
@@ -342,6 +371,7 @@ export function summarizeLedger(
 		generatedAt: new Date(now).toISOString(),
 		total,
 		open,
+		refreshQueue,
 		closed,
 		verified,
 		cleared,

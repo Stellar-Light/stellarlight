@@ -298,13 +298,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// tag-only. Research used 16 GitHub API calls.
 	"x402-foundation/x402": [
 		{
-			note: "npm @x402/stellar — 2.24.0 (2026-08-27; 18 versions since 2026-03-10; repository → this repo; Apache-2.0), the 'x402 Payment Protocol Stellar Implementation' (depends on @stellar/stellar-sdk ^16 and @x402/core ~2.24.0); the README's SDK install line lists it among the chain packages next to @x402/core 2.24.0. Git tags are per package (npm-@x402/stellar@v2.24.0). https://www.npmjs.com/package/@x402/stellar",
+			note: "npm @x402/stellar — the 'x402 Payment Protocol Stellar Implementation', Apache-2.0, repository → this repo, published since 2026-03-10. Depends on @stellar/stellar-sdk ^16 and @x402/core; the README's SDK install line lists it among the chain packages next to @x402/core. Git tags are per package (npm-@x402/stellar@v<version>). Read the current version from npm — this package releases continuously (three publishes in a day, 2026-09-04) and a version pinned here would be a stale mirror rather than knowledge. https://www.npmjs.com/package/@x402/stellar",
 			triggers: ["x402 stellar npm", "x402 stellar package"],
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 		{
-			note: "PyPI x402 — 2.21.0 (2026-08-27; 32 releases; Repository → this repo; MIT; tag pypi-x402@v2.21.0) is the Python SDK; npm @x402/core 2.24.0 (27 versions since 2025-12-10) and the older unscoped npm x402 1.2.0 (2026-04-16; 34 versions since 2025-02-20) both link back here. No single latest GitHub release — 570 per-package tags. https://pypi.org/project/x402/",
+			note: "PyPI x402 is the Python SDK (MIT; Repository → this repo; tags are per package, pypi-x402@v<version>); npm @x402/core (published since 2025-12-10) and the older unscoped npm x402 (since 2025-02-20, superseded by the scoped packages) both link back here. There is NO single latest GitHub release for this repo — it carries hundreds of per-package tags, so a plain 'latest release' lookup answers the wrong question. Read current versions from PyPI/npm rather than from here; this project publishes several releases a day. https://pypi.org/project/x402/",
 			triggers: ["x402 python sdk"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1194,7 +1194,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/react": [
 		{
-			note: "npm @bluxcc/react — 0.3.3 (2026-09-02; published since 2025-02-03). Its npm repository field still names github.com/bluxcc/blux, which now returns HTTP 301 to bluxcc/react (2026-09-01) — this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. https://www.npmjs.com/package/@bluxcc/react",
+			note: "npm @bluxcc/react — published since 2025-02-03. Its npm repository field still names github.com/bluxcc/blux, which returns HTTP 301 to bluxcc/react (2026-09-01) — this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/react",
 			triggers: ["blux react package", "bluxcc blux repo moved"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1843,7 +1843,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/core": [
 		{
-			note: "npm @bluxcc/core — 0.3.3 (2026-09-02; published since 2025-09-23; repository points here). Licensed BUSL on npm (README section 'License & Usage Restrictions'); install `npm i @bluxcc/core`; site blux.cc. https://www.npmjs.com/package/@bluxcc/core",
+			note: "npm @bluxcc/core — published since 2025-09-23; repository points here. Licensed BUSL on npm (README section 'License & Usage Restrictions') — the fact worth knowing before depending on it; install `npm i @bluxcc/core`; site blux.cc. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/core",
 			triggers: ["blux npm package", "blux core license"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -2090,7 +2090,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: gh api releases?per_page=4; hub.docker.com/v2/repositories/stellar/anchor-platform/ (pull_count 936473).
 	"stellar/stellar-disbursement-platform-backend": [
 		{
-			note: "Latest release 7.0.0 (2026-08-19; 6.6.1 2026-06-24, 6.6.0 2026-06-18, 6.5.0 2026-05-05); Docker Hub image stellar/stellar-disbursement-platform-backend (~34.6k pulls, updated 2026-08-27); the UI is the companion repo stellar/stellar-disbursement-platform-frontend. https://github.com/stellar/stellar-disbursement-platform-backend/releases",
+			note: "On the 7.x release line since 7.0.0 (2026-08-19); prior minors 6.6.1 (2026-06-24), 6.6.0 (2026-06-18), 6.5.0 (2026-05-05). Published as the Docker Hub image stellar/stellar-disbursement-platform-backend (~34.6k pulls); the image is rebuilt frequently, so read its current tag from Docker Hub rather than from here. The UI is the companion repo stellar/stellar-disbursement-platform-frontend. https://github.com/stellar/stellar-disbursement-platform-backend/releases",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
