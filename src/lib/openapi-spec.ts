@@ -8007,6 +8007,7 @@ export const spec: OpenAPISpec = {
 						enum: [
 							"operator-announcement",
 							"site-liveness",
+							"repo-activity",
 							"product-integration",
 							"onchain-activity",
 							"human-verified",
@@ -8014,7 +8015,7 @@ export const spec: OpenAPISpec = {
 							"unverified",
 						],
 						description:
-							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
+							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
 					},
 					scfConfidence: {
 						type: "object",
