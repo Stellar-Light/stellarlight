@@ -32,6 +32,7 @@ import {
 	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
+	parsePlacement,
 } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -106,6 +107,14 @@ export async function GET(req: NextRequest) {
 		track: b.track,
 		placement: b.hackathonPlacement,
 		award: b.award,
+		// What this project actually won, parsed from its own placement string.
+		// `award` is the CATEGORY title and is shared by every placement inside
+		// it: DoraHacks nests prizes under an award_list entry, so all five
+		// winners of Stellar Hacks: Real-World ZK carry award "$10,000 XLM
+		// Prize" while placing 1st ($5,000) through 5th ($750) — the five sum
+		// to that pool. Reading `award` as one winner's prize overstates 3rd
+		// place by 8x and makes the winners sum to 5x the pot.
+		prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
 		isWinner: b.isWinner,
 		votes: b.voteCount,
 		url: b.url,

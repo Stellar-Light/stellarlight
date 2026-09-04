@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-03",
 		surfaces: ["api"],
+		version: "spec@1.9.26",
+		type: "changed",
+		summary:
+			"Hackathon build rows gain `prizeUsd` (what a project actually won), `award` is documented as the shared category pool it really is, and `votes` is null instead of a fabricated 0.",
+		detail:
+			"DoraHacks nests placements under an award category, and we assigned the category title to every winner's `award`. All five winners of Stellar Hacks: Real-World ZK carried award \"$10,000 XLM Prize\" while placing 1st ($5,000) through 5th ($750) — the five placements sum to exactly that pool. An agent asked what Umbra Wallet won read `award` and answered $10,000; the truth is $1,250, an 8x overstatement, and summing `award` across winners returns 5x the pot. The field is now documented as the category title it has always been, and `prizeUsd` carries what the project itself won, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250) and null — never 0 — when the placement is tier-labelled and names no amount. Separately, `votes` was hardcoded 0 on every submission because the v1 hub API stopped serving vote counts; 0 asserts that nobody voted rather than that we cannot see votes, so it is null now, and an unknown count contributes nothing to build ranking rather than being scored as a zero.",
+	},
+	{
+		date: "2026-09-03",
+		surfaces: ["api"],
 		version: "spec@1.9.25",
 		type: "changed",
 		summary:

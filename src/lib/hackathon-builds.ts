@@ -147,7 +147,7 @@ export function searchHackathonBuilds(
 		return pool
 			.map((b) => ({
 				b,
-				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount, 100),
+				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount ?? 0, 100),
 				matched: [] as string[],
 			}))
 			.sort((a, b) => b.score - a.score);
@@ -177,7 +177,7 @@ export function searchHackathonBuilds(
 			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
 		) {
 			score += b.isWinner ? 2 : 0;
-			score += Math.min(b.voteCount, 20) * 0.05;
+			score += Math.min(b.voteCount ?? 0, 20) * 0.05;
 			scored.push({ b, score, matched: [...matched] });
 		}
 	}

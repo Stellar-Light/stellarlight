@@ -8012,7 +8012,12 @@ export const spec: OpenAPISpec = {
 						description:
 							"Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds.",
 						properties: {
-							votes: { type: "integer" },
+							votes: {
+								type: "integer",
+								nullable: true,
+								description:
+									"Community votes on the submission, or null — the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises.",
+							},
 							worked: { type: "integer" },
 							score: { type: "number", nullable: true },
 							asOf: { type: "string" },
@@ -8603,7 +8608,13 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"Official award title (e.g. '$10,000 XLM Prize').",
+										"Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`).",
+								},
+								prizeUsd: {
+									type: "number",
+									nullable: true,
+									description:
+										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing.",
 								},
 								isWinner: { type: "boolean" },
 								githubUrl: { type: "string", nullable: true },
