@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-04T02:26:24.018Z",
+	"asOf": "2026-09-04T02:51:26.527Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 84,
-	"healthy": 82,
+	"checked": 85,
+	"healthy": 83,
 	"broken": [
 		{
 			"file": "api-drift.yml",
@@ -12,7 +12,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "3 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "4 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -160,6 +160,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "basis-from-onchain.yml",
+			"name": "Award onchain-activity basis (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T02:33:56Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 5,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "calibrate-semantic.yml",
 			"name": "Calibrate semantic floor (read-only)",
 			"cron": null,
@@ -197,10 +208,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:21:36Z",
+			"lastSuccessAt": "2026-09-04T02:49:15Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -219,10 +230,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:21:36Z",
+			"lastSuccessAt": "2026-09-04T02:49:15Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -407,10 +418,10 @@
 			"cron": "0 8 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-02T02:41:48Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
 			"runs": 24,
-			"why": "last green 1d ago"
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "enrich-scf.yml",
@@ -593,10 +604,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:21:36Z",
+			"lastSuccessAt": "2026-09-04T02:46:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 97,
+			"runs": 98,
 			"why": "last green 0d ago"
 		},
 		{
@@ -604,10 +615,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:37:36Z",
+			"lastSuccessAt": "2026-09-04T02:49:15Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 34,
+			"runs": 36,
 			"why": "last green 0d ago"
 		},
 		{
@@ -641,7 +652,7 @@
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 25,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -879,7 +890,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:24:43Z",
+			"lastSuccessAt": "2026-09-04T02:49:15Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -923,7 +934,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:34:24Z",
+			"lastSuccessAt": "2026-09-04T02:46:07Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -937,8 +948,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 1,
 			"graceDays": 21,
-			"runs": 10,
-			"why": "3 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 11,
+			"why": "4 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
