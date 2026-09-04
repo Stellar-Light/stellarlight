@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-04",
 		surfaces: ["api"],
+		version: "spec@1.9.33",
+		type: "changed",
+		summary:
+			"`deployment` on project rows is now filled from the verified RWA registry (new basis `rwa-registry`) where it was unknown — the last open item in sls-023.",
+		detail:
+			"sls-023's 2026-09-04 re-check measured the RWA rows: deployment present on 61, but 47 with network unknown, basis null and sourceUrl null. A project whose live product is in the registry has proven mainnet deployment — the issuer's own stellar.toml plus Horizon, or the Soroban contract itself — which is exactly the evidence `deployment` is documented to require. Where the stored fact was unknown and the registry holds a live row for the project, the row now serves network=mainnet, basis=rwa-registry, sourceUrl = the strongest-verified product's own evidence URL, and asOf = the registry's verification date. A stored mainnet or testnet fact is never overwritten: it is a stronger, deliberately placed claim. A project with no live registry row stays unknown — unknown is an admission, and this must not turn it into a claim.",
+	},
+	{
+		date: "2026-09-04",
+		surfaces: ["api"],
 		version: "spec@1.9.32",
 		type: "fixed",
 		summary:

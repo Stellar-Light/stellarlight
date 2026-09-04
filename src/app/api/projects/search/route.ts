@@ -165,7 +165,7 @@ async function semanticProjectRows(
 			// "deployed on which network?". Two facts, two fields. unknown is
 			// served explicitly - absence of evidence is never proof of disuse,
 			// and a consumer must see that we do not know rather than guess.
-			deployment: pickDeployment(p.deployment),
+			deployment: pickDeployment(p.deployment, p.slug),
 			canonicalSlug: p.canonicalSlug ?? null,
 			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
@@ -1402,7 +1402,7 @@ export async function GET(req: NextRequest) {
 					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
 					// sls-079: deployment rides EVERY row builder — the first fix
 					// landed on one of three builders and the served paths missed it.
-					deployment: pickDeployment(p.deployment),
+					deployment: pickDeployment(p.deployment, p.slug),
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
@@ -2048,7 +2048,7 @@ export async function GET(req: NextRequest) {
 					statusBasis: c.statusBasis ?? null,
 					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
 					// sls-079: from the canonical too, same rule as the fields above
-					deployment: pickDeployment(c.deployment),
+					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not

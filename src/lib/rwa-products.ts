@@ -65,3 +65,5 @@ export function mergeProducts(
 	}
 	return out;
 }
+
+export { deploymentFromRegistry } from "@/lib/project-deployment";
