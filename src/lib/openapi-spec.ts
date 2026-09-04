@@ -8238,7 +8238,7 @@ export const spec: OpenAPISpec = {
 					deployment: {
 						type: "object",
 						description:
-							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a live product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
 						properties: {
 							network: {
 								type: "string",
@@ -8248,7 +8248,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								nullable: true,
 								description:
-									"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified. Null when network is unknown.",
+									"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | rwa-registry | human-verified. rwa-registry = a live product in the verified RWA registry (/api/rwa) proves mainnet deployment; sourceUrl is that product's own evidence (the issuer's stellar.toml, or the contract on stellar.expert). Null when network is unknown.",
 							},
 							sourceUrl: { type: "string", nullable: true },
 							asOf: { type: "string", nullable: true },

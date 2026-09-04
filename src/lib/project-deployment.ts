@@ -1,3 +1,4 @@
+import { RWA_REGISTRY } from "@/data/rwa-registry";
 /**
  * The ONE serializer for a project's deployment fact (sls-079).
  *
@@ -31,21 +32,71 @@ export function pickDeployment(
 		  }
 		| null
 		| undefined,
+	slug?: string | null,
 ): DeploymentFact {
 	const network = (DEPLOYMENT_NETWORKS as readonly string[]).includes(
 		d?.network ?? "",
 	)
 		? (d?.network as DeploymentNetwork)
 		: "unknown";
-	if (network === "unknown") {
-		// An unknown must not carry stray provenance: basis/sourceUrl describe
-		// EVIDENCE, and unknown means there is none.
-		return { network, basis: null, sourceUrl: null, asOf: null };
-	}
+	const stored: DeploymentFact =
+		network === "unknown"
+			? // An unknown must not carry stray provenance: basis/sourceUrl describe
+				// EVIDENCE, and unknown means there is none.
+				{ network, basis: null, sourceUrl: null, asOf: null }
+			: {
+					network,
+					basis: d?.basis ?? null,
+					sourceUrl: d?.sourceUrl ?? null,
+					asOf: d?.asOf ?? null,
+				};
+	// sls-023: a live product in the verified RWA registry proves mainnet
+	// deployment. Applied INSIDE the one serializer so every row builder gets
+	// it and the three-builder drift guard stays literally true.
+	return deploymentFromRegistry(stored, slug);
+}
+
+const LEVEL_RANK: Record<string, number> = {
+	"toml-bidirectional": 0,
+	"entity-toml": 1,
+	"contract-metadata": 2,
+	"on-chain-home-domain": 3,
+	"on-chain-only": 4,
+};
+
+/**
+ * Fill an UNKNOWN deployment from the verified RWA registry — never overwrite
+ * a known one.
+ *
+ * sls-023's 2026-09-04 re-check: "Deployment exists on 61 rows, but 47 have
+ * network unknown, basis null, and sourceUrl null." A project whose live
+ * product is in the registry has proven mainnet deployment — the issuer's own
+ * stellar.toml plus Horizon, or the Soroban contract itself — and that is
+ * exactly the evidence `deployment` is documented to require. The strongest
+ * verified row lends its evidence URL, so the claim is re-checkable at source.
+ *
+ * A stored mainnet/testnet fact is a stronger, human- or scanner-placed claim
+ * and stands; a slug with no live registry row stays unknown, because unknown
+ * is an admission and this must not turn it into a claim.
+ */
+export function deploymentFromRegistry(
+	stored: DeploymentFact,
+	slug: string | null | undefined,
+): DeploymentFact {
+	if (stored.network !== "unknown" || !slug) return stored;
+	const live = RWA_REGISTRY.filter(
+		(r) => r.projectSlug === slug && r.state === "live",
+	).sort(
+		(a, b) =>
+			(LEVEL_RANK[a.verificationLevel] ?? 9) -
+				(LEVEL_RANK[b.verificationLevel] ?? 9) || a.id.localeCompare(b.id),
+	);
+	const best = live[0];
+	if (!best) return stored;
 	return {
-		network,
-		basis: d?.basis ?? null,
-		sourceUrl: d?.sourceUrl ?? null,
-		asOf: d?.asOf ?? null,
+		network: "mainnet",
+		basis: "rwa-registry",
+		sourceUrl: best.evidenceUrl,
+		asOf: best.verifiedAt,
 	};
 }

@@ -113,3 +113,48 @@ describe("registry -> project products", () => {
 		);
 	});
 });
+
+import { deploymentFromRegistry } from "../rwa-products";
+
+describe("registry -> project deployment (sls-023: 47 of 61 RWA rows had network unknown)", () => {
+	const unknown = {
+		network: "unknown" as const,
+		basis: null,
+		sourceUrl: null,
+		asOf: null,
+	};
+
+	it("fills an UNKNOWN deployment from a project's strongest-verified live product", () => {
+		const d = deploymentFromRegistry(unknown, "wisdomtree");
+		expect(d.network).toBe("mainnet");
+		expect(d.basis).toBe("rwa-registry");
+		expect(d.sourceUrl).toMatch(/^https:\/\//);
+		expect(d.asOf).toBe(RWA_REGISTRY_AS_OF);
+		// WisdomTree's rows are toml-bidirectional, so the lent evidence is the toml.
+		expect(d.sourceUrl).toContain("stellar.toml");
+	});
+
+	it("never overwrites a stored mainnet or testnet fact", () => {
+		const stored = {
+			network: "testnet" as const,
+			basis: "human-verified",
+			sourceUrl: "https://x",
+			asOf: "2026-01-01",
+		};
+		expect(deploymentFromRegistry(stored, "wisdomtree")).toEqual(stored);
+	});
+
+	it("leaves unknown as unknown when the project has no live registry row: an admission must not become a claim", () => {
+		expect(deploymentFromRegistry(unknown, "no-such-project")).toEqual(unknown);
+		expect(deploymentFromRegistry(unknown, null)).toEqual(unknown);
+	});
+
+	it("does not lend a deployed-no-supply contract as deployment evidence", () => {
+		const d = deploymentFromRegistry(unknown, "spiko");
+		expect(d.network).toBe("mainnet");
+		const dead = RWA_REGISTRY.find(
+			(r) => r.state === "deployed-no-supply" && r.projectSlug === "spiko",
+		);
+		if (dead?.contract) expect(d.sourceUrl).not.toContain(dead.contract);
+	});
+});
