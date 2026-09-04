@@ -1,0 +1,47 @@
+name: Backfill contract ownership basis (manual)
+
+# Re-judges every stored mainnetContractId against ownership evidence and
+# records mainnetContractBasis. The scanner fix (#1279) only governs FUTURE
+# scans; this repairs what is already stored.
+#
+#   clear  — provably not this repo's (a Stellar Asset Contract, or a contract
+#            stellar.expert validates against a different repository)
+#   keep   — with basis self-validated or published
+#   skip   — stellar.expert would not answer. Could-not-look is never a verdict:
+#            those rows are left exactly as they are and counted separately.
+#
+# Dry-run by default. The script exits 2 when it could not look at most of the
+# set, so a rate-limited run cannot be mistaken for a clean bill of health —
+# read the tallies before setting execute.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-contract-basis
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    # ~137 rows at a 350ms pace plus 429 backoff; generous headroom, but
+    # bounded so a stalling stellar.expert cannot hold a runner open.
+    timeout-minutes: 25
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Backfill (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/backfill-contract-basis.ts ${{ inputs.execute && '--execute' || '' }}
