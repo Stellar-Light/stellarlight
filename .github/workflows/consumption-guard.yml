@@ -56,6 +56,15 @@ jobs:
       - name: Cross-artifact quantities agree
         run: pnpm exec tsx scripts/check-artifact-agreement.ts
 
+      # A partition must sum to its denominator. Hackathon outcomes served
+      # 0/0/0/0 beside 300 submissions; toolchain buckets summed to the 2,000-row
+      # query cap under a 5,616 headline; a changelog said four deployed-no-supply
+      # rows where the surface served one. Every part was locally plausible and
+      # nothing added the buckets up. Exit 2 = could not read the surface, which
+      # is neither red nor green.
+      - name: Served partitions sum to their denominators
+        run: pnpm exec tsx scripts/check-sum-invariants.ts
+
       # Fable's audit finding #4: check-curated-canonical.ts was written to
       # "exit 1 so a lane can gate on it" — and no lane existed. The curated
       # list breaks on GitHub's clock (renames, casing), which no local change
