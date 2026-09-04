@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-04T00:54:42.905Z",
+	"asOf": "2026-09-04T01:46:36.076Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 84,
 	"healthy": 82,
@@ -12,7 +12,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "2 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -92,6 +92,17 @@
 			"graceDays": 45,
 			"runs": 5,
 			"why": "last green 19d ago (manual tool — age not judged)"
+		},
+		{
+			"file": "backfill-contract-basis.yml",
+			"name": "Backfill contract ownership basis (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T01:01:29Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 2,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-knowledge-notes.yml",
@@ -186,7 +197,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:43:26Z",
+			"lastSuccessAt": "2026-09-04T01:44:32Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -208,7 +219,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:52:37Z",
+			"lastSuccessAt": "2026-09-04T01:44:32Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -406,11 +417,11 @@
 			"name": "Enrich SCF data (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T16:24:20Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-04T01:01:36Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 20,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"runs": 22,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-tvl.yml",
@@ -589,17 +600,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "nightly-health.yml",
-			"name": "Nightly health (detectors → issue)",
-			"cron": "45 5 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-03T22:06:13Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 4,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "openapi-lint.yml",
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
@@ -759,10 +759,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-21T01:31:14Z",
-			"ageDays": 44,
+			"ageDays": 45,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 44d ago (manual tool — age not judged)"
+			"why": "last green 45d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "seed-partners.yml",
@@ -879,7 +879,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:52:37Z",
+			"lastSuccessAt": "2026-09-04T01:44:32Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -937,8 +937,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 1,
 			"graceDays": 21,
-			"runs": 8,
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 9,
+			"why": "2 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
