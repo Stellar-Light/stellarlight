@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-04T12:15:23.373Z",
+ "generatedAt": "2026-09-04T16:23:05.915Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -175,11 +175,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 3
+    "count": 2
    },
    {
     "bucket": "8–30d",
-    "count": 0
+    "count": 1
    },
    {
     "bucket": "31–60d",
@@ -294,7 +294,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1099,
+  "population": 1100,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -524,10 +524,8 @@
    {
     "slug": "stellar-confidential-token-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
@@ -767,10 +765,8 @@
    {
     "slug": "stellar-agent-search",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -792,10 +788,8 @@
    {
     "slug": "stellar-mpp-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -810,28 +804,22 @@
    {
     "slug": "stellar-indexer",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Pre-Release"
    },
    {
     "slug": "colibri",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "soropass",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -855,10 +843,8 @@
    {
     "slug": "safu",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -918,10 +904,8 @@
    {
     "slug": "lumenwipe",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -981,10 +965,8 @@
    {
     "slug": "authline",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -999,10 +981,8 @@
    {
     "slug": "sodax",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1017,10 +997,8 @@
    {
     "slug": "flutter-stellar-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1049,10 +1027,8 @@
    {
     "slug": "stellar-defi-hub",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1065,28 +1041,22 @@
    {
     "slug": "stellar-wallets-kit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "routedock",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "smart-account-kit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1130,19 +1100,15 @@
    {
     "slug": "passkey-kit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "sunereum-labs",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
@@ -1173,10 +1139,8 @@
    {
     "slug": "lumagg",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1287,10 +1251,8 @@
    {
     "slug": "tokeshare",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1305,10 +1267,8 @@
    {
     "slug": "the-strategists",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
@@ -1341,10 +1301,8 @@
    {
     "slug": "fuul",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1377,10 +1335,8 @@
    {
     "slug": "trustline",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1512,10 +1468,8 @@
    {
     "slug": "refractor",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1584,19 +1538,15 @@
    {
     "slug": "liquidsfi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "lightsail",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1647,10 +1597,8 @@
    {
     "slug": "dig",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1693,10 +1641,8 @@
    {
     "slug": "matrixdock",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1711,10 +1657,8 @@
    {
     "slug": "reapp",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1756,19 +1700,15 @@
    {
     "slug": "stellar-registry",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "opengrants",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1810,10 +1750,8 @@
    {
     "slug": "arcane",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1944,19 +1882,15 @@
    {
     "slug": "net-stellar-sdk",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "ios-stellar-sdk",
     "prominence": 55,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1983,10 +1917,8 @@
    {
     "slug": "go-stellar-sdk",
     "prominence": 88,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2047,10 +1979,8 @@
    {
     "slug": "bitgo",
     "prominence": 72,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2129,28 +2059,22 @@
    {
     "slug": "xbid-ai",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "warpdrive",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Development"
    },
    {
     "slug": "vesseo",
     "prominence": 78,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2215,10 +2139,8 @@
    {
     "slug": "tender",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2231,10 +2153,8 @@
    {
     "slug": "surgepay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2249,10 +2169,8 @@
    {
     "slug": "soropg",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2267,10 +2185,8 @@
    {
     "slug": "solv-protocol",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2321,10 +2237,8 @@
    {
     "slug": "rumble-fish",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2409,10 +2323,8 @@
    {
     "slug": "pg-atlas",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2463,10 +2375,8 @@
    {
     "slug": "noir",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2479,19 +2389,15 @@
    {
     "slug": "nethermind",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "nectar-network",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2506,10 +2412,8 @@
    {
     "slug": "microvault",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2533,10 +2437,8 @@
    {
     "slug": "lumexo",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2551,10 +2453,8 @@
    {
     "slug": "kmp-stellar-sdk",
     "prominence": 78,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2567,10 +2467,8 @@
    {
     "slug": "kalien",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2693,10 +2591,8 @@
    {
     "slug": "cyberbrawl",
     "prominence": 62,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2720,10 +2616,8 @@
    {
     "slug": "content-dao",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2763,10 +2657,8 @@
    {
     "slug": "centrifuge",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2888,19 +2780,15 @@
    {
     "slug": "the-aha-company",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "zig3v2",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2915,10 +2803,8 @@
    {
     "slug": "zentra",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2985,10 +2871,8 @@
    {
     "slug": "websoroban-ide",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3063,10 +2947,8 @@
    {
     "slug": "vottun",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3088,10 +2970,8 @@
    {
     "slug": "via-labs",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3158,19 +3038,15 @@
    {
     "slug": "usdc-swap",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "upwealth",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3203,10 +3079,8 @@
    {
     "slug": "ultra-stellar",
     "prominence": 74,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3255,10 +3129,8 @@
    {
     "slug": "trustless-work",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3486,10 +3358,8 @@
    {
     "slug": "sytemap",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3529,19 +3399,15 @@
    {
     "slug": "swift-wallet-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "subs",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3595,10 +3461,8 @@
    {
     "slug": "stellot",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3661,10 +3525,8 @@
    {
     "slug": "stellarguard",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3700,19 +3562,15 @@
    {
     "slug": "stellar-unity-developer-kit",
     "prominence": 66,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "stellar-transaction-visualizer",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3745,19 +3603,15 @@
    {
     "slug": "stellar-router-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "stellar-razor-and-blazor-suite",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3772,10 +3626,8 @@
    {
     "slug": "stellar-php-sdk",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3808,19 +3660,15 @@
    {
     "slug": "stellar-light",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "stellar-development-foundation",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3851,19 +3699,15 @@
    {
     "slug": "stellar-ai-agent-kit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "steepx",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3932,10 +3776,8 @@
    {
     "slug": "spinach",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -3957,19 +3799,15 @@
    {
     "slug": "space-and-time",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "source-of-tales",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4066,37 +3904,29 @@
    {
     "slug": "sorobanhooks",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "soroban-timelock-contract",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "soroban-sdk-tools",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "soroban-resource-usage-reporter",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4193,19 +4023,15 @@
    {
     "slug": "solang",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "socketfi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4261,10 +4087,8 @@
    {
     "slug": "silicore",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4304,10 +4128,8 @@
    {
     "slug": "sentinel",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4386,10 +4208,8 @@
    {
     "slug": "scalps",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4413,10 +4233,8 @@
    {
     "slug": "rust-soroban-client-library",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4458,10 +4276,8 @@
    {
     "slug": "rivool-finance",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4527,19 +4343,15 @@
    {
     "slug": "reclaim",
     "prominence": 85,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "reblue",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4573,10 +4385,8 @@
    {
     "slug": "range",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4675,10 +4485,8 @@
    {
     "slug": "poma",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4718,19 +4526,15 @@
    {
     "slug": "php-anchor-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "perun",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4743,10 +4547,8 @@
    {
     "slug": "peerpesa",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4788,19 +4590,15 @@
    {
     "slug": "payqin",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "paykit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4822,10 +4620,8 @@
    {
     "slug": "pakananet",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4892,10 +4688,8 @@
    {
     "slug": "openzeppelin",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4994,10 +4788,8 @@
    {
     "slug": "nebulavrf",
     "prominence": 66,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5037,10 +4829,8 @@
    {
     "slug": "mugglepay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5125,10 +4915,8 @@
    {
     "slug": "lumenshade",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5157,10 +4945,8 @@
    {
     "slug": "lumen-later",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5309,10 +5095,8 @@
    {
     "slug": "kryptos",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5327,10 +5111,8 @@
    {
     "slug": "kotlin-stellar-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5354,10 +5136,8 @@
    {
     "slug": "kindfi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5390,10 +5170,8 @@
    {
     "slug": "juntta",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5462,10 +5240,8 @@
    {
     "slug": "infinity-wallet",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5595,10 +5371,8 @@
    {
     "slug": "hedgepay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5631,10 +5405,8 @@
    {
     "slug": "greeppay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5649,19 +5421,15 @@
    {
     "slug": "grantfox",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "governance-modules-library",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5717,10 +5485,8 @@
    {
     "slug": "gearup",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5794,10 +5560,8 @@
    {
     "slug": "flutter-wallet-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5810,10 +5574,8 @@
    {
     "slug": "flashback",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5873,10 +5635,8 @@
    {
     "slug": "estrela",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5898,10 +5658,8 @@
    {
     "slug": "eqlab",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5923,10 +5681,8 @@
    {
     "slug": "empowch",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5950,19 +5706,15 @@
    {
     "slug": "elixir-stellar-sdk",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "edunode",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5975,10 +5727,8 @@
    {
     "slug": "earnbit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6000,10 +5750,8 @@
    {
     "slug": "dropzey",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6070,28 +5818,22 @@
    {
     "slug": "dex-tools",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "devtrak",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "devasign",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6122,10 +5864,8 @@
    {
     "slug": "decentrio",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6141,19 +5881,15 @@
    {
     "slug": "dcm",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "dappradar",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6464,10 +6200,8 @@
    {
     "slug": "certik",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6498,10 +6232,8 @@
    {
     "slug": "catalyst",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6532,19 +6264,15 @@
    {
     "slug": "calimero",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "btq",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6593,10 +6321,8 @@
    {
     "slug": "blux",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6679,10 +6405,8 @@
    {
     "slug": "bitbond",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6722,10 +6446,8 @@
    {
     "slug": "beamable",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6800,19 +6522,15 @@
    {
     "slug": "attest",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "astrograph",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6906,10 +6624,8 @@
    {
     "slug": "answerly",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6960,10 +6676,8 @@
    {
     "slug": "airgap",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6996,10 +6710,8 @@
    {
     "slug": "agnostic",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7012,10 +6724,8 @@
    {
     "slug": "adamik",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7129,10 +6839,8 @@
    {
     "slug": "give-credit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7280,10 +6988,8 @@
    {
     "slug": "ngnc",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7332,10 +7038,8 @@
    {
     "slug": "glousd",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7380,10 +7084,8 @@
    {
     "slug": "taurus",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7407,10 +7109,8 @@
    {
     "slug": "nirvana-labs",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7439,10 +7139,8 @@
    {
     "slug": "blockdaemon",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7692,10 +7390,8 @@
    {
     "slug": "link",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7764,10 +7460,8 @@
    {
     "slug": "fluxity",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7818,10 +7512,8 @@
    {
     "slug": "decaf",
     "prominence": 66,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8102,10 +7794,8 @@
    {
     "slug": "ziriz",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8136,10 +7826,8 @@
    {
     "slug": "xycloans",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8159,10 +7847,8 @@
    {
     "slug": "subquery",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8177,10 +7863,8 @@
    {
     "slug": "mercury",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8238,10 +7922,8 @@
    {
     "slug": "dogstar",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8256,10 +7938,8 @@
    {
     "slug": "stellar-quest",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8274,19 +7954,15 @@
    {
     "slug": "nearx",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "dfs-labs",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8319,19 +7995,15 @@
    {
     "slug": "soroban-domains",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "stellarx",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8409,10 +8081,8 @@
    {
     "slug": "soroban-hub",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8441,28 +8111,22 @@
    {
     "slug": "expand-network",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "pipeops",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "kwickbit",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8503,10 +8167,8 @@
    {
     "slug": "dapplooker",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8648,10 +8310,8 @@
    {
     "slug": "lumen-loop",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8693,10 +8353,8 @@
    {
     "slug": "cubist",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8738,19 +8396,15 @@
    {
     "slug": "stellarchain",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "stellar-expert",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8809,7 +8463,7 @@
     "status": "Live"
    }
   ],
-  "meanScore": 83,
+  "meanScore": 87,
   "deploymentMix": [
    {
     "network": "unknown",
@@ -8831,9 +8485,9 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongBasisSplit": {
-   "weakLiveRows": 790,
-   "onchainEligible": 37,
-   "appOnly": 753,
+   "weakLiveRows": 617,
+   "onchainEligible": 34,
+   "appOnly": 583,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification."
   },
   "basisMix": [
@@ -8871,7 +8525,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 799,
+  "weakestTotal": 626,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9274,25 +8928,6 @@
     ]
    },
    {
-    "slug": "go-stellar-sdk",
-    "name": "Go Stellar SDK",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 88,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "SDK"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "ondo",
     "name": "Ondo",
     "status": "Live",
@@ -9303,26 +8938,6 @@
     "deploymentApplies": true,
     "types": [
      "RWA"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "reclaim",
-    "name": "Reclaim",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 85,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security",
-     "SDK"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9409,45 +9024,6 @@
     ]
    },
    {
-    "slug": "beamable",
-    "name": "Beamable",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Gaming",
-     "SDK"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "blockdaemon",
-    "name": "Blockdaemon",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "RPC"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "didstellar",
     "name": "DID:STELLAR",
     "status": "Live",
@@ -9458,25 +9034,6 @@
     "deploymentApplies": false,
     "types": [
      "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "stellar-php-sdk",
-    "name": "Stellar PHP SDK",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "SDK"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9506,25 +9063,6 @@
     ]
    },
    {
-    "slug": "kmp-stellar-sdk",
-    "name": "KMP Stellar SDK",
-    "status": "Live",
-    "statusBasis": "repo-activity",
-    "prominence": 78,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "SDK"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "scorechain",
     "name": "Scorechain",
     "status": "Live",
@@ -9545,25 +9083,6 @@
     ]
    },
    {
-    "slug": "vesseo",
-    "name": "Vesseo",
-    "status": "Live",
-    "statusBasis": "product-integration",
-    "prominence": 78,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Wallet"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "fonbnk",
     "name": "Fonbnk",
     "status": "Live",
@@ -9574,44 +9093,6 @@
     "deploymentApplies": false,
     "types": [
      "Anchor"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "ultra-stellar",
-    "name": "Ultra Stellar",
-    "status": "Live",
-    "statusBasis": "product-integration",
-    "prominence": 74,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "bitgo",
-    "name": "BitGo",
-    "status": "Live",
-    "statusBasis": "product-integration",
-    "prominence": 72,
-    "deploymentNetwork": "unknown",
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9657,12 +9138,186 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "infstones",
+    "name": "InfStones",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "RPC"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "lightsail-network-quasar",
+    "name": "Lightsail Network (Quasar)",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "SDK",
+     "Indexer"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "orbitcdp",
+    "name": "OrbitCDP",
+    "status": "Inactive",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Lending"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "redswan",
+    "name": "RedSwan",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "RWA"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "solar-wallet",
+    "name": "Solar Wallet",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Wallet"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "spacewalk",
+    "name": "Spacewalk",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Bridge"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "chipper",
+    "name": "Chipper",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 68,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "katagames",
+    "name": "Kata.Games",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 68,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Gaming",
+     "SDK"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "zettablock",
+    "name": "ZettaBlock",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 68,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Indexer",
+     "Analytics"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 790
+    "count": 617
    },
    {
     "field": "dated",
@@ -9826,11 +9481,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1255
+     "count": 1256
     },
     {
      "label": "slowing",
-     "count": 937
+     "count": 936
     },
     {
      "label": "active",
@@ -11348,28 +11003,28 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 790,
+    "missing": 617,
     "of": 984,
-    "share": 80.3,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 37 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 753 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 62.7,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 34 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 583 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 31,
+    "examplePoolSize": 20,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
      "kale",
-     "go-stellar-sdk",
      "allbridge",
      "ondo",
-     "reclaim",
      "quicknode",
      "dia",
      "axelar",
      "alchemy",
-     "stellar-php-sdk",
      "didstellar",
-     "beamable"
+     "yellow-card",
+     "scorechain",
+     "fonbnk",
+     "brale"
     ]
    },
    {
