@@ -96,7 +96,8 @@ async function scrapeDetailPage(slug: string): Promise<{
 	totalAwarded?: number;
 	awardedRounds?: number[];
 	roundAwards?: Array<{
-		round: number;
+		awardName?: string | null;
+		round: number | null;
 		amountUSD: number | null;
 		awardType: string | null;
 	}>;
@@ -182,6 +183,7 @@ async function scrapeDetailPage(slug: string): Promise<{
 		if (verdicts.awards.length > 0) {
 			result.roundAwards = verdicts.awards.map((a) => ({
 				round: a.round,
+				awardName: a.awardName,
 				amountUSD: a.budgetUSD,
 				awardType: a.awardType,
 			}));
@@ -444,20 +446,34 @@ async function main() {
 			(detail?.awardedRounds &&
 				JSON.stringify(currentScf.awardedRounds) !==
 					JSON.stringify(detail.awardedRounds)) ||
-			// roundAwards drift: compare on the value triple only — the stored
+			// roundAwards drift: compare on the value tuple only — the stored
 			// rows carry Payload array-row ids the scrape doesn't have.
+			// awardName is part of the tuple: a non-numbered award has round
+			// null, so without the name two different Liquidity Awards compare
+			// equal and a real change would read as no drift.
 			(detail?.roundAwards &&
 				JSON.stringify(
 					(currentScf.roundAwards ?? []).map(
 						(r: {
-							round: number;
+							round: number | null;
+							awardName?: string | null;
 							amountUSD?: number | null;
 							awardType?: string | null;
-						}) => [r.round, r.amountUSD ?? null, r.awardType ?? null],
+						}) => [
+							r.round ?? null,
+							r.awardName ?? null,
+							r.amountUSD ?? null,
+							r.awardType ?? null,
+						],
 					),
 				) !==
 					JSON.stringify(
-						detail.roundAwards.map((r) => [r.round, r.amountUSD, r.awardType]),
+						detail.roundAwards.map((r) => [
+							r.round ?? null,
+							r.awardName ?? null,
+							r.amountUSD,
+							r.awardType,
+						]),
 					));
 
 		// No-resurrect guard (2026-07-11): if this record is already

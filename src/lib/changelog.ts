@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-03",
 		surfaces: ["api"],
+		version: "spec@1.9.27",
+		type: "changed",
+		summary:
+			"SCF awards that carry no round number are no longer dropped. `scfRoundAwards` entries can now have `round: null` plus the award's own `awardName`, so an empty `scfAwardedRounds` beside real award money is explainable.",
+		detail:
+			"SCF grants awards outside the numbered rounds. Blend's $50,000 is a \"Liquidity Award - '24 Q1\", status Awarded on SCF's own project page, and it carries no SCF #N — so it mapped onto no numeric round, was dropped by the parser, rejected by the schema (roundAwards.round was required) and filtered out again on read (pickScfRoundAwards demanded a numeric round). The project surfaced $50,000 of award money beside scfAwardedRounds: [] with nothing to explain it, and an empty array reads as 'none'. Three projects in the first hundred SCF-awarded rows were in this shape (Blend $50k, Orally $48k, Zenex $150k). Awards now flow through with round null and awardName, verified against the live pages: Blend yields round=null / \"Liquidity Award - '24 Q1\" / $50,000, while Aquarius still yields 17+23+27 = $291,000 and Beans 10+15+21+29 = $490,160, both matching their stored totals exactly. Aquarius's Liquidity Award stays out because SCF marks it Pending, not Awarded. The numeric round SETS are deliberately unchanged — the never-accuse and no-resurrect guards read them, so this adds award records and changes no verdict.",
+	},
+	{
+		date: "2026-09-03",
+		surfaces: ["api"],
 		version: "spec@1.9.26",
 		type: "changed",
 		summary:
