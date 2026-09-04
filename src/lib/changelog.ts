@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-04",
+		surfaces: ["api"],
+		version: "spec@1.9.29",
+		type: "added",
+		summary:
+			"New statusBasis tier `product-integration` — the live product itself was found to reference Stellar infrastructure, which is stronger than a page merely answering and weaker than a person confirming it.",
+		detail:
+			"site-liveness only records that a page answered: a parked domain, a coming-soon splash and a dead product's marketing site all pass it, and 518 of the 601 app-only rows rested on exactly that. product-integration records what the deployed surface actually contains — a SEP-1 stellar.toml, a Horizon or Soroban RPC endpoint, an on-chain address, or a Stellar SDK in the product's own JS bundle. It is deliberately NOT called verification: it observes an integration, never exercises a user flow, and is never evidence the product works. human-verified stays a separate, higher tier because a person looked, and relabelling machine work as a human attestation would be a lie about provenance. The probe skips SDK/RPC/indexer/analytics rows entirely — a website check says nothing about whether a package is alive, and pointing it at libraries would manufacture false negatives. Precision was checked against controls before it was trusted: three known Stellar products resolved via their stellar.toml, while example.com and the Wikipedia article about Stellar (which is full of the word) correctly returned nothing, because the marker list carries endpoints, SDK names, the network passphrase and address formats but never the bare word `stellar`.",
+	},
+	{
 		date: "2026-09-03",
 		surfaces: ["api"],
 		version: "spec@1.9.28",
