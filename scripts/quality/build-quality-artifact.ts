@@ -109,8 +109,15 @@ const CLASS_OF: Record<string, string> = {
 	// §0.5 contract completeness — spec and live surface disagree
 	"api-drift": "contract-completeness",
 	"ambiguous-contract": "contract-completeness",
+	// nightly-claims failures are contract-surface: a published claim the live
+	// surface will not support.
+	"claim-blocker": "contract-completeness",
 	// §0.6 cross-surface consistency — our answer vs the official record
 	"scf-round-overclaim": "cross-surface-consistency",
+	// A knowledge note that was true on its asOf date while the registry has
+	// moved since is our record disagreeing with the upstream official one —
+	// the same class, found by the nightly note-freshness sweep.
+	"note-stale": "cross-surface-consistency",
 	// findings about our EVAL machinery, not the product; §0 says six
 	// classes cover NEARLY everything — this is the honest remainder.
 	"battery-coverage-weak": "meta-eval",

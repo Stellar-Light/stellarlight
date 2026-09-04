@@ -1,11 +1,18 @@
 {
- "generatedAt": "2026-09-03T22:08:46.570Z",
+ "generatedAt": "2026-09-04T00:06:59.535Z",
  "surfaces": [
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
    "openFindings": 5,
    "clearedFindings": 19,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 3,
+   "clearedFindings": 7,
    "verifiedFindings": 0
   },
   {
@@ -30,13 +37,6 @@
    "verifiedFindings": 7
   },
   {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 0,
-   "clearedFindings": 10,
-   "verifiedFindings": 0
-  },
-  {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 0,
@@ -54,8 +54,8 @@
  "findings": {
   "states": "open + cleared + verified = total, disjoint",
   "total": 526,
-  "open": 5,
-  "cleared": 514,
+  "open": 8,
+  "cleared": 511,
   "verified": 7,
   "byFailureMode": [
    {
@@ -130,8 +130,8 @@
    },
    {
     "mode": "note-stale",
-    "open": 0,
-    "cleared": 5,
+    "open": 3,
+    "cleared": 2,
     "verified": 0,
     "surface": "code"
    },
@@ -174,7 +174,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 2
+    "count": 5
    },
    {
     "bucket": "8–30d",
@@ -209,24 +209,6 @@
     "clearedAt": "2026-09-02"
    },
    {
-    "probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-02"
-   },
-   {
     "probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
     "surface": "code",
     "failureMode": "note-stale",
@@ -237,19 +219,37 @@
     "surface": "corpus",
     "failureMode": "battery-coverage-weak",
     "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "scfRoundAwards empty: coala-pay",
+    "surface": "directory",
+    "failureMode": "completeness-residual",
+    "clearedAt": "2026-09-02"
+   },
+   {
+    "probe": "battery:q-tool-indexer-repos-discovery",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-01"
+   },
+   {
+    "probe": "scfRoundAwards empty: inferera",
+    "surface": "directory",
+    "failureMode": "completeness-residual",
+    "clearedAt": "2026-09-01"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
     "newFindings": 234,
-    "repeats": 233,
-    "ratePct": 99.6
+    "repeats": 234,
+    "ratePct": 100
    },
    "lifetime": {
     "newFindings": 526,
-    "repeats": 519,
-    "ratePct": 98.7
+    "repeats": 520,
+    "ratePct": 98.9
    },
    "byClass": [
     {
@@ -272,8 +272,14 @@
     },
     {
      "class": "contract-completeness",
-     "total": 24,
+     "total": 27,
      "open": 0,
+     "firstSeen": "2026-07-22"
+    },
+    {
+     "class": "cross-surface-consistency",
+     "total": 21,
+     "open": 3,
      "firstSeen": "2026-07-22"
     },
     {
@@ -281,18 +287,6 @@
      "total": 19,
      "open": 0,
      "firstSeen": "2026-07-23"
-    },
-    {
-     "class": "cross-surface-consistency",
-     "total": 16,
-     "open": 0,
-     "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "unclassified",
-     "total": 8,
-     "open": 0,
-     "firstSeen": "2026-09-01"
     }
    ]
   }
@@ -9835,11 +9829,11 @@
     },
     {
      "label": "slowing",
-     "count": 937
+     "count": 938
     },
     {
      "label": "active",
-     "count": 796
+     "count": 795
     },
     {
      "label": "unknown",
@@ -11089,13 +11083,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 514
+    "value": 511
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 5
+    "value": 8
    },
    {
     "id": "o:verified",
@@ -11201,7 +11195,7 @@
     "target": 20,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 10
+    "value": 7
    },
    {
     "source": 1,
@@ -11265,6 +11259,13 @@
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
     "value": 5
+   },
+   {
+    "source": 19,
+    "target": 21,
+    "sourceId": "f:code",
+    "targetId": "o:open",
+    "value": 3
    }
   ]
  },
