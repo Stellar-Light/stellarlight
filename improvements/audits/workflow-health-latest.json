@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-04T01:46:36.076Z",
+	"asOf": "2026-09-04T02:26:24.018Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 84,
 	"healthy": 82,
@@ -12,7 +12,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "2 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "3 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -197,10 +197,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T01:44:32Z",
+			"lastSuccessAt": "2026-09-04T02:21:36Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -219,10 +219,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T01:44:32Z",
+			"lastSuccessAt": "2026-09-04T02:21:36Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -242,10 +242,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-03T01:56:44Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 45,
 			"runs": 23,
-			"why": "last green 0d ago (manual tool — age not judged)"
+			"why": "last green 1d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "curate-projects.yml",
@@ -484,10 +484,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 12,
+			"ageDays": 13,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 12d ago (manual tool — age not judged)"
+			"why": "last green 13d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -593,10 +593,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:39:51Z",
+			"lastSuccessAt": "2026-09-04T02:21:36Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 96,
+			"runs": 97,
 			"why": "last green 0d ago"
 		},
 		{
@@ -858,10 +858,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-03T01:56:36Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 45,
 			"runs": 15,
-			"why": "last green 0d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
+			"why": "last green 1d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "tag-watch.yml",
@@ -879,7 +879,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T01:44:32Z",
+			"lastSuccessAt": "2026-09-04T02:24:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -937,8 +937,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 1,
 			"graceDays": 21,
-			"runs": 9,
-			"why": "2 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 10,
+			"why": "3 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
