@@ -163,6 +163,7 @@ export const Projects: CollectionConfig = {
 			options: [
 				"operator-announcement",
 				"site-liveness",
+				"product-integration",
 				"onchain-activity",
 				"human-verified",
 				"source-inherited",
@@ -170,7 +171,7 @@ export const Projects: CollectionConfig = {
 			],
 			admin: {
 				description:
-					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
+					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (a page answered - a parked domain and a dead product's marketing site both pass this), product-integration (the LIVE product itself references Stellar infrastructure - a SEP-1 toml, a Horizon/RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle; an integration OBSERVED, never a claim the product works), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
 			},
 		},
 		{

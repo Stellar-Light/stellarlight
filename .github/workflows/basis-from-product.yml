@@ -1,0 +1,49 @@
+name: Award product-integration basis (manual)
+
+# site-liveness only records that a page answered — a parked domain and a dead
+# product's marketing site both pass it. This probes the deployed surface for
+# what it actually contains: a SEP-1 stellar.toml, a Horizon/Soroban RPC
+# endpoint, an on-chain address, or a Stellar SDK in the product's own bundle.
+#
+# It observes an INTEGRATION. It never exercises a user flow and is never
+# evidence the product works, which is why human-verified remains a separate,
+# higher tier. Library/SDK rows are skipped: a website probe says nothing about
+# whether a package is alive.
+#
+# Walks other people's sites, so it paces itself. Dry-run by default; use
+# --limit on a first run to sample before committing to the whole set.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+      limit:
+        description: "Probe at most N rows (0 = all eligible)."
+        type: string
+        default: "0"
+
+concurrency:
+  group: basis-from-product
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    # ~350 rows, each up to a toml + a page + 6 bundles at a 700ms pace.
+    timeout-minutes: 45
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Probe (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/basis-from-product.ts --limit=${{ inputs.limit }} ${{ inputs.execute && '--execute' || '' }}
