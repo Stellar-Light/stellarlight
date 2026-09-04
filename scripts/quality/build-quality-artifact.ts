@@ -211,10 +211,25 @@ const ONCHAIN_PRODUCT_TYPES = [
 	"Stablecoin",
 	"RWA",
 ];
+// "Strong" means the row cites DATED evidence someone else can re-check, as
+// opposed to site-liveness (a page answered — a parked domain passes that) or
+// source-inherited (another list said so). Every basis here carries a
+// statusAsOf and a statusSourceUrl that opens.
+//
+// product-integration and repo-activity were added to the enum on 2026-09-04
+// and NOT added here, so 173 rows earned dated evidence while the headline
+// moved by four and the board read as though nothing had happened. A metric
+// that silently ignores a new evidence tier is worse than no metric: it
+// reports the work as not done.
 const STRONG_BASES = [
 	"human-verified",
 	"onchain-activity",
 	"official-record",
+	// the live product itself was observed referencing Stellar infrastructure
+	"product-integration",
+	// the project's own repo committed inside a dated window — awarded only to
+	// library/SDK rows, where the source moving IS the product being alive
+	"repo-activity",
 ] as const;
 const isStrongBasis = (b: string | null | undefined) =>
 	!!b && (STRONG_BASES as readonly string[]).includes(b);
