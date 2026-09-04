@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-04T02:51:26.527Z",
+	"asOf": "2026-09-04T03:46:50.187Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 85,
-	"healthy": 83,
+	"checked": 86,
+	"healthy": 84,
 	"broken": [
 		{
 			"file": "api-drift.yml",
@@ -12,7 +12,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "4 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "5 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -171,6 +171,17 @@
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "basis-from-product.yml",
+			"name": "Award product-integration basis (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-04T03:19:17Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 3,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "calibrate-semantic.yml",
 			"name": "Calibrate semantic floor (read-only)",
 			"cron": null,
@@ -208,7 +219,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:49:15Z",
+			"lastSuccessAt": "2026-09-04T03:44:45Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -230,7 +241,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:49:15Z",
+			"lastSuccessAt": "2026-09-04T03:44:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -473,10 +484,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T03:20:14Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-zenex.yml",
@@ -484,10 +495,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 81,
+			"ageDays": 82,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 81d ago (manual tool — age not judged)"
+			"why": "last green 82d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "import-replit-stablecoin-history.yml",
@@ -604,10 +615,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:46:07Z",
+			"lastSuccessAt": "2026-09-04T03:41:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 98,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -615,10 +626,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:49:15Z",
+			"lastSuccessAt": "2026-09-04T03:44:45Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 36,
+			"runs": 38,
 			"why": "last green 0d ago"
 		},
 		{
@@ -648,10 +659,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T00:43:26Z",
+			"lastSuccessAt": "2026-09-04T02:49:15Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 25,
+			"runs": 26,
 			"why": "last green 0d ago"
 		},
 		{
@@ -792,10 +803,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-29T03:29:14Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 5d ago (manual tool — age not judged)"
+			"why": "last green 6d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "self-audit.yml",
@@ -890,7 +901,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:49:15Z",
+			"lastSuccessAt": "2026-09-04T03:44:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -934,7 +945,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:46:07Z",
+			"lastSuccessAt": "2026-09-04T03:41:33Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -948,8 +959,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 1,
 			"graceDays": 21,
-			"runs": 11,
-			"why": "4 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 12,
+			"why": "5 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
