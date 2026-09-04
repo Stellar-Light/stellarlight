@@ -330,7 +330,20 @@ export async function GET(
 							totalSubmissions: liveSubmissions.length,
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
 							winners: winners.length,
-							outcomes: { built: 0, inProgress: 0, abandoned: 0, unknown: 0 },
+							// Every bucket was hardcoded 0, including `unknown` — so a
+							// hackathon with 300 submissions reported none built,
+							// none abandoned and none unknown, which reads as "we
+							// checked and nothing survived" rather than "we never
+							// classified these". Zero is a measurement; absence of
+							// one is not. Nothing classifies these yet, so all 300
+							// are unknown, and the buckets sum to the submissions
+							// they describe.
+							outcomes: {
+								built: 0,
+								inProgress: 0,
+								abandoned: 0,
+								unknown: liveSubmissions.length,
+							},
 						},
 						tracks: liveTracks,
 					},
