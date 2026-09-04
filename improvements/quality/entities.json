@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-04T02:21:25.188Z",
+ "generatedAt": "2026-09-04T12:15:23.373Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -11,8 +11,8 @@
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 3,
-   "clearedFindings": 7,
+   "openFindings": 1,
+   "clearedFindings": 10,
    "verifiedFindings": 0
   },
   {
@@ -53,10 +53,10 @@
  ],
  "findings": {
   "states": "open + refreshQueue + cleared + verified = total, disjoint. `open` is the DEFECT backlog; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect). Kept apart because 118 of 290 notes cite a version and upstream publishes continuously, so folding them in means `open` can never reach zero.",
-  "total": 526,
+  "total": 527,
   "open": 5,
-  "refreshQueue": 3,
-  "cleared": 511,
+  "refreshQueue": 1,
+  "cleared": 514,
   "verified": 7,
   "byFailureMode": [
    {
@@ -131,8 +131,8 @@
    },
    {
     "mode": "note-stale",
-    "open": 3,
-    "cleared": 2,
+    "open": 1,
+    "cleared": 5,
     "verified": 0,
     "surface": "code"
    },
@@ -175,7 +175,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 5
+    "count": 3
    },
    {
     "bucket": "8–30d",
@@ -191,6 +191,24 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-04"
+   },
+   {
+    "probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-04"
+   },
+   {
+    "probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-04"
+   },
    {
     "probe": "repos-streaming-payments",
     "surface": "retrieval",
@@ -220,36 +238,18 @@
     "surface": "corpus",
     "failureMode": "battery-coverage-weak",
     "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "scfRoundAwards empty: coala-pay",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "battery:q-tool-indexer-repos-discovery",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-01"
-   },
-   {
-    "probe": "scfRoundAwards empty: inferera",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-01"
    }
   ],
   "closure": {
    "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
    "last30d": {
-    "newFindings": 234,
-    "repeats": 234,
+    "newFindings": 235,
+    "repeats": 235,
     "ratePct": 100
    },
    "lifetime": {
-    "newFindings": 526,
-    "repeats": 520,
+    "newFindings": 527,
+    "repeats": 521,
     "ratePct": 98.9
    },
    "byClass": [
@@ -279,8 +279,8 @@
     },
     {
      "class": "cross-surface-consistency",
-     "total": 21,
-     "open": 3,
+     "total": 22,
+     "open": 1,
      "firstSeen": "2026-07-22"
     },
     {
@@ -294,7 +294,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1097,
+  "population": 1099,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -4736,10 +4736,8 @@
    {
     "slug": "peridot-finance",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8147,19 +8145,15 @@
    {
     "slug": "yieldblox",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
     "slug": "blend",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8785,10 +8779,8 @@
    {
     "slug": "phoenix",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8839,27 +8831,35 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongBasisSplit": {
-   "weakLiveRows": 794,
-   "onchainEligible": 41,
+   "weakLiveRows": 790,
+   "onchainEligible": 37,
    "appOnly": 753,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 668
+    "count": 506
    },
    {
     "basis": "human-verified",
     "count": 155
    },
    {
-    "basis": "source-inherited",
+    "basis": "repo-activity",
     "count": 115
    },
    {
+    "basis": "source-inherited",
+    "count": 100
+   },
+   {
+    "basis": "product-integration",
+    "count": 58
+   },
+   {
     "basis": "onchain-activity",
-    "count": 35
+    "count": 39
    },
    {
     "basis": "unverified",
@@ -8871,7 +8871,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 803,
+  "weakestTotal": 799,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9236,25 +9236,6 @@
     ]
    },
    {
-    "slug": "blend",
-    "name": "Blend",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 90,
-    "deploymentNetwork": "mainnet",
-    "hasOnchainFootprint": true,
-    "deploymentApplies": true,
-    "types": [
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "kale",
     "name": "Kale",
     "status": "Live",
@@ -9296,7 +9277,7 @@
     "slug": "go-stellar-sdk",
     "name": "Go Stellar SDK",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 88,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9334,7 +9315,7 @@
     "slug": "reclaim",
     "name": "Reclaim",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 85,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9431,7 +9412,7 @@
     "slug": "beamable",
     "name": "Beamable",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 80,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9451,7 +9432,7 @@
     "slug": "blockdaemon",
     "name": "Blockdaemon",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 80,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9486,29 +9467,10 @@
     ]
    },
    {
-    "slug": "phoenix",
-    "name": "Phoenix",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 80,
-    "deploymentNetwork": "mainnet",
-    "hasOnchainFootprint": true,
-    "deploymentApplies": true,
-    "types": [
-     "DEX"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "stellar-php-sdk",
     "name": "Stellar PHP SDK",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 80,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9547,7 +9509,7 @@
     "slug": "kmp-stellar-sdk",
     "name": "KMP Stellar SDK",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "repo-activity",
     "prominence": 78,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9586,7 +9548,7 @@
     "slug": "vesseo",
     "name": "Vesseo",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "product-integration",
     "prominence": 78,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9624,7 +9586,7 @@
     "slug": "ultra-stellar",
     "name": "Ultra Stellar",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "product-integration",
     "prominence": 74,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9643,7 +9605,7 @@
     "slug": "bitgo",
     "name": "BitGo",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "product-integration",
     "prominence": 72,
     "deploymentNetwork": "unknown",
     "hasOnchainFootprint": false,
@@ -9657,12 +9619,50 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "stellarterm",
+    "name": "StellarTerm",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 72,
+    "deploymentNetwork": "mainnet",
+    "hasOnchainFootprint": true,
+    "deploymentApplies": true,
+    "types": [
+     "DEX"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "felix-pago",
+    "name": "Felix Pago",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 70,
+    "deploymentNetwork": "unknown",
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 794
+    "count": 790
    },
    {
     "field": "dated",
@@ -9774,9 +9774,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5659,
+    "pool": 5660,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 106
+    "joined": 107
    }
   },
   "curatedShape": {
@@ -9826,11 +9826,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1254
+     "count": 1255
     },
     {
      "label": "slowing",
-     "count": 938
+     "count": 937
     },
     {
      "label": "active",
@@ -9891,7 +9891,7 @@
   },
   "withCodeDepth": 10847,
   "withNotes": 496,
-  "withMainnet": 106,
+  "withMainnet": 107,
   "top": [
    {
     "fullName": "Andy00L/x402-autopilot",
@@ -10940,8 +10940,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "80% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "783 of 984 rows (census)",
+   "limit": "62% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "606 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -11012,7 +11012,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 5
+    "value": 6
    },
    {
     "id": "s:golden-eval",
@@ -11078,19 +11078,19 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 10
+    "value": 11
    },
    {
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 511
+    "value": 514
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 8
+    "value": 6
    },
    {
     "id": "o:verified",
@@ -11196,7 +11196,7 @@
     "target": 20,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 7
+    "value": 10
    },
    {
     "source": 1,
@@ -11259,14 +11259,14 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 5
+    "value": 6
    },
    {
     "source": 19,
     "target": 21,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 3
+    "value": 1
    }
   ]
  },
@@ -11279,7 +11279,7 @@
     "missing": 381,
     "of": 395,
     "share": 96.5,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5264 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5265 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 381,
@@ -11348,17 +11348,16 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 794,
+    "missing": 790,
     "of": 984,
-    "share": 80.7,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 41 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 753 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 80.3,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 37 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 753 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 33,
+    "examplePoolSize": 31,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "blend",
      "kale",
      "go-stellar-sdk",
      "allbridge",
@@ -11369,7 +11368,8 @@
      "axelar",
      "alchemy",
      "stellar-php-sdk",
-     "didstellar"
+     "didstellar",
+     "beamable"
     ]
    },
    {
