@@ -1,0 +1,41 @@
+name: Award onchain-activity basis (manual)
+
+# The quality board tells readers that weak-basis rows with an on-chain
+# footprint "can earn onchain-activity from dated evidence" — and nothing in
+# the repo ever wrote that value, so the 41 eligible rows had no lane to
+# travel. This is that lane. It reads the enrich-onchain snapshot we already
+# store (a dated prevAsOf -> asOf window with per-window deltas) and upgrades
+# only rows that MOVED inside it.
+#
+# Never downgrades, never overwrites human-verified, and leaves a quiet window
+# alone — no movement is not proof of death. Dry-run by default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: basis-from-onchain
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  award:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Award (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/basis-from-onchain.ts ${{ inputs.execute && '--execute' || '' }}
