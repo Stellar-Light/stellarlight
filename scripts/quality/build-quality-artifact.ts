@@ -10,7 +10,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { isMaintenance } from "../../src/lib/improvement-ledger";
+import { MAINTENANCE_MODES } from "../../src/lib/improvement-ledger";
 import { REPO_KNOWLEDGE_NOTES } from "../../src/lib/repo-knowledge";
 import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
@@ -401,10 +401,11 @@ const out = {
 		states:
 			"open + refreshQueue + cleared + verified = total, disjoint. `open` is the DEFECT backlog; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect). Kept apart because 118 of 290 notes cite a version and upstream publishes continuously, so folding them in means `open` can never reach zero.",
 		total: findings.length,
-		open: findings.filter((f) => f.status === "open" && !isMaintenance(f))
-			.length,
+		open: findings.filter(
+			(f) => f.status === "open" && !MAINTENANCE_MODES.has(f.failureMode),
+		).length,
 		refreshQueue: findings.filter(
-			(f) => f.status === "open" && isMaintenance(f),
+			(f) => f.status === "open" && MAINTENANCE_MODES.has(f.failureMode),
 		).length,
 		cleared: findings.filter((f) => f.status === "cleared").length,
 		verified: findings.filter((f) => f.status === "verified").length,
