@@ -29,8 +29,13 @@ import configPromise from "../src/payload.config";
 const EXECUTE = process.argv.includes("--execute");
 /** Beyond this, the snapshot describes a product we haven't seen recently. */
 const MAX_EVIDENCE_AGE_DAYS = 90;
-/** A person's verdict is never overwritten by a probe. */
-const NEVER_OVERWRITE = new Set(["human-verified", "onchain-activity"]);
+/** A person's verdict is never overwritten by a probe — and that is the ONLY
+ *  basis this lane refuses to touch. onchain-activity used to be in here too,
+ *  which froze the lane's own output: a row awarded once could never be
+ *  re-dated, so statusAsOf rotted while fresh snapshots arrived every day, and
+ *  a wrong citation could never be corrected. A dated claim that can never be
+ *  re-dated is the same failure as one that was never dated. */
+const NEVER_OVERWRITE = new Set(["human-verified"]);
 
 /** `url` cites the exact thing observed — the asset or the specific contract
  *  whose delta moved. A citation that points somewhere else is not evidence. */
@@ -100,7 +105,15 @@ function evidenceOf(onchain: any): Ev | null {
 		`${docs.length} rows carry an on-chain snapshot — ${EXECUTE ? "EXECUTING" : "dry run"}\n`,
 	);
 
-	const t = { awarded: 0, alreadyStrong: 0, noEvidence: 0, stale: 0, noDate: 0 };
+	const t = {
+		awarded: 0,
+		refreshed: 0,
+		upToDate: 0,
+		alreadyStrong: 0,
+		noEvidence: 0,
+		stale: 0,
+		noDate: 0,
+	};
 	for (const d of docs) {
 		const basis = String(d.statusBasis ?? "");
 		if (NEVER_OVERWRITE.has(basis)) {
@@ -125,9 +138,18 @@ function evidenceOf(onchain: any): Ev | null {
 			);
 			continue;
 		}
-		t.awarded++;
+		// Refreshing an existing award only moves FORWARD: a snapshot older
+		// than the stored date would silently walk the evidence backwards.
+		const storedAsOf = d.statusAsOf ? Date.parse(String(d.statusAsOf)) : 0;
+		const isRefresh = basis === "onchain-activity";
+		if (isRefresh && !(asOf > storedAsOf) && d.statusSourceUrl === ev.url) {
+			t.upToDate++;
+			continue;
+		}
+		if (isRefresh) t.refreshed++;
+		else t.awarded++;
 		console.log(
-			`  AWARD ${String(d.slug).padEnd(30)} ${basis || "(none)"} -> onchain-activity · ${ev.detail}`,
+			`  ${isRefresh ? "REFRESH" : "AWARD  "} ${String(d.slug).padEnd(30)} ${basis || "(none)"} -> onchain-activity · ${ev.detail}`,
 		);
 		if (EXECUTE)
 			await payload.update({
@@ -143,7 +165,7 @@ function evidenceOf(onchain: any): Ev | null {
 			});
 	}
 	console.log(
-		`\nawarded ${t.awarded} | already strong ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate}`,
+		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate}`,
 	);
 	process.exit(0);
 })();
