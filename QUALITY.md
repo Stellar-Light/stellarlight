@@ -337,8 +337,11 @@ overclaimed and 34 one-holder assets served as live — both corrected.
   our corpus is not where operator launch posts live. Not viable as designed.
 
 **Which commitment is at risk.**
-- P4 done-bar (weak < 50%): 57.2% on the 09-05 evening board (563 of 984).
-  The day's 54-row drop, decomposed so it is never read as 54 new facts:
+- P4 done-bar (weak < 50%): read `strongBasisSplit.weakLiveRows` over
+  `servedPopulation` in improvements/quality/entities.json (571 of 984 at the
+  09-05 evening regeneration, after eight stamps were withdrawn; the figure
+  is not hand-maintained here). The day's drop, decomposed so it is never
+  read as new facts:
   13 propagated from receipted deployment evidence (a copy, not new
   evidence); 38 owner-approved packet stamps, of which 34 kept their status,
   2 Live verdicts were overturned by the owner within the hour (orbitcdp,
