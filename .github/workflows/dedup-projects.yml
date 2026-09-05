@@ -19,6 +19,10 @@ on:
         description: "Actually hide dupes (Draft)? Leave false for a dry run."
         type: boolean
         default: false
+      skip:
+        description: "Comma-separated slugs to never hide (freezes their whole cluster)."
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -46,4 +50,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Detect duplicates${{ inputs.execute && ' + hide (Draft)' || ' (dry run)' }}
-        run: pnpm exec tsx scripts/detect-duplicate-projects.ts ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/detect-duplicate-projects.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.skip && format('--skip={0}', inputs.skip) || '' }}
