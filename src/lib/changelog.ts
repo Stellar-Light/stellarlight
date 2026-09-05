@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.45",
+		type: "changed",
+		summary:
+			"getLeaderboard sort=activity ranks by commit VOLUME (`github.commits90d`, dated by `github.commits90dAsOf`), recency breaking ties; getPartners names a valid-type miss as a coverage statement.",
+		detail:
+			"A through-Raven battery on 2026-09-05 asked for the most active projects by GitHub activity and got this service's own row at #1: sort=activity was last-commit recency alone, so any row with a commit that day outranked Blend. The enrich pass already stamps activitySignals.commits90d on 2,268 of 2,321 project-linked repos, so the leaderboard now sums it per project (github.commits90d, with the newest activitySignals.asOf as github.commits90dAsOf), sorts by it (null = index gap, sorts last, never zero), and breaks ties by recency; `range` still filters membership by recency. metricDefinitions.activity says so. Also: getPartners with a valid `type` and no rows used to answer with the cross-chain scope advisory; it now says no partner of that type is listed and names the type vocabulary and the match endpoint.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.44",
 		type: "added",
 		summary:
