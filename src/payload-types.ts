@@ -75,6 +75,7 @@ export interface Config {
     audits: Audit;
     stablecoins: Stablecoin;
     'stablecoin-snapshots': StablecoinSnapshot;
+    'rwa-assets': RwaAsset;
     'award-rounds': AwardRound;
     'award-nominees': AwardNominee;
     'award-voters': AwardVoter;
@@ -118,6 +119,7 @@ export interface Config {
     audits: AuditsSelect<false> | AuditsSelect<true>;
     stablecoins: StablecoinsSelect<false> | StablecoinsSelect<true>;
     'stablecoin-snapshots': StablecoinSnapshotsSelect<false> | StablecoinSnapshotsSelect<true>;
+    'rwa-assets': RwaAssetsSelect<false> | RwaAssetsSelect<true>;
     'award-rounds': AwardRoundsSelect<false> | AwardRoundsSelect<true>;
     'award-nominees': AwardNomineesSelect<false> | AwardNomineesSelect<true>;
     'award-voters': AwardVotersSelect<false> | AwardVotersSelect<true>;
@@ -1257,6 +1259,43 @@ export interface StablecoinSnapshot {
    * Which pipeline wrote it — 'stellarlight' now; 'replit-import' for history imported from the retired service.
    */
   source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rwa-assets".
+ */
+export interface RwaAsset {
+  id: string;
+  /**
+   * Registry id: CODE-GISSUER or the contract id
+   */
+  assetId: string;
+  kind: 'classic' | 'soroban';
+  symbol?: string | null;
+  issuerEntity?: string | null;
+  /**
+   * Classic: authorized supply (stellar.expert). Soroban: total_supply() where the contract exposes it. null = not measured
+   */
+  supply?: number | null;
+  /**
+   * Classic: trustlines. Soroban: null unless a holder count is readable. null = not measured
+   */
+  holders?: number | null;
+  /**
+   * Classic: lifetime payment operations. Soroban: lifetime contract events (stellar.expert). A COUNT, not an amount; not comparable across kinds
+   */
+  activityCount?: number | null;
+  /**
+   * live = read this cycle; unmeasured = the fetch failed and the previous good numbers were kept (or none exist). Never 'zero'.
+   */
+  measureBasis: 'live' | 'unmeasured';
+  measuredAt: string;
+  /**
+   * Set when the row could not be measured; names why
+   */
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2635,6 +2674,10 @@ export interface PayloadLockedDocument {
         value: string | StablecoinSnapshot;
       } | null)
     | ({
+        relationTo: 'rwa-assets';
+        value: string | RwaAsset;
+      } | null)
+    | ({
         relationTo: 'award-rounds';
         value: string | AwardRound;
       } | null)
@@ -3184,6 +3227,24 @@ export interface StablecoinSnapshotsSelect<T extends boolean = true> {
   basis?: T;
   measuredAt?: T;
   source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rwa-assets_select".
+ */
+export interface RwaAssetsSelect<T extends boolean = true> {
+  assetId?: T;
+  kind?: T;
+  symbol?: T;
+  issuerEntity?: T;
+  supply?: T;
+  holders?: T;
+  activityCount?: T;
+  measureBasis?: T;
+  measuredAt?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
