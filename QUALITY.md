@@ -347,13 +347,13 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 1. Make silence-close ineligible for the headline close rate
    (write-set: summarizeLedger; done = closingRate counts re-probed +
    verified only, silence reported apart).
-2. DONE 2026-09-05 — the routing battery grades the INTENDED op
-   (scripts/raven-routing.ts: 65 questions incl. the 28 gradable persona
-   probes; 48/65, T1 2/7 · T2 3/5 · T3 5/8 · T4 6/8; each miss carries a
-   class + evidence). Next on this lane: re-run after Raven re-baselines —
-   9 of the 17 misses are `catalog-lag` (our text routes them, Raven's
-   indexed text predates 08-31), and that re-run is the read-back that
-   closes #1141/#1226/#1282 or reopens them.
+2. DONE 2026-09-05 — the routing battery grades the INTENDED op. This is a
+   NEW series (persona bank + intended-op expectations + evidence-classed
+   misses), not the old 32-probe "some scout op present" series: 48/65 overall,
+   persona 16/28 (T1 2/7 · T2 3/5 · T3 5/8 · T4 6/8); 9 of 17 misses are
+   catalog lag (Raven's manifest is dated 2026-09-03T17:09Z and still serves
+   pre-08-31 descriptions for getRfps/explainRepo/getPartners). The old
+   series is unchanged at 32/37. Nothing external is closed by this.
 3. Exhaust the 34 `onchainEligible` weak rows with the existing lane
    (dispatch; done = onchainEligible 0 or each row carries a
    could-not-check).
@@ -366,6 +366,49 @@ overclaimed and 34 one-holder assets served as live — both corrected.
    reports as eligible is promoted or declined with the reason recorded
    here, and the append rule holds — a PR that corrects a lane's output
    logs it in improvements/lanes/interventions.json in that same PR.
+
+### Night-shift addendum (2026-09-05, 04:30–06:30 UTC)
+
+**What changed tonight (2026-09-05, 04:30–06:00 UTC).** 14 merged PRs
+(#1311–#1324), seven bounded agents, two cross-vendor audits. Every scout.*
+surface touched. Production writes, each dry-run, executed and read back:
+dedup 11 records hidden (3 clusters vetoed for a human), deployment→status
+propagation 13 rows, curated row facts 12 (142 writes incl. standing
+re-applies), all read back 100%. Fixes served live: a typed set no longer
+gated by q (Exchange 15→18), unknown partner regions 400 with the vocabulary
+(labels/case normalised), material-change counts on /api/changes, builders
+admitted by owned-repo language (rust 8→33), two audit reports joined to
+their projects, a hijacked website link no longer re-written nightly, the
+nightly knowledge-notes backfill actually executing (18 green no-op runs
+found), lane autonomy measured (62 lanes; 11 at 4+ weeks; 0 could-not-check),
+routing graded on the intended op (48/65; persona 16/28), a partition guard
+that names vacuous checks. Truth battery 112/112 (was 110/112); golden 51/51.
+
+**Blocked (unchanged + new).**
+- Raven catalog: manifest 2026-09-03T17:09Z, pre-08-31 descriptions still
+  served for getRfps/explainRepo/getPartners — every routing-vocabulary fix
+  since 08-31 is unmeasured until a re-baseline. Upstream; not filed as drift.
+- Raven scorer counts stopwords in its gated pass (evidence in
+  improvements/engine/raven-routing-latest.json) — candidate issue, unfiled.
+- 21 Inactive rows rest on site-liveness (duplicates parked as Inactive
+  before Draft-hide existed) — triage table drafted, human call.
+- 6 rows with a strong deployment basis and no citable artifact (xoxno, huma,
+  untangled, rozo, bondhive, allbridge, blend) — could-not-propagate until a
+  receipt exists.
+
+**At risk.** P4 weak share unchanged in kind: tonight moved 13 by propagation
+and 3 by curated evidence, and removed 5 lineage shadows from the count only
+if the scorer learns to skip canonicalSlug rows (queued). P3 Stage 2: the
+counter exists now; curate-projects shows 89 executes in 8 weeks of which 1
+was unattended — autonomy is measured, not earned.
+
+**Next (ordered).** 1. Scorer skips lineage shadows; STRONG_BASES drops
+`official-record` (not a statusBasis value) and /api/quality's definition text
+names the five real tiers. 2. Act on the Inactive/site-liveness triage
+(hide duplicates → Draft; receipts for the dead). 3. Health guard treats a
+run whose execute step was skipped as never-ran. 4. Re-run the routing
+battery after Raven re-baselines; file the stopword finding with the replica
+evidence. 5. Silence-close out of the headline close rate (ledger PR).
 
 ## Lessons — 2026-09-05 cross-vendor audit of the program
 
@@ -402,6 +445,22 @@ other claims were checked and, where wrong, are not here):
     is not a hit.
 12. Do not answer a routing miss with vocabulary once the failure mode is
     id-noun exclusion; that is the scorer's, upstream.
+13. A lane earns a run only when its execute step concluded `success`; a run
+    whose steps were skipped is a no-op, and the health guard reports it as
+    never-ran. (18 green nightly note-backfill runs executed nothing.)
+14. An artifact licenses only the tier it can support: asset movement →
+    onchain-activity; an operator's toml or a receipt → human-verified /
+    product-integration. A strong basis copied across records without a
+    tier-consistent artifact is a could-not-propagate.
+15. A filter with a closed vocabulary rejects unknown values with the
+    vocabulary (400) after normalising case and labels; it never serves an
+    unfiltered-looking zero.
+16. Evidence date, never observation day, on every provenance stamp — a repo's
+    push date, a receipt's date, an announcement's date.
+17. One field, one owner: when two lanes can write the same field with
+    different verdicts (dedup's Draft vs the merge fold's Inactive), the later
+    one wins silently. Register ownership or merge the lanes before either
+    runs unattended.
 
 Recorded lessons this week violated (so the loop is honest): verify before
 advertise (#494, twice); examples are probes, not targets (11 of 61 treated
