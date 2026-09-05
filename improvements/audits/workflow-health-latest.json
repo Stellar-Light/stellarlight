@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-05T21:25:00.045Z",
+	"asOf": "2026-09-05T23:26:31.017Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 90,
 	"healthy": 90,
@@ -44,10 +44,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T22:07:42Z",
-			"ageDays": 82,
+			"ageDays": 83,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 82d ago (manual tool — age not judged)"
+			"why": "last green 83d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "apply-wallet-availability.yml",
@@ -55,10 +55,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T22:24:00Z",
-			"ageDays": 21,
+			"ageDays": 22,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 21d ago (manual tool — age not judged)"
+			"why": "last green 22d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -77,10 +77,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-15T22:34:25Z",
-			"ageDays": 20,
+			"ageDays": 21,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 20d ago (manual tool — age not judged)"
+			"why": "last green 21d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-contract-basis.yml",
@@ -132,10 +132,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 24,
+			"ageDays": 25,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 24d ago (manual tool — age not judged)"
+			"why": "last green 25d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -164,10 +164,10 @@
 			"name": "Award onchain-activity basis (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T15:19:49Z",
+			"lastSuccessAt": "2026-09-05T22:51:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 8,
+			"runs": 12,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -230,10 +230,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:10:46Z",
+			"lastSuccessAt": "2026-09-05T23:20:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -252,10 +252,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:10:47Z",
+			"lastSuccessAt": "2026-09-05T23:20:12Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -285,10 +285,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:14:22Z",
+			"lastSuccessAt": "2026-09-05T23:13:34Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 59,
+			"runs": 62,
 			"why": "last green 0d ago"
 		},
 		{
@@ -297,10 +297,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T22:13:42Z",
-			"ageDays": 21,
+			"ageDays": 22,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 21d ago (manual tool — age not judged)"
+			"why": "last green 22d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "db-space.yml",
@@ -395,10 +395,10 @@
 			"name": "Enrich on-chain metrics",
 			"cron": "0 6 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T15:15:24Z",
+			"lastSuccessAt": "2026-09-05T22:46:57Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 30,
+			"runs": 32,
 			"why": "last green 0d ago"
 		},
 		{
@@ -582,10 +582,10 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T19:29:52Z",
+			"lastSuccessAt": "2026-09-05T21:42:11Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 33,
+			"runs": 34,
 			"why": "last green 0d ago"
 		},
 		{
@@ -637,10 +637,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:06:56Z",
+			"lastSuccessAt": "2026-09-05T23:17:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -659,10 +659,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T11:47:12Z",
+			"lastSuccessAt": "2026-09-05T23:09:39Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 69,
+			"runs": 78,
 			"why": "last green 0d ago"
 		},
 		{
@@ -692,10 +692,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T20:46:05Z",
+			"lastSuccessAt": "2026-09-05T23:09:39Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 41,
+			"runs": 44,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -715,10 +715,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T21:29:07Z",
-			"ageDays": 4,
+			"ageDays": 5,
 			"graceDays": 45,
 			"runs": 4,
-			"why": "last green 4d ago (nothing under api-client/package.json, scout-mcp/package.json has changed since — nothing to do, not stale)"
+			"why": "last green 5d ago (nothing under api-client/package.json, scout-mcp/package.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "raven-category-battery.yml",
@@ -791,10 +791,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T18:22:28Z",
+			"lastSuccessAt": "2026-09-05T22:04:56Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 20,
+			"runs": 21,
 			"why": "last green 0d ago"
 		},
 		{
@@ -934,7 +934,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:10:46Z",
+			"lastSuccessAt": "2026-09-05T23:24:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -978,7 +978,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T16:42:31Z",
+			"lastSuccessAt": "2026-09-05T23:06:29Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -989,10 +989,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T16:47:46Z",
+			"lastSuccessAt": "2026-09-05T21:23:08Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 25,
+			"runs": 26,
 			"why": "last green 0d ago"
 		}
 	]
