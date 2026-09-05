@@ -52,6 +52,7 @@ for (const f of findings) {
 	const cur = byMode.get(f.failureMode) ?? {
 		open: 0,
 		refresh: 0,
+		blocked: 0,
 		cleared: 0,
 		verified: 0,
 		surface: f.surface,
