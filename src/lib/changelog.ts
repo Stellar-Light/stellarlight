@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api"],
+		version: "spec@1.9.35",
+		type: "added",
+		summary:
+			"RWA rows and product records gain `controls` — the issuer's on-chain whitelist / freeze / clawback flags read from Horizon (sls-023 GT-18).",
+		detail:
+			"GT-18 in sls-023 asked how a live regulated fund share differs from a stablecoin: eligibility, whitelisting and clawback controls. For a classic Stellar asset those are not prose — they are the issuer's flags on the ledger, and Horizon serves them. Every classic registry row (65) now carries controls {authRequired, authRevocable, authImmutable, clawbackEnabled} with `controlsBasis` horizon-issuer-flags, and the product record on a project row carries the same object. Read live on 2026-09-05: 23 rows require issuer approval to hold (a whitelist) and are revocable with clawback — the BENJI family and YLDS among them; 25 are revocable with clawback but open to any holder (USDY, the WisdomTree funds); 4 are revocable only; 13 carry no flags and are freely transferable. Soroban tokens carry null: their controls live in contract logic and are not uniformly readable, and null says so rather than guessing. Not carried: legal class beyond rwa.xyz's assetClass, and transfer-agent record priority — prospectus facts, not ledger facts.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api"],
 		version: "spec@1.9.34",
 		type: "changed",
 		summary:

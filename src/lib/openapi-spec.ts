@@ -7480,6 +7480,25 @@ export const spec: OpenAPISpec = {
 														description:
 															"The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair.",
 													},
+													controls: {
+														type: "object",
+														nullable: true,
+														description:
+															"The issuer's on-chain flags, read from Horizon (classic assets only) — the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic.",
+														properties: {
+															authRequired: { type: "boolean" },
+															authRevocable: { type: "boolean" },
+															authImmutable: { type: "boolean" },
+															clawbackEnabled: { type: "boolean" },
+														},
+													},
+													controlsBasis: {
+														type: "string",
+														nullable: true,
+														enum: ["horizon-issuer-flags"],
+														description:
+															"Where controls came from; null when controls is null.",
+													},
 												},
 											},
 										},
@@ -8422,6 +8441,18 @@ export const spec: OpenAPISpec = {
 									nullable: true,
 									description:
 										"Contract creation date (Soroban); null for classic assets, which Horizon does not date.",
+								},
+								controls: {
+									type: "object",
+									nullable: true,
+									description:
+										"Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows.",
+									properties: {
+										authRequired: { type: "boolean" },
+										authRevocable: { type: "boolean" },
+										authImmutable: { type: "boolean" },
+										clawbackEnabled: { type: "boolean" },
+									},
 								},
 							},
 						},

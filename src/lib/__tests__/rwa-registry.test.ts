@@ -251,3 +251,46 @@ describe("audit corrections (cross-vendor, 2026-09-04)", () => {
 		).toBe(false);
 	});
 });
+
+describe("controls — the issuer's on-chain flags (sls-023 GT-18)", () => {
+	it("every classic row carries the four flags from Horizon; every Soroban row says null", () => {
+		for (const r of RWA_REGISTRY) {
+			if (r.kind === "classic") {
+				expect(r.controlsBasis, r.id).toBe("horizon-issuer-flags");
+				for (const k of [
+					"authRequired",
+					"authRevocable",
+					"authImmutable",
+					"clawbackEnabled",
+				] as const)
+					expect(typeof r.controls?.[k], `${r.id}.${k}`).toBe("boolean");
+			} else {
+				expect(r.controls, r.id).toBeNull();
+				expect(r.controlsBasis, r.id).toBeNull();
+			}
+		}
+	});
+
+	it("pins two fixtures read live 2026-09-05: BENJI is whitelisted + revocable + clawback; USDY is revocable + clawback and open to any holder", () => {
+		const benji = RWA_REGISTRY.find((r) => r.symbol === "BENJI")?.controls;
+		expect(benji).toEqual({
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		});
+		const usdy = RWA_REGISTRY.find((r) => r.symbol === "USDY")?.controls;
+		expect(usdy?.authRequired).toBe(false);
+		expect(usdy?.authRevocable).toBe(true);
+		expect(usdy?.clawbackEnabled).toBe(true);
+	});
+
+	it("a product record carries the controls, so a project row can tell a whitelisted fund share from an open stablecoin", () => {
+		const p = registryProducts("benji").find((x) =>
+			x.assetId?.startsWith("BENJI-"),
+		);
+		expect(p?.controls?.authRequired).toBe(true);
+		const w = registryProducts("wisdomtree")[0];
+		expect(w.controls).not.toBeUndefined();
+	});
+});
