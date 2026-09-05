@@ -112,11 +112,17 @@ weeks** (human reviewed, changed nothing), then the gate opens.
   changes, outward-facing posts, spend, and anything §0-class-new.
 
 **How a week is counted.** A week counts for a lane only when that lane
-executed and nothing it wrote was corrected. Elapsed time earns nothing: the
-count is capped at the distinct ISO weeks in which the lane actually completed
-an execute, so a lane nobody ran sits at zero however long it has been quiet.
-The registry of lanes that can write to production is
-`improvements/lanes/lanes.json`, built by reading `.github/workflows`;
+executed ITSELF and nothing it wrote was corrected, and the weeks must be
+CONSECUTIVE ISO weeks running up to the current one — four scattered good weeks
+are not four clean weeks, and a lane that stops running stops earning the same
+day. An execute a human dispatched is a person operating the lane: it is
+reported and it earns nothing. Every counted execute is proven from that run's
+own job steps (a skipped step moved nothing), never from today's copy of the
+workflow file — an instrument that re-reads the past when you edit a YAML today
+is not an instrument. The roster of lanes that can write to production is
+derived at run time from `.github/workflows`;
+`improvements/lanes/lanes.json` supplies only what each lane writes, and a
+workflow missing from it is reported could-not-check.
 `scripts/check-lane-autonomy.ts` counts against GitHub's own run history into
 `improvements/audits/lane-autonomy-latest.json`, published on /quality. The
 reset is `improvements/lanes/interventions.json`, append-only: the newest entry

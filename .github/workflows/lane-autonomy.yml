@@ -50,8 +50,12 @@ jobs:
           git commit -m "chore(quality): lane autonomy [skip ci]"
           # Same rebase-and-retry as workflow-health.yml: the artifact is a
           # fresh measurement, so replaying it on top of whatever landed first
-          # is always correct, and -X theirs resolves the two-runs-of-this-lane
-          # conflict in favour of the commit being replayed (ours).
+          # is always correct. In a REBASE the sides are swapped from a merge's
+          # — `ours` is the upstream series being replayed onto, `theirs` is the
+          # commit being replayed — so `-X theirs` keeps THIS run's fresh
+          # measurement, which is what we want. (`-X ours` here would keep the
+          # already-pushed artifact and drop the new one; verified locally
+          # 2026-09-05 on a two-commit collision, both directions.)
           for i in 1 2 3; do
             git push && exit 0
             git pull --rebase -X theirs || git rebase --abort
