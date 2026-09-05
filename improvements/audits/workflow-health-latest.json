@@ -1,13 +1,13 @@
 {
-	"asOf": "2026-09-05T05:44:29.911Z",
+	"asOf": "2026-09-05T06:19:32.529Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 88,
-	"healthy": 87,
+	"checked": 89,
+	"healthy": 88,
 	"broken": [
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "12 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "13 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -144,6 +144,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "basis-from-deployment.yml",
+			"name": "Propagate deployment basis to status (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-05T05:42:51Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 1,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "basis-from-onchain.yml",
 			"name": "Award onchain-activity basis (manual)",
 			"cron": null,
@@ -159,11 +170,11 @@
 			"name": "Award product-integration basis (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:19:17Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-05T05:58:10Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 3,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"runs": 5,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "basis-from-repo.yml",
@@ -214,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:39:30Z",
+			"lastSuccessAt": "2026-09-05T06:14:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 53,
+			"runs": 65,
 			"why": "last green 0d ago"
 		},
 		{
@@ -236,10 +247,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:42:42Z",
+			"lastSuccessAt": "2026-09-05T06:17:39Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -610,7 +621,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:39:30Z",
+			"lastSuccessAt": "2026-09-05T06:14:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
@@ -632,10 +643,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:39:25Z",
+			"lastSuccessAt": "2026-09-05T06:07:34Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 66,
+			"runs": 68,
 			"why": "last green 0d ago"
 		},
 		{
@@ -665,11 +676,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:03:33Z",
+			"lastSuccessAt": "2026-09-05T06:07:34Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 36,
-			"why": "last green 0d ago"
+			"runs": 39,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -918,10 +929,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:42:42Z",
+			"lastSuccessAt": "2026-09-05T06:18:15Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -929,11 +940,11 @@
 			"name": "Upgrade status basis from on-chain evidence (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T16:18:45Z",
-			"ageDays": 2,
+			"lastSuccessAt": "2026-09-05T05:48:36Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 8,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"runs": 11,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -962,7 +973,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:36:25Z",
+			"lastSuccessAt": "2026-09-05T06:04:35Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -976,8 +987,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 19,
-			"why": "12 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 20,
+			"why": "13 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
