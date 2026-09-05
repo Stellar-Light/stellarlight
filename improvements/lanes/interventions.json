@@ -28,7 +28,7 @@
     {
       "date": "2026-09-05",
       "lane": "backfill-knowledge-notes",
-      "what": "The nightly step was gated to workflow_dispatch, so 18 green scheduled runs since 2026-08-18 executed nothing; the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
+      "what": "The nightly step was gated to workflow_dispatch, so the 3 scheduled runs since the cron was added on 2026-09-02 executed nothing (18 completed runs in total, most manual dispatches; corrected 2026-09-05 from the runs' job steps); the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
       "source": "PR night/notes-nightly (this fix); runs 33851502654 and 33731681303 show the step skipped"
     },
     {
