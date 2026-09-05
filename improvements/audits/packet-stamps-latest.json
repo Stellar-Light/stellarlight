@@ -1,0 +1,509 @@
+{
+	"generatedAt": "2026-09-05T23:10:54.138Z",
+	"source": "scripts/check-packet-stamps.ts",
+	"rule": "Each human-verified packet stamp is re-fetched at its own deciding sourceUrl. A contradiction is a finding for a human, never an auto-flip; a page we could not read is never a contradiction.",
+	"tally": {
+		"checked": 55,
+		"holds": 52,
+		"contradicted": 0,
+		"revived": 0,
+		"couldNotCheck": 3
+	},
+	"rows": [
+		{
+			"slug": "abroad",
+			"to": "Live",
+			"sourceUrl": "https://abroad.finance/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 7827 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:42.850Z"
+		},
+		{
+			"slug": "albedo",
+			"to": "Live",
+			"sourceUrl": "https://albedo.link/",
+			"httpStatus": 200,
+			"verdict": "COULD-NOT-CHECK",
+			"reason": "client-rendered shell (6 chars readable, needs a browser)",
+			"checkedAt": "2026-09-05T23:10:50.058Z"
+		},
+		{
+			"slug": "allbridge",
+			"to": "Live",
+			"sourceUrl": "https://allbridge.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3602 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.063Z"
+		},
+		{
+			"slug": "alternun",
+			"to": "Live",
+			"sourceUrl": "https://alternun.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 4343 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:43.288Z"
+		},
+		{
+			"slug": "basement",
+			"to": "Inactive",
+			"sourceUrl": "https://basement.dev/",
+			"httpStatus": 404,
+			"verdict": "HOLDS",
+			"reason": "HTTP 404",
+			"checkedAt": "2026-09-05T23:10:42.856Z"
+		},
+		{
+			"slug": "beans",
+			"to": "Live",
+			"sourceUrl": "https://beansapp.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 81263 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.288Z"
+		},
+		{
+			"slug": "bitget-wallet",
+			"to": "Live",
+			"sourceUrl": "https://web3.bitget.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 2133 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:54.129Z"
+		},
+		{
+			"slug": "bitso",
+			"to": "Live",
+			"sourceUrl": "https://bitso.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6048 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:49.300Z"
+		},
+		{
+			"slug": "blindpay",
+			"to": "Live",
+			"sourceUrl": "https://blindpay.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5653 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:43.176Z"
+		},
+		{
+			"slug": "boundless",
+			"to": "Live",
+			"sourceUrl": "https://boundless.network/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5127 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:43.844Z"
+		},
+		{
+			"slug": "chaincerts",
+			"to": "Live",
+			"sourceUrl": "https://chaincerts.co/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 1528 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:49.295Z"
+		},
+		{
+			"slug": "chainsatlas",
+			"to": "Inactive",
+			"sourceUrl": "https://chainsatlas.com/",
+			"httpStatus": 404,
+			"verdict": "HOLDS",
+			"reason": "HTTP 404",
+			"checkedAt": "2026-09-05T23:10:43.985Z"
+		},
+		{
+			"slug": "code4rena",
+			"to": "Inactive",
+			"sourceUrl": "https://code4rena.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "still says \"winding down\"",
+			"checkedAt": "2026-09-05T23:10:43.959Z"
+		},
+		{
+			"slug": "dfns",
+			"to": "Live",
+			"sourceUrl": "https://dfns.co/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 17902 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:50.112Z"
+		},
+		{
+			"slug": "dia",
+			"to": "Live",
+			"sourceUrl": "https://www.diadata.org/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 11296 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.254Z"
+		},
+		{
+			"slug": "flutterwave",
+			"to": "Live",
+			"sourceUrl": "https://flutterwave.com/us/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6459 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:41.555Z"
+		},
+		{
+			"slug": "fordefi",
+			"to": "Live",
+			"sourceUrl": "https://fordefi.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 13200 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:53.932Z"
+		},
+		{
+			"slug": "gatewayfm",
+			"to": "Live",
+			"sourceUrl": "https://gateway.fm/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 10609 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:51.322Z"
+		},
+		{
+			"slug": "giveth",
+			"to": "Live",
+			"sourceUrl": "https://giveth.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 10770 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:43.900Z"
+		},
+		{
+			"slug": "hubble",
+			"to": "Live",
+			"sourceUrl": "https://developers.stellar.org/docs/data/analytics/hubble",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5703 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:48.198Z"
+		},
+		{
+			"slug": "idos",
+			"to": "Live",
+			"sourceUrl": "https://idos.network/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6816 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:48.613Z"
+		},
+		{
+			"slug": "inference",
+			"to": "Live",
+			"sourceUrl": "https://inferara.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 2972 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:45.268Z"
+		},
+		{
+			"slug": "java-stellar-sdk",
+			"to": "Live",
+			"sourceUrl": "https://github.com/lightsail-network/java-stellar-sdk",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5387 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:51.361Z"
+		},
+		{
+			"slug": "katagames",
+			"to": "Live",
+			"sourceUrl": "https://kata.games/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3242 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.458Z"
+		},
+		{
+			"slug": "keystone",
+			"to": "Live",
+			"sourceUrl": "https://keyst.one/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 16363 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:45.325Z"
+		},
+		{
+			"slug": "klever",
+			"to": "Live",
+			"sourceUrl": "https://klever.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6731 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:53.933Z"
+		},
+		{
+			"slug": "ledger",
+			"to": "Live",
+			"sourceUrl": "https://ledger.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 16725 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.986Z"
+		},
+		{
+			"slug": "moneygram",
+			"to": "Live",
+			"sourceUrl": "https://moneygram.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5268 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:48.687Z"
+		},
+		{
+			"slug": "nodies",
+			"to": "Live",
+			"sourceUrl": "https://nodies.app/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 4253 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:49.506Z"
+		},
+		{
+			"slug": "nownodes",
+			"to": "Live",
+			"sourceUrl": "https://nownodes.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 4855 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:51.465Z"
+		},
+		{
+			"slug": "obsrvr",
+			"to": "Live",
+			"sourceUrl": "https://withobsrvr.com/",
+			"httpStatus": 200,
+			"verdict": "COULD-NOT-CHECK",
+			"reason": "client-rendered shell (63 chars readable, needs a browser)",
+			"checkedAt": "2026-09-05T23:10:50.146Z"
+		},
+		{
+			"slug": "onekey",
+			"to": "Live",
+			"sourceUrl": "https://onekey.so/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 4151 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:42.286Z"
+		},
+		{
+			"slug": "onfinality",
+			"to": "Live",
+			"sourceUrl": "https://onfinality.io/en/networks/stellar",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5255 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.935Z"
+		},
+		{
+			"slug": "ottersec",
+			"to": "Live",
+			"sourceUrl": "https://osec.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6062 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:45.175Z"
+		},
+		{
+			"slug": "python-stellar-sdk",
+			"to": "Live",
+			"sourceUrl": "https://github.com/stellarcn/py-stellar-base",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 6701 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:48.691Z"
+		},
+		{
+			"slug": "rabet",
+			"to": "Live",
+			"sourceUrl": "https://rabet.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3568 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:50.419Z"
+		},
+		{
+			"slug": "rango",
+			"to": "Live",
+			"sourceUrl": "https://rango.exchange/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5839 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:44.822Z"
+		},
+		{
+			"slug": "rarible",
+			"to": "Live",
+			"sourceUrl": "https://rarible.com/all",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3231 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:46.324Z"
+		},
+		{
+			"slug": "ripio",
+			"to": "Live",
+			"sourceUrl": "https://www.ripio.com/es",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 16175 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.991Z"
+		},
+		{
+			"slug": "rozo",
+			"to": "Live",
+			"sourceUrl": "https://rozo.ai/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3884 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.999Z"
+		},
+		{
+			"slug": "runtime-verification",
+			"to": "Live",
+			"sourceUrl": "https://runtimeverification.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5019 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:45.974Z"
+		},
+		{
+			"slug": "soundness",
+			"to": "Inactive",
+			"sourceUrl": "https://soundness.xyz/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "still says \"winding down\"",
+			"checkedAt": "2026-09-05T23:10:46.290Z"
+		},
+		{
+			"slug": "spacewalk",
+			"to": "Live",
+			"sourceUrl": "https://www.pendulumchain.org/spacewalk",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 3755 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:40.264Z"
+		},
+		{
+			"slug": "splito",
+			"to": "Live",
+			"sourceUrl": "https://www.splito.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 2375 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:45.971Z"
+		},
+		{
+			"slug": "spydra",
+			"to": "Live",
+			"sourceUrl": "https://www.spydra.app/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 38714 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:46.884Z"
+		},
+		{
+			"slug": "stellar-disbursement-platform-sdp",
+			"to": "Live",
+			"sourceUrl": "https://stellar.org/products-and-tools/disbursement-platform",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 7154 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.112Z"
+		},
+		{
+			"slug": "stellar-quickstart",
+			"to": "Live",
+			"sourceUrl": "https://github.com/stellar/quickstart",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 29846 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:51.459Z"
+		},
+		{
+			"slug": "stellarbroker",
+			"to": "Live",
+			"sourceUrl": "https://stellar.broker/",
+			"httpStatus": 200,
+			"verdict": "COULD-NOT-CHECK",
+			"reason": "client-rendered shell (104 chars readable, needs a browser)",
+			"checkedAt": "2026-09-05T23:10:52.080Z"
+		},
+		{
+			"slug": "streamingfast",
+			"to": "Live",
+			"sourceUrl": "https://streamingfast.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 2620 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.082Z"
+		},
+		{
+			"slug": "the-give-hub",
+			"to": "Live",
+			"sourceUrl": "https://thegivehub.com/en/index.html",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 15063 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:46.888Z"
+		},
+		{
+			"slug": "token-tails",
+			"to": "Live",
+			"sourceUrl": "https://tokentails.com/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5916 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:46.847Z"
+		},
+		{
+			"slug": "trezor",
+			"to": "Live",
+			"sourceUrl": "https://trezor.io/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 7875 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:52.908Z"
+		},
+		{
+			"slug": "typescript-wallet-sdk",
+			"to": "Live",
+			"sourceUrl": "https://github.com/stellar/typescript-wallet-sdk",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 4674 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:53.307Z"
+		},
+		{
+			"slug": "usher",
+			"to": "Live",
+			"sourceUrl": "https://www.usher.so/",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 2556 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:47.616Z"
+		},
+		{
+			"slug": "validation-cloud",
+			"to": "Live",
+			"sourceUrl": "https://validationcloud.io/stellar",
+			"httpStatus": 200,
+			"verdict": "HOLDS",
+			"reason": "200, 5802 chars, no markers",
+			"checkedAt": "2026-09-05T23:10:49.385Z"
+		}
+	]
+}

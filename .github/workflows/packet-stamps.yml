@@ -1,0 +1,66 @@
+# Re-probe every human-verified packet stamp against its own deciding URL.
+#
+# The lane exists because on 2026-09-05 two "high confidence" Live stamps were
+# wrong within hours (orbitcdp: a "Live on Stellar" banner over empty protocol
+# stats; skyhitz: a title and a fresh commit over 0.00 balances) and eight more
+# were withdrawn for thin evidence. A stamp is a claim about a live product,
+# read once by hand; the page keeps moving and nothing was watching it.
+#
+# Weekly, off the top of the hour, because that is the cadence at which a
+# product state actually changes — and because 55 outbound fetches at :00 is
+# the shape every rate limiter is tuned against.
+#
+# A red at "Re-check" is a CONTRADICTED or REVIVED row: this lane doing its
+# job, and a finding for a person to read, never an auto-flip. A red anywhere
+# else is this lane broken.
+# workflow-health: signal-steps: ^Re-check$
+name: packet-stamps
+
+on:
+  schedule:
+    - cron: "43 7 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: packet-stamps
+  cancel-in-progress: true
+
+jobs:
+  recheck:
+    runs-on: ubuntu-latest
+    # 55 fetches at concurrency 4 with a 25s ceiling each: ~6 min worst case.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Re-check
+        run: pnpm exec tsx scripts/check-packet-stamps.ts --json
+
+      # always(): the artifact is written BEFORE the exit code is chosen, and a
+      # red run is exactly the run whose evidence the board needs. Same lesson
+      # as workflow-health — a bad exit code must never cost us the artifact.
+      - name: Commit it
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/packet-stamps-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): packet stamp re-check [skip ci]"
+          # Rebase-and-retry, copied from workflow-health: this artifact is a
+          # fresh measurement, so replaying it on top of whatever landed first
+          # is always correct. -X theirs resolves the two-runs-of-this-lane
+          # conflict in favour of the commit being replayed — ours.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs || git rebase --abort
+          done
+          git push
