@@ -3636,6 +3636,10 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	if (slug in STATUS_FIX) owned.add("status");
 	if (slug in NAME_FIXES) owned.add("name");
 	if (slug in WEBSITE_FIXES) owned.add("links.website");
+	// A removed (hijacked/parked) website is a curated fact about links.website
+	// too: without ownership, sync-lumenloop re-wrote the-blue-marble's hijacked
+	// casino link back from the feed every night (found 2026-09-05).
+	if (slug in WEBSITE_REMOVE) owned.add("links.website");
 	if (slug in DOCS_LINKS) owned.add("links.docs");
 	if (slug in GITHUB_REPOS_ADD) owned.add("github");
 	return owned;
@@ -3647,7 +3651,6 @@ export function curatedSlugs(): string[] {
 	return [
 		...new Set([
 			...Object.keys(DESCRIPTION_FIXES),
-			...Object.keys(BUILT_BY_FIXES),
 			...Object.keys(TYPES_SET),
 			...Object.keys(TYPES_ADD),
 			...Object.keys(STATUS_FIX),
@@ -3655,6 +3658,7 @@ export function curatedSlugs(): string[] {
 			...Object.keys(WEBSITE_FIXES),
 			...Object.keys(DOCS_LINKS),
 			...Object.keys(GITHUB_REPOS_ADD),
+			...Object.keys(WEBSITE_REMOVE),
 		]),
 	].sort();
 }
