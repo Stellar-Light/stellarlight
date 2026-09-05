@@ -1,15 +1,9 @@
 {
-	"asOf": "2026-09-05T21:12:15.925Z",
+	"asOf": "2026-09-05T21:25:00.045Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 90,
-	"healthy": 89,
-	"broken": [
-		{
-			"file": "self-audit.yml",
-			"state": "standing-signal",
-			"why": "5 run(s) red at its declared signal step since its last green 5d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Fail the job so the regression is visible\")"
-		}
-	],
+	"healthy": 90,
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -236,10 +230,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:06:56Z",
+			"lastSuccessAt": "2026-09-05T21:10:46Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -258,10 +252,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:06:56Z",
+			"lastSuccessAt": "2026-09-05T21:10:47Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -291,10 +285,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T19:09:51Z",
+			"lastSuccessAt": "2026-09-05T21:14:22Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 57,
+			"runs": 59,
 			"why": "last green 0d ago"
 		},
 		{
@@ -851,12 +845,12 @@
 			"file": "self-audit.yml",
 			"name": "Self-audit (data-quality guard)",
 			"cron": "0 13 * * *",
-			"state": "standing-signal",
-			"lastSuccessAt": "2026-08-31T19:28:33Z",
-			"ageDays": 5,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-05T21:20:24Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 6,
-			"why": "5 run(s) red at its declared signal step since its last green 5d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Fail the job so the regression is visible\")"
+			"runs": 7,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "set-project-status.yml",
@@ -998,7 +992,7 @@
 			"lastSuccessAt": "2026-09-05T16:47:46Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 24,
+			"runs": 25,
 			"why": "last green 0d ago"
 		}
 	]
