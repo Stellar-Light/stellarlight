@@ -2539,8 +2539,12 @@ async function main() {
 				note: `Duplicate record of '${m.canonical}' (same project, split entry) — funding, status and repos live on the canonical record. Merged ${ASOF}.`,
 			};
 		if (Object.keys(dData).length) {
+			// Name the status TRANSITION, not just the key: this line is the dry
+			// run's only evidence of what the pass would do to a duplicate, and
+			// "status was 'Inactive'" reads identically whether the pass parks the
+			// row at Draft or re-marks it dead.
 			console.log(
-				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status was '${dupe.status}')`,
+				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status '${dupe.status}' ${dData.status ? `→ '${dData.status}'` : "kept"})`,
 			);
 			writes.push({ id: dupe.id, slug: m.dupe, data: dData });
 		} else {
