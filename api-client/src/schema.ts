@@ -955,6 +955,8 @@ export interface components {
                 validTypes?: string[];
                 /** @description Every value the ramps filter accepts (unknown values 400 with this list). */
                 validRamps?: string[];
+                /** @description Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions — they go in q. */
+                validRegions?: string[];
                 /**
                  * @description Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.
                  * @enum {string}
@@ -3245,7 +3247,7 @@ export interface operations {
                 type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
                 /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
                 sector?: string;
-                /** @description Filter by region served (global, latam, africa, …) */
+                /** @description Filter by region served — a closed vocabulary of continents/blocs: global, north-america, latam, europe, africa, mena, asia, oceania. Unknown values return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text. */
                 region?: string;
                 /** @description Filter by fiat-ramp capability: `on-ramp` (fiat → Stellar), `off-ramp` (Stellar → fiat), or `on-ramp,off-ramp` to require both. Unknown values return 400 with `validRamps`. Combine with `region`/`q` for corridor lookups (e.g. ramps=on-ramp&q=mexico). */
                 ramps?: string;

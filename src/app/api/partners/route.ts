@@ -16,6 +16,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { REGIONS } from "@/collections/Partners";
 import { logApiHit } from "@/lib/api-usage";
 import { partnerTrust } from "@/lib/confidence";
 import { isExperimentOn } from "@/lib/experiments";
@@ -55,6 +56,7 @@ const PARTNER_TYPES = [
 
 // Mirrors Partners.rampTypes select options.
 const RAMP_TYPES = ["on-ramp", "off-ramp"];
+const REGION_VALUES: string[] = REGIONS.map((r) => r.value);
 
 /**
  * Map a Payload partner doc → the public shape. Drops auth/internal fields,
@@ -304,6 +306,23 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// Region is a hasMany select with a closed vocabulary (continents/blocs).
+	// Payload `contains` on a hasMany is a substring test, so an unknown value
+	// used to return an unfiltered-looking 0 with an advisory that read as
+	// "no partners here": region=Nigeria served counts 0/0 with no warning on
+	// 2026-09-05 while q=nigeria found an anchor. A country is not a region —
+	// it lives in coverage.countries and is matched from q. Unknown values 400
+	// with the vocabulary, the ramps pattern.
+	if (region && !REGION_VALUES.includes(region)) {
+		return NextResponse.json(
+			{
+				error: `Unknown region '${region}'`,
+				validRegions: REGION_VALUES,
+				hint: "Regions are continents/blocs. For a country or currency put it in q (e.g. ?q=nigeria or ?ramps=off-ramp&q=mexico) — coverage.countries is matched from the query text.",
+			},
+			{ status: 400 },
+		);
+	}
 
 	let partners: ReturnType<typeof toPublic>[] = [];
 	let totalMatching = 0;
@@ -327,8 +346,7 @@ export async function GET(req: NextRequest) {
 			// undecidable from outside. accepting=0 now selects the complement
 			// (only NOT-accepting partners; today the honest empty set), so the
 			// two values return different pages and the parameter proves itself.
-			if (acceptingParsed === true)
-				where.acceptingClients = { equals: true };
+			if (acceptingParsed === true) where.acceptingClients = { equals: true };
 			else if (acceptingParsed === false)
 				where.acceptingClients = { equals: false };
 

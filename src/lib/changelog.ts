@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.38",
+		type: "fixed",
+		summary:
+			"getPartners: an unknown `region` value now returns 400 with `validRegions` instead of a silent 0 — a country is not a region, use q.",
+		detail:
+			"region is a hasMany select with a closed vocabulary (global, north-america, latam, europe, africa, mena, asia, oceania). Payload's contains operator is a substring test on hasMany, so region=Nigeria matched nothing and served counts 0/0 with an advisory that read as 'no partners here' — while q=nigeria found an anchor. Found by a through-Raven hand battery on 2026-09-05. Same pattern as the ramps filter: unknown values 400 with the vocabulary and a hint that countries and currencies live in q (coverage.countries is matched from query text).",
+	},
+	{
+		date: "2026-09-05",
 		surfaces: ["api"],
 		version: "spec@1.9.37",
 		type: "added",
