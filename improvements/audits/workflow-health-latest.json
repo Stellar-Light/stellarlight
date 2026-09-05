@@ -1,20 +1,9 @@
 {
-	"asOf": "2026-09-05T16:38:01.039Z",
+	"asOf": "2026-09-05T16:49:36.782Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 91,
-	"healthy": 89,
-	"broken": [
-		{
-			"file": "api-drift.yml",
-			"state": "failing",
-			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Skill-reference coverage (sk-009 — served skill must not lag the contract)\""
-		},
-		{
-			"file": "workflow-health.yml",
-			"state": "failing",
-			"why": "14 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
-		}
-	],
+	"healthy": 91,
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -31,12 +20,12 @@
 			"file": "api-drift.yml",
 			"name": "API drift guard",
 			"cron": "17 13 * * *",
-			"state": "failing",
-			"lastSuccessAt": "2026-09-04T16:51:51Z",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-05T16:46:33Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 6,
-			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Skill-reference coverage (sk-009 — served skill must not lag the contract)\""
+			"runs": 8,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "apply-content-pass.yml",
@@ -252,10 +241,10 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T16:07:46Z",
+			"lastSuccessAt": "2026-09-05T16:43:55Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 11,
+			"runs": 13,
 			"why": "last green 0d ago"
 		},
 		{
@@ -263,7 +252,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T16:28:32Z",
+			"lastSuccessAt": "2026-09-05T16:43:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -638,10 +627,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T16:42:16Z",
-			"ageDays": 61,
+			"ageDays": 62,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 61d ago (manual tool — age not judged)"
+			"why": "last green 62d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "next-build-gate.yml",
@@ -934,11 +923,11 @@
 			"name": "Sync Stellar Scout skill to distribution repo",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-03T01:56:36Z",
-			"ageDays": 2,
+			"lastSuccessAt": "2026-09-05T16:43:55Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 15,
-			"why": "last green 2d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
+			"runs": 16,
+			"why": "last green 0d ago (nothing under public/skills/stellar-scout.md, public/skills/references/** has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "tag-watch.yml",
@@ -956,7 +945,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T16:28:32Z",
+			"lastSuccessAt": "2026-09-05T16:43:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1000,7 +989,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T06:04:35Z",
+			"lastSuccessAt": "2026-09-05T16:42:31Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1010,12 +999,12 @@
 			"file": "workflow-health.yml",
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
-			"state": "failing",
+			"state": "ok",
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 21,
-			"why": "14 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 22,
+			"why": "last green 2d ago"
 		}
 	]
 }
