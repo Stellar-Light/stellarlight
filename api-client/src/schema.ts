@@ -1616,10 +1616,10 @@ export interface components {
                     [key: string]: string;
                 };
                 /**
-                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name).
+                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: a query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields ['codeEvidence'], matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, and these candidate rows sort below all prose hits.
                  * @enum {string}
                  */
-                basis?: "profile-text" | "repo-owner";
+                basis?: "profile-text" | "repo-owner" | "code-language";
             } | null;
             /** @description Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
             codeEvidence?: {

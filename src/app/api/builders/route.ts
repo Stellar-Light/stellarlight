@@ -28,6 +28,10 @@ import {
 	onStellarBlock,
 	SKILL_HINT,
 } from "@/lib/builder-code-derived";
+import {
+	admitByCodeLanguage,
+	CODE_EVIDENCE_CAP,
+} from "@/lib/builder-code-language";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
@@ -287,6 +291,59 @@ export async function GET(req: NextRequest) {
 			// mention as if it were verified experience.
 			if (q) {
 				const tokens = q.split(/\s+/).filter(Boolean);
+				// A query token that IS a primary language in the repo index admits
+				// the builders who OWN such a repo, even when their profile prose
+				// never says the word. Measured 2026-09-05: ?q=rust returned 8 rows
+				// while 40 of the 170 served carry "Rust" in onStellar.languages —
+				// "who are experienced Rust Soroban devs" missed most of them.
+				// `like` is the case-insensitive net; the exact equality inside
+				// admitByCodeLanguage is the precise cut (a non-language token like
+				// "nigeria" simply matches no language and admits nobody).
+				// ponytail: bounded at 500 repos across the loaded roster and the
+				// first 4 tokens; 1-char tokens are skipped rather than flooding the
+				// net (so q="c" stays prose-only). Widen if a real query truncates.
+				const langProbes = [...new Set(tokens)]
+					.filter((t) => t.length > 1)
+					.slice(0, 4);
+				const langReposByOwner = new Map<string, Record<string, unknown>[]>();
+				if (langProbes.length && builders.length) {
+					try {
+						const lres = await payload.find({
+							collection: "repos",
+							where: {
+								and: [
+									{ owner: { in: builders.map((b) => b.githubUsername) } },
+									{
+										or: langProbes.map((t) => ({
+											primaryLanguage: { like: t },
+										})),
+									},
+								],
+							},
+							limit: 500,
+							depth: 0,
+							select: {
+								owner: true,
+								fullName: true,
+								url: true,
+								primaryLanguage: true,
+								stars: true,
+								lastCommitAt: true,
+								repoScore: true,
+							},
+						});
+						for (const d of lres.docs as unknown as Array<
+							Record<string, unknown>
+						>) {
+							const k = String(d.owner ?? "").toLowerCase();
+							const arr = langReposByOwner.get(k);
+							if (arr) arr.push(d);
+							else langReposByOwner.set(k, [d]);
+						}
+					} catch {
+						// best-effort: on failure admission stays prose-only, as before
+					}
+				}
 				builders = builders.filter((b) => {
 					const fields: Array<[field: string, text: string]> = [
 						// F1: githubUsername is the record's primary key — q must match it
@@ -306,6 +363,11 @@ export async function GET(req: NextRequest) {
 					const matchedFields = new Set<string>();
 					const matchedProjects = new Map<string, string | null>();
 					const matchedTerms: Record<string, string> = {};
+					const code = admitByCodeLanguage(
+						tokens,
+						langReposByOwner.get(b.githubUsername.toLowerCase()) ?? [],
+					);
+					let viaCode = false;
 					// Each concept must be present (AND across tokens), but a token
 					// matches via any of its synonyms/stems (sls-010) — so
 					// "payments" also hits a "boleto/PIX/remittance" bio.
@@ -328,7 +390,21 @@ export async function GET(req: NextRequest) {
 								}
 							}
 						}
-						if (!tokenHit) return false;
+						// AND still holds: a token the prose missed is admitted ONLY if
+						// it names a language this builder ships in. Anything else
+						// (a location, a product word) still has to hit the prose.
+						if (!tokenHit) {
+							if (!(t in code.terms)) return false;
+							viaCode = true;
+						}
+					}
+					if (viaCode) {
+						// Provenance for the code path: the evidence is the repo, not
+						// the profile — say so, and name the language as INDEXED.
+						matchedFields.add("codeEvidence");
+						for (const [t, lang] of Object.entries(code.terms))
+							matchedTerms[t] ??= lang;
+						b.codeEvidence = code.repos;
 					}
 					b.match = {
 						matchedFields: [...matchedFields],
@@ -336,13 +412,22 @@ export async function GET(req: NextRequest) {
 							([name, slug]) => ({ name, slug }),
 						),
 						matchedTerms,
-						basis: "profile-text",
+						basis: viaCode ? "code-language" : "profile-text",
 					};
 					return true;
 				});
 			}
 
 			totalMatching = builders.length;
+			// Prose hits outrank code-language candidates, so a candidate never
+			// pushes a real prose match off the page. Sort is stable, so the DB's
+			// -is_featured order survives inside each group.
+			if (q)
+				builders.sort(
+					(a, b) =>
+						Number(a.match?.basis === "code-language") -
+						Number(b.match?.basis === "code-language"),
+				);
 			builders = builders.slice(offset, offset + limit);
 
 			// sls-041: repository-backed evidence, fetched ONLY for the returned
@@ -353,7 +438,9 @@ export async function GET(req: NextRequest) {
 			// itself is signal ("no direct code evidence in the index").
 			if (q && builders.length) {
 				const tokens = q.split(/\s+/).filter(Boolean);
-				for (const b of builders) b.codeEvidence = [];
+				// `??=`: a code-language row already carries the repos that admitted
+				// it — top that up here, don't wipe it.
+				for (const b of builders) b.codeEvidence ??= [];
 				try {
 					const byOwner = new Map(
 						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
@@ -393,9 +480,13 @@ export async function GET(req: NextRequest) {
 						const hits = tokens.some((t) =>
 							expandBuilderTerm(t).some((v) => hay.includes(v)),
 						);
-						if (!hits || holder.codeEvidence.length >= 5) continue;
+						if (!hits || holder.codeEvidence.length >= CODE_EVIDENCE_CAP)
+							continue;
+						const full = String(d.fullName ?? "");
+						// already seeded by the code-language admission above
+						if (holder.codeEvidence.some((e) => e.fullName === full)) continue;
 						holder.codeEvidence.push({
-							fullName: String(d.fullName ?? ""),
+							fullName: full,
 							url: (d.url as string) ?? null,
 							primaryLanguage: (d.primaryLanguage as string) ?? null,
 							stars: typeof d.stars === "number" ? d.stars : 0,
@@ -508,9 +599,21 @@ export async function GET(req: NextRequest) {
 						o.lastCommitAt ? Date.parse(o.lastCommitAt) || 0 : 0,
 					] as const;
 				};
+				// A code-language row is a candidate, not a prose match: it sorts
+				// below every prose hit (featured or not), and among themselves by
+				// how recently the repo that admitted them was committed to.
+				const candidate = (b: (typeof builders)[number]) =>
+					b.match?.basis === "code-language";
+				const evidenceAt = (b: (typeof builders)[number]) =>
+					Date.parse(
+						b.codeEvidence?.[0]?.lastCommitAt ??
+							b.onStellar?.lastCommitAt ??
+							"",
+					) || 0;
 				builders.sort((x, y) => {
-					if (!!y.isFeatured !== !!x.isFeatured)
-						return y.isFeatured ? 1 : -1;
+					if (candidate(x) !== candidate(y)) return candidate(x) ? 1 : -1;
+					if (candidate(x)) return evidenceAt(y) - evidenceAt(x);
+					if (!!y.isFeatured !== !!x.isFeatured) return y.isFeatured ? 1 : -1;
 					const a = rank(x);
 					const b2 = rank(y);
 					return b2[0] - a[0] || b2[1] - a[1] || b2[2] - a[2];
@@ -669,7 +772,7 @@ export async function GET(req: NextRequest) {
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name).",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: a query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word — matchedFields is ['codeEvidence'], matchedTerms names the language as indexed, and codeEvidence holds the proving repos; every other token still had to hit the prose, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 				// sls-025 shape, ported from /api/repos/search: a zero-result page
 				// says exactly what WAS searched. `strupey` was the 4th-most-asked
@@ -683,8 +786,9 @@ export async function GET(req: NextRequest) {
 								indexes: [
 									"builder profiles (Stellar Passport: displayName, githubUsername, bio, roleTitle, projects)",
 									"code-derived owners (GitHub logins owning indexed Stellar repos, no profile required)",
+									"primary language of the repos each builder owns (a language token admits its owners even when their prose never says it)",
 								],
-								note: "0 builders matched. Both identity paths were searched — the curated profile index AND the code-derived owner index — including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
+								note: "0 builders matched. All three identity paths were searched — the curated profile index, the code-derived owner index AND the owned-repo language index — including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
 							},
 						}
 					: {}),
