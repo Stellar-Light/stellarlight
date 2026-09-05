@@ -1391,6 +1391,15 @@ export interface components {
         Repo: {
             /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance. */
             successorRepo?: string | null;
+            /** @description Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
+            supersededBy?: string | null;
+            /** @description The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD) — GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it. */
+            deprecatedAt?: string | null;
+            /**
+             * @description archived = GitHub archived the repo; renamed = the path 301s to a new one; deprecated = the package or repo carries a deprecation notice; superseded = a newer generation exists and the repo says so.
+             * @enum {string|null}
+             */
+            supersessionKind?: "archived" | "renamed" | "deprecated" | "superseded" | null;
             /** @description owner/name */
             fullName: string;
             owner?: string | null;
