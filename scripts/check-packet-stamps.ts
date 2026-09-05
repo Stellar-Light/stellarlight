@@ -187,6 +187,33 @@ async function appleReleaseDate(url: string): Promise<string | null> {
 	}
 }
 
+/** A stamp whose deciding URL is a JSON-RPC endpoint (stamped from getHealth). */
+const isRpcUrl = (url: string): boolean =>
+	/\/\/rpc\.|\/soroban\b|stellar_soroban|\.g\.alchemy\.com\/v2\//i.test(url);
+
+/** POST getHealth to a JSON-RPC endpoint; null when it did not answer JSON-RPC
+ *  (then the page verdict applies). Alchemy's demo key needs its docs Origin. */
+async function rpcHealth(url: string): Promise<string | null> {
+	try {
+		const res = await fetch(url, {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				"user-agent": UA,
+				...(/alchemy\.com/i.test(url)
+					? { origin: "https://www.alchemy.com" }
+					: {}),
+			},
+			body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth" }),
+			signal: AbortSignal.timeout(TIMEOUT_MS),
+		});
+		const body = (await res.json()) as { result?: { status?: string } };
+		return body.result?.status ?? null;
+	} catch {
+		return null;
+	}
+}
+
 const isAppStore = (url: string): boolean => {
 	try {
 		return APP_STORE.test(new URL(url).hostname);
@@ -215,16 +242,33 @@ export function judgeStamp(p: {
 	 *  HTML title never reliably names the row (boss-revolution's listing is
 	 *  "BOSS Money Transfer", a false contradiction on the first run). */
 	storeReleasedAt?: string | null;
+	/** JSON-RPC endpoints only: the getHealth result status from a POST probe
+	 *  ("healthy" HOLDS). A GET on an RPC host answers 401/405 and says nothing
+	 *  about the service — ankr and lightsail on the first re-tuned run. */
+	rpcHealth?: string | null;
 }): { verdict: StampVerdict; reason: string } {
+	if (p.rpcHealth !== undefined && p.rpcHealth !== null) {
+		return p.rpcHealth === "healthy"
+			? { verdict: "HOLDS", reason: "JSON-RPC getHealth: healthy" }
+			: {
+					verdict: "CONTRADICTED",
+					reason: `JSON-RPC getHealth reports "${p.rpcHealth}"`,
+				};
+	}
 	// Blocked or unreachable. Its own state in BOTH directions: a 403 is the
 	// host refusing us, not the product dying, and a dead-looking silence is
 	// not evidence a retired site is still retired either.
 	if (p.error || p.httpStatus === null)
 		return { verdict: "COULD-NOT-CHECK", reason: p.error ?? "no response" };
-	if (p.httpStatus === 403 || p.httpStatus === 429)
+	if (
+		p.httpStatus === 401 ||
+		p.httpStatus === 403 ||
+		p.httpStatus === 405 ||
+		p.httpStatus === 429
+	)
 		return {
 			verdict: "COULD-NOT-CHECK",
-			reason: `HTTP ${p.httpStatus} — blocked, not judged`,
+			reason: `HTTP ${p.httpStatus} — refused this probe, not judged (a 401/405 on a GET is an endpoint's method or auth policy, not a product state)`,
 		};
 
 	const text = readableText(p.html);
@@ -356,12 +400,18 @@ async function probe(s: {
 		httpStatus = 200;
 		error = undefined;
 	}
+	const health = isRpcUrl(s.sourceUrl) ? await rpcHealth(s.sourceUrl) : null;
+	if (health) {
+		httpStatus = 200;
+		error = undefined;
+	}
 	const { verdict, reason } = judgeStamp({
 		...s,
 		httpStatus,
 		html,
 		error,
 		storeReleasedAt,
+		rpcHealth: health,
 	});
 	return {
 		slug: s.slug,
