@@ -1090,3 +1090,30 @@ describe("explicitRepoName", () => {
 		expect(canonicalFor("etl pipeline").length).toBeGreaterThan(0);
 	});
 });
+describe("language filter survives every candidate source (2026-09-05)", () => {
+	it("q + language serves only repos whose primaryLanguage matches", async () => {
+		const docs = [
+			doc({
+				fullName: "acme/sep10-py",
+				description: "SEP-10 authentication server",
+				primaryLanguage: "Python",
+			}),
+			doc({
+				fullName: "acme/sep10-ts",
+				description: "SEP-10 authentication client",
+				primaryLanguage: "TypeScript",
+			}),
+			doc({
+				fullName: "stellar/stellar-protocol",
+				description: "SEP-10 authentication spec",
+				primaryLanguage: "RPC",
+			}),
+		];
+		const { repos } = await searchRepos(mockPayload(docs), {
+			q: "SEP-10 authentication",
+			language: "python",
+			limit: 10,
+		});
+		expect(repos.map((r) => r.fullName)).toEqual(["acme/sep10-py"]);
+	});
+});
