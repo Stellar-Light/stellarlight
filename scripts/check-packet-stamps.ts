@@ -159,6 +159,34 @@ const findMarker = (text: string): string | undefined => {
 	return DEAD_MARKERS.find((m) => lower.includes(m));
 };
 
+/** A store listing whose last release is older than this is not a live
+ *  product signal (plutope's 95-day-old build was the tier's flagged case). */
+const STORE_RELEASE_WINDOW_DAYS = 120;
+
+/** apps.apple.com listing → the iTunes lookup API's release date, or null when
+ *  the id is unparseable or the lookup failed (then the page verdict applies). */
+async function appleReleaseDate(url: string): Promise<string | null> {
+	const id = /\/id(\d+)/.exec(url)?.[1];
+	if (!id) return null;
+	const cc = /apps\.apple\.com\/([a-z]{2})\//i.exec(url)?.[1] ?? "us";
+	try {
+		const res = await fetch(
+			`https://itunes.apple.com/lookup?id=${id}&country=${cc}`,
+			{
+				headers: { "user-agent": UA },
+				signal: AbortSignal.timeout(TIMEOUT_MS),
+			},
+		);
+		if (!res.ok) return null;
+		const body = (await res.json()) as {
+			results?: Array<{ currentVersionReleaseDate?: string }>;
+		};
+		return body.results?.[0]?.currentVersionReleaseDate ?? null;
+	} catch {
+		return null;
+	}
+}
+
 const isAppStore = (url: string): boolean => {
 	try {
 		return APP_STORE.test(new URL(url).hostname);
@@ -182,6 +210,11 @@ export function judgeStamp(p: {
 	httpStatus: number | null;
 	html: string;
 	error?: string;
+	/** apps.apple.com only: currentVersionReleaseDate from the iTunes lookup
+	 *  API (ISO). The listing's release recency IS the product signal; the
+	 *  HTML title never reliably names the row (boss-revolution's listing is
+	 *  "BOSS Money Transfer", a false contradiction on the first run). */
+	storeReleasedAt?: string | null;
 }): { verdict: StampVerdict; reason: string } {
 	// Blocked or unreachable. Its own state in BOTH directions: a 403 is the
 	// host refusing us, not the product dying, and a dead-looking silence is
@@ -237,12 +270,26 @@ export function judgeStamp(p: {
 	// The listing existing under the app's name IS the signal.
 	if (isAppStore(p.sourceUrl)) {
 		const title = titleOf(p.html);
-		return squash(title).includes(squash(p.slug))
+		if (p.storeReleasedAt) {
+			const days = Math.round(
+				(Date.now() - Date.parse(p.storeReleasedAt)) / 86_400_000,
+			);
+			return days <= STORE_RELEASE_WINDOW_DAYS
+				? {
+						verdict: "HOLDS",
+						reason: `store release ${p.storeReleasedAt.slice(0, 10)} (${days}d ago) — "${title.slice(0, 60)}"`,
+					}
+				: {
+						verdict: "CONTRADICTED",
+						reason: `last store release ${p.storeReleasedAt.slice(0, 10)} is ${days}d ago (window ${STORE_RELEASE_WINDOW_DAYS}d) — "${title.slice(0, 60)}"`,
+					};
+		}
+		// No lookup data (Play Store, or the lookup failed but the page served):
+		// the listing existing under the row's own URL is the signal; the store's
+		// chrome is full of dashes and generic "no longer" copy, so no other test.
+		return title
 			? { verdict: "HOLDS", reason: `store listing "${title.slice(0, 80)}"` }
-			: {
-					verdict: "CONTRADICTED",
-					reason: `store listing title does not name ${p.slug}: "${title.slice(0, 80)}"`,
-				};
+			: { verdict: "COULD-NOT-CHECK", reason: "store page without a title" };
 	}
 
 	if (text.length <= 300)
@@ -301,7 +348,21 @@ async function probe(s: {
 	} catch (e) {
 		error = String((e as Error).message ?? e).slice(0, 140);
 	}
-	const { verdict, reason } = judgeStamp({ ...s, httpStatus, html, error });
+	const storeReleasedAt = /apps\.apple\.com/i.test(s.sourceUrl)
+		? await appleReleaseDate(s.sourceUrl)
+		: null;
+	// A rate-limited store page (429) still judges when the lookup answered.
+	if (storeReleasedAt && (httpStatus === 429 || httpStatus === 403)) {
+		httpStatus = 200;
+		error = undefined;
+	}
+	const { verdict, reason } = judgeStamp({
+		...s,
+		httpStatus,
+		html,
+		error,
+		storeReleasedAt,
+	});
 	return {
 		slug: s.slug,
 		to: s.to,

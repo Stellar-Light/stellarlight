@@ -106,12 +106,20 @@ describe("judgeStamp", () => {
 			html: `<title>LOBSTR: Stellar Wallet on the App Store</title><p>Age — Size — Category — Seller —</p>${filler}`,
 		};
 		expect(judgeStamp(store).verdict).toBe("HOLDS");
+		// The listing title never reliably names the row (BOSS Money Transfer for
+		// boss-revolution): a title alone HOLDS; the lookup's release date decides.
+		const recent = new Date(Date.now() - 20 * 86_400_000).toISOString();
+		const stale = new Date(Date.now() - 200 * 86_400_000).toISOString();
 		expect(
-			judgeStamp({
-				...store,
-				html: "<title>App Store - Apple</title>",
-			}).verdict,
-		).toBe("CONTRADICTED");
+			judgeStamp({ ...store, slug: "boss-revolution", storeReleasedAt: recent })
+				.verdict,
+		).toBe("HOLDS");
+		expect(judgeStamp({ ...store, storeReleasedAt: stale }).verdict).toBe(
+			"CONTRADICTED",
+		);
+		expect(
+			judgeStamp({ ...store, html: "<p>no title at all</p>" }).verdict,
+		).toBe("COULD-NOT-CHECK");
 	});
 
 	it("REVIVES an Inactive stamp whose page came back, and HOLDS a still-dead one", () => {
