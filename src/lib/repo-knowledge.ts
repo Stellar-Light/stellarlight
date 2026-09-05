@@ -42,6 +42,403 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── P5 batch 10 (2026-09-05): the 62 never-examined pool rows — 47 repos /
+	// 47 notes, 15 internal triage verdicts (BATCH_10_TRIAGE_2026_09_05).
+	// Registry identities that link back (@kyvernlabs/pulse+mcp, @dfns/sdk,
+	// @idos-network/client), README-published MAINNET IDs confirmed on
+	// stellar.expert with creation dates (arka.fund factory/registry, Nirium's
+	// client-owned DeFindex vault), release schemes (Moonlight soroban-core,
+	// sorocarbon per-contract tags, quilltip), Cargo-pinned soroban-sdk versions
+	// (25.3.0 / 25 / 26.1.0 / 22 / 21.0.1-preview.3 / 25.1.0), an SCF audit-bank
+	// freeze tag (nectar), three renames resolved by 301 (Query402, RizoDAO,
+	// NUUP — REPO_SUPERSESSIONS carries them), one dated 404. The 29 identity
+	// notes are for rows with NO GitHub description — the README's own tagline,
+	// its named hackathon, and its stated network, dated by the README commit.
+	// Held to the bar: orbitkit-fun/stellar-agent-kit's four npm packages list a
+	// repository that 404s (triage, not a note). ~250 GitHub API calls.
+	"dogstarapps/arka.fund": [
+		{
+			note: "README (2026-07-04): 'Arka.fund is a non-custodial asset-management protocol for Stellar/Soroban' — managers create configurable vaults ('Arkas'). Mainnet: 'Mainnet release gate: passed on 2026-06-13'; 'deployed contract WASM hashes match the manifest as of 2026-07-03'; canonical IDs in deployments.mainnet.json — Arka Factory CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK and Arka Registry CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY, both created on the public network 2026-06-11 by GBHIT7TX… (stellar.expert, read 2026-09-05); also Router CCZNPW4X…, Venue Registry CAR5IEPA…, OracleGuard CDHSFLLD…, Aquarius Adapter CAOJRRH3…. App app.arka.fund; no tags or releases. https://github.com/dogstarapps/arka.fund#readme",
+			triggers: ["arka fund contracts", "arka fund mainnet"],
+			source: "curated",
+			asOf: "2026-07-04",
+		},
+	],
+	"shariqazeem/kyvernlabs": [
+		{
+			note: "npm @kyvernlabs/pulse — 0.2.0 (2026-04-08; 2 versions since 2026-04-03; repository → this repo; MIT): 'x402 analytics middleware — multi-chain (Base, Stellar, Solana), blockchain-verified'; companion @kyvernlabs/mcp 0.2.0 (2026-04-04), 'MCP server for KyvernLabs Pulse — 17 tools'. README 'Pulse by KyvernLabs': Stellar verification via @stellar/stellar-sdk v15 on mainnet (horizon.stellar.org) + testnet, USDC; dashboard at kyvernlabs.com/pulse/dashboard. No tags or releases. https://www.npmjs.com/package/@kyvernlabs/pulse",
+			triggers: ["kyvernlabs pulse npm", "x402 revenue analytics stellar"],
+			source: "curated",
+			asOf: "2026-04-08",
+		},
+	],
+	"dfns/dfns-sdk-ts": [
+		{
+			note: "npm @dfns/sdk — 0.8.29 (2026-09-03; 185 versions since 2023-06-13; repository → this repo; MIT), the Dfns TypeScript SDK; GitHub release 0.8.29 the same day (README install `npm i @dfns/sdk`, Node 18+). Dfns' docs list Stellar among supported networks (docs.dfns.co/networks/stellar — Stellar wallets, sign and broadcast). https://www.npmjs.com/package/@dfns/sdk",
+			triggers: ["dfns typescript sdk", "dfns sdk npm"],
+			source: "curated",
+			asOf: "2026-09-03",
+		},
+	],
+	"idos-network/idos-sdk-js": [
+		{
+			note: "npm @idos-network/client — 1.5.0 (2026-08-11; 9 versions since 2025-05-22; repository → this repo; MIT), 'idOS Client JavaScript SDK for browser environments'; the client README lists \"stellar\" among wallet types ('Multi-Chain Wallet Support — Works with EVM, NEAR, XRPL, and Stellar wallet types'), with Stellar signature verification under packages/kwil-infra. Monorepo: all @idos-network/* packages are versioned together via Changesets; tags are per package (e.g. @idos-network/issuer-sdk-js@0.0.4). https://www.npmjs.com/package/@idos-network/client",
+			triggers: ["idos javascript sdk", "idos stellar wallet"],
+			source: "curated",
+			asOf: "2026-08-11",
+		},
+	],
+	"moonlight-protocol/soroban-core": [
+		{
+			note: "GitHub releases v0.5.0 (2026-07-20), v0.4.0 (2026-06-23), v0.3.0 (2026-06-17); 5 tags. Cargo workspace version 0.5.0 pins soroban-sdk =25.3.0 (Cargo.toml at HEAD). README: 'Moonlight: the missing privacy layer, for any blockchain, built on Stellar' — 'the core smart contracts and modules for the Moonlight Protocol on Soroban' (moonlightprotocol.io); the v0.5.0 notes declare the wasm32v1-none target in rust-toolchain.toml. https://github.com/Moonlight-Protocol/soroban-core/releases",
+			triggers: [
+				"moonlight soroban core release",
+				"moonlight protocol contracts",
+			],
+			source: "curated",
+			asOf: "2026-07-20",
+		},
+	],
+	"nectar-network/nectar": [
+		{
+			note: "README (2026-08-16): 'Multi-operator keeper infrastructure for Soroban DeFi. Distributed liquidation network for Blend Protocol on Stellar'; 'Canonical repository: github.com/Nectar-Network/nectar — other mirrors may lag'; contracts 'frozen at tag audit-freeze-v1 for the SCF Soroban Security Audit Bank' (tag dated 2026-08-15; earlier v0.3.0-audit 2026-07-25; no releases). Testnet only: 'Tranche 3 hardened deploy settling in Circle testnet USDC, 2026-07-22' — KeeperRegistry CD33A7IG…, NectarVault CDOGQY7N… on Soroban testnet; the nectar-vault crate targets soroban-sdk 22.0.0. Companion: Nectar-Network/keeper-sdk; site nectarnetwork.fun. https://github.com/Nectar-Network/nectar#readme",
+			triggers: [
+				"nectar network audit freeze",
+				"nectar keeper blend liquidation",
+			],
+			source: "curated",
+			asOf: "2026-08-16",
+		},
+	],
+	"stellarcarbon/sorocarbon": [
+		{
+			note: "GitHub releases are per-contract tags carrying the stellar-cli version — latest v0.4.5_contracts_sink_carbon_sink-carbon_cli22.8.1 (2025-11-13; a plain v0.4.5 tag the same day; v0.4.4 2025-11-13, v0.4.3 2025-11-03). The workspace targets soroban-sdk 22 (Cargo.toml at HEAD). README: 'Home of Stellarcarbon's Soroban smart contracts' — contracts/sink_carbon; the documented deploy path is testnet ('To deploy the latest release to testnet, first download it from GitHub'), showing a testnet sink contract CBDWJLGQ…. https://github.com/stellarcarbon/sorocarbon/releases",
+			triggers: ["sorocarbon release", "stellarcarbon sink contract"],
+			source: "curated",
+			asOf: "2025-11-13",
+		},
+	],
+	"pragya-shar/quilltip": [
+		{
+			note: "GitHub releases v1.2.0 (2026-08-25), v1.1.0 (2026-06-22), v1.0.0 (2026-05-08); 4 tags. README 'Quilltip - Decentralized Publishing Platform' (quilltip.me, MIT): micro-tipping for authors on Stellar — 'Network: Stellar Testnet' ('testnet practice today'); the Tipping Contract badge links a testnet contract (CC7Q3HDX…), documented in docs/tipping-contract-testnet-deploy.md. https://github.com/pragya-shar/quilltip/releases",
+			triggers: ["quilltip release", "quilltip tipping contract"],
+			source: "curated",
+			asOf: "2026-08-25",
+		},
+	],
+	"eras256/nirium": [
+		{
+			note: "README (2026-09-04): 'Nirium's own NiriumVault treasury contract remains on Stellar Testnet, audit-gated' (testnet CBTWMZCG…; NiriumProtocol CC2TU5BD…); 'The autonomous treasury node runs on mainnet over a DeFindex vault the client owns: a third-party contract audited by OtterSec, not ours' — that vault is CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, created on the public network 2026-08-06 (stellar.expert token name 'DeFindex-Vault-Nirium Treasury', read 2026-09-05); 'Mainnet is invite-only'. Badges claim 'SCF Instaward #1 & #2 Delivered'; Apache-2.0; tags showroom-stable (2026-03-27) and deploy-1, no releases. https://github.com/Eras256/Nirium#readme",
+			triggers: ["nirium vault mainnet", "nirium treasury contract"],
+			source: "curated",
+			asOf: "2026-09-04",
+		},
+	],
+	"xccy-labs/xccy-soroban": [
+		{
+			note: "Only tag oraclehub-v0.1.0-soroban (commit 2026-05-06; no releases); workspace version 0.1.0 targets soroban-sdk 25 (Cargo.toml comment: 'soroban-sdk 25.3 transitively'). README 'Status: early. The OracleHub module is the only thing shipped so far. Hub + 5 adapters are deployed and live on Stellar testnet' — OracleHub v2 CDYX3GID…, ReflectorPrice v2 CACERBYE…, BlendRate CCHP47YX… (testnet); 'Mainnet readiness: security audit, parameter calibration, observability' is an open checkbox. https://github.com/XCCY-Labs/xccy-soroban#readme",
+			triggers: ["xccy soroban oraclehub", "xccy interest rate swap soroban"],
+			source: "curated",
+			asOf: "2026-05-07",
+		},
+	],
+	"cushyon/stellar_migration": [
+		{
+			note: "README 'CushionStellar' (2026-07-05): 'Capital-protected strategy vaults on Stellar' — a Next.js frontend plus one Soroban contract, 'SEP-41 token + SEP-56 vault with on-chain strategy safety checks'; the strategy-vault crate (0.1.0) targets soroban-sdk 26.1.0 with the wasm32v1-none target (Cargo.toml at HEAD). The repo description 'Migrate the smart contract logic to Stellar' predates this; deploy instructions are testnet; no tags or releases. https://github.com/cushyon/Stellar_migration#readme",
+			triggers: ["cushionstellar vault", "cushion stellar strategy vault"],
+			source: "curated",
+			asOf: "2026-07-05",
+		},
+	],
+	"towa-hi/stellarunitydevtoolkit": [
+		{
+			note: "README (2026-04-06): 'a set of tools that allows Unity developers to interface with the Stellar smart contract platform (formerly known as Soroban) through RPC' — 'Distributed as a Unity Package Manager package (com.scryingstone.stellar-sdk), targeting Unity 2022.3+'; the manifest at StellarDevToolkit/Packages/com.scryingstone.stellar-sdk/package.json is version 0.1.0, displayName 'Stellar Development Toolkit for Unity' (unity field 6000.0), beside a com.scryingstone.stellar-wallet package. No description, tags, releases or registry listing. https://github.com/towa-hi/StellarUnityDevToolkit#readme",
+			triggers: ["unity stellar sdk", "stellar unity toolkit"],
+			source: "curated",
+			asOf: "2026-04-06",
+		},
+	],
+	"stellarchain/soroban-auditor": [
+		{
+			note: "README (2026-02-11): 'Decompiler for Soroban WASM contracts -> source-like Rust (focus: reverse engineering, not perfect recompilation)' — binaries soroban-auditor and sdk-analyze; the Cargo package soroban-auditor 2.5.1 at HEAD depends on soroban-sdk 25.1.0 and is NOT on crates.io ('crate soroban-auditor does not exist', 2026-09-05) — build from source with `cargo build`. MIT; no tags or releases. https://github.com/stellarchain/soroban-auditor#readme",
+			triggers: ["soroban wasm decompiler", "soroban auditor decompile"],
+			source: "curated",
+			asOf: "2026-02-11",
+		},
+	],
+	"airswiftio/scf": [
+		{
+			note: "Soroban contracts only — soroban/contract_deployer, soroban/scf_pool and soroban/scf_soroban, built with `make` and deployed/bumped by per-contract deploy.sh and bump.sh scripts against the network named in a `network_name` file (README, 2024-03-12; it never says what SCF stands for). The pool crate pins soroban-sdk 21.0.1-preview.3 (Cargo.toml at HEAD); the README's setup links point at the retired soroban.stellar.org docs. No description, tags or releases; last push 2025-02-27. https://github.com/Airswiftio/SCF#readme",
+			source: "curated",
+			asOf: "2024-03-12",
+		},
+	],
+	"emrekayat/query402": [
+		{
+			note: "RENAMED: this path redirects to github.com/Query402/Query402 (HTTP 301, 2026-09-05). README (2026-08-31): 'Query402 participates in the Stellar Wave program. This public repository is the canonical workspace for Wave issues and contributions'; 'Agentic pay-per-query internet access on Stellar with x402' — a 'hackathon-ready' router for search/news/scrape on stellar:testnet (facilitator keys from channels.openzeppelin.com/testnet); MIT; no tags or releases. https://github.com/Query402/Query402",
+			triggers: ["query402 repo", "query402 stellar wave"],
+			source: "curated",
+			asOf: "2026-09-05",
+		},
+	],
+	"nallely-lopez/rizodao": [
+		{
+			note: "RENAMED: this path redirects to github.com/RizoDAO/RizoDAO (HTTP 301, 2026-09-05). README 'RIZO — Web3 Beauty Platform for the Latin Curly Hair Community' (2026-04-22): 'Payments: USDC on Stellar Testnet', a $RIZO loyalty token 'Soroban contract deployed' (testnet), 'Phase 2 — Mainnet (Q2 2026)' still a roadmap item; live at rizo-dao.vercel.app; no tags or releases. https://github.com/RizoDAO/RizoDAO",
+			triggers: ["rizo dao repo", "rizodao stellar"],
+			source: "curated",
+			asOf: "2026-09-05",
+		},
+	],
+	"elegidokawai2/hackaton--ajolote-en-ingles-": [
+		{
+			note: "RENAMED: this path redirects to github.com/Ander-tsx/NUUP (HTTP 301, 2026-09-05). README 'NUUP — ProofWork' (2026-04-26, Spanish): 'Plataforma gamificada de freelancers con reputación on-chain sobre la red Stellar' — four Soroban contracts deployed to testnet by the repo's script ('Red: Testnet Stellar | Token de pago: MXNe (SAC)'); the original path records its hackathon origin ('Hackaton Ajolote'); no tags or releases. https://github.com/Ander-tsx/NUUP",
+			triggers: ["nuup proofwork repo", "hackaton ajolote stellar"],
+			source: "curated",
+			asOf: "2026-09-05",
+		},
+	],
+	"gatogrozero/devengo": [
+		{
+			note: "No longer accessible: github.com/GatoGroZero/devengo returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-05) — deleted or made private. https://github.com/GatoGroZero/devengo",
+			source: "curated",
+			asOf: "2026-09-05",
+		},
+	],
+	"0xyudz/magentix": [
+		{
+			note: "README 'MagentiX — Autonomous AI Agents with x402 Payments on Stellar' (2026-04-13): 'Built for the Stellar Hacks 2026 hackathon' — a marketplace where 'Service Providers register AI tools' and agents pay per call via x402 with a '60/40' provider/platform split, demo at magenti-x-app-frontend-hyr5.vercel.app; Stellar testnet; no description, license, tags or releases. https://github.com/0xyudz/MagentiX#readme",
+			triggers: ["magentix repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"7maylord/erebus": [
+		{
+			note: "README 'Erebus' (2026-04-12): 'Privacy-preserving payment pool for AI agents on Stellar × x402' — agents fund a shared pool and queue payouts so only Pool → Payee appears on-chain; 'Built for the Stellar Agents x402 + Stripe MPP Hackathon'; 'Network: Stellar Testnet', USDC, pool address GBP642BQ…; AGPL-3.0; frontend erebus-x.vercel.app; no tags or releases. https://github.com/7maylord/erebus#readme",
+			triggers: ["erebus payment pool", "erebus x402 privacy"],
+			source: "curated",
+			asOf: "2026-04-12",
+		},
+	],
+	"ella0victor/sentryx402": [
+		{
+			note: "README 'Sentryx402' (2026-04-13): 'a payment-native agent runner built for the Stellar x402 hackathon' — an autonomous research agent with 'a real wallet, a hard spending budget, a receipt trail', paying per query 'on Stellar testnet using x402' (Freighter on stellar:testnet); sentryx402.vercel.app; no description, license, tags or releases. https://github.com/ELLA0VICTOR/sentryx402#readme",
+			triggers: ["sentryx402 repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"glayzz/agentmarket-pro": [
+		{
+			note: "README 'AgentMarket Pro' (2026-04-12): 'A live AI agent economy where autonomous agents hire each other and pay in real USDC via the x402 protocol on Stellar' — 'Built for Stellar Hacks: Agents — x402 + Stripe MPP Track' (DoraHacks stellar-agents-x402-stripe-mpp), a solo project; 'real USDC transaction on Stellar testnet'; demo agentmarket-pro.vercel.app; no description, license, tags or releases. https://github.com/Glayzz/agentmarket-pro#readme",
+			triggers: ["agentmarket pro repo"],
+			source: "curated",
+			asOf: "2026-04-12",
+		},
+	],
+	"jwattjr/x4tella-mvp": [
+		{
+			note: "README 'x4tella — Stellar Spend Guardrails for AI Agents' (2026-04-13): 'a Stellar-native controlled spend layer for autonomous AI agents' handling HTTP 402 challenges under maxPerRequest / totalBudget policies; 'Payments are settled in USDC on the Stellar Testnet'; a 'Project Notes & Hackathon Status' section marks it a hackathon build; no description, license, tags or releases. https://github.com/JWattjr/x4tella-mvp#readme",
+			triggers: ["x4tella spend guardrails"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"jennivarl/autox420": [
+		{
+			note: "README 'AutoX420 — On-Chain API Paywall with x402 on Stellar' (2026-04-13): 'An AI agent that autonomously buys real API data using x402 micropayments on Stellar' — five paid endpoints bought every 45 seconds, 'Real USDC transactions on Stellar testnet'; live at auto402-production.up.railway.app; a 'Hackathon Requirements Met' table marks it a hackathon build; sibling Jennivarl/underworld; no description, license, tags or releases. https://github.com/Jennivarl/AutoX420#readme",
+			triggers: ["autox420 repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"jennivarl/underworld": [
+		{
+			note: "README 'UNDERWORLD — AI Research Marketplace on Stellar' (2026-04-13): 'Three AI agents that autonomously buy and sell deep research intelligence' — client, orchestrator (Gemini 2.5 Flash) and specialists paid via x402, '$0.10 USDC' per request; 'Built for the Stellar Agents Hackathon'; 'Real Stellar testnet transactions — USDC verified by x402 facilitator'; sibling Jennivarl/AutoX420; no description, license, tags or releases. https://github.com/Jennivarl/underworld#readme",
+			triggers: ["underworld research marketplace"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"unique-coder/stellarbrief": [
+		{
+			note: "README 'StellarBrief' (2026-04-13): 'A two-sided x402 trading intelligence market on Stellar' — six paid endpoints (crypto/forex prices, news, Claude summaries) at $0.01 USDC per call; 'Built for Stellar Hacks: Agents — April 2026'; 'a complete x402 product on Stellar testnet' (USDC SAC on testnet); no description, license, tags or releases. https://github.com/Unique-coder/stellarbrief#readme",
+			triggers: ["stellarbrief repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"techkeyy/the-signaler": [
+		{
+			note: "README 'The Signaler' (2026-04-11): 'Autonomous Signal Acquisition Network' — seller agents post encrypted crypto-price signals, buyers (Python + stellar-sdk + Gemini) pay 'via x402-inspired protocol on Stellar'; 'Built for Stellar Hacks: Agents on DoraHacks'; 'Real Stellar testnet XLM payments per acquisition' ('Testnet-only transfers'); live at the-signaler-production.up.railway.app; no description, license, tags or releases. https://github.com/Techkeyy/the-signaler#readme",
+			triggers: ["the signaler repo"],
+			source: "curated",
+			asOf: "2026-04-11",
+		},
+	],
+	"aliveevie/sentinelmesh": [
+		{
+			note: "README 'SentinelMesh — Autonomous DeFi Threat Detection Network on Stellar' (2026-04-04): 'Built for the Agents on Stellar Hackathon — April 2026' (DoraHacks agents-on-stellar); 'Two Rust contracts deployed to Stellar testnet, built with soroban-sdk 21.7.6' — Circuit Breaker CDX4AAQT… and Reputation Registry CBGMETPT… (testnet), four sentinel agents paid over x402 (stellar:testnet); no description, license, tags or releases. https://github.com/aliveevie/sentinelmesh#readme",
+			triggers: ["sentinelmesh repo", "sentinelmesh circuit breaker"],
+			source: "curated",
+			asOf: "2026-04-04",
+		},
+	],
+	"chinesepowered/hack-stellaragents": [
+		{
+			note: "README 'Stellar Security Audit Agent' (2026-04-11): 'AI-powered smart contract auditor that verifies deployed code, finds vulnerabilities, and stores immutable audit results on Stellar' — compares deployed WASM against source and writes results to a Soroban audit-registry contract (submit_audit); 'Built for the Stellar Agents Hackathon'; Stellar testnet ('The pre-compiled Soroban WASM is included — deploy to testnet'); no description, license, tags or releases. https://github.com/chinesepowered/hack-stellaragents#readme",
+			triggers: ["stellar security audit agent"],
+			source: "curated",
+			asOf: "2026-04-11",
+		},
+	],
+	"comzzy-comzzy/datavend": [
+		{
+			note: "README 'DataVend — AI-Powered Stellar Data Agent' (2026-04-11): 'An autonomous AI agent that sells on-chain Stellar wallet data per query using the x402 payment protocol on Stellar mainnet' — '$0.01 USDC on Stellar mainnet', verified 'via OpenZeppelin facilitator'; 'Competition: Stellar Hacks: Agents — DoraHacks'; live at datavend.tech / datavend-three.vercel.app; no description, license, tags or releases. https://github.com/comzzy-comzzy/datavend#readme",
+			triggers: ["datavend repo", "datavend x402"],
+			source: "curated",
+			asOf: "2026-04-11",
+		},
+	],
+	"divineudoka12/zerixs": [
+		{
+			note: "README 'Zerixs' (2026-04-13): 'Goal-based autonomous financial agent network on Stellar' — an orchestrator that pays specialist agents 'through x402 on Stellar testnet' (Groq as the AI provider); its 'Submission Snapshot' and 'Why This Fits The Hackathon' sections mark it a hackathon submission; no description, license, tags or releases. https://github.com/divineudoka12/Zerixs#readme",
+			triggers: ["zerixs repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"emdevelopa/stellar_payment_api": [
+		{
+			note: "README 'PLUTO — Agentic Payment Infrastructure on Stellar' (2026-04-13): 'a dual-mode payment infrastructure' — Freighter checkouts for humans plus an x402Middleware for agents; 'All Stellar interactions use actual testnet transactions' (USDC issuer GBBD47IF… on testnet); the 'Hackathon Notes & Judging Criteria' section lists areas unfinished 'due to hackathon time constraints'; live at stellar-payment-api.vercel.app; no description, license, tags or releases. https://github.com/emdevelopa/Stellar_Payment_API#readme",
+			triggers: ["pluto agentic payment", "stellar payment api pluto"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"nice-bills/stipend": [
+		{
+			note: "README 'Stipend' (2026-04-12): 'Autonomous agent payment sidecar — intercepts HTTP 402 Payment Required responses and pays via Stellar automatically'; 'cross-submitted to two awesome hackathons simultaneously: the Stellar Hacks Hackathon and the OKX Build X Hackathon' with routing between Stellar and OKX X Layer; 'Testnet: Uses XLM (not USDC) on testnet'; @stellar/stellar-sdk; no description, license, tags or releases. https://github.com/nice-bills/stipend#readme",
+			triggers: ["stipend payment sidecar"],
+			source: "curated",
+			asOf: "2026-04-12",
+		},
+	],
+	"rtomas/soundstake": [
+		{
+			note: "README 'SoundStake' (2026-04-13): 'The first music catalog where AI agents pay musicians directly' — musicians register songs and price tiers on a Soroban contract, buyers pay per use via x402 in USDC; 'Hackathon: Stellar Agents x402 + Stripe MPP'; 'Blockchain: Stellar testnet → mainnet' (deploy steps are testnet, wasm32v1-none); live at soundstake-ten.vercel.app; no description, license, tags or releases. https://github.com/rtomas/soundstake#readme",
+			triggers: ["soundstake repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"oscargauss/fan-match": [
+		{
+			note: "README 'FanForge' (2026-04-13): 'a Massively Multiplayer Online Stadium built for the Stellar Agents x402 Stripe MPP Hackathon' (DoraHacks) — two Claude-powered agents play foosball while fans fund them 'with USDC on Stellar testnet' via x402 micropayments (@stellar/stellar-sdk, Pollar keys); live at fan-forge.ogauss.io; no tags or releases. https://github.com/OscarGauss/fan-match#readme",
+			triggers: ["fanforge stadium", "fan match repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"gabrululu/propulsor": [
+		{
+			note: "README 'Hackathon Context' (2026-08-21): 'Propulsor was originally built for She Ships 2026, a 48-hour global hackathon celebrating International Women's Day (March 6–8, 2026)', then 'extended for the Stellar Agentic Payments Hackathon' (x402 agent) 'and again for Stellar Hacks — Real-World ZK' (Groth16/BLS12-381 and RISC Zero proofs). SplitProtocol and TimeVault Soroban contracts are 'Deployed Testnet'; 'Stellar Mainnet — Post-hackathon'; app propulsor.lovable.app; no tags or releases. https://github.com/Gabrululu/Propulsor#readme",
+			triggers: ["propulsor hackathon", "propulsor split protocol"],
+			source: "curated",
+			asOf: "2026-08-21",
+		},
+	],
+	"penguinpecker/ko402": [
+		{
+			note: "README 'KO402 — Pay-Per-Move AI Fighting Game on Stellar' (2026-04-06): 'a turn-based fighting game where autonomous AI agents battle each other using real Stellar micropayments' — each move is a USDC payment and the pot (0.2 USDC) settles to the winner; 'Stellar Hacks: Agents — DoraHacks'; 'Stellar Testnet, USDC payments via Horizon SDK' (escrow account GCRRX5XD…); ko402.vercel.app; no description, license, tags or releases. https://github.com/penguinpecker/ko402#readme",
+			triggers: ["ko402 fighting game"],
+			source: "curated",
+			asOf: "2026-04-06",
+		},
+	],
+	"zzzbedream/cortex402": [
+		{
+			note: "README 'Cortex402' (2026-04-13): 'AI-native payment middleware for the x402 protocol on Stellar' — server-side 402 lifecycle plus typed agent tools (sign_stellar_transaction, check_payment_status) with single-use memo_hash replay protection; Horizon on Stellar Testnet with testnet USDC by default; the repo description is just the name; no license, tags or releases. https://github.com/zzzbedream/Cortex402#readme",
+			triggers: ["cortex402 middleware"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"marxmad/agenticx402": [
+		{
+			note: "README 'PumaX402 — Agentic Services Hub on Stellar' (2026-04-13): 'A unified catalog and access layer for x402 and MPP services on Stellar: discover, pay per request, and consume APIs' — live hub at agenticx402-production.up.railway.app; stellar-sdk + stellar-cli + Soroban (Rust); MIT (Node ≥20); no description, tags or releases. https://github.com/MarxMad/Agenticx402#readme",
+			triggers: ["pumax402 hub", "agenticx402 repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"panditdhamdhere/payflow": [
+		{
+			note: "README 'Payflow Agent Tools' (2026-04-12): 'Pay-per-call HTTP tools for AI agents on Stellar, using x402' — Express + @x402/express + @x402/stellar (exact scheme) with a Vite/React UI and Freighter; prices in 'testnet USDC' (issuer GBBD47IF…), flow 'matches the Stellar x402 quickstart'; written as a submission ('put the live URL at the top of your submission'); MIT; no description, tags or releases. https://github.com/panditdhamdhere/Payflow#readme",
+			triggers: ["payflow agent tools"],
+			source: "curated",
+			asOf: "2026-04-12",
+		},
+	],
+	"isaac-richie/stellarpulse": [
+		{
+			note: "README 'StellarPulse' (2026-04-13): 'a pay-per-insight intelligence terminal built on Stellar' — Polymarket/Kalshi signals turned into briefs, premium analysis 'behind Stellar x402 payment verification' for humans and agents; needs a 'Stellar testnet account' for payment testing; API at stellarpulse-api.vercel.app; no description, license, tags or releases. https://github.com/isaac-richie/stellarpulse#readme",
+			triggers: ["stellarpulse repo"],
+			source: "curated",
+			asOf: "2026-04-13",
+		},
+	],
+	"methu-ship/toll": [
+		{
+			note: "README 'toll: The Stellar Agentic API Marketplace' (2026-04-10): 'a decentralized, autonomous marketplace where AI agents buy and sell data and services using the X402 payment protocol on the Stellar Network' — a seller agent registers price/swap/FX feeds, a buyer agent scores and purchases them; 'Stellar Testnet' with Friendbot funding; no description, license, tags or releases. https://github.com/methu-ship/toll#readme",
+			triggers: ["toll agentic api marketplace"],
+			source: "curated",
+			asOf: "2026-04-10",
+		},
+	],
+	"shivraigithub/genesis402": [
+		{
+			note: "README 'Genesis402 - Stellar x402 Gateway' (2026-04-11): 'a no-code monetization layer that wraps existing APIs with pay-per-request enforcement using x402 on Stellar' — Express/TypeScript backend, Next.js frontend, x402Version 2 challenges; no description, license, tags or releases. https://github.com/ShivRaiGithub/Genesis402#readme",
+			triggers: ["genesis402 gateway"],
+			source: "curated",
+			asOf: "2026-04-11",
+		},
+	],
+	"godbrand0/argent": [
+		{
+			note: "README 'Argen: Agentic Liquidation Protocol' (2026-04-12): 'an autonomous lending protocol on Stellar that leverages ZK-Proofs and x402 payments' — 'Deployed Contracts (Stellar Testnet)': Vault CBNXMW4Q…, vUSDC CDEMATCS…, ZK Verifier CDGYLCFD… (all testnet); Apache-2.0; argent-mu.vercel.app; no description, tags or releases. https://github.com/Godbrand0/argent#readme",
+			triggers: ["argen liquidation protocol", "argent repo stellar"],
+			source: "curated",
+			asOf: "2026-04-12",
+		},
+	],
+	"soomtochukwu/tradeflow": [
+		{
+			note: "README 'TradeFlow' (2026-05-15): 'a decentralized, enterprise-grade Trade Finance (TradeFi) platform built on the Stellar network' digitizing Letters of Credit with 'Trustless Work Smart Contract Primitives' (multi-release escrow); 'Built for the Boundless Hackathon'; NEXT_PUBLIC_USE_MAINNET=false by default; trade--flow.vercel.app; no description, license, tags or releases. https://github.com/soomtochukwu/TradeFlow#readme",
+			triggers: ["tradeflow letter of credit"],
+			source: "curated",
+			asOf: "2026-05-15",
+		},
+	],
+	"dpinones/liars-dice": [
+		{
+			note: "README 'Liar's Dice — Bluffing with ZK Proofs on Stellar' (2026-02-23): 'a PvP bluffing game on Stellar where two players secretly roll dice' with zero-knowledge proofs keeping hands hidden; demo video on YouTube; MIT; no description, tags or releases. https://github.com/dpinones/liars-dice#readme",
+			triggers: ["liars dice zk stellar"],
+			source: "curated",
+			asOf: "2026-02-23",
+		},
+	],
+	"warp-driver/phoenix-blend-pool": [
+		{
+			note: "README 'phoenix-blend-pool' (2026-06-01): 'WarpDrive-driven rebalance automation for the Phoenix XLM-USDC blended pool variant' — a circuit subscribes to the blended pool's events, WarpDrive operators sign, an aggregator submits at quorum and an automation-handler contract on Stellar verifies; the Rebalance action moves USDC between the pool and Blend; GPL-3.0; no description, tags or releases. https://github.com/warp-driver/Phoenix-Blend-Pool#readme",
+			triggers: [
+				"phoenix blend pool rebalance",
+				"warpdrive phoenix automation",
+			],
+			source: "curated",
+			asOf: "2026-06-01",
+		},
+	],
 	// ── P5 batch 9 (2026-09-02): 26 repos / 27 notes — the 40–49 band (181
 	// curated-index rows, 96 examined after registry keys, earlier rejects and
 	// rows already carrying a derived audit note). Registry identities that
@@ -2867,7 +3264,8 @@ const POOL_TRIAGE_2026_09_02: Record<string, string> = {
 	"zhekinmaksim/orbitsafe": "hackathon demo, testnet by design",
 };
 for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
-	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+	REPO_KNOWLEDGE_NOTES[key] ??= [];
+	REPO_KNOWLEDGE_NOTES[key].push({
 		note: `Pool triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
@@ -2875,7 +3273,8 @@ for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
 	});
 }
 for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
-	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+	REPO_KNOWLEDGE_NOTES[key] ??= [];
+	REPO_KNOWLEDGE_NOTES[key].push({
 		note: `Band 50–59 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
@@ -2883,10 +3282,55 @@ for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
 	});
 }
 for (const [key, why] of Object.entries(BAND_40_49_TRIAGE_2026_09_02)) {
-	(REPO_KNOWLEDGE_NOTES[key] ??= []).push({
+	REPO_KNOWLEDGE_NOTES[key] ??= [];
+	REPO_KNOWLEDGE_NOTES[key].push({
 		note: `Band 40–49 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
+		visibility: "internal",
+	});
+}
+
+/**
+ * Batch-10 triage verdicts (2026-09-05): the 15 of the 62 never-examined pool
+ * rows that yielded nothing durable, each with the reason — INTERNAL, never
+ * served, counted by the board as "judged" rather than "unexamined".
+ */
+const BATCH_10_TRIAGE_2026_09_05: Record<string, string> = {
+	"acta-team/brazil-regional-kit":
+		"README's 'seven publishable packages' are not on npm (packages/ holds anchors + kit workspaces; @acta-team/ramp-core unpublished); testnet only; no tags",
+	"chidubemkingsley/proofescrow":
+		"hackathon demo ('Built for the Hackathon', unnamed) — Trustless Work escrow on Stellar testnet; no registry, no tags",
+	"edgadafi/dispersor-nomina-alebrije":
+		"testnet MVP (Spanish README; hackathon not named); no registry, no tags",
+	"joseluismirro/settler": "no README; no tags",
+	"websoroban/backend-ide": "empty repo (no README, no language detected)",
+	"rodolfonv/proyecto-rbj":
+		"672-byte README ('plataforma de préstamos descentralizada en Stellar'); no registry, no tags",
+	"shadowfirmware/safelytics":
+		"2 KB README, 'testnet en desarrollo'; no registry, no tags",
+	"diegoveme/macetero":
+		"Prisma/PostgreSQL backend; 0 Stellar mentions in README",
+	"inferara/inference-language-spec":
+		"language specification; 0 Stellar/Soroban mentions in README",
+	"blockdaemon/solana-cluster": "not a Stellar repo (Solana cluster manager)",
+	"dfns/terraform-provider-tunnel":
+		"not a Stellar repo (Terraform tunnel provider)",
+	"stallionsassemble/stallion-contract":
+		"bounty contract with no network stated; no registry, no tags (BSL-1.0)",
+	"official-jumpa/jumpa-web-app":
+		"multi-chain wallet web app (Stellar, Base, Solana); no registry, no tags",
+	"sam-rytech/automata-v2":
+		"cross-chain agent app, Stellar one of several chains; README 'Version 2.0.0' has no tag or registry behind it",
+	"orbitkit-fun/stellar-agent-kit":
+		"README-claimed npm packages (stellar-agent-kit 1.0.6, x402-stellar-sdk 1.0.5, create-stellar-devkit-app 1.1.5, stellar-devkit-mcp 1.0.6; all 2026-03-15) list repository codewmilan/stellar-agent-kit, which returns 404 — no link back (see D)",
+};
+for (const [key, why] of Object.entries(BATCH_10_TRIAGE_2026_09_05)) {
+	REPO_KNOWLEDGE_NOTES[key] ??= [];
+	REPO_KNOWLEDGE_NOTES[key].push({
+		note: `Batch-10 triage 2026-09-05: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		source: "curated",
+		asOf: "2026-09-05",
 		visibility: "internal",
 	});
 }

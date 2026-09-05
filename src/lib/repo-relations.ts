@@ -54,6 +54,30 @@ export interface RepoSupersession {
  * the day we looked.
  */
 export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
+	"emrekayat/query402": {
+		kind: "renamed",
+		supersededBy: "Query402/Query402",
+		deprecatedAt: null,
+		source:
+			"github.com/emrekayat/Query402 → HTTP 301 → github.com/Query402/Query402; GitHub API full_name Query402/Query402",
+		asOf: "2026-09-05",
+	},
+	"nallely-lopez/rizodao": {
+		kind: "renamed",
+		supersededBy: "RizoDAO/RizoDAO",
+		deprecatedAt: null,
+		source:
+			"github.com/nallely-lopez/RizoDAO → HTTP 301 → github.com/RizoDAO/RizoDAO; GitHub API full_name RizoDAO/RizoDAO",
+		asOf: "2026-09-05",
+	},
+	"elegidokawai2/hackaton--ajolote-en-ingles-": {
+		kind: "renamed",
+		supersededBy: "Ander-tsx/NUUP",
+		deprecatedAt: null,
+		source:
+			"github.com/Elegidokawai2/Hackaton--Ajolote-en-ingles- → HTTP 301 → github.com/Ander-tsx/NUUP; GitHub API full_name Ander-tsx/NUUP",
+		asOf: "2026-09-05",
+	},
 	"blend-capital/blend-contracts": {
 		kind: "superseded",
 		supersededBy: "blend-capital/blend-contracts-v2",
