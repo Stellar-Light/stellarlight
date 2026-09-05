@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StablecoinHistoryChart } from "@/components/stablecoin-history-chart";
-import { VenueLogo } from "@/components/stablecoin-logos";
+import { AssetLogo, VenueLogo } from "@/components/stablecoin-logos";
 import { Card, CardContent } from "@/components/ui/card";
 import { STABLECOIN_MARKETS } from "@/data/stablecoin-markets";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -141,6 +141,12 @@ export default async function StablecoinDetailPage({
 
 				<div className="mb-8">
 					<div className="flex items-center gap-3 flex-wrap mb-2">
+						<AssetLogo
+							logoUrl={row.logoUrl}
+							ticker={row.ticker}
+							company={row.company}
+							domain={row.issuerDomain}
+						/>
 						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
 							{row.ticker}
 						</h1>
