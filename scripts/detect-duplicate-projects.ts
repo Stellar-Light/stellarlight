@@ -16,6 +16,11 @@
  *
  * Run:
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/detect-duplicate-projects.ts
+ *
+ * Flags:
+ *   --execute            actually hide (status=Draft). Default is a dry run.
+ *   --skip=slug,slug     operator veto: a cluster containing any of these slugs
+ *                        is reported but never hidden (needs a human call).
  */
 import "./load-env";
 import { getPayload } from "payload";
@@ -65,6 +70,12 @@ class UF {
 }
 
 const EXECUTE = process.argv.includes("--execute");
+const SKIP = new Set(
+	(process.argv.find((a) => a.startsWith("--skip="))?.slice(7) ?? "")
+		.split(",")
+		.map((s) => s.trim())
+		.filter(Boolean),
+);
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -114,7 +125,10 @@ async function main() {
 	clusters.sort((a, b) => b.length - a.length);
 
 	let toHide = 0;
+	let skipped = 0;
+	let alreadyHidden = 0;
 	console.log(`HIGH-CONFIDENCE duplicate clusters: ${clusters.length}\n`);
+	if (SKIP.size) console.log(`Operator skip list: ${[...SKIP].join(", ")}\n`);
 	for (const ids of clusters) {
 		const ranked = ids
 			.map((i) => byId.get(i)!)
@@ -123,7 +137,27 @@ async function main() {
 		console.log(
 			`■ keep: ${keeper.name} [${keeper.status}/${keeper.verificationLevel ?? "?"}${keeper.scf?.awarded ? "/SCF" : ""}] (${keeper.slug})`,
 		);
+		// A vetoed slug anywhere in the cluster freezes the WHOLE cluster: the
+		// operator's call is "leave these records alone", and which one ranks as
+		// keeper can shift as data changes.
+		const veto = ranked.filter((d) => SKIP.has(d.slug));
+		for (const d of veto) console.log(`   SKIPPED by operator: ${d.slug}`);
 		for (const d of ranked.slice(1)) {
+			if (veto.length) {
+				skipped++;
+				if (!SKIP.has(d.slug))
+					console.log(
+						`   not hidden (cluster skipped): ${d.name} (${d.slug}) id=${d.id}`,
+					);
+				continue;
+			}
+			if (d.status === "Draft") {
+				alreadyHidden++;
+				console.log(
+					`   already hidden (Draft): ${d.name} (${d.slug}) id=${d.id}`,
+				);
+				continue;
+			}
 			toHide++;
 			if (EXECUTE) {
 				await payload.update({
@@ -172,7 +206,7 @@ async function main() {
 	if (fuzzy.length > 40) console.log(`   …and ${fuzzy.length - 40} more`);
 
 	console.log(
-		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${docs.length - toHide} kept of ${docs.length}.`,
+		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${skipped} skipped by operator · ${alreadyHidden} already hidden (Draft) · ${docs.length - toHide} kept of ${docs.length}.`,
 	);
 	console.log("READ-ONLY — nothing was changed.");
 	process.exit(0);
