@@ -1278,20 +1278,6 @@ export async function searchRepos(
 		// ever sees it. A small identity-only supplemental fetch guarantees
 		// name/topic-anchored candidates enter the pool; the anchorIdentity sort
 		// key below then ranks them on merit within their stellarness tier.
-		// The language filter rides the candidate query, but two more candidate
-		// sources — canonical/flagship injection and the anchor-token net — did
-		// not carry it, so ?q=SEP-10+authentication&language=Python served
-		// TypeScript rows with no warning while ?language=Python alone filtered
-		// correctly (through-Raven battery, 2026-09-05). Every candidate source
-		// passes the same gate here, once.
-		if (language) {
-			const want = language.toLowerCase();
-			rawDocs = rawDocs.filter((d) =>
-				String(d.primaryLanguage ?? "")
-					.toLowerCase()
-					.includes(want),
-			);
-		}
 		const queryAnchors = anchorTokens(tokens);
 		if (queryAnchors.length) {
 			const ares = await payload.find({
@@ -1308,16 +1294,10 @@ export async function searchRepos(
 				select: { readmeExcerpt: false },
 			});
 			const seenA = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
-			const wantLang = language.toLowerCase();
 			rawDocs = [
 				...rawDocs,
 				...(ares.docs as unknown as RepoDoc[]).filter(
-					(d) =>
-						!seenA.has(d.fullName.toLowerCase()) &&
-						(!wantLang ||
-							String(d.primaryLanguage ?? "")
-								.toLowerCase()
-								.includes(wantLang)),
+					(d) => !seenA.has(d.fullName.toLowerCase()),
 				),
 			];
 		}
@@ -1403,6 +1383,20 @@ export async function searchRepos(
 			normAlias(q).length >= 8;
 		const qNorm =
 			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
+		// The language filter rides the first candidate query, but three more
+		// candidate sources (canonical/flagship injection, the anchor-token net,
+		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
+		// Python served TypeScript rows with no warning while ?language=Python
+		// alone filtered correctly (through-Raven battery, 2026-09-05). Every
+		// source passes the same gate here, once, after the last merge.
+		if (language) {
+			const want = language.toLowerCase();
+			rawDocs = rawDocs.filter((d) =>
+				String(d.primaryLanguage ?? "")
+					.toLowerCase()
+					.includes(want),
+			);
+		}
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
