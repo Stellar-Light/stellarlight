@@ -2000,6 +2000,31 @@ async function main() {
 			);
 			continue;
 		}
+		// A weak curated basis never overwrites a strong one a lane earned. The
+		// July entry for blend (from Live, to Live, basis site-liveness) re-stamped
+		// site-liveness on every execute, erasing the onchain-activity the basis
+		// lane keeps awarding (1,682 subinvocations in the window, 2026-09-05) —
+		// 16 STATUS_FIX entries carry a weak basis and could do the same. When
+		// the status is unchanged, the stored strong provenance IS the better
+		// evidence; there is nothing to write. A status MOVE is a verdict and
+		// still writes as the entry says.
+		const STRONG_STATUS_BASES = new Set([
+			"human-verified",
+			"onchain-activity",
+			"product-integration",
+			"repo-activity",
+		]);
+		if (
+			fix.from === fix.to &&
+			fix.basis &&
+			!STRONG_STATUS_BASES.has(fix.basis) &&
+			STRONG_STATUS_BASES.has(String(d.statusBasis ?? ""))
+		) {
+			console.log(
+				`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
+			);
+			continue;
+		}
 		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
 		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
 		const data: any = { status: fix.to };
