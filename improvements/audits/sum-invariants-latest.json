@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-04T21:22:33.110Z",
+  "generatedAt": "2026-09-05T02:09:38.061Z",
   "base": "https://stellarlight.xyz",
-  "checked": 13,
-  "pass": 13,
+  "checked": 17,
+  "pass": 17,
   "fail": 0,
   "couldNotCheck": 0,
   "results": [
@@ -82,6 +82,34 @@
       "status": "pass",
       "sum": 5617,
       "total": 5617
+    },
+    {
+      "name": "hackathon byStatus sums to totalEvents",
+      "scope": "byStatus",
+      "status": "pass",
+      "sum": 26,
+      "total": 26
+    },
+    {
+      "name": "developer partitions sum to monthlyActiveDevs.total",
+      "scope": "tenure",
+      "status": "pass",
+      "sum": 2699,
+      "total": 2699
+    },
+    {
+      "name": "developer partitions sum to monthlyActiveDevs.total",
+      "scope": "exclusive+multichain",
+      "status": "pass",
+      "sum": 2699,
+      "total": 2699
+    },
+    {
+      "name": "developer partitions sum to monthlyActiveDevs.total",
+      "scope": "geography",
+      "status": "pass",
+      "sum": 2699,
+      "total": 2699
     },
     {
       "name": "stablecoin byBasis sums to returned",
