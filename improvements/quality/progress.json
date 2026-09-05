@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T06:18:08.967Z",
+ "generatedAt": "2026-09-05T11:23:12.359Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -66,7 +66,7 @@
     "date": "2026-09-05",
     "title": "Lessons: the 2026-09-05 night shift (agents in parallel, executes read back, two audits)",
     "lessonCount": null,
-    "bytes": 6032
+    "bytes": 6141
    },
    {
     "file": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
