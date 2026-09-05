@@ -3135,7 +3135,9 @@ export interface operations {
                             hackathon?: string;
                             hackathonSlug?: string;
                             track?: string | null;
+                            /** @description This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner. */
                             placement?: string | null;
+                            /** @description Award CATEGORY title as DoraHacks published it ('10K Prize Pool', '$10,000 XLM Prize'), shared by every placement inside that category — NOT this build's payout. For what the build itself won use `prizeUsd` (null = undisclosed) or `placement`; reading this string as the prize overstates a 3rd place several times over. */
                             award?: string | null;
                             /** @description Placed in the event; absence of a win is not a quality judgement. */
                             isWinner?: boolean;
@@ -3336,7 +3338,8 @@ export interface operations {
                             assets?: string[];
                             /** @description SEP standards the partner implements. */
                             seps?: string[];
-                            rampTypes?: string[];
+                            /** @description Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed — the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner. */
+                            rampTypes?: ("on-ramp" | "off-ramp")[] | null;
                             country?: string | null;
                             acceptingClients?: boolean;
                             typicalEngagement?: string | null;

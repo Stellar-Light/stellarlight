@@ -586,7 +586,7 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window.",
+						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts EVERY indexed repo linked to the project, including a company's non-Stellar repositories, so an infrastructure provider or dev shop can lead on volume alone — read github.repos for the exact set behind each number.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:
