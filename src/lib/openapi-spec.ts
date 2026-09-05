@@ -5317,14 +5317,38 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded; null when membership came via usage attribution without a specific id. Read `contractBasis` before treating it as the repo's own deployment.",
+															"Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded. When the repo published no id but on-chain enrichment attributed contracts to it, the first attributed address is served here with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null only when neither exists. Read `contractBasis` before treating it as the repo's own deployment.",
 													},
 													contractBasis: {
 														type: "string",
 														nullable: true,
-														enum: ["self-validated", "published"],
+														enum: [
+															"self-validated",
+															"published",
+															"onchain-attributed",
+														],
 														description:
-															"Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. null = recorded before the basis was tracked.",
+															"Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. onchain-attributed = the repo published no id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null = recorded before the basis was tracked.",
+													},
+													verifiedContracts: {
+														type: "array",
+														description:
+															"Every mainnet address on-chain enrichment attributed to this repo (stellar.expert names it as the source), with the enrichment's label and the reading date that attributed it. Empty = nothing attributed, never a claim the repo deploys nothing.",
+														items: {
+															type: "object",
+															properties: {
+																address: { type: "string" },
+																label: { type: "string", nullable: true },
+																asOf: {
+																	type: "string",
+																	format: "date-time",
+																	nullable: true,
+																	description:
+																		"When on-chain enrichment last read this contract (the project's onchain.asOf); null only if the enrichment never stamped a date.",
+																},
+															},
+															required: ["address", "label", "asOf"],
+														},
 													},
 													repo: {
 														type: "object",

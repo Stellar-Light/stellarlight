@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.44",
+		type: "added",
+		summary:
+			"listContracts: rows admitted on usage alone are filled from the project's on-chain attribution (`contractBasis: onchain-attributed`), and every row carries `verifiedContracts`.",
+		detail:
+			"A through-Raven battery on 2026-09-05 asked 'which lending contracts are deployed on mainnet' and got Blend with contractId null: the repo row was admitted on codeInUse alone, while the project row already held the pool factory and backstop addresses that on-chain enrichment attributed to that same repo (stellar.expert names it as the source). The registry now joins project onchain.contracts by verifiedRepo: the first attributed address fills contractId with the new basis value onchain-attributed, and verifiedContracts lists them all with their labels. Rows with a repo-published id are unchanged.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.43",
 		type: "fixed",
 		summary:

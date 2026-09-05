@@ -21,6 +21,16 @@ export interface ContractRow {
 	/** Verified mainnet contract id (C…), null when membership came via
 	 * usage attribution without a specific id in the repo's README. */
 	contractId: string | null;
+	/** Every mainnet address on-chain enrichment attributed to THIS repo
+	 *  (stellar.expert names the repo as the contract's source), carried on the
+	 *  project row. Empty when nothing was attributed — never a claim that the
+	 *  repo deploys nothing. */
+	verifiedContracts: Array<{
+		address: string;
+		label: string | null;
+		/** The on-chain enrichment reading that attributed it (project onchain.asOf). */
+		asOf: string | null;
+	}>;
 	contractBasis: string | null;
 	repo: { fullName: string; url: string | null };
 	project: { slug: string; name: string | null } | null;
@@ -78,6 +88,42 @@ export async function buildContractsRegistry(
 	const slugs = [
 		...new Set(docs.map((d) => d.projectSlug).filter(Boolean)),
 	] as string[];
+	// Project rows carry on-chain enrichment's per-contract attribution
+	// (onchain.contracts[].verifiedRepo). A repo row admitted on usage alone
+	// (Blend: codeInUse.contracts 2, mainnetContractId null) served no address
+	// at all while its project row held the pool factory and backstop for the
+	// SAME repo — found by a through-Raven battery on 2026-09-05. Join them.
+	const attributedByRepo = new Map<
+		string,
+		Array<{ address: string; label: string | null; asOf: string | null }>
+	>();
+	if (slugs.length) {
+		const projects = await payload.find({
+			collection: "projects",
+			where: { slug: { in: slugs } },
+			limit: 500,
+			depth: 0,
+			select: { slug: true, onchain: true },
+		});
+		for (const p of projects.docs as any[]) {
+			const list = Array.isArray(p?.onchain?.contracts)
+				? p.onchain.contracts
+				: [];
+			for (const c of list) {
+				const repo = typeof c?.verifiedRepo === "string" ? c.verifiedRepo : "";
+				const m = repo.match(/github\.com\/([^/]+\/[^/?#]+)/i);
+				if (!m || typeof c?.address !== "string" || !c.address) continue;
+				const key = m[1].replace(/\.git$/, "").toLowerCase();
+				const cur = attributedByRepo.get(key) ?? [];
+				cur.push({
+					address: c.address,
+					label: typeof c.label === "string" && c.label ? c.label : null,
+					asOf: p?.onchain?.asOf ? String(p.onchain.asOf) : null,
+				});
+				attributedByRepo.set(key, cur);
+			}
+		}
+	}
 	const auditsByProject = new Map<
 		string,
 		{
@@ -119,11 +165,19 @@ export async function buildContractsRegistry(
 				)
 			: [];
 		const ciu = d.codeInUse;
+		const attributed =
+			attributedByRepo.get(String(d.fullName).toLowerCase()) ?? [];
+		const ownId = d.mainnetContractId ? String(d.mainnetContractId) : null;
 		return {
-			contractId: d.mainnetContractId ? String(d.mainnetContractId) : null,
+			contractId: ownId ?? attributed[0]?.address ?? null,
 			contractBasis: d.mainnetContractBasis
 				? String(d.mainnetContractBasis)
-				: null,
+				: ownId
+					? null
+					: attributed.length
+						? "onchain-attributed"
+						: null,
+			verifiedContracts: attributed,
 			repo: { fullName: String(d.fullName), url: d.url ? String(d.url) : null },
 			project: d.projectSlug
 				? {
