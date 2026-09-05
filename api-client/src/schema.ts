@@ -679,7 +679,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; this service's own row is never ranked; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
+         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
          */
         get: operations["getLeaderboard"];
         put?: never;
