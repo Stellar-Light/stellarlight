@@ -16,6 +16,9 @@ import curatedCanonical from "../../improvements/audits/curated-canonical-latest
 // (scripts/check-lane-autonomy.ts). Registry: improvements/lanes/lanes.json.
 import laneAutonomy from "../../improvements/audits/lane-autonomy-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
+// Weekly re-probe of every human-verified packet stamp against its own
+// deciding URL (scripts/check-packet-stamps.ts).
+import packetStamps from "../../improvements/audits/packet-stamps-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
@@ -46,6 +49,16 @@ import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import openapi from "../../specs/openapi.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
+
+/** The packet-stamp artifact's row shape. Named explicitly because a green
+ * run's `rows` still types fine, but any filtered/mapped subset of a JSON
+ * import is the `never[]` trap curated-canonical hit on 2026-08-31. */
+interface StampArtifactRow {
+	slug: string;
+	to: string;
+	verdict: string;
+	reason: string;
+}
 
 const REPO_BLOB = "https://github.com/Stellar-Light/stellarlight/blob/main";
 
@@ -340,6 +353,45 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			artifact: "improvements/audits/curated-canonical-latest.json",
 			passing: curatedCanonical.findings === 0,
 		}),
+
+		// Human-verified stamps, re-probed against the page that decided them.
+		//
+		// On 2026-09-05 two "high confidence" Live stamps were wrong within
+		// hours — orbitcdp's "Live on Stellar" banner sat over oUSD Minted —,
+		// Collateral Locked —, Borrow APY —, and skyhitz's title and fresh
+		// commit sat over 0.00 balances — and eight more were withdrawn for thin
+		// evidence. Every one had been read ONCE, by hand, and then stood as a
+		// durable claim on a project row. A stamp is a claim about a live
+		// product; the page it was read from keeps moving.
+		//
+		// It never flips a status. A contradiction is a finding for a person,
+		// because a machine reading a banner is the failure being guarded here.
+		(() => {
+			const t = packetStamps.tally;
+			const decided = (packetStamps.rows as StampArtifactRow[]).filter(
+				(r) => r.verdict === "CONTRADICTED" || r.verdict === "REVIVED",
+			);
+			return g({
+				key: "packet-stamps",
+				title: "Human-verified stamps still hold",
+				promise:
+					"Every human-verified packet stamp is re-probed weekly against its own deciding URL; a contradiction is a finding, not a silent stale claim.",
+				measure: { value: t.holds, of: t.checked, unit: "stamps" },
+				sub: `${t.holds}/${t.checked} packet stamps re-probed at their own sourceUrl and still supported by it`,
+				details: [
+					...decided
+						.slice(0, 4)
+						.map((r) => `${r.verdict}: ${r.slug} (${r.to}) — ${r.reason}`),
+					`${t.couldNotCheck} could-not-check — a 403, a timeout or a client-rendered shell is a page we did not read, never a contradiction`,
+					"read-only: this guard files a finding for a human and never writes a status, because reading a marketing banner as a product state is the failure it exists to catch",
+				],
+				asOf: packetStamps.generatedAt.slice(0, 10),
+				cadence: "weekly",
+				severity: "high",
+				artifact: "improvements/audits/packet-stamps-latest.json",
+				passing: t.contradicted + t.revived === 0,
+			});
+		})(),
 
 		// THE META-ROW. Every significant defect of 2026-08-30 was one shape:
 		// machinery exists, is tested, produces a value, and NOTHING CONSUMES

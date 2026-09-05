@@ -37,6 +37,7 @@ import { isFabricatedProbe } from "./eval/battery-banks";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEEKLY = join(ROOT, "improvements/engine/weekly");
 const ENGINE = join(ROOT, "improvements/engine");
+const AUDITS = join(ROOT, "improvements/audits");
 const LEDGER_FILE = join(ROOT, "improvements/ledger/findings.json");
 const SUMMARY_FILE = join(WEEKLY, "improvement-ledger-latest.json");
 // Wave manifests — the deliberate detect→verified transitions (slice 3).
@@ -492,6 +493,37 @@ const RAVEN_ROUTING_SPEC: SourceSpec = {
 	],
 };
 
+// The weekly packet-stamp re-check (scripts/check-packet-stamps.ts), whose
+// artifact lives in improvements/audits/ with the other check-* guards. Only
+// the two decided verdicts become findings: a COULD-NOT-CHECK row is a page we
+// failed to read, and filing it would put our own instrument's blindness on
+// the backlog as if it were a broken stamp.
+const PACKET_STAMPS_SPEC: SourceSpec = {
+	source: "packet-recheck",
+	file: "packet-stamps-latest.json",
+	dir: AUDITS,
+	arrays: [
+		{
+			key: "rows",
+			surface: "directory",
+			// A stamp whose own deciding page no longer supports it — the
+			// orbitcdp/skyhitz class — is a false claim served on a project row.
+			mode: (r) =>
+				str(r?.verdict) === "REVIVED" ? "stamp-revived" : "stamp-contradicted",
+			// A revival is a project we called dead that is answering again: worth
+			// a human re-grade, but nobody is being told something false today.
+			severity: (r) => (str(r?.verdict) === "REVIVED" ? "medium" : "high"),
+			keep: (r) =>
+				str(r?.verdict) === "CONTRADICTED" || str(r?.verdict) === "REVIVED",
+			probe: (r) => {
+				const slug = str(r?.slug);
+				const reason = str(r?.reason);
+				return slug && reason ? `${slug} — ${reason}` : slug;
+			},
+		},
+	],
+};
+
 /** raven-drift is a dated file in improvements/engine/, not weekly/. */
 function latestRavenDrift(): string | null {
 	if (!existsSync(ENGINE)) return null;
@@ -536,6 +568,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 		...NIGHTLY_SPECS,
 		RAVEN_LOOP_SPEC,
 		RAVEN_ROUTING_SPEC,
+		PACKET_STAMPS_SPEC,
 	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);

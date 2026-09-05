@@ -18,7 +18,14 @@ export type StatusBasis =
 	| "repo-activity"
 	| "onchain-activity"
 	| "human-verified"
-	| "source-inherited";
+	| "source-inherited"
+	// The two remaining Projects-enum values, missing here until 2026-09-05:
+	// `mydatacoin` already carried basis "unverified" and did not type-check,
+	// and nothing noticed because tsconfig excludes scripts/**. Surfaced by
+	// src/lib/__tests__/packet-stamps-verdict.test.ts pulling this file into the
+	// checked graph. Kept in sync with src/collections/Projects.ts.
+	| "product-integration"
+	| "unverified";
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
  * launching while allbridge has launched"). Each row is grounded in the
