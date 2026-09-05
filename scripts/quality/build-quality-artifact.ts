@@ -297,6 +297,7 @@ const projects = [...seen.values()].map((p) => ({
 	statusBasis: p.statusBasis ?? null,
 	prominence: typeof p.prominence === "number" ? p.prominence : 0,
 	deploymentNetwork: p.deployment?.network ?? "unknown",
+	deploymentBasis: p.deployment?.basis ?? null,
 	hasOnchainFootprint:
 		!!p.onchain?.assetCode ||
 		(Array.isArray(p.onchain?.contracts) && p.onchain.contracts.length > 0) ||
@@ -551,8 +552,16 @@ const out = {
 			appOnly: projects.filter(
 				(p) => !isStrongBasis(p.statusBasis) && !p.hasOnchainFootprint,
 			).length,
+			// Not a missing-evidence bucket: these rows ALREADY hold strong
+			// evidence, on the deployment record, with receipts. It never
+			// reached the record this board scores. Tracked here so the drift
+			// is visible while scripts/basis-from-deployment.ts drains it.
+			deploymentStrongStatusWeak: projects.filter(
+				(p) =>
+					isStrongBasis(p.deploymentBasis) && !isStrongBasis(p.statusBasis),
+			).length,
 			means:
-				"weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification.",
+				"weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record already carries a strong basis while the STATUS record this board scores is still weak — evidence that was earned and receipted but never propagated, not evidence that is missing.",
 		},
 		basisMix: [...basisMix.entries()]
 			.map(([basis, count]) => ({ basis, count }))

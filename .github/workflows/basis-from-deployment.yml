@@ -1,0 +1,47 @@
+name: Propagate deployment basis to status (manual)
+
+# Project rows carry two provenance records for "is it live on Stellar": the
+# STATUS record (statusBasis/statusAsOf/statusSourceUrl, which /quality and
+# every consumer weigh) and the DEPLOYMENT group added 2026-08-28, which has
+# its own receipts under improvements/receipts/. Nothing ever carried a verdict
+# across, so 20 served rows hold a STRONG deployment basis behind a WEAK status
+# basis — evidence earned, receipted, then stranded on the record nobody reads.
+#
+# This lane is NOT a classifier. It re-probes nothing and invents no evidence:
+# it copies an already-earned basis, WITH its own date and its own URL, onto
+# the field the board reads. Report its output as "propagated N".
+#
+# Upgrades only Live + mainnet + strong-deployment-basis + weak-status-basis
+# rows whose deployment evidence is citable (a sourceUrl, a receipt file, or
+# asset payments observed on-chain). Testnet never upgrades a live-status
+# basis. Every write is read back; a mismatch fails the run. Dry-run by default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: basis-from-deployment
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Propagate (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/basis-from-deployment.ts ${{ inputs.execute && '--execute' || '' }}
