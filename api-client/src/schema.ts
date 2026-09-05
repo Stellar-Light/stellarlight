@@ -679,7 +679,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across indexed repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
+         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
          */
         get: operations["getLeaderboard"];
         put?: never;
@@ -1857,7 +1857,7 @@ export interface components {
                 totalStars?: number;
                 /** @description Sum of OPEN issues (EXCLUDES pull requests — will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking. */
                 openIssuesTotal?: number;
-                /** @description Default-branch commits over the trailing 90 days, summed across the project's indexed repos from the enrich pass's activitySignals. The sort=activity key. null = no indexed repo carries a count (an INDEX gap, never zero activity); such rows sort last. */
+                /** @description Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking — the directory is the instrument, not a subject. */
                 commits90d?: number | null;
                 /**
                  * Format: date-time

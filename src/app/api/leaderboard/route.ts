@@ -128,6 +128,7 @@ export async function GET(req: NextRequest) {
 			hint: "Ranking is chosen with `sort`; see meta.metricDefinitions for what each metric means.",
 		},
 	);
+	const INSTRUMENT_SLUGS = new Set(["stellar-light"]);
 	const sort = (sp.get("sort") || "activity").toLowerCase();
 	const range = (sp.get("range") || "all").toLowerCase();
 	const category = sp.get("category");
@@ -308,6 +309,7 @@ export async function GET(req: NextRequest) {
 						commits90d?: number | null;
 						asOf?: string | null;
 					} | null;
+					stellarProof?: string | null;
 				}>
 			>();
 			if (projectSlugs.length > 0) {
@@ -332,6 +334,9 @@ export async function GET(req: NextRequest) {
 						// 2026-09-05: velocity, not just recency — the enrich pass stamps
 						// activitySignals.commits90d on 2,268 of 2,321 project-linked repos.
 						activitySignals: true,
+						// Only repos with Stellar code evidence count toward volume: a
+						// company's unrelated repositories were leading the board.
+						stellarProof: true,
 						// sls-036: index-refresh timestamp feeds meta.dataAsOf
 						updatedAt: true,
 					},
@@ -346,6 +351,7 @@ export async function GET(req: NextRequest) {
 						commits90d?: number | null;
 						asOf?: string | null;
 					} | null;
+					stellarProof?: string | null;
 					updatedAt?: string | null;
 				}>) {
 					// ISO-8601 strings compare correctly lexicographically.
@@ -401,6 +407,10 @@ export async function GET(req: NextRequest) {
 				let commits90d: number | null = null;
 				let commits90dAsOf: string | null = null;
 				for (const r of repos) {
+					// Volume counts only repos the scanner proved use Stellar (a
+					// stellarProof other than "none"): Gateway.fm and Rumble Fish led
+					// the first volume board on company-wide, non-Stellar commits.
+					if (!r.stellarProof || r.stellarProof === "none") continue;
 					const c = r.activitySignals?.commits90d;
 					if (typeof c !== "number") continue;
 					commits90d = (commits90d ?? 0) + c;
@@ -459,6 +469,11 @@ export async function GET(req: NextRequest) {
 			}
 
 			// Time-range filter
+			// The directory is the instrument, not a subject: this service's own
+			// rows are never ranked (owner call, 2026-09-05 — "we're not really
+			// doing on-chain stuff like protocols"). Named in metricDefinitions.
+			rows = rows.filter((r) => !INSTRUMENT_SLUGS.has(r.slug));
+
 			if (range !== "all") {
 				const cutoff = new Date();
 				if (range === "7d") cutoff.setDate(cutoff.getDate() - 7);
@@ -586,7 +601,7 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts EVERY indexed repo linked to the project, including a company's non-Stellar repositories, so an infrastructure provider or dev shop can lead on volume alone — read github.repos for the exact set behind each number.",
+						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none) — a company's unrelated repositories do not count — read github.repos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:
