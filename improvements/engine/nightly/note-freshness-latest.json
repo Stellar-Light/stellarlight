@@ -1,10 +1,20 @@
 {
-	"generatedAt": "2026-09-04T10:08:56.117Z",
+	"generatedAt": "2026-09-05T09:35:21.681Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
-			"probe": "note-stale:stellar/anchor-platform:docker:stellar/anchor-platform",
-			"note": "note (asOf 2026-09-01) cites 2026-09-01; registry latest is 2026-09-04 (published 2026-09-04)",
+			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+			"note": "note (asOf 2026-09-02) cites 2026-09-02; registry latest is 2026-09-04 (published 2026-09-04)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+			"note": "note (asOf 2026-09-02) cites 0.17.1; registry latest is 0.17.2 (published 2026-09-04)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
+			"note": "note (asOf 2026-09-01) cites 0.6.2; registry latest is 0.7.0 (published 2026-09-04)",
 			"surface": "code"
 		}
 	]

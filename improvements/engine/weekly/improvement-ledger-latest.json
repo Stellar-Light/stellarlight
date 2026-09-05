@@ -1,40 +1,45 @@
 {
-	"generatedAt": "2026-09-05T06:04:05.157Z",
-	"total": 539,
-	"open": 17,
-	"refreshQueue": 1,
-	"closed": 521,
+	"generatedAt": "2026-09-05T09:35:27.532Z",
+	"total": 542,
+	"open": 19,
+	"refreshQueue": 3,
+	"closed": 520,
 	"verified": 7,
-	"cleared": 514,
+	"cleared": 513,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 298,
+	"clearedOnSilence": 297,
 	"closingRate": 0.41,
 	"silenceShare": 0.55,
 	"recurrence": {
-		"reopened": 5,
+		"reopened": 7,
 		"reopenedShareOfClosures": 0.01,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 247,
-				"recurred": 136,
-				"ratePct": 55.1
+				"newFindings": 250,
+				"recurred": 139,
+				"ratePct": 55.6
 			},
 			"lifetime": {
-				"newFindings": 539,
-				"recurred": 136,
-				"ratePct": 25.2
+				"newFindings": 542,
+				"recurred": 139,
+				"ratePct": 25.6
 			}
 		}
 	},
 	"oldestOpenDays": 44,
 	"inWave": 0,
-	"highOpen": 0,
+	"highOpen": 2,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "consumer",
 			"open": 17,
+			"total": 36
+		},
+		{
+			"surface": "contract",
+			"open": 2,
 			"total": 36
 		},
 		{
@@ -45,7 +50,7 @@
 		{
 			"surface": "code",
 			"open": 0,
-			"total": 11
+			"total": 12
 		},
 		{
 			"surface": "directory",
@@ -58,11 +63,6 @@
 			"total": 16
 		},
 		{
-			"surface": "contract",
-			"open": 0,
-			"total": 34
-		},
-		{
 			"surface": "corpus",
 			"open": 0,
 			"total": 18
@@ -71,6 +71,20 @@
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
+		{
+			"id": "nightly-drift:status-endpoints-lists-api-rwa",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "status.endpoints lists /api/rwa",
+			"severity": "high"
+		},
+		{
+			"id": "nightly-drift:api-rwa-emits-x-api-version",
+			"surface": "contract",
+			"source": "nightly-drift",
+			"probe": "/api/rwa emits X-API-Version",
+			"severity": "high"
+		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
@@ -111,20 +125,6 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "is anyone actually building on Stellar or is it dead?",
-			"severity": "medium"
-		},
-		{
-			"id": "raven-routing:what-can-you-actually-build-on-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "what can you actually build on Stellar?",
-			"severity": "medium"
-		},
-		{
-			"id": "raven-routing:what-wallet-should-i-use-for-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "what wallet should I use for Stellar?",
 			"severity": "medium"
 		}
 	]
