@@ -350,9 +350,13 @@ overclaimed and 34 one-holder assets served as live — both corrected.
   anything else — see §1.)
 
 **What should happen next (ordered).**
-1. Make silence-close ineligible for the headline close rate
-   (write-set: summarizeLedger; done = closingRate counts re-probed +
-   verified only, silence reported apart).
+1. DONE 2026-09-05 (#1327) — silence-close is out of the headline close
+   rate: closingRate counts verified + re-probed only (0.41), silenceShare is
+   published apart (0.55), and the steering metric is recurrence after a
+   silence-close (findings.closure.recurredAfterSilence). Caveats stated in
+   the code: a re-detected verified finding is flagged (regressedFromVerified)
+   because applyWaves re-asserts verified; reopenedShareOfClosures is a lower
+   bound because a re-clear erases its own reopen stamp.
 2. DONE 2026-09-05 — the routing battery grades the INTENDED op. This is a
    NEW series (persona bank + intended-op expectations + evidence-classed
    misses), not the old 32-probe "some scout op present" series: 48/65 overall,
