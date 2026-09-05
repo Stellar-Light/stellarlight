@@ -208,7 +208,11 @@ async function main() {
 	console.log(
 		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${skipped} skipped by operator · ${alreadyHidden} already hidden (Draft) · ${docs.length - toHide} kept of ${docs.length}.`,
 	);
-	console.log("READ-ONLY — nothing was changed.");
+	console.log(
+		EXECUTE
+			? `EXECUTED — ${toHide} record(s) set to Draft (reversible). Read them back before trusting this line.`
+			: "READ-ONLY — nothing was changed.",
+	);
 	process.exit(0);
 }
 
