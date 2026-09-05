@@ -552,16 +552,18 @@ const out = {
 			appOnly: projects.filter(
 				(p) => !isStrongBasis(p.statusBasis) && !p.hasOnchainFootprint,
 			).length,
-			// Not a missing-evidence bucket: these rows ALREADY hold strong
-			// evidence, on the deployment record, with receipts. It never
-			// reached the record this board scores. Tracked here so the drift
-			// is visible while scripts/basis-from-deployment.ts drains it.
+			// Not a missing-evidence bucket in the usual sense: the DEPLOYMENT
+			// record already carries a strong basis while the STATUS record
+			// this board scores does not. Whether that basis is backed by a
+			// citable artifact is a separate question, and it is the one
+			// scripts/basis-from-deployment.ts answers per row — propagating
+			// the backed ones and reporting the rest as could-not-propagate.
 			deploymentStrongStatusWeak: projects.filter(
 				(p) =>
 					isStrongBasis(p.deploymentBasis) && !isStrongBasis(p.statusBasis),
 			).length,
 			means:
-				"weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record already carries a strong basis while the STATUS record this board scores is still weak — evidence that was earned and receipted but never propagated, not evidence that is missing.",
+				"weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied.",
 		},
 		basisMix: [...basisMix.entries()]
 			.map(([basis, count]) => ({ basis, count }))
