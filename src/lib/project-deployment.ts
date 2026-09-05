@@ -84,8 +84,12 @@ export function deploymentFromRegistry(
 	slug: string | null | undefined,
 ): DeploymentFact {
 	if (stored.network !== "unknown" || !slug) return stored;
+	// Minted rows lend evidence: a single-holder tranche IS deployed on
+	// mainnet. A zero-supply contract or a listing that no longer resolves is not.
 	const live = RWA_REGISTRY.filter(
-		(r) => r.projectSlug === slug && r.state === "live",
+		(r) =>
+			r.projectSlug === slug &&
+			(r.state === "live" || r.state === "issued-single-holder"),
 	).sort(
 		(a, b) =>
 			(LEVEL_RANK[a.verificationLevel] ?? 9) -

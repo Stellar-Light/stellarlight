@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-05",
+		surfaces: ["api"],
+		version: "spec@1.9.34",
+		type: "changed",
+		summary:
+			"RWA registry corrected after a cross-vendor audit: new state `issued-single-holder` (34 rows were served as live with one holder), duplicate tranches linked via `pairedWith`, product records gain issuer / assetId / verificationLevel / `registryState` / launchedAt, and the #494 close-out is reframed.",
+		detail:
+			"A second auditor (Grok, hard-scoped to the shipped diffs and the registry) found what the first pass had not: 34 rows served as live had exactly one holder — the issuer or its custodian — which the spec's own definition ('issued with supply and activity') did not cover; six real-estate tranches were deployed twice (same wasm, same deployer, minutes apart, identical supply) and rwa.xyz lists both, so a project could be double-counted; grBENJI carried gBENJI's name; USDY, USDM1 and YLDS were classed stablecoin by a ticker list while rwa.xyz classes them US Treasury Debt; USDGLO was joined to Brale, its issuing platform, rather than its own row; the contract-metadata level promised a total_supply three rows do not have; and the product record served on project rows carried none of the identity, issuer, verification level or launch date the finding asked for, only a hard-coded status. Each is corrected: the new state is served and lends mainnet-deployment evidence (it is minted) but is never a live market; a pair yields one product; productKind follows rwa.xyz's asset class; the product record carries the fields; the level's definition says where total_supply is absent. Not changed: ZUSD stays joined to the gyen row, which itself names ZUSD as GMO's sister token. Also reframed on #494: the product model is served for issuers with a project row, and the finding's own probe remains majority-null because most of its 61 rows are not issuers — that is coverage, not a fix of every row, and the earlier comments said 'fixed' too broadly.",
+	},
+	{
 		date: "2026-09-04",
 		surfaces: ["api"],
 		version: "spec@1.9.33",
