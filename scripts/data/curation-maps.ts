@@ -74,12 +74,17 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Spacewalk"; repo pendulum-chain/vortex pushed 2026-09-02 (high confidence).',
 	},
 	orbitcdp: {
-		from: "Inactive",
-		to: "Live",
+		// Owner verdict 2026-09-05: dead. The packet took the page's marketing
+		// banner "Live on Stellar" as evidence while the protocol stats on the
+		// same page are empty dashes (oUSD Minted —, Collateral Locked —,
+		// Borrow APY —); receipt improvements/receipts/orbitcdp-2026-09-05.json.
+		// A banner is not a product state. Reverts the packet write of #1345.
+		from: "Live",
+		to: "Inactive",
 		basis: "human-verified",
 		asOf: "2026-09-05",
 		sourceUrl: "https://orbitcdp.finance/",
-		note: 'Verification packet 2026-09-05, owner-approved: CDP protocol page: "Live on Stellar", Launch App (high confidence).',
+		note: "Owner verdict 2026-09-05: dead — the page's protocol stats are empty (oUSD Minted —, Collateral Locked —, Borrow APY —); the 'Live on Stellar' banner is marketing copy, not a product state. Corrects the 2026-09-05 packet.",
 	},
 	katagames: {
 		from: "Live",
