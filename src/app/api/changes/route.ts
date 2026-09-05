@@ -11,8 +11,16 @@
  * Semantics agents must not misread:
  *   - `changedAt` is the row's last write (Payload updatedAt). `facets` names
  *     which DATED fact families moved past `since` where sub-field dating
- *     exists (status, scf-awards, code-facts, toml); `["row"]` means the row
- *     changed but no dated facet localizes it — re-read the row.
+ *     exists (status, scf-awards, deployment, code-facts, toml); `["row"]`
+ *     means the row changed but no dated facet localizes it — re-read the row.
+ *   - `meta.byFacet.<surface>.<facet>` counts rows whose DATED fact moved past
+ *     `since`, computed over the whole surface (not the returned page). This is
+ *     the material-change number: enrichment lanes touch hundreds of rows a
+ *     week (943 project rows in the week to 2026-09-05) and every touch bumps
+ *     updatedAt, so `counts.<surface>` alone reads as "everything changed".
+ *     Facet counts overlap (a row can move two facts) and a lane that stamps
+ *     an EVIDENCE date older than `since` (statusAsOf = the day the evidence
+ *     was observed, never the write day) shows as `row`, not as a facet.
  *   - A row absent here changed nothing SINCE `since` — it is not a liveness
  *     or existence claim. Deletions are not represented (rows are pruned
  *     rarely and deliberately; a 404 on re-read is the deletion signal).
@@ -148,8 +156,25 @@ export async function GET(req: NextRequest) {
 	const changes: ChangeRow[] = [];
 	const counts: Record<string, number> = {};
 	const truncated: Record<string, boolean> = {};
+	const byFacet: Record<string, Record<string, number>> = {};
 
 	const where = { updatedAt: { greater_than: sinceIso } } as const;
+	/** Whole-surface count of rows whose dated field moved past `since`. */
+	const facetTotal = async (
+		collection: "projects" | "repos" | "partner-accounts",
+		field: string,
+	): Promise<number> => {
+		const r = await payload.find({
+			collection,
+			where: { [field]: { greater_than: sinceIso } },
+			limit: 0,
+			depth: 0,
+			overrideAccess: true,
+			// biome-ignore lint/suspicious/noExplicitAny: dynamic select key
+			select: { id: true } as any,
+		});
+		return r.totalDocs;
+	};
 
 	if (surfaces.includes("projects")) {
 		const r = await payload.find({
@@ -164,6 +189,7 @@ export async function GET(req: NextRequest) {
 				updatedAt: true,
 				statusAsOf: true,
 				scf: true,
+				deployment: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -171,6 +197,7 @@ export async function GET(req: NextRequest) {
 			const facets: string[] = [];
 			if (afterSince(d.statusAsOf, sinceMs)) facets.push("status");
 			if (afterSince(d.scf?.asOf, sinceMs)) facets.push("scf-awards");
+			if (afterSince(d.deployment?.asOf, sinceMs)) facets.push("deployment");
 			changes.push({
 				surface: "projects",
 				slug: String(d.slug),
@@ -180,6 +207,11 @@ export async function GET(req: NextRequest) {
 		}
 		counts.projects = r.totalDocs;
 		truncated.projects = r.totalDocs > perSurface;
+		byFacet.projects = {
+			status: await facetTotal("projects", "statusAsOf"),
+			"scf-awards": await facetTotal("projects", "scf.asOf"),
+			deployment: await facetTotal("projects", "deployment.asOf"),
+		};
 	}
 
 	if (surfaces.includes("repos")) {
@@ -205,6 +237,9 @@ export async function GET(req: NextRequest) {
 		}
 		counts.repos = r.totalDocs;
 		truncated.repos = r.totalDocs > perSurface;
+		byFacet.repos = {
+			"code-facts": await facetTotal("repos", "codeScannedAt"),
+		};
 	}
 
 	if (surfaces.includes("partners")) {
@@ -230,6 +265,9 @@ export async function GET(req: NextRequest) {
 		}
 		counts.partners = r.totalDocs;
 		truncated.partners = r.totalDocs > perSurface;
+		byFacet.partners = {
+			toml: await facetTotal("partner-accounts", "tomlFetchedAt"),
+		};
 	}
 
 	logApiHit({ req, endpoint: "/api/changes" });
@@ -253,6 +291,8 @@ export async function GET(req: NextRequest) {
 					total: Object.values(counts).reduce((a, b) => a + b, 0),
 				},
 				truncated,
+				byFacet,
+				note: "counts.<surface> is every row written since `since` — enrichment lanes bump updatedAt on hundreds of rows a week, so it is not a material-change number. byFacet.<surface>.<facet> counts rows whose DATED fact moved past `since` over the whole surface; facets overlap, and a lane that stamps an evidence date older than `since` shows as `row`.",
 			},
 		},
 		{

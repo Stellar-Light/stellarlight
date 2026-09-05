@@ -2667,6 +2667,14 @@ export interface operations {
                             truncated?: {
                                 [key: string]: boolean;
                             };
+                            /** @description Per surface, the number of rows whose DATED fact family moved past `since`, counted over the whole surface (not the returned page): projects {status, scf-awards, deployment}, repos {code-facts}, partners {toml}. This is the material-change number; counts.<surface> is every write, and enrichment lanes bump updatedAt on hundreds of rows a week. Facets overlap. A lane that stamps an evidence date older than `since` (statusAsOf is the day the evidence was observed, never the write day) shows as `row`, not as a facet. */
+                            byFacet?: {
+                                [key: string]: {
+                                    [key: string]: number;
+                                };
+                            };
+                            /** @description How to read counts vs byFacet, stated on every response. */
+                            note?: string;
                         };
                     };
                 };
