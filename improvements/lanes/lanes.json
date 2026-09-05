@@ -1,5 +1,5 @@
 {
-	"note": "Every workflow in this repo that can WRITE to production data — built by reading .github/workflows/*.yml for an `execute` input or a literal --execute/--apply/--prune-logs flag, not from anyone's memory of the list. `cadence` is the lane's own clock; `executeInput` is the dispatch input that turns writing on, or \"flag\" when the flag is hardcoded. `since` is the lane's first green run and is null everywhere today: improvements/audits/workflow-health-latest.json records LAST success, not first, so the counter falls back to the 8-week observation window and says so (spanBasis).",
+	"note": "Every workflow in this repo that can WRITE to production data \u2014 built by reading .github/workflows/*.yml for an `execute` input or a literal --execute/--apply/--prune-logs flag, not from anyone's memory of the list. `cadence` is the lane's own clock; `executeInput` is the dispatch input that turns writing on, or \"flag\" when the flag is hardcoded. `since` is the lane's first green run and is null everywhere today: improvements/audits/workflow-health-latest.json records LAST success, not first, so the counter falls back to the 8-week observation window and says so (spanBasis).",
 	"source": ".github/workflows/*.yml",
 	"lanes": [
 		{
@@ -31,7 +31,7 @@
 			"workflow": "apply-wallet-availability.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "wallet `availability` (+ storeUrl, checkedAt) from a reviewed, committed drafts file — only where availability is currently empty",
+			"writeSet": "wallet `availability` (+ storeUrl, checkedAt) from a reviewed, committed drafts file \u2014 only where availability is currently empty",
 			"since": null
 		},
 		{
@@ -55,7 +55,7 @@
 			"workflow": "backfill-code-domains.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "repos.codeDomains re-derived from stored contractInterface / stellarDeps / sdkCapabilities — zero GitHub calls",
+			"writeSet": "repos.codeDomains re-derived from stored contractInterface / stellarDeps / sdkCapabilities \u2014 zero GitHub calls",
 			"since": null
 		},
 		{
@@ -63,7 +63,7 @@
 			"workflow": "backfill-code-tier.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "repos.codeProofTier — the write path scan-report.ts only ever printed",
+			"writeSet": "repos.codeProofTier \u2014 the write path scan-report.ts only ever printed",
 			"since": null
 		},
 		{
@@ -87,7 +87,7 @@
 			"workflow": "backfill-lifecycle.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "projects.lifecycle { wasLive, note } only — additive, never deletes, never changes status",
+			"writeSet": "projects.lifecycle { wasLive, note } only \u2014 additive, never deletes, never changes status",
 			"since": null
 		},
 		{
@@ -113,6 +113,14 @@
 			"executeInput": "execute",
 			"writeSet": "repos triage tags across the whole collection, including the EC-taxonomy rows the project-scoped enrich loop never visits",
 			"since": null
+		},
+		{
+			"id": "basis-from-deployment",
+			"workflow": "basis-from-deployment.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects statusBasis := deployment.basis (+ statusAsOf := deployment.asOf, statusSourceUrl := the deployment evidence URL) only where status is Live, deployment.network is mainnet, deployment.basis is a strong tier and the evidence is real (deployment.sourceUrl, a receipt file, or onchain.assetPayments > 0); shadows and testnet skipped",
+			"since": "2026-09-05"
 		},
 		{
 			"id": "basis-from-onchain",
@@ -175,7 +183,7 @@
 			"workflow": "dedup-projects.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "hides duplicate project rows (status → Draft) on high-confidence signals only",
+			"writeSet": "hides duplicate project rows (status \u2192 Draft) on high-confidence signals only",
 			"since": null
 		},
 		{
@@ -215,7 +223,7 @@
 			"workflow": "enrich-onchain.yml",
 			"cadence": "cron 0 6 * * 2",
 			"executeInput": "execute",
-			"writeSet": "projects.onchain per contract — lifetime events, subinvocations, storage entries, created date, wasm-validation repo — from stellar.expert",
+			"writeSet": "projects.onchain per contract \u2014 lifetime events, subinvocations, storage entries, created date, wasm-validation repo \u2014 from stellar.expert",
 			"since": null
 		},
 		{
@@ -223,7 +231,7 @@
 			"workflow": "enrich-partner-onchain.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "partner.onchain — holders / payment activity / rating for the partner's OWN issued assets, attributed only on an issuer-domain match",
+			"writeSet": "partner.onchain \u2014 holders / payment activity / rating for the partner's OWN issued assets, attributed only on an issuer-domain match",
 			"since": null
 		},
 		{
@@ -239,7 +247,7 @@
 			"workflow": "enrich-repo-activity.yml",
 			"cadence": "cron 20 4 * * *",
 			"executeInput": "execute",
-			"writeSet": "repos.activitySignals (commits90d, lastCommitAt, stars, …) on the rows enrich-repos never reaches",
+			"writeSet": "repos.activitySignals (commits90d, lastCommitAt, stars, \u2026) on the rows enrich-repos never reaches",
 			"since": null
 		},
 		{
@@ -247,7 +255,7 @@
 			"workflow": "enrich-repos.yml",
 			"cadence": "cron 0 8 * * 1",
 			"executeInput": "execute",
-			"writeSet": "repos upserts from the projects directory — topics, description, language, stars, last commit, fused into repoScore",
+			"writeSet": "repos upserts from the projects directory \u2014 topics, description, language, stars, last commit, fused into repoScore",
 			"since": null
 		},
 		{
@@ -287,7 +295,7 @@
 			"workflow": "fix-scf-rounds.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "projects SCF round membership — removes rounds the official source affirmatively marks Not Awarded",
+			"writeSet": "projects SCF round membership \u2014 removes rounds the official source affirmatively marks Not Awarded",
 			"since": null
 		},
 		{
@@ -343,7 +351,7 @@
 			"workflow": "mark-defunct.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "projects.status → Draft for confirmed-defunct rows (+ provenance=AdminEdit, verificationLevel off Unverified)",
+			"writeSet": "projects.status \u2192 Draft for confirmed-defunct rows (+ provenance=AdminEdit, verificationLevel off Unverified)",
 			"since": null
 		},
 		{
@@ -351,7 +359,7 @@
 			"workflow": "mark-inactive-projects.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "projects.status → Inactive for a CURATED list only",
+			"writeSet": "projects.status \u2192 Inactive for a CURATED list only",
 			"since": null
 		},
 		{
@@ -399,7 +407,7 @@
 			"workflow": "refresh-rwa.yml",
 			"cadence": "cron 37 */6 * * *",
 			"executeInput": "execute",
-			"writeSet": "rwa-asset measurements — supply, holders, registryState, controls — dated, plus the products fed onto project rows",
+			"writeSet": "rwa-asset measurements \u2014 supply, holders, registryState, controls \u2014 dated, plus the products fed onto project rows",
 			"since": null
 		},
 		{
@@ -415,7 +423,7 @@
 			"workflow": "scan-repo-code.yml",
 			"cadence": "cron 17 */2 * * *",
 			"executeInput": "execute",
-			"writeSet": "repos code signals — stellarProof, codeDepth, code facts, farmScore, codeScanState",
+			"writeSet": "repos code signals \u2014 stellarProof, codeDepth, code facts, farmScore, codeScanState",
 			"since": null
 		},
 		{
@@ -487,7 +495,7 @@
 			"workflow": "upgrade-basis-onchain.yml",
 			"cadence": "dispatch",
 			"executeInput": "execute",
-			"writeSet": "projects.statusBasis → onchain-activity where the row already holds dated on-chain evidence",
+			"writeSet": "projects.statusBasis \u2192 onchain-activity where the row already holds dated on-chain evidence",
 			"since": null
 		},
 		{
