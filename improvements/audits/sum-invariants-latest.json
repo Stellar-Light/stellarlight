@@ -1,31 +1,35 @@
 {
-  "generatedAt": "2026-09-05T02:09:38.061Z",
+  "generatedAt": "2026-09-05T03:54:34.344Z",
   "base": "https://stellarlight.xyz",
   "checked": 17,
-  "pass": 17,
+  "pass": 11,
+  "vacuous": 6,
   "fail": 0,
   "couldNotCheck": 0,
   "results": [
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "hackmeridian-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "stellar-builders-camp-jaipur-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "stellar-builder-summit-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
@@ -44,23 +48,26 @@
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "stellar-journey-to-mastery-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "build-on-stellar-philippines-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "apac-stellar-hackathon-2026",
-      "status": "pass",
+      "status": "vacuous",
       "sum": 0,
-      "total": 0
+      "total": 0,
+      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "rwa byState / byLevel sum to registry",

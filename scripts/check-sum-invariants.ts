@@ -192,7 +192,7 @@ const PARTITIONS: Part[] = [
 	const results: {
 		name: string;
 		scope: string;
-		status: "pass" | "FAIL" | "could-not-check";
+		status: "pass" | "vacuous" | "FAIL" | "could-not-check";
 		sum?: number;
 		total?: number;
 		detail?: string;
@@ -221,26 +221,35 @@ const PARTITIONS: Part[] = [
 		}
 		for (const r of rows) {
 			const s = sum(r.parts);
+			// 0 = 0 proves nothing: a hackathon with no submissions yet, a limit=1
+			// read. The 2026-09-05 audit found 6 of 17 passes were this. Reported
+			// as vacuous — visible, never counted as a pass.
+			const status =
+				s !== r.total ? "FAIL" : r.total === 0 ? "vacuous" : "pass";
 			results.push({
 				name: p.name,
 				scope: r.scope,
-				status: s === r.total ? "pass" : "FAIL",
+				status,
 				sum: s,
 				total: r.total,
 				detail:
-					s === r.total
-						? undefined
-						: `${JSON.stringify(r.parts)} sums to ${s}, denominator is ${r.total}`,
+					status === "FAIL"
+						? `${JSON.stringify(r.parts)} sums to ${s}, denominator is ${r.total}`
+						: status === "vacuous"
+							? "denominator is 0 — holds trivially, proves nothing"
+							: undefined,
 			});
 		}
 	}
 	const fails = results.filter((r) => r.status === "FAIL");
 	const cnc = results.filter((r) => r.status === "could-not-check");
+	const vac = results.filter((r) => r.status === "vacuous");
 	const report = {
 		generatedAt: new Date().toISOString(),
 		base: BASE,
 		checked: results.length,
-		pass: results.length - fails.length - cnc.length,
+		pass: results.length - fails.length - cnc.length - vac.length,
+		vacuous: vac.length,
 		fail: fails.length,
 		couldNotCheck: cnc.length,
 		results,
@@ -250,10 +259,10 @@ const PARTITIONS: Part[] = [
 	else {
 		for (const r of results)
 			console.log(
-				`  ${r.status === "pass" ? "✓" : r.status === "FAIL" ? "✗" : "?"} ${r.name} · ${r.scope}${r.detail ? ` — ${r.detail}` : ""}`,
+				`  ${r.status === "pass" ? "✓" : r.status === "FAIL" ? "✗" : r.status === "vacuous" ? "○" : "?"} ${r.name} · ${r.scope}${r.detail ? ` — ${r.detail}` : ""}`,
 			);
 		console.log(
-			`\n${fails.length ? "RED" : cnc.length === results.length ? "COULD NOT CHECK" : "GREEN"}: ${report.pass} pass · ${fails.length} fail · ${cnc.length} could-not-check`,
+			`\n${fails.length ? "RED" : cnc.length === results.length ? "COULD NOT CHECK" : "GREEN"}: ${report.pass} pass · ${vac.length} vacuous · ${fails.length} fail · ${cnc.length} could-not-check`,
 		);
 	}
 	// A fail is a broken invariant. Could-not-check on EVERYTHING is an instrument

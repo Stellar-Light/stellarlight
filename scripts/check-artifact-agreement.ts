@@ -96,8 +96,15 @@ const rows = PAIRS.map((p) => {
 	const db = read(p.b.artifact);
 	const va = da === null ? null : dig(da, p.a.path);
 	const vb = db === null ? null : dig(db, p.b.path);
-	const readable = va !== undefined && va !== null && vb !== undefined && vb !== null;
-	return { ...p, valueA: va ?? null, valueB: vb ?? null, readable, agrees: readable && va === vb };
+	const readable =
+		va !== undefined && va !== null && vb !== undefined && vb !== null;
+	return {
+		...p,
+		valueA: va ?? null,
+		valueB: vb ?? null,
+		readable,
+		agrees: readable && va === vb,
+	};
 });
 
 const unreadable = rows.filter((r) => !r.readable);
@@ -126,7 +133,10 @@ if (JSON_OUT) {
 if (unreadable.length > 0) {
 	console.error(
 		`INCONCLUSIVE: could not read ${unreadable.length} claim(s):\n${unreadable
-			.map((r) => `  ${r.quantity}: ${r.a.artifact}#${r.a.path} / ${r.b.artifact}#${r.b.path}`)
+			.map(
+				(r) =>
+					`  ${r.quantity}: ${r.a.artifact}#${r.a.path} / ${r.b.artifact}#${r.b.path}`,
+			)
 			.join("\n")}`,
 	);
 	process.exit(2);

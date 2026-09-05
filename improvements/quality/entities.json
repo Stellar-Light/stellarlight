@@ -1,18 +1,11 @@
 {
- "generatedAt": "2026-09-04T16:23:05.915Z",
+ "generatedAt": "2026-09-05T04:00:31.479Z",
  "surfaces": [
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
    "openFindings": 5,
    "clearedFindings": 19,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 1,
-   "clearedFindings": 10,
    "verifiedFindings": 0
   },
   {
@@ -35,6 +28,13 @@
    "openFindings": 0,
    "clearedFindings": 27,
    "verifiedFindings": 7
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 0,
+   "clearedFindings": 10,
+   "verifiedFindings": 0
   },
   {
    "surface": "directory",
@@ -62,6 +62,7 @@
    {
     "mode": "recall-miss",
     "open": 0,
+    "refresh": 0,
     "cleared": 284,
     "verified": 0,
     "surface": "retrieval"
@@ -69,6 +70,7 @@
    {
     "mode": "coverage-gap",
     "open": 0,
+    "refresh": 0,
     "cleared": 61,
     "verified": 0,
     "surface": "directory"
@@ -76,6 +78,7 @@
    {
     "mode": "demand-miss",
     "open": 0,
+    "refresh": 0,
     "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
@@ -83,6 +86,7 @@
    {
     "mode": "completeness-residual",
     "open": 0,
+    "refresh": 0,
     "cleared": 28,
     "verified": 0,
     "surface": "directory"
@@ -90,6 +94,7 @@
    {
     "mode": "api-drift",
     "open": 0,
+    "refresh": 0,
     "cleared": 23,
     "verified": 0,
     "surface": "contract"
@@ -97,6 +102,7 @@
    {
     "mode": "battery-coverage-weak",
     "open": 0,
+    "refresh": 0,
     "cleared": 18,
     "verified": 0,
     "surface": "corpus"
@@ -104,6 +110,7 @@
    {
     "mode": "scf-round-overclaim",
     "open": 0,
+    "refresh": 0,
     "cleared": 16,
     "verified": 0,
     "surface": "scf"
@@ -111,6 +118,7 @@
    {
     "mode": "demand-routing-miss",
     "open": 0,
+    "refresh": 0,
     "cleared": 13,
     "verified": 0,
     "surface": "consumer"
@@ -118,6 +126,7 @@
    {
     "mode": "routing-miss",
     "open": 5,
+    "refresh": 0,
     "cleared": 6,
     "verified": 0,
     "surface": "consumer"
@@ -125,13 +134,15 @@
    {
     "mode": "missing-field",
     "open": 0,
+    "refresh": 0,
     "cleared": 0,
     "verified": 7,
     "surface": "contract"
    },
    {
     "mode": "note-stale",
-    "open": 1,
+    "open": 0,
+    "refresh": 1,
     "cleared": 5,
     "verified": 0,
     "surface": "code"
@@ -139,6 +150,7 @@
    {
     "mode": "golden-fail",
     "open": 0,
+    "refresh": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "retrieval"
@@ -146,6 +158,7 @@
    {
     "mode": "population-miss",
     "open": 0,
+    "refresh": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "code"
@@ -153,6 +166,7 @@
    {
     "mode": "claim-blocker",
     "open": 0,
+    "refresh": 0,
     "cleared": 3,
     "verified": 0,
     "surface": "contract"
@@ -160,6 +174,7 @@
    {
     "mode": "ambiguous-contract",
     "open": 0,
+    "refresh": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "contract"
@@ -167,6 +182,7 @@
    {
     "mode": "consumer-code-shallow",
     "open": 0,
+    "refresh": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "code"
@@ -175,7 +191,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 2
+    "count": 1
    },
    {
     "bucket": "8–30d",
@@ -8484,6 +8500,13 @@
    "notApplicable": 704,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
+  "strongByBasis": {
+   "human-verified": 155,
+   "onchain-activity": 39,
+   "official-record": 0,
+   "product-integration": 58,
+   "repo-activity": 115
+  },
   "strongBasisSplit": {
    "weakLiveRows": 617,
    "onchainEligible": 34,
@@ -9481,11 +9504,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1256
+     "count": 1258
     },
     {
      "label": "slowing",
-     "count": 936
+     "count": 934
     },
     {
      "label": "active",
@@ -10733,7 +10756,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 11
+    "value": 10
    },
    {
     "id": "o:cleared",
