@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T17:14:19.523Z",
+ "generatedAt": "2026-09-05T19:15:31.012Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -1979,8 +1979,10 @@
    {
     "slug": "hot-wallet",
     "prominence": 60,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -2333,9 +2335,10 @@
    {
     "slug": "pyth",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "typed"
     ],
     "status": "Live"
    },
@@ -3050,8 +3053,10 @@
    {
     "slug": "vanna-finance",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -3087,8 +3092,10 @@
    {
     "slug": "untangled",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -4696,7 +4703,7 @@
     "prominence": 70,
     "factsPresent": 5,
     "missing": [],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "orally",
@@ -4767,8 +4774,10 @@
    {
     "slug": "normal",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -5624,8 +5633,10 @@
    {
     "slug": "fairblock",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -7119,8 +7130,10 @@
    {
     "slug": "zebec",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -7160,8 +7173,10 @@
    {
     "slug": "wagelink",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -7230,8 +7245,10 @@
    {
     "slug": "tala",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
     "status": "Live"
    },
    {
@@ -7739,7 +7756,7 @@
     "prominence": 0,
     "factsPresent": 5,
     "missing": [],
-    "status": "Live"
+    "status": "Inactive"
    },
    {
     "slug": "litemint",
@@ -8428,31 +8445,31 @@
   ],
   "deploymentSplit": {
    "unknown": 900,
-   "applicableUnknown": 198,
-   "notApplicable": 702,
+   "applicableUnknown": 194,
+   "notApplicable": 706,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 201,
+   "human-verified": 193,
    "onchain-activity": 47,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 563,
-   "onchainEligible": 13,
-   "appOnly": 550,
-   "deploymentStrongStatusWeak": 2,
+   "weakLiveRows": 571,
+   "onchainEligible": 15,
+   "appOnly": 556,
+   "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 462
+    "count": 470
    },
    {
     "basis": "human-verified",
-    "count": 201
+    "count": 193
    },
    {
     "basis": "repo-activity",
@@ -8480,7 +8497,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 573,
+  "weakestTotal": 581,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8546,6 +8563,25 @@
     "missing": [
      "strongBasis",
      "sourced"
+    ]
+   },
+   {
+    "slug": "pyth",
+    "name": "Pyth",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
     ]
    },
    {
@@ -9190,6 +9226,26 @@
     ]
    },
    {
+    "slug": "hot-wallet",
+    "name": "HOT Wallet",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 60,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Wallet"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
     "slug": "open-gamefi-sdk",
     "name": "Open GameFi SDK",
     "status": "Live",
@@ -9269,53 +9325,12 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "exaion",
-    "name": "Exaion",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 55,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "RPC"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "stellar-passport",
-    "name": "Stellar Passport",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 55,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security",
-     "Wallet"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 563
+    "count": 571
    },
    {
     "field": "dated",
@@ -9327,7 +9342,7 @@
    },
    {
     "field": "typed",
-    "count": 0
+    "count": 1
    },
    {
     "field": "linked",
@@ -10578,9 +10593,15 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "56% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "555 of 984 rows (census)",
+   "limit": "57% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "563 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
+  },
+  {
+   "area": "project types",
+   "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
+   "measurement": "1 of 984 sampled rows untyped",
+   "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
    "area": "repo knowledge notes",
@@ -10972,26 +10993,25 @@
     "missing": 900,
     "of": 984,
     "share": 91.5,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 900 unknown rows, 198 are on-chain product types where the question applies and an agent will ask it; the other 702 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 900 unknown rows, 194 are on-chain product types where the question applies and an agent will ask it; the other 706 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
-    "examplePoolSize": 4,
+    "examplePoolSize": 3,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
      "wisdomtree",
      "redswan",
-     "orbitcdp",
      "spacewalk"
     ]
    },
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 563,
+    "missing": 571,
     "of": 984,
-    "share": 57.2,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 13 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 550 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 58,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 15 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 556 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 14,
@@ -11063,16 +11083,18 @@
    {
     "entity": "project",
     "field": "typed",
-    "missing": 0,
+    "missing": 1,
     "of": 984,
-    "share": 0,
+    "share": 0.1,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
     "exampleSource": "highest-prominence rows carrying no type",
-    "examplePoolSize": 0,
+    "examplePoolSize": 1,
     "exampleCap": 12,
     "exampleTruncated": false,
-    "examples": []
+    "examples": [
+     "pyth"
+    ]
    }
   ]
  }
