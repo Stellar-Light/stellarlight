@@ -8,15 +8,18 @@
  * the artifact path so every number links to its reproducible evidence.
  */
 
-import consumption from "../../improvements/audits/consumption-latest.json";
 import answerDating from "../../improvements/audits/answer-dating-latest.json";
-import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
-import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
+import consumption from "../../improvements/audits/consumption-latest.json";
 import coverageGaps from "../../improvements/audits/coverage-gaps-latest.json";
 import curatedCanonical from "../../improvements/audits/curated-canonical-latest.json";
+// The autonomy ladder's counter, one row per lane that can write to production
+// (scripts/check-lane-autonomy.ts). Registry: improvements/lanes/lanes.json.
+import laneAutonomy from "../../improvements/audits/lane-autonomy-latest.json";
 import northStarSeries from "../../improvements/audits/north-star-series.json";
-import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
+import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
+import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
+import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
@@ -540,8 +543,12 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				// Two independent rosters agreeing is a stronger signal than either
 				// lane's own threshold. Rendered only when non-empty, so it costs
 				// nothing on a quiet week.
-				...((coverageGaps as { corroboratedAbsent?: Array<{ name: string; slug: string }> })
-					.corroboratedAbsent ?? []
+				...(
+					(
+						coverageGaps as {
+							corroboratedAbsent?: Array<{ name: string; slug: string }>;
+						}
+					).corroboratedAbsent ?? []
 				).map(
 					(c) =>
 						`corroborated by BOTH rosters — ${c.name} (${c.slug}) is on the SCF absent list AND listed by DefiLlama on Stellar, below the TVL floor that hid it`,
@@ -1102,6 +1109,56 @@ export function getEntities() {
  * MEASURED (lane run conclusion + write-set diff), never asserted. */
 export function getLanes() {
 	return [laneOperatorToml];
+}
+
+export type LaneAutonomyRow = {
+	id: string;
+	workflow: string;
+	cadence: string;
+	writeSet: string;
+	executeDetection: string;
+	executesLast8w: number | null;
+	/** Of those, the ones the lane's own cron started. An execute a human
+	 * dispatched still counts toward a week, but it is not evidence of
+	 * unattended operation, so the split has to stay visible. */
+	scheduledExecutesLast8w: number | null;
+	executesAreLowerBound: boolean;
+	interventionFreeWeeks: number | null;
+	stage: number | string;
+	lastInterventionAt: string | null;
+	lastInterventionWhat: string | null;
+	lastInterventionSource: string | null;
+	state: string;
+	why: string;
+};
+
+/** Intervention-free weeks per production-writing lane (QUALITY.md §3),
+ * measured by scripts/check-lane-autonomy.ts against GitHub's own run history
+ * and improvements/lanes/interventions.json. The return type is declared
+ * rather than inferred from the JSON on purpose: a week where every lane
+ * happens to have a null field would otherwise narrow the import's type and
+ * break the build on an artifact that is perfectly valid. */
+export function getLaneAutonomy(): {
+	generatedAt: string;
+	windowWeeks: number;
+	thresholdWeeks: number;
+	rule: string;
+	summary: {
+		lanes: number;
+		ok: number;
+		couldNotCheck: number;
+		eligibleForStage2: number;
+	};
+	lanes: LaneAutonomyRow[];
+} {
+	return {
+		...laneAutonomy,
+		lanes: [...laneAutonomy.lanes].sort(
+			(a, b) =>
+				(b.interventionFreeWeeks ?? -1) - (a.interventionFreeWeeks ?? -1) ||
+				a.id.localeCompare(b.id),
+		),
+	};
 }
 
 /** Where known-item misses die, measured by replaying every open recall

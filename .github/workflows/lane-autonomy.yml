@@ -1,0 +1,59 @@
+# Recount every mutating lane's intervention-free weeks (QUALITY.md §3).
+#
+# Weekly, because a week is the unit the ladder counts in — and Monday 07:41
+# rather than the top of the hour: crons scheduled at :00 are the ones GitHub
+# drops when the whole world asks for a runner at once (see check-links.yml,
+# 2026-09-02). Off-hour minutes have been the convention here since.
+#
+# The script never fails on a finding — a lane at zero weeks is the normal
+# reading, and a rate-limited sweep reports could-not-check rather than
+# claiming a lane is broken. So there is no second "turn the finding red" run
+# the way workflow-health.yml has; this lane is a measurement only.
+name: lane-autonomy
+
+on:
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: lane-autonomy
+  cancel-in-progress: true
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Count intervention-free weeks
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-lane-autonomy.ts --json
+
+      - name: Commit it
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/lane-autonomy-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): lane autonomy [skip ci]"
+          # Same rebase-and-retry as workflow-health.yml: the artifact is a
+          # fresh measurement, so replaying it on top of whatever landed first
+          # is always correct, and -X theirs resolves the two-runs-of-this-lane
+          # conflict in favour of the commit being replayed (ours).
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs || git rebase --abort
+          done
+          git push
