@@ -156,4 +156,30 @@ describe("judgeStamp", () => {
 			).toBe("COULD-NOT-CHECK");
 		}
 	});
+	it("JSON-RPC endpoints judge on getHealth; a 401/405 on a GET is could-not-check", () => {
+		expect(
+			judgeStamp({
+				...base,
+				sourceUrl: "https://rpc.ankr.com/stellar_soroban",
+				httpStatus: 200,
+				html: "",
+				rpcHealth: "healthy",
+			}).verdict,
+		).toBe("HOLDS");
+		expect(
+			judgeStamp({
+				...base,
+				sourceUrl: "https://rpc.ankr.com/stellar_soroban",
+				httpStatus: 200,
+				html: "",
+				rpcHealth: "degraded",
+			}).verdict,
+		).toBe("CONTRADICTED");
+		expect(judgeStamp({ ...base, httpStatus: 405, html: "" }).verdict).toBe(
+			"COULD-NOT-CHECK",
+		);
+		expect(judgeStamp({ ...base, httpStatus: 401, html: "" }).verdict).toBe(
+			"COULD-NOT-CHECK",
+		);
+	});
 });
