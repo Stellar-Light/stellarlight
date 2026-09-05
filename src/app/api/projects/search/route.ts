@@ -1105,7 +1105,15 @@ export async function GET(req: NextRequest) {
 					{ "coverage.currencies": { like: v } },
 				]),
 			);
-			if (tokens.length) {
+			// A type enumeration is a CLOSED set and q only RANKS within it (the
+			// contract the typed+q branch below documents). The DB text clauses
+			// are membership machinery, so they must not run here: with them,
+			// type=Exchange&q=exchange dropped lusty, rails and sikadesk — three
+			// Exchange rows whose prose never says "exchange" — and the truth
+			// battery's G slice (2026-09-05) caught the set shrinking 18→15.
+			// The whole typed set is a few hundred rows at most; it is fetched
+			// and scored in memory.
+			if (tokens.length && !typeParam) {
 				where.or = [
 					...baseOr,
 					...structuredOr,
@@ -1163,7 +1171,7 @@ export async function GET(req: NextRequest) {
 				result = await findCandidates(where);
 			} catch {
 				result = await findCandidates(
-					tokens.length ? { ...where, or: baseOr } : where,
+					tokens.length && !typeParam ? { ...where, or: baseOr } : where,
 				);
 			}
 
