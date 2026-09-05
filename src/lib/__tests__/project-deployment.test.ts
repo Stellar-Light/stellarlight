@@ -86,7 +86,13 @@ describe("deployment contract parity", () => {
 			"utf8",
 		);
 		const builders = route.match(/statusConfidence: factConfidence\(/g) ?? [];
-		const shared = route.match(/deployment: pickDeployment\(/g) ?? [];
+		// The serializer must receive the row's slug, or the registry fill
+		// (sls-023) silently never applies — a bare pickDeployment(x.deployment)
+		// would satisfy a looser regex while serving unknown for every issuer.
+		const shared =
+			route.match(
+				/deployment: pickDeployment\((\w+)\.deployment, \1\.slug\)/g,
+			) ?? [];
 		// One pickDeployment call per row builder; an inline `deployment: {`
 		// block in the route would be the drift class reopening.
 		expect(shared.length).toBe(builders.length);

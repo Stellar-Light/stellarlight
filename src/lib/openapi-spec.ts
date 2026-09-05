@@ -7217,7 +7217,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Tokenized real-world assets verified on Stellar",
 				description:
-					"Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon, Soroban tokens from the contract's own name/symbol/total_supply via RPC. Rows carry state (live | deployed-no-supply), verificationLevel, evidenceUrl and verifiedAt. The product-level fact a project row cannot carry: which products are actually issued on Stellar today. Curated registry — absence means untracked, never 'not on Stellar'.",
+					"Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon where the toml declares them (else on-chain-only), Soroban tokens from the contract's own metadata via RPC. state is live | issued-single-holder | deployed-no-supply | not-found; rows carry verificationLevel, evidenceUrl, verifiedAt, and pairedWith for a tranche deployed twice. Includes the fiat stablecoins rwa.xyz classes as RWA (productKind=stablecoin). Curated registry: absence means untracked, never 'not on Stellar'.",
 				"x-routing": {
 					purpose:
 						"Which real-world-asset tokens (tokenized funds, treasuries, bonds, real estate, gold) are actually issued on Stellar, by whom, with on-chain evidence and a verification level.",
@@ -7262,7 +7262,7 @@ export const spec: OpenAPISpec = {
 						name: "state",
 						in: "query",
 						description:
-							"Filter by product state. live = issued with supply and activity; deployed-no-supply = the contract exists with zero supply and zero events (deployed, never used — NOT a live product); not-found = registry row no longer resolves on mainnet.",
+							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = the contract exists with zero supply and zero events; not-found = a listing that no longer resolves on mainnet.",
 						schema: {
 							type: "string",
 							enum: ["live", "deployed-no-supply", "not-found"],
@@ -7474,6 +7474,12 @@ export const spec: OpenAPISpec = {
 															"rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders.",
 													},
 													rwaxyzHolders: { type: "integer", nullable: true },
+													pairedWith: {
+														type: "string",
+														nullable: true,
+														description:
+															"The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair.",
+													},
 												},
 											},
 										},
@@ -8238,7 +8244,7 @@ export const spec: OpenAPISpec = {
 					deployment: {
 						type: "object",
 						description:
-							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a live product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is — read `products` for per-product state. Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
 						properties: {
 							network: {
 								type: "string",
@@ -8387,6 +8393,36 @@ export const spec: OpenAPISpec = {
 								evidenceUrl: { type: "string" },
 								asOf: { type: "string" },
 								note: { type: "string", nullable: true },
+								issuer: {
+									type: "string",
+									nullable: true,
+									description:
+										"Issuing entity as the RWA registry attributes it; null on hand-curated rows.",
+								},
+								assetId: {
+									type: "string",
+									nullable: true,
+									description:
+										"CODE-GISSUER for a classic asset, the contract id for a Soroban token — the product's identity.",
+								},
+								verificationLevel: {
+									type: "string",
+									nullable: true,
+									description:
+										"How the registry verified this product (see getRwaAssets methodology); null on hand-curated rows.",
+								},
+								registryState: {
+									type: "string",
+									nullable: true,
+									description:
+										"The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'.",
+								},
+								launchedAt: {
+									type: "string",
+									nullable: true,
+									description:
+										"Contract creation date (Soroban); null for classic assets, which Horizon does not date.",
+								},
 							},
 						},
 					},

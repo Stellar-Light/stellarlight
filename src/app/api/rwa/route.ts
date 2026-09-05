@@ -14,7 +14,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 const KNOWN_PARAMS = new Set(["state", "level", "kind", "project", "limit"]);
-const STATES: RwaState[] = ["live", "deployed-no-supply", "not-found"];
+const STATES: RwaState[] = [
+	"live",
+	"issued-single-holder",
+	"deployed-no-supply",
+	"not-found",
+];
 const LEVELS: RwaVerificationLevel[] = [
 	"toml-bidirectional",
 	"entity-toml",

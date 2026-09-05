@@ -723,7 +723,7 @@ export interface paths {
         };
         /**
          * Tokenized real-world assets verified on Stellar
-         * @description Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon, Soroban tokens from the contract's own name/symbol/total_supply via RPC. Rows carry state (live | deployed-no-supply), verificationLevel, evidenceUrl and verifiedAt. The product-level fact a project row cannot carry: which products are actually issued on Stellar today. Curated registry — absence means untracked, never 'not on Stellar'.
+         * @description Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon where the toml declares them (else on-chain-only), Soroban tokens from the contract's own metadata via RPC. state is live | issued-single-holder | deployed-no-supply | not-found; rows carry verificationLevel, evidenceUrl, verifiedAt, and pairedWith for a tranche deployed twice. Includes the fiat stablecoins rwa.xyz classes as RWA (productKind=stablecoin). Curated registry: absence means untracked, never 'not on Stellar'.
          */
         get: operations["getRwaAssets"];
         put?: never;
@@ -1027,7 +1027,7 @@ export interface components {
              * @enum {string}
              */
             status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
-            /** @description Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a live product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'. */
+            /** @description Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is — read `products` for per-product state. Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'. */
             deployment?: {
                 /** @enum {string} */
                 network?: "mainnet" | "testnet" | "unknown";
@@ -1101,6 +1101,16 @@ export interface components {
                 evidenceUrl?: string;
                 asOf?: string;
                 note?: string | null;
+                /** @description Issuing entity as the RWA registry attributes it; null on hand-curated rows. */
+                issuer?: string | null;
+                /** @description CODE-GISSUER for a classic asset, the contract id for a Soroban token — the product's identity. */
+                assetId?: string | null;
+                /** @description How the registry verified this product (see getRwaAssets methodology); null on hand-curated rows. */
+                verificationLevel?: string | null;
+                /** @description The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'. */
+                registryState?: string | null;
+                /** @description Contract creation date (Soroban); null for classic assets, which Horizon does not date. */
+                launchedAt?: string | null;
             }[] | null;
             /** @description The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate. */
             scfRoundAwards?: {
@@ -5145,7 +5155,7 @@ export interface operations {
     getRwaAssets: {
         parameters: {
             query?: {
-                /** @description Filter by product state. live = issued with supply and activity; deployed-no-supply = the contract exists with zero supply and zero events (deployed, never used — NOT a live product); not-found = registry row no longer resolves on mainnet. */
+                /** @description Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = the contract exists with zero supply and zero events; not-found = a listing that no longer resolves on mainnet. */
                 state?: "live" | "deployed-no-supply" | "not-found";
                 /** @description Filter by verificationLevel (see methodology). */
                 level?: "toml-bidirectional" | "entity-toml" | "contract-metadata" | "on-chain-home-domain" | "on-chain-only";
@@ -5244,6 +5254,8 @@ export interface operations {
                             /** @description rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders. */
                             rwaxyzValueUsd?: number | null;
                             rwaxyzHolders?: number | null;
+                            /** @description The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair. */
+                            pairedWith?: string | null;
                         }[];
                     };
                 };

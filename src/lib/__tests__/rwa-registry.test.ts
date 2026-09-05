@@ -11,7 +11,12 @@ const LEVELS = new Set([
 	"on-chain-home-domain",
 	"on-chain-only",
 ]);
-const STATES = new Set(["live", "deployed-no-supply", "not-found"]);
+const STATES = new Set([
+	"live",
+	"issued-single-holder",
+	"deployed-no-supply",
+	"not-found",
+]);
 
 describe("RWA registry integrity", () => {
 	it("holds the 97 tokens rwa.xyz lists on Stellar, each with one identity", () => {
@@ -156,5 +161,93 @@ describe("registry -> project deployment (sls-023: 47 of 61 RWA rows had network
 			(r) => r.state === "deployed-no-supply" && r.projectSlug === "spiko",
 		);
 		if (dead?.contract) expect(d.sourceUrl).not.toContain(dead.contract);
+	});
+});
+
+describe("audit corrections (cross-vendor, 2026-09-04)", () => {
+	it("live means a second holder exists; a one-holder mint is issued-single-holder, never live", () => {
+		for (const r of RWA_REGISTRY.filter((x) => x.state === "live"))
+			expect(
+				(r.rwaxyzHolders ?? 0) >= 2 ||
+					/holders=([2-9]|\d{2,})/.test(String(r.horizonNote)),
+				r.id,
+			).toBe(true);
+		expect(
+			RWA_REGISTRY.filter((x) => x.state === "issued-single-holder").length,
+		).toBeGreaterThan(0);
+	});
+
+	it("a tranche deployed twice is linked both ways, same name and symbol, and a project gets ONE product per pair", () => {
+		const paired = RWA_REGISTRY.filter((r) => r.pairedWith);
+		expect(paired.length % 2).toBe(0);
+		for (const r of paired) {
+			const sib = RWA_REGISTRY.find((x) => x.id === r.pairedWith);
+			expect(sib?.pairedWith, r.id).toBe(r.id);
+			expect([sib?.name, sib?.symbol]).toEqual([r.name, r.symbol]);
+		}
+		// no paired tranche currently joins a project row; if one ever does, the
+		// de-dup in registryProducts is what keeps the count honest
+		for (const slug of new Set(
+			paired.map((r) => r.projectSlug).filter(Boolean),
+		)) {
+			const names = registryProducts(slug as string).map((p) => p.name);
+			expect(new Set(names).size).toBe(names.length);
+		}
+	});
+
+	it("USDGLO joins Glo Dollar's own row, not its issuing platform; grBENJI carries its real fund name", () => {
+		expect(RWA_REGISTRY.find((r) => r.symbol === "USDGLO")?.projectSlug).toBe(
+			"glo-dollar",
+		);
+		expect(RWA_REGISTRY.find((r) => r.symbol === "grBENJI")?.name).toContain(
+			"AB (Ddis)",
+		);
+	});
+
+	it("productKind follows rwa.xyz's asset class, not a ticker list", () => {
+		for (const r of RWA_REGISTRY)
+			expect(r.productKind, r.symbol).toBe(
+				r.assetClass === "Stablecoins" ? "stablecoin" : "rwa-asset",
+			);
+	});
+
+	it("a product record carries the identity, issuer, level, state and launch date the finding asked for", () => {
+		const p = registryProducts("wisdomtree")[0];
+		expect(p.assetId).toMatch(
+			/^[A-Za-z0-9]{1,12}-G[A-Z2-7]{55}$|^C[A-Z2-7]{55}$/,
+		);
+		expect(p.issuer).toBeTruthy();
+		expect(p.verificationLevel).toBeTruthy();
+		expect(["live", "issued-single-holder"]).toContain(p.registryState);
+	});
+
+	it("a single-holder mint is served as a product with its state said, and lends deployment evidence; a zero-supply contract does neither", () => {
+		const single = RWA_REGISTRY.find(
+			(r) => r.state === "issued-single-holder" && r.projectSlug,
+		);
+		expect(single).toBeTruthy();
+		const prods = registryProducts(single?.projectSlug as string);
+		expect(
+			prods.some(
+				(p) =>
+					p.assetId === single?.id &&
+					p.registryState === "issued-single-holder",
+			),
+		).toBe(true);
+		const unknown = {
+			network: "unknown" as const,
+			basis: null,
+			sourceUrl: null,
+			asOf: null,
+		};
+		expect(
+			deploymentFromRegistry(unknown, single?.projectSlug as string).network,
+		).toBe("mainnet");
+		const dead = RWA_REGISTRY.find((r) => r.state === "deployed-no-supply");
+		expect(
+			registryProducts(dead?.projectSlug as string).some(
+				(p) => p.assetId === dead?.id,
+			),
+		).toBe(false);
 	});
 });
