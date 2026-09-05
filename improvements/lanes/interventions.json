@@ -1,41 +1,47 @@
 {
-  "note": "Append-only log of human/agent corrections to a mutating lane's output. One entry per correction, newest last. THE RULE (QUALITY.md \u00a73): any PR that corrects what a lane wrote \u2014 or corrects the read-back that was used to verify it \u2014 appends its entry HERE, in that same PR. scripts/check-lane-autonomy.ts resets a lane's intervention-free week count to the latest entry for that lane, so an unlogged correction silently buys autonomy the lane did not earn. Every `source` below was verified with `gh pr view` before it was written down; nothing here is inferred.",
-  "interventions": [
-    {
-      "date": "2026-09-04",
-      "lane": "basis-from-product",
-      "what": "The lane's writes were correct, its read-back was not: STRONG_BASES still listed only three tiers, so the 58 rows this lane awarded `product-integration` were counted as weak and the board read the completed work as failed.",
-      "source": "PR #1297 \u2014 fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
-    },
-    {
-      "date": "2026-09-04",
-      "lane": "basis-from-repo",
-      "what": "Same defect, same PR: the 115 rows this lane awarded `repo-activity` were excluded from the strong-basis metric, so weakLiveRows read 790 when it was 617.",
-      "source": "PR #1297 \u2014 fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
-    },
-    {
-      "date": "2026-09-05",
-      "lane": "refresh-rwa",
-      "what": "34 registry assets were served as `live` with exactly one holder \u2014 the issuer or its custodian \u2014 against the spec's own \"live = issued with supply and activity\"; a second auditor found it and a new `issued-single-holder` state now says so, plus six double-deployed tranches linked via `pairedWith`.",
-      "source": "PR #1302 \u2014 fix(rwa): registry corrected after a cross-vendor audit (merged 2026-09-05T00:15Z)"
-    },
-    {
-      "date": "2026-09-05",
-      "lane": "refresh-rwa",
-      "what": "The sls-023 close-out on issue #494 was overclaimed \u2014 11 of the finding's 61 rows were treated as closing the whole probe. Recorded as a violated lesson (\"verify before advertise (#494, twice)\"); the close-out itself has not yet been reframed upstream, so this stays open as a correction against the lane that now owns those rows.",
-      "source": "PR #1310 \u2014 quality: program audit wrap (merged 2026-09-05T04:04Z), QUALITY.md Lessons 2026-09-05"
-    },
-    {
-      "date": "2026-09-05",
-      "lane": "backfill-knowledge-notes",
-      "what": "The nightly step was gated to workflow_dispatch, so the 3 scheduled runs since the cron was added on 2026-09-02 executed nothing (18 completed runs in total, most manual dispatches; corrected 2026-09-05 from the runs' job steps); the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
-      "source": "PR night/notes-nightly (this fix); runs 33851502654 and 33731681303 show the step skipped"
-    },
-    {
-      "date": "2026-09-05",
-      "lane": "dedup-projects",
-      "what": "Its 11 Draft hides were overwritten 30 minutes later by curate-projects' DUPE_MERGES step, which forces status=Inactive on every shadow (scripts/data/curate-projects.ts, 'if (dupe.status !== \"Inactive\")'). Two lanes own one field with different verdicts; the July fold (Inactive + canonicalSlug) won silently. Rows stay hidden from search and the board either way; the wrong status on duplicates is the open class in improvements/drafts/2026-09-05-inactive-site-liveness-triage.md.",
-      "source": "runs 33945510647 (dedup execute) and 33947198155 (curate execute); read-back 2026-09-05T05:55Z"
-    }
-  ]
+	"note": "Append-only log of human/agent corrections to a mutating lane's output. One entry per correction, newest last. THE RULE (QUALITY.md \u00a73): any PR that corrects what a lane wrote \u2014 or corrects the read-back that was used to verify it \u2014 appends its entry HERE, in that same PR. scripts/check-lane-autonomy.ts resets a lane's intervention-free week count to the latest entry for that lane, so an unlogged correction silently buys autonomy the lane did not earn. Every `source` below was verified with `gh pr view` before it was written down; nothing here is inferred.",
+	"interventions": [
+		{
+			"date": "2026-09-04",
+			"lane": "basis-from-product",
+			"what": "The lane's writes were correct, its read-back was not: STRONG_BASES still listed only three tiers, so the 58 rows this lane awarded `product-integration` were counted as weak and the board read the completed work as failed.",
+			"source": "PR #1297 \u2014 fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
+		},
+		{
+			"date": "2026-09-04",
+			"lane": "basis-from-repo",
+			"what": "Same defect, same PR: the 115 rows this lane awarded `repo-activity` were excluded from the strong-basis metric, so weakLiveRows read 790 when it was 617.",
+			"source": "PR #1297 \u2014 fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "refresh-rwa",
+			"what": "34 registry assets were served as `live` with exactly one holder \u2014 the issuer or its custodian \u2014 against the spec's own \"live = issued with supply and activity\"; a second auditor found it and a new `issued-single-holder` state now says so, plus six double-deployed tranches linked via `pairedWith`.",
+			"source": "PR #1302 \u2014 fix(rwa): registry corrected after a cross-vendor audit (merged 2026-09-05T00:15Z)"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "refresh-rwa",
+			"what": "The sls-023 close-out on issue #494 was overclaimed \u2014 11 of the finding's 61 rows were treated as closing the whole probe. Recorded as a violated lesson (\"verify before advertise (#494, twice)\"); the close-out itself has not yet been reframed upstream, so this stays open as a correction against the lane that now owns those rows.",
+			"source": "PR #1310 \u2014 quality: program audit wrap (merged 2026-09-05T04:04Z), QUALITY.md Lessons 2026-09-05"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "backfill-knowledge-notes",
+			"what": "The nightly step was gated to workflow_dispatch, so the 3 scheduled runs since the cron was added on 2026-09-02 executed nothing (18 completed runs in total, most manual dispatches; corrected 2026-09-05 from the runs' job steps); the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
+			"source": "PR night/notes-nightly (this fix); runs 33851502654 and 33731681303 show the step skipped"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "dedup-projects",
+			"what": "Its 11 Draft hides were overwritten 30 minutes later by curate-projects' DUPE_MERGES step, which forces status=Inactive on every shadow (scripts/data/curate-projects.ts, 'if (dupe.status !== \"Inactive\")'). Two lanes own one field with different verdicts; the July fold (Inactive + canonicalSlug) won silently. Rows stay hidden from search and the board either way; the wrong status on duplicates is the open class in improvements/drafts/2026-09-05-inactive-site-liveness-triage.md.",
+			"source": "runs 33945510647 (dedup execute) and 33947198155 (curate execute); read-back 2026-09-05T05:55Z"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "curate-projects",
+			"what": "Verification-packet verdict orbitcdp Inactive\u2192Live (tier: high) was wrong and was executed (#1345, run 33979942527): the packet accepted the page's 'Live on Stellar' banner as a live signal while the protocol stats on the same page are empty dashes. Owner corrected to Inactive. Rule that follows: a marketing banner is never a product-state signal; a Live verdict needs the product itself (stats, app, chain activity) to be alive.",
+			"source": "#1345 corrected by the owner in chat; receipt improvements/receipts/orbitcdp-2026-09-05.json"
+		}
+	]
 }

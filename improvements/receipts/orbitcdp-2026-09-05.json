@@ -1,0 +1,33 @@
+{
+ "slug": "orbitcdp",
+ "url": "https://orbitcdp.finance/",
+ "finalUrl": "https://orbitcdp.finance/",
+ "fetchedAt": "2026-09-05T17:49:59.932Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 17:49:59 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "0ab2b56fd7f2f59a23134f6e8d2d952569ec1038061e14de1362f6a4ce7a3b58",
+ "bodyTextChars": 4438,
+ "markers": [
+  {
+   "marker": "oUSD Minted —",
+   "found": true,
+   "excerpt": "of Collateralized Debt Positions for secure, reliable stablecoins — built natively on Stellar. Launch App Read the Docs oUSD Minted — Collateral Locked — Borrow APY — BLND Rewards — Supported Collateral Deposit. Borrow. Stay liquid. Lock accepted collateral to mint oUSD — our overcollateralized stab"
+  },
+  {
+   "marker": "Collateral Locked —",
+   "found": true,
+   "excerpt": "zed Debt Positions for secure, reliable stablecoins — built natively on Stellar. Launch App Read the Docs oUSD Minted — Collateral Locked — Borrow APY — BLND Rewards — Supported Collateral Deposit. Borrow. Stay liquid. Lock accepted collateral to mint oUSD — our overcollateralized stablecoin pegged "
+  },
+  {
+   "marker": "Borrow APY —",
+   "found": true,
+   "excerpt": "or secure, reliable stablecoins — built natively on Stellar. Launch App Read the Docs oUSD Minted — Collateral Locked — Borrow APY — BLND Rewards — Supported Collateral Deposit. Borrow. Stay liquid. Lock accepted collateral to mint oUSD — our overcollateralized stablecoin pegged to the US Dollar. Co"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
