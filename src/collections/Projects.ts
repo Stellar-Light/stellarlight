@@ -220,7 +220,7 @@ export const Projects: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.",
+					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Draft to suppress a duplicate (a duplicate is hidden, never dead; Inactive is a death verdict and is reserved for projects that actually shut down). Search still admits the row as a fold candidate so a lookup of the old name resolves to the canonical.",
 			},
 		},
 		{

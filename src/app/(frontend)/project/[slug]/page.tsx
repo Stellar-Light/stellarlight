@@ -164,14 +164,28 @@ export default async function ProjectDetailPage({
 						},
 					},
 					{
-						// "Inactive" belongs here. Excluding it 404'd all 96 archived
-						// projects — including any we mark Inactive ourselves, which
-						// silently deleted Keybase's page the night we curated it. The
-						// page already renders an "Inactive / archived" badge that could
-						// never fire. An honest archive record beats a dead link.
-						status: {
-							in: [...RESOLVABLE_PROJECT_STATUSES],
-						},
+						or: [
+							{
+								// "Inactive" belongs here. Excluding it 404'd all 96 archived
+								// projects — including any we mark Inactive ourselves, which
+								// silently deleted Keybase's page the night we curated it. The
+								// page already renders an "Inactive / archived" badge that could
+								// never fire. An honest archive record beats a dead link.
+								status: {
+									in: [...RESOLVABLE_PROJECT_STATUSES],
+								},
+							},
+							{
+								// A lineage shadow is parked at Draft (2026-09-05: a duplicate
+								// is HIDDEN, never dead — Inactive was a death verdict on a row
+								// that is only a twin). Its slug is still a link a reader may
+								// hold, so it is admitted here for ONE purpose: the redirect
+								// below sends them to the canonical. It is never rendered —
+								// the belt after the redirect 404s a hidden row whose pointer
+								// dangles.
+								canonicalSlug: { exists: true },
+							},
+						],
 					},
 				],
 			},
@@ -192,6 +206,14 @@ export default async function ProjectDetailPage({
 	// showing them a merged husk (41 projects carry one, e.g. meria → meria-defi).
 	if (project.canonicalSlug && project.canonicalSlug !== project.slug) {
 		redirect(`/project/${project.canonicalSlug}`);
+	}
+	// Belt on the shadow admission above: a hidden row reaches this line only
+	// with a self- or empty pointer, i.e. nothing to redirect to. A Draft row
+	// has no public page.
+	if (
+		!(RESOLVABLE_PROJECT_STATUSES as readonly string[]).includes(project.status)
+	) {
+		notFound();
 	}
 
 	// Fetch GitHub data directly (no HTTP call needed in server component)

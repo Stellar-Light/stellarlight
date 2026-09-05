@@ -74,6 +74,25 @@ describe("project status tiers", () => {
 		);
 	});
 
+	it("a hidden lineage shadow still reaches its redirect, and is never rendered", () => {
+		// 2026-09-05: a duplicate is parked at Draft (hidden), not Inactive (a
+		// death verdict). Draft is outside RESOLVABLE, so without an admission
+		// for shadows the page 404s a slug that used to 307 to the survivor.
+		const src = readFileSync(
+			resolve(__dirname, "../app/(frontend)/project/[slug]/page.tsx"),
+			"utf8",
+		);
+		const admit = src.indexOf("canonicalSlug: { exists: true }");
+		const redirectAt = src.indexOf("redirect(`/project/");
+		const belt = src.indexOf(
+			"!(RESOLVABLE_PROJECT_STATUSES as readonly string[]).includes(project.status)",
+		);
+		expect(admit).toBeGreaterThan(0);
+		expect(redirectAt).toBeGreaterThan(admit);
+		// the belt must come AFTER the redirect, or a shadow never gets folded
+		expect(belt).toBeGreaterThan(redirectAt);
+	});
+
 	it("the /project/[slug] route filters by RESOLVABLE, not a hand-copied list", () => {
 		const filters = detailRouteStatusFilters();
 		expect(filters.length, "detail route should filter by status").toBe(2);
