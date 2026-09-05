@@ -64,3 +64,32 @@ export function admitByCodeLanguage(
 	);
 	return { terms, repos: hits.slice(0, cap) };
 }
+
+/** GitHub language names whose casing a Title-case of the token gets wrong. */
+const LANGUAGE_CASING: Record<string, string> = {
+	typescript: "TypeScript",
+	javascript: "JavaScript",
+	"c++": "C++",
+	"c#": "C#",
+	php: "PHP",
+	html: "HTML",
+	css: "CSS",
+	"objective-c": "Objective-C",
+};
+
+/**
+ * Language values to test a query token against with an EXACT (`in`) match.
+ *
+ * `primaryLanguage: { like: token }` was a substring test, so `java` matched
+ * every JavaScript repo — filling a capped page with rows the JS-side exact
+ * check then discards, and dropping the Java owners that never fit. Mongo
+ * equality is case-sensitive, so the token is mapped to GitHub's own casing
+ * (Title-case by default) and the raw token is kept for anything the map and
+ * Title-case both miss.
+ */
+export function languageCandidates(token: string): string[] {
+	const t = token.toLowerCase();
+	const canonical =
+		LANGUAGE_CASING[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
+	return [...new Set([canonical, token])];
+}

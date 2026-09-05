@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { admitByCodeLanguage } from "@/lib/builder-code-language";
+import {
+	admitByCodeLanguage,
+	languageCandidates,
+} from "@/lib/builder-code-language";
 
 const repo = (
 	fullName: string,
@@ -56,5 +59,29 @@ describe("admitByCodeLanguage", () => {
 		expect(admitByCodeLanguage(["rust"], many, 2).repos).toHaveLength(2);
 		// a builder with no indexed repos is simply not admitted
 		expect(admitByCodeLanguage(["rust"], []).terms).toEqual({});
+	});
+});
+
+describe("languageCandidates", () => {
+	it("maps to GitHub's own casing, Title-case by default", () => {
+		expect(languageCandidates("typescript")).toContain("TypeScript");
+		expect(languageCandidates("c++")).toContain("C++");
+		expect(languageCandidates("c#")).toContain("C#");
+		expect(languageCandidates("php")).toContain("PHP");
+		expect(languageCandidates("objective-c")).toContain("Objective-C");
+		expect(languageCandidates("rust")).toContain("Rust");
+		expect(languageCandidates("go")).toContain("Go");
+	});
+
+	it("never proposes a candidate that a substring test would have matched", () => {
+		// The bug: `primaryLanguage: { like: "java" }` matched JavaScript, so a
+		// capped page filled with JS repos and real Java owners fell off it.
+		expect(languageCandidates("java")).not.toContain("JavaScript");
+		expect(languageCandidates("java")).toEqual(["Java", "java"]);
+	});
+
+	it("keeps the raw token so an already-cased query still matches", () => {
+		expect(languageCandidates("TypeScript")).toEqual(["TypeScript"]);
+		expect(languageCandidates("Rust")).toEqual(["Rust"]);
 	});
 });

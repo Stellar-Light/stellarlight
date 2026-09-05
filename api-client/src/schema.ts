@@ -1616,7 +1616,7 @@ export interface components {
                     [key: string]: string;
                 };
                 /**
-                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: a query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields ['codeEvidence'], matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, and these candidate rows sort below all prose hits.
+                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.
                  * @enum {string}
                  */
                 basis?: "profile-text" | "repo-owner" | "code-language";
@@ -3178,6 +3178,8 @@ export interface operations {
                              */
                             matchMode?: "all" | "expanded";
                             matchModeLabel?: string;
+                            /** @description THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead — the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only). */
+                            warnings?: string[];
                             /** @description What a skill match IS: free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
                             matchBasis?: string;
                         };

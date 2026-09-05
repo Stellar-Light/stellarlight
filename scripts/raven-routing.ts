@@ -23,6 +23,16 @@
  * keywords in Raven's committed manifest). The live ranking is the truth; the
  * replica explains it, and the artifact reports how often it reproduces the
  * live score exactly so its own drift is visible.
+ * CLASSES, IN PRECEDENCE ORDER (scripts/eval/raven-miss-class.ts, tested at
+ * tests/int/raven-miss-class.int.spec.ts):
+ *   catalog-lag        the question uses words our current text carries and
+ *                      the text Raven indexes does not, and our current text
+ *                      would route it (replica rank ≤ 3) — wait for the
+ *                      re-baseline, never "fix" it twice. FIRST: text upstream
+ *                      has not absorbed is not our collision and not our
+ *                      vocabulary hole, whatever else the ranking looks like.
+ *                      Every lag miss carries `evidence.lagEvidence` — the
+ *                      words our spec ships that the LIVE description lacks
  *   no-scout-op        no scout hit at all (a bare name: no field carries the
  *                      token, so every scout op gates out) — upstream, named-
  *                      entity routing is Raven's alias pack, not our text
@@ -30,10 +40,6 @@
  *                      outranked the intended one — Raven weighs id/name at
  *                      12/10 vs description 5; upstream (#124), vocabulary
  *                      on our side does not fix it
- *   catalog-lag        the question uses words our current text carries and
- *                      the text Raven indexes does not, and our current text
- *                      would route it (replica rank ≤ 3) — wait for the
- *                      re-baseline, never "fix" it twice
  *   named-entity       the only words the intended op lacks are project
  *                      names (the directory's own resolver says so) —
  *                      upstream, same mechanism as no-scout-op
@@ -41,6 +47,10 @@
  *                      ordinary words of the question (listed) — ours to fix
  *   outscored          no collision, no lag, nothing missing, still lost on
  *                      score to a sibling — a ranking contest, reported as is
+ *   could-not-check    the directory resolver could not say whether a missing
+ *                      word is a project name — the class is UNKNOWN, and the
+ *                      run says so instead of falling open into `vocabulary`
+ *                      and sending someone to edit correct text over a blip
  * Bank errors (a wrong expectation) are fixed in the BANK with a comment,
  * never carried as a class the artifact could hide behind.
  *
@@ -59,6 +69,12 @@ import { fileURLToPath } from "node:url";
 import { isSyntheticQuery } from "../src/lib/improvement-ledger";
 import { spec } from "../src/lib/openapi-spec";
 import { isFabricatedProbe } from "./eval/battery-banks";
+import {
+	classifyMiss,
+	MISS_CLASSES,
+	type MissClass,
+	type NameVerdict,
+} from "./eval/raven-miss-class";
 import {
 	buildScoutEntries,
 	explain,
@@ -687,14 +703,6 @@ function hitsOf(body: Record<string, unknown> | null): Hit[] {
 	}
 }
 
-type MissClass =
-	| "no-scout-op"
-	| "id-noun-exclusion"
-	| "catalog-lag"
-	| "named-entity"
-	| "vocabulary"
-	| "outscored";
-
 interface OpEvidence {
 	op: string;
 	/** Live 1-based rank among scout hits, null = not returned. */
@@ -705,6 +713,9 @@ interface OpEvidence {
 	replicaRankLive: number | null;
 	/** Question words our text carries and the indexed text does not. */
 	lagTokens: string[];
+	/** Words of our WHOLE spec text for this op (description + routing keywords)
+	 *  that the text Raven indexes lacks — the lag itself, question-independent. */
+	specNotLive: string[];
 	score: number | null;
 	gate: number;
 	coverage: number;
@@ -742,24 +753,36 @@ interface Miss {
 		} | null;
 		/** Missing words the directory resolver recognises as project names. */
 		projectNames: string[];
+		/** Only on catalog-lag: what our spec carries that the LIVE text does not. */
+		lagEvidence?: Array<{
+			op: string;
+			/** Words OF THIS QUESTION ours carries and the indexed text lacks. */
+			inQuestion: string[];
+			/** Words of our whole spec text for the op the live text lacks. */
+			inSpecNotLive: string[];
+		}>;
+		/** Only on could-not-check: which resolver call failed, and why. */
+		resolverError?: string;
 	};
 }
 
 const OURS = buildScoutEntries(spec);
 const ourEntry = (op: string) => OURS.find((e) => e.name === op);
 
-/** Is this word a project name? The directory's own resolver decides. */
-async function isProjectName(word: string): Promise<boolean | null> {
+/** Is this word a project name? The directory's own resolver decides.
+ *  An error is NOT "no" — it returns `{ error }` so the classifier can fail
+ *  closed into could-not-check instead of blaming our vocabulary. */
+async function isProjectName(word: string): Promise<NameVerdict> {
 	try {
 		const res = await fetch(
 			`${BASE}/api/projects/resolve?q=${encodeURIComponent(word)}`,
 			{ signal: AbortSignal.timeout(10_000) },
 		);
-		if (!res.ok) return null;
+		if (!res.ok) return { error: `resolve HTTP ${res.status}` };
 		const body = (await res.json()) as { found?: boolean };
 		return body.found === true;
-	} catch {
-		return null;
+	} catch (e) {
+		return { error: e instanceof Error ? e.message : String(e) };
 	}
 }
 
@@ -933,6 +956,14 @@ async function main() {
 				replicaRankLive: live?.keywordsKnown ? (rl < 0 ? null : rl + 1) : null,
 				lagTokens:
 					ours && liveForLag ? lagTokens(item.q, ours, liveForLag) : [],
+				specNotLive:
+					ours && liveForLag
+						? lagTokens(
+								[ours.description, ...ours.routingKeywords].join(" "),
+								ours,
+								liveForLag,
+							)
+						: [],
 				...ex,
 			};
 		});
@@ -971,23 +1002,24 @@ async function main() {
 				a.missingWords.length - b.missingWords.length ||
 				b.coverage - a.coverage,
 		)[0];
-		let projectNames: string[] = [];
-		let missClass: MissClass;
-		if (scoutHits.length === 0) missClass = "no-scout-op";
-		else if (collisions.length > 0) missClass = "id-noun-exclusion";
-		else if (lagged.length > 0) missClass = "catalog-lag";
-		else if (best.missingWords.length > 0) {
-			const verdicts = await Promise.all(
-				best.missingWords.map(
-					async (w) => [w, await isProjectName(w)] as const,
-				),
-			);
-			projectNames = verdicts.filter(([, v]) => v === true).map(([w]) => w);
-			missClass =
-				projectNames.length === best.missingWords.length
-					? "named-entity"
-					: "vocabulary";
-		} else missClass = "outscored";
+		// catalog-lag FIRST (see scripts/eval/raven-miss-class.ts): text upstream
+		// has not absorbed yet is not an id-noun collision and not a hole in our
+		// vocabulary, whatever else the live ranking looks like.
+		const { missClass, projectNames, resolverError } = await classifyMiss({
+			scoutHits,
+			collisions,
+			lagged,
+			best,
+			resolveProjectName: isProjectName,
+		});
+		// Every lag miss carries what our spec says and the live text doesn't —
+		// both the question's words (why THIS question missed) and the whole
+		// op's (the lag itself, so the re-baseline has something to check).
+		const lagEvidence = lagged.map((l) => ({
+			op: l.op,
+			inQuestion: l.lagTokens,
+			inSpecNotLive: l.specNotLive,
+		}));
 
 		misses.push({
 			query: item.q,
@@ -998,20 +1030,29 @@ async function main() {
 			topAll,
 			note: item.note,
 			missClass,
-			evidence: { collisions, intended, winner, projectNames },
+			evidence: {
+				collisions,
+				intended,
+				winner,
+				projectNames,
+				...(missClass === "catalog-lag" ? { lagEvidence } : {}),
+				...(resolverError ? { resolverError } : {}),
+			},
 		});
 		const why =
-			missClass === "id-noun-exclusion"
-				? `noun "${collisions[0].token}" → ${collisions[0].op} live #${collisions[0].rank}`
-				: missClass === "catalog-lag"
-					? `${lagged[0].op} would rank #${lagged[0].replicaRankOurs} on our text; Raven's text lacks [${lagged[0].lagTokens.join(", ")}] (live rank ${lagged[0].replicaRankLive ?? "gated/unknown"})`
-					: missClass === "named-entity"
-						? `${best.op} lacks only project names [${projectNames.join(", ")}]`
-						: missClass === "vocabulary"
-							? `${best.op} lacks [${best.missingWords.join(", ")}] (coverage ${best.coverage}, gate ${best.gate}, replica rank ${best.replicaRankOurs ?? "gated"})`
-							: missClass === "no-scout-op"
-								? "no scout hit at all"
-								: `${best.op} covers every word, replica rank ${best.replicaRankOurs ?? "gated"}, lost to ${winnerOp} live`;
+			missClass === "catalog-lag"
+				? `${lagged[0].op} would rank #${lagged[0].replicaRankOurs} on our text; Raven's text lacks [${lagged[0].lagTokens.join(", ")}] (live rank ${lagged[0].replicaRankLive ?? "gated/unknown"}); spec words absent from the live description: [${lagEvidence[0].inSpecNotLive.join(", ") || "none"}]`
+				: missClass === "no-scout-op"
+					? "no scout hit at all"
+					: missClass === "id-noun-exclusion"
+						? `noun "${collisions[0].token}" → ${collisions[0].op} live #${collisions[0].rank}`
+						: missClass === "named-entity"
+							? `${best.op} lacks only project names [${projectNames.join(", ")}]`
+							: missClass === "vocabulary"
+								? `${best.op} lacks [${best.missingWords.join(", ")}] (coverage ${best.coverage}, gate ${best.gate}, replica rank ${best.replicaRankOurs ?? "gated"})`
+								: missClass === "could-not-check"
+									? `unclassified — ${resolverError}`
+									: `${best.op} covers every word, replica rank ${best.replicaRankOurs ?? "gated"}, lost to ${winnerOp} live`;
 		console.log(
 			`\n  ✗ [${missClass}${item.persona ? ` ${item.persona}` : ""}] "${item.q}"\n      want ${cataloged.join("/")} · got top-${TOP_K} scout: ${topScout.join(", ") || "none"} · all: ${topAll.join(", ")}\n      ${why}`,
 		);
@@ -1127,7 +1168,11 @@ async function main() {
 
 	const graded = results.length;
 	const passed = results.filter((r) => r.pass).length;
-	const okRate = graded > 0 ? Math.round((passed / graded) * 100) / 100 : 1;
+	// A zero denominator is VACUOUS, not a pass. `okRate: 1` on an empty catalog
+	// parse (or a bank every item of which was lag-skipped) reads as 100% routed
+	// on every dashboard downstream — the artifact must say it graded nothing.
+	const vacuous = graded === 0;
+	const okRate = vacuous ? null : Math.round((passed / graded) * 100) / 100;
 	const byPersona = Object.fromEntries(
 		PERSONAS.map((p) => {
 			const rows = results.filter((r) => r.persona === p);
@@ -1143,16 +1188,11 @@ async function main() {
 			];
 		}),
 	);
-	const CLASSES: MissClass[] = [
-		"no-scout-op",
-		"id-noun-exclusion",
-		"catalog-lag",
-		"named-entity",
-		"vocabulary",
-		"outscored",
-	];
 	const missClasses = Object.fromEntries(
-		CLASSES.map((c) => [c, misses.filter((m) => m.missClass === c).length]),
+		MISS_CLASSES.map((c) => [
+			c,
+			misses.filter((m) => m.missClass === c).length,
+		]),
 	);
 	const artifact = {
 		generatedAt: new Date().toISOString(),
@@ -1161,7 +1201,7 @@ async function main() {
 			basis: `intended-op: PASS only when one of the item's expected operation ids is within the top-${TOP_K} scout hits; rank = 1-based position of the first expected op among scout hits (null = not returned)`,
 			evidence:
 				"missClass evidence comes from scripts/eval/raven-scorer-replica.ts — Raven's lexical scoring math run over our current spec text AND over the text Raven indexes (live descriptions + manifest routing keywords); the live ranking is the truth, the replica explains it",
-			classes: CLASSES,
+			classes: MISS_CLASSES,
 		},
 		catalogView: {
 			descriptionsRead: liveDescriptions.length,
@@ -1173,6 +1213,7 @@ async function main() {
 		frame: {
 			graded,
 			passed,
+			vacuous,
 			failed: misses.length,
 			lagging: lagging.length,
 			demandChecked: demand.length,
@@ -1189,7 +1230,9 @@ async function main() {
 	};
 	writeFileSync(OUT, `${JSON.stringify(artifact, null, "\t")}\n`);
 	console.log(
-		`\n\nraven-routing: intended-op ${passed}/${graded} routed (${okRate * 100}%) · ${misses.length} miss(es) · ${lagging.length} lagging`,
+		vacuous
+			? `\n\nraven-routing: vacuous — nothing graded (0 of ${BANK.length} bank items reached a cataloged op; ${lagging.length} lag-skipped). okRate is null, NOT 100%.`
+			: `\n\nraven-routing: intended-op ${passed}/${graded} routed (${(okRate as number) * 100}%) · ${misses.length} miss(es) · ${lagging.length} lagging`,
 	);
 	console.log(
 		`  by persona: ${PERSONAS.map((p) => `${p} ${byPersona[p].passed}/${byPersona[p].graded}`).join(" · ")}`,

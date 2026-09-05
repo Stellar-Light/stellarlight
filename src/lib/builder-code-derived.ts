@@ -28,10 +28,12 @@ export interface BuilderMatch {
 	/** 'profile-text' = free-text hit over a Stellar Passport profile.
 	 * 'repo-owner' = code-derived: the query is a GitHub login that owns indexed
 	 * Stellar repos but has no Passport profile (P2).
-	 * 'code-language' = admitted by CODE, not prose: a query token IS the primary
-	 * language of a repo this builder owns in our index, and their profile text
-	 * never says it. Candidate discovery from an observable repo fact — never
-	 * verified experience — so these rows rank below every prose hit. */
+	 * 'code-language' = admitted by CODE, not prose: at least one query token IS
+	 * the primary language of a repo this builder owns in our index, and their
+	 * profile text never says it. A MIXED row (one token by code, another by
+	 * prose) keeps this basis and lists the prose fields in matchedFields too.
+	 * Candidate discovery from an observable repo fact — never verified
+	 * experience — so these rows rank below every prose hit. */
 	basis: "profile-text" | "repo-owner" | "code-language";
 }
 
