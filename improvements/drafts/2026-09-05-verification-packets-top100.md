@@ -6,6 +6,8 @@ Population: 984 served rows (status ≠ Draft, no canonicalSlug), 601 on a weak 
 Every website, GitHub repo/org and stellar.expert page cited here was fetched on 2026-09-05; `statusAsOf` is that fetch date and nothing older is dated as if fetched today.
 **Every verdict here is a recommendation; the owner's approval of a row is what makes it human-verified.**
 
+> **Applied 2026-09-05 17:10 UTC (high-confidence tier, 38 rows):** owner said "apply the high confidence packets"; entries live in `STATUS_FIX` (#1345), curate-projects executed (run 33979942527), all 38 read back. Medium (32) and low (30) tiers remain recommendations.
+
 ## How to read a verdict
 
 - **Confidence** — `high` = two independent live signals inside 90 days (a 200 page today serving substantive product content **and** a repo pushed ≤90d), or a parked / retired / removed-site page. `medium` = one signal, with a dated corroborator outside the window. `low` = only a marketing page answered, or nothing did.
