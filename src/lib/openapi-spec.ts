@@ -9032,6 +9032,25 @@ export const spec: OpenAPISpec = {
 						description:
 							"Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance.",
 					},
+					supersededBy: {
+						type: "string",
+						nullable: true,
+						description:
+							"Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'.",
+					},
+					deprecatedAt: {
+						type: "string",
+						nullable: true,
+						description:
+							"The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD) — GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it.",
+					},
+					supersessionKind: {
+						type: "string",
+						nullable: true,
+						enum: ["archived", "renamed", "deprecated", "superseded"],
+						description:
+							"archived = GitHub archived the repo; renamed = the path 301s to a new one; deprecated = the package or repo carries a deprecation notice; superseded = a newer generation exists and the repo says so.",
+					},
 					fullName: { type: "string", description: "owner/name" },
 					owner: { type: "string", nullable: true },
 					name: { type: "string", nullable: true },

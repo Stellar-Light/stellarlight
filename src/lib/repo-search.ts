@@ -9,6 +9,7 @@
  * the repoScore quality grade.
  */
 
+import { repoSupersession } from "@/lib/repo-relations";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import { symbolsHaystack } from "./code-symbols";
@@ -152,6 +153,12 @@ export interface RepoResult {
 	 * snapshot (null until one exists). null = no verified contract joined —
 	 * NOT a claim the code is unused. */
 	successorRepo: string | null;
+	/** P5 (2026-09-05): supersession as FIELDS, from the curated dated map —
+	 * where to go instead, the repo's own date for it, and the kind. null =
+	 * no curated supersession statement, never 'not superseded'. */
+	supersededBy: string | null;
+	deprecatedAt: string | null;
+	supersessionKind: "archived" | "renamed" | "deprecated" | "superseded" | null;
 	codeInUse: {
 		contracts: number;
 		events: number | null;
@@ -1668,6 +1675,15 @@ export async function searchRepos(
 						: null,
 				successorRepo:
 					(r as { successorRepo?: string | null }).successorRepo ?? null,
+				// Read-time from the curated dated map; the stored successorRepo is the
+				// weekly-stamped view of the same map. A stored value is never overridden.
+				supersededBy:
+					(r as { successorRepo?: string | null }).successorRepo ??
+					repoSupersession(r.fullName)?.supersededBy ??
+					null,
+				deprecatedAt: repoSupersession(r.fullName)?.deprecatedAt ?? null,
+				supersessionKind:
+					repoSupersession(r.fullName)?.supersessionKind ?? null,
 				codeInUse:
 					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
 						? {

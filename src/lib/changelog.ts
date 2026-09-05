@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api"],
+		version: "spec@1.9.36",
+		type: "added",
+		summary:
+			"Repo rows gain `supersededBy`, `deprecatedAt` and `supersessionKind` — supersession as fields a consumer can join on, from a curated dated map (P5).",
+		detail:
+			"P5's remaining item said it plainly: supersededBy / deprecatedAt existed nowhere as fields — the facts lived in knowledgeNotes prose, which a consumer had to read rather than join on. 50 of 254 curated notes carried that prose (GitHub archive banners, 'this repository has moved', npm deprecation notices). Each was read by eye and 34 became entries in a curated map keyed by the SUPERSEDED repo: kind (archived | renamed | deprecated | superseded), supersededBy as GitHub spells it, deprecatedAt as the repo's OWN date — GitHub's archive banner or a release notice — and the repo's statement quoted as source. Deliberately left out: repos whose older packages are deprecated in their favour (js-stellar-sdk, typescript-wallet-sdk, js-xdr are successors, not superseded); case-only path changes; and read dates — kotlin-wallet-sdk's banner gives no date, so its deprecatedAt is null rather than the day we looked. The existing successorRepo (weekly-stamped by enrich) is now derived from the same map, so there is one truth; on the row, supersededBy prefers the stored value and never overrides it. A test holds prose and fields together: every public note that says ARCHIVED, RENAMED, REPOSITORY DEPRECATED or 'has moved' must have a map entry, and no successor may.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api"],
 		version: "spec@1.9.35",
 		type: "added",
 		summary:
