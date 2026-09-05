@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T19:04:03.290Z",
+ "generatedAt": "2026-09-05T19:15:31.289Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -192,6 +192,10 @@
    {
     "file": "improvements/audits/review-2026-07-08-findings.md",
     "name": "review-2026-07-08-findings"
+   },
+   {
+    "file": "improvements/audits/grok-day-audit-2026-09-05.md",
+    "name": "grok-day-audit-2026-09-05"
    },
    {
     "file": "improvements/audits/audit-2026-07-09-full-surface.md",
