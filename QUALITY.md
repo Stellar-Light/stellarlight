@@ -185,8 +185,15 @@ service runs at Stage 3+ by default and humans do product, not repair.
   registry (12) and operators' own stellar.toml (7) so deltas compound
   weekly. Death receipts: 42 stamped, 8 retracted after audit (a live-200
   page cannot stand as "observed dead"), 2 re-stamped once their domains
-  went hard-dead. Untyped 59→2 (both honest residuals). Weak share
-  86%→84% (830 of 984 served rows).
+  went hard-dead. Untyped 59→2 (both honest residuals). Weak share: read
+  `strongBasisSplit` and `strongByBasis` in
+  `improvements/quality/entities.json` — the number is no longer
+  hand-printed here, because on 2026-09-05 this file said 84%, the board
+  62.7% and knownLimitations 62% for one SLO. The 2026-09-04 drop
+  (794→617 weak) was 173 rows on two NEW evidence tiers (repo-activity,
+  product-integration) plus 4 within the pre-existing onchain-activity
+  tier: real evidence, and a change in what counts — reported as two
+  numbers from now on, never as the ratchet falling.
   *Remaining:* the done bar is weak bases under 50%. 144 weak rows have a
   website that never answered a successful check — their reason is now
   printed as an owner triage table (relink / Inactive / leave), and that
@@ -236,6 +243,120 @@ service runs at Stage 3+ by default and humans do product, not repair.
   note is, which the note-freshness lane does not yet detect. 12,851
   indexed repos carry no note — the long tail is by design, the curated
   pool is the floor that rises.
+
+## State of the program — as of 2026-09-05
+
+Kept current by rule: any PR that adds, changes or retires a lane, moves a
+phase status, or opens/closes a blocker updates this block in the same PR.
+An agent must be able to answer these six without archaeology.
+
+**What are we actually trying to do.** End the recurring §0 defect classes
+by forcing every finding into a layer (guard / SLO / bank / won't-fix), and
+earn autonomy until bounded agent lanes run quality without drop — the
+owner needed only for contracts, posts, spend and a new §0 class. P1–P5
+above are the phases; the done-bars are theirs.
+
+**Who owns it.** The program, /quality and the ledger: Shubh. Lanes —
+enrich-repos (weekly, Monday), refresh-stablecoins (6h), refresh-rwa (6h),
+basis lanes (onchain / product / repo-activity, dispatch), dedup (manual,
+dry-run) — all Shubh until a lane earns its intervention-free weeks. Raven's
+router scorer and catalog: upstream (stellar-experimental/stellar-raven).
+Golden questions: Raph. External findings: Tyler / kalepail / SDF reviewers.
+
+**What changed this week (2026-08-31 → 09-05).** ~80 merged PRs
+(#1229–#1309): the RWA product model for sls-023 (registry, products,
+deployment, controls, an hourly pin, a six-hour measuring lane);
+supersession as fields on repo rows; a partition-sum guard; fixes across
+every scout.* surface — hackathon submissions truncated at 300, outcomes
+served as 0/0/0/0, a winner's award serving the whole pool, contract
+ownership stamped on other people's contracts, builders ranked by a
+featured flag, an audit count that was a subset, a chart drawing gaps as
+zero. And a cross-vendor audit that found the first sls-023 close-out
+overclaimed and 34 one-holder assets served as live — both corrected.
+
+**What's blocked.**
+- Raven router: the intended op is excluded when a question contains
+  another op's id noun (stellar-raven #124, filed 2026-09-03) — upstream
+  scorer; Scout-side vocabulary does not fix this class.
+- Raven catalog lag: `getRwaAssets` (since 2026-09-04) and `verifyClaim`
+  (since 2026-08-27) not exposed. Not filed — lag, not drift.
+- 583 app-only weak rows and 144 never-answered sites: human triage
+  (relink / Inactive / leave). Since 2026-09-01.
+- 22 dedup clusters from the dry-run: human call (the EURC cluster is a
+  name-only false positive; the Passport cluster would hide an SDF-verified
+  row). Since 2026-09-04.
+- Corpus-announcement lane (P4's named lever): tested 2026-09-05, 2 of 18
+  sampled weak projects appear in a dated corpus doc, one a false match —
+  our corpus is not where operator launch posts live. Not viable as designed.
+
+**Which commitment is at risk.**
+- P4 done-bar (weak < 50%): 62.7%, and the last drop was mostly new tiers.
+- P3 Stage 2 (auto-merge after N intervention-free weeks): the count is
+  zero, and this week reset it — the sls-023 close-out needed an
+  independent auditor to be corrected.
+- The closure rule's own metric: trailing-30d repeat-class rate is 100%;
+  closures are 298 on silence, 216 by re-probe, 7 verified. Detection is
+  outrunning remediation exactly as §0 warned.
+
+**What should happen next (ordered).**
+1. Make silence-close ineligible for the headline close rate
+   (write-set: summarizeLedger; done = closingRate counts re-probed +
+   verified only, silence reported apart).
+2. Score the routing battery on the INTENDED op, not "some scout op
+   present" (write-set: scripts/eval/routing-surface-check + battery
+   banks; done = the 32-probe run reports intended-op hits, now ~8/32).
+3. Exhaust the 34 `onchainEligible` weak rows with the existing lane
+   (dispatch; done = onchainEligible 0 or each row carries a
+   could-not-check).
+4. Human triage of the 22 dedup clusters and the dead repo links (owner:
+   Shubh; done = executed or declined per cluster, in the dry-run's own
+   format).
+5. Start the intervention-free week counter honestly — a lane week counts
+   only when every execute in it was dry-run, executed and read back with
+   zero human correction; publish the count on /quality.
+
+## Lessons — 2026-09-05 cross-vendor audit of the program
+
+Rules an agent follows (each verified against evidence; the auditor's
+other claims were checked and, where wrong, are not here):
+
+1. A new enum member and every aggregator that classifies it ship in the
+   same PR — or the PR does not merge. (statusBasis gained two tiers; the
+   strong-metric ignored both; 173 rows earned evidence and the headline
+   moved by 4.)
+2. A classifier change never moves a ratchet series. Report
+   "recategorized N" and "upgraded M" as two numbers.
+3. A close-out on an external finding states the finding's OWN probe and
+   its remaining miss count. "Fixed and verified live" without that number
+   is banned.
+4. A new guard's first alarm is a candidate false alarm. It may not page
+   until it has a known-bad and a known-good fixture. (The partition
+   guard's first two alarms were its own wrong denominators.)
+5. A sum check whose denominator is 0 is vacuous — reported, never counted
+   as a pass.
+6. A third-party list is asserted against the source's own total; if the
+   source ignores paging, the served count is could-not-check, never a
+   number. (DoraHacks 50/page; SCF capped at 500.)
+7. Live ∧ (holders ≤ 1 ∨ a "coming soon" page ∨ a 200 that is a parked
+   domain) is never served as a live market.
+8. An independent audit — second agent or human — precedes closing any
+   externally-filed finding.
+9. A guard artifact under improvements/audits is only as fresh as its
+   last local `--json` commit; CI runs do not persist it. Read its date
+   before citing it.
+10. A bounded-lane count increments only when the PR body carries its
+    write-set, a dry-run, an execute and a live read-back.
+11. Score routing on the intended operation id. "Some scout op appeared"
+    is not a hit.
+12. Do not answer a routing miss with vocabulary once the failure mode is
+    id-noun exclusion; that is the scorer's, upstream.
+
+Recorded lessons this week violated (so the loop is honest): verify before
+advertise (#494, twice); examples are probes, not targets (11 of 61 treated
+as closing a 61-row probe); review new guards adversarially; ledger closure
+is not repair (298 silence-closes behind a 0.99 close rate); stale evidence
+is not a finding (a guard artifact cited at 08-31 on 09-05; this file's own
+P4 number).
 
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from

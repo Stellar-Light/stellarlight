@@ -146,6 +146,7 @@ export async function GET(req: NextRequest) {
 					issuers,
 					matched: total,
 					returned: rows.length,
+					measured: measuredCount,
 					byLevel,
 					byState,
 				},

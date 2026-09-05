@@ -47,16 +47,28 @@ const findings: Finding[] = Array.isArray(ledger) ? ledger : ledger.findings;
 // as their own state there. The three states partition the ledger exactly once.
 const byMode = new Map<
 	string,
-	{ open: number; cleared: number; verified: number; surface: string }
+	{
+		open: number;
+		refresh: number;
+		cleared: number;
+		verified: number;
+		surface: string;
+	}
 >();
 for (const f of findings) {
 	const cur = byMode.get(f.failureMode) ?? {
 		open: 0,
+		refresh: 0,
 		cleared: 0,
 		verified: 0,
 		surface: f.surface,
 	};
-	if (f.status === "open") cur.open++;
+	// The refresh queue (note-stale) is open but not a defect; it must not
+	// surface as an open finding while findings.open excludes it — the
+	// 2026-09-05 audit found code.openFindings = 1 beside ledger code.open = 0.
+	if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
+		cur.refresh++;
+	else if (f.status === "open") cur.open++;
 	else if (f.status === "verified") cur.verified++;
 	else cur.cleared++;
 	byMode.set(f.failureMode, cur);
@@ -68,7 +80,12 @@ const ageBucket = (f: Finding) => {
 	return d <= 7 ? "≤7d" : d <= 30 ? "8–30d" : d <= 60 ? "31–60d" : ">60d";
 };
 const openAges = new Map<string, number>();
-for (const f of findings.filter((x) => x.status === "open"))
+// Same predicate as findings.open: the refresh queue is not a defect and
+// must not age as one — the 2026-09-05 audit found openByAge summing to 6
+// beside open = 5, one artifact disagreeing with itself.
+for (const f of findings.filter(
+	(x) => x.status === "open" && !MAINTENANCE_MODES.has(x.failureMode),
+))
 	openAges.set(ageBucket(f), (openAges.get(ageBucket(f)) ?? 0) + 1);
 
 const recentlyCleared = findings
@@ -383,11 +400,21 @@ const SURFACE_MEANS: Record<string, string> = {
 // as their own state there. The three states partition the ledger exactly once.
 const bySurface = new Map<
 	string,
-	{ open: number; cleared: number; verified: number }
+	{ open: number; refresh: number; cleared: number; verified: number }
 >();
 for (const f of findings) {
-	const cur = bySurface.get(f.surface) ?? { open: 0, cleared: 0, verified: 0 };
-	if (f.status === "open") cur.open++;
+	const cur = bySurface.get(f.surface) ?? {
+		open: 0,
+		refresh: 0,
+		cleared: 0,
+		verified: 0,
+	};
+	// The refresh queue (note-stale) is open but not a defect; it must not
+	// surface as an open finding while findings.open excludes it — the
+	// 2026-09-05 audit found code.openFindings = 1 beside ledger code.open = 0.
+	if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
+		cur.refresh++;
+	else if (f.status === "open") cur.open++;
 	else if (f.status === "verified") cur.verified++;
 	else cur.cleared++;
 	bySurface.set(f.surface, cur);
@@ -504,6 +531,17 @@ const out = {
 			means:
 				"rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer.",
 		},
+		// Composition of the STRONG side by basis value, so a change to what
+		// counts as strong (a new evidence tier) is visible as a tier gaining
+		// rows — not as the weak share silently falling. 2026-09-04: two new
+		// tiers took 173 rows; the pre-existing tiers moved by 4. Both are
+		// real evidence, and they must be reported as two numbers.
+		strongByBasis: Object.fromEntries(
+			STRONG_BASES.map((b) => [
+				b,
+				projects.filter((p) => p.statusBasis === b).length,
+			]),
+		),
 		strongBasisSplit: {
 			weakLiveRows: projects.filter((p) => !isStrongBasis(p.statusBasis))
 				.length,
