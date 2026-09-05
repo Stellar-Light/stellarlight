@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-05T05:08:19.275Z",
+	"generatedAt": "2026-09-05T05:58:22.854Z",
 	"total": 539,
 	"open": 17,
 	"refreshQueue": 1,
@@ -8,7 +8,25 @@
 	"cleared": 514,
 	"clearedByReprobe": 216,
 	"clearedOnSilence": 298,
-	"closingRate": 0.97,
+	"closingRate": 0.41,
+	"silenceShare": 0.55,
+	"recurrence": {
+		"reopened": 5,
+		"reopenedShareOfClosures": 0.01,
+		"regressedFromVerified": 0,
+		"recurredAfterSilence": {
+			"last30d": {
+				"newFindings": 247,
+				"recurred": 136,
+				"ratePct": 55.1
+			},
+			"lifetime": {
+				"newFindings": 539,
+				"recurred": 136,
+				"ratePct": 25.2
+			}
+		}
+	},
 	"oldestOpenDays": 44,
 	"inWave": 0,
 	"highOpen": 0,

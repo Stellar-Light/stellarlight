@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T05:49:22.639Z",
+ "generatedAt": "2026-09-05T05:57:23.533Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -257,55 +257,76 @@
    }
   ],
   "closure": {
-   "definition": "repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
-   "last30d": {
-    "newFindings": 247,
-    "repeats": 247,
-    "ratePct": 100
-   },
-   "lifetime": {
-    "newFindings": 539,
-    "repeats": 533,
-    "ratePct": 98.9
-   },
-   "byClass": [
-    {
-     "class": "identity",
-     "total": 324,
-     "open": 17,
-     "firstSeen": "2026-07-22"
+   "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
+   "recurredAfterSilence": {
+    "last30d": {
+     "newFindings": 247,
+     "recurred": 136,
+     "ratePct": 55.1
     },
-    {
-     "class": "taxonomy-coverage",
-     "total": 108,
-     "open": 0,
-     "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "evidence-population",
-     "total": 39,
-     "open": 0,
-     "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "contract-completeness",
-     "total": 27,
-     "open": 0,
-     "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "cross-surface-consistency",
-     "total": 22,
-     "open": 1,
-     "firstSeen": "2026-07-22"
-    },
-    {
-     "class": "meta-eval",
-     "total": 19,
-     "open": 0,
-     "firstSeen": "2026-07-23"
+    "lifetime": {
+     "newFindings": 539,
+     "recurred": 136,
+     "ratePct": 25.2
     }
-   ]
+   },
+   "reopened": {
+    "count": 5,
+    "shareOfClosures": 0.01,
+    "regressedFromVerified": 0,
+    "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
+   },
+   "classRecurrence": {
+    "note": "structurally near 100% with 8 broad classes — context, not a target",
+    "last30d": {
+     "newFindings": 247,
+     "repeats": 247,
+     "ratePct": 100
+    },
+    "lifetime": {
+     "newFindings": 539,
+     "repeats": 533,
+     "ratePct": 98.9
+    },
+    "byClass": [
+     {
+      "class": "identity",
+      "total": 324,
+      "open": 17,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "taxonomy-coverage",
+      "total": 108,
+      "open": 0,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "evidence-population",
+      "total": 39,
+      "open": 0,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "contract-completeness",
+      "total": 27,
+      "open": 0,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "cross-surface-consistency",
+      "total": 22,
+      "open": 1,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "meta-eval",
+      "total": 19,
+      "open": 0,
+      "firstSeen": "2026-07-23"
+     }
+    ]
+   }
   }
  },
  "projects": {

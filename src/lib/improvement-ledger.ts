@@ -38,8 +38,9 @@ export type Surface = (typeof SURFACES)[number];
 /**
  * A finding's lifecycle. `cleared` is AUTOMATIC — the detector that raised it
  * no longer reports it on a later run (soft-fixed); `verified` is DELIBERATE —
- * a human/re-run confirmed the fix. Both count toward the closing rate, but
- * `verified` is the strong signal.
+ * a human/re-run confirmed the fix. Only `verified` and a `cleared` carrying a
+ * live re-probe stamp (`clearedBy`) count toward the closing rate — a detector
+ * merely going quiet is not repair.
  */
 export type FindingStatus =
 	| "open"
@@ -76,6 +77,13 @@ export interface Finding {
 	/** Set when an auto-cleared finding was raised again — the ledger CAN show
 	 *  a regression, and this is the paper trail that it did. */
 	reopenedAt?: string;
+	/**
+	 * A `verified` finding a detector raised AGAIN. `verified` is a human's
+	 * assertion that the fix landed, so a re-raise is the strongest regression
+	 * signal the ledger holds — and it used to be the quietest one. Sticky: a
+	 * later wave re-asserting `verified` does not erase it.
+	 */
+	regressedFromVerified?: boolean;
 	/** Set only by the stale sweep, which clears on a live PASS. */
 	clearedBy?: string | null;
 	/** memory/lesson slug that generalized this finding, if any. */
@@ -97,7 +105,9 @@ const CLOSED_STATUSES: ReadonlySet<FindingStatus> = new Set([
 	"verified",
 	"cleared",
 ]);
-/** Status a human set deliberately — the orchestrator must never overwrite it. */
+/** Status a human set deliberately. The orchestrator never overwrites these on
+ *  SILENCE; a detector re-raising a `verified` finding is the one exception,
+ *  and it is flagged rather than quietly kept (see upsertFindings). */
 export const MANUAL_STATUSES: ReadonlySet<FindingStatus> = new Set([
 	"in-wave",
 	"fixed",
@@ -156,6 +166,9 @@ export const STALE_DAYS = 30;
  */
 export const EVIDENCE_GRACE_DAYS = 10;
 
+/** 2-dp rounding for published rates — the board never shows float noise. */
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
 function ageDays(iso: string, now: number): number {
 	const t = Date.parse(iso);
 	return Number.isNaN(t) ? 0 : Math.max(0, (now - t) / 86_400_000);
@@ -203,6 +216,45 @@ export function rankFindings(findings: Finding[], now: number): Finding[] {
 	});
 }
 
+/** One window of "we closed without repairing, and it came back in kind". */
+export interface RecurrenceWindow {
+	/** Findings FIRST SEEN inside the window — the denominator. */
+	newFindings: number;
+	/** Of those, how many repeat a (surface, failureMode) pair already closed ON
+	 *  SILENCE before this finding was first seen. */
+	recurred: number;
+	ratePct: number;
+}
+
+/**
+ * Did closed work come back? Three distinct questions, never one number.
+ *
+ * The number this replaces — "repeat-class rate", which called a new finding a
+ * repeat when its §0 class had ANY prior finding — answered none of them. With
+ * 8 broad classes over 527 findings, every new finding lands in a class that
+ * has already fired, so the trailing-30d rate sat at 235/235 = 100% and
+ * structurally could not fall. A metric that cannot move measures nothing. It
+ * survives in the artifact as `classRecurrence`: context, not a target.
+ */
+export interface Recurrence {
+	/** Exact-id recurrence: a closed finding a detector raised again. The paper
+	 *  trail already existed (`reopenedAt`); this counts it. */
+	reopened: number;
+	/** `reopened` over everything ever closed. A LOWER BOUND: re-clearing a
+	 *  reopened finding wipes its stamp, so those cycles are invisible. */
+	reopenedShareOfClosures: number;
+	/** `verified` findings a detector raised again — a human's fix that did not
+	 *  hold. No false-positive story: someone asserted it landed, the detector
+	 *  disagrees. */
+	regressedFromVerified: number;
+	/** Recurrence IN KIND: NEW findings on a (surface, failureMode) pair that was
+	 *  closed on silence before they appeared. */
+	recurredAfterSilence: {
+		last30d: RecurrenceWindow;
+		lifetime: RecurrenceWindow;
+	};
+}
+
 export interface LedgerSummary {
 	generatedAt: string;
 	total: number;
@@ -218,8 +270,21 @@ export interface LedgerSummary {
 	 *  not hold (kutana, etesia, octopos) sat in the closed column. This is the
 	 *  re-probe backlog. */
 	clearedOnSilence: number;
-	/** Fraction of all findings ever seen that are now closed (verified+cleared). */
+	/**
+	 * Fraction of all findings ever seen that are closed ON EVIDENCE:
+	 * `verified` (deliberately re-probed after a fix) plus `clearedByReprobe`
+	 * (the stale sweep observed a live PASS). Silence-closes are NOT in the
+	 * numerator. Measured 2026-09-05: 298 of 514 closures had never been
+	 * re-checked, and folding them in printed 0.99 for a ledger where most
+	 * "closed" meant "nobody asked again". They are published beside it as
+	 * `silenceShare`, never hidden.
+	 */
 	closingRate: number;
+	/** Share of ALL findings closed only because a detector went quiet — the
+	 *  re-probe backlog, sized. Read next to `closingRate`, never instead. */
+	silenceShare: number;
+	/** Did closed work come back? See {@link Recurrence}. */
+	recurrence: Recurrence;
 	/** Age of the oldest still-open finding, in whole days. */
 	oldestOpenDays: number;
 	/** Findings a wave has picked up but not yet verified — work in progress. */
@@ -275,7 +340,8 @@ export interface LedgerSummary {
  */
 export const MAINTENANCE_MODES = new Set(["note-stale"]);
 
-export const isMaintenance = (f: Finding) => MAINTENANCE_MODES.has(f.failureMode);
+export const isMaintenance = (f: Finding) =>
+	MAINTENANCE_MODES.has(f.failureMode);
 
 /** An open row that is a real defect — excludes the refresh queue. */
 export const isOpenDefect = (f: Finding) => isOpen(f) && !isMaintenance(f);
@@ -288,7 +354,9 @@ export function summarizeLedger(
 ): LedgerSummary {
 	const total = findings.length;
 	const open = findings.filter(isOpenDefect).length;
-	const refreshQueue = findings.filter((f) => isOpen(f) && isMaintenance(f)).length;
+	const refreshQueue = findings.filter(
+		(f) => isOpen(f) && isMaintenance(f),
+	).length;
 	const verified = findings.filter((f) => f.status === "verified").length;
 	const clearedRows = findings.filter((f) => f.status === "cleared");
 	const cleared = clearedRows.length;
@@ -298,6 +366,59 @@ export function summarizeLedger(
 	// again.
 	const clearedByReprobe = clearedRows.filter((f) => !!f.clearedBy).length;
 	const clearedOnSilence = cleared - clearedByReprobe;
+
+	// ── recurrence: did closed work come back? ──
+	// Earliest SILENCE-close per (surface, failureMode). A pair closed only
+	// because a detector went quiet, then raised again under a NEW id, is this
+	// ledger's own definition of having closed something without repairing it.
+	const silenceClosedAt = new Map<string, string>();
+	for (const f of clearedRows) {
+		if (f.clearedBy || !f.clearedAt) continue;
+		const k = `${f.surface}|${f.failureMode}`;
+		const prev = silenceClosedAt.get(k);
+		if (!prev || f.clearedAt < prev) silenceClosedAt.set(k, f.clearedAt);
+	}
+	// `windowDays === null` is the lifetime window. The silence-close must
+	// predate `firstSeen`, or every row of a pair would mark every other row —
+	// itself included — and the number would just count pair membership.
+	const afterSilence = (windowDays: number | null): RecurrenceWindow => {
+		const cutoff =
+			windowDays === null
+				? null
+				: new Date(now - windowDays * 86_400_000).toISOString();
+		const fresh =
+			cutoff === null
+				? findings
+				: findings.filter((f) => f.firstSeen >= cutoff);
+		const recurred = fresh.filter((f) => {
+			const at = silenceClosedAt.get(`${f.surface}|${f.failureMode}`);
+			return at !== undefined && at < f.firstSeen;
+		}).length;
+		return {
+			newFindings: fresh.length,
+			recurred,
+			ratePct: fresh.length
+				? Math.round((recurred / fresh.length) * 1000) / 10
+				: 0,
+		};
+	};
+	// Everything ever closed that the ledger can still tell WAS closed: rows
+	// closed now, plus rows a reopen pulled back out. Re-clearing a reopened
+	// finding wipes `reopenedAt` (see upsertFindings), so both are lower bounds.
+	const reopened = findings.filter((f) => !!f.reopenedAt).length;
+	const everClosed = findings.filter(
+		(f) => !isOpen(f) || !!f.reopenedAt,
+	).length;
+	const recurrence: Recurrence = {
+		reopened,
+		reopenedShareOfClosures: everClosed > 0 ? round2(reopened / everClosed) : 0,
+		regressedFromVerified: findings.filter((f) => f.regressedFromVerified)
+			.length,
+		recurredAfterSilence: {
+			last30d: afterSilence(30),
+			lifetime: afterSilence(null),
+		},
+	};
 	const inWave = findings.filter(
 		(f) => f.status === "in-wave" || f.status === "fixed",
 	).length;
@@ -357,7 +478,10 @@ export function summarizeLedger(
 
 	// The ranked backlog is defects only — a refresh-queue row outranking real
 	// work would put "npm published 0.3.5" at the top of the board.
-	const topOpen = rankFindings(findings.filter((f) => !isMaintenance(f)), now)
+	const topOpen = rankFindings(
+		findings.filter((f) => !isMaintenance(f)),
+		now,
+	)
 		.slice(0, topN)
 		.map((f) => ({
 			id: f.id,
@@ -377,7 +501,11 @@ export function summarizeLedger(
 		cleared,
 		clearedByReprobe,
 		clearedOnSilence,
-		closingRate: total > 0 ? Math.round((closed / total) * 100) / 100 : 1,
+		// An EMPTY ledger scores 0, not 1. No findings is no evidence of repair,
+		// and a vacuous denominator must never render as a perfect score.
+		closingRate: total > 0 ? round2((verified + clearedByReprobe) / total) : 0,
+		silenceShare: total > 0 ? round2(clearedOnSilence / total) : 0,
+		recurrence,
 		oldestOpenDays: Math.round(oldestOpenDays),
 		inWave,
 		highOpen,
@@ -396,6 +524,9 @@ export function summarizeLedger(
  *  - a prior `open` finding ABSENT from this run's detected set is auto-`cleared`
  *    (its detector stopped flagging it — soft-fixed). Manual statuses
  *    (in-wave/fixed/verified) are NEVER auto-changed, and already-cleared stays.
+ *  - a CLOSED finding the detector raises AGAIN reopens: `cleared` outright,
+ *    `verified` with a sticky `regressedFromVerified` flag (the asserted fix
+ *    did not hold). in-wave/fixed are work in progress and stay put.
  * `detectedBySource` lets clearing be scoped per detector, so one detector's
  * run never clears another detector's findings.
  */
@@ -435,12 +566,21 @@ export function upsertFindings(
 			// "nobody asked recently" in both directions: silence closes, and
 			// noise does not reopen.
 			//
-			// Only `cleared` reopens. The deliberate states — in-wave, fixed,
-			// verified — are a human's assertion and are never auto-changed;
-			// that rule predates this and is right. A wave that says "verified"
-			// on something still failing is a different problem, and one a person
-			// has put their name to.
+			// `cleared` reopens outright. `verified` reopens AND is flagged: it is
+			// a human's assertion that the fix landed, so a detector raising it
+			// again is the strongest regression signal here — and until 2026-09-05
+			// it was the quietest. This branch left a re-raised `verified` wholly
+			// untouched; the only trace was applyWaves' `suspectVerified` console
+			// warning in the nightly run, which reaches neither the ledger, nor
+			// the summary, nor the board. Every `verified` row carries a wave, so
+			// applyWaves re-asserts `verified` immediately after this — the
+			// durable signal is the sticky flag and the reopen stamp, both of
+			// which the summary counts.
+			//
+			// in-wave and fixed are still never auto-changed: they say work is
+			// underway, and a detector still reporting them is expected.
 			const reopens = p.status === "cleared";
+			const regressed = p.status === "verified";
 			out.push({
 				...p,
 				...(reopens
@@ -449,6 +589,16 @@ export function upsertFindings(
 							clearedAt: undefined,
 							clearedBy: undefined,
 							reopenedAt: nowIso,
+						}
+					: {}),
+				...(regressed
+					? {
+							status: "open" as const,
+							// keep the FIRST stamp: applyWaves restores the wave's
+							// `verified` every run, so re-stamping would churn the
+							// committed ledger nightly for no new information.
+							reopenedAt: p.reopenedAt ?? nowIso,
+							regressedFromVerified: true as const,
 						}
 					: {}),
 				// Re-raised: take THIS run's evidence stamp. `lastSeen` alone can't

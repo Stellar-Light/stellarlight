@@ -635,7 +635,7 @@ function main() {
 	const summary = summarizeLedger(merged, Date.now());
 
 	console.log(
-		`\n  ledger: ${summary.total} total · ${summary.open} open · ${summary.closingRate * 100}% closed · oldest open ${summary.oldestOpenDays}d`,
+		`\n  ledger: ${summary.total} total · ${summary.open} open · ${Math.round(summary.closingRate * 100)}% closed ON EVIDENCE (+${Math.round(summary.silenceShare * 100)}% closed on silence, the re-probe backlog) · oldest open ${summary.oldestOpenDays}d`,
 	);
 	console.log(
 		`  by surface: ${summary.bySurface

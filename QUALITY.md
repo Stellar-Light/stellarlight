@@ -53,8 +53,24 @@ curation instead of hand-written lists, extend that principle everywhere.
 kalepail's, gets a class label from §0 and must close as one of:
 `invariant-added` (L1) · `slo-added` (L2) · `bank-added` (L3) · `wont-fix`
 (with reason). *A fix with no layer is not closed.* The metric that matters
-is **repeat-class rate**: findings whose class already had a prior finding.
-Steady state means that number reaches zero and stays there.
+is **recurrence after a silence-close**: a NEW finding on a (surface,
+failure-mode) pair we had already closed *on silence* — the detector stopped
+reporting and nobody re-probed. That is the closure rule's actual question:
+did we close without repairing, and did the same kind of failure come back?
+Steady state means that number reaches zero and stays there. Its exact-id
+sibling — a specific finding a detector raises again after closure, hardest
+when the closure was `verified` — is published beside it.
+
+The **headline close rate counts evidence only**: `verified` plus a `cleared`
+carrying a live re-probe stamp. A detector going quiet is not repair, and
+silence-closes are published apart as their own share rather than folded in.
+Both live in the artifact (`findings.closure`, `closingRate`, `silenceShare`)
+— never hand-copied into this document.
+
+The number this replaces, **repeat-class rate** (a finding whose §0 class had
+any prior finding), is kept as context under `classRecurrence`. With eight
+broad classes it is pinned near 100% however much repair lands, so it cannot
+be steered by; it is reported, not targeted.
 
 ## 2. The machinery we already have, and the one loop it was missing
 
@@ -109,9 +125,10 @@ or the read-back used to verify it — appends its entry there in the same PR.**
 An unlogged correction silently buys autonomy the lane did not earn. Reaching
 the bar publishes ELIGIBILITY; the promotion itself stays a human call.
 
-**Steady state =** 4 consecutive weeks of: all dailies green · repeat-class rate
-0 · SLOs at target · zero externally-filed correctness findings. Then the
-service runs at Stage 3+ by default and humans do product, not repair.
+**Steady state =** 4 consecutive weeks of: all dailies green · recurrence
+after a silence-close at 0 · SLOs at target · zero externally-filed
+correctness findings. Then the service runs at Stage 3+ by default and humans
+do product, not repair.
 
 ## 4. Phases
 
@@ -318,9 +335,13 @@ overclaimed and 34 one-holder assets served as live — both corrected.
   improvements/audits/lane-autonomy-latest.json and on /quality. Nothing
   is promoted on them yet, and the RWA and basis lanes restarted their
   clocks on 09-04/09-05 (improvements/lanes/interventions.json).
-- The closure rule's own metric: trailing-30d repeat-class rate is 100%;
-  closures are 298 on silence, 216 by re-probe, 7 verified. Detection is
-  outrunning remediation exactly as §0 warned.
+- The closure rule's own metric: recurrence after a silence-close is well
+  clear of zero, and the majority of this ledger's closures were closed on
+  silence rather than re-probed — detection is outrunning remediation exactly
+  as §0 warned. Live numbers: `findings.closure.recurredAfterSilence` and
+  `closingRate` / `silenceShare` in the /quality artifact. (The old figure
+  quoted here, a 100% trailing-30d repeat-CLASS rate, could not have been
+  anything else — see §1.)
 
 **What should happen next (ordered).**
 1. Make silence-close ineligible for the headline close rate
