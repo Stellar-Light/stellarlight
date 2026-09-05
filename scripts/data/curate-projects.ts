@@ -1984,6 +1984,16 @@ async function main() {
 			);
 			continue;
 		}
+		// A lineage shadow is not a record: its status is the fold's (Draft +
+		// canonicalSlug, #1337) and no curated entry may write onto it — a
+		// STATUS_FIX keyed by a shadow slug would silently re-open a hidden
+		// duplicate (audit 2026-09-05, "one field, one writer").
+		if (d.canonicalSlug) {
+			console.log(
+				`  ${slug}: shadow of ${d.canonicalSlug} — curated status entry skipped; re-key it to the canonical row`,
+			);
+			continue;
+		}
 		if (d.status !== fix.from) {
 			console.log(
 				`  ${slug}: status '${d.status}' ≠ '${fix.from}', skip (retired or manually set)`,
