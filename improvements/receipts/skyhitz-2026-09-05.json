@@ -1,0 +1,33 @@
+{
+ "slug": "skyhitz",
+ "url": "https://skyhitz.io/",
+ "finalUrl": "https://skyhitz.io/",
+ "fetchedAt": "2026-09-05T18:34:38.650Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 18:34:38 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "4eb5fc7442ae42a53e3f04467ef7fd5569e886f6b5fa1521b7056426d89203f1",
+ "bodyTextChars": 656,
+ "markers": [
+  {
+   "marker": "Total Mass 0.00",
+   "found": true,
+   "excerpt": "Skyhitz - Gravity. Mainnet SKYHITZ · Mainnet Whitepaper Connect S Total Mass 0.00 HITZ L Event Horizon 0.0000 HITZ B Balance — HITZ Your Orbit – ◈ Trade ⬡ Vault ≡ Monitor Safe Orbit Smart Swap Multi-path aggregator. The engine enumerates every di"
+  },
+  {
+   "marker": "Event Horizon 0.0000",
+   "found": true,
+   "excerpt": "Skyhitz - Gravity. Mainnet SKYHITZ · Mainnet Whitepaper Connect S Total Mass 0.00 HITZ L Event Horizon 0.0000 HITZ B Balance — HITZ Your Orbit – ◈ Trade ⬡ Vault ≡ Monitor Safe Orbit Smart Swap Multi-path aggregator. The engine enumerates every direct and 2-hop route to"
+  },
+  {
+   "marker": "Balance —",
+   "found": true,
+   "excerpt": "Skyhitz - Gravity. Mainnet SKYHITZ · Mainnet Whitepaper Connect S Total Mass 0.00 HITZ L Event Horizon 0.0000 HITZ B Balance — HITZ Your Orbit – ◈ Trade ⬡ Vault ≡ Monitor Safe Orbit Smart Swap Multi-path aggregator. The engine enumerates every direct and 2-hop route to HITZ, asks Aqua for on-chai"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
