@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-05T04:52:45.640Z",
+	"asOf": "2026-09-05T04:55:45.838Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 89,
 	"healthy": 88,
@@ -7,7 +7,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "8 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "9 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -225,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:50:45Z",
+			"lastSuccessAt": "2026-09-05T04:53:43Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 24,
+			"runs": 27,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:50:45Z",
+			"lastSuccessAt": "2026-09-05T04:53:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -624,7 +624,7 @@
 			"lastSuccessAt": "2026-09-05T04:46:47Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 98,
 			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
 		},
 		{
@@ -643,10 +643,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:27:46Z",
+			"lastSuccessAt": "2026-09-05T04:53:01Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 53,
+			"runs": 54,
 			"why": "last green 0d ago"
 		},
 		{
@@ -929,10 +929,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:50:45Z",
+			"lastSuccessAt": "2026-09-05T04:53:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -973,7 +973,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:22:57Z",
+			"lastSuccessAt": "2026-09-05T04:53:01Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -987,8 +987,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 15,
-			"why": "8 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 16,
+			"why": "9 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
