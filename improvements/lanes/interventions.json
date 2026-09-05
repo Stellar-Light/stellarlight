@@ -30,6 +30,12 @@
       "lane": "backfill-knowledge-notes",
       "what": "The nightly step was gated to workflow_dispatch, so 18 green scheduled runs since 2026-08-18 executed nothing; the gate was removed so schedule runs write. Found by the lane-autonomy counter's first run.",
       "source": "PR night/notes-nightly (this fix); runs 33851502654 and 33731681303 show the step skipped"
+    },
+    {
+      "date": "2026-09-05",
+      "lane": "dedup-projects",
+      "what": "Its 11 Draft hides were overwritten 30 minutes later by curate-projects' DUPE_MERGES step, which forces status=Inactive on every shadow (scripts/data/curate-projects.ts, 'if (dupe.status !== \"Inactive\")'). Two lanes own one field with different verdicts; the July fold (Inactive + canonicalSlug) won silently. Rows stay hidden from search and the board either way; the wrong status on duplicates is the open class in improvements/drafts/2026-09-05-inactive-site-liveness-triage.md.",
+      "source": "runs 33945510647 (dedup execute) and 33947198155 (curate execute); read-back 2026-09-05T05:55Z"
     }
   ]
 }
