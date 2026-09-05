@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T04:00:37.678Z",
+ "generatedAt": "2026-09-05T05:27:43.520Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -54,6 +54,13 @@
  ],
  "library": {
   "lessons": [
+   {
+    "file": "improvements/lessons/2026-09-05-routing-on-the-intended-op.md",
+    "date": "2026-09-05",
+    "title": "Routing on the intended op, and the consumer that had not read our fixes (2026-09-05)",
+    "lessonCount": 4,
+    "bytes": 7372
+   },
    {
     "file": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
     "date": "2026-08-31",
