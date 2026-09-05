@@ -1,16 +1,17 @@
 {
-	"generatedAt": "2026-09-05T05:06:45.466Z",
+	"generatedAt": "2026-09-05T05:56:41.909Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"scoring": {
 		"basis": "intended-op: PASS only when one of the item's expected operation ids is within the top-3 scout hits; rank = 1-based position of the first expected op among scout hits (null = not returned)",
 		"evidence": "missClass evidence comes from scripts/eval/raven-scorer-replica.ts — Raven's lexical scoring math run over our current spec text AND over the text Raven indexes (live descriptions + manifest routing keywords); the live ranking is the truth, the replica explains it",
 		"classes": [
+			"catalog-lag",
 			"no-scout-op",
 			"id-noun-exclusion",
-			"catalog-lag",
 			"named-entity",
 			"vocabulary",
-			"outscored"
+			"outscored",
+			"could-not-check"
 		]
 	},
 	"catalogView": {
@@ -83,6 +84,7 @@
 	"frame": {
 		"graded": 65,
 		"passed": 48,
+		"vacuous": false,
 		"failed": 17,
 		"lagging": 0,
 		"demandChecked": 0,
@@ -116,12 +118,13 @@
 	},
 	"okRate": 0.74,
 	"missClasses": {
+		"catalog-lag": 9,
 		"no-scout-op": 1,
 		"id-noun-exclusion": 2,
-		"catalog-lag": 9,
 		"named-entity": 1,
 		"vocabulary": 1,
-		"outscored": 3
+		"outscored": 3,
+		"could-not-check": 0
 	},
 	"results": [
 		{
@@ -1361,6 +1364,10 @@
 						"replicaRankOurs": 2,
 						"replicaRankLive": 4,
 						"lagTokens": [],
+						"specNotLive": [
+							"analytics",
+							"ranking"
+						],
 						"score": 165,
 						"gate": 0.6,
 						"coverage": 1,
@@ -1406,6 +1413,7 @@
 						"replicaRankOurs": 4,
 						"replicaRankLive": 5,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 70,
 						"gate": 0.6,
 						"coverage": 0.75,
@@ -1424,6 +1432,7 @@
 						"replicaRankOurs": 17,
 						"replicaRankLive": 12,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 45,
 						"gate": 0.6,
 						"coverage": 0.75,
@@ -1473,6 +1482,7 @@
 						"replicaRankOurs": null,
 						"replicaRankLive": null,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": null,
 						"gate": 1,
 						"coverage": 0,
@@ -1491,6 +1501,7 @@
 						"replicaRankOurs": null,
 						"replicaRankLive": null,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": null,
 						"gate": 1,
 						"coverage": 0,
@@ -1538,6 +1549,21 @@
 							"work",
 							"contributors"
 						],
+						"specNotLive": [
+							"paid",
+							"work",
+							"jobs",
+							"freelance",
+							"contributors",
+							"earn",
+							"developers",
+							"gives",
+							"out",
+							"contract",
+							"contributor",
+							"opportunities",
+							"contributing"
+						],
 						"score": 185,
 						"gate": 0.6,
 						"coverage": 1,
@@ -1553,7 +1579,33 @@
 					"replicaScoreLive": 106,
 					"replicaScoreOurs": 106
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "getRfps",
+						"inQuestion": [
+							"jobs",
+							"freelance",
+							"work",
+							"contributors"
+						],
+						"inSpecNotLive": [
+							"paid",
+							"work",
+							"jobs",
+							"freelance",
+							"contributors",
+							"earn",
+							"developers",
+							"gives",
+							"out",
+							"contract",
+							"contributor",
+							"opportunities",
+							"contributing"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -1587,6 +1639,21 @@
 							"interest",
 							"rates"
 						],
+						"specNotLive": [
+							"indexed",
+							"ecosystem",
+							"calculate",
+							"graded",
+							"index",
+							"implemented",
+							"interest",
+							"rate",
+							"model",
+							"contract",
+							"algorithm",
+							"mechanism",
+							"walkthrough"
+						],
 						"score": 199,
 						"gate": 0.6,
 						"coverage": 0.67,
@@ -1610,7 +1677,32 @@
 					"replicaScoreLive": null,
 					"replicaScoreOurs": null
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "explainRepo",
+						"inQuestion": [
+							"calculate",
+							"interest",
+							"rates"
+						],
+						"inSpecNotLive": [
+							"indexed",
+							"ecosystem",
+							"calculate",
+							"graded",
+							"index",
+							"implemented",
+							"interest",
+							"rate",
+							"model",
+							"contract",
+							"algorithm",
+							"mechanism",
+							"walkthrough"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -1641,6 +1733,10 @@
 						"replicaRankOurs": 27,
 						"replicaRankLive": 25,
 						"lagTokens": [],
+						"specNotLive": [
+							"analytics",
+							"ranking"
+						],
 						"score": 100,
 						"gate": 0.6,
 						"coverage": 0.8,
@@ -1665,6 +1761,15 @@
 							"anyone",
 							"actually",
 							"dead"
+						],
+						"specNotLive": [
+							"anyone",
+							"actually",
+							"still",
+							"dead",
+							"community",
+							"value",
+							"locked"
 						],
 						"score": 171,
 						"gate": 0.6,
@@ -1718,6 +1823,10 @@
 						"replicaRankOurs": 7,
 						"replicaRankLive": 5,
 						"lagTokens": [],
+						"specNotLive": [
+							"verticals",
+							"least"
+						],
 						"score": 99,
 						"gate": 0.6,
 						"coverage": 0.71,
@@ -1737,6 +1846,7 @@
 						"replicaRankOurs": 10,
 						"replicaRankLive": 10,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 89,
 						"gate": 0.6,
 						"coverage": 0.71,
@@ -1788,6 +1898,7 @@
 						"replicaRankOurs": 5,
 						"replicaRankLive": 5,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 121,
 						"gate": 0.6,
 						"coverage": 0.86,
@@ -1805,6 +1916,26 @@
 						"replicaRankLive": 20,
 						"lagTokens": [
 							"stellar"
+						],
+						"specNotLive": [
+							"stellar",
+							"fiat",
+							"sep",
+							"implement",
+							"24",
+							"vs",
+							"lives",
+							"here",
+							"row",
+							"31",
+							"seps",
+							"read",
+							"each",
+							"toml",
+							"null",
+							"fetched",
+							"none",
+							"implemented"
 						],
 						"score": 99,
 						"gate": 0.6,
@@ -1859,6 +1990,21 @@
 							"gives",
 							"out"
 						],
+						"specNotLive": [
+							"paid",
+							"work",
+							"jobs",
+							"freelance",
+							"contributors",
+							"earn",
+							"developers",
+							"gives",
+							"out",
+							"contract",
+							"contributor",
+							"opportunities",
+							"contributing"
+						],
 						"score": 161,
 						"gate": 0.6,
 						"coverage": 0.88,
@@ -1875,6 +2021,7 @@
 						"replicaRankOurs": 13,
 						"replicaRankLive": 12,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 56,
 						"gate": 0.6,
 						"coverage": 0.6,
@@ -1896,6 +2043,32 @@
 						"replicaRankOurs": 6,
 						"replicaRankLive": 4,
 						"lagTokens": [],
+						"specNotLive": [
+							"upgrade",
+							"feature",
+							"archival",
+							"version",
+							"shipped",
+							"19",
+							"headline",
+							"24",
+							"latest",
+							"each",
+							"network",
+							"ship",
+							"soon",
+							"after",
+							"23",
+							"upgrades",
+							"causes",
+							"walk",
+							"through",
+							"21",
+							"22",
+							"whisk",
+							"root",
+							"cause"
+						],
 						"score": 110,
 						"gate": 0.6,
 						"coverage": 0.75,
@@ -1917,7 +2090,31 @@
 					"replicaScoreLive": 156,
 					"replicaScoreOurs": 156
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "getRfps",
+						"inQuestion": [
+							"gives",
+							"out"
+						],
+						"inSpecNotLive": [
+							"paid",
+							"work",
+							"jobs",
+							"freelance",
+							"contributors",
+							"earn",
+							"developers",
+							"gives",
+							"out",
+							"contract",
+							"contributor",
+							"opportunities",
+							"contributing"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -1951,6 +2148,9 @@
 						"lagTokens": [
 							"copy"
 						],
+						"specNotLive": [
+							"copy"
+						],
 						"score": 140,
 						"gate": 0.6,
 						"coverage": 0.78,
@@ -1968,6 +2168,7 @@
 						"replicaRankOurs": null,
 						"replicaRankLive": null,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": null,
 						"gate": 0.6,
 						"coverage": 0.4,
@@ -1991,7 +2192,18 @@
 					"replicaScoreLive": 143,
 					"replicaScoreOurs": 143
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "searchRepos",
+						"inQuestion": [
+							"copy"
+						],
+						"inSpecNotLive": [
+							"copy"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -2021,6 +2233,7 @@
 						"replicaRankOurs": 6,
 						"replicaRankLive": 4,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 77,
 						"gate": 0.6,
 						"coverage": 0.67,
@@ -2070,6 +2283,7 @@
 						"replicaRankOurs": 5,
 						"replicaRankLive": 5,
 						"lagTokens": [],
+						"specNotLive": [],
 						"score": 153,
 						"gate": 0.6,
 						"coverage": 0.89,
@@ -2124,6 +2338,15 @@
 							"last",
 							"year"
 						],
+						"specNotLive": [
+							"contract",
+							"smart",
+							"published",
+							"last",
+							"year",
+							"contracts",
+							"recent"
+						],
 						"score": 303,
 						"gate": 0.6,
 						"coverage": 0.85,
@@ -2142,7 +2365,28 @@
 					"replicaScoreLive": 202,
 					"replicaScoreOurs": 202
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "listAudits",
+						"inQuestion": [
+							"smart",
+							"contract",
+							"published",
+							"last",
+							"year"
+						],
+						"inSpecNotLive": [
+							"contract",
+							"smart",
+							"published",
+							"last",
+							"year",
+							"contracts",
+							"recent"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -2176,6 +2420,21 @@
 							"calculate",
 							"interest"
 						],
+						"specNotLive": [
+							"indexed",
+							"ecosystem",
+							"calculate",
+							"graded",
+							"index",
+							"implemented",
+							"interest",
+							"rate",
+							"model",
+							"contract",
+							"algorithm",
+							"mechanism",
+							"walkthrough"
+						],
 						"score": 98,
 						"gate": 0.6,
 						"coverage": 0.83,
@@ -2196,7 +2455,31 @@
 					"replicaScoreLive": 42,
 					"replicaScoreOurs": 42
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "explainRepo",
+						"inQuestion": [
+							"calculate",
+							"interest"
+						],
+						"inSpecNotLive": [
+							"indexed",
+							"ecosystem",
+							"calculate",
+							"graded",
+							"index",
+							"implemented",
+							"interest",
+							"rate",
+							"model",
+							"contract",
+							"algorithm",
+							"mechanism",
+							"walkthrough"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -2231,6 +2514,26 @@
 							"sep",
 							"24"
 						],
+						"specNotLive": [
+							"stellar",
+							"fiat",
+							"sep",
+							"implement",
+							"24",
+							"vs",
+							"lives",
+							"here",
+							"row",
+							"31",
+							"seps",
+							"read",
+							"each",
+							"toml",
+							"null",
+							"fetched",
+							"none",
+							"implemented"
+						],
 						"score": 98,
 						"gate": 0.6,
 						"coverage": 0.83,
@@ -2250,7 +2553,37 @@
 					"replicaScoreLive": 78,
 					"replicaScoreOurs": 88
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "getPartners",
+						"inQuestion": [
+							"implement",
+							"sep",
+							"24"
+						],
+						"inSpecNotLive": [
+							"stellar",
+							"fiat",
+							"sep",
+							"implement",
+							"24",
+							"vs",
+							"lives",
+							"here",
+							"row",
+							"31",
+							"seps",
+							"read",
+							"each",
+							"toml",
+							"null",
+							"fetched",
+							"none",
+							"implemented"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -2283,6 +2616,15 @@
 						"lagTokens": [
 							"community"
 						],
+						"specNotLive": [
+							"anyone",
+							"actually",
+							"still",
+							"dead",
+							"community",
+							"value",
+							"locked"
+						],
 						"score": 158,
 						"gate": 0.6,
 						"coverage": 0.8,
@@ -2301,7 +2643,24 @@
 					"replicaScoreLive": 148,
 					"replicaScoreOurs": 148
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "analyzeEcosystem",
+						"inQuestion": [
+							"community"
+						],
+						"inSpecNotLive": [
+							"anyone",
+							"actually",
+							"still",
+							"dead",
+							"community",
+							"value",
+							"locked"
+						]
+					}
+				]
 			}
 		},
 		{
@@ -2334,6 +2693,10 @@
 							"verticals",
 							"least"
 						],
+						"specNotLive": [
+							"verticals",
+							"least"
+						],
 						"score": 130,
 						"gate": 0.6,
 						"coverage": 0.75,
@@ -2351,6 +2714,15 @@
 						"replicaRankOurs": null,
 						"replicaRankLive": null,
 						"lagTokens": [],
+						"specNotLive": [
+							"anyone",
+							"actually",
+							"still",
+							"dead",
+							"community",
+							"value",
+							"locked"
+						],
 						"score": null,
 						"gate": 0.6,
 						"coverage": 0.5,
@@ -2372,7 +2744,20 @@
 					"replicaScoreLive": 98,
 					"replicaScoreOurs": 98
 				},
-				"projectNames": []
+				"projectNames": [],
+				"lagEvidence": [
+					{
+						"op": "getClusters",
+						"inQuestion": [
+							"verticals",
+							"least"
+						],
+						"inSpecNotLive": [
+							"verticals",
+							"least"
+						]
+					}
+				]
 			}
 		}
 	],

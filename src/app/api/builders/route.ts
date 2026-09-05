@@ -31,6 +31,7 @@ import {
 import {
 	admitByCodeLanguage,
 	CODE_EVIDENCE_CAP,
+	languageCandidates,
 } from "@/lib/builder-code-language";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
@@ -192,6 +193,7 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let builders: BuilderRow[] = [];
 	let totalMatching = 0;
+	const warnings: string[] = [];
 	const rawByLogin = new Map<string, Record<string, unknown>>();
 
 	if (payload) {
@@ -296,52 +298,83 @@ export async function GET(req: NextRequest) {
 				// never says the word. Measured 2026-09-05: ?q=rust returned 8 rows
 				// while 40 of the 170 served carry "Rust" in onStellar.languages —
 				// "who are experienced Rust Soroban devs" missed most of them.
-				// `like` is the case-insensitive net; the exact equality inside
-				// admitByCodeLanguage is the precise cut (a non-language token like
-				// "nigeria" simply matches no language and admits nobody).
-				// ponytail: bounded at 500 repos across the loaded roster and the
-				// first 4 tokens; 1-char tokens are skipped rather than flooding the
-				// net (so q="c" stays prose-only). Widen if a real query truncates.
+				// The match is EXACT and case-insensitive, via GitHub's own casing
+				// (languageCandidates). `primaryLanguage: { like: t }` was a
+				// SUBSTRING test, so `java` matched every JavaScript repo: the page
+				// filled with rows the exact check below discards and the real Java
+				// owners fell off the end. 1-char tokens are skipped rather than
+				// flooding the net (so q="c" stays prose-only).
 				const langProbes = [...new Set(tokens)]
 					.filter((t) => t.length > 1)
 					.slice(0, 4);
 				const langReposByOwner = new Map<string, Record<string, unknown>[]>();
 				if (langProbes.length && builders.length) {
 					try {
-						const lres = await payload.find({
-							collection: "repos",
-							where: {
-								and: [
-									{ owner: { in: builders.map((b) => b.githubUsername) } },
-									{
-										or: langProbes.map((t) => ({
-											primaryLanguage: { like: t },
+						// ponytail: paged to LANG_REPO_MAX repos; beyond that the roster
+						// is capped and `meta.warnings` says so rather than silently
+						// dropping owners. Raise the ceiling if a real query hits it.
+						const LANG_PAGE = 500;
+						const LANG_REPO_MAX = 2000;
+						// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
+						const langWhere: any = {
+							and: [
+								{ owner: { in: builders.map((b) => b.githubUsername) } },
+								{
+									or: langProbes.flatMap((t) =>
+										languageCandidates(t).map((v) => ({
+											primaryLanguage: { equals: v },
 										})),
-									},
-								],
-							},
-							limit: 500,
-							depth: 0,
-							select: {
-								owner: true,
-								fullName: true,
-								url: true,
-								primaryLanguage: true,
-								stars: true,
-								lastCommitAt: true,
-								repoScore: true,
-							},
-						});
-						for (const d of lres.docs as unknown as Array<
-							Record<string, unknown>
-						>) {
-							const k = String(d.owner ?? "").toLowerCase();
-							const arr = langReposByOwner.get(k);
-							if (arr) arr.push(d);
-							else langReposByOwner.set(k, [d]);
+									),
+								},
+							],
+						};
+						let page = 1;
+						let read = 0;
+						let langTotal = 0;
+						for (;;) {
+							const lres = await payload.find({
+								collection: "repos",
+								where: langWhere,
+								limit: LANG_PAGE,
+								page,
+								depth: 0,
+								select: {
+									owner: true,
+									fullName: true,
+									url: true,
+									primaryLanguage: true,
+									stars: true,
+									lastCommitAt: true,
+									repoScore: true,
+								},
+							});
+							langTotal = lres.totalDocs;
+							for (const d of lres.docs as unknown as Array<
+								Record<string, unknown>
+							>) {
+								const k = String(d.owner ?? "").toLowerCase();
+								const arr = langReposByOwner.get(k);
+								if (arr) arr.push(d);
+								else langReposByOwner.set(k, [d]);
+							}
+							read += lres.docs.length;
+							if (
+								!lres.docs.length ||
+								!lres.hasNextPage ||
+								read >= LANG_REPO_MAX
+							)
+								break;
+							page++;
 						}
+						if (read < langTotal)
+							warnings.push(
+								`Code-language admission read ${read} of ${langTotal} owned repos matching [${langProbes.join(", ")}] (roster capped at ${LANG_REPO_MAX}) — builders whose only repo in that language falls outside the page are missing from these results. Narrow the query or filter by location to shrink the roster.`,
+							);
 					} catch {
 						// best-effort: on failure admission stays prose-only, as before
+						warnings.push(
+							"Code-language admission could not run (repo index lookup failed) — results are prose-only, so builders proven only by an owned repo's language may be missing.",
+						);
 					}
 				}
 				builders = builders.filter((b) => {
@@ -769,10 +802,11 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				filters: { q, location, limit, offset },
 				counts: { returned: builders.length, total: totalMatching },
+				...(warnings.length ? { warnings } : {}),
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: a query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word — matchedFields is ['codeEvidence'], matchedTerms names the language as indexed, and codeEvidence holds the proving repos; every other token still had to hit the prose, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word — matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis — the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 				// sls-025 shape, ported from /api/repos/search: a zero-result page
 				// says exactly what WAS searched. `strupey` was the 4th-most-asked

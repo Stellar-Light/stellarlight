@@ -3103,6 +3103,12 @@ export const spec: OpenAPISpec = {
 																"How rows matched q: expanded = matched via synonym/stem expansion of the query terms (verify relevance for niche terms); all = no text query.",
 														},
 														matchModeLabel: { type: "string" },
+														warnings: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead — the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only).",
+														},
 														matchBasis: {
 															type: "string",
 															description:
@@ -9531,7 +9537,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profile-text", "repo-owner", "code-language"],
 								description:
-									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: a query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields ['codeEvidence'], matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, and these candidate rows sort below all prose hits.",
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
 							},
 						},
 					},

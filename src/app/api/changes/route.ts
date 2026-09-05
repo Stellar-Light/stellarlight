@@ -13,8 +13,10 @@
  *     which DATED fact families moved past `since` where sub-field dating
  *     exists (status, scf-awards, deployment, code-facts, toml); `["row"]`
  *     means the row changed but no dated facet localizes it — re-read the row.
- *   - `meta.byFacet.<surface>.<facet>` counts rows whose DATED fact moved past
- *     `since`, computed over the whole surface (not the returned page). This is
+ *   - `meta.byFacet.<surface>.<facet>` counts rows written since `since` whose
+ *     DATED fact ALSO moved past it, computed over the whole surface (not the
+ *     returned page) — both conditions, so it never exceeds `counts.<surface>`.
+ *     This is
  *     the material-change number: enrichment lanes touch hundreds of rows a
  *     week (943 project rows in the week to 2026-09-05) and every touch bumps
  *     updatedAt, so `counts.<surface>` alone reads as "everything changed".
@@ -159,14 +161,23 @@ export async function GET(req: NextRequest) {
 	const byFacet: Record<string, Record<string, number>> = {};
 
 	const where = { updatedAt: { greater_than: sinceIso } } as const;
-	/** Whole-surface count of rows whose dated field moved past `since`. */
+	/** Whole-surface count of rows whose dated field moved past `since`.
+	 *  BOTH conditions: without `updatedAt` a row whose evidence date is recent
+	 *  but which has not been written since `since` was counted here while never
+	 *  appearing in `changes`, so a facet could exceed the change list it is
+	 *  supposed to localize. */
 	const facetTotal = async (
 		collection: "projects" | "repos" | "partner-accounts",
 		field: string,
 	): Promise<number> => {
 		const r = await payload.find({
 			collection,
-			where: { [field]: { greater_than: sinceIso } },
+			where: {
+				and: [
+					{ updatedAt: { greater_than: sinceIso } },
+					{ [field]: { greater_than: sinceIso } },
+				],
+			},
 			limit: 0,
 			depth: 0,
 			overrideAccess: true,
@@ -292,7 +303,7 @@ export async function GET(req: NextRequest) {
 				},
 				truncated,
 				byFacet,
-				note: "counts.<surface> is every row written since `since` — enrichment lanes bump updatedAt on hundreds of rows a week, so it is not a material-change number. byFacet.<surface>.<facet> counts rows whose DATED fact moved past `since` over the whole surface; facets overlap, and a lane that stamps an evidence date older than `since` shows as `row`.",
+				note: "counts.<surface> is every row written since `since` — enrichment lanes bump updatedAt on hundreds of rows a week, so it is not a material-change number. byFacet.<surface>.<facet> counts rows that were BOTH written since `since` AND whose DATED fact moved past it, over the whole surface — so a facet never exceeds counts.<surface>; facets overlap, and a lane that stamps an evidence date older than `since` shows as `row`.",
 			},
 		},
 		{
