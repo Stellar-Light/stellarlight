@@ -42,6 +42,20 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner verdict 2026-09-05: FxDAO is a dead protocol. Evidence read the
+	// same day: the contracts repo (FxDAO/fxdao-sc, "Smart Contracts for the
+	// https://fxdao.io protocol") last pushed 2025-06-16; fxdao.io answers 200
+	// with a generic page titled "connected world", not the protocol app. SCF
+	// award stays on the row; Inactive drops it from the live lists and
+	// down-ranks it in search.
+	fxdao: {
+		from: "Live",
+		to: "Inactive",
+		note: "Owner verdict 2026-09-05: dead protocol — contracts repo last pushed 2025-06-16, site serves a generic page.",
+		asOf: "2026-09-05",
+		sourceUrl: "https://github.com/FxDAO/fxdao-sc",
+		basis: "human-verified",
+	},
 	// ── Owner approval 2026-09-02 ("all 27") of verification packet
 	// improvements/quality/verification-packets-2026-09-02.md: app-only weak
 	// rows whose evidence bundle (site 200 naming the product + a commit,
