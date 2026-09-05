@@ -49,6 +49,113 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner approval 2026-09-05 ("apply the low tier that are live") of the low tier
+	// re-graded under the product-state rule (#1369): 12 Live rows, each re-probed the same
+	// evening with its own instrument (getHealth at the live ledger for the RPCs, the three
+	// Public Node archives within a minute of the network ledger, iTunes lookups for the five
+	// store apps, rendered pages for WalletConnect / RedSwan / QuickNode status). Held for
+	// the owner: getblock, kotani-pay, plutope (the tier's flagged weakest) and mystic (live
+	// on Flare; its Stellar side is a four-day-old repo). from-guarded; status unchanged.
+	"lightsail-network-quasar": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rpc.lightsail.network/",
+		note: "Re-graded 2026-09-05 under the product-state rule: rpc.lightsail.network getHealth answers status healthy, latestLedger 64291981 (closed 2026-09-05); quasar.lightsail.network 1,052 chars listing the endpoints. No row repo.",
+	},
+	ankr: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rpc.ankr.com/stellar_soroban",
+		note: "Re-graded 2026-09-05 under the product-state rule: rpc.ankr.com/stellar_soroban getHealth answers status healthy, latestLedger 64291981 without a key; /stellar_horizon said 'No nodes available' at fetch time. Chainlist page is JS (168 chars in curl). No row repo.",
+	},
+	alchemy: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://stellar-mainnet.g.alchemy.com/v2/docs-demo",
+		note: "Re-graded 2026-09-05 under the product-state rule: stellar-mainnet.g.alchemy.com/v2/docs-demo getHealth (with Origin https://www.alchemy.com) answers healthy, latestLedger 64292013; status.alchemy.com lists Stellar Operational; changelog 2026-08-06 'Stellar Mainnet: stellar-rpc 27.1.1-198'. No row repo.",
+	},
+	quicknode: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://status.quicknode.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: status.quicknode.com lists 'Stellar \u2014 Operational' for Mainnet REST API and Mainnet JSON-RPC API with a resolved Aug 21 Stellar Mainnet JSON-RPC incident; docs page 3,853 chars. No public endpoint (keyed). No row repo.",
+	},
+	walletconnect: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://walletconnect.network/",
+		note: "Re-graded 2026-09-05 under the product-state rule: the page renders 'Daily Network Volume $1,184,573,698' in a dynamic ticker (same daily figure on two fetches 40 min apart); 2,126 chars. Stellar not named on the page. No row repo.",
+	},
+	"public-node": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://bootes-history.publicnode.org/.well-known/stellar-history.json",
+		note: "Re-graded 2026-09-05 under the product-state rule: the three validators in publicnode.org's stellar.toml (Bo\u00f6tes, Hercules, Lyra) publish history archives at currentLedger 64292031, the live ledger at fetch; the website's newest content is 2024-10-01. Org publicnode has 0 public repos.",
+	},
+	afriex: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/afriex-money-transfer/id1492022568",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Afriex - Money transfer v11.111.54 released 2026-09-02 (iTunes lookup); site 9,171 chars. No row repo; Stellar not visible on the page.",
+	},
+	wave: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/wave-mobile-money/id1523884528",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Wave - Mobile Money v26.8.26 released 2026-08-26 \u2014 the app id wave.com links; site 808 chars. No row repo.",
+	},
+	"wirex-pay": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/wirex-one/id6762381032",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Wirex One v8.0 released 2026-08-10 (Wirex: All-In-One Trading App v4.11.75 2026-01-23); site 5,592 chars. Wirex Pay (the SCF R35 chain) not visible on the page. No row repo.",
+	},
+	"felix-pago": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/f%C3%A9lix-pago-env%C3%ADos-de-dinero/id6756128226",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists F\u00e9lix Pago - Env\u00edos de dinero v1.1 released 2026-08-24 (Felix Technologies Inc.); site 20,593 chars with the send-money calculator. No row repo.",
+	},
+	lemon: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/ar/app/lemon-billetera-virtual/id1499421511",
+		note: "Re-graded 2026-09-05 under the product-state rule: Argentina App Store lists Lemon - Billetera virtual v3.0.15 released 2026-09-01 (Lemon Cash Inc); site 7,714 chars, its '+4M usuarios' claims ignored as chrome. No row repo.",
+	},
+	redswan: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://app.redswan.io/",
+		note: "Re-graded 2026-09-05 under the product-state rule: app.redswan.io renders the Properties marketplace with 8+ offerings carrying target IRR / cash yield / minimum invest (LDV at Maidstone 8.0% / 5.7% / $25,000 \u2026); redswan.io itself answers HTTP 500 with a full 7,305-char body \u2014 consider pointing the row at the app. No row repo.",
+	},
 	// ── Owner approval 2026-09-05 ("apply the medium packets that are live") of the
 	// medium tier re-graded under the product-state rule (#1361): the 8 Live rows whose
 	// deciding URL was independently re-probed the same evening (App Store lookup for
