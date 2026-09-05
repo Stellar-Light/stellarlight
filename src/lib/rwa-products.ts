@@ -25,6 +25,13 @@ export interface ProductRecord {
 	verificationLevel?: string | null;
 	registryState?: string | null;
 	launchedAt?: string | null;
+	/** Issuer flags from Horizon (classic assets): whitelist, freeze, clawback. null on Soroban tokens and hand-curated rows. */
+	controls?: {
+		authRequired: boolean;
+		authRevocable: boolean;
+		authImmutable: boolean;
+		clawbackEnabled: boolean;
+	} | null;
 }
 
 /** States that mean the asset is minted on mainnet. */
@@ -79,6 +86,7 @@ function toProduct(r: RwaAsset): ProductRecord {
 		verificationLevel: r.verificationLevel,
 		registryState: r.state,
 		launchedAt: r.launchedAt,
+		controls: r.controls,
 	};
 }
 

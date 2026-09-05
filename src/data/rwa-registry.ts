@@ -56,6 +56,14 @@
  * network (not Mesh Trade, the mZAR issuer), `forge` is a node-deployment SDK
  * (not Societe Generale-FORGE, the EURCV issuer). Those rows carry null on
  * purpose; re-joining them attributes a fund to a stranger.
+ *
+ * controls (classic assets only): the issuer's on-chain flags, read from
+ * Horizon — the whitelisting and clawback controls GT-18 asked for, as
+ * facts rather than prose. authRequired = holders must be approved by the
+ * issuer (a whitelist); authRevocable = the issuer can freeze a holder;
+ * clawbackEnabled = the issuer can pull tokens back; authImmutable = the
+ * issuer has given those powers up for good. null on Soroban tokens: their
+ * controls live in contract logic and are not uniformly readable.
  */
 
 export type RwaVerificationLevel =
@@ -101,6 +109,14 @@ export interface RwaAsset {
 	rwaxyzHolders: number | null;
 	/** The sibling contract when the same tranche was deployed twice (see header); null otherwise. */
 	pairedWith: string | null;
+	/** Issuer flags from Horizon (classic only); null on Soroban tokens. */
+	controls: {
+		authRequired: boolean;
+		authRevocable: boolean;
+		authImmutable: boolean;
+		clawbackEnabled: boolean;
+	} | null;
+	controlsBasis: "horizon-issuer-flags" | null;
 }
 
 export const RWA_REGISTRY_AS_OF = "2026-09-04";
@@ -132,6 +148,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 630558.12,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "ACREDIT05-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -159,6 +182,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 630950.75,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "ACREDIT06-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -186,6 +216,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 620153.52,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "AUDD-GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWH4GLNFECQVJJLB2EEU",
@@ -212,6 +249,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2572387.8481743974,
 		rwaxyzHolders: 443,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "BB1-GD5J6HLF5666X4AZLTFTXLY46J5SW7EXRKBLEYPJP33S33MXZGV6CWFN",
@@ -238,6 +282,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 3102770.48184013,
 		rwaxyzHolders: 1464,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "BENJI-GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5",
@@ -264,6 +315,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 450305422.50546753,
 		rwaxyzHolders: 1096,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "BRPL01-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -291,6 +349,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1973536.98,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CARTAO56-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -318,6 +383,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 869590.77,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CARTAO57-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -345,6 +417,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 785.25,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CETES-GCRYUGD5NVARGXT56XEZI5CIFCQETYHAPQQTHO2O3IQZTHDH4LATMYWC",
@@ -371,6 +450,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4535072.38843961,
 		rwaxyzHolders: 772,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CAJD2IBSP7VO2VYJQUYJSOGPJINTUYV7MQITINXVPTIH3CCLCUENNMW4",
@@ -399,6 +485,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CHILLI09-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -426,6 +514,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CHILLI10-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -453,6 +548,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CHILLI11-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -480,6 +582,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CAXJP5XW37Q73N24YFVIHI475PJJC2TBJKJV3HPMITKANCJ77VPQBW2L",
@@ -508,6 +617,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4005000,
 		rwaxyzHolders: 1,
 		pairedWith: "CALKAWFRZJIX4UFNPK2PEYUUWS2VOIAPS4PU7SSV7HK4PTFAQLJ52SAM",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CALKAWFRZJIX4UFNPK2PEYUUWS2VOIAPS4PU7SSV7HK4PTFAQLJ52SAM",
@@ -536,6 +647,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4005000,
 		rwaxyzHolders: 1,
 		pairedWith: "CAXJP5XW37Q73N24YFVIHI475PJJC2TBJKJV3HPMITKANCJ77VPQBW2L",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CRDT-GBWMQUGPPLSC62YPGD5CEHATOQRQMNLNAV2TMEXJ4ZYOTY4TJD6J2P45",
@@ -563,6 +676,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 290794.1900097236,
 		rwaxyzHolders: 55,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CC64WBDGS6QQP22QTTIACYIXT3WF7BBQEYOQPLTP7GTKYY7PZ74QYGSL",
@@ -591,6 +711,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 6893938.59520881,
 		rwaxyzHolders: 37,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBI7UCH5KGSVQRO5H4SUCZUTZABCITZLRHQQZTWL2TK4RZ72TAR6IHRV",
@@ -619,6 +741,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 5077759.101050769,
 		rwaxyzHolders: 27,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "DUX30-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -646,6 +770,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "EQTY-GAKODZFS4MV36JGDTULJACWJKBJCO33CJTVTWSQFSUV7XLZJNXTDH6D6",
@@ -672,6 +803,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1231593.0156462207,
 		rwaxyzHolders: 90,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CB44W727WSLHPXJ47A6DHF5D34RKWSOZAMEDXO3CF5TEEEQ2ZX4V3VRI",
@@ -700,6 +838,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 116.28042186537053,
 		rwaxyzHolders: 31,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "EURC-GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
@@ -727,6 +867,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4113165.443829928,
 		rwaxyzHolders: 5748,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "EURCV-GCEYGIVOLAVBF2TG2RUSGTUJCIN75KEX3NGLMY4VPL4GFE5L355AXW3G",
@@ -754,6 +901,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 17477645.23424691,
 		rwaxyzHolders: 5,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "EUROB-GCRYUGD5NVARGXT56XEZI5CIFCQETYHAPQQTHO2O3IQZTHDH4LATMYWC",
@@ -780,6 +934,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1.794835747899101,
 		rwaxyzHolders: 2,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "EURS-GC5FGCDEOGOGSNWCCNKS3OMEVDHTE3Q5A5FEQWQKV3AXA7N6KDQ2CUZJ",
@@ -806,6 +967,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1139898.138350446,
 		rwaxyzHolders: 34,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBOOCGZSVRSZFRE4U2NWR2B4RXYVJWRCBTGOUD2JPI2TDJPWMTJX7FZP",
@@ -834,6 +1002,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 968178505.3681656,
 		rwaxyzHolders: 7802,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CDWOB6T7SVSMMQN5V3P2OPTBAXOP7DAZHGVW3PYTZIKHVFKN6TBSXR6A",
@@ -862,6 +1032,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2828756.332182775,
 		rwaxyzHolders: 16,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBGV2QFQBBGEQRUKUMCPO3SZOHDDYO6SCP5CH6TW7EALKVHCXTMWDDOF",
@@ -890,6 +1062,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 441692137.3035398,
 		rwaxyzHolders: 2334,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "FLTT-GBTZKH3RNKW46XEZNCGZEBAGJISKDZKQXKSQ2N5G5SFX36TLWKKR6QJ6",
@@ -916,6 +1090,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1894457.575653583,
 		rwaxyzHolders: 147,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "gBENJI-GD5J73EKK5IYL5XS3FBTHHX7CZIYRP7QXDL57XFWGC2WVYWT326OBXRP",
@@ -942,6 +1123,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 56746066.75295377,
 		rwaxyzHolders: 9,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "grBENJI-GA3ZBL3LBRKOF7CZ6MCA7JLPHWQCGYCCGKH4GVWNEDZOXW4IPXFGN2FQ",
@@ -968,6 +1156,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 272119.5599497929,
 		rwaxyzHolders: 5,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CAGYRRKPFSWKM6SJOE4QAAVYMOSHMDS5WOQ4T5A2E6XNCU7LZZKUNQKP",
@@ -996,6 +1191,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 36385595.171469145,
 		rwaxyzHolders: 187,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "GYEN-GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB",
@@ -1022,6 +1219,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 347062.71481501247,
 		rwaxyzHolders: 2863,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CDV6U7OEVY6KUEJ4WNS63AYB6RFU3BAE7AZJOQ7LPH447C6NWUXEZZSO",
@@ -1050,6 +1254,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 5093243.617437684,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "JEITTO36-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1077,6 +1283,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1582481.01,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "JEITTO37-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1104,6 +1317,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBHOEKLWTB6HR2A3IXHIIMQG5FOXWXS6EG4Q5YJDRPMXPCX7M24CYR2O",
@@ -1132,6 +1352,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 5069576.19482337,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "KTB-GCRYUGD5NVARGXT56XEZI5CIFCQETYHAPQQTHO2O3IQZTHDH4LATMYWC",
@@ -1158,6 +1380,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 0.07621710836525798,
 		rwaxyzHolders: 3,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CDA3TFZNNDE2FL7EXM5MA3USLN5KCQRD2R5T6KQDHWDVZR2HR5YBNGND",
@@ -1186,6 +1415,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 6320400,
 		rwaxyzHolders: 1,
 		pairedWith: "CCWCNQ6PBZ6FQFOJPURTJCRL2IB7K5BFBT4AWDEQJLF7J6PRDBIQSQJK",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CCWCNQ6PBZ6FQFOJPURTJCRL2IB7K5BFBT4AWDEQJLF7J6PRDBIQSQJK",
@@ -1214,6 +1445,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 6320400,
 		rwaxyzHolders: 1,
 		pairedWith: "CDA3TFZNNDE2FL7EXM5MA3USLN5KCQRD2R5T6KQDHWDVZR2HR5YBNGND",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CAA4SZLVEY6FQTO7GA2AIWRPBKHS2F5VXIXWE3YIOIC6A6DI6PKBIP2K",
@@ -1242,6 +1475,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 5844796.1242,
 		rwaxyzHolders: 2,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBV4ASJV2DQVTLRI3CKNT5TOQJBZDUAUDQCQWZ7LB6SIWYX7EW7DSMBX",
@@ -1270,6 +1505,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2835301.7338254824,
 		rwaxyzHolders: 2,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "LNGV-GAHOGWBAWNIKESGNNW7Y7JU5KL54HIEHJGY6Y5QLY6YR3J7WZIDHLC6D",
@@ -1296,6 +1533,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 538442.7976233744,
 		rwaxyzHolders: 43,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "MBCREDIT10-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1323,6 +1567,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 16686.63,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "MBCREDSB10-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1350,6 +1601,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 18649.76,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "MEDTKN04-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1377,6 +1635,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 27091.23,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBMNFCZ6XFISCZ56NGO5FVBQBK2CRFPQZQLQCEIRV7VSVG4HGE3HGP33",
@@ -1405,6 +1670,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1300000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBGNGQVUKWZ5WBH5B4DCIWPO6ZFLO7NM6BWB5M6WQPVLSXOBBUI5AAJM",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBGNGQVUKWZ5WBH5B4DCIWPO6ZFLO7NM6BWB5M6WQPVLSXOBBUI5AAJM",
@@ -1433,6 +1700,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1300000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBMNFCZ6XFISCZ56NGO5FVBQBK2CRFPQZQLQCEIRV7VSVG4HGE3HGP33",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "MODR-GANULT25TFO6V6BFWSEG4VSCR4QXBNHV5T344R2AFZEPE6B324LVLOOJ",
@@ -1459,6 +1728,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 537908.5643625492,
 		rwaxyzHolders: 39,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "MXNe-GCQCNWT22JDLENQAVIE6DRJGHWAQ6EX2H5ABGPV55EJUPPZM5UA7KHZR",
@@ -1486,6 +1762,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 8.633070128173005,
 		rwaxyzHolders: 2,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "mZAR-GCBNWTCCMC32UHZ5OCC2PNMFDGXRVPA7MFFBFFTCVW77SX5PMRB7Q4BY",
@@ -1512,6 +1795,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 299640.739003787,
 		rwaxyzHolders: 2095,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "POOLCP02-GBVMRBARLKFMH56ROJEGGIB5KSTBC3DNP4ZYP4TZLKKFPCI75ECPWY4D",
@@ -1539,6 +1829,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 175896.66,
 		rwaxyzHolders: 0,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "PYUSD-GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5",
@@ -1566,6 +1863,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 13402124.958119093,
 		rwaxyzHolders: 4737,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "QCAD-GBRSN6AURJN4R7RT5EDLO3SPFEZBS5FWE3W2R7RTMCYDIJH3ISSF5MKJ",
@@ -1593,6 +1897,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2539.480674547851,
 		rwaxyzHolders: 12,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBTYPYAI4W47NTHBM5N3TSMNF2VYF5MWLRTVN3LPKJIEOLMNBUCPND3B",
@@ -1621,6 +1932,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 3000000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBVWKNOEBQUDW4YAEFLKZUIUZXTEYLFQ2BB4VYPOHJ4JVXHJNB6KJTOP",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBVWKNOEBQUDW4YAEFLKZUIUZXTEYLFQ2BB4VYPOHJ4JVXHJNB6KJTOP",
@@ -1649,6 +1962,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 3000000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBTYPYAI4W47NTHBM5N3TSMNF2VYF5MWLRTVN3LPKJIEOLMNBUCPND3B",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CDH2A7S4J6ECQDL4K4BB5JCBF37DYYYFNNKM2VIRZV3IVZ5VAT55BVFR",
@@ -1677,6 +1992,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 8202000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBJKR3NVPIL4REW75PG7M7ZJIJJ62U7I4K52Y634G7AX5C4L5ADGDKLC",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CBJKR3NVPIL4REW75PG7M7ZJIJJ62U7I4K52Y634G7AX5C4L5ADGDKLC",
@@ -1705,6 +2022,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 8202000,
 		rwaxyzHolders: 1,
 		pairedWith: "CDH2A7S4J6ECQDL4K4BB5JCBF37DYYYFNNKM2VIRZV3IVZ5VAT55BVFR",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CB7ID5RFSHXTXNGBRJBK4S2WQBD2WJQSNGY5FX6EYI7PITXEED5AI54W",
@@ -1733,6 +2052,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 9000000,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CDTPLH4K7DCVCVEE5HQXAE2PFSW23SPYBKPMITWF3BYW3T32JZL5223J",
@@ -1761,6 +2082,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 9000000,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "RVL1-GCHCHABG57ZC6RMWQK34Q7XPMXDHMTD6G22T5HDXOOIRGOBCAKHS3VMC",
@@ -1787,6 +2110,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1803479.5652749387,
 		rwaxyzHolders: 3,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "RVL2-GCHCHABG57ZC6RMWQK34Q7XPMXDHMTD6G22T5HDXOOIRGOBCAKHS3VMC",
@@ -1813,6 +2143,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4537476.343165875,
 		rwaxyzHolders: 11,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "RVL4-GCHCHABG57ZC6RMWQK34Q7XPMXDHMTD6G22T5HDXOOIRGOBCAKHS3VMC",
@@ -1839,6 +2176,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 9191581.98155801,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "RVL5-GCHCHABG57ZC6RMWQK34Q7XPMXDHMTD6G22T5HDXOOIRGOBCAKHS3VMC",
@@ -1865,6 +2209,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 9191581.98155801,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CDGSC6BA4TCAOVSFQCUEHDMOIIHYYVNYBT6YEARS4MX3ITAHUINVGQHX",
@@ -1893,6 +2244,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 65193364.43246445,
 		rwaxyzHolders: 338,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "SBC-GCQCNWT22JDLENQAVIE6DRJGHWAQ6EX2H5ABGPV55EJUPPZM5UA7KHZR",
@@ -1919,6 +2272,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 20279.23000002466,
 		rwaxyzHolders: 9,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "sgBENJI-GAGICV3VBJSKKH5H5MQQIUTUP462YVHC23KUHZY6FJERRJFBDIVZBM5C",
@@ -1945,6 +2305,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 30253129.198364455,
 		rwaxyzHolders: 12,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBZNQF6LYJ3L6UNB4RSFAD2QVJVQYXN5CWU74T33UXCT7I52UD5GPKOB",
@@ -1973,6 +2340,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4029000,
 		rwaxyzHolders: 1,
 		pairedWith: "CARM2SLSX7N43DKAHOJXUKZOTL27PMRVOAVSIJABBPRWDNBEPYD63JH7",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CARM2SLSX7N43DKAHOJXUKZOTL27PMRVOAVSIJABBPRWDNBEPYD63JH7",
@@ -2001,6 +2370,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4029000,
 		rwaxyzHolders: 1,
 		pairedWith: "CBZNQF6LYJ3L6UNB4RSFAD2QVJVQYXN5CWU74T33UXCT7I52UD5GPKOB",
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CDS2GCAQTNQINSCJUJIVBJXILKBWP5PU7LOBGHMP3X47QCQBFKPMTCNT",
@@ -2029,6 +2400,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 528130.7844485802,
 		rwaxyzHolders: 3,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "SPX-GCYVGZHMNWII6F3JHBPERKFCRSPS7NOMKOCFXDP2QD62ZE3JKF3465FL",
@@ -2056,6 +2429,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 17121200,
 		rwaxyzHolders: 100,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "SPXU-GDJBVX3QA5HJPBSAU5VIX2W6MC37NU4UFXPKEGK42SJCYN6AEQ4Z6COM",
@@ -2082,6 +2462,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 18871837.109890424,
 		rwaxyzHolders: 188,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "TECH-GDSAW27GPR7EWKPTFDPGN2WWZYUHBFKVDBLOUUEKSNKHID4ZWUVOBF5R",
@@ -2108,6 +2495,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 6161404.94203353,
 		rwaxyzHolders: 218,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "TESOURO-GCRYUGD5NVARGXT56XEZI5CIFCQETYHAPQQTHO2O3IQZTHDH4LATMYWC",
@@ -2134,6 +2528,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 602453.7473522702,
 		rwaxyzHolders: 126,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "TIPS-GAJ4KSYLVBJKQ4UBPKJJXPYWVIRZWVTIYRMHBXTHGCDS4XJXXYEUALVD",
@@ -2160,6 +2561,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 940492.070722757,
 		rwaxyzHolders: 38,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CBUBVYRKTQLMDRUBPP6SH4GO33KZCEEYBIWB5AWNGKODP4A6KPKM2VJ4",
@@ -2188,6 +2596,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 500000000,
 		rwaxyzHolders: 1,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "CDT3KU6TQZNOHKNOHNAFFDQZDURVC3MSTL4ML7TUTZGNOPBZCLABP4FR",
@@ -2216,6 +2626,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 13773829.47786667,
 		rwaxyzHolders: 360,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
@@ -2242,6 +2654,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 317354964.1812753,
 		rwaxyzHolders: 691575,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "USDGLO-GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
@@ -2268,6 +2687,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 251647.90770203824,
 		rwaxyzHolders: 548,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "USDM1-GDM5QWWXCMDTQMZAKMYTCI52LA7FWBHAZMU5NJLMIFHDJISJRP2ZWPKC",
@@ -2295,6 +2721,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1129021.8530018972,
 		rwaxyzHolders: 510,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "USDY-GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6",
@@ -2321,6 +2754,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 535326846.4063888,
 		rwaxyzHolders: 1292,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CARUUX2FZNPH6DGJOEUFSIUQWYHNL5AVDV7PMVSHWL7OBYIBFC76F4TO",
@@ -2349,6 +2789,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 35156235.30687135,
 		rwaxyzHolders: 370,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "USTRY-GCRYUGD5NVARGXT56XEZI5CIFCQETYHAPQQTHO2O3IQZTHDH4LATMYWC",
@@ -2375,6 +2817,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 12362763.891314479,
 		rwaxyzHolders: 442,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: false,
+			authImmutable: false,
+			clawbackEnabled: false,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "VCHF-GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN",
@@ -2401,6 +2850,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 9031.018952585067,
 		rwaxyzHolders: 15,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "VEUR-GDXLSLCOPPHTWOQXLLKSVN4VN3G67WD2ENU7UMVAROEYVJLSPSEWXIZN",
@@ -2428,6 +2884,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 17110.884163199164,
 		rwaxyzHolders: 16,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "GOLD-GCK75CK3VX5L4ZLSD7HHNVA4L3LKGIAYWLCZO2IBNGOFTBV3HJBE2MPJ",
@@ -2454,6 +2917,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2170686.8714437,
 		rwaxyzHolders: 576,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTGX-GDMBNMFJ3TRFLASJ6UGETFME3PJPNKPU24C7KFDBEBPQFG2CI6UC3JG6",
@@ -2480,6 +2950,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 2546881.329918905,
 		rwaxyzHolders: 789,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTLG-GAK7PE7DD4ZRJQN3VBCQFBKFV53JGUM2SQATQAKLFK6MVONPGNYK34XH",
@@ -2506,6 +2983,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 759788.1290737014,
 		rwaxyzHolders: 32,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "EPXC-GDEFMEVYR6OWK2ZA2CSNPX6R5UQ4I55Y3HNEWO7XASLB2LU6FDNST5GO",
@@ -2533,6 +3017,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 331685.58051326394,
 		rwaxyzHolders: 27,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTSI-GAD22PDBRFEMXAKPFDP4JGDFWKKD6VPXWUWEAXBS6ZYJYFFQDUN7HAFG",
@@ -2559,6 +3050,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1285929.1358838885,
 		rwaxyzHolders: 61,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTST-GDEBI5X7J4IDXCSVV3KPFZIHQRCBVF3DAZMS5H7KYOBK45T6XYGDE77P",
@@ -2585,6 +3083,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 929221.8754788607,
 		rwaxyzHolders: 25,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTSY-GB3ZUC7FGDEEBXY3BDEJWMPNGBFA66YRI4QQT6PBO3ZT6F33S7RL36VF",
@@ -2611,6 +3116,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 1021212.7302779768,
 		rwaxyzHolders: 78,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "WTTS-GBBV5CF7UPA2PYRPA632URLB55BWML7X4H33ZRCDWMTULOXDGPHJR5VI",
@@ -2637,6 +3149,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 970541.7645656805,
 		rwaxyzHolders: 36,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "CC2RBGYNCFBCVENIDL5BFBWPH4OUZM2UA3OD2K2N54GLMWCC4KWPVAGO",
@@ -2665,6 +3184,8 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 4607194.107936894,
 		rwaxyzHolders: 31,
 		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
 	},
 	{
 		id: "YLDS-GAC7MOPTQLQUM3KC24AW4GHS3RLF72LPEZO54AH7EZ6TSMGRB5SOAVH3",
@@ -2691,6 +3212,13 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 25173530.722920913,
 		rwaxyzHolders: 8,
 		pairedWith: null,
+		controls: {
+			authRequired: true,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 	{
 		id: "ZUSD-GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB",
@@ -2717,5 +3245,12 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		rwaxyzValueUsd: 110177.6365196511,
 		rwaxyzHolders: 5875,
 		pairedWith: null,
+		controls: {
+			authRequired: false,
+			authRevocable: true,
+			authImmutable: false,
+			clawbackEnabled: true,
+		},
+		controlsBasis: "horizon-issuer-flags",
 	},
 ];

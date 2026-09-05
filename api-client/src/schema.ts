@@ -1111,6 +1111,13 @@ export interface components {
                 registryState?: string | null;
                 /** @description Contract creation date (Soroban); null for classic assets, which Horizon does not date. */
                 launchedAt?: string | null;
+                /** @description Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows. */
+                controls?: {
+                    authRequired?: boolean;
+                    authRevocable?: boolean;
+                    authImmutable?: boolean;
+                    clawbackEnabled?: boolean;
+                } | null;
             }[] | null;
             /** @description The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate. */
             scfRoundAwards?: {
@@ -5256,6 +5263,18 @@ export interface operations {
                             rwaxyzHolders?: number | null;
                             /** @description The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair. */
                             pairedWith?: string | null;
+                            /** @description The issuer's on-chain flags, read from Horizon (classic assets only) — the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic. */
+                            controls?: {
+                                authRequired?: boolean;
+                                authRevocable?: boolean;
+                                authImmutable?: boolean;
+                                clawbackEnabled?: boolean;
+                            } | null;
+                            /**
+                             * @description Where controls came from; null when controls is null.
+                             * @enum {string|null}
+                             */
+                            controlsBasis?: "horizon-issuer-flags" | null;
                         }[];
                     };
                 };
