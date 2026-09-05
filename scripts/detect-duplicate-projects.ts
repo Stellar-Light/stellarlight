@@ -18,7 +18,8 @@
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/detect-duplicate-projects.ts
  *
  * Flags:
- *   --execute            actually hide (status=Draft). Default is a dry run.
+ *   --execute            actually hide: status=Draft + canonicalSlug=keeper.
+ *                        Default is a dry run.
  *   --skip=slug,slug     operator veto: a cluster containing any of these slugs
  *                        is reported but never hidden (needs a human call).
  *                        Slugs are trimmed, so "a, b" == "a,b" — but the
@@ -92,7 +93,7 @@ async function main() {
 	});
 	const docs = res.docs as Doc[];
 	console.log(
-		`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft)" : "DRY RUN (read-only)"}`,
+		`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft + canonicalSlug)" : "DRY RUN (read-only)"}`,
 	);
 	console.log(`Loaded ${docs.length} projects (totalDocs=${res.totalDocs}).\n`);
 	if (docs.length < res.totalDocs) {
@@ -159,11 +160,16 @@ async function main() {
 			nonKeepers++;
 			// Already-Draft FIRST: a row that is already hidden was never a
 			// candidate, so counting it as "vetoed" would inflate what the
-			// operator's call actually froze.
-			if (d.status === "Draft") {
+			// operator's call actually froze. "Hidden" means the FULL end state
+			// — Draft AND owned by a canonical: a Draft row with no canonicalSlug
+			// is invisible everywhere INCLUDING name lookups, so it still needs
+			// its owner stamped (see the write below). An owner pointing somewhere
+			// else is a curated call (curate's DUPE_MERGES) and outranks this
+			// lane's ranked keeper.
+			if (d.status === "Draft" && d.canonicalSlug) {
 				alreadyHidden++;
 				console.log(
-					`   already hidden (Draft): ${d.name} (${d.slug}) id=${d.id}`,
+					`   already hidden (Draft → ${d.canonicalSlug}): ${d.name} (${d.slug}) id=${d.id}`,
 				);
 				continue;
 			}
@@ -175,33 +181,45 @@ async function main() {
 				continue;
 			}
 			proposed++;
+			// ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05): the hide stamps
+			// the keeper as this row's canonical too, so this lane and curate's
+			// DUPE_MERGES converge on the SAME end state (Draft + canonicalSlug).
+			// Without the owner a hidden row is not a lineage shadow: search
+			// cannot fold its name to the keeper, so the old name goes dark.
+			// Never repointed — a row already naming a different canonical took
+			// the `already hidden` branch above.
+			const data = { status: "Draft" as const, canonicalSlug: keeper.slug };
 			if (EXECUTE) {
 				await payload.update({
 					collection: "projects",
 					id: d.id,
-					data: { status: "Draft" }, // reversible hide — record preserved
+					data, // reversible hide — record preserved
 				});
 				// READ-BACK: payload.update() reports success while silently
 				// dropping a key it does not recognise, so the only proof a
 				// write landed is reading it again. `hidden` increments here
-				// and nowhere else.
+				// and nowhere else — and it checks BOTH fields, since a
+				// half-landed write leaves exactly the ownerless Draft row
+				// this change exists to prevent.
 				const back = await payload.findByID({
 					collection: "projects",
 					id: d.id,
 					depth: 0,
 				});
-				if (back?.status === "Draft") {
+				if (back?.status === "Draft" && back?.canonicalSlug === keeper.slug) {
 					hidden++;
-					console.log(`   HIDDEN→Draft: ${d.name} (${d.slug}) id=${d.id}`);
+					console.log(
+						`   HIDDEN→Draft (canonical ${keeper.slug}): ${d.name} (${d.slug}) id=${d.id}`,
+					);
 				} else {
 					mismatched++;
 					console.error(
-						`   read-back MISMATCH: ${d.name} (${d.slug}) id=${d.id} status=${back?.status} — the update reported success and did not land`,
+						`   read-back MISMATCH: ${d.name} (${d.slug}) id=${d.id} status=${back?.status} canonicalSlug=${back?.canonicalSlug ?? "null"} — the update reported success and did not land`,
 					);
 				}
 			} else {
 				console.log(
-					`   hide: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id}`,
+					`   ${d.status === "Draft" ? "adopt canonical" : "hide"}: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id} → canonical ${keeper.slug}`,
 				);
 			}
 		}

@@ -1,4 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "../project-status";
 import {
 	anchorIdentityHit,
 	anchorTokens,
@@ -11,6 +17,7 @@ import {
 	isRampIntent,
 	namedChains,
 	scoreTokens,
+	statusAdmissionWhere,
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
@@ -583,5 +590,86 @@ describe("dotted/punctuated names carry their joined identity in the haystack", 
 			shortDescription: "payments",
 		} as Parameters<typeof buildHaystack>[0]);
 		expect(hay.split("beans").length - 1).toBeLessThanOrEqual(3);
+	});
+});
+
+// ── One owner, one status for a duplicate (2026-09-05) ──────────────────
+//
+// The dedup lane parks a duplicate at Draft; curate's DUPE_MERGES used to
+// re-mark the same row Inactive half an hour later, so 29+ duplicates were
+// served as DEAD projects. Both lanes now write Draft — which only works if a
+// Draft shadow is still admitted as a FOLD CANDIDATE, or the old name goes
+// dark. These lock the three properties that make that safe.
+describe("duplicate admission: a shadow is hidden, never dead", () => {
+	const clause = (w: Record<string, unknown>) => JSON.stringify(w);
+
+	it("the pool is the shared RESOLVABLE tier — Draft is hidden", () => {
+		// Why the fold and the belt below must exist at all.
+		expect([...RESOLVABLE_PROJECT_STATUSES]).not.toContain("Draft");
+		expect([...HIDDEN_PROJECT_STATUSES]).toEqual(["Draft"]);
+	});
+
+	it("query mode admits a shadow at ANY status — Draft included", () => {
+		const w = statusAdmissionWhere(true, null);
+		// status-pool OR is-a-shadow: a Draft shadow satisfies the second arm,
+		// so a lookup of the old name still reaches the fold.
+		expect(w).toEqual({
+			and: [
+				{
+					or: [
+						{ status: { in: [...RESOLVABLE_PROJECT_STATUSES] } },
+						{ canonicalSlug: { exists: true } },
+					],
+				},
+			],
+		});
+		// `and`, never a second `or`: the route owns top-level `or` for the
+		// token clauses and Payload ANDs every top-level key.
+		expect(w.or).toBeUndefined();
+	});
+
+	it("browse mode (no q) excludes shadows outright", () => {
+		expect(statusAdmissionWhere(false, null)).toEqual({
+			status: { in: [...RESOLVABLE_PROJECT_STATUSES] },
+			canonicalSlug: { equals: null },
+		});
+		// no shadow escape hatch in a browse — counts.total stays exact
+		expect(clause(statusAdmissionWhere(false, null))).not.toContain("exists");
+	});
+
+	it("an explicit ?status= stays a hard contract, shadows included", () => {
+		expect(statusAdmissionWhere(true, "Inactive")).toEqual({
+			status: { equals: "Inactive" },
+		});
+		expect(statusAdmissionWhere(false, "Live")).toEqual({
+			status: { equals: "Live" },
+			canonicalSlug: { equals: null },
+		});
+	});
+});
+
+// The route itself needs a live Payload, so these two wiring facts — the only
+// places the admission above can be defeated — are asserted against its source.
+describe("/api/projects/search wires the admission + the Draft belt", () => {
+	const src = readFileSync(
+		join(process.cwd(), "src/app/api/projects/search/route.ts"),
+		"utf-8",
+	);
+
+	it("reads the route (guard is not vacuously passing)", () => {
+		expect(src.length).toBeGreaterThan(10_000);
+	});
+
+	it("builds the candidate where-clause from statusAdmissionWhere", () => {
+		expect(src).toContain("statusAdmissionWhere(!!q, statusParam)");
+		// the old hardcoded pool must not come back alongside it
+		expect(src).not.toContain('status: { in: ["Development"');
+	});
+
+	it("drops any hidden row that survives the fold (never served as itself)", () => {
+		const fold = src.indexOf("Shadow-fold");
+		const belt = src.indexOf("HIDDEN_PROJECT_STATUSES as readonly string[]");
+		expect(fold).toBeGreaterThan(0);
+		expect(belt).toBeGreaterThan(fold); // after the fold, or it eats the candidates
 	});
 });

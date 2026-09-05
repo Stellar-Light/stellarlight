@@ -24,6 +24,10 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { pickDeployment } from "@/lib/project-deployment";
 import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "@/lib/project-status";
+import {
 	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
@@ -37,6 +41,7 @@ import {
 	nameMatchScore,
 	scoreTokens,
 	splitIdentityGroups,
+	statusAdmissionWhere,
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
@@ -84,7 +89,7 @@ async function semanticProjectRows(
 		// stars to the top of a topic query.
 		{
 			$match: {
-				status: { $in: ["Development", "Pre-Release", "Live", "Inactive"] },
+				status: { $in: [...RESOLVABLE_PROJECT_STATUSES] },
 			},
 		},
 		{
@@ -1018,22 +1023,18 @@ export async function GET(req: NextRequest) {
 
 	if (payload) {
 		try {
+			// Status + lineage admission (see statusAdmissionWhere): Inactive is
+			// included so a name lookup still finds it (the score() penalty keeps
+			// it out of the way on topic queries), browse mode excludes lineage
+			// shadows outright, and in query mode a shadow is a fold candidate at
+			// ANY status — including the Draft the dedup lane parks it at.
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = {
-				// Inactive included so a name lookup still finds it; the score()
-				// penalty keeps it out of the way on topic queries.
-				status: { in: ["Development", "Pre-Release", "Live", "Inactive"] },
-			};
+			const where: any = statusAdmissionWhere(!!q, statusParam);
 			if (category) {
 				where.category = { equals: category };
 			}
 			if (scfAwardedOnly) {
 				where["scf.awarded"] = { equals: true };
-			}
-			if (statusParam) {
-				// Explicit filter overrides the default status pool — this is what
-				// makes the Inactive corpus reachable (?status=Inactive).
-				where.status = { equals: statusParam };
 			}
 			if (typeParam) {
 				// sls-033 + 2026-08-28 audit: `types` is a hasMany select and
@@ -1045,15 +1046,6 @@ export async function GET(req: NextRequest) {
 				// the memory bank recorded and this file's comment already
 				// claimed while the operator below contradicted it.
 				where.types = { in: [typeParam] };
-			}
-			if (!q) {
-				// Browse mode (no query): lineage shadows are merged-away dupes, not
-				// real records — exclude them in the DB so counts.total and page
-				// sizes are exact (re-measure 2026-07-11: ?status=Inactive said
-				// total=82 but only 42 real rows survived the fold). Query mode
-				// keeps shadows as candidates: their NAMES must stay searchable so
-				// the fold can serve the canonical for alias lookups.
-				where.canonicalSlug = { equals: null };
 			}
 
 			// `let`, not `const`: the fuzzy-recovery rung below may re-point these
@@ -2136,6 +2128,15 @@ export async function GET(req: NextRequest) {
 			// fold is best-effort — serving the shadow beats erroring the search
 		}
 	}
+	// Belt on the shadow admission (2026-09-05): a Draft shadow is a candidate
+	// for the FOLD ONLY, never a served row — Draft is the hidden state and no
+	// public surface shows it. It reaches here only when the fold could not
+	// replace it (dangling canonicalSlug, or the fold threw), and then dropping
+	// the hit beats serving a hidden row. Draft is rejected as a ?status= value
+	// (400 above), so this can never fight a caller's filter.
+	baseProjects = baseProjects.filter(
+		(p) => !(HIDDEN_PROJECT_STATUSES as readonly string[]).includes(p.status),
+	);
 	// Belt-and-suspenders on the ?status= contract: keyword candidates are
 	// DB-filtered and semanticAdds are filtered at source, so this should be a
 	// no-op — but any row that still slips through must not be served. (Counts

@@ -1040,9 +1040,10 @@ const VENUE_ROLE: Record<string, string> = {
  *
  * Per merge: the CANONICAL record absorbs the dupe's complementary facts
  * (fill-if-empty only — desc/github verbatim from the dupe's own record);
- * the DUPE gets canonicalSlug → canonical + status Inactive (the documented
- * suppress-from-active-listings mechanism) + a lifecycle note. Nothing is
- * deleted. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
+ * the DUPE gets canonicalSlug → canonical + status Draft (hidden, the same
+ * end state the dedup lane writes — a duplicate is hidden, NEVER dead, and
+ * Inactive is a death verdict) + a lifecycle note. Nothing is deleted, and a
+ * shadow that already carries a human death verdict keeps it. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
  * the award sits on the stale-named record: awarded/rounds copy to the
  * canonical only when the canonical carries no award of its own. */
 const DUPE_MERGES: Array<{
@@ -2507,19 +2508,45 @@ async function main() {
 			);
 			continue;
 		}
-		if (dupe.status !== "Inactive") dData.status = "Inactive";
+		// ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05). This wrote
+		// Inactive — a DEATH VERDICT ("defunct/abandoned") on a row that is
+		// merely a duplicate — and it fought the dedup lane, which parks the
+		// lower-ranked twin at Draft: on 2026-09-05 detect-duplicate-projects
+		// hid 11 rows as Draft and this step re-marked them Inactive 30 minutes
+		// later, leaving 29+ duplicates served through the raw API as dead
+		// projects. A duplicate is HIDDEN, never dead: park it at Draft, the
+		// same end state the dedup lane writes. Name continuity survives —
+		// statusAdmissionWhere() admits a shadow as a fold candidate at ANY
+		// status, so a lookup of the old name still folds to the canonical.
+		//
+		// EXCEPT a human death verdict: a genuinely dead project that also
+		// happens to be a duplicate keeps the status a human gave it. No lane
+		// overwrites that.
+		const humanDeathVerdict =
+			dupe.status === "Inactive" &&
+			dupe.statusBasis === "human-verified" &&
+			!!dupe.statusSourceUrl;
+		if (humanDeathVerdict) {
+			console.log(
+				`  ${m.dupe}: human death verdict kept, not re-parked (Inactive, human-verified, ${dupe.statusSourceUrl})`,
+			);
+		} else if (dupe.status !== "Draft") {
+			dData.status = "Draft";
+		}
 		if (!dupe.lifecycle?.note)
 			dData.lifecycle = {
 				...(dupe.lifecycle ?? {}),
 				note: `Duplicate record of '${m.canonical}' (same project, split entry) — funding, status and repos live on the canonical record. Merged ${ASOF}.`,
 			};
 		if (Object.keys(dData).length) {
+			// Name the status TRANSITION, not just the key: this line is the dry
+			// run's only evidence of what the pass would do to a duplicate.
 			console.log(
-				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status was '${dupe.status}')`,
+				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status '${dupe.status}' ${dData.status ? `→ '${dData.status}'` : "kept"})`,
 			);
 			writes.push({ id: dupe.id, slug: m.dupe, data: dData });
 		} else {
-			console.log(`  ${m.dupe}: already linked + Inactive, skip`);
+			console.log(`  ${m.dupe}: already linked + parked (${dupe.status}), skip`);
 		}
 	}
 
