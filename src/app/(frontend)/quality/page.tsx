@@ -224,7 +224,12 @@ export default function QualityPage() {
 							<Stat
 								label="Open findings"
 								value={String(entities.findings.open)}
-								sub="Still reproducing on the latest run"
+								sub="Ours, still reproducing on the latest run"
+							/>
+							<Stat
+								label="Waiting on upstream"
+								value={String(entities.findings.blockedUpstream)}
+								sub="Raven catalog lag or scorer — carried, not ours to fix"
 							/>
 						</div>
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -633,7 +638,16 @@ export default function QualityPage() {
 					<Stat
 						label="Open"
 						value={String(entities.findings.open)}
-						sub="Still reproducing"
+						sub="Ours, still reproducing"
+					/>
+					<Stat
+						label="Waiting on upstream"
+						value={String(entities.findings.blockedUpstream)}
+						sub={
+							Object.entries(entities.findings.blockedBy ?? {})
+								.map(([k, v]) => `${k} ${v}`)
+								.join(" · ") || "none"
+						}
 					/>
 					<Stat
 						label="Cleared"

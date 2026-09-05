@@ -63,6 +63,10 @@ interface ArraySpec {
 	keep?: (r: Row) => boolean;
 	/** pull a stable, human probe string from a row */
 	probe: (r: Row) => string | undefined;
+	/** When the finding cannot be acted on from this repo — an upstream
+	 *  consumer's stale catalog or its scorer — name the blocker. The board
+	 *  counts these apart from the defect backlog; they are never dropped. */
+	blockedOn?: (r: Row) => string | undefined;
 }
 
 const resolve = <T>(v: T | ((r: Row) => T), r: Row): T =>
@@ -455,6 +459,24 @@ const RAVEN_ROUTING_SPEC: SourceSpec = {
 			// awaiting re-baseline. Work it down, not on fire.
 			severity: "medium",
 			probe: (r) => str(r?.query),
+			// The detector classifies every miss with evidence (missClass). Two of
+			// the classes are not ours to fix: Raven has not re-read our text
+			// (catalog-lag), or its scorer decides the outcome regardless of our
+			// text (stopword scoring, id-noun exclusion, bare names with no field
+			// to carry them). 2026-09-05: 16 of 17 open routing misses were these,
+			// and the board called all 17 "still reproducing" as if they were ours.
+			blockedOn: (r) => {
+				const c = str(r?.missClass);
+				if (c === "catalog-lag") return "raven-catalog-lag";
+				if (
+					c === "outscored" ||
+					c === "id-noun-exclusion" ||
+					c === "no-scout-op" ||
+					c === "named-entity"
+				)
+					return "raven-scorer";
+				return undefined;
+			},
 		},
 		{
 			key: "demandMisses",
@@ -537,6 +559,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 					surface: resolve(a.surface, row),
 					probe,
 					failureMode: resolve(a.mode, row),
+					...(a.blockedOn?.(row) ? { blockedOn: a.blockedOn(row) } : {}),
 					severity: resolve(a.severity, row),
 					firstSeen: nowIso,
 					lastSeen: nowIso,

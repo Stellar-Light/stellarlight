@@ -133,6 +133,30 @@ describe("isSyntheticQuery — noise, not demand", () => {
 describe("summarizeLedger — the /quality numbers", () => {
 	const now = Date.now();
 
+	it("carries an upstream-blocked row apart from the defect backlog, never inside it", () => {
+		const findings = [
+			f({ id: "ours", source: "raven-routing", status: "open" }),
+			f({
+				id: "lag",
+				source: "raven-routing",
+				status: "open",
+				blockedOn: "raven-catalog-lag",
+			}),
+			f({
+				id: "scorer",
+				source: "raven-routing",
+				status: "open",
+				blockedOn: "raven-scorer",
+			}),
+		];
+		const s = summarizeLedger(findings, now);
+		expect(s.open).toBe(1);
+		expect(s.blockedUpstream).toBe(2);
+		expect(s.blockedBy).toEqual({ "raven-catalog-lag": 1, "raven-scorer": 1 });
+		// open + blockedUpstream + refreshQueue + closed = total, disjoint
+		expect(s.open + s.blockedUpstream + s.refreshQueue + s.closed).toBe(3);
+	});
+
 	it("counts open vs closed; the rate counts only EVIDENCE closures", () => {
 		const findings = [
 			f({ id: "a", source: "s", status: "open" }),

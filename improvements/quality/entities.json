@@ -1,19 +1,19 @@
 {
- "generatedAt": "2026-09-05T11:23:11.897Z",
+ "generatedAt": "2026-09-05T15:32:10.969Z",
  "surfaces": [
-  {
-   "surface": "consumer",
-   "means": "questions real consumers asked that we answered weakly",
-   "openFindings": 17,
-   "clearedFindings": 19,
-   "verifiedFindings": 0
-  },
   {
    "surface": "contract",
    "means": "the OpenAPI contract and its generated artifacts",
    "openFindings": 2,
    "clearedFindings": 27,
    "verifiedFindings": 7
+  },
+  {
+   "surface": "consumer",
+   "means": "questions real consumers asked that we answered weakly",
+   "openFindings": 1,
+   "clearedFindings": 19,
+   "verifiedFindings": 0
   },
   {
    "surface": "retrieval",
@@ -52,10 +52,15 @@
   }
  ],
  "findings": {
-  "states": "open + refreshQueue + cleared + verified = total, disjoint. `open` is the DEFECT backlog; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect). Kept apart because 118 of 290 notes cite a version and upstream publishes continuously, so folding them in means `open` can never reach zero.",
+  "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 542,
-  "open": 19,
+  "open": 3,
   "refreshQueue": 3,
+  "blockedUpstream": 16,
+  "blockedBy": {
+   "raven-catalog-lag": 9,
+   "raven-scorer": 7
+  },
   "cleared": 513,
   "verified": 7,
   "byFailureMode": [
@@ -63,6 +68,7 @@
     "mode": "recall-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 284,
     "verified": 0,
     "surface": "retrieval"
@@ -71,6 +77,7 @@
     "mode": "coverage-gap",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 61,
     "verified": 0,
     "surface": "directory"
@@ -79,6 +86,7 @@
     "mode": "demand-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
@@ -87,6 +95,7 @@
     "mode": "completeness-residual",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 28,
     "verified": 0,
     "surface": "directory"
@@ -95,22 +104,16 @@
     "mode": "api-drift",
     "open": 2,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 23,
     "verified": 0,
     "surface": "contract"
    },
    {
-    "mode": "routing-miss",
-    "open": 17,
-    "refresh": 0,
-    "cleared": 6,
-    "verified": 0,
-    "surface": "consumer"
-   },
-   {
     "mode": "battery-coverage-weak",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 18,
     "verified": 0,
     "surface": "corpus"
@@ -119,6 +122,7 @@
     "mode": "scf-round-overclaim",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 16,
     "verified": 0,
     "surface": "scf"
@@ -127,6 +131,7 @@
     "mode": "demand-routing-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 13,
     "verified": 0,
     "surface": "consumer"
@@ -135,14 +140,25 @@
     "mode": "missing-field",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 0,
     "verified": 7,
     "surface": "contract"
    },
    {
+    "mode": "routing-miss",
+    "open": 1,
+    "refresh": 0,
+    "blocked": 16,
+    "cleared": 6,
+    "verified": 0,
+    "surface": "consumer"
+   },
+   {
     "mode": "golden-fail",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "retrieval"
@@ -151,6 +167,7 @@
     "mode": "population-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "code"
@@ -159,6 +176,7 @@
     "mode": "note-stale",
     "open": 0,
     "refresh": 3,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "code"
@@ -167,6 +185,7 @@
     "mode": "claim-blocker",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 3,
     "verified": 0,
     "surface": "contract"
@@ -175,6 +194,7 @@
     "mode": "ambiguous-contract",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "contract"
@@ -183,6 +203,7 @@
     "mode": "consumer-code-shallow",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "code"
@@ -191,15 +212,15 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 15
+    "count": 3
    },
    {
     "bucket": "8–30d",
-    "count": 1
+    "count": 0
    },
    {
     "bucket": "31–60d",
-    "count": 3
+    "count": 0
    },
    {
     "bucket": ">60d",
@@ -331,7 +352,7 @@
  },
  "projects": {
   "read": 984,
-  "population": 1100,
+  "population": 1103,
   "servedPopulation": 984,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -1786,10 +1807,8 @@
    {
     "slug": "xoxno",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2516,10 +2535,8 @@
    {
     "slug": "huma",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8490,21 +8507,21 @@
   },
   "strongByBasis": {
    "human-verified": 162,
-   "onchain-activity": 46,
+   "onchain-activity": 48,
    "product-integration": 59,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 601,
-   "onchainEligible": 21,
+   "weakLiveRows": 599,
+   "onchainEligible": 19,
    "appOnly": 580,
-   "deploymentStrongStatusWeak": 7,
+   "deploymentStrongStatusWeak": 5,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 496
+    "count": 495
    },
    {
     "basis": "human-verified",
@@ -8516,7 +8533,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 96
+    "count": 95
    },
    {
     "basis": "product-integration",
@@ -8524,7 +8541,7 @@
    },
    {
     "basis": "onchain-activity",
-    "count": 46
+    "count": 48
    },
    {
     "basis": "unverified",
@@ -8536,7 +8553,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 611,
+  "weakestTotal": 609,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9369,7 +9386,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 601
+    "count": 599
    },
    {
     "field": "dated",
@@ -9413,47 +9430,35 @@
     "pool": 408,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
     "withNotes": 151,
-    "triaged": 195,
+    "triaged": 210,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
      "0xyudz/MagentiX",
      "7maylord/erebus",
-     "ACTA-Team/brazil-regional-kit",
      "Airswiftio/SCF",
-     "Chidubemkingsley/ProofEscrow",
      "ELLA0VICTOR/sentryx402",
-     "Edgadafi/dispersor-nomina-alebrije",
      "Elegidokawai2/Hackaton--Ajolote-en-ingles-",
      "Eras256/Nirium",
      "Gabrululu/Propulsor",
      "GatoGroZero/devengo",
      "Glayzz/agentmarket-pro",
      "Godbrand0/argent",
-     "Inferara/inference-language-spec",
      "JWattjr/x4tella-mvp",
      "Jennivarl/AutoX420",
      "Jennivarl/underworld",
-     "JoseLuisMirRo/settler",
      "MarxMad/Agenticx402",
      "Moonlight-Protocol/soroban-core",
      "Nectar-Network/nectar",
      "OscarGauss/fan-match",
-     "RodolfoNV/PROYECTO-RBJ",
-     "Sam-Rytech/Automata-V2",
-     "ShadowFirmware/Safelytics",
      "ShivRaiGithub/Genesis402",
      "Techkeyy/the-signaler",
      "Unique-coder/stellarbrief",
-     "WebSoroban/backend-ide",
      "XCCY-Labs/xccy-soroban",
      "aliveevie/sentinelmesh",
-     "blockdaemon/solana-cluster",
      "chinesepowered/hack-stellaragents",
      "comzzy-comzzy/datavend",
      "cushyon/Stellar_migration",
      "dfns/dfns-sdk-ts",
-     "dfns/terraform-provider-tunnel",
-     "diegoveme/Macetero",
      "divineudoka12/Zerixs",
      "dogstarapps/arka.fund",
      "dpinones/liars-dice",
@@ -9464,15 +9469,12 @@
      "methu-ship/toll",
      "nallely-lopez/RizoDAO",
      "nice-bills/stipend",
-     "official-jumpa/jumpa-web-app",
-     "orbitkit-fun/stellar-agent-kit",
      "panditdhamdhere/Payflow",
      "penguinpecker/ko402",
      "pragya-shar/quilltip",
      "rtomas/soundstake",
      "shariqazeem/kyvernlabs",
      "soomtochukwu/TradeFlow",
-     "stallionsassemble/stallion-contract",
      "stellarcarbon/sorocarbon",
      "stellarchain/soroban-auditor",
      "towa-hi/StellarUnityDevToolkit",
@@ -10648,7 +10650,7 @@
   {
    "area": "project status",
    "limit": "60% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "592 of 984 rows (census)",
+   "measurement": "590 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10767,7 +10769,7 @@
     "id": "f:consumer",
     "label": "consumer",
     "column": 1,
-    "value": 36
+    "value": 20
    },
    {
     "id": "f:corpus",
@@ -11062,10 +11064,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 601,
+    "missing": 599,
     "of": 984,
-    "share": 61.1,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 21 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 580 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 60.9,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 19 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 580 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 16,
