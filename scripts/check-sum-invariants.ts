@@ -99,6 +99,57 @@ const PARTITIONS: Part[] = [
 		},
 	},
 	{
+		name: "hackathon byStatus sums to totalEvents",
+		why: "a status partition beside a headline event count — the same shape as outcomes vs submissions",
+		read: async () => {
+			const h = (await getJson("/api/analyze?dimension=hackathons")).hackathons;
+			return h?.byStatus
+				? [
+						{
+							scope: "byStatus",
+							parts: h.byStatus,
+							total: Number(h.totalEvents ?? 0),
+						},
+					]
+				: [];
+		},
+	},
+	{
+		name: "developer partitions sum to monthlyActiveDevs.total",
+		why: "tenure, exclusive+multichain and geography each partition the same active-developer population; a drift in any one is a silent miscount",
+		read: async () => {
+			const d = (await getJson("/api/analyze?dimension=developers")).developers;
+			const m = d?.monthlyActiveDevs;
+			if (!m) return [];
+			const total = Number(m.total ?? 0);
+			const out = [];
+			if (d.tenure) out.push({ scope: "tenure", parts: d.tenure, total });
+			if (m.exclusive != null && m.multichain != null)
+				out.push({
+					scope: "exclusive+multichain",
+					parts: {
+						exclusive: Number(m.exclusive),
+						multichain: Number(m.multichain),
+					},
+					total,
+				});
+			if (
+				d.geography &&
+				d.geography.located != null &&
+				d.geography.unknown != null
+			)
+				out.push({
+					scope: "geography",
+					parts: {
+						located: Number(d.geography.located),
+						unknown: Number(d.geography.unknown),
+					},
+					total,
+				});
+			return out;
+		},
+	},
+	{
 		name: "stablecoin byBasis sums to returned",
 		why: "a basis partition served beside tracked/total/returned — three denominators to pick from, and the spec says which: RETURNED. This guard first paired it with tracked and flagged a correct surface",
 		read: async () => {
