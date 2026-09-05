@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 /**
  * Bundled issuer/token logos for the stablecoin explorer — the eight marks
  * the original explorer shipped as local assets (re-labelled by sight on
@@ -59,6 +61,60 @@ const SIZES = {
 	md: "w-10 h-10",
 	lg: "w-14 h-14",
 } as const;
+
+/**
+ * The asset's own mark for its page header. Same ladder the explorer rows use,
+ * one rung at a time on error: the issuer's served logo (never a "flag:"
+ * pseudo-URL), then the bundled token mark, the issuer mark, the issuer's
+ * favicon, and finally a letter tile — so an asset page is never iconless.
+ * 2026-09-05: the USDT0 page had no logo at all; the header never rendered one
+ * for any asset, and its toml logo was an IPFS URL that would not have loaded.
+ */
+export function AssetLogo({
+	logoUrl,
+	ticker,
+	company,
+	domain,
+	size = "lg",
+}: {
+	logoUrl?: string | null;
+	ticker: string;
+	company?: string | null;
+	domain?: string | null;
+	size?: keyof typeof SIZES;
+}) {
+	const candidates = [
+		logoUrl && !logoUrl.startsWith("flag:") ? logoUrl : null,
+		TOKEN_LOGOS[ticker] ?? null,
+		company ? (ISSUER_LOGOS[company] ?? null) : null,
+		faviconFor(domain),
+	].filter((u): u is string => typeof u === "string" && u.length > 0);
+	const [rung, setRung] = useState(0);
+	const src = candidates[rung] ?? null;
+	if (src)
+		return (
+			<div
+				className={`${SIZES[size]} flex-shrink-0 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center`}
+			>
+				{/* biome-ignore lint/performance/noImgElement: issuer-served or bundled mark */}
+				<img
+					src={src}
+					alt={ticker}
+					className="w-full h-full object-cover"
+					onError={() => setRung((r) => r + 1)}
+				/>
+			</div>
+		);
+	return (
+		<div
+			className={`${SIZES[size]} flex-shrink-0 rounded-full bg-[#262626] flex items-center justify-center`}
+		>
+			<span className="text-[#999999] text-sm font-medium">
+				{ticker.charAt(0)}
+			</span>
+		</div>
+	);
+}
 
 export function IssuerLogo({
 	company,
@@ -138,7 +194,9 @@ export function VenueLogo({
 		return (
 			<div
 				className={`${SIZES[size]} flex-shrink-0 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center ${
-					VENUE_MARKS_NEED_LIGHT_BACKING.has(name) ? "bg-white p-1" : "bg-white/5"
+					VENUE_MARKS_NEED_LIGHT_BACKING.has(name)
+						? "bg-white p-1"
+						: "bg-white/5"
 				}`}
 			>
 				{/* biome-ignore lint/performance/noImgElement: bundled or venue-hosted mark */}
