@@ -474,6 +474,81 @@ async function totalIsLimitIndependent() {
 	}
 }
 
+// 6. PRODUCT MODEL (sls-023). The finding was filed because a Live project
+// row read as "this RWA is live on Stellar" — DTCC was Live with its Stellar
+// connection planned for H1 2027. The product model fixed that on
+// 2026-09-04, and these pins hold it: a regression here is the exact false
+// claim the finding named, so it must go red the hour it reappears.
+async function productModelHolds() {
+	console.log("\n6. product model — the sls-023 pins hold on the live rows");
+	const row = async (q: string, slugRe: RegExp) => {
+		const { status, body } = await getJson(
+			`/api/projects/search?q=${encodeURIComponent(q)}&limit=10`,
+		);
+		if (status !== 200) return { err: `HTTP ${status}`, p: null as any };
+		const rows: any[] = Array.isArray(body?.projects) ? body.projects : [];
+		return {
+			err: null,
+			p: rows.find((r) => slugRe.test(String(r.slug))) ?? null,
+		};
+	};
+	// DTCC: entity is Development, the product claim is ANNOUNCED, deployment
+	// stays unknown. Any of those flipping without new evidence is the finding.
+	{
+		const { err, p } = await row("dtcc", /dtcc/);
+		const label = "dtcc — Development · product announced · deployment unknown";
+		if (err || !p) bad(label, err ?? "row missing");
+		else {
+			const prods: any[] = Array.isArray(p.products) ? p.products : [];
+			const announced = prods.some((x) => x.status === "announced");
+			const unk = p.deployment?.network === "unknown";
+			if (p.status === "Development" && announced && unk) ok(label);
+			else
+				bad(
+					label,
+					`status=${p.status} announcedProduct=${announced} deployment=${p.deployment?.network}`,
+				);
+		}
+	}
+	// WisdomTree: the issuer with the most verified funds must serve them.
+	{
+		const { err, p } = await row("wisdomtree", /^wisdomtree$/);
+		const label = "wisdomtree — >=10 products, deployment mainnet";
+		const n = Array.isArray(p?.products) ? p.products.length : 0;
+		if (err || !p) bad(label, err ?? "row missing");
+		else if (n >= 10 && p.deployment?.network === "mainnet") ok(label);
+		else bad(label, `products=${n} deployment=${p.deployment?.network}`);
+	}
+	// Spiko: Soroban-only issuer; every product must carry its registry state.
+	{
+		const { err, p } = await row("spiko", /^spiko$/);
+		const label = "spiko — products carry registryState";
+		const prods: any[] = Array.isArray(p?.products) ? p.products : [];
+		if (err || !p) bad(label, err ?? "row missing");
+		else if (
+			prods.length &&
+			prods.every((x) => typeof x.registryState === "string")
+		)
+			ok(label);
+		else
+			bad(
+				label,
+				`products=${prods.length} withState=${prods.filter((x) => x.registryState).length}`,
+			);
+	}
+	// BENJI: GT-18 — the whitelist flag must be served on the product record.
+	{
+		const { err, p } = await row("benji", /^benji$/);
+		const label = "benji — product controls.authRequired (GT-18)";
+		const c = (Array.isArray(p?.products) ? p.products : []).find((x: any) =>
+			String(x.assetId ?? "").startsWith("BENJI-"),
+		)?.controls;
+		if (err || !p) bad(label, err ?? "row missing");
+		else if (c?.authRequired === true && c?.clawbackEnabled === true) ok(label);
+		else bad(label, `controls=${JSON.stringify(c ?? null)}`);
+	}
+}
+
 (async () => {
 	console.log(`Live canary against ${BASE}`);
 	await silentEmpty();
@@ -481,6 +556,7 @@ async function totalIsLimitIndependent() {
 	await knownAssetCoverage();
 	await everyPageRenders();
 	await totalIsLimitIndependent();
+	await productModelHolds();
 	console.log(`\n${passes} passed, ${failures} failed`);
 	writeNightlyFindings("live-canary", failRows);
 	process.exit(failures > 0 ? 1 : 0);
