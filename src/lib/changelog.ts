@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.41",
+		type: "added",
+		summary:
+			'getBuilders: a language in `q`/`skill` also admits builders who OWN an indexed repo in that language, with `match.basis: "code-language"` and the proving repos in `codeEvidence`.',
+		detail:
+			"Measured 2026-09-05: `?q=rust` returned 8 builders while 40 of the 170 served profiles carry Rust in onStellar.languages — a builder whose Passport bio never says Rust but who owns Rust repos on Stellar was invisible to 'who are experienced Rust Soroban devs'. Admission by code language is candidate discovery, never verified experience: such rows carry match.basis 'code-language', matchedFields ['codeEvidence'], matchedTerms with the language as indexed, and sort below every prose hit. Only OWNED repos admit (onStellar's contributor join is computed after filtering); AND semantics across tokens hold, so 'rust nigeria' still needs the location to hit.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.40",
 		type: "changed",
 		summary:
