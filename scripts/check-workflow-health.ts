@@ -43,7 +43,7 @@
  * red is designed, and only the named steps inherit the exemption.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 
@@ -115,7 +115,13 @@ type Row = {
 	file: string;
 	name: string;
 	cron: string | null;
-	state: "ok" | "never-ran" | "always-red" | "failing" | "stale";
+	state:
+		| "ok"
+		| "never-ran"
+		| "always-red"
+		| "failing"
+		| "standing-signal"
+		| "stale";
 	lastSuccessAt: string | null;
 	ageDays: number | null;
 	graceDays: number;
@@ -241,8 +247,12 @@ async function main() {
 	// One call for the whole list beats one per file, and it also tells us
 	// GitHub's own id and state for each workflow.
 	const list = await gh(`/repos/${REPO}/actions/workflows?per_page=100`);
-	const known: Array<{ id: number; path: string; name: string; state: string }> =
-		list.workflows ?? [];
+	const known: Array<{
+		id: number;
+		path: string;
+		name: string;
+		state: string;
+	}> = list.workflows ?? [];
 	// 88 workflow files today, and this endpoint also returns entries for files
 	// deleted from the default branch. Past 100 the overflow simply would not be
 	// in the map, and every one of those lanes would be reported "GitHub does
@@ -253,7 +263,9 @@ async function main() {
 		);
 		process.exit(2);
 	}
-	const byPath = new Map(known.map((w) => [w.path.replace(/^\.github\//, ""), w]));
+	const byPath = new Map(
+		known.map((w) => [w.path.replace(/^\.github\//, ""), w]),
+	);
 
 	const rows: Row[] = [];
 	for (const file of files.sort()) {
@@ -263,9 +275,8 @@ async function main() {
 		// unparseable regex is a config defect, not an absence: reading it as "no
 		// declaration" would silently flip a signal lane to FAILING, the exact
 		// quiet misclassification this file exists to catch. So: no verdict.
-		const sigDecl = /^\s*#\s*workflow-health:\s*signal-steps:\s*(\S.*?)\s*$/m.exec(
-			src,
-		);
+		const sigDecl =
+			/^\s*#\s*workflow-health:\s*signal-steps:\s*(\S.*?)\s*$/m.exec(src);
 		let signalRe: RegExp | null = null;
 		if (sigDecl) {
 			try {
@@ -299,7 +310,12 @@ async function main() {
 		// finished. "Last green 77d ago" is the correct state for a job that is
 		// done, and reporting it as broken is how a board teaches people to skip
 		// it. Judged only on whether it works WHEN dispatched, never on age.
-		const automatic = !!(cron || on.push || on.pull_request || on.repository_dispatch);
+		const automatic = !!(
+			cron ||
+			on.push ||
+			on.pull_request ||
+			on.repository_dispatch
+		);
 		// The path filters this lane watches, if it is push-triggered by paths.
 		const watched: string[] = !cron
 			? [
@@ -346,8 +362,11 @@ async function main() {
 		// promise silently: contract-gate and tests fire on every push to main
 		// with no path filter, so 30 runs can be a single busy day.
 		const runs: any[] =
-			(await gh(`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=100`))
-				.workflow_runs ?? [];
+			(
+				await gh(
+					`/repos/${REPO}/actions/workflows/${meta.id}/runs?per_page=100`,
+				)
+			).workflow_runs ?? [];
 		const since = changedAt;
 		// CONCLUSIVE means the lane reached a verdict of its own. A run someone
 		// CANCELLED is a person changing their mind, and reading it as a failure
@@ -472,12 +491,27 @@ async function main() {
 		const failing =
 			failedSinceGreen.length > 0 &&
 			!(signalRe && failStep && signalRe.test(failStep));
-		const stale = automatic && age > grace && hadWorkSince && !failing;
+		// A red at a declared signal step is the lane WORKING — once. Three or
+		// more reds in a row since the last green is a standing signal: the
+		// thing it measures has failed every run and nobody has acted. Found
+		// 2026-09-05: raven-eval-parity (the daily quality progression) was
+		// red three days on one truth-battery probe and the board showed
+		// every guard holding, because this file counted each red as a signal
+		// and moved on.
+		const standingSignal = !failing && failedSinceGreen.length >= 3;
+		const stale =
+			automatic && age > grace && hadWorkSince && !failing && !standingSignal;
 		rows.push({
 			file,
 			name: meta.name,
 			cron,
-			state: failing ? "failing" : stale ? "stale" : "ok",
+			state: failing
+				? "failing"
+				: standingSignal
+					? "standing-signal"
+					: stale
+						? "stale"
+						: "ok",
 			lastSuccessAt: success.created_at,
 			ageDays: age,
 			graceDays: grace,
@@ -486,15 +520,19 @@ async function main() {
 				? `${failedSinceGreen.length} failed run(s) since its last green ${age}d ago — it is trying and losing, not idle${
 						failStep ? `; dies at "${failStep}"` : ""
 					}`
-				: stale
-					? `last green ${age}d ago, past its ${grace}d window${cron ? ` (cron "${cron}")` : ""}`
-					: `last green ${age}d ago${
-							automatic
-								? watched.length && !hadWorkSince
-									? ` (nothing under ${watched.join(", ")} has changed since — nothing to do, not stale)`
-									: ""
-								: " (manual tool — age not judged)"
-						}`,
+				: standingSignal
+					? `${failedSinceGreen.length} run(s) red at its declared signal step since its last green ${age}d ago — the lane works; what it measures has failed every run and nobody has acted${
+							failStep ? ` (step "${failStep}")` : ""
+						}`
+					: stale
+						? `last green ${age}d ago, past its ${grace}d window${cron ? ` (cron "${cron}")` : ""}`
+						: `last green ${age}d ago${
+								automatic
+									? watched.length && !hadWorkSince
+										? ` (nothing under ${watched.join(", ")} has changed since — nothing to do, not stale)`
+										: ""
+									: " (manual tool — age not judged)"
+							}`,
 		});
 	}
 
@@ -525,14 +563,18 @@ async function main() {
 		console.log(`wrote ${OUT}`);
 	} else {
 		for (const r of rows.filter((x) => x.state !== "ok"))
-			console.log(`  ${r.state.toUpperCase().padEnd(10)} ${r.file.padEnd(38)} ${r.why}`);
+			console.log(
+				`  ${r.state.toUpperCase().padEnd(10)} ${r.file.padEnd(38)} ${r.why}`,
+			);
 		console.log(
 			`\n${rows.length - broken.length}/${rows.length} workflows have a recent green run.`,
 		);
 	}
 	if (broken.length > 0) {
 		if (!JSON_OUT)
-			console.error(`RED: ${broken.length} lanes are armed but not working.`);
+			console.error(
+				`RED: ${broken.length} lanes are armed but not working, or red at their signal step for 3+ runs unheard.`,
+			);
 		// --json EXITS 0 ON PURPOSE. The workflow runs this twice: once with
 		// --json to write the artifact, once without to turn a finding into a
 		// red. Exiting 1 here killed the job at the first step, skipping the
