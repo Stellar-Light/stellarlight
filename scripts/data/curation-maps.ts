@@ -42,6 +42,78 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner approval 2026-09-05 ("apply the medium packets that are live") of the
+	// medium tier re-graded under the product-state rule (#1361): the 8 Live rows whose
+	// deciding URL was independently re-probed the same evening (App Store lookup for
+	// Chipper, rendered pages for alterscope / one-click / Fonbnk, page metrics for the
+	// rest). litemint (111-day-old store build) and tellus-cooperative (a blog as the
+	// product) were held back for the owner. from-guarded; status unchanged on all 8.
+	kale: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://api.stellar.expert/explorer/public/asset/KALE-GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE/stats-history",
+		note: "Re-graded 2026-09-05 under the product-state rule: KALE asset shows 532,475 payments on 2026-09-05 (stellar.expert stats-history), kalefarm.xyz renders the farm app, own repo kalepail/KALE-sc pushed 2026-03-06.",
+	},
+	ichi: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://ichi.org/",
+		note: "Re-graded 2026-09-05 under the product-state rule: page renders TOTAL VALUE LOCKED $18.21m, 897 vaults, 45 AMMs; DefiLlama reports $7.75M TVL dated 2026-09-05; app.ichi.org loads the vault app. No Stellar surface visible; no row repo.",
+	},
+	alterscope: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://app.alterscope.org/",
+		note: "Re-graded 2026-09-05 under the product-state rule: app.alterscope.org serves a live market-signals feed timestamped '2m ago' (overview tiles are sign-in gated dashes, not counted); landing 6,808 chars. No row repo.",
+	},
+	"one-click": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://stellar.oneclick.fi/",
+		note: "Re-graded 2026-09-05 under the product-state rule: stellar.oneclick.fi lists 276 Stellar DeFi pools with live TVL/APY (XLM/SHX aqua $8,297,766.60); the row's website www.oneclick.fi is a 305-char studio page \u2014 consider pointing the row at the app.",
+	},
+	chipper: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/chipper-cash/id1353631552",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Chipper Cash v1.158.0 released 2026-08-28 (iTunes lookup); site 6,443 chars. No row repo; Stellar usage not visible on the page.",
+	},
+	"boss-revolution": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/boss-money-transfer-send-fast/id1169518032",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists BOSS Money Transfer v26.8.1 released 2026-08-18 (IDT); bossmoney.com 15,255 chars with live promo. No row repo.",
+	},
+	fonbnk: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://pay.fonbnk.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: pay.fonbnk.com renders the working Buy/Sell USDT widget (NGN bank transfer, fee, next step) before any login; dashboard.fonbnk.com is the merchant login; site 4,022 chars. No row repo.",
+	},
+	findtruman: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://iris.findtruman.io/ai/",
+		note: "Re-graded 2026-09-05 under the product-state rule: Launch App opens iris.findtruman.io/ai/ with a Discover feed of ~50 items carrying view counts (233.6k, 158.8k, 11.2k), Leaderboard and Create; landing renders (packet's 'empty shell' was a curl artefact). Own repo TrumanStellar/Story-Creation idle since 2024-07-12 \u2014 product pivoted to AI app-creation.",
+	},
 	// ── Owner approval 2026-09-05 ("apply the high confidence packets") of the
 	// high-confidence tier (38 rows) of improvements/drafts/2026-09-05-verification-
 	// packets-top100.md: two independent live signals inside 90 days, or a parked /
