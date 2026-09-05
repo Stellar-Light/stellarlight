@@ -291,7 +291,15 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 **What's blocked.**
 - Raven router: the intended op is excluded when a question contains
   another op's id noun (stellar-raven #124, filed 2026-09-03) — upstream
-  scorer; Scout-side vocabulary does not fix this class.
+  scorer; Scout-side vocabulary does not fix this class. Measured
+  2026-09-05: 2 misses of this class, plus 2 named-entity misses (bare
+  project names route to no operation text) and 3 where a long description
+  wins on stopword density — all three are the scorer's, not vocabulary.
+- Raven catalog text: the deployed catalog (manifest 2026-09-03T17:09Z)
+  still serves pre-08-31 descriptions for getRfps/explainRepo/getPartners
+  and none of the 09-02/09-03 x-routing words — 9 routing misses are
+  `catalog-lag`. Not filed — lag, not drift; the artifact's `catalogView`
+  says when it clears.
 - Raven catalog lag: `getRwaAssets` (since 2026-09-04) and `verifyClaim`
   (since 2026-08-27) not exposed. Not filed — lag, not drift.
 - 583 app-only weak rows and 144 never-answered sites: human triage
@@ -318,9 +326,13 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 1. Make silence-close ineligible for the headline close rate
    (write-set: summarizeLedger; done = closingRate counts re-probed +
    verified only, silence reported apart).
-2. Score the routing battery on the INTENDED op, not "some scout op
-   present" (write-set: scripts/eval/routing-surface-check + battery
-   banks; done = the 32-probe run reports intended-op hits, now ~8/32).
+2. DONE 2026-09-05 — the routing battery grades the INTENDED op
+   (scripts/raven-routing.ts: 65 questions incl. the 28 gradable persona
+   probes; 48/65, T1 2/7 · T2 3/5 · T3 5/8 · T4 6/8; each miss carries a
+   class + evidence). Next on this lane: re-run after Raven re-baselines —
+   9 of the 17 misses are `catalog-lag` (our text routes them, Raven's
+   indexed text predates 08-31), and that re-run is the read-back that
+   closes #1141/#1226/#1282 or reopens them.
 3. Exhaust the 34 `onchainEligible` weak rows with the existing lane
    (dispatch; done = onchainEligible 0 or each row carries a
    could-not-check).
