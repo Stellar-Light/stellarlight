@@ -3353,7 +3353,8 @@ export const spec: OpenAPISpec = {
 					{
 						name: "region",
 						in: "query",
-						description: "Filter by region served (global, latam, africa, …)",
+						description:
+							"Filter by region served — a closed vocabulary of continents/blocs: global, north-america, latam, europe, africa, mena, asia, oceania. Unknown values return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text.",
 						schema: { type: "string" },
 					},
 					{
@@ -8144,6 +8145,12 @@ export const spec: OpenAPISpec = {
 										items: { type: "string" },
 										description:
 											"Every value the ramps filter accepts (unknown values 400 with this list).",
+									},
+									validRegions: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions — they go in q.",
 									},
 									matchMode: {
 										type: "string",

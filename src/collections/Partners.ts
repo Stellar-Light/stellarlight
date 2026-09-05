@@ -86,7 +86,7 @@ const SECTORS = [
 	{ label: "Other", value: "other" },
 ] as const;
 
-const REGIONS = [
+export const REGIONS = [
 	{ label: "Global", value: "global" },
 	{ label: "North America", value: "north-america" },
 	{ label: "Latin America", value: "latam" },
