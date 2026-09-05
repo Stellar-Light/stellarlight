@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T23:29:45.251Z",
+ "generatedAt": "2026-09-05T23:58:18.649Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -1896,10 +1896,8 @@
    {
     "slug": "lightsail-network-quasar",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1921,10 +1919,8 @@
    {
     "slug": "ankr",
     "prominence": 55,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2018,10 +2014,8 @@
    {
     "slug": "walletconnect",
     "prominence": 58,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2073,10 +2067,8 @@
    {
     "slug": "quicknode",
     "prominence": 84,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2308,10 +2300,8 @@
    {
     "slug": "redswan",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2803,10 +2793,8 @@
    {
     "slug": "alchemy",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2903,10 +2891,8 @@
    {
     "slug": "wirex-pay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7075,10 +7061,8 @@
    {
     "slug": "public-node",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7173,10 +7157,8 @@
    {
     "slug": "wave",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7379,10 +7361,8 @@
    {
     "slug": "lemon",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7445,10 +7425,8 @@
    {
     "slug": "felix-pago",
     "prominence": 70,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7709,10 +7687,8 @@
    {
     "slug": "afriex",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8431,26 +8407,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 201,
+   "human-verified": 213,
    "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 562,
+   "weakLiveRows": 550,
    "onchainEligible": 14,
-   "appOnly": 548,
+   "appOnly": 536,
    "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 461
+    "count": 449
    },
    {
     "basis": "human-verified",
-    "count": 201
+    "count": 213
    },
    {
     "basis": "repo-activity",
@@ -8478,7 +8454,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 572,
+  "weakestTotal": 560,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8842,47 +8818,6 @@
     ]
    },
    {
-    "slug": "quicknode",
-    "name": "QuickNode",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 84,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "RPC"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "alchemy",
-    "name": "Alchemy",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "RPC",
-     "Indexer"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "didstellar",
     "name": "DID:STELLAR",
     "status": "Live",
@@ -8965,26 +8900,6 @@
     ]
    },
    {
-    "slug": "felix-pago",
-    "name": "Felix Pago",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 70,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "infstones",
     "name": "InfStones",
     "status": "Live",
@@ -8996,47 +8911,6 @@
     "deploymentApplies": false,
     "types": [
      "RPC"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "lightsail-network-quasar",
-    "name": "Lightsail Network (Quasar)",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 70,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "SDK",
-     "Indexer"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "redswan",
-    "name": "RedSwan",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 70,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "RWA"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9140,46 +9014,6 @@
     "types": [
      "Gaming",
      "SDK"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "walletconnect",
-    "name": "WalletConnect",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 58,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Infrastructure"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "ankr",
-    "name": "Ankr",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 55,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "RPC"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9310,12 +9144,155 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "5x-crypto",
+    "name": "5x Crypto",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Education"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "accelar",
+    "name": "Accelar",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "AI"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "acta",
+    "name": "ACTA",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "deploymentBasis": "mainnet-contract-join",
+    "hasOnchainFootprint": true,
+    "deploymentApplies": false,
+    "types": [
+     "Security"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "agtrail",
+    "name": "AgTrail",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "mainnet",
+    "deploymentBasis": "operator-toml",
+    "hasOnchainFootprint": true,
+    "deploymentApplies": true,
+    "types": [
+     "RWA"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "ai-transparency-token",
+    "name": "AI Transparency Token",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "AI",
+     "NFT"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "aida",
+    "name": "AIDA",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "AI",
+     "DEX"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "airswift",
+    "name": "Airswift",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Payments",
+     "Lending"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 562
+    "count": 550
    },
    {
     "field": "dated",
@@ -10578,8 +10555,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "56% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "554 of 984 rows (census)",
+   "limit": "55% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "542 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10987,27 +10964,22 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 562,
+    "missing": 550,
     "of": 984,
-    "share": 57.1,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 548 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 55.9,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 536 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 11,
+    "examplePoolSize": 6,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
-     "quicknode",
-     "alchemy",
      "didstellar",
      "yellow-card",
      "vesseo",
      "scorechain",
-     "lightsail-network-quasar",
      "solar-wallet",
-     "redswan",
-     "infstones",
-     "felix-pago"
+     "infstones"
     ]
    },
    {

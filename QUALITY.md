@@ -462,19 +462,17 @@ the page veto Live; the second signal is this product's own repository
 (not a hackathon, seeder, fund or shared repo, and never a 404 substitute);
 a page rendering under ~300 characters is not substantive.
 
-**Next (ordered).** 1. Medium tier: re-graded under the product-state rule (#1361: Live 10 ·
-Development 2 · Inactive 5 · cannot-tell 15) and the owner applied the Live rows — 8 stamped
-after an independent re-probe of each deciding URL (#1367, read back 8/8); litemint and
-tellus-cooperative held (a 111-day-old store build; a blog as the product). Low tier:
-re-graded (#1369: Live 16 · Development 1 · Inactive 0 · cannot-tell 13; 10 of 25 low Live
-verdicts did not survive), awaiting the owner's call; three of its Live rows are flagged
-weakest (getblock, kotani-pay, plutope). 2. Owner verdicts on the 8 withdrawn high-tier
-rows and the 11 flagged (improvements/drafts/2026-09-05-verification-packets-top100.md),
-and on the medium tier's 5 Inactive / 2 Development re-grades. 3. A weekly re-check of every
-human-verified packet stamp against its own deciding URL (guard in flight). 4. KALE and
-Blend rest on onchain-activity by dated movement windows; the curate lane keeps a lane-earned
-strong basis over a weak curated entry (#1364). 5. Re-run the routing battery after Raven
-re-baselines.
+**Next (ordered).** 1. DONE 2026-09-05 late: both remaining packet tiers re-graded under the
+product-state rule and their Live rows applied after an independent re-probe per row —
+medium 8 of 10 (#1367; litemint, tellus-cooperative held), low 12 of 16 (#1371; getblock,
+kotani-pay, plutope, mystic held). Every stamp is now re-probed weekly by the packet-stamps
+guard (#1368, #1372, #1374: 67 hold, 0 contradicted, 8 client-rendered shells it cannot
+read without a browser). 2. Owner verdicts still open: the 6 held rows above, the medium
+tier's 5 Inactive / 2 Development re-grades, the 8 withdrawn high-tier rows and the 11
+flagged (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
+the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
+our spec changes — batch routing-text edits).
 
 ## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
 
