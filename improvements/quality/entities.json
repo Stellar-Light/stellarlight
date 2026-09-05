@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T15:24:17.835Z",
+ "generatedAt": "2026-09-05T15:32:10.969Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -68,6 +68,7 @@
     "mode": "recall-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 284,
     "verified": 0,
     "surface": "retrieval"
@@ -76,6 +77,7 @@
     "mode": "coverage-gap",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 61,
     "verified": 0,
     "surface": "directory"
@@ -84,6 +86,7 @@
     "mode": "demand-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
@@ -92,6 +95,7 @@
     "mode": "completeness-residual",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 28,
     "verified": 0,
     "surface": "directory"
@@ -100,6 +104,7 @@
     "mode": "api-drift",
     "open": 2,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 23,
     "verified": 0,
     "surface": "contract"
@@ -108,6 +113,7 @@
     "mode": "battery-coverage-weak",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 18,
     "verified": 0,
     "surface": "corpus"
@@ -116,6 +122,7 @@
     "mode": "scf-round-overclaim",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 16,
     "verified": 0,
     "surface": "scf"
@@ -124,6 +131,7 @@
     "mode": "demand-routing-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 13,
     "verified": 0,
     "surface": "consumer"
@@ -132,6 +140,7 @@
     "mode": "missing-field",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 0,
     "verified": 7,
     "surface": "contract"
@@ -140,15 +149,16 @@
     "mode": "routing-miss",
     "open": 1,
     "refresh": 0,
+    "blocked": 16,
     "cleared": 6,
     "verified": 0,
-    "surface": "consumer",
-    "blocked": null
+    "surface": "consumer"
    },
    {
     "mode": "golden-fail",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "retrieval"
@@ -157,6 +167,7 @@
     "mode": "population-miss",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "code"
@@ -165,6 +176,7 @@
     "mode": "note-stale",
     "open": 0,
     "refresh": 3,
+    "blocked": 0,
     "cleared": 4,
     "verified": 0,
     "surface": "code"
@@ -173,6 +185,7 @@
     "mode": "claim-blocker",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 3,
     "verified": 0,
     "surface": "contract"
@@ -181,6 +194,7 @@
     "mode": "ambiguous-contract",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "contract"
@@ -189,6 +203,7 @@
     "mode": "consumer-code-shallow",
     "open": 0,
     "refresh": 0,
+    "blocked": 0,
     "cleared": 1,
     "verified": 0,
     "surface": "code"
@@ -9415,47 +9430,35 @@
     "pool": 408,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
     "withNotes": 151,
-    "triaged": 195,
+    "triaged": 210,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
      "0xyudz/MagentiX",
      "7maylord/erebus",
-     "ACTA-Team/brazil-regional-kit",
      "Airswiftio/SCF",
-     "Chidubemkingsley/ProofEscrow",
      "ELLA0VICTOR/sentryx402",
-     "Edgadafi/dispersor-nomina-alebrije",
      "Elegidokawai2/Hackaton--Ajolote-en-ingles-",
      "Eras256/Nirium",
      "Gabrululu/Propulsor",
      "GatoGroZero/devengo",
      "Glayzz/agentmarket-pro",
      "Godbrand0/argent",
-     "Inferara/inference-language-spec",
      "JWattjr/x4tella-mvp",
      "Jennivarl/AutoX420",
      "Jennivarl/underworld",
-     "JoseLuisMirRo/settler",
      "MarxMad/Agenticx402",
      "Moonlight-Protocol/soroban-core",
      "Nectar-Network/nectar",
      "OscarGauss/fan-match",
-     "RodolfoNV/PROYECTO-RBJ",
-     "Sam-Rytech/Automata-V2",
-     "ShadowFirmware/Safelytics",
      "ShivRaiGithub/Genesis402",
      "Techkeyy/the-signaler",
      "Unique-coder/stellarbrief",
-     "WebSoroban/backend-ide",
      "XCCY-Labs/xccy-soroban",
      "aliveevie/sentinelmesh",
-     "blockdaemon/solana-cluster",
      "chinesepowered/hack-stellaragents",
      "comzzy-comzzy/datavend",
      "cushyon/Stellar_migration",
      "dfns/dfns-sdk-ts",
-     "dfns/terraform-provider-tunnel",
-     "diegoveme/Macetero",
      "divineudoka12/Zerixs",
      "dogstarapps/arka.fund",
      "dpinones/liars-dice",
@@ -9466,15 +9469,12 @@
      "methu-ship/toll",
      "nallely-lopez/RizoDAO",
      "nice-bills/stipend",
-     "official-jumpa/jumpa-web-app",
-     "orbitkit-fun/stellar-agent-kit",
      "panditdhamdhere/Payflow",
      "penguinpecker/ko402",
      "pragya-shar/quilltip",
      "rtomas/soundstake",
      "shariqazeem/kyvernlabs",
      "soomtochukwu/TradeFlow",
-     "stallionsassemble/stallion-contract",
      "stellarcarbon/sorocarbon",
      "stellarchain/soroban-auditor",
      "towa-hi/StellarUnityDevToolkit",
