@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.43",
+		type: "fixed",
+		summary:
+			"getBuilders: the owned-repo language match is exact (not a substring — 'java' no longer fills the page with JavaScript repos), and a capped roster is disclosed in `meta.warnings`; a mixed prose+code hit keeps its code-language basis and says so.",
+		detail:
+			"From the second cross-vendor audit of 2026-09-05. The 1.9.41 admission fetched owned repos with a substring match on primaryLanguage under a silent 500-row cap; the match is now exact with GitHub's own casing (typescript → TypeScript, c# → C#) and the cap, when hit, is a warning on the response. The spec's description of match.basis for a mixed hit was corrected: matchedFields includes codeEvidence rather than being only codeEvidence. Same PR, not on the contract: the routing detector reports a zero-denominator run as vacuous (never 100%), classifies catalog lag before id-noun exclusion, and fails closed on a resolver error; /api/changes byFacet counts only rows also written since `since`.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.42",
 		type: "fixed",
 		summary:
