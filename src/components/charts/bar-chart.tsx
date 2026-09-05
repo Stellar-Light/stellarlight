@@ -587,9 +587,13 @@ const ChartCore = memo(function ChartCore({
 			columnWidth,
 		],
 	);
+	// Lift-off dismisses the tooltip and the highlighted bar, like the mouse
+	// leaving — a card that stays after the finger is gone reads as a stuck
+	// state on a phone (owner, 2026-09-05). Same on a cancelled touch.
 	const handleTouchEnd = useCallback(() => {
 		lastTouchBandRef.current = null;
-	}, []);
+		handleMouseLeave();
+	}, [handleMouseLeave]);
 
 	const canInteract = isLoaded;
 
@@ -685,6 +689,7 @@ const ChartCore = memo(function ChartCore({
 					onTouchStart={canInteract ? handleTouch : undefined}
 					onTouchMove={canInteract ? handleTouch : undefined}
 					onTouchEnd={canInteract ? handleTouchEnd : undefined}
+					onTouchCancel={canInteract ? handleTouchEnd : undefined}
 					style={{
 						cursor: canInteract ? "crosshair" : "default",
 						touchAction: canInteract ? "pan-y" : "auto",
