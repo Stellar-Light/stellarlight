@@ -1,0 +1,502 @@
+{
+	"note": "Every workflow in this repo that can WRITE to production data — built by reading .github/workflows/*.yml for an `execute` input or a literal --execute/--apply/--prune-logs flag, not from anyone's memory of the list. `cadence` is the lane's own clock; `executeInput` is the dispatch input that turns writing on, or \"flag\" when the flag is hardcoded. `since` is the lane's first green run and is null everywhere today: improvements/audits/workflow-health-latest.json records LAST success, not first, so the counter falls back to the 8-week observation window and says so (spanBasis).",
+	"source": ".github/workflows/*.yml",
+	"lanes": [
+		{
+			"id": "aggregate-feedback",
+			"workflow": "aggregate-feedback.yml",
+			"cadence": "cron 40 3 * * *",
+			"executeInput": "execute",
+			"writeSet": "projects.feedbackSignal { votes, worked, score, asOf } reduced from scout-feedback votes (one per target + hashed IP, latest wins)",
+			"since": null
+		},
+		{
+			"id": "apply-content-pass",
+			"workflow": "apply-content-pass.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "project descriptions, SCF/category re-tags and 4 new flagship records from scripts/data/content-pass.json; existing rows sync-protected (AdminEdit)",
+			"since": null
+		},
+		{
+			"id": "apply-status-batch",
+			"workflow": "apply-status-batch.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.status for a listed batch of slugs (+ provenance=AdminEdit, verificationLevel off Unverified)",
+			"since": null
+		},
+		{
+			"id": "apply-wallet-availability",
+			"workflow": "apply-wallet-availability.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "wallet `availability` (+ storeUrl, checkedAt) from a reviewed, committed drafts file — only where availability is currently empty",
+			"since": null
+		},
+		{
+			"id": "award-import",
+			"workflow": "award-import.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "see scripts/data/award-import.ts",
+			"since": null
+		},
+		{
+			"id": "award-test-setup",
+			"workflow": "award-test-setup.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "see scripts/data/award-test-setup.ts (test fixtures for the i3 award flow)",
+			"since": null
+		},
+		{
+			"id": "backfill-code-domains",
+			"workflow": "backfill-code-domains.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "repos.codeDomains re-derived from stored contractInterface / stellarDeps / sdkCapabilities — zero GitHub calls",
+			"since": null
+		},
+		{
+			"id": "backfill-code-tier",
+			"workflow": "backfill-code-tier.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "repos.codeProofTier — the write path scan-report.ts only ever printed",
+			"since": null
+		},
+		{
+			"id": "backfill-contract-basis",
+			"workflow": "backfill-contract-basis.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "re-judges every stored mainnetContractId against ownership evidence and rewrites its basis (shared-token / attributed-elsewhere / own / no-evidence)",
+			"since": null
+		},
+		{
+			"id": "backfill-knowledge-notes",
+			"workflow": "backfill-knowledge-notes.yml",
+			"cadence": "cron 23 3 * * *",
+			"executeInput": "execute",
+			"writeSet": "repos.knowledgeNotes (+ the audits crosslink) stamped from the curated registry for every registry-keyed repo, project-linked or not",
+			"since": null
+		},
+		{
+			"id": "backfill-lifecycle",
+			"workflow": "backfill-lifecycle.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.lifecycle { wasLive, note } only — additive, never deletes, never changes status",
+			"since": null
+		},
+		{
+			"id": "backfill-project-github",
+			"workflow": "backfill-project-github.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.links.github, from a hand-verified allowlist only",
+			"since": null
+		},
+		{
+			"id": "backfill-provenance",
+			"workflow": "backfill-provenance.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects statusAsOf / statusBasis / statusSourceUrl from evidence the repo already holds",
+			"since": null
+		},
+		{
+			"id": "backfill-triage-tags",
+			"workflow": "backfill-triage-tags.yml",
+			"cadence": "cron 0 4 * * *",
+			"executeInput": "execute",
+			"writeSet": "repos triage tags across the whole collection, including the EC-taxonomy rows the project-scoped enrich loop never visits",
+			"since": null
+		},
+		{
+			"id": "basis-from-onchain",
+			"workflow": "basis-from-onchain.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects statusBasis=onchain-activity (+ statusAsOf, statusSourceUrl) from the dated enrich-onchain snapshot",
+			"since": null
+		},
+		{
+			"id": "basis-from-product",
+			"workflow": "basis-from-product.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects statusBasis=product-integration (+ statusAsOf, statusSourceUrl) from a probe of the deployed product (stellar.toml / RPC / on-chain address / SDK in bundle)",
+			"since": null
+		},
+		{
+			"id": "basis-from-repo",
+			"workflow": "basis-from-repo.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects statusBasis=repo-activity (+ statusAsOf, statusSourceUrl) for library/SDK/RPC/indexer rows only",
+			"since": null
+		},
+		{
+			"id": "check-links",
+			"workflow": "check-links.yml",
+			"cadence": "cron 23 2 * * *",
+			"executeInput": "flag",
+			"writeSet": "LinkChecks rows (url, status, checkedAt) for every external URL across projects, partners and the corpus",
+			"since": null
+		},
+		{
+			"id": "curate-partners",
+			"workflow": "curate-partners.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "partners freshnessStatus=archived for owner-confirmed dead slugs, plus targeted curated field edits",
+			"since": null
+		},
+		{
+			"id": "curate-projects",
+			"workflow": "curate-projects.yml",
+			"cadence": "cron 30 7 * * 2",
+			"executeInput": "execute",
+			"writeSet": "targeted per-slug project edits (description / tags / status), then projects.deployment { network, basis } from evidence via scripts/data/backfill-deployment.ts",
+			"since": null
+		},
+		{
+			"id": "db-space",
+			"workflow": "db-space.yml",
+			"cadence": "dispatch",
+			"executeInput": "prune",
+			"writeSet": "DELETES transparency-logs rows older than PRUNE_DAYS; reports per-collection storage otherwise",
+			"since": null
+		},
+		{
+			"id": "dedup-projects",
+			"workflow": "dedup-projects.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "hides duplicate project rows (status → Draft) on high-confidence signals only",
+			"since": null
+		},
+		{
+			"id": "dedupe-repos",
+			"workflow": "dedupe-repos.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "removes case-variant duplicate repo docs and keeps the curated knowledge on the survivor",
+			"since": null
+		},
+		{
+			"id": "embed-projects",
+			"workflow": "embed-projects.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.embedding (voyage-3, 1024-dim) written through the raw Mongo driver, plus the vector index",
+			"since": null
+		},
+		{
+			"id": "enrich-builder-repos",
+			"workflow": "enrich-builder-repos.yml",
+			"cadence": "cron 0 5 * * 2",
+			"executeInput": "execute",
+			"writeSet": "repos rows for the Stellar repositories tracked builders own personally",
+			"since": null
+		},
+		{
+			"id": "enrich-builders",
+			"workflow": "enrich-builders.yml",
+			"cadence": "cron 30 6 * * *",
+			"executeInput": "execute",
+			"writeSet": "builders bio / location / website / twitter (EMPTY fields only, never overwrites) and builders.contributions from the GitHub contributor pass",
+			"since": null
+		},
+		{
+			"id": "enrich-onchain",
+			"workflow": "enrich-onchain.yml",
+			"cadence": "cron 0 6 * * 2",
+			"executeInput": "execute",
+			"writeSet": "projects.onchain per contract — lifetime events, subinvocations, storage entries, created date, wasm-validation repo — from stellar.expert",
+			"since": null
+		},
+		{
+			"id": "enrich-partner-onchain",
+			"workflow": "enrich-partner-onchain.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "partner.onchain — holders / payment activity / rating for the partner's OWN issued assets, attributed only on an issuer-domain match",
+			"since": null
+		},
+		{
+			"id": "enrich-partners",
+			"workflow": "enrich-partners.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "partners service tags, contact and assets from their stellar.toml (SEP-1), plus a curated audit-firm backfill",
+			"since": null
+		},
+		{
+			"id": "enrich-repo-activity",
+			"workflow": "enrich-repo-activity.yml",
+			"cadence": "cron 20 4 * * *",
+			"executeInput": "execute",
+			"writeSet": "repos.activitySignals (commits90d, lastCommitAt, stars, …) on the rows enrich-repos never reaches",
+			"since": null
+		},
+		{
+			"id": "enrich-repos",
+			"workflow": "enrich-repos.yml",
+			"cadence": "cron 0 8 * * 1",
+			"executeInput": "execute",
+			"writeSet": "repos upserts from the projects directory — topics, description, language, stars, last commit, fused into repoScore",
+			"since": null
+		},
+		{
+			"id": "enrich-scf",
+			"workflow": "enrich-scf.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects SCF award status, category mapping, thumbnail, links, team and funding, scraped from the SCF site",
+			"since": null
+		},
+		{
+			"id": "enrich-tvl",
+			"workflow": "enrich-tvl.yml",
+			"cadence": "cron 0 5 * * 1",
+			"executeInput": "flag",
+			"writeSet": "projects tvlUSD / tvlAsOf / tvlSource / tvlMethod from DefiLlama; null means NOT TRACKED, never zero",
+			"since": null
+		},
+		{
+			"id": "fix-dev-docs-titles",
+			"workflow": "fix-dev-docs-titles.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "research-docs chunk titles for dev-docs rows (the script's write flag is --apply, not --execute)",
+			"since": null
+		},
+		{
+			"id": "fix-research-titles",
+			"workflow": "fix-research-titles.yml",
+			"cadence": "dispatch",
+			"executeInput": "apply",
+			"writeSet": "research-docs titles, mirror URLs and dates the corpus-health sweep flags; three independent input gates (apply / apply_mirrors / apply_dates)",
+			"since": null
+		},
+		{
+			"id": "fix-scf-rounds",
+			"workflow": "fix-scf-rounds.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects SCF round membership — removes rounds the official source affirmatively marks Not Awarded",
+			"since": null
+		},
+		{
+			"id": "fix-zenex",
+			"workflow": "fix-zenex.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "the zenex project row (scf flag + description) and retires the stale hermes duplicate to Draft",
+			"since": null
+		},
+		{
+			"id": "import-replit-stablecoin-history",
+			"workflow": "import-replit-stablecoin-history.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "see scripts/data/import-replit-stablecoin-history.ts (one-off import of the pre-migration stablecoin snapshot history)",
+			"since": null
+		},
+		{
+			"id": "ingest-dora-evals",
+			"workflow": "ingest-dora-evals.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "repos judgeScore / hackathon / winner flag from scripts/data/dora-evals.json",
+			"since": null
+		},
+		{
+			"id": "ingest-ec-taxonomy",
+			"workflow": "ingest-ec-taxonomy.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "repos rows ingested from Electric Capital's crypto-ecosystems taxonomy (source: ec-taxonomy)",
+			"since": null
+		},
+		{
+			"id": "link-canonical-slug",
+			"workflow": "link-canonical-slug.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.canonicalSlug on duplicate / renamed rows so consumers resolve to the canonical project",
+			"since": null
+		},
+		{
+			"id": "link-partner-projects",
+			"workflow": "link-partner-projects.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "partners.projectSlug from the hand-verified identity map in src/lib/partner-project-identity.ts",
+			"since": null
+		},
+		{
+			"id": "mark-defunct",
+			"workflow": "mark-defunct.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.status → Draft for confirmed-defunct rows (+ provenance=AdminEdit, verificationLevel off Unverified)",
+			"since": null
+		},
+		{
+			"id": "mark-inactive-projects",
+			"workflow": "mark-inactive-projects.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.status → Inactive for a CURATED list only",
+			"since": null
+		},
+		{
+			"id": "migrate-research-url-host",
+			"workflow": "migrate-research-url-host.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "research-docs.url repointed off the rebranded audit host; idempotent, never deletes",
+			"since": null
+		},
+		{
+			"id": "patch-rozo",
+			"workflow": "patch-rozo.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "the rozo project row's description and tags for its live cross-chain USDC bridge",
+			"since": null
+		},
+		{
+			"id": "prune-denied-repos",
+			"workflow": "prune-denied-repos.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "DELETES repos rows named in DENIED_REPOS (src/lib/repo-allowlist.ts)",
+			"since": null
+		},
+		{
+			"id": "raven-eval-parity",
+			"workflow": "raven-eval-parity.yml",
+			"cadence": "cron 30 7 * * *",
+			"executeInput": "flag",
+			"writeSet": "clears ledger findings that no longer reproduce (scripts/quality/clear-stale-findings.ts) and commits the improvements/quality artifacts",
+			"since": null
+		},
+		{
+			"id": "refresh-research-corpus",
+			"workflow": "refresh-research-corpus.yml",
+			"cadence": "cron 0 6 * * *",
+			"executeInput": "flag",
+			"writeSet": "research-docs upserts from the ingester set (SEPs, CAPs, repo docs, SDF blog/org, papers, incidents, security program, lumenloop) plus the vector index and a junk prune",
+			"since": null
+		},
+		{
+			"id": "refresh-rwa",
+			"workflow": "refresh-rwa.yml",
+			"cadence": "cron 37 */6 * * *",
+			"executeInput": "execute",
+			"writeSet": "rwa-asset measurements — supply, holders, registryState, controls — dated, plus the products fed onto project rows",
+			"since": null
+		},
+		{
+			"id": "refresh-stablecoins",
+			"workflow": "refresh-stablecoins.yml",
+			"cadence": "cron 25 */6 * * *",
+			"executeInput": "execute",
+			"writeSet": "stablecoin registry upserts plus a dated supply / market-cap snapshot",
+			"since": null
+		},
+		{
+			"id": "scan-repo-code",
+			"workflow": "scan-repo-code.yml",
+			"cadence": "cron 17 */2 * * *",
+			"executeInput": "execute",
+			"writeSet": "repos code signals — stellarProof, codeDepth, code facts, farmScore, codeScanState",
+			"since": null
+		},
+		{
+			"id": "seed-blog-posts",
+			"workflow": "seed-blog-posts.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "Blog posts upserted from content/reports/*.md (--remove=<slug> retracts one)",
+			"since": null
+		},
+		{
+			"id": "seed-i3-mock",
+			"workflow": "seed-i3-mock.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "MOCK i3 Awards round rows for design/wallet-flow testing (testnet; --fund friendbots the mock voters)",
+			"since": null
+		},
+		{
+			"id": "seed-partners",
+			"workflow": "seed-partners.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "partner directory rows from curated audit firms plus anchors already in the project directory",
+			"since": null
+		},
+		{
+			"id": "seed-summit-sp-winners",
+			"workflow": "seed-summit-sp-winners.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "project and award rows for the Stellar Builder Summit SP 26 bounty winners, per-row dispositions encoded in the script",
+			"since": null
+		},
+		{
+			"id": "set-project-status",
+			"workflow": "set-project-status.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.status for a single slug given by env (+ provenance=AdminEdit, verificationLevel off Unverified)",
+			"since": null
+		},
+		{
+			"id": "set-prominence",
+			"workflow": "set-prominence.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.prominence search-ranking boost (+ verificationLevel, provenance=AdminEdit)",
+			"since": null
+		},
+		{
+			"id": "set-types",
+			"workflow": "set-types.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.types on flagship rows so search can intent-scope its category boost",
+			"since": null
+		},
+		{
+			"id": "sync-lumenloop",
+			"workflow": "sync-lumenloop.yml",
+			"cadence": "cron 0 7 * * *",
+			"executeInput": "flag",
+			"writeSet": "projects and entities synced from the Lumenloop stellar-ecosystem-db (AdminEdit rows are overwrite-protected)",
+			"since": null
+		},
+		{
+			"id": "upgrade-basis-onchain",
+			"workflow": "upgrade-basis-onchain.yml",
+			"cadence": "dispatch",
+			"executeInput": "execute",
+			"writeSet": "projects.statusBasis → onchain-activity where the row already holds dated on-chain evidence",
+			"since": null
+		},
+		{
+			"id": "upgrade-status-basis",
+			"workflow": "upgrade-status-basis.yml",
+			"cadence": "cron 23 4 * * *",
+			"executeInput": "execute",
+			"writeSet": "projects.statusBasis on inherited status labels, so a label discriminates instead of being uniform",
+			"since": null
+		}
+	]
+}

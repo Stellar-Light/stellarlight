@@ -28,6 +28,7 @@ import {
 	getEntities,
 	getExternalFindings,
 	getGuardRows,
+	getLaneAutonomy,
 	getLanes,
 	getMissFunnel,
 	getNorthStar,
@@ -143,6 +144,7 @@ export default function QualityPage() {
 	const funnel = getMissFunnel();
 	const progress = getProgress();
 	const external = getExternalFindings();
+	const laneAutonomy = getLaneAutonomy();
 
 	return (
 		<div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -521,6 +523,99 @@ export default function QualityPage() {
 					the committed snapshot — a quiet failure reads as a red week, never a
 					clean one. A stamp a human upgrades to human-verified stays clean; a
 					stamp a human removes or changes resets the count to zero.
+				</p>
+			</Card>
+
+			{/* ── the same counter, for EVERY lane that can write to production ── */}
+			<Card
+				title="Lane autonomy — intervention-free weeks"
+				description="Every workflow in this repo that can write to production data, and the weeks each has earned toward running its execute unattended. Built by reading the workflow files, counted from GitHub's own run history, and reset by the intervention log — no lane's number is asserted here."
+				right={
+					<EvidenceLink path="improvements/audits/lane-autonomy-latest.json" />
+				}
+				className="mb-6"
+			>
+				<p className="text-xs text-muted-foreground mb-5">
+					A week counts only when the lane executed and nothing it wrote was
+					corrected.
+				</p>
+				<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
+					<Stat
+						label="Lanes that write to production"
+						value={String(laneAutonomy.summary.lanes)}
+						sub="from .github/workflows, not from a list"
+					/>
+					<Stat
+						label={`At ${laneAutonomy.thresholdWeeks}+ clean weeks`}
+						value={String(laneAutonomy.summary.eligibleForStage2)}
+						sub="eligible — the promotion is still a human call"
+					/>
+					<Stat
+						label="Could not check"
+						value={String(laneAutonomy.summary.couldNotCheck)}
+						sub="API refused; not counted as clean or broken"
+					/>
+				</div>
+				<div className="overflow-x-auto">
+					<table className="w-full text-xs min-w-[640px]">
+						<thead>
+							<tr className="text-muted-foreground text-left">
+								<th className="font-normal pb-2 pr-4">Lane</th>
+								<th className="font-normal pb-2 pr-4">Cadence</th>
+								<th className="font-normal pb-2 pr-4 text-right">
+									Executes ({laneAutonomy.windowWeeks}w)
+								</th>
+								<th className="font-normal pb-2 pr-4 text-right">
+									Clean weeks
+								</th>
+								<th className="font-normal pb-2">Last intervention</th>
+							</tr>
+						</thead>
+						<tbody>
+							{laneAutonomy.lanes.map((l) => (
+								<tr key={l.id} className="border-t border-border align-top">
+									<td className="py-2 pr-4 text-foreground">{l.id}</td>
+									<td className="py-2 pr-4 text-muted-foreground tabular-nums">
+										{l.cadence}
+									</td>
+									<td className="py-2 pr-4 text-right text-muted-foreground tabular-nums">
+										{l.state === "could-not-check"
+											? "—"
+											: `${l.executesLast8w}${l.executesAreLowerBound ? "+" : ""} (${l.scheduledExecutesLast8w} unattended)`}
+									</td>
+									<td className="py-2 pr-4 text-right text-foreground tabular-nums">
+										{l.state === "could-not-check"
+											? "could not check"
+											: l.interventionFreeWeeks}
+									</td>
+									<td className="py-2 text-muted-foreground max-w-md">
+										{l.lastInterventionAt
+											? `${l.lastInterventionAt} — ${l.lastInterventionWhat}`
+											: "none logged"}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				<p className="text-[11px] text-muted-foreground leading-relaxed mt-4">
+					Elapsed time earns nothing: the count is capped at the number of
+					distinct weeks the lane actually completed an execute, so a lane
+					nobody has run sits at zero however long it has been quiet. Executes
+					include runs a human dispatched — &ldquo;unattended&rdquo; is the
+					subset the lane&apos;s own cron started, and only that subset is
+					evidence it can run itself. A &ldquo;+&rdquo; marks a floor: GitHub
+					does not expose a manual run&apos;s inputs, so a run whose step was
+					explicitly named could not be classified. Corrections live in{" "}
+					<a
+						href={evidenceUrl("improvements/lanes/interventions.json")}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="underline hover:text-foreground transition-colors"
+					>
+						improvements/lanes/interventions.json
+					</a>
+					, appended by the same PR that makes the correction.
 				</p>
 			</Card>
 

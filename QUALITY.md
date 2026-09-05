@@ -95,6 +95,20 @@ weeks** (human reviewed, changed nothing), then the gate opens.
 - **Stage 4 (steady state):** human gates only: contract version
   changes, outward-facing posts, spend, and anything §0-class-new.
 
+**How a week is counted.** A week counts for a lane only when that lane
+executed and nothing it wrote was corrected. Elapsed time earns nothing: the
+count is capped at the distinct ISO weeks in which the lane actually completed
+an execute, so a lane nobody ran sits at zero however long it has been quiet.
+The registry of lanes that can write to production is
+`improvements/lanes/lanes.json`, built by reading `.github/workflows`;
+`scripts/check-lane-autonomy.ts` counts against GitHub's own run history into
+`improvements/audits/lane-autonomy-latest.json`, published on /quality. The
+reset is `improvements/lanes/interventions.json`, append-only: the newest entry
+for a lane restarts its clock, and **any PR that corrects what a lane wrote —
+or the read-back used to verify it — appends its entry there in the same PR.**
+An unlogged correction silently buys autonomy the lane did not earn. Reaching
+the bar publishes ELIGIBILITY; the promotion itself stays a human call.
+
 **Steady state =** 4 consecutive weeks of: all dailies green · repeat-class rate
 0 · SLOs at target · zero externally-filed correctness findings. Then the
 service runs at Stage 3+ by default and humans do product, not repair.
@@ -291,9 +305,11 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 
 **Which commitment is at risk.**
 - P4 done-bar (weak < 50%): 62.7%, and the last drop was mostly new tiers.
-- P3 Stage 2 (auto-merge after N intervention-free weeks): the count is
-  zero, and this week reset it — the sls-023 close-out needed an
-  independent auditor to be corrected.
+- P3 Stage 2 (auto-merge after N intervention-free weeks): counted for
+  the first time this week — the per-lane figures are in
+  improvements/audits/lane-autonomy-latest.json and on /quality. Nothing
+  is promoted on them yet, and the RWA and basis lanes restarted their
+  clocks on 09-04/09-05 (improvements/lanes/interventions.json).
 - The closure rule's own metric: trailing-30d repeat-class rate is 100%;
   closures are 298 on silence, 216 by re-probe, 7 verified. Detection is
   outrunning remediation exactly as §0 warned.
@@ -311,9 +327,12 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 4. Human triage of the 22 dedup clusters and the dead repo links (owner:
    Shubh; done = executed or declined per cluster, in the dry-run's own
    format).
-5. Start the intervention-free week counter honestly — a lane week counts
-   only when every execute in it was dry-run, executed and read back with
-   zero human correction; publish the count on /quality.
+5. Act on the intervention-free week counter, which now exists and is
+   published (improvements/audits/lane-autonomy-latest.json, on /quality,
+   registry improvements/lanes/lanes.json). Done = every lane the artifact
+   reports as eligible is promoted or declined with the reason recorded
+   here, and the append rule holds — a PR that corrects a lane's output
+   logs it in improvements/lanes/interventions.json in that same PR.
 
 ## Lessons — 2026-09-05 cross-vendor audit of the program
 

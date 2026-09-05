@@ -1,0 +1,29 @@
+{
+	"note": "Append-only log of human/agent corrections to a mutating lane's output. One entry per correction, newest last. THE RULE (QUALITY.md §3): any PR that corrects what a lane wrote — or corrects the read-back that was used to verify it — appends its entry HERE, in that same PR. scripts/check-lane-autonomy.ts resets a lane's intervention-free week count to the latest entry for that lane, so an unlogged correction silently buys autonomy the lane did not earn. Every `source` below was verified with `gh pr view` before it was written down; nothing here is inferred.",
+	"interventions": [
+		{
+			"date": "2026-09-04",
+			"lane": "basis-from-product",
+			"what": "The lane's writes were correct, its read-back was not: STRONG_BASES still listed only three tiers, so the 58 rows this lane awarded `product-integration` were counted as weak and the board read the completed work as failed.",
+			"source": "PR #1297 — fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
+		},
+		{
+			"date": "2026-09-04",
+			"lane": "basis-from-repo",
+			"what": "Same defect, same PR: the 115 rows this lane awarded `repo-activity` were excluded from the strong-basis metric, so weakLiveRows read 790 when it was 617.",
+			"source": "PR #1297 — fix(quality): the strong-basis metric ignored two new evidence tiers (merged 2026-09-04T16:24Z); written up as Lesson 1 in QUALITY.md by PR #1310"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "refresh-rwa",
+			"what": "34 registry assets were served as `live` with exactly one holder — the issuer or its custodian — against the spec's own \"live = issued with supply and activity\"; a second auditor found it and a new `issued-single-holder` state now says so, plus six double-deployed tranches linked via `pairedWith`.",
+			"source": "PR #1302 — fix(rwa): registry corrected after a cross-vendor audit (merged 2026-09-05T00:15Z)"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "refresh-rwa",
+			"what": "The sls-023 close-out on issue #494 was overclaimed — 11 of the finding's 61 rows were treated as closing the whole probe. Recorded as a violated lesson (\"verify before advertise (#494, twice)\"); the close-out itself has not yet been reframed upstream, so this stays open as a correction against the lane that now owns those rows.",
+			"source": "PR #1310 — quality: program audit wrap (merged 2026-09-05T04:04Z), QUALITY.md Lessons 2026-09-05"
+		}
+	]
+}
