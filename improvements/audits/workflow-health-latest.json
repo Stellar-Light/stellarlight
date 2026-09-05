@@ -1,13 +1,13 @@
 {
-	"asOf": "2026-09-05T04:55:45.838Z",
+	"asOf": "2026-09-05T05:18:59.427Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 89,
-	"healthy": 88,
+	"checked": 90,
+	"healthy": 89,
 	"broken": [
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "9 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "10 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -155,6 +155,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "basis-from-deployment.yml",
+			"name": "Propagate deployment basis to status (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-05T04:56:26Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 2,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "basis-from-onchain.yml",
 			"name": "Award onchain-activity basis (manual)",
 			"cron": null,
@@ -225,10 +236,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:53:43Z",
+			"lastSuccessAt": "2026-09-05T05:17:00Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 27,
+			"runs": 37,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +258,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:53:43Z",
+			"lastSuccessAt": "2026-09-05T05:17:00Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -280,11 +291,11 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-02T18:20:53Z",
-			"ageDays": 2,
+			"lastSuccessAt": "2026-09-05T05:11:37Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 38,
-			"why": "last green 2d ago"
+			"runs": 39,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -621,11 +632,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:46:47Z",
+			"lastSuccessAt": "2026-09-05T05:12:58Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 98,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
+			"runs": 99,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -643,10 +654,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:53:01Z",
+			"lastSuccessAt": "2026-09-05T05:12:41Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 54,
+			"runs": 58,
 			"why": "last green 0d ago"
 		},
 		{
@@ -676,10 +687,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:04:58Z",
+			"lastSuccessAt": "2026-09-05T05:03:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 35,
+			"runs": 36,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -929,10 +940,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:53:43Z",
+			"lastSuccessAt": "2026-09-05T05:17:00Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -973,7 +984,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T04:53:01Z",
+			"lastSuccessAt": "2026-09-05T05:00:09Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -987,8 +998,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 16,
-			"why": "9 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 17,
+			"why": "10 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
