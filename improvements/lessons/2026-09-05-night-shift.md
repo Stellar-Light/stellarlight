@@ -8,8 +8,9 @@ thing that was verified, or a mistake that was caught — nothing aspirational.
 ## What the night proved
 
 1. **A green scheduled run is not a run.** `backfill-knowledge-notes.yml`'s
-   only step carried `if: github.event_name == 'workflow_dispatch'`; 18 green
-   nightly runs since 08-18 executed nothing. The program text said notes reach
+   only step carried `if: github.event_name == 'workflow_dispatch'`; the 3 scheduled runs
+   since the cron was added on 09-02 executed nothing (a first count said 18 by
+   reading completed runs; verified from the runs' job steps). The program text said notes reach
    rows nightly; the coordinator's memory said so twice, once after "verifying"
    the cron and the `--execute` expression. Found by the first run of the lane
    counter, which reads step conclusions. Rule: a lane is credited only for a
