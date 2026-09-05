@@ -1109,11 +1109,11 @@ describe("language filter survives every candidate source (2026-09-05)", () => {
 				primaryLanguage: "RPC",
 			}),
 		];
-		const { repos } = await searchRepos(mockPayload(docs), {
-			q: "SEP-10 authentication",
-			language: "python",
-			limit: 10,
-		});
+		const { repos } = await searchRepos(
+			mockPayload(docs),
+			"SEP-10 authentication",
+			{ language: "python", limit: 10 },
+		);
 		expect(repos.map((r) => r.fullName)).toEqual(["acme/sep10-py"]);
 	});
 });
