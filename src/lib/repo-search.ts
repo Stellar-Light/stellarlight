@@ -9,8 +9,8 @@
  * the repoScore quality grade.
  */
 
-import { repoSupersession } from "@/lib/repo-relations";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
+import { repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
@@ -1383,6 +1383,20 @@ export async function searchRepos(
 			normAlias(q).length >= 8;
 		const qNorm =
 			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
+		// The language filter rides the first candidate query, but three more
+		// candidate sources (canonical/flagship injection, the anchor-token net,
+		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
+		// Python served TypeScript rows with no warning while ?language=Python
+		// alone filtered correctly (through-Raven battery, 2026-09-05). Every
+		// source passes the same gate here, once, after the last merge.
+		if (language) {
+			const want = language.toLowerCase();
+			rawDocs = rawDocs.filter((d) =>
+				String(d.primaryLanguage ?? "")
+					.toLowerCase()
+					.includes(want),
+			);
+		}
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
