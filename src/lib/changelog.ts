@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.40",
+		type: "changed",
+		summary:
+			"x-routing vocabulary widened on getClusters, getPartners, getRfps and searchRepos from a builder-persona routing battery scored on the INTENDED operation.",
+		detail:
+			"The through-Raven routing detector (scripts/raven-routing.ts) now grades every question on the operation that should answer it — not on whether some scout operation appeared — with a persona tag (brand-new / knows-a-little / experienced / SDF-level), the intended op's rank, the top hits across services, and an evidence-classed miss (catalog-lag, outscored, id-noun-exclusion, no-scout-op, named-entity, vocabulary). Live 2026-09-05: 48 of 65 graded questions route to the intended op; persona bank 16 of 28. Nine misses are catalog lag: Raven's deployed catalog manifest is dated 2026-09-03T17:09Z and still carries pre-08-31 descriptions for getRfps, explainRepo and getPartners, so routing words added since then have not been read by the consumer yet. Vocabulary added here uses the askers' own words — 'verticals / least competition' (getClusters), 'implement SEP-24' (getPartners), 'who gives out grants' (getRfps), 'copy or fork' (searchRepos) — and cannot move the live number until Raven re-baselines.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.39",
 		type: "added",
 		summary:
