@@ -42,6 +42,7 @@ const byMode = new Map<
 	{
 		open: number;
 		refresh: number;
+		blocked: number;
 		cleared: number;
 		verified: number;
 		surface: string;
@@ -58,7 +59,8 @@ for (const f of findings) {
 	// The refresh queue (note-stale) is open but not a defect; it must not
 	// surface as an open finding while findings.open excludes it — the
 	// 2026-09-05 audit found code.openFindings = 1 beside ledger code.open = 0.
-	if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
+	if (f.status === "open" && f.blockedOn) cur.blocked++;
+	else if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
 		cur.refresh++;
 	else if (f.status === "open") cur.open++;
 	else if (f.status === "verified") cur.verified++;
@@ -76,7 +78,10 @@ const openAges = new Map<string, number>();
 // must not age as one — the 2026-09-05 audit found openByAge summing to 6
 // beside open = 5, one artifact disagreeing with itself.
 for (const f of findings.filter(
-	(x) => x.status === "open" && !MAINTENANCE_MODES.has(x.failureMode),
+	(x) =>
+		x.status === "open" &&
+		!MAINTENANCE_MODES.has(x.failureMode) &&
+		!x.blockedOn,
 ))
 	openAges.set(ageBucket(f), (openAges.get(ageBucket(f)) ?? 0) + 1);
 
@@ -401,19 +406,27 @@ const SURFACE_MEANS: Record<string, string> = {
 // as their own state there. The three states partition the ledger exactly once.
 const bySurface = new Map<
 	string,
-	{ open: number; refresh: number; cleared: number; verified: number }
+	{
+		open: number;
+		refresh: number;
+		blocked: number;
+		cleared: number;
+		verified: number;
+	}
 >();
 for (const f of findings) {
 	const cur = bySurface.get(f.surface) ?? {
 		open: 0,
 		refresh: 0,
+		blocked: 0,
 		cleared: 0,
 		verified: 0,
 	};
 	// The refresh queue (note-stale) is open but not a defect; it must not
 	// surface as an open finding while findings.open excludes it — the
 	// 2026-09-05 audit found code.openFindings = 1 beside ledger code.open = 0.
-	if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
+	if (f.status === "open" && f.blockedOn) cur.blocked++;
+	else if (f.status === "open" && MAINTENANCE_MODES.has(f.failureMode))
 		cur.refresh++;
 	else if (f.status === "open") cur.open++;
 	else if (f.status === "verified") cur.verified++;
@@ -442,14 +455,35 @@ const out = {
 		 * confirmation the fix works. "verified" means it was deliberately
 		 * re-probed after the fix and the probe passed. */
 		states:
-			"open + refreshQueue + cleared + verified = total, disjoint. `open` is the DEFECT backlog; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect). Kept apart because 118 of 290 notes cite a version and upstream publishes continuously, so folding them in means `open` can never reach zero.",
+			"open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
 		total: findings.length,
 		open: findings.filter(
-			(f) => f.status === "open" && !MAINTENANCE_MODES.has(f.failureMode),
+			(f) =>
+				f.status === "open" &&
+				!MAINTENANCE_MODES.has(f.failureMode) &&
+				!f.blockedOn,
 		).length,
 		refreshQueue: findings.filter(
 			(f) => f.status === "open" && MAINTENANCE_MODES.has(f.failureMode),
 		).length,
+		blockedUpstream: findings.filter(
+			(f) => f.status === "open" && !!f.blockedOn,
+		).length,
+		blockedBy: Object.fromEntries(
+			[
+				...new Set(
+					findings
+						.filter((f) => f.status === "open" && f.blockedOn)
+						.map((f) => f.blockedOn as string),
+				),
+			]
+				.sort()
+				.map((b) => [
+					b,
+					findings.filter((f) => f.status === "open" && f.blockedOn === b)
+						.length,
+				]),
+		),
 		cleared: findings.filter((f) => f.status === "cleared").length,
 		verified: findings.filter((f) => f.status === "verified").length,
 		byFailureMode: [...byMode.entries()]

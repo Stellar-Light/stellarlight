@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T05:57:40.254Z",
+  "generatedAt": "2026-09-05T15:24:32.866Z",
   "base": "https://stellarlight.xyz",
   "checked": 17,
   "pass": 11,
@@ -87,8 +87,8 @@
       "name": "toolchain version buckets sum to measuredRepos",
       "scope": "byVersionStatus",
       "status": "pass",
-      "sum": 5617,
-      "total": 5617
+      "sum": 5618,
+      "total": 5618
     },
     {
       "name": "hackathon byStatus sums to totalEvents",
@@ -126,11 +126,11 @@
       "total": 1
     },
     {
-      "name": "quality findings open + refreshQueue + cleared + verified = total",
+      "name": "quality findings open + refreshQueue + blockedUpstream + cleared + verified = total",
       "scope": "findings",
       "status": "pass",
-      "sum": 539,
-      "total": 539
+      "sum": 542,
+      "total": 542
     }
   ]
 }

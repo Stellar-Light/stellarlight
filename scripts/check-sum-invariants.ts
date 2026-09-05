@@ -166,8 +166,8 @@ const PARTITIONS: Part[] = [
 		},
 	},
 	{
-		name: "quality findings open + refreshQueue + cleared + verified = total",
-		why: "entities.json states it in its own `states` field: open + refreshQueue + cleared + verified = total, disjoint. This guard first shipped with three states and flagged the artifact — the guard was wrong, the data was right",
+		name: "quality findings open + refreshQueue + blockedUpstream + cleared + verified = total",
+		why: "entities.json states it in its own `states` field: open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. This guard first shipped with three states and flagged the artifact — the guard was wrong, the data was right; blockedUpstream (open rows an upstream consumer decides) was added 2026-09-05",
 		read: async () => {
 			const p = "improvements/quality/entities.json";
 			if (!existsSync(p)) throw new Error(`missing ${p}`);
@@ -178,6 +178,7 @@ const PARTITIONS: Part[] = [
 					parts: {
 						open: f.open,
 						refreshQueue: f.refreshQueue ?? 0,
+						blockedUpstream: f.blockedUpstream ?? 0,
 						cleared: f.cleared,
 						verified: f.verified,
 					},

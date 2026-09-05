@@ -84,6 +84,11 @@ export interface Finding {
 	 * later wave re-asserting `verified` does not erase it.
 	 */
 	regressedFromVerified?: boolean;
+	/** Set by the detector when the finding cannot be acted on from this
+	 *  repo (an upstream consumer's stale catalog: "raven-catalog-lag"; its
+	 *  scorer: "raven-scorer"). Open, carried, re-classified on every run —
+	 *  and counted APART from the defect backlog, never inside it. */
+	blockedOn?: string;
 	/** Set only by the stale sweep, which clears on a live PASS. */
 	clearedBy?: string | null;
 	/** memory/lesson slug that generalized this finding, if any. */
@@ -313,6 +318,11 @@ export interface LedgerSummary {
 	 *  Counted separately so `open` stays a backlog someone can burn down;
 	 *  never folded into it and never dropped. */
 	refreshQueue: number;
+	/** Open rows blocked on an upstream consumer (see Finding.blockedOn) —
+	 *  counted apart from `open` so the backlog is what we can act on, and
+	 *  never dropped. `blockedBy` names the blocker per count. */
+	blockedUpstream: number;
+	blockedBy: Record<string, number>;
 	/** The current top of the ranked backlog (probe + surface + source). */
 	topOpen: Array<{
 		id: string;
@@ -343,8 +353,12 @@ export const MAINTENANCE_MODES = new Set(["note-stale"]);
 export const isMaintenance = (f: Finding) =>
 	MAINTENANCE_MODES.has(f.failureMode);
 
+/** An open row we cannot act on here — waiting on an upstream consumer. */
+export const isBlocked = (f: Finding) => isOpen(f) && !!f.blockedOn;
+
 /** An open row that is a real defect — excludes the refresh queue. */
-export const isOpenDefect = (f: Finding) => isOpen(f) && !isMaintenance(f);
+export const isOpenDefect = (f: Finding) =>
+	isOpen(f) && !isMaintenance(f) && !f.blockedOn;
 
 /** Reduce the full ledger to the numbers /quality and the weekly row render. */
 export function summarizeLedger(
@@ -357,6 +371,12 @@ export function summarizeLedger(
 	const refreshQueue = findings.filter(
 		(f) => isOpen(f) && isMaintenance(f),
 	).length;
+	const blockedRows = findings.filter(isBlocked);
+	const blockedUpstream = blockedRows.length;
+	const blockedBy: Record<string, number> = {};
+	for (const f of blockedRows)
+		blockedBy[f.blockedOn as string] =
+			(blockedBy[f.blockedOn as string] ?? 0) + 1;
 	const verified = findings.filter((f) => f.status === "verified").length;
 	const clearedRows = findings.filter((f) => f.status === "cleared");
 	const cleared = clearedRows.length;
@@ -496,6 +516,8 @@ export function summarizeLedger(
 		total,
 		open,
 		refreshQueue,
+		blockedUpstream,
+		blockedBy,
 		closed,
 		verified,
 		cleared,
@@ -605,6 +627,9 @@ export function upsertFindings(
 				// say whether the detector genuinely re-ran or the orchestrator just
 				// re-read a stale artifact — `evidenceAt` comes from the artifact
 				// itself, so it only advances when the detector actually did.
+				// The blocker is re-read from THIS run's detection: a lag that clears
+				// or a class that changes must move the row between buckets.
+				blockedOn: still.blockedOn,
 				lastSeen: nowIso,
 				evidenceAt: still.evidenceAt,
 			});

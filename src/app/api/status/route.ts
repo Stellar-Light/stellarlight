@@ -197,6 +197,7 @@ export async function GET() {
 				"/api/rfps",
 				"/api/research",
 				"/api/stablecoins",
+				"/api/rwa",
 				"/api/feedback",
 				"/api/skills",
 				"/api/skills/{name}",

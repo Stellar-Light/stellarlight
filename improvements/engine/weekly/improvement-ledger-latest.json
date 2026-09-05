@@ -1,8 +1,13 @@
 {
-	"generatedAt": "2026-09-05T09:35:27.532Z",
+	"generatedAt": "2026-09-05T15:24:11.503Z",
 	"total": 542,
-	"open": 19,
+	"open": 3,
 	"refreshQueue": 3,
+	"blockedUpstream": 16,
+	"blockedBy": {
+		"raven-scorer": 7,
+		"raven-catalog-lag": 9
+	},
 	"closed": 520,
 	"verified": 7,
 	"cleared": 513,
@@ -27,19 +32,19 @@
 			}
 		}
 	},
-	"oldestOpenDays": 44,
+	"oldestOpenDays": 0,
 	"inWave": 0,
 	"highOpen": 2,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
-			"surface": "consumer",
-			"open": 17,
+			"surface": "contract",
+			"open": 2,
 			"total": 36
 		},
 		{
-			"surface": "contract",
-			"open": 2,
+			"surface": "consumer",
+			"open": 1,
 			"total": 36
 		},
 		{

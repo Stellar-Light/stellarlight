@@ -2221,13 +2221,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-disbursement-platform-frontend": [
 		{
-			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-02). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
+			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-04). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
 			triggers: [
 				"sdp frontend docker",
 				"disbursement platform frontend release",
 			],
 			source: "curated",
-			asOf: "2026-09-02",
+			asOf: "2026-09-04",
 		},
 	],
 	"stellar/soroban-examples": [
@@ -2405,10 +2405,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/passkey-kit": [
 		{
-			note: "Moved from kalepail/passkey-kit (496 stars there; archived; README 'This repository has moved… all tags were carried over'); stellar/passkey-kit was created 2026-07-30, so its own star count understates adoption. npm passkey-kit (0.17.1, 2026-09-02; first published 2024-06-06; 126 versions) now points its repository at stellar/passkey-kit. https://www.npmjs.com/package/passkey-kit",
+			note: "Moved from kalepail/passkey-kit (496 stars there; archived; README 'This repository has moved… all tags were carried over'); stellar/passkey-kit was created 2026-07-30, so its own star count understates adoption. npm passkey-kit (0.17.2, 2026-09-04; first published 2024-06-06; 126 versions) now points its repository at stellar/passkey-kit. https://www.npmjs.com/package/passkey-kit",
 			triggers: ["passkey kit moved", "kalepail passkey kit"],
 			source: "curated",
-			asOf: "2026-09-02",
+			asOf: "2026-09-04",
 		},
 		{
 			note: "README security status (relay it): unaudited — the smart-wallet contract, SDKs and relayer proxy have had no independent audit; for context rules, thresholds and spending limits it points to the sibling stellar/smart-account-kit built on the audited OpenZeppelin stellar-contracts. Exports PasskeyKit (browser) and PasskeyServer (holds the relayer secret). https://github.com/stellar/passkey-kit",
@@ -2700,9 +2700,9 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/smart-account-kit": [
 		{
-			note: "npm package is the unscoped smart-account-kit (0.6.2, 2026-08-19) \u2014 TypeScript client for the OpenZeppelin/stellar-contracts smart-account contract (passkeys, multi-signers, policies, fee sponsoring). Repo created 2026-07-30; Protocol 27 deployment artifacts are versioned in docs/deployments-protocol-27-2026-07-09.md. https://www.npmjs.com/package/smart-account-kit",
+			note: "npm package is the unscoped smart-account-kit (0.7.0, 2026-09-04) \u2014 TypeScript client for the OpenZeppelin/stellar-contracts smart-account contract (passkeys, multi-signers, policies, fee sponsoring). Repo created 2026-07-30; Protocol 27 deployment artifacts are versioned in docs/deployments-protocol-27-2026-07-09.md. https://www.npmjs.com/package/smart-account-kit",
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-04",
 		},
 		{
 			note: "README security status (verify before recommending): the SDK, demo, relayer proxy and integration code have NOT had an independent audit; the underlying OZ contracts' audit (rc v0.7.0) has different scope and the deployed artifacts use a later source revision. Breaking changes at v0.4.0 are listed in docs/migration-v0.4.0.md. https://github.com/stellar/smart-account-kit",

@@ -125,6 +125,8 @@ const nextConfig = {
 			// CORS or a version header — invisible to browser agents.
 			"/api/quality",
 			"/api/verify",
+			// Drift guard 2026-09-05: /api/rwa shipped 09-04 without the header.
+			"/api/rwa",
 		];
 		const corsHeaders = [
 			{ key: "Access-Control-Allow-Origin", value: "*" },
