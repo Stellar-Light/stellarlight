@@ -341,6 +341,7 @@ export function StablecoinCharts({
 							aspectRatio="unset"
 						>
 							<Grid horizontal strokeOpacity={0.2} />
+							<YAxis formatValue={fmtValue} numTicks={5} />
 							<Line
 								dataKey="total"
 								stroke="hsl(200, 75%, 60%)"

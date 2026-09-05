@@ -14,6 +14,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { hapticTick } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { DEFAULT_ANIMATION_EASING } from "./animation";
 import type { BarProps } from "./bar";
@@ -396,7 +397,7 @@ const ChartCore = memo(function ChartCore({
 
 	// Mouse move handler
 	const handleMouseMove = useCallback(
-		(event: React.MouseEvent<SVGGElement>) => {
+		(event: React.MouseEvent<SVGGElement> | React.TouchEvent<SVGGElement>) => {
 			const point = localPoint(event);
 			if (!point) {
 				return;
@@ -553,6 +554,43 @@ const ChartCore = memo(function ChartCore({
 		onHover?.(null);
 	}, [clearTooltip, onHover]);
 
+	// Touch: a finger dragged across the chart scrubs the tooltip exactly like
+	// a mouse (2026-09-05: only mouse events were attached, so on a phone each
+	// bar had to be tapped one by one). The band index is tracked so a short
+	// haptic pulse fires when the finger crosses into a new bar; the tooltip
+	// stays after lift-off so the reader can read it. touch-action pan-y keeps
+	// vertical page scrolling working over the chart.
+	const lastTouchBandRef = useRef<number | null>(null);
+	const handleTouch = useCallback(
+		(event: React.TouchEvent<SVGGElement>) => {
+			if (event.touches.length !== 1) return;
+			const point = localPoint(event);
+			if (point) {
+				const pos = isHorizontal ? point.y - margin.top : point.x - margin.left;
+				const band = Math.max(
+					0,
+					Math.min(data.length - 1, Math.floor(pos / columnWidth)),
+				);
+				if (band !== lastTouchBandRef.current) {
+					lastTouchBandRef.current = band;
+					hapticTick();
+				}
+			}
+			handleMouseMove(event);
+		},
+		[
+			handleMouseMove,
+			isHorizontal,
+			margin.top,
+			margin.left,
+			data.length,
+			columnWidth,
+		],
+	);
+	const handleTouchEnd = useCallback(() => {
+		lastTouchBandRef.current = null;
+	}, []);
+
 	const canInteract = isLoaded;
 
 	// Separate children into defs, pre-overlay, and post-overlay
@@ -644,7 +682,13 @@ const ChartCore = memo(function ChartCore({
 				<g
 					onMouseLeave={canInteract ? handleMouseLeave : undefined}
 					onMouseMove={canInteract ? handleMouseMove : undefined}
-					style={{ cursor: canInteract ? "crosshair" : "default" }}
+					onTouchStart={canInteract ? handleTouch : undefined}
+					onTouchMove={canInteract ? handleTouch : undefined}
+					onTouchEnd={canInteract ? handleTouchEnd : undefined}
+					style={{
+						cursor: canInteract ? "crosshair" : "default",
+						touchAction: canInteract ? "pan-y" : "auto",
+					}}
 					transform={`translate(${margin.left},${margin.top})`}
 				>
 					{/* Background rect for mouse event detection */}

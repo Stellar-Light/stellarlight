@@ -48,6 +48,14 @@ export interface StablecoinAsset {
 	peg: StablecoinPeg;
 	/** Logo when the domain's TOML has none (or serves a broken one). */
 	fallbackImageUrl?: string;
+	/**
+	 * Serve fallbackImageUrl even though the TOML carries an image — for a
+	 * TOML image that is an IPFS-gateway URL, which resolves for our refresh
+	 * runner but not reliably in a reader's browser (USDT0, 2026-09-05: the
+	 * asset page rendered no logo at all). Our own copy wins; logoSource says
+	 * "fallback" so nobody mistakes it for the issuer's file.
+	 */
+	preferFallbackLogo?: boolean;
 	/** Use the peg's country flag instead of a logo. */
 	useCountryFlag?: boolean;
 	/** Extra qualifier — e.g. USDY is yield-bearing, not a pure peg. */
@@ -184,7 +192,10 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		domain: "usdt0.to",
 		company: "Tether (USDT0)",
 		peg: "USD",
+		// The toml's CURRENCIES image is an ipfs.io gateway URL that does not load
+		// reliably in browsers; the 512×512 mark below is the official asset mark.
 		fallbackImageUrl: "https://stellarlight.xyz/stablecoins/logos/usdt0.png",
+		preferFallbackLogo: true,
 	},
 	{
 		code: "PYUSD",
