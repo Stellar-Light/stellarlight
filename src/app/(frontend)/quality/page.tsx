@@ -647,29 +647,50 @@ export default function QualityPage() {
 					Cleared is NOT confirmation the fix works; only verified means it was
 					deliberately re-probed after a fix.
 				</p>
-				{/* The closure rule's metric (QUALITY.md §1): findings whose class
-				    already had a prior finding. Zero = new findings only ever open
-				    NEW classes; every recurrence means a fix landed on the instance
-				    instead of the class. */}
+				{/* The closure rule's metric (QUALITY.md §1), stated so it can move.
+				    The old headline here was "repeat-class rate": a new finding counted
+				    as a repeat when its §0 class had ANY prior finding. Across 8 broad
+				    classes that is pinned near 100% however much repair lands, so it
+				    is demoted to context below. What replaces it asks the question the
+				    closure rule actually cares about: did something we closed WITHOUT
+				    repairing come back? */}
 				<div className="mb-6 pb-5 border-b border-border">
 					<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-3">
 						<Stat
-							label="Repeat-class rate (30d)"
-							value={`${entities.findings.closure.last30d.ratePct}%`}
-							sub={`${entities.findings.closure.last30d.repeats} of ${entities.findings.closure.last30d.newFindings} new findings`}
+							label="Recurred after a silence-close (30d)"
+							value={`${entities.findings.closure.recurredAfterSilence.last30d.ratePct}%`}
+							sub={`${entities.findings.closure.recurredAfterSilence.last30d.recurred} of ${entities.findings.closure.recurredAfterSilence.last30d.newFindings} new findings`}
 						/>
 						<Stat
 							label="Lifetime"
-							value={`${entities.findings.closure.lifetime.ratePct}%`}
-							sub={`across ${entities.findings.closure.lifetime.newFindings} findings, ${entities.findings.closure.byClass.length} classes`}
+							value={`${entities.findings.closure.recurredAfterSilence.lifetime.ratePct}%`}
+							sub={`${entities.findings.closure.recurredAfterSilence.lifetime.recurred} of ${entities.findings.closure.recurredAfterSilence.lifetime.newFindings} findings`}
+						/>
+						<Stat
+							label="Reopened after closing"
+							value={String(entities.findings.closure.reopened.count)}
+							sub={`${entities.findings.closure.reopened.regressedFromVerified} of them had been VERIFIED`}
 						/>
 					</div>
 					<p className="text-[11px] text-muted-foreground leading-relaxed">
-						A repeat is a finding whose class (identity, taxonomy coverage,
-						contract completeness…) already had a prior finding — the measure of
-						whether fixes land on the class or just the instance. Steady state
-						is the 30-day rate at zero: new findings only ever open new classes.
-						This number is expected to start ugly; publishing it is the point.
+						A recurrence is a NEW finding on a surface-and-failure-mode pair we
+						had already closed <em>on silence</em> — the detector went quiet and
+						nobody re-probed. It is the closure rule's real question: did we
+						close without repairing, and did the same kind of failure come back?
+						Steady state is that rate at zero. Reopened counts the exact-id
+						version and is a lower bound, because re-clearing a reopened finding
+						erases its stamp. These numbers are expected to start ugly;
+						publishing them is the point.
+					</p>
+					<p className="text-[11px] text-muted-foreground leading-relaxed mt-2">
+						For context, the repeat-<em>class</em> rate — a finding whose §0
+						class (identity, taxonomy coverage, contract completeness…) already
+						had any prior finding — is{" "}
+						{entities.findings.closure.classRecurrence.last30d.ratePct}% over 30
+						days across{" "}
+						{entities.findings.closure.classRecurrence.byClass.length} classes.
+						With classes that broad it cannot fall, so it is reported as context
+						rather than steered by.
 					</p>
 				</div>
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

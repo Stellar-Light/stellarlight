@@ -133,17 +133,20 @@ describe("isSyntheticQuery — noise, not demand", () => {
 describe("summarizeLedger — the /quality numbers", () => {
 	const now = Date.now();
 
-	it("counts open vs closed and the closing rate", () => {
+	it("counts open vs closed; the rate counts only EVIDENCE closures", () => {
 		const findings = [
 			f({ id: "a", source: "s", status: "open" }),
 			f({ id: "b", source: "s", status: "verified" }),
-			f({ id: "c", source: "s", status: "cleared" }),
+			f({ id: "c", source: "s", status: "cleared" }), // silence, no clearedBy
 		];
 		const s = summarizeLedger(findings, now);
 		expect(s.total).toBe(3);
 		expect(s.open).toBe(1);
-		expect(s.closed).toBe(2);
-		expect(s.closingRate).toBeCloseTo(0.67, 1);
+		expect(s.closed).toBe(2); // `closed` still means "not open"
+		// …but only the verified one is a closure on evidence. The silence-close
+		// is carried apart, never folded in.
+		expect(s.closingRate).toBeCloseTo(0.33, 2);
+		expect(s.silenceShare).toBeCloseTo(0.33, 2);
 	});
 
 	it("flags a HIGH-severity finding neglected past STALE_DAYS (the red line)", () => {
@@ -382,7 +385,12 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 		// a SECOND call is a coin flip that lands heads on a fast machine: it
 		// passed locally and failed on the CI runner. Capture it once.
 		const now = iso(0);
-		const out = upsertFindings(prior, [f({ id: "s:x", source: "s" })], ["s"], now);
+		const out = upsertFindings(
+			prior,
+			[f({ id: "s:x", source: "s" })],
+			["s"],
+			now,
+		);
 		expect(out[0]?.status).toBe("open");
 		expect(out[0]?.reopenedAt).toBe(now);
 		// the old clearance is not evidence about the new state
@@ -419,8 +427,10 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 		expect(recleared[0]?.evidenceAt).toBe(clearNow); // dates the quiet run, not the failure
 	});
 
-	it("does NOT reopen a deliberate close — a person asserted that one", () => {
-		for (const status of ["verified", "fixed", "in-wave"] as const) {
+	it("leaves WORK IN PROGRESS alone — in-wave and fixed are not auto-changed", () => {
+		// A detector still reporting these is expected: nobody has claimed the
+		// fix landed yet. Only `verified` makes that claim.
+		for (const status of ["fixed", "in-wave"] as const) {
 			const prior = [f({ id: "s:x", source: "s", status })];
 			const out = upsertFindings(
 				prior,
@@ -429,6 +439,191 @@ describe("evidence freshness — 'not re-checked' is not 'still broken'", () => 
 				iso(0),
 			);
 			expect(out[0]?.status).toBe(status);
+			expect(out[0]?.regressedFromVerified).toBeUndefined();
 		}
+	});
+
+	// Before 2026-09-05 `verified` was in the loop above: a detector raising a
+	// verified finding again changed nothing on the row, and the only trace was
+	// applyWaves\' `suspectVerified` console warning — not in the ledger, not in
+	// the summary, not on the board. A fix a human asserted had landed and that
+	// regressed is the strongest signal here; it must not be the quietest.
+	it("REOPENS a verified finding a detector raises again, and flags the regression", () => {
+		const now = new Date().toISOString();
+		const prior = [
+			f({
+				id: "s:x",
+				source: "s",
+				status: "verified",
+				verifiedAt: iso(9),
+				wave: "w1",
+			}),
+		];
+		const out = upsertFindings(
+			prior,
+			[f({ id: "s:x", source: "s" })],
+			["s"],
+			now,
+		);
+		expect(out[0]?.status).toBe("open");
+		expect(out[0]?.regressedFromVerified).toBe(true);
+		expect(out[0]?.reopenedAt).toBe(now);
+		expect(
+			summarizeLedger(out, Date.now()).recurrence.regressedFromVerified,
+		).toBe(1);
+
+		// A wave puts `verified` back every run (all 7 live verified rows carry
+		// one), so the stamp must NOT be re-cut each night — that would churn the
+		// committed ledger daily and lose when the regression actually started.
+		const later = new Date(Date.now() + 86_400_000).toISOString();
+		const again = upsertFindings(
+			[{ ...out[0], status: "verified" as const }],
+			[f({ id: "s:x", source: "s" })],
+			["s"],
+			later,
+		);
+		expect(again[0]?.reopenedAt).toBe(now);
+		expect(again[0]?.regressedFromVerified).toBe(true);
+	});
+});
+
+describe("closure honesty — the metrics that can actually move", () => {
+	const now = Date.now();
+
+	it("an EMPTY ledger scores 0, not 1 — a vacuous denominator is not a pass", () => {
+		const s = summarizeLedger([], now);
+		expect(s.total).toBe(0);
+		expect(s.closingRate).toBe(0);
+		expect(s.silenceShare).toBe(0);
+		expect(s.recurrence.recurredAfterSilence.lifetime.ratePct).toBe(0);
+	});
+
+	it("a re-probed close counts, a silence-close does not", () => {
+		const s = summarizeLedger(
+			[
+				f({ id: "a", source: "s", status: "verified" }),
+				f({
+					id: "b",
+					source: "s",
+					status: "cleared",
+					clearedBy: "stale-sweep: re-probed live and passing",
+				}),
+				f({ id: "c", source: "s", status: "cleared" }),
+				f({ id: "d", source: "s", status: "cleared" }),
+			],
+			now,
+		);
+		// 2 of 4 closed on evidence, 2 of 4 on silence. The two halves are
+		// published side by side and sum to the closed share.
+		expect(s.closingRate).toBe(0.5);
+		expect(s.silenceShare).toBe(0.5);
+	});
+
+	it("recurredAfterSilence needs a silence-close BEFORE the new finding appeared", () => {
+		const silenceClose = f({
+			id: "s:old",
+			source: "s",
+			surface: "directory",
+			failureMode: "missing-field",
+			status: "cleared",
+			firstSeen: iso(40),
+			clearedAt: iso(20),
+		});
+		const after = f({
+			id: "s:new",
+			source: "s",
+			surface: "directory",
+			failureMode: "missing-field",
+			firstSeen: iso(5), // AFTER the silence-close → came back in kind
+		});
+		const before = f({
+			id: "s:concurrent",
+			source: "s",
+			surface: "directory",
+			failureMode: "missing-field",
+			firstSeen: iso(25), // BEFORE it → same pair, but not a recurrence
+		});
+		const otherPair = f({
+			id: "s:other",
+			source: "s",
+			surface: "retrieval", // same failureMode, different surface
+			failureMode: "missing-field",
+			firstSeen: iso(5),
+		});
+		const r = summarizeLedger([silenceClose, after, before, otherPair], now)
+			.recurrence.recurredAfterSilence;
+		expect(r.lifetime.recurred).toBe(1); // only `after`
+		expect(r.lifetime.newFindings).toBe(4);
+		// the 30d window drops the two rows first seen outside it
+		expect(r.last30d.newFindings).toBe(3);
+		expect(r.last30d.recurred).toBe(1);
+	});
+
+	it("a RE-PROBED close is not silence — its pair recurring is not counted", () => {
+		const r = summarizeLedger(
+			[
+				f({
+					id: "s:old",
+					source: "s",
+					failureMode: "recall-miss",
+					status: "cleared",
+					firstSeen: iso(40),
+					clearedAt: iso(20),
+					clearedBy: "stale-sweep: re-probed live and passing",
+				}),
+				f({
+					id: "s:new",
+					source: "s",
+					failureMode: "recall-miss",
+					firstSeen: iso(5),
+				}),
+			],
+			now,
+		).recurrence.recurredAfterSilence;
+		// The pair WAS re-checked and passed. Something regressed later, which is
+		// a different story from "we closed it without ever looking".
+		expect(r.lifetime.recurred).toBe(0);
+	});
+
+	it("counts exact-id reopens as a lower bound on recurrence", () => {
+		const s = summarizeLedger(
+			[
+				f({ id: "a", source: "s", status: "open", reopenedAt: iso(2) }),
+				f({ id: "b", source: "s", status: "cleared" }),
+				f({ id: "c", source: "s", status: "verified" }),
+				f({ id: "d", source: "s", status: "open" }),
+			],
+			now,
+		);
+		expect(s.recurrence.reopened).toBe(1);
+		// denominator = everything ever closed we can still see: b, c, and a
+		// (which a reopen pulled back out). `d` was never closed.
+		expect(s.recurrence.reopenedShareOfClosures).toBeCloseTo(0.33, 2);
+	});
+
+	it("a silence-closed finding the same detector raises again REOPENS", () => {
+		const now = new Date().toISOString();
+		const prior = [
+			f({
+				id: "s:x",
+				source: "s",
+				status: "cleared",
+				clearedAt: iso(3), // no clearedBy → closed on silence
+			}),
+		];
+		const out = upsertFindings(
+			prior,
+			[f({ id: "s:x", source: "s" })],
+			["s"],
+			now,
+		);
+		expect(out[0]?.status).toBe("open");
+		expect(out[0]?.reopenedAt).toBe(now);
+		expect(out[0]?.clearedAt).toBeUndefined();
+		// and it is no longer in either closed bucket
+		const s = summarizeLedger(out, Date.now());
+		expect(s.clearedOnSilence).toBe(0);
+		expect(s.closingRate).toBe(0);
+		expect(s.recurrence.reopened).toBe(1);
 	});
 });

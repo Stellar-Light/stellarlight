@@ -10,7 +10,11 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { MAINTENANCE_MODES } from "../../src/lib/improvement-ledger";
+import {
+	type Finding,
+	MAINTENANCE_MODES,
+	summarizeLedger,
+} from "../../src/lib/improvement-ledger";
 import { REPO_KNOWLEDGE_NOTES } from "../../src/lib/repo-knowledge";
 import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
@@ -21,18 +25,6 @@ const api = async <T>(path: string): Promise<T> =>
 	).json()) as T;
 
 // ── findings ledger: what we found, what closed, how old the rest is ──
-type Finding = {
-	id: string;
-	source: string;
-	surface: string;
-	probe: string;
-	failureMode: string;
-	severity: string;
-	firstSeen: string;
-	lastSeen: string;
-	clearedAt?: string | null;
-	status: "open" | "cleared" | "verified";
-};
 const ledger = JSON.parse(
 	readFileSync(
 		join(process.cwd(), "improvements/ledger/findings.json"),
@@ -173,6 +165,10 @@ for (const f of [...findings].sort((a, b) =>
 		});
 	}
 }
+// The ledger's own numbers, so page / API / weekly row cannot disagree about
+// what "closed" means. closingRate here counts verified + re-probed only.
+const ledgerSummary = summarizeLedger(findings, now);
+
 const closureWindow = (days: number) => {
 	const cutoff = new Date(now - days * DAY).toISOString();
 	const fresh = findings.filter((f) => f.firstSeen >= cutoff);
@@ -467,25 +463,41 @@ const out = {
 			count: openAges.get(b) ?? 0,
 		})),
 		recentlyCleared,
-		/** QUALITY.md §1's "metric that matters". A repeat = a finding whose
-		 * §0 class already had a prior finding; steady state = the trailing
-		 * rate at zero (new findings only open new classes). Classes are
-		 * derived from failureMode via CLASS_OF in the builder — a total,
-		 * reviewable map, not per-row hand labels. */
+		/** QUALITY.md §1's "metric that matters", stated honestly.
+		 *
+		 * `classRecurrence` used to BE this block and used to be the headline.
+		 * It counts a new finding as a repeat when its §0 class already had any
+		 * prior finding — with 8 broad classes over 500+ findings that is pinned
+		 * near 100% and cannot fall no matter how much repair lands, so it is
+		 * served as CONTEXT and carries a note saying so.
+		 *
+		 * The two numbers that can actually move sit above it, both from
+		 * summarizeLedger so the page, the API and the weekly row cannot drift
+		 * apart: recurrence in kind after a silence-close, and exact-id reopens. */
 		closure: {
 			definition:
-				"repeat-class rate: share of findings whose §0 class already had a prior finding. The lifetime number can only grow; the trailing-30d rate is the one that must reach zero and stay there.",
-			last30d: closureWindow(30),
-			lifetime: {
-				newFindings: findings.length,
-				repeats: repeatIds.size,
-				ratePct: findings.length
-					? Math.round((repeatIds.size / findings.length) * 1000) / 10
-					: 0,
+				"recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
+			recurredAfterSilence: ledgerSummary.recurrence.recurredAfterSilence,
+			reopened: {
+				count: ledgerSummary.recurrence.reopened,
+				shareOfClosures: ledgerSummary.recurrence.reopenedShareOfClosures,
+				regressedFromVerified: ledgerSummary.recurrence.regressedFromVerified,
+				note: "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again.",
 			},
-			byClass: [...classAgg.entries()]
-				.map(([cls, v]) => ({ class: cls, ...v }))
-				.sort((a, b) => b.total - a.total),
+			classRecurrence: {
+				note: "structurally near 100% with 8 broad classes — context, not a target",
+				last30d: closureWindow(30),
+				lifetime: {
+					newFindings: findings.length,
+					repeats: repeatIds.size,
+					ratePct: findings.length
+						? Math.round((repeatIds.size / findings.length) * 1000) / 10
+						: 0,
+				},
+				byClass: [...classAgg.entries()]
+					.map(([cls, v]) => ({ class: cls, ...v }))
+					.sort((a, b) => b.total - a.total),
+			},
 		},
 	},
 	projects: {
