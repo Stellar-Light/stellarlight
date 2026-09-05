@@ -48,6 +48,12 @@
 			"lane": "curate-projects",
 			"what": "Verification-packet verdict skyhitz Live (tier: high) was wrong and was executed (#1345): the page's stats are zero (Total Mass 0.00 HITZ, Balance \u2014). Owner corrected to Inactive. Same class as orbitcdp: a page title plus a repo push is not a product state.",
 			"source": "#1345 corrected by the owner in chat; receipt improvements/receipts/skyhitz-2026-09-05.json"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "curate-projects",
+			"what": "Eight high-tier packet stamps (fairblock, untangled, wagelink, hot-wallet, tala, normal, vanna-finance, zebec) rested on evidence the packet's own table calls thin (8\u201340 rendered chars; a hackathon, seeder, shared or 404-substitute repo as the second signal). Withdrawn to site-liveness the same evening after a cross-vendor audit; status unchanged. Rule tightened: Live = product state, own repo, substantive page.",
+			"source": "#1345 corrected; audit bundle scratchpad/grok-day-audit"
 		}
 	]
 }

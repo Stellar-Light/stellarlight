@@ -95,12 +95,15 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Kata.Games - Revolutionary Gaming Platform"; repo pyved-solution/pyved-engine pushed 2026-06-08 (high confidence).',
 	},
 	"hot-wallet": {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the second signal is a hackathon repo (hot-dao/pitchtalk-hachathon), not this product.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://hot-labs.org/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "HOT Protocol | HOT Labs | Chain abstraction"; repo hot-dao/pitchtalk-hachathon pushed 2026-07-06 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the second signal is a hackathon repo (hot-dao/pitchtalk-hachathon), not this product. Status unchanged; owner verdict pending.",
 	},
 	flutterwave: {
 		from: "Live",
@@ -119,12 +122,15 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "OneKey: Hardware Wallet & Crypto DeFi Wallet |"; repo OneKeyHQ/hardware-js-sdk pushed 2026-09-05 (high confidence).',
 	},
 	zebec: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): its second signal (Zebec-protocol/canton-dev-fund) is the same repo used for wagelink — one repo cannot be two products' independent live signals.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://zebec.io/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Zebec Network | Real\u2011Time Crypto Payroll & Payments"; repo Zebec-protocol/canton-dev-fund pushed 2026-09-02 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — its second signal (Zebec-protocol/canton-dev-fund) is the same repo used for wagelink — one repo cannot be two products' independent live signals. Status unchanged; owner verdict pending.",
 	},
 	ripio: {
 		from: "Live",
@@ -135,12 +141,15 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Liderando cripto en LATAM desde 2013 | Crypto"; repo ripio/agents-toolkit pushed 2026-08-24 (high confidence).',
 	},
 	tala: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the second signal is inventure/docker-play-seeder, not this product.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://tala.co/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Tala | Digital Financial Services, Credit, Savings and"; repo inventure/docker-play-seeder pushed 2026-08-21 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the second signal is inventure/docker-play-seeder, not this product. Status unchanged; owner verdict pending.",
 	},
 	rozo: {
 		from: "Live",
@@ -151,12 +160,15 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "ROZO - Visa Layer for Stablecoins. Spend crypto,"; repo RozoAI/intent-pay pushed 2026-09-05 (high confidence).',
 	},
 	normal: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the linked repo is a 404; an org-newest repo was substituted.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://www.normalfinance.io/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Home | Normal"; linked repo 404, org newest push 2026-09-02 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the linked repo is a 404; an org-newest repo was substituted. Status unchanged; owner verdict pending.",
 	},
 	abroad: {
 		from: "Live",
@@ -215,12 +227,15 @@ export const STATUS_FIX: Record<
 		note: "Verification packet 2026-09-05, owner-approved: Audit contest platform, page announces closing (high confidence).",
 	},
 	fairblock: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 40 chars rendered — not substantive product content.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://www.fairblock.network/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Fairblock - Enterprise Privacy Solutions"; repo Fairblock/stabletrust-sdk pushed 2026-09-03 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 40 chars rendered — not substantive product content. Status unchanged; owner verdict pending.",
 	},
 	giveth: {
 		from: "Live",
@@ -332,12 +347,15 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Token Tails | A family of feline care"; repo zbagdzevicius/tokentails pushed 2026-07-24 (high confidence).',
 	},
 	untangled: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 17 chars rendered; the contract has no in-window activity counter.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://untangled.finance/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Untangled Finance"; repo untangledfinance/oz-policy-builder pushed 2026-09-01 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 17 chars rendered; the contract has no in-window activity counter. Status unchanged; owner verdict pending.",
 	},
 	usher: {
 		from: "Live",
@@ -348,20 +366,26 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Usher Labs - Trace, Prove, and Mobilise Capital"; repo usherlabs/cex-broker pushed 2026-09-05 (high confidence).',
 	},
 	"vanna-finance": {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the linked repo is a 404; an org-newest repo was substituted.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://vanna.finance/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Vanna \u2014 Composable Undercollateralized Credit for DeFi"; linked repo 404, org newest push 2026-09-02 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the linked repo is a 404; an org-newest repo was substituted. Status unchanged; owner verdict pending.",
 	},
 	wagelink: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 8 chars rendered, and its second signal (Zebec-protocol/canton-dev-fund) is another row's repo.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
+		basis: "site-liveness",
 		asOf: "2026-09-05",
-		sourceUrl: "https://wagelink.io/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "WageLink"; repo Zebec-protocol/canton-dev-fund pushed 2026-09-02 (high confidence).',
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 8 chars rendered, and its second signal (Zebec-protocol/canton-dev-fund) is another row's repo. Status unchanged; owner verdict pending.",
 	},
 	// ── Owner approval 2026-09-02 ("all 27") of verification packet
 	// improvements/quality/verification-packets-2026-09-02.md: app-only weak

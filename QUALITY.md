@@ -295,13 +295,13 @@ above are the phases; the done-bars are theirs.
 
 **Who owns it.** The program, /quality and the ledger: Shubh. Lanes —
 enrich-repos (weekly, Monday), refresh-stablecoins (6h), refresh-rwa (6h),
-basis lanes (onchain / product / repo-activity, dispatch), dedup (manual,
-dry-run) — all Shubh until a lane earns its intervention-free weeks. Raven's
+basis lanes (onchain / product / repo-activity, dispatch), dedup (manual:
+dry-run, then execute with a read-back) — all Shubh until a lane earns its intervention-free weeks. Raven's
 router scorer and catalog: upstream (stellar-experimental/stellar-raven).
 Golden questions: Raph. External findings: Tyler / kalepail / SDF reviewers.
 
-**What changed this week (2026-08-31 → 09-05).** ~80 merged PRs
-(#1229–#1309): the RWA product model for sls-023 (registry, products,
+**What changed this week (2026-08-31 → 09-05).** ~120 merged PRs
+(#1229–#1348; the 09-05 day addendum below covers #1311 onward): the RWA product model for sls-023 (registry, products,
 deployment, controls, an hourly pin, a six-hour measuring lane);
 supersession as fields on repo rows; a partition-sum guard; fixes across
 every scout.* surface — hackathon submissions truncated at 300, outcomes
@@ -315,9 +315,9 @@ overclaimed and 34 one-holder assets served as live — both corrected.
 - Raven router: the intended op is excluded when a question contains
   another op's id noun (stellar-raven #124, filed 2026-09-03) — upstream
   scorer; Scout-side vocabulary does not fix this class. Measured
-  2026-09-05: 2 misses of this class, plus 2 named-entity misses (bare
-  project names route to no operation text) and 3 where a long description
-  wins on stopword density — all three are the scorer's, not vocabulary.
+  2026-09-05: 2 misses of this class, 1 named-entity miss and 1 bare-name
+  miss (no operation text carries project names), and 3 where a long
+  description wins on stopword density — all the scorer's, not vocabulary.
 - Raven catalog text: the deployed catalog (manifest 2026-09-03T17:09Z)
   still serves pre-08-31 descriptions for getRfps/explainRepo/getPartners
   and none of the 09-02/09-03 x-routing words — 9 routing misses are
@@ -325,17 +325,26 @@ overclaimed and 34 one-holder assets served as live — both corrected.
   says when it clears.
 - Raven catalog lag: `getRwaAssets` (since 2026-09-04) and `verifyClaim`
   (since 2026-08-27) not exposed. Not filed — lag, not drift.
-- 583 app-only weak rows and 144 never-answered sites: human triage
-  (relink / Inactive / leave). Since 2026-09-01.
-- 22 dedup clusters from the dry-run: human call (the EURC cluster is a
-  name-only false positive; the Passport cluster would hide an SDF-verified
-  row). Since 2026-09-04.
+- App-only weak rows (`strongBasisSplit.appOnly`; 550 on the 09-05 evening
+  board) and the never-answered sites: human triage (relink / Inactive /
+  leave). The verification-packet lane is the instrument, under the
+  tightened Live rule in the day addendum. Since 2026-09-01.
+- 3 dedup clusters vetoed for a human (EURC is a name-only false positive;
+  Passport would hide an SDF-verified row; LumosDAO's keeper is a Draft).
+  The other 19 executed 2026-09-05. Since 2026-09-04.
 - Corpus-announcement lane (P4's named lever): tested 2026-09-05, 2 of 18
   sampled weak projects appear in a dated corpus doc, one a false match —
   our corpus is not where operator launch posts live. Not viable as designed.
 
 **Which commitment is at risk.**
-- P4 done-bar (weak < 50%): 62.7%, and the last drop was mostly new tiers.
+- P4 done-bar (weak < 50%): 57.2% on the 09-05 evening board (563 of 984).
+  The day's 54-row drop, decomposed so it is never read as 54 new facts:
+  13 propagated from receipted deployment evidence (a copy, not new
+  evidence); 38 owner-approved packet stamps, of which 34 kept their status,
+  2 Live verdicts were overturned by the owner within the hour (orbitcdp,
+  skyhitz) and 8 stamps were withdrawn the same evening because the packet's
+  own text showed thin evidence; 3 curated. New status truth today: five
+  receipted deaths. Nothing here is a new evidence tier.
 - P3 Stage 2 (auto-merge after N intervention-free weeks): counted for
   the first time this week — the per-lane figures are in
   improvements/audits/lane-autonomy-latest.json and on /quality. Nothing
@@ -364,12 +373,12 @@ overclaimed and 34 one-holder assets served as live — both corrected.
    catalog lag (Raven's manifest is dated 2026-09-03T17:09Z and still serves
    pre-08-31 descriptions for getRfps/explainRepo/getPartners). The old
    series is unchanged at 32/37. Nothing external is closed by this.
-3. Exhaust the 34 `onchainEligible` weak rows with the existing lane
-   (dispatch; done = onchainEligible 0 or each row carries a
-   could-not-check).
-4. Human triage of the 22 dedup clusters and the dead repo links (owner:
-   Shubh; done = executed or declined per cluster, in the dry-run's own
-   format).
+3. DONE in kind 2026-09-05: `onchainEligible` 34 → 13 after a snapshot
+   refresh (2 awarded, 18 with no movement in the window). The residue is
+   could-not-earn until the chain moves; re-run after each weekly snapshot.
+4. Human call on the 3 vetoed dedup clusters and the dead repo links
+   (owner: Shubh; done = executed or declined per cluster, in the dry-run's
+   own format).
 5. Act on the intervention-free week counter, which now exists and is
    published (improvements/audits/lane-autonomy-latest.json, on /quality,
    registry improvements/lanes/lanes.json). Done = every lane the artifact
@@ -400,25 +409,86 @@ that names vacuous checks. Truth battery 112/112 (was 110/112); golden 51/51.
   since 08-31 is unmeasured until a re-baseline. Upstream; not filed as drift.
 - Raven scorer counts stopwords in its gated pass (evidence in
   improvements/engine/raven-routing-latest.json) — candidate issue, unfiled.
-- 21 Inactive rows rest on site-liveness (duplicates parked as Inactive
-  before Draft-hide existed) — triage table drafted, human call.
-- 6 rows with a strong deployment basis and no citable artifact (xoxno, huma,
-  untangled, rozo, bondhive, allbridge, blend) — could-not-propagate until a
-  receipt exists.
+- The Inactive/site-liveness class was triaged (#1326, 31 rows); the
+  duplicates among them are Draft shadows since 2026-09-05 (#1337 executed,
+  44 rows). Real deaths in that class still need the owner's verdict.
+- 2 rows with a strong deployment basis and no citable artifact remain
+  (`strongBasisSplit.deploymentStrongStatusWeak`); xoxno and huma earned
+  onchain-activity on the 2026-09-05 snapshot refresh.
 
-**At risk.** P4 weak share unchanged in kind: tonight moved 13 by propagation
-and 3 by curated evidence, and removed 5 lineage shadows from the count only
-if the scorer learns to skip canonicalSlug rows (queued). P3 Stage 2: the
+**At risk.** P4 weak share: tonight moved 13 by propagation and 3 by curated
+evidence; the served denominator stayed 984 (shadows are Draft now, and the
+board's population did not move). P3 Stage 2: the
 counter exists now; curate-projects shows 89 executes in 8 weeks of which 1
 was unattended — autonomy is measured, not earned.
 
-**Next (ordered).** 1. Scorer skips lineage shadows; STRONG_BASES drops
-`official-record` (not a statusBasis value) and /api/quality's definition text
-names the five real tiers. 2. Act on the Inactive/site-liveness triage
-(hide duplicates → Draft; receipts for the dead). 3. Health guard treats a
-run whose execute step was skipped as never-ran. 4. Re-run the routing
-battery after Raven re-baselines; file the stopword finding with the replica
-evidence. 5. Silence-close out of the headline close rate (ledger PR).
+**Next (ordered).** 1. DONE (#1325): STRONG_BASES names the five real tiers.
+2. DONE (#1337/#1338, executed): duplicates are Draft shadows with one
+owner. 3. DONE (#1331): a skipped execute step counts as never-ran.
+4. Re-run the routing battery after Raven re-baselines (anything filed
+upstream is the owner's call; nothing is drafted). 5. DONE (#1327).
+
+### Day addendum (2026-09-05, 15:00–19:00 UTC)
+
+**What changed.** #1340–#1348. Stablecoin page: USDT0 mark, a header logo
+that never rendered, finger scrubbing on bar charts with a haptic tick
+(web-haptics), a dollar y-axis. Board: `open` means ours (3), 16 routing
+misses carried as waiting-on-upstream, 3 refreshes. Duplicates: one owner
+(fold writes Draft + canonicalSlug; search folds by name at any status;
+the feed never writes onto a shadow) — 44 rows executed and read back.
+Knowledge notes: 47 repos gained dated, sourced notes (nightly backfill
+stamps them). Partners: 10 enriched from their own stellar.toml (SEPs,
+assets, ramps). Verification packets: 100 built; the owner approved the
+high tier (38 rows) and it was executed and read back; within the hour the
+owner overturned two Live verdicts (orbitcdp, skyhitz — both pages carry
+empty protocol stats under a "live" banner) and a cross-vendor audit showed
+8 more stamps rested on evidence the packet's own text called thin; those 8
+were withdrawn to site-liveness the same evening. Mirror pushed; the skill
+reference documents /api/rwa; the health lane is green.
+
+**Blocked.** Medium (32) and low (30) packet tiers: NOT to be applied under
+the old rule; re-grade under the rule below first. Raven catalog lag and
+scorer: unchanged, upstream, nothing drafted.
+
+**At risk.** The packet method itself: its Live rule ("a 200 page with
+product copy and a repo pushed in 90 days") returned two dead products to
+Live and stamped eight more on thin evidence — 10 of 34 high-tier Live
+verdicts. The tightened rule: a Live verdict is the product's own state
+(stats, app, chain), never a banner, title or CTA; empty or zero metrics on
+the page veto Live; the second signal is this product's own repository
+(not a hackathon, seeder, fund or shared repo, and never a 404 substitute);
+a page rendering under ~300 characters is not substantive.
+
+**Next (ordered).** 1. Re-grade the 32 medium and 30 low packet rows under
+the tightened rule, capturing the product-state signal per row, before any
+tier is offered for approval. 2. The Draft/Inactive/Live writers: the
+curated status step and the on-chain basis lane now skip shadows (#this
+PR); verify the 10:58 UTC sync skip live after its first scheduled run.
+3. The owner's verdicts on the 8 withdrawn rows and the 11 flagged
+small-product rows.
+
+## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
+
+1. A Live verdict is the product's own state, never chrome. orbitcdp went
+   Inactive → Live on the banner "Live on Stellar" and a Launch App button
+   while the same page served empty protocol stats.
+2. Empty or zero metrics on the page veto Live even with a 200 and a
+   same-day repo push. skyhitz: title "Gravity. Mainnet", repo pushed that
+   day, Total Mass 0.00 HITZ, Balance —.
+3. The second live signal is this product's own repository. Not a hackathon
+   repo (hot-wallet), a seeder (tala), a shared repo (wagelink/zebec), or an
+   org-newest substitute for a 404 (normal, vanna-finance). A page the
+   packet itself records at 8, 17 or 40 rendered characters is not
+   substantive (wagelink, untangled, fairblock).
+4. One field, one writer, registered before either lane runs unattended.
+   dedup wrote Draft, curate wrote Inactive, sync wrote Live on the same
+   status field in one day; the fix landed in three PRs and two more
+   writers were found by audit the same evening.
+5. Recategorization is reported as its own number, never as progress. The
+   day's 54-row weak-share drop is 13 propagated + 38 stamped + 3 curated;
+   the status truths gained are five receipted deaths.
+6. Numbers come from the run's own steps or the fetched page, never from an
+   agent's note. The packets cited titles while the pages' stats were dashes.
 
 ## Lessons — 2026-09-05 cross-vendor audit of the program
 
