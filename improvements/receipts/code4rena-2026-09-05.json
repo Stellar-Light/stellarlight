@@ -1,0 +1,28 @@
+{
+ "slug": "code4rena",
+ "url": "https://code4rena.com/",
+ "finalUrl": "https://code4rena.com/",
+ "fetchedAt": "2026-09-05T17:02:06.309Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 17:02:06 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": "fc70e0a914cebaa57afac0bbadafb0e00996bae31366f97e2b0c1795080af356",
+ "bodyTextChars": 2278,
+ "markers": [
+  {
+   "marker": "winding down",
+   "found": true,
+   "excerpt": "ast 90 days Past 365 days All time Resources Reports Help desk Docs Support Log in Login Log in / Register Code4rena is winding down. After 5 years of securing DeFi, Code4rena is closing its doors. Active competitions and bounties are being seen through to completion. 1,607 unique high-severity vuln"
+  },
+  {
+   "marker": "closing its doors",
+   "found": true,
+   "excerpt": "esk Docs Support Log in Login Log in / Register Code4rena is winding down. After 5 years of securing DeFi, Code4rena is closing its doors. Active competitions and bounties are being seen through to completion. 1,607 unique high-severity vulns 26,898 unique findings 16,600+ registered wardens 512 aud"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
