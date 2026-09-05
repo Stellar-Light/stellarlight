@@ -385,7 +385,7 @@ gated by q (Exchange 15→18), unknown partner regions 400 with the vocabulary
 (labels/case normalised), material-change counts on /api/changes, builders
 admitted by owned-repo language (rust 8→33), two audit reports joined to
 their projects, a hijacked website link no longer re-written nightly, the
-nightly knowledge-notes backfill actually executing (18 green no-op runs
+nightly knowledge-notes backfill actually executing (3 scheduled no-op runs
 found), lane autonomy measured (62 lanes; 11 at 4+ weeks; 0 could-not-check),
 routing graded on the intended op (48/65; persona 16/28), a partition guard
 that names vacuous checks. Truth battery 112/112 (was 110/112); golden 51/51.
@@ -453,7 +453,7 @@ other claims were checked and, where wrong, are not here):
     id-noun exclusion; that is the scorer's, upstream.
 13. A lane earns a run only when its execute step concluded `success`; a run
     whose steps were skipped is a no-op, and the health guard reports it as
-    never-ran. (18 green nightly note-backfill runs executed nothing.)
+    never-ran. (3 scheduled note-backfill runs executed nothing; a first count said 18 by reading completed runs, not schedule runs.)
 14. An artifact licenses only the tier it can support: asset movement →
     onchain-activity; an operator's toml or a receipt → human-verified /
     product-integration. A strong basis copied across records without a

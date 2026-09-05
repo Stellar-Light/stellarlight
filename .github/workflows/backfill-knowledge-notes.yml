@@ -44,8 +44,8 @@ jobs:
       # the nightly gets its own hardcoded execute step.
 
       # 2026-09-05: this step carried `if: github.event_name == 'workflow_dispatch'`,
-      # so every SCHEDULED run skipped its only step and reported green — 18
-      # nightly runs (since 2026-08-18) moved no data while the board and the
+      # so every SCHEDULED run skipped its only step and reported green — the 3
+      # scheduled runs since the cron was added (2026-09-02) moved no data while the board and the
       # program text said notes reach rows nightly. The expression below already
       # writes on schedule and dry-runs on a manual dispatch unless execute=true.
       - name: Backfill (schedule = execute; dispatch = dry run unless execute)
