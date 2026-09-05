@@ -238,10 +238,14 @@ const ONCHAIN_PRODUCT_TYPES = [
 // moved by four and the board read as though nothing had happened. A metric
 // that silently ignores a new evidence tier is worse than no metric: it
 // reports the work as not done.
+// NOT here: "official-record". It is a value of scf.basis (award facts parsed
+// from the SCF submission cards), never a statusBasis option, and it sat on
+// this list serving 0 forever — the board's own definition named a tier no
+// row could hold while omitting two tiers rows do hold (found by a lane agent
+// on 2026-09-05; lesson 1: an enum and every aggregator that classifies it).
 const STRONG_BASES = [
 	"human-verified",
 	"onchain-activity",
-	"official-record",
 	// the live product itself was observed referencing Stellar infrastructure
 	"product-integration",
 	// the project's own repo committed inside a dated window — awarded only to
@@ -791,11 +795,7 @@ if (recallOpen > 0)
  * denominator, why it matters to a caller, what closes it, and real examples
  * so the work is pickup-able. This is the actionable half of the report:
  * knownLimitations says "be careful", the matrix says "here is the list". */
-const strongBases = new Set([
-	"human-verified",
-	"onchain-activity",
-	"official-record",
-]);
+const strongBases = new Set<string>(STRONG_BASES);
 const weakBasisRows = [...seen.values()].filter(
 	(p) => !isStrongBasis(p.statusBasis),
 );

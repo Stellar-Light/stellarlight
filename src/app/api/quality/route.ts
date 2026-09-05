@@ -127,9 +127,11 @@ export async function GET(req: NextRequest) {
 				probedAt: "2026-07-11",
 				counts: {
 					clean: ops.filter((o) => o.contractProbe === "clean").length,
-					violations: ops.filter((o) => o.contractProbe === "violations").length,
+					violations: ops.filter((o) => o.contractProbe === "violations")
+						.length,
 					skipped: ops.filter((o) => o.contractProbe === "skipped").length,
-					unmeasured: ops.filter((o) => o.contractProbe === "unmeasured").length,
+					unmeasured: ops.filter((o) => o.contractProbe === "unmeasured")
+						.length,
 				},
 				operations: ops,
 			},
@@ -189,10 +191,11 @@ export async function GET(req: NextRequest) {
 				strongBases: [
 					"human-verified",
 					"onchain-activity",
-					"official-record",
+					"product-integration",
+					"repo-activity",
 				],
 				basisStrength:
-					"Strong = human-verified, onchain-activity, official-record. Everything else (operator-announcement, site-liveness, source-inherited, unverified) is weak and counts as the strongBasis fact being ABSENT. site-liveness means only that a page answered.",
+					"Strong = human-verified (a person looked), onchain-activity (dated asset/contract/TVL evidence), product-integration (the live product references Stellar infrastructure — an integration observed, never proof it works), repo-activity (the project's own repo committed inside a dated window; awarded to library/SDK rows only). Everything else (operator-announcement, site-liveness, source-inherited, unverified) is weak and counts as the strongBasis fact being ABSENT. site-liveness means only that a page answered. This list and the board's STRONG_BASES are the same list; official-record is an scf.basis value and was never a status tier.",
 				missingByField: e.projects.missingCounts,
 			},
 			repoQuality: {
