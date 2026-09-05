@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-05T03:29:52.551Z",
+	"asOf": "2026-09-05T04:52:45.640Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 89,
 	"healthy": 88,
@@ -7,7 +7,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "7 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "8 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -159,11 +159,11 @@
 			"name": "Award onchain-activity basis (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T02:33:56Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-05T04:31:30Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 5,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"runs": 6,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -182,10 +182,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-04T03:45:51Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 0d ago (manual tool — age not judged)"
+			"why": "last green 1d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -225,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:22:57Z",
+			"lastSuccessAt": "2026-09-05T04:50:45Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 16,
+			"runs": 24,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:27:46Z",
+			"lastSuccessAt": "2026-09-05T04:50:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -309,26 +309,15 @@
 			"why": "last green 43d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "dedup-projects.yml",
-			"name": "Dedup projects (manual)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-09-04T21:31:14Z",
-			"ageDays": 0,
-			"graceDays": 45,
-			"runs": 4,
-			"why": "last green 0d ago (manual tool — age not judged)"
-		},
-		{
 			"file": "dedupe-repos.yml",
 			"name": "Dedupe repo docs (manual)",
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T04:04:32Z",
-			"ageDays": 7,
+			"ageDays": 8,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 7d ago (manual tool — age not judged)"
+			"why": "last green 8d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "deepwiki-calibrate.yml",
@@ -336,10 +325,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T04:05:47Z",
-			"ageDays": 4,
+			"ageDays": 5,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 4d ago (manual tool — age not judged)"
+			"why": "last green 5d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "depth-eval.yml",
@@ -369,10 +358,10 @@
 			"cron": "0 9 * * 0",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T04:13:43Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "enrich-builder-repos.yml",
@@ -611,10 +600,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T04:18:43Z",
-			"ageDays": 61,
+			"ageDays": 62,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 61d ago (manual tool — age not judged)"
+			"why": "last green 62d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "migrate-research-url-host.yml",
@@ -632,11 +621,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:22:57Z",
+			"lastSuccessAt": "2026-09-05T04:46:47Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
-			"why": "last green 0d ago"
+			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -687,11 +676,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:10:51Z",
+			"lastSuccessAt": "2026-09-05T04:04:58Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 33,
-			"why": "last green 0d ago"
+			"runs": 35,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -771,14 +760,25 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "refresh-rwa.yml",
+			"name": "Refresh RWA measurements",
+			"cron": "37 */6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-05T03:33:35Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 2,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "refresh-stablecoins.yml",
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T20:49:45Z",
+			"lastSuccessAt": "2026-09-05T04:38:14Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 87,
+			"runs": 88,
 			"why": "last green 0d ago"
 		},
 		{
@@ -786,10 +786,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T00:09:52Z",
+			"lastSuccessAt": "2026-09-05T04:37:14Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 16,
+			"runs": 17,
 			"why": "last green 0d ago"
 		},
 		{
@@ -929,10 +929,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T03:27:46Z",
+			"lastSuccessAt": "2026-09-05T04:50:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -987,8 +987,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 14,
-			"why": "7 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 15,
+			"why": "8 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
