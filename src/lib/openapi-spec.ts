@@ -2960,8 +2960,18 @@ export const spec: OpenAPISpec = {
 													hackathon: { type: "string" },
 													hackathonSlug: { type: "string" },
 													track: { type: "string", nullable: true },
-													placement: { type: "string", nullable: true },
-													award: { type: "string", nullable: true },
+													placement: {
+														type: "string",
+														nullable: true,
+														description:
+															"This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner.",
+													},
+													award: {
+														type: "string",
+														nullable: true,
+														description:
+															"Award CATEGORY title as DoraHacks published it ('10K Prize Pool', '$10,000 XLM Prize'), shared by every placement inside that category — NOT this build's payout. For what the build itself won use `prizeUsd` (null = undisclosed) or `placement`; reading this string as the prize overstates a 3rd place several times over.",
+													},
 													isWinner: {
 														type: "boolean",
 														description:
@@ -3519,7 +3529,16 @@ export const spec: OpenAPISpec = {
 													items: { type: "string" },
 													description: "SEP standards the partner implements.",
 												},
-												rampTypes: { type: "array", items: { type: "string" } },
+												rampTypes: {
+													type: "array",
+													nullable: true,
+													items: {
+														type: "string",
+														enum: ["on-ramp", "off-ramp"],
+													},
+													description:
+														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed — the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
+												},
 												country: { type: "string", nullable: true },
 												acceptingClients: { type: "boolean" },
 												typicalEngagement: { type: "string", nullable: true },

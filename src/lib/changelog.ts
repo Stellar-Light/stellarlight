@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.46",
+		type: "fixed",
+		summary:
+			"getPartner serves an unconfirmed `rampTypes` as null like getPartners (was []); searchHackathonBuilds documents `award` as the category title and `placement` as the build's own rank; getLeaderboard's activity metric states that volume counts every linked repo.",
+		detail:
+			"Through-Raven battery 2026-09-05: MYKOBO's detail row served rampTypes [] while the list row served null for the same partner — the anchor implements SEP-24 but its transfer-server /info is unreachable from outside, so nothing was confirmed; an empty array asserted 'no ramps'. Both routes now serve null (#1360 shipped the route; this entry documents it), and the schema says null = no ramp confirmed (unreadable /info or none enabled), never inferred from SEP presence. The builds surface gains the award-category wording the hackathon winners already carried (a '10K Prize Pool' string is the category, not the payout; use prizeUsd/placement). metricDefinitions.activity now says the 90-day sum counts every indexed repo linked to the project, non-Stellar work included, and points at github.repos.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.45",
 		type: "changed",
 		summary:
