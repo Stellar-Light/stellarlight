@@ -6868,7 +6868,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across indexed repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
+					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; this service's own row is never ranked; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
 						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
@@ -10075,7 +10075,7 @@ export const spec: OpenAPISpec = {
 								type: "integer",
 								nullable: true,
 								description:
-									"Default-branch commits over the trailing 90 days, summed across the project's indexed repos from the enrich pass's activitySignals. The sort=activity key. null = no indexed repo carries a count (an INDEX gap, never zero activity); such rows sort last.",
+									"Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking — the directory is the instrument, not a subject.",
 							},
 							commits90dAsOf: {
 								type: "string",

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.47",
+		type: "changed",
+		summary:
+			"getLeaderboard: activity volume counts only Stellar-evidenced repos, and this service's own row is never ranked.",
+		detail:
+			"The first volume board (1.9.45) was led by Gateway.fm and Rumble Fish on company-wide commits and carried this directory's own row: neither is what 'most active Stellar projects' means. `github.commits90d` now sums only linked repos whose scanned code proves Stellar use (stellarProof other than none), and the stellar-light row is excluded from every sort — the directory is the instrument, not a subject. metricDefinitions.activity says both.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.46",
 		type: "fixed",
 		summary:
