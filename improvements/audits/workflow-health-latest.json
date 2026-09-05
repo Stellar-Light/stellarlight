@@ -1,14 +1,9 @@
 {
-	"asOf": "2026-09-05T21:02:30.936Z",
+	"asOf": "2026-09-05T21:12:15.925Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 91,
+	"checked": 90,
 	"healthy": 89,
 	"broken": [
-		{
-			"file": "refresh-ec-snapshot.yml",
-			"state": "failing",
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Commit if EC has published a new day\""
-		},
 		{
 			"file": "self-audit.yml",
 			"state": "standing-signal",
@@ -241,10 +236,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:00:14Z",
+			"lastSuccessAt": "2026-09-05T21:06:56Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -263,10 +258,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:00:14Z",
+			"lastSuccessAt": "2026-09-05T21:06:56Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -648,7 +643,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T20:42:56Z",
+			"lastSuccessAt": "2026-09-05T21:06:56Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -763,17 +758,6 @@
 			"graceDays": 45,
 			"runs": 3,
 			"why": "last green 79d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "refresh-ec-snapshot.yml",
-			"name": "Refresh Electric Capital developer snapshot",
-			"cron": "0 15 * * *",
-			"state": "failing",
-			"lastSuccessAt": "2026-09-04T17:57:56Z",
-			"ageDays": 1,
-			"graceDays": 4,
-			"runs": 63,
-			"why": "1 failed run(s) since its last green 1d ago — it is trying and losing, not idle; dies at \"Commit if EC has published a new day\""
 		},
 		{
 			"file": "refresh-research-corpus.yml",
@@ -956,7 +940,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T21:00:14Z",
+			"lastSuccessAt": "2026-09-05T21:10:46Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1014,7 +998,7 @@
 			"lastSuccessAt": "2026-09-05T16:47:46Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 23,
+			"runs": 24,
 			"why": "last green 0d ago"
 		}
 	]
