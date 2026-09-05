@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T05:27:43.261Z",
+ "generatedAt": "2026-09-05T05:49:22.639Z",
  "surfaces": [
   {
    "surface": "consumer",
@@ -7835,10 +7835,8 @@
    {
     "slug": "blend",
     "prominence": 90,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8459,11 +8457,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 903
+    "count": 900
    },
    {
     "network": "mainnet",
-    "count": 79
+    "count": 82
    },
    {
     "network": "testnet",
@@ -8471,29 +8469,28 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 903,
-   "applicableUnknown": 195,
-   "notApplicable": 708,
+   "unknown": 900,
+   "applicableUnknown": 194,
+   "notApplicable": 706,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
    "human-verified": 162,
-   "onchain-activity": 45,
-   "official-record": 0,
+   "onchain-activity": 46,
    "product-integration": 56,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 605,
-   "onchainEligible": 22,
+   "weakLiveRows": 604,
+   "onchainEligible": 21,
    "appOnly": 583,
-   "deploymentStrongStatusWeak": 8,
-   "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record already carries a strong basis while the STATUS record this board scores is still weak — evidence that was earned and receipted but never propagated, not evidence that is missing."
+   "deploymentStrongStatusWeak": 7,
+   "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 499
+    "count": 498
    },
    {
     "basis": "human-verified",
@@ -8513,7 +8510,7 @@
    },
    {
     "basis": "onchain-activity",
-    "count": 45
+    "count": 46
    },
    {
     "basis": "unverified",
@@ -8525,7 +8522,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 615,
+  "weakestTotal": 614,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8926,26 +8923,6 @@
     "missing": [
      "strongBasis",
      "linked"
-    ]
-   },
-   {
-    "slug": "blend",
-    "name": "Blend",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 90,
-    "deploymentNetwork": "mainnet",
-    "deploymentBasis": "onchain-activity",
-    "hasOnchainFootprint": true,
-    "deploymentApplies": true,
-    "types": [
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
     ]
    },
    {
@@ -9353,12 +9330,33 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "decaf",
+    "name": "Decaf",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 66,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Wallet",
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 605
+    "count": 604
    },
    {
     "field": "dated",
@@ -10636,8 +10634,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "61% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "596 of 984 rows (census)",
+   "limit": "60% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "595 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -11026,10 +11024,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 903,
+    "missing": 900,
     "of": 984,
-    "share": 91.8,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 195 are on-chain product types where the question applies and an agent will ask it; the other 708 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "share": 91.5,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 900 unknown rows, 194 are on-chain product types where the question applies and an agent will ask it; the other 706 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11044,17 +11042,16 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 605,
+    "missing": 604,
     "of": 984,
-    "share": 61.5,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 22 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 583 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 61.4,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 21 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 583 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 18,
+    "examplePoolSize": 17,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "blend",
      "kale",
      "allbridge",
      "quicknode",
@@ -11065,7 +11062,8 @@
      "vesseo",
      "scorechain",
      "fonbnk",
-     "lightsail-network-quasar"
+     "lightsail-network-quasar",
+     "solar-wallet"
     ]
    },
    {
