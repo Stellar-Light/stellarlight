@@ -18,6 +18,7 @@
 // "dex" → "amm"/"swap", "pool" → "liquidity", "on-ramp" → "anchor". Each query
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
+import { RESOLVABLE_PROJECT_STATUSES } from "./project-status";
 import { contentTokens, isContentStopword } from "./repo-search";
 import {
 	anchorTokens,
@@ -480,6 +481,53 @@ export function structuredSelectClauses(
 		if (m) out.push({ "coverage.seps": { contains: `sep-${m[1]}` } });
 	}
 	return out;
+}
+
+/**
+ * Status + lineage half of the candidate where-clause — "which rows may this
+ * search even look at". The default pool is the shared RESOLVABLE tier
+ * (src/lib/project-status.ts): everything with a public page, Inactive
+ * included (a name lookup must still find a project we record as dead) and
+ * Draft — hidden pending approval — excluded.
+ *
+ * ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05). Two lanes hide a
+ * duplicate and they used to disagree: the dedup lane parks the lower-ranked
+ * twin as Draft, curate's DUPE_MERGES re-marked the same row Inactive 30
+ * minutes later, and Inactive is a DEATH VERDICT a consumer reads as "this
+ * project shut down". The reason curate chose Inactive was here: a lineage
+ * shadow must stay a FOLD CANDIDATE so a lookup of the old name still resolves
+ * to the canonical, and the default pool below excludes Draft — so a Draft
+ * shadow would have gone dark and broken name continuity.
+ *
+ * So a shadow (canonicalSlug set) is admitted in query mode REGARDLESS of its
+ * status, Draft included. It is never SERVED as itself: the shadow-fold swaps
+ * it for its canonical, and the route drops any Draft row that survives the
+ * fold. An explicit ?status= stays a hard contract (it already excluded
+ * off-status shadows), and browse mode still excludes shadows outright so
+ * counts.total and page sizes stay exact.
+ */
+export function statusAdmissionWhere(
+	hasQuery: boolean,
+	statusParam: string | null,
+): Record<string, unknown> {
+	const status = statusParam
+		? { equals: statusParam }
+		: { in: [...RESOLVABLE_PROJECT_STATUSES] };
+	// Browse mode (no query): shadows are merged-away dupes, not real records
+	// — excluded in the DB so counts.total and page sizes are exact
+	// (re-measure 2026-07-11: ?status=Inactive said total=82 while only 42
+	// real rows survived the fold).
+	if (!hasQuery) return { status, canonicalSlug: { equals: null } };
+	// Explicit ?status= overrides the pool — including for shadows, so a status
+	// browse can never be widened by a fold candidate of another status.
+	if (statusParam) return { status };
+	// Query mode, default pool: status OR shadow. `and` (not a second `or`) —
+	// the caller owns top-level `or` for the token clauses, and Payload ANDs
+	// every top-level key. `exists` on a text field means set, non-null and
+	// non-empty, which is exactly "is a shadow".
+	return {
+		and: [{ or: [{ status }, { canonicalSlug: { exists: true } }] }],
+	};
 }
 
 // Ramp/anchor/corridor intent vocabulary. A query carrying any of these (direct

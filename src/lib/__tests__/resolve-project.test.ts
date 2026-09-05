@@ -125,3 +125,32 @@ describe("resolveProject", () => {
 		expect(r.current?.slug).toBe("stellar-passport");
 	});
 });
+
+// One owner, one status for a duplicate (2026-09-05): both lanes now park a
+// merged twin at Draft instead of Inactive. Resolution must not care — it
+// reads the WHOLE collection (no status filter) and follows canonicalSlug, so
+// the old name keeps resolving to the survivor.
+describe("a Draft shadow still resolves to its canonical", () => {
+	const SET_DRAFT: ResolvableProject[] = [
+		P({ slug: "stellar-passport", name: "Stellar Passport" }),
+		P({
+			slug: "passport",
+			name: "Passport",
+			status: "Draft",
+			canonicalSlug: "stellar-passport",
+		}),
+	];
+
+	it("by slug", () => {
+		const r = resolveProject("passport", SET_DRAFT);
+		expect(r.found).toBe(true);
+		expect(r.superseded).toBe(true);
+		expect(r.current?.slug).toBe("stellar-passport");
+	});
+
+	it("by name", () => {
+		const r = resolveProject("Passport", SET_DRAFT);
+		expect(r.current?.slug).toBe("stellar-passport");
+		expect(r.subject?.status).toBe("Draft"); // hidden, and said so — not dead
+	});
+});
