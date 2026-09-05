@@ -1085,6 +1085,13 @@ export async function GET(req: NextRequest) {
 			const baseOr = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
 					{ name: { like: v } },
+					// The slug IS identity vocabulary (buildHaystack says so) — but
+					// the haystack only scores rows the DB returned, and this clause
+					// never asked the DB for the slug. q="gatewayfm" (name
+					// "Gateway.fm") fetched nothing, fell to semantic neighbours and
+					// kept the daily truth battery red for three days (E:hv-status).
+					// Over-fetch is harmless: admission below decides membership.
+					{ slug: { like: v } },
 					{ aliases: { like: v } },
 					{ shortDescription: { like: v } },
 					{ category: { like: v } },
