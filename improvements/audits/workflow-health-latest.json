@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-05T06:19:32.529Z",
+	"asOf": "2026-09-05T06:21:28.808Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 89,
 	"healthy": 88,
@@ -225,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T06:14:13Z",
+			"lastSuccessAt": "2026-09-05T06:19:32Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 65,
+			"runs": 69,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T06:17:39Z",
+			"lastSuccessAt": "2026-09-05T06:19:32Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
@@ -566,10 +566,10 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T01:24:29Z",
+			"lastSuccessAt": "2026-09-05T06:18:37Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 28,
+			"runs": 29,
 			"why": "last green 0d ago"
 		},
 		{
@@ -929,7 +929,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T06:18:15Z",
+			"lastSuccessAt": "2026-09-05T06:19:32Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
