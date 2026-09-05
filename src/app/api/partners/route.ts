@@ -57,6 +57,18 @@ const PARTNER_TYPES = [
 // Mirrors Partners.rampTypes select options.
 const RAMP_TYPES = ["on-ramp", "off-ramp"];
 const REGION_VALUES: string[] = REGIONS.map((r) => r.value);
+/** "North America" / "north america" / "NORTH-AMERICA" / "latam" → "north-america" / "latam". */
+function normalizeRegion(raw: string): string | null {
+	const key = raw
+		.trim()
+		.toLowerCase()
+		.replace(/[\s_]+/g, "-");
+	if (REGION_VALUES.includes(key)) return key;
+	const byLabel = REGIONS.find(
+		(r) => r.label.toLowerCase() === raw.trim().toLowerCase(),
+	);
+	return byLabel ? byLabel.value : null;
+}
 
 /**
  * Map a Payload partner doc → the public shape. Drops auth/internal fields,
@@ -313,7 +325,13 @@ export async function GET(req: NextRequest) {
 	// 2026-09-05 while q=nigeria found an anchor. A country is not a region —
 	// it lives in coverage.countries and is matched from q. Unknown values 400
 	// with the vocabulary, the ramps pattern.
-	if (region && !REGION_VALUES.includes(region)) {
+	// Labels ("North America"), case ("Africa") and the label/value hybrids a
+	// consumer might carry from another surface normalise to the stored value
+	// before the vocabulary check — the 400 is for values outside the
+	// vocabulary, never for spelling the right one differently (Grok audit,
+	// 2026-09-05).
+	const regionNorm = region ? normalizeRegion(region) : null;
+	if (region && (!regionNorm || !REGION_VALUES.includes(regionNorm))) {
 		return NextResponse.json(
 			{
 				error: `Unknown region '${region}'`,
@@ -337,7 +355,7 @@ export async function GET(req: NextRequest) {
 			const where: any = { status: { equals: "published" } };
 			if (type) where.partnerType = { equals: type };
 			if (sector) where.sectors = { contains: sector };
-			if (region) where.regions = { contains: region };
+			if (regionNorm) where.regions = { contains: regionNorm };
 			if (rampList.length)
 				where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
 			// engine-e ambiguous-contract (open since 07-22): with every published

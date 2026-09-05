@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.42",
+		type: "fixed",
+		summary:
+			"getPartners `region` normalises labels and case before the vocabulary check and the parameter carries its enum; searchProjects with a `type` filter no longer lets `q` gate the typed set at the query.",
+		detail:
+			"Two fixes from the 2026-09-05 audits. (1) The 1.9.38 region check compared exact values, so 'North America' and 'Africa' — spellings a consumer carries from another surface — returned 400 alongside genuinely unknown values; labels and case now normalise to the stored value and the OpenAPI parameter lists the eight values. (2) searchProjects with type=<T>&q=<terms> promised that q only RANKS within the closed typed set (matchMode 'all') but the text clauses still ran at the query: type=Exchange&q=exchange served 15 of 18 Exchange rows. With a type filter the whole typed set is fetched and ranked in memory; the truth battery's G slice is green for every type.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.41",
 		type: "added",
 		summary:

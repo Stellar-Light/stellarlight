@@ -3377,8 +3377,20 @@ export const spec: OpenAPISpec = {
 						name: "region",
 						in: "query",
 						description:
-							"Filter by region served — a closed vocabulary of continents/blocs: global, north-america, latam, europe, africa, mena, asia, oceania. Unknown values return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text.",
-						schema: { type: "string" },
+							'Filter by region served — a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text.',
+						schema: {
+							type: "string",
+							enum: [
+								"global",
+								"north-america",
+								"latam",
+								"europe",
+								"africa",
+								"mena",
+								"asia",
+								"oceania",
+							],
+						},
 					},
 					{
 						// Param-level doc ONLY — op description deliberately untouched
