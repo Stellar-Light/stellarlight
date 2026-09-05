@@ -101,14 +101,23 @@ export const AUDIT_PROJECT_ALIASES: Record<
 	crossmint: { slug: "crossmint", basis: "name-exact" },
 	equitx: { slug: "equitx", basis: "name-exact" },
 	excellar: { slug: "excellar", basis: "name-exact" },
-	"fxdao-sc": { slug: null, basis: "unmatched" },
+	// "FxDAO-SC" is FxDAO's smart-contract repo name (report #? "Security Audit
+	// Report FxDAO", Runtime Verification 2024-05-16); the directory row is
+	// `fxdao` (name "FxDAO"). Linked 2026-09-05 after the audit served with no
+	// project for four months.
+	"fxdao-sc": { slug: "fxdao", basis: "alias" },
 	grantpicks: { slug: "grantpicks", basis: "name-exact" },
 	hiyield: { slug: "hiyield", basis: "name-exact" },
 	"hot bridge": { slug: "hot-protocol", basis: "alias" },
 	"huma protocol": { slug: "huma", basis: "name-exact" },
 	"icon xcall": { slug: null, basis: "unmatched" },
 	"normal finance": { slug: "normal", basis: "name-exact" },
-	octolend: { slug: null, basis: "unmatched" },
+	// The report's own title reads "OctoLend - Untangled - Security Audit
+	// Report" (Runtime Verification 2026-03-20): OctoLend is Untangled's
+	// lending product on Stellar and the directory row is `untangled`
+	// (src/data/onchain-contracts.ts carries its mainnet addresses). Linked
+	// 2026-09-05.
+	octolend: { slug: "untangled", basis: "alias" },
 	"openzeppelin stellar contracts library": {
 		slug: "openzeppelin",
 		basis: "alias",
