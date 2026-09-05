@@ -55,9 +55,9 @@
  *
  * Dry-run by default; --execute writes.
  */
+import "./load-env";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 import type { Project } from "../src/payload-types";
