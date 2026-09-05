@@ -421,6 +421,11 @@ export async function measureStablecoin(
 	if (asset.useCountryFlag) {
 		logoUrl = `flag:${asset.peg}`;
 		logoSource = "country-flag";
+	} else if (asset.preferFallbackLogo && asset.fallbackImageUrl) {
+		// The issuer's own image is known not to load for readers (an IPFS
+		// gateway URL); our copy is served and labelled as such.
+		logoUrl = asset.fallbackImageUrl;
+		logoSource = "fallback";
 	} else {
 		const toml = await issuerToml(asset.domain);
 		const fromToml = toml
