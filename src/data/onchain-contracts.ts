@@ -30,6 +30,28 @@ export interface OnchainSeed {
 
 export const ONCHAIN_SEEDS: OnchainSeed[] = [
 	{
+		// kalepail/KALE-sc README "Network | MAINNET" table (verified 2026-09-05):
+		// farm contract CDL74…, asset KALE:GBDVX4…, SAC CB23…. stellar.expert
+		// shows the asset at 11,272 holders and 83M payments (domain kalepail.com);
+		// the row (prominence 90) had an empty onchain block until this entry.
+		slug: "kale",
+		contracts: [
+			{
+				address: "CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA",
+				label: "KALE farm contract",
+			},
+			{
+				address: "CB23WRDQWGSP6YPMY4UV5C4OW5CBTXKYN3XEATG7KJEZCXMJBYEHOUOV",
+				label: "KALE token (SAC)",
+			},
+		],
+		asset: {
+			code: "KALE",
+			issuer: "GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE",
+		},
+		source: "https://github.com/kalepail/KALE-sc#readme",
+	},
+	{
 		// blend-capital/blend-utils mainnet.contracts.json (verified 2026-07-20)
 		slug: "blend",
 		contracts: [
