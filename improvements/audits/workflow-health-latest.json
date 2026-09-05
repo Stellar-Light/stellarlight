@@ -1,13 +1,18 @@
 {
-	"asOf": "2026-09-05T05:18:59.427Z",
+	"asOf": "2026-09-05T05:21:38.056Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 90,
-	"healthy": 89,
+	"checked": 89,
+	"healthy": 87,
 	"broken": [
+		{
+			"file": "consumption-guard.yml",
+			"state": "failing",
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"No new type errors in scripts/\""
+		},
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "10 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "11 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -98,17 +103,6 @@
 			"graceDays": 45,
 			"runs": 2,
 			"why": "last green 1d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "backfill-knowledge-notes.yml",
-			"name": "Backfill knowledge notes",
-			"cron": "23 3 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-04T08:02:28Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 9,
-			"why": "last green 0d ago"
 		},
 		{
 			"file": "backfill-lifecycle.yml",
@@ -235,12 +229,12 @@
 			"file": "consumption-guard.yml",
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:17:00Z",
+			"state": "failing",
+			"lastSuccessAt": "2026-09-05T05:19:04Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 37,
-			"why": "last green 0d ago"
+			"runs": 40,
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"No new type errors in scripts/\""
 		},
 		{
 			"file": "content-freshness.yml",
@@ -258,10 +252,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:17:00Z",
+			"lastSuccessAt": "2026-09-05T05:19:52Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -635,7 +629,7 @@
 			"lastSuccessAt": "2026-09-05T05:12:58Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 98,
 			"why": "last green 0d ago"
 		},
 		{
@@ -940,7 +934,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:17:00Z",
+			"lastSuccessAt": "2026-09-05T05:20:11Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
@@ -998,8 +992,8 @@
 			"lastSuccessAt": "2026-09-02T17:27:02Z",
 			"ageDays": 2,
 			"graceDays": 21,
-			"runs": 17,
-			"why": "10 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 18,
+			"why": "11 failed run(s) since its last green 2d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
