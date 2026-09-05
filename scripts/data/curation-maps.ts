@@ -1267,7 +1267,7 @@ export const STATUS_FIX: Record<
 		from: "Development",
 		to: "Development",
 		note: "Row-facts 2026-09-05: RaumFi V3 (CLMM DEX for Soroban) is in active development — Raum-Network/raum-raumfi-v3 ('CLMM implementation of RaumFi DEX') pushed 2026-05-30, and raum.network names 'RaumFi V3 for Stellar Soroban concentrated liquidity' as current product work; the recorded dex.raum.network has no DNS record (link removed 2026-09-02).",
-		asOf: "2026-09-05",
+		asOf: "2026-05-30", // the repo's last push — the evidence date, not the day we looked,
 		sourceUrl: "https://github.com/Raum-Network/raum-raumfi-v3",
 		basis: "repo-activity",
 	},
