@@ -43,7 +43,11 @@ function toPublic(p: any) {
 		seps: p.seps ?? [],
 		tomlSourceUrl: p.tomlSourceUrl ?? null,
 		tomlFetchedAt: p.tomlFetchedAt ?? null,
-		rampTypes: p.rampTypes ?? [],
+		// null, never []: the list route already serves an unconfirmed ramp set
+		// as null, and the detail served [] for the same row (MYKOBO, 2026-09-05
+		// through-Raven battery) — an empty array asserts "no ramps" where the
+		// transfer server's /info was simply not readable.
+		rampTypes: p.rampTypes?.length ? p.rampTypes : null,
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		typicalEngagement: p.typicalEngagement ?? null,
