@@ -5219,6 +5219,8 @@ export interface operations {
                                 issuers?: number;
                                 matched?: number;
                                 returned?: number;
+                                /** @description Served rows that carry a `measured` reading from the six-hour lane. */
+                                measured?: number;
                                 byLevel?: {
                                     [key: string]: number;
                                 };
@@ -5284,6 +5286,17 @@ export interface operations {
                              * @enum {string|null}
                              */
                             controlsBasis?: "horizon-issuer-flags" | null;
+                            /** @description What the six-hour refresh lane measured about this asset — supply, holders, activityCount — dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why). */
+                            measured?: {
+                                supply?: number | null;
+                                holders?: number | null;
+                                /** @description Classic: lifetime payment operations. Soroban: lifetime contract events. A count, not an amount; not comparable across kinds. */
+                                activityCount?: number | null;
+                                /** @enum {string} */
+                                measureBasis?: "live" | "unmeasured";
+                                measuredAt?: string;
+                                note?: string | null;
+                            } | null;
                         }[];
                     };
                 };

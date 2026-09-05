@@ -7367,6 +7367,11 @@ export const spec: OpenAPISpec = {
 														issuers: { type: "integer" },
 														matched: { type: "integer" },
 														returned: { type: "integer" },
+														measured: {
+															type: "integer",
+															description:
+																"Served rows that carry a `measured` reading from the six-hour lane.",
+														},
 														byLevel: {
 															type: "object",
 															additionalProperties: { type: "integer" },
@@ -7498,6 +7503,28 @@ export const spec: OpenAPISpec = {
 														enum: ["horizon-issuer-flags"],
 														description:
 															"Where controls came from; null when controls is null.",
+													},
+													measured: {
+														type: "object",
+														nullable: true,
+														description:
+															"What the six-hour refresh lane measured about this asset — supply, holders, activityCount — dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why).",
+														properties: {
+															supply: { type: "number", nullable: true },
+															holders: { type: "number", nullable: true },
+															activityCount: {
+																type: "number",
+																nullable: true,
+																description:
+																	"Classic: lifetime payment operations. Soroban: lifetime contract events. A count, not an amount; not comparable across kinds.",
+															},
+															measureBasis: {
+																type: "string",
+																enum: ["live", "unmeasured"],
+															},
+															measuredAt: { type: "string" },
+															note: { type: "string", nullable: true },
+														},
 													},
 												},
 											},

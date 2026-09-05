@@ -32,6 +32,7 @@ import { RSSFeeds } from "./collections/RSSFeeds";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
 import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
+import { RwaAssets } from "./collections/RwaAssets";
 import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
@@ -88,6 +89,7 @@ export default buildConfig({
 		Audits,
 		Stablecoins,
 		StablecoinSnapshots,
+		RwaAssets,
 		AwardRounds,
 		AwardNominees,
 		AwardVoters,

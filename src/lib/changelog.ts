@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api"],
+		version: "spec@1.9.37",
+		type: "added",
+		summary:
+			"getRwaAssets rows gain `measured` — supply, holders and activity read by a six-hour lane and dated — the second bounded lane (P3).",
+		detail:
+			"P3 said one lane is not a system. The RWA registry was a one-off: 97 assets verified by hand on 2026-09-04, with a verifiedAt that would only age. It is now the identity source for a bounded lane that MEASURES each row every six hours into its own collection (rwa-assets) — classic assets via stellar.expert (supply, trustlines, lifetime payments), Soroban tokens via the contract record (lifetime events, supply where exposed). Every reading is dated; a failed fetch never blanks a good number (measureBasis unmeasured, previous values kept, note says why); a row is never deleted; and a run that could not measure most of the set exits 2 rather than passing as clean. On the row, `measured` is null until the lane has read that asset — an admission, never zero — and counts.measured says how many served rows carry one. If the store is unreachable, the registry still serves and meta.warnings says the readings are missing this request. Not a human stamp: the lane writes only measurement fields and never touches identity, verification level or state.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api"],
 		version: "spec@1.9.36",
 		type: "added",
 		summary:
