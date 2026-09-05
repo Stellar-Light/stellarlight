@@ -164,6 +164,19 @@ async function main() {
 
 			if (existing.docs.length > 0) {
 				const doc = existing.docs[0];
+				// A lineage shadow (canonicalSlug set) is not a record: its facts live on
+				// the canonical row and its status is the fold's (Draft, hidden). The
+				// feed must not write onto it — on 2026-09-05 the sync restored "Live"
+				// onto 13 shadows the dedup lane had hidden hours earlier, the third
+				// writer on one field in one day.
+				const shadowOf = (doc as { canonicalSlug?: string | null })
+					.canonicalSlug;
+				if (shadowOf) {
+					console.log(
+						`  SKIP: ${mapped.name} (${slug}) is a shadow of ${shadowOf} — the feed does not write onto shadows`,
+					);
+					continue;
+				}
 
 				// Only update LumenloopSeed or Unverified projects
 				if (
