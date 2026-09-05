@@ -43,6 +43,10 @@ jobs:
       # inputs.* are EMPTY on schedule events (scan-repo-code finding 18) —
       # the nightly gets its own hardcoded execute step.
 
-      - name: Manual backfill (dispatch)
-        if: github.event_name == 'workflow_dispatch'
+      # 2026-09-05: this step carried `if: github.event_name == 'workflow_dispatch'`,
+      # so every SCHEDULED run skipped its only step and reported green — 18
+      # nightly runs (since 2026-08-18) moved no data while the board and the
+      # program text said notes reach rows nightly. The expression below already
+      # writes on schedule and dry-runs on a manual dispatch unless execute=true.
+      - name: Backfill (schedule = execute; dispatch = dry run unless execute)
         run: pnpm exec tsx scripts/backfill-knowledge-notes.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
