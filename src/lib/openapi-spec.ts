@@ -2202,6 +2202,10 @@ export const spec: OpenAPISpec = {
 						"What OpenZeppelin contracts exist for Stellar?",
 						"Show me passkey smart-wallet repos",
 						"Is there a Groth16 proof verifier for Soroban?",
+						// 2026-09-05 routing battery (T1): a newcomer wants code to
+						// "copy" — templates/starters/examples are this op's job, but
+						// the word itself was in no field.
+						"Show me example Stellar projects I can copy or fork",
 					],
 				},
 				parameters: [
@@ -3324,6 +3328,10 @@ export const spec: OpenAPISpec = {
 						// corridor are the facts only this side holds; the roster is
 						// larger on the other.
 						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
+						// 2026-09-05 routing battery (T3): partner rows carry `seps`
+						// (SEP-6 / SEP-24 / SEP-31, read from stellar.toml), but no field
+						// said "implement" or "SEP-24", so the question gated out.
+						"which anchors implement SEP-24 / SEP-6 / SEP-31 — `seps` is read from each partner's stellar.toml (null = not fetched, [] = none implemented)",
 					],
 					notFor: [
 						"projects/products that were BUILT -> searchProjects",
@@ -3333,6 +3341,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who can audit my Soroban contract?",
 						"Find a USDC off-ramp partner in Mexico",
+						"Which anchors implement SEP-24?",
 					],
 				},
 				parameters: [
@@ -4261,6 +4270,9 @@ export const spec: OpenAPISpec = {
 						"What RFPs are open this quarter?",
 						"Is there a sponsor brief for X I could get funded to build?",
 						"Which SCF round is open and when does it close?",
+						// 2026-09-05 routing battery (T1): a newcomer asks who "gives
+						// out" grants — neither word was in any field.
+						"Who gives out grants for building on Stellar?",
 					],
 				},
 				parameters: [
@@ -6187,6 +6199,9 @@ export const spec: OpenAPISpec = {
 						"What's the most crowded category on Stellar?",
 						"How many projects are in RWA vs wallets?",
 						"Where is there room to build?",
+						// 2026-09-05 routing battery (T4): "verticals" and "least" were
+						// absent from every field, so the question gated out entirely.
+						"Which verticals on Stellar have the least competition?",
 					],
 				},
 				parameters: [
@@ -6332,6 +6347,10 @@ export const spec: OpenAPISpec = {
 						"Which product verticals have no Live projects yet?",
 						"How many active developers are building on Stellar? (dimension=developers)",
 						"Is Stellar's developer base growing year over year?",
+						// 2026-09-05 routing battery (T1): the newcomer's version of the
+						// developers question — "anyone", "actually", "dead" were in no
+						// field. dimension=developers is the dated answer.
+						"Is anyone actually still building on Stellar, or is it dead? (dimension=developers)",
 					],
 				},
 				parameters: [
