@@ -42,6 +42,12 @@
 			"lane": "curate-projects",
 			"what": "Verification-packet verdict orbitcdp Inactive\u2192Live (tier: high) was wrong and was executed (#1345, run 33979942527): the packet accepted the page's 'Live on Stellar' banner as a live signal while the protocol stats on the same page are empty dashes. Owner corrected to Inactive. Rule that follows: a marketing banner is never a product-state signal; a Live verdict needs the product itself (stats, app, chain activity) to be alive.",
 			"source": "#1345 corrected by the owner in chat; receipt improvements/receipts/orbitcdp-2026-09-05.json"
+		},
+		{
+			"date": "2026-09-05",
+			"lane": "curate-projects",
+			"what": "Verification-packet verdict skyhitz Live (tier: high) was wrong and was executed (#1345): the page's stats are zero (Total Mass 0.00 HITZ, Balance \u2014). Owner corrected to Inactive. Same class as orbitcdp: a page title plus a repo push is not a product state.",
+			"source": "#1345 corrected by the owner in chat; receipt improvements/receipts/skyhitz-2026-09-05.json"
 		}
 	]
 }

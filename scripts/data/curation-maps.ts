@@ -279,12 +279,17 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Runtime Verification - Software Assurance for the AI"; repo runtimeverification/stellar-debugger pushed 2026-09-04 (high confidence).',
 	},
 	skyhitz: {
+		// Owner verdict 2026-09-05: dead. The packet read the page title
+		// "Skyhitz - Gravity. Mainnet" and a same-day repo push as a live
+		// product; the page's own stats are zero (Total Mass 0.00 HITZ,
+		// Event Horizon 0.0000, Balance —); receipt
+		// improvements/receipts/skyhitz-2026-09-05.json. Corrects #1345.
 		from: "Live",
-		to: "Live",
+		to: "Inactive",
 		basis: "human-verified",
 		asOf: "2026-09-05",
 		sourceUrl: "https://skyhitz.io/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Skyhitz - Gravity. Mainnet"; repo skyhitz/hitz-gravity pushed 2026-09-05 (high confidence).',
+		note: "Owner verdict 2026-09-05: dead — the page's protocol stats are zero (Total Mass 0.00 HITZ, Event Horizon 0.0000, Balance —); a title and a repo push are not a product state. Corrects the 2026-09-05 packet.",
 	},
 	soundness: {
 		from: "Live",
