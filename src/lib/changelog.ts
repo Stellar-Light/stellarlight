@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
+		version: "spec@1.9.39",
+		type: "added",
+		summary:
+			"getChanges: `meta.byFacet` counts rows whose DATED fact moved past `since` per surface — the material-change number next to `counts`, which is every write.",
+		detail:
+			"Asked 'what changed this week' on 2026-09-05, the feed answered 943 project rows, 10,476 repo rows and 9 partners — every row an enrichment lane had touched, because updatedAt moves on every write. byFacet.projects {status, scf-awards, deployment}, byFacet.repos {code-facts} and byFacet.partners {toml} are counted over the whole surface with the row's own dated fields; facets overlap; a `note` on every response says how to read the two numbers. Rows also gain a `deployment` facet (deployment.asOf). Limitation stated in the note: a lane that stamps an evidence date older than `since` (statusAsOf is the observation day, never the write day) shows as `row`, not as a facet.",
+	},
+	{
+		date: "2026-09-05",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.38",
 		type: "fixed",
 		summary:
