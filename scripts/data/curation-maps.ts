@@ -3956,9 +3956,9 @@ export const TYPES_SET: Record<string, string[]> = {
 	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
 	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
 	// evidence per row). Bridge removed; remaining types verified.
-	orally: ["Infrastructure", "AI", "SDK", "Security"], // orally.network: oracle service (data feeds/automation), not an asset bridge
+	orally: ["Infrastructure", "AI", "SDK", "Security", "Oracle"], // orally.network: oracle service (data feeds/automation), not an asset bridge; Oracle carried here since 2026-09-05 (exact-sync runs last)
 	tezoro: ["Lending"], // tezoro.io: yield aggregator over Ethereum lending protocols
-	"soroban-optimistic-oracle": ["Infrastructure"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one
+	"soroban-optimistic-oracle": ["Infrastructure", "Oracle"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one; Oracle carried here since 2026-09-05 (exact-sync runs last)
 	"unstoppable-wallet": ["Wallet"], // unstoppable.money: multichain wallet; swaps via DEXes, no own bridge
 	sorobanhooks: ["Infrastructure", "Analytics", "SDK"], // sorobanhooks.xyz: webhook/notification tooling; moves no assets
 	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
@@ -4003,7 +4003,7 @@ export const TYPES_SET: Record<string, string[]> = {
 	// stay Bridge. Frontend /directory reads the same projects.types as the API,
 	// so this fixes both surfaces at once.
 	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
-	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
+	pyth: ["Oracle"], // pyth.network: decentralized price-feed ORACLE. The old "oracle convention types=[]" predates the Oracle enum member (guard D, 2026-08-27); exact-sync runs last so the tag must live here.
 	nethermind: ["Infrastructure", "Security"], // nethermind.io: research/engineering firm + Nethermind Security (audits, formal verification, ZK); Stellar work = RISC Zero zkVM verifier + private-payments. Verifier-confirmed 2026-07-15.
 	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
 	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
@@ -4022,7 +4022,8 @@ export const TYPES_SET: Record<string, string[]> = {
 	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
 	defindex: ["Infrastructure", "SDK", "Yield"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks (Yield added with spec 1.9.13).
 	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
-	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
+	// 2026-09-05: TYPES_SET is exact-sync and runs LAST in curate, so an Oracle tag appended by TYPE_ADD was stripped on every execute and the self-audit stayed red five days. The exact set must carry the whole truth itself.
+	nebula: ["SDK", "Oracle"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK, and the row describes a "price feed oracle grid" = Oracle. Drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
 	// Held-queue resolutions after a closer look (boxy 2026-07-15).
 	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
 	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.

@@ -19,7 +19,12 @@ import {
 	classifyExternalStatus,
 	probeExternal,
 } from "../src/lib/probe-external";
-import { STATUS_FIX, TYPES_ADD, TYPES_SET } from "./data/curation-maps";
+import {
+	STATUS_FIX,
+	TYPE_ADD,
+	TYPES_ADD,
+	TYPES_SET,
+} from "./data/curation-maps";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
@@ -436,8 +441,21 @@ async function main() {
 		>();
 		for (const [slug, want] of Object.entries(TYPES_SET))
 			targets.set(slug, { ...targets.get(slug), types: want });
-		for (const [slug, add] of Object.entries(TYPES_ADD))
-			targets.set(slug, { ...targets.get(slug), typesInclude: add });
+		// Two additive maps exist (TYPES_ADD and the older TYPE_ADD — the Oracle
+		// vertical from guard D, 2026-08-27) and curate applies BOTH after the
+		// exact-sync. This check read only one, so four oracle rows whose Oracle
+		// tag came from TYPE_ADD read as "production drift" for five days
+		// (2026-09-05, standing self-audit red). Union them.
+		for (const [slug, add] of [
+			...Object.entries(TYPE_ADD),
+			...Object.entries(TYPES_ADD),
+		]) {
+			const cur = targets.get(slug);
+			targets.set(slug, {
+				...cur,
+				typesInclude: [...new Set([...(cur?.typesInclude ?? []), ...add])],
+			});
+		}
 		for (const [slug, fix] of Object.entries(STATUS_FIX))
 			targets.set(slug, { ...targets.get(slug), status: fix.to });
 
@@ -475,11 +493,21 @@ async function main() {
 				const want = targets.get(slug);
 				if (!want) continue;
 				const live: string[] = Array.isArray(doc.types) ? doc.types : [];
-				if (want.types && live.join(",") !== want.types.join(","))
-					drift.push(
-						`${slug}.types: registry [${want.types.join(", ")}] ≠ live [${live.join(", ")}]`,
-					);
-				else if (want.typesInclude) {
+				// Exact-sync rows are compared as SETS against TYPES_SET plus what
+				// the additive maps append afterwards — that union is what curate
+				// leaves on the row, so it is the registry's own expectation.
+				if (want.types) {
+					const expected = [
+						...new Set([...want.types, ...(want.typesInclude ?? [])]),
+					];
+					const same =
+						expected.length === live.length &&
+						expected.every((t) => live.includes(t));
+					if (!same)
+						drift.push(
+							`${slug}.types: registry [${expected.join(", ")}] ≠ live [${live.join(", ")}]`,
+						);
+				} else if (want.typesInclude) {
 					const missing = want.typesInclude.filter((t) => !live.includes(t));
 					if (missing.length)
 						drift.push(
