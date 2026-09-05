@@ -462,13 +462,15 @@ the page veto Live; the second signal is this product's own repository
 (not a hackathon, seeder, fund or shared repo, and never a 404 substitute);
 a page rendering under ~300 characters is not substantive.
 
-**Next (ordered).** 1. Re-grade the 32 medium and 30 low packet rows under
-the tightened rule, capturing the product-state signal per row, before any
-tier is offered for approval. 2. The Draft/Inactive/Live writers: the
-curated status step and the on-chain basis lane now skip shadows (#this
-PR); verify the 10:58 UTC sync skip live after its first scheduled run.
-3. The owner's verdicts on the 8 withdrawn rows and the 11 flagged
-small-product rows.
+**Next (ordered).** 1. DONE for the medium tier (#1361, 2026-09-05 evening): re-graded
+under the product-state rule — Live 10 · Development 2 · Inactive 5 · cannot-tell 15;
+20 of 32 grades changed and 14 of 23 medium Live verdicts did not survive (login shells,
+org-substitute repos, empty metrics, waitlist wording). Awaits the owner's tier call; the
+low tier (30) is still ungraded. 2. Owner verdicts on the 8 withdrawn high-tier rows and
+the 11 flagged (improvements/drafts/2026-09-05-verification-packets-top100.md).
+3. KALE and Blend now rest on onchain-activity by dated movement windows (2026-09-05
+evening); the curate lane keeps a lane-earned strong basis over a weak curated entry
+(#1364). 4. Re-run the routing battery after Raven re-baselines.
 
 ## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
 
