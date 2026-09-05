@@ -2082,9 +2082,9 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: default branch master; raw Cargo.toml members; gh api releases?per_page=6; gh api contents/audits; README lines 29-30.
 	"stellar/anchor-platform": [
 		{
-			note: "Releases every 1–3 weeks: 4.7.1 (2026-08-26), 4.7.0 (2026-08-20), 4.6.2 (2026-08-03), 4.6.1 (2026-07-20); Docker Hub image stellar/anchor-platform (~936k pulls, updated 2026-09-01). https://github.com/stellar/anchor-platform/releases",
+			note: "Releases every 1–3 weeks: 4.7.1 (2026-08-26), 4.7.0 (2026-08-20), 4.6.2 (2026-08-03), 4.6.1 (2026-07-20). Published as the Docker Hub image stellar/anchor-platform; the image is rebuilt with each release and between them, so read its current tag from Docker Hub rather than from here. https://github.com/stellar/anchor-platform/releases",
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-05",
 		},
 	],
 	// verified: gh api releases?per_page=4; hub.docker.com/v2/repositories/stellar/anchor-platform/ (pull_count 936473).
