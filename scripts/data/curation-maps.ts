@@ -385,13 +385,20 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
 		note: "Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023. Served as an Inactive row so the funded history is answerable.",
 	},
+	// 2026-08-31 this entry un-hid the row (Draft → Live on site-liveness: the
+	// review had called it "genuinely absent" when it was merely hidden).
+	// 2026-09-05 owner verdict: FxDAO is a dead protocol — the contracts repo
+	// (FxDAO/fxdao-sc) last pushed 2025-06-16 and fxdao.io answers 200 with a
+	// generic page titled "connected world", not the protocol app. Inactive
+	// drops it from the live lists and down-ranks it in search; the SCF award
+	// stays on the row so the funded history is answerable.
 	fxdao: {
-		from: "Draft",
-		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-08-31",
-		sourceUrl: "https://fxdao.io",
-		note: "Soroban-native stablecoin protocol; site 200, org repos active 2025-09; SCF round 13 already on the row. Hidden as Draft while the review found it 'genuinely absent' — it was hidden, not absent.",
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://github.com/FxDAO/fxdao-sc",
+		note: "Owner verdict 2026-09-05: dead protocol — contracts repo last pushed 2025-06-16, site serves a generic page.",
 	},
 	enerdao: {
 		from: "Draft",
