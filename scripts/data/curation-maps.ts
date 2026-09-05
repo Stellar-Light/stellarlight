@@ -12,6 +12,10 @@ const ASOF_SEED = "2026-08-31";
 export type StatusBasis =
 	| "operator-announcement"
 	| "site-liveness"
+	// Mirrors the Projects enum: the row's OWN indexed repo committed inside a
+	// dated window. For a product still in Development the source moving IS
+	// the status claim (row-facts 2026-09-05, raum-network).
+	| "repo-activity"
 	| "onchain-activity"
 	| "human-verified"
 	| "source-inherited";
@@ -1244,6 +1248,41 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Operator announcement 2026-08-17 (SOC 2) + operating product app; dd.xyz now redirects to dapp.webacy.com (product consolidation).",
 	},
+	// ── Row-facts pass 2026-09-05 (quality residuals: served rows carrying a
+	// status with no statusSourceUrl). from === to again: the status does not
+	// move, the EVIDENCE does — every URL below was fetched 2026-09-05 and
+	// supports the CURRENT value. Machine bases only (an agent does not
+	// self-assign human-verified); the curator gate scans each Live source
+	// for pre-launch markers at apply time.
+	mbrl: {
+		from: "Live",
+		to: "Live",
+		note: "Row-facts 2026-09-05: MBRL is live on the public network — issuer GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z carries home_domain mbrl.com.br (Horizon), which 301s to www.mercadobitcoin.com.br/mbrl (the operator page itself is Cloudflare-gated to non-browsers); stellar.expert: created 2022-10-27, 19 trustlines, 2.05M supply, 24,935 trades; issuer operations as recent as 2026-05-31.",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/MBRL-GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z",
+		basis: "onchain-activity",
+	},
+	"raum-network": {
+		from: "Development",
+		to: "Development",
+		note: "Row-facts 2026-09-05: RaumFi V3 (CLMM DEX for Soroban) is in active development — Raum-Network/raum-raumfi-v3 ('CLMM implementation of RaumFi DEX') pushed 2026-05-30, and raum.network names 'RaumFi V3 for Stellar Soroban concentrated liquidity' as current product work; the recorded dex.raum.network has no DNS record (link removed 2026-09-02).",
+		asOf: "2026-05-30", // the repo's last push — the evidence date, not the day we looked,
+		sourceUrl: "https://github.com/Raum-Network/raum-raumfi-v3",
+		basis: "repo-activity",
+	},
+	// The .md variant of Dune's page is cited on purpose: the HTML variant's
+	// chain sidebar lists "Monad Testnet", which the curator gate's word-match
+	// reads as a pre-launch marker and refuses; the content is identical
+	// (Mintlify serves both). Gate false-positive class noted in the PR.
+	dune: {
+		from: "Live",
+		to: "Live",
+		note: "Row-facts 2026-09-05: Dune's own data catalog serves Stellar mainnet tables (accounts, contract_data, trust_lines, liquidity_pools, ttl, history_ledgers/operations/trades/transactions/effects/contract_events) — 'Stellar blockchain data on Dune'.",
+		asOf: "2026-09-05",
+		sourceUrl: "https://docs.dune.com/data-catalog/stellar/overview.md",
+		basis: "site-liveness",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -1406,6 +1445,24 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	dd: "https://dapp.webacy.com/",
 	// /protocol path 404s; the root serves "Home | Normal"
 	normal: "https://www.normalfinance.io/",
+	// ── Row-facts pass 2026-09-05 (every target fetched that day):
+	// autowhale.io 301s to renesis.fi — the same company (raw HTML footer
+	// "© 2025 Autowhale Labs GmbH"; github.com/autowhale's profile blog is
+	// renesis.fi). The offsite hop is why the row never earned a liveness
+	// success. Title "Crypto Portfolio Management & Execution System |
+	// Renesis". Name/alias stays an owner call (NAME_FIXES/ALIAS_ADD).
+	autowhale: "https://renesis.fi/",
+	// The recorded sheet id was lowercased at seed (the chaincred case-
+	// mangling class, audit C2) and 404s; the SCF page carries the real id,
+	// which serves 200 ("Very extensive list of very questionable token
+	// domains"). The Inactive verdict rested on that 404 — owner re-triage.
+	"scam-flagging-system":
+		"https://docs.google.com/spreadsheets/d/1JCkWZ3X1h6kJKM6ZCZThDshK_whhNiTyGTV8R24Anho/edit?usp=sharing",
+	// SCF-seeded program row with no link: the SCF project page's Website
+	// field is discord.gg/web3dev (the WEB3DEV community that ran the study
+	// group); the invite resolves 200 ("WEB3DEV", 9,692 members) — same
+	// canonical invite form as the web3dev row above.
+	"study-stellar-sdk-soroban": "https://discord.com/invite/web3dev",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
@@ -3389,6 +3446,11 @@ export const GITHUB_REPOS_ADD: Record<
 		{ owner: "stellar-registry", name: "contracts" },
 		{ owner: "stellar-registry", name: "cli" },
 	],
+	// Row-facts 2026-09-05: the row links the 2024 core-v1 repo only; the
+	// same org's raum-raumfi-v3 ("CLMM implementation of RaumFi DEX", pushed
+	// 2026-05-30) is the repo the Development status now rests on (see
+	// STATUS_FIX) — attach it so enrich-repos indexes it.
+	"raum-network": [{ owner: "Raum-Network", name: "raum-raumfi-v3" }],
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
@@ -3514,6 +3576,19 @@ export const TYPES_ADD: Record<string, string[]> = {
 	// explicitly DECLINED — wallets stay wallets; the sweep keeps reporting.
 	// (etherfuse Anchor already added above; this appends Stablecoin.)
 	anclap: ["Stablecoin"],
+	// ── Row-facts pass 2026-09-05: the typed residuals (types:[]).
+	// boundlessfi.xyz (fetched 2026-09-05): "Launch ideas, join hackathons,
+	// earn from bounties, apply for grants and raise community funding" with
+	// "Funds held in escrow until milestones clear" (TrustlessWork, USDC) —
+	// the offer-hub precedent: the on-chain core is payments/escrow.
+	"boundless-bounties": ["Payments"],
+	// galactictalk.org/d/2532 (the team's 2020 launch thread): "Stellar's
+	// payment network will allow us to charge a lower commission on each
+	// ride" + a DEB asset on stellar.expert — ride payments over Stellar are
+	// the product's Stellar function. Type is identity, not liveness: the
+	// demo (demo.drivedeb.com) times out and drivedeb.com serves a bare
+	// directory index (owner note in the 2026-09-05 row-facts PR).
+	deb: ["Payments"],
 };
 
 export const TYPES_SET: Record<string, string[]> = {
@@ -3811,6 +3886,20 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	stellarstrides: "https://stellarstrides.xyz/",
 	swplug: "https://swplug.com/",
 	typiqo: "https://typiqo.it/",
+	// ── Re-triage 2026-09-05 of two audit-C2 retractions (row-facts pass):
+	// b4b.app now answers a 200 empty shell (title only), so it cannot stand;
+	// the brand domain b4b.world serves its own for-sale listing ("b4b.world
+	// for sale | Spaceship.com") — the parked observation the July verdict
+	// itself cited, re-observed 2026-09-05.
+	b4b: "https://b4b.world/",
+	// The builder's own closing announcement (2024-05-05: "we have resolved
+	// to dissolve the UrbanChange Foundation … the UrbanChange Mobile App
+	// will close" on May 8) — the operator statement the verdict cites.
+	// Medium serves the article only to browsers (403 otherwise); read
+	// 2026-09-05 through the publication's feed (medium.com/feed/urbanchange),
+	// which carries the full text.
+	localcoin:
+		"https://medium.com/urbanchange/important-announcement-urbanchange-foundation-and-app-closing-30e4e56fa709",
 };
 
 /**

@@ -43,6 +43,13 @@ const GITHUB_LINK_FIX: Record<string, string> = {
 	// registry split out of scaffold-stellar into its own org 2026-05-19;
 	// the old link now literally shows a different product's code
 	"stellar-registry": "https://github.com/stellar-registry/contracts",
+	// Row-facts 2026-09-05: SCF-seeded row (SCF #44 Build) with no links. The
+	// SCF project page links the author (github.com/NibrasD); the author's
+	// Stellar-VRF repo (BLS12-381 VRF + drand for Soroban, pushed 2026-08-21)
+	// is the row's own subject ("ECVRF plus Drand verifiable randomness for
+	// Soroban contracts"). The SCF-linked frontend
+	// (soroban-vrf-frontend.onrender.com) answers 503 "Service Suspended".
+	"vrf-soroban": "https://github.com/NibrasD/Stellar-VRF",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
