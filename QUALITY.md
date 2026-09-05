@@ -219,13 +219,23 @@ service runs at Stage 3+ by default and humans do product, not repair.
   or by hand-authored trigger phrases; the matcher was hijack-hardened
   (citation URLs and bare domains can no longer route a note). sls-080
   closed on the consumer's own probe and independently re-verified by
-  Raven on 2026-09-01.
-  *Remaining:* supersededBy / deprecatedAt still exist nowhere as FIELDS —
-  the facts live in note prose, which a consumer must read rather than
-  join on. Contracts as first-class joined entities only where the P3 lane
-  reached (11 of the 308 expected-tier repos). Builder/org identity is
-  still thinner than project identity. 12,851 indexed repos carry no note
-  — the long tail is by design, the curated pool is the floor that rises.
+  Raven on 2026-09-01. 2026-09-04/05 — the product-level knowledge sls-023
+  asked for (which product is actually issued on Stellar, by whom, with
+  what controls) exists as a verified RWA registry: 97 tokens re-verified
+  from the issuer's own stellar.toml or the Soroban contract itself, feeding
+  `products`, `deployment` and on-chain `controls` on project rows, pinned
+  hourly on production (#1298–#1306). 2026-09-05 — supersededBy /
+  deprecatedAt / supersessionKind are FIELDS on repo rows: 50 notes carried
+  the prose, 34 became a curated dated map keyed by the superseded repo,
+  `successorRepo` is derived from it, and a test holds prose and fields
+  together (spec 1.9.36, #1307).
+  *Remaining:* contracts as first-class joined entities only where the P3
+  lane reached (11 of the 308 expected-tier repos). Builder/org identity is
+  still thinner than project identity. Supersession is curated (34 repos):
+  a repo archived after its note was written is not covered until the
+  note is, which the note-freshness lane does not yet detect. 12,851
+  indexed repos carry no note — the long tail is by design, the curated
+  pool is the floor that rises.
 
 What this is not: an org-chart cosplay. Lanes are prompts + charters +
 write-sets; the ladder is entry criteria; the scoreboard is generated from
