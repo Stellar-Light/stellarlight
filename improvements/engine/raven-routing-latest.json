@@ -1,68 +1,2379 @@
 {
-	"generatedAt": "2026-08-31T23:07:08.334Z",
+	"generatedAt": "2026-09-05T05:06:45.466Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
+	"scoring": {
+		"basis": "intended-op: PASS only when one of the item's expected operation ids is within the top-3 scout hits; rank = 1-based position of the first expected op among scout hits (null = not returned)",
+		"evidence": "missClass evidence comes from scripts/eval/raven-scorer-replica.ts — Raven's lexical scoring math run over our current spec text AND over the text Raven indexes (live descriptions + manifest routing keywords); the live ranking is the truth, the replica explains it",
+		"classes": [
+			"no-scout-op",
+			"id-noun-exclusion",
+			"catalog-lag",
+			"named-entity",
+			"vocabulary",
+			"outscored"
+		]
+	},
+	"catalogView": {
+		"descriptionsRead": 30,
+		"manifestGeneratedAt": "2026-09-03T17:09:55.410Z",
+		"keywordsKnownFor": 30,
+		"laggingOps": [
+			{
+				"op": "explainRepo",
+				"unseenLive": [
+					"indexed",
+					"ecosystem",
+					"calculate",
+					"graded",
+					"index"
+				]
+			},
+			{
+				"op": "getPartners",
+				"unseenLive": [
+					"stellar",
+					"fiat"
+				]
+			},
+			{
+				"op": "getPartner",
+				"unseenLive": [
+					"api",
+					"api",
+					"api"
+				]
+			},
+			{
+				"op": "matchPartners",
+				"unseenLive": [
+					"api",
+					"api",
+					"interactive",
+					"human",
+					"chat",
+					"chat",
+					"page",
+					"api",
+					"assistant"
+				]
+			},
+			{
+				"op": "getRfps",
+				"unseenLive": [
+					"paid",
+					"work",
+					"jobs",
+					"freelance",
+					"contributors"
+				]
+			},
+			{
+				"op": "getSkill",
+				"unseenLive": [
+					"api"
+				]
+			}
+		]
+	},
+	"replicaAgreement": {
+		"compared": 269,
+		"exact": 206,
+		"within5pct": 221
+	},
 	"frame": {
-		"graded": 37,
-		"passed": 32,
-		"failed": 5,
+		"graded": 65,
+		"passed": 48,
+		"failed": 17,
 		"lagging": 0,
 		"demandChecked": 0,
-		"demandMissed": 0
+		"demandMissed": 0,
+		"byPersona": {
+			"T1": {
+				"graded": 7,
+				"passed": 2,
+				"failed": 5,
+				"rate": 0.29
+			},
+			"T2": {
+				"graded": 5,
+				"passed": 3,
+				"failed": 2,
+				"rate": 0.6
+			},
+			"T3": {
+				"graded": 8,
+				"passed": 5,
+				"failed": 3,
+				"rate": 0.63
+			},
+			"T4": {
+				"graded": 8,
+				"passed": 6,
+				"failed": 2,
+				"rate": 0.75
+			}
+		}
 	},
-	"okRate": 0.86,
-	"misses": [
+	"okRate": 0.74,
+	"missClasses": {
+		"no-scout-op": 1,
+		"id-noun-exclusion": 2,
+		"catalog-lag": 9,
+		"named-entity": 1,
+		"vocabulary": 1,
+		"outscored": 3
+	},
+	"results": [
+		{
+			"query": "biggest stablecoins on Stellar by market cap",
+			"expect": [
+				"getStablecoins"
+			],
+			"rank": 1,
+			"topScout": [
+				"getStablecoins",
+				"searchProjects",
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"scout.getStablecoins",
+				"stellarDocs.search_asset_token_docs",
+				"scout.searchProjects"
+			],
+			"pass": true
+		},
+		{
+			"query": "which are the largest stablecoins issued on Stellar",
+			"expect": [
+				"getStablecoins"
+			],
+			"rank": 1,
+			"topScout": [
+				"getStablecoins",
+				"searchHackathonBuilds",
+				"compareHackathons"
+			],
+			"topAll": [
+				"stellarDocs.search_docs",
+				"scout.getStablecoins",
+				"stellarDocs.search_asset_token_docs"
+			],
+			"pass": true
+		},
+		{
+			"query": "is Blend audited and by whom",
+			"expect": [
+				"listAudits"
+			],
+			"rank": 1,
+			"topScout": [
+				"listAudits",
+				"getBuilders",
+				"searchProjects"
+			],
+			"topAll": [
+				"lumenloop.find_content_by_entity",
+				"scout.listAudits",
+				"lumenloop.list_documents"
+			],
+			"pass": true
+		},
+		{
+			"query": "security audit reports for Soroban projects",
+			"expect": [
+				"listAudits"
+			],
+			"rank": 2,
+			"topScout": [
+				"explainRepo",
+				"listAudits",
+				"searchResearch"
+			],
+			"topAll": [
+				"scout.explainRepo",
+				"scout.listAudits",
+				"scout.searchResearch"
+			],
+			"pass": true
+		},
+		{
+			"query": "who is Tyler van der Hoeven",
+			"expect": [
+				"getPeople",
+				"getBuilders"
+			],
+			"rank": 1,
+			"topScout": [
+				"getBuilders",
+				"listContracts",
+				"getPeople"
+			],
+			"topAll": [
+				"scout.getBuilders",
+				"scout.listContracts",
+				"skills.lumenloop.stellar-ecosystem-scout"
+			],
+			"pass": true
+		},
+		{
+			"query": "find developers who work at the Stellar Development Foundation",
+			"expect": [
+				"getPeople",
+				"getBuilders"
+			],
+			"rank": 2,
+			"topScout": [
+				"searchResearch",
+				"getBuilders",
+				"getPeople"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"skills.stellar-dev.standards",
+				"skills.stellar-dev.data"
+			],
+			"pass": true
+		},
+		{
+			"query": "what wallets support Stellar",
+			"expect": [
+				"searchProjects",
+				"getPartners"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"getClusters",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_wallet_dapp_docs",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"skills.lumenloop.stellar-ecosystem-digest"
+			],
+			"pass": true
+		},
+		{
+			"query": "on and off ramps for Stellar payments",
+			"expect": [
+				"getPartners",
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"skills.stellar-dev.agentic-payments",
+				"stellarDocs.search_anchor_sep_docs",
+				"stellarDocs.search_protocol_concepts_docs"
+			],
+			"pass": true
+		},
 		{
 			"query": "top Stellar projects by GitHub activity",
 			"expect": [
 				"getLeaderboard"
 			],
+			"rank": null,
 			"topScout": [
 				"searchProjects",
 				"searchRepos"
 			],
-			"note": "activity leaderboard"
+			"topAll": [
+				"skills.lumenloop.stellar-project-dossier",
+				"scout.searchProjects",
+				"skills.lumenloop.stellar-ecosystem-scout"
+			],
+			"pass": false
+		},
+		{
+			"query": "find Soroban lending and money-market protocols",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"analyzeEcosystem",
+				"vetIdea"
+			],
+			"topAll": [
+				"scout.searchProjects",
+				"scout.analyzeEcosystem",
+				"lumenloop.find_content_about_project"
+			],
+			"pass": true
+		},
+		{
+			"query": "recent Stellar hackathon winners",
+			"expect": [
+				"getHackathons",
+				"getHackathon"
+			],
+			"rank": 1,
+			"topScout": [
+				"getHackathon",
+				"searchHackathonBuilds",
+				"getHackathons"
+			],
+			"topAll": [
+				"scout.getHackathon",
+				"scout.searchHackathonBuilds",
+				"scout.getHackathons"
+			],
+			"pass": true
+		},
+		{
+			"query": "explain the soroban examples repository",
+			"expect": [
+				"explainRepo"
+			],
+			"rank": 1,
+			"topScout": [
+				"explainRepo",
+				"searchRepos",
+				"listSkills"
+			],
+			"topAll": [
+				"scout.explainRepo",
+				"stellarDocs.search_soroban_contract_docs",
+				"scout.searchRepos"
+			],
+			"pass": true
+		},
+		{
+			"query": "open RFPs bounties and grants on Stellar",
+			"expect": [
+				"getRfps"
+			],
+			"rank": 1,
+			"topScout": [
+				"getRfps",
+				"scfPitch"
+			],
+			"topAll": [
+				"scout.getRfps",
+				"skills.stellar-light.stellar-scout",
+				"stellarDocs.get_doc_page_sections"
+			],
+			"pass": true
+		},
+		{
+			"query": "which project categories are most crowded or underbuilt",
+			"expect": [
+				"getClusters"
+			],
+			"rank": 1,
+			"topScout": [
+				"getClusters",
+				"analyzeEcosystem",
+				"resolveProject"
+			],
+			"topAll": [
+				"scout.getClusters",
+				"lumenloop.get_categories",
+				"scout.analyzeEcosystem"
+			],
+			"pass": true
+		},
+		{
+			"query": "ecosystem overview: total projects funding and hackathons",
+			"expect": [
+				"analyzeEcosystem"
+			],
+			"rank": 1,
+			"topScout": [
+				"analyzeEcosystem",
+				"compareHackathons",
+				"searchResearch"
+			],
+			"topAll": [
+				"scout.analyzeEcosystem",
+				"scout.compareHackathons",
+				"skills.lumenloop.stellar-ecosystem-scout"
+			],
+			"pass": true
+		},
+		{
+			"query": "compare the Meridian and Consensus hackathons",
+			"expect": [
+				"compareHackathons"
+			],
+			"rank": 1,
+			"topScout": [
+				"compareHackathons",
+				"hackathonBrief",
+				"getHackathons"
+			],
+			"topAll": [
+				"scout.compareHackathons",
+				"scout.hackathonBrief",
+				"scout.getHackathons"
+			],
+			"pass": true
+		},
+		{
+			"query": "total value locked in Stellar DeFi protocols",
+			"expect": [
+				"getLeaderboard",
+				"analyzeEcosystem"
+			],
+			"rank": 1,
+			"topScout": [
+				"getLeaderboard"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.search_docs_in_category",
+				"scout.getLeaderboard"
+			],
+			"pass": true
+		},
+		{
+			"query": "find open source Rust repositories for Soroban",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"getBuilders",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"scout.searchRepos",
+				"lumenloop.find_content_about_project",
+				"lumenloop.find_content_by_entity"
+			],
+			"pass": true
+		},
+		{
+			"query": "how does Soroban authorization work",
+			"expect": [
+				"searchResearch"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchResearch",
+				"searchRepos",
+				"getBuilders"
+			],
+			"topAll": [
+				"scout.searchResearch",
+				"stellarDocs.search_docs",
+				"stellarDocs.search_asset_token_docs"
+			],
+			"pass": true
+		},
+		{
+			"query": "what changed recently in the Stellar Scout API",
+			"expect": [
+				"getChangelog"
+			],
+			"rank": 2,
+			"topScout": [
+				"getChanges",
+				"getChangelog",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"skills.stellar-light.stellar-scout",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"scout.getChanges"
+			],
+			"pass": true
+		},
+		{
+			"query": "which AI agent skills are available for Stellar",
+			"expect": [
+				"listSkills"
+			],
+			"rank": 1,
+			"topScout": [
+				"listSkills",
+				"getSkill"
+			],
+			"topAll": [
+				"skills.stellar-dev.agentic-payments",
+				"skills.stellar-light.stellar-scout",
+				"skills.openzeppelin-stellar.setup-stellar-contracts"
+			],
+			"pass": true
+		},
+		{
+			"query": "passkey-kit",
+			"expect": [
+				"searchProjects",
+				"searchRepos"
+			],
+			"rank": 2,
+			"topScout": [
+				"listSkills",
+				"searchRepos",
+				"getBuilders"
+			],
+			"topAll": [
+				"skills.stellar-dev.dapp",
+				"scout.listSkills",
+				"scout.searchRepos"
+			],
+			"pass": true
 		},
 		{
 			"query": "reflector oracle on Stellar",
 			"expect": [
-				"searchProjects"
+				"searchProjects",
+				"resolveProject"
 			],
+			"rank": null,
 			"topScout": [
 				"searchResearch",
 				"listContracts"
 			],
-			"note": "demand: oracle project"
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_rpc_horizon_data_docs"
+			],
+			"pass": false
 		},
 		{
 			"query": "freighter",
 			"expect": [
+				"resolveProject",
 				"searchProjects"
 			],
+			"rank": null,
 			"topScout": [],
-			"note": "demand: project by name (held, strict match)"
+			"topAll": [
+				"skills.stellar-dev.dapp",
+				"stellarDocs.search_wallet_dapp_docs",
+				"stellarDocs.search_soroban_contract_docs"
+			],
+			"pass": false
+		},
+		{
+			"query": "zk-snark",
+			"expect": [
+				"searchRepos",
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"searchHackathonBuilds",
+				"compareHackathons"
+			],
+			"topAll": [
+				"skills.stellar-dev.zk-proofs",
+				"scout.searchRepos",
+				"scout.searchHackathonBuilds"
+			],
+			"pass": true
 		},
 		{
 			"query": "jobs bounties and freelance work for Stellar contributors",
 			"expect": [
 				"getRfps"
 			],
+			"rank": null,
 			"topScout": [
 				"getBuilders"
 			],
-			"note": "demand: jobs/bounties (2×)"
+			"topAll": [
+				"scout.getBuilders",
+				"stellarDocs.search_docs",
+				"skills.lumenloop.stellar-builder-quickstart"
+			],
+			"pass": false
+		},
+		{
+			"query": "has anyone built a recurring payments protocol at a Stellar hackathon",
+			"expect": [
+				"searchHackathonBuilds"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchHackathonBuilds",
+				"getHackathon",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"scout.searchHackathonBuilds",
+				"scout.getHackathon",
+				"scout.hackathonBrief"
+			],
+			"pass": true
+		},
+		{
+			"query": "what prediction markets were built at Stellar hackathons",
+			"expect": [
+				"searchHackathonBuilds"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchHackathonBuilds",
+				"hackathonBrief",
+				"getHackathon"
+			],
+			"topAll": [
+				"scout.searchHackathonBuilds",
+				"scout.hackathonBrief",
+				"scout.getHackathon"
+			],
+			"pass": true
+		},
+		{
+			"query": "winning zero-knowledge privacy builds at Stellar hackathons",
+			"expect": [
+				"searchHackathonBuilds"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchHackathonBuilds",
+				"getHackathons",
+				"compareHackathons"
+			],
+			"topAll": [
+				"scout.searchHackathonBuilds",
+				"stellarDocs.search_wallet_dapp_docs",
+				"skills.stellar-dev.zk-proofs"
+			],
+			"pass": true
+		},
+		{
+			"query": "show me a Rust example of a Soroban token contract",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"listContracts",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"stellarDocs.search_soroban_contract_docs",
+				"stellarDocs.search_asset_token_docs",
+				"scout.searchRepos"
+			],
+			"pass": true
+		},
+		{
+			"query": "find the Stellar JavaScript and TypeScript SDK repositories",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"explainRepo",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_sdk_cli_tools_docs",
+				"stellarDocs.search_rpc_horizon_data_docs",
+				"lumenloop.find_similar_scf_submissions"
+			],
+			"pass": true
+		},
+		{
+			"query": "flash loan implementation on Soroban",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"analyzeEcosystem",
+				"getClusters"
+			],
+			"topAll": [
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts",
+				"stellarDocs.search_soroban_contract_docs",
+				"stellarDocs.search_docs"
+			],
+			"pass": true
 		},
 		{
 			"query": "how does the Blend lending pool calculate interest rates in the code",
 			"expect": [
-				"explainRepo",
-				"searchRepos"
+				"explainRepo"
 			],
+			"rank": 5,
 			"topScout": [
 				"listContracts",
 				"compareHackathons",
 				"vetIdea"
 			],
-			"note": "code: deep repo mechanism (DeepWiki)"
+			"topAll": [
+				"stellarDocs.search_docs_in_category",
+				"scout.listContracts",
+				"stellarDocs.search_asset_token_docs"
+			],
+			"pass": false
+		},
+		{
+			"query": "explain how passkey-kit verifies a WebAuthn signature on Soroban",
+			"expect": [
+				"explainRepo",
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"explainRepo",
+				"getClusters",
+				"compareHackathons"
+			],
+			"topAll": [
+				"scout.explainRepo",
+				"stellarDocs.search_soroban_contract_docs",
+				"scout.getClusters"
+			],
+			"pass": true
+		},
+		{
+			"query": "find example Soroban smart contract repos written in Rust",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"getBuilders",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"stellarDocs.search_soroban_contract_docs",
+				"scout.searchRepos",
+				"skills.stellar-dev.smart-contracts"
+			],
+			"pass": true
+		},
+		{
+			"query": "how does cross-contract invocation and authorization work in Soroban",
+			"expect": [
+				"searchResearch",
+				"searchRepos"
+			],
+			"rank": 2,
+			"topScout": [
+				"listContracts",
+				"searchResearch",
+				"searchRepos"
+			],
+			"topAll": [
+				"stellarDocs.search_soroban_contract_docs",
+				"stellarDocs.search_docs_in_category",
+				"skills.stellar-dev.cross-chain"
+			],
+			"pass": true
+		},
+		{
+			"query": "find a JavaScript example repo for building and submitting a Stellar transaction",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 2,
+			"topScout": [
+				"explainRepo",
+				"searchRepos",
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"stellarDocs.search_sdk_cli_tools_docs",
+				"stellarDocs.search_rpc_horizon_data_docs",
+				"scout.explainRepo"
+			],
+			"pass": true
+		},
+		{
+			"query": "is anyone actually building on Stellar or is it dead?",
+			"persona": "T1",
+			"expect": [
+				"getLeaderboard",
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"listContracts",
+				"listAudits"
+			],
+			"topAll": [
+				"stellarDocs.search_doc_titles",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"skills.lumenloop.stellar-content-auditor"
+			],
+			"pass": false
+		},
+		{
+			"query": "what can you actually build on Stellar?",
+			"persona": "T1",
+			"expect": [
+				"getClusters",
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-builder-quickstart",
+				"skills.stellar-light.stellar-scout",
+				"stellarDocs.search_doc_titles"
+			],
+			"pass": false
+		},
+		{
+			"query": "does Stellar have NFTs?",
+			"persona": "T1",
+			"expect": [
+				"searchProjects",
+				"getClusters"
+			],
+			"rank": 1,
+			"topScout": [
+				"getClusters",
+				"searchProjects",
+				"getLeaderboard"
+			],
+			"topAll": [
+				"stellarDocs.search_docs",
+				"stellarDocs.search_meeting_notes",
+				"skills.lumenloop.stellar-builder-quickstart"
+			],
+			"pass": true
+		},
+		{
+			"query": "what wallet should I use for Stellar?",
+			"persona": "T1",
+			"expect": [
+				"searchProjects",
+				"getPartners"
+			],
+			"rank": null,
+			"topScout": [
+				"getClusters",
+				"listSkills"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.search_wallet_dapp_docs",
+				"skills.lumenloop.stellar-ecosystem-digest"
+			],
+			"pass": false
+		},
+		{
+			"query": "are there any Stellar hackathons coming up?",
+			"persona": "T1",
+			"expect": [
+				"getHackathons"
+			],
+			"rank": 1,
+			"topScout": [
+				"getHackathons",
+				"compareHackathons",
+				"getHackathon"
+			],
+			"topAll": [
+				"scout.getHackathons",
+				"scout.compareHackathons",
+				"stellarDocs.search_doc_titles"
+			],
+			"pass": true
+		},
+		{
+			"query": "who gives out grants for building on Stellar?",
+			"persona": "T1",
+			"expect": [
+				"getRfps",
+				"scfPitch",
+				"searchResearch"
+			],
+			"rank": null,
+			"topScout": [
+				"searchProjects",
+				"getBuilders"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"stellarDocs.get_doc_page_sections",
+				"skills.lumenloop.stellar-integration-finder"
+			],
+			"pass": false
+		},
+		{
+			"query": "show me some example Stellar projects I can copy",
+			"persona": "T1",
+			"expect": [
+				"searchRepos",
+				"searchProjects"
+			],
+			"rank": 4,
+			"topScout": [
+				"vetIdea",
+				"listSkills",
+				"scfPitch"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-content-auditor",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"scout.vetIdea"
+			],
+			"pass": false
+		},
+		{
+			"query": "is Soroswap or SDEX the main DEX on Stellar?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects",
+				"getLeaderboard"
+			],
+			"rank": 2,
+			"topScout": [
+				"listContracts",
+				"searchProjects"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.search_protocol_concepts_docs",
+				"stellarDocs.search_rpc_horizon_data_docs"
+			],
+			"pass": true
+		},
+		{
+			"query": "which Stellar wallets support Soroban contracts?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"getSkill",
+				"searchResearch"
+			],
+			"topAll": [
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts",
+				"skills.openzeppelin-stellar.setup-stellar-contracts",
+				"skills.stellar-dev.smart-contracts"
+			],
+			"pass": false
+		},
+		{
+			"query": "what oracle should I use for prices on Stellar?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"skills.lumenloop.stellar-ecosystem-digest",
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts"
+			],
+			"pass": false
+		},
+		{
+			"query": "has anyone built a lending protocol on Soroban already?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects",
+				"vetIdea",
+				"searchHackathonBuilds"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"searchHackathonBuilds",
+				"vetIdea"
+			],
+			"topAll": [
+				"scout.searchProjects",
+				"scout.searchHackathonBuilds",
+				"scout.vetIdea"
+			],
+			"pass": true
+		},
+		{
+			"query": "what stablecoins are actually live on Stellar?",
+			"persona": "T2",
+			"expect": [
+				"getStablecoins"
+			],
+			"rank": 1,
+			"topScout": [
+				"getStablecoins",
+				"searchProjects",
+				"hackathonBrief"
+			],
+			"topAll": [
+				"scout.getStablecoins",
+				"skills.lumenloop.stellar-ecosystem-digest",
+				"stellarDocs.search_doc_titles"
+			],
+			"pass": true
+		},
+		{
+			"query": "which Stellar projects had a smart contract audit published in the last year?",
+			"persona": "T3",
+			"expect": [
+				"listAudits"
+			],
+			"rank": null,
+			"topScout": [
+				"searchResearch",
+				"explainRepo",
+				"searchRepos"
+			],
+			"topAll": [
+				"skills.stellar-dev.smart-contracts",
+				"stellarDocs.search_docs",
+				"stellarDocs.search_sdk_cli_tools_docs"
+			],
+			"pass": false
+		},
+		{
+			"query": "how does Blend calculate interest accrual?",
+			"persona": "T3",
+			"expect": [
+				"explainRepo"
+			],
+			"rank": null,
+			"topScout": [
+				"listContracts",
+				"getRfps",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_docs",
+				"scout.listContracts",
+				"stellarDocs.search_docs_in_category"
+			],
+			"pass": false
+		},
+		{
+			"query": "which repos use soroban-sdk version 22?",
+			"persona": "T3",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"explainRepo",
+				"getStatus"
+			],
+			"topAll": [
+				"scout.searchRepos",
+				"scout.explainRepo",
+				"scout.getStatus"
+			],
+			"pass": true
+		},
+		{
+			"query": "who are the most active Stellar contributors outside SDF?",
+			"persona": "T3",
+			"expect": [
+				"getBuilders"
+			],
+			"rank": 3,
+			"topScout": [
+				"compareHackathons",
+				"getPeople",
+				"getBuilders"
+			],
+			"topAll": [
+				"scout.compareHackathons",
+				"scout.getPeople",
+				"scout.getBuilders"
+			],
+			"pass": true
+		},
+		{
+			"query": "which anchors actually implement SEP-24?",
+			"persona": "T3",
+			"expect": [
+				"getPartners"
+			],
+			"rank": null,
+			"topScout": [
+				"explainRepo",
+				"matchPartners",
+				"getClusters"
+			],
+			"topAll": [
+				"stellarDocs.search_anchor_sep_docs",
+				"scout.explainRepo",
+				"scout.matchPartners"
+			],
+			"pass": false
+		},
+		{
+			"query": "show me Soroban contracts that have been audited by Certora",
+			"persona": "T3",
+			"expect": [
+				"listAudits",
+				"listContracts"
+			],
+			"rank": 1,
+			"topScout": [
+				"listContracts",
+				"searchRepos",
+				"getSkill"
+			],
+			"topAll": [
+				"scout.listContracts",
+				"skills.openzeppelin-stellar.setup-stellar-contracts",
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts"
+			],
+			"pass": true
+		},
+		{
+			"query": "what changed in the Stellar ecosystem in the last month?",
+			"persona": "T3",
+			"expect": [
+				"getChanges",
+				"analyzeEcosystem"
+			],
+			"rank": 1,
+			"topScout": [
+				"analyzeEcosystem",
+				"searchResearch",
+				"compareHackathons"
+			],
+			"topAll": [
+				"scout.analyzeEcosystem",
+				"stellarDocs.search_docs_in_category",
+				"skills.lumenloop.stellar-ecosystem-digest"
+			],
+			"pass": true
+		},
+		{
+			"query": "which Stellar repos are archived or unmaintained?",
+			"persona": "T3",
+			"expect": [
+				"searchRepos"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchRepos",
+				"explainRepo",
+				"searchProjects"
+			],
+			"topAll": [
+				"scout.searchRepos",
+				"stellarDocs.search_docs",
+				"stellarDocs.search_meeting_notes"
+			],
+			"pass": true
+		},
+		{
+			"query": "which SCF-funded projects are now inactive or abandoned?",
+			"persona": "T4",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"scfPitch",
+				"resolveProject"
+			],
+			"topAll": [
+				"scout.searchProjects",
+				"scout.scfPitch",
+				"lumenloop.find_similar_scf_submissions"
+			],
+			"pass": true
+		},
+		{
+			"query": "how much has the Stellar Community Fund awarded in total?",
+			"persona": "T4",
+			"expect": [
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"scfPitch",
+				"searchProjects",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_docs_in_category",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_doc_titles"
+			],
+			"pass": false
+		},
+		{
+			"query": "what percentage of hackathon winners are still building?",
+			"persona": "T4",
+			"expect": [
+				"analyzeEcosystem",
+				"compareHackathons",
+				"getHackathon"
+			],
+			"rank": 2,
+			"topScout": [
+				"searchHackathonBuilds",
+				"compareHackathons",
+				"getHackathon"
+			],
+			"topAll": [
+				"scout.searchHackathonBuilds",
+				"scout.compareHackathons",
+				"scout.getHackathon"
+			],
+			"pass": true
+		},
+		{
+			"query": "which verticals on Stellar have the least competition?",
+			"persona": "T4",
+			"expect": [
+				"getClusters",
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"scfPitch"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_protocol_concepts_docs"
+			],
+			"pass": false
+		},
+		{
+			"query": "how many SCF-funded projects have no public repository?",
+			"persona": "T4",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"searchProjects",
+				"searchResearch",
+				"scfPitch"
+			],
+			"topAll": [
+				"scout.searchProjects",
+				"scout.searchResearch",
+				"scout.scfPitch"
+			],
+			"pass": true
+		},
+		{
+			"query": "which Stellar projects have the most on-chain usage?",
+			"persona": "T4",
+			"expect": [
+				"listContracts",
+				"searchProjects"
+			],
+			"rank": 1,
+			"topScout": [
+				"listContracts",
+				"searchProjects",
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"scout.listContracts",
+				"scout.searchProjects",
+				"scout.searchHackathonBuilds"
+			],
+			"pass": true
+		},
+		{
+			"query": "what is the total value locked across Stellar DeFi?",
+			"persona": "T4",
+			"expect": [
+				"analyzeEcosystem",
+				"getLeaderboard"
+			],
+			"rank": 1,
+			"topScout": [
+				"getLeaderboard"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"stellarDocs.search_doc_titles"
+			],
+			"pass": true
+		},
+		{
+			"query": "which SCF rounds produced the most lasting projects?",
+			"persona": "T4",
+			"expect": [
+				"searchProjects",
+				"analyzeEcosystem"
+			],
+			"rank": 3,
+			"topScout": [
+				"scfPitch",
+				"searchHackathonBuilds",
+				"searchProjects"
+			],
+			"topAll": [
+				"lumenloop.find_similar_scf_submissions",
+				"lumenloop.get_scf_submissions",
+				"scout.scfPitch"
+			],
+			"pass": true
+		}
+	],
+	"misses": [
+		{
+			"query": "top Stellar projects by GitHub activity",
+			"expect": [
+				"getLeaderboard"
+			],
+			"rank": null,
+			"topScout": [
+				"searchProjects",
+				"searchRepos"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-project-dossier",
+				"scout.searchProjects",
+				"skills.lumenloop.stellar-ecosystem-scout"
+			],
+			"note": "activity leaderboard",
+			"missClass": "id-noun-exclusion",
+			"evidence": {
+				"collisions": [
+					{
+						"noun": "projects",
+						"token": "projects",
+						"op": "searchProjects",
+						"rank": 1
+					}
+				],
+				"intended": [
+					{
+						"op": "getLeaderboard",
+						"liveRank": null,
+						"replicaRankOurs": 2,
+						"replicaRankLive": 4,
+						"lagTokens": [],
+						"score": 165,
+						"gate": 0.6,
+						"coverage": 1,
+						"missing": [],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchProjects",
+					"liveScore": 185,
+					"replicaScoreLive": 185,
+					"replicaScoreOurs": 185
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "reflector oracle on Stellar",
+			"expect": [
+				"searchProjects",
+				"resolveProject"
+			],
+			"rank": null,
+			"topScout": [
+				"searchResearch",
+				"listContracts"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_rpc_horizon_data_docs"
+			],
+			"note": "demand: oracle project by name",
+			"missClass": "named-entity",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": 4,
+						"replicaRankLive": 5,
+						"lagTokens": [],
+						"score": 70,
+						"gate": 0.6,
+						"coverage": 0.75,
+						"missing": [
+							"reflector"
+						],
+						"missingWords": [
+							"reflector"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "resolveProject",
+						"liveRank": null,
+						"replicaRankOurs": 17,
+						"replicaRankLive": 12,
+						"lagTokens": [],
+						"score": 45,
+						"gate": 0.6,
+						"coverage": 0.75,
+						"missing": [
+							"reflector"
+						],
+						"missingWords": [
+							"reflector",
+							"oracle"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchResearch",
+					"liveScore": 97,
+					"replicaScoreLive": 97,
+					"replicaScoreOurs": 60
+				},
+				"projectNames": [
+					"reflector"
+				]
+			}
+		},
+		{
+			"query": "freighter",
+			"expect": [
+				"resolveProject",
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [],
+			"topAll": [
+				"skills.stellar-dev.dapp",
+				"stellarDocs.search_wallet_dapp_docs",
+				"stellarDocs.search_soroban_contract_docs"
+			],
+			"note": "demand: project by bare name (held, strict match)",
+			"missClass": "no-scout-op",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "resolveProject",
+						"liveRank": null,
+						"replicaRankOurs": null,
+						"replicaRankLive": null,
+						"lagTokens": [],
+						"score": null,
+						"gate": 1,
+						"coverage": 0,
+						"missing": [
+							"freighter"
+						],
+						"missingWords": [
+							"freighter"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": null,
+						"replicaRankLive": null,
+						"lagTokens": [],
+						"score": null,
+						"gate": 1,
+						"coverage": 0,
+						"missing": [
+							"freighter"
+						],
+						"missingWords": [
+							"freighter"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": null,
+				"projectNames": []
+			}
+		},
+		{
+			"query": "jobs bounties and freelance work for Stellar contributors",
+			"expect": [
+				"getRfps"
+			],
+			"rank": null,
+			"topScout": [
+				"getBuilders"
+			],
+			"topAll": [
+				"scout.getBuilders",
+				"stellarDocs.search_docs",
+				"skills.lumenloop.stellar-builder-quickstart"
+			],
+			"note": "demand: jobs/bounties (2×) — RFP briefs are the bounty half",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "getRfps",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"jobs",
+							"freelance",
+							"work",
+							"contributors"
+						],
+						"score": 185,
+						"gate": 0.6,
+						"coverage": 1,
+						"missing": [],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "getBuilders",
+					"liveScore": 106,
+					"replicaScoreLive": 106,
+					"replicaScoreOurs": 106
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "how does the Blend lending pool calculate interest rates in the code",
+			"expect": [
+				"explainRepo"
+			],
+			"rank": null,
+			"topScout": [
+				"listContracts",
+				"compareHackathons",
+				"vetIdea"
+			],
+			"topAll": [
+				"stellarDocs.search_docs_in_category",
+				"scout.listContracts",
+				"stellarDocs.search_asset_token_docs"
+			],
+			"note": "code: deep repo mechanism (DeepWiki)",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "explainRepo",
+						"liveRank": 5,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"calculate",
+							"interest",
+							"rates"
+						],
+						"score": 199,
+						"gate": 0.6,
+						"coverage": 0.67,
+						"missing": [
+							"blend",
+							"lending",
+							"pool"
+						],
+						"missingWords": [
+							"blend",
+							"lending",
+							"pool"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "listContracts",
+					"liveScore": 131,
+					"replicaScoreLive": null,
+					"replicaScoreOurs": null
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "is anyone actually building on Stellar or is it dead?",
+			"persona": "T1",
+			"expect": [
+				"getLeaderboard",
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"listContracts",
+				"listAudits"
+			],
+			"topAll": [
+				"stellarDocs.search_doc_titles",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"skills.lumenloop.stellar-content-auditor"
+			],
+			"note": "T1: activity — the activity leaderboard or the EC developer trend (dimension=developers) both answer",
+			"missClass": "outscored",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "getLeaderboard",
+						"liveRank": null,
+						"replicaRankOurs": 27,
+						"replicaRankLive": 25,
+						"lagTokens": [],
+						"score": 100,
+						"gate": 0.6,
+						"coverage": 0.8,
+						"missing": [
+							"building"
+						],
+						"missingWords": [
+							"anyone",
+							"actually",
+							"building",
+							"dead"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "analyzeEcosystem",
+						"liveRank": null,
+						"replicaRankOurs": 5,
+						"replicaRankLive": 8,
+						"lagTokens": [
+							"anyone",
+							"actually",
+							"dead"
+						],
+						"score": 171,
+						"gate": 0.6,
+						"coverage": 0.9,
+						"missing": [],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "listContracts",
+					"liveScore": 211,
+					"replicaScoreLive": 211,
+					"replicaScoreOurs": 211
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "what can you actually build on Stellar?",
+			"persona": "T1",
+			"expect": [
+				"getClusters",
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-builder-quickstart",
+				"skills.stellar-light.stellar-scout",
+				"stellarDocs.search_doc_titles"
+			],
+			"note": "T1: what exists, by category — the cluster map or the directory market map",
+			"missClass": "id-noun-exclusion",
+			"evidence": {
+				"collisions": [
+					{
+						"noun": "builds",
+						"token": "build",
+						"op": "searchHackathonBuilds",
+						"rank": 1
+					}
+				],
+				"intended": [
+					{
+						"op": "getClusters",
+						"liveRank": null,
+						"replicaRankOurs": 7,
+						"replicaRankLive": 5,
+						"lagTokens": [],
+						"score": 99,
+						"gate": 0.6,
+						"coverage": 0.71,
+						"missing": [
+							"can",
+							"you"
+						],
+						"missingWords": [
+							"actually"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": 10,
+						"replicaRankLive": 10,
+						"lagTokens": [],
+						"score": 89,
+						"gate": 0.6,
+						"coverage": 0.71,
+						"missing": [
+							"can",
+							"you"
+						],
+						"missingWords": [
+							"actually"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchHackathonBuilds",
+					"liveScore": 155,
+					"replicaScoreLive": 155,
+					"replicaScoreOurs": 155
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "what wallet should I use for Stellar?",
+			"persona": "T1",
+			"expect": [
+				"searchProjects",
+				"getPartners"
+			],
+			"rank": null,
+			"topScout": [
+				"getClusters",
+				"listSkills"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.search_wallet_dapp_docs",
+				"skills.lumenloop.stellar-ecosystem-digest"
+			],
+			"note": "T1: wallets — same call as the wallets probe above (directory 64, partners 5)",
+			"missClass": "outscored",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": 5,
+						"replicaRankLive": 5,
+						"lagTokens": [],
+						"score": 121,
+						"gate": 0.6,
+						"coverage": 0.86,
+						"missing": [
+							"should"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "getPartners",
+						"liveRank": null,
+						"replicaRankOurs": 13,
+						"replicaRankLive": 20,
+						"lagTokens": [
+							"stellar"
+						],
+						"score": 99,
+						"gate": 0.6,
+						"coverage": 0.71,
+						"missing": [
+							"what",
+							"should"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "getClusters",
+					"liveScore": 147,
+					"replicaScoreLive": 147,
+					"replicaScoreOurs": 147
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "who gives out grants for building on Stellar?",
+			"persona": "T1",
+			"expect": [
+				"getRfps",
+				"scfPitch",
+				"searchResearch"
+			],
+			"rank": null,
+			"topScout": [
+				"searchProjects",
+				"getBuilders"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"stellarDocs.get_doc_page_sections",
+				"skills.lumenloop.stellar-integration-finder"
+			],
+			"note": "T1: grants — the open briefs/round (getRfps, scfPitch) or the SCF program itself (research corpus)",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "getRfps",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": 5,
+						"lagTokens": [
+							"gives",
+							"out"
+						],
+						"score": 161,
+						"gate": 0.6,
+						"coverage": 0.88,
+						"missing": [
+							"who"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "scfPitch",
+						"liveRank": null,
+						"replicaRankOurs": 13,
+						"replicaRankLive": 12,
+						"lagTokens": [],
+						"score": 56,
+						"gate": 0.6,
+						"coverage": 0.6,
+						"missing": [
+							"gives",
+							"building"
+						],
+						"missingWords": [
+							"gives",
+							"out",
+							"building"
+						],
+						"exactPhrase": false,
+						"rescued": true
+					},
+					{
+						"op": "searchResearch",
+						"liveRank": null,
+						"replicaRankOurs": 6,
+						"replicaRankLive": 4,
+						"lagTokens": [],
+						"score": 110,
+						"gate": 0.6,
+						"coverage": 0.75,
+						"missing": [
+							"who",
+							"gives"
+						],
+						"missingWords": [
+							"gives",
+							"out"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchProjects",
+					"liveScore": 156,
+					"replicaScoreLive": 156,
+					"replicaScoreOurs": 156
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "show me some example Stellar projects I can copy",
+			"persona": "T1",
+			"expect": [
+				"searchRepos",
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"vetIdea",
+				"listSkills",
+				"scfPitch"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-content-auditor",
+				"skills.lumenloop.stellar-ecosystem-scout",
+				"scout.vetIdea"
+			],
+			"note": "T1: code to fork — repos first; directory rows carry indexed repos inline",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "searchRepos",
+						"liveRank": 4,
+						"replicaRankOurs": 2,
+						"replicaRankLive": 4,
+						"lagTokens": [
+							"copy"
+						],
+						"score": 140,
+						"gate": 0.6,
+						"coverage": 0.78,
+						"missing": [
+							"some",
+							"can"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": null,
+						"replicaRankLive": null,
+						"lagTokens": [],
+						"score": null,
+						"gate": 0.6,
+						"coverage": 0.4,
+						"missing": [
+							"show",
+							"example",
+							"copy"
+						],
+						"missingWords": [
+							"show",
+							"example",
+							"copy"
+						],
+						"exactPhrase": false,
+						"rescued": true
+					}
+				],
+				"winner": {
+					"op": "vetIdea",
+					"liveScore": 143,
+					"replicaScoreLive": 143,
+					"replicaScoreOurs": 143
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "which Stellar wallets support Soroban contracts?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"getSkill",
+				"searchResearch"
+			],
+			"topAll": [
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts",
+				"skills.openzeppelin-stellar.setup-stellar-contracts",
+				"skills.stellar-dev.smart-contracts"
+			],
+			"note": "T2: wallets by capability (routing-surface-check win-probe); carries the 'contracts' id noun; the missing word is the platform name — fix declined, see comment",
+			"missClass": "vocabulary",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": 6,
+						"replicaRankLive": 4,
+						"lagTokens": [],
+						"score": 77,
+						"gate": 0.6,
+						"coverage": 0.67,
+						"missing": [
+							"which",
+							"soroban"
+						],
+						"missingWords": [
+							"soroban"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "getSkill",
+					"liveScore": 88,
+					"replicaScoreLive": 88,
+					"replicaScoreOurs": 88
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "what oracle should I use for prices on Stellar?",
+			"persona": "T2",
+			"expect": [
+				"searchProjects"
+			],
+			"rank": null,
+			"topScout": [
+				"searchHackathonBuilds"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"skills.lumenloop.stellar-ecosystem-digest",
+				"skills.openzeppelin-stellar.upgrade-stellar-contracts"
+			],
+			"note": "T2: oracle roster (type=Oracle)",
+			"missClass": "outscored",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "searchProjects",
+						"liveRank": null,
+						"replicaRankOurs": 5,
+						"replicaRankLive": 5,
+						"lagTokens": [],
+						"score": 153,
+						"gate": 0.6,
+						"coverage": 0.89,
+						"missing": [
+							"should"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchHackathonBuilds",
+					"liveScore": 166,
+					"replicaScoreLive": 166,
+					"replicaScoreOurs": 166
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "which Stellar projects had a smart contract audit published in the last year?",
+			"persona": "T3",
+			"expect": [
+				"listAudits"
+			],
+			"rank": null,
+			"topScout": [
+				"searchResearch",
+				"explainRepo",
+				"searchRepos"
+			],
+			"topAll": [
+				"skills.stellar-dev.smart-contracts",
+				"stellarDocs.search_docs",
+				"stellarDocs.search_sdk_cli_tools_docs"
+			],
+			"note": "T3: audit registry (win-probe); carries the 'projects' and 'contract' id nouns",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "listAudits",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"smart",
+							"contract",
+							"published",
+							"last",
+							"year"
+						],
+						"score": 303,
+						"gate": 0.6,
+						"coverage": 0.85,
+						"missing": [
+							"which",
+							"had"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "searchResearch",
+					"liveScore": 202,
+					"replicaScoreLive": 202,
+					"replicaScoreOurs": 202
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "how does Blend calculate interest accrual?",
+			"persona": "T3",
+			"expect": [
+				"explainRepo"
+			],
+			"rank": null,
+			"topScout": [
+				"listContracts",
+				"getRfps",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_docs",
+				"scout.listContracts",
+				"stellarDocs.search_docs_in_category"
+			],
+			"note": "T3: code mechanism (win-probe)",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "explainRepo",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"calculate",
+							"interest"
+						],
+						"score": 98,
+						"gate": 0.6,
+						"coverage": 0.83,
+						"missing": [
+							"blend"
+						],
+						"missingWords": [
+							"blend",
+							"accrual"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "listContracts",
+					"liveScore": 42,
+					"replicaScoreLive": 42,
+					"replicaScoreOurs": 42
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "which anchors actually implement SEP-24?",
+			"persona": "T3",
+			"expect": [
+				"getPartners"
+			],
+			"rank": null,
+			"topScout": [
+				"explainRepo",
+				"matchPartners",
+				"getClusters"
+			],
+			"topAll": [
+				"stellarDocs.search_anchor_sep_docs",
+				"scout.explainRepo",
+				"scout.matchPartners"
+			],
+			"note": "T3: partner rows carry `seps` read from each anchor's stellar.toml",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "getPartners",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"implement",
+							"sep",
+							"24"
+						],
+						"score": 98,
+						"gate": 0.6,
+						"coverage": 0.83,
+						"missing": [
+							"which"
+						],
+						"missingWords": [
+							"actually"
+						],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "explainRepo",
+					"liveScore": 78,
+					"replicaScoreLive": 78,
+					"replicaScoreOurs": 88
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "how much has the Stellar Community Fund awarded in total?",
+			"persona": "T4",
+			"expect": [
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"scfPitch",
+				"searchProjects",
+				"searchResearch"
+			],
+			"topAll": [
+				"stellarDocs.search_docs_in_category",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_doc_titles"
+			],
+			"note": "T4: SCF funding total (win-probe)",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "analyzeEcosystem",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": 4,
+						"lagTokens": [
+							"community"
+						],
+						"score": 158,
+						"gate": 0.6,
+						"coverage": 0.8,
+						"missing": [
+							"how",
+							"has"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					}
+				],
+				"winner": {
+					"op": "scfPitch",
+					"liveScore": 148,
+					"replicaScoreLive": 148,
+					"replicaScoreOurs": 148
+				},
+				"projectNames": []
+			}
+		},
+		{
+			"query": "which verticals on Stellar have the least competition?",
+			"persona": "T4",
+			"expect": [
+				"getClusters",
+				"analyzeEcosystem"
+			],
+			"rank": null,
+			"topScout": [
+				"scfPitch"
+			],
+			"topAll": [
+				"skills.lumenloop.stellar-integration-finder",
+				"stellarDocs.get_doc_page_sections",
+				"stellarDocs.search_protocol_concepts_docs"
+			],
+			"note": "T4: whitespace — crowdedness scores or dimension=gaps",
+			"missClass": "catalog-lag",
+			"evidence": {
+				"collisions": [],
+				"intended": [
+					{
+						"op": "getClusters",
+						"liveRank": null,
+						"replicaRankOurs": 1,
+						"replicaRankLive": null,
+						"lagTokens": [
+							"verticals",
+							"least"
+						],
+						"score": 130,
+						"gate": 0.6,
+						"coverage": 0.75,
+						"missing": [
+							"which",
+							"have"
+						],
+						"missingWords": [],
+						"exactPhrase": false,
+						"rescued": false
+					},
+					{
+						"op": "analyzeEcosystem",
+						"liveRank": null,
+						"replicaRankOurs": null,
+						"replicaRankLive": null,
+						"lagTokens": [],
+						"score": null,
+						"gate": 0.6,
+						"coverage": 0.5,
+						"missing": [
+							"least",
+							"competition"
+						],
+						"missingWords": [
+							"least",
+							"competition"
+						],
+						"exactPhrase": false,
+						"rescued": true
+					}
+				],
+				"winner": {
+					"op": "scfPitch",
+					"liveScore": 98,
+					"replicaScoreLive": 98,
+					"replicaScoreOurs": 98
+				},
+				"projectNames": []
+			}
 		}
 	],
 	"lagging": [],
@@ -71,42 +2382,78 @@
 		{
 			"query": "what is the current price of XLM",
 			"top": "scout.searchProjects",
+			"topScout": "scout.searchProjects",
 			"note": "no price-feed capability — should NOT confidently claim a scout op"
 		},
 		{
 			"query": "tell me about Solana",
 			"top": "lumenloop.find_content_about_project",
+			"topScout": "scout.explainRepo",
 			"note": "off-topic (not Stellar)"
 		},
 		{
 			"query": "how do I buy Bitcoin",
 			"top": "stellarDocs.search_doc_titles",
+			"topScout": "scout.listContracts",
 			"note": "off-topic"
 		},
 		{
 			"query": "compare Ethereum and Stellar total value locked",
 			"top": "scout.compareHackathons",
+			"topScout": "scout.compareHackathons",
 			"note": "cross-chain — Ethereum half is out of scope"
 		},
 		{
 			"query": "Stellar projects that are NOT funded by SCF",
 			"top": "scout.searchProjects",
+			"topScout": "scout.searchProjects",
 			"note": "negation — easy to invert"
 		},
 		{
 			"query": "sorobon lending protcols",
 			"top": "scout.getClusters",
+			"topScout": "scout.getClusters",
 			"note": "typos — should still fuzzy-route to searchProjects"
 		},
 		{
 			"query": "list all Stellar mainnet validators",
 			"top": "stellarDocs.search_docs",
+			"topScout": "scout.listContracts",
 			"note": "validator-set capability we don't have"
 		},
 		{
 			"query": "who is the CEO of the Stellar Development Foundation",
 			"top": "skills.lumenloop.stellar-ecosystem-scout",
+			"topScout": "scout.getPeople",
 			"note": "person → getPeople (Denelle Dixon)"
+		},
+		{
+			"query": "how do I make a smart contract on Stellar?",
+			"persona": "T1",
+			"top": "stellarDocs.search_soroban_contract_docs",
+			"topScout": "scout.listContracts",
+			"note": "T1: docs how-to (stellarDocs) — no scout op holds it"
+		},
+		{
+			"query": "can I use Solidity on Stellar?",
+			"persona": "T2",
+			"top": "skills.lumenloop.stellar-integration-finder",
+			"topScout": "scout.listSkills",
+			"note": "T2: docs feasibility — no scout op holds it"
+		},
+		{
+			"query": "what is the difference between Horizon and Soroban RPC?",
+			"persona": "T2",
+			"top": "stellarDocs.search_rpc_horizon_data_docs",
+			"topScout": "scout.explainRepo",
+			"note": "T2: docs concept — no scout op holds it"
+		},
+		{
+			"query": "how do I get testnet USDC on Stellar?",
+			"persona": "T2",
+			"top": "stellarDocs.get_doc_page_sections",
+			"topScout": "scout.getHackathons",
+			"note": "T2: docs how-to — no scout op holds it"
 		}
 	]
 }

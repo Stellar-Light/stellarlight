@@ -1,23 +1,23 @@
 {
-	"generatedAt": "2026-09-04T10:09:03.857Z",
-	"total": 527,
-	"open": 5,
+	"generatedAt": "2026-09-05T05:08:19.275Z",
+	"total": 539,
+	"open": 17,
 	"refreshQueue": 1,
 	"closed": 521,
 	"verified": 7,
 	"cleared": 514,
 	"clearedByReprobe": 216,
 	"clearedOnSilence": 298,
-	"closingRate": 0.99,
-	"oldestOpenDays": 43,
+	"closingRate": 0.97,
+	"oldestOpenDays": 44,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "consumer",
-			"open": 5,
-			"total": 24
+			"open": 17,
+			"total": 36
 		},
 		{
 			"surface": "retrieval",
@@ -86,6 +86,27 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "freighter",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:is-anyone-actually-building-on-stellar-or-is-it-",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "is anyone actually building on Stellar or is it dead?",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:what-can-you-actually-build-on-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "what can you actually build on Stellar?",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:what-wallet-should-i-use-for-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "what wallet should I use for Stellar?",
 			"severity": "medium"
 		}
 	]
