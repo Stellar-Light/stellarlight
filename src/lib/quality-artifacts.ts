@@ -1115,13 +1115,13 @@ export type LaneAutonomyRow = {
 	id: string;
 	workflow: string;
 	cadence: string;
-	writeSet: string;
-	executeDetection: string;
-	executesLast8w: number | null;
-	/** Of those, the ones the lane's own cron started. An execute a human
-	 * dispatched still counts toward a week, but it is not evidence of
-	 * unattended operation, so the split has to stay visible. */
-	scheduledExecutesLast8w: number | null;
+	writeSet: string | null;
+	/** Successful runs the lane started ITSELF. A count of runs, not of writes —
+	 * which of them wrote is what interventionFreeWeeks is proven from. */
+	unattendedRuns: number | null;
+	/** Successful runs a human dispatched. Reported so the split stays visible,
+	 * and worth nothing: a hand-flown lane is not an autonomous one. */
+	attendedRuns: number | null;
 	executesAreLowerBound: boolean;
 	interventionFreeWeeks: number | null;
 	stage: number | string;

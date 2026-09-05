@@ -543,7 +543,7 @@ export default function QualityPage() {
 					<Stat
 						label="Lanes that write to production"
 						value={String(laneAutonomy.summary.lanes)}
-						sub="from .github/workflows, not from a list"
+						sub="derived from .github/workflows each run, not from a list"
 					/>
 					<Stat
 						label={`At ${laneAutonomy.thresholdWeeks}+ clean weeks`}
@@ -563,7 +563,7 @@ export default function QualityPage() {
 								<th className="font-normal pb-2 pr-4">Lane</th>
 								<th className="font-normal pb-2 pr-4">Cadence</th>
 								<th className="font-normal pb-2 pr-4 text-right">
-									Executes ({laneAutonomy.windowWeeks}w)
+									Runs ({laneAutonomy.windowWeeks}w)
 								</th>
 								<th className="font-normal pb-2 pr-4 text-right">
 									Clean weeks
@@ -579,12 +579,12 @@ export default function QualityPage() {
 										{l.cadence}
 									</td>
 									<td className="py-2 pr-4 text-right text-muted-foreground tabular-nums">
-										{l.state === "could-not-check"
+										{l.unattendedRuns === null
 											? "—"
-											: `${l.executesLast8w}${l.executesAreLowerBound ? "+" : ""} (${l.scheduledExecutesLast8w} unattended)`}
+											: `${l.unattendedRuns} self-started (${l.attendedRuns} hand-dispatched)`}
 									</td>
 									<td className="py-2 pr-4 text-right text-foreground tabular-nums">
-										{l.state === "could-not-check"
+										{l.interventionFreeWeeks === null
 											? "could not check"
 											: l.interventionFreeWeeks}
 									</td>
@@ -599,14 +599,18 @@ export default function QualityPage() {
 					</table>
 				</div>
 				<p className="text-[11px] text-muted-foreground leading-relaxed mt-4">
-					Elapsed time earns nothing: the count is capped at the number of
-					distinct weeks the lane actually completed an execute, so a lane
-					nobody has run sits at zero however long it has been quiet. Executes
-					include runs a human dispatched — &ldquo;unattended&rdquo; is the
-					subset the lane&apos;s own cron started, and only that subset is
-					evidence it can run itself. A &ldquo;+&rdquo; marks a floor: GitHub
-					does not expose a manual run&apos;s inputs, so a run whose step was
-					explicitly named could not be classified. Corrections live in{" "}
+					Elapsed time earns nothing. The weeks must be consecutive and must run
+					up to this one, so a lane nobody has run sits at zero however long it
+					has been quiet, and four scattered good weeks are not four clean
+					weeks. Only runs the lane started ITSELF count — a hand-dispatched
+					execute is a person operating the lane, and is reported here rather
+					than counted. The run counts are runs, not writes: which of them wrote
+					is what the week count is proven from. Every counted execute is proven
+					from that run&apos;s own job steps, never from today&apos;s copy of
+					the workflow file: a step that was skipped moved nothing, whatever the
+					file says now. A &ldquo;+&rdquo; marks a floor: GitHub does not expose
+					a run&apos;s commands, so a step the author named and that actually
+					ran could not be classified. Corrections live in{" "}
 					<a
 						href={evidenceUrl("improvements/lanes/interventions.json")}
 						target="_blank"
