@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T22:52:31.665Z",
+ "generatedAt": "2026-09-05T23:18:41.540Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -4746,10 +4746,8 @@
    {
     "slug": "one-click",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5303,10 +5301,8 @@
    {
     "slug": "ichi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -5605,10 +5601,8 @@
    {
     "slug": "findtruman",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6316,10 +6310,8 @@
    {
     "slug": "boss-revolution",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7446,10 +7438,8 @@
    {
     "slug": "fonbnk",
     "prominence": 76,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7554,10 +7544,8 @@
    {
     "slug": "chipper",
     "prominence": 68,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8152,10 +8140,8 @@
    {
     "slug": "alterscope",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8427,11 +8413,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 900
+    "count": 899
    },
    {
     "network": "mainnet",
-    "count": 82
+    "count": 83
    },
    {
     "network": "testnet",
@@ -8439,32 +8425,32 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 900,
-   "applicableUnknown": 198,
+   "unknown": 899,
+   "applicableUnknown": 197,
    "notApplicable": 702,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 193,
-   "onchain-activity": 49,
+   "human-verified": 201,
+   "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 569,
+   "weakLiveRows": 562,
    "onchainEligible": 14,
-   "appOnly": 555,
-   "deploymentStrongStatusWeak": 2,
+   "appOnly": 548,
+   "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 468
+    "count": 461
    },
    {
     "basis": "human-verified",
-    "count": 193
+    "count": 201
    },
    {
     "basis": "repo-activity",
@@ -8480,7 +8466,7 @@
    },
    {
     "basis": "onchain-activity",
-    "count": 49
+    "count": 48
    },
    {
     "basis": "unverified",
@@ -8492,7 +8478,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 579,
+  "weakestTotal": 572,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8979,26 +8965,6 @@
     ]
    },
    {
-    "slug": "fonbnk",
-    "name": "Fonbnk",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 76,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Anchor"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "felix-pago",
     "name": "Felix Pago",
     "status": "Live",
@@ -9091,26 +9057,6 @@
     "deploymentApplies": false,
     "types": [
      "Wallet"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "chipper",
-    "name": "Chipper",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 68,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9323,12 +9269,53 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "vaquita",
+    "name": "Vaquita",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 4,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Lending"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "0xauth",
+    "name": "0xAuth",
+    "status": "Live",
+    "statusBasis": "unverified",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "SDK",
+     "Security"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 569
+    "count": 562
    },
    {
     "field": "dated",
@@ -10591,8 +10578,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "57% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "561 of 984 rows (census)",
+   "limit": "56% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "554 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10982,10 +10969,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 900,
+    "missing": 899,
     "of": 984,
-    "share": 91.5,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 900 unknown rows, 198 are on-chain product types where the question applies and an agent will ask it; the other 702 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "share": 91.4,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 899 unknown rows, 197 are on-chain product types where the question applies and an agent will ask it; the other 702 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11000,13 +10987,13 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 569,
+    "missing": 562,
     "of": 984,
-    "share": 57.8,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 555 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 57.1,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 548 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 12,
+    "examplePoolSize": 11,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
@@ -11016,7 +11003,6 @@
      "yellow-card",
      "vesseo",
      "scorechain",
-     "fonbnk",
      "lightsail-network-quasar",
      "solar-wallet",
      "redswan",
