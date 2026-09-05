@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T17:14:19.902Z",
+ "generatedAt": "2026-09-05T19:04:03.290Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -279,6 +279,17 @@
     ]
    },
    {
+    "file": "improvements/receipts/skyhitz-2026-09-05.json",
+    "slug": "skyhitz",
+    "url": "https://skyhitz.io/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "Total Mass 0.00",
+     "Event Horizon 0.0000",
+     "Balance —"
+    ]
+   },
+   {
     "file": "improvements/receipts/redstone-finance-2026-08-29.json",
     "slug": "redstone-finance",
     "url": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
@@ -306,6 +317,17 @@
     "markers": [
      "Site Not Found",
      "NOT app.letsping.com resolves"
+    ]
+   },
+   {
+    "file": "improvements/receipts/orbitcdp-2026-09-05.json",
+    "slug": "orbitcdp",
+    "url": "https://orbitcdp.finance/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "oUSD Minted —",
+     "Collateral Locked —",
+     "Borrow APY —"
     ]
    },
    {

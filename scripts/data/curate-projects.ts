@@ -121,13 +121,36 @@ const SCF_SUBMISSION_LINKS: Record<
 	{ rounds: number[]; evidence: string }
 > = {
 	// the 19 approved creates (seeded this run — SEEDS runs first)
-	loop: { rounds: [40], evidence: "https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom" },
-	"crediolabs-ai": { rounds: [44], evidence: "https://communityfund.stellar.org/project/crediolabsai-ut9" },
-	policywright: { rounds: [42, 44], evidence: "https://communityfund.stellar.org/project/policywright-j8x" },
-	"vrf-soroban": { rounds: [44], evidence: "https://communityfund.stellar.org/project/vrf-soroban-8yl" },
-	komet: { rounds: [28, 30], evidence: "https://communityfund.stellar.org/project/komet-formal-verification-o0s" },
-	"roberto-sanz-criptomonedas": { rounds: [22, 24], evidence: "https://communityfund.stellar.org/project/social-podcast-ini" },
-	janus: { rounds: [45], evidence: "https://communityfund.stellar.org/project/janus-m2t" },
+	loop: {
+		rounds: [40],
+		evidence:
+			"https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom",
+	},
+	"crediolabs-ai": {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/crediolabsai-ut9",
+	},
+	policywright: {
+		rounds: [42, 44],
+		evidence: "https://communityfund.stellar.org/project/policywright-j8x",
+	},
+	"vrf-soroban": {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/vrf-soroban-8yl",
+	},
+	komet: {
+		rounds: [28, 30],
+		evidence:
+			"https://communityfund.stellar.org/project/komet-formal-verification-o0s",
+	},
+	"roberto-sanz-criptomonedas": {
+		rounds: [22, 24],
+		evidence: "https://communityfund.stellar.org/project/social-podcast-ini",
+	},
+	janus: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/janus-m2t",
+	},
 	// kutana/sendana rounds corrected 2026-09-01 (crosscheck roundsOverstated,
 	// verified by hand against the pages' per-submission verdicts): the review
 	// read the top badge list, which includes NOT-awarded submission rounds —
@@ -135,54 +158,149 @@ const SCF_SUBMISSION_LINKS: Record<
 	// kutana: #38/#39/#43/#44 submissions read "Not Awarded"/"Panel Review
 	// Failed"; the #45 submission ($97k budget = the page's totalAwarded,
 	// totalPaid $9.7k) is the award. Same shape for sendana ($100k/#45).
-	kutana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/kutana-9ti" },
+	kutana: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/kutana-9ti",
+	},
 	// sorted/crebit corrected 2026-09-01 (post-enrich sweep of the same
 	// badge-inheritance class): crebit #44 is affirmatively "Not Awarded";
 	// sorted #44 is neutral Pre-Screen but the page's own arithmetic proves
 	// it contributed nothing (totalAwarded $150k equals the #45 budget
 	// alone). Both awards are #45; enrich already wrote the rows — these
 	// entries just stop the union-merge from resurrecting the dead rounds.
-	sorted: { rounds: [45], evidence: "https://communityfund.stellar.org/project/sorted-jqh" },
-	sendana: { rounds: [45], evidence: "https://communityfund.stellar.org/project/sendana-axa" },
-	"account-demolisher": { rounds: [29, 41, 44], evidence: "https://communityfund.stellar.org/project/account-demolisher-bfe" },
-	etesia: { rounds: [44], evidence: "https://communityfund.stellar.org/project/etesia-rgj" },
-	"nouns-builder-protocol": { rounds: [44], evidence: "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7" },
-	yolat: { rounds: [44], evidence: "https://communityfund.stellar.org/project/yolat-bl5" },
-	crebit: { rounds: [45], evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril" },
-	pagcrypto: { rounds: [42], evidence: "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu" },
+	sorted: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/sorted-jqh",
+	},
+	sendana: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/sendana-axa",
+	},
+	"account-demolisher": {
+		rounds: [29, 41, 44],
+		evidence:
+			"https://communityfund.stellar.org/project/account-demolisher-bfe",
+	},
+	etesia: {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/etesia-rgj",
+	},
+	"nouns-builder-protocol": {
+		rounds: [44],
+		evidence:
+			"https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+	},
+	yolat: {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/yolat-bl5",
+	},
+	crebit: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril",
+	},
+	pagcrypto: {
+		rounds: [42],
+		evidence:
+			"https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+	},
 	// upesa/verseprop rounds corrected 2026-09-01 (same badge-inheritance
 	// class as kutana/sendana, caught at slug-override verification): the
 	// pages affirmatively verdict upesa #41 and verseprop #31/#32 "Not
 	// Awarded"; the awards are #42 and #33 ("Awarded" cards, $86k / $112,020).
-	upesa: { rounds: [42], evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq" },
-	fxdao: { rounds: [13], evidence: "https://communityfund.stellar.org/project/fxdao-xov" },
+	upesa: {
+		rounds: [42],
+		evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq",
+	},
+	fxdao: {
+		rounds: [13],
+		evidence: "https://communityfund.stellar.org/project/fxdao-xov",
+	},
 	// the duplicates whose rounds the review read off their SCF pages
-	verseprop: { rounds: [33], evidence: "https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1" },
-	ctx: { rounds: [19, 41], evidence: "https://communityfund.stellar.org/project/prices-api-rfp-ctx-1vo" },
-	inferera: { rounds: [41], evidence: "https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply" },
-	simbolik: { rounds: [41], evidence: "https://communityfund.stellar.org/project/advanced-debugging-for-soroban-contracts-5sr" },
-	fairblock: { rounds: [40], evidence: "https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt" },
-	tucambio: { rounds: [37, 43], evidence: "https://communityfund.stellar.org/project/seasonal-workers-payroll-lru" },
-	womenbiz: { rounds: [29], evidence: "https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v" },
-	fastbuka: { rounds: [35, 38, 44], evidence: "https://communityfund.stellar.org/project/choppaddi-vmf" },
-	untangled: { rounds: [41], evidence: "https://communityfund.stellar.org/project/octopos-g6i" },
+	verseprop: {
+		rounds: [33],
+		evidence:
+			"https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1",
+	},
+	ctx: {
+		rounds: [19, 41],
+		evidence:
+			"https://communityfund.stellar.org/project/prices-api-rfp-ctx-1vo",
+	},
+	inferera: {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply",
+	},
+	simbolik: {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/advanced-debugging-for-soroban-contracts-5sr",
+	},
+	fairblock: {
+		rounds: [40],
+		evidence:
+			"https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt",
+	},
+	tucambio: {
+		rounds: [37, 43],
+		evidence:
+			"https://communityfund.stellar.org/project/seasonal-workers-payroll-lru",
+	},
+	womenbiz: {
+		rounds: [29],
+		evidence:
+			"https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v",
+	},
+	fastbuka: {
+		rounds: [35, 38, 44],
+		evidence: "https://communityfund.stellar.org/project/choppaddi-vmf",
+	},
+	untangled: {
+		rounds: [41],
+		evidence: "https://communityfund.stellar.org/project/octopos-g6i",
+	},
 	// coala-pay is MULTI-PAGE (2026-09-01 verification): r22 ($50k) verified
 	// on anticipatory-aid-on-soroban-f7j, r35 ($60k) verified on
 	// coala-pay-billy-wallet-9mi, r31 unverdicted on both pages (kept —
 	// never accuse on silence). Deliberately NOT slug-joined; the union
 	// merge below is what records the verified rounds.
-	"coala-pay": { rounds: [22, 31, 35], evidence: "https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j" },
+	"coala-pay": {
+		rounds: [22, 31, 35],
+		evidence:
+			"https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j",
+	},
 	// escala corrected 2026-09-01 (badge-inheritance class, caught at
 	// linkage verification): the page marks #42/#43 "Not Awarded"; the award
 	// is #44 ($70k Build).
-	escala: { rounds: [44], evidence: "https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi" },
-	lobster: { rounds: [42], evidence: "https://communityfund.stellar.org/project/institutional-liquidity-infrastructure-for-stellar-k5c" },
-	"dfs-labs": { rounds: [24], evidence: "https://communityfund.stellar.org/project/stellar-surge-1gh" },
-	ichi: { rounds: [26], evidence: "https://communityfund.stellar.org/project/solo-labs-iy1" },
-	"the-aha-company": { rounds: [41], evidence: "https://communityfund.stellar.org/project/smart-account-onboarding-8yr" },
-	"soroban-decompiler": { rounds: [41], evidence: "https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh" },
+	escala: {
+		rounds: [44],
+		evidence:
+			"https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi",
+	},
+	lobster: {
+		rounds: [42],
+		evidence:
+			"https://communityfund.stellar.org/project/institutional-liquidity-infrastructure-for-stellar-k5c",
+	},
+	"dfs-labs": {
+		rounds: [24],
+		evidence: "https://communityfund.stellar.org/project/stellar-surge-1gh",
+	},
+	ichi: {
+		rounds: [26],
+		evidence: "https://communityfund.stellar.org/project/solo-labs-iy1",
+	},
+	"the-aha-company": {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/smart-account-onboarding-8yr",
+	},
+	"soroban-decompiler": {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
+	},
 };
-
 
 const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 	"stellar-php-sdk": {
@@ -1857,6 +1975,15 @@ async function main() {
 			console.log(`  WARN: no project "${slug}" — skipped`);
 			continue;
 		}
+		// A lineage shadow is owned by the fold (Draft + canonicalSlug). A
+		// status entry naming one would overwrite that — the third writer the
+		// 2026-09-05 audit warned about. Fix the canonical row instead.
+		if (d.canonicalSlug) {
+			console.log(
+				`  ${slug}: is a shadow of ${d.canonicalSlug} — skip (fix the canonical row)`,
+			);
+			continue;
+		}
 		if (d.status !== fix.from) {
 			console.log(
 				`  ${slug}: status '${d.status}' ≠ '${fix.from}', skip (retired or manually set)`,
@@ -2097,7 +2224,9 @@ async function main() {
 			);
 			continue;
 		}
-		console.log(`  ${slug}: website REMOVED (was ${d.links.website} — hijacked)`);
+		console.log(
+			`  ${slug}: website REMOVED (was ${d.links.website} — hijacked)`,
+		);
 		writes.push({
 			id: d.id,
 			slug,
@@ -2548,7 +2677,9 @@ async function main() {
 			);
 			writes.push({ id: dupe.id, slug: m.dupe, data: dData });
 		} else {
-			console.log(`  ${m.dupe}: already linked + parked (${dupe.status}), skip`);
+			console.log(
+				`  ${m.dupe}: already linked + parked (${dupe.status}), skip`,
+			);
 		}
 	}
 

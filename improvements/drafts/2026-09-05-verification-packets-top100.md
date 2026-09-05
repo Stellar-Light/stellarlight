@@ -6,6 +6,8 @@ Population: 984 served rows (status ≠ Draft, no canonicalSlug), 601 on a weak 
 Every website, GitHub repo/org and stellar.expert page cited here was fetched on 2026-09-05; `statusAsOf` is that fetch date and nothing older is dated as if fetched today.
 **Every verdict here is a recommendation; the owner's approval of a row is what makes it human-verified.**
 
+> **Corrections after execution (2026-09-05 evening):** the owner overturned two high-tier Live verdicts — `orbitcdp` and `skyhitz` are DEAD (both pages carry empty protocol stats under a live banner/title; receipted, reverted). A cross-vendor audit then showed eight more high-tier Live stamps rested on evidence this file's own table calls thin (fairblock 40 chars, untangled 17, wagelink 8; hot-wallet's hackathon repo; tala's seeder repo; normal and vanna-finance 404 substitutes; wagelink/zebec sharing one repo): their human-verified stamps were withdrawn to site-liveness, status unchanged. **The Live rule used here is superseded:** a Live verdict needs the product's own state (stats, app, chain), never a banner, title or CTA; empty or zero page metrics veto Live; the second signal must be this product's own repo; under ~300 rendered characters is not substantive. **The medium and low tiers must be re-graded under that rule before any apply.**
+
 > **Applied 2026-09-05 17:10 UTC (high-confidence tier, 38 rows):** owner said "apply the high confidence packets"; entries live in `STATUS_FIX` (#1345), curate-projects executed (run 33979942527), all 38 read back. Medium (32) and low (30) tiers remain recommendations.
 
 ## How to read a verdict

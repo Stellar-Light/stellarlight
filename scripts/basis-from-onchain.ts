@@ -97,6 +97,7 @@ function evidenceOf(onchain: any): Ev | null {
 			statusAsOf: true,
 			statusSourceUrl: true,
 			onchain: true,
+			canonicalSlug: true,
 		},
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
@@ -113,14 +114,23 @@ function evidenceOf(onchain: any): Ev | null {
 		noEvidence: 0,
 		stale: 0,
 		noDate: 0,
+		shadow: 0,
 	};
 	for (const d of docs) {
+		// A lineage shadow (Draft + canonicalSlug) is not a served row; its
+		// status record belongs to the fold, never to a basis lane.
+		if (d.canonicalSlug || d.status === "Draft") {
+			t.shadow++;
+			continue;
+		}
 		const basis = String(d.statusBasis ?? "");
 		if (NEVER_OVERWRITE.has(basis)) {
 			t.alreadyStrong++;
 			continue;
 		}
-		const asOf = d.onchain?.asOf ? Date.parse(String(d.onchain.asOf)) : Number.NaN;
+		const asOf = d.onchain?.asOf
+			? Date.parse(String(d.onchain.asOf))
+			: Number.NaN;
 		if (Number.isNaN(asOf)) {
 			t.noDate++;
 			continue;
@@ -165,7 +175,7 @@ function evidenceOf(onchain: any): Ev | null {
 			});
 	}
 	console.log(
-		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate}`,
+		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate} | shadows skipped ${t.shadow}`,
 	);
 	process.exit(0);
 })();
