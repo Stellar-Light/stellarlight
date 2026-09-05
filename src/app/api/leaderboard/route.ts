@@ -53,6 +53,11 @@ interface ProjectRow {
 		totalStars: number;
 		openIssuesTotal: number;
 		lastActivityAt: string | null;
+		/** Default-branch commits over the trailing 90 days summed across indexed
+		 *  repos (activitySignals); null = no repo carries a count (index gap). */
+		commits90d: number | null;
+		/** Newest activitySignals.asOf among the summed repos; null with commits90d. */
+		commits90dAsOf: string | null;
 		repoCount: number;
 		/** The exact repos the stats aggregate over — repoCount === repos.length. */
 		repos: string[];
@@ -299,6 +304,10 @@ export async function GET(req: NextRequest) {
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
+					activitySignals?: {
+						commits90d?: number | null;
+						asOf?: string | null;
+					} | null;
 				}>
 			>();
 			if (projectSlugs.length > 0) {
@@ -320,6 +329,9 @@ export async function GET(req: NextRequest) {
 						stars: true,
 						openIssues: true,
 						lastCommitAt: true,
+						// 2026-09-05: velocity, not just recency — the enrich pass stamps
+						// activitySignals.commits90d on 2,268 of 2,321 project-linked repos.
+						activitySignals: true,
 						// sls-036: index-refresh timestamp feeds meta.dataAsOf
 						updatedAt: true,
 					},
@@ -330,6 +342,10 @@ export async function GET(req: NextRequest) {
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
+					activitySignals?: {
+						commits90d?: number | null;
+						asOf?: string | null;
+					} | null;
 					updatedAt?: string | null;
 				}>) {
 					// ISO-8601 strings compare correctly lexicographically.
@@ -377,6 +393,20 @@ export async function GET(req: NextRequest) {
 						lastActivityAt = r.lastCommitAt as string;
 					}
 				}
+				// Commit VOLUME over the trailing 90 days, summed across the
+				// project's indexed repos. null = no repo carries a count (an index
+				// gap, never zero activity). Before 2026-09-05 sort=activity was
+				// last-commit recency alone, so any row with a commit today outranked
+				// Blend — and this service's own row sat at #1.
+				let commits90d: number | null = null;
+				let commits90dAsOf: string | null = null;
+				for (const r of repos) {
+					const c = r.activitySignals?.commits90d;
+					if (typeof c !== "number") continue;
+					commits90d = (commits90d ?? 0) + c;
+					const a = r.activitySignals?.asOf ?? null;
+					if (a && (!commits90dAsOf || a > commits90dAsOf)) commits90dAsOf = a;
+				}
 				return {
 					rank: 0,
 					id: String(project.id),
@@ -404,6 +434,8 @@ export async function GET(req: NextRequest) {
 						totalStars,
 						openIssuesTotal,
 						lastActivityAt,
+						commits90d,
+						commits90dAsOf,
 						repoCount: repos.length,
 						// The exact universe the numbers above are computed over —
 						// sorted so the list is stable across runs. A consumer can now
@@ -442,7 +474,16 @@ export async function GET(req: NextRequest) {
 
 			// Sort
 			if (sort === "activity") {
+				// Volume first (rows with no count sort LAST, never as zero), recency
+				// breaks ties — see the rollup comment above.
 				rows.sort((a, b) => {
+					const ac = a.github.commits90d;
+					const bc = b.github.commits90d;
+					if (ac !== bc) {
+						if (ac === null || ac === undefined) return 1;
+						if (bc === null || bc === undefined) return -1;
+						return bc - ac;
+					}
 					const ad = a.github.lastActivityAt
 						? new Date(a.github.lastActivityAt).getTime()
 						: 0;
@@ -545,7 +586,7 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.lastActivityAt — the most recent default-branch commit timestamp (falling back to last push) across the project's indexed repos. A recency signal, NOT commit volume/velocity; per-project commit counts are not served.",
+						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:

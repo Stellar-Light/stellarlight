@@ -519,7 +519,10 @@ export async function GET(req: NextRequest) {
 								// mistake this advisory exists to prevent — an unverified
 								// claim stated confidently. Verify what a field MEANS before
 								// telling anyone to act on it.
-								summary: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
+								summary:
+									type && !q
+										? `No partner of type '${type}' is listed among the published partners — a statement about THIS directory's coverage (it holds integration partners of these types: ${PARTNER_TYPES.join(", ")}), not about the ecosystem. For a concrete need, POST /api/partners/match ranks every published partner by fit.`
+										: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
 								scope:
 									"Stellar integration partners (anchors, ramps, custody, infrastructure); not a multi-chain directory and not a project directory",
 								tryInstead: [
