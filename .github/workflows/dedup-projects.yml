@@ -49,5 +49,10 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      # SKIP goes through the environment, not string interpolation: an
+      # unquoted `--skip=a, b` splits into two argv entries and the script
+      # silently reads only the first, so a vetoed slug would be hidden.
       - name: Detect duplicates${{ inputs.execute && ' + hide (Draft)' || ' (dry run)' }}
-        run: pnpm exec tsx scripts/detect-duplicate-projects.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.skip && format('--skip={0}', inputs.skip) || '' }}
+        env:
+          SKIP: ${{ inputs.skip }}
+        run: pnpm exec tsx scripts/detect-duplicate-projects.ts ${{ inputs.execute && '--execute' || '' }} "--skip=$SKIP"

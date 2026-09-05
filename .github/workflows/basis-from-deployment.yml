@@ -4,8 +4,9 @@ name: Propagate deployment basis to status (manual)
 # STATUS record (statusBasis/statusAsOf/statusSourceUrl, which /quality and
 # every consumer weigh) and the DEPLOYMENT group added 2026-08-28, which has
 # its own receipts under improvements/receipts/. Nothing ever carried a verdict
-# across, so 20 served rows hold a STRONG deployment basis behind a WEAK status
-# basis — evidence earned, receipted, then stranded on the record nobody reads.
+# across, so a class of served rows holds a STRONG deployment basis behind a
+# WEAK status basis — evidence earned, receipted, then stranded on the record
+# nobody reads.
 #
 # This lane is NOT a classifier. It re-probes nothing and invents no evidence:
 # it copies an already-earned basis, WITH its own date and its own URL, onto
@@ -13,7 +14,9 @@ name: Propagate deployment basis to status (manual)
 #
 # Upgrades only Live + mainnet + strong-deployment-basis + weak-status-basis
 # rows whose deployment evidence is citable (a sourceUrl, a receipt file, or
-# asset payments observed on-chain). Testnet never upgrades a live-status
+# asset payments observed on-chain) AND whose artifact can support that tier:
+# payments back onchain-activity only; a citation or receipt backs
+# human-verified or product-integration. Testnet never upgrades a live-status
 # basis. Every write is read back; a mismatch fails the run. Dry-run by default.
 
 on:
