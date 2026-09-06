@@ -49,6 +49,27 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner verdicts 2026-09-06 ("tellus is live, litemint is live"): the two medium-tier
+	// Live rows held back on 09-05 (a 111-day-old store build; a blog as the product). The
+	// owner knows both products; the packet evidence is kept in the note for the record.
+	litemint: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://play.google.com/store/apps/details?id=com.litemint.cyberbrawl",
+		note: "Owner verdict 2026-09-06: live. Packet evidence: Re-graded 2026-09-05 under the product-state rule: Google Play lists Cyber Brawl 'Updated on May 17, 2026' (111 days \u2014 outside the 90-day window; weakest Live in the tier); own repo litemint/litemint pushed 2026-01-25; s",
+	},
+	"tellus-cooperative": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://blog.telluscoop.com/p/hackers-usan-ia-para-explotar-defi",
+		note: "Owner verdict 2026-09-06: live. Packet evidence: Re-graded 2026-09-05 under the product-state rule: the blog is the product; latest post datePublished 2026-07-21, front page 9,160 chars with newsletter and course banner. No row repo.",
+	},
 	// ── Owner approval 2026-09-06 ("apply the medium development ones too"), with one
 	// override: the owner says Stellar Passport is live, so the packet's Development
 	// re-grade for it is NOT applied — it is stamped Live on the owner's verdict instead.
