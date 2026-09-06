@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T18:02:07.469Z",
+ "generatedAt": "2026-09-06T19:50:20.157Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -1482,11 +1482,9 @@
    {
     "slug": "stellar-token-launchpad",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "stellar-security-portal",
@@ -2217,11 +2215,9 @@
    {
     "slug": "soroban-optimistic-oracle",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "solv-protocol",
@@ -3528,11 +3524,9 @@
    {
     "slug": "stellarpay",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "stellarmint",
@@ -3854,11 +3848,9 @@
    {
     "slug": "sorosplits",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "sorosorcerer",
@@ -3879,11 +3871,9 @@
    {
     "slug": "sorodrop",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "sorobuilder",
@@ -4451,11 +4441,9 @@
    {
     "slug": "qolaq",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "python-stellar-sdk",
@@ -6661,11 +6649,9 @@
    {
     "slug": "0xauth",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "tansu",
@@ -7750,11 +7736,9 @@
    {
     "slug": "digicus",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "okashi",
@@ -7999,11 +7983,9 @@
    {
     "slug": "soroban-pulse",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "stellar-pulse",
@@ -8323,26 +8305,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 259,
+   "human-verified": 268,
    "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 504,
+   "weakLiveRows": 495,
    "onchainEligible": 12,
-   "appOnly": 492,
+   "appOnly": 483,
    "deploymentStrongStatusWeak": 2,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 408
+    "count": 406
    },
    {
     "basis": "human-verified",
-    "count": 259
+    "count": 268
    },
    {
     "basis": "repo-activity",
@@ -8350,7 +8332,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 88
+    "count": 83
    },
    {
     "basis": "product-integration",
@@ -8362,7 +8344,7 @@
    },
    {
     "basis": "unverified",
-    "count": 6
+    "count": 4
    },
    {
     "basis": "operator-announcement",
@@ -8370,7 +8352,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 514,
+  "weakestTotal": 505,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8918,27 +8900,6 @@
     ]
    },
    {
-    "slug": "0xauth",
-    "name": "0xAuth",
-    "status": "Live",
-    "statusBasis": "unverified",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "SDK",
-     "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "5x-crypto",
     "name": "5x Crypto",
     "status": "Live",
@@ -9203,12 +9164,32 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "amero",
+    "name": "Amero",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 504
+    "count": 495
    },
    {
     "field": "dated",
@@ -9229,19 +9210,19 @@
   ]
  },
  "repos": {
-  "read": 13151,
-  "population": 13154,
+  "read": 13167,
+  "population": 13167,
   "coveragePct": 100,
-  "duplicateRows": 3,
-  "duplicateNote": "3 row(s) in the repos collection duplicate a fullName already stored, one repo appears up to 20 times. Every count below is over DISTINCT repos; the duplicate rows are storage debt, tracked separately.",
+  "duplicateRows": 0,
+  "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13151,
+  "sampled": 13167,
   "coverage": {
    "curatedIndex": {
-    "repos": 3133,
+    "repos": 3149,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 2912,
-    "depthPct": 93
+    "withCodeDepth": 2950,
+    "depthPct": 94
    },
    "tail": {
     "repos": 10018,
@@ -9249,75 +9230,99 @@
     "withCodeDepth": 7935
    },
    "knowledgeNotes": {
-    "pool": 438,
+    "pool": 473,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 203,
-    "triaged": 210,
+    "withNotes": 212,
+    "triaged": 212,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
+     "Accelar-labs/accelar-frontend-frax",
+     "Accelar-labs/accelar-plataform-frontend",
+     "Accelar-labs/accelar-studio",
+     "Accelar-labs/educhain-accelar-frontend",
      "Alkeops/It-s-not-another-package",
+     "AssetDesk/Smart-Contracts",
+     "AssetDesk/front",
      "BuilderOSS/nouns-builder",
      "CollaborativeEconomics/give-credit",
+     "EduNodeOrg/edunode-governance",
      "Epta-Node/ai-net",
      "GRMarkkes/ArtCC",
      "Glo-Foundation/glo-wallet",
+     "Lobster-Protocol/stellar",
+     "MoonBite-GmbH/soroban-multisig-contracts",
      "NibrasD/stellar-transaction-visualizer",
      "Raum-Network/raum-raumfi-v3",
+     "Sorosan/sorosan-client",
+     "Sorosan/sorosan-sdk",
+     "Tellus-Cooperative/sorobounty.xyz",
+     "Wadzzo2023/brand-wadzzo",
+     "alternun-development/alternunV2-Stellar-POC",
      "authentication-labs/0xauth-stellar",
+     "bp-ventures/retail-wallet",
+     "bp-ventures/stellar-payment-api",
      "constellation-protocol/constellation-protocol",
      "daccred/attestprotocol",
      "damzylance/bigiftyxsoroban",
+     "expand-network/sdk-nodejs",
      "freelii/freelii-core",
      "hyperledger-solang/solang",
      "jamiels/ramm.ai",
+     "keizai-tools/keizai-api",
+     "luanlabs/stellar-extend-entry-ttl",
      "lumenlater/lumen-later",
      "paltalabs/available-xlm",
      "paltalabs/soroban-toolkit",
      "paltalabs/stellar-react",
      "paulfears/StellarSnap",
      "payrouteshq/stellartools",
+     "perun-network/perun-stellar-backend",
      "siborg-ads/stellar-client",
      "skyhitz/skyhitz",
+     "sorobanhooks/stellar-logos",
+     "sorobanhooks/stellar-wallet-sdk",
      "stellar-chef/stellar-chef",
+     "tupui/soroban-pumpit",
+     "tupui/tansu-vault",
      "yripper/stellar-tools"
     ]
    },
    "mainnetJoin": {
-    "pool": 5661,
+    "pool": 5666,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 108
    }
   },
   "curatedShape": {
-   "repos": 3133,
+   "repos": 3149,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 801
+     "count": 775
     },
     {
      "bucket": "10–19",
-     "count": 610
+     "count": 582
     },
     {
      "bucket": "20–29",
-     "count": 601
+     "count": 594
     },
     {
      "bucket": "30–39",
-     "count": 477
+     "count": 495
     },
     {
      "bucket": "40–49",
-     "count": 206
+     "count": 230
     },
     {
      "bucket": "50–59",
-     "count": 217
+     "count": 235
     },
     {
      "bucket": "60–69",
-     "count": 184
+     "count": 202
     },
     {
      "bucket": "70–79",
@@ -9325,7 +9330,7 @@
     },
     {
      "bucket": "80–89",
-     "count": 15
+     "count": 14
     },
     {
      "bucket": "90–99",
@@ -9335,15 +9340,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1266
+     "count": 1269
     },
     {
      "label": "slowing",
-     "count": 936
+     "count": 937
     },
     {
      "label": "active",
-     "count": 806
+     "count": 818
     },
     {
      "label": "unknown",
@@ -9357,7 +9362,7 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1110
+     "count": 1114
     },
     {
      "label": "unknown",
@@ -9365,11 +9370,11 @@
     },
     {
      "label": "Rust",
-     "count": 452
+     "count": 455
     },
     {
      "label": "JavaScript",
-     "count": 353
+     "count": 356
     },
     {
      "label": "Go",
@@ -9377,11 +9382,11 @@
     },
     {
      "label": "Python",
-     "count": 105
+     "count": 106
     },
     {
      "label": "Solidity",
-     "count": 99
+     "count": 101
     },
     {
      "label": "HTML",
@@ -9389,17 +9394,17 @@
     },
     {
      "label": "Shell",
-     "count": 40
+     "count": 41
     },
     {
      "label": "PHP",
      "count": 24
     }
    ],
-   "languageOther": 49
+   "languageOther": 50
   },
-  "withCodeDepth": 10847,
-  "withNotes": 541,
+  "withCodeDepth": 10885,
+  "withNotes": 542,
   "withMainnet": 108,
   "top": [
    {
@@ -9556,19 +9561,6 @@
     "notes": 0,
     "codeDepth": 71,
     "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/smart-account-kit",
-    "repoScore": 80,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "stellar-development-foundation",
-    "notes": 2,
-    "codeDepth": 100,
-    "deployable": false,
     "mainnetJoined": false
    },
    {
@@ -9920,6 +9912,19 @@
     "notes": 0,
     "codeDepth": 71,
     "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "oyingrace/agent_loom",
+    "repoScore": 69,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "slowing",
+    "language": "TypeScript",
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 42,
+    "deployable": true,
     "mainnetJoined": false
    }
   ],
@@ -10450,13 +10455,13 @@
   {
    "area": "project status",
    "limit": "50% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "496 of 984 rows (census)",
+   "measurement": "489 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "203 of 438 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "212 of 473 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -10812,13 +10817,13 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 381,
-    "of": 395,
+    "missing": 387,
+    "of": 401,
     "share": 96.5,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5266 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5265 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 381,
+    "examplePoolSize": 387,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -10839,13 +10844,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12610,
-    "of": 13151,
+    "missing": 12625,
+    "of": 13167,
     "share": 95.9,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 128,
+    "examplePoolSize": 139,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -10884,10 +10889,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 504,
+    "missing": 495,
     "of": 984,
-    "share": 51.2,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 12 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 492 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 50.3,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 12 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 483 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -10903,28 +10908,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2304,
-    "of": 13151,
-    "share": 17.5,
+    "missing": 2282,
+    "of": 13167,
+    "share": 17.3,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2304,
+    "examplePoolSize": 2282,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "GetBlock-io/.github",
-     "GetBlock-io/mcp-server",
-     "GetBlock-io/rpc-endpoint-benchmark",
-     "GetBlock-io/guides",
-     "GetBlock-io/getblock-docs",
-     "TrustLine-id/stellar-validation-engine",
-     "TrustLine-id/stellar-demo-app",
-     "TrustLine-id/stellar-sdk",
-     "ondoprotocol/ondo-v1",
-     "ondoprotocol/usdy",
-     "ondoprotocol/usdy-aptos",
-     "ondoprotocol/usdy-noble"
+     "leocagli/pontepay",
+     "leocagli/tralalero-contracts",
+     "KingFRANKHOOD/soroban-sql-sync",
+     "KB2410/ai-wallet-manager",
+     "KaruG1999/ocean_request",
+     "karagozemin/frontend-app",
+     "kalepail/stellar-mpp-demo",
+     "kalepail/quarterly-ascension",
+     "justmert/sora",
+     "JulioMh/dogstar-bridge-stellar",
+     "JOHED-Velca/CycleBuddy-stellar",
+     "JFWooten4/TAD3-core"
     ]
    },
    {
