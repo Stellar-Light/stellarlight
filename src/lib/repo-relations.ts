@@ -54,6 +54,209 @@ export interface RepoSupersession {
  * the day we looked.
  */
 export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
+	// -- 2026-09-06 supersession-freshness sweep: every archived repo in the curated pool
+	// (project-linked or repoScore >= 60) that had no entry. deprecatedAt is GitHub's own
+	// archivedAt (the archive banner date); a successor only where the README names one.
+	"gateway-fm/stakeway-flare-claim-rewards": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-09",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-09); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"soroswap/info": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-24",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-24); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"gateway-fm/prover-pool-lib": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-09",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-09); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"brale-xyz/lambda-docker": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-21",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-21); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/apwine-landing-page": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"soroswap/subql": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-24",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-24); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"gateway-fm/ups-typescript": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-09",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-09); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"gateway-fm/vectorized-poseidon-gold": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-09",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-09); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"stellar-expert/navigation": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-04",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-04); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"paltalabs/defindex": {
+		kind: "archived",
+		supersededBy: "defindex-io/stellar-contracts",
+		deprecatedAt: "2026-07-01",
+		source:
+			"README: 'This repository has been archived. The public smart contracts have been moved to defindex-io/stellar-contracts.'; GitHub archivedAt 2026-07-01",
+		asOf: "2026-09-06",
+	},
+	"vestinglabs/stellar_vesting": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-25",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-25); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"kalepail/stellar-raven": {
+		kind: "archived",
+		supersededBy: "stellar-experimental/stellar-raven",
+		deprecatedAt: "2026-07-31",
+		source:
+			"README: 'This repository has moved - Development continues at stellar-experimental/stellar-raven. This repository is archived and read-only.'; GitHub archivedAt 2026-07-31",
+		asOf: "2026-09-06",
+	},
+	"paltalabs/soroban-react": {
+		kind: "archived",
+		supersededBy: "paltalabs/soroban-react-stellar-wallets-kit",
+		deprecatedAt: "2025-02-27",
+		source:
+			"README: 'We wont support this library any more, please check github.com/paltalabs/soroban-react-stellar-wallets-kit'; GitHub archivedAt 2025-02-27",
+		asOf: "2026-09-06",
+	},
+	"stellar/moneygram-access-wallet-mvp": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2024-06-06",
+		source:
+			"GitHub archived:true (archivedAt 2024-06-06); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"yaleopenlab/opensolar": {
+		kind: "archived",
+		supersededBy: "Open-Earth-Foundation/opensolar",
+		deprecatedAt: "2020-11-24",
+		source:
+			"README: 'Opensolar has migrated to the Open Earth Foundation repository' (link to Open-Earth-Foundation/opensolar); GitHub archivedAt 2020-11-24",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/apwine-branding-resources": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"soroswap/poc-soroswap-indexer": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-24",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-24); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/apwine-sdk": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/frontend-exercise": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/cairozen-lib": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/spectra-governance": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/spectra4626rewards-deployer": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-05",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-05); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/core-v2-hats": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-05",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-05); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"perspectivefi/vision-sps": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-07-31",
+		source:
+			"GitHub archived:true (archivedAt 2026-07-31); README names no successor",
+		asOf: "2026-09-06",
+	},
+	"soroban-learn/soroban-learn": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2023-11-02",
+		source:
+			"GitHub archived:true (archivedAt 2023-11-02); README names no successor",
+		asOf: "2026-09-06",
+	},
 	"emrekayat/query402": {
 		kind: "renamed",
 		supersededBy: "Query402/Query402",
