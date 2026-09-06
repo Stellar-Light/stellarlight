@@ -302,6 +302,17 @@ async function main() {
 		// coala-pay-billy-wallet-9mi (2026-09-01).
 		"anticipatory-aid-on-soroban-f7j": "coala-pay",
 		"coala-pay-billy-wallet-9mi": "coala-pay",
+		// One row, several pages (2026-09-06): the second page is submission-
+		// named and carries a later round. Every pair host-matched to our row
+		// and page-parsed; the fold below keeps every page's award (before it,
+		// the last page written won and curate's promote-only linkage put the
+		// dropped round back — the row flipped on every execute).
+		"prices-api-rfp-ctx-1vo": "ctx", // r41 $138,000 · rates.ctx.com (ctxcom-evm carries r19)
+		"octopos-g6i": "untangled", // r41 $120,000 · stellar.untangled.finance (untangled-qcs carries r31 + Liquidity '25 Q3)
+		"institutional-liquidity-infrastructure-for-stellar-k5c": "lobster", // r42 $115,000 · lobster-protocol.com, github.com/lobster-protocol (lobster-vzw carries r36)
+		// tucambio's stored slug tucambio-wallets-lru renders no project payload
+		// (soft-404); the project's page is submission-named.
+		"seasonal-workers-payroll-lru": "tucambio", // r37 $75,000 + r43 $100,000 · tucambio.app, github.com/tucambioapp
 		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
 		"coinsph-stellar-remittances-qwo": "coins-ph",
 		"identity-operating-system-idos-nqg": "idos",
@@ -403,6 +414,7 @@ async function main() {
 		astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
 		astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
 		autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
+		blend: "blend-mfy", // Liquidity '24 Q1 $50,000 · site+github: blend.capital, github.com/blend-capital — awarded=true was hand-patched with no page; the page is not numbered-round listed (Wayback CDX only)
 		blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
 		blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
 		borderless: "borderless-u3x", // #20 $43,000 · #22 $82,500 · site+github: borderlesspayments.xyz, github.com/borderless-payments
@@ -638,8 +650,94 @@ async function main() {
 		`Beyond-cap pages: ${beyondCap.queued.length} awarded (queued) · ${beyondCap.notAwarded.length} not awarded on page (no write) · ${beyondCap.unparseable.length} could not parse\n`,
 	);
 
+	// One row, several pages (2026-09-06). A project with a submission-named
+	// second page (ctx, untangled, lobster, coala-pay) was written once PER
+	// PAGE and the last page won: the exact-replace dropped the other page's
+	// award on every execute, curate's promote-only linkage put it back, and
+	// the row flipped between runs. Pages mapped to one row are read first and
+	// folded into one record: rounds and round awards are the union, the total
+	// is the sum of the pages' own totals (undefined when any page withholds
+	// it — never derived from round sums), and the citable slug is the page the
+	// name matcher joined (the project-named one), else the page with the
+	// latest numbered round.
+	const byRow = new Map<string, { scf: any; ours: any }[]>();
+	for (const m of matched) {
+		const list = byRow.get(m.ours.slug) ?? [];
+		list.push(m);
+		byRow.set(m.ours.slug, list);
+	}
+	const folded: { scf: any; ours: any }[] = [];
+	for (const list of byRow.values()) {
+		if (list.length === 1) {
+			folded.push(list[0]);
+			continue;
+		}
+		for (const m of list) {
+			if (m.scf.detail === undefined) {
+				m.scf.detail = await scrapeDetailPage(String(m.scf.slug));
+				await sleep(300);
+			}
+		}
+		const ours = list[0].ours;
+		const viaOverride = (p: any) =>
+			Number(SCF_SLUG_OVERRIDES[String(p.slug)] === ours.slug);
+		const top = (p: any) =>
+			Math.max(0, ...((p.detail?.awardedRounds ?? []) as number[]));
+		const pages = list
+			.map((m) => m.scf)
+			.sort(
+				(a, b) =>
+					viaOverride(a) - viaOverride(b) ||
+					top(b) - top(a) ||
+					String(a.slug).localeCompare(String(b.slug)),
+			);
+		const primary = pages[0];
+		const details = pages.map((p) => p.detail).filter(Boolean);
+		const totals = details.map((d) => d.totalAwarded);
+		const seen = new Set<string>();
+		const detail = {
+			...(primary.detail ?? {}),
+			totalAwarded:
+				details.length === pages.length &&
+				totals.every((t) => typeof t === "number")
+					? totals.reduce((a, b) => a + b, 0)
+					: undefined,
+			awardedRounds: [
+				...new Set(details.flatMap((d) => d.awardedRounds ?? [])),
+			].sort((a, b) => a - b),
+			roundAwards: details
+				.flatMap((d) => d.roundAwards ?? [])
+				.filter((r) => {
+					const k = `${r.round ?? ""}|${r.awardName ?? ""}|${r.amountUSD ?? ""}`;
+					if (seen.has(k)) return false;
+					seen.add(k);
+					return true;
+				}),
+			verdictSubmissions: details.reduce(
+				(n, d) => n + (d.verdictSubmissions ?? 0),
+				0,
+			),
+			verdictAwardedAny: details.reduce(
+				(n, d) => n + (d.verdictAwardedAny ?? 0),
+				0,
+			),
+		};
+		const lastAwardedRound =
+			Math.max(...pages.map((p) => Number(p.lastAwardedRound) || 0)) ||
+			primary.lastAwardedRound;
+		console.log(
+			`  ${ours.slug}: ${pages.length} SCF pages folded → ${primary.slug} (${pages
+				.map(
+					(p) =>
+						`${p.slug} ${p.detail ? `#${(p.detail.awardedRounds ?? []).join(" #") || "—"}` : "unread"}`,
+				)
+				.join(" + ")})`,
+		);
+		folded.push({ scf: { ...primary, lastAwardedRound, detail }, ours });
+	}
+
 	// 5. Enrich matched projects
-	for (const { scf, ours } of matched) {
+	for (const { scf, ours } of folded) {
 		console.log(
 			`  ${ours.name} ← SCF "${scf.title}" (round ${scf.lastAwardedRound})`,
 		);
@@ -664,7 +762,7 @@ async function main() {
 			(detail?.totalAwarded ?? 0) > 0 ||
 			(detail?.awardedRounds?.length ?? 0) > 0;
 
-		const hasNewData =
+		const pageDiffers =
 			// provenance first-stamp: a row missing the citation trio IS new data
 			// (the trio ships 2026-08-12; without this the stamp only rides award
 			// deltas and an already-converged corpus never gets it — the
@@ -711,6 +809,35 @@ async function main() {
 						]),
 					));
 
+		// One field, one writer (2026-09-06): a human-verified block (curate
+		// SCF_FIX) is the writer of record for its values — the page's total can
+		// include an ineligible round (aquarius: page $391k, paid $291k) and its
+		// award types are not what the human recorded. This lane only ADDS to
+		// such a row: rounds and round awards the page shows that the block
+		// lacks (union; stored tuples win), plus the citation when missing.
+		// Before this the two lanes flipped aquarius, stride, palremit and
+		// autoaction on every execute.
+		const humanOwned = currentScf.basis === "human-verified";
+		const storedRounds: number[] = (currentScf.awardedRounds ?? []).map(Number);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+		const storedRA: any[] = currentScf.roundAwards ?? [];
+		// biome-ignore lint/suspicious/noExplicitAny: scrape + Payload rows
+		const raKey = (r: any) => `${r.round ?? ""}|${r.awardName ?? ""}`;
+		const storedRAKeys = new Set(storedRA.map(raKey));
+		const addRounds = (detail?.awardedRounds ?? []).filter(
+			(r) => !storedRounds.includes(r),
+		);
+		const addRA = (detail?.roundAwards ?? []).filter(
+			(r) => !storedRAKeys.has(raKey(r)),
+		);
+		const pageUrl = `https://communityfund.stellar.org/project/${scf.slug}`;
+		const hasNewData = humanOwned
+			? addRounds.length > 0 ||
+				addRA.length > 0 ||
+				currentScf.slug !== scf.slug ||
+				currentScf.sourceUrl !== pageUrl
+			: pageDiffers;
+
 		// No-resurrect guard (2026-07-11): if this record is already
 		// awarded=false and the official page affirmatively shows ZERO awarded
 		// submissions, don't let API round-codes flip it back to true (the
@@ -727,6 +854,32 @@ async function main() {
 			console.log(
 				`    SCF: NO-RESURRECT — awarded=false stands (official page shows ${detail?.verdictSubmissions} submission(s), zero awarded)`,
 			);
+		} else if (hasNewData && humanOwned) {
+			const pageLast = Number(scf.lastAwardedRound) || 0;
+			const storedLast = Number(currentScf.lastAwardedRound) || 0;
+			updateData.scf = {
+				...currentScf,
+				slug: scf.slug,
+				sourceUrl: pageUrl,
+				asOf: new Date().toISOString().slice(0, 10),
+				lastAwardedRound:
+					pageLast > storedLast ? pageLast : currentScf.lastAwardedRound,
+				awardedRounds: [...storedRounds, ...addRounds].sort((a, b) => a - b),
+				roundAwards: [
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+					...storedRA.map((r: any) => ({
+						round: r.round ?? null,
+						awardName: r.awardName ?? null,
+						amountUSD: r.amountUSD ?? null,
+						awardType: r.awardType ?? null,
+					})),
+					...addRA,
+				],
+			};
+			console.log(
+				`    SCF (human-verified, additive): +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
+			);
+			stats.scfDataUpdated++;
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
