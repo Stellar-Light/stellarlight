@@ -201,7 +201,14 @@ export function parseRoundVerdicts(html: string): {
 	>();
 	for (const m of txt.matchAll(re)) {
 		const status = m[2];
-		const isAward = status === "Awarded";
+		// SCF marks a partially-disbursed award "Awarded (50%)" / "Awarded (10%)"
+		// — the percentage is how much of the budget has been PAID, not how much
+		// was awarded. Exact-matching "Awarded" filed those cards as neutral, so
+		// the award verdicted nothing and the row kept an uncited scf.awarded:
+		// soropg (Public Goods Q2 '26, 50%), clob and qstn (SCF #20, 10%) all
+		// read as "no award on the page". "Not Awarded" does not start with
+		// "Awarded", so the negative verdicts are untouched.
+		const isAward = /^Awarded\b/.test(status);
 		if (!isAward && !isNegativeVerdict(status)) {
 			const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
 			const nc = {

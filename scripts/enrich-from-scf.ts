@@ -475,6 +475,11 @@ async function main() {
 		oinc: "oinc-kix", // #17 $105,000 · site: com.br, useoinc.com.br
 		okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
 		omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
+		// scf.awarded was true with $48,000 and no page anywhere — an uncited award.
+		// The page's own SCF #27 Legacy v5.0 Activation budget is $48,000, equal to
+		// the figure already on our row, and its links (orally.net,
+		// github.com/orally-network) match the product's name.
+		orally: "orally-network-76g", // #27 $48,000 · amount+name
 		"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
 		opengrants: "opengrants-fdb", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · site+github: opengrants.net, github.com/metagov/daostar
 		ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
@@ -527,6 +532,10 @@ async function main() {
 		xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
 		zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
 		ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
+		// Our zenex row carried $150,000 uncited. SCF lists the product under its
+		// own name, Hermes: the page links github.com/zenith-protocols, which is
+		// our row's org, and our row's only repo is zenith-protocols/hermes.
+		zenex: "hermes-isy", // #32 $150,000 · github: github.com/zenith-protocols
 	};
 
 	const matched: { scf: any; ours: any }[] = [];

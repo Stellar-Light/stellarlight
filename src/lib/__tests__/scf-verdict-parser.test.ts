@@ -326,3 +326,30 @@ describe("fragment host preference (round-2 audit)", () => {
 		]);
 	});
 });
+
+describe("partially-disbursed awards (2026-09-06)", () => {
+	it('reads "Awarded (50%)" and "Awarded (10%)" as awards — the percentage is disbursement, not the verdict', () => {
+		// Live pages: soropg-zcg (Public Goods Q2 '26, 50%), clob-qoi and
+		// qstn-3rv (SCF #20, 10%). Exact-matching "Awarded" filed all three as
+		// neutral, so soropg's only award verdicted nothing and clob lost a
+		// $14,792.10 round while keeping its other one — a silent undercount.
+		const v = parseRoundVerdicts(
+			page([
+				{ status: "Awarded (50%)", round: "SCF #12" },
+				{ status: "Awarded (10%)", round: "SCF #20" },
+			]),
+		);
+		expect([...v.awarded].sort()).toEqual(["12", "20"]);
+		expect(v.notAwarded.size).toBe(0);
+		expect(v.awardedAnyCount).toBe(2);
+		expect(v.submissions).toBe(2);
+	});
+
+	it('"Not Awarded" is still a negative verdict, not an award prefix-match', () => {
+		const v = parseRoundVerdicts(
+			page([{ status: "Not Awarded", round: "SCF #20" }]),
+		);
+		expect([...v.awarded]).toEqual([]);
+		expect([...v.notAwarded]).toEqual(["20"]);
+	});
+});
