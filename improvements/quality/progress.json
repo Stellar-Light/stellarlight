@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T02:03:23.389Z",
+ "generatedAt": "2026-09-06T02:29:54.881Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -223,6 +223,25 @@
     ]
    },
    {
+    "file": "improvements/receipts/wagelink-2026-09-06.json",
+    "slug": "wagelink",
+    "url": "https://itunes.apple.com/lookup?id=6461461372&country=us",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "\"resultCount\":0"
+    ]
+   },
+   {
+    "file": "improvements/receipts/vanna-finance-2026-09-06.json",
+    "slug": "vanna-finance",
+    "url": "https://docs.vanna.finance/developers/deployed-contracts.md",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "All contracts are deployed on **Stellar Testnet**",
+     "Mainnet addresses will be published at launch"
+    ]
+   },
+   {
     "file": "improvements/receipts/usdt0-2026-08-29.json",
     "slug": "usdt0",
     "url": "https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
@@ -239,6 +258,15 @@
     "fetchedAt": "2026-09-06",
     "markers": [
      "Not Found"
+    ]
+   },
+   {
+    "file": "improvements/receipts/the-give-hub-2026-09-06.json",
+    "slug": "the-give-hub",
+    "url": "https://app.thegivehub.com/api.php/campaigns",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "[] (\"…[]…\")"
     ]
    },
    {
