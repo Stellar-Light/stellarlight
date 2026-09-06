@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 79136,
-    "realHits": 9254,
-    "distinctQueries": 4072,
+    "loggedHits": 95585,
+    "realHits": 13238,
+    "distinctQueries": 4556,
     "replayed": 250
   },
   "okRate": 99,
@@ -11,9 +11,9 @@
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 102,
-      "lastSeen": "2026-09-01T03:36:19.681Z",
-      "days": 15,
+      "hits": 125,
+      "lastSeen": "2026-09-06T09:42:51.674Z",
+      "days": 14,
       "buckets": [
         "other"
       ],
@@ -23,9 +23,9 @@
     {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 26,
-      "lastSeen": "2026-09-01T03:48:39.282Z",
-      "days": 8,
+      "hits": 54,
+      "lastSeen": "2026-09-06T11:44:17.055Z",
+      "days": 13,
       "buckets": [
         "other"
       ],
@@ -33,6 +33,6 @@
       "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-09-01T04:24:07Z",
+  "generatedAt": "2026-09-06T12:49:44Z",
   "evalKey": "engine-d-demand"
 }

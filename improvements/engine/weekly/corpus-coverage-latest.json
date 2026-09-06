@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-01T04:24:07Z",
-  "total": 12,
-  "ok": 12,
+  "generatedAt": "2026-09-06T12:49:44Z",
+  "total": 14,
+  "ok": 14,
   "failed": 0,
   "rows": [
     {
@@ -121,6 +121,26 @@
       "url": "https://stellar.org/grants-and-funding/bug-bounty",
       "ingestedBy": "ingest-security-program.ts",
       "chunkCount": 1,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "usdt0-launch-page",
+      "family": "asset-launches",
+      "source": "dev-docs",
+      "url": "https://developers.stellar.org/launch/usdt0",
+      "ingestedBy": "ingest-developers-docs.ts",
+      "chunkCount": 6,
+      "missingSignatures": [],
+      "status": "OK"
+    },
+    {
+      "id": "usdt0-launch-announcement",
+      "family": "asset-launches",
+      "source": "sdf-blog",
+      "url": "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+      "ingestedBy": "ingest-sdf-blog.ts",
+      "chunkCount": 6,
       "missingSignatures": [],
       "status": "OK"
     }

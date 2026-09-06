@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 10132,
-    "docs": 2070
+    "chunks": 10479,
+    "docs": 2151
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,43 +13,8 @@
     "sample": []
   },
   "s7_coverage": {
-    "release": {
-      "chunks": 195,
-      "datedPct": 100,
-      "newestAgeDays": 3,
-      "undated": false,
-      "stalled": false
-    },
-    "lumenloop-research": {
-      "chunks": 476,
-      "datedPct": 100,
-      "newestAgeDays": 4,
-      "undated": false,
-      "stalled": false
-    },
-    "dev-docs": {
-      "chunks": 3959,
-      "datedPct": 74,
-      "newestAgeDays": 5,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-blog": {
-      "chunks": 2216,
-      "datedPct": 100,
-      "newestAgeDays": 8,
-      "undated": false,
-      "stalled": false
-    },
-    "cap": {
-      "chunks": 936,
-      "datedPct": 98,
-      "newestAgeDays": 11,
-      "undated": false,
-      "stalled": false
-    },
     "repo-docs": {
-      "chunks": 250,
+      "chunks": 327,
       "datedPct": 0,
       "newestAgeDays": null,
       "undated": false,
@@ -57,10 +22,45 @@
       "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
+    "lumenloop-research": {
+      "chunks": 485,
+      "datedPct": 100,
+      "newestAgeDays": 2,
+      "undated": false,
+      "stalled": false
+    },
+    "dev-docs": {
+      "chunks": 4006,
+      "datedPct": 74,
+      "newestAgeDays": 6,
+      "undated": false,
+      "stalled": false
+    },
+    "sdf-blog": {
+      "chunks": 2428,
+      "datedPct": 100,
+      "newestAgeDays": 5,
+      "undated": false,
+      "stalled": false
+    },
+    "release": {
+      "chunks": 197,
+      "datedPct": 100,
+      "newestAgeDays": 5,
+      "undated": false,
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 936,
+      "datedPct": 98,
+      "newestAgeDays": 17,
+      "undated": false,
+      "stalled": false
+    },
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 162,
+      "newestAgeDays": 168,
       "undated": false,
       "stalled": false
     },
@@ -76,49 +76,49 @@
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 29,
+      "newestAgeDays": 35,
       "undated": false,
       "stalled": false
     },
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 123,
+      "newestAgeDays": 128,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 117,
+      "newestAgeDays": 123,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 104,
+      "newestAgeDays": 110,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 79,
+      "newestAgeDays": 85,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1339,
+      "newestAgeDays": 1345,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3841,
+      "newestAgeDays": 3847,
       "undated": false,
       "stalled": false
     }
@@ -133,6 +133,6 @@
       "boilerplateOverlap": 33
     }
   },
-  "generatedAt": "2026-09-01T04:24:08Z",
+  "generatedAt": "2026-09-06T12:49:44Z",
   "evalKey": "corpus-health"
 }

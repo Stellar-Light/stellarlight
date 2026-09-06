@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 35,
+    "count": 36,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -30,6 +30,12 @@
         "slug": "boundless",
         "field": "supportedNetworks",
         "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "agnostic",
+        "field": "supportedNetworks",
+        "prose": "evm",
         "missing": "evm"
       },
       {
@@ -145,43 +151,37 @@
         "field": "supportedNetworks",
         "prose": "polygon",
         "missing": "evm"
-      },
-      {
-        "slug": "automated-finance",
-        "field": "supportedNetworks",
-        "prose": "base",
-        "missing": "evm"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
       "shortDescription": "99% (198/200)",
-      "types": "100% (199/200)",
-      "supportedNetworks": "48% (96/200)",
+      "types": "100% (200/200)",
+      "supportedNetworks": "56% (111/200)",
       "logoUrl": "78% (155/200)"
     },
     "Tooling": {
       "shortDescription": "98% (177/181)",
       "types": "100% (181/181)",
-      "logoUrl": "80% (145/181)"
+      "logoUrl": "82% (149/181)"
     },
     "User-Facing App": {
       "shortDescription": "99% (391/395)",
-      "types": "99% (393/395)",
-      "supportedNetworks": "60% (238/395)",
-      "logoUrl": "86% (338/395)"
+      "types": "100% (395/395)",
+      "supportedNetworks": "73% (290/395)",
+      "logoUrl": "86% (340/395)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
       "types": "100% (36/36)",
-      "supportedNetworks": "28% (10/36)",
-      "logoUrl": "78% (28/36)"
+      "supportedNetworks": "25% (9/36)",
+      "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
       "shortDescription": "100% (155/155)",
       "types": "100% (155/155)",
-      "supportedNetworks": "70% (109/155)",
+      "supportedNetworks": "77% (120/155)",
       "logoUrl": "81% (125/155)",
       "tvlUSD": "9% (14/155)"
     },
@@ -189,7 +189,7 @@
       "shortDescription": "94% (15/16)",
       "types": "100% (16/16)",
       "supportedNetworks": "75% (12/16)",
-      "logoUrl": "81% (13/16)"
+      "logoUrl": "88% (14/16)"
     },
     "Partner Integration": {
       "shortDescription": "100% (1/1)",
@@ -203,7 +203,7 @@
     "groups": []
   },
   "s3b_domain_duplicates": {
-    "count": 6,
+    "count": 7,
     "groups": [
       {
         "apex": "jsr.io",
@@ -217,6 +217,26 @@
             "slug": "stellar-indexer",
             "name": "Stellar Indexer",
             "scfAwarded": false
+          }
+        ]
+      },
+      {
+        "apex": "57blocks.com",
+        "records": [
+          {
+            "slug": "soroban-timelock-contract",
+            "name": "Soroban Timelock Contract",
+            "scfAwarded": true
+          },
+          {
+            "slug": "soroban-resource-usage-reporter",
+            "name": "Soroban Resource Usage Reporter",
+            "scfAwarded": true
+          },
+          {
+            "slug": "autoaction",
+            "name": "AutoAction",
+            "scfAwarded": true
           }
         ]
       },
@@ -313,20 +333,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 411,
-    "liveStale365": 145,
+    "liveNoDatedSignal": 396,
+    "liveStale365": 141,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 546,
+        "ageDays": 552,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 915,
+        "ageDays": 920,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -347,7 +367,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2314,
+        "ageDays": 2320,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -389,13 +409,6 @@
       {
         "slug": "redstone-finance",
         "name": "Redstone Finance",
-        "ageDays": null,
-        "hasDated": false,
-        "tvlUSD": null
-      },
-      {
-        "slug": "didstellar",
-        "name": "DID:STELLAR",
         "ageDays": null,
         "hasDated": false,
         "tvlUSD": null
@@ -455,9 +468,16 @@
         "ageDays": null,
         "hasDated": false,
         "tvlUSD": null
+      },
+      {
+        "slug": "fordefi",
+        "name": "Fordefi",
+        "ageDays": null,
+        "hasDated": false,
+        "tvlUSD": null
       }
     ]
   },
-  "generatedAt": "2026-09-01T04:24:08Z",
+  "generatedAt": "2026-09-06T12:49:44Z",
   "evalKey": "engine-b-sweeps"
 }

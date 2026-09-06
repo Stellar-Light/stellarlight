@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-09-01T04:24:07Z",
-  "specVersion": "1.9.16",
+  "generatedAt": "2026-09-06T12:49:44Z",
+  "specVersion": "1.9.47",
   "frame": {
-    "ops": 37,
-    "paramsProbed": 24,
-    "fieldsChecked": 872,
+    "ops": 38,
+    "paramsProbed": 28,
+    "fieldsChecked": 886,
     "postChecked": 5,
     "skipped": [
       "GET /api/verify ?type (baseline 400)",
@@ -43,6 +43,7 @@
       "GET /api/repos/trust",
       "GET /api/research",
       "GET /api/rfps",
+      "GET /api/rwa",
       "GET /api/scf-pitch",
       "GET /api/skills",
       "GET /api/skills/{name}",
@@ -90,17 +91,7 @@
     {
       "op": "GET /api/projects/search",
       "field": "projects[].placementRank",
-      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].ciPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].testsPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 98 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/search",
@@ -120,6 +111,11 @@
     {
       "op": "GET /api/repos/explain",
       "field": "codeVerified",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/explain?q=soroban) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/repos/explain",
+      "field": "knowledgeNotes",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/explain?q=soroban) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -209,6 +205,11 @@
     },
     {
       "op": "GET /api/partners",
+      "field": "meta.validRegions",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/partners",
       "field": "meta.matchMode",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
@@ -265,9 +266,19 @@
   ],
   "undocumentedFields": [
     {
-      "op": "GET /api/analyze",
-      "field": "toolchain.deprecatedTotal",
-      "evidence": "served live (https://stellarlight.xyz/api/analyze), missing from the spec"
+      "op": "GET /api/quality",
+      "field": "rowQuality.strongBasisSplit",
+      "evidence": "served live (https://stellarlight.xyz/api/quality), missing from the spec"
+    },
+    {
+      "op": "GET /api/quality",
+      "field": "rowQuality.deploymentSplit",
+      "evidence": "served live (https://stellarlight.xyz/api/quality), missing from the spec"
+    },
+    {
+      "op": "GET /api/hackathons/builds",
+      "field": "builds[].prizeUsd",
+      "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/builds?limit=200), missing from the spec's item schema"
     },
     {
       "op": "GET /api/analyze",
@@ -278,6 +289,11 @@
       "op": "GET /api/analyze",
       "field": "toolchain.basis",
       "evidence": "served live (https://stellarlight.xyz/api/analyze), missing from the spec"
+    },
+    {
+      "op": "GET /api/stablecoins",
+      "field": "stablecoins[].paymentsCount24h",
+      "evidence": "served on live rows (https://stellarlight.xyz/api/stablecoins?limit=200), missing from the spec's item schema"
     }
   ],
   "ambiguous": [],

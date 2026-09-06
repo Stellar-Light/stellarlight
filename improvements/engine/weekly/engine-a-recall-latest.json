@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T04:24:08Z",
+  "generatedAt": "2026-09-06T12:49:44Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
@@ -20,9 +20,9 @@
     },
     {
       "bucket": "P-ORDER",
-      "ok": 24,
+      "ok": 23,
       "total": 24,
-      "rate": 100,
+      "rate": 95.8,
       "floor": 70,
       "status": "OK "
     },
@@ -67,6 +67,14 @@
       "status": "OK "
     }
   ],
-  "failures": [],
+  "failures": [
+    {
+      "bucket": "P-ORDER",
+      "area": "Education",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=education&limit=10",
+      "expected": "#1 result carries types=Education",
+      "observed": "#1 = stellar-passport [Security,Wallet]"
+    }
+  ],
   "evalKey": "engine-a-recall"
 }
