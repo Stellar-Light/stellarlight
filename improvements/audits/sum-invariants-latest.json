@@ -1,12 +1,97 @@
 {
-  "generatedAt": "2026-09-06T06:16:37.341Z",
+  "generatedAt": "2026-09-06T23:08:04.377Z",
   "base": "https://stellarlight.xyz",
-  "checked": 17,
-  "pass": 11,
+  "checked": 29,
+  "pass": 22,
   "vacuous": 6,
-  "fail": 0,
+  "fail": 1,
   "couldNotCheck": 0,
   "results": [
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "hackmeridian-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-builders-camp-jaipur-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-builder-summit-2026",
+      "status": "FAIL",
+      "sum": 12,
+      "total": 0,
+      "detail": "{\"winners\":12} sums to 12, which EXCEEDS 0"
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-hacks-zk",
+      "status": "pass",
+      "sum": 5,
+      "total": 345
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-pulso-hackathon",
+      "status": "pass",
+      "sum": 0,
+      "total": 70
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-journey-to-mastery-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "build-on-stellar-philippines-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "apac-stellar-hackathon-2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 0
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-agents-x402-stripe-mpp",
+      "status": "pass",
+      "sum": 5,
+      "total": 262
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "alebrije2026",
+      "status": "pass",
+      "sum": 0,
+      "total": 28
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "buildonstellarchile",
+      "status": "pass",
+      "sum": 15,
+      "total": 42
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-hacks-zk-gaming",
+      "status": "pass",
+      "sum": 5,
+      "total": 99
+    },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
       "scope": "hackmeridian-2026",
@@ -87,8 +172,8 @@
       "name": "toolchain version buckets sum to measuredRepos",
       "scope": "byVersionStatus",
       "status": "pass",
-      "sum": 5618,
-      "total": 5618
+      "sum": 5623,
+      "total": 5623
     },
     {
       "name": "hackathon byStatus sums to totalEvents",
@@ -101,22 +186,22 @@
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "tenure",
       "status": "pass",
-      "sum": 2699,
-      "total": 2699
+      "sum": 3092,
+      "total": 3092
     },
     {
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "exclusive+multichain",
       "status": "pass",
-      "sum": 2699,
-      "total": 2699
+      "sum": 3092,
+      "total": 3092
     },
     {
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "geography",
       "status": "pass",
-      "sum": 2699,
-      "total": 2699
+      "sum": 3092,
+      "total": 3092
     },
     {
       "name": "stablecoin byBasis sums to returned",
@@ -129,8 +214,8 @@
       "name": "quality findings open + refreshQueue + blockedUpstream + cleared + verified = total",
       "scope": "findings",
       "status": "pass",
-      "sum": 542,
-      "total": 542
+      "sum": 650,
+      "total": 650
     }
   ]
 }

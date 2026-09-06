@@ -488,10 +488,17 @@ export async function GET(
 					externalUrl: hackathon.externalUrl ?? null,
 					organizer: org,
 					stats: {
-						totalSubmissions: submissions.length,
+						// Zero is a measurement; absence of one is not. A curated
+						// in-person event (the São Paulo Builder Summit) has no
+						// submission list anywhere, so counting its zero rows served
+						// `totalSubmissions: 0` beside twelve winners — a hackathon
+						// nobody entered and twelve people won. With no submission
+						// records we hold no submission count, and the outcome funnel
+						// over an unknown denominator means nothing either.
+						totalSubmissions: submissions.length || null,
 						totalPrizeUSD,
 						winners: winners.length,
-						outcomes,
+						outcomes: submissions.length ? outcomes : null,
 					},
 					tracks,
 				},
