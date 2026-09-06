@@ -649,6 +649,13 @@ async function main() {
 			join(dir, "link-health-latest.json"),
 			`${JSON.stringify(
 				{
+					// generatedAt is the stamp the improvement ledger reads
+					// (evidenceStamp: generatedAt / ranAt / meta.generatedAt).
+					// Written as asOf alone, the whole file came through
+					// "UNSTAMPED — findings count as unconfirmed": 108 real
+					// findings, every one of them demoted, because the run date
+					// was in a field nobody reads. asOf stays for readers.
+					generatedAt: new Date().toISOString(),
 					asOf: new Date().toISOString(),
 					source: "scripts/check-links.ts",
 					rule: "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
