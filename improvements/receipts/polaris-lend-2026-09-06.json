@@ -1,0 +1,23 @@
+{
+ "slug": "polaris-lend",
+ "url": "https://jetprotocol.io/lander",
+ "finalUrl": "https://jetprotocol.io/lander",
+ "fetchedAt": "2026-09-06T00:15:36.972Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 00:15:36 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "openresty"
+ },
+ "bodyTextSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "bodyTextChars": 0,
+ "markers": [
+  {
+   "marker": "lander",
+   "found": false,
+   "excerpt": null
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
