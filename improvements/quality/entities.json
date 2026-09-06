@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T23:58:18.649Z",
+ "generatedAt": "2026-09-06T00:27:48.034Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -3206,12 +3206,9 @@
    {
     "slug": "transfermole",
     "prominence": 0,
-    "factsPresent": 3,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "trak",
@@ -4510,11 +4507,9 @@
    {
     "slug": "polaris-lend",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "plutus",
@@ -4832,11 +4827,9 @@
    {
     "slug": "muwp",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "mugglepay",
@@ -5630,11 +5623,9 @@
    {
     "slug": "every-finance",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "estrela",
@@ -5788,11 +5779,9 @@
    {
     "slug": "didstellar",
     "prominence": 80,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "diameter-pay",
@@ -8407,26 +8396,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 213,
+   "human-verified": 218,
    "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 550,
+   "weakLiveRows": 545,
    "onchainEligible": 14,
-   "appOnly": 536,
+   "appOnly": 531,
    "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 449
+    "count": 446
    },
    {
     "basis": "human-verified",
-    "count": 213
+    "count": 218
    },
    {
     "basis": "repo-activity",
@@ -8434,7 +8423,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 93
+    "count": 91
    },
    {
     "basis": "product-integration",
@@ -8454,7 +8443,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 560,
+  "weakestTotal": 555,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8733,27 +8722,6 @@
     ]
    },
    {
-    "slug": "transfermole",
-    "name": "TransferMole",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "sourced"
-    ]
-   },
-   {
     "slug": "trustedplastic",
     "name": "TrustedPlastic",
     "status": "Live",
@@ -8815,26 +8783,6 @@
     "missing": [
      "strongBasis",
      "linked"
-    ]
-   },
-   {
-    "slug": "didstellar",
-    "name": "DID:STELLAR",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 80,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
     ]
    },
    {
@@ -9287,12 +9235,53 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "airtm",
+    "name": "Airtm",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "akuna",
+    "name": "Akuna",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Wallet",
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 550
+    "count": 545
    },
    {
     "field": "dated",
@@ -9300,7 +9289,7 @@
    },
    {
     "field": "sourced",
-    "count": 6
+    "count": 5
    },
    {
     "field": "typed",
@@ -10556,7 +10545,7 @@
   {
    "area": "project status",
    "limit": "55% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "542 of 984 rows (census)",
+   "measurement": "537 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10964,17 +10953,16 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 550,
+    "missing": 545,
     "of": 984,
-    "share": 55.9,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 536 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 55.4,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 531 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
-    "examplePoolSize": 6,
+    "examplePoolSize": 5,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
-     "didstellar",
      "yellow-card",
      "vesseo",
      "scorechain",
@@ -11012,18 +11000,17 @@
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 6,
+    "missing": 5,
     "of": 984,
-    "share": 0.6,
+    "share": 0.5,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 6,
+    "examplePoolSize": 5,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
      "mydatacoin",
-     "transfermole",
      "the-blue-marble",
      "scam-flagging-system",
      "chaincred",

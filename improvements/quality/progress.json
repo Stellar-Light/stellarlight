@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T23:58:18.961Z",
+ "generatedAt": "2026-09-06T00:27:48.352Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -233,6 +233,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/transfermole-2026-09-06.json",
+    "slug": "transfermole",
+    "url": "https://api.github.com/repos/ivandzen/transfermole",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
+    ]
+   },
+   {
     "file": "improvements/receipts/stronghold-deployment-2026-08-28.json",
     "slug": "stronghold",
     "url": "https://stronghold.co/.well-known/stellar.toml",
@@ -304,6 +313,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/polaris-lend-2026-09-06.json",
+    "slug": "polaris-lend",
+    "url": "https://jetprotocol.io/lander",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "NOT lander"
+    ]
+   },
+   {
     "file": "improvements/receipts/pluto-loans-2026-08-28.json",
     "slug": "pluto-loans",
     "url": "https://plutoloans.com/",
@@ -356,6 +374,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/muwp-2026-09-06.json",
+    "slug": "muwp",
+    "url": "https://muwpay.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "DEPLOYMENT_DISABLED"
+    ]
+   },
+   {
     "file": "improvements/receipts/lobstr-2026-08-29.json",
     "slug": "lobstr",
     "url": "https://lobstr.co/",
@@ -403,6 +430,24 @@
     "markers": [
      "xyz redirects to edisyl",
      "com redirects too"
+    ]
+   },
+   {
+    "file": "improvements/receipts/every-finance-2026-09-06.json",
+    "slug": "every-finance",
+    "url": "https://every.finance/lander",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "is for sale"
+    ]
+   },
+   {
+    "file": "improvements/receipts/didstellar-2026-09-06.json",
+    "slug": "didstellar",
+    "url": "https://api.github.com/repos/mavennet/stellar-did",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
     ]
    },
    {
