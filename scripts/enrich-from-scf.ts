@@ -235,6 +235,17 @@ async function scrapeDetailPage(slug: string): Promise<{
 	}
 }
 
+/**
+ * SCF encodes an award it does not number (Public Goods, Liquidity, RFP) as a
+ * NEGATIVE lastAwardedRound code on the page — the award-detection below reads
+ * those codes deliberately. They are not round numbers, so they must never
+ * reach the stored field: six rows served `lastAwardedRound: -326` (and one
+ * page carries -226), which reads as a real round to every consumer. Awards
+ * without a number carry their own `awardName` in roundAwards instead.
+ */
+const storedRound = (v: unknown): number | null =>
+	typeof v === "number" && v > 0 ? v : null;
+
 async function main() {
 	console.log("=== Enrich Projects from Stellar Community Fund ===");
 	console.log(`Mode: ${dryRun ? "DRY RUN" : "EXECUTE"}`);
@@ -318,6 +329,14 @@ async function main() {
 		// page retitled — same hash vmf, choppaddi.com is the row's site).
 		"trustswap-team-finance-coa": "trustswap", // r36 $120,000 · team.finance
 		"choppaddi-vmf": "fastbuka", // r38 $70,000 + r44 $80,000 (#35 not awarded) · choppaddi.com; folds with fast-buka-delivery-nbo (no submissions)
+		// 2026-09-06: SCF's "Hermes: Stellar's Own Perpetual Exchange" links
+		// github.com/zenith-protocols — that is our ZENEX row (zenex.trade, org
+		// zenith-protocols, described "Zenex, formerly Hermes"). The name matcher
+		// gave the page to our unrelated `hermes` row (OrbitCDP's perp exchange,
+		// github.com/orbit-cdp/hermes), which carried $150,000 that is not its
+		// award; that row is unlinked in SCF_FIX. Two live products share a name,
+		// so only the link intersection decides.
+		"hermes-isy": "zenex", // #32 $150,000 · github: github.com/zenith-protocols
 		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
 		"coinsph-stellar-remittances-qwo": "coins-ph",
 		"identity-operating-system-idos-nqg": "idos",
@@ -532,10 +551,6 @@ async function main() {
 		xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
 		zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
 		ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
-		// Our zenex row carried $150,000 uncited. SCF lists the product under its
-		// own name, Hermes: the page links github.com/zenith-protocols, which is
-		// our row's org, and our row's only repo is zenith-protocols/hermes.
-		zenex: "hermes-isy", // #32 $150,000 · github: github.com/zenith-protocols
 	};
 
 	const matched: { scf: any; ours: any }[] = [];
@@ -668,7 +683,7 @@ async function main() {
 			scf: {
 				slug: scfSlug,
 				title: detail.title ?? ours.name,
-				lastAwardedRound: detail.lastAwardedRound ?? null,
+				lastAwardedRound: storedRound(detail.lastAwardedRound),
 				detail,
 			},
 			ours,
@@ -904,8 +919,9 @@ async function main() {
 				slug: scf.slug,
 				sourceUrl: pageUrl,
 				asOf: new Date().toISOString().slice(0, 10),
-				lastAwardedRound:
+				lastAwardedRound: storedRound(
 					pageLast > storedLast ? pageLast : currentScf.lastAwardedRound,
+				),
 				awardedRounds: [...storedRounds, ...addRounds].sort((a, b) => a - b),
 				roundAwards: [
 					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
@@ -925,7 +941,7 @@ async function main() {
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
-				lastAwardedRound: scf.lastAwardedRound,
+				lastAwardedRound: storedRound(scf.lastAwardedRound),
 				slug: scf.slug,
 				// provenance trio: parsed from the official page, dated, citable.
 				// human-verified (curate SCF_FIX) outranks the page and must survive
