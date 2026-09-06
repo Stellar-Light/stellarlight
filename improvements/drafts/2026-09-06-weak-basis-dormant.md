@@ -38,10 +38,15 @@ cite the `/lander` redirect that is present in the raw markup.
 
 ## Held for the owner — a judgment, not a dead domain
 
-- **ramm** — ramm.ai is live but is now "Popupz.ai … Launching soon" with a
-  waitlist, an AI marketspace. The Stellar retail AMM the row describes is gone;
-  the company is not. Its repo `jamiels/ramm.ai` exists and last moved
-  2024-04-16. SCF #22, $38,500. Receipt captured.
+- **ramm** — RESOLVED 2026-09-06 by the owner: "RAMM is not related to
+  stellar", removed from the directory (Draft). The evidence is kept on the row
+  rather than erased, because it was not empty: SCF #22 awarded $38,500, and
+  `jamiels/ramm.ai` holds real Soroban contracts (`soroban/factory`,
+  `soroban/pool`) with a `@stellar/stellar-sdk` UI. Every network reference in
+  it is FUTURENET, the last commit is 2024-04-16, and ramm.ai today sells
+  Popupz.ai, an AI marketspace with no Stellar. A funded prototype that never
+  left a test network, from a company now doing something else, is not a
+  directory row.
 - **sorosan** — sorosan-dapp.vercel.app serves an unmodified Next.js template
   ("Create Next App", body text "poc for. h1 bc"). The org's nine repos all
   stopped in February 2024. This reads as never-shipped rather than
