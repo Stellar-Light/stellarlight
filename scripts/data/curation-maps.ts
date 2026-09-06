@@ -52,7 +52,8 @@ export const STATUS_FIX: Record<
 	// ── Owner approval 2026-09-05 ("apply the medium inactive ones too"): the medium tier's
 	// five Inactive re-grades under the product-state rule (#1361), each a parked / for-sale
 	// / disabled-deployment page or a removed sole repository, each receipted in
-	// improvements/receipts/<slug>-2026-09-05.json and hand-checked before this write.
+	// improvements/receipts/<slug>-2026-09-06.json (captured after the UTC rollover)
+	// and hand-checked before this write.
 	"polaris-lend": {
 		from: "Live",
 		to: "Inactive",
