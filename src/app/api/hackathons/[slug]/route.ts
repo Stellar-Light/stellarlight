@@ -325,9 +325,14 @@ export async function GET(
 						// prose (rank → amountUSD → asset); [] when not itemized.
 						prizeTiers: parsePrizeTiers(dora.description),
 						hackersCount: dora.hackers_count || null,
-						source: "dorahacks",
+						source: dora.source === "curated" ? "curated" : "dorahacks",
 						stats: {
-							totalSubmissions: liveSubmissions.length,
+							// An empty submission roster is not a count of zero. The
+							// code-curated events ride this branch too (the São Paulo
+							// Builder Summit is an in-person sprint with no roster
+							// anywhere), and counting its zero rows published
+							// `totalSubmissions: 0` beside twelve winners.
+							totalSubmissions: liveSubmissions.length || null,
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
 							winners: winners.length,
 							// Every bucket was hardcoded 0, including `unknown` — so a
@@ -338,12 +343,14 @@ export async function GET(
 							// one is not. Nothing classifies these yet, so all 300
 							// are unknown, and the buckets sum to the submissions
 							// they describe.
-							outcomes: {
-								built: 0,
-								inProgress: 0,
-								abandoned: 0,
-								unknown: liveSubmissions.length,
-							},
+							outcomes: liveSubmissions.length
+								? {
+										built: 0,
+										inProgress: 0,
+										abandoned: 0,
+										unknown: liveSubmissions.length,
+									}
+								: null,
 						},
 						tracks: liveTracks,
 					},
