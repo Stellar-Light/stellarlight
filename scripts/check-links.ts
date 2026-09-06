@@ -41,6 +41,9 @@
  */
 
 import "./load-env";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { getPayload } from "payload";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
 import {
@@ -55,6 +58,8 @@ import {
 	isBotWall,
 } from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const EXECUTE = process.argv.includes("--execute");
 const CONCURRENCY = 5;
@@ -629,6 +634,44 @@ async function main() {
 			}
 		}
 		console.log("");
+	}
+
+	// The proven-broken set, written where the improvement ledger can read it.
+	// This checker has been finding these every day and the only consumer was
+	// the admin dashboard, so 108 dead citations — 41 of them GitHub links on
+	// project rows, 26 on Live ones — were detected daily and never queued for
+	// anyone. Only `error` is written: a blocked probe proves nothing, and the
+	// escalation for those is the streak below, not this file.
+	{
+		const dir = join(ROOT, "improvements/audits");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(
+			join(dir, "link-health-latest.json"),
+			`${JSON.stringify(
+				{
+					asOf: new Date().toISOString(),
+					source: "scripts/check-links.ts",
+					rule: "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
+					checked: results.length,
+					broken: results
+						.filter((r) => r.status === "error")
+						.map((r) => ({
+							url: r.url,
+							httpStatus: r.statusCode ?? null,
+							reason: r.errorReason ?? null,
+							targets: r.targets.map(
+								(t) => `${t.collection}/${t.recordSlug}.${t.field}`,
+							),
+						}))
+						.sort((a, b) => a.url.localeCompare(b.url)),
+				},
+				null,
+				1,
+			)}\n`,
+		);
+		console.log(
+			`Wrote improvements/audits/link-health-latest.json (${error} proven broken).\n`,
+		);
 	}
 
 	// Class 32 escalation: no single unverifiable probe is a finding, but a URL

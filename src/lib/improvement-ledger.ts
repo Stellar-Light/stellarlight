@@ -353,6 +353,9 @@ export const MAINTENANCE_MODES = new Set([
 	// An archived curated-pool repo with no supersession entry yet: a curation
 	// refresh (read the banner, record the successor), not a served defect.
 	"supersession-unrecorded",
+	// A URL a probe PROVED dead. The repair is on the record that cites it —
+	// relink it or retire it — so it is a refresh queue, not a served defect.
+	"broken-link",
 ]);
 
 export const isMaintenance = (f: Finding) =>
