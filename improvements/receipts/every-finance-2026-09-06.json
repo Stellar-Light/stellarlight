@@ -1,0 +1,23 @@
+{
+ "slug": "every-finance",
+ "url": "https://every.finance/lander",
+ "finalUrl": "https://forsale.godaddy.com/forsale/every.finance?utm_source=TDFS_DASLNC&utm_medium=parkedpages&utm_campaign=x_corp_tdfs-daslnc_base&traffic_type=TDFS_DASLNC&traffic_id=daslnc&",
+ "fetchedAt": "2026-09-06T00:15:02.388Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 00:15:02 GMT",
+  "etag": "\"pxhub2y61g53sk\"",
+  "lastModified": null,
+  "server": "envoy"
+ },
+ "bodyTextSha256": "81d0ce20ef9c61d20c0e9123d361dcf172460cb22bd5a1e9b36111e235a9de86",
+ "bodyTextChars": 761,
+ "markers": [
+  {
+   "marker": "is for sale",
+   "found": true,
+   "excerpt": "every.finance is for sale — Get a price in 24 hours | GoDaddy Excellent 4.5 out of 5 Trustpilot The domain name every.finance is for sale! Premium Verified Domain Get a price instantly First Nam"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

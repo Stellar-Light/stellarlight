@@ -49,6 +49,50 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner approval 2026-09-05 ("apply the medium inactive ones too"): the medium tier's
+	// five Inactive re-grades under the product-state rule (#1361), each a parked / for-sale
+	// / disabled-deployment page or a removed sole repository, each receipted in
+	// improvements/receipts/<slug>-2026-09-05.json and hand-checked before this write.
+	"polaris-lend": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://jetprotocol.io/lander",
+		note: "Re-graded 2026-09-05 under the product-state rule: jetprotocol.io redirects to a GoDaddy parking lander rendering 'jetprotocol.io is parked free, courtesy of GoDaddy.com'; own repo jet-lab/polaris 404. Parked page marker is client-rendered \u2014 see receipt caveat. Rendered 2026-09-05 in a browser: 'jetprotocol.io is parked free, courtesy of GoDaddy.com' \u2014 the raw HTML is only the GoDaddy lander shell, so the receipt marker is 'lander'.",
+	},
+	"every-finance": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://every.finance/lander",
+		note: "Re-graded 2026-09-05 under the product-state rule: every.finance redirects to forsale.godaddy.com ('The domain name every.finance is for sale!'); own repo Frihat-dev/every_finance idle since 2024-08-29. Org repos EveryFinance/smart-contracts-Stellar (2026-07-13) and onchain-manager-dapp (2026-05-15) are not row repos \u2014 owner may prefer Development plus a repo fix.",
+	},
+	muwp: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://muwpay.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: muwpay.com answers 451 DEPLOYMENT_DISABLED ('This deployment is unavailable') and muwp.xyz 402 'Deployment Paused'; own repo muwpay-uniswapper/muwp-stellar 404. Org repo Muwpay-uniswapper/MUWP pushed 2026-08-18 is not a row repo \u2014 owner may prefer Development.",
+	},
+	didstellar: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://api.github.com/repos/mavennet/stellar-did",
+		note: "Re-graded 2026-09-05 under the product-state rule: the product's only page, repo mavennet/stellar-did, is removed (GitHub 'Not Found'); the row website mavennet.com is the vendor's corporate site with no DID:STELLAR mention.",
+	},
+	transfermole: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://api.github.com/repos/ivandzen/transfermole",
+		note: "Re-graded 2026-09-05 under the product-state rule: no website in row; the only artefact, repo ivandzen/transfermole, is removed (GitHub 'Not Found'); the user's live repos are unrelated.",
+	},
 	// ── Owner approval 2026-09-05 ("apply the low tier that are live") of the low tier
 	// re-graded under the product-state rule (#1369): 12 Live rows, each re-probed the same
 	// evening with its own instrument (getHealth at the live ledger for the RPCs, the three
