@@ -348,7 +348,12 @@ export interface LedgerSummary {
  * So these are tracked in their own counter, never hidden: `refreshQueue`
  * carries them, `open` means defects we can actually act on.
  */
-export const MAINTENANCE_MODES = new Set(["note-stale"]);
+export const MAINTENANCE_MODES = new Set([
+	"note-stale",
+	// An archived curated-pool repo with no supersession entry yet: a curation
+	// refresh (read the banner, record the successor), not a served defect.
+	"supersession-unrecorded",
+]);
 
 export const isMaintenance = (f: Finding) =>
 	MAINTENANCE_MODES.has(f.failureMode);

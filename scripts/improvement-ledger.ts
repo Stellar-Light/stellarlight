@@ -93,7 +93,26 @@ const opField = (r: Row, key: string): string | undefined => {
 };
 
 // Each detector's finding-arrays, tagged with the surface they belong to.
+// Supersession freshness (P5): an archived curated-pool repo with no entry in
+// REPO_SUPERSESSIONS. The weekly check reads the public repos API, so a miss
+// is a curation refresh queued for a human/agent read of the archive banner.
+const SUPERSESSION_FRESHNESS_SPEC: SourceSpec = {
+	source: "supersession-freshness",
+	file: "supersession-freshness-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "missing",
+			surface: "code",
+			mode: "supersession-unrecorded",
+			severity: "low",
+			probe: (r) => str(r?.fullName),
+		},
+	],
+};
+
 const SPECS: SourceSpec[] = [
+	SUPERSESSION_FRESHNESS_SPEC,
 	{
 		source: "golden-eval",
 		file: "golden-eval-latest.json",
