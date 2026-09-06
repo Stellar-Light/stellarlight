@@ -108,6 +108,9 @@ const FOLD = 600;
  */
 const DASH_LIMIT = 5;
 
+/** Statuses whose product legitimately advertises that it is not out yet. */
+const PRELAUNCH = new Set(["Development", "Pre-Release"]);
+
 const APP_STORE = /(^|\.)(apps\.apple\.com|play\.google\.com)$/i;
 
 export type StampVerdict =
@@ -150,9 +153,30 @@ export function readableText(html: string): string {
 const titleOf = (html: string): string =>
 	readableText(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "");
 
-/** Standalone em/en dashes — an empty metric, not a hyphenated word. */
-const countDashes = (text: string): number =>
-	(text.match(/(?:^|\s)[—–](?=\s|$)/g) ?? []).length;
+/**
+ * Standalone em/en dashes — an empty metric, not a hyphenated word.
+ *
+ * Counting them anywhere in the fold was not enough: hiwomenbiz.com, a live
+ * bootcamp platform, put five em-dashes of ordinary Spanish punctuation in its
+ * meta description and the guard called it dead on the lane's first real run.
+ * An empty stats block is a ROW — "— · — · —" — so the dashes must CLUSTER.
+ * Punctuation dashes are separated by whole clauses; placeholder values are
+ * separated by a label or a bullet.
+ */
+const DASH_GAP = 24;
+const countDashes = (text: string): number => {
+	const at: number[] = [];
+	const re = /(?:^|\s)[—–](?=\s|$)/g;
+	for (let m = re.exec(text); m; m = re.exec(text)) at.push(m.index);
+	// Longest run of dashes each within DASH_GAP characters of the previous.
+	let best = at.length ? 1 : 0;
+	let run = best;
+	for (let i = 1; i < at.length; i++) {
+		run = at[i] - at[i - 1] <= DASH_GAP ? run + 1 : 1;
+		if (run > best) best = run;
+	}
+	return best;
+};
 
 const findMarker = (text: string): string | undefined => {
 	const lower = text.toLowerCase();
@@ -361,6 +385,16 @@ export function judgeStamp(p: {
 		return {
 			verdict: "CONTRADICTED",
 			reason: `body is ${text.length} chars after tag-strip`,
+		};
+	// Pre-launch tiers are the one place a wind-down marker is CONFIRMATION.
+	// "waitlist" and "coming soon" are exactly what a Development or
+	// Pre-Release product says about itself; neovestor tripped this the first
+	// time such a stamp reached the guard (2026-09-06), because the rule had
+	// only ever been written for Live and Inactive.
+	if (marker && PRELAUNCH.has(p.to))
+		return {
+			verdict: "HOLDS",
+			reason: `fold says "${marker}" — consistent with ${p.to}`,
 		};
 	if (marker)
 		return { verdict: "CONTRADICTED", reason: `fold says "${marker}"` };
