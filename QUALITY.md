@@ -600,6 +600,23 @@ The first run came through `UNSTAMPED` because the date was in `asOf` and
 `evidenceStamp` reads `generatedAt`; 108 findings were demoted for want of a
 field name.
 
+**The same free text, one level down (#1417, #1419, #1421).** `github.repos[]`
+held 16 entries naming no GitHub repository: another forge's host as the owner,
+GitHub's own `orgs` path, a person's display name (`Omkar Nanavare`, beside the
+correct `OmcarSN` on the same row), and a second URL glued to the repo name.
+Two of my own repair rules then reached past their evidence, and the dry run
+caught both before any write: trimming an owner to its first word invented the
+accounts `Omkar` and `anclap`, and a hostname-shaped rejection on the NAME
+would have deleted `jamiels/ramm.ai`, a real repository named after its product
+domain. The owner is now never inferred — only whitespace-trimmed, and dropped
+if anything else remains. 22 writes applied, replan 0.
+
+**Hermes is Zenex (#1420).** Owner history: Orbit CDP was built by Zenith and
+Orbit died; Hermes was Zenith's product, renamed to Zenex. So the `hermes` row
+was the same product under its Orbit-era home, and the duplicate is what made
+this morning's $150,000 misattribution available in the first place. Folded
+into `zenex`.
+
 **Repo coverage, measured correctly.** A first count said 747 of 1,103 rows had
 no repository — it read `project.github.repos`, a curated seed list. The
 authoritative link is `repo.projectSlug`: 527 rows have at least one indexed
@@ -638,6 +655,10 @@ confirmed 82 owners by intersection; 70 already stored the right link, and the
 21. A guard that cannot finish gives no verdict, and a cancelled run reads
     much like a clean one. Curate applied 35 writes and had its idempotence
     replan killed by an 8-minute job cap.
+23. A repair rule must not reach past its evidence. Trimming an unparseable
+    owner to its first word invents an account; rejecting a domain-shaped repo
+    name deletes a real one. When the right value cannot be known, drop the
+    entry and say so — both errors were caught by a dry run, neither by review.
 22. Free text in a typed field is an input-validation bug, not a data-entry
     mistake. Normalize at the boundary, then repair with a DERIVED pass that
     re-normalises to itself — a hand-listed map cannot converge.
