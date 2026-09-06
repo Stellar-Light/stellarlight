@@ -49,6 +49,16 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Deep verification 2026-09-06: rows the packet tiers could not decide, re-verified
+	// by two agents under the product-state rule and hand-checked by the coordinator.
+	getblock: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.getblock.io/api-reference/stellar-xlm",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: GetBlock's own Stellar (XLM) API reference (getHealth/getLatestLedger/getEvents\u2026 with endpoint template) and nodes catalog (Stellar Mainnet, shared+dedicated) observed today; SDF RPC providers page lists GetBlock; status page company-wide with no Stellar component. Medium: no keyed call made.",
+	},
 	// ── Owner verdicts 2026-09-06 ("tellus is live, litemint is live"): the two medium-tier
 	// Live rows held back on 09-05 (a 111-day-old store build; a blog as the product). The
 	// owner knows both products; the packet evidence is kept in the note for the record.
@@ -366,15 +376,13 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Kata.Games - Revolutionary Gaming Platform"; repo pyved-solution/pyved-engine pushed 2026-06-08 (high confidence).',
 	},
 	"hot-wallet": {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the second signal is a hackathon repo (hot-dao/pitchtalk-hachathon), not this product.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the second signal is a hackathon repo (hot-dao/pitchtalk-hachathon), not this product. Status unchanged; owner verdict pending.",
+		basis: "human-verified",
+		asOf: "2026-07-09",
+		sourceUrl:
+			"https://chromewebstore.google.com/detail/hot-wallet/mpeengabcnhhjjgleiodimegnkpcenbk",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Chrome Web Store HOT Wallet v1.0.142 updated 2026-07-09, listing names Stellar transfers/swaps/gas-free txs; iOS v1.0.3 2026-01-15 (Soroswap notes); Play updated 2025-06-15; hot-dao/omni-sdk (Stellar) pushed 2026-04-30. Medium: one in-window release.",
 	},
 	flutterwave: {
 		from: "Live",
@@ -393,15 +401,13 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "OneKey: Hardware Wallet & Crypto DeFi Wallet |"; repo OneKeyHQ/hardware-js-sdk pushed 2026-09-05 (high confidence).',
 	},
 	zebec: {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): its second signal (Zebec-protocol/canton-dev-fund) is the same repo used for wagelink — one repo cannot be two products' independent live signals.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "site-liveness",
+		basis: "human-verified",
 		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — its second signal (Zebec-protocol/canton-dev-fund) is the same repo used for wagelink — one repo cannot be two products' independent live signals. Status unchanged; owner verdict pending.",
+		sourceUrl:
+			"https://horizon.stellar.org/transactions/5797fe8a7bd572efbcf19ca80f1ff402aa59c5426adbe2acdd3757a5806cbcaf",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Stellar mainnet payroll contract CBGU4YF7RZR2JRYQ6YXYJCROX47FJ3GFRWQSJJEEF5NAWU2OO3NUSZIW (the `mainnet` address in @zebec-network/stellar-payroll-sdk 3.2.4, published 2026-08-17) invoked 2026-09-05 08:53 UTC, 1,725 events since 2026-06-25; docs list Stellar mainnet; SuperApp iOS v0.08.26 released 2026-08-28, Play updated 2026-08-27 (high).",
 	},
 	ripio: {
 		from: "Live",
@@ -431,15 +437,13 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "ROZO - Visa Layer for Stablecoins. Spend crypto,"; repo RozoAI/intent-pay pushed 2026-09-05 (high confidence).',
 	},
 	normal: {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the linked repo is a 404; an org-newest repo was substituted.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the linked repo is a 404; an org-newest repo was substituted. Status unchanged; owner verdict pending.",
+		basis: "human-verified",
+		asOf: "2026-09-02",
+		sourceUrl:
+			"https://horizon.stellar.org/transactions/46e4f3075bea41c472302556831e6317dec8661fa69109ff96035a9b0fe809e3",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Normal's own USDC savings vault nUSDC (DeFindex-Vault-NormalUSDC) CAWM7NKSYG2ITJW2MYYJWJ5ULGCJLDB6MXZIWPL3VPRG5TDVLJ66IMWR invoked by users \u2014 withdraw 2026-09-02 11:39 UTC, 10,050 USDC withdraw 2026-09-01, 130,345 USDC deposit 2026-08-26 (stellar.expert contract activity); interface repo normalfinance/normal-v1-interface pushed 2026-09-02. Site savings page is a wallet sign-in gate; $24M TVL claim unverified (high).",
 	},
 	abroad: {
 		from: "Live",
@@ -520,9 +524,9 @@ export const STATUS_FIX: Record<
 		from: "Live",
 		to: "Live",
 		basis: "human-verified",
-		asOf: "2026-09-05",
-		sourceUrl: "https://inferara.com/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Inferara"; repo Inferara/inference pushed 2026-09-04 (high confidence).',
+		asOf: "2026-07-27",
+		sourceUrl: "https://github.com/Inferara/inference/releases/tag/v0.0.5",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: compiler release v0.0.5 with binaries 2026-07-27, VS Code extension 0.0.5 same day, inference-lang.org renders 'v0.0.5 is available' + install.sh; own repo Inferara/inference pushed 2026-09-05. 'Coming soon / waitlist' is Inference Studio, a separate product. Book calls the language pre-stable \u2014 Development if the owner holds a pre-1.0 line (medium).",
 	},
 	keystone: {
 		from: "Live",
@@ -589,9 +593,9 @@ export const STATUS_FIX: Record<
 		from: "Live",
 		to: "Live",
 		basis: "human-verified",
-		asOf: "2026-09-05",
-		sourceUrl: "https://www.splito.io/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Splito \u2014 Request Money, Get Paid in Any"; repo Splitoio/web-app pushed 2026-08-28 (high confidence).',
+		asOf: "2026-09-06",
+		sourceUrl: "https://app.splito.io/",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: app renders a no-account request builder settling in USDC/XLM on Stellar ('No account needed \u2014 fill this in and you get a link to send'); backend server.splito.io/api answers 401 Missing session (deployed, session-enforced); repo Splitoio/web-app pushed 2026-08-28. Form not submitted, so no request link minted (medium).",
 	},
 	spydra: {
 		from: "Live",
@@ -618,15 +622,12 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Token Tails | A family of feline care"; repo zbagdzevicius/tokentails pushed 2026-07-24 (high confidence).',
 	},
 	untangled: {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 17 chars rendered; the contract has no in-window activity counter.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
 		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 17 chars rendered; the contract has no in-window activity counter. Status unchanged; owner verdict pending.",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellar.untangled.finance/",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Stellar app renders 4 vaults with TVL (USDyc II $151.5K at 10.76%, AGUSD, DENT1, AGXLM); USDyc II vault CDDDLSQAR6EVIBFU6KMHA6WLIZJ5PDPXKJCEADD6YJ3HJ3S775XHVEE4 (mainnet, created 2026-01-09) instance last modified 2026-08-18; own Soroban repos pushed 2026-09-01. Row contract CBLC4N\u2026 is the older USDyc I (0 events in 7 days) \u2014 attach USDyc II.",
 	},
 	usher: {
 		from: "Live",
