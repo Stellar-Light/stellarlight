@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T19:50:20.157Z",
+ "generatedAt": "2026-09-06T23:49:20.405Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -360,13 +360,13 @@
   }
  },
  "projects": {
-  "read": 984,
+  "read": 983,
   "population": 1103,
-  "servedPopulation": 984,
+  "servedPopulation": 983,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 984,
+  "sampled": 983,
   "scatter": [
    {
     "slug": "hypertron",
@@ -4391,15 +4391,6 @@
     "status": "Live"
    },
    {
-    "slug": "ramm",
-    "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
-   },
-   {
     "slug": "rahat",
     "prominence": 0,
     "factsPresent": 5,
@@ -8287,7 +8278,7 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 899
+    "count": 898
    },
    {
     "network": "mainnet",
@@ -8299,8 +8290,8 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 899,
-   "applicableUnknown": 197,
+   "unknown": 898,
+   "applicableUnknown": 196,
    "notApplicable": 702,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
@@ -8311,16 +8302,16 @@
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 495,
+   "weakLiveRows": 494,
    "onchainEligible": 12,
-   "appOnly": 483,
+   "appOnly": 482,
    "deploymentStrongStatusWeak": 2,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 406
+    "count": 405
    },
    {
     "basis": "human-verified",
@@ -8352,7 +8343,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 505,
+  "weakestTotal": 504,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9189,7 +9180,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 495
+    "count": 494
    },
    {
     "field": "dated",
@@ -9340,11 +9331,11 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1269
+     "count": 1270
     },
     {
      "label": "slowing",
-     "count": 937
+     "count": 936
     },
     {
      "label": "active",
@@ -10455,7 +10446,7 @@
   {
    "area": "project status",
    "limit": "50% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "489 of 984 rows (census)",
+   "measurement": "488 of 983 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10871,10 +10862,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 899,
-    "of": 984,
+    "missing": 898,
+    "of": 983,
     "share": 91.4,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 899 unknown rows, 197 are on-chain product types where the question applies and an agent will ask it; the other 702 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 898 unknown rows, 196 are on-chain product types where the question applies and an agent will ask it; the other 702 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -10889,10 +10880,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 495,
-    "of": 984,
+    "missing": 494,
+    "of": 983,
     "share": 50.3,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 12 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 483 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 12 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 482 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -10936,7 +10927,7 @@
     "entity": "project",
     "field": "sourced",
     "missing": 5,
-    "of": 984,
+    "of": 983,
     "share": 0.5,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
@@ -10956,7 +10947,7 @@
     "entity": "project",
     "field": "typed",
     "missing": 0,
-    "of": 984,
+    "of": 983,
     "share": 0,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
