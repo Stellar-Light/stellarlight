@@ -26,8 +26,30 @@ const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
 	"",
 );
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
 const RAVEN = process.env.RAVEN_URL || "https://agents.stellar.buzz/mcp";
-const TOKEN = process.env.RAVEN_TOKEN || "";
+/**
+ * The token lives durably at ~/.config/stellarlight/raven.token; CI supplies
+ * RAVEN_TOKEN. Falling back to the file matters because the alternative is
+ * worse than an error: on 2026-09-06 four slices sent UNAUTHENTICATED
+ * requests, took an empty-bodied 401, and the run still printed "0 fail" —
+ * a third of the battery silently not running.
+ */
+const TOKEN =
+	process.env.RAVEN_TOKEN ||
+	(() => {
+		try {
+			return readFileSync(
+				join(homedir(), ".config/stellarlight/raven.token"),
+				"utf8",
+			).trim();
+		} catch {
+			return "";
+		}
+	})();
 const GATE = process.argv.includes("--gate");
 const ALL = process.argv.includes("--all"); // ignore rotation, run every bank
 
@@ -78,23 +100,51 @@ async function raven(code: string): Promise<any> {
 		}),
 	});
 	const text = await res.text();
+	// A refusal is not a parse error. Without this, a 429 or a 5xx with an
+	// empty body surfaced as "SyntaxError: Unexpected end of JSON input" and
+	// read like OUR bug — four slices reported that on 2026-09-06 and the
+	// message named neither the status nor the endpoint.
+	if (!res.ok)
+		throw new Error(
+			`raven HTTP ${res.status} ${res.statusText} (${text.length} bytes)${text ? `: ${text.slice(0, 160)}` : " — empty body"}`,
+		);
+	if (!text.trim()) throw new Error(`raven returned an empty body (HTTP ${res.status})`);
 	// SSE or plain; find the result payload's first text content
 	const line = text
 		.split("\n")
 		.filter((l) => l.startsWith("data:"))
 		.map((l) => l.slice(5).trim())
 		.find((l) => l.startsWith("{"));
-	const body = JSON.parse(line ?? text);
+	let body: any;
+	try {
+		body = JSON.parse(line ?? text);
+	} catch (e) {
+		throw new Error(
+			`raven reply was not JSON (HTTP ${res.status}, ${text.length} bytes): ${text.slice(0, 160)}`,
+		);
+	}
 	const content =
 		body?.result?.content?.find((c: any) => c.type === "text")?.text ?? "";
 	// Raven appends coaching after the JSON — parse the leading object only.
 	const start = content.indexOf("{");
-	if (start < 0) throw new Error("no JSON in raven reply");
+	if (start < 0)
+		throw new Error(
+			`no JSON in raven reply — it answered in prose: ${content.slice(0, 200)}`,
+		);
 	let depth = 0;
 	for (let i = start; i < content.length; i++) {
 		if (content[i] === "{") depth++;
 		else if (content[i] === "}" && --depth === 0)
-			return JSON.parse(content.slice(start, i + 1));
+			{
+				const slice = content.slice(start, i + 1);
+				try {
+					return JSON.parse(slice);
+				} catch {
+					throw new Error(
+						`raven's JSON did not parse (${slice.length} bytes of ${content.length}): ${slice.slice(0, 160)}`,
+					);
+				}
+			}
 	}
 	throw new Error("unterminated JSON in raven reply");
 }
@@ -505,6 +555,15 @@ async function sliceI() {
 		"I:unknown-clean",
 		`${strayProvenance} unknown row(s) carrying stray provenance`,
 	);
+}
+
+// A battery with no credential is not a battery. Sending the requests anyway
+// buys four opaque slice errors and a "0 fail" summary.
+if (!TOKEN) {
+	console.error(
+		"INCONCLUSIVE: no Raven token (RAVEN_TOKEN, or ~/.config/stellarlight/raven.token). The through-Raven slices cannot run, and an unauthenticated 401 is not a test result.",
+	);
+	process.exit(2);
 }
 
 const slices = [
