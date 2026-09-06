@@ -396,9 +396,12 @@ enrich↔curate write fights ended behind an idempotence gate (#1400, #1401)
    (orally $48k, zenex, soropg — `awarded: true` predates provenance; owner
    call or a receipt each); anclap-r4u carries three awards ($325,762 ·
    $146,400 · $100,000) and we have no Anclap row — `pen` is its asset row
-   and a company award does not belong there; nebulavrf's award card parses
-   with no round number (parser edge, 1 row). Also: give enrich-scf the same
-   post-execute idempotence step curate has.
+   and a company award does not belong there. DONE 2026-09-06 (#1403): the
+   nebulavrf card was the RSC chunk-split trap — the verdict parser read raw
+   markup and a cut inside a field truncated it; it now reads the rebuilt
+   stream, which also corrected 9 rows whose served award type was a
+   fragment ("B", "Legacy v5", "Legac"). enrich-scf carries the same
+   post-execute Idempotence step as curate; first run after the fix: 0.
 
 ### Night-shift addendum (2026-09-05, 04:30–06:30 UTC)
 
@@ -538,7 +541,9 @@ scaffold-stellar.
 
 **The audit that catches this class from outside:** awarded rows whose
 `awardedRounds` has a round absent from `roundAwards` — 8 before, 1 after
-(nebulavrf, a card that parses with no round number). Awarded rows with no
+(nebulavrf — which turned out to be the RSC chunk-split trap in the verdict
+parser: raw markup, a cut inside a field; #1403 reads the rebuilt stream and
+also repaired 9 rows served with a truncated award type). Awarded rows with no
 round award at all: 11 → 6, of which 3 are Draft shadows and 3 have no SCF page
 anywhere (orally, zenex, soropg — uncited, under next steps).
 
