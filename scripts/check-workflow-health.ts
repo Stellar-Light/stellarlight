@@ -246,17 +246,26 @@ async function main() {
 	const files = readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f));
 	// One call for the whole list beats one per file, and it also tells us
 	// GitHub's own id and state for each workflow.
-	const list = await gh(`/repos/${REPO}/actions/workflows?per_page=100`);
+	// 2026-09-06: the 101st workflow file tripped the guard below for three
+	// runs, so the list is paged. The endpoint also returns entries for files
+	// deleted from the default branch; anything past the last page would not be
+	// in the map, and every one of those lanes would be reported "GitHub does
+	// not know this workflow" — a partial read rendered as a confident verdict.
 	const known: Array<{
 		id: number;
 		path: string;
 		name: string;
 		state: string;
-	}> = list.workflows ?? [];
-	// 88 workflow files today, and this endpoint also returns entries for files
-	// deleted from the default branch. Past 100 the overflow simply would not be
-	// in the map, and every one of those lanes would be reported "GitHub does
-	// not know this workflow" — a partial read rendered as a confident verdict.
+	}> = [];
+	let list: any = { total_count: 0 };
+	for (let page = 1; page <= 10; page++) {
+		list = await gh(
+			`/repos/${REPO}/actions/workflows?per_page=100&page=${page}`,
+		);
+		const got: typeof known = list.workflows ?? [];
+		known.push(...got);
+		if (got.length < 100 || known.length >= (list.total_count ?? 0)) break;
+	}
 	if ((list.total_count ?? 0) > known.length) {
 		console.error(
 			`INCONCLUSIVE: GitHub reports ${list.total_count} workflows and this page carried ${known.length}. Paginate before trusting a verdict.`,
