@@ -1,13 +1,18 @@
 {
-	"asOf": "2026-09-06T22:36:06.495Z",
+	"asOf": "2026-09-06T22:40:20.842Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 93,
+	"checked": 94,
 	"healthy": 92,
 	"broken": [
 		{
+			"file": "weak-basis-liveness.yml",
+			"state": "always-red",
+			"why": "1 runs since this file was last edited, zero successes — dies at \"Run pnpm/action-setup@v4\", not a declared signal step"
+		},
+		{
 			"file": "workflow-health.yml",
 			"state": "standing-signal",
-			"why": "6 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
+			"why": "7 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
 		}
 	],
 	"rows": [
@@ -236,10 +241,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T22:31:03Z",
+			"lastSuccessAt": "2026-09-06T22:34:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -258,7 +263,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T22:34:12Z",
+			"lastSuccessAt": "2026-09-06T22:38:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -973,7 +978,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T22:34:12Z",
+			"lastSuccessAt": "2026-09-06T22:38:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 99,
@@ -1024,6 +1029,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "weak-basis-liveness.yml",
+			"name": "weak-basis liveness",
+			"cron": "17 8 * * 4",
+			"state": "always-red",
+			"lastSuccessAt": null,
+			"ageDays": null,
+			"graceDays": 21,
+			"runs": 1,
+			"why": "1 runs since this file was last edited, zero successes — dies at \"Run pnpm/action-setup@v4\", not a declared signal step"
+		},
+		{
 			"file": "workflow-health.yml",
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
@@ -1031,8 +1047,8 @@
 			"lastSuccessAt": "2026-09-05T23:24:55Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 33,
-			"why": "6 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
+			"runs": 34,
+			"why": "7 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
 		}
 	]
 }
