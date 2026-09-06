@@ -1,11 +1,11 @@
 {
- "slug": "qolaq",
- "url": "https://qolaq.com/",
- "finalUrl": "https://qolaq.com/",
- "fetchedAt": "2026-09-06T19:21:57.405Z",
+ "slug": "soroban-pulse",
+ "url": "https://sorobanpulse.app/",
+ "finalUrl": "https://sorobanpulse.app/",
+ "fetchedAt": "2026-09-06T19:22:19.923Z",
  "httpStatus": 200,
  "headers": {
-  "date": "Sun, 06 Sep 2026 19:21:57 GMT",
+  "date": "Sun, 06 Sep 2026 19:22:19 GMT",
   "etag": null,
   "lastModified": null,
   "server": null

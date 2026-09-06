@@ -59,6 +59,78 @@ export const STATUS_FIX: Record<
 	// pages rendered, APIs, rendered apps). Held for the owner: cartwey and fastbuka (the
 	// shipped app names no Stellar), horizon-as-a-service / hot-protocol / k3-labs (docs-only
 	// evidence the agent itself flagged low). Status moves are presented, not applied.
+	// -- Weak-basis dormant sweep 2026-09-06 (draft improvements/drafts/
+	// 2026-09-06-weak-basis-dormant.md): Live rows resting on site-liveness or
+	// source-inherited whose newest linked repo commit is over a year old. Each
+	// was re-probed at the product's OWN surfaces. Only affirmative deaths are
+	// below — a domain for sale, a domain that no longer resolves, a 404. Rows
+	// that merely could not be read are NOT here; eleven more that a first pass
+	// called dead were false deaths from a probe that did not follow 308
+	// redirects (eiger.co, hatom.com, wombat.exchange among them).
+	"sorosplits": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorosplits.xyz/",
+		note: "Weak-basis sweep 2026-09-06: sorosplits.xyz now renders GoDaddy's \"is for sale\" page ($399); a plain fetch sees only the client-side redirect to /lander, so this was read in a browser. Own repos (findolor) last pushed 2024. SCF #19 + #23, $153,700 — the award stands, the product does not.",
+	},
+	"sorodrop": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorodrop.xyz/",
+		note: "Weak-basis sweep 2026-09-06: sorodrop.xyz renders GoDaddy's \"is for sale\" page ($599, or lease-to-own); the raw markup carries only the /lander redirect. Rendered read confirmed the sale page.",
+	},
+	"soroban-pulse": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorobanpulse.app/",
+		note: "Weak-basis sweep 2026-09-06: sorobanpulse.app \"has expired and is parked free, courtesy of GoDaddy.com\" — the domain lapsed. Rendered read; the raw markup carries only the /lander redirect.",
+	},
+	"qolaq": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://qolaq.com/",
+		note: "Weak-basis sweep 2026-09-06: qolaq.org and www.qolaq.org both 404, and qolaq.com serves a two-line document that redirects to a parked /lander. The GitHub org survives with one repo and still links the dead qolaq.org. SCF #13, $150,000 — the award stands, the product does not.",
+	},
+	"stellarpay": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellarpay.io/",
+		note: "Weak-basis sweep 2026-09-06: stellarpay.io no longer resolves (NXDOMAIN, checked from two paths). Newest linked repo commit 2019-10-07. Not to be confused with our own private stellar-pay work.",
+	},
+	"0xauth": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://0xauth.co/",
+		note: "Weak-basis sweep 2026-09-06: 0xauth.co no longer resolves (NXDOMAIN).",
+	},
+	"digicus": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://digicus.dev/",
+		note: "Weak-basis sweep 2026-09-06: digicus.dev returns HTTP 404 after following redirects. Newest linked repo commit 2021-11-23.",
+	},
+	"soroban-optimistic-oracle": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://github.com/stackman27/soroban-opt-oracle",
+		note: "Weak-basis sweep 2026-09-06: the row's only URL is its GitHub repo, and that repo returns 404 — deleted or made private. Nothing else to probe.",
+	},
 	axal: {
 		from: "Live",
 		to: "Live",
