@@ -14,7 +14,10 @@
  */
 import "../load-env";
 import { getPayload } from "payload";
-import { parseGithubIdentity } from "../../src/lib/github-identity";
+import {
+	parseGithubIdentity,
+	parseGithubRepoRef,
+} from "../../src/lib/github-identity";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
@@ -33,6 +36,29 @@ import {
 	WEBSITE_FIXES,
 	WEBSITE_REMOVE,
 } from "./curation-maps";
+
+/** Stored repo entries, normalised and deduped. An entry that names no GitHub
+ *  repository (another forge's host as the owner) is dropped rather than
+ *  repaired — see parseGithubRepoRef. */
+function normalizedRepos(
+	raw: Array<{ owner: string; name: string }> | undefined,
+): Array<{ owner: string; name: string }> {
+	const out: Array<{ owner: string; name: string }> = [];
+	for (const r of raw ?? []) {
+		const ref = parseGithubRepoRef(r?.owner, r?.name);
+		if (!ref) continue;
+		if (
+			out.some(
+				(o) =>
+					o.owner.toLowerCase() === ref.owner.toLowerCase() &&
+					o.name.toLowerCase() === ref.name.toLowerCase(),
+			)
+		)
+			continue;
+		out.push(ref);
+	}
+	return out;
+}
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -1771,12 +1797,7 @@ async function main() {
 			if (typeof cur !== "string" || !cur) continue;
 			const { orgLogin, repo } = parseGithubIdentity(cur);
 			if (orgLogin === cur && !repo) continue;
-			const repos: Array<{ owner: string; name: string }> = [
-				...(d.github?.repos ?? []),
-			].map((r: { owner: string; name: string }) => ({
-				owner: r.owner,
-				name: r.name,
-			}));
+			const repos = normalizedRepos(d.github?.repos);
 			// A submission URL that names a repository is the only record we have
 			// of it; keep it so enrich-repos can verify and score it. Never
 			// duplicate one the row already carries.
@@ -1804,6 +1825,37 @@ async function main() {
 		}
 		if (!planned)
 			console.log("  (none — every stored orgLogin is already a GitHub login)");
+
+		// Same free text, one level down: github.repos[] entries holding another
+		// forge's host as the owner, a person's display name, or a second URL
+		// glued to the repo name. Runs over every row, including those whose
+		// orgLogin was already clean.
+		let repoPlanned = 0;
+		for (const doc of all.docs) {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			const d = doc as any;
+			if (writes.some((w) => w.id === d.id)) continue; // already rewritten above
+			const cur: Array<{ owner: string; name: string }> = d.github?.repos ?? [];
+			if (!cur.length) continue;
+			const want = normalizedRepos(cur);
+			const same =
+				want.length === cur.length &&
+				want.every(
+					(r, i) => r.owner === cur[i]?.owner && r.name === cur[i]?.name,
+				);
+			if (same) continue;
+			repoPlanned++;
+			console.log(
+				`  ${d.slug}: repos [${cur.map((r) => `${r.owner}/${r.name}`).join(", ")}] → [${want.map((r) => `${r.owner}/${r.name}`).join(", ")}]`,
+			);
+			writes.push({
+				id: d.id,
+				slug: d.slug,
+				data: { github: { ...(d.github ?? {}), repos: want } },
+			});
+		}
+		if (!repoPlanned)
+			console.log("  (none — every stored repo entry names a GitHub repo)");
 	}
 
 	// ── finding 27: corridor-country corrections (OVERWRITE, equality-guarded) ──

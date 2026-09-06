@@ -88,3 +88,39 @@ export function parseGithubIdentity(raw: unknown): GithubIdentity {
 			: null;
 	return { orgLogin: owner, repo };
 }
+
+/**
+ * A stored `github.repos[]` entry, normalised — or null when it names no
+ * GitHub repository.
+ *
+ * The same free-text problem as the field above, one level down. 16 entries
+ * held another forge's host as the owner (`gitlab.com/tales`,
+ * `bitbucket.org/...`, `docs.google.com/document`), a person's display name
+ * (`Omkar Nanavare`, beside the correct `OmcarSN` on the same row), or a
+ * second URL glued to the repo name (`chatspy; https:`,
+ * `soroban-oracle-feeders ; https:`, `django-polaris-bpv  https:`).
+ *
+ * Trailing junk is trimmed — the leading run of legal characters is the real
+ * name, and every one of those entries is a valid repo with a URL appended.
+ * An owner that is not a login after trimming names no GitHub repo and
+ * resolves to null: the row's own link fields are where a GitLab or Bitbucket
+ * URL belongs.
+ */
+export function parseGithubRepoRef(
+	rawOwner: unknown,
+	rawName: unknown,
+): { owner: string; name: string } | null {
+	if (typeof rawOwner !== "string" || typeof rawName !== "string") return null;
+	// Cut ONLY at a separator that cannot occur inside the identifier —
+	// whitespace, comma or semicolon. Taking the leading legal run instead
+	// would turn the hostname "gitlab.com" into the plausible-looking owner
+	// "gitlab", inventing a GitHub account that has nothing to do with the
+	// project. A dot in an owner means a host, and a host is not a login.
+	const cut = (v: string) => v.trim().split(/[\s,;]+/)[0] ?? "";
+	const owner = cut(rawOwner);
+	const name = cut(rawName).replace(/\.git$/i, "");
+	if (!LOGIN.test(owner) || RESERVED.has(owner.toLowerCase())) return null;
+	if (!name || name === "." || name === ".." || !/^[A-Za-z0-9._-]+$/.test(name))
+		return null;
+	return { owner, name };
+}

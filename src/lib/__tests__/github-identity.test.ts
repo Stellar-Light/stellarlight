@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseGithubIdentity } from "../github-identity";
+import { parseGithubIdentity, parseGithubRepoRef } from "../github-identity";
 
 describe("parseGithubIdentity", () => {
 	it("keeps a bare login unchanged", () => {
@@ -77,5 +77,69 @@ describe("parseGithubIdentity", () => {
 			orgLogin: "stellar",
 			repo: { owner: "stellar", name: "quickstart" },
 		});
+	});
+});
+
+describe("parseGithubRepoRef", () => {
+	it("passes a clean entry through", () => {
+		expect(parseGithubRepoRef("stellar", "quickstart")).toEqual({
+			owner: "stellar",
+			name: "quickstart",
+		});
+	});
+
+	it("trims a second URL glued to the repo name", () => {
+		// All five live examples of this shape.
+		expect(parseGithubRepoRef("team-convexity", "chatspy; https:")?.name).toBe(
+			"chatspy",
+		);
+		expect(
+			parseGithubRepoRef("diadata-org", "soroban-oracle-feeders ; https:")
+				?.name,
+		).toBe("soroban-oracle-feeders");
+		expect(
+			parseGithubRepoRef("bp-ventures", "django-polaris-bpv  https:")?.name,
+		).toBe("django-polaris-bpv");
+		expect(
+			parseGithubRepoRef(
+				"Raum-Network",
+				"raum-chrysalis-stellarcontract, https:",
+			)?.name,
+		).toBe("raum-chrysalis-stellarcontract");
+		expect(
+			parseGithubRepoRef("horizontalsystems", "stellarkit.swift ")?.name,
+		).toBe("stellarkit.swift");
+	});
+
+	it("drops an entry whose owner is another forge's host", () => {
+		expect(parseGithubRepoRef("gitlab.com", "tales")).toBeNull();
+		expect(
+			parseGithubRepoRef("bitbucket.org", "vestigiadesarrollo"),
+		).toBeNull();
+		expect(parseGithubRepoRef("docs.google.com", "document")).toBeNull();
+		expect(parseGithubRepoRef("dev-api-new.skopadev.com", "api")).toBeNull();
+	});
+
+	it("keeps the login half of a display name rather than inventing one", () => {
+		// "Omkar Nanavare" sat beside the correct "OmcarSN" on the same row; the
+		// trimmed result is deduped away by the caller, never merged.
+		// "Omkar Nanavare" sat beside the correct "OmcarSN" on the same row.
+		expect(parseGithubRepoRef("Omkar Nanavare", "TrustChain")).toEqual({
+			owner: "Omkar",
+			name: "TrustChain",
+		});
+		expect(parseGithubRepoRef("anclap, https:", "github.com")).toEqual({
+			owner: "anclap",
+			name: "github.com",
+		});
+		// The rule that keeps this honest: a dotted host is never trimmed into
+		// a plausible login.
+		expect(parseGithubRepoRef("gitlab.com", "anything")).toBeNull();
+	});
+
+	it("rejects non-strings and empty parts", () => {
+		expect(parseGithubRepoRef(undefined, "x")).toBeNull();
+		expect(parseGithubRepoRef("owner", "")).toBeNull();
+		expect(parseGithubRepoRef("", "name")).toBeNull();
 	});
 });
