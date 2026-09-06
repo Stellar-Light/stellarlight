@@ -199,8 +199,13 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
-	// 2. Live DoraHacks feed.
-	if (sourceFilter !== "curated") {
+	// 2. Live DoraHacks feed — which also carries the code-curated events
+	// (src/data/curated-hackathons.ts), each keeping `source: "curated"`.
+	// Skipping this fetch for `source=curated` therefore dropped exactly the
+	// rows the caller asked for: `?source=curated` served 0 while the
+	// unfiltered response carried 6 of them. The source filter is applied to
+	// the MERGED rows below, where every row's own `source` is visible.
+	{
 		try {
 			const doraHackathons = await fetchAllDoraHacksHackathons();
 			dora = doraHackathons.map(doraToRow);
@@ -226,6 +231,9 @@ export async function GET(req: NextRequest) {
 		["upcoming", "active", "completed"].includes(statusFilter)
 	) {
 		hackathons = hackathons.filter((h) => h.status === statusFilter);
+	}
+	if (sourceFilter) {
+		hackathons = hackathons.filter((h) => h.source === sourceFilter);
 	}
 	if (organizerFilter) {
 		hackathons = hackathons.filter(
@@ -256,6 +264,7 @@ export async function GET(req: NextRequest) {
 	// `dorahacks` below are per-SOURCE totals of the merged set, which is a
 	// different denominator and cannot stand in for it.
 	const matchedBeforeLimit = hackathons.length;
+	const matchedRows = hackathons;
 	hackathons = hackathons.slice(0, limit);
 
 	logApiHit({
@@ -310,8 +319,14 @@ export async function GET(req: NextRequest) {
 					limit,
 				},
 				counts: {
-					curated: curated.length,
-					dorahacks: dora.length,
+					// Counted from the rows THEMSELVES, not from the two input
+					// arrays: the code-curated events arrive through the DoraHacks
+					// fetch, so `dora.length` reported all 26 as dorahacks while
+					// `curated.length` (the Payload collection, empty) reported 0 —
+					// beside six served rows whose own source said "curated".
+					curated: matchedRows.filter((h) => h.source === "curated").length,
+					dorahacks: matchedRows.filter((h) => h.source === "dorahacks")
+						.length,
 					returned: hackathons.length,
 					total: matchedBeforeLimit,
 				},
