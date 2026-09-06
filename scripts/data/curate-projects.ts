@@ -14,6 +14,7 @@
  */
 import "../load-env";
 import { getPayload } from "payload";
+import { parseGithubIdentity } from "../../src/lib/github-identity";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
@@ -1741,6 +1742,68 @@ async function main() {
 
 		if (!candidates)
 			console.log("  (none — every capability axis agrees with its project)");
+	}
+
+	// ── github.orgLogin normalization (derived, not a map) ──
+	// The field is a GitHub login. The public intake form takes free text, so
+	// rows arrived holding submission URLs, owner/repo pairs, other forges'
+	// hostnames and comma-joined junk. Every reader rejects those shapes, so
+	// those projects were never fanned out to their repos and the API served a
+	// hostname where a login belongs. parseGithubIdentity is the same function
+	// the intake route now applies at the boundary, so this pass converges: a
+	// normalised value re-normalises to itself and plans nothing.
+	//
+	// Rows whose value names another forge lose the field entirely — an absent
+	// GitHub owner, not a repaired one. The forge URL belongs in links.
+	console.log("\n── github.orgLogin normalization ──");
+	{
+		const all = await payload.find({
+			collection: "projects",
+			limit: 5000,
+			depth: 0,
+			overrideAccess: true,
+		});
+		let planned = 0;
+		for (const doc of all.docs) {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			const d = doc as any;
+			const cur = d.github?.orgLogin;
+			if (typeof cur !== "string" || !cur) continue;
+			const { orgLogin, repo } = parseGithubIdentity(cur);
+			if (orgLogin === cur && !repo) continue;
+			const repos: Array<{ owner: string; name: string }> = [
+				...(d.github?.repos ?? []),
+			].map((r: { owner: string; name: string }) => ({
+				owner: r.owner,
+				name: r.name,
+			}));
+			// A submission URL that names a repository is the only record we have
+			// of it; keep it so enrich-repos can verify and score it. Never
+			// duplicate one the row already carries.
+			const addRepo =
+				repo &&
+				!repos.some((r) => r.owner === repo.owner && r.name === repo.name)
+					? repo
+					: null;
+			if (orgLogin === cur && !addRepo) continue;
+			planned++;
+			console.log(
+				`  ${d.slug}: orgLogin "${cur}" → ${orgLogin ? `"${orgLogin}"` : "(none — not a GitHub owner)"}${addRepo ? ` + repo ${addRepo.owner}/${addRepo.name}` : ""}`,
+			);
+			writes.push({
+				id: d.id,
+				slug: d.slug,
+				data: {
+					github: {
+						...(d.github ?? {}),
+						orgLogin: orgLogin ?? null,
+						repos: addRepo ? [...repos, addRepo] : repos,
+					},
+				},
+			});
+		}
+		if (!planned)
+			console.log("  (none — every stored orgLogin is already a GitHub login)");
 	}
 
 	// ── finding 27: corridor-country corrections (OVERWRITE, equality-guarded) ──
