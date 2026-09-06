@@ -683,7 +683,13 @@ async function main() {
 			scf: {
 				slug: scfSlug,
 				title: detail.title ?? ours.name,
-				lastAwardedRound: storedRound(detail.lastAwardedRound),
+				// NOT storedRound() here: this value is the award SIGNAL that
+				// isAwarded reads below, and a non-numbered award is encoded as a
+				// negative code. Clamping it here flipped every Public Goods row
+				// (the four Stellar SDKs, opengrants, scaffold-stellar) to
+				// awarded=false in the 2026-09-06 dry run. The clamp belongs only
+				// where the value is STORED.
+				lastAwardedRound: detail.lastAwardedRound ?? null,
 				detail,
 			},
 			ours,
