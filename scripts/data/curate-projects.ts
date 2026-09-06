@@ -255,8 +255,11 @@ const SCF_SUBMISSION_LINKS: Record<
 		evidence:
 			"https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v",
 	},
+	// #35 dropped 2026-09-06: the cited page marks it "Not Awarded" (badge-
+	// inherited); #38 $70k + #44 $80k are its awarded cards. The page is now
+	// slug-joined to the row (enrich SCF_SLUG_OVERRIDES), so this is satisfied.
 	fastbuka: {
-		rounds: [35, 38, 44],
+		rounds: [38, 44],
 		evidence: "https://communityfund.stellar.org/project/choppaddi-vmf",
 	},
 	untangled: {
