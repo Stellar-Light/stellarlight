@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T00:27:48.034Z",
+ "generatedAt": "2026-09-06T01:15:32.744Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -3659,10 +3659,8 @@
    {
     "slug": "stellar-passport",
     "prominence": 55,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4786,11 +4784,9 @@
    {
     "slug": "neovestor",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Development"
    },
    {
     "slug": "nebulavrf",
@@ -8396,26 +8392,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 218,
+   "human-verified": 220,
    "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 545,
+   "weakLiveRows": 543,
    "onchainEligible": 14,
-   "appOnly": 531,
+   "appOnly": 529,
    "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 446
+    "count": 444
    },
    {
     "basis": "human-verified",
-    "count": 218
+    "count": 220
    },
    {
     "basis": "repo-activity",
@@ -8443,7 +8439,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 555,
+  "weakestTotal": 553,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9011,27 +9007,6 @@
     ]
    },
    {
-    "slug": "stellar-passport",
-    "name": "Stellar Passport",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 55,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security",
-     "Wallet"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "getblock",
     "name": "GetBlock",
     "status": "Live",
@@ -9276,12 +9251,33 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "alfred",
+    "name": "Alfred",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments",
+     "Anchor"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 545
+    "count": 543
    },
    {
     "field": "dated",
@@ -10544,8 +10540,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "55% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "537 of 984 rows (census)",
+   "limit": "54% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "535 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10953,10 +10949,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 545,
+    "missing": 543,
     "of": 984,
-    "share": 55.4,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 531 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 55.2,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 529 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 5,
