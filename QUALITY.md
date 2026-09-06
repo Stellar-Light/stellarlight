@@ -669,7 +669,80 @@ gate correctly declines. Discovery over the 586 no-repo Live/Development rows
 confirmed 82 owners by intersection; 70 already stored the right link, and the
 12 that did not were written (#1414).
 
+### Wide-sweep addendum (2026-09-06, 22:30–00:00 UTC)
+
+Running every guard wide, plus both eval engines, on the theory that a guard
+tested on a hand-picked list is Tier C for every shape outside it (§3b).
+
+**The truth battery was 32 tests short and said "0 fail".** Four slices died on
+`SyntaxError: Unexpected end of JSON input` while the summary read
+`80 pass · 0 fail`. The helper parsed Raven's body without ever checking the
+HTTP status, so a refusal surfaced as a parse error that looked like our bug.
+With the status printed, the cause was **HTTP 401**: the battery reads
+`RAVEN_TOKEN` from the environment only, so outside CI it sent unauthenticated
+requests. It now falls back to the durable token file and exits INCONCLUSIVE
+with no credential — an unauthenticated 401 is not a test result. Restored to
+**112 pass · 0 fail · 0 slice errors**.
+
+**Six vacuous invariants were hiding a served contradiction.**
+`check-sum-invariants` reported six partitions holding only because their
+denominator was zero. Behind one of them: `stellar-builder-summit-2026`
+published **12 winners beside `totalSubmissions: 0`** — a hackathon nobody
+entered that twelve people won. The curated São Paulo sprint has no submission
+roster anywhere, so the API counted zero rows and served that as the count.
+Three defects in one thread:
+
+- The count is now `null` when we hold no roster, and the outcome funnel is
+  `null` over an unknown denominator. The DoraHacks branch of that same file
+  already carried the comment "zero is a measurement; absence of one is not" —
+  the curated branch did not follow it.
+- **The fix landed on one of two call sites.** Production kept serving `0`
+  because the code-curated events ride the DoraHacks branch, not the curated
+  one. Same rule, second place, found only by reading production after the
+  deploy.
+- That branch also hardcoded `source: "dorahacks"` for every row, so the detail
+  route disagreed with the list route about what the summit is.
+
+**A published value that does not work as a filter.**
+`/api/hackathons?source=curated` returned **0 rows** while the unfiltered
+response carried six whose own `source` said `curated`, and `meta.counts` said
+`{curated: 0, dorahacks: 26}` beside them. The route skipped the DoraHacks
+fetch when asked for curated — dropping exactly the requested rows — and
+counted from its two input arrays instead of from the merged rows. Both now
+read each row's own `source`.
+
+After the data became honest, the vacuous count went **6 → 0**: rows we hold no
+count for are skipped rather than counted as trivial passes.
+
+**The merge gate itself was the same bug.** My gate passed a PR whose only
+reported row was Vercel's comment bot — the Actions checks had not been created
+yet, so "nothing is running" was true and vacuous. It now requires at least one
+Actions check and settles: after the rows go quiet it waits and re-reads, and a
+new row restarts the wait. It cannot demand a fixed set of names, because
+path-filtered workflows honestly skip. Moved out of a scratchpad into
+`scripts/gate-pr.sh`. On its first use it caught a real FAILURE the old one
+would have merged past.
+
+**Raven, asked directly.** It exposes 30 Scout operations and proxies our live
+API — `getStatus` through Raven returned tonight's `projects.lastUpdatedAt`, so
+the routing misses classed as "catalog-lag" are about its manifest, not stale
+data. Routing holds at **48/65 (74%)**, and the golden set at **51/51**.
+
 ## Lessons — 2026-09-06 (the instrument speaks first)
+
+29. **A guard tested on a hand-picked list is Tier C everywhere else.** Every
+    defect found tonight was found by pointing an existing checker at rows it
+    had never seen — the packet guard's dash rule, its pre-launch blind spot,
+    the battery's 401, the hackathon counts. Running wide IS the test.
+30. **"0 fail" is a claim about the tests that ran.** Four slices vanished and
+    the headline stayed green. A suite must report what it did not run as
+    loudly as what failed.
+31. **A vacuous check is a place to look, not a place to relax.** Six
+    invariants held trivially; one of them was standing on a served
+    contradiction. Chase the zero denominators.
+32. **Fix every call site or verify production, ideally both.** The null-count
+    rule landed on one of two branches computing the same number, and only
+    reading the deployed API afterwards revealed it.
 
 24. **An instrument's blind spot looks exactly like a finding.** Unfollowed
     308s, a 5xx, a client-rendered page and a default page title each produced
