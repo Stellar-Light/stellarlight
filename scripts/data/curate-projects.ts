@@ -2017,6 +2017,7 @@ async function main() {
 		if (
 			fix.from === fix.to &&
 			fix.basis &&
+			!fix.withdraw &&
 			!STRONG_STATUS_BASES.has(fix.basis) &&
 			STRONG_STATUS_BASES.has(String(d.statusBasis ?? ""))
 		) {
