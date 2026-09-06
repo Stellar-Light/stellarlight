@@ -59,6 +59,35 @@ export const STATUS_FIX: Record<
 	// pages rendered, APIs, rendered apps). Held for the owner: cartwey and fastbuka (the
 	// shipped app names no Stellar), horizon-as-a-service / hot-protocol / k3-labs (docs-only
 	// evidence the agent itself flagged low). Status moves are presented, not applied.
+	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
+	// their own surfaces after the first tranche. A default page TITLE is not a
+	// verdict — zilt's title is the unedited "Create Next App" while the page
+	// itself sells USDC over M-Pesa on Stellar, and reading the title alone
+	// would have retired a live product.
+	"stellar-token-launchpad": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://tokenlaunchpad.eu/",
+		note: "Weak-basis sweep 2026-09-06: tokenlaunchpad.eu (and www) now redirect to cryptix.ag, the parent company's venture-building site, which carries no launchpad product — the product has no state of its own left to read. Newest linked repo commit is over a year old. SCF #24, $40,000 — the award stands, the product does not.",
+	},
+	paychant: {
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		sourceUrl: "https://paychant.com/",
+		note: "Weak-basis sweep 2026-09-06: probed alive at its own site (\"Fiat On and Off Ramp Solution for Stablecoins\"). Basis was source-inherited — a claim we had never checked; now it is one we have. Not stronger than site-liveness: the site loading is all the evidence this product offers.",
+	},
+	zilt: {
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		sourceUrl: "https://zilt.vercel.app/",
+		note: "Weak-basis sweep 2026-09-06: the page title is the unedited Next.js default (\"Create Next App\"), but the page sells the product — buy and sell USDC with M-Pesa and Eco-cash, on Stellar. Rendered read. Basis was unverified; a lazy title is not a dead product.",
+	},
 	// -- Weak-basis dormant sweep 2026-09-06 (draft improvements/drafts/
 	// 2026-09-06-weak-basis-dormant.md): Live rows resting on site-liveness or
 	// source-inherited whose newest linked repo commit is over a year old. Each

@@ -69,3 +69,36 @@ moved.
   scoping question, not a status one.
 - **wombat** — live multi-chain DEX defaulting to BNB Chain across 26+ chains.
   Same question.
+
+## Tranche 2 — the registry gate, and a title that lied
+
+**Package registries as product-state evidence.** For the 64 alive rows I
+probed npm, crates.io and PyPI for a published release under a name the row's
+own repositories carry. 31 rows matched by name; **5 survived the gate** that
+requires the package to point back at one of the row's own repositories.
+The 26 rejected were collisions of exactly the kind that has cost us all day —
+`ripe` matched `markdoc`, `womenbiz` matched `filecoin`, `paychant` matched a
+package called `stellar`, `siborg` matched `stellar-client`.
+
+Of the five confirmed, only `rehive` has a recent release (PyPI 1.3.13,
+2026-05-26). The others are 1–8 years old, which corroborates the dormancy
+rather than lifting it: bidali (2019), solar-wallet (2021), sorobanmath (2024),
+assemblyscript-soroban-sdk (2025).
+
+The honest conclusion: these rows sit on a weak basis because most of these
+products publish no artifact strong enough to earn a better one, not because
+nobody looked. A site that loads IS site-liveness. Refusing to inflate that into
+`human-verified` is the point of the tier.
+
+**A default title is not a verdict.** `zilt`'s page title is the unedited
+"Create Next App", and reading the title alone would have retired it. The page
+itself sells the product: buy and sell USDC with M-Pesa and Eco-cash, on
+Stellar. It moves from `unverified` to `site-liveness`, alive.
+
+**One more retirement.** `stellar-token-launchpad`: tokenlaunchpad.eu and its
+www form both redirect to cryptix.ag, the parent company's venture-building
+site, which carries no launchpad product. The product has no state of its own
+left to read. SCF #24, $40,000. Receipt captured.
+
+**paychant** moves from `source-inherited` to `site-liveness` — a claim we had
+never checked is now one we have.
