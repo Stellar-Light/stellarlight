@@ -129,9 +129,13 @@ describe("parseGithubRepoRef", () => {
 		expect(parseGithubRepoRef("gitlab.com", "anything")).toBeNull();
 	});
 
-	it("drops a hostname sitting in the repo-name column", () => {
-		expect(parseGithubRepoRef("anclap", "github.com")).toBeNull();
-		// a real name that merely contains a dot is fine
+	it("keeps a repo named after a domain — those exist", () => {
+		// github.com/jamiels/ramm.ai is a real repository; an earlier version
+		// rejected dot-TLD names and would have deleted the link.
+		expect(parseGithubRepoRef("jamiels", "ramm.ai")).toEqual({
+			owner: "jamiels",
+			name: "ramm.ai",
+		});
 		expect(parseGithubRepoRef("horizontalsystems", "stellarkit.swift")).toEqual(
 			{
 				owner: "horizontalsystems",
