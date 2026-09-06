@@ -313,6 +313,11 @@ async function main() {
 		// tucambio's stored slug tucambio-wallets-lru renders no project payload
 		// (soft-404); the project's page is submission-named.
 		"seasonal-workers-payroll-lru": "tucambio", // r37 $75,000 + r43 $100,000 · tucambio.app, github.com/tucambioapp
+		// Wave 2 (2026-09-06): rows the title-prefix matcher rightly rejects
+		// ("Team Finance" ≠ "TrustSwap: Team Finance"; "Choppaddi" is FastBuka's
+		// page retitled — same hash vmf, choppaddi.com is the row's site).
+		"trustswap-team-finance-coa": "trustswap", // r36 $120,000 · team.finance
+		"choppaddi-vmf": "fastbuka", // r38 $70,000 + r44 $80,000 (#35 not awarded) · choppaddi.com; folds with fast-buka-delivery-nbo (no submissions)
 		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
 		"coinsph-stellar-remittances-qwo": "coins-ph",
 		"identity-operating-system-idos-nqg": "idos",
@@ -414,6 +419,7 @@ async function main() {
 		astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
 		astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
 		autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
+		"scaffold-stellar": "scaffold-stellar-ldy", // PG Q2 '26 undisclosed · github: github.com/theahaco — awarded=true was hand-patched with no page
 		blend: "blend-mfy", // Liquidity '24 Q1 $50,000 · site+github: blend.capital, github.com/blend-capital — awarded=true was hand-patched with no page; the page is not numbered-round listed (Wayback CDX only)
 		blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
 		blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
@@ -570,6 +576,19 @@ async function main() {
 			}
 		}
 
+		// A lineage shadow (Draft + canonicalSlug, #1337) is not a record. The
+		// name matcher joined "Liqvid" to the parked duplicate `liqvid` and wrote
+		// the page there, while the canonical `liqvidxyz` kept a dead slug and no
+		// round awards. Re-key to the canonical row — one page, one row.
+		if (ours?.canonicalSlug) {
+			const canon = bySlug.get(String(ours.canonicalSlug));
+			if (canon) {
+				console.log(
+					`  ${ours.slug}: shadow of ${canon.slug} — page ${scf.slug} re-keyed to the canonical row`,
+				);
+				ours = canon;
+			}
+		}
 		if (ours) {
 			matched.push({ scf, ours });
 		} else {
