@@ -1,0 +1,45 @@
+name: Supersession freshness
+
+# P5: an archived curated-pool repo with no REPO_SUPERSESSIONS entry served
+# "archived" with no successor and no date until somebody re-read it. Weekly,
+# from the public repos API. A red at "Check" is the refresh queue, not a
+# broken lane.
+# workflow-health: signal-steps: ^Check$
+
+on:
+  schedule:
+    - cron: "47 7 * * 2" # weekly, Tue 07:47 UTC — off the top of the hour
+  workflow_dispatch:
+
+permissions: { contents: write }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Check
+        id: check
+        continue-on-error: true
+        run: pnpm exec tsx scripts/check-supersession-freshness.ts --json
+      - name: Commit the artifact if it changed
+        run: |
+          set -euo pipefail
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/audits/supersession-freshness-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "data(quality): supersession freshness [skip ci]"
+          git pull --rebase origin main
+          git push
+      - name: Propagate the check's exit code
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "The check found archived curated-pool repos without a supersession entry (or could not look) — see the Check step."
+          exit 1
