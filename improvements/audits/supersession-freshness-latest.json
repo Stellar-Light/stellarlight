@@ -1,0 +1,159 @@
+{
+	"generatedAt": "2026-09-06T04:21:31.247Z",
+	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
+	"archivedTotal": 254,
+	"archivedInPool": 33,
+	"covered": 8,
+	"missing": [
+		{
+			"fullName": "gateway-fm/stakeway-flare-claim-rewards",
+			"projectSlug": "gatewayfm",
+			"repoScore": 39,
+			"url": "https://github.com/gateway-fm/stakeway-flare-claim-rewards"
+		},
+		{
+			"fullName": "soroswap/info",
+			"projectSlug": "soroswap",
+			"repoScore": 36,
+			"url": "https://github.com/soroswap/info"
+		},
+		{
+			"fullName": "gateway-fm/prover-pool-lib",
+			"projectSlug": "gatewayfm",
+			"repoScore": 34,
+			"url": "https://github.com/gateway-fm/prover-pool-lib"
+		},
+		{
+			"fullName": "brale-xyz/lambda-docker",
+			"projectSlug": "brale",
+			"repoScore": 32,
+			"url": "https://github.com/Brale-xyz/lambda-docker"
+		},
+		{
+			"fullName": "perspectivefi/apwine-landing-page",
+			"projectSlug": "spectra-finance",
+			"repoScore": 30,
+			"url": "https://github.com/perspectivefi/apwine-landing-page"
+		},
+		{
+			"fullName": "soroswap/subql",
+			"projectSlug": "soroswap",
+			"repoScore": 30,
+			"url": "https://github.com/soroswap/subql"
+		},
+		{
+			"fullName": "gateway-fm/ups-typescript",
+			"projectSlug": "gatewayfm",
+			"repoScore": 29,
+			"url": "https://github.com/gateway-fm/ups-typescript"
+		},
+		{
+			"fullName": "gateway-fm/vectorized-poseidon-gold",
+			"projectSlug": "gatewayfm",
+			"repoScore": 25,
+			"url": "https://github.com/gateway-fm/vectorized-poseidon-gold"
+		},
+		{
+			"fullName": "stellar-expert/navigation",
+			"projectSlug": "stellar-expert",
+			"repoScore": 23,
+			"url": "https://github.com/stellar-expert/navigation"
+		},
+		{
+			"fullName": "paltalabs/defindex",
+			"projectSlug": "defindex",
+			"repoScore": 23,
+			"url": "https://github.com/paltalabs/defindex"
+		},
+		{
+			"fullName": "VestingLabs/stellar_vesting",
+			"projectSlug": "tokenops",
+			"repoScore": 22,
+			"url": "https://github.com/VestingLabs/stellar_vesting"
+		},
+		{
+			"fullName": "kalepail/stellar-raven",
+			"projectSlug": "raven",
+			"repoScore": 20,
+			"url": "https://github.com/kalepail/stellar-raven"
+		},
+		{
+			"fullName": "paltalabs/soroban-react",
+			"projectSlug": "soroban-react",
+			"repoScore": 16,
+			"url": "https://github.com/paltalabs/soroban-react"
+		},
+		{
+			"fullName": "stellar/moneygram-access-wallet-mvp",
+			"projectSlug": "moneygram",
+			"repoScore": 15,
+			"url": "https://github.com/stellar/moneygram-access-wallet-mvp"
+		},
+		{
+			"fullName": "YaleOpenLab/opensolar",
+			"projectSlug": "opensolar",
+			"repoScore": 15,
+			"url": "https://github.com/YaleOpenLab/opensolar"
+		},
+		{
+			"fullName": "perspectivefi/apwine-branding-resources",
+			"projectSlug": "spectra-finance",
+			"repoScore": 14,
+			"url": "https://github.com/perspectivefi/apwine-branding-resources"
+		},
+		{
+			"fullName": "soroswap/poc-soroswap-indexer",
+			"projectSlug": "soroswap",
+			"repoScore": 14,
+			"url": "https://github.com/soroswap/poc-soroswap-indexer"
+		},
+		{
+			"fullName": "perspectivefi/apwine-sdk",
+			"projectSlug": "spectra-finance",
+			"repoScore": 12,
+			"url": "https://github.com/perspectivefi/apwine-sdk"
+		},
+		{
+			"fullName": "perspectivefi/frontend-exercise",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/frontend-exercise"
+		},
+		{
+			"fullName": "perspectivefi/cairozen-lib",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/cairozen-lib"
+		},
+		{
+			"fullName": "perspectivefi/spectra-governance",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/spectra-governance"
+		},
+		{
+			"fullName": "perspectivefi/spectra4626rewards-deployer",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/spectra4626rewards-deployer"
+		},
+		{
+			"fullName": "perspectivefi/core-v2-hats",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/core-v2-hats"
+		},
+		{
+			"fullName": "perspectivefi/vision-sps",
+			"projectSlug": "spectra-finance",
+			"repoScore": 10,
+			"url": "https://github.com/perspectivefi/vision-sps"
+		},
+		{
+			"fullName": "Soroban-Learn/soroban-learn",
+			"projectSlug": "soroban-learn",
+			"repoScore": 8,
+			"url": "https://github.com/Soroban-Learn/soroban-learn"
+		}
+	]
+}
