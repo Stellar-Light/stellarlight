@@ -692,6 +692,20 @@ async function main() {
 					String(a.slug).localeCompare(String(b.slug)),
 			);
 		const primary = pages[0];
+		// Two NAME-matched pages on one row are two SCF records titled alike —
+		// a rename (wellspring-xuv is the team's RampMeDaddy page retitled
+		// "Wellspring") or a second product of one company (cashabroad's Smart
+		// Treasury). Say so in the log: a fold of two unrelated projects that
+		// merely share a name would look identical, and only a reader can tell.
+		if (pages.filter((p) => !viaOverride(p)).length > 1)
+			console.log(
+				`  WARN ${ours.slug}: ${pages.filter((p) => !viaOverride(p)).length} pages joined by NAME alone (${pages
+					.filter((p) => !viaOverride(p))
+					.map((p) => p.slug)
+					.join(
+						", ",
+					)}) — confirm they are one project before trusting the fold`,
+			);
 		const details = pages.map((p) => p.detail).filter(Boolean);
 		const totals = details.map((d) => d.totalAwarded);
 		const seen = new Set<string>();

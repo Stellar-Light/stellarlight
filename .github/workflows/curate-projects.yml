@@ -42,6 +42,7 @@ jobs:
       # landed; this step only reports, loudly.
       - name: Idempotence
         if: ${{ github.event_name == 'schedule' || inputs.execute }}
+        shell: bash
         run: |
           set -o pipefail
           pnpm exec tsx scripts/data/curate-projects.ts 2>&1 | tee replan.log || true
