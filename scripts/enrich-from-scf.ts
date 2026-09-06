@@ -173,7 +173,22 @@ async function scrapeDetailPage(slug: string): Promise<{
 		// for pages the listing never serves (SCF_PAGES_BEYOND_CAP). pageSlug
 		// doubles as the identity check: an unknown slug renders 200 with no
 		// project payload (soft-404), which must read as could-not-parse.
-		const txt = html.replace(/\\"/g, '"');
+		// Read off the REBUILT flight stream, not the raw HTML: the stream is
+		// cut into <script> chunks at arbitrary points, and a cut inside this
+		// field sequence blanked the identity check on 3 of 113 pages in the
+		// first dry run (mojoflower-mq4, sorostarter-9b2, opengrants-fdb).
+		const flight = [
+			...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
+		]
+			.map((m) => {
+				try {
+					return JSON.parse(m[1]) as string;
+				} catch {
+					return "";
+				}
+			})
+			.join("");
+		const txt = flight || html.replace(/\\"/g, '"');
 		const pageRec = txt.match(
 			/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
 		);
@@ -586,7 +601,11 @@ async function main() {
 		}
 		const detail = await scrapeDetailPage(scfSlug);
 		await sleep(300);
-		if (!detail || detail.pageSlug !== scfSlug) {
+		if (!detail) {
+			beyondCap.unparseable.push(`${scfSlug} (HTTP error or network failure)`);
+			continue;
+		}
+		if (detail.pageSlug !== scfSlug) {
 			beyondCap.unparseable.push(
 				`${scfSlug} (no project payload at that slug)`,
 			);
