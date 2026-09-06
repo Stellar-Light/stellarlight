@@ -41,7 +41,7 @@ Each row has a `source` field (`"curated"` or `"dorahacks"`). When `.meta.counts
 Single-hackathon detail. **Two response shapes** depending on the data source:
 
 **(a) Curated** (slug resolves to a Payload Hackathons row) — full detail:
-- `.hackathon.stats` — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown)
+- `.hackathon.stats` — totalSubmissions, totalPrizeUSD, winners count, outcome funnel (built / inProgress / abandoned / unknown). **`totalSubmissions` and `outcomes` are `null` when we hold no submission records for the event** — a curated in-person summit has no submission list anywhere, and publishing `0` there would claim nobody entered an event that had winners. Read `null` as unknown, never as zero.
 - `.hackathon.tracks[*]` — prize tracks derived from past submissions, each with `{name, winnerCount, submissionCount, totalPrizeUSD}`. Use for "which tracks did this hackathon pay out for?"
 - `.winners[*]` — projects that placed, **sorted by placement** (`winners[0]` = 1st), each with a numeric `placementRank` (1 = best) alongside the `hackathonPlacement` label — sort/filter on `placementRank`, don't parse the string
 - `.submissions[*]` — every submission with placement, prize, track
