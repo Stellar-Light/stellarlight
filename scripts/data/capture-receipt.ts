@@ -32,12 +32,29 @@ const text = raw
 	.replace(/\s+/g, " ")
 	.trim();
 
+// A marker is looked for in the rendered TEXT first. When the text has no
+// match, the raw markup is searched too and the hit is recorded as
+// `where: "markup"` — a parked domain (GoDaddy's lander: no text nodes at
+// all, only `window._trfd ap:"parking"` and /parking-lander/ assets) carries
+// its evidence in scripts, and a receipt that can only read text could never
+// cite it (polaris-lend, 2026-09-06). The record says where the marker was,
+// so a reader can weigh markup evidence for what it is.
+const rawLower = raw.toLowerCase();
 const found = markers.map((m) => {
 	const i = text.toLowerCase().indexOf(m.toLowerCase());
+	if (i >= 0)
+		return {
+			marker: m,
+			found: true,
+			where: "text" as const,
+			excerpt: text.slice(Math.max(0, i - 120), i + 180),
+		};
+	const j = rawLower.indexOf(m.toLowerCase());
 	return {
 		marker: m,
-		found: i >= 0,
-		excerpt: i >= 0 ? text.slice(Math.max(0, i - 120), i + 180) : null,
+		found: j >= 0,
+		where: j >= 0 ? ("markup" as const) : null,
+		excerpt: j >= 0 ? raw.slice(Math.max(0, j - 120), j + 180) : null,
 	};
 });
 
@@ -63,7 +80,7 @@ mkdirSync(join(process.cwd(), "improvements/receipts"), { recursive: true });
 const path = join(process.cwd(), `improvements/receipts/${slug}-${date}.json`);
 writeFileSync(path, `${JSON.stringify(out, null, 1)}\n`);
 console.log(
-	`${path}\n  status=${res.status} markers: ${found.map((f) => `${f.marker}=${f.found ? "FOUND" : "absent"}`).join(" · ")}`,
+	`${path}\n  status=${res.status} markers: ${found.map((f) => `${f.marker}=${f.found ? `FOUND (${f.where})` : "absent"}`).join(" · ")}`,
 );
 if (markers.length && !found.some((f) => f.found)) {
 	console.error(

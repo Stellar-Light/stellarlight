@@ -59,7 +59,7 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-09-05",
 		sourceUrl: "https://jetprotocol.io/lander",
-		note: "Re-graded 2026-09-05 under the product-state rule: jetprotocol.io redirects to a GoDaddy parking lander rendering 'jetprotocol.io is parked free, courtesy of GoDaddy.com'; own repo jet-lab/polaris 404. Parked page marker is client-rendered \u2014 see receipt caveat. Rendered 2026-09-05 in a browser: 'jetprotocol.io is parked free, courtesy of GoDaddy.com' \u2014 the raw HTML is only the GoDaddy lander shell, so the receipt marker is 'lander'.",
+		note: "Re-graded 2026-09-05 under the product-state rule: jetprotocol.io redirects to a GoDaddy parking lander rendering 'jetprotocol.io is parked free, courtesy of GoDaddy.com'; own repo jet-lab/polaris 404. Parked page marker is client-rendered \u2014 see receipt caveat. Rendered 2026-09-05 in a browser: 'jetprotocol.io is parked free, courtesy of GoDaddy.com' \u2014 the raw HTML is GoDaddy's parking-lander shell with no text nodes, so the receipt (improvements/receipts/polaris-lend-2026-09-06.json) cites the markup markers ap:\"parking\" and /parking-lander/ — where: markup.",
 	},
 	"every-finance": {
 		from: "Live",

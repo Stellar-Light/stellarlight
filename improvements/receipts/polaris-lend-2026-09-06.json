@@ -2,10 +2,10 @@
  "slug": "polaris-lend",
  "url": "https://jetprotocol.io/lander",
  "finalUrl": "https://jetprotocol.io/lander",
- "fetchedAt": "2026-09-06T00:15:36.972Z",
+ "fetchedAt": "2026-09-06T00:29:55.305Z",
  "httpStatus": 200,
  "headers": {
-  "date": "Sun, 06 Sep 2026 00:15:36 GMT",
+  "date": "Sun, 06 Sep 2026 00:29:55 GMT",
   "etag": null,
   "lastModified": null,
   "server": "openresty"
@@ -14,9 +14,16 @@
  "bodyTextChars": 0,
  "markers": [
   {
-   "marker": "lander",
-   "found": false,
-   "excerpt": null
+   "marker": "parking-lander",
+   "found": true,
+   "where": "markup",
+   "excerpt": "ps://img1.wsimg.com/signals/js/clients/scc-c2/scc-c2.min.js\"></script><script defer=\"defer\" src=\"https://img1.wsimg.com/parking-lander/static/js/main.b227b566.js\"></script><link href=\"https://img1.wsimg.com/parking-lander/static/css/main.52c56e7a.css\" rel=\"stylesheet\"></head><body><div id=\"root\"></d"
+  },
+  {
+   "marker": "ap:\"parking\"",
+   "found": true,
+   "where": "markup",
+   "excerpt": "icon\" href=\"data:,\"/><script>window.LANDER_SYSTEM=\"PW\"</script><script>window._trfd=window._trfd||[],window._trfd.push({ap:\"parking\"})</script><script>window._signalsDataLayer=window._signalsDataLayer||[]</script><script async src=\"https://img1.wsimg.com/signals/js/clients/scc-c2/scc-c2.min.js\"></sc"
   }
  ],
  "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
