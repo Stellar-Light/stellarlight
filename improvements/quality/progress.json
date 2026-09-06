@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T00:27:48.352Z",
+ "generatedAt": "2026-09-06T01:15:33.094Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -318,7 +318,8 @@
     "url": "https://jetprotocol.io/lander",
     "fetchedAt": "2026-09-06",
     "markers": [
-     "NOT lander"
+     "parking-lander",
+     "ap:\"parking\""
     ]
    },
    {
@@ -371,6 +372,17 @@
      "funds are not real",
      "testnet",
      "waitlist"
+    ]
+   },
+   {
+    "file": "improvements/receipts/neovestor-2026-09-06.json",
+    "slug": "neovestor",
+    "url": "https://neovestor.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "waitlist",
+     "Early access",
+     "0.0 (\"…t works Licensed custody Gasless From $10 Regulated T-Bills…\")"
     ]
    },
    {

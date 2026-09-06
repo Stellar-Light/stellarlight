@@ -468,8 +468,10 @@ medium 8 of 10 (#1367; litemint, tellus-cooperative held) plus its 5 Inactive re
 (#1376, receipted: polaris-lend, every-finance, muwp, didstellar, transfermole), low 12 of
 16 (#1371; getblock, kotani-pay, plutope, mystic held). Every stamp is now re-probed weekly by the packet-stamps
 guard (#1368, #1372, #1374: 67 hold, 0 contradicted, 8 client-rendered shells it cannot
-read without a browser). 2. Owner verdicts still open: the 6 held rows above, the medium
-tier's 2 Development re-grades, the 8 withdrawn high-tier rows and the 11 flagged (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+read without a browser). 2. DONE 2026-09-06: the medium tier's Development re-grades — neovestor applied
+(waitlist product, receipted), Stellar Passport overridden by the owner and stamped Live
+(#1380). Owner verdicts still open: the 6 held rows above, the 8 withdrawn high-tier rows
+and the 11 flagged (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
 rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
 the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
 our spec changes — batch routing-text edits).
