@@ -130,8 +130,12 @@ const SCF_SUBMISSION_LINKS: Record<
 		rounds: [44],
 		evidence: "https://communityfund.stellar.org/project/crediolabsai-ut9",
 	},
+	// policywright / account-demolisher (2026-09-06): the cited page shows ONE
+	// awarded submission (#44); the earlier rounds were badge-inherited, no
+	// page carries them (Wayback CDX: no other page). Enrich exact-syncs the
+	// page and this map put the rounds back — the row flipped every execute.
 	policywright: {
-		rounds: [42, 44],
+		rounds: [44],
 		evidence: "https://communityfund.stellar.org/project/policywright-j8x",
 	},
 	"vrf-soroban": {
@@ -177,7 +181,7 @@ const SCF_SUBMISSION_LINKS: Record<
 		evidence: "https://communityfund.stellar.org/project/sendana-axa",
 	},
 	"account-demolisher": {
-		rounds: [29, 41, 44],
+		rounds: [44],
 		evidence:
 			"https://communityfund.stellar.org/project/account-demolisher-bfe",
 	},
@@ -264,8 +268,10 @@ const SCF_SUBMISSION_LINKS: Record<
 	// coala-pay-billy-wallet-9mi, r31 unverdicted on both pages (kept —
 	// never accuse on silence). Deliberately NOT slug-joined; the union
 	// merge below is what records the verified rounds.
+	// r31 is on neither page (unverdicted) — dropped 2026-09-06; the enrich
+	// fold now carries both pages' awards, so this entry is satisfied.
 	"coala-pay": {
-		rounds: [22, 31, 35],
+		rounds: [22, 35],
 		evidence:
 			"https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j",
 	},
@@ -441,29 +447,42 @@ const SCF_FIX: Record<
 		awardedRounds: [32],
 		roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }],
 	},
+	// tucambio re-verified 2026-09-06 on seasonal-workers-payroll-lru (the
+	// project's only live page; tucambio-wallets-lru renders no payload):
+	// #37 $75,000 + #43 $100,000, page total $175,000. The old [37] entry
+	// fought SCF_SUBMISSION_LINKS' [37, 43] on every execute.
 	tucambio: {
 		awarded: true,
-		totalAwarded: null,
-		awardedRounds: [37],
-		roundAwards: [{ round: 37, amountUSD: 75000, awardType: null }],
+		totalAwarded: 175000,
+		awardedRounds: [37, 43],
+		roundAwards: [
+			{ round: 37, amountUSD: 75000, awardType: "Build" },
+			{ round: 43, amountUSD: 100000, awardType: "Build" },
+		],
 	},
 	stride: {
 		awarded: true,
 		totalAwarded: 120000,
 		awardedRounds: [33],
-		roundAwards: [{ round: 33, amountUSD: 120000, awardType: null }],
+		roundAwards: [{ round: 33, amountUSD: 120000, awardType: "Build" }], // type read off the page 2026-09-06 (it parses now)
 	},
 	palremit: {
 		awarded: true,
 		totalAwarded: 60000,
 		awardedRounds: [32],
-		roundAwards: [{ round: 32, amountUSD: 60000, awardType: null }],
+		roundAwards: [{ round: 32, amountUSD: 60000, awardType: "Build" }], // type read off the page 2026-09-06
 	},
 	autoaction: {
 		awarded: true,
 		totalAwarded: 50000,
 		awardedRounds: [29],
-		roundAwards: [{ round: 29, amountUSD: 50000, awardType: null }],
+		roundAwards: [
+			{
+				round: 29,
+				amountUSD: 50000,
+				awardType: "Legacy v5.0 Activation Award",
+			},
+		], // type read off the page 2026-09-06
 	},
 	comet: {
 		awarded: true,
@@ -2057,6 +2076,21 @@ async function main() {
 			);
 			continue;
 		}
+		// Idempotence (2026-09-06): a stamp whose every field already matches
+		// the row is not a write. 141 from===to entries were re-written on every
+		// execute — "143 applied" meant nothing, and the noise hid that tucambio
+		// flipped between two curate maps each run. A stamp only fills an empty
+		// note, so a row with any note is in sync on the note.
+		if (
+			fix.from === fix.to &&
+			(!fix.asOf || String(d.statusAsOf ?? "").slice(0, 10) === fix.asOf) &&
+			(!fix.sourceUrl || d.statusSourceUrl === fix.sourceUrl) &&
+			(!fix.basis || d.statusBasis === fix.basis) &&
+			(!fix.note || !!d.lifecycle?.note)
+		) {
+			console.log(`  ${slug}: stamp already in sync, skip`);
+			continue;
+		}
 		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
 		// biome-ignore lint/suspicious/noExplicitAny: partial update payload
 		const data: any = { status: fix.to };
@@ -2349,7 +2383,9 @@ async function main() {
 		if (
 			cur.join(",") === fix.aliases.join(",") &&
 			(d.renameSourceUrl ?? undefined) === fix.renameSourceUrl &&
-			(d.renamedAt ?? undefined) === fix.renamedAt
+			// renamedAt is a date field: compare the day, not the stored timestamp
+			// (wirex-pay and vesseo re-wrote identical aliases on every execute)
+			String(d.renamedAt ?? "").slice(0, 10) === (fix.renamedAt ?? "")
 		) {
 			console.log(`  ${slug}: identity already in sync, skip`);
 			continue;

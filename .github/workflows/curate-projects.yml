@@ -1,4 +1,5 @@
 name: Curate projects (manual)
+# workflow-health: signal-steps: ^Idempotence$
 on:
   workflow_dispatch:
     inputs:
@@ -33,3 +34,21 @@ jobs:
       # (mainnet joins, onchain activity, DEPLOYMENT_VERIFIED curation),
       # everything else stays explicitly unknown.
       - run: pnpm exec tsx scripts/data/backfill-deployment.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+      # Idempotence gate (2026-09-06): an execute must leave nothing planned.
+      # A write still planned right after it was applied is a lane fight (two
+      # maps, or this lane and enrich-scf, on one field) or a writer that does
+      # not read back — the class that flipped tucambio, coala-pay, aquarius
+      # and six linkage rows on every run for weeks. The writes above already
+      # landed; this step only reports, loudly.
+      - name: Idempotence
+        if: ${{ github.event_name == 'schedule' || inputs.execute }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/data/curate-projects.ts 2>&1 | tee replan.log || true
+          n=$(grep -oE '^[0-9]+ write\(s\) planned' replan.log | grep -oE '^[0-9]+' || echo unknown)
+          if [ "$n" != "0" ]; then
+            echo "::error::$n write(s) still planned after execute — a lane fight or a non-idempotent writer; see the plan above"
+            exit 1
+          fi
+          echo "0 writes planned after execute — every map is in sync"
