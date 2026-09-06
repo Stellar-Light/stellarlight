@@ -1,0 +1,30 @@
+{
+ "slug": "bigger",
+ "url": "http://biggertech.co/",
+ "finalUrl": "http://biggertech.co/",
+ "fetchedAt": "2026-09-06T04:19:25.453Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:19:25 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "nginx"
+ },
+ "bodyTextSha256": "79eb403c55b02adf599cfd4ae5b010e1678b9570d5bada63384a253b0f935cc2",
+ "bodyTextChars": 312,
+ "markers": [
+  {
+   "marker": "has been registered with Gandi.net",
+   "found": true,
+   "where": "text",
+   "excerpt": "biggertech.co This domain name has been registered with Gandi.net View the WHOIS results of biggertech.co to get the domain’s public registration information. biggertech.co is unavailable Want your own domain na"
+  },
+  {
+   "marker": "biggertech.co is unavailable",
+   "found": true,
+   "where": "text",
+   "excerpt": " registered with Gandi.net View the WHOIS results of biggertech.co to get the domain’s public registration information. biggertech.co is unavailable Want your own domain name? Learn more about the domain name extensions we manage Find a domain name similar to biggertech.co"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
