@@ -413,6 +413,18 @@ const SCF_FIX: Record<
 	// company award does not belong on an asset row. opengrants-fdb joins our
 	// `opengrants` row via SCF_PAGES_BEYOND_CAP (enrich-from-scf.ts).
 	pen: { awarded: false, totalAwarded: null, awardedRounds: [], unlink: true },
+	// 2026-09-06: the same wrong-row class, caught by link intersection. SCF's
+	// only Hermes page (hermes-isy, "Stellar's Own Perpetual Exchange") links
+	// github.com/zenith-protocols = our ZENEX row; the name matcher wrote its
+	// $150,000 SCF #32 award onto this row, OrbitCDP's separate Hermes
+	// (github.com/orbit-cdp/hermes). Unlinked here; the page is bound to zenex
+	// in SCF_SLUG_OVERRIDES (enrich-from-scf.ts).
+	hermes: {
+		awarded: false,
+		totalAwarded: null,
+		awardedRounds: [],
+		unlink: true,
+	},
 	// sls-026: live said $391K + rounds [17,23,27,30]; official = $291K PAID,
 	// round 30 marked Ineligible. Paid awards only.
 	aquarius: {
