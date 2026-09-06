@@ -387,12 +387,23 @@ const SCF_FIX: Record<
 			amountUSD: number | null;
 			awardType: string | null;
 		}>;
+		/** true = the stored join is a fossil of the pre-2026-08-12 substring
+		 * matcher (another project's page written onto this row): drop the page
+		 * linkage (slug / sourceUrl / lastAwardedRound) too, not just the facts. */
+		unlink?: boolean;
 	}
 > = {
 	// sls-027: official page shows 7 submissions, 4 AWARDED (#16 $150K, #20
 	// $100K, #25 $94.5K + Q1-2024 Liquidity $50K); #18/#24 explicitly NOT
 	// awarded. Total was right, membership wasn't.
 	phoenix: { awarded: true, totalAwarded: 394500, awardedRounds: [16, 20, 25] },
+	// 2026-09-06: fossil of the pre-2026-08-12 substring matcher — OpenGrants
+	// ("opengrants" ⊃ "pen") was written onto PEN, Anclap's asset row. No SCF
+	// page is titled PEN (listing + Wayback CDX checked); anclap-r4u is the
+	// COMPANY page (r7/r17/r26) and no Anclap row exists — left unjoined, a
+	// company award does not belong on an asset row. opengrants-fdb joins our
+	// `opengrants` row via SCF_PAGES_BEYOND_CAP (enrich-from-scf.ts).
+	pen: { awarded: false, totalAwarded: null, awardedRounds: [], unlink: true },
 	// sls-026: live said $391K + rounds [17,23,27,30]; official = $291K PAID,
 	// round 30 marked Ineligible. Paid awards only.
 	aquarius: {
@@ -2391,6 +2402,7 @@ async function main() {
 			cur.totalAwarded === fix.totalAwarded &&
 			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",") &&
 			raInSync &&
+			(!fix.unlink || cur.slug == null) &&
 			// provenance first-stamp (same gap enrich had, #828): a curated row
 			// whose values are in sync but whose basis is missing still needs
 			// the human-verified stamp — in-sync is not stamped.
@@ -2402,13 +2414,17 @@ async function main() {
 		console.log(
 			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]`,
 		);
+		const { unlink, ...scfFix } = fix;
 		writes.push({
 			id: d.id,
 			slug,
 			data: {
 				scf: {
 					...cur,
-					...fix,
+					...scfFix,
+					...(unlink
+						? { slug: null, sourceUrl: null, lastAwardedRound: null }
+						: {}),
 					// curated corrections are page-verified by a human where the
 					// official record is ambiguous — the strongest basis we serve
 					basis: "human-verified",
