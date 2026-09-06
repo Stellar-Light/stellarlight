@@ -136,6 +136,48 @@ after a silence-close at 0 · SLOs at target · zero externally-filed
 correctness findings. Then the service runs at Stage 3+ by default and humans
 do product, not repair.
 
+## 3b. Instrument tiers — what a prober earns the right to say
+
+A finding is never better than the instrument that produced it, so an
+instrument carries a tier of its own and may only speak at that tier.
+
+- **Tier A — can report an absence.** Every failure mode it can encounter has
+  a test that pins it, and each one is either a verdict or an explicit
+  could-not-check. Only a Tier A instrument may say "this is gone".
+- **Tier B — can report a presence.** It found something and can cite where.
+  A hit proves the thing exists; it says nothing about what it did not find.
+- **Tier C — can report only its own reading.** An untested prober, or one
+  that has just been changed. Its output is a queue for a human, never a
+  verdict, and never a write.
+
+The promotion rule is the same as the autonomy ladder's: an instrument reaches
+Tier A when its blind spots have been *enumerated and tested*, not when it has
+run cleanly for a while. A quiet instrument and a blind one produce identical
+output.
+
+**Why this exists (2026-09-06).** A weak-basis sweep made twelve false death
+calls before it made one true one: it did not follow 308 redirects, so eleven
+live sites that redirect read as 0-byte pages; it treated a 503 as a death; it
+could not tell a domain that no longer resolves from one that timed out; and it
+nearly retired a live product whose page title is the unedited "Create Next
+App". Separately, a package-registry probe matched 31 rows by name of which 26
+were collisions, and two of my own repair rules invented GitHub accounts and
+would have deleted a real repository.
+
+Two things are true of all of them. **None was caught by review** — every one
+was caught by a second, differently-shaped look: a dry run that printed the
+planned writes, a rendered read, an intersection gate that demanded the
+package point back at the row's own repository. And **the corrections already
+existed**: the shipped packet guard had solved redirects and refusal codes
+months earlier, and the sweep was a throwaway script that reimplemented the
+same logic badly. A prober that is not the shared prober starts at Tier C
+no matter how careful its author was.
+
+So: one prober per question, corrections land in it, and anything that wants
+to speak at Tier A imports it. `scripts/check-weak-basis-liveness.ts` is the
+worked example — it exists to sweep a different pool, and it calls
+`check-packet-stamps.ts`'s `probe` rather than fetching for itself.
+
 ## 4. Phases
 
 - **P0. Name the classes, lock the first invariant.** `status: done`
@@ -626,6 +668,29 @@ are mostly partners whose repositories are not Stellar code, which the relevance
 gate correctly declines. Discovery over the 586 no-repo Live/Development rows
 confirmed 82 owners by intersection; 70 already stored the right link, and the
 12 that did not were written (#1414).
+
+## Lessons — 2026-09-06 (the instrument speaks first)
+
+24. **An instrument's blind spot looks exactly like a finding.** Unfollowed
+    308s, a 5xx, a client-rendered page and a default page title each produced
+    a confident "this product is dead". Enumerate what the prober cannot see
+    and give each case its own could-not-check before trusting one verdict.
+25. **A second prober is a second set of the same bugs.** The corrections for
+    redirects and refusal codes already existed in the packet guard; a
+    throwaway sweep re-derived them wrong. One question, one prober, and the
+    sweeps import it.
+26. **A dry run catches what review does not.** Every one of the day's six
+    near-misses was caught by printing the planned writes or by rendering the
+    page — none by reading the diff. Plan output is not a formality before an
+    execute; it is the test.
+27. **A match needs an intersection, not a name.** 26 of 31 package matches
+    were collisions until the package had to point back at the row's own
+    repository. Same shape as the SCF `opengrants`/`pen` fossil and the
+    Hermes misattribution: a name is a hypothesis, a link is evidence.
+28. **Funding is not membership.** RAMM held a real SCF award and real Soroban
+    contracts, but every network reference was Futurenet and the company now
+    ships something else. An award proves a proposal was funded, never that a
+    product exists in the ecosystem today.
 
 ## Lessons — 2026-09-06 (one field, one writer)
 
