@@ -1,14 +1,9 @@
 {
-	"asOf": "2026-09-06T22:40:20.842Z",
+	"asOf": "2026-09-06T22:43:33.735Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 94,
+	"checked": 93,
 	"healthy": 92,
 	"broken": [
-		{
-			"file": "weak-basis-liveness.yml",
-			"state": "always-red",
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Run pnpm/action-setup@v4\", not a declared signal step"
-		},
 		{
 			"file": "workflow-health.yml",
 			"state": "standing-signal",
@@ -263,7 +258,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T22:38:43Z",
+			"lastSuccessAt": "2026-09-06T22:41:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -978,10 +973,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T22:38:43Z",
+			"lastSuccessAt": "2026-09-06T22:41:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1027,17 +1022,6 @@
 			"graceDays": 21,
 			"runs": 100,
 			"why": "last green 0d ago"
-		},
-		{
-			"file": "weak-basis-liveness.yml",
-			"name": "weak-basis liveness",
-			"cron": "17 8 * * 4",
-			"state": "always-red",
-			"lastSuccessAt": null,
-			"ageDays": null,
-			"graceDays": 21,
-			"runs": 1,
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Run pnpm/action-setup@v4\", not a declared signal step"
 		},
 		{
 			"file": "workflow-health.yml",
