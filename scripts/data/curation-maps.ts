@@ -49,6 +49,25 @@ export const STATUS_FIX: Record<
 		basis?: StatusBasis;
 	}
 > = {
+	// ── Owner approval 2026-09-06 ("apply the medium development ones too"), with one
+	// override: the owner says Stellar Passport is live, so the packet's Development
+	// re-grade for it is NOT applied — it is stamped Live on the owner's verdict instead.
+	neovestor: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://neovestor.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: page says 'Join waitlist \u00b7 2026 Early access' with 'Yield 0.0 % est.'; app.neovestor.com is a Privy sign-in shell. Waitlist product, nothing live. Receipt improvements/receipts/neovestor-2026-09-06.json (markers: waitlist, Early access, 0.0).",
+	},
+	"stellar-passport": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellarpassport.xyz/",
+		note: "Owner verdict 2026-09-06: Stellar Passport is live. The 2026-09-05 medium-tier re-grade read the demo app's 'Beta · Testnet' label as a product state and proposed Development; the owner overrode it. SCF R40; events with live countdowns and passkey sign-in on the app.",
+	},
 	// ── Owner approval 2026-09-05 ("apply the medium inactive ones too"): the medium tier's
 	// five Inactive re-grades under the product-state rule (#1361), each a parked / for-sale
 	// / disabled-deployment page or a removed sole repository, each receipted in

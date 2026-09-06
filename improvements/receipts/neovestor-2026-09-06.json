@@ -1,0 +1,36 @@
+{
+ "slug": "neovestor",
+ "url": "https://neovestor.com/",
+ "finalUrl": "https://neovestor.com/",
+ "fetchedAt": "2026-09-06T01:05:19.642Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 01:05:19 GMT",
+  "etag": "W/\"d02c0c21b62c019c97143b70dabfc229\"",
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "aeae073323248600cfe8b4acfd75c483a266ed11690824e514e6e860e2030630",
+ "bodyTextChars": 3546,
+ "markers": [
+  {
+   "marker": "waitlist",
+   "found": true,
+   "where": "text",
+   "excerpt": "Neovestor — Tokenized real-world assets, from $10 Assets How it works Compliance Docs ↗ Join waitlist 2026 Early access · regulated RWA platform Real business. Real yield. Tokenized for all. Tokenized real estate, treasuries, and private credit. Held in licensed custody. O"
+  },
+  {
+   "marker": "Early access",
+   "found": true,
+   "where": "text",
+   "excerpt": "Neovestor — Tokenized real-world assets, from $10 Assets How it works Compliance Docs ↗ Join waitlist 2026 Early access · regulated RWA platform Real business. Real yield. Tokenized for all. Tokenized real estate, treasuries, and private credit. Held in licensed custody. Opened from ten"
+  },
+  {
+   "marker": "0.0",
+   "found": true,
+   "where": "text",
+   "excerpt": "t works Licensed custody Gasless From $10 Regulated T-Bills Real Estate Credit Low US T-Bills Fixed Income · 12wk Yield 0.0 % est. From $10 US T-Bills 4.8% est. ◆ Real Estate 6–9% est. ◆ Private Credit 9–12% ◆ S&amp;P 500 Market ◆ DeFi Yield Flex. ◆ Venture Locked ◆ US T-Bills 4.8% est. ◆ Real Estat"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
