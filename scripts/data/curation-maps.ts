@@ -59,6 +59,23 @@ export const STATUS_FIX: Record<
 	// pages rendered, APIs, rendered apps). Held for the owner: cartwey and fastbuka (the
 	// shipped app names no Stellar), horizon-as-a-service / hot-protocol / k3-labs (docs-only
 	// evidence the agent itself flagged low). Status moves are presented, not applied.
+	// Owner-directed removal 2026-09-06: "RAMM is not related to stellar".
+	// Recorded rather than erased, because the row was not empty: SCF #22
+	// awarded $38,500 to "RAMM: Global Retail Commerce" (SCF #36 prescreen
+	// failed), and jamiels/ramm.ai does carry Soroban contracts
+	// (soroban/factory, soroban/pool) with a @stellar/stellar-sdk UI. All of it
+	// targets FUTURENET, the last commit is 2024-04-16, and ramm.ai today sells
+	// Popupz.ai, an AI marketspace with no Stellar anywhere. A funded prototype
+	// that never left a test network, from a company now doing something else,
+	// is not a Stellar project for directory purposes — the owner's call.
+	ramm: {
+		from: "Live",
+		to: "Draft",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://ramm.ai/",
+		note: "owner-directed removal 2026-09-06: not a Stellar project. SCF #22 awarded $38,500 and the repo holds Futurenet-only Soroban contracts last touched 2024-04-16; ramm.ai now sells an unrelated AI marketspace (Popupz.ai, waitlist). Evidence kept on the row; the directory entry is withdrawn.",
+	},
 	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
 	// their own surfaces after the first tranche. A default page TITLE is not a
 	// verdict — zilt's title is the unedited "Create Next App" while the page
