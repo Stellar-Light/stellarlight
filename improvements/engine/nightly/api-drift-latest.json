@@ -1,14 +1,5 @@
 {
-	"generatedAt": "2026-09-05T09:25:26.491Z",
+	"generatedAt": "2026-09-06T09:42:01.328Z",
 	"detector": "api-drift",
-	"failures": [
-		{
-			"probe": "status.endpoints lists /api/rwa",
-			"note": "OpenAPI documents /api/rwa but /api/status.endpoints[] omits it"
-		},
-		{
-			"probe": "/api/rwa emits X-API-Version",
-			"note": "got \"none\" — add \"/api/rwa\" to next.config.mjs publicApi[]"
-		}
-	]
+	"failures": []
 }
