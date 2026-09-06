@@ -1,35 +1,53 @@
 {
-  "generatedAt": "2026-09-06T22:58:56.501Z",
+  "generatedAt": "2026-09-06T23:43:15.103Z",
   "base": "https://stellarlight.xyz",
   "checked": 17,
-  "pass": 11,
-  "vacuous": 6,
+  "pass": 17,
+  "vacuous": 0,
   "fail": 0,
   "couldNotCheck": 0,
   "results": [
     {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "hackmeridian-2026",
-      "status": "vacuous",
-      "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-hacks-zk",
+      "status": "pass",
+      "sum": 5,
+      "total": 345
     },
     {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "stellar-builders-camp-jaipur-2026",
-      "status": "vacuous",
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-pulso-hackathon",
+      "status": "pass",
       "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
+      "total": 70
     },
     {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "stellar-builder-summit-2026",
-      "status": "vacuous",
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-agents-x402-stripe-mpp",
+      "status": "pass",
+      "sum": 5,
+      "total": 262
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "alebrije2026",
+      "status": "pass",
       "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
+      "total": 28
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "buildonstellarchile",
+      "status": "pass",
+      "sum": 15,
+      "total": 42
+    },
+    {
+      "name": "hackathon winners never exceed submissions",
+      "scope": "stellar-hacks-zk-gaming",
+      "status": "pass",
+      "sum": 5,
+      "total": 99
     },
     {
       "name": "hackathon outcomes sum to totalSubmissions",
@@ -44,30 +62,6 @@
       "status": "pass",
       "sum": 70,
       "total": 70
-    },
-    {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "stellar-journey-to-mastery-2026",
-      "status": "vacuous",
-      "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
-    },
-    {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "build-on-stellar-philippines-2026",
-      "status": "vacuous",
-      "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
-    },
-    {
-      "name": "hackathon outcomes sum to totalSubmissions",
-      "scope": "apac-stellar-hackathon-2026",
-      "status": "vacuous",
-      "sum": 0,
-      "total": 0,
-      "detail": "denominator is 0 — holds trivially, proves nothing"
     },
     {
       "name": "rwa byState / byLevel sum to registry",

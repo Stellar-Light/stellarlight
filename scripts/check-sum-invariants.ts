@@ -37,7 +37,14 @@ type Part = {
 	why: string;
 	/** Fetch the response (or read an artifact) and return the partition + denominator. */
 	read: () => Promise<
-		{ parts: Record<string, number>; total: number; scope: string }[]
+		{
+			parts: Record<string, number>;
+			total: number;
+			scope: string;
+			/** The parts are a SUBSET of the total, not a partition of it: assert
+			 *  sum <= total instead of sum === total. */
+			atMost?: boolean;
+		}[]
 	>;
 };
 
@@ -53,6 +60,31 @@ const sum = (o: Record<string, number>) =>
 	Object.values(o).reduce((a, b) => a + (Number(b) || 0), 0);
 
 const PARTITIONS: Part[] = [
+	{
+		// The partition check above cannot see this: with a zero denominator it
+		// holds trivially, so "12 winners of 0 submissions" passed as vacuous.
+		// A count that is smaller than its own subset is a contradiction no sum
+		// rule catches.
+		name: "hackathon winners never exceed submissions",
+		why: "stellar-builder-summit-2026 served 12 winners beside totalSubmissions 0 — a curated event with no submission list, whose absent count was published as zero",
+		read: async () => {
+			const list = await getJson("/api/hackathons");
+			const out = [];
+			for (const h of (list.hackathons ?? []).slice(0, 12)) {
+				const d = await getJson(`/api/hackathons/${h.slug}`);
+				const st = d.hackathon?.stats;
+				// null = we hold no count, which is an admission, not a claim.
+				if (typeof st?.totalSubmissions !== "number") continue;
+				out.push({
+					scope: h.slug,
+					parts: { winners: Number(st.winners ?? 0) },
+					total: Number(st.totalSubmissions),
+					atMost: true,
+				});
+			}
+			return out;
+		},
+	},
 	{
 		name: "hackathon outcomes sum to totalSubmissions",
 		why: "outcomes served 0/0/0/0 beside 300 submissions — a classification that never ran, asserted as a result",
@@ -225,8 +257,16 @@ const PARTITIONS: Part[] = [
 			// 0 = 0 proves nothing: a hackathon with no submissions yet, a limit=1
 			// read. The 2026-09-05 audit found 6 of 17 passes were this. Reported
 			// as vacuous — visible, never counted as a pass.
-			const status =
-				s !== r.total ? "FAIL" : r.total === 0 ? "vacuous" : "pass";
+			// atMost: the parts are a subset, so exceeding the total is the
+			// failure and being under it is fine. A subset larger than its own
+			// superset (12 winners of 0 submissions) is a contradiction the
+			// equality rule reports as vacuous.
+			const broken = r.atMost ? s > r.total : s !== r.total;
+			const status = broken
+				? "FAIL"
+				: r.total === 0 && !r.atMost
+					? "vacuous"
+					: "pass";
 			results.push({
 				name: p.name,
 				scope: r.scope,
@@ -235,7 +275,7 @@ const PARTITIONS: Part[] = [
 				total: r.total,
 				detail:
 					status === "FAIL"
-						? `${JSON.stringify(r.parts)} sums to ${s}, denominator is ${r.total}`
+						? `${JSON.stringify(r.parts)} sums to ${s}, ${r.atMost ? "which EXCEEDS" : "denominator is"} ${r.total}`
 						: status === "vacuous"
 							? "denominator is 0 — holds trivially, proves nothing"
 							: undefined,
