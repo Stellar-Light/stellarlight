@@ -2,10 +2,10 @@
  "slug": "bigger",
  "url": "http://biggertech.co/",
  "finalUrl": "http://biggertech.co/",
- "fetchedAt": "2026-09-06T04:19:25.453Z",
+ "fetchedAt": "2026-09-06T19:21:55.707Z",
  "httpStatus": 200,
  "headers": {
-  "date": "Sun, 06 Sep 2026 04:19:25 GMT",
+  "date": "Sun, 06 Sep 2026 19:21:55 GMT",
   "etag": null,
   "lastModified": null,
   "server": "nginx"
@@ -14,16 +14,10 @@
  "bodyTextChars": 312,
  "markers": [
   {
-   "marker": "has been registered with Gandi.net",
+   "marker": "is unavailable",
    "found": true,
    "where": "text",
-   "excerpt": "biggertech.co This domain name has been registered with Gandi.net View the WHOIS results of biggertech.co to get the domain’s public registration information. biggertech.co is unavailable Want your own domain na"
-  },
-  {
-   "marker": "biggertech.co is unavailable",
-   "found": true,
-   "where": "text",
-   "excerpt": " registered with Gandi.net View the WHOIS results of biggertech.co to get the domain’s public registration information. biggertech.co is unavailable Want your own domain name? Learn more about the domain name extensions we manage Find a domain name similar to biggertech.co"
+   "excerpt": "th Gandi.net View the WHOIS results of biggertech.co to get the domain’s public registration information. biggertech.co is unavailable Want your own domain name? Learn more about the domain name extensions we manage Find a domain name similar to biggertech.co"
   }
  ],
  "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
