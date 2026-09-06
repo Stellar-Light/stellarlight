@@ -1,0 +1,30 @@
+{
+ "slug": "grantpicks",
+ "url": "https://app.grantpicks.com/",
+ "finalUrl": "https://app.grantpicks.com/",
+ "fetchedAt": "2026-09-06T04:16:24.295Z",
+ "httpStatus": 402,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:16:24 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "36c4b3481809faa1cefeaaeb5038f0fa3c801ae122f67f51b10a731eb9dd5244",
+ "bodyTextChars": 75,
+ "markers": [
+  {
+   "marker": "DEPLOYMENT_DISABLED",
+   "found": true,
+   "where": "text",
+   "excerpt": "Payment required DEPLOYMENT_DISABLED yul1::9ms4r-1788668184281-8e02de0844bf"
+  },
+  {
+   "marker": "Payment required",
+   "found": true,
+   "where": "text",
+   "excerpt": "Payment required DEPLOYMENT_DISABLED yul1::9ms4r-1788668184281-8e02de0844bf"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

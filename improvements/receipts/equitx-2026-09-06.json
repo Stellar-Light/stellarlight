@@ -1,0 +1,24 @@
+{
+ "slug": "equitx",
+ "url": "https://api.github.com/repos/EquitXCompany/equitx-project",
+ "finalUrl": "https://api.github.com/repos/EquitXCompany/equitx-project",
+ "fetchedAt": "2026-09-06T04:16:23.809Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:16:23 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "github.com"
+ },
+ "bodyTextSha256": "4f50e254a719a6b1b06b529bdaa08980e4acf0878aad0090cba7771f6ebdf0b9",
+ "bodyTextChars": 118,
+ "markers": [
+  {
+   "marker": "Not Found",
+   "found": true,
+   "where": "text",
+   "excerpt": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
