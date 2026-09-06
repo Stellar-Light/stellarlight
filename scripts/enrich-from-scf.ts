@@ -522,6 +522,12 @@ async function main() {
 		sorobanmath: "sorobanmath-zuo", // #20 $40,000 · github: github.com/rahul-soshte
 		sorobuild: "sorobuild-zhc", // #22 $44,800 · name: Soroban-specific coined name
 		sorosan: "sorosan-twd", // #20 $29,000 · github: github.com/sorosan
+		// scf.slug soropg-zcg was hand-set, but the page is outside the 500-row
+		// listing, so no pass ever visited it: the row served awarded=true with an
+		// empty roundAwards and the page's -226 sentinel as its round. Its one
+		// award is a partial disbursement ("Awarded (50%)"), which only became
+		// readable with the status fix in the same batch.
+		soropg: "soropg-zcg", // PG Q2 '26 undisclosed · site+github: soropg.com, github.com/jamesbachini
 		sorosplits: "sorosplits-9w7", // #19 $59,700 · #23 $94,000 · site+github: github.com/findolor, sorosplits.xyz
 		sorostarter: "sorostarter-9b2", // #29 $47,175 · github: github.com/sorostarter, x.com/sorostarter
 		spacewalk: "spacewalk-sel", // #11 $100,000 · site+github: github.com/pendulum-chain, pendulumchain.org
