@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
 				openFindings: e.findings.open,
 				/** the ONE definition of open used everywhere in this document */
 				openDefinition:
-					"A finding whose probe still reproduced on the most recent run of its detector. open + cleared + verified = total, disjoint.",
+					"A finding whose probe still reproduced on the most recent run of its detector, minus the two kinds we count apart: refreshQueue (a refresh, not a defect) and blockedUpstream (a consumer we do not control decides it). open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint.",
 				projectRows: e.projects.population,
 				meanRowEvidence: e.projects.meanScore,
 				safeToRelyOn: [
@@ -161,6 +161,14 @@ export async function GET(req: NextRequest) {
 			surfaces: e.surfaces,
 			findings: {
 				open: e.findings.open,
+				/** Open rows that are a REFRESH, not a defect — a note citing a
+				 *  version upstream has bumped, an archived repo with no recorded
+				 *  successor, a URL a probe proved dead. Counted apart so `open`
+				 *  stays a backlog someone can burn down. */
+				refreshQueue: e.findings.refreshQueue,
+				/** Open rows an upstream consumer decides (Raven has not re-read
+				 *  our text, or its scorer decides regardless of it). */
+				blockedUpstream: e.findings.blockedUpstream,
 				cleared: e.findings.cleared,
 				verifiedClosed: e.findings.verified,
 				total: e.findings.total,
@@ -168,7 +176,7 @@ export async function GET(req: NextRequest) {
 				byFailureMode: e.findings.byFailureMode,
 				openByAge: e.findings.openByAge,
 				recentlyCleared: e.findings.recentlyCleared,
-				note: "Open = still reproducing on the latest run. Cleared = a later run stopped reproducing it, which is NOT confirmation the fix works. Verified = deliberately re-probed after a fix. The three are disjoint and sum to total.",
+				note: "Open = still reproducing on the latest run, and ours to fix. refreshQueue = open, but a refresh rather than a defect (a note upstream has moved past, a dead URL to relink or retire). blockedUpstream = open, waiting on a consumer we do not control. Cleared = a later run stopped reproducing it, which is NOT confirmation the fix works. Verified = deliberately re-probed after a fix. The five are disjoint and sum to total.",
 			},
 			rowQuality: {
 				read: e.projects.read,
