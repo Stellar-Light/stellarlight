@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-06T17:24:41.087Z",
+	"asOf": "2026-09-06T17:37:46.125Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 91,
 	"healthy": 90,
@@ -7,7 +7,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "standing-signal",
-			"why": "4 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
+			"why": "5 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
 		}
 	],
 	"rows": [
@@ -225,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T17:22:25Z",
+			"lastSuccessAt": "2026-09-06T17:34:25Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T17:22:25Z",
+			"lastSuccessAt": "2026-09-06T17:35:50Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -274,17 +274,6 @@
 			"graceDays": 45,
 			"runs": 23,
 			"why": "last green 3d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "curate-projects.yml",
-			"name": "Curate projects (manual)",
-			"cron": "30 7 * * 2",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-06T16:49:32Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 2,
-			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -578,10 +567,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-20T17:34:17Z",
-			"ageDays": 47,
+			"ageDays": 48,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 47d ago (manual tool — age not judged)"
+			"why": "last green 48d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "live-canary.yml",
@@ -771,6 +760,17 @@
 			"why": "last green 80d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "refresh-ec-snapshot.yml",
+			"name": "Refresh Electric Capital developer snapshot",
+			"cron": "0 15 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-06T17:26:39Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "refresh-research-corpus.yml",
 			"name": "Refresh Scout research corpus",
 			"cron": "0 6 * * *",
@@ -951,7 +951,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T17:22:25Z",
+			"lastSuccessAt": "2026-09-06T17:35:50Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1009,8 +1009,8 @@
 			"lastSuccessAt": "2026-09-05T23:24:55Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 31,
-			"why": "4 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
+			"runs": 32,
+			"why": "5 run(s) red at its declared signal step since its last green 0d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
 		}
 	]
 }
