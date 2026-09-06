@@ -2224,10 +2224,14 @@ export interface operations {
                         }[];
                         findings?: {
                             open?: number;
+                            /** @description Open rows that are a refresh, not a defect: a note citing a version upstream has bumped, an archived repo with no recorded successor, a URL a probe proved dead. Counted apart so `open` stays a backlog someone can burn down. */
+                            refreshQueue?: number;
+                            /** @description Open rows a consumer we do not control decides. */
+                            blockedUpstream?: number;
                             cleared?: number;
                             verifiedClosed?: number;
                             total?: number;
-                            /** @description The partition rule: open + cleared + verified = total, disjoint. */
+                            /** @description The partition rule: open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. */
                             states?: string;
                             note?: string;
                             byFailureMode?: {
