@@ -101,6 +101,30 @@ export function isNegativeVerdict(status: string): boolean {
  * NOTE: the page's `buildAwardRounds` array is NOT usable — it includes
  * not-awarded rounds (verified on phoenix-svj, 2026-07-11).
  */
+/** RSC pages ship their payload as `self.__next_f.push([1,"…"])` string
+ * chunks cut at arbitrary byte offsets — inside a card's id (the prism-dxb
+ * double count below), inside a roundName ("SCF #" | "34 ": nebulavrf-uve
+ * parsed as an award with no round, 2026-09-06), anywhere. Reading the raw
+ * markup means a card that straddles a cut parses with a truncated field.
+ * Join the chunks (each is one JSON string literal) and read the stream the
+ * browser would; a page without chunks, or one whose chunk does not parse,
+ * is read as it came. */
+export function rebuildFlight(html: string): string {
+	const chunks = [
+		...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
+	];
+	if (chunks.length === 0) return html;
+	let out = "";
+	for (const m of chunks) {
+		try {
+			out += JSON.parse(m[1]) as string;
+		} catch {
+			return html;
+		}
+	}
+	return out;
+}
+
 export function parseRoundVerdicts(html: string): {
 	awarded: Set<string>;
 	notAwarded: Set<string>;
@@ -131,7 +155,7 @@ export function parseRoundVerdicts(html: string): {
 		awardType: string | null;
 	}>;
 } {
-	const txt = html.replace(/\\"/g, '"');
+	const txt = rebuildFlight(html).replace(/\\"/g, '"');
 	const awardByRound = new Map<
 		number,
 		{ round: number; budgetUSD: number | null; awardType: string | null }
@@ -168,7 +192,12 @@ export function parseRoundVerdicts(html: string): {
 	// the double embeds — same discipline as verdict cards).
 	const neutralByKey = new Map<
 		string,
-		{ id: string; roundNum: number | null; budgetUSD: number | null; awardType: string | null }
+		{
+			id: string;
+			roundNum: number | null;
+			budgetUSD: number | null;
+			awardType: string | null;
+		}
 	>();
 	for (const m of txt.matchAll(re)) {
 		const status = m[2];
