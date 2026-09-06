@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-09-06T09:52:07.187Z",
-	"total": 543,
-	"open": 1,
-	"refreshQueue": 1,
+	"generatedAt": "2026-09-06T17:39:09.837Z",
+	"total": 650,
+	"open": 2,
+	"refreshQueue": 107,
 	"blockedUpstream": 16,
 	"blockedBy": {
 		"raven-scorer": 7,
@@ -13,39 +13,39 @@
 	"cleared": 518,
 	"clearedByReprobe": 216,
 	"clearedOnSilence": 302,
-	"closingRate": 0.41,
-	"silenceShare": 0.56,
+	"closingRate": 0.34,
+	"silenceShare": 0.46,
 	"recurrence": {
 		"reopened": 5,
 		"reopenedShareOfClosures": 0.01,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 251,
-				"recurred": 140,
-				"ratePct": 55.8
+				"newFindings": 358,
+				"recurred": 141,
+				"ratePct": 39.4
 			},
 			"lifetime": {
-				"newFindings": 543,
-				"recurred": 140,
-				"ratePct": 25.8
+				"newFindings": 650,
+				"recurred": 141,
+				"ratePct": 21.7
 			}
 		}
 	},
-	"oldestOpenDays": 1,
+	"oldestOpenDays": 2,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
+			"surface": "retrieval",
+			"open": 1,
+			"total": 336
+		},
+		{
 			"surface": "consumer",
 			"open": 1,
 			"total": 36
-		},
-		{
-			"surface": "retrieval",
-			"open": 0,
-			"total": 335
 		},
 		{
 			"surface": "code",
@@ -55,7 +55,7 @@
 		{
 			"surface": "directory",
 			"open": 0,
-			"total": 89
+			"total": 195
 		},
 		{
 			"surface": "scf",

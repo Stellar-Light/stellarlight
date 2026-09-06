@@ -551,6 +551,65 @@ anywhere (orally, zenex, soropg — uncited, under next steps).
 not a status basis. 606 awarded rows, 580 cite their page, disclosed totals
 sum to $61.0M.
 
+### Repo addendum (2026-09-06, 16:00–18:00 UTC)
+
+**The award parser called a partial award nothing (#1406).** `parseRoundVerdicts`
+matched the status exactly, so SCF's `Awarded (50%)` / `Awarded (10%)` — the
+percentage is how much has been DISBURSED, not the verdict — fell into the
+neutral bucket. Measured on the live pages: soropg had no award at all, clob
+was missing SCF #20 ($14,792.10) while serving #29, qstn's #20 came through
+with `submissions=0`, an incoherent state. Five such cards sit across the 46
+numbered round pages, plus the Public Goods rounds the round pages never list.
+
+**A $150,000 award on the wrong row (#1407).** SCF has one Hermes page, and it
+links github.com/zenith-protocols — our `zenex` row (zenex.trade, described on
+our own row as "Zenex, formerly Hermes"; the owner confirmed the rename). The
+name matcher had given it to `hermes`, a different live product (OrbitCDP's
+perp exchange, github.com/orbit-cdp/hermes). Same class as yesterday's
+`pen`/OpenGrants fossil, caught the same way: only the link intersection
+decides. Bound in `SCF_SLUG_OVERRIDES`, the wrong row unlinked in `SCF_FIX`.
+
+**A sentinel served as a round number (#1407, #1409, #1412).** SCF encodes an
+award it does not number as a negative `lastAwardedRound`; six rows served
+`-326`. Fixing it took three passes and both failures were caught by our own
+gates before anyone saw them: clamping the value on the SIGNAL path flipped
+every Public Goods row to `awarded=false` (the dry run caught it), and then
+comparing the clamped stored value against the raw signal made those six rows
+re-plan forever (the idempotence replan caught it, on its first real firing).
+`soropg`'s page was also beyond the listing cap, so no pass had ever visited it
+(#1411). Final execute: 18 rows, read back, idempotence replan 0.
+
+**GitHub-shaped fields hold free text (#1410).** The public intake form took
+`github.orgLogin` as free text, so 33 rows held a submission URL, an
+`owner/repo` pair, another forge's hostname (`gitlab.com`, `bitbucket.org`,
+`docs.google.com`), GitHub's own `orgs` path, or comma-joined junk. Every
+reader rejects those shapes, so the rows were never fanned out to their repos
+and the API served a hostname where a login belongs. One reader now
+(`parseGithubIdentity`, 8 tests) applied at the boundary AND as a DERIVED
+repair pass in curate — not a 33-entry map, so it converges. 35 writes applied
+and read back; 12 rows also recovered the repository their URL named.
+
+**A detector nobody read (#1413, #1415).** The daily link checker has been
+proving URLs broken for months: 108 today, 53 on github.com, 103 cited by
+project rows, 26 of those on Live rows. Its only consumer was the admin
+dashboard, so none of it ever reached the board. Found from the repo side —
+rows storing a GitHub link with no indexed repo — not from the detector. It now
+writes `improvements/audits/link-health-latest.json` and the ledger reads it
+under a new `broken-link` maintenance mode: refresh queue 107, open still 2.
+The first run came through `UNSTAMPED` because the date was in `asOf` and
+`evidenceStamp` reads `generatedAt`; 108 findings were demoted for want of a
+field name.
+
+**Repo coverage, measured correctly.** A first count said 747 of 1,103 rows had
+no repository — it read `project.github.repos`, a curated seed list. The
+authoritative link is `repo.projectSlug`: 527 rows have at least one indexed
+repo, 576 do not, 402 of those Live. Of the non-Draft rows with a stored GitHub
+link and no indexed repo, 41 of the links are dead (now queued) and the rest
+are mostly partners whose repositories are not Stellar code, which the relevance
+gate correctly declines. Discovery over the 586 no-repo Live/Development rows
+confirmed 82 owners by intersection; 70 already stored the right link, and the
+12 that did not were written (#1414).
+
 ## Lessons — 2026-09-06 (one field, one writer)
 
 1. A write count is not a signal. 141 stamps re-written per execute made
@@ -566,6 +625,22 @@ sum to $61.0M.
    re-added for weeks.
 4. Renamed SCF pages keep their hash suffix; a dead stored slug with a live
    same-hash page is a rename, not a new project (choppaddi-vmf, liqvid-hrr).
+
+18. One value, two jobs: SCF's negative round is both the award SIGNAL and a
+    stored field. Clamp only at the write site, and compare like with like —
+    `stored !== clamp(raw)`. Comparing a clamped store against a raw signal is
+    a permanent flip-flop.
+19. Measure with the field that owns the fact. Repo coverage read from the
+    curated seed list said 68% of rows had no repository; the authoritative
+    linkage said 52%. Check which writer owns a field before counting it.
+20. Before building a detector, find out who reads the one that exists. The
+    link checker proved 108 URLs broken every day and queued them nowhere.
+21. A guard that cannot finish gives no verdict, and a cancelled run reads
+    much like a clean one. Curate applied 35 writes and had its idempotence
+    replan killed by an 8-minute job cap.
+22. Free text in a typed field is an input-validation bug, not a data-entry
+    mistake. Normalize at the boundary, then repair with a DERIVED pass that
+    re-normalises to itself — a hand-listed map cannot converge.
 
 ## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
 
