@@ -6,6 +6,8 @@ name: weak-basis liveness
 # its own URL, through the same judgeStamp the packet guard uses.
 # workflow-health: signal-steps: ^Sweep$
 
+permissions: { contents: write }
+
 on:
   schedule:
     - cron: "17 8 * * 4"
