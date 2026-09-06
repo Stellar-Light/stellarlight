@@ -1345,6 +1345,14 @@ const DUPE_MERGES: Array<{
 	{ dupe: "pakana", canonical: "pakananet" }, // pakananet carries the $45.2k SCF award
 	{ dupe: "meria", canonical: "meria-defi" },
 	{ dupe: "coca-wallet", canonical: "coca" },
+	// Owner, 2026-09-06: "orbitcdp was built by zenith but orbit died; hermes
+	// was a product of zenith but renamed to zenex". So this row is not a
+	// second perpetual exchange — it is the same product under its Orbit-era
+	// home (github.com/orbit-cdp/hermes), and the live one is zenex
+	// (zenex.trade, github.com/zenith-protocols). SCF's only Hermes page is
+	// already bound to zenex in SCF_SLUG_OVERRIDES; this folds the row so the
+	// old name stops standing as a separate project.
+	{ dupe: "hermes", canonical: "zenex" },
 	{ dupe: "alfred-pay", canonical: "alfred" },
 	{ dupe: "blue-marble", canonical: "the-blue-marble" },
 	{ dupe: "mica-rent", canonical: "mica" },
