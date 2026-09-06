@@ -111,8 +111,29 @@ const SUPERSESSION_FRESHNESS_SPEC: SourceSpec = {
 	],
 };
 
+/** Proven-broken external URLs (check-links, daily). A dead citation is a
+ *  curation refresh — relink the record or retire it — not a served bug, so it
+ *  files under a maintenance mode and is counted in the refresh queue rather
+ *  than the "ours, still reproducing" backlog. The probe is trinary upstream:
+ *  only PROVEN-broken URLs reach the artifact, so a bot wall never files. */
+const LINK_HEALTH_SPEC: SourceSpec = {
+	source: "link-health",
+	file: "link-health-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "broken",
+			surface: "directory",
+			mode: "broken-link",
+			severity: "medium",
+			probe: (r) => str(r?.url),
+		},
+	],
+};
+
 const SPECS: SourceSpec[] = [
 	SUPERSESSION_FRESHNESS_SPEC,
+	LINK_HEALTH_SPEC,
 	{
 		source: "golden-eval",
 		file: "golden-eval-latest.json",
