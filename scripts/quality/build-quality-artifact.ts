@@ -136,6 +136,10 @@ const CLASS_OF: Record<string, string> = {
 	"note-stale": "cross-surface-consistency",
 	// findings about our EVAL machinery, not the product; §0 says six
 	// classes cover NEARLY everything — this is the honest remainder.
+	// A URL a probe PROVED dead: our record cites something the upstream world
+	// no longer serves — the same disagreement as a stale note, found by the
+	// daily link checker instead of the nightly sweep.
+	"broken-link": "cross-surface-consistency",
 	"battery-coverage-weak": "meta-eval",
 	"consumer-code-shallow": "meta-eval",
 };
