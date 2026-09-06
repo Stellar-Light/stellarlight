@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-06",
+		surfaces: ["api"],
+		version: "spec@1.9.48",
+		type: "fixed",
+		summary:
+			"getQuality: the findings partition now reports every part it claims to sum.",
+		detail:
+			"The response carried open, cleared, verifiedClosed and total with a note saying the parts are disjoint and sum to total — but two members were missing from the payload, so 2 + 518 + 7 did not reach 650. refreshQueue (open rows that are a refresh rather than a defect: a note upstream has moved past, an archived repo with no recorded successor, a URL a probe proved dead) and blockedUpstream (open rows a consumer we do not control decides) are now served alongside the others, and the note and openDefinition state the five-way partition. The artifact behind the page already tracked both; only the public response omitted them.",
+	},
+	{
 		date: "2026-09-05",
 		surfaces: ["api", "mcp"],
 		version: "spec@1.9.47",
