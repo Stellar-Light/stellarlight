@@ -841,7 +841,13 @@ async function main() {
 			currentScf.sourceUrl !==
 				`https://communityfund.stellar.org/project/${scf.slug}` ||
 			currentScf.awarded !== isAwarded ||
-			currentScf.lastAwardedRound !== scf.lastAwardedRound ||
+			// Compare like with like: the stored field is clamped by storedRound,
+			// so testing it against the RAW page signal made every non-numbered
+			// award row differ forever — it wrote null, still saw -326, and
+			// re-planned on the next run. The Idempotence step caught exactly
+			// that: 6 rows (the four Stellar SDKs, opengrants, scaffold-stellar)
+			// still planned after the 2026-09-06 execute.
+			currentScf.lastAwardedRound !== storedRound(scf.lastAwardedRound) ||
 			currentScf.slug !== scf.slug ||
 			(detail?.totalAwarded &&
 				currentScf.totalAwarded !== detail.totalAwarded) ||
