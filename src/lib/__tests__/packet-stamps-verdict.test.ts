@@ -236,3 +236,50 @@ describe("failures that are not verdicts (weak-basis sweep, 2026-09-06)", () => 
 		expect(v.verdict).toBe("HOLDS");
 	});
 });
+
+describe("the dash test measures a stats ROW, not punctuation", () => {
+	const base = { slug: "x", to: "Live", sourceUrl: "https://example.com/", httpStatus: 200 };
+	const pad = "Real product copy that carries the page. ".repeat(12);
+
+	it("holds a live page whose em-dashes are prose punctuation", () => {
+		// hiwomenbiz.com, verbatim shape: a WordPress meta description repeated,
+		// five standalone em-dashes, every one of them punctuation. The lane's
+		// first real run called this contradicted.
+		const fold =
+			"Women Biz es el lugar donde las mujeres latinoamericanas aprenden a invertir, se conectan con su tribu y construyen su poder financiero — desde el bootcamp hasta el club. " +
+			"Pages Admin — Admin on Women Biz. Guias Educativas — Guias Educativas on Women Biz. " +
+			"Recursos — Recursos on Women Biz. Eventos — Eventos on Women Biz. " + pad;
+		expect(judgeStamp({ ...base, html: `<body>${fold}</body>` }).verdict).toBe("HOLDS");
+	});
+
+	it("still contradicts a stats block whose every value is a dash", () => {
+		const fold = `oUSD Minted — Collateral Locked — Borrow APY — Total Supply — TVL — ${pad}`;
+		const v = judgeStamp({ ...base, html: `<body>${fold}</body>` });
+		expect(v.verdict).toBe("CONTRADICTED");
+		expect(v.reason).toMatch(/empty-metric/);
+	});
+});
+
+describe("a pre-launch product may say it is pre-launch", () => {
+	const base = { slug: "x", sourceUrl: "https://example.com/", httpStatus: 200 };
+	const body = (lead: string) =>
+		`<body>${lead} ${"Real product copy carrying the page. ".repeat(12)}</body>`;
+
+	it("holds a Development row whose page advertises a waitlist", () => {
+		const v = judgeStamp({ ...base, to: "Development", html: body("Join the waitlist.") });
+		expect(v.verdict).toBe("HOLDS");
+		expect(v.reason).toMatch(/consistent with Development/);
+	});
+
+	it("holds a Pre-Release row that says coming soon", () => {
+		expect(
+			judgeStamp({ ...base, to: "Pre-Release", html: body("Coming soon.") }).verdict,
+		).toBe("HOLDS");
+	});
+
+	it("still contradicts a Live row that says the same thing", () => {
+		expect(judgeStamp({ ...base, to: "Live", html: body("Join the waitlist.") }).verdict).toBe(
+			"CONTRADICTED",
+		);
+	});
+});
