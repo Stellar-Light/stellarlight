@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-09-06T11:44:58.764Z",
+ "generatedAt": "2026-09-06T18:02:07.469Z",
  "surfaces": [
+  {
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 1,
+   "clearedFindings": 335,
+   "verifiedFindings": 0
+  },
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
    "openFindings": 1,
    "clearedFindings": 19,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 0,
-   "clearedFindings": 335,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 543,
-  "open": 1,
-  "refreshQueue": 1,
+  "total": 650,
+  "open": 2,
+  "refreshQueue": 107,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
@@ -66,7 +66,7 @@
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 0,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
     "cleared": 284,
@@ -207,12 +207,21 @@
     "cleared": 1,
     "verified": 0,
     "surface": "code"
+   },
+   {
+    "mode": "broken-link",
+    "open": 0,
+    "refresh": 106,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "directory"
    }
   ],
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 1
+    "count": 2
    },
    {
     "bucket": "8–30d",
@@ -281,14 +290,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 251,
-     "recurred": 140,
-     "ratePct": 55.8
+     "newFindings": 358,
+     "recurred": 141,
+     "ratePct": 39.4
     },
     "lifetime": {
-     "newFindings": 543,
-     "recurred": 140,
-     "ratePct": 25.8
+     "newFindings": 650,
+     "recurred": 141,
+     "ratePct": 21.7
     }
    },
    "reopened": {
@@ -300,20 +309,26 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 251,
-     "repeats": 251,
+     "newFindings": 358,
+     "repeats": 358,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 543,
-     "repeats": 537,
-     "ratePct": 98.9
+     "newFindings": 650,
+     "repeats": 644,
+     "ratePct": 99.1
     },
     "byClass": [
      {
       "class": "identity",
-      "total": 324,
-      "open": 17,
+      "total": 325,
+      "open": 18,
+      "firstSeen": "2026-07-22"
+     },
+     {
+      "class": "cross-surface-consistency",
+      "total": 130,
+      "open": 107,
       "firstSeen": "2026-07-22"
      },
      {
@@ -332,12 +347,6 @@
       "class": "contract-completeness",
       "total": 29,
       "open": 0,
-      "firstSeen": "2026-07-22"
-     },
-     {
-      "class": "cross-surface-consistency",
-      "total": 24,
-      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9220,19 +9229,19 @@
   ]
  },
  "repos": {
-  "read": 13129,
-  "population": 13129,
+  "read": 13151,
+  "population": 13154,
   "coveragePct": 100,
-  "duplicateRows": 0,
-  "duplicateNote": "no duplicate fullName rows",
+  "duplicateRows": 3,
+  "duplicateNote": "3 row(s) in the repos collection duplicate a fullName already stored, one repo appears up to 20 times. Every count below is over DISTINCT repos; the duplicate rows are storage debt, tracked separately.",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13129,
+  "sampled": 13151,
   "coverage": {
    "curatedIndex": {
-    "repos": 3111,
+    "repos": 3133,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
     "withCodeDepth": 2912,
-    "depthPct": 94
+    "depthPct": 93
    },
    "tail": {
     "repos": 10018,
@@ -9240,12 +9249,38 @@
     "withCodeDepth": 7935
    },
    "knowledgeNotes": {
-    "pool": 408,
+    "pool": 438,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 199,
-    "triaged": 209,
+    "withNotes": 203,
+    "triaged": 210,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
-    "missing": []
+    "missing": [
+     "Alkeops/It-s-not-another-package",
+     "BuilderOSS/nouns-builder",
+     "CollaborativeEconomics/give-credit",
+     "Epta-Node/ai-net",
+     "GRMarkkes/ArtCC",
+     "Glo-Foundation/glo-wallet",
+     "NibrasD/stellar-transaction-visualizer",
+     "Raum-Network/raum-raumfi-v3",
+     "authentication-labs/0xauth-stellar",
+     "constellation-protocol/constellation-protocol",
+     "daccred/attestprotocol",
+     "damzylance/bigiftyxsoroban",
+     "freelii/freelii-core",
+     "hyperledger-solang/solang",
+     "jamiels/ramm.ai",
+     "lumenlater/lumen-later",
+     "paltalabs/available-xlm",
+     "paltalabs/soroban-toolkit",
+     "paltalabs/stellar-react",
+     "paulfears/StellarSnap",
+     "payrouteshq/stellartools",
+     "siborg-ads/stellar-client",
+     "skyhitz/skyhitz",
+     "stellar-chef/stellar-chef",
+     "yripper/stellar-tools"
+    ]
    },
    "mainnetJoin": {
     "pool": 5661,
@@ -9254,35 +9289,35 @@
    }
   },
   "curatedShape": {
-   "repos": 3111,
+   "repos": 3133,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 811
+     "count": 801
     },
     {
      "bucket": "10–19",
-     "count": 636
+     "count": 610
     },
     {
      "bucket": "20–29",
-     "count": 598
+     "count": 601
     },
     {
      "bucket": "30–39",
-     "count": 467
+     "count": 477
     },
     {
      "bucket": "40–49",
-     "count": 191
+     "count": 206
     },
     {
      "bucket": "50–59",
-     "count": 200
+     "count": 217
     },
     {
      "bucket": "60–69",
-     "count": 171
+     "count": 184
     },
     {
      "bucket": "70–79",
@@ -9300,15 +9335,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1259
+     "count": 1266
     },
     {
      "label": "slowing",
-     "count": 934
+     "count": 936
     },
     {
      "label": "active",
-     "count": 793
+     "count": 806
     },
     {
      "label": "unknown",
@@ -9322,23 +9357,23 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1105
+     "count": 1110
     },
     {
      "label": "unknown",
-     "count": 450
+     "count": 456
     },
     {
      "label": "Rust",
-     "count": 448
+     "count": 452
     },
     {
      "label": "JavaScript",
-     "count": 350
+     "count": 353
     },
     {
      "label": "Go",
-     "count": 109
+     "count": 110
     },
     {
      "label": "Python",
@@ -9346,7 +9381,7 @@
     },
     {
      "label": "Solidity",
-     "count": 98
+     "count": 99
     },
     {
      "label": "HTML",
@@ -9364,7 +9399,7 @@
    "languageOther": 49
   },
   "withCodeDepth": 10847,
-  "withNotes": 544,
+  "withNotes": 541,
   "withMainnet": 108,
   "top": [
    {
@@ -9784,6 +9819,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "lightsail-network/java-stellar-sdk",
+    "repoScore": 73,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Java",
+    "projectSlug": "java-stellar-sdk",
+    "notes": 2,
+    "codeDepth": 100,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "foundermafstat/nft-dnd-stellar",
     "repoScore": 72,
     "tier": "community",
@@ -9797,19 +9845,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "NoetherDEX/noether",
-    "repoScore": 71,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "noether",
-    "notes": 1,
-    "codeDepth": 87,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "hyperledger-solang/solang",
     "repoScore": 70,
     "tier": "community",
@@ -9817,7 +9852,7 @@
     "activity": "active",
     "language": "Rust",
     "projectSlug": "solang",
-    "notes": 3,
+    "notes": 0,
     "codeDepth": 57,
     "deployable": true,
     "mainnetJoined": false
@@ -10421,8 +10456,14 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "199 of 408 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "203 of 438 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
+  },
+  {
+   "area": "known-item recall",
+   "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
+   "measurement": "1 open recall-miss findings",
+   "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
  "flow": {
@@ -10432,13 +10473,19 @@
     "id": "s:engine-a-recall",
     "label": "engine-a-recall",
     "column": 0,
-    "value": 284
+    "value": 285
    },
    {
     "id": "s:engine-d-demand",
     "label": "engine-d-demand",
     "column": 0,
     "value": 108
+   },
+   {
+    "id": "s:link-health",
+    "label": "link-health",
+    "column": 0,
+    "value": 106
    },
    {
     "id": "s:raven-routing",
@@ -10510,7 +10557,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 335
+    "value": 336
    },
    {
     "id": "f:directory",
@@ -10558,7 +10605,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 18
+    "value": 125
    },
    {
     "id": "o:verified",
@@ -10569,170 +10616,191 @@
   ],
   "links": [
    {
-    "source": 9,
-    "target": 13,
+    "source": 10,
+    "target": 14,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
     "value": 4
    },
    {
-    "source": 13,
-    "target": 20,
+    "source": 14,
+    "target": 21,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
     "value": 335
    },
    {
     "source": 1,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
     "value": 47
    },
    {
     "source": 0,
-    "target": 13,
+    "target": 14,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
-    "value": 284
+    "value": 285
    },
    {
-    "source": 6,
-    "target": 18,
+    "source": 7,
+    "target": 19,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 16
    },
    {
-    "source": 18,
-    "target": 20,
+    "source": 19,
+    "target": 21,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 16
    },
    {
-    "source": 7,
-    "target": 15,
+    "source": 8,
+    "target": 16,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 15,
-    "target": 22,
+    "source": 16,
+    "target": 23,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 15,
-    "target": 20,
+    "source": 16,
+    "target": 21,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 29
    },
    {
-    "source": 2,
-    "target": 16,
+    "source": 3,
+    "target": 17,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 36
    },
    {
-    "source": 16,
-    "target": 20,
+    "source": 17,
+    "target": 21,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 16,
-    "target": 21,
+    "source": 17,
+    "target": 22,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 17
    },
    {
-    "source": 12,
-    "target": 19,
+    "source": 13,
+    "target": 20,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 19,
-    "target": 20,
+    "source": 20,
+    "target": 21,
     "sourceId": "f:code",
     "targetId": "o:cleared",
     "value": 12
    },
    {
     "source": 1,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
     "value": 61
    },
    {
-    "source": 14,
-    "target": 20,
+    "source": 15,
+    "target": 21,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
     "value": 89
    },
    {
-    "source": 4,
-    "target": 15,
+    "source": 5,
+    "target": 16,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 25
    },
    {
-    "source": 5,
-    "target": 17,
+    "source": 6,
+    "target": 18,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 17,
-    "target": 20,
+    "source": 18,
+    "target": 21,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 18
    },
    {
-    "source": 10,
-    "target": 19,
+    "source": 11,
+    "target": 20,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
    },
    {
-    "source": 3,
-    "target": 14,
+    "source": 4,
+    "target": 15,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 28
    },
    {
-    "source": 11,
-    "target": 15,
+    "source": 12,
+    "target": 16,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
     "value": 3
    },
    {
-    "source": 8,
-    "target": 19,
+    "source": 9,
+    "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
     "value": 8
    },
    {
-    "source": 19,
-    "target": 21,
+    "source": 20,
+    "target": 22,
     "sourceId": "f:code",
+    "targetId": "o:open",
+    "value": 1
+   },
+   {
+    "source": 2,
+    "target": 15,
+    "sourceId": "s:link-health",
+    "targetId": "f:directory",
+    "value": 106
+   },
+   {
+    "source": 15,
+    "target": 22,
+    "sourceId": "f:directory",
+    "targetId": "o:open",
+    "value": 106
+   },
+   {
+    "source": 14,
+    "target": 22,
+    "sourceId": "f:retrieval",
     "targetId": "o:open",
     "value": 1
    }
@@ -10771,13 +10839,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12585,
-    "of": 13129,
+    "missing": 12610,
+    "of": 13151,
     "share": 95.9,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 117,
+    "examplePoolSize": 128,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -10835,28 +10903,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2282,
-    "of": 13129,
-    "share": 17.4,
+    "missing": 2304,
+    "of": 13151,
+    "share": 17.5,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2282,
+    "examplePoolSize": 2304,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "leocagli/pontepay",
-     "leocagli/tralalero-contracts",
-     "KingFRANKHOOD/soroban-sql-sync",
-     "KB2410/ai-wallet-manager",
-     "KaruG1999/ocean_request",
-     "karagozemin/frontend-app",
-     "kalepail/stellar-mpp-demo",
-     "kalepail/quarterly-ascension",
-     "justmert/sora",
-     "JulioMh/dogstar-bridge-stellar",
-     "JOHED-Velca/CycleBuddy-stellar",
-     "JFWooten4/TAD3-core"
+     "GetBlock-io/.github",
+     "GetBlock-io/mcp-server",
+     "GetBlock-io/rpc-endpoint-benchmark",
+     "GetBlock-io/guides",
+     "GetBlock-io/getblock-docs",
+     "TrustLine-id/stellar-validation-engine",
+     "TrustLine-id/stellar-demo-app",
+     "TrustLine-id/stellar-sdk",
+     "ondoprotocol/ondo-v1",
+     "ondoprotocol/usdy",
+     "ondoprotocol/usdy-aptos",
+     "ondoprotocol/usdy-noble"
     ]
    },
    {
