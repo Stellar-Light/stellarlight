@@ -120,21 +120,24 @@ describe("parseGithubRepoRef", () => {
 		expect(parseGithubRepoRef("dev-api-new.skopadev.com", "api")).toBeNull();
 	});
 
-	it("keeps the login half of a display name rather than inventing one", () => {
-		// "Omkar Nanavare" sat beside the correct "OmcarSN" on the same row; the
-		// trimmed result is deduped away by the caller, never merged.
-		// "Omkar Nanavare" sat beside the correct "OmcarSN" on the same row.
-		expect(parseGithubRepoRef("Omkar Nanavare", "TrustChain")).toEqual({
-			owner: "Omkar",
-			name: "TrustChain",
-		});
-		expect(parseGithubRepoRef("anclap, https:", "github.com")).toEqual({
-			owner: "anclap",
-			name: "github.com",
-		});
-		// The rule that keeps this honest: a dotted host is never trimmed into
-		// a plausible login.
+	it("never infers an owner from a value that is not a login", () => {
+		// "Omkar Nanavare" is a person's display name; the same row carries the
+		// real login OmcarSN, which survives. "anclap, https:" is two values in
+		// one field. Trimming either to its first word invents an account.
+		expect(parseGithubRepoRef("Omkar Nanavare", "TrustChain")).toBeNull();
+		expect(parseGithubRepoRef("anclap, https:", "github.com")).toBeNull();
 		expect(parseGithubRepoRef("gitlab.com", "anything")).toBeNull();
+	});
+
+	it("drops a hostname sitting in the repo-name column", () => {
+		expect(parseGithubRepoRef("anclap", "github.com")).toBeNull();
+		// a real name that merely contains a dot is fine
+		expect(parseGithubRepoRef("horizontalsystems", "stellarkit.swift")).toEqual(
+			{
+				owner: "horizontalsystems",
+				name: "stellarkit.swift",
+			},
+		);
 	});
 
 	it("rejects non-strings and empty parts", () => {

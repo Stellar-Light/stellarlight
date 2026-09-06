@@ -111,16 +111,30 @@ export function parseGithubRepoRef(
 	rawName: unknown,
 ): { owner: string; name: string } | null {
 	if (typeof rawOwner !== "string" || typeof rawName !== "string") return null;
-	// Cut ONLY at a separator that cannot occur inside the identifier —
-	// whitespace, comma or semicolon. Taking the leading legal run instead
-	// would turn the hostname "gitlab.com" into the plausible-looking owner
-	// "gitlab", inventing a GitHub account that has nothing to do with the
-	// project. A dot in an owner means a host, and a host is not a login.
-	const cut = (v: string) => v.trim().split(/[\s,;]+/)[0] ?? "";
-	const owner = cut(rawOwner);
-	const name = cut(rawName).replace(/\.git$/i, "");
+	// The OWNER is never repaired, only trimmed of surrounding whitespace. Any
+	// remaining separator means the value is not a login and we cannot infer
+	// which part was meant: "Omkar Nanavare" is a person's display name (the
+	// same row carries the real login "OmcarSN") and "anclap, https:" is two
+	// values in one field. A first version took the leading run and produced
+	// the owners "Omkar" and "anclap" — plausible-looking GitHub accounts
+	// invented out of nothing, which is the failure this function exists to
+	// prevent. Same reason a hostname stays null: "gitlab.com" must not become
+	// the owner "gitlab".
+	const owner = rawOwner.trim();
+	// The NAME may be trimmed, because there the junk is always a second URL
+	// appended after a separator and the head is the complete original name
+	// ("chatspy; https:", "django-polaris-bpv  https:").
+	const name = (rawName.trim().split(/[\s,;]+/)[0] ?? "").replace(
+		/\.git$/i,
+		"",
+	);
 	if (!LOGIN.test(owner) || RESERVED.has(owner.toLowerCase())) return null;
 	if (!name || name === "." || name === ".." || !/^[A-Za-z0-9._-]+$/.test(name))
+		return null;
+	// A bare hostname is not a repository name. It reaches this field when a
+	// URL was split across the owner and name columns ("anclap, https:" +
+	// "github.com").
+	if (/^[a-z0-9-]+\.(?:com|org|io|net|xyz|dev|app|co|fi|ai)$/i.test(name))
 		return null;
 	return { owner, name };
 }
