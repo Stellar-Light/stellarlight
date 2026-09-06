@@ -310,6 +310,10 @@ ownership stamped on other people's contracts, builders ranked by a
 featured flag, an audit count that was a subset, a chart drawing gaps as
 zero. And a cross-vendor audit that found the first sls-023 close-out
 overclaimed and 34 one-holder assets served as live — both corrected.
+On 09-06: SCF awards beyond the listing cap (#1397: 112 rows, 147 award
+records, executed and read back), a fossil join cleared (#1399), and the
+enrich↔curate write fights ended behind an idempotence gate (#1400, #1401)
+— the SCF addendum below.
 
 **What's blocked.**
 - Raven router: the intended op is excluded when a question contains
@@ -388,6 +392,13 @@ overclaimed and 34 one-holder assets served as live — both corrected.
    reports as eligible is promoted or declined with the reason recorded
    here, and the append rule holds — a PR that corrects a lane's output
    logs it in improvements/lanes/interventions.json in that same PR.
+6. SCF residue (2026-09-06): three awarded rows with no SCF page anywhere
+   (orally $48k, zenex, soropg — `awarded: true` predates provenance; owner
+   call or a receipt each); anclap-r4u carries three awards ($325,762 ·
+   $146,400 · $100,000) and we have no Anclap row — `pen` is its asset row
+   and a company award does not belong there; nebulavrf's award card parses
+   with no round number (parser edge, 1 row). Also: give enrich-scf the same
+   post-execute idempotence step curate has.
 
 ### Night-shift addendum (2026-09-05, 04:30–06:30 UTC)
 
@@ -485,6 +496,71 @@ service, hot-protocol, k3-labs: docs-only); 21 status moves (9 Development, 5 Pr
 rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
 the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
 our spec changes — batch routing-text edits).
+
+### SCF addendum (2026-09-06, 05:00–06:30 UTC)
+
+**Awards beyond the listing cap (#1397).** `/backend/projects` serves the same
+500 rows whatever it is asked. Discovery ran once, offline — the official round
+pages (46 rounds, 3,195 submissions keyed by project record id) plus the Wayback
+CDX index for the awards SCF does not number — and produced a curated
+`SCF_PAGES_BEYOND_CAP` map: 112 rows, 147 award records, $7.77M disclosed.
+Every page parsed with the shared verdict parser; every match confirmed by a
+site / GitHub org / X handle the page shares with our row, or a coined name
+where a legacy page carries no links. Executed from main after a dry run: 125
+writes (112 beyond-cap + 13 ordinary listing drifts), read back (Mystic r29
+$47,000; Blocknify r6 + r7; xycloans r13 + Liquidity '24 Q1; the Soneso SDK
+Public Goods awards).
+
+**A fossil join (#1399).** `pen` (Anclap's asset row) carried OpenGrants's SCF
+record — the pre-08-12 substring matcher ("opengrants" ⊃ "pen"). `SCF_FIX`
+gained `unlink`; the page now joins our `opengrants` row (opengrants.net and
+github.com/metagov/daostar on both sides).
+
+**One field, one writer (#1400, #1401).** Reading the curate lane right after
+an execute: a dry run still planned 11 SCF writes and the enrich dry run 4 —
+the same rows, opposite directions. Two lanes and three curate maps wrote one
+field: exact-sync vs promote-only on `awardedRounds`; rows with TWO SCF pages
+where the last page written won and the other page's award ($60k–$138k) was
+dropped every other run; a human-verified total ($291k paid, aquarius)
+overwritten by the page's $391k; badge-inherited rounds no page carries. Nobody
+saw it because 141 unchanged status stamps were re-written on every execute —
+"143 applied" carried no information. Fixes: enrich folds pages mapped to one
+row (union of awards, sum of the pages' own totals, the project-named page as
+the citation, a WARN on name-only pairs); human-verified blocks are
+additive-only for the machine lane; curate stamps and aliases skip when in
+sync; linkage entries the pages contradict corrected (policywright,
+account-demolisher, coala-pay, fastbuka); tucambio's dead slug replaced by its
+live page. `curate-projects.yml` re-runs the dry run after every execute and
+fails if anything is still planned — first run: 0. Wave 2 re-keys a page the
+matcher joined to a lineage shadow onto its canonical row (liqvidxyz) and joins
+trustswap, fastbuka (Choppaddi is its page retitled, same hash) and
+scaffold-stellar.
+
+**The audit that catches this class from outside:** awarded rows whose
+`awardedRounds` has a round absent from `roundAwards` — 8 before, 1 after
+(nebulavrf, a card that parses with no round number). Awarded rows with no
+round award at all: 11 → 6, of which 3 are Draft shadows and 3 have no SCF page
+anywhere (orally, zenex, soropg — uncited, under next steps).
+
+**Board.** Weak 504 of 984 (51.2%) — unchanged: an SCF award is provenance,
+not a status basis. 606 awarded rows, 580 cite their page, disclosed totals
+sum to $61.0M.
+
+## Lessons — 2026-09-06 (one field, one writer)
+
+1. A write count is not a signal. 141 stamps re-written per execute made
+   "143 applied" meaningless and hid rows that flipped every run. The check
+   every writing lane should carry: run the dry run again after the execute;
+   anything still planned is a fight or a writer that does not read back
+   (curate has it; enrich-scf next).
+2. Before adding a map entry, ask which other writer owns the field. `scf.*`
+   now: enrich exact for official-record rows, `SCF_FIX` for human-verified
+   rows, linkage only promotes what a page shows.
+3. A positive award claim needs a page. "Never accuse on silence" is about
+   deaths; three linkage rounds (#42, #29/#41, #31) had no page and were
+   re-added for weeks.
+4. Renamed SCF pages keep their hash suffix; a dead stored slug with a live
+   same-hash page is a rename, not a new project (choppaddi-vmf, liqvid-hrr).
 
 ## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
 
