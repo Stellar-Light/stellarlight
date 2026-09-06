@@ -47,8 +47,22 @@ export const STATUS_FIX: Record<
 		asOf?: string;
 		sourceUrl?: string;
 		basis?: StatusBasis;
+		/** A deliberate retraction of a wrong strong stamp: lets a weak basis
+		 *  overwrite a strong one when the status is unchanged (the precedence
+		 *  rule otherwise keeps the stored strong provenance). */
+		withdraw?: boolean;
 	}
 > = {
+	// ── Deep verification 2026-09-06 downgrades, owner-approved.
+	mystic: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl:
+			"https://github.com/mystic-finance/Stellar-RFQ/blob/main/docs/MILESTONE_1.md",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: Stellar product is a testnet MVP \u2014 the repo's SCF Build tranche form says 'Pre-Launch #1 \u2014 MVP', 'Done on testnet: 20+ Order fills'; deployments/testnet.json deployedAt 2026-08-27, testnet contract CDB75DJB\u2026 has 40 events; docs/Circle directory show no Stellar. The company's live vaults ($22.03M) are Morpho on Flare, a different product. Row scf says no award but the repo is an SCF Build tranche \u2014 enrich-scf gap. Receipt improvements/receipts/mystic-2026-09-06.json (markers: Pre-Launch, testnet).",
+	},
 	// ── Deep verification 2026-09-06: rows the packet tiers could not decide, re-verified
 	// by two agents under the product-state rule and hand-checked by the coordinator.
 	getblock: {
@@ -502,15 +516,13 @@ export const STATUS_FIX: Record<
 		note: "Verification packet 2026-09-05, owner-approved: Audit contest platform, page announces closing (high confidence).",
 	},
 	fairblock: {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 40 chars rendered — not substantive product content.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
-		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 40 chars rendered — not substantive product content. Status unchanged; owner verdict pending.",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: SCF #40 Build $150K 'Private & Compliant Payments On Stellar' (own submission: confidential stablecoins, primary focus on Stellar) observed today; only shipped artifact Fairblock/stabletrust-sdk (pushed 2026-09-03) is an ethers.js SDK with EVM testnet addresses; docs and org have no Stellar/Soroban code; landing page renders marketing only, no app or metrics.",
 	},
 	giveth: {
 		from: "Live",
@@ -600,18 +612,18 @@ export const STATUS_FIX: Record<
 	spydra: {
 		from: "Live",
 		to: "Live",
-		basis: "human-verified",
-		asOf: "2026-09-05",
-		sourceUrl: "https://www.spydra.app/",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Asset Tokenization Platform | Spydra"; repo spydra-tech/presidio pushed 2026-08-25 (high confidence).',
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		withdraw: true,
+		note: 'Owner-approved 2026-09-06 ("apply the downgrades") from the deep verification (#1384/#1385): Deep verify 2026-09-06: human-verified stamp WITHDRAWN \u2014 the 09-05 stamp cited a Microsoft Presidio fork as the repo; console is an Auth0 login (api/health OK); docs have no Stellar/Soroban page (public chain = Polygon Amoy testnet); linked repo erc3643 404; SCF Stellar award 2025-03-11 with no visible deliverable. Status unchanged; cannot tell from the web.',
 	},
 	"the-give-hub": {
 		from: "Live",
-		to: "Live",
+		to: "Development",
 		basis: "human-verified",
-		asOf: "2026-09-05",
-		sourceUrl: "https://thegivehub.com/en/index.html",
-		note: 'Verification packet 2026-09-05, owner-approved: site 200 "The Give Hub - Blockchain Charity Simplified"; repo thegivehub/www pushed 2026-07-27 (high confidence).',
+		asOf: "2026-09-06",
+		sourceUrl: "https://app.thegivehub.com/api.php/campaigns",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: the app's own API returns [] for campaigns, active campaigns, the featured campaign id and donations; app shell 'Unable to Load Content'; documented api.thegivehub.com has no DNS; app repo thegivehub/app pushed 2026-06-03 (the packet's www repo is the marketing site). Empty metrics veto Live; no parked/retired page (high). Receipt improvements/receipts/the-give-hub-2026-09-06.json.",
 	},
 	"token-tails": {
 		from: "Live",
@@ -638,26 +650,20 @@ export const STATUS_FIX: Record<
 		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Usher Labs - Trace, Prove, and Mobilise Capital"; repo usherlabs/cex-broker pushed 2026-09-05 (high confidence).',
 	},
 	"vanna-finance": {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the linked repo is a 404; an org-newest repo was substituted.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
-		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the linked repo is a 404; an org-newest repo was substituted. Status unchanged; owner verdict pending.",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.vanna.finance/developers/deployed-contracts.md",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: docs state 'All contracts are deployed on Stellar Testnet. Mainnet addresses will be published at launch.'; Launch App \u2192 test.stellar.vanna.finance (testnet AMM API); app.vanna.finance has no DNS; linked repo protocol_v1_soroban 404; org backend Vercel 402 disabled (high). Receipt improvements/receipts/vanna-finance-2026-09-06.json.",
 	},
 	wagelink: {
-		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the packet itself recorded 8 chars rendered, and its second signal (Zebec-protocol/canton-dev-fund) is another row's repo.
-		// human-verified needs the product's own state; status stays Live on the
-		// page that answered. No sourceUrl here on purpose: the row keeps the
-		// packet's page URL and the pre-launch scan does not re-run.
 		from: "Live",
-		to: "Live",
-		basis: "site-liveness",
-		asOf: "2026-09-05",
-		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the packet itself recorded 8 chars rendered, and its second signal (Zebec-protocol/canton-dev-fund) is another row's repo. Status unchanged; owner verdict pending.",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6461461372&country=us",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: wagelink.io's own bundle links App Store id 6461461372 and the page's setup step 1 is 'Download the WageLink App from the Apple App Store'; that listing 404s and the iTunes lookup returns resultCount 0 in 10 storefronts; no Android app, no API host, no app subdomain, no WageLink repo; Zebec site/docs do not mention it. Receipt improvements/receipts/wagelink-2026-09-06.json. Medium: marketing page still 200. Receipt improvements/receipts/wagelink-2026-09-06.json.",
 	},
 	// ── Owner approval 2026-09-02 ("all 27") of verification packet
 	// improvements/quality/verification-packets-2026-09-02.md: app-only weak

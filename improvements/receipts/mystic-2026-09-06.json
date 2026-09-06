@@ -1,0 +1,30 @@
+{
+ "slug": "mystic",
+ "url": "https://raw.githubusercontent.com/mystic-finance/Stellar-RFQ/main/docs/MILESTONE_1.md",
+ "finalUrl": "https://raw.githubusercontent.com/mystic-finance/Stellar-RFQ/main/docs/MILESTONE_1.md",
+ "fetchedAt": "2026-09-06T02:34:02.589Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 02:34:02 GMT",
+  "etag": "W/\"075d29bf47c262ad54bdac41edc6fc9077a68785cd124e434c6637cce39cd929\"",
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": "87806ba500af545d2f65b7c14b50a41ab371a0584d4590e55cdd3e5ad784b1f7",
+ "bodyTextChars": 3592,
+ "markers": [
+  {
+   "marker": "Pre-Launch",
+   "found": true,
+   "where": "text",
+   "excerpt": "SCF Build — Tranche Completion Form ## Are you ready to submit your next tranche of deliverables? Yes. ## Project Stage Pre-Launch #1 — MVP. ## Telegram Username @Kelmat ## Tranche Deliverables **1. RFQ Settlement Smart Contracts**: Holds the terms of a trade and executes it. Both sides sign off-cha"
+  },
+  {
+   "marker": "testnet",
+   "found": true,
+   "where": "text",
+   "excerpt": "utch listings, partial fills, delegated signing keys, batch cancellation, SEP-53 signatures and SAC allowances. Done on testnet: 20+ Order fills. **2. RFQ Router**: Settles the chosen trade in a single transaction, across one or more liquidity sources. The seller sets a minimum output; if the trade "
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
