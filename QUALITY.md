@@ -476,8 +476,12 @@ re-verified the 17 undecided rows under the product-state rule (drafts
 (#1386, read back 7/7). The downgrades were owner-approved and applied
 (#1388, read back 6/6): mystic, fairblock, vanna-finance, the-give-hub → Development;
 wagelink → Inactive (receipted); spydra's stamp withdrawn (STATUS_FIX gained `withdraw:
-true` for deliberate retractions). Still open: token-tails (Live on low evidence) and three
-cannot-tell rows (plutope, kotani-pay, tala) — no lane can decide them (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+true` for deliberate retractions). Next 100 weak rows packeted by three agents (#1392/#1394/#1395): 29 Live
+rows stamped after the coordinator re-probed each with its own instrument (#1396, read
+back 29/29); 5 held (cartwey, fastbuka: the shipped app names no Stellar; horizon-as-a-
+service, hot-protocol, k3-labs: docs-only); 21 status moves (9 Development, 5 Pre-Release,
+7 Inactive, receipted where dead) await the owner; 45 cannot-tell. Also open: token-tails
+(Live on low evidence) and plutope, kotani-pay, tala (cannot-tell) (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
 rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
 the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
 our spec changes — batch routing-text edits).
