@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T01:15:32.744Z",
+ "generatedAt": "2026-09-06T02:03:23.059Z",
  "surfaces": [
   {
    "surface": "contract",
@@ -3328,10 +3328,8 @@
    {
     "slug": "tellus-cooperative",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7709,10 +7707,8 @@
    {
     "slug": "litemint",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8392,26 +8388,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 220,
+   "human-verified": 222,
    "onchain-activity": 48,
    "product-integration": 57,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 543,
+   "weakLiveRows": 541,
    "onchainEligible": 14,
-   "appOnly": 529,
+   "appOnly": 527,
    "deploymentStrongStatusWeak": 3,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 444
+    "count": 442
    },
    {
     "basis": "human-verified",
-    "count": 220
+    "count": 222
    },
    {
     "basis": "repo-activity",
@@ -8439,7 +8435,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 553,
+  "weakestTotal": 551,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9277,7 +9273,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 543
+    "count": 541
    },
    {
     "field": "dated",
@@ -10541,7 +10537,7 @@
   {
    "area": "project status",
    "limit": "54% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "535 of 984 rows (census)",
+   "measurement": "533 of 984 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10949,10 +10945,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 543,
+    "missing": 541,
     "of": 984,
-    "share": 55.2,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 529 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 55,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 14 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 527 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 5,
