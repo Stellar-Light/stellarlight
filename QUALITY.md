@@ -470,10 +470,13 @@ medium 8 of 10 (#1367; litemint, tellus-cooperative held) plus its 5 Inactive re
 guard (#1368, #1372, #1374: 67 hold, 0 contradicted, 8 client-rendered shells it cannot
 read without a browser). 2. DONE 2026-09-06: the medium tier's Development re-grades — neovestor applied
 (waitlist product, receipted), Stellar Passport overridden by the owner and stamped Live
-(#1380). litemint and tellus-cooperative stamped Live on the owner's verdict (#1382). Owner
-verdicts still open: the 4 remaining held rows (getblock, kotani-pay, plutope, mystic), the
-8 withdrawn high-tier rows and the flagged rows — two agents are re-verifying all 17 under
-the product-state rule (drafts 2026-09-06-deep-verify-a/b) (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+(#1380). litemint and tellus-cooperative stamped Live on the owner's verdict (#1382). Two agents
+re-verified the 17 undecided rows under the product-state rule (drafts
+2026-09-06-deep-verify-a/b, #1384/#1385): 7 earned Live on product state and are stamped
+(#1386, read back 7/7). Owner verdicts still open: five downgrades the rows' own documents
+support (mystic, fairblock, vanna-finance, the-give-hub → Development; wagelink → Inactive,
+App Store app gone, receipted), the spydra stamp withdrawal (its cited repo is a Presidio
+fork), token-tails (low), and three cannot-tell (plutope, kotani-pay, tala) (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
 rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
 the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
 our spec changes — batch routing-text edits).
