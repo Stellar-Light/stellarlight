@@ -63,10 +63,8 @@
  *
  * LOCAL RUN ONLY — token from env only, never hardcoded/logged/written.
  */
-import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isSyntheticQuery } from "../src/lib/improvement-ledger";
