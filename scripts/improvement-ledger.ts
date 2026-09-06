@@ -96,6 +96,27 @@ const opField = (r: Row, key: string): string | undefined => {
 // Supersession freshness (P5): an archived curated-pool repo with no entry in
 // REPO_SUPERSESSIONS. The weekly check reads the public repos API, so a miss
 // is a curation refresh queued for a human/agent read of the archive banner.
+/** Weak-basis liveness (check-weak-basis-liveness, weekly). A Live row on a
+ *  weak basis whose product URL now contradicts the claim is OUR error — the
+ *  directory asserts something the product itself denies — so it files as a
+ *  real defect, not a maintenance refresh. Rows the probe could not read never
+ *  reach the artifact's contradicted list. */
+const WEAK_BASIS_LIVENESS_SPEC: SourceSpec = {
+	source: "weak-basis-liveness",
+	file: "weak-basis-liveness-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "directory",
+			mode: "status-contradicted",
+			severity: "medium",
+			keep: (r) => str(r?.verdict) === "CONTRADICTED",
+			probe: (r) => str(r?.slug),
+		},
+	],
+};
+
 const SUPERSESSION_FRESHNESS_SPEC: SourceSpec = {
 	source: "supersession-freshness",
 	file: "supersession-freshness-latest.json",
@@ -132,6 +153,7 @@ const LINK_HEALTH_SPEC: SourceSpec = {
 };
 
 const SPECS: SourceSpec[] = [
+	WEAK_BASIS_LIVENESS_SPEC,
 	SUPERSESSION_FRESHNESS_SPEC,
 	LINK_HEALTH_SPEC,
 	{

@@ -183,3 +183,56 @@ describe("judgeStamp", () => {
 		);
 	});
 });
+
+describe("failures that are not verdicts (weak-basis sweep, 2026-09-06)", () => {
+	const base = { slug: "x", sourceUrl: "https://example.com/", html: "" };
+
+	it("a 5xx is the server failing, not the product ending", () => {
+		// Cost a false death on command-robotics' Heroku dyno.
+		for (const status of [500, 502, 503, 504]) {
+			const v = judgeStamp({ ...base, to: "Live", httpStatus: status });
+			expect(v.verdict).toBe("COULD-NOT-CHECK");
+			expect(v.reason).toMatch(/server error/);
+		}
+	});
+
+	it("does not read a 5xx as confirmation of an Inactive row either", () => {
+		expect(judgeStamp({ ...base, to: "Inactive", httpStatus: 503 }).verdict).toBe(
+			"COULD-NOT-CHECK",
+		);
+	});
+
+	it("names a domain that no longer resolves, and still refuses to flip it", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			httpStatus: null,
+			error: "getaddrinfo ENOTFOUND stellarpay.io",
+		});
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+		expect(v.reason).toMatch(/does not resolve/);
+	});
+
+	it("keeps a transport failure separate from a dead domain", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			httpStatus: null,
+			error: "The operation timed out",
+		});
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+		expect(v.reason).not.toMatch(/does not resolve/);
+	});
+
+	it("judges the page body, never the page title", () => {
+		// zilt ships the unedited Next.js title over a live product; retiring it
+		// on the title alone would have been wrong.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			httpStatus: 200,
+			html: `<title>Create Next App</title><body>${"Buy and sell USDC with mobile money on Stellar. ".repeat(20)}</body>`,
+		});
+		expect(v.verdict).toBe("HOLDS");
+	});
+});

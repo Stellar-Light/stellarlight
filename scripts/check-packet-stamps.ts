@@ -258,8 +258,21 @@ export function judgeStamp(p: {
 	// Blocked or unreachable. Its own state in BOTH directions: a 403 is the
 	// host refusing us, not the product dying, and a dead-looking silence is
 	// not evidence a retired site is still retired either.
-	if (p.error || p.httpStatus === null)
-		return { verdict: "COULD-NOT-CHECK", reason: p.error ?? "no response" };
+	if (p.error || p.httpStatus === null) {
+		// A domain that no longer resolves is a real death signal; a TLS or
+		// timeout failure is no verdict at all. Both arrive here as an
+		// exception, so the reason has to say which — the sweep that could not
+		// tell them apart reported both as "unreachable".
+		const dns =
+			p.error &&
+			/ENOTFOUND|EAI_AGAIN|getaddrinfo|dns|name not resolved/i.test(p.error);
+		return {
+			verdict: "COULD-NOT-CHECK",
+			reason: dns
+				? `${p.error} — domain does not resolve (a death signal for a human to confirm, never an auto-flip)`
+				: (p.error ?? "no response"),
+		};
+	}
 	if (
 		p.httpStatus === 401 ||
 		p.httpStatus === 403 ||
@@ -269,6 +282,14 @@ export function judgeStamp(p: {
 		return {
 			verdict: "COULD-NOT-CHECK",
 			reason: `HTTP ${p.httpStatus} — refused this probe, not judged (a 401/405 on a GET is an endpoint's method or auth policy, not a product state)`,
+		};
+	// 5xx is the server failing on this request, not the product ending. The
+	// weak-basis sweep (2026-09-06) called a Heroku dyno's 503 a death; one
+	// run of a 5xx says nothing in either direction.
+	if (p.httpStatus >= 500)
+		return {
+			verdict: "COULD-NOT-CHECK",
+			reason: `HTTP ${p.httpStatus} — server error, not a product state`,
 		};
 
 	const text = readableText(p.html);
@@ -373,7 +394,12 @@ export function packetStamps(): Array<{
 		}));
 }
 
-async function probe(s: {
+/** Exported so a sibling lane probes with the SAME instrument. The weak-basis
+ *  sweep of 2026-09-06 reimplemented this in a throwaway script and reproduced
+ *  bugs this file had already fixed: it did not follow 308s (eleven live sites
+ *  read as dead), it called a 503 a death, and it could not tell a dead domain
+ *  from a timeout. One prober, one set of corrections. */
+export async function probe(s: {
 	slug: string;
 	to: string;
 	sourceUrl: string;

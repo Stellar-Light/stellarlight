@@ -1,0 +1,40 @@
+name: weak-basis liveness
+
+# The softest claims in the directory: Live rows resting on site-liveness,
+# source-inherited or unverified whose every linked repo is over a year
+# silent. Repo staleness is never judged here — the PRODUCT is re-probed at
+# its own URL, through the same judgeStamp the packet guard uses.
+# workflow-health: signal-steps: ^Sweep$
+
+on:
+  schedule:
+    - cron: "17 8 * * 4"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "How many rows to probe (oldest evidence first)"
+        default: "60"
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sweep
+        run: pnpm exec tsx scripts/check-weak-basis-liveness.ts --limit=${{ github.event.inputs.limit || 60 }}
+      - name: Commit the artifact
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/weak-basis-liveness-latest.json || true
+          git diff --cached --quiet || git commit -m "chore(audit): weak-basis liveness sweep [skip ci]"
+          git pull --rebase origin main && git push
