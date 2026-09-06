@@ -1,4 +1,5 @@
 name: Enrich SCF data (manual)
+# workflow-health: signal-steps: ^Idempotence$
 # Re-runs scripts/enrich-from-scf.ts against prod to fix SCF award tagging.
 # Dry-run by default; set execute=true to write. Pulls the live SCF API.
 on:
@@ -25,3 +26,21 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/enrich-from-scf.ts ${{ inputs.execute && '--execute' || '' }}
+      # Idempotence gate (2026-09-06, same rule as curate-projects.yml): an
+      # execute must leave nothing to enrich. A row still planned right after
+      # it was written is a lane fight (curate's SCF_FIX / linkage on the same
+      # field) or a writer that does not read back — the class that flipped
+      # 11 SCF rows on every run. The writes above already landed; this step
+      # only reports, loudly.
+      - name: Idempotence
+        if: ${{ inputs.execute }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/enrich-from-scf.ts 2>&1 | tee replan.log || true
+          n=$(grep -oE '^Enriched: +[0-9]+' replan.log | grep -oE '[0-9]+$' || echo unknown)
+          if [ "$n" != "0" ]; then
+            echo "::error::$n row(s) still planned after execute — a lane fight or a non-idempotent writer; see the plan above"
+            exit 1
+          fi
+          echo "0 rows planned after execute — the page and the row agree everywhere"
