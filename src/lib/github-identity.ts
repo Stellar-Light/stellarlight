@@ -131,10 +131,10 @@ export function parseGithubRepoRef(
 	if (!LOGIN.test(owner) || RESERVED.has(owner.toLowerCase())) return null;
 	if (!name || name === "." || name === ".." || !/^[A-Za-z0-9._-]+$/.test(name))
 		return null;
-	// A bare hostname is not a repository name. It reaches this field when a
-	// URL was split across the owner and name columns ("anclap, https:" +
-	// "github.com").
-	if (/^[a-z0-9-]+\.(?:com|org|io|net|xyz|dev|app|co|fi|ai)$/i.test(name))
-		return null;
+	// No hostname-shaped rejection on the NAME. A repo may legitimately be
+	// named after a domain — github.com/jamiels/ramm.ai is real, and a rule
+	// that dropped dot-TLD names would have deleted that link. The only case
+	// it would have caught, "anclap, https:" + "github.com", is already
+	// rejected on the owner side.
 	return { owner, name };
 }
