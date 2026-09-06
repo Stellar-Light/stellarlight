@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-06T23:29:10.415Z",
+	"generatedAt": "2026-09-06T23:45:43.789Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"scoring": {
 		"basis": "intended-op: PASS only when one of the item's expected operation ids is within the top-3 scout hits; rank = 1-based position of the first expected op among scout hits (null = not returned)",
