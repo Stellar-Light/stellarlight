@@ -103,6 +103,11 @@ async function scrapeDetailPage(slug: string): Promise<{
 	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
+	/** Page-level project record (title / slug / lastAwardedRound), read for
+	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
+	pageSlug?: string;
+	title?: string;
+	lastAwardedRound?: number;
 } | null> {
 	try {
 		const res = await fetch(
@@ -163,6 +168,36 @@ async function scrapeDetailPage(slug: string): Promise<{
 				result.totalAwarded = parseFloat(awardedMatch[1]);
 			}
 		}
+
+		// Page-level project record — the same fields a listing row carries —
+		// for pages the listing never serves (SCF_PAGES_BEYOND_CAP). pageSlug
+		// doubles as the identity check: an unknown slug renders 200 with no
+		// project payload (soft-404), which must read as could-not-parse.
+		// Read off the REBUILT flight stream, not the raw HTML: the stream is
+		// cut into <script> chunks at arbitrary points, and a cut inside this
+		// field sequence blanked the identity check on 3 of 113 pages in the
+		// first dry run (mojoflower-mq4, sorostarter-9b2, opengrants-fdb).
+		const flight = [
+			...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
+		]
+			.map((m) => {
+				try {
+					return JSON.parse(m[1]) as string;
+				} catch {
+					return "";
+				}
+			})
+			.join("");
+		const txt = flight || html.replace(/\\"/g, '"');
+		const pageRec = txt.match(
+			/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
+		);
+		if (pageRec) {
+			result.title = pageRec[1];
+			result.pageSlug = pageRec[2];
+		}
+		const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
+		if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
 
 		// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
 		// The old "grab every SCF #N on the page" scrape read the badge/
@@ -337,6 +372,143 @@ async function main() {
 		"band-protocol-2ob": "band",
 	};
 
+	// Pages BEYOND the 500-row listing cap (2026-09-06). /backend/projects
+	// serves the same 500 rows whatever it is asked (search/round/page/offset/
+	// limit/sort all ignored), so an SCF project outside that page can never
+	// reach the name matcher above — Blend was patched by hand, Mystic
+	// Finance's r29 award sat unread. Discovery ran ONCE, offline: the official
+	// per-round pages (/awards/<recId>, 46 rounds, 3,195 submissions keyed by
+	// project record id; /project/<recId> resolves to the canonical page) for
+	// numbered rounds, plus the Wayback CDX index of /project/* for the awards
+	// SCF does not number (Liquidity, Public Goods). Every entry: page parsed
+	// with parseRoundVerdicts, and the site / GitHub org / X handle on the page
+	// matched our row's links — or, where the page carries no links, the name
+	// is coined / Stellar-specific and unambiguous (marked "name"). Keyed by
+	// OUR slug → SCF page slug: the reverse of SCF_SLUG_OVERRIDES, which only
+	// re-keys rows already IN the listing and can never reach these.
+	// Left out on purpose: pages whose cards are all negative verdicts,
+	// Kickstart-only pages ("SCF Kickstart #N" cards are neutral to the
+	// parser), and name collisions (SCF #2's 2018 "StellarPay" ≠ our x402
+	// row; Wally / Sendit / Relax / Grip / Amber carry no links to confirm),
+	// and pages already attached to another row (opengrants-fdb is row
+	// `pen`'s scf.slug — one page never joins two rows; dedup is curation).
+	// Amounts are the page's own budgets; "undisclosed" = award confirmed,
+	// no budget on the page (stored as amountUSD null, never 0).
+	const SCF_PAGES_BEYOND_CAP: Record<string, string> = {
+		accelar: "accelar-2td", // #26 $33,000 · site+github: accelar.io, github.com/accelar-labs
+		"art-club": "art-club-ia2", // #26 $40,000 · github: github.com/grmarkkes
+		artizen: "artizen-ngf", // #33 $130,000 · site+github: artizen.fund, github.com/artizen-fund
+		assetdesk: "assetdesk-kqx", // #19 $70,000 · site: assetdesk.xyz
+		astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
+		astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
+		autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
+		blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
+		blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
+		borderless: "borderless-u3x", // #20 $43,000 · #22 $82,500 · site+github: borderlesspayments.xyz, github.com/borderless-payments
+		bravepay: "bravepay-tze", // #11 $200,000 · site: bravepay.net
+		btq: "btq-jva", // #14 $10,000 · site: btq.com
+		cede: "cede-labs-fxy", // #31 $119,800 · site+github: cede.store, github.com/cedelabs
+		chaincerts: "chaincerts-u04", // #13 $75,000 · #18 $103,125 · site+github: chaincerts.co, github.com/kommitters
+		"chainlink-oracles-relayer": "chainlink-oracles-relayer-c5f", // #15 $38,400 · site+github: docs.relink.services, github.com/relinkservices
+		chef: "chef-c8c", // #22 $18,000 · site: github.io/stellar-chef, stellar-chef.github.io
+		chronospay: "chronospay-nrb", // #11 $65,000 · site: chronospay.io
+		"city-states": "city-states-medieval-70v", // #2 undisclosed · name: our host citystatesm = "City States: Medieval"
+		clear: "clear-4rw", // #26 $45,000 · site: borderlesspayments.xyz
+		"clickpesa-debt-fund": "clickpesa-debt-fund-ssc", // #26 $30,000 · #28 $95,000 · name: product-named, same company (ClickPesa)
+		clob: "clob-qoi", // #29 $72,019 · site: ideasoft.io
+		coinsender: "coinsender-f7q", // #24 $23,440 · site+github: coinsender.io, github.com/megadev-ou
+		constellation: "constellation-protocol-4uv", // #19 $110,000 · #23 $100,000 · github: github.com/constellation-protocol
+		copperx: "copperx-gateway-and-payout-yhf", // #29 $50,000 · site+github: copperx.io, github.com/copperxhq
+		dappradar: "dappradar-e06", // #27 $50,000 · #34 $95,000 · site: dappradar.com, x.com/dappradar
+		deb: "deb-sj5", // #6 $653.09 · site: demo.drivedeb.com, drivedeb.com
+		dropzey: "dropzey-in4", // #23 $38,500 · site+github: dropzey.com, github.com/zainh332
+		"elixir-stellar-sdk": "elixir-stellar-sdk-wib", // #10 $12,000 · github: github.com/kommitters
+		elsa: "elsa-wallet-banking-filipinos-hcg", // #11 $95,000 · site: elsa.care
+		emigro: "emigro-jp6", // #17 $46,400 · #20 $33,920 · #25 $90,000 · site+github: emigro.co, github.com/emigro
+		empowch: "empowch-eh9", // #11 $25,000 · site: empowch.com
+		fijicoin: "fijicoin-frq", // #8 $50,000 · site: mai.money
+		"flutter-stellar-sdk": "flutter-stellar-sdk-ilm", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+		flux: "flux-yu0", // #22 $38,000 · site: iflux.app
+		"fx-swap": "fx-swap-by-hedgehog-unu", // #21 $42,450 · site: hedgeeffective.com
+		getpaid: "getpaid-z9y", // #9 $192,500 · site: getpaid.africa
+		"governance-modules-library": "governance-modules-library-nr4", // #22 $27,000 · #26 $74,000 · github: github.com/blockscience
+		handlpay: "handlpay-ah3", // #30 $60,000 · site+github: github.com/handlpay, handlpay.com
+		hiyield: "hiyield-0e4", // #18 $150,000 · site: hiyield.xyz
+		icanproveit: "icanproveit-proof-of-learning-icn", // #26 $50,000 · github: github.com/tuvalusoftware
+		idunu: "idunu-help-kids-thrive-3tm", // #21 $15,000 · #25 $15,000 · name: coined name
+		"infinity-wallet": "infinity-wallet-f7m", // #16 $130,000 · site+github: github.com/infinitywallet, infinitywallet.io
+		"ios-stellar-sdk": "ios-stellar-sdk-tdq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+		"java-stellar-sdk": "java-stellar-sdk-btq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/lightsail-network
+		"js-worker-sdk": "js-worker-sdk-rjo", // #24 $12,500 · #27 $35,000 · github: github.com/cloudouble
+		katagames: "katagames-r2t", // #11 $25,000 · site: kata.games, x.com/createplayearn
+		keizai: "keizai-qfe", // #21 $43,000 · #28 $41,000 · github: github.com/keizai-tools
+		"kmac-state-machine-template": "kmac-state-machine-template-extension-jqw", // #20 $7,500 · github: github.com/huitemagico
+		"kotlin-stellar-sdk": "kotlin-stellar-sdk-fjl", // #9 $11,500 · github: github.com/rahimklaber
+		kript: "kript-pva", // #27 $35,000 · #32 $77,000 · site: kriptup.io
+		kunst21: "kunst21com-ray", // #9 undisclosed · name: SCF title is our host kunst21.com
+		"legacy-suite": "legacy-suite-on-stellar-zpd", // #24 $49,998 · site+github: github.com/avento-labs, legacysuite.com
+		lumenscan: "lumenscan-bwl", // #4 undisclosed · name: Lumen-specific name
+		mica: "mica-ckw", // #16 $138,700 · site+github: github.com/micatechnology, mica.rent
+		mojoflower: "mojoflower-mq4", // #7 $196,415 · #11 $47,500 · #17 $100,000 · github: github.com/mojoflower-garden
+		mystic: "mystic-finance-xp7", // #29 $47,000 · site: mysticfinance.xyz
+		"net-sdk": "net-sdk-cfe", // PG Q2 '26 undisclosed · PG Q4 '25 undisclosed · github: github.com/beans-bv
+		"nirvana-labs": "nirvana-labs-4eh", // #26 $36,000 · site: nirvanalabs.io
+		oinc: "oinc-kix", // #17 $105,000 · site: com.br, useoinc.com.br
+		okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
+		omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
+		"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
+		ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
+		paysapp: "paysapp-l02", // #3 undisclosed · name: coined name (kuyawa)
+		"planet-pay": "planet-pay-lxg", // #14 $49,500 · #21 $96,000 · github: github.com/scalemote
+		plutope: "plutope-merchant-app-zmh", // #27 $33,400 · github: github.com/plutopein, x.com/plutopeio
+		poma: "poma-protocol-s3f", // #29 $14,000 · github: github.com/poma-protocol, x.com/pomaprotocol
+		qolaq: "qolaq-wev", // #13 $150,000 · site: qolaq.org
+		qstn: "qstn-3rv", // #20 $2,500 · site: qstn.us
+		ramm: "ramm-global-retail-commerce-zbg", // #22 $38,500 · site+github: github.com/jamiels, ramm.ai
+		rarible: "rariblecom-stellar-ujd", // #30 $150,000 · site+github: github.com/rarible, rarible.com
+		sanctum: "sanctum-cfe", // #23 $50,000 · #25 $85,000 · github: github.com/zkbricks
+		securx: "securx-medical-prescriptions-xmt", // #27 $42,400 · site: securxtech.wixsite.com, wixsite.com/securx
+		silicore: "silicore-wrz", // #29 $31,000 · github: github.com/ilanklim
+		"simple-signer": "simple-signer-ei9", // #9 $10,000 · github: github.com/fsodano
+		solarkraft: "solarkraft-jdu", // #24 $50,000 · #29 $67,000 · github: github.com/freespek
+		"soroban-explorer": "soroban-explorer-rtb", // #19 $61,000 · #23 $100,000 · site: sorobanexp.com
+		"soroban-polygon-interop": "soroban-polygon-interop-3gz", // #27 $42,755 · site: entethalliance.github.io, github.io/crosschain-interoperability
+		"soroban-pre-order-contract": "soroban-pre-order-contract-ucp", // #12 $1,000 · github: github.com/aolieman
+		"soroban-react": "soroban-react-khv", // #20 $25,000 · github: github.com/paltalabs
+		sorobanmath: "sorobanmath-zuo", // #20 $40,000 · github: github.com/rahul-soshte
+		sorobuild: "sorobuild-zhc", // #22 $44,800 · name: Soroban-specific coined name
+		sorosan: "sorosan-twd", // #20 $29,000 · github: github.com/sorosan
+		sorosplits: "sorosplits-9w7", // #19 $59,700 · #23 $94,000 · site+github: github.com/findolor, sorosplits.xyz
+		sorostarter: "sorostarter-9b2", // #29 $47,175 · github: github.com/sorostarter, x.com/sorostarter
+		spacewalk: "spacewalk-sel", // #11 $100,000 · site+github: github.com/pendulum-chain, pendulumchain.org
+		spatium: "spatium-wallet-7ii", // #13 $148,000 · #22 $35,200 · name: coined wallet name, spatium.net on page
+		starloom: "starloom-ox2", // #26 $45,900 · site: starloom.io
+		"stellar-nest": "stellar-nest-thq", // #25 $14,800 · github: github.com/alkeops
+		"stellar-tip": "stellar-tip-pj5", // #4 undisclosed · name: Stellar-specific name
+		"stellar-token-launchpad": "stellar-token-launchpad-flp", // #24 $40,000 · site+github: github.com/cryptixag, tokenlaunchpad.eu
+		"stellar-tools": "stellar-tools-6qw", // #26 $18,700 · site+github: github.com/joaquinsoza, stellartools.xyz
+		stellarguard: "stellarguard-41d", // #1 undisclosed · name: Stellar-specific name
+		stellarmint: "stellarmint-ece", // #5 $51,277.94 · site: stellarmint.io
+		stellarport: "stellarport-gfe", // #2 undisclosed · name: Stellar-specific name
+		stellarprodev: "stellarprodev-z0n", // #17 $39,880 · #29 $26,000 · site+github: github.com/omeganetwork-tech, stellarpro.dev
+		stellarscamreport: "stellarscamreport-wir", // #6 $5,445 · site: stellarscam.report
+		stellot: "stellot-vp7", // #4 undisclosed · name: Stellar-specific coined name
+		"storehouse-gold": "storehouse-gold-to-stellar-nlz", // #26 $50,000 · name: distinctive product name
+		stroopyai: "stroopyai-e5a", // #20 $21,370 · site: stroopy.ai
+		tap4change: "tap4change-wgd", // #21 $73,280 · site: tap4change.org
+		taskio: "taskio-87z", // #7 $283,499 · site: task.io
+		teken: "teken-easy-multi-signatures-avi", // #28 $29,500 · github: github.com/moonbite-gmbh
+		"timed-transactions-api": "timed-transactions-api-shu", // #1 undisclosed · name: SCF #1 project, name unambiguous
+		tracee: "tracee-jnz", // #16 $128,925 · github: github.com/tracee1910
+		triiyo: "triiyo-5cf", // #22 $50,303 · site: triiyo.com
+		uils: "uils-yl5", // #17 $141,027.50 · name: coined name, uils.la on page, no links on our row
+		walletban: "walletban-n32", // #20 $20,000 · site: walletban.xyz
+		"web3-antivirus": "web3-antivirus-w3a-a37", // #28 $50,000 · github: github.com/web3-antivirus
+		xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
+		zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
+		ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
+	};
+
 	const matched: { scf: any; ours: any }[] = [];
 	const unmatched: string[] = [];
 
@@ -404,6 +576,66 @@ async function main() {
 		console.log("");
 	}
 
+	// 4b. Beyond-cap pages: fetched here, parsed by the SAME scrapeDetailPage,
+	// queued as synthetic listing rows for the loop below. Trinary on purpose
+	// (awarded / not-awarded-on-page / could-not-parse): a page that cannot be
+	// read is reported and exits 2 — never a silent "not awarded".
+	const beyondCap = {
+		queued: [] as string[],
+		notAwarded: [] as string[],
+		unparseable: [] as string[],
+	};
+	const listedSlugs = new Set(scfProjects.map((p) => String(p.slug)));
+	const matchedOurSlugs = new Set(matched.map((m) => m.ours.slug));
+	for (const [ourSlug, scfSlug] of Object.entries(SCF_PAGES_BEYOND_CAP)) {
+		if (listedSlugs.has(scfSlug) || matchedOurSlugs.has(ourSlug)) {
+			console.log(
+				`  beyond-cap ${scfSlug}: now served by the listing — the normal path owns it`,
+			);
+			continue;
+		}
+		const ours = bySlug.get(ourSlug);
+		if (!ours) {
+			beyondCap.unparseable.push(`${scfSlug} (our row ${ourSlug} missing)`);
+			continue;
+		}
+		const detail = await scrapeDetailPage(scfSlug);
+		await sleep(300);
+		if (!detail) {
+			beyondCap.unparseable.push(`${scfSlug} (HTTP error or network failure)`);
+			continue;
+		}
+		if (detail.pageSlug !== scfSlug) {
+			beyondCap.unparseable.push(
+				`${scfSlug} (no project payload at that slug)`,
+			);
+			continue;
+		}
+		const awardedOnPage =
+			(detail.roundAwards?.length ?? 0) > 0 ||
+			(detail.awardedRounds?.length ?? 0) > 0 ||
+			(detail.verdictAwardedAny ?? 0) > 0;
+		if (!awardedOnPage) {
+			if ((detail.verdictSubmissions ?? 0) > 0)
+				beyondCap.notAwarded.push(scfSlug);
+			else beyondCap.unparseable.push(`${scfSlug} (page verdicts nothing)`);
+			continue;
+		}
+		beyondCap.queued.push(scfSlug);
+		matched.push({
+			scf: {
+				slug: scfSlug,
+				title: detail.title ?? ours.name,
+				lastAwardedRound: detail.lastAwardedRound ?? null,
+				detail,
+			},
+			ours,
+		});
+	}
+	console.log(
+		`Beyond-cap pages: ${beyondCap.queued.length} awarded (queued) · ${beyondCap.notAwarded.length} not awarded on page (no write) · ${beyondCap.unparseable.length} could not parse\n`,
+	);
+
 	// 5. Enrich matched projects
 	for (const { scf, ours } of matched) {
 		console.log(
@@ -415,7 +647,8 @@ async function main() {
 		const currentScf = ours.scf || {};
 
 		// Scrape detail page early so we can include totalAwarded in SCF data
-		const detail = await scrapeDetailPage(scf.slug);
+		const detail: Awaited<ReturnType<typeof scrapeDetailPage>> =
+			scf.detail ?? (await scrapeDetailPage(scf.slug));
 
 		// The SCF API encodes special award types (Liquidity / Public Goods / RFP)
 		// as NEGATIVE lastAwardedRound codes — those ARE awards. The old
@@ -632,6 +865,13 @@ async function main() {
 	console.log(`  Links:            ${stats.linksAdded}`);
 	console.log(`Skipped (no new):   ${stats.skipped}`);
 	console.log(`Errors:             ${stats.errors}`);
+	console.log(
+		`Beyond-cap pages:   ${beyondCap.queued.length} awarded · ${beyondCap.notAwarded.length} not awarded on page · ${beyondCap.unparseable.length} could not parse`,
+	);
+	for (const s of beyondCap.notAwarded)
+		console.log(`  not awarded on page: ${s}`);
+	for (const s of beyondCap.unparseable)
+		console.log(`  could not parse:     ${s}`);
 
 	if (dryRun) {
 		console.log(
@@ -645,6 +885,15 @@ async function main() {
 			`\n✗ ${stats.errors} write error(s) — exiting 1 so the run shows red.`,
 		);
 		process.exit(1);
+	}
+	// A curated page that reads not-awarded or cannot be parsed means the map
+	// is stale or the page moved — its own exit code, so "could not look"
+	// never reads as "checked, absent".
+	if (beyondCap.notAwarded.length > 0 || beyondCap.unparseable.length > 0) {
+		console.error(
+			`\n✗ ${beyondCap.notAwarded.length + beyondCap.unparseable.length} beyond-cap page(s) disagree with the map — exiting 2.`,
+		);
+		process.exit(2);
 	}
 	process.exit(0);
 }
