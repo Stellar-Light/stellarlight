@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T02:44:24.869Z",
+ "generatedAt": "2026-09-06T04:48:08.125Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -204,6 +204,15 @@
   ],
   "receipts": [
    {
+    "file": "improvements/receipts/zkcross-2026-09-06.json",
+    "slug": "zkcross",
+    "url": "https://zkcross-network-1.gitbook.io/learn.zkcross.network/ecosystem-validation/production-validation.md",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "zkCrossDEX served as the main proving ground for this phase"
+    ]
+   },
+   {
     "file": "improvements/receipts/zenex-2026-08-28.json",
     "slug": "zenex",
     "url": "https://docs.zenex.trade/deployments/contract-addresses",
@@ -267,6 +276,16 @@
     "fetchedAt": "2026-09-06",
     "markers": [
      "[] (\"…[]…\")"
+    ]
+   },
+   {
+    "file": "improvements/receipts/taskio-2026-09-06.json",
+    "slug": "taskio",
+    "url": "https://task.io/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "NOT for sale",
+     "atom.com"
     ]
    },
    {
@@ -339,6 +358,22 @@
      "Stellar mainnet",
      "price feeds"
     ]
+   },
+   {
+    "file": "improvements/receipts/quasar-2026-09-06.json",
+    "slug": "quasar",
+    "url": "https://eiger.co/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Eiger and Equilibrium Labs unite"
+    ]
+   },
+   {
+    "file": "improvements/receipts/qolaq-2026-09-06.json",
+    "slug": "qolaq",
+    "url": "https://qolaq.org/",
+    "fetchedAt": "2026-09-06",
+    "markers": []
    },
    {
     "file": "improvements/receipts/polaris-lend-2026-09-06.json",
@@ -463,6 +498,16 @@
     ]
    },
    {
+    "file": "improvements/receipts/grantpicks-2026-09-06.json",
+    "slug": "grantpicks",
+    "url": "https://app.grantpicks.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "DEPLOYMENT_DISABLED",
+     "Payment required"
+    ]
+   },
+   {
     "file": "improvements/receipts/glo-dollar-deployment-2026-08-28.json",
     "slug": "glo-dollar",
     "url": "https://horizon.stellar.org/accounts/GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
@@ -489,6 +534,15 @@
     "fetchedAt": "2026-09-06",
     "markers": [
      "is for sale"
+    ]
+   },
+   {
+    "file": "improvements/receipts/equitx-2026-09-06.json",
+    "slug": "equitx",
+    "url": "https://api.github.com/repos/EquitXCompany/equitx-project",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
     ]
    },
    {
@@ -557,6 +611,26 @@
     "markers": [
      "operator toml",
      "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/bigger-2026-09-06.json",
+    "slug": "bigger",
+    "url": "http://biggertech.co/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "has been registered with Gandi.net",
+     "biggertech.co is unavailable"
+    ]
+   },
+   {
+    "file": "improvements/receipts/bes-metaverse-2026-09-06.json",
+    "slug": "bes-metaverse",
+    "url": "https://besmetaverse.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "is for sale",
+     "This domain is for sale"
     ]
    },
    {
