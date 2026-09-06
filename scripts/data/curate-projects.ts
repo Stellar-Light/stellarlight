@@ -1995,6 +1995,26 @@ async function main() {
 			continue;
 		}
 		if (d.status !== fix.from) {
+			// An entry that already moved the row keeps owning its lifecycle note:
+			// when the stored note lags the verdict (fill-if-empty left the earlier
+			// Live packet note on five rows retired or downgraded on 2026-09-06),
+			// refresh the note alone. Status, basis and dates are not touched.
+			if (
+				fix.from !== fix.to &&
+				d.status === fix.to &&
+				fix.note &&
+				d.lifecycle?.note !== fix.note
+			) {
+				console.log(
+					`  ${slug}: already ${fix.to} — lifecycle note refreshed to the verdict`,
+				);
+				writes.push({
+					id: d.id,
+					slug,
+					data: { lifecycle: { ...(d.lifecycle ?? {}), note: fix.note } },
+				});
+				continue;
+			}
 			console.log(
 				`  ${slug}: status '${d.status}' ≠ '${fix.from}', skip (retired or manually set)`,
 			);
@@ -2031,7 +2051,9 @@ async function main() {
 		const data: any = { status: fix.to };
 		// Inactive flips carry their evidence as ecosystem memory (fill-if-
 		// empty): "X WAS a live Y that shut down" beats silence for consumers.
-		if (fix.note && !d.lifecycle?.note)
+		// A status MOVE is a verdict: its note replaces whatever was there. A
+		// stamp (from === to) only fills an empty note, as before.
+		if (fix.note && (fix.from !== fix.to || !d.lifecycle?.note))
 			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
 		// served label stops being an unprovenanced bare string.
