@@ -374,7 +374,9 @@ async function main() {
 	// Left out on purpose: pages whose cards are all negative verdicts,
 	// Kickstart-only pages ("SCF Kickstart #N" cards are neutral to the
 	// parser), and name collisions (SCF #2's 2018 "StellarPay" ≠ our x402
-	// row; Wally / Sendit / Relax / Grip / Amber carry no links to confirm).
+	// row; Wally / Sendit / Relax / Grip / Amber carry no links to confirm),
+	// and pages already attached to another row (opengrants-fdb is row
+	// `pen`'s scf.slug — one page never joins two rows; dedup is curation).
 	// Amounts are the page's own budgets; "undisclosed" = award confirmed,
 	// no budget on the page (stored as amountUSD null, never 0).
 	const SCF_PAGES_BEYOND_CAP: Record<string, string> = {
@@ -440,7 +442,6 @@ async function main() {
 		okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
 		omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
 		"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
-		opengrants: "opengrants-fdb", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · site+github: github.com/metagov, opengrants.net
 		ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
 		paysapp: "paysapp-l02", // #3 undisclosed · name: coined name (kuyawa)
 		"planet-pay": "planet-pay-lxg", // #14 $49,500 · #21 $96,000 · github: github.com/scalemote
