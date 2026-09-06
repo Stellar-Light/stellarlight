@@ -473,10 +473,11 @@ read without a browser). 2. DONE 2026-09-06: the medium tier's Development re-gr
 (#1380). litemint and tellus-cooperative stamped Live on the owner's verdict (#1382). Two agents
 re-verified the 17 undecided rows under the product-state rule (drafts
 2026-09-06-deep-verify-a/b, #1384/#1385): 7 earned Live on product state and are stamped
-(#1386, read back 7/7). Owner verdicts still open: five downgrades the rows' own documents
-support (mystic, fairblock, vanna-finance, the-give-hub → Development; wagelink → Inactive,
-App Store app gone, receipted), the spydra stamp withdrawal (its cited repo is a Presidio
-fork), token-tails (low), and three cannot-tell (plutope, kotani-pay, tala) (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+(#1386, read back 7/7). The downgrades were owner-approved and applied
+(#1388, read back 6/6): mystic, fairblock, vanna-finance, the-give-hub → Development;
+wagelink → Inactive (receipted); spydra's stamp withdrawn (STATUS_FIX gained `withdraw:
+true` for deliberate retractions). Still open: token-tails (Live on low evidence) and three
+cannot-tell rows (plutope, kotani-pay, tala) — no lane can decide them (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
 rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
 the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
 our spec changes — batch routing-text edits).
