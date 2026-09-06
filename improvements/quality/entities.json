@@ -1,13 +1,6 @@
 {
- "generatedAt": "2026-09-06T06:16:19.119Z",
+ "generatedAt": "2026-09-06T11:44:58.764Z",
  "surfaces": [
-  {
-   "surface": "contract",
-   "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 2,
-   "clearedFindings": 27,
-   "verifiedFindings": 7
-  },
   {
    "surface": "consumer",
    "means": "questions real consumers asked that we answered weakly",
@@ -30,10 +23,17 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "contract",
+   "means": "the OpenAPI contract and its generated artifacts",
+   "openFindings": 0,
+   "clearedFindings": 29,
+   "verifiedFindings": 7
+  },
+  {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
    "openFindings": 0,
-   "clearedFindings": 9,
+   "clearedFindings": 12,
    "verifiedFindings": 0
   },
   {
@@ -53,15 +53,15 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 542,
-  "open": 3,
-  "refreshQueue": 3,
+  "total": 543,
+  "open": 1,
+  "refreshQueue": 1,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 513,
+  "cleared": 518,
   "verified": 7,
   "byFailureMode": [
    {
@@ -102,10 +102,10 @@
    },
    {
     "mode": "api-drift",
-    "open": 2,
+    "open": 0,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 23,
+    "cleared": 25,
     "verified": 0,
     "surface": "contract"
    },
@@ -155,6 +155,15 @@
     "surface": "consumer"
    },
    {
+    "mode": "note-stale",
+    "open": 0,
+    "refresh": 1,
+    "blocked": 0,
+    "cleared": 7,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
     "mode": "golden-fail",
     "open": 0,
     "refresh": 0,
@@ -167,15 +176,6 @@
     "mode": "population-miss",
     "open": 0,
     "refresh": 0,
-    "blocked": 0,
-    "cleared": 4,
-    "verified": 0,
-    "surface": "code"
-   },
-   {
-    "mode": "note-stale",
-    "open": 0,
-    "refresh": 3,
     "blocked": 0,
     "cleared": 4,
     "verified": 0,
@@ -212,7 +212,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 3
+    "count": 1
    },
    {
     "bucket": "8–30d",
@@ -228,6 +228,36 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-06"
+   },
+   {
+    "probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-06"
+   },
+   {
+    "probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
+    "surface": "code",
+    "failureMode": "note-stale",
+    "clearedAt": "2026-09-06"
+   },
+   {
+    "probe": "status.endpoints lists /api/rwa",
+    "surface": "contract",
+    "failureMode": "api-drift",
+    "clearedAt": "2026-09-06"
+   },
+   {
+    "probe": "/api/rwa emits X-API-Version",
+    "surface": "contract",
+    "failureMode": "api-drift",
+    "clearedAt": "2026-09-06"
+   },
    {
     "probe": "note-stale:stellar/anchor-platform:docker:stellar/anchor-platform",
     "surface": "code",
@@ -245,54 +275,24 @@
     "surface": "code",
     "failureMode": "note-stale",
     "clearedAt": "2026-09-04"
-   },
-   {
-    "probe": "repos-streaming-payments",
-    "surface": "retrieval",
-    "failureMode": "golden-fail",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "repos-escrow",
-    "surface": "retrieval",
-    "failureMode": "golden-fail",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "note-stale:lightsail-network/stellar-contract-bindings:pypi:stellar-contract-bindings",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "battery:q-tool-leaderboard-open-issues",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-02"
-   },
-   {
-    "probe": "scfRoundAwards empty: coala-pay",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-02"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 250,
-     "recurred": 139,
-     "ratePct": 55.6
+     "newFindings": 251,
+     "recurred": 140,
+     "ratePct": 55.8
     },
     "lifetime": {
-     "newFindings": 542,
-     "recurred": 139,
-     "ratePct": 25.6
+     "newFindings": 543,
+     "recurred": 140,
+     "ratePct": 25.8
     }
    },
    "reopened": {
-    "count": 7,
+    "count": 5,
     "shareOfClosures": 0.01,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -300,13 +300,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 250,
-     "repeats": 250,
+     "newFindings": 251,
+     "repeats": 251,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 542,
-     "repeats": 536,
+     "newFindings": 543,
+     "repeats": 537,
      "ratePct": 98.9
     },
     "byClass": [
@@ -331,13 +331,13 @@
      {
       "class": "contract-completeness",
       "total": 29,
-      "open": 2,
+      "open": 0,
       "firstSeen": "2026-07-22"
      },
      {
       "class": "cross-surface-consistency",
-      "total": 23,
-      "open": 3,
+      "total": 24,
+      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9242,58 +9242,10 @@
    "knowledgeNotes": {
     "pool": 408,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 151,
-    "triaged": 210,
+    "withNotes": 199,
+    "triaged": 209,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
-    "missing": [
-     "0xyudz/MagentiX",
-     "7maylord/erebus",
-     "Airswiftio/SCF",
-     "ELLA0VICTOR/sentryx402",
-     "Elegidokawai2/Hackaton--Ajolote-en-ingles-",
-     "Eras256/Nirium",
-     "Gabrululu/Propulsor",
-     "GatoGroZero/devengo",
-     "Glayzz/agentmarket-pro",
-     "Godbrand0/argent",
-     "JWattjr/x4tella-mvp",
-     "Jennivarl/AutoX420",
-     "Jennivarl/underworld",
-     "MarxMad/Agenticx402",
-     "Moonlight-Protocol/soroban-core",
-     "Nectar-Network/nectar",
-     "OscarGauss/fan-match",
-     "ShivRaiGithub/Genesis402",
-     "Techkeyy/the-signaler",
-     "Unique-coder/stellarbrief",
-     "XCCY-Labs/xccy-soroban",
-     "aliveevie/sentinelmesh",
-     "chinesepowered/hack-stellaragents",
-     "comzzy-comzzy/datavend",
-     "cushyon/Stellar_migration",
-     "dfns/dfns-sdk-ts",
-     "divineudoka12/Zerixs",
-     "dogstarapps/arka.fund",
-     "dpinones/liars-dice",
-     "emdevelopa/Stellar_Payment_API",
-     "emrekayat/Query402",
-     "idos-network/idos-sdk-js",
-     "isaac-richie/stellarpulse",
-     "methu-ship/toll",
-     "nallely-lopez/RizoDAO",
-     "nice-bills/stipend",
-     "panditdhamdhere/Payflow",
-     "penguinpecker/ko402",
-     "pragya-shar/quilltip",
-     "rtomas/soundstake",
-     "shariqazeem/kyvernlabs",
-     "soomtochukwu/TradeFlow",
-     "stellarcarbon/sorocarbon",
-     "stellarchain/soroban-auditor",
-     "towa-hi/StellarUnityDevToolkit",
-     "warp-driver/Phoenix-Blend-Pool",
-     "zzzbedream/Cortex402"
-    ]
+    "missing": []
    },
    "mainnetJoin": {
     "pool": 5661,
@@ -9412,7 +9364,7 @@
    "languageOther": 49
   },
   "withCodeDepth": 10847,
-  "withNotes": 496,
+  "withNotes": 544,
   "withMainnet": 108,
   "top": [
    {
@@ -10469,7 +10421,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "151 of 408 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "199 of 408 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -10528,7 +10480,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 7
+    "value": 8
    },
    {
     "id": "s:golden-eval",
@@ -10594,19 +10546,19 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 9
+    "value": 12
    },
    {
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 513
+    "value": 518
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 22
+    "value": 18
    },
    {
     "id": "o:verified",
@@ -10677,7 +10629,7 @@
     "target": 20,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
-    "value": 27
+    "value": 29
    },
    {
     "source": 2,
@@ -10712,7 +10664,7 @@
     "target": 20,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 9
+    "value": 12
    },
    {
     "source": 1,
@@ -10775,21 +10727,14 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 7
+    "value": 8
    },
    {
     "source": 19,
     "target": 21,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 3
-   },
-   {
-    "source": 15,
-    "target": 21,
-    "sourceId": "f:contract",
-    "targetId": "o:open",
-    "value": 2
+    "value": 1
    }
   ]
  },
@@ -10826,9 +10771,9 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12633,
+    "missing": 12585,
     "of": 13129,
-    "share": 96.2,
+    "share": 95.9,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
