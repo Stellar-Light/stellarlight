@@ -1,0 +1,24 @@
+{
+ "slug": "wagelink",
+ "url": "https://itunes.apple.com/lookup?id=6461461372&country=us",
+ "finalUrl": "https://itunes.apple.com/lookup?id=6461461372&country=us",
+ "fetchedAt": "2026-09-06T02:10:32.832Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 02:10:32 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "daiquiri/5"
+ },
+ "bodyTextSha256": "caad4436f9340956251bd36d395394cfe0479a8564e6a810399f1860e23c7314",
+ "bodyTextChars": 34,
+ "markers": [
+  {
+   "marker": "\"resultCount\":0",
+   "found": true,
+   "where": "text",
+   "excerpt": "{ \"resultCount\":0, \"results\": [] }"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
