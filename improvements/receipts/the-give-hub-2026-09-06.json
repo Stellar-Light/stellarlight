@@ -1,0 +1,24 @@
+{
+ "slug": "the-give-hub",
+ "url": "https://app.thegivehub.com/api.php/campaigns",
+ "finalUrl": "https://app.thegivehub.com/api.php/campaigns",
+ "fetchedAt": "2026-09-06T02:10:05.089Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 02:10:05 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Apache/2.4.67 (Debian)"
+ },
+ "bodyTextSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+ "bodyTextChars": 2,
+ "markers": [
+  {
+   "marker": "[]",
+   "found": true,
+   "where": "text",
+   "excerpt": "[]"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
