@@ -26,6 +26,25 @@ const EXECUTE = process.argv.includes("--execute");
 // Hand-verified: slug → exact github url (org-level for dedicated orgs;
 // specific repo for SDKs that live inside a big multi-repo org).
 const CURATED: Record<string, string> = {
+	// 2026-09-06 discovery wave. Each row below had NO github link and its own
+	// site linked a GitHub owner; the pair was then CONFIRMED by intersection
+	// before being written — the owner's profile or the repo's homepage cites
+	// the project's own domain, or the owner/repo name equals the row's. A link
+	// found on a page is a lead, not an owner: 37 further rows whose leads did
+	// not intersect are left out, and 3 FxDAO stablecoins are left out because
+	// that removal was a human decision recorded above.
+	"nouns-builder-protocol": "https://github.com/BuilderOSS/nouns-builder", // repo homepage/desc cites nouns.build
+	"crypto-com": "https://github.com/crypto-com/crypto-agent-trading", // repo homepage/desc cites crypto.com
+	usdy: "https://github.com/ondoprotocol", // owner profile cites ondo.finance
+	dcent: "https://github.com/DcentWallet", // owner profile cites dcentwallet.com
+	getblock: "https://github.com/GetBlock-io", // owner profile cites getblock.io
+	ondo: "https://github.com/ondoprotocol", // owner profile cites ondo.finance
+	helix: "https://github.com/HelixLabsDev", // owner profile cites helixlabs.org
+	alchemy: "https://github.com/alchemyplatform", // owner profile cites alchemy.com
+	pagcrypto: "https://github.com/PagCrypto", // owner name = PagCrypto
+	etesia: "https://github.com/Etesia-Research", // owner name = Etesia-Research
+	"safu-protocol": "https://github.com/mrkanchwala/safu-protocol", // repo name = safu-protocol
+	uniblock: "https://github.com/Uniblock", // owner name = Uniblock
 	// Real Stellar-native OSS — owner-level (enrich-repos stellar-gate keeps it clean)
 	noether: "https://github.com/NoetherDEX",
 	arcane: "https://github.com/arcane-finance-defi",
