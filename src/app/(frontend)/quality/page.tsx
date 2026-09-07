@@ -318,7 +318,11 @@ export default function QualityPage() {
 							</div>
 							{/* Two or three columns, because 19 one-line rows in a single
 							    column is a scroll, not a scan. */}
-							<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-0 mb-4">
+							{/* Two columns, not three: at three the column is ~200px and
+							    every title truncated ("Contract honesty probe (Engi…"),
+							    which defeats the point of a scan. Ten rows a column reads
+							    fine and the names survive whole. */}
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-0 mb-4">
 								{holding.map((g) => (
 									<GuardLine
 										key={g.key}
