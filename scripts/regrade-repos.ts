@@ -25,7 +25,7 @@
 import "./load-env";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { repoGrade } from "../src/lib/repo-grade";
+import { isFirstParty, repoGrade } from "../src/lib/repo-grade";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -101,6 +101,21 @@ async function main() {
 				stellarProof: typeof r.stellarProof === "string" ? r.stellarProof : null,
 				knowledgeNoteCount: notes.length,
 				curatedCanonical: CURATED.has(String(r.fullName ?? "").toLowerCase()),
+				firstParty: isFirstParty(String(r.fullName ?? "")),
+				// Scanned facts. Present on the row since the code scan; they
+				// reached the grade for the first time on 2026-09-07.
+				testsPresent:
+					typeof r.testsPresent === "boolean" ? r.testsPresent : null,
+				ciPresent: typeof r.ciPresent === "boolean" ? r.ciPresent : null,
+				lastReleaseAt:
+					(r.activitySignals as { lastReleaseAt?: string })?.lastReleaseAt ??
+					null,
+				versionStatus:
+					typeof r.versionStatus === "string" ? r.versionStatus : null,
+				contractInterfaceCount: Array.isArray(r.contractInterface)
+					? r.contractInterface.length
+					: 0,
+				codeScanned: r.codeScanState === "scanned",
 			});
 			const before = Number(r.repoScore ?? -1);
 			if (grade.score === before) continue;

@@ -185,3 +185,104 @@ describe("stars are evidence about the ecosystem that gave them", () => {
 		);
 	});
 });
+
+/**
+ * 2026-09-07 — "what's the point of code depth then, if we are not actually
+ * looking at the code and just guessing off a broken system to grade repos"
+ *
+ * The scanner reads sixteen facts out of each of 10,876 repos. Until this date
+ * exactly two of them (codeDepth, stellarProof) reached the grade, and both were
+ * MULTIPLIED by a funding proxy — so a repo we had read, tested and verified was
+ * discounted up to 55% for being unfunded. These lock the fix.
+ */
+describe("code evidence outranks institutional recognition", () => {
+	const scanned = {
+		lastCommitAt: new Date().toISOString(),
+		stargazerCount: 3,
+		hasDescription: true,
+		topicCount: 6,
+		codeScanned: true,
+		testsPresent: true,
+		ciPresent: true,
+		lastReleaseAt: new Date().toISOString(),
+		versionStatus: "supported",
+		contractInterfaceCount: 48,
+		codeDepth: 0.45,
+		stellarProof: "cargo-sdk",
+		commits90d: 95,
+	};
+
+	it("an unfunded repo we have READ beats a funded one we have not", () => {
+		// The colibri case: 3 stars, no grant, no prominence, no curation — but
+		// releases, tests, CI, a live SDK pin and 48 contract methods.
+		const read = repoGrade(scanned);
+		const funded = repoGrade({
+			lastCommitAt: new Date().toISOString(),
+			stargazerCount: 3,
+			hasDescription: true,
+			topicCount: 6,
+			scfAwarded: true,
+			projectProminence: 40,
+			codeScanned: true, // scanned, and the scan found none of it
+		});
+		expect(read.score).toBeGreaterThan(funded.score);
+	});
+
+	it("read code alone clears the midpoint, with no grant and 3 stars", () => {
+		// Not a tuned number: half the scale earned purely from what the scanner
+		// read. The real fazzatti/colibri, which also carries six knowledge
+		// notes, lands at 62 — it scored 35 before.
+		expect(repoGrade(scanned).score).toBeGreaterThanOrEqual(50);
+	});
+
+	it("first-party publication is authority on its own", () => {
+		// SDF never receives an SCF award — it awards them. All 212 first-party
+		// repos sat on the "nothing vouches for it" floor until 2026-09-07.
+		const sdf = repoGrade({ ...scanned, firstParty: true });
+		expect(sdf.score).toBeGreaterThan(repoGrade(scanned).score);
+	});
+
+	it("a first-party repo is never discounted as 'not about Stellar'", () => {
+		// stellar/js-xdr is the codec every SDK is built on and imports no
+		// soroban-sdk, so the proof test read "none" and cut its evidence to 25%.
+		const codec = { ...scanned, stellarProof: "none", codeDepth: 0 };
+		expect(repoGrade({ ...codec, firstParty: true }).score).toBeGreaterThan(
+			repoGrade(codec).score,
+		);
+	});
+
+	it("tests and CI on a repo with no Stellar code do not count as Stellar evidence", () => {
+		// keybase/client: 9,248 stars, tests, CI, releases, no Stellar code.
+		const foreign = { ...scanned, stellarProof: "none", codeDepth: 0 };
+		expect(repoGrade(foreign).score).toBeLessThan(repoGrade(scanned).score);
+	});
+
+	it("a deprecated SDK pin lowers the score; an unknown one does not", () => {
+		const dead = repoGrade({ ...scanned, versionStatus: "deprecated" });
+		const unknown = repoGrade({ ...scanned, versionStatus: "unknown" });
+		expect(dead.score).toBeLessThan(unknown.score);
+	});
+
+	it("an unscanned repo is not scored as though it failed the scan", () => {
+		// Absence of a reading is not a negative reading: dropping the code terms
+		// must renormalize, not zero them.
+		const base = {
+			lastCommitAt: new Date().toISOString(),
+			stargazerCount: 400,
+			hasDescription: true,
+			topicCount: 4,
+		};
+		const unscanned = repoGrade(base);
+		const scannedEmpty = repoGrade({ ...base, codeScanned: true });
+		expect(unscanned.score).toBeGreaterThan(scannedEmpty.score);
+	});
+
+	it("deep code that nobody has touched in two years is a weaker reference", () => {
+		const stale = repoGrade({
+			...scanned,
+			lastCommitAt: new Date(Date.now() - 800 * 86_400_000).toISOString(),
+			commits90d: 0,
+		});
+		expect(stale.score).toBeLessThan(repoGrade(scanned).score);
+	});
+});

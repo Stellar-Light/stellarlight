@@ -1,6 +1,6 @@
 {
 	"asOf": "2026-09-07",
-	"means": "Ordering claims about repoScore that must hold in the LIVE index. Each is a judgement a person can argue with — that is the point: the ranking model is tuned against a written answer key, not against whichever number looks nicer this week. A pair fails when the live scores contradict it; a pair whose repos are missing is could-not-check, never a pass.",
+	"means": "Ordering claims about repoScore that must hold in the LIVE index. Each is a judgement a person can argue with \u2014 that is the point: the ranking model is tuned against a written answer key, not against whichever number looks nicer this week. A pair fails when the live scores contradict it; a pair whose repos are missing is could-not-check, never a pass.",
 	"pairs": [
 		{
 			"higher": "stellar/js-stellar-sdk",
@@ -31,6 +31,31 @@
 			"higher": "soroswap/core",
 			"lower": "ashfrancis/chickenz",
 			"why": "A deployed AMM over a hackathon game, both Soroban, one with a product behind it."
+		},
+		{
+			"higher": "fazzatti/colibri",
+			"lower": "Andy00L/x402-autopilot",
+			"why": "An unfunded, unstarred TypeScript toolkit \u2014 95 commits in 90 days, a release the same day, tests, CI, a supported SDK pin and six knowledge notes \u2014 over a judged hackathon submission. Nobody funded colibri and it has 3 stars, which is exactly why it scored 35 while the hackathon entry scored 68. An award is a past funding decision, not evidence the code works."
+		},
+		{
+			"higher": "stellar/js-xdr",
+			"lower": "ashfrancis/chickenz",
+			"why": "The XDR codec every Stellar SDK is built on, published by SDF, over a hackathon game. SDF never receives an SCF award \u2014 it awards them \u2014 so all 212 first-party repos scored as though nothing vouched for them. js-xdr also imports no soroban-sdk (a codec does not), so the relevance filter cut its evidence to a quarter. It scored 31."
+		},
+		{
+			"higher": "stellar/stellar-docs",
+			"lower": "402md/agentcard",
+			"why": "The official Stellar documentation over a judged hackathon entry. Tests the same first-party blindness on a repo with no Soroban code at all."
+		},
+		{
+			"higher": "smartcontractkit/chainlink-stellar",
+			"lower": "iancoleman/bip39",
+			"why": "Chainlink's official Stellar integration \u2014 167 commits in 90 days, tests, CI, releases, 48 contract methods, 0 stars because the repo is new under a large org \u2014 over a generic mnemonic tool with 4,314 stars and no Stellar code. Zero stars is not zero evidence when we have read the code."
+		},
+		{
+			"higher": "stellar/stellar-horizon",
+			"lower": "keoyle52/AgentMart",
+			"why": "The API server the whole ecosystem queries (9 stars) over a hackathon repo pinned to a deprecated Stellar SDK. A dead SDK pin is an affirmative finding about a reference's quality, not a missing datum."
 		}
 	]
 }
