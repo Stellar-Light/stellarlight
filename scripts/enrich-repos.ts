@@ -22,6 +22,7 @@ import {
 } from "../src/lib/github";
 import { repoGrade,
 	isFirstParty,
+	FIRST_PARTY_OWNERS,
 } from "../src/lib/repo-grade";
 import {
 	type AuditRecord,
@@ -293,6 +294,40 @@ async function main() {
 			orgByLogin.set(key, { login, project: p });
 		}
 	}
+	// The orgs that publish the protocol are indexed because they publish it —
+	// not because some product's record happens to name them.
+	//
+	// Until 2026-09-07 org fan-out was driven ENTIRELY by project rows carrying
+	// a bare-org github link, so SDF's presence in the index was an accident:
+	// `stellar` is expanded only because Freighter, MoneyGram and the Laboratory
+	// each list orgLogin=stellar. `stellar-experimental` — "Experiments at the
+	// frontier of the Stellar Development Foundation", 30 repos, all Stellar —
+	// is named by NO project row, so 18 of its 30 repos were absent from the
+	// index: henyey (a pure-Rust Stellar Core), stellar-spec (the protocol
+	// specifications), the Zig and C Soroban SDKs, contract-verifications, and
+	// stellar-raven itself.
+	//
+	// Seeded with a synthetic owner carrying no slug and zero prominence, so
+	// these repos inherit NO project authority and stand on their own merit plus
+	// the firstParty term in repoGrade. Never overrides a real project link: a
+	// first-party org a project already claims keeps that attribution.
+	const FIRST_PARTY_SEED: Doc = {
+		slug: undefined,
+		name: undefined,
+		prominence: 0,
+		provenance: { source: "FirstParty" },
+	};
+	let seeded = 0;
+	for (const owner of FIRST_PARTY_OWNERS) {
+		if (orgByLogin.has(owner)) continue;
+		orgByLogin.set(owner, { login: owner, project: FIRST_PARTY_SEED });
+		seeded++;
+	}
+	if (seeded)
+		console.log(
+			`Seeded ${seeded} first-party org(s) no project row names: ${[...FIRST_PARTY_OWNERS].filter((o) => orgByLogin.get(o)?.project === FIRST_PARTY_SEED).join(", ")}`,
+		);
+
 	// Stellar relevance gate: a bare-org link to a multi-chain org (Axelar,
 	// Allbridge, Pendulum) otherwise drags dozens of Cosmos/EVM/unrelated repos
 	// into the code-reference index. A DEDICATED Stellar org (most repos signal)
