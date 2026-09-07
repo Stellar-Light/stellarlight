@@ -36,6 +36,7 @@ import {
 	WEBSITE_FIXES,
 	GITHUB_LINK_REMOVE,
 	WEBSITE_REMOVE,
+	WEBSITE_REMOVE_DEAD,
 } from "./curation-maps";
 
 /** Stored repo entries, normalised and deduped. An entry that names no GitHub
@@ -2445,8 +2446,11 @@ async function main() {
 		});
 	}
 
-	console.log("\n── Website removals (hijacked domains, value-keyed) ──");
-	for (const [slug, hijacked] of Object.entries(WEBSITE_REMOVE)) {
+	console.log("\n── Website removals (hijacked + dead, value-keyed) ──");
+	for (const [slug, hijacked] of Object.entries({
+		...WEBSITE_REMOVE,
+		...WEBSITE_REMOVE_DEAD,
+	})) {
 		const r = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: slug } },

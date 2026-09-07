@@ -2324,6 +2324,12 @@ export const PROMINENCE_SET: Record<string, number> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// check-links 2026-09-07: the cited blog post 404s but the operator's site
+	// is alive — and its own menu now reads "Descontinuação tokens BRL", the
+	// operator saying the BRL tokens are discontinued. Relinked to the site;
+	// the discontinuation is a status question for a human, not a link fix.
+	brl: "https://ntokens.com/",
+
 	// Case-mangled at seed (audit C2): github.io paths are case-sensitive;
 	// the stored all-lowercase path 404s while the real page serves.
 	chaincred: "https://prince29chouhan.github.io/ChainCred_landing/",
@@ -5017,6 +5023,68 @@ export const GITHUB_LINK_REMOVE: Record<string, string> = {
 	"wallet-guru": "https://github.com/WalletGuruLLC/paystreme",  // owner has 10 repos, none close
 	"walletban": "https://github.com/darthbenro008/walletban",  // owner has 100 repos, none close
 	"warmancer": "https://github.com/towa-hi/solid-parakeet",  // owner has 4 repos, none close
+};
+
+/**
+ * Dead website citations, value-keyed to the EXACT stored URL (same discipline
+ * as the entries above). Found by check-links and re-probed 2026-09-07 with
+ * redirects followed, 5xx treated as no verdict, and DNS failure separated
+ * from transport failure; every "domain does not resolve" below was confirmed
+ * against two public resolvers, not one local lookup.
+ *
+ * A dead link is a dead CITATION and never a status change on its own — the
+ * rule the 2026-09-02 batch above already states.
+ *
+ * One correction worth keeping: stellarupdate.com answers 200 with a default
+ * nginx welcome page. A probe that only counts readable characters called it
+ * alive; it is an unconfigured server, not a product.
+ */
+export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
+	"0xauth": "https://0xauth.co",  // domain does not resolve
+	"adamik": "https://adamik.io",  // HTTP 404
+	"aerochain": "https://aerochain.wingleet.com/redoc",  // domain does not resolve
+	"apay": "https://apay.io",  // HTTP 404
+	"arcturus": "https://arcturus-gpt.com",  // domain does not resolve
+	"basement": "https://basement.dev",  // HTTP 404
+	"benkiko": "https://benkiko.xyz",  // domain does not resolve
+	"bigger": "https://biggertech.co",  // "registered with gandi"
+	"borderdollar": "https://borderdollar.co",  // HTTP 404
+	"bravepay": "https://bravepay.net",  // domain does not resolve
+	"canfy": "https://canfy.net",  // domain does not resolve
+	"chainsatlas": "https://chainsatlas.com",  // HTTP 404
+	"cosmiclink": "https://cosmic.link",  // domain does not resolve
+	"cosmicvote": "https://cosmic.vote",  // domain does not resolve
+	"cryptocannoneer": "https://blockshangerous.com/cryptocannoneer",  // domain does not resolve
+	"digicus": "https://digicus.dev",  // HTTP 404
+	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi",  // domain does not resolve
+	"equilibre": "https://equilibre.io",  // domain does not resolve
+	"forge": "https://forgerpc.com",  // domain does not resolve
+	"getpaid": "https://getpaid.africa",  // domain does not resolve
+	"lumenaut": "https://pool.lumenaut.net",  // domain does not resolve
+	"lumens-for-charity": "https://lumensforcharity.tech",  // domain does not resolve
+	"mxlet": "https://xlet.io",  // domain does not resolve
+	"opensolar": "https://openx.solar",  // domain does not resolve
+	"paygo-crypto": "https://paygocrypto.io",  // domain does not resolve
+	"ping": "https://letsping.com",  // HTTP 404
+	"qolaq": "https://qolaq.org",  // HTTP 404
+	"rigel": "https://rigel.link",  // domain does not resolve
+	"skeeper": "https://skeeper.xyz",  // domain does not resolve
+	"slender": "https://slender.fi",  // domain does not resolve
+	"snnac": "https://snnac.me",  // domain does not resolve
+	"soroban-assistant": "https://soroban-assistant.herokuapp.com",  // HTTP 404
+	"soroban-learn": "https://sorobanlearn.com",  // domain does not resolve
+	"sorobanide": "https://sorobanide.com",  // domain does not resolve
+	"sorosorcerer": "https://sorosorcerer.com",  // domain does not resolve
+	"sorscan": "https://sorscan.org",  // domain does not resolve
+	"stellar-global": "https://stellarglobal.community",  // domain does not resolve
+	"stellar-update": "https://stellarupdate.com",  // default nginx welcome page — an unconfigured server, not a pro
+	"stellarpay": "https://stellarpay.io",  // domain does not resolve
+	"stellarstrides": "https://stellarstrides.xyz",  // domain does not resolve
+	"stex": "https://stex.xycloo.com",  // domain does not resolve
+	"stride": "https://stride.social",  // HTTP 404
+	"tribal": "https://tribal.credit",  // "registered with gandi"
+	"vitreous": "https://vitreous.co",  // domain does not resolve
+	"websoroban-ide": "https://websoroban.vercel.app",  // HTTP 404
 };
 
 export const WEBSITE_REMOVE: Record<string, string> = {
