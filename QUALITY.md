@@ -669,6 +669,54 @@ gate correctly declines. Discovery over the 586 no-repo Live/Development rows
 confirmed 82 owners by intersection; 70 already stored the right link, and the
 12 that did not were written (#1414).
 
+### Second wide sweep (2026-09-07, 00:00–01:30 UTC)
+
+Same method, run again after the first round of fixes. Three more instruments
+were reporting health they had not earned, and all three were mine.
+
+**A third credential gap, and this one printed "ok".** `check-raven-drift`
+read its token from the environment only; with none present it pushed a warning
+note, skipped the entire catalog half, and fell through to the success line at
+exit 0. Same shape as the truth battery's "0 fail" with four slices dead. It now
+resolves the durable token lazily (that file deliberately has no top-level
+import, to stay in global scope) and exits 2 INCONCLUSIVE with no credential.
+
+**Running, it then accused Raven of dropping two operations.** `vetIdea` and
+`partnerOnboard` came back "missing beyond grace — worth a (polite) upstream
+ping". Both were wrong:
+
+- `vetIdea` **ranks first** for "should i build this on stellar", tested
+  directly. The sweep unions 14 vocabulary queries and none of them asked an
+  idea-vetting question. **The query list IS the instrument's reach.**
+- `partnerOnboard` is `x-side-effecting: true`, deliberately outside the agent
+  research surface — a research sweep must never expect it.
+
+The guard now probes the sandbox for every suspect and splits **callable but
+undiscovered** (ours) from **missing** (theirs), and the expected set excludes
+side-effecting ops. End state: 30 catalog ops against 30 claimed, three lagging
+inside grace, zero missing. Manufacturing upstream complaints out of our own
+blind spots is precisely what the catalog-lag rule exists to prevent.
+
+**P5, measured before writing.** Knowledge notes cover 193 of 2,361
+project-linked repos. The gap is not evenly valuable, so the batch targets rows
+where a consumer is actively misled — multi-repo projects whose repo NAME does
+not say which half of the product it is. Four notes, each quoting the repo's own
+README: the Aquarius governance frontend (despite a `-soroban` suffix), Slender's
+UI, Blend's bootstrapper interface (whose contracts live in a repo its README
+links), and the Sorosan SDK/client pair told apart only by package name. Two
+candidates got **no** note on purpose: their READMEs are unmodified
+create-next-app boilerplate, and "this repo has no description" is not a fact
+worth publishing.
+
+**Two negative results worth recording, so nobody "fixes" them later.**
+85 of 100 contracts carry no project — every one of them from a repo that
+genuinely has no project link, so the join is honest, not missing. And 142 of
+171 builders show `projectCount: 0` while the code-derived join under
+`onStellar.builds` is correct and populated; the api-reference already directs
+consumers there. I also built a repo-misattribution detector and **threw it
+away**: it flagged 1,789 of 2,361 rows, nearly all correct. A guard that cries
+wolf on three quarters of its population is worse than no guard.
+
 ### Wide-sweep addendum (2026-09-06, 22:30–00:00 UTC)
 
 Running every guard wide, plus both eval engines, on the theory that a guard
