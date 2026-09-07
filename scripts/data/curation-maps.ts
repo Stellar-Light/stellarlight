@@ -5060,6 +5060,18 @@ export const GITHUB_LINK_REMOVE: Record<string, string> = {
  * alive; it is an unconfigured server, not a product.
  */
 export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
+	// ── 2026-09-07, second pass: four rows store a GitHub url in
+	// links.website. Same free-text-in-a-typed-field shape as orgLogin,
+	// github.repos[] and links.github before it — fourth field. Each repo
+	// also 404s, so the value is wrong twice over.
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"teken": "https://github.com/moonbite-gmbh/multisig-ui",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"mimoto": "https://github.com/nkoorty/mimoto",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"soroban-optimistic-oracle": "https://github.com/stackman27/soroban-opt-oracle",
 	"0xauth": "https://0xauth.co",  // domain does not resolve
 	"adamik": "https://adamik.io",  // HTTP 404
 	"aerochain": "https://aerochain.wingleet.com/redoc",  // domain does not resolve
