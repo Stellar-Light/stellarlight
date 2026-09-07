@@ -44,7 +44,7 @@ import "./load-env";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getPayload } from "payload";
+import { getPayloadOrInconclusive } from "./lib/payload-connect";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
 import {
 	type LinkStatus,
@@ -595,7 +595,7 @@ async function main() {
 	console.log(`Curator Agent — Link health checker`);
 	console.log(`Mode: ${EXECUTE ? "EXECUTE (writes to DB)" : "DRY RUN"}\n`);
 
-	const payload = await getPayload({ config: await configPromise });
+	const payload = await getPayloadOrInconclusive(await configPromise);
 	const urls = await collectAllUrls(payload);
 
 	const entries: UrlEntry[] = Array.from(urls.entries()).map(
@@ -891,7 +891,24 @@ async function main() {
 	process.exit(writeFailed ? 1 : 0);
 }
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
+/**
+ * A crash is NOT a finding. Exit 1 is this guard's declared signal — "I looked
+ * and something is wrong with the data" — and a database that would not
+ * connect used to exit 1 too, so an outage was indistinguishable from a
+ * defect: the same red, chased the same way, for a problem that is not in the
+ * data at all. Exit 2 is "I could not look", which every other guard here
+ * already uses.
+ */
+main().catch((e) => {
+	const msg = String((e as Error)?.message ?? e);
+	const cannotReach =
+		/bad auth|authentication failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|connect ECONN|MongoServerSelectionError|getaddrinfo/i.test(
+			msg,
+		);
+	console.error(
+		cannotReach
+			? `INCONCLUSIVE: could not reach the store — ${msg.slice(0, 160)}. No verdict.`
+			: `INCONCLUSIVE (did not complete): ${msg.slice(0, 200)}`,
+	);
+	process.exit(2);
 });

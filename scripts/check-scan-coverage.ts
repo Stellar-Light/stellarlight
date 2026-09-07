@@ -19,7 +19,7 @@
  */
 
 import "./load-env";
-import { getPayload } from "payload";
+import { getPayloadOrInconclusive } from "./lib/payload-connect";
 import config from "../src/payload.config";
 
 const PRIORITY_SCORE = 50;
@@ -27,7 +27,7 @@ const PRIORITY_STARS = 25;
 const STALE_DAYS = 45;
 
 async function main() {
-	const payload = await getPayload({ config });
+	const payload = await getPayloadOrInconclusive(config);
 	const res = await payload.find({
 		collection: "repos",
 		limit: 3000,
@@ -113,7 +113,24 @@ async function main() {
 	process.exit(0);
 }
 
+/**
+ * A crash is NOT a finding. Exit 1 is this guard's declared signal — "I looked
+ * and something is wrong with the data" — and a database that would not
+ * connect used to exit 1 too, so an outage was indistinguishable from a
+ * defect: the same red, chased the same way, for a problem that is not in the
+ * data at all. Exit 2 is "I could not look", which every other guard here
+ * already uses.
+ */
 main().catch((e) => {
-	console.error("Fatal:", e);
-	process.exit(1);
+	const msg = String((e as Error)?.message ?? e);
+	const cannotReach =
+		/bad auth|authentication failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|connect ECONN|MongoServerSelectionError|getaddrinfo/i.test(
+			msg,
+		);
+	console.error(
+		cannotReach
+			? `INCONCLUSIVE: could not reach the store — ${msg.slice(0, 160)}. No verdict.`
+			: `INCONCLUSIVE (did not complete): ${msg.slice(0, 200)}`,
+	);
+	process.exit(2);
 });
