@@ -770,6 +770,133 @@ interface AvailabilityRow {
 	note?: string;
 }
 const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
+	// ── Store evidence 2026-09-07. Every listing below was found on the
+	// PROJECT'S OWN SITE, never by searching a store for the project's name:
+	// the operator publishing their own store link IS the intersection, and a
+	// name search is the collision trap that cost 26 of 31 matches on the
+	// package-registry pass. Release dates come from Apple's lookup API by id
+	// and Play's "Updated on"; all 13 shipped a build within 90 days.
+	// Three ship under a product name that differs from the row (fastbuka →
+	// "Choppaddi", providencia-onchain → "VIIO", utoken → "Upesa") — kept,
+	// because the link came from their own site, and named here so the
+	// mismatch is visible rather than silently resolved.
+	"akuna": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Akuna Wallet — release 2026-08-31, found via the project's own site",
+		},
+	],
+	"bousol": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Bousol Wallet - Paon Bleu Inc. — release 2026-08-26, found via the project's own site",
+		},
+	],
+	"dollarize": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Dollarize: USD Account — release 2026-08-10, found via the project's own site",
+		},
+	],
+	"ebioro": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
+			checkedAt: "2026-09-07",
+			note: "ebioro — release 2026-09-06, found via the project's own site",
+		},
+	],
+	"fastbuka": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Choppaddi — release 2026-08-03, found via the project's own site",
+		},
+	],
+	"fewticket": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Fewticket — release 2026-09-02, found via the project's own site",
+		},
+	],
+	"freedom-pay-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Freedom Pay Wallet — release 2026-07-16, found via the project's own site",
+		},
+	],
+	"meru": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Meru | Cuenta en dólares — release 2026-09-06, found via the project's own site",
+		},
+	],
+	"providencia-onchain": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
+			checkedAt: "2026-09-07",
+			note: "VIIO — release 2026-08-31, found via the project's own site",
+		},
+	],
+	"scopex": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Scopex — release 2026-08-28, found via the project's own site",
+		},
+	],
+	"seevcash": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Seevcash: Send Money Anywhere — release 2026-09-06, found via the project's own site",
+		},
+	],
+	"utoken": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Upesa — release 2026-08-19, found via the project's own site",
+		},
+	],
+	"yolat": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Yolat — release 2026-09-04, found via the project's own site",
+		},
+	],
 	xbull: [
 		{
 			platform: "web",
