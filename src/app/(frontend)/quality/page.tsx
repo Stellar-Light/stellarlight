@@ -183,17 +183,23 @@ function Card({
 			<span className={`${dot} -top-[3px] -right-[3px]`} />
 			<span className={`${dot} -bottom-[3px] -left-[3px]`} />
 			<span className={`${dot} -bottom-[3px] -right-[3px]`} />
-			<div className="flex items-start justify-between gap-4 px-5 pt-5 pb-3">
-				<div>
-					<h2 className="text-base font-semibold text-foreground">{title}</h2>
+			{/* Stacks on mobile: at 375px a three-line title and the right-hand
+			    link were sharing a row, so the heading wrapped into the link. */}
+			<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-4 px-5 pt-5 pb-3">
+				<div className="min-w-0">
+					<h2 className="text-base font-semibold text-foreground text-balance">
+						{title}
+					</h2>
 					{description && (
-						<p className="text-xs text-muted-foreground mt-1 max-w-xl">
+						<p className="text-xs text-muted-foreground mt-1 max-w-xl leading-relaxed">
 							{description}
 						</p>
 					)}
 				</div>
 				{right && (
-					<div className="text-xs text-muted-foreground shrink-0">{right}</div>
+					<div className="text-xs text-muted-foreground shrink-0 order-first sm:order-none self-start">
+						{right}
+					</div>
 				)}
 			</div>
 			<div className="px-5 pb-5">{children}</div>
@@ -236,10 +242,10 @@ export default function QualityPage() {
 					Data quality
 				</h1>
 				<p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-					Every number below is read from a committed engine artifact, this page
-					cannot say anything the runs didn&apos;t measure. Each stat links its
-					reproducible evidence; each figure carries the date it was measured.
-					The standing promises behind these guards live in{" "}
+					Every number here is read from a committed engine artifact, so this
+					page cannot say anything the runs did not measure. Each figure links
+					its evidence and carries the date it was taken. The standing promises
+					live in{" "}
 					<a
 						href={evidenceUrl("DATA_SLA.md")}
 						target="_blank"
@@ -262,7 +268,7 @@ export default function QualityPage() {
 				return (
 					<Card
 						title="Verdict: where this data stands right now"
-						description="Derived from the guard states below, not written by hand. A guard is at target only when its evidence is both passing and fresh; below-target rows carry their own work queue, and aged evidence counts as unmeasured, never as passing."
+						description="Derived from the guard states below, not written by hand."
 						right={
 							<a
 								href="/api/quality"
