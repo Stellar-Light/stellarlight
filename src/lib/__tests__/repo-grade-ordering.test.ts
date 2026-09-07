@@ -266,18 +266,102 @@ describe("code evidence outranks institutional recognition", () => {
 		expect(dead.score).toBeLessThan(unknown.score);
 	});
 
-	it("an unscanned repo is not scored as though it failed the scan", () => {
-		// Absence of a reading is not a negative reading: dropping the code terms
-		// must renormalize, not zero them.
+	it("measuring a repo never costs it — scanning and finding nothing ties with never looking", () => {
+		// This test originally asserted `unscanned > scannedEmpty`, which encoded
+		// the defect rather than the rule: a 1,000-star, fresh, documented repo
+		// scored 57 unscanned and 40 once scanned without a test directory, so
+		// running the scan lane over a repo could only hurt it. Absence of a
+		// reading and a reading that found nothing must land in the same place;
+		// only a reading that finds something may move the number.
 		const base = {
 			lastCommitAt: new Date().toISOString(),
 			stargazerCount: 400,
 			hasDescription: true,
 			topicCount: 4,
 		};
-		const unscanned = repoGrade(base);
-		const scannedEmpty = repoGrade({ ...base, codeScanned: true });
-		expect(unscanned.score).toBeGreaterThan(scannedEmpty.score);
+		expect(repoGrade({ ...base, codeScanned: true }).score).toBe(
+			repoGrade(base).score,
+		);
+		// And a scan that DOES find something still moves it up.
+		expect(
+			repoGrade({
+				...base,
+				codeScanned: true,
+				testsPresent: true,
+				ciPresent: true,
+			}).score,
+		).toBeGreaterThan(repoGrade(base).score);
+	});
+
+	it("an afternoon of GitHub cosmetics cannot buy a strong reference", () => {
+		// tests + CI + an annual tag + a pinned SDK are each minutes of work, and
+		// together they used to bid 0.95 corroboration — tying with the protocol
+		// foundation — which left a 5/5-judged hackathon on the official starter
+		// kit at 81/high after the funding fix was already in.
+		const scaffold = {
+			lastCommitAt: new Date().toISOString(),
+			stargazerCount: 0,
+			hasDescription: true,
+			topicCount: 1,
+			codeScanned: true,
+			testsPresent: true,
+			ciPresent: true,
+			lastReleaseAt: new Date().toISOString(),
+			versionStatus: "current",
+			contractInterfaceCount: 15,
+			judgeScore: 1.0,
+			codeDepth: 0.9,
+			stellarProof: "cargo-sdk",
+		};
+		expect(repoGrade(scaffold).score).toBeLessThan(70); // not "high"
+	});
+
+	it("adoption has proxies other than stars, and they are not free", () => {
+		// A 30%-of-ownMerit slot only stars could fill capped a perfect 3-star
+		// repo at 76 while the same repo at 700 stars reached 89.
+		const lib = {
+			lastCommitAt: new Date().toISOString(),
+			stargazerCount: 3,
+			hasDescription: true,
+			topicCount: 6,
+			codeScanned: true,
+			testsPresent: true,
+			ciPresent: true,
+			lastReleaseAt: new Date().toISOString(),
+			versionStatus: "supported",
+			contractInterfaceCount: 48,
+			codeDepth: 0.45,
+			stellarProof: "cargo-sdk",
+			commits90d: 95,
+			knowledgeNoteCount: 6,
+		};
+		const bare = repoGrade(lib).score;
+		// A registry serving this repo's packages: 0 of 25 sampled hackathon
+		// repos had one, though 18 declared a package.json name.
+		expect(repoGrade({ ...lib, publishedPackageCount: 9 }).score).toBeGreaterThan(
+			bare,
+		);
+		// A human naming it canonical is domain knowledge a star count proxies badly.
+		expect(repoGrade({ ...lib, curatedCanonical: true }).score).toBeGreaterThan(
+			bare,
+		);
+	});
+
+	it("a release decays rather than falling off a cliff at one year", () => {
+		const d = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+		const base = {
+			lastCommitAt: new Date().toISOString(),
+			stargazerCount: 50,
+			hasDescription: true,
+			codeScanned: true,
+			testsPresent: true,
+		};
+		const at364 = repoGrade({ ...base, lastReleaseAt: d(364) }).score;
+		const at400 = repoGrade({ ...base, lastReleaseAt: d(400) }).score;
+		const at1200 = repoGrade({ ...base, lastReleaseAt: d(1200) }).score;
+		// 364 → 366 used to swing the full 0.3, rewarding an annual re-tag.
+		expect(at364 - at400).toBeLessThanOrEqual(2);
+		expect(at400).toBeGreaterThan(at1200);
 	});
 
 	it("deep code that nobody has touched in two years is a weaker reference", () => {
