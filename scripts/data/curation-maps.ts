@@ -4933,6 +4933,92 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
  * not follow the historical link"; this removes it. Keyed to the exact
  * hijacked value so a later legitimate relink can never be clobbered.
  */
+/**
+ * links.github values that are dead citations, value-keyed to the EXACT
+ * stored URL so a later legitimate relink is never clobbered (same discipline
+ * as WEBSITE_REMOVE).
+ *
+ * Two classes, both found by check-links (2026-09-07), which had been proving
+ * these broken daily with nothing consuming the result:
+ *
+ *  - NOT A GITHUB PATH: the stored value is another host with
+ *    "https://github.com/" prefixed onto it — gitlab.com project pages, a
+ *    Google Doc, an API endpoint. The entity page renders links.github under a
+ *    GitHub icon labelled "GitHub", so a GitLab URL there is a lie about where
+ *    the code lives, and the mangled form 404s anyway. The real URL is kept in
+ *    the comment beside each entry so nothing is lost when a generic
+ *    source-repo field exists to hold it.
+ *  - GONE: the repo 404s and the owner has no repository that survives an
+ *    intersection check. A fuzzy name match found 7 candidates and only ONE
+ *    (normal) had corroborating evidence — its repo homepage is the project
+ *    site — so it is a GITHUB_LINK_FIX above and the other six were rejected.
+ *    A name is a hypothesis; a link is evidence.
+ */
+export const GITHUB_LINK_REMOVE: Record<string, string> = {
+	// ── not a GitHub path (real URL noted; the stored value 404s) ──
+	// real: https://gitlab.com/b4b-world
+	"b4b": "https://github.com/gitlab.com/b4b-world",
+	// real: https://gitlab.com/dolphinze/disbursements
+	"dolphinze": "https://github.com/gitlab.com/dolphinze/disbursements",
+	// real: a Google Doc, not a repo
+	"payrit": "https://github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
+	// real: https://gitlab.com/rivool-finance/stellar-contracts
+	"rivool-finance": "https://github.com/gitlab.com/rivool-finance/stellar-contracts",
+	// real: https://dev-api-new.skopadev.com/api (an API endpoint, not a repo)
+	"skopa": "https://github.com/dev-api-new.skopadev.com/api#",
+	// real: https://gitlab.com/soroban-explorer
+	"soroban-explorer": "https://github.com/gitlab.com/soroban-explorer",
+	// real: https://gitlab.com/tales
+	"source-of-tales": "https://github.com/gitlab.com/tales",
+	// ── repo gone; owner has nothing that passes an intersection check ──
+	"6a2a4efab6c85e93c7be0090": "https://github.com/gustavo-f0ntz",  // owner account gone
+	"ai-transparency-token": "https://github.com/falparis/aitt",  // closest of 3 repos
+	"bingtellar": "https://github.com/bingtellar/bingtellar-serverside",  // owner has 2 repos, none close
+	"cartwey": "https://github.com/Cartwey001/cartwey-app",  // closest of 1 repos
+	"cede": "https://github.com/cedelabs/sdk-examples",  // owner has 5 repos, none close
+	"centiiv": "https://github.com/centiiv/protocol-node",  // owner has 1 repos, none close
+	"coinsender": "https://github.com/megadev-ou/cs-payments",  // owner has 9 repos, none close
+	"didstellar": "https://github.com/mavennet/stellar-did",  // owner has 30 repos, none close
+	"elsa": "https://github.com/elsa-care",  // owner account gone
+	"forestio": "https://github.com/forest-io/ForestConsumerWeb",  // owner has 3 repos, none close
+	// Stored form is the capitalised one; GitHub is case-insensitive so both
+	// 404 identically, and the value guard has to match what the row holds.
+	"gecko-fuzz": "https://github.com/jjjutla/GeckoFuzz",  // owner has 5 repos, none close
+	"interlinked": "https://github.com/antontat27/interlinked-backend",  // closest of 7 repos
+	"jetpad": "https://github.com/jetpad-digital-limited/jetpad-wallet",  // owner has no public repos
+	"js-capacitor-passkey-kit": "https://github.com/argo-navis-dev/js-capacitor-passkey-kit",  // closest of 6 repos
+	"lettuce": "https://github.com/stellar-merchants",  // owner account gone
+	"metafyed": "https://github.com/nasdex-marketplace/md-stellar_wallet_service",  // owner has no public repos
+	"mimoto": "https://github.com/nkoorty/mimoto",  // owner has 14 repos, none close
+	"minah": "https://github.com/gakpe/minah_blockchain_v0.2",  // owner has 14 repos, none close
+	"muwp": "https://github.com/muwpay-uniswapper/muwp-stellar",  // owner has 1 repos, none close
+	"nemorixpay": "https://github.com/nemorixpay",  // owner account gone
+	"nobak": "https://github.com/nobak-net/nobak-mobile",  // owner has 4 repos, none close
+	"paystreme": "https://github.com/walletgurullc/paystreme",  // owner has 10 repos, none close
+	"plutope": "https://github.com/plutopein/plutope-merchant-stellar",  // owner has no public repos
+	"polaris-lend": "https://github.com/jet-lab/polaris",  // owner has 17 repos, none close
+	"proofbridge": "https://github.com/explore-beyond-innovations/proofbridge",  // closest of 19 repos
+	"prophe": "https://github.com/seunsanyaa/prophe",  // owner has 39 repos, none close
+	"satellite": "https://github.com/spaceboatdvlp/hello-soroban",  // owner has 10 repos, none close
+	"scalps": "https://github.com/imobi/scalps-core-api",  // owner has 16 repos, none close
+	"sollpay": "https://github.com/mercury-labs-dev/stellar-sollpay",  // owner has 3 repos, none close
+	"soroban-optimistic-oracle": "https://github.com/stackman27/soroban-opt-oracle",  // owner has 37 repos, none close
+	"soroban-polygon-interop": "https://github.com/wanchain/message-bridge-contracts",  // owner has 13 repos, none close
+	"sorobuilder": "https://github.com/luisao8/sorobuilder",  // owner has 17 repos, none close
+	"sorosorcerer": "https://github.com/nossicasystems/soroban_extend",  // owner has 9 repos, none close
+	"talwex": "https://github.com/talwex-inc/stellar-vault",  // owner has 1 repos, none close
+	"tauvlo": "https://github.com/tauvlo",  // owner account gone
+	"teken": "https://github.com/moonbite-gmbh/multisig-ui",  // owner has 1 repos, none close
+	"tracee": "https://github.com/Tracee1910/tracee-app",  // owner has no public repos
+	"transfermole": "https://github.com/ivandzen/transfermole",  // closest of 35 repos
+	"tumbl": "https://github.com/cordilleradev",  // owner account gone
+	"utoken": "https://github.com/utokens",  // owner account gone
+	"vanna-finance": "https://github.com/vannafinance/protocol_v1_soroban",  // owner has 5 repos, none close
+	"wallet-guru": "https://github.com/WalletGuruLLC/paystreme",  // owner has 10 repos, none close
+	"walletban": "https://github.com/darthbenro008/walletban",  // owner has 100 repos, none close
+	"warmancer": "https://github.com/towa-hi/solid-parakeet",  // owner has 4 repos, none close
+};
+
 export const WEBSITE_REMOVE: Record<string, string> = {
 	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
 	"the-blue-marble": "https://thebluemarble.io/",
