@@ -42,6 +42,193 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── 2026-09-07, third batch: the tail of the board's named gap. Three are
+	// internal triage (an empty README states nothing; a withdrawn row is a
+	// judgment, not a published fact about someone's repo).
+	"AssetDesk/Smart-Contracts": [
+		{
+			note: "README (read 2026-09-07): \"This repository contains the smart contracts for an implementation of the AssetDesk. AssetDesk is a decentralized non-custodial liquidity protocol.\" The contracts live here; AssetDesk/front is the interface. Rust, last commit 2024-02-16, and assetdesk.xyz resolves but answers nothing. https://github.com/AssetDesk/Smart-Contracts",
+			triggers: ["assetdesk contracts", "assetdesk liquidity protocol"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"CollaborativeEconomics/give-credit": [
+		{
+			note: "README (read 2026-09-07): \"GIVE-CREDIT — donations app in Stellar network … donate to causes you believe in with XLM, save the world retiring carbon credits.\" GitHub description: \"Donate to offset carbon credits.\" https://github.com/CollaborativeEconomics/give-credit",
+			triggers: ["carbon credit donations stellar", "give credit xlm"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"EduNodeOrg/edunode-governance": [
+		{
+			note: "README (read 2026-09-07): \"edunode.org – Phase IV: Decentralized Governance & Certification Ecosystem for a MOOC Platform\", an R&D project. One phase of a larger platform, not the platform. https://github.com/EduNodeOrg/edunode-governance",
+			triggers: ["edunode governance", "mooc certification stellar"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Glo-Foundation/glo-wallet": [
+		{
+			note: "README (read 2026-09-07): \"The Glo Wallet is a web3 dApp created by the Glo Foundation\" for glodollar.org. Glo Dollar is a multi-chain stablecoin, so this repo is not Stellar-specific work. https://github.com/Glo-Foundation/glo-wallet",
+			triggers: ["glo dollar wallet", "glodollar dapp"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Lobster-Protocol/stellar": [
+		{
+			note: "README (read 2026-09-07): \"A comprehensive Automated Market Maker (AMM) aggregation and analytics platform for the Stellar/Soroban ecosystem.\" An aggregator over other venues rather than an AMM of its own. https://github.com/Lobster-Protocol/stellar",
+			triggers: ["amm aggregator stellar", "lobster protocol analytics"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"NibrasD/stellar-transaction-visualizer": [
+		{
+			note: "README (read 2026-09-07): \"A powerful visualization tool and SDK for Stellar blockchain transactions with advanced Soroban smart contract support.\" Same author as the SCF #44 VRF work. https://github.com/NibrasD/stellar-transaction-visualizer",
+			triggers: ["stellar transaction visualizer", "soroban transaction sdk"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"authentication-labs/0xauth-stellar": [
+		{
+			note: "README (read 2026-09-07): \"0xAuth Stellar Contracts\" with a single \"identity\" contract in the standard Soroban layout. The project's own domain 0xauth.co no longer resolves (NXDOMAIN on 1.1.1.1 and 8.8.8.8, 2026-09-07), so this repo is the only surface left. https://github.com/authentication-labs/0xauth-stellar",
+			triggers: ["0xauth identity contract", "stellar identity soroban"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"freelii/freelii-core": [
+		{
+			note: "README (read 2026-09-07): \"Freelii is a non-custodial crypto wallet built on the Stellar blockchain, designed for remittances, P2P payments.\" GitHub description adds \"USDC Business Bank Account\". https://github.com/freelii/freelii-core",
+			triggers: ["freelii wallet remittances", "non-custodial stellar wallet"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"keizai-tools/keizai-api": [
+		{
+			note: "GitHub description (read 2026-09-07): \"Keizai is a postman-like Soroban contract testing platform.\" This repo is the API half; the product is the platform. SCF #21 and #28, $84,000. https://github.com/keizai-tools/keizai-api",
+			triggers: ["keizai soroban testing", "postman for soroban"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"paltalabs/soroban-toolkit": [
+		{
+			note: "README (read 2026-09-07): \"Soroban Toolkit is a powerful library designed to simplify interactions with Stellar's Soroban smart contracts.\" One of several paltalabs libraries; distinct from paltalabs/stellar-react, which is the React binding. https://github.com/paltalabs/soroban-toolkit",
+			triggers: ["soroban toolkit library", "paltalabs soroban helpers"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"paltalabs/stellar-react": [
+		{
+			note: "README (read 2026-09-07): \"soroban-react with stellar wallets kit\" — the React binding layered on the Stellar Wallets Kit, and the successor line to paltalabs/soroban-react. https://github.com/paltalabs/stellar-react",
+			triggers: ["soroban react hooks", "stellar wallets kit react"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"siborg-ads/stellar-client": [
+		{
+			note: "README (read 2026-09-07): \"Siborg is a decentralized platform for managing and sponsoring advertising spaces as NFTs on the Stellar blockchain.\" https://github.com/siborg-ads/stellar-client",
+			triggers: ["advertising nft stellar", "siborg ad spaces"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"skyhitz/skyhitz": [
+		{
+			note: "README (read 2026-09-07): \"Skyhitz is a music and media platform with blockchain integration, allowing creators to tokenize and monetize their content.\" GitHub description: \"Crypto music chart\". https://github.com/skyhitz/skyhitz",
+			triggers: ["music tokenization stellar", "skyhitz platform"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"tupui/soroban-pumpit": [
+		{
+			note: "README (read 2026-09-07): \"The goal of this project is to explore with IOT and Soroban.\" The author's own framing is exploration, not a product. Same author as tansu. https://github.com/tupui/soroban-pumpit",
+			triggers: ["iot soroban experiment", "pumpit stellar"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"tupui/tansu-vault": [
+		{
+			note: "README (read 2026-09-07) is two lines: the vault at vault.tansu.dev, and a pointer to the tansu project's treasury page. The code is here; the explanation is in tansu. https://github.com/tupui/tansu-vault",
+			triggers: ["tansu vault", "tansu treasury"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Alkeops/It-s-not-another-package": [
+		{
+			note: "README (read 2026-09-07) opens with the author's own warning: \":warning: Preliminary development stage. Not for production use. Be careful!\" Carried rather than smoothed away. https://github.com/Alkeops/It-s-not-another-package",
+			triggers: ["alkeops package", "stellar decorators library"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Wadzzo2023/brand-wadzzo": [
+		{
+			note: "README (read 2026-09-07): \"Wadzzo Full Ecosystem\" with an \"AI-powered chat assistant that provides information about brands, locations\". The brand-facing half of the Wadzzo product. https://github.com/Wadzzo2023/brand-wadzzo",
+			triggers: ["wadzzo brand app", "wadzzo ecosystem"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Accelar-labs/accelar-studio": [
+		{
+			note: "README (read 2026-09-07): \"Accelar Studio — installation and dev environment\", and the same text appears verbatim in accelar-frontend-frax, accelar-plataform-frontend and educhain-accelar-frontend. Four repos, one README: the names are the only thing telling them apart, so none of them can be quoted as evidence about a specific surface. SCF #26, $33,000. https://github.com/Accelar-labs/accelar-studio",
+			triggers: ["accelar studio", "accelar frontends"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"damzylance/bigiftyxsoroban": [
+		{
+			note: "GitHub description (read 2026-09-07): \"Lightweight Bitgifty Dapp on Soroban\". The README is unmodified create-next-app boilerplate, so the description is the only fact this repo states about itself. https://github.com/damzylance/bigiftyxsoroban",
+			triggers: ["bitgifty soroban dapp"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"yripper/stellar-tools": [
+		{
+			note: "GitHub description (read 2026-09-07): \"Stellar tools\". The README is unmodified create-next-app boilerplate. Distinct from payrouteshq/stellartools and joaquinsoza/stellar-tools, which are different products with near-identical names. https://github.com/yripper/stellar-tools",
+			triggers: ["stellar tools yripper"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"AssetDesk/front": [
+		{
+			note: "Triage 2026-09-07: empty README, no GitHub description. The contracts repo AssetDesk/Smart-Contracts carries the product's own description; nothing here states a durable fact. Re-examine if it gains a package or a deployment. https://github.com/AssetDesk/front",
+			source: "curated",
+			asOf: "2026-09-07",
+			visibility: "internal",
+		},
+	],
+	"GRMarkkes/ArtCC": [
+		{
+			note: "Triage 2026-09-07: empty README, no GitHub description. The project row (art-club, SCF #26 $40,000) is the only source of context; the repo states nothing about itself. https://github.com/GRMarkkes/ArtCC",
+			source: "curated",
+			asOf: "2026-09-07",
+			visibility: "internal",
+		},
+	],
+	"jamiels/ramm.ai": [
+		{
+			note: "Triage 2026-09-07: the directory row was WITHDRAWN by the owner (\"RAMM is not related to stellar\"). The repo does hold Soroban contracts under soroban/factory and soroban/pool with a @stellar/stellar-sdk UI, but every network reference is FUTURENET and the last commit is 2024-04-16; ramm.ai now sells an unrelated AI marketspace. Kept so a future attribution pass does not re-add it. https://github.com/jamiels/ramm.ai",
+			source: "curated",
+			asOf: "2026-09-07",
+			visibility: "internal",
+		},
+	],
 	// ── 2026-09-07 batch: the /quality board named 49 curated-pool repos with
 	// no note. These are the ones whose own text carries a fact worth
 	// keeping — most often a correction: a package that announces its own
