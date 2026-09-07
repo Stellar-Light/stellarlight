@@ -507,7 +507,18 @@ async function main() {
 		// red three days on one truth-battery probe and the board showed
 		// every guard holding, because this file counted each red as a signal
 		// and moved on.
-		const standingSignal = !failing && failedSinceGreen.length >= 3;
+		// A checker must not be evidence about itself. This lane exits 1 to
+		// REPORT a standing signal, so once it had a red streak of its own it
+		// counted that streak, reported itself, exited 1 again, and could never
+		// reach the green run that would clear it. Nine runs deep on
+		// 2026-09-07, showing as the board's one breached guard, with nothing
+		// actually wrong underneath: the streak began as an INCONCLUSIVE from
+		// the workflows-endpoint paging bug, which is already fixed.
+		// Whether THIS lane runs is judged by whether it completed, which the
+		// run conclusion carries — never by the exit code it uses to speak.
+		const selfReport = file === "workflow-health.yml";
+		const standingSignal =
+			!selfReport && !failing && failedSinceGreen.length >= 3;
 		const stale =
 			automatic && age > grace && hadWorkSince && !failing && !standingSignal;
 		rows.push({
