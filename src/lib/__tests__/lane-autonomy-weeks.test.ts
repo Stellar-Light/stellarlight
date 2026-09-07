@@ -35,55 +35,66 @@ const run = (back: number, over: Partial<LaneRun> = {}): LaneRun => ({
 });
 
 describe("interventionFreeWeeks", () => {
-	it("counts consecutive unattended executes up to the current week", () => {
-		const runs = [0, 1, 2, 3].map((b) => run(b));
+	it("counts consecutive unattended executes up to the last COMPLETE week", () => {
+		// The current week is partial by definition and is never required: at
+		// 04:22 on a Monday every lane would otherwise read 0. Runs in weeks
+		// 1..4 are four complete weeks; the week-0 run is not needed.
+		const runs = [1, 2, 3, 4].map((b) => run(b));
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(4);
 	});
 
+	it("does not need a run in the partial current week", () => {
+		const runs = [1, 2].map((b) => run(b));
+		expect(interventionFreeWeeks(runs, [], NOW)).toBe(2);
+	});
+
 	it("earns nothing when the write step was skipped", () => {
-		const runs = [0, 1, 2, 3].map((b) =>
+		const runs = [1, 2, 3, 4].map((b) =>
 			run(b, { executeStepConclusion: "skipped" }),
 		);
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(0);
 	});
 
 	it("earns nothing from an unclassifiable run", () => {
-		const runs = [0, 1, 2, 3].map((b) =>
+		const runs = [1, 2, 3, 4].map((b) =>
 			run(b, { executeStepConclusion: null }),
 		);
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(0);
 	});
 
 	it("earns nothing from a human-dispatched execute", () => {
-		const runs = [0, 1, 2, 3].map((b) =>
+		const runs = [1, 2, 3, 4].map((b) =>
 			run(b, { event: "workflow_dispatch" }),
 		);
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(0);
 	});
 
 	it("counts a dispatch GitHub marks as a bot", () => {
-		const runs = [0, 1].map((b) =>
+		const runs = [1, 2].map((b) =>
 			run(b, { event: "workflow_dispatch", actorIsBot: true }),
 		);
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(2);
 	});
 
 	it("does not reach 4 on four non-consecutive weeks", () => {
-		// weeks 0, 1, 3, 4 — the gap at week 2 ends the count at 2.
-		const runs = [0, 1, 3, 4].map((b) => run(b));
+		// weeks 1, 2, 4, 5 — the gap at week 3 ends the count at 2.
+		const runs = [1, 2, 4, 5].map((b) => run(b));
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(2);
 	});
 
-	it("stops at the current week when this week has no run", () => {
-		const runs = [1, 2, 3, 4].map((b) => run(b));
+	it("stops at the last complete week when THAT week has no run", () => {
+		// A lane that stopped running still stops earning — one week later than
+		// before, which is the price of not resetting every Monday.
+		const runs = [2, 3, 4, 5].map((b) => run(b));
 		expect(interventionFreeWeeks(runs, [], NOW)).toBe(0);
 	});
 
 	it("resets on a logged intervention", () => {
-		const runs = [0, 1, 2, 3].map((b) => run(b));
-		const twoWeeksAgo = new Date(NOW - 2 * WEEK).toISOString().slice(0, 10);
-		// The intervention's own week is dirty, so the chain ends before it.
-		expect(interventionFreeWeeks(runs, [{ date: twoWeeksAgo }], NOW)).toBe(2);
+		const runs = [1, 2, 3, 4].map((b) => run(b));
+		const threeWeeksAgo = new Date(NOW - 3 * WEEK).toISOString().slice(0, 10);
+		// The intervention's own week is dirty, so the chain ends before it:
+		// weeks 1 and 2 count, week 3 does not.
+		expect(interventionFreeWeeks(runs, [{ date: threeWeeksAgo }], NOW)).toBe(2);
 	});
 
 	it("does not count an execute on the same day as the intervention", () => {
@@ -91,6 +102,9 @@ describe("interventionFreeWeeks", () => {
 		// One run today, and a correction logged today. Both the dirty-week rule
 		// and the end-of-day cutoff have to hold for this to be zero.
 		expect(interventionFreeWeeks([run(0)], [{ date: day }], NOW)).toBe(0);
+		// A run in the last complete week, corrected today, is also worth nothing:
+		// the cutoff is the end of the intervention's day.
+		expect(interventionFreeWeeks([run(1)], [{ date: day }], NOW)).toBe(0);
 		// …and the cutoff alone: a run earlier the same day, intervention week
 		// aside, must not be readable as evidence.
 		const earlier: LaneRun = {
@@ -102,8 +116,10 @@ describe("interventionFreeWeeks", () => {
 	});
 
 	it("counts the week after an intervention once the lane runs again", () => {
-		const lastWeek = new Date(NOW - WEEK).toISOString().slice(0, 10);
-		expect(interventionFreeWeeks([run(0)], [{ date: lastWeek }], NOW)).toBe(1);
+		const twoWeeksAgo = new Date(NOW - 2 * WEEK).toISOString().slice(0, 10);
+		expect(interventionFreeWeeks([run(1)], [{ date: twoWeeksAgo }], NOW)).toBe(
+			1,
+		);
 	});
 });
 
