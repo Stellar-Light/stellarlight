@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-07T22:20:31.783Z",
+	"asOf": "2026-09-07T23:05:43.744Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 93,
-	"healthy": 93,
+	"checked": 94,
+	"healthy": 94,
 	"broken": [],
 	"rows": [
 		{
@@ -55,10 +55,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T22:24:00Z",
-			"ageDays": 23,
+			"ageDays": 24,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 23d ago (manual tool — age not judged)"
+			"why": "last green 24d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -77,10 +77,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-15T22:34:25Z",
-			"ageDays": 22,
+			"ageDays": 23,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 22d ago (manual tool — age not judged)"
+			"why": "last green 23d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-contract-basis.yml",
@@ -92,6 +92,17 @@
 			"graceDays": 45,
 			"runs": 2,
 			"why": "last green 3d ago (manual tool — age not judged)"
+		},
+		{
+			"file": "backfill-knowledge-notes.yml",
+			"name": "Backfill knowledge notes",
+			"cron": "23 3 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-07T22:18:48Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "backfill-lifecycle.yml",
@@ -121,10 +132,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 26,
+			"ageDays": 27,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 26d ago (manual tool — age not judged)"
+			"why": "last green 27d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -154,10 +165,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-05T22:51:25Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 45,
 			"runs": 12,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"why": "last green 2d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -219,10 +230,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T22:16:48Z",
+			"lastSuccessAt": "2026-09-07T23:00:10Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 97,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -241,7 +252,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T22:18:40Z",
+			"lastSuccessAt": "2026-09-07T23:03:51Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -332,7 +343,7 @@
 			"lastSuccessAt": "2026-09-07T10:40:39Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 98,
 			"why": "last green 0d ago"
 		},
 		{
@@ -385,10 +396,10 @@
 			"cron": "0 6 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-05T22:46:57Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
 			"runs": 32,
-			"why": "last green 1d ago"
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "enrich-partner-onchain.yml",
@@ -626,7 +637,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T21:51:21Z",
+			"lastSuccessAt": "2026-09-07T23:00:10Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 98,
@@ -692,10 +703,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T23:40:01Z",
+			"lastSuccessAt": "2026-09-07T22:56:10Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 49,
+			"runs": 50,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -802,10 +813,10 @@
 			"name": "Regrade repos (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T19:27:22Z",
+			"lastSuccessAt": "2026-09-07T23:00:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 2,
+			"runs": 3,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -813,10 +824,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T18:45:46Z",
+			"lastSuccessAt": "2026-09-07T22:52:14Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 31,
+			"runs": 32,
 			"why": "last green 0d ago"
 		},
 		{
@@ -956,7 +967,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T22:18:40Z",
+			"lastSuccessAt": "2026-09-07T23:03:51Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1012,20 +1023,20 @@
 			"cron": "17 8 * * 4",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-06T22:50:16Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "workflow-health.yml",
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T19:25:21Z",
+			"lastSuccessAt": "2026-09-07T22:18:40Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 41,
+			"runs": 42,
 			"why": "last green 0d ago"
 		}
 	]
