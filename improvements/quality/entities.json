@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T07:10:29.299Z",
+ "generatedAt": "2026-09-07T07:21:59.646Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -9263,37 +9263,16 @@
    "knowledgeNotes": {
     "pool": 473,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 233,
-    "triaged": 213,
+    "withNotes": 253,
+    "triaged": 214,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
      "Accelar-labs/accelar-frontend-frax",
      "Accelar-labs/accelar-plataform-frontend",
-     "Accelar-labs/accelar-studio",
      "Accelar-labs/educhain-accelar-frontend",
-     "Alkeops/It-s-not-another-package",
-     "AssetDesk/Smart-Contracts",
      "AssetDesk/front",
      "BuilderOSS/nouns-builder",
-     "CollaborativeEconomics/give-credit",
-     "EduNodeOrg/edunode-governance",
-     "GRMarkkes/ArtCC",
-     "Glo-Foundation/glo-wallet",
-     "Lobster-Protocol/stellar",
-     "NibrasD/stellar-transaction-visualizer",
-     "Wadzzo2023/brand-wadzzo",
-     "authentication-labs/0xauth-stellar",
-     "damzylance/bigiftyxsoroban",
-     "freelii/freelii-core",
-     "jamiels/ramm.ai",
-     "keizai-tools/keizai-api",
-     "paltalabs/soroban-toolkit",
-     "paltalabs/stellar-react",
-     "siborg-ads/stellar-client",
-     "skyhitz/skyhitz",
-     "tupui/soroban-pumpit",
-     "tupui/tansu-vault",
-     "yripper/stellar-tools"
+     "GRMarkkes/ArtCC"
     ]
    },
    "mainnetJoin": {
@@ -9413,7 +9392,7 @@
    "languageOther": 50
   },
   "withCodeDepth": 10885,
-  "withNotes": 563,
+  "withNotes": 583,
   "withMainnet": 108,
   "top": [
    {
@@ -10470,7 +10449,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "233 of 473 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "253 of 473 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -10853,13 +10832,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12604,
+    "missing": 12584,
     "of": 13167,
-    "share": 95.7,
+    "share": 95.6,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 133,
+    "examplePoolSize": 124,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
