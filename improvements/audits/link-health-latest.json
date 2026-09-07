@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-09-06T17:46:12.125Z",
- "asOf": "2026-09-06T17:46:12.125Z",
+ "generatedAt": "2026-09-07T03:50:08.434Z",
+ "asOf": "2026-09-07T03:50:08.434Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2443,
+ "checked": 2399,
  "broken": [
   {
    "url": "https://0xauth.co",
@@ -191,164 +191,11 @@
    ]
   },
   {
-   "url": "https://github.com/antontat27/interlinked-backend",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/interlinked.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/argo-navis-dev/js-capacitor-passkey-kit",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/js-capacitor-passkey-kit.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/bingtellar/bingtellar-serverside",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/bingtellar.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/Cartwey001/cartwey-app",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/cartwey.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/cedelabs/sdk-examples",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/cede.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/centiiv/protocol-node",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/centiiv.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/cordilleradev",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/tumbl.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/darthbenro008/walletban",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/walletban.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/dev-api-new.skopadev.com/api#",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/skopa.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/payrit.links.github"
-   ]
-  },
-  {
    "url": "https://github.com/elsa-care",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
-    "projects/elsa.links.github",
     "entities/borderless.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/explore-beyond-innovations/proofbridge",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/proofbridge.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/falparis/aitt",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/ai-transparency-token.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/forest-io/ForestConsumerWeb",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/forestio.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gakpe/minah_blockchain_v0.2",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/minah.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gitlab.com/b4b-world",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/b4b.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gitlab.com/dolphinze/disbursements",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/dolphinze.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gitlab.com/rivool-finance/stellar-contracts",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/rivool-finance.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gitlab.com/soroban-explorer",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/soroban-explorer.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/gitlab.com/tales",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/source-of-tales.links.github"
    ]
   },
   {
@@ -360,36 +207,11 @@
    ]
   },
   {
-   "url": "https://github.com/imobi/scalps-core-api",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/scalps.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/ivandzen/transfermole",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/transfermole.links.github"
-   ]
-  },
-  {
    "url": "https://github.com/jet-lab/polaris",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
-    "projects/polaris-lend.links.github",
     "entities/jet-protocol.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/jetpad-digital-limited/jetpad-wallet",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/jetpad.links.github"
    ]
   },
   {
@@ -401,46 +223,6 @@
    ]
   },
   {
-   "url": "https://github.com/jjjutla/GeckoFuzz",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/gecko-fuzz.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/luisao8/sorobuilder",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/sorobuilder.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/mavennet/stellar-did",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/didstellar.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/megadev-ou/cs-payments",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/coinsender.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/mercury-labs-dev/stellar-sollpay",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/sollpay.links.github"
-   ]
-  },
-  {
    "url": "https://github.com/moonbite-gmbh/multisig-ui",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -449,84 +231,11 @@
    ]
   },
   {
-   "url": "https://github.com/muwpay-uniswapper/muwp-stellar",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/muwp.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/nasdex-marketplace/md-stellar_wallet_service",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/metafyed.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/nemorixpay",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/nemorixpay.links.github"
-   ]
-  },
-  {
    "url": "https://github.com/nkoorty/mimoto",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
-    "projects/mimoto.links.website",
-    "projects/mimoto.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/nobak-net/nobak-mobile",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/nobak.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/normalfinance/normal-v1",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/normal.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/nossicasystems/soroban_extend",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/sorosorcerer.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/plutopein/plutope-merchant-stellar",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/plutope.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/seunsanyaa/prophe",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/prophe.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/spaceboatdvlp/hello-soroban",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/satellite.links.github"
+    "projects/mimoto.links.website"
    ]
   },
   {
@@ -540,91 +249,11 @@
    ]
   },
   {
-   "url": "https://github.com/stellar-merchants",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/lettuce.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/talwex-inc/stellar-vault",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/talwex.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/tauvlo",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/tauvlo.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/towa-hi/solid-parakeet",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/warmancer.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/Tracee1910/tracee-app",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/tracee.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/utokens",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/utoken.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/vannafinance/protocol_v1_soroban",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/vanna-finance.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/walletgurullc/paystreme",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/paystreme.links.github"
-   ]
-  },
-  {
    "url": "https://github.com/WalletGuruLLC/paystreme",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
     "entities/wallet-guru.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/wanchain/message-bridge-contracts",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/soroban-polygon-interop.links.github"
-   ]
-  },
-  {
-   "url": "https://kunst21.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/kunst21.links.website"
    ]
   },
   {
