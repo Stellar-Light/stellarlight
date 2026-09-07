@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T23:49:20.405Z",
+ "generatedAt": "2026-09-07T02:49:38.830Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -2137,10 +2137,8 @@
    {
     "slug": "usdm1",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -2847,10 +2845,8 @@
    {
     "slug": "xlmeme",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4298,10 +4294,8 @@
    {
     "slug": "reyts",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6594,10 +6588,8 @@
    {
     "slug": "agtrail",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -6733,10 +6725,8 @@
    {
     "slug": "stellar-carbon",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7096,11 +7086,9 @@
    {
     "slug": "triiyo",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Live"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Inactive"
    },
    {
     "slug": "tribal",
@@ -7362,10 +7350,8 @@
    {
     "slug": "decaf",
     "prominence": 66,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -7837,10 +7823,8 @@
    {
     "slug": "lumenswap",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8274,7 +8258,7 @@
     "status": "Live"
    }
   ],
-  "meanScore": 89,
+  "meanScore": 90,
   "deploymentMix": [
    {
     "network": "unknown",
@@ -8296,26 +8280,26 @@
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
-   "human-verified": 268,
-   "onchain-activity": 48,
-   "product-integration": 57,
+   "human-verified": 269,
+   "onchain-activity": 49,
+   "product-integration": 63,
    "repo-activity": 116
   },
   "strongBasisSplit": {
-   "weakLiveRows": 494,
-   "onchainEligible": 12,
-   "appOnly": 482,
-   "deploymentStrongStatusWeak": 2,
+   "weakLiveRows": 486,
+   "onchainEligible": 6,
+   "appOnly": 480,
+   "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 405
+    "count": 399
    },
    {
     "basis": "human-verified",
-    "count": 268
+    "count": 269
    },
    {
     "basis": "repo-activity",
@@ -8323,15 +8307,15 @@
    },
    {
     "basis": "source-inherited",
-    "count": 83
+    "count": 81
    },
    {
     "basis": "product-integration",
-    "count": 57
+    "count": 63
    },
    {
     "basis": "onchain-activity",
-    "count": 48
+    "count": 49
    },
    {
     "basis": "unverified",
@@ -8343,7 +8327,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 504,
+  "weakestTotal": 496,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8789,27 +8773,6 @@
     ]
    },
    {
-    "slug": "decaf",
-    "name": "Decaf",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 66,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Wallet",
-     "Payments"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
     "slug": "open-gamefi-sdk",
     "name": "Open GameFi SDK",
     "status": "Live",
@@ -8942,26 +8905,6 @@
     "deploymentApplies": false,
     "types": [
      "Security"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "agtrail",
-    "name": "AgTrail",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "mainnet",
-    "deploymentBasis": "operator-toml",
-    "hasOnchainFootprint": true,
-    "deploymentApplies": true,
-    "types": [
-     "RWA"
     ],
     "score": 80,
     "factsPresent": 4,
@@ -9175,12 +9118,55 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "amulets",
+    "name": "Amulets",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Wallet",
+     "Card Issuing",
+     "Stablecoin"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "anchainai",
+    "name": "AnChain.AI",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Security",
+     "AI"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 494
+    "count": 486
    },
    {
     "field": "dated",
@@ -10445,8 +10431,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "50% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "488 of 983 rows (census)",
+   "limit": "49% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "480 of 983 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10880,10 +10866,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 494,
+    "missing": 486,
     "of": 983,
-    "share": 50.3,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 12 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 482 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 49.4,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 480 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
