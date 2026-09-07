@@ -229,6 +229,19 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
 		note: "Store evidence 2026-09-07: the project's own site (https://yolat.com/) links ios listing \"Yolat\" v1.0.57, released 2026-09-04 (Apple lookup API by id).",
 	},
+	// Found 2026-09-07 by teaching the packet guard to read a Chrome Web Store
+	// title: the row was Live on the strength of a listing that no longer
+	// exists, and the guard had reported could-not-check on it every week
+	// because the store renders client-side.
+	"stellar-tip": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl:
+			"https://chromewebstore.google.com/detail/stellar-tip/nofpjgocmncmlacjfnniilnckjbhmgdh",
+		note: "Retired 2026-09-07: the Chrome Web Store listing is gone — it renders \"This item is not available\" and its server-rendered title is the bare \"Chrome Web Store\" with no extension name. Checked against a control the same minute: Freighter's listing renders in full and titles itself \"Freighter - Chrome Web Store\", so this is about the item, not a sign-in wall. The only linked repo (MichaelxhJiang/stellar-tip) last committed 2020-05-07. SCF #4 — the award stands, the product does not.",
+	},
 	// ── The two the broken-link split surfaced 2026-09-07. Both were Live with
 	// a dead site, which is the case the old model buried: a broken link on a
 	// LIVE row is either our wrong citation or an undetected death, and these
