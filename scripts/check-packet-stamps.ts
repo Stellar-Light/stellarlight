@@ -238,6 +238,27 @@ async function rpcHealth(url: string): Promise<string | null> {
 	}
 }
 
+/**
+ * A Chrome Web Store listing renders client-side, so a plain fetch sees a
+ * shell and the guard reported could-not-check forever — nine rows sat in that
+ * state. But the SERVER-rendered <title> already distinguishes them:
+ *
+ *   live    "Freighter - Chrome Web Store"      (the item's name)
+ *   gone    "Chrome Web Store"                  (no item name)
+ *
+ * Verified against a control on 2026-09-07: Freighter's listing renders in
+ * full without signing in, while stellar-tip's answers "This item is not
+ * available", so the message is about the item and not a generic auth wall.
+ */
+const CHROME_STORE = /(^|\.)chromewebstore\.google\.com$/i;
+const isChromeStore = (url: string): boolean => {
+	try {
+		return CHROME_STORE.test(new URL(url).hostname);
+	} catch {
+		return false;
+	}
+};
+
 const isAppStore = (url: string): boolean => {
 	try {
 		return APP_STORE.test(new URL(url).hostname);
@@ -325,6 +346,25 @@ export function judgeStamp(p: {
 		return p.to === "Inactive"
 			? { verdict: "HOLDS", reason: `HTTP ${p.httpStatus}` }
 			: { verdict: "CONTRADICTED", reason: `HTTP ${p.httpStatus}` };
+
+	// A Chrome Web Store listing: the title carries the verdict even though the
+	// body does not, so this must run BEFORE the client-rendered bail-out below
+	// — otherwise the row is could-not-check forever and a removed extension
+	// keeps its Live stamp.
+	if (isChromeStore(p.sourceUrl) && p.httpStatus === 200) {
+		const title = titleOf(p.html).trim();
+		const named = /\S/.test(title.replace(/chrome web store/i, "").replace(/[-–—|]/g, ""));
+		return named
+			? {
+					verdict: "HOLDS",
+					reason: `store listing "${title.slice(0, 60)}"`,
+				}
+			: {
+					verdict: p.to === "Inactive" ? "HOLDS" : "CONTRADICTED",
+					reason:
+						'Chrome Web Store served no item name in its title ("Chrome Web Store" alone) — the listing is gone or unpublished; a live one carries the extension name',
+				};
+	}
 
 	// A 200 that renders itself in the browser — a mount div and a bundle — is
 	// a page we did NOT read, not a page with nothing on it. albedo.link

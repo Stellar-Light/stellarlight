@@ -283,3 +283,55 @@ describe("a pre-launch product may say it is pre-launch", () => {
 		);
 	});
 });
+
+describe("a Chrome Web Store listing is readable without a browser", () => {
+	const base = {
+		slug: "x",
+		sourceUrl:
+			"https://chromewebstore.google.com/detail/stellar-tip/nofpjgocmncmlacjfnniilnckjbhmgdh",
+		httpStatus: 200,
+	};
+
+	it("holds when the title carries the extension name", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: "<title>Freighter - Chrome Web Store</title><div id=root></div><script></script>",
+		});
+		expect(v.verdict).toBe("HOLDS");
+	});
+
+	it("contradicts a Live row when the title is the bare store name", () => {
+		// The removed-listing shape: the store answers 200 and renders "This item
+		// is not available" client-side, so the body is empty to a fetch — but the
+		// server-rendered title has already dropped the item name.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: "<title>Chrome Web Store</title><div id=root></div><script></script>",
+		});
+		expect(v.verdict).toBe("CONTRADICTED");
+		expect(v.reason).toMatch(/no item name/);
+	});
+
+	it("holds an Inactive row on the same evidence — it agrees with the verdict", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Inactive",
+			html: "<title>Chrome Web Store</title><div id=root></div><script></script>",
+		});
+		expect(v.verdict).toBe("HOLDS");
+	});
+
+	it("runs BEFORE the client-rendered bail-out, or the row stays blind forever", () => {
+		// The body is a mount div: without this rule the shell test fires first
+		// and every extension row reports could-not-check, which is how a removed
+		// listing kept a Live stamp.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: "<title>Chrome Web Store</title><div id=root></div><script src=x.js></script>",
+		});
+		expect(v.verdict).not.toBe("COULD-NOT-CHECK");
+	});
+});
