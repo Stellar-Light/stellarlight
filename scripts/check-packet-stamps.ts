@@ -335,7 +335,13 @@ export function judgeStamp(p: {
 	if (text.length <= 300 && /<script\b/i.test(p.html))
 		return {
 			verdict: "COULD-NOT-CHECK",
-			reason: `client-rendered shell (${text.length} chars readable, needs a browser)`,
+			// An App Store URL that reaches here means the iTunes lookup did not
+			// answer AND the listing served no readable text — usually a rate
+			// limit, never a statement about the app. Saying "client-rendered
+			// shell" about a store listing sends the reader to the wrong place.
+			reason: isAppStore(p.sourceUrl)
+				? `store listing unreadable and the lookup API did not answer (${text.length} chars) — retry, not a verdict`
+				: `client-rendered shell (${text.length} chars readable, needs a browser)`,
 		};
 
 	if (p.to === "Inactive") {

@@ -27,8 +27,29 @@
  */
 
 const SCOUT_BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
-const MCP_URL = process.env.RAVEN_MCP_URL || "";
-const MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || "";
+const MCP_URL = process.env.RAVEN_MCP_URL || "https://agents.stellar.buzz/mcp";
+/**
+ * The token is durable at ~/.config/stellarlight/raven.token. Reading only the
+ * env meant every local run skipped the catalog half — and then printed "ok".
+ * Resolved lazily with a dynamic import: this file deliberately has no
+ * top-level import, so that it stays in global scope (see the collision guard
+ * at the bottom).
+ */
+let MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || "";
+async function resolveToken(): Promise<void> {
+	if (MCP_TOKEN) return;
+	try {
+		const { readFileSync } = await import("node:fs");
+		const { homedir } = await import("node:os");
+		const { join } = await import("node:path");
+		MCP_TOKEN = readFileSync(
+			join(homedir(), ".config/stellarlight/raven.token"),
+			"utf8",
+		).trim();
+	} catch {
+		MCP_TOKEN = "";
+	}
+}
 // How long a newly-shipped op may stay un-cataloged before lag becomes drift.
 const GRACE_DAYS = Number(process.env.RAVEN_DRIFT_GRACE_DAYS || 10);
 // Cloudflare 1010-blocks some non-browser signatures (python-urllib); a curl
@@ -52,6 +73,8 @@ interface DriftReport {
 	catalogOps: string[] | null;
 	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
+	/** In the sandbox but not surfaced by the discovery sweep — ours to fix. */
+	undiscoverable: string[];
 	/** Absent but recently shipped — expected re-baseline lag, warn only. */
 	laggingInCatalog: { op: string; addedAt: string; ageDays: number }[];
 	extraInCatalog: string[];
@@ -178,8 +201,11 @@ async function expectedFromSpec(): Promise<{
 	};
 }
 
-async function catalogOps(): Promise<{
+async function catalogOps(specOps: string[]): Promise<{
 	ops: string[];
+	/** Ops the vocabulary sweep missed that the sandbox still exposes — our
+	 *  discoverability gap, never their absence. */
+	callableButUndiscovered: string[];
 	claimed: number | null;
 	auditRouted: boolean | null;
 }> {
@@ -217,8 +243,33 @@ async function catalogOps(): Promise<{
 			`execute returned unparseable payload: ${text.slice(0, 160)}`,
 		);
 	}
+	const discovered = ids.map((id) => id.replace(/^scout\./, "")).sort();
+
+	// An op the sweep did not surface is NOT necessarily absent. The sweep
+	// measures DISCOVERABILITY through 14 vocabulary queries; the sandbox is
+	// the authority on existence. vetIdea was reported "missing beyond grace"
+	// on 2026-09-06 while `typeof scout.vetIdea === "function"` — callable, just
+	// unreachable by those words. That distinction decides who owns the fix:
+	// callable-but-undiscoverable is OUR routing vocabulary, not their catalog.
+	const suspect = specOps.filter((o: string) => !discovered.includes(o));
+	let callable: string[] = [];
+	if (suspect.length) {
+		const probe = `const names = ${JSON.stringify(suspect)}; return names.filter(n => typeof scout[n] === "function");`;
+		try {
+			const res = await rpc("tools/call", {
+				name: "execute",
+				arguments: { code: probe },
+			});
+			const t: string = res?.result?.content?.[0]?.text ?? "[]";
+			const start = t.indexOf("[");
+			callable = start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
+		} catch {
+			callable = [];
+		}
+	}
 	return {
-		ops: ids.map((id) => id.replace(/^scout\./, "")).sort(),
+		ops: discovered,
+		callableButUndiscovered: callable,
 		claimed,
 		auditRouted,
 	};
@@ -238,6 +289,7 @@ async function main() {
 		expectedOps: spec.ops,
 		catalogOps: null,
 		missingFromCatalog: [],
+		undiscoverable: [],
 		laggingInCatalog: [],
 		extraInCatalog: [],
 		claimedOpCount: null,
@@ -246,13 +298,19 @@ async function main() {
 		notes: [],
 	};
 
+	await resolveToken();
 	if (!MCP_URL || !MCP_TOKEN) {
+		// A run that skipped its only upstream probe is not "ok". This used to
+		// print the warning and fall through to the success line — the same
+		// shape as the truth battery reporting "0 fail" with four slices dead
+		// (both 2026-09-06).
 		report.notes.push(
-			"RAVEN_MCP_URL/RAVEN_MCP_TOKEN not set — catalog half SKIPPED (local-only credentials).",
+			"no Raven credential (RAVEN_MCP_TOKEN, or ~/.config/stellarlight/raven.token) — the catalog half could not run.",
 		);
-		console.log(`\n⚠ ${report.notes[0]}`);
+		console.error(`\nINCONCLUSIVE: ${report.notes[0]}`);
+		process.exit(2);
 	} else {
-		const cat = await catalogOps();
+		const cat = await catalogOps(spec.ops);
 		report.checked = true;
 		report.catalogOps = cat.ops;
 		report.claimedOpCount = cat.claimed;
@@ -270,6 +328,11 @@ async function main() {
 				: null;
 			if (addedAt && ageDays !== null && ageDays <= GRACE_DAYS) {
 				report.laggingInCatalog.push({ op, addedAt, ageDays });
+			} else if (cat.callableButUndiscovered.includes(op)) {
+				// Present in the sandbox, unreachable by our discovery
+				// vocabulary. That is our routing text to fix, not their
+				// catalog to chase.
+				report.undiscoverable.push(op);
 			} else {
 				report.missingFromCatalog.push(op);
 			}
@@ -281,6 +344,10 @@ async function main() {
 		for (const l of report.laggingInCatalog)
 			console.log(
 				`  ⚠ lagging (expected): ${l.op} shipped ${l.ageDays}d ago — awaiting their re-baseline (grace ${GRACE_DAYS}d)`,
+			);
+		for (const u of report.undiscoverable)
+			console.log(
+				`  ⚠ callable but undiscovered: ${u} — scout.${u} exists in the sandbox; our own discovery vocabulary does not reach it (OUR fix, not theirs)`,
 			);
 		for (const m of report.missingFromCatalog)
 			console.log(`  ✗ missing beyond grace: ${m}`);
