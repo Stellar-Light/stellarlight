@@ -13,40 +13,44 @@
  */
 import { describe, expect, it } from "vitest";
 
-/** The coalescing curate applies before writing. Mirrors the loop exactly. */
-function coalesce(
+/** The reduction curate applies before writing. Mirrors the loop exactly:
+ *  every patch for a row was built from the same stored doc, so the keys where
+ *  a patch DIFFERS from what is stored are what that section meant to change. */
+function reduceToIntent(
+	stored: Record<string, unknown>,
 	writes: Array<{ id: string; data: Record<string, unknown> }>,
-): Array<{ id: string; data: Record<string, unknown> }> {
-	const merged = new Map<string, { id: string; data: Record<string, unknown> }>();
+): Record<string, unknown> {
+	const data: Record<string, unknown> = {};
 	for (const w of writes) {
-		const prev = merged.get(w.id);
-		if (!prev) {
-			merged.set(w.id, { ...w, data: { ...w.data } });
-			continue;
-		}
-		for (const [k, v] of Object.entries(w.data)) {
-			const a = prev.data[k];
-			prev.data[k] =
-				a && v && typeof a === "object" && typeof v === "object" &&
-				!Array.isArray(a) && !Array.isArray(v)
-					? { ...(a as object), ...(v as object) }
-					: v;
+		for (const [key, val] of Object.entries(w.data)) {
+			const cur = stored[key];
+			if (
+				val && cur && typeof val === "object" && typeof cur === "object" &&
+				!Array.isArray(val) && !Array.isArray(cur)
+			) {
+				const base = (data[key] ?? { ...(cur as object) }) as Record<string, unknown>;
+				for (const [k2, v2] of Object.entries(val as Record<string, unknown>)) {
+					if ((cur as Record<string, unknown>)[k2] !== v2) base[k2] = v2;
+				}
+				data[key] = base;
+			} else {
+				data[key] = val;
+			}
 		}
 	}
-	return [...merged.values()];
+	return data;
 }
 
 describe("planned writes coalesce per row", () => {
 	it("keeps BOTH nulls when two sections clear two links on one row", () => {
 		// The exact mimoto case: stored links carry a dead website AND a dead
 		// github; two sections each clear one, each spreading what it read.
-		const stored = { website: "https://github.com/nkoorty/mimoto", github: "https://github.com/nkoorty/mimoto" };
-		const out = coalesce([
-			{ id: "1", data: { links: { ...stored, github: null } } },
-			{ id: "1", data: { links: { ...stored, website: null } } },
+		const links = { website: "https://github.com/nkoorty/mimoto", github: "https://github.com/nkoorty/mimoto" };
+		const out = reduceToIntent({ links }, [
+			{ id: "1", data: { links: { ...links, github: null } } },
+			{ id: "1", data: { links: { ...links, website: null } } },
 		]);
-		expect(out).toHaveLength(1);
-		expect(out[0].data.links).toEqual({ website: null, github: null });
+		expect(out.links).toEqual({ website: null, github: null });
 	});
 
 	it("without coalescing the second patch resurrects the first's removal", () => {
@@ -59,26 +63,32 @@ describe("planned writes coalesce per row", () => {
 	});
 
 	it("merges sibling groups without dropping either", () => {
-		const out = coalesce([
-			{ id: "1", data: { lifecycle: { wasLive: true } } },
-			{ id: "1", data: { links: { website: null } } },
-		]);
-		expect(out[0].data).toEqual({
-			lifecycle: { wasLive: true },
-			links: { website: null },
-		});
+		const out = reduceToIntent(
+			{ lifecycle: { wasLive: false }, links: { website: "x" } },
+			[
+				{ id: "1", data: { lifecycle: { wasLive: true } } },
+				{ id: "1", data: { links: { website: null } } },
+			],
+		);
+		expect(out.lifecycle).toEqual({ wasLive: true });
+		expect(out.links).toEqual({ website: null });
 	});
 
 	it("a later scalar still wins over an earlier one", () => {
-		const out = coalesce([
+		const out = reduceToIntent({ status: "Draft" }, [
 			{ id: "1", data: { status: "Live" } },
 			{ id: "1", data: { status: "Inactive" } },
 		]);
-		expect(out[0].data.status).toBe("Inactive");
+		expect(out.status).toBe("Inactive");
 	});
 
-	it("leaves single-write rows exactly as planned", () => {
-		const w = [{ id: "1", data: { status: "Live" } }, { id: "2", data: { status: "Draft" } }];
-		expect(coalesce(w)).toEqual(w);
+	it("an unchanged key in a patch is not re-written", () => {
+		// The spread carries siblings that did not change; they must not appear
+		// in the reduced patch at all.
+		const links = { website: "keep", github: "dead" };
+		const out = reduceToIntent({ links }, [
+			{ id: "1", data: { links: { ...links, github: null } } },
+		]);
+		expect(out.links).toEqual({ website: "keep", github: null });
 	});
 });
