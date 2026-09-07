@@ -1,13 +1,13 @@
 {
-	"generatedAt": "2026-09-07T00:52:58.645Z",
+	"generatedAt": "2026-09-07T03:17:45.892Z",
 	"source": "scripts/check-packet-stamps.ts",
 	"rule": "Each human-verified packet stamp is re-fetched at its own deciding sourceUrl. A contradiction is a finding for a human, never an auto-flip; a page we could not read is never a contradiction.",
 	"tally": {
 		"checked": 77,
-		"holds": 66,
+		"holds": 68,
 		"contradicted": 0,
 		"revived": 0,
-		"couldNotCheck": 11
+		"couldNotCheck": 9
 	},
 	"rows": [
 		{
@@ -17,7 +17,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7827 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:45.108Z"
+			"checkedAt": "2026-09-07T03:17:34.181Z"
 		},
 		{
 			"slug": "afriex",
@@ -26,7 +26,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "store release 2026-09-02 (4d ago) — \"‎Afriex - Money transfer App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:38.157Z"
+			"checkedAt": "2026-09-07T03:17:27.936Z"
 		},
 		{
 			"slug": "albedo",
@@ -35,7 +35,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (6 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:53.671Z"
+			"checkedAt": "2026-09-07T03:17:40.993Z"
 		},
 		{
 			"slug": "alchemy",
@@ -44,7 +44,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "JSON-RPC getHealth: healthy",
-			"checkedAt": "2026-09-07T00:52:35.908Z"
+			"checkedAt": "2026-09-07T03:17:26.241Z"
 		},
 		{
 			"slug": "allbridge",
@@ -53,7 +53,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3602 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:41.382Z"
+			"checkedAt": "2026-09-07T03:17:31.191Z"
 		},
 		{
 			"slug": "alternun",
@@ -62,7 +62,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4343 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:45.371Z"
+			"checkedAt": "2026-09-07T03:17:34.561Z"
 		},
 		{
 			"slug": "alterscope",
@@ -71,7 +71,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (45 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:40.524Z"
+			"checkedAt": "2026-09-07T03:17:30.078Z"
 		},
 		{
 			"slug": "ankr",
@@ -80,7 +80,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "JSON-RPC getHealth: healthy",
-			"checkedAt": "2026-09-07T00:52:34.790Z"
+			"checkedAt": "2026-09-07T03:17:25.365Z"
 		},
 		{
 			"slug": "basement",
@@ -89,7 +89,7 @@
 			"httpStatus": 404,
 			"verdict": "HOLDS",
 			"reason": "HTTP 404",
-			"checkedAt": "2026-09-07T00:52:45.975Z"
+			"checkedAt": "2026-09-07T03:17:35.108Z"
 		},
 		{
 			"slug": "beans",
@@ -98,7 +98,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 81263 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:57.146Z"
+			"checkedAt": "2026-09-07T03:17:44.474Z"
 		},
 		{
 			"slug": "bitget-wallet",
@@ -107,7 +107,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2133 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:58.008Z"
+			"checkedAt": "2026-09-07T03:17:45.285Z"
 		},
 		{
 			"slug": "bitso",
@@ -116,7 +116,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6048 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:52.582Z"
+			"checkedAt": "2026-09-07T03:17:40.145Z"
 		},
 		{
 			"slug": "blindpay",
@@ -125,7 +125,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5653 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:47.295Z"
+			"checkedAt": "2026-09-07T03:17:35.576Z"
 		},
 		{
 			"slug": "boss-revolution",
@@ -134,7 +134,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "store release 2026-08-18 (20d ago) — \"‎BOSS Money Transfer. Send Fast App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:40.235Z"
+			"checkedAt": "2026-09-07T03:17:29.871Z"
 		},
 		{
 			"slug": "boundless",
@@ -143,7 +143,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5127 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:46.055Z"
+			"checkedAt": "2026-09-07T03:17:35.309Z"
 		},
 		{
 			"slug": "chaincerts",
@@ -152,7 +152,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1528 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:53.744Z"
+			"checkedAt": "2026-09-07T03:17:41.048Z"
 		},
 		{
 			"slug": "chainsatlas",
@@ -161,7 +161,7 @@
 			"httpStatus": 404,
 			"verdict": "HOLDS",
 			"reason": "HTTP 404",
-			"checkedAt": "2026-09-07T00:52:46.052Z"
+			"checkedAt": "2026-09-07T03:17:35.232Z"
 		},
 		{
 			"slug": "chipper",
@@ -169,8 +169,8 @@
 			"sourceUrl": "https://apps.apple.com/us/app/chipper-cash/id1353631552",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "store release 2026-08-28 (9d ago) — \"‎Chipper Cash App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:40.344Z"
+			"reason": "store release 2026-08-28 (10d ago) — \"‎Chipper Cash App - App Store\"",
+			"checkedAt": "2026-09-07T03:17:29.662Z"
 		},
 		{
 			"slug": "code4rena",
@@ -179,7 +179,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "still says \"winding down\"",
-			"checkedAt": "2026-09-07T00:52:48.037Z"
+			"checkedAt": "2026-09-07T03:17:36.240Z"
 		},
 		{
 			"slug": "dfns",
@@ -188,7 +188,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 17902 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:54.024Z"
+			"checkedAt": "2026-09-07T03:17:41.276Z"
 		},
 		{
 			"slug": "dia",
@@ -197,16 +197,16 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 11296 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:41.601Z"
+			"checkedAt": "2026-09-07T03:17:31.384Z"
 		},
 		{
 			"slug": "didstellar",
 			"to": "Inactive",
 			"sourceUrl": "https://api.github.com/repos/mavennet/stellar-did",
-			"httpStatus": 403,
-			"verdict": "COULD-NOT-CHECK",
-			"reason": "HTTP 403 — refused this probe, not judged (a 401/405 on a GET is an endpoint's method or auth policy, not a product state)",
-			"checkedAt": "2026-09-07T00:52:34.507Z"
+			"httpStatus": 404,
+			"verdict": "HOLDS",
+			"reason": "HTTP 404",
+			"checkedAt": "2026-09-07T03:17:25.226Z"
 		},
 		{
 			"slug": "every-finance",
@@ -215,7 +215,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "still says \"is for sale\"",
-			"checkedAt": "2026-09-07T00:52:33.928Z"
+			"checkedAt": "2026-09-07T03:17:24.589Z"
 		},
 		{
 			"slug": "felix-pago",
@@ -224,7 +224,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "store release 2026-08-24 (14d ago) — \"‎Félix Pago - Envíos de dinero App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:38.159Z"
+			"checkedAt": "2026-09-07T03:17:27.919Z"
 		},
 		{
 			"slug": "findtruman",
@@ -233,7 +233,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (286 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:42.192Z"
+			"checkedAt": "2026-09-07T03:17:31.493Z"
 		},
 		{
 			"slug": "flutterwave",
@@ -242,7 +242,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6459 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:43.523Z"
+			"checkedAt": "2026-09-07T03:17:32.918Z"
 		},
 		{
 			"slug": "fonbnk",
@@ -251,7 +251,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (17 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:41.337Z"
+			"checkedAt": "2026-09-07T03:17:31.076Z"
 		},
 		{
 			"slug": "fordefi",
@@ -260,7 +260,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 13200 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:57.821Z"
+			"checkedAt": "2026-09-07T03:17:45.118Z"
 		},
 		{
 			"slug": "gatewayfm",
@@ -269,7 +269,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 10609 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:56.161Z"
+			"checkedAt": "2026-09-07T03:17:43.279Z"
 		},
 		{
 			"slug": "giveth",
@@ -277,8 +277,8 @@
 			"sourceUrl": "https://giveth.io/",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "200, 10774 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:47.994Z"
+			"reason": "200, 10775 chars, no markers",
+			"checkedAt": "2026-09-07T03:17:36.226Z"
 		},
 		{
 			"slug": "hubble",
@@ -287,7 +287,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5703 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:51.123Z"
+			"checkedAt": "2026-09-07T03:17:38.676Z"
 		},
 		{
 			"slug": "ichi",
@@ -296,7 +296,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 810 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:39.152Z"
+			"checkedAt": "2026-09-07T03:17:28.723Z"
 		},
 		{
 			"slug": "idos",
@@ -305,7 +305,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6816 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:52.900Z"
+			"checkedAt": "2026-09-07T03:17:40.350Z"
 		},
 		{
 			"slug": "java-stellar-sdk",
@@ -314,7 +314,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5387 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:56.071Z"
+			"checkedAt": "2026-09-07T03:17:43.195Z"
 		},
 		{
 			"slug": "kale",
@@ -322,8 +322,8 @@
 			"sourceUrl": "https://api.stellar.expert/explorer/public/asset/KALE-GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE/stats-history",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "200, 144129 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:39.400Z"
+			"reason": "200, 144130 chars, no markers",
+			"checkedAt": "2026-09-07T03:17:28.998Z"
 		},
 		{
 			"slug": "katagames",
@@ -332,7 +332,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3242 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:43.248Z"
+			"checkedAt": "2026-09-07T03:17:32.476Z"
 		},
 		{
 			"slug": "keystone",
@@ -341,7 +341,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 16363 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:48.771Z"
+			"checkedAt": "2026-09-07T03:17:36.916Z"
 		},
 		{
 			"slug": "klever",
@@ -350,7 +350,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6731 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:58.632Z"
+			"checkedAt": "2026-09-07T03:17:45.879Z"
 		},
 		{
 			"slug": "ledger",
@@ -359,7 +359,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 16725 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:56.891Z"
+			"checkedAt": "2026-09-07T03:17:43.982Z"
 		},
 		{
 			"slug": "lemon",
@@ -367,8 +367,8 @@
 			"sourceUrl": "https://apps.apple.com/ar/app/lemon-billetera-virtual/id1499421511",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "store release 2026-09-01 (5d ago) — \"‎App Lemon - Billetera virtual - App Store\"",
-			"checkedAt": "2026-09-07T00:52:39.149Z"
+			"reason": "store release 2026-09-01 (6d ago) — \"‎App Lemon - Billetera virtual - App Store\"",
+			"checkedAt": "2026-09-07T03:17:28.615Z"
 		},
 		{
 			"slug": "lightsail-network-quasar",
@@ -377,7 +377,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "JSON-RPC getHealth: healthy",
-			"checkedAt": "2026-09-07T00:52:34.945Z"
+			"checkedAt": "2026-09-07T03:17:25.518Z"
 		},
 		{
 			"slug": "moneygram",
@@ -386,7 +386,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5268 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:51.726Z"
+			"checkedAt": "2026-09-07T03:17:39.171Z"
 		},
 		{
 			"slug": "muwp",
@@ -395,7 +395,7 @@
 			"httpStatus": 451,
 			"verdict": "HOLDS",
 			"reason": "HTTP 451",
-			"checkedAt": "2026-09-07T00:52:33.594Z"
+			"checkedAt": "2026-09-07T03:17:23.842Z"
 		},
 		{
 			"slug": "neovestor",
@@ -404,7 +404,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "fold says \"waitlist\" — consistent with Development",
-			"checkedAt": "2026-09-07T00:52:33.605Z"
+			"checkedAt": "2026-09-07T03:17:23.729Z"
 		},
 		{
 			"slug": "nodies",
@@ -413,7 +413,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4253 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:53.928Z"
+			"checkedAt": "2026-09-07T03:17:41.188Z"
 		},
 		{
 			"slug": "nownodes",
@@ -421,8 +421,8 @@
 			"sourceUrl": "https://nownodes.io/",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "200, 4851 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:55.123Z"
+			"reason": "200, 4847 chars, no markers",
+			"checkedAt": "2026-09-07T03:17:42.359Z"
 		},
 		{
 			"slug": "obsrvr",
@@ -431,7 +431,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (63 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:54.690Z"
+			"checkedAt": "2026-09-07T03:17:42.043Z"
 		},
 		{
 			"slug": "one-click",
@@ -440,7 +440,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (86 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:40.734Z"
+			"checkedAt": "2026-09-07T03:17:30.526Z"
 		},
 		{
 			"slug": "onekey",
@@ -449,7 +449,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4151 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:44.207Z"
+			"checkedAt": "2026-09-07T03:17:33.502Z"
 		},
 		{
 			"slug": "onfinality",
@@ -458,7 +458,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5255 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:57.734Z"
+			"checkedAt": "2026-09-07T03:17:45.032Z"
 		},
 		{
 			"slug": "ottersec",
@@ -467,7 +467,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6062 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:48.776Z"
+			"checkedAt": "2026-09-07T03:17:36.803Z"
 		},
 		{
 			"slug": "polaris-lend",
@@ -476,7 +476,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (0 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:33.602Z"
+			"checkedAt": "2026-09-07T03:17:23.724Z"
 		},
 		{
 			"slug": "public-node",
@@ -485,7 +485,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4197 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:35.726Z"
+			"checkedAt": "2026-09-07T03:17:26.136Z"
 		},
 		{
 			"slug": "python-stellar-sdk",
@@ -494,7 +494,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 6701 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:53.005Z"
+			"checkedAt": "2026-09-07T03:17:40.291Z"
 		},
 		{
 			"slug": "quicknode",
@@ -502,8 +502,8 @@
 			"sourceUrl": "https://status.quicknode.com/",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "200, 95625 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:37.218Z"
+			"reason": "200, 99837 chars, no markers",
+			"checkedAt": "2026-09-07T03:17:26.275Z"
 		},
 		{
 			"slug": "rabet",
@@ -512,7 +512,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3568 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:54.968Z"
+			"checkedAt": "2026-09-07T03:17:42.201Z"
 		},
 		{
 			"slug": "rango",
@@ -521,7 +521,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5839 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:50.389Z"
+			"checkedAt": "2026-09-07T03:17:37.867Z"
 		},
 		{
 			"slug": "rarible",
@@ -529,8 +529,8 @@
 			"sourceUrl": "https://rarible.com/all",
 			"httpStatus": 200,
 			"verdict": "HOLDS",
-			"reason": "200, 3249 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:49.867Z"
+			"reason": "200, 3250 chars, no markers",
+			"checkedAt": "2026-09-07T03:17:37.955Z"
 		},
 		{
 			"slug": "redswan",
@@ -539,7 +539,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (41 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:38.919Z"
+			"checkedAt": "2026-09-07T03:17:28.539Z"
 		},
 		{
 			"slug": "ripio",
@@ -548,7 +548,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 16175 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:44.803Z"
+			"checkedAt": "2026-09-07T03:17:34.051Z"
 		},
 		{
 			"slug": "rozo",
@@ -557,7 +557,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3884 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:44.781Z"
+			"checkedAt": "2026-09-07T03:17:34.105Z"
 		},
 		{
 			"slug": "runtime-verification",
@@ -566,7 +566,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5019 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:49.485Z"
+			"checkedAt": "2026-09-07T03:17:37.603Z"
 		},
 		{
 			"slug": "soundness",
@@ -575,7 +575,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "still says \"winding down\"",
-			"checkedAt": "2026-09-07T00:52:49.872Z"
+			"checkedAt": "2026-09-07T03:17:37.970Z"
 		},
 		{
 			"slug": "spacewalk",
@@ -584,7 +584,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3755 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:43.474Z"
+			"checkedAt": "2026-09-07T03:17:32.360Z"
 		},
 		{
 			"slug": "stellar-disbursement-platform-sdp",
@@ -593,7 +593,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7154 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:56.026Z"
+			"checkedAt": "2026-09-07T03:17:43.215Z"
 		},
 		{
 			"slug": "stellar-quickstart",
@@ -602,7 +602,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 29846 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:55.009Z"
+			"checkedAt": "2026-09-07T03:17:42.231Z"
 		},
 		{
 			"slug": "stellarbroker",
@@ -611,7 +611,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (104 chars readable, needs a browser)",
-			"checkedAt": "2026-09-07T00:52:55.930Z"
+			"checkedAt": "2026-09-07T03:17:43.103Z"
 		},
 		{
 			"slug": "streamingfast",
@@ -620,7 +620,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2620 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:56.925Z"
+			"checkedAt": "2026-09-07T03:17:44.034Z"
 		},
 		{
 			"slug": "token-tails",
@@ -629,16 +629,16 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5916 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:51.032Z"
+			"checkedAt": "2026-09-07T03:17:38.586Z"
 		},
 		{
 			"slug": "transfermole",
 			"to": "Inactive",
 			"sourceUrl": "https://api.github.com/repos/ivandzen/transfermole",
-			"httpStatus": 403,
-			"verdict": "COULD-NOT-CHECK",
-			"reason": "HTTP 403 — refused this probe, not judged (a 401/405 on a GET is an endpoint's method or auth policy, not a product state)",
-			"checkedAt": "2026-09-07T00:52:34.506Z"
+			"httpStatus": 404,
+			"verdict": "HOLDS",
+			"reason": "HTTP 404",
+			"checkedAt": "2026-09-07T03:17:25.201Z"
 		},
 		{
 			"slug": "trezor",
@@ -647,7 +647,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7875 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:57.749Z"
+			"checkedAt": "2026-09-07T03:17:45.047Z"
 		},
 		{
 			"slug": "typescript-wallet-sdk",
@@ -656,7 +656,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4674 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:57.090Z"
+			"checkedAt": "2026-09-07T03:17:44.145Z"
 		},
 		{
 			"slug": "usher",
@@ -665,7 +665,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2556 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:51.769Z"
+			"checkedAt": "2026-09-07T03:17:39.314Z"
 		},
 		{
 			"slug": "validation-cloud",
@@ -674,7 +674,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5802 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:52.727Z"
+			"checkedAt": "2026-09-07T03:17:40.127Z"
 		},
 		{
 			"slug": "walletconnect",
@@ -683,7 +683,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2126 chars, no markers",
-			"checkedAt": "2026-09-07T00:52:37.169Z"
+			"checkedAt": "2026-09-07T03:17:27.042Z"
 		},
 		{
 			"slug": "wave",
@@ -692,7 +692,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "store release 2026-08-26 (11d ago) — \"‎Wave - Mobile Money App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:38.292Z"
+			"checkedAt": "2026-09-07T03:17:27.937Z"
 		},
 		{
 			"slug": "wirex-pay",
@@ -701,7 +701,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "store release 2026-08-10 (27d ago) — \"‎Wirex One App - App Store\"",
-			"checkedAt": "2026-09-07T00:52:38.294Z"
+			"checkedAt": "2026-09-07T03:17:27.921Z"
 		}
 	]
 }
