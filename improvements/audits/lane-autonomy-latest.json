@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-07T04:34:23.186Z",
+	"generatedAt": "2026-09-07T04:41:31.420Z",
 	"source": "scripts/check-lane-autonomy.ts",
 	"registry": "improvements/lanes/lanes.json",
 	"interventionLog": "improvements/lanes/interventions.json",
