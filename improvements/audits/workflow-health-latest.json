@@ -1,15 +1,9 @@
 {
-	"asOf": "2026-09-07T13:02:08.062Z",
+	"asOf": "2026-09-07T15:59:46.284Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 93,
-	"healthy": 92,
-	"broken": [
-		{
-			"file": "consumption-guard.yml",
-			"state": "failing",
-			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
-		}
-	],
+	"healthy": 93,
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -72,10 +66,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-24T15:08:53Z",
-			"ageDays": 44,
+			"ageDays": 45,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 44d ago (manual tool — age not judged)"
+			"why": "last green 45d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -235,12 +229,12 @@
 			"file": "consumption-guard.yml",
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
-			"state": "failing",
-			"lastSuccessAt": "2026-09-07T07:33:17Z",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-07T15:49:45Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 44,
-			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
+			"runs": 46,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "content-freshness.yml",
@@ -258,7 +252,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T07:33:17Z",
+			"lastSuccessAt": "2026-09-07T15:49:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -424,10 +418,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-05T15:15:16Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 45,
 			"runs": 15,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"why": "last green 2d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-repo-activity.yml",
@@ -445,10 +439,10 @@
 			"name": "Enrich repos (code-reference index)",
 			"cron": "0 8 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T17:47:29Z",
+			"lastSuccessAt": "2026-09-07T13:46:30Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 25,
+			"runs": 26,
 			"why": "last green 0d ago"
 		},
 		{
@@ -555,10 +549,10 @@
 			"name": "lane-autonomy",
 			"cron": "41 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T04:39:56Z",
+			"lastSuccessAt": "2026-09-07T13:40:24Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 3,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -588,10 +582,10 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T06:37:35Z",
+			"lastSuccessAt": "2026-09-07T13:01:42Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 44,
+			"runs": 45,
 			"why": "last green 0d ago"
 		},
 		{
@@ -665,10 +659,10 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T18:18:49Z",
+			"lastSuccessAt": "2026-09-07T14:11:09Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 82,
+			"runs": 83,
 			"why": "last green 0d ago"
 		},
 		{
@@ -753,11 +747,11 @@
 			"name": "raven-eval-parity",
 			"cron": "30 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T11:42:59Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-07T13:37:07Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 28,
-			"why": "last green 1d ago"
+			"runs": 29,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "recent-api-usage.yml",
@@ -929,11 +923,11 @@
 			"name": "Sync Lumenloop ecosystem projects",
 			"cron": "0 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T11:23:57Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-07T13:05:15Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 45,
-			"why": "last green 1d ago"
+			"runs": 46,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "sync-scout-skill.yml",
@@ -962,7 +956,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T07:33:17Z",
+			"lastSuccessAt": "2026-09-07T15:49:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1006,7 +1000,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T23:15:29Z",
+			"lastSuccessAt": "2026-09-07T13:10:45Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1031,7 +1025,7 @@
 			"lastSuccessAt": "2026-09-07T06:11:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 38,
+			"runs": 39,
 			"why": "last green 0d ago"
 		}
 	]
