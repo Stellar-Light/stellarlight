@@ -90,6 +90,16 @@ export interface RepoGradeInput {
 	 * gathered. Absence of a scan must never read as failing the scan. */
 	codeScanned?: boolean;
 	/**
+	 * The repo's name (short or owner/name), used ONLY for the template test.
+	 *
+	 * repoKindOf() has classified hello-world / template / starter / example
+	 * repos since it was written, and repoGrade ignored the classification
+	 * entirely — so a first-party scaffold could rank as a strong reference and
+	 * an agent could be handed `hello-world` as production architecture. That is
+	 * the one repo kind whose PURPOSE is to be incomplete.
+	 */
+	name?: string | null;
+	/**
 	 * How many packages this repo publishes that the REGISTRY confirms came
 	 * from it (jsr.io's `githubRepository`, npm's `repository.url`).
 	 *
@@ -320,6 +330,11 @@ function stellarRelevance(input: RepoGradeInput): number {
  * "never scanned".
  */
 export function codeEvidence(input: RepoGradeInput): number {
+	// Gated on a real scan EVERYWHERE. ownMerit checked codeScanned and the
+	// corroboration and authority paths did not, so a partial or stale flag set
+	// could lift those two while the merit path behaved as if nothing was read.
+	// One gate, one meaning.
+	if (input.codeScanned === false) return 0;
 	let e = 0;
 	if (input.testsPresent) e += 0.3;
 	if (input.ciPresent) e += 0.2;
@@ -576,6 +591,20 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		// codeDepth block draws between REAL and CANONICAL.
 		const judgeDriven = (0.05 + 0.8 * j) * corroboration(input) * liveness;
 		composite = Math.max(composite, judgeDriven);
+		// TWO-SIDED, as the interface comment above has always promised ("sink a
+		// weak one regardless of how fresh/linked it is"). It was a one-sided
+		// rectifier: `Math.max` alone discards every bad review, because the
+		// heuristic is nearly always higher. A human or model read the code and
+		// scored it 1/5 — that is a stronger statement about quality than a
+		// description field and a topic list, and it must be able to pull down.
+		//
+		// Only a clearly-poor review caps (j < 0.4), and the cap is generous
+		// enough that a judged repo with real external corroboration is not
+		// buried by one harsh score.
+		if (j < 0.4) {
+			const cap = 0.35 + 0.5 * j + 0.25 * corroboration(input);
+			composite = Math.min(composite, cap);
+		}
 	}
 
 	// Code depth trumps heuristics too — parallel to judgeScore. A code-verified
@@ -612,6 +641,12 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 
 	if (input.isArchived) composite *= 0.5; // archived = weaker reference
 	if (input.isFork) composite *= 0.7; // forks deprioritized
+	// A template/example is deliberately incomplete: it is the right answer to
+	// "how do I start" and the wrong one to "what should I copy into
+	// production", and a single scalar cannot say both. Demoted rather than
+	// buried, so soroban-examples stays findable and stays below the SDKs.
+	// Applies to first-party scaffolds too — that is where the risk is highest.
+	if (nameLooksTemplate(input.name)) composite *= 0.8;
 	composite *= deprecatedPenalty(input); // pins a dead Stellar SDK
 	composite = clamp01(composite);
 

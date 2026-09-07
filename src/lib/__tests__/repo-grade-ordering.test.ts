@@ -413,3 +413,76 @@ describe("first-party ownership", () => {
 			expect(isFirstParty(o)).toBe(false);
 	});
 });
+
+/**
+ * Residue from an adversarial audit of the rewrite (2026-09-07). Each of these
+ * was a claim the file's own comments already made and the code did not keep.
+ */
+describe("audit residue", () => {
+	const now = new Date().toISOString();
+	const strong = {
+		lastCommitAt: now,
+		stargazerCount: 300,
+		hasDescription: true,
+		topicCount: 6,
+		openIssues: 4,
+		codeScanned: true,
+		testsPresent: true,
+		ciPresent: true,
+		lastReleaseAt: now,
+		versionStatus: "current",
+		contractInterfaceCount: 20,
+		codeDepth: 0.8,
+		stellarProof: "cargo-sdk",
+		commits90d: 40,
+		knowledgeNoteCount: 2,
+	};
+
+	it("a bad code review pulls a repo DOWN, as the interface has always claimed", () => {
+		// The comment promised judgeScore could "sink a weak one regardless of
+		// how fresh/linked it is". The code was `Math.max(composite, judgeDriven)`
+		// — a one-sided rectifier that discards every bad review, because the
+		// heuristic is nearly always higher. Only high scores ever fired.
+		const unreviewed = repoGrade(strong).score;
+		expect(repoGrade({ ...strong, judgeScore: 0.2 }).score).toBeLessThan(
+			unreviewed,
+		);
+		// A good review still may not drag a repo below its own merit.
+		expect(
+			repoGrade({ ...strong, judgeScore: 1.0 }).score,
+		).toBeGreaterThanOrEqual(unreviewed);
+	});
+
+	it("a template ranks below the same repo under a non-template name", () => {
+		// repoKindOf has classified hello-world/template/starter/example since it
+		// was written, and repoGrade ignored it — so an agent could be handed
+		// `hello-world` as production architecture.
+		expect(repoGrade({ ...strong, name: "someone/soroban-hello-world" }).score).toBeLessThan(
+			repoGrade({ ...strong, name: "someone/lending-protocol" }).score,
+		);
+	});
+
+	it("first-party scaffolds are demoted too — that is where the risk is highest", () => {
+		expect(
+			repoGrade({ ...strong, firstParty: true, name: "stellar/soroban-examples" })
+				.score,
+		).toBeLessThan(
+			repoGrade({ ...strong, firstParty: true, name: "stellar/anchor-platform" })
+				.score,
+		);
+	});
+
+	it("code evidence is gated on an actual scan on EVERY path, not just ownMerit", () => {
+		// ownMerit checked codeScanned; corroboration and authority did not, so a
+		// stale or partial flag set could lift those two while the merit path
+		// behaved as though nothing had been read.
+		const flagsWithoutScan = {
+			...strong,
+			codeScanned: false,
+			judgeScore: undefined,
+		};
+		expect(repoGrade(flagsWithoutScan).score).toBeLessThan(
+			repoGrade({ ...flagsWithoutScan, codeScanned: true }).score,
+		);
+	});
+});
