@@ -33,7 +33,8 @@ async function main(): Promise<number> {
 	let mismatches = 0;
 
 	for (const key of Object.keys(REPO_KNOWLEDGE_NOTES)) {
-		// Registry keys are lowercase; rows keep GitHub's casing
+		// Registry keys may be lowercase OR GitHub's own casing; rows keep
+		// GitHub's casing
 		// (0xNana/SearchPay, Creit-Tech/…). Mongo `equals` is case-sensitive, so
 		// every mixed-case repo reported "missing row" and was never stamped —
 		// 131 of 325 keys on 2026-09-02, including batch-1 rows the board had
@@ -50,7 +51,13 @@ async function main(): Promise<number> {
 			context: { internal: true },
 		});
 		const d = (res.docs as Array<{ fullName?: string }>).find(
-			(x) => String(x.fullName ?? "").toLowerCase() === key,
+			// Both sides lowercased. Comparing a lowercased row to the key AS
+			// WRITTEN meant a key in GitHub's own casing could never match: ten
+			// entries — every note added on 2026-09-07 among them — reported
+			// "missing row" and were silently never stamped, while the board went
+			// on listing those repos as un-noted. A registry key's capitalisation
+			// must not decide whether a fact reaches the row.
+			(x) => String(x.fullName ?? "").toLowerCase() === key.toLowerCase(),
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		) as any;
 		if (!d) {
