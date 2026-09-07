@@ -3161,7 +3161,65 @@ async function main() {
 	// enum value missing from the Types options — aborted the whole batch,
 	// losing 12 valid writes). A bad row fails loudly; the rest still land.
 	let failed = 0;
+	// Two sections can plan a write for the same row, and each builds its patch
+	// by spreading the group as it was READ — `{ ...d.links, website: null }`.
+	// Applied in sequence the second patch's stale spread RESURRECTS what the
+	// first cleared, and merging the patches does not help: the later one still
+	// carries the stale sibling. On 2026-09-07 mimoto and sorosorcerer were
+	// named by both GITHUB_LINK_REMOVE and WEBSITE_REMOVE_DEAD, both writes
+	// reported success, and each row ended with one link cleared and the other
+	// restored. 42 of 44 removals stuck; the two that did not were exactly the
+	// two with a second write in the same run.
+	//
+	// So the patches are reduced to their INTENT. Every patch for a row was
+	// built from the same stored group, so the keys where a patch DIFFERS from
+	// what is stored are precisely what that section meant to change. Union the
+	// differences and one write carries them all.
+	const byRow = new Map<string, Array<(typeof writes)[number]>>();
 	for (const w of writes) {
+		const k = String(w.id);
+		byRow.set(k, [...(byRow.get(k) ?? []), w]);
+	}
+	const merged: typeof writes = [];
+	for (const [, group] of byRow) {
+		if (group.length === 1) {
+			merged.push(group[0]);
+			continue;
+		}
+		const stored = (await payload.findByID({
+			collection: "projects",
+			id: group[0].id,
+			depth: 0,
+			overrideAccess: true,
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		})) as any;
+		const data: Record<string, unknown> = {};
+		for (const w of group) {
+			for (const [key, val] of Object.entries(
+				w.data as Record<string, unknown>,
+			)) {
+				const cur = stored?.[key];
+				if (
+					val && cur && typeof val === "object" && typeof cur === "object" &&
+					!Array.isArray(val) && !Array.isArray(cur)
+				) {
+					// Group patch: keep only the keys this section actually changed.
+					const base = (data[key] ?? { ...(cur as object) }) as Record<string, unknown>;
+					for (const [k2, v2] of Object.entries(val as Record<string, unknown>)) {
+						if ((cur as Record<string, unknown>)[k2] !== v2) base[k2] = v2;
+					}
+					data[key] = base;
+				} else {
+					data[key] = val;
+				}
+			}
+		}
+		merged.push({ ...group[0], data });
+		console.log(
+			`  (${group.length} patches for ${group[0].slug} reduced to their intent — a stale spread would have resurrected one)`,
+		);
+	}
+	for (const w of merged) {
 		try {
 			await payload.update({
 				collection: "projects",
@@ -3179,7 +3237,9 @@ async function main() {
 		console.error(`\n${failed} write(s) FAILED — fix and re-run.`);
 		process.exitCode = 1;
 	}
-	console.log(`\nDONE: ${writes.length} write(s) applied.`);
+	console.log(
+		`\nDONE: ${merged.length} write(s) applied (${writes.length} planned).`,
+	);
 	// exit(0) STOMPED the exitCode set above (same bug enrich-repos fixed):
 	// failed writes exited green. Honor the failure code.
 	process.exit(process.exitCode ?? 0);
