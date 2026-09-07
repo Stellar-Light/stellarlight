@@ -75,13 +75,18 @@ describe("judgeStamp", () => {
 			}).verdict,
 		).toBe("HOLDS");
 		// albedo.link: a live signer whose HTML is a mount div plus a bundle.
-		expect(
-			judgeStamp({
-				...base,
-				slug: "albedo",
-				html: '<title>Albedo</title><div id="app"></div><script src="/b.js"></script>',
-			}).verdict,
-		).toBe("COULD-NOT-CHECK");
+		// This asserted COULD-NOT-CHECK until 2026-09-07, which encoded the
+		// guard's blindness rather than the rule it exists for. The invariant
+		// was always "a live product's shell is never called dead"; the head
+		// rule now reads the served <title> and HOLDS it, which satisfies that
+		// invariant strictly better than admitting ignorance.
+		const albedo = judgeStamp({
+			...base,
+			slug: "albedo",
+			html: '<title>Albedo</title><div id="app"></div><script src="/b.js"></script>',
+		});
+		expect(albedo.verdict).not.toBe("CONTRADICTED");
+		expect(albedo.verdict).toBe("HOLDS");
 	});
 
 	it("CONTRADICTS a Live stamp on fold wind-down language, and on a non-200", () => {
@@ -333,5 +338,80 @@ describe("a Chrome Web Store listing is readable without a browser", () => {
 			html: "<title>Chrome Web Store</title><div id=root></div><script src=x.js></script>",
 		});
 		expect(v.verdict).not.toBe("COULD-NOT-CHECK");
+	});
+});
+
+describe("a client-rendered page still serves a head", () => {
+	const shell = (head: string) =>
+		`<html><head>${head}</head><body><div id="root"></div><script src="/a.js"></script></body></html>`;
+	const base = { slug: "x", sourceUrl: "https://example.com/", httpStatus: 200 };
+
+	it("holds when the served title names the product", () => {
+		// albedo, obsrvr, StellarBroker: 15 of the 20 rows stuck on
+		// could-not-check carry a title like this.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: shell("<title>Obsrvr — Structured data infrastructure for Stellar</title>"),
+		});
+		expect(v.verdict).toBe("HOLDS");
+		expect(v.reason).toMatch(/head names the product/);
+	});
+
+	it("does not accept a framework's default title as the product", () => {
+		// sorosan's dapp: an unmodified scaffold is not a shipped product.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: shell("<title>Create Next App</title>"),
+		});
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+	});
+
+	it("does not accept a bare hostname — that names a domain, not a product", () => {
+		// What a parked page serves.
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: shell("<title>sorosplits.xyz</title>"),
+		});
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+	});
+
+	it("contradicts a Live row when the head itself carries a wind-down marker", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: shell("<title>example.com is for sale | GoDaddy</title>"),
+		});
+		expect(v.verdict).toBe("CONTRADICTED");
+		expect(v.reason).toMatch(/is for sale/);
+	});
+
+	it("the same head HOLDS an Inactive row — it agrees with the verdict", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Inactive",
+			html: shell("<title>example.com is for sale | GoDaddy</title>"),
+		});
+		expect(v.verdict).toBe("HOLDS");
+	});
+
+	it("falls back to a meta description when there is no title", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Live",
+			html: shell(
+				'<title></title><meta name="description" content="Walletless onboarding for soroban!">',
+			),
+		});
+		// No title to name the product, so still honest about not knowing.
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+	});
+
+	it("stays could-not-check when the head is empty", () => {
+		const v = judgeStamp({ ...base, to: "Live", html: shell("") });
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
+		expect(v.reason).toMatch(/no head to read/);
 	});
 });
