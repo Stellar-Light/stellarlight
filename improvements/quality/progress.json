@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T11:44:59.354Z",
+ "generatedAt": "2026-09-07T13:39:01.085Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -261,6 +261,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/triiyo-2026-09-07.json",
+    "slug": "triiyo",
+    "url": "https://triiyo.com/",
+    "fetchedAt": "2026-09-07",
+    "markers": [
+     "for sale"
+    ]
+   },
+   {
     "file": "improvements/receipts/transfermole-2026-09-06.json",
     "slug": "transfermole",
     "url": "https://api.github.com/repos/ivandzen/transfermole",
@@ -328,6 +337,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/stellar-token-launchpad-2026-09-06.json",
+    "slug": "stellar-token-launchpad",
+    "url": "https://tokenlaunchpad.eu/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Cryptix"
+    ]
+   },
+   {
     "file": "improvements/receipts/soundness-2026-09-05.json",
     "slug": "soundness",
     "url": "https://soundness.xyz/",
@@ -336,6 +354,42 @@
      "winding down",
      "no longer being developed",
      "services are now offline"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorosplits-2026-09-06.json",
+    "slug": "sorosplits",
+    "url": "https://sorosplits.xyz/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorosan-2026-09-06.json",
+    "slug": "sorosan",
+    "url": "https://sorosan-dapp.vercel.app/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Create Next App"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorodrop-2026-09-06.json",
+    "slug": "sorodrop",
+    "url": "https://sorodrop.xyz/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/soroban-pulse-2026-09-06.json",
+    "slug": "soroban-pulse",
+    "url": "https://sorobanpulse.app/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
     ]
    },
    {
@@ -360,6 +414,15 @@
     ]
    },
    {
+    "file": "improvements/receipts/ramm-2026-09-06.json",
+    "slug": "ramm",
+    "url": "https://ramm.ai/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Popupz"
+    ]
+   },
+   {
     "file": "improvements/receipts/quasar-2026-09-06.json",
     "slug": "quasar",
     "url": "https://eiger.co/",
@@ -371,9 +434,11 @@
    {
     "file": "improvements/receipts/qolaq-2026-09-06.json",
     "slug": "qolaq",
-    "url": "https://qolaq.org/",
+    "url": "https://qolaq.com/",
     "fetchedAt": "2026-09-06",
-    "markers": []
+    "markers": [
+     "lander"
+    ]
    },
    {
     "file": "improvements/receipts/polaris-lend-2026-09-06.json",
@@ -619,8 +684,7 @@
     "url": "http://biggertech.co/",
     "fetchedAt": "2026-09-06",
     "markers": [
-     "has been registered with Gandi.net",
-     "biggertech.co is unavailable"
+     "is unavailable"
     ]
    },
    {

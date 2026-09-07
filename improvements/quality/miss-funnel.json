@@ -1,10 +1,15 @@
 {
- "generatedAt": "2026-09-06T11:44:54.000Z",
+ "generatedAt": "2026-09-07T13:38:52.769Z",
  "population": {
-  "openRecallMisses": 0,
+  "openRecallMisses": 1,
   "replayableOpenRecallMisses": 0,
-  "unclassified": 0,
-  "unclassifiedExamples": [],
+  "unclassified": 1,
+  "unclassifiedExamples": [
+   {
+    "id": "engine-a-recall:1-result-carries-types-education",
+    "probe": "#1 result carries types=Education"
+   }
+  ],
   "coveragePct": 0,
   "sampled": 0,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."

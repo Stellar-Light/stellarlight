@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T07:31:02.885Z",
+ "generatedAt": "2026-09-07T13:39:00.459Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 650,
+  "total": 651,
   "open": 2,
-  "refreshQueue": 18,
+  "refreshQueue": 19,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
@@ -166,7 +166,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 1,
+    "refresh": 2,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -290,14 +290,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 358,
-     "recurred": 141,
-     "ratePct": 39.4
+     "newFindings": 359,
+     "recurred": 142,
+     "ratePct": 39.6
     },
     "lifetime": {
-     "newFindings": 650,
-     "recurred": 141,
-     "ratePct": 21.7
+     "newFindings": 651,
+     "recurred": 142,
+     "ratePct": 21.8
     }
    },
    "reopened": {
@@ -309,13 +309,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 358,
-     "repeats": 358,
+     "newFindings": 359,
+     "repeats": 359,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 650,
-     "repeats": 644,
+     "newFindings": 651,
+     "repeats": 645,
      "ratePct": 99.1
     },
     "byClass": [
@@ -327,8 +327,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 130,
-      "open": 18,
+      "total": 131,
+      "open": 19,
       "firstSeen": "2026-07-22"
      },
      {
@@ -2985,10 +2985,8 @@
    {
     "slug": "vitreous",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -3437,10 +3435,9 @@
    {
     "slug": "stride",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "linked"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -3486,10 +3483,8 @@
    {
     "slug": "stellarstrides",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -3573,10 +3568,8 @@
    {
     "slug": "stellar-update",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -3837,10 +3830,8 @@
    {
     "slug": "sorscan",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -3862,10 +3853,8 @@
    {
     "slug": "sorosorcerer",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4000,10 +3989,8 @@
    {
     "slug": "soroban-assistant",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4087,10 +4074,8 @@
    {
     "slug": "skeeper",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4304,10 +4289,8 @@
    {
     "slug": "rigel",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4468,10 +4451,8 @@
    {
     "slug": "prophe",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4592,10 +4573,8 @@
    {
     "slug": "paygo-crypto",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4848,10 +4827,8 @@
    {
     "slug": "mimoto",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4907,19 +4884,15 @@
    {
     "slug": "lumens-for-charity",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
     "slug": "lumenaut",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -4998,10 +4971,8 @@
    {
     "slug": "lettuce",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -5423,10 +5394,9 @@
    {
     "slug": "getpaid",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "linked"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -5449,10 +5419,8 @@
    {
     "slug": "gecko-fuzz",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -5517,10 +5485,8 @@
    {
     "slug": "forge",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -5891,10 +5857,8 @@
    {
     "slug": "cryptocannoneer",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -6199,10 +6163,8 @@
    {
     "slug": "canfy",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "linked"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Inactive"
    },
    {
@@ -6222,10 +6184,9 @@
    {
     "slug": "bravepay",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "linked"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -7136,10 +7097,9 @@
    {
     "slug": "tribal",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "linked"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8152,10 +8112,9 @@
    {
     "slug": "stellar-global",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "linked"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8307,7 +8266,7 @@
     "status": "Live"
    }
   ],
-  "meanScore": 89,
+  "meanScore": 90,
   "deploymentMix": [
    {
     "network": "unknown",
@@ -8344,7 +8303,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 399
+    "count": 398
    },
    {
     "basis": "human-verified",
@@ -8368,7 +8327,7 @@
    },
    {
     "basis": "unverified",
-    "count": 4
+    "count": 5
    },
    {
     "basis": "operator-announcement",
@@ -8376,51 +8335,9 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 518,
+  "weakestTotal": 500,
   "weakestTruncated": true,
   "weakest": [
-   {
-    "slug": "bravepay",
-    "name": "BravePay",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "linked"
-    ]
-   },
-   {
-    "slug": "getpaid",
-    "name": "GetPaid",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "linked"
-    ]
-   },
    {
     "slug": "grip",
     "name": "Grip",
@@ -8571,27 +8488,6 @@
     ]
    },
    {
-    "slug": "stellar-global",
-    "name": "Stellar Global",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Education"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "linked"
-    ]
-   },
-   {
     "slug": "stellar-pulse",
     "name": "Stellar Pulse",
     "status": "Live",
@@ -8624,30 +8520,6 @@
     "deploymentApplies": false,
     "types": [
      "Education"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "linked"
-    ]
-   },
-   {
-    "slug": "stride",
-    "name": "Stride",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "AI",
-     "Gaming",
-     "NFT",
-     "Payments"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -8723,27 +8595,6 @@
    {
     "slug": "timed-transactions-api",
     "name": "Timed Transactions API",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 60,
-    "factsPresent": 3,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis",
-     "linked"
-    ]
-   },
-   {
-    "slug": "tribal",
-    "name": "Tribal",
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
@@ -9215,6 +9066,109 @@
     "missing": [
      "strongBasis"
     ]
+   },
+   {
+    "slug": "alula",
+    "name": "Alula",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Lending"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "amber",
+    "name": "Amber",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "RWA"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "amero",
+    "name": "Amero",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "amulets",
+    "name": "Amulets",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "Wallet",
+     "Card Issuing",
+     "Stablecoin"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
+    "slug": "anchainai",
+    "name": "AnChain.AI",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Security",
+     "AI"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
    }
   ],
   "missingCounts": [
@@ -9236,7 +9190,7 @@
    },
    {
     "field": "linked",
-    "count": 47
+    "count": 24
    }
   ]
  },
@@ -9329,11 +9283,11 @@
     },
     {
      "label": "slowing",
-     "count": 936
+     "count": 938
     },
     {
      "label": "active",
-     "count": 818
+     "count": 816
     },
     {
      "label": "unknown",
@@ -10440,7 +10394,7 @@
   {
    "area": "project status",
    "limit": "49% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "480 of 983 rows (census)",
+   "measurement": "479 of 983 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10508,14 +10462,14 @@
     "value": 16
    },
    {
-    "id": "s:engine-e-contract",
-    "label": "engine-e-contract",
-    "column": 0,
-    "value": 8
-   },
-   {
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 9
+   },
+   {
+    "id": "s:engine-e-contract",
+    "label": "engine-e-contract",
     "column": 0,
     "value": 8
    },
@@ -10595,7 +10549,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 36
+    "value": 37
    },
    {
     "id": "o:verified",
@@ -10648,7 +10602,7 @@
     "value": 16
    },
    {
-    "source": 8,
+    "source": 9,
     "target": 16,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
@@ -10760,18 +10714,18 @@
     "value": 3
    },
    {
-    "source": 9,
+    "source": 8,
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 8
+    "value": 9
    },
    {
     "source": 20,
     "target": 22,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 1
+    "value": 2
    },
    {
     "source": 2,
