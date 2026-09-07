@@ -15,7 +15,7 @@ concurrency:
   group: generated-recall
   cancel-in-progress: false
 permissions:
-  contents: read
+  contents: write
   issues: write
 jobs:
   recall:
@@ -40,6 +40,26 @@ jobs:
         # masked this step's exit code (2026-08-12 lesson).
         shell: bash
         run: pnpm exec tsx scripts/eval/generated-recall.ts | tee engine-a.log $GITHUB_STEP_SUMMARY
+
+      # The engine wrote its artifact and nothing carried the number across, so
+      # /quality reported the north star "measured 10 days ago" while this lane
+      # had run the day before. Appending here keeps the headline tracking the
+      # engine instead of a hand-edited file. Idempotent: it appends only when
+      # the artifact is newer than the last point.
+      - name: Append to the north-star series
+        run: pnpm exec tsx scripts/quality/append-north-star.ts --execute
+
+      # Without this the append lives and dies inside the runner, which is the
+      # same "nothing consumed it" defect one layer down.
+      - name: Commit the series
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/north-star-series.json || true
+          git diff --cached --quiet || git commit -m "data(quality): north-star point from Engine A [skip ci]"
+          git diff --quiet HEAD origin/main -- improvements/audits/north-star-series.json 2>/dev/null || {
+            git pull --rebase origin main && git push
+          }
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:
