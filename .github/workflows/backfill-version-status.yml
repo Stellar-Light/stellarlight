@@ -1,0 +1,43 @@
+name: Backfill versionStatus (manual)
+
+# Recomputes versionStatus for every code-scanned repo from SDK facts already
+# stored — no GitHub calls, no re-scan. The field was derived from the Rust
+# soroban-sdk crate alone, and was assigned before the scan had populated
+# stellarJsDep, so 5,356 of 10,876 scanned repos read "unknown". It became
+# load-bearing when repoScore started reading it (a deprecated pin costs 25%),
+# and a signal blind on half the population cannot carry that.
+#
+# ONE WRITER: calls the same combinedVersionStatus() the scanner calls, so a
+# later re-scan lands on the same value.
+# workflow-health: signal-steps: ^Backfill$
+
+permissions: { contents: read }
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-version-status
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Backfill
+        run: pnpm exec tsx scripts/backfill-version-status.ts ${{ inputs.execute && '--execute' || '' }}
