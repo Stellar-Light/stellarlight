@@ -42,6 +42,165 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── 2026-09-07 batch: the /quality board named 49 curated-pool repos with
+	// no note. These are the ones whose own text carries a fact worth
+	// keeping — most often a correction: a package that announces its own
+	// deprecation, a multi-chain compiler where Stellar is one backend of
+	// three, a README belonging to a different project, a "general" utility
+	// that is specific to one contract. Two are internal triage flags rather
+	// than published facts about someone's repo.
+	"Sorosan/sorosan-client": [
+		{
+			note: "README (read 2026-09-07) opens with its own retirement: \"Note this will be deprecated in use for sorosan-sdk/core. This package is now outdated and deprecated. Please update to the latest version.\" So @sorosan-client/core is the OLD package and Sorosan/sorosan-sdk is its successor — the two repos otherwise read almost identically. Last commit 2023-12-24. https://github.com/Sorosan/sorosan-client#readme",
+			triggers: ["sorosan client deprecated", "sorosan-sdk successor"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"BuilderOSS/nouns-builder": [
+		{
+			note: "Triage 2026-09-07: README is \"Nouns Builder front-end website and subgraph mono-repo\", deployed on \"Mainnet\" and \"Sepolia testnet\" — Ethereum, not Stellar. Kept as a flag so an attribution pass does not read it as Stellar evidence. https://github.com/BuilderOSS/nouns-builder",
+			source: "curated",
+			asOf: "2026-09-07",
+			visibility: "internal",
+		},
+	],
+	"stellar-chef/stellar-chef": [
+		{
+			note: "Triage 2026-09-07: the README is an unmodified \"Salvia-kit Dashboard v4 Svelte-kit\" template — a different project's starter docs, not this one's. The deployed tool at stellar-chef.github.io/stellar-chef IS real (recipes, faucet, calculators, testnet) and was read in a browser 2026-09-06; the repo's own text just describes something else. Do not quote this README as a fact about Stellar Chef. https://github.com/stellar-chef/stellar-chef",
+			source: "curated",
+			asOf: "2026-09-07",
+			visibility: "internal",
+		},
+	],
+	"luanlabs/stellar-extend-entry-ttl": [
+		{
+			note: "README (read 2026-09-07): \"Fluxity Extend Entry TTL — a long-running daemon that keeps the Fluxity Soroban contract's storage entries alive on the Stellar network.\" The repo name reads like a general-purpose TTL utility; it is specific to Fluxity's contract. https://github.com/luanlabs/stellar-extend-entry-ttl",
+			triggers: ["soroban ttl daemon", "fluxity storage entries"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"paltalabs/available-xlm": [
+		{
+			note: "GitHub description (read 2026-09-07): \"A repo to experiment with maximum available XLM when...\"; README: \"intended to test and understand the Minimum Balance needed for an account to be able to perform transactions.\" An experiment, not a library — nothing here is published or importable. https://github.com/paltalabs/available-xlm",
+			triggers: ["stellar minimum balance experiment"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Raum-Network/raum-raumfi-v3": [
+		{
+			note: "README (read 2026-09-07): \"Concentrated-liquidity exchange stack for Stellar Soroban\" — one repository holding the contract workspace AND a Next.js frontend, so it answers both \"where are the RaumFi contracts\" and \"where is the app\". GitHub description calls it the \"CLMM implementation of RaumFi DEX\". https://github.com/Raum-Network/raum-raumfi-v3",
+			triggers: ["raumfi clmm contracts", "concentrated liquidity soroban"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"constellation-protocol/constellation-protocol": [
+		{
+			note: "README (read 2026-09-07): \"Constellation Protocol is an open protocol for Index Funds on Stellar/Soroban.\" SCF #19 and #23, $210,000. https://github.com/constellation-protocol/constellation-protocol",
+			triggers: ["index funds soroban", "constellation protocol contracts"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"MoonBite-GmbH/soroban-multisig-contracts": [
+		{
+			note: "GitHub description (read 2026-09-07): \"A simple multisig contract allowing to configure a r[equired quorum]\"; the README calls itself \"an attempt to create a smart contract allowing to initialize a multisig with a configurable quorum\" — the authors' own hedge, worth carrying rather than presenting it as a finished product. https://github.com/MoonBite-GmbH/soroban-multisig-contracts",
+			triggers: ["soroban multisig contract", "configurable quorum stellar"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"perun-network/perun-stellar-backend": [
+		{
+			note: "README (read 2026-09-07): \"the Stellar backend for the go-perun channel library\" — peer-to-peer payment channels. The product is go-perun; this repo is its Stellar adapter, so it answers \"does Perun support Stellar\", not \"what is Perun\". https://github.com/perun-network/perun-stellar-backend",
+			triggers: ["perun payment channels stellar", "go-perun stellar backend"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"sorobanhooks/stellar-wallet-sdk": [
+		{
+			note: "GitHub description (read 2026-09-07): \"Minimal, non-custodial Stellar wallet SDK with encrypted local key storage and session-based signing.\" Distinct from the SDF-published @stellar/typescript-wallet-sdk despite the near-identical name — different org, different package. https://github.com/sorobanhooks/stellar-wallet-sdk",
+			triggers: ["non-custodial wallet sdk stellar", "sorobanhooks wallet sdk"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"sorobanhooks/stellar-logos": [
+		{
+			note: "README (read 2026-09-07): \"A collection of high-quality logos and assets for the Stellar ecosystem.\" An asset repository — no code, so repo activity here says nothing about a product. https://github.com/sorobanhooks/stellar-logos",
+			triggers: ["stellar ecosystem logos"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Tellus-Cooperative/sorobounty.xyz": [
+		{
+			note: "GitHub description (read 2026-09-07): \"An open-source bounty hunting platform where users c[an create and participate in bounties]\", README confirms the same. https://github.com/Tellus-Cooperative/sorobounty.xyz",
+			triggers: ["soroban bounty platform", "sorobounty"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"bp-ventures/stellar-payment-api": [
+		{
+			note: "README (read 2026-09-07) is documentation, not a service: \"Overview of Stellar Anchors and integration examples\", with sections on issuance, deposits and withdrawals and the SEPs involved. The repo name reads like a deployable API; it is a written guide. https://github.com/bp-ventures/stellar-payment-api",
+			triggers: ["stellar anchor integration guide", "seps deposits withdrawals"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"bp-ventures/retail-wallet": [
+		{
+			note: "GitHub description (read 2026-09-07): \"A reference implementation of a Stellar Retail Wallet and Investment Dashboard built using Next.js, branded for the CLPX Stellar asset.\" A reference implementation branded for one asset, not a shipped consumer wallet. https://github.com/bp-ventures/retail-wallet",
+			triggers: ["stellar retail wallet reference", "clpx wallet"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"lumenlater/lumen-later": [
+		{
+			note: "README (read 2026-09-07): \"LumenLater BNPL Protocol — decentralized Buy-Now-Pay-Later system built on Stellar's Soroban smart contract platform.\" https://github.com/lumenlater/lumen-later",
+			triggers: ["buy now pay later stellar", "bnpl soroban"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"alternun-development/alternunV2-Stellar-POC": [
+		{
+			note: "README (read 2026-09-07): \"Alternun POC — Gold-Backed Tokenization on Stellar. Complete proof-of-concept for tokenizing underground gold reserves.\" The repo says of itself that it is a proof of concept; do not read it as a deployed product. https://github.com/alternun-development/alternunV2-Stellar-POC",
+			triggers: ["gold backed token stellar poc", "alternun tokenization"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Epta-Node/ai-net": [
+		{
+			note: "GitHub description (read 2026-09-07): \"AI-Net is a decentralized agent coordination network\"; README: \"the network where AI agents discover, hire, and pay each other.\" https://github.com/Epta-Node/ai-net",
+			triggers: ["agent coordination network stellar", "ai agents pay each other"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"paulfears/StellarSnap": [
+		{
+			note: "README (read 2026-09-07): integrating \"Stellar wallet functionalities into MetaMask Snaps\" — the surface is MetaMask, not a standalone wallet. https://github.com/paulfears/StellarSnap",
+			triggers: ["stellar metamask snap", "metamask stellar wallet"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"expand-network/sdk-nodejs": [
+		{
+			note: "GitHub description (read 2026-09-07): \"SDK for node.js\" from expand.network, a multi-chain API provider — Stellar is one supported network among many, so activity here is not Stellar-specific. https://github.com/expand-network/sdk-nodejs",
+			triggers: ["expand network sdk", "multi-chain api sdk"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
 	// ── 2026-09-06 batch: multi-repo projects, where the repo NAME does not say
 	// which half of the product it is. A consumer asking "where are the Blend
 	// contracts" must not be handed a frontend. Each fact is quoted from the
@@ -2622,6 +2781,12 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 		},
 	],
 	"hyperledger-solang/solang": [
+		{
+			note: "README (read 2026-09-07): \"solang - Solidity Compiler for Solana, Polkadot and Soroban\", written in Rust on LLVM. Stellar/Soroban is ONE backend of three, so activity here is not Stellar-specific work and the repo answers \"can I write Soroban contracts in Solidity\", never \"what is built on Stellar\". https://github.com/hyperledger-solang/solang",
+			triggers: ["solidity on soroban", "solang stellar backend"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
 		{
 			note: "Org moved twice: hyperledger-labs/solang -> hyperledger/solang -> hyperledger-solang/solang; both old GitHub paths redirect to the current repo (https://github.com/hyperledger/solang resolves to hyperledger-solang/solang as of 2026-09).",
 			source: "curated",
