@@ -116,9 +116,18 @@ async function main() {
 					? r.contractInterface.length
 					: 0,
 				codeScanned: r.codeScanState === "scanned",
+				// Stored on the row by enrich, which passes it to repoGrade. This
+				// script did not, so the same row scored differently depending on
+				// which lane wrote it last — the one-field-one-writer flip-flop.
+				builderReputation:
+					typeof r.builderReputation === "number" ? r.builderReputation : 0,
 			});
 			const before = Number(r.repoScore ?? -1);
-			if (grade.score === before) continue;
+			const labelBefore = r.repoScoreLabel ? String(r.repoScoreLabel) : "";
+			// A row whose score is right but whose LABEL is stale still needs a
+			// write, so skipping on score alone would leave the 1,741 desynced
+			// rows unrepaired by the very run meant to repair them.
+			if (grade.score === before && grade.label === labelBefore) continue;
 			moved++;
 			deltas.push({
 				full: String(r.fullName),
@@ -129,7 +138,13 @@ async function main() {
 				await payload.update({
 					collection: "repos",
 					id: String(r.id),
-					data: { repoScore: grade.score },
+					// BOTH fields, always. Writing the score alone left 1,741 rows
+					// whose served label contradicted their own score — 11 of them
+					// labelled "low" while scoring in the "high" band — because
+					// enrich-repos writes the pair and this lane wrote one of them.
+					// Same class as the input divergence above: two writers of one
+					// concept, behaving differently.
+					data: { repoScore: grade.score, repoScoreLabel: grade.label },
 					overrideAccess: true,
 					context: { internal: true },
 				});

@@ -296,13 +296,19 @@ describe("first-party ownership", () => {
 		// the Stellar Development Foundation" and holds henyey (a pure-Rust
 		// Stellar Core), stellar-spec (protocol specifications), the Zig and C
 		// Soroban SDKs and stellar-raven. 18 of its 30 repos were unindexed.
-		for (const o of [
-			"stellar",
-			"stellar-experimental",
-			"stellar-deprecated",
-			"soroban",
-		])
+		for (const o of ["stellar", "stellar-experimental", "stellar-deprecated"])
 			expect(FIRST_PARTY_OWNERS.has(o)).toBe(true);
+	});
+
+	it("holds only real SDF ORGANISATIONS, not accounts holding the name", () => {
+		// Verified against the GitHub API 2026-09-07: `soroban` is type=User with
+		// 0 repos (created 2014) and `stellardevelopmentfoundation` is type=User
+		// with 1 repo and no name or company. Both sat in this set. Harmless
+		// while it only broke search ties; not harmless once it grants 0.95
+		// corroboration, +0.4 authority, exemption from the relevance discount,
+		// and uncapped indexing of everything the account publishes.
+		for (const o of ["soroban", "stellardevelopmentfoundation"])
+			expect(FIRST_PARTY_OWNERS.has(o)).toBe(false);
 	});
 
 	it("accepts owner or owner/name, and is case-insensitive", () => {

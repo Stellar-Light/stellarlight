@@ -108,10 +108,16 @@ const DAY_MS = 86_400_000;
  * about who is first-party.
  */
 export const FIRST_PARTY_OWNERS = new Set([
-	"stellar",
-	"soroban",
-	"stellar-deprecated",
-	"stellardevelopmentfoundation",
+	// Verified 2026-09-07 against the GitHub API — every entry must be a real
+	// SDF ORGANISATION. `soroban` (type=User, 0 repos, created 2014) and
+	// `stellardevelopmentfoundation` (type=User, 1 repo, no name or company)
+	// were in this list and are NOT SDF: they are unrelated personal accounts
+	// holding the names. Harmless while the set only broke search ties; not
+	// harmless once it grants 0.95 corroboration, +0.4 authority, exemption from
+	// the Stellar-relevance discount and uncapped indexing of everything they
+	// publish.
+	"stellar", // org "Stellar" — stellar.org
+	"stellar-deprecated", // org "Stellar (Deprecated Repositories)" — stellar.org
 	// "Experiments at the frontier of the Stellar Development Foundation"
 	// (the org's own description). 30 repos, every one Stellar, none funded and
 	// none starred: henyey (a pure-Rust Stellar Core), stellar-spec (protocol
