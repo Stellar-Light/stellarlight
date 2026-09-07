@@ -39,6 +39,25 @@ export interface RepoGradeInput {
 	// code-verified 0-star contract earns a strong reference on its own merit.
 	// Ungated by own-merit on purpose (the code IS the merit).
 	codeDepth?: number | null;
+	/**
+	 * The scan's verdict on whether this repo contains Stellar code at all:
+	 * "none" is an affirmative finding (we looked and found nothing), while
+	 * null/undefined means nobody looked — never punished.
+	 *
+	 * Stars are evidence the ECOSYSTEM AT LARGE noticed a repo, not that the
+	 * STELLAR ecosystem did. iancoleman/bip39 carries 4,314 stars and no
+	 * Stellar code; OneKeyHQ/app-monorepo 2,433 and none. Both outscored
+	 * blend-capital/blend-contracts (21 stars, the live lending protocol) until
+	 * traction was made relevance-weighted.
+	 */
+	stellarProof?: string | null;
+	/**
+	 * How many curated knowledge notes this repo carries. A note is a human
+	 * writing down what the repo IS, with a source and a date — the same kind
+	 * of external validation as being named canonical, and cheaper to earn, so
+	 * it counts one tier lower.
+	 */
+	knowledgeNoteCount?: number | null;
 	/** Default-branch commits in the last 90 days (activitySignals.commits90d).
 	 * Refines freshness WITHIN the fresh band: two repos committed last week can
 	 * differ 50x in velocity. Null = not captured — no penalty, never punish
@@ -192,6 +211,45 @@ function tractionOf(stars?: number | null): number {
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
+/**
+ * How much of this repo's popularity is evidence about STELLAR?
+ *
+ * 1.0 when the scan found Stellar code, or when nobody has scanned (missing
+ * data is never a penalty). Heavily discounted when the scan affirmatively
+ * found none: those stars were earned somewhere else.
+ */
+function stellarRelevance(input: RepoGradeInput): number {
+	if (input.stellarProof == null) return 1; // not scanned — no verdict, no penalty
+	if (input.stellarProof !== "none") return 1;
+	// Scanned, and no Stellar code found. Depth can still rescue it if the
+	// scanner recorded some, otherwise its stars barely count here.
+	const c = typeof input.codeDepth === "number" ? clamp01(input.codeDepth) : 0;
+	return 0.25 + 0.45 * c;
+}
+
+/**
+ * Does anything OUTSIDE a repo's own source say it is an answer?
+ *
+ * Both evidence-from-the-code lifts (a hackathon judge's review, and Soroban
+ * code depth) are scaled by this. Each is evidence the repo is REAL; neither is
+ * evidence it is CANONICAL, and a repo with nothing vouching for it should not
+ * outrank the ecosystem's reference implementations on either.
+ *
+ * Deliberately NOT gated on stars alone — that would reinstate the star
+ * dominance these lifts exist to fix. A curated, funded or project-linked repo
+ * keeps the full lift at zero stars.
+ */
+function externalValidation(input: RepoGradeInput): number {
+	if (input.curatedCanonical) return 1; // a human named it the answer
+	if (input.scfAwarded || (input.projectProminence ?? 0) > 0) return 0.85;
+	// A curated knowledge note is a human recording what this repo IS, dated
+	// and sourced. Weaker than being named canonical, stronger than a star
+	// count from an ecosystem that may not be ours.
+	if ((input.knowledgeNoteCount ?? 0) > 0) return 0.8;
+	if ((input.stargazerCount ?? 0) >= 10) return 0.7; // the ecosystem noticed
+	return 0.45; // nothing outside the repo vouches for it
+}
+
 export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// Velocity-adjusted freshness (repo-intel blend, answer-key calibrated):
 	// date freshness says WHEN the last commit was; commits90d says how alive
@@ -203,7 +261,11 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 			? 0.85 + 0.15 * Math.min(Math.max(input.commits90d, 0) / 30, 1)
 			: 1;
 	const freshness = freshnessOf(input.lastCommitAt) * velocityAdj;
-	const traction = tractionOf(input.stargazerCount);
+	// Traction, weighted by whether those stars are about STELLAR. A scan that
+	// affirmatively found no Stellar code means this repo's popularity says
+	// nothing about its value as a Stellar reference; an unscanned repo is not
+	// punished, because absence of evidence is not evidence.
+	const traction = tractionOf(input.stargazerCount) * stellarRelevance(input);
 	const hasDesc = input.hasDescription ? 1 : 0;
 	const hasTopics = (input.topicCount ?? 0) > 0 ? 1 : 0;
 	const engaged = (input.openIssues ?? 0) > 0 ? 1 : 0;
@@ -221,6 +283,13 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 
 	// Inherited authority from the owning project/builder.
 	let authority = 0;
+	// A human naming this repo THE answer for a concept is the strongest
+	// external validation we hold, and until 2026-09-07 it earned nothing here:
+	// curatedCanonical only gated the codeDepth lift, so stellar/stellar-core —
+	// on the canonical list, 3,301 stars — got zero authority, because a C++
+	// network implementation has no Soroban SDK depth to be lifted by. It
+	// capped at 60 with PERFECT own merit while judged hackathon repos sat at 85.
+	if (input.curatedCanonical) authority += 0.45;
 	if (input.hackathonWinner) authority += 0.35;
 	if (input.scfAwarded) authority += 0.25;
 	authority += Math.min(0.4, Math.max(0, input.projectProminence ?? 0) / 250); // prominence 100 → +0.4
@@ -243,7 +312,17 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		Number.isFinite(input.judgeScore)
 	) {
 		const j = Math.max(0, Math.min(1, input.judgeScore));
-		const judgeDriven = 0.05 + 0.8 * j; // 0 → 0.05, 1 → 0.85
+		// SCALED BY EXTERNAL VALIDATION, exactly as codeDepth is below, and for
+		// the same reason. Ungated, a judge score of 1.0 set the score to a flat
+		// 85 whatever the repo's own merit — and on 2026-09-07 the top TWELVE
+		// repos in the whole index were hackathon submissions with 0-4 stars and
+		// no project link, above stellar/freighter, xBull and every SDK.
+		//
+		// A hackathon review says this submission is GOOD, judged against the
+		// other submissions of that hackathon. It does not say the repo is a
+		// canonical reference for the ecosystem — the same distinction the
+		// codeDepth block draws between REAL and CANONICAL.
+		const judgeDriven = (0.05 + 0.8 * j) * externalValidation(input);
 		composite = Math.max(composite, judgeDriven);
 	}
 
@@ -275,14 +354,7 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// project-linked repo keeps the full lift at zero stars.
 	if (typeof input.codeDepth === "number" && Number.isFinite(input.codeDepth)) {
 		const c = Math.max(0, Math.min(1, input.codeDepth));
-		const validated = input.curatedCanonical
-			? 1 // a human named it the canonical answer
-			: input.scfAwarded || (input.projectProminence ?? 0) > 0
-				? 0.85 // funded, or linked to a curated project
-				: (input.stargazerCount ?? 0) >= 10
-					? 0.7 // the ecosystem noticed it
-					: 0.45; // deep code and nothing else vouching for it
-		const codeDriven = (0.1 + 0.7 * c) * validated;
+		const codeDriven = (0.1 + 0.7 * c) * externalValidation(input);
 		composite = Math.max(composite, codeDriven);
 	}
 
