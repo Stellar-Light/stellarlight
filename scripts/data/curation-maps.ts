@@ -2364,8 +2364,17 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	// PARTNER side was corrected in curate-partners URL_CORRECTIONS on 07-06;
 	// this fixes the PROJECT row that kept serving the hijacked domain.
 	"boss-pay": "https://www.bossmoney.com/",
-	// Product site live at https://www.bravepay.net/ (wallet/POS/payments content), help.bravepay.net 200; only the recorded apex bravepay.net DNS record is broken.
-	bravepay: "https://www.bravepay.net/",
+	// WITHDRAWN 2026-09-07. This fix was added when www.bravepay.net served
+	// wallet/POS content; it now returns Cloudflare's "Suspected Phishing"
+	// interstitial (403), while the apex bravepay.net is NXDOMAIN on both
+	// 1.1.1.1 and 8.8.8.8. Linking a row at a host flagged for phishing is
+	// worse than serving no link, so the row keeps neither: bravepay is in
+	// WEBSITE_REMOVE_DEAD and this entry is gone. Found because the two maps
+	// fought — one nulling the apex, one setting the www — and the idempotence
+	// gate reported a write that replanned on every run.
+	// Still alive and unflagged: help.bravepay.net serves "Brave HelpCenter"
+	// (200, read 2026-09-07). A help centre is not the product site, so it is
+	// recorded here rather than published as one — a human can decide.
 	// BRZ stablecoin actively offered by issuer Transfero, live at transfero.com featuring BRZ; recorded brztoken.io returns 404.
 	brz: "https://www.transfero.com/",
 	// Old domain depayapp.com serves the rebranded live site depay.us (200, 'infraestructura de pagos cross-border', same org per hreflang); old domain's TLS cert …
