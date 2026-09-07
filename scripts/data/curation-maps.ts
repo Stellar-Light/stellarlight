@@ -4839,6 +4839,15 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	// too: without ownership, sync-lumenloop re-wrote the-blue-marble's hijacked
 	// casino link back from the feed every night (found 2026-09-05).
 	if (slug in WEBSITE_REMOVE) owned.add("links.website");
+	// Same fact, second map. Registered 2026-09-07 after the sync re-wrote 44
+	// dead websites and 37 dead GitHub links that curate had removed hours
+	// earlier: the removal maps were new, ownership is granted map-by-map by
+	// hand, and nobody granted it. The identical incident is described three
+	// lines above for WEBSITE_REMOVE — a solved problem, repeated because the
+	// solution had to be remembered rather than enforced. `ownershipCoverage`
+	// below now enumerates it, and a test walks it.
+	if (slug in WEBSITE_REMOVE_DEAD) owned.add("links.website");
+	if (slug in GITHUB_LINK_REMOVE) owned.add("links.github");
 	if (slug in DOCS_LINKS) owned.add("links.docs");
 	if (slug in GITHUB_REPOS_ADD) owned.add("github");
 	return owned;
@@ -4858,6 +4867,8 @@ export function curatedSlugs(): string[] {
 			...Object.keys(DOCS_LINKS),
 			...Object.keys(GITHUB_REPOS_ADD),
 			...Object.keys(WEBSITE_REMOVE),
+			...Object.keys(WEBSITE_REMOVE_DEAD),
+			...Object.keys(GITHUB_LINK_REMOVE),
 		]),
 	].sort();
 }
@@ -5304,3 +5315,32 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 	// parked domain page
 	stellarauth: "https://stellarauth.com/",
 };
+
+/**
+ * Which registry owns which field. The list `curatedFieldsFor` applies, stated
+ * once so a test can walk it instead of trusting that whoever adds the next map
+ * also remembers to grant ownership — which is precisely what went wrong twice:
+ * the-blue-marble's hijacked link came back nightly (2026-09-05), and 81 dead
+ * links came back the same day they were removed (2026-09-07).
+ *
+ * A registry that WRITES a field and is absent here is a lane fight waiting to
+ * happen: curate writes it, the feed sync overwrites it, and no single run's
+ * idempotence check can see it because the two lanes run hours apart.
+ */
+export const OWNERSHIP_COVERAGE: Array<{
+	map: Record<string, unknown>;
+	name: string;
+	field: string;
+}> = [
+	{ map: DESCRIPTION_FIXES, name: "DESCRIPTION_FIXES", field: "shortDescription" },
+	{ map: TYPES_SET, name: "TYPES_SET", field: "types" },
+	{ map: TYPES_ADD, name: "TYPES_ADD", field: "types" },
+	{ map: STATUS_FIX, name: "STATUS_FIX", field: "status" },
+	{ map: NAME_FIXES, name: "NAME_FIXES", field: "name" },
+	{ map: WEBSITE_FIXES, name: "WEBSITE_FIXES", field: "links.website" },
+	{ map: WEBSITE_REMOVE, name: "WEBSITE_REMOVE", field: "links.website" },
+	{ map: WEBSITE_REMOVE_DEAD, name: "WEBSITE_REMOVE_DEAD", field: "links.website" },
+	{ map: GITHUB_LINK_REMOVE, name: "GITHUB_LINK_REMOVE", field: "links.github" },
+	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
+	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
+];
