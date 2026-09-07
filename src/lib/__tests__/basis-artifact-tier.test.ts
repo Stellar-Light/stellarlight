@@ -44,3 +44,26 @@ describe("artifactSupports", () => {
 		}
 	});
 });
+
+/**
+ * operator-toml translation (2026-09-07). `operator-toml` is a deployment
+ * basis, never a statusBasis option, so five rows carrying a SEP-1 toml on
+ * their own domain (agtrail, lumenswap, reyts, stellar-carbon, xlmeme) were
+ * reported CANNOT on every run. The statusBasis field's own description names
+ * "a SEP-1 toml" as product-integration evidence, so the lane now translates
+ * before it licenses. These pin what must stay true either side of that.
+ */
+describe("operator-toml translation", () => {
+	it("the raw label is never a tier any artifact can license", () => {
+		for (const kind of ALL) expect(artifactSupports("operator-toml", kind)).toBe(false);
+	});
+
+	it("the tier it translates INTO is backed by the toml URL itself", () => {
+		expect(artifactSupports("product-integration", "deployment.sourceUrl")).toBe(true);
+	});
+
+	it("translation never reaches human-verified from an on-chain artifact", () => {
+		expect(artifactSupports("human-verified", "asset payments")).toBe(false);
+	});
+});
+

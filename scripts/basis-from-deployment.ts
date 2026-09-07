@@ -111,6 +111,27 @@ export type ArtifactKind =
 	| "deployment.sourceUrl"
 	| "receipt"
 	| "asset payments";
+/**
+ * A deployment basis that is not itself a statusBasis option, but whose
+ * evidence the status enum already recognises under another name.
+ *
+ * `operator-toml` is the only one. The statusBasis field documents
+ * product-integration as "the LIVE product itself references Stellar
+ * infrastructure — **a SEP-1 toml**, a Horizon/RPC endpoint, an on-chain
+ * address, or a Stellar SDK in its own bundle; an integration OBSERVED, never
+ * a claim the product works". A toml served from the project's own domain and
+ * naming mainnet accounts is exactly that, so the tier is not an invention —
+ * it is the definition already written on the field. The label still never
+ * says human-verified: a machine stamp does not impersonate a human one.
+ *
+ * Measured 2026-09-07: five rows (agtrail, lumenswap, reyts, stellar-carbon,
+ * xlmeme) carried operator-toml on their deployment and a weak status basis,
+ * and this lane reported them CANNOT every run because no translation existed.
+ */
+const BASIS_TRANSLATION: Record<string, string> = {
+	"operator-toml": "product-integration",
+};
+
 const SUPPORTS: Record<ArtifactKind, readonly string[]> = {
 	"deployment.sourceUrl": ["human-verified", "product-integration"],
 	receipt: ["human-verified", "product-integration"],
@@ -162,7 +183,11 @@ type Evidence = { url: string; asOf: string; via: string; kind: ArtifactKind };
  *  an onchain-activity row that has both a sourceUrl and observed payments is
  *  backed by the payments, not by the URL that happens to rank first. */
 // biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-function evidenceOf(d: any, depBasis: string): Evidence | string {
+function evidenceOf(
+	d: any,
+	depBasis: string,
+	targetBasis: string = depBasis,
+): Evidence | string {
 	const depAsOf = d.deployment?.asOf ? String(d.deployment.asOf) : null;
 	const rawSrc = d.deployment?.sourceUrl;
 	const src = typeof rawSrc === "string" && rawSrc ? rawSrc : null;
@@ -212,8 +237,8 @@ function evidenceOf(d: any, depBasis: string): Evidence | string {
 	if (!candidates.length)
 		return "no deployment.sourceUrl, no receipt, no asset payments";
 	return (
-		candidates.find((c) => artifactSupports(depBasis, c.kind)) ??
-		`${depBasis} not supported by ${candidates.map((c) => c.kind).join(" / ")}`
+		candidates.find((c) => artifactSupports(targetBasis, c.kind)) ??
+		`${targetBasis} not supported by ${candidates.map((c) => c.kind).join(" / ")}`
 	);
 }
 
@@ -283,14 +308,18 @@ async function main() {
 			);
 			continue;
 		}
-		if (!isStatusBasis(depBasis)) {
+		// A deployment basis the status enum spells differently (operator-toml
+		// → product-integration) is translated, never invented: see
+		// BASIS_TRANSLATION for the definition it is drawn from.
+		const targetBasis = BASIS_TRANSLATION[depBasis] ?? depBasis;
+		if (!isStatusBasis(targetBasis)) {
 			blocked.push(`${d.slug}: "${depBasis}" is not a statusBasis option`);
 			console.log(
 				`  CANNOT  ${String(d.slug).padEnd(42)} "${depBasis}" is strong but statusBasis cannot hold it`,
 			);
 			continue;
 		}
-		const ev = evidenceOf(d, depBasis);
+		const ev = evidenceOf(d, depBasis, targetBasis);
 		if (typeof ev === "string") {
 			blocked.push(`${d.slug}: ${ev}`);
 			console.log(
@@ -300,7 +329,7 @@ async function main() {
 		}
 
 		console.log(
-			`  PROPAGATE ${String(d.slug).padEnd(42)} ${statusBasis || "(none)"} -> ${depBasis} · asOf ${ev.asOf.slice(0, 10)} · via ${ev.via} · ${ev.url}`,
+			`  PROPAGATE ${String(d.slug).padEnd(42)} ${statusBasis || "(none)"} -> ${targetBasis}${targetBasis === depBasis ? "" : ` (from deployment ${depBasis})`} · asOf ${ev.asOf.slice(0, 10)} · via ${ev.via} · ${ev.url}`,
 		);
 		if (!EXECUTE) {
 			propagated++;
@@ -308,7 +337,7 @@ async function main() {
 		}
 
 		const data = {
-			statusBasis: depBasis,
+			statusBasis: targetBasis,
 			statusAsOf: new Date(ev.asOf).toISOString(),
 			statusSourceUrl: ev.url,
 		};

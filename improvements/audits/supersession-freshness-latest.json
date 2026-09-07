@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-07T00:03:47.330Z",
+	"generatedAt": "2026-09-07T00:52:30.109Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
 	"archivedTotal": 254,
 	"archivedInPool": 33,
