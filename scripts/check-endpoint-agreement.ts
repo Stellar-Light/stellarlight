@@ -30,11 +30,16 @@ const JSON_OUT = process.argv.includes("--json");
  * Deliberately short: this is not a schema diff. Every entry is a fact that
  * answers "is this thing still real, and what replaced it".
  */
-const RESOLUTION_FACTS = [
+const RESOLUTION_FACTS: Array<{
+	field: string;
+	why: string;
+	/** Skip when neither path has it — most repos were never superseded. */
+	onlyWhenSuperseded?: boolean;
+}> = [
 	{ field: "activityState", why: "is this repo alive, archived or dormant" },
 	{ field: "supersededBy", why: "what replaced it", onlyWhenSuperseded: true },
 	{ field: "deprecatedAt", why: "when it was replaced", onlyWhenSuperseded: true },
-] as const;
+];
 
 const REPOS = [
 	"paltalabs/defindex",
