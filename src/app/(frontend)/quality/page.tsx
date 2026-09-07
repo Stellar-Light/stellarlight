@@ -667,65 +667,103 @@ export default function QualityPage() {
 							<tr className="text-muted-foreground text-left">
 								<th className="font-normal pb-2 pr-4">Lane</th>
 								<th className="font-normal pb-2 pr-4">Cadence</th>
-								<th className="font-normal pb-2 pr-4 text-right">
-									Runs ({laneAutonomy.windowWeeks}w)
+								<th
+									className="font-normal pb-2 pr-4 text-right"
+									title="self-started / hand-dispatched"
+								>
+									Runs {laneAutonomy.windowWeeks}w
 								</th>
-								<th className="font-normal pb-2 pr-4 text-right">
-									Clean weeks
-								</th>
-								<th className="font-normal pb-2">Last intervention</th>
+								<th className="font-normal pb-2 pr-4 text-right">Weeks</th>
+								<th className="font-normal pb-2">Last correction</th>
 							</tr>
 						</thead>
 						<tbody>
-							{laneAutonomy.lanes.map((l) => (
-								<tr key={l.id} className="border-t border-border align-top">
-									<td className="py-2 pr-4 text-foreground">{l.id}</td>
-									<td className="py-2 pr-4 text-muted-foreground tabular-nums">
-										{l.cadence}
-									</td>
-									<td className="py-2 pr-4 text-right text-muted-foreground tabular-nums">
-										{l.unattendedRuns === null
-											? "—"
-											: `${l.unattendedRuns} self-started (${l.attendedRuns} hand-dispatched)`}
-									</td>
-									<td className="py-2 pr-4 text-right text-foreground tabular-nums">
-										{l.interventionFreeWeeks === null
-											? "could not check"
-											: l.interventionFreeWeeks}
-									</td>
-									<td className="py-2 text-muted-foreground max-w-md">
-										{l.lastInterventionAt
-											? `${l.lastInterventionAt} — ${l.lastInterventionWhat}`
-											: "none logged"}
-									</td>
-								</tr>
-							))}
+							{[...laneAutonomy.lanes]
+								.sort(
+									(a, b) =>
+										(b.interventionFreeWeeks ?? -1) -
+										(a.interventionFreeWeeks ?? -1),
+								)
+								.map((l) => (
+									<tr key={l.id} className="border-t border-border/60">
+										<td className="py-1.5 pr-4 text-foreground">{l.id}</td>
+										<td className="py-1.5 pr-4 text-muted-foreground/80">
+											{l.cadence}
+										</td>
+										<td
+											className="py-1.5 pr-4 text-right text-muted-foreground tabular-nums whitespace-nowrap"
+											title={
+												l.unattendedRuns === null
+													? undefined
+													: `${l.unattendedRuns} self-started, ${l.attendedRuns} hand-dispatched`
+											}
+										>
+											{l.unattendedRuns === null
+												? "—"
+												: `${l.unattendedRuns} / ${l.attendedRuns}`}
+										</td>
+										<td
+											className={`py-1.5 pr-4 text-right tabular-nums ${
+												l.interventionFreeWeeks === null
+													? "text-muted-foreground/60"
+													: l.interventionFreeWeeks >=
+															laneAutonomy.thresholdWeeks
+														? "text-emerald-400/90"
+														: "text-foreground"
+											}`}
+										>
+											{l.interventionFreeWeeks === null
+												? "?"
+												: l.interventionFreeWeeks}
+										</td>
+										<td className="py-1.5 text-muted-foreground/80 max-w-[22rem] truncate">
+											{l.lastInterventionAt ? (
+												<span
+													title={`${l.lastInterventionAt} — ${l.lastInterventionWhat}`}
+												>
+													{l.lastInterventionAt} · {l.lastInterventionWhat}
+												</span>
+											) : (
+												"—"
+											)}
+										</td>
+									</tr>
+								))}
 						</tbody>
 					</table>
 				</div>
-				<p className="text-[11px] text-muted-foreground leading-relaxed mt-4">
-					Elapsed time earns nothing. The weeks must be consecutive and must run
-					up to this one, so a lane nobody has run sits at zero however long it
-					has been quiet, and four scattered good weeks are not four clean
-					weeks. Only runs the lane started ITSELF count — a hand-dispatched
-					execute is a person operating the lane, and is reported here rather
-					than counted. The run counts are runs, not writes: which of them wrote
-					is what the week count is proven from. Every counted execute is proven
-					from that run&apos;s own job steps, never from today&apos;s copy of
-					the workflow file: a step that was skipped moved nothing, whatever the
-					file says now. A &ldquo;+&rdquo; marks a floor: GitHub does not expose
-					a run&apos;s commands, so a step the author named and that actually
-					ran could not be classified. Corrections live in{" "}
-					<a
-						href={evidenceUrl("improvements/lanes/interventions.json")}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="underline hover:text-foreground transition-colors"
-					>
-						improvements/lanes/interventions.json
-					</a>
-					, appended by the same PR that makes the correction.
-				</p>
+				<details className="group mt-4">
+					<summary className="text-[11px] text-muted-foreground/70 hover:text-foreground cursor-pointer list-none marker:hidden select-none">
+						<span className="group-open:hidden">how a week is counted ›</span>
+						<span className="hidden group-open:inline">
+							how a week is counted ⌄
+						</span>
+					</summary>
+					<p className="text-[11px] text-muted-foreground leading-relaxed mt-2">
+						Elapsed time earns nothing. The weeks must be consecutive and must
+						run up to this one, so a lane nobody has run sits at zero however
+						long it has been quiet, and four scattered good weeks are not four
+						clean weeks. Only runs the lane started ITSELF count — a
+						hand-dispatched execute is a person operating the lane, and is
+						reported here rather than counted. The run counts are runs, not
+						writes: which of them wrote is what the week count is proven from.
+						Every counted execute is proven from that run&apos;s own job steps,
+						never from today&apos;s copy of the workflow file: a step that was
+						skipped moved nothing, whatever the file says now. A &ldquo;+&rdquo;
+						marks a floor: GitHub does not expose a run&apos;s commands, so a
+						step the author named and that actually ran could not be classified.
+						Corrections live in{" "}
+						<a
+							href={evidenceUrl("improvements/lanes/interventions.json")}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-foreground transition-colors"
+						>
+							improvements/lanes/interventions.json
+						</a>
+						, appended by the same PR that makes the correction.
+					</p>
+				</details>
 			</Card>
 
 			{/* ── findings: what we actually found, cleared, and still owe ── */}
@@ -1294,8 +1332,11 @@ export default function QualityPage() {
 							Correction receipts
 							<Info text="A human-verified status change commits its evidence: the URL fetched, the time, response identity headers, and the exact markers on the page that decided the verdict. Re-run the capture to diff what a page says now against what it said then." />
 						</p>
+						{/* Capped like its siblings. Every receipt rendered, 53 of them
+						    and growing with each correction, so this one list was
+						    longer than the rest of the card put together. */}
 						<div className="flex flex-col">
-							{progress.library.receipts.map((r) => (
+							{progress.library.receipts.slice(0, 8).map((r) => (
 								<QueueRow
 									key={r.file}
 									href={evidenceUrl(r.file)}
@@ -1305,6 +1346,16 @@ export default function QualityPage() {
 								/>
 							))}
 						</div>
+						{progress.library.receipts.length > 8 && (
+							<a
+								href={evidenceUrl("improvements/receipts")}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors -mt-1"
+							>
+								{progress.library.receipts.length - 8} more receipts ›
+							</a>
+						)}
 						<p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 mt-3">
 							Audits
 						</p>

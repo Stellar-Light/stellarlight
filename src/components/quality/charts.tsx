@@ -507,9 +507,20 @@ export function MissFunnel({
 	);
 }
 
-/** Phase progress, states render with equal weight on purpose. A roadmap
- * that only shows green is marketing; "in progress" and its remaining work
- * are the parts a reader actually needs. */
+/**
+ * Phase progress.
+ *
+ * States still render with equal weight on purpose: a roadmap that only shows
+ * green is marketing, and "in progress" with its remaining work is the part a
+ * reader actually needs. What changed on 2026-09-07 is the SHAPE — each phase
+ * printed three prose paragraphs (evidence, shipped so far, remaining) at 11px,
+ * six times over, and the section read as a wall of grey text nobody scans.
+ *
+ * So: the rail carries the phase ids, every phase keeps a one-line header, and
+ * REMAINING WORK STAYS VISIBLE — it is the live part. A completed phase's
+ * evidence is reference material, not something to re-read each visit, so it
+ * folds into a native disclosure. Nothing is hidden that is still open.
+ */
 export function PhaseProgress({
 	phases,
 }: {
@@ -523,74 +534,114 @@ export function PhaseProgress({
 	}>;
 }) {
 	const done = phases.filter((p) => p.state === "done").length;
+	const tone = (state: string) =>
+		state === "done"
+			? "#a78bfa"
+			: state === "in-progress"
+				? "#5b21b6"
+				: "#2F2F2F";
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex items-center gap-3">
-				<div className="flex-1 flex gap-[3px] h-2">
+			{/* The rail names its segments, so the bar is readable without hover. */}
+			<div>
+				<div className="flex items-center gap-3 mb-1.5">
+					<div className="flex-1 flex gap-[3px] h-2">
+						{phases.map((p) => (
+							<div
+								key={p.id}
+								className="flex-1 rounded-[2px]"
+								style={{ backgroundColor: tone(p.state) }}
+								title={`${p.id} — ${p.title}: ${p.state}`}
+							/>
+						))}
+					</div>
+					<span className="text-xs text-muted-foreground tabular-nums shrink-0">
+						{done}/{phases.length} phases
+					</span>
+				</div>
+				<div className="flex gap-[3px] pr-[4.5rem]">
 					{phases.map((p) => (
-						<div
+						<span
 							key={p.id}
-							className="flex-1 rounded-[2px]"
-							style={{
-								backgroundColor:
-									p.state === "done"
-										? "#a78bfa"
-										: p.state === "in-progress"
-											? "#5b21b6"
-											: "#2F2F2F",
-							}}
-							title={`${p.id} - ${p.title}: ${p.state}`}
-						/>
+							className={`flex-1 text-[10px] tabular-nums ${
+								p.state === "done"
+									? "text-muted-foreground/70"
+									: p.state === "in-progress"
+										? "text-amber-400/90"
+										: "text-muted-foreground/40"
+							}`}
+						>
+							{p.id}
+						</span>
 					))}
 				</div>
-				<span className="text-xs text-muted-foreground tabular-nums shrink-0">
-					{done} of {phases.length} phases complete
-				</span>
 			</div>
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-				{phases.map((p) => (
-					<div key={p.id} className="flex flex-col gap-1">
-						<span className="flex items-baseline gap-2">
-							<span className="text-xs font-semibold text-foreground">
-								{p.id}
-							</span>
-							<span className="text-xs text-foreground">{p.title}</span>
-							<span
-								className={`text-[10px] px-1.5 py-px rounded-full border shrink-0 ${
-									p.state === "done"
-										? "border-border text-muted-foreground"
-										: p.state === "in-progress"
+
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-3">
+				{phases.map((p) => {
+					const detail = [
+						p.evidence ? { label: "Evidence", text: p.evidence } : null,
+						p.shippedSoFar
+							? { label: "Shipped so far", text: p.shippedSoFar }
+							: null,
+					].filter(Boolean) as Array<{ label: string; text: string }>;
+					return (
+						<div
+							key={p.id}
+							className="border-t border-border/60 pt-2.5 flex flex-col gap-1"
+						>
+							<span className="flex items-baseline gap-2">
+								<span className="text-xs font-semibold text-foreground tabular-nums">
+									{p.id}
+								</span>
+								<span className="text-xs text-foreground flex-1 min-w-0">
+									{p.title}
+								</span>
+								<span
+									className={`text-[10px] px-1.5 py-px rounded-full border shrink-0 ${
+										p.state === "in-progress"
 											? "border-amber-500/40 text-amber-400"
 											: "border-border text-muted-foreground"
-								}`}
-							>
-								{p.state === "in-progress"
-									? "In progress"
-									: p.state === "done"
-										? "Done"
-										: "Not started"}
+									}`}
+								>
+									{p.state === "in-progress"
+										? "In progress"
+										: p.state === "done"
+											? "Done"
+											: "Not started"}
+								</span>
 							</span>
-						</span>
-						{p.evidence && (
-							<span className="text-[11px] text-muted-foreground leading-relaxed">
-								<span className="text-foreground/60">Evidence: </span>
-								{p.evidence}
-							</span>
-						)}
-						{p.shippedSoFar && (
-							<span className="text-[11px] text-muted-foreground leading-relaxed">
-								<span className="text-foreground/60">Shipped so far: </span>
-								{p.shippedSoFar}
-							</span>
-						)}
-						{p.remaining && (
-							<span className="text-[11px] leading-relaxed text-amber-400/80">
-								<span className="text-amber-400/60">Remaining: </span>
-								{p.remaining}
-							</span>
-						)}
-					</div>
-				))}
+
+							{/* The live part, never folded. */}
+							{p.remaining && (
+								<span className="text-[11px] leading-relaxed text-amber-400/80">
+									<span className="text-amber-400/60">Remaining: </span>
+									{p.remaining}
+								</span>
+							)}
+
+							{detail.length > 0 && (
+								<details className="group">
+									<summary className="text-[11px] text-muted-foreground/70 hover:text-foreground cursor-pointer list-none marker:hidden select-none">
+										<span className="group-open:hidden">evidence ›</span>
+										<span className="hidden group-open:inline">evidence ⌄</span>
+									</summary>
+									<div className="mt-1 flex flex-col gap-1">
+										{detail.map((d) => (
+											<span
+												key={d.label}
+												className="text-[11px] text-muted-foreground leading-relaxed"
+											>
+												<span className="text-foreground/60">{d.label}: </span>
+												{d.text}
+											</span>
+										))}
+									</div>
+								</details>
+							)}
+						</div>
+					);
+				})}
 			</div>
 		</div>
 	);
