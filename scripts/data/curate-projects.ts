@@ -2302,19 +2302,34 @@ async function main() {
 			// when the stored note lags the verdict (fill-if-empty left the earlier
 			// Live packet note on five rows retired or downgraded on 2026-09-06),
 			// refresh the note alone. Status, basis and dates are not touched.
-			if (
+			// The entry itself proves the row was once Live: `from: "Live"` is a
+			// statement that we observed it Live before retiring it. That is the
+			// wasLive flag, and it was set on 1 of 99 Inactive rows while 90 were
+			// provably Live — so a consumer asking "was this ever real?" got
+			// silence about a product that shipped and died.
+			const provesWasLive = fix.from === "Live" && fix.to !== "Live";
+			const needsWasLive = provesWasLive && !d.lifecycle?.wasLive;
+			const needsNote =
 				fix.from !== fix.to &&
 				d.status === fix.to &&
 				fix.note &&
-				d.lifecycle?.note !== fix.note
-			) {
-				console.log(
-					`  ${slug}: already ${fix.to} — lifecycle note refreshed to the verdict`,
-				);
+				d.lifecycle?.note !== fix.note;
+			if (needsNote || needsWasLive) {
+				const parts = [
+					needsNote ? "lifecycle note refreshed to the verdict" : null,
+					needsWasLive ? "wasLive set (the entry retired it FROM Live)" : null,
+				].filter(Boolean);
+				console.log(`  ${slug}: already ${fix.to} — ${parts.join("; ")}`);
 				writes.push({
 					id: d.id,
 					slug,
-					data: { lifecycle: { ...(d.lifecycle ?? {}), note: fix.note } },
+					data: {
+						lifecycle: {
+							...(d.lifecycle ?? {}),
+							...(needsNote ? { note: fix.note } : {}),
+							...(needsWasLive ? { wasLive: true } : {}),
+						},
+					},
 				});
 				continue;
 			}
@@ -2373,6 +2388,11 @@ async function main() {
 		// stamp (from === to) only fills an empty note, as before.
 		if (fix.note && (fix.from !== fix.to || !d.lifecycle?.note))
 			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
+		// Retiring a row FROM Live is itself the proof it was once Live — the
+		// flag a consumer needs to hear "this used to be a real product" rather
+		// than silence. Rides the same write, never guessed.
+		if (fix.from === "Live" && fix.to !== "Live")
+			data.lifecycle = { ...(d.lifecycle ?? {}), ...data.lifecycle, wasLive: true };
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
 		// served label stops being an unprovenanced bare string.
 		if (fix.asOf) data.statusAsOf = fix.asOf;

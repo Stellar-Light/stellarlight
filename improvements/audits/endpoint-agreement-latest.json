@@ -1,79 +1,43 @@
 {
-	"generatedAt": "2026-09-07T16:48:52.848Z",
+	"generatedAt": "2026-09-07T17:03:10.054Z",
 	"source": "scripts/check-endpoint-agreement.ts",
 	"rule": "Resolution facts — is this alive, what replaced it — must be served on every agent-reachable path to an entity, not only the curated one.",
 	"tally": {
 		"checked": 6,
-		"agree": 0,
-		"missing": 6,
+		"agree": 6,
+		"missing": 0,
 		"couldNotCheck": 0
 	},
 	"rows": [
 		{
 			"repo": "paltalabs/defindex",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		},
 		{
 			"repo": "kalepail/stellar-raven",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		},
 		{
 			"repo": "stellar/js-stellar-sdk",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		},
 		{
 			"repo": "blend-capital/blend-contracts",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		},
 		{
 			"repo": "soroswap/core",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		},
 		{
 			"repo": "YaleOpenLab/opensolar",
-			"verdict": "missing",
-			"missing": [
-				{
-					"field": "activityState",
-					"servedBy": "search",
-					"why": "is this repo alive, archived or dormant"
-				}
-			]
+			"verdict": "agree",
+			"missing": []
 		}
 	]
 }
