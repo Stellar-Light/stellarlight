@@ -42,6 +42,55 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// ── 2026-09-06 batch: multi-repo projects, where the repo NAME does not say
+	// which half of the product it is. A consumer asking "where are the Blend
+	// contracts" must not be handed a frontend. Each fact is quoted from the
+	// repo's own README, read 2026-09-06; the two siblings I looked at whose
+	// READMEs are unmodified create-next-app boilerplate (Bond-Hive/interface,
+	// zenith-protocols/vault-ui) got NO note — "this repo has no description"
+	// is not a fact worth publishing.
+	"AquariusDeFi/dao-aquarius-soroban": [
+		{
+			note: "GitHub description (read 2026-09-06): 'V1 DAO Aquarius web app — public frontend source for aqua.network (governance, voting, A…'. README: 'DAO Aquarius — Aquarius protocol is governed by…'. This is the FRONTEND for Aquarius governance, not the AMM or the Soroban contracts, despite the -soroban suffix. TypeScript, MIT, last commit 2026-07-03. https://github.com/AquariusDeFi/dao-aquarius-soroban",
+			triggers: ["aquarius dao frontend", "aqua.network governance app"],
+			source: "curated",
+			asOf: "2026-09-06",
+		},
+	],
+	"eq-lab/slender-ui": [
+		{
+			note: "README (read 2026-09-06): 'Slender is the first noncustodial Lending protocol on Stellar Soroban. Slender allows users to lend and borrow any crypto asset which supported by the Soroban network.' App at app.slender.fi, landing at slender.fi. This repo is the UI only; TypeScript, last commit 2025-11-25. https://github.com/eq-lab/slender-ui",
+			triggers: ["slender lending ui", "slender.fi app source"],
+			source: "curated",
+			asOf: "2026-09-06",
+		},
+	],
+	"blend-capital/blend-bootstrapper-ui": [
+		{
+			note: "README (read 2026-09-06): 'The Blend Bootstrapper UI is a dApp that allows individuals to interact with Bootstrapper based contracts on the Soroban network' — the contracts live in blend-capital/backstop-bootstrapper, which the README links. So this repo answers 'the bootstrapper interface', never 'the bootstrapper contract'. TypeScript, last commit 2025-05-13. https://github.com/blend-capital/blend-bootstrapper-ui",
+			triggers: ["blend bootstrapper ui", "blend backstop bootstrapper contracts"],
+			source: "curated",
+			asOf: "2026-09-06",
+		},
+	],
+	"Sorosan/sorosan-sdk": [
+		{
+			note: "README (read 2026-09-06): 'Sorosan SDK … your gateway to a seamless Stellar network development experience.' Package @sorosan-sdk/core; the sibling repo Sorosan/sorosan-client publishes @sorosan-client/core with near-identical wording, so the two are told apart by package name, not by README. Both dormant: last commits 2024-02-22 (sdk) and 2023-12-24 (client), and sorosan-dapp.vercel.app serves an unmodified create-next-app template as of 2026-09-06. SCF #20, $29,000. https://github.com/Sorosan/sorosan-sdk",
+			triggers: ["sorosan sdk vs client", "sorosan core package"],
+			source: "curated",
+			asOf: "2026-09-06",
+		},
+	],
+	"blockdaemon/solana-accountsdb-plugin-kafka": [
+		{
+			// internal: a judgment about attribution, not a published fact about
+			// someone's repo. See the visibility contract on KnowledgeNote.
+			note: "Triage 2026-09-06: GitHub description 'Solana geyser plugin implementing a Kafka publisher', topics [kafka, solana], Rust, no Stellar reference. Our index carries stellarProof 'none' for it, yet it is attributed to the Stellar project row 'blockdaemon' — org-wide attribution pulling in a sibling-chain repo. It is already excluded from leaderboard activity (that lane skips stellarProof none, spec 1.9.47); flagged here so a future attribution pass does not read it as Stellar evidence. https://github.com/blockdaemon/solana-accountsdb-plugin-kafka",
+			source: "curated",
+			asOf: "2026-09-06",
+			visibility: "internal",
+		},
+	],
 	// ── P5 batch 10 (2026-09-05): the 62 never-examined pool rows — 47 repos /
 	// 47 notes, 15 internal triage verdicts (BATCH_10_TRIAGE_2026_09_05).
 	// Registry identities that link back (@kyvernlabs/pulse+mcp, @dfns/sdk,
