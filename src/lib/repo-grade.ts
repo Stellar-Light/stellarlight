@@ -112,6 +112,12 @@ export const FIRST_PARTY_OWNERS = new Set([
 	"soroban",
 	"stellar-deprecated",
 	"stellardevelopmentfoundation",
+	// "Experiments at the frontier of the Stellar Development Foundation"
+	// (the org's own description). 30 repos, every one Stellar, none funded and
+	// none starred: henyey (a pure-Rust Stellar Core), stellar-spec (protocol
+	// specifications), zig-/c-soroban-sdk, contract-verifications, and
+	// stellar-raven itself. 18 of the 30 were absent from the index entirely.
+	"stellar-experimental",
 ]);
 
 /** Accepts "owner" or "owner/name". */

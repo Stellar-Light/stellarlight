@@ -15,7 +15,10 @@
  *      a C++ network implementation never has.
  */
 import { describe, expect, it } from "vitest";
-import { repoGrade } from "../repo-grade";
+import { repoGrade,
+	FIRST_PARTY_OWNERS,
+	isFirstParty,
+} from "../repo-grade";
 
 const NOW = new Date().toISOString();
 
@@ -284,5 +287,39 @@ describe("code evidence outranks institutional recognition", () => {
 			commits90d: 0,
 		});
 		expect(stale.score).toBeLessThan(repoGrade(scanned).score);
+	});
+});
+
+describe("first-party ownership", () => {
+	it("covers the SDF orgs, including the experimental frontier", () => {
+		// stellar-experimental describes itself as "Experiments at the frontier of
+		// the Stellar Development Foundation" and holds henyey (a pure-Rust
+		// Stellar Core), stellar-spec (protocol specifications), the Zig and C
+		// Soroban SDKs and stellar-raven. 18 of its 30 repos were unindexed.
+		for (const o of [
+			"stellar",
+			"stellar-experimental",
+			"stellar-deprecated",
+			"soroban",
+		])
+			expect(FIRST_PARTY_OWNERS.has(o)).toBe(true);
+	});
+
+	it("accepts owner or owner/name, and is case-insensitive", () => {
+		expect(isFirstParty("stellar-experimental/stellar-raven")).toBe(true);
+		expect(isFirstParty("Stellar/js-xdr")).toBe(true);
+		expect(isFirstParty("stellar")).toBe(true);
+	});
+
+	it("does not claim lookalike orgs", () => {
+		for (const o of [
+			"stellar-light",
+			"stellarterm",
+			"StellarCN/py-stellar-base",
+			"lightsail-network/java-stellar-sdk",
+			"",
+			null,
+		])
+			expect(isFirstParty(o)).toBe(false);
 	});
 });
