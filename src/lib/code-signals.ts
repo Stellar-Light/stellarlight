@@ -15,7 +15,10 @@
  */
 
 import { isProtected, type ProtectionSignals } from "./repo-allowlist";
-import { type VersionStatus, versionStatusOf } from "./soroban-versions";
+import {
+	combinedVersionStatus,
+	type VersionStatus,
+} from "./soroban-versions";
 
 // ── Inputs ───────────────────────────────────────────────────────────────────
 
@@ -428,7 +431,8 @@ function scanFiles(
 	facts.contractMacroCount = macroCount;
 	if (cargoBlobs.some((b) => RE_CDYLIB.test(b.text as string)))
 		facts.isDeployableContract = true;
-	facts.versionStatus = versionStatusOf(facts.sorobanSdkVersion);
+	// versionStatus is assigned AFTER the JS block below — it needs
+	// facts.stellarJsDep, which does not exist yet at this point in the scan.
 
 	// ---- JS / TS Stellar SDK ----
 	let jsDep: string | null = null;
@@ -478,6 +482,17 @@ function scanFiles(
 		}
 	}
 	if (langDep && !facts.stellarJsDep) facts.stellarJsDep = langDep;
+
+	// Now that BOTH SDK facts are gathered, classify support status from
+	// whichever we hold. This used to read the Rust crate alone, and ran before
+	// the JS block above had populated stellarJsDep — so every repo without a
+	// Cargo.toml was stamped "unknown". 5,356 of 10,876 scanned repos, 1,598 of
+	// which pin a readable @stellar/stellar-sdk major and 681 of which depend on
+	// a package npm itself marks deprecated.
+	facts.versionStatus = combinedVersionStatus(
+		facts.sorobanSdkVersion,
+		facts.stellarJsDep,
+	);
 
 	// ---- stellar.toml (SEP-1) ----
 	const hasStellarToml = tomlBlobs.some((b) =>

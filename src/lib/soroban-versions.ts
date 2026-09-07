@@ -70,6 +70,104 @@ export function protocolForSdkMajor(major: number | null): number | null {
 export type VersionStatus = "current" | "supported" | "deprecated" | "unknown";
 
 /**
+ * The JavaScript SDK line — a SEPARATE major series from the Rust crate, and
+ * the reason `versionStatus` read "unknown" on 5,356 of 10,876 scanned repos.
+ *
+ * Reusing the Rust classifier here is actively wrong: @stellar/stellar-sdk v17
+ * is the CURRENT release, but 17 sits below SUPPORTED_FLOOR_MAJOR (21) in the
+ * Rust table, so the newest JS SDK in the ecosystem would have been stamped
+ * "deprecated". Hence its own table.
+ *
+ * Sourced 2026-09-07 from the npm registry, not inferred:
+ *   dist-tags  latest=17.0.1, lts-16=16.3.0, p27=16.0.0-rc.2
+ *   v17 2026-08-20 · v16 2026-06-15 · v15 2026-03-30 · v14 2025-08-14
+ *   v13 2024-11-14 · v12 2024-05-02 · v11 2023-12-07
+ *
+ * MAINTENANCE: re-verify against `npm view @stellar/stellar-sdk dist-tags`.
+ */
+export const JS_SDK_ASOF = "2026-09-07";
+
+/** dist-tags.latest major at JS_SDK_ASOF. */
+export const JS_SDK_LATEST_MAJOR = 17;
+
+/**
+ * Oldest JS SDK major we still call supported. The publisher's own oldest
+ * maintained tag is `lts-16`, which would put the floor at 16 and stamp 1,430
+ * repos deprecated in one step. We sit two majors below that instead: the same
+ * conservatism the Rust table is built on ("being wrong is worse than being
+ * absent"), so only majors from the Protocol-22 era and earlier — last
+ * published 2025-04-21 — are called deprecated.
+ */
+export const JS_SDK_SUPPORTED_FLOOR_MAJOR = 14;
+
+/**
+ * Packages npm itself serves with a `deprecated` field set by the publisher.
+ * Not our judgement — the maintainers' own words:
+ *   stellar-sdk            "This package has moved to @stellar/stellar-sdk!"
+ *   @stellar/stellar-base  "now rolled into @stellar/stellar-sdk"
+ * 681 and 39 indexed repos respectively still depend on them.
+ */
+export const PUBLISHER_DEPRECATED_JS_PACKAGES: ReadonlySet<string> = new Set([
+	"stellar-sdk",
+	"@stellar/stellar-base",
+]);
+
+/** Split a stored `stellarJsDep` ("@stellar/stellar-sdk@^17.0.1") into its parts. */
+export function splitJsDep(
+	dep: string | null | undefined,
+): { name: string; range: string } | null {
+	if (!dep) return null;
+	const i = dep.lastIndexOf("@");
+	if (i <= 0) return { name: dep, range: "" };
+	return { name: dep.slice(0, i), range: dep.slice(i + 1) };
+}
+
+/**
+ * Support status of a JS Stellar dependency, or "unknown" when we cannot read
+ * it. Same safety doctrine as versionStatusOf: unparseable, unpinned or
+ * unrecognised NEVER yields "deprecated".
+ *
+ * Non-npm sentinels the scanner also stores in this field
+ * ("rust-infra:cargo.toml", "go:go.mod", "python:requirements.txt") are not JS
+ * deps and return "unknown".
+ */
+export function jsSdkVersionStatusOf(
+	dep: string | null | undefined,
+): VersionStatus {
+	const parts = splitJsDep(dep);
+	if (!parts) return "unknown";
+	const { name, range } = parts;
+	// A publisher-deprecated package is deprecated at ANY version.
+	if (PUBLISHER_DEPRECATED_JS_PACKAGES.has(name)) return "deprecated";
+	if (name !== "@stellar/stellar-sdk") return "unknown"; // only this line is tabled
+	if (isPrereleaseOrUnpinned(range)) return "unknown";
+	const m = /^[\^~>=<\s]*(\d+)\./.exec(range);
+	if (!m) return "unknown";
+	const major = Number(m[1]);
+	if (!Number.isFinite(major)) return "unknown";
+	if (major < JS_SDK_SUPPORTED_FLOOR_MAJOR) return "deprecated";
+	if (major >= JS_SDK_LATEST_MAJOR) return "current";
+	return "supported";
+}
+
+/**
+ * The repo's overall SDK support status. The Rust crate is the stronger signal
+ * (a Soroban contract's own SDK) and wins when it says anything; the JS dep
+ * fills in the scanned repos that carry no Cargo.toml. A "deprecated" reading
+ * from either is kept — a stale pin is a stale pin.
+ */
+export function combinedVersionStatus(
+	sorobanSdkVersion: string | null | undefined,
+	stellarJsDep: string | null | undefined,
+): VersionStatus {
+	const rust = versionStatusOf(sorobanSdkVersion);
+	const js = jsSdkVersionStatusOf(stellarJsDep);
+	if (rust !== "unknown" && js !== "unknown")
+		return rust === "deprecated" || js === "deprecated" ? "deprecated" : rust;
+	return rust !== "unknown" ? rust : js;
+}
+
+/**
  * Parse a raw Cargo dependency version requirement into a numeric MAJOR, or null
  * when it is not a pinned semver we can reason about (git deps, path deps,
  * wildcards, pre-release-only, workspace markers). Returning null is the SAFE
