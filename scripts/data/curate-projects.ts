@@ -34,6 +34,7 @@ import {
 	TYPES_ADD,
 	TYPES_SET,
 	WEBSITE_FIXES,
+	GITHUB_LINK_REMOVE,
 	WEBSITE_REMOVE,
 } from "./curation-maps";
 
@@ -77,6 +78,12 @@ const GITHUB_LINK_FIX: Record<string, string> = {
 	// Soroban contracts"). The SCF-linked frontend
 	// (soroban-vrf-frontend.onrender.com) answers 503 "Service Suspended".
 	"vrf-soroban": "https://github.com/NibrasD/Stellar-VRF",
+	// check-links 2026-09-07: normalfinance/normal-v1 404s. Of seven fuzzy
+	// name matches across the dead-link queue this was the only one with
+	// corroborating evidence — the successor repo's homepage IS the project's
+	// own site (normalfinance.io). The other six were rejected: a docs repo, an
+	// org placeholder, a widget, all name-similar and evidence-free.
+	normal: "https://github.com/normalfinance/normal-index-v1",
 };
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
@@ -2472,6 +2479,40 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { links: { ...(d.links ?? {}), website: null } },
+		});
+	}
+
+	console.log("\n── GitHub link removals (dead citations, value-keyed) ──");
+	for (const [slug, dead] of Object.entries(GITHUB_LINK_REMOVE)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const norm = (u: string) => (u ?? "").replace(/\/+$/, "");
+		if (!d.links?.github) {
+			console.log(`  ${slug}: github link already empty, skip`);
+			continue;
+		}
+		if (norm(d.links.github) !== norm(dead)) {
+			console.log(
+				`  ${slug}: github is ${d.links.github}, not the recorded dead value — skip (relinked since)`,
+			);
+			continue;
+		}
+		console.log(`  ${slug}: github REMOVED (was ${d.links.github} — 404)`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), github: null } },
 		});
 	}
 
