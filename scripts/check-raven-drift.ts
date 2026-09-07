@@ -188,7 +188,16 @@ async function expectedFromSpec(): Promise<{
 				op && typeof op === "object"
 					? (op as { operationId?: string }).operationId
 					: undefined;
-			if (id && !CATALOG_EXCLUDED.has(id)) {
+			// Side-effecting ops (the get-listed flow: partnerOnboard,
+			// submit-listing) are deliberately NOT part of the agent research
+			// surface, so a discovery sweep must not expect to find them.
+			// partnerOnboard was reported as a routing gap on 2026-09-06 purely
+			// because this list included it.
+			const sideEffecting =
+				op && typeof op === "object"
+					? (op as { "x-side-effecting"?: boolean })["x-side-effecting"] === true
+					: false;
+			if (id && !CATALOG_EXCLUDED.has(id) && !sideEffecting) {
 				ops.push(id);
 				pathByOp.set(id, path);
 			}
@@ -229,7 +238,12 @@ async function catalogOps(specOps: string[]): Promise<{
 
 	// Vocabulary sweep — the catalog search caps hits per query, so union
 	// several targeted queries inside ONE execute (same technique as #38).
-	const sweep = `const qs = ["projects search directory","repos code search","builders people leaderboard","hackathons compare winners","research corpus semantic","skills marketplace list","partners anchors match","clusters topics analyze ecosystem","changelog status health","audits security reports","people person lookup identity","rfps grants open","feedback submit","explain repo deepwiki"]; const rs = await Promise.all(qs.map(q => codemode.search(q, { service: "scout", limit: 20 }))); const ids = new Set(); for (const r of rs) for (const h of (r.hits ?? [])) if (h.id && h.id.startsWith("scout.")) ids.add(h.id); return [...ids].sort();`;
+	//
+	// The query list IS the instrument's reach. On 2026-09-06 it had no
+	// idea-vetting question in it, so vetIdea came back "missing beyond grace"
+	// while ranking FIRST for "should i build this on stellar". A sweep can
+	// only report on the vocabularies it actually asks.
+	const sweep = `const qs = ["projects search directory","repos code search","builders people leaderboard","hackathons compare winners","research corpus semantic","skills marketplace list","partners anchors match","clusters topics analyze ecosystem","changelog status health","audits security reports","people person lookup identity","rfps grants open","feedback submit","explain repo deepwiki","vet a build idea competitors prior art","should i build this on stellar","scf pitch funding readiness","verify claim quality report","rwa tokenized assets"]; const rs = await Promise.all(qs.map(q => codemode.search(q, { service: "scout", limit: 20 }))); const ids = new Set(); for (const r of rs) for (const h of (r.hits ?? [])) if (h.id && h.id.startsWith("scout.")) ids.add(h.id); return [...ids].sort();`;
 	const out = await rpc("tools/call", {
 		name: "execute",
 		arguments: { code: sweep },
