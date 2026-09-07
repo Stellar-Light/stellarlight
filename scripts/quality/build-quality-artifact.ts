@@ -599,6 +599,26 @@ const out = {
 			]),
 		),
 		strongBasisSplit: {
+			// The denominator, published beside the numerator. P4's bar is a
+			// SHARE, and a share needs both halves from the same population —
+			// on 2026-09-07 a meter divided this count by the sum of
+			// strongByBasis and reported the phase complete, because that sum is
+			// a different population. Whoever reads weakLiveRows must be able to
+			// divide without guessing what it was counted over.
+			population: projects.length,
+			populationMeans:
+				"every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
+			// The share P4 is actually about. Counting every status lets the
+			// ratchet fall for the wrong reason: retiring a dead row stamps it
+			// human-verified, which is strong, so a day of retirements improves
+			// the weak share without improving one row a consumer relies on.
+			// This programme has already been bitten by that once (the
+			// 2026-09-04 drop was 173 recategorised rows and 4 real). A
+			// consumer reads Live rows; the ratchet should measure those.
+			livePopulation: projects.filter((p) => p.status === "Live").length,
+			weakLiveOnly: projects.filter(
+				(p) => p.status === "Live" && !isStrongBasis(p.statusBasis),
+			).length,
 			weakLiveRows: projects.filter((p) => !isStrongBasis(p.statusBasis))
 				.length,
 			onchainEligible: projects.filter(

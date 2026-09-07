@@ -74,6 +74,111 @@ const PHASES = PHASE_IDS.map((id) => {
 	};
 });
 
+/**
+ * How far each in-progress phase actually is, measured from live artifacts.
+ *
+ * A phase that says "in progress" for months is unfalsifiable: nobody can tell
+ * whether it is nearly done or has not moved. Each bar below is the phase's
+ * OWN stated done-condition, read out of the artifacts the guards write, with
+ * the origin it started from — so the meter is a measurement and not a
+ * self-assessment. A bar that cannot be computed reports null rather than a
+ * guess, and says why.
+ */
+function phaseMeters(): Record<
+	string,
+	{
+		bar: string;
+		origin: number | null;
+		current: number | null;
+		target: number;
+		unit: string;
+		pct: number | null;
+		note: string;
+	}
+> {
+	const read = (rel: string) => {
+		try {
+			return JSON.parse(readFileSync(join(root, rel), "utf8"));
+		} catch {
+			return null;
+		}
+	};
+	const entities = read("improvements/quality/entities.json");
+	const lanes = read("improvements/audits/lane-autonomy-latest.json");
+
+	/** Fraction of the journey covered, origin → target. Never below 0 or above 1. */
+	const span = (origin: number | null, current: number | null, target: number) =>
+		origin === null || current === null || origin === target
+			? null
+			: Math.max(
+					0,
+					Math.min(1, (origin - current) / (origin - target)),
+				);
+
+	// P4's bar is the phase's own: weak bases under 50% of Live rows. The origin
+	// is the share when the phase opened (842/979 = 86%), quoted in its block.
+	const split = entities?.projects?.strongBasisSplit ?? {};
+	// Live rows only. Counting every status lets the ratchet fall for the wrong
+	// reason — retiring a dead row stamps it human-verified, so a day of
+	// retirements improves the share without improving anything a consumer
+	// reads. On 2026-09-07 the all-status reading said 49.1% (bar met) while
+	// Live-only said 54.2% (bar not met, ~35 rows short).
+	const weak = split.weakLiveOnly ?? null;
+	// The population the split was counted over, published beside it. Summing
+	// strongByBasis instead reported P4 complete on 2026-09-07 — that sum is a
+	// different population, and a share needs both halves from the same one.
+	const live =
+		typeof split.livePopulation === "number" ? split.livePopulation : null;
+	const weakShare =
+		typeof weak === "number" && typeof live === "number" && live > 0
+			? (weak / live) * 100
+			: null;
+
+	// P3: Stage 2 opens per lane at the intervention-free threshold. The meter is
+	// the share of production-writing lanes that have earned it.
+	const laneTotal = lanes?.summary?.lanes ?? null;
+	const laneEligible = lanes?.summary?.eligibleForStage2 ?? null;
+	const lanePct =
+		typeof laneTotal === "number" && laneTotal > 0 && typeof laneEligible === "number"
+			? laneEligible / laneTotal
+			: null;
+
+	// P5: the curated-pool note floor, which may only rise.
+	const notes = entities?.repos?.coverage?.knowledgeNotes ?? null;
+	const notePct =
+		notes && notes.pool > 0 ? (notes.withNotes + notes.triaged) / notes.pool : null;
+
+	return {
+		P3: {
+			bar: "every lane that writes to production has earned the intervention-free threshold",
+			origin: 0,
+			current: laneEligible,
+			target: laneTotal ?? 0,
+			unit: "lanes",
+			pct: lanePct,
+			note: "Weeks measure the absence of correction, not effect — the second condition (a lane asserts its own end state) is not yet counted here because most lanes do not report one.",
+		},
+		P4: {
+			bar: "weak bases under 50% of Live rows",
+			origin: 86,
+			current: weakShare === null ? null : Math.round(weakShare * 10) / 10,
+			target: 50,
+			unit: "% of Live rows on a weak basis",
+			pct: span(86, weakShare, 50),
+			note: "Origin is the share when the phase opened (842/979). The ratchet may only fall.",
+		},
+		P5: {
+			bar: "the curated-pool note floor, examined or noted",
+			origin: 0,
+			current: notes ? notes.withNotes + notes.triaged : null,
+			target: notes?.pool ?? 0,
+			unit: "curated-pool repos",
+			pct: notePct,
+			note: "Counts a repo examined and recorded as yielding no durable public fact — a judged repo is not a gap.",
+		},
+	};
+}
+
 /** The written reasoning, listed from the repo so it cannot claim a document
  * that does not exist. */
 const lessonsDir = join(root, "improvements/lessons");
@@ -169,6 +274,7 @@ writeFileSync(
 			source: "QUALITY.md",
 			note: "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
 			phases: PHASES,
+			phaseMeters: phaseMeters(),
 			library: { lessons, audits, receipts },
 		},
 		null,
