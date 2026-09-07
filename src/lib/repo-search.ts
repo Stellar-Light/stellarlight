@@ -20,6 +20,7 @@ import {
 	type RepoKind,
 	type RepoKindBasis,
 	repoKindOf,
+	isFirstParty,
 } from "./repo-grade";
 import {
 	anchorTokens,
@@ -698,12 +699,8 @@ export function isContentStopword(t: string): boolean {
 
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
-const SDF_OWNERS = new Set([
-	"stellar",
-	"soroban",
-	"stellar-deprecated",
-	"stellardevelopmentfoundation",
-]);
+// SDF ownership comes from repo-grade's FIRST_PARTY_OWNERS — one definition,
+// so the ranker and the grade can never disagree about who is first-party.
 
 // Tiebreak signals applied ABOVE the authority grade, most → least decisive:
 // SDF-org ownership, then "alive" (committed within a year), then an explicit
@@ -719,7 +716,7 @@ const SDF_OWNERS = new Set([
 // tools, payment-gateway SDKs) are ALSO project-linked, so that boost buried
 // strong unlinked repos (zk hackathon winners) under mediocre linked ones.
 function isSdfOwned(owner: string): boolean {
-	return SDF_OWNERS.has(owner);
+	return isFirstParty(owner);
 }
 function isAlive(lastCommitAt?: string | null): boolean {
 	if (!lastCommitAt) return false;

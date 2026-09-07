@@ -63,6 +63,32 @@ export interface RepoGradeInput {
 	 * differ 50x in velocity. Null = not captured — no penalty, never punish
 	 * missing data. */
 	commits90d?: number | null;
+	/**
+	 * The publisher is the protocol org itself (stellar/, soroban/, SDF).
+	 *
+	 * SDF never receives an SCF award — it AWARDS them — so every first-party
+	 * repo scored as though nothing outside it vouched for it. Measured
+	 * 2026-09-07: 0 of 212 indexed stellar-org repos carried scfAwarded, and 74
+	 * live first-party repos graded "low", among them stellar/js-xdr (26 stars,
+	 * the XDR codec every SDK depends on) at 31 and stellar/stellar-docs at 34.
+	 */
+	firstParty?: boolean;
+	// --- Facts the code scanner already reads, stores and serves. Until
+	// 2026-09-07 exactly two of the sixteen (codeDepth, stellarProof) reached
+	// this grade; the rest were scanned on 10,876 repos and discarded here.
+	/** a test suite exists in the tree (4,029 scanned repos have one) */
+	testsPresent?: boolean | null;
+	/** CI config exists in the tree (2,529 scanned repos have one) */
+	ciPresent?: boolean | null;
+	/** activitySignals.lastReleaseAt — a published release, not just a commit */
+	lastReleaseAt?: string | Date | null;
+	/** the scanned Stellar SDK pin: "current" | "supported" | "deprecated" | "unknown" */
+	versionStatus?: string | null;
+	/** contractInterface.length — how much contract surface the repo exports */
+	contractInterfaceCount?: number | null;
+	/** codeScanState === "scanned" — whether the code facts above were actually
+	 * gathered. Absence of a scan must never read as failing the scan. */
+	codeScanned?: boolean;
 }
 
 export interface RepoGrade {
@@ -75,6 +101,24 @@ export interface RepoGrade {
 }
 
 const DAY_MS = 86_400_000;
+
+/**
+ * Orgs that publish the protocol itself. ONE definition — repo-search imports
+ * this for its ranking tiebreak, so the grade and the ranker can never disagree
+ * about who is first-party.
+ */
+export const FIRST_PARTY_OWNERS = new Set([
+	"stellar",
+	"soroban",
+	"stellar-deprecated",
+	"stellardevelopmentfoundation",
+]);
+
+/** Accepts "owner" or "owner/name". */
+export function isFirstParty(owner: string | null | undefined): boolean {
+	if (!owner) return false;
+	return FIRST_PARTY_OWNERS.has(owner.split("/")[0].toLowerCase());
+}
 
 /**
  * Observable per-repo activity state, derived at serve time — never stored, so
@@ -221,6 +265,13 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 function stellarRelevance(input: RepoGradeInput): number {
 	if (input.stellarProof == null) return 1; // not scanned — no verdict, no penalty
 	if (input.stellarProof !== "none") return 1;
+	// A repo the protocol org publishes, or that a human named THE answer for a
+	// Stellar concept, cannot be "not about Stellar" — the scanner's proof test
+	// looks for an SDK import, and the ecosystem's own foundations don't import
+	// themselves. stellar/js-xdr is the XDR codec every SDK is built on and
+	// imports no soroban-sdk; it was discounted to a quarter of its evidence and
+	// scored 39 next to hackathon entries at 68.
+	if (input.firstParty || input.curatedCanonical) return 1;
 	// Scanned, and no Stellar code found. Depth can still rescue it if the
 	// scanner recorded some, otherwise its stars barely count here.
 	const c = typeof input.codeDepth === "number" ? clamp01(input.codeDepth) : 0;
@@ -228,26 +279,92 @@ function stellarRelevance(input: RepoGradeInput): number {
 }
 
 /**
- * Does anything OUTSIDE a repo's own source say it is an answer?
+ * Evidence FROM THE CODE that this repo is maintained software rather than a
+ * snapshot somebody pushed once.
  *
- * Both evidence-from-the-code lifts (a hackathon judge's review, and Soroban
- * code depth) are scaled by this. Each is evidence the repo is REAL; neither is
- * evidence it is CANONICAL, and a repo with nothing vouching for it should not
- * outrank the ecosystem's reference implementations on either.
+ * Every input is a fact the scanner read out of the tree — a test suite, a CI
+ * config, a published release, the Stellar SDK version actually pinned. None of
+ * it is a proxy for who paid for the work. This is the point of scanning 10,876
+ * repos, and until 2026-09-07 none of these four facts reached the score.
  *
- * Deliberately NOT gated on stars alone — that would reinstate the star
- * dominance these lifts exist to fix. A curated, funded or project-linked repo
- * keeps the full lift at zero stars.
+ * Absence is never punished here: an unscanned repo returns 0 and simply wins
+ * nothing, because 0 is also the floor for "we never looked". A deprecated SDK
+ * pin IS punished, but separately (see deprecatedPenalty) — clamping it to 0
+ * inside this function would make "pins a dead SDK" indistinguishable from
+ * "never scanned".
  */
-function externalValidation(input: RepoGradeInput): number {
-	if (input.curatedCanonical) return 1; // a human named it the answer
-	if (input.scfAwarded || (input.projectProminence ?? 0) > 0) return 0.85;
-	// A curated knowledge note is a human recording what this repo IS, dated
-	// and sourced. Weaker than being named canonical, stronger than a star
-	// count from an ecosystem that may not be ours.
-	if ((input.knowledgeNoteCount ?? 0) > 0) return 0.8;
-	if ((input.stargazerCount ?? 0) >= 10) return 0.7; // the ecosystem noticed
-	return 0.45; // nothing outside the repo vouches for it
+export function codeEvidence(input: RepoGradeInput): number {
+	let e = 0;
+	if (input.testsPresent) e += 0.3;
+	if (input.ciPresent) e += 0.2;
+	// A release is the difference between code that exists and code that ships.
+	// Only recent ones count: a 2019 final release is an archive, not a cadence.
+	if (input.lastReleaseAt) {
+		const t = new Date(input.lastReleaseAt).getTime();
+		if (Number.isFinite(t) && (Date.now() - t) / DAY_MS <= 365) e += 0.3;
+	}
+	if (input.versionStatus === "current") e += 0.2;
+	else if (input.versionStatus === "supported") e += 0.12;
+	// Exported contract surface — a repo that defines 48 callable contract
+	// methods is a reference for how to write them; one that defines none isn't.
+	const iface = Math.max(0, input.contractInterfaceCount ?? 0);
+	if (iface > 0) e += Math.min(0.15, 0.01 * iface);
+	// Relevance-weighted, exactly as traction is. A green CI badge on a repo the
+	// scanner affirmatively found no Stellar code in is evidence of good
+	// engineering somewhere else — keybase/client (9,248 stars, tests, CI,
+	// releases, no Stellar code) rose 60 → 72 on this signal before the weight
+	// was applied, closing on the JS SDK it must never approach. Unscanned repos
+	// return 1 and are not punished.
+	return clamp01(e) * stellarRelevance(input);
+}
+
+/**
+ * A repo pinned to a Stellar SDK we have marked deprecated is a worse reference
+ * than one that is merely unscanned, and no number of stars fixes that — an
+ * agent copying from it copies a dead API. Affirmative finding only: "unknown"
+ * (5,356 repos) is not a verdict and costs nothing. 400 repos pin a dead SDK.
+ */
+function deprecatedPenalty(input: RepoGradeInput): number {
+	return input.versionStatus === "deprecated" ? 0.75 : 1;
+}
+
+/**
+ * Does anything OUTSIDE a repo's own claims say it is an answer?
+ *
+ * Independent evidence streams, strongest bid wins — deliberately NOT a ladder
+ * with money near the top. It used to be one, and the ranking it produced was
+ * indefensible: the code-driven lifts (a judge's review, Soroban code depth)
+ * were MULTIPLIED by this, so a repo we had read, tested, and verified was
+ * discounted by up to 55% for the sole offence of being unfunded.
+ *
+ * Funding is real evidence and it stays. It is now one bid among several rather
+ * than the ceiling, because it answers a different question than the one we
+ * ask: an award says somebody believed in this in the past, not that the code
+ * works now. The streams below are genuinely independent of each other — a
+ * human naming it, the protocol org publishing it, the code being maintained
+ * software, a written note, money, a crowd — so taking the max is honest: any
+ * ONE of them is sufficient corroboration, and a repo needs no funder to earn
+ * a full reading of its own source.
+ */
+function corroboration(input: RepoGradeInput): number {
+	let best = 0.45; // nothing outside the repo vouches for it
+	const bid = (v: number) => {
+		if (v > best) best = v;
+	};
+	if (input.curatedCanonical) bid(1); // a human named it THE answer
+	// SDF publishes the protocol; its repos ARE the reference. They are never
+	// SCF-funded, so all 212 of them sat on the floor above until 2026-09-07.
+	if (input.firstParty) bid(0.95);
+	// The code corroborates itself. Ships releases, carries tests, runs CI,
+	// pins a live SDK: that is evidence it works, gathered by reading it.
+	// fazzatti/colibri — 95 commits/90d, a release the same day, tests, CI, a
+	// supported SDK pin, 48 contract methods, six notes — scored 35/low because
+	// none of that could bid.
+	bid(0.5 + 0.45 * codeEvidence(input));
+	if ((input.knowledgeNoteCount ?? 0) > 0) bid(0.8);
+	if (input.scfAwarded || (input.projectProminence ?? 0) > 0) bid(0.8);
+	if ((input.stargazerCount ?? 0) >= 10) bid(0.7); // the crowd noticed
+	return best;
 }
 
 export function repoGrade(input: RepoGradeInput): RepoGrade {
@@ -261,6 +378,12 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 			? 0.85 + 0.15 * Math.min(Math.max(input.commits90d, 0) / 30, 1)
 			: 1;
 	const freshness = freshnessOf(input.lastCommitAt) * velocityAdj;
+	// Both code-driven lifts below bypass ownMerit by design (the code IS the
+	// merit) — which also meant they bypassed recency, so a repo with deep
+	// verified code and no commits for a year scored identically to one shipping
+	// daily. A stable library legitimately needs few commits, so this is a
+	// gentle tilt with a high floor, not the full freshness decay.
+	const liveness = 0.75 + 0.25 * freshness;
 	// Traction, weighted by whether those stars are about STELLAR. A scan that
 	// affirmatively found no Stellar code means this repo's popularity says
 	// nothing about its value as a Stellar reference; an unscanned repo is not
@@ -270,15 +393,30 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	const hasTopics = (input.topicCount ?? 0) > 0 ? 1 : 0;
 	const engaged = (input.openIssues ?? 0) > 0 ? 1 : 0;
 
-	// Does the repo stand on its OWN as a reference? Stars + recency + whether
-	// it's documented/tagged/has any engagement. This is the base — a 0-star,
-	// undocumented sub-repo scores low here no matter whose org it's under.
+	// Does the repo stand on its OWN as a reference? A 0-star, undocumented
+	// sub-repo scores low here no matter whose org it's under.
+	//
+	// Until 2026-09-07 this was 45% star count — and stars are precisely what a
+	// good unfunded library does not have. A repo that ships tagged releases,
+	// carries a test suite, runs CI and pins a live SDK has demonstrated its own
+	// merit far more directly than a popularity number, so that evidence now
+	// carries the same weight as traction and the star term drops to 0.30.
+	//
+	// Weights renormalize over the signals we actually hold: an unscanned repo
+	// is scored on the remaining terms, never scored as though it had failed the
+	// code checks. (Unscanned, the star weight lands at 0.30/0.70 ≈ 0.43 — where
+	// it was before — so this changes the ranking only where we did the reading.)
+	const meritParts: Array<[number, number]> = [
+		[0.3, traction],
+		[0.22, freshness],
+		[0.11, hasDesc],
+		[0.04, hasTopics],
+		[0.03, engaged],
+	];
+	if (input.codeScanned) meritParts.push([0.3, codeEvidence(input)]);
+	const meritWeight = meritParts.reduce((a, [w]) => a + w, 0);
 	const ownMerit = clamp01(
-		0.45 * traction +
-			0.25 * freshness +
-			0.18 * hasDesc +
-			0.07 * hasTopics +
-			0.05 * engaged,
+		meritParts.reduce((a, [w, v]) => a + w * v, 0) / meritWeight,
 	);
 
 	// Inherited authority from the owning project/builder.
@@ -290,6 +428,25 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// network implementation has no Soroban SDK depth to be lifted by. It
 	// capped at 60 with PERFECT own merit while judged hackathon repos sat at 85.
 	if (input.curatedCanonical) authority += 0.45;
+	// Curated knowledge notes are external validation in their own right: a
+	// human read this repo and wrote down dated, sourced facts about it, which
+	// is the same KIND of signal as naming it canonical and a weaker degree of
+	// it. Until 2026-09-07 notes only scaled the code-depth and judge lifts, so
+	// a repo we had documented six times over earned nothing from any of it —
+	// fazzatti/colibri, actively developed, SDK-typed, six notes, scored 35
+	// because prominence, funding and canonical status were all absent.
+	//
+	// Capped low on purpose: notes say somebody looked, not that the ecosystem
+	// depends on it, and the cap keeps a heavily-annotated small repo below a
+	// canonical one.
+	authority += Math.min(0.25, 0.06 * Math.max(0, input.knowledgeNoteCount ?? 0));
+	// Publishing the protocol is authority. SDF's own repos carry it without any
+	// grant, prominence score or curation pass having named them.
+	if (input.firstParty) authority += 0.4;
+	// Maintained-software evidence read out of the tree — releases, tests, CI, a
+	// live SDK pin. This is authority a repo earns by being good, which is the
+	// only kind an unfunded project can earn.
+	authority += 0.3 * codeEvidence(input);
 	if (input.hackathonWinner) authority += 0.35;
 	if (input.scfAwarded) authority += 0.25;
 	authority += Math.min(0.4, Math.max(0, input.projectProminence ?? 0) / 250); // prominence 100 → +0.4
@@ -322,7 +479,7 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		// other submissions of that hackathon. It does not say the repo is a
 		// canonical reference for the ecosystem — the same distinction the
 		// codeDepth block draws between REAL and CANONICAL.
-		const judgeDriven = (0.05 + 0.8 * j) * externalValidation(input);
+		const judgeDriven = (0.05 + 0.8 * j) * corroboration(input) * liveness;
 		composite = Math.max(composite, judgeDriven);
 	}
 
@@ -354,12 +511,13 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// project-linked repo keeps the full lift at zero stars.
 	if (typeof input.codeDepth === "number" && Number.isFinite(input.codeDepth)) {
 		const c = Math.max(0, Math.min(1, input.codeDepth));
-		const codeDriven = (0.1 + 0.7 * c) * externalValidation(input);
+		const codeDriven = (0.1 + 0.7 * c) * corroboration(input) * liveness;
 		composite = Math.max(composite, codeDriven);
 	}
 
 	if (input.isArchived) composite *= 0.5; // archived = weaker reference
 	if (input.isFork) composite *= 0.7; // forks deprioritized
+	composite *= deprecatedPenalty(input); // pins a dead Stellar SDK
 	composite = clamp01(composite);
 
 	const score = Math.round(composite * 100);

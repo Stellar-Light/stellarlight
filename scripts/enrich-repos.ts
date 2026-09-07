@@ -20,7 +20,9 @@ import {
 	listOwnerRepos,
 	type OwnerRepo,
 } from "../src/lib/github";
-import { repoGrade } from "../src/lib/repo-grade";
+import { repoGrade,
+	isFirstParty,
+} from "../src/lib/repo-grade";
 import {
 	type AuditRecord,
 	buildKnowledgeNotes,
@@ -535,6 +537,22 @@ async function main() {
 					knowledgeNoteCount: Array.isArray(existing?.knowledgeNotes)
 						? existing.knowledgeNotes.length
 						: 0,
+					// The protocol org publishes the reference implementations
+					// and never receives an SCF award, so first-party repos read
+					// as unvouched-for until this reached the grader.
+					firstParty: isFirstParty(info.nameWithOwner ?? full),
+					// Facts the code scan already stored on the row. Reading them
+					// here is the point of scanning: releases, tests, CI and the
+					// live SDK pin are evidence the repo WORKS, earned by the
+					// code rather than inherited from whoever funded it.
+					testsPresent: existing?.testsPresent ?? null,
+					ciPresent: existing?.ciPresent ?? null,
+					lastReleaseAt: existing?.activitySignals?.lastReleaseAt ?? null,
+					versionStatus: existing?.versionStatus ?? null,
+					contractInterfaceCount: Array.isArray(existing?.contractInterface)
+						? existing.contractInterface.length
+						: 0,
+					codeScanned: existing?.codeScanState === "scanned",
 				})
 			: { score: 0, label: "low" as const };
 
