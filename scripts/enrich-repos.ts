@@ -521,6 +521,20 @@ async function main() {
 					curatedCanonical: CURATED.has(
 						(info.nameWithOwner ?? full).toLowerCase(),
 					),
+					// Stars are evidence the ecosystem AT LARGE noticed a repo,
+					// not that OURS did. A scan that affirmatively found no
+					// Stellar code discounts them; an unscanned repo is not
+					// punished. Without this, iancoleman/bip39 (4,314 stars, no
+					// Stellar code) outscored blend-capital/blend-contracts.
+					stellarProof:
+						typeof existing?.stellarProof === "string"
+							? existing.stellarProof
+							: null,
+					// A curated note is a human recording what this repo IS,
+					// dated and sourced — external validation in its own right.
+					knowledgeNoteCount: Array.isArray(existing?.knowledgeNotes)
+						? existing.knowledgeNotes.length
+						: 0,
 				})
 			: { score: 0, label: "low" as const };
 
