@@ -4565,6 +4565,21 @@ export const GITHUB_REPOS_ADD: Record<
 	string,
 	Array<{ owner: string; name: string }>
 > = {
+	// ── 2026-09-07. Found by reading each row's OWN SITE for the github.com
+	// links it publishes, then requiring the repo to tie back to the row —
+	// never a name search. Of 74 library-typed weak rows with no linked repo,
+	// 48 publish no GitHub link at all, 9 have no website and 8 would not load;
+	// only these survived the check.
+	//
+	// Rejected on purpose, and worth naming because a looser rule would have
+	// taken them: js-capacitor-passkey-kit's site (argo-navis.dev) links
+	// Soneso/as-soroban-sdk, which is Soneso's AssemblyScript SDK and nothing
+	// to do with a Capacitor passkey kit — a page linking a dependency is not
+	// the page naming its own repo. orion → daccred and xlmsh →
+	// lightsail-network name an org with no tie to the row's domain; uniblock
+	// and zettablock match by name and have zero public repos.
+	"ios-mac-stellar-sdk": [{ owner: "Soneso", name: "stellar-ios-mac-sdk" }],
+	"scaffold-stellar": [{ owner: "stellar-scaffold", name: "cli" }],
 	// Colibri's two repos, attached explicitly (see the seed's rationale —
 	// fazzatti's 39-repo personal account is over the org-sweep threshold, and
 	// the examples repo carries no topics so relevance filters would miss it).
