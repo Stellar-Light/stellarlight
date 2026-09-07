@@ -77,13 +77,20 @@ import type { Project } from "../src/payload-types";
 
 const EXECUTE = process.argv.includes("--execute");
 
-/** The board's strong tiers (STRONG_BASES in build-quality-artifact.ts). */
+/** The board's strong tiers (STRONG_BASES in build-quality-artifact.ts), plus
+ *  the DEPLOYMENT-side labels that translate onto one of them.
+ *
+ *  operator-toml is the case: it is a strong deployment artifact and not a
+ *  board tier, so without it here the five rows carrying one were skipped as
+ *  "unchanged" before the translation below ever ran — the lane reported a
+ *  clean pass over rows it had decided not to look at. See BASIS_TRANSLATION. */
 const STRONG = new Set([
 	"human-verified",
 	"onchain-activity",
 	"official-record",
 	"product-integration",
 	"repo-activity",
+	"operator-toml",
 ]);
 /** What the statusBasis select will actually accept. The board's strong list
  *  is NOT a subset of it — official-record is scored as strong and is not an
