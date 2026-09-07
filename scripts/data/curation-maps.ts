@@ -229,6 +229,26 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
 		note: "Store evidence 2026-09-07: the project's own site (https://yolat.com/) links ios listing \"Yolat\" v1.0.57, released 2026-09-04 (Apple lookup API by id).",
 	},
+	// ── The two the broken-link split surfaced 2026-09-07. Both were Live with
+	// a dead site, which is the case the old model buried: a broken link on a
+	// LIVE row is either our wrong citation or an undetected death, and these
+	// are the second kind.
+	assetdesk: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "http://assetdesk.xyz/",
+		note: "Retired 2026-09-07: assetdesk.xyz serves Namecheap's \"Domain registration has expired\" notice over http and refuses https entirely; the domain lapsed. The GitHub org github.com/assetdesk still exists with 3 repos, last touched 2023-09-08. SCF #19, $77,000 — the award stands, the product does not. Found because a broken link on a LIVE row is a defect, not corroboration.",
+	},
+	kunst21: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "https://kunst21.com/",
+		note: "Retired 2026-09-07: kunst21.com resolves and answers 200, but the domain has been taken over — it now serves a Chinese corporate/betting site (\"365英国上市公司(集团)官方网站\"), nothing to do with the SCF #9 art project. The row's Live status rested on site-liveness earned FROM that hijacked page, which is why a page answering is a weak basis. Same class as the-blue-marble's casino redirect.",
+	},
 	// -- Weak-basis dormant sweep 2026-09-06 (draft improvements/drafts/
 	// 2026-09-06-weak-basis-dormant.md): Live rows resting on site-liveness or
 	// source-inherited whose newest linked repo commit is over a year old. Each
@@ -5244,6 +5264,11 @@ export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
 };
 
 export const WEBSITE_REMOVE: Record<string, string> = {
+	// Taken over 2026-09-07: kunst21.com now serves a Chinese corporate/betting
+	// site, not the SCF #9 art project. A hijacked domain must not be linked
+	// from a directory row, and its 200 must never again be read as liveness.
+	kunst21: "https://kunst21.com/",
+
 	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
 	"the-blue-marble": "https://thebluemarble.io/",
 	// Same hijacked domain on a second row (slug "blue-marble", Inactive): the

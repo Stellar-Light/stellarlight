@@ -1,0 +1,24 @@
+{
+ "slug": "assetdesk",
+ "url": "http://assetdesk.xyz/",
+ "finalUrl": "http://assetdesk.xyz/",
+ "fetchedAt": "2026-09-07T20:06:25.027Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Mon, 07 Sep 2026 20:06:24 GMT",
+  "etag": "W/\"6a6b7712-127a\"",
+  "lastModified": "Thu, 30 Jul 2026 16:08:50 GMT",
+  "server": "nginx/1.28.3 (Ubuntu)"
+ },
+ "bodyTextSha256": "e214b3d4a35ab62445481d5217fab78fda9e9ca2a2e5ef90aaa51d34d8c630d4",
+ "bodyTextChars": 447,
+ "markers": [
+  {
+   "marker": "Domain registration has expired",
+   "found": true,
+   "where": "text",
+   "excerpt": "Domain registration has expired. Renewal instructions If you own this domain , you may still be able to renew it through your Namecheap account. To renew: sign in, open Domain List"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}
