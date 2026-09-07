@@ -35,7 +35,13 @@ const MCP_URL = process.env.RAVEN_MCP_URL || "https://agents.stellar.buzz/mcp";
  * top-level import, so that it stays in global scope (see the collision guard
  * at the bottom).
  */
-let MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || "";
+// RAVEN_TOKEN is the name the repo's secret actually carries (see
+// raven-category-battery.yml, raven-eval-parity.yml). Reading only
+// RAVEN_MCP_TOKEN is why this guard could not be wired to CI at all: in a
+// runner the ~/.config file does not exist either, so it would have skipped
+// the catalog half and printed "ok" — the exact failure the comment above
+// warns about, one env-var name away.
+let MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || process.env.RAVEN_TOKEN || "";
 async function resolveToken(): Promise<void> {
 	if (MCP_TOKEN) return;
 	try {
