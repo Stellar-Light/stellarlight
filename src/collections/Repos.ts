@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { repoSupersession } from "../lib/repo-relations";
 
 /**
  * Code references: GitHub repos in the Stellar ecosystem as flat, searchable,
@@ -45,6 +46,21 @@ export const Repos: CollectionConfig = {
 					// public surfaces express the same reality via tier +
 					// activityState in neutral language.
 					if (doc && "triageTags" in doc) doc.triageTags = undefined;
+				}
+				// A repo that was replaced must say so on EVERY read path.
+				// Until 2026-09-07 this was attached in repo-search only, so
+				// /api/repos/search?q=defindex reported paltalabs/defindex
+				// superseded by defindex-io/stellar-contracts (archived,
+				// 2026-07-01) while /api/repos returned the same row with
+				// isArchived: true and supersededBy absent. An agent that hits
+				// the collection learns the repo is dead and nothing about what
+				// replaced it — exactly the case this data exists for.
+				//
+				// Derived at read time from the dated map, never stored, so the
+				// map stays the single truth and no backfill can go stale.
+				if (doc?.fullName) {
+					const sup = repoSupersession(String(doc.fullName));
+					if (sup) Object.assign(doc, sup);
 				}
 				return doc;
 			},
