@@ -50,7 +50,22 @@ async function main() {
 		},
 	);
 	if (!res.ok) {
-		console.error(`INCONCLUSIVE: mirror tree fetch HTTP ${res.status} — no verdict.`);
+		// A bare "HTTP 403" sends the reader looking for a permissions problem on
+		// a PUBLIC repo. The usual cause is the unauthenticated rate limit (60/hr),
+		// which GitHub reports in the same status — so say which, and say how to
+		// fix it. Seen 2026-09-07 on two consecutive local sweeps.
+		const remaining = res.headers.get("x-ratelimit-remaining");
+		const why =
+			res.status === 403 && remaining === "0"
+				? `rate limit exhausted (x-ratelimit-remaining: 0${
+						res.headers.get("x-ratelimit-reset")
+							? `, resets ${new Date(Number(res.headers.get("x-ratelimit-reset")) * 1000).toISOString()}`
+							: ""
+					}) — set GITHUB_TOKEN`
+				: res.status === 403 || res.status === 404
+					? `${res.status} — the mirror is public, so this is a token or network problem, not the repo`
+					: `HTTP ${res.status}`;
+		console.error(`INCONCLUSIVE: mirror tree fetch failed: ${why}. No verdict.`);
 		process.exit(2);
 	}
 	const tree = (await res.json()) as {
