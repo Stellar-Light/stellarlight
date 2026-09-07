@@ -116,6 +116,119 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://zilt.vercel.app/",
 		note: "Weak-basis sweep 2026-09-06: the page title is the unedited Next.js default (\"Create Next App\"), but the page sells the product — buy and sell USDC with M-Pesa and Eco-cash, on Stellar. Rendered read. Basis was unverified; a lazy title is not a dead product.",
 	},
+	// ── Store evidence 2026-09-07 (P4). A weak "the site loaded" basis is
+	// replaced by the product's OWN dated artifact: a store listing the
+	// operator publishes on their own site, carrying a build shipped inside 90
+	// days. Basis operator-announcement — the operator is the one saying this,
+	// via a listing they published and a build they shipped. Deliberately NOT
+	// human-verified: no human read these, and a machine chain must never
+	// impersonate one. Deliberately NOT product-integration: a fresh build
+	// proves the product ships, not that it touches Stellar.
+
+	"akuna": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-31",
+		sourceUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://akunawallet.com/) links ios listing \"Akuna Wallet\" v3.1.0, released 2026-08-31 (Apple lookup API by id).",
+	},
+	"bousol": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-26",
+		sourceUrl: "https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://bousolapp.com/) links ios listing \"Bousol Wallet - Paon Bleu Inc.\" v4.2.0, released 2026-08-26 (Apple lookup API by id).",
+	},
+	"dollarize": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-10",
+		sourceUrl: "https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://dollarize.me/) links ios listing \"Dollarize: USD Account\" v1.1.41, released 2026-08-10 (Apple lookup API by id).",
+	},
+	"ebioro": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://ebioro.com/) links ios listing \"ebioro\" v8.9.4, released 2026-09-06 (Apple lookup API by id).",
+	},
+	"fastbuka": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-03",
+		sourceUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://choppaddi.com/) links ios listing \"Choppaddi\" v1.0, released 2026-08-03 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	"fewticket": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-02",
+		sourceUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://fewticket.com/) links ios listing \"Fewticket\" v1.0.6, released 2026-09-02 (Apple lookup API by id).",
+	},
+	"freedom-pay-wallet": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-07-16",
+		sourceUrl: "https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://freedompaywallet.com/) links ios listing \"Freedom Pay Wallet\" v2.4, released 2026-07-16 (Apple lookup API by id).",
+	},
+	"meru": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl: "https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://getmeru.com/) links ios listing \"Meru | Cuenta en dólares\" v4.29.3, released 2026-09-06 (Apple lookup API by id).",
+	},
+	"providencia-onchain": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-31",
+		sourceUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://viio.me/) links ios listing \"VIIO\" v3.2.27, released 2026-08-31 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	"scopex": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-28",
+		sourceUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://scopex.money/) links ios listing \"Scopex\" v4.1.3, released 2026-08-28 (Apple lookup API by id).",
+	},
+	"seevcash": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl: "https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://seevcash.com/) links ios listing \"Seevcash: Send Money Anywhere\" v11.5, released 2026-09-06 (Apple lookup API by id).",
+	},
+	"utoken": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-19",
+		sourceUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://upesa.app/) links ios listing \"Upesa\" v1.3.0, released 2026-08-19 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	"yolat": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-04",
+		sourceUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://yolat.com/) links ios listing \"Yolat\" v1.0.57, released 2026-09-04 (Apple lookup API by id).",
+	},
 	// -- Weak-basis dormant sweep 2026-09-06 (draft improvements/drafts/
 	// 2026-09-06-weak-basis-dormant.md): Live rows resting on site-liveness or
 	// source-inherited whose newest linked repo commit is over a year old. Each
