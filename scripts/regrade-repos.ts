@@ -116,6 +116,11 @@ async function main() {
 					? r.contractInterface.length
 					: 0,
 				codeScanned: r.codeScanState === "scanned",
+				// Stored on the row by enrich, which passes it to repoGrade. This
+				// script did not, so the same row scored differently depending on
+				// which lane wrote it last — the one-field-one-writer flip-flop.
+				builderReputation:
+					typeof r.builderReputation === "number" ? r.builderReputation : 0,
 			});
 			const before = Number(r.repoScore ?? -1);
 			if (grade.score === before) continue;

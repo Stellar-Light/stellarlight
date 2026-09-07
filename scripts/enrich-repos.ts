@@ -599,6 +599,12 @@ async function main() {
 						? existing.contractInterface.length
 						: 0,
 					codeScanned: existing?.codeScanState === "scanned",
+					// The other half of the same divergence: regrade-repos passes
+					// judgeScore and this lane did not, so the 10 judged repos that
+					// ALSO carry a project link scored differently depending on
+					// which lane touched them last.
+					judgeScore:
+						typeof existing?.judgeScore === "number" ? existing.judgeScore : null,
 				})
 			: { score: 0, label: "low" as const };
 
