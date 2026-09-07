@@ -152,7 +152,53 @@ const LINK_HEALTH_SPEC: SourceSpec = {
 	],
 };
 
+/** Repo-ranking answer key (check-repo-ranking, daily). A written ordering
+ *  claim that the LIVE index contradicts. This is a served defect, not a
+ *  refresh: an agent asking for the reference implementation is handed the
+ *  wrong repo. Pairs the guard could not read never reach `INVERTED`. */
+const REPO_RANKING_SPEC: SourceSpec = {
+	source: "repo-ranking",
+	file: "repo-ranking-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "retrieval",
+			mode: "ranking-inverted",
+			severity: "high",
+			keep: (r) => str(r?.verdict) === "INVERTED",
+			probe: (r) => {
+				const h = str(r?.higher);
+				const l = str(r?.lower);
+				return h && l ? `${h} > ${l}` : (h ?? l);
+			},
+		},
+	],
+};
+
+/** Endpoint agreement (check-endpoint-agreement, daily). A resolution fact —
+ *  is this alive, what replaced it — served on one agent-reachable path and
+ *  withheld on another. A defect: the answer an agent gets depends on which
+ *  door it came through. */
+const ENDPOINT_AGREEMENT_SPEC: SourceSpec = {
+	source: "endpoint-agreement",
+	file: "endpoint-agreement-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "contract",
+			mode: "endpoint-disagreement",
+			severity: "medium",
+			keep: (r) => str(r?.verdict) === "missing",
+			probe: (r) => str(r?.repo),
+		},
+	],
+};
+
 const SPECS: SourceSpec[] = [
+	REPO_RANKING_SPEC,
+	ENDPOINT_AGREEMENT_SPEC,
 	WEAK_BASIS_LIVENESS_SPEC,
 	SUPERSESSION_FRESHNESS_SPEC,
 	LINK_HEALTH_SPEC,

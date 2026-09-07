@@ -1,0 +1,71 @@
+# The live-API guards that had NO RUNNER.
+#
+# A sweep of all 31 guard scripts on 2026-09-07 found four with no workflow and
+# no package.json script: they had run once by hand, written their artifact, and
+# would never fire again. Two of them were written that same day. A detector
+# nothing runs proves nothing — the same shape as check-links, which proved 108
+# URLs broken daily and queued them nowhere.
+#
+#   check-repo-ranking          ordering claims vs the live index
+#   check-endpoint-agreement    do /api/repos and /api/repos/search agree
+#   check-partner-project-identity  has a mapped partner's domain drifted
+#   check-raven-drift           does our #1 consumer's catalog match our contract
+#
+# SCHEDULE ONLY, never `pull_request`: it reads the production API, so it would
+# go red on the very PR that fixes an inversion (the fix is not deployed yet).
+#
+# Exit codes are the finding: 1 = an ordering claim inverted on the live index,
+# 2 = more than half the pairs unreadable, so the run could not look and must
+# not read as a run that found nothing.
+# workflow-health: signal-steps: ^(Grade the live index|Endpoint agreement|Partner identity|Raven catalog drift)$
+
+name: live-index-guards
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily 06:00 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: live-index-guards
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Each guard reports independently: one red must not hide the others, so
+      # every step runs and the job's conclusion is the union.
+      - name: Grade the live index
+        run: pnpm exec tsx scripts/check-repo-ranking.ts
+      - name: Endpoint agreement
+        if: '!cancelled()'
+        run: pnpm exec tsx scripts/check-endpoint-agreement.ts
+      - name: Partner identity
+        if: '!cancelled()'
+        run: pnpm exec tsx scripts/data/check-partner-project-identity.ts
+      - name: Raven catalog drift
+        if: '!cancelled()'
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/check-raven-drift.ts
+      - name: Commit the artifact
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- improvements/audits/; then
+            git add improvements/audits/
+            git commit -m "chore(audit): live-index guard artifacts [skip ci]"
+            git push
+          fi
