@@ -235,7 +235,15 @@ worked example — it exists to sweep a different pool, and it calls
   *Remaining:* one lane is not a system — the gap matrix's other rows
   (typed, sourced, knowledge notes) still close by hand, and Stage 2
   requires N intervention-free weeks before auto-merge opens for bounded
-  lanes; the count starts now, at zero.
+  lanes. **The count is no longer zero, and it never was.** On 2026-09-07
+  the counter read 0 of 63 lanes eligible, and all three causes were the
+  METER: a lane whose write step is NAMED rather than an inline `run:`
+  was unclassifiable and silently uncounted; unknown verdicts were cached
+  so the first fix stayed invisible; and both week walks demanded the
+  CURRENT partial week, so every lane reset to zero each Monday and the
+  board could only ever show a number on a Sunday night. Fixed: **8 lanes
+  are eligible at 4+ intervention-free weeks, 3 clean across the full
+  window.** Eligibility publishes; the promotion stays a human call.
 
 - **P4. Basis strength at scale.** `status: in progress`
   The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
@@ -273,12 +281,25 @@ worked example — it exists to sweep a different pool, and it calls
   product-integration) plus 4 within the pre-existing onchain-activity
   tier: real evidence, and a change in what counts — reported as two
   numbers from now on, never as the ratchet falling.
-  *Remaining:* the done bar is weak bases under 50%. 144 weak rows have a
-  website that never answered a successful check — their reason is now
-  printed as an owner triage table (relink / Inactive / leave), and that
-  is human work, not a lane. operator-announcement is a basis value on 3
-  rows: a corpus-announcement lane (dated SDF/operator launch posts →
-  basis + receipt) is the unbuilt lever with the most headroom. The
+  *Remaining:* the done bar is weak bases under 50%; the share is 486 of
+  832 Live rows (58%) as of 2026-09-07, so ~71 rows must move.
+  **Measured 2026-09-07, the obvious lever awards nothing.** `repo-activity`
+  is the basis for rows whose own source moving IS their liveness, and of
+  the 114 library-typed weak rows: 74 have **no linked repo at all**, and
+  the other 40 have repos whose freshest commit is **392 days old**, past
+  the 365-day window. Eligible today: **0**. Those rows are weak because
+  the evidence does not exist, not because a lane has not run — a
+  different problem, and one no lane fixes.
+  Finding the 74 missing repos was tried the same day, by reading each
+  row's OWN site for the GitHub links it publishes: 48 publish none, 9
+  have no website, 8 would not load, 3 resolved, 2 survived an
+  intersection check. That lever is now measured and small.
+  What DID move: 13 rows to operator-announcement from store listings the
+  operator publishes on their own site (Apple lookup by id / Play "Updated
+  on", release inside 90 days), which is the corpus-announcement lever in
+  its cheapest form. 144 weak rows have a website that never answered a
+  successful check — their reason is printed as an owner triage table
+  (relink / Inactive / leave), and that is human work, not a lane. The
   XLM-denominated channel deposit has no USD ceiling until a price source
   that path may depend on exists.
 
@@ -315,13 +336,28 @@ worked example — it exists to sweep a different pool, and it calls
   the prose, 34 became a curated dated map keyed by the superseded repo,
   `successorRepo` is derived from it, and a test holds prose and fields
   together (spec 1.9.36, #1307).
-  *Remaining:* contracts as first-class joined entities only where the P3
-  lane reached (11 of the 308 expected-tier repos). Builder/org identity is
-  still thinner than project identity. Supersession is curated (34 repos):
-  a repo archived after its note was written is not covered until the
-  note is, which the note-freshness lane does not yet detect. 12,851
-  indexed repos carry no note — the long tail is by design, the curated
-  pool is the floor that rises.
+  *Remaining:* knowledge notes cover **222 of the 382-row curated pool**
+  (2026-09-07); the three still listed carry INTERNAL triage notes, which
+  is the metric's own correct state for a repo examined and found to state
+  no durable public fact. 12,851 indexed repos carry no note — the long
+  tail is by design, the curated pool is the floor that rises.
+  **Two gaps closed by measurement rather than by building, 2026-09-07.**
+  85 of 100 contracts serve no project join — every one of them from a
+  repo that genuinely has no project link, so the join is honest and
+  absent, not missing. And 142 of 171 builders show `projectCount: 0`
+  while the code-derived join under `onStellar.builds` is correct and
+  populated; the api-reference already routes consumers there. A
+  repo-misattribution detector was built the same day and **thrown away**:
+  it flagged 1,789 of 2,361 rows, nearly all correctly attributed, and a
+  guard that cries wolf on three quarters of its population is worse than
+  none.
+  Still open: contracts as first-class joined entities only where the P3
+  lane reached (11 of the 308 expected-tier repos). Supersession is
+  curated (62 entries): a repo archived after its note was written is not
+  covered until the note is, which the note-freshness lane does not yet
+  detect. Supersession now resolves on EVERY read path — it was served by
+  repo-search and withheld by the collection until 2026-09-07, so the same
+  repo answered two different truths depending on the URL.
 
 ## State of the program — as of 2026-09-05
 
