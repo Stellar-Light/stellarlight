@@ -62,7 +62,20 @@ jobs:
       # rows where the surface served one. Every part was locally plausible and
       # nothing added the buckets up. Exit 2 = could not read the surface, which
       # is neither red nor green.
+      #
+      # NOT on pull_request. This reads the LIVE API, so on a PR it reports the
+      # state of production — which the PR has not changed yet. That inverts the
+      # gate twice over: a PR that FIXES a served defect is red until it
+      # deploys, and a PR that introduces one is green because production is
+      # still fine. Both happened on 2026-09-07 (the hackathon "12 winners of 0
+      # submissions" fix had to be split in two so neither half merged past a
+      # red check that was describing a defect it was repairing).
+      #
+      # It stays blocking where it is meaningful: on push to main after the
+      # deploy, on the weekly cron, and on demand. Same reasoning the curated
+      # canonical step below already carries.
       - name: Served partitions sum to their denominators
+        if: github.event_name != 'pull_request'
         run: pnpm exec tsx scripts/check-sum-invariants.ts
 
       # Fable's audit finding #4: check-curated-canonical.ts was written to
