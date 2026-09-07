@@ -3161,7 +3161,39 @@ async function main() {
 	// enum value missing from the Types options — aborted the whole batch,
 	// losing 12 valid writes). A bad row fails loudly; the rest still land.
 	let failed = 0;
+	// Coalesce per row before applying. Two sections can plan a write for the
+	// same row, and each builds its patch by spreading the group as it was READ
+	// — `{ ...d.links, website: null }`. Applied in sequence, the second write's
+	// stale spread RESURRECTS what the first cleared: on 2026-09-07 mimoto and
+	// sorosorcerer were named by both GITHUB_LINK_REMOVE and
+	// WEBSITE_REMOVE_DEAD, both writes reported success, and the row ended with
+	// github nulled and the dead website back. 42 of 44 removals stuck; the two
+	// that did not were exactly the two with a second write in the same run.
+	//
+	// Merging one level down is enough: patches are `{ field: value }` or
+	// `{ group: { ... } }`, never deeper.
+	const merged = new Map<string, (typeof writes)[number]>();
 	for (const w of writes) {
+		const prev = merged.get(String(w.id));
+		if (!prev) {
+			merged.set(String(w.id), { ...w, data: { ...w.data } });
+			continue;
+		}
+		const data = prev.data as Record<string, unknown>;
+		for (const [k, v] of Object.entries(w.data as Record<string, unknown>)) {
+			const a = data[k];
+			data[k] =
+				a && v && typeof a === "object" && typeof v === "object" &&
+				!Array.isArray(a) && !Array.isArray(v)
+					? { ...(a as object), ...(v as object) }
+					: v;
+		}
+	}
+	if (merged.size !== writes.length)
+		console.log(
+			`\n  (${writes.length - merged.size} write(s) coalesced into a sibling patch for the same row)`,
+		);
+	for (const w of merged.values()) {
 		try {
 			await payload.update({
 				collection: "projects",
@@ -3179,7 +3211,7 @@ async function main() {
 		console.error(`\n${failed} write(s) FAILED — fix and re-run.`);
 		process.exitCode = 1;
 	}
-	console.log(`\nDONE: ${writes.length} write(s) applied.`);
+	console.log(`\nDONE: ${merged.size} write(s) applied (${writes.length} planned).`);
 	// exit(0) STOMPED the exitCode set above (same bug enrich-repos fixed):
 	// failed writes exited green. Honor the failure code.
 	process.exit(process.exitCode ?? 0);
