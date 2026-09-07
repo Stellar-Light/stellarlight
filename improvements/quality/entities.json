@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T02:49:38.830Z",
+ "generatedAt": "2026-09-07T03:56:21.278Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -40,7 +40,7 @@
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 0,
-   "clearedFindings": 89,
+   "clearedFindings": 133,
    "verifiedFindings": 0
   },
   {
@@ -55,13 +55,13 @@
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 650,
   "open": 2,
-  "refreshQueue": 107,
+  "refreshQueue": 63,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 518,
+  "cleared": 562,
   "verified": 7,
   "byFailureMode": [
    {
@@ -90,6 +90,15 @@
     "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
+   },
+   {
+    "mode": "broken-link",
+    "open": 0,
+    "refresh": 62,
+    "blocked": 0,
+    "cleared": 44,
+    "verified": 0,
+    "surface": "directory"
    },
    {
     "mode": "completeness-residual",
@@ -207,15 +216,6 @@
     "cleared": 1,
     "verified": 0,
     "surface": "code"
-   },
-   {
-    "mode": "broken-link",
-    "open": 0,
-    "refresh": 106,
-    "blocked": 0,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "directory"
    }
   ],
   "openByAge": [
@@ -238,52 +238,52 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-06"
+    "probe": "https://github.com/antontat27/interlinked-backend",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-06"
+    "probe": "https://github.com/argo-navis-dev/js-capacitor-passkey-kit",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-06"
+    "probe": "https://github.com/bingtellar/bingtellar-serverside",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "status.endpoints lists /api/rwa",
-    "surface": "contract",
-    "failureMode": "api-drift",
-    "clearedAt": "2026-09-06"
+    "probe": "https://github.com/Cartwey001/cartwey-app",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "/api/rwa emits X-API-Version",
-    "surface": "contract",
-    "failureMode": "api-drift",
-    "clearedAt": "2026-09-06"
+    "probe": "https://github.com/cedelabs/sdk-examples",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "note-stale:stellar/anchor-platform:docker:stellar/anchor-platform",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-05"
+    "probe": "https://github.com/centiiv/protocol-node",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "note-stale:bluxcc/react:npm:@bluxcc/react",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-04"
+    "probe": "https://github.com/cordilleradev",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    },
    {
-    "probe": "note-stale:bluxcc/core:npm:@bluxcc/core",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-04"
+    "probe": "https://github.com/darthbenro008/walletban",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
    }
   ],
   "closure": {
@@ -328,7 +328,7 @@
      {
       "class": "cross-surface-consistency",
       "total": 130,
-      "open": 107,
+      "open": 63,
       "firstSeen": "2026-07-22"
      },
      {
@@ -3197,8 +3197,10 @@
    {
     "slug": "transfermole",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4449,8 +4451,10 @@
    {
     "slug": "prophe",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4967,8 +4971,10 @@
    {
     "slug": "lettuce",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -8327,7 +8333,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 496,
+  "weakestTotal": 499,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9182,7 +9188,7 @@
    },
    {
     "field": "linked",
-    "count": 21
+    "count": 24
    }
   ]
  },
@@ -10545,7 +10551,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 89
+    "value": 133
    },
    {
     "id": "f:contract",
@@ -10581,13 +10587,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 518
+    "value": 562
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 125
+    "value": 81
    },
    {
     "id": "o:verified",
@@ -10707,7 +10713,7 @@
     "target": 21,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 89
+    "value": 133
    },
    {
     "source": 5,
@@ -10777,7 +10783,7 @@
     "target": 22,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 106
+    "value": 62
    },
    {
     "source": 14,
