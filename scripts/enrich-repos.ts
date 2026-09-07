@@ -358,10 +358,21 @@ async function main() {
 		// (it's what fixed the Noether no-repos gap).
 		const trustedProvenance = p.provenance?.source !== "UserSubmitted";
 		const smallOrg = repos.length <= SMALL_ORG_MAX && trustedProvenance;
-		const keep = (dedicated || smallOrg ? repos : signal).slice(
-			0,
-			ORG_REPO_CAP,
-		);
+		// ORG_REPO_CAP protects the PAT budget from a large org flooding the
+		// index. The orgs that PUBLISH the protocol are not that risk: `stellar`
+		// (147 public repos), `stellar-deprecated` (81) and `stellar-experimental`
+		// (30) are a bounded, wholly-relevant 258, and every one of them is an
+		// answer an agent may need — including the archived ones, which are how
+		// an agent learns that stellar-deprecated/stellarterm is dead.
+		//
+		// Measured 2026-09-07: the cap is why 28 first-party repos were absent
+		// while 138 `stellar` rows were indexed — the cap admits 40 per
+		// expansion, and the rest of the org arrived only where some project
+		// happened to link a repo explicitly. Among the missing:
+		// stellar/stellar-confidential-token and stellar/mcp-stellar-xdr, both
+		// live, both current work.
+		const capped = isFirstParty(login) ? repos.length : ORG_REPO_CAP;
+		const keep = (dedicated || smallOrg ? repos : signal).slice(0, capped);
 		orgReposDropped += repos.length - keep.length;
 		const siblings = orgSiblings.get(login.toLowerCase()) ?? [p];
 		const siblingRefs = siblings.map((sp) => ({
