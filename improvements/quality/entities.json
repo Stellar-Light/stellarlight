@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T07:03:45.424Z",
+ "generatedAt": "2026-09-07T07:10:29.299Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -40,7 +40,7 @@
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 0,
-   "clearedFindings": 175,
+   "clearedFindings": 178,
    "verifiedFindings": 0
   },
   {
@@ -55,13 +55,13 @@
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 650,
   "open": 2,
-  "refreshQueue": 21,
+  "refreshQueue": 18,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 604,
+  "cleared": 607,
   "verified": 7,
   "byFailureMode": [
    {
@@ -76,9 +76,9 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 20,
+    "refresh": 17,
     "blocked": 0,
-    "cleared": 86,
+    "cleared": 89,
     "verified": 0,
     "surface": "directory"
    },
@@ -238,6 +238,24 @@
   ],
   "recentlyCleared": [
    {
+    "probe": "https://github.com/jjjutla/geckofuzz",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
+   },
+   {
+    "probe": "https://github.com/moonbite-gmbh/multisig-ui",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
+   },
+   {
+    "probe": "https://github.com/nkoorty/mimoto",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-07"
+   },
+   {
     "probe": "https://0xauth.co",
     "surface": "directory",
     "failureMode": "broken-link",
@@ -263,24 +281,6 @@
    },
    {
     "probe": "https://arcturus-gpt.com",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-07"
-   },
-   {
-    "probe": "https://basement.dev",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-07"
-   },
-   {
-    "probe": "https://benkiko.xyz",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-07"
-   },
-   {
-    "probe": "https://biggertech.co",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
@@ -328,7 +328,7 @@
      {
       "class": "cross-surface-consistency",
       "total": 130,
-      "open": 21,
+      "open": 18,
       "firstSeen": "2026-07-22"
      },
      {
@@ -10577,7 +10577,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 175
+    "value": 178
    },
    {
     "id": "f:contract",
@@ -10613,13 +10613,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 604
+    "value": 607
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 39
+    "value": 36
    },
    {
     "id": "o:verified",
@@ -10739,7 +10739,7 @@
     "target": 21,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 175
+    "value": 178
    },
    {
     "source": 5,
@@ -10809,7 +10809,7 @@
     "target": 22,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 20
+    "value": 17
    },
    {
     "source": 14,
