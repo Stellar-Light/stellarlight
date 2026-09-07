@@ -1,88 +1,16 @@
 {
- "generatedAt": "2026-09-07T03:50:08.434Z",
- "asOf": "2026-09-07T03:50:08.434Z",
+ "generatedAt": "2026-09-07T05:56:53.236Z",
+ "asOf": "2026-09-07T05:56:53.236Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2399,
+ "checked": 2357,
  "broken": [
-  {
-   "url": "https://0xauth.co",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/0xauth.links.website"
-   ]
-  },
-  {
-   "url": "https://adamik.io",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/adamik.links.website"
-   ]
-  },
-  {
-   "url": "https://aerochain.wingleet.com/redoc",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/aerochain.links.website"
-   ]
-  },
-  {
-   "url": "https://apay.io",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/apay.links.website"
-   ]
-  },
-  {
-   "url": "https://arcturus-gpt.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/arcturus.links.website"
-   ]
-  },
   {
    "url": "https://assetdesk.xyz",
    "httpStatus": null,
    "reason": "fetch failed",
    "targets": [
     "projects/assetdesk.links.website"
-   ]
-  },
-  {
-   "url": "https://basement.dev",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/basement.links.website"
-   ]
-  },
-  {
-   "url": "https://benkiko.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/benkiko.links.website"
-   ]
-  },
-  {
-   "url": "https://biggertech.co",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/bigger.links.website"
-   ]
-  },
-  {
-   "url": "https://biotlabs.africa/projects/ea-kazi",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/ea-kazi.links.website"
    ]
   },
   {
@@ -94,43 +22,10 @@
    ]
   },
   {
-   "url": "https://blockshangerous.com/cryptocannoneer",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/cryptocannoneer.links.website"
-   ]
-  },
-  {
-   "url": "https://borderdollar.co",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/borderdollar.links.website"
-   ]
-  },
-  {
-   "url": "https://bravepay.net",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/bravepay.links.website"
-   ]
-  },
-  {
-   "url": "https://canfy.net",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/canfy.links.website"
-   ]
-  },
-  {
    "url": "https://chainsatlas.com",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
-    "projects/chainsatlas.links.website",
     "projects/chainatlas.links.website"
    ]
   },
@@ -140,54 +35,6 @@
    "reason": "fetch failed",
    "targets": [
     "entities/clickpesa.links.website"
-   ]
-  },
-  {
-   "url": "https://cosmic.link",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/cosmiclink.links.website"
-   ]
-  },
-  {
-   "url": "https://cosmic.vote",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/cosmicvote.links.website"
-   ]
-  },
-  {
-   "url": "https://digicus.dev",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/digicus.links.website"
-   ]
-  },
-  {
-   "url": "https://equilibre.io",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/equilibre.links.website"
-   ]
-  },
-  {
-   "url": "https://forgerpc.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/forge.links.website"
-   ]
-  },
-  {
-   "url": "https://getpaid.africa",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/getpaid.links.website"
    ]
   },
   {
@@ -261,16 +108,7 @@
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
-    "projects/ping.links.website",
     "partner-accounts/anchor-ping.websiteUrl"
-   ]
-  },
-  {
-   "url": "https://lumensforcharity.tech",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/lumens-for-charity.links.website"
    ]
   },
   {
@@ -282,51 +120,11 @@
    ]
   },
   {
-   "url": "https://ntokens.com/blog/brl-anchor-stellar",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/brl.links.website"
-   ]
-  },
-  {
-   "url": "https://openx.solar",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/opensolar.links.website"
-   ]
-  },
-  {
    "url": "https://padparadscho.com",
    "httpStatus": 404,
    "reason": "Not Found",
    "targets": [
     "builders/6a9a5e6d32df846e8503fdaf.website_url"
-   ]
-  },
-  {
-   "url": "https://paygocrypto.io",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/paygo-crypto.links.website"
-   ]
-  },
-  {
-   "url": "https://pool.lumenaut.net",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/lumenaut.links.website"
-   ]
-  },
-  {
-   "url": "https://qolaq.org",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/qolaq.links.website"
    ]
   },
   {
@@ -338,108 +136,11 @@
    ]
   },
   {
-   "url": "https://rigel.link",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/rigel.links.website"
-   ]
-  },
-  {
-   "url": "https://skeeper.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/skeeper.links.website"
-   ]
-  },
-  {
    "url": "https://slender.fi",
    "httpStatus": null,
    "reason": "fetch failed",
    "targets": [
-    "projects/slender.links.website",
     "entities/eq-lab.links.website"
-   ]
-  },
-  {
-   "url": "https://snnac.me",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/snnac.links.website"
-   ]
-  },
-  {
-   "url": "https://soroban-assistant.herokuapp.com",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/soroban-assistant.links.website"
-   ]
-  },
-  {
-   "url": "https://sorobanide.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/sorobanide.links.website"
-   ]
-  },
-  {
-   "url": "https://sorobanlearn.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/soroban-learn.links.website"
-   ]
-  },
-  {
-   "url": "https://sorosorcerer.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/sorosorcerer.links.website"
-   ]
-  },
-  {
-   "url": "https://sorscan.org",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/sorscan.links.website"
-   ]
-  },
-  {
-   "url": "https://stellarglobal.community",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/stellar-global.links.website"
-   ]
-  },
-  {
-   "url": "https://stellarpay.io",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/stellarpay.links.website"
-   ]
-  },
-  {
-   "url": "https://stellarstrides.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/stellarstrides.links.website"
-   ]
-  },
-  {
-   "url": "https://stellarupdate.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/stellar-update.links.website"
    ]
   },
   {
@@ -447,16 +148,7 @@
    "httpStatus": null,
    "reason": "fetch failed",
    "targets": [
-    "projects/stex.links.website",
     "entities/xycloo.links.website"
-   ]
-  },
-  {
-   "url": "https://stride.social",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/stride.links.website"
    ]
   },
   {
@@ -468,43 +160,11 @@
    ]
   },
   {
-   "url": "https://tribal.credit",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/tribal.links.website"
-   ]
-  },
-  {
-   "url": "https://vitreous.co",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/vitreous.links.website"
-   ]
-  },
-  {
-   "url": "https://websoroban.vercel.app",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/websoroban-ide.links.website"
-   ]
-  },
-  {
    "url": "https://www.grupoamonet.com.br",
    "httpStatus": null,
    "reason": "fetch failed",
    "targets": [
     "builders/69d19a821a0f3c3e3c2706e2.website_url"
-   ]
-  },
-  {
-   "url": "https://xlet.io",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/mxlet.links.website"
    ]
   }
  ]
