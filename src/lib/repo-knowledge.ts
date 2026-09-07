@@ -42,6 +42,33 @@ export interface KnowledgeNote {
  * verified against the repo's own docs/registry pages on the asOf date.
  */
 export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
+	// The three Accelar siblings. The warning belongs on EACH of them, not
+	// only on accelar-studio: a reader who lands here needs to know this
+	// README is not about this repo.
+	"Accelar-labs/accelar-frontend-frax": [
+		{
+			note: "README (read 2026-09-07) is the \"Accelar Studio — installation and dev environment\" text, verbatim the same file as Accelar-labs/accelar-studio and the other two frontends. It does NOT describe this repo; the name (\"frax\") is the only thing distinguishing it, so nothing here can be quoted as evidence about this particular surface. TypeScript, last commit February 2026. SCF #26, $33,000 to the project. https://github.com/Accelar-labs/accelar-frontend-frax",
+			triggers: ["accelar frontends", "accelar shared readme"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Accelar-labs/accelar-plataform-frontend": [
+		{
+			note: "README (read 2026-09-07) is the \"Accelar Studio — installation and dev environment\" text, verbatim the same file as Accelar-labs/accelar-studio and the other two frontends. It does NOT describe this repo; the name (\"plataform\") is the only thing distinguishing it, so nothing here can be quoted as evidence about this particular surface. TypeScript, last commit February 2026. SCF #26, $33,000 to the project. https://github.com/Accelar-labs/accelar-plataform-frontend",
+			triggers: ["accelar frontends", "accelar shared readme"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
+	"Accelar-labs/educhain-accelar-frontend": [
+		{
+			note: "README (read 2026-09-07) is the \"Accelar Studio — installation and dev environment\" text, verbatim the same file as Accelar-labs/accelar-studio and the other two frontends. It does NOT describe this repo; the name (\"educhain\") is the only thing distinguishing it, so nothing here can be quoted as evidence about this particular surface. TypeScript, last commit February 2026. SCF #26, $33,000 to the project. https://github.com/Accelar-labs/educhain-accelar-frontend",
+			triggers: ["accelar frontends", "accelar shared readme"],
+			source: "curated",
+			asOf: "2026-09-07",
+		},
+	],
 	// ── 2026-09-07, third batch: the tail of the board's named gap. Three are
 	// internal triage (an empty README states nothing; a withdrawn row is a
 	// judgment, not a published fact about someone's repo).
