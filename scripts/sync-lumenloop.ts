@@ -188,6 +188,34 @@ async function main() {
 					// a record never made it ineligible for this branch, so every
 					// curated field was reverted within 24h of any curate run.
 					const owned = curatedFieldsFor(slug);
+					// A status a LANE earned outranks a feed label, whether or not a
+					// curation map happens to name the row. The map protected 161 of
+					// 309 touched rows; the other 148 carried repo-activity (84),
+					// product-integration (52), onchain-activity (11) or
+					// human-verified (1) and the feed's label would have overwritten
+					// the evidence. It had not bitten yet only because the two mostly
+					// agree — the damage lands exactly when we know better, which is
+					// the whole point of holding the row.
+					//
+					// The same weak-basis test already decides whether the sync may
+					// stamp its own provenance; it now decides whether it may write
+					// the status at all.
+					// An explicit list of tiers WE produced, not "anything but weak".
+					// site-liveness is deliberately absent: it means a page answered,
+					// which a parked domain also does, and it is often months stale.
+					// Protecting it would mean the feed could never tell us a project
+					// died — losing the one thing an upstream curator is well placed
+					// to notice. The feed keeps refreshing those; it may not touch a
+					// status our own lanes or a human established.
+					const EARNED_STATUS_BASES = new Set([
+						"human-verified",
+						"onchain-activity",
+						"product-integration",
+						"repo-activity",
+						"operator-announcement",
+					]);
+					if (EARNED_STATUS_BASES.has(String(doc.statusBasis)))
+						owned.add("status");
 					const { data: patch, protectedFields } = withoutCuratedFields(
 						mapped,
 						owned,
