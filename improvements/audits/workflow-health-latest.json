@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-07T23:05:43.744Z",
+	"asOf": "2026-09-07T23:16:49.824Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 94,
-	"healthy": 94,
+	"checked": 95,
+	"healthy": 95,
 	"broken": [],
 	"rows": [
 		{
@@ -149,6 +149,17 @@
 			"why": "last green 0d ago"
 		},
 		{
+			"file": "backfill-version-status.yml",
+			"name": "Backfill versionStatus (manual)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-07T23:04:33Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 1,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "basis-from-deployment.yml",
 			"name": "Propagate deployment basis to status (manual)",
 			"cron": null,
@@ -230,7 +241,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T23:00:10Z",
+			"lastSuccessAt": "2026-09-07T23:12:59Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -252,10 +263,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T23:03:51Z",
+			"lastSuccessAt": "2026-09-07T23:12:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -340,10 +351,10 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T10:40:39Z",
+			"lastSuccessAt": "2026-09-07T23:03:51Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 98,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -637,7 +648,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T23:00:10Z",
+			"lastSuccessAt": "2026-09-07T23:06:31Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 98,
@@ -967,7 +978,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T23:03:51Z",
+			"lastSuccessAt": "2026-09-07T23:14:53Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1033,10 +1044,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T22:18:40Z",
+			"lastSuccessAt": "2026-09-07T23:03:51Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 42,
+			"runs": 43,
 			"why": "last green 0d ago"
 		}
 	]
