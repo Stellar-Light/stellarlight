@@ -926,6 +926,18 @@ export interface Repo {
    */
   stellarJsDep?: string | null;
   /**
+   * Registry-verified packages this repo publishes (the registry names this repo as the source).
+   */
+  publishedPackages?:
+    | {
+        registry?: string | null;
+        name?: string | null;
+        version?: string | null;
+        verifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Farm signal count (>=2 = archive; real code forces 0)
    */
   farmScore?: number | null;
@@ -3114,6 +3126,15 @@ export interface ReposSelect<T extends boolean = true> {
   hasEvents?: T;
   usesNoStd?: T;
   stellarJsDep?: T;
+  publishedPackages?:
+    | T
+    | {
+        registry?: T;
+        name?: T;
+        version?: T;
+        verifiedAt?: T;
+        id?: T;
+      };
   farmScore?: T;
   farmFlags?: T;
   codeSymbols?: T;

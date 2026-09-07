@@ -1,0 +1,50 @@
+name: Verify published packages (manual)
+
+# Which repos publish something you can actually install, verified against the
+# registry — jsr.io returns `githubRepository: {owner,name}`, npm returns
+# `repository.url`. A package.json `name` is not evidence (18 of 25 sampled
+# judged-hackathon repos declare one, and ZERO were verified-published); the
+# registry naming THIS repo as the source is, and it cannot be produced without
+# controlling both the repo and the namespace.
+#
+# TRINARY, and the distinction reaches the write: verified → a list,
+# checked-and-none → [], could-not-check → NOT WRITTEN. An empty array asserts
+# emptiness, so a network failure must never produce one.
+# workflow-health: signal-steps: ^Verify$
+
+permissions: { contents: read }
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+      limit:
+        description: "Max repos to read (0 = all)"
+        default: "0"
+  schedule:
+    - cron: "40 5 * * 2" # weekly, Tuesday 05:40 UTC — off enrich's and the scanner's hours
+
+concurrency:
+  group: verify-published-packages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Verify
+        # Scheduled runs always execute; manual dispatch stays dry unless ticked.
+        run: pnpm exec tsx scripts/verify-published-packages.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.limit != '0' && format('--limit={0}', inputs.limit) || '' }}

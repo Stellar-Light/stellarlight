@@ -351,6 +351,31 @@ export const Repos: CollectionConfig = {
 				description: "Matched @stellar/* JS dependency",
 			},
 		},
+		{
+			// Packages this repo PUBLISHES, verified against the registry.
+			//
+			// A package.json `name` is worthless as evidence — 18 of 25 sampled
+			// hackathon repos have one. The evidence is the registry serving that
+			// package AND naming this repo as its source: jsr.io returns
+			// `githubRepository: {owner, name}`, npm returns `repository.url`.
+			// Neither can be produced without controlling both the repo and the
+			// namespace, which is what makes it hard to fake — unlike a test file
+			// or a CI badge.
+			//
+			// In the same 25-repo hackathon sample: 0 verified-published.
+			name: "publishedPackages",
+			type: "array",
+			admin: {
+				description:
+					"Registry-verified packages this repo publishes (the registry names this repo as the source).",
+			},
+			fields: [
+				{ name: "registry", type: "text" }, // "npm" | "jsr"
+				{ name: "name", type: "text" },
+				{ name: "version", type: "text" },
+				{ name: "verifiedAt", type: "text" },
+			],
+		},
 		// Anti-farm (additive; real code caps to 0).
 		{
 			name: "farmScore",

@@ -89,6 +89,20 @@ export interface RepoGradeInput {
 	/** codeScanState === "scanned" — whether the code facts above were actually
 	 * gathered. Absence of a scan must never read as failing the scan. */
 	codeScanned?: boolean;
+	/**
+	 * How many packages this repo publishes that the REGISTRY confirms came
+	 * from it (jsr.io's `githubRepository`, npm's `repository.url`).
+	 *
+	 * The strongest cheap evidence a library is usable: somebody can install it,
+	 * and an independent party vouches for where it came from. Measured
+	 * 2026-09-07 on a 25-repo judged-hackathon sample: 18 declared a package.json
+	 * name (so the declaration is worthless), and ZERO were verified-published.
+	 * fazzatti/colibri publishes nine on JSR and had no way to say so.
+	 *
+	 * Null/0 is never a penalty — most good repos here are Rust contracts, Go
+	 * services or C++ that publish no JS package at all.
+	 */
+	publishedPackageCount?: number | null;
 }
 
 export interface RepoGrade {
@@ -310,10 +324,16 @@ export function codeEvidence(input: RepoGradeInput): number {
 	if (input.testsPresent) e += 0.3;
 	if (input.ciPresent) e += 0.2;
 	// A release is the difference between code that exists and code that ships.
-	// Only recent ones count: a 2019 final release is an archive, not a cadence.
+	// DECAY, not a cliff: at 365 days exactly this used to swing 0.3 → 0, which
+	// rewards an annual re-tag and punishes a correct codec that ships every 18
+	// months. Full credit inside a year, fading to nothing at three.
 	if (input.lastReleaseAt) {
 		const t = new Date(input.lastReleaseAt).getTime();
-		if (Number.isFinite(t) && (Date.now() - t) / DAY_MS <= 365) e += 0.3;
+		if (Number.isFinite(t)) {
+			const days = (Date.now() - t) / DAY_MS;
+			const f = days <= 365 ? 1 : days >= 1095 ? 0 : 1 - (days - 365) / 730;
+			e += 0.3 * f;
+		}
 	}
 	if (input.versionStatus === "current") e += 0.2;
 	else if (input.versionStatus === "supported") e += 0.12;
@@ -367,12 +387,27 @@ function corroboration(input: RepoGradeInput): number {
 	// SDF publishes the protocol; its repos ARE the reference. They are never
 	// SCF-funded, so all 212 of them sat on the floor above until 2026-09-07.
 	if (input.firstParty) bid(0.95);
-	// The code corroborates itself. Ships releases, carries tests, runs CI,
-	// pins a live SDK: that is evidence it works, gathered by reading it.
-	// fazzatti/colibri — 95 commits/90d, a release the same day, tests, CI, a
-	// supported SDK pin, 48 contract methods, six notes — scored 35/low because
-	// none of that could bid.
-	bid(0.5 + 0.45 * codeEvidence(input));
+	// The repo's OWN tree, bidding on the question "does anything OUTSIDE this
+	// repo vouch for it". It is not nothing — but it is not corroboration
+	// either, and it used to bid up to 0.95, tying with the protocol foundation.
+	//
+	// Every input is cheap: a `foo.test.ts` containing `assert(true)`, a CI YAML
+	// that echoes ok, an annual `gh release create`, a pinned SDK you never
+	// compile against. Tests + CI + release + current pin = 1.0 before the
+	// clamp. An afternoon of GitHub cosmetics bought a 0.95 corroboration, and
+	// that is why a 5/5-judged hackathon on the official starter kit still
+	// measured 81/high after the funding fix — the very inversion this file
+	// exists to remove, four points shaved off it.
+	//
+	// Capped at 0.62 now: better than nothing vouching for it, below a written
+	// note, well below anything a stranger cannot mint in an afternoon.
+	bid(0.45 + 0.17 * codeEvidence(input));
+	// A registry serving this repo's package, and naming this repo as its
+	// source, is an independent party attesting the thing ships and is
+	// installable. Stronger than a note (which is us) and than money (which is
+	// a past decision), below a human naming it canonical and below the
+	// protocol org publishing it.
+	if ((input.publishedPackageCount ?? 0) > 0) bid(0.88);
 	if ((input.knowledgeNoteCount ?? 0) > 0) bid(0.8);
 	if (input.scfAwarded || (input.projectProminence ?? 0) > 0) bid(0.8);
 	if ((input.stargazerCount ?? 0) >= 10) bid(0.7); // the crowd noticed
@@ -400,7 +435,33 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// affirmatively found no Stellar code means this repo's popularity says
 	// nothing about its value as a Stellar reference; an unscanned repo is not
 	// punished, because absence of evidence is not evidence.
-	const traction = tractionOf(input.stargazerCount) * stellarRelevance(input);
+	// ADOPTION HAS MORE THAN ONE VISIBLE PROXY, and stars are the weakest of
+	// them for a library. Until 2026-09-07 this term was stars alone, which made
+	// it a 30%-of-ownMerit slot NOTHING else could fill: a repo with every code
+	// signal maxed, ten knowledge notes and a human calling it canonical still
+	// capped at 76 on 3 stars, while the identical repo with 700 stars reached
+	// 89. That is the same popularity bias the rest of this file removes, just
+	// at lower magnitude, and no amount of evidence could reach past it.
+	//
+	// The other two proxies are deliberately NOT cheap:
+	//   · a registry serving this repo's package — someone can install it, and
+	//     an independent party names this repo as the source. In a 25-repo
+	//     judged-hackathon sample, 18 declared a package.json name and ZERO were
+	//     verified-published; a name is free, a namespace is not.
+	//   · a human naming it canonical — a person's read of the domain, which is
+	//     exactly the knowledge a star count is a poor stand-in for.
+	// Both are capped below what real popularity earns, so a published library
+	// sits under a 1,000-star SDK on this term rather than beside it.
+	const distribution =
+		(input.publishedPackageCount ?? 0) > 0
+			? Math.min(0.88, 0.55 + 0.11 * (input.publishedPackageCount ?? 0))
+			: 0;
+	const adoption = Math.max(
+		tractionOf(input.stargazerCount),
+		distribution,
+		input.curatedCanonical ? 0.8 : 0,
+	);
+	const traction = adoption * stellarRelevance(input);
 	const hasDesc = input.hasDescription ? 1 : 0;
 	const hasTopics = (input.topicCount ?? 0) > 0 ? 1 : 0;
 	const engaged = (input.openIssues ?? 0) > 0 ? 1 : 0;
@@ -425,10 +486,25 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		[0.04, hasTopics],
 		[0.03, engaged],
 	];
-	if (input.codeScanned) meritParts.push([0.3, codeEvidence(input)]);
-	const meritWeight = meritParts.reduce((a, [w]) => a + w, 0);
+	const baseWeight = meritParts.reduce((a, [w]) => a + w, 0);
+	const baseMerit =
+		meritParts.reduce((a, [w, v]) => a + w * v, 0) / baseWeight;
+	// MEASURING MUST NEVER COST A REPO. Adding the code term with a zero value
+	// made a scanned repo with no test directory score BELOW an identical repo
+	// nobody had looked at (1,000 stars, fresh, documented: 57 unscanned vs 40
+	// scanned-and-empty). That inverts this file's own doctrine — absence of
+	// evidence is not evidence of absence — and penalises the lane doing the
+	// work. A scan that finds nothing now lands exactly where no scan lands;
+	// only a scan that finds something moves the number.
 	const ownMerit = clamp01(
-		meritParts.reduce((a, [w, v]) => a + w * v, 0) / meritWeight,
+		input.codeScanned
+			? Math.max(
+					baseMerit,
+					(meritParts.reduce((a, [w, v]) => a + w * v, 0) +
+						0.3 * codeEvidence(input)) /
+						(baseWeight + 0.3),
+				)
+			: baseMerit,
 	);
 
 	// Inherited authority from the owning project/builder.
@@ -452,6 +528,13 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// depends on it, and the cap keeps a heavily-annotated small repo below a
 	// canonical one.
 	authority += Math.min(0.25, 0.06 * Math.max(0, input.knowledgeNoteCount ?? 0));
+	// Shipping installable, registry-verified packages is authority a library
+	// earns by being usable. Capped: nine small packages are not nine times the
+	// evidence of one, and a monorepo should not out-authority an SDK.
+	authority += Math.min(
+		0.2,
+		0.09 * Math.max(0, input.publishedPackageCount ?? 0),
+	);
 	// Publishing the protocol is authority. SDF's own repos carry it without any
 	// grant, prominence score or curation pass having named them.
 	if (input.firstParty) authority += 0.4;
