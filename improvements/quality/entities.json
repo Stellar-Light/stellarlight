@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T07:21:59.646Z",
+ "generatedAt": "2026-09-07T07:31:02.885Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -9263,13 +9263,10 @@
    "knowledgeNotes": {
     "pool": 473,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 253,
+    "withNotes": 256,
     "triaged": 214,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
-     "Accelar-labs/accelar-frontend-frax",
-     "Accelar-labs/accelar-plataform-frontend",
-     "Accelar-labs/educhain-accelar-frontend",
      "AssetDesk/front",
      "BuilderOSS/nouns-builder",
      "GRMarkkes/ArtCC"
@@ -9392,7 +9389,7 @@
    "languageOther": 50
   },
   "withCodeDepth": 10885,
-  "withNotes": 583,
+  "withNotes": 586,
   "withMainnet": 108,
   "top": [
    {
@@ -10449,7 +10446,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "253 of 473 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "256 of 473 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -10832,13 +10829,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12584,
+    "missing": 12581,
     "of": 13167,
-    "share": 95.6,
+    "share": 95.5,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 124,
+    "examplePoolSize": 121,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
