@@ -116,6 +116,9 @@ async function main() {
 					? r.contractInterface.length
 					: 0,
 				codeScanned: r.codeScanState === "scanned",
+				// Feeds the template/scaffold demotion — a repo whose PURPOSE is
+				// to be incomplete is a weaker reference than a finished one.
+				name: r.fullName ? String(r.fullName) : null,
 				// Stored on the row by enrich, which passes it to repoGrade. This
 				// script did not, so the same row scored differently depending on
 				// which lane wrote it last — the one-field-one-writer flip-flop.
