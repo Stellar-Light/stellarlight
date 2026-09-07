@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-07T03:25:48.640Z",
+	"asOf": "2026-09-07T06:13:17.654Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 94,
-	"healthy": 94,
+	"checked": 93,
+	"healthy": 93,
 	"broken": [],
 	"rows": [
 		{
@@ -98,10 +98,10 @@
 			"name": "Backfill knowledge notes",
 			"cron": "23 3 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T07:57:55Z",
+			"lastSuccessAt": "2026-09-07T05:03:05Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 2,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -187,10 +187,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-04T03:45:51Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -208,10 +208,10 @@
 			"name": "Curator Agent — Link health check",
 			"cron": "23 2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T17:40:41Z",
+			"lastSuccessAt": "2026-09-07T05:51:16Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 2,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -230,10 +230,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T03:21:29Z",
+			"lastSuccessAt": "2026-09-07T06:09:04Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 2,
+			"runs": 24,
 			"why": "last green 0d ago"
 		},
 		{
@@ -252,7 +252,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T03:23:38Z",
+			"lastSuccessAt": "2026-09-07T06:11:12Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -285,10 +285,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T02:09:38Z",
+			"lastSuccessAt": "2026-09-07T05:46:41Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 9,
+			"runs": 16,
 			"why": "last green 0d ago"
 		},
 		{
@@ -319,10 +319,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T04:04:32Z",
-			"ageDays": 9,
+			"ageDays": 10,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 9d ago (manual tool — age not judged)"
+			"why": "last green 10d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "deepwiki-calibrate.yml",
@@ -330,10 +330,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T04:05:47Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 6d ago (manual tool — age not judged)"
+			"why": "last green 7d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "depth-eval.yml",
@@ -512,17 +512,6 @@
 			"why": "last green 85d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "generated-recall.yml",
-			"name": "generated-recall",
-			"cron": "0 7 * * 0",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-06T11:32:16Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 1,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "import-replit-stablecoin-history.yml",
 			"name": "Import Replit stablecoin history (manual)",
 			"cron": null,
@@ -560,11 +549,11 @@
 			"name": "lane-autonomy",
 			"cron": "41 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T20:38:08Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-07T04:39:56Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 2,
-			"why": "last green 1d ago"
+			"runs": 3,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "link-canonical-slug.yml",
@@ -627,10 +616,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T04:18:43Z",
-			"ageDays": 63,
+			"ageDays": 64,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 63d ago (manual tool — age not judged)"
+			"why": "last green 64d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "migrate-research-url-host.yml",
@@ -648,7 +637,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T02:34:41Z",
+			"lastSuccessAt": "2026-09-07T05:34:26Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 98,
@@ -802,10 +791,10 @@
 			"name": "Refresh RWA measurements",
 			"cron": "37 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T20:46:00Z",
+			"lastSuccessAt": "2026-09-07T05:09:43Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 9,
+			"runs": 10,
 			"why": "last green 0d ago"
 		},
 		{
@@ -813,10 +802,10 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T20:29:37Z",
+			"lastSuccessAt": "2026-09-07T04:53:25Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 96,
+			"runs": 97,
 			"why": "last green 0d ago"
 		},
 		{
@@ -824,10 +813,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-06T23:59:52Z",
+			"lastSuccessAt": "2026-09-07T04:51:38Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 28,
+			"runs": 29,
 			"why": "last green 0d ago"
 		},
 		{
@@ -869,10 +858,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-29T03:29:14Z",
-			"ageDays": 8,
+			"ageDays": 9,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 8d ago (manual tool — age not judged)"
+			"why": "last green 9d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "self-audit.yml",
@@ -967,7 +956,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T03:23:38Z",
+			"lastSuccessAt": "2026-09-07T06:11:12Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -979,10 +968,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-05T05:48:36Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 45,
 			"runs": 11,
-			"why": "last green 1d ago (manual tool — age not judged)"
+			"why": "last green 2d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -1033,11 +1022,11 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T23:24:55Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-07T03:23:44Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 36,
-			"why": "last green 1d ago"
+			"runs": 37,
+			"why": "last green 0d ago"
 		}
 	]
 }
