@@ -156,7 +156,19 @@ async function main() {
 			// error rows excluded from routine waves (2026-08-15): the same ~65
 			// blob-unreadable dead repos re-erred EVERY wave, burning budget at
 			// the front of each run. --rescan still retries them deliberately.
-			...(RESCAN ? [] : [{ codeScanState: { not_in: ["scanned", "error"] } }]),
+			//
+			// `incomplete` is excluded for the identical reason, found 2026-09-07:
+			// the fix was applied to `error` and never to its sibling. All 14
+			// incomplete rows carry a STRUCTURAL note — `submodule-contracts` (9,
+			// the contracts live in a git submodule we don't follow) or
+			// `tree-incomplete` (5, the tree API truncated) — so a re-scan
+			// produces the identical result every time. They were re-picked every
+			// two hours forever: ~70 calls a wave, ~840 a day, and every wave
+			// reported `scanned=0` as a success. A lane that CAN do no work then
+			// looks exactly like a lane that is failing to.
+			...(RESCAN
+				? []
+				: [{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }]),
 		],
 	};
 	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
@@ -624,10 +636,25 @@ async function main() {
 				`   ${l.full.padEnd(44)} ${String(l.cur).padStart(3)} → ~${l.predicted}  (proof=${l.proof} depth=${l.depth.toFixed(2)})`,
 			);
 	}
+	// An EMPTY wave and a BROKEN wave are different facts and must not print
+	// the same thing. Say which one this was, out loud, rather than exiting 0
+	// on a summary a reader has to interpret.
+	if (docs.length === 0) {
+		console.log(
+			`\n· no eligible repos this wave — the routine backlog is exhausted (${eligible} matched the state filter, ${skippedTriaged} of them triaged). Structurally unscannable rows (submodule-contracts, tree-incomplete) and prior errors are retried only under --rescan.`,
+		);
+		process.exit(0);
+	}
 	// Zero-work waves are FAILURES, not successes (2026-08-08: a rate-limit
 	// stop 0.8s in exited green — the run looked healthy on every dashboard
 	// while writing nothing; the quiet-detector class). A wave that selected
 	// repos but scanned none must go red so it's visible.
+	//
+	// `incomplete === 0` in this condition was load-bearing in the wrong
+	// direction until 2026-09-07: the 14 permanently-incomplete rows the wave
+	// re-picked every two hours SATISFIED it, so the guard could never fire
+	// while those rows were in the routine query. Excluding them (see the wave
+	// selection above) is what lets this guard work again.
 	if (docs.length > 0 && scanned === 0 && errored === 0 && incomplete === 0) {
 		console.log(
 			"\n✗ zero-work wave: repos were selected but none were scanned (rate limit or early stop) — exiting 1 so the run shows red.",
