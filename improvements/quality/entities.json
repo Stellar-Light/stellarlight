@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T04:41:56.595Z",
+ "generatedAt": "2026-09-07T05:06:09.670Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -9215,7 +9215,7 @@
    "knowledgeNotes": {
     "pool": 473,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 212,
+    "withNotes": 225,
     "triaged": 213,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
@@ -9242,28 +9242,15 @@
      "Wadzzo2023/brand-wadzzo",
      "alternun-development/alternunV2-Stellar-POC",
      "authentication-labs/0xauth-stellar",
-     "bp-ventures/retail-wallet",
-     "bp-ventures/stellar-payment-api",
-     "constellation-protocol/constellation-protocol",
-     "daccred/attestprotocol",
      "damzylance/bigiftyxsoroban",
-     "expand-network/sdk-nodejs",
      "freelii/freelii-core",
-     "hyperledger-solang/solang",
      "jamiels/ramm.ai",
      "keizai-tools/keizai-api",
-     "luanlabs/stellar-extend-entry-ttl",
-     "lumenlater/lumen-later",
-     "paltalabs/available-xlm",
      "paltalabs/soroban-toolkit",
      "paltalabs/stellar-react",
      "paulfears/StellarSnap",
-     "payrouteshq/stellartools",
-     "perun-network/perun-stellar-backend",
      "siborg-ads/stellar-client",
      "skyhitz/skyhitz",
-     "sorobanhooks/stellar-logos",
-     "sorobanhooks/stellar-wallet-sdk",
      "tupui/soroban-pumpit",
      "tupui/tansu-vault",
      "yripper/stellar-tools"
@@ -9386,7 +9373,7 @@
    "languageOther": 50
   },
   "withCodeDepth": 10885,
-  "withNotes": 542,
+  "withNotes": 555,
   "withMainnet": 108,
   "top": [
    {
@@ -9826,7 +9813,7 @@
     "activity": "active",
     "language": "Rust",
     "projectSlug": "solang",
-    "notes": 0,
+    "notes": 4,
     "codeDepth": 57,
     "deployable": true,
     "mainnetJoined": false
@@ -10443,7 +10430,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "212 of 473 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "225 of 473 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -10826,13 +10813,13 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12625,
+    "missing": 12612,
     "of": 13167,
-    "share": 95.9,
+    "share": 95.8,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 139,
+    "examplePoolSize": 136,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
