@@ -4850,13 +4850,25 @@ export const DEPLOYMENT_VERIFIED: Record<
  * empty; never touches status/basis/asOf; Live rows are deliberately NOT
  * here (their source is the site-liveness lane's own evidence).
  */
+/**
+ * NOTE (2026-09-07): two rows used to appear here AND in STATUS_SOURCE_RETRACT
+ * with the SAME url — pactta (https://pactta.com/) and mimoto
+ * (github.com/nkoorty/mimoto). Both maps are value-keyed, so this backfill set
+ * the url and the retract nulled it on the same run, every run: 46 writes
+ * applied and 1 still planned afterwards, forever. The idempotence gate caught
+ * it. Both urls are dead (unreachable / 404), so the retract is right and the
+ * entries were dropped from here — one field, one writer.
+ *
+ * Six other slugs appear in both maps and are FINE: they carry DIFFERENT urls,
+ * so the retract removes a bad citation and this map sets a good one. Overlap
+ * by slug is not a conflict; overlap by value is.
+ */
 export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	// Re-triage 2026-09-01 (the two retracted rows whose death has since
 	// become directly observable): both domains now fail to connect at all —
 	// an unreachable origin IS the observed-dead evidence the July zombie-200
 	// pages could not provide. whalestack cites the successor brand's own
 	// domain, not the coinqvest redirect that confused the first receipt.
-	pactta: "https://pactta.com/",
 	whalestack: "https://whalestack.com/",
 	aerochain: "https://aerochain.wingleet.com/redoc",
 	apay: "https://apay.io/",
@@ -4875,7 +4887,6 @@ export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
 	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
 	lumenaut: "https://pool.lumenaut.net/",
 	"lumens-for-charity": "https://lumensforcharity.tech/",
-	mimoto: "https://github.com/nkoorty/mimoto",
 	mxlet: "https://xlet.io/",
 	opensolar: "https://openx.solar/",
 	"paygo-crypto": "https://paygocrypto.io/",
