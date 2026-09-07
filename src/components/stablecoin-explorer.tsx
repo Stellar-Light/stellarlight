@@ -1541,10 +1541,13 @@ export function StablecoinExplorer({
 										).map(([k, v]) => (
 											<div
 												key={k}
-												className="bg-muted rounded-lg p-4 space-y-1"
+												className="bg-muted rounded-lg p-4 space-y-1 min-w-0"
 											>
 												<div className="text-sm text-muted-foreground">{k}</div>
-												<div className="text-xl font-semibold tabular-nums">
+												{/* Holders is the one that grows without a compact
+												    form ("12,284,095"); truncate rather than let it
+												    widen the cell. */}
+												<div className="text-lg sm:text-xl font-semibold tabular-nums truncate">
 													{v}
 												</div>
 											</div>
@@ -1716,30 +1719,38 @@ export function StablecoinExplorer({
 															);
 															return (
 																<>
-																	<div className="grid grid-cols-3 gap-4 pb-4 mb-3 border-b border-border">
-																		<div>
-																			<div className="text-xs text-muted-foreground mb-1">
-																				Total Value Locked
+																	{/* Three stats across a ~93px column at 375px:
+																	    "Total Value Locked" wrapped to two lines and
+																	    pushed its own value out of line with the other
+																	    two, and text-xl could not hold "$999.99M".
+																	    Short labels that never wrap, a size that steps
+																	    up only when there is room, and min-w-0 so a
+																	    long value truncates instead of pushing its
+																	    neighbours off. */}
+																	<div className="grid grid-cols-3 gap-3 sm:gap-4 pb-4 mb-3 border-b border-border">
+																		<div className="min-w-0">
+																			<div className="text-xs text-muted-foreground mb-1 whitespace-nowrap">
+																				TVL
 																			</div>
-																			<div className="text-xl font-semibold tabular-nums">
+																			<div className="text-base sm:text-xl font-semibold tabular-nums truncate">
 																				{displayUSD(pooledUSD)}
 																			</div>
 																		</div>
-																		<div>
-																			<div className="text-xs text-muted-foreground mb-1">
-																				Total Pools
+																		<div className="min-w-0">
+																			<div className="text-xs text-muted-foreground mb-1 whitespace-nowrap">
+																				Pools
 																			</div>
-																			<div className="text-xl font-semibold tabular-nums">
+																			<div className="text-base sm:text-xl font-semibold tabular-nums truncate">
 																				{pools}
 																			</div>
 																		</div>
-																		<div>
-																			<div className="text-xs text-muted-foreground mb-1">
+																		<div className="min-w-0">
+																			<div className="text-xs text-muted-foreground mb-1 whitespace-nowrap">
 																				Pooled
 																			</div>
-																			<div className="text-xl font-semibold tabular-nums">
-																				{displaySupply(pooled)}{" "}
-																				<span className="text-sm font-normal text-muted-foreground">
+																			<div className="text-base sm:text-xl font-semibold tabular-nums truncate">
+																				{displaySupply(pooled)}
+																				<span className="ml-1 text-xs sm:text-sm font-normal text-muted-foreground">
 																					{selectedCoin.ticker}
 																				</span>
 																			</div>
@@ -1754,21 +1765,30 @@ export function StablecoinExplorer({
 																				rel="noopener noreferrer"
 																				className="flex items-center justify-between gap-3 text-sm rounded-md px-2 py-2 -mx-2 hover:bg-white/[0.04] transition-colors"
 																			>
-																				<div className="flex items-center gap-2.5 min-w-0">
+																				{/* The meta line ("62 pools · top 8
+																				    measured · largest USDC/PYUSD") sat
+																				    beside the venue name on one flex row,
+																				    so on a phone it wrapped to four lines
+																				    and crushed the value column. Name and
+																				    meta now stack, and the meta truncates
+																				    to a single line. */}
+																				<div className="flex items-center gap-2.5 min-w-0 flex-1">
 																					<VenueLogo name={r.name} />
-																					<span className="font-medium">
-																						{r.name}
-																					</span>
-																					<span className="text-xs text-muted-foreground">
-																						{r.poolCount} pool
-																						{r.poolCount === 1 ? "" : "s"}
-																						{r.measuredPools < r.poolCount
-																							? ` · top ${r.measuredPools} measured`
-																							: ""}
-																						{r.largest
-																							? ` · largest ${selectedCoin.ticker}/${r.largest.counter}`
-																							: ""}
-																					</span>
+																					<div className="min-w-0">
+																						<div className="font-medium truncate">
+																							{r.name}
+																						</div>
+																						<div className="text-xs text-muted-foreground truncate">
+																							{r.poolCount} pool
+																							{r.poolCount === 1 ? "" : "s"}
+																							{r.measuredPools < r.poolCount
+																								? ` · top ${r.measuredPools} measured`
+																								: ""}
+																							{r.largest
+																								? ` · largest ${selectedCoin.ticker}/${r.largest.counter}`
+																								: ""}
+																						</div>
+																					</div>
 																				</div>
 																				<div className="text-right tabular-nums flex-shrink-0">
 																					<div>
