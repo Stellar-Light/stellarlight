@@ -9,7 +9,7 @@
  * those repos as un-noted.
  */
 import { describe, expect, it } from "vitest";
-import { REPO_KNOWLEDGE_NOTES } from "../repo-knowledge";
+import { curatedNotesFor, REPO_KNOWLEDGE_NOTES } from "../repo-knowledge";
 
 /** The confirm step, as the script performs it. */
 const matches = (fullName: string, key: string) =>
@@ -33,5 +33,23 @@ describe("knowledge-note keys match their rows whatever the casing", () => {
 		for (const key of Object.keys(REPO_KNOWLEDGE_NOTES)) {
 			expect(matches(key, key)).toBe(true);
 		}
+	});
+});
+
+describe("the registry itself is read case-insensitively", () => {
+	it("returns notes for a key written in GitHub's casing", () => {
+		// The second half of the same bug: even once the ROW was found, the
+		// registry was indexed by `fullName.toLowerCase()`, so a mixed-case KEY
+		// returned nothing and the row was judged "unchanged" against an empty
+		// list.
+		for (const key of Object.keys(REPO_KNOWLEDGE_NOTES)) {
+			expect(curatedNotesFor(key)).toBeDefined();
+			expect(curatedNotesFor(key.toLowerCase())).toBeDefined();
+			expect(curatedNotesFor(key.toUpperCase())).toBeDefined();
+		}
+	});
+
+	it("does not invent notes for a repo with none", () => {
+		expect(curatedNotesFor("nobody/not-a-real-repo")).toBeUndefined();
 	});
 });
