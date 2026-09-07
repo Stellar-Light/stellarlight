@@ -1,15 +1,9 @@
 {
-	"asOf": "2026-09-07T02:59:38.347Z",
+	"asOf": "2026-09-07T03:25:48.640Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 93,
-	"healthy": 92,
-	"broken": [
-		{
-			"file": "workflow-health.yml",
-			"state": "standing-signal",
-			"why": "8 run(s) red at its declared signal step since its last green 1d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
-		}
-	],
+	"checked": 94,
+	"healthy": 94,
+	"broken": [],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -232,6 +226,17 @@
 			"why": "last green 5d ago"
 		},
 		{
+			"file": "consumption-guard.yml",
+			"name": "consumption-guard",
+			"cron": "23 6 * * 1",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-07T03:21:29Z",
+			"ageDays": 0,
+			"graceDays": 21,
+			"runs": 2,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "content-freshness.yml",
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
@@ -247,7 +252,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T02:57:46Z",
+			"lastSuccessAt": "2026-09-07T03:23:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -490,10 +495,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T03:20:14Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 5d ago (manual tool — age not judged)"
+			"why": "last green 6d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-zenex.yml",
@@ -501,10 +506,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 84,
+			"ageDays": 85,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 84d ago (manual tool — age not judged)"
+			"why": "last green 85d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "generated-recall.yml",
@@ -962,7 +967,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-07T02:57:46Z",
+			"lastSuccessAt": "2026-09-07T03:23:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1027,12 +1032,12 @@
 			"file": "workflow-health.yml",
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
-			"state": "standing-signal",
+			"state": "ok",
 			"lastSuccessAt": "2026-09-05T23:24:55Z",
 			"ageDays": 1,
 			"graceDays": 21,
-			"runs": 35,
-			"why": "8 run(s) red at its declared signal step since its last green 1d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Report\")"
+			"runs": 36,
+			"why": "last green 1d ago"
 		}
 	]
 }
