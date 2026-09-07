@@ -1,5 +1,11 @@
 name: Backfill knowledge notes
 
+# The backfill asserts its own end state (QUALITY.md §3): every registry key
+# must resolve to a row, and every write must read back. A non-zero exit here
+# is that assertion failing, which is the lane working — so the step is
+# declared as its signal rather than treated as a broken lane.
+# workflow-health: signal-steps: ^Backfill
+
 # Full-corpus triage tagging from STORED signals (zero GitHub API calls —
 # safe to run any time without touching the scan budget). Covers the
 # EC-taxonomy rows the project-scoped enrich loop never reaches. Dry-run

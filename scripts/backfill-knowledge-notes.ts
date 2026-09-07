@@ -128,7 +128,31 @@ async function main(): Promise<number> {
 	console.log(
 		`\nregistry keys: ${Object.keys(REPO_KNOWLEDGE_NOTES).length} · ${EXECUTE ? "stamped" : "would stamp"}: ${stamped || "(dry)"} · unchanged: ${same} · missing rows: ${missing} · mismatches: ${mismatches}`,
 	);
-	return mismatches > 0 ? 1 : 0;
+	// END-STATE ASSERTION (QUALITY.md §3, added 2026-09-07). A run that stamped
+	// nothing looks exactly like a run with nothing to stamp, and on 2026-09-07
+	// that is precisely what happened: ten registry keys written in GitHub's own
+	// casing resolved to no row, the run reported "missing rows: 10 · unchanged:
+	// 594" and exited 0, and the board went on listing those repos as un-noted
+	// for as long as it had been true.
+	//
+	// So the lane now makes a claim about the world after it ran: every registry
+	// key resolves to a row. A key that does not is a defect in the registry or
+	// in the lookup — never a line of output nobody reads.
+	if (missing > 0) {
+		console.error(
+			`\n${missing} registry key(s) resolved to NO ROW — the notes they carry reach nothing. A key in GitHub's own casing used to fail here silently; check the key against the row's fullName.`,
+		);
+	}
+	if (mismatches > 0) {
+		console.error(
+			`\n${mismatches} row(s) did not read back with the notes just written.`,
+		);
+	}
+	if (missing === 0 && mismatches === 0 && EXECUTE)
+		console.log(
+			`end state: every one of the ${Object.keys(REPO_KNOWLEDGE_NOTES).length} registry keys resolves to a row, and every write read back.`,
+		);
+	return mismatches > 0 || missing > 0 ? 1 : 0;
 }
 
 main()
