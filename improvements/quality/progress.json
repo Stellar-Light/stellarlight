@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T22:13:10.955Z",
+ "generatedAt": "2026-09-07T22:28:33.918Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -52,6 +52,35 @@
    "remaining": "knowledge notes cover **222 of the 382-row curated pool** (2026-09-07); the three still listed carry INTERNAL triage notes, which is the metric's own correct state for a repo examined and found to state no durable public fact. 12,851 indexed repos carry no note — the long tail is by design, the curated pool is the floor that rises. **Two gaps closed by measurement rather than by building, 2026-09-07.** 85 of 100 contracts serve no project join — every one of them from a repo that genuinely has no project link, so the join is honest and absent, not missing. And 142 of 171 builders show projectCount: 0 while the code-derived join under onStellar.builds is correct and populated; the api-reference already routes consumers there. A repo-misattribution detector was built the same day and **thrown away**: it flagged 1,789 of 2,361 rows, nearly all correctly attributed, and a guard that cries wolf on three quarters of its population is worse than none. Still open: contracts as first-class joined entities only where the P3 lane reached (11 of the 308 expected-tier repos). Supersession is curated (62 entries): a repo archived after its note was written is not covered until the note is, which the note-freshness lane does not yet detect. Supersession now resolves on EVERY read path — it was served by repo-search and withheld by the collection until 2026-09-07, so the same repo answered two different truths depending on the URL."
   }
  ],
+ "phaseMeters": {
+  "P3": {
+   "bar": "every lane that writes to production has earned the intervention-free threshold",
+   "origin": 0,
+   "current": 8,
+   "target": 64,
+   "unit": "lanes",
+   "pct": 0.125,
+   "note": "Weeks measure the absence of correction, not effect — the second condition (a lane asserts its own end state) is not yet counted here because most lanes do not report one."
+  },
+  "P4": {
+   "bar": "weak bases under 50% of Live rows",
+   "origin": 86,
+   "current": 55.8,
+   "target": 50,
+   "unit": "% of Live rows on a weak basis",
+   "pct": 0.8397435897435896,
+   "note": "Origin is the share when the phase opened (842/979). The ratchet may only fall."
+  },
+  "P5": {
+   "bar": "the curated-pool note floor, examined or noted",
+   "origin": 0,
+   "current": 376,
+   "target": 382,
+   "unit": "curated-pool repos",
+   "pct": 0.9842931937172775,
+   "note": "Counts a repo examined and recorded as yielding no durable public fact — a judged repo is not a gap."
+  }
+ },
  "library": {
   "lessons": [
    {
