@@ -991,10 +991,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-python": [
 		{
-			note: "PyPI dfns-sdk — 0.0.2 (2026-05-08; 4 releases since 2026-01-12; Repository → this repo), the Dfns Python SDK (GitHub release v0.0.2 the same day; 4 tags). Dfns' docs list Stellar among supported networks — 'Network-specific features, signature kinds, supported assets, and integration requirements for Stellar wallets on the DFNS platform' (docs.dfns.co/networks/stellar), with Stellar sign and broadcast API references. https://pypi.org/project/dfns-sdk/",
+			note: "PyPI dfns-sdk — 0.0.3 (2026-09-07; 5 releases since 2026-01-12; Repository → this repo), the Dfns Python SDK. Dfns' docs list Stellar among supported networks — 'Network-specific features, signature kinds, supported assets, and integration requirements for Stellar wallets on the DFNS platform' (docs.dfns.co/networks/stellar), with Stellar sign and broadcast API references. https://pypi.org/project/dfns-sdk/",
 			triggers: ["dfns python sdk", "dfns stellar wallets"],
 			source: "curated",
-			asOf: "2026-09-02",
+			asOf: "2026-09-07",
 		},
 	],
 	"blindpaylabs/blindpay-node": [
@@ -1332,10 +1332,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"noir-lang/noir": [
 		{
-			note: "npm @noir-lang/noir_js 1.0.0-beta.26 (2026-07-30; 655 versions since 2023-09-15; repository → this repo, directory tooling/noir_js; MIT OR Apache-2.0) and @noir-lang/noir_wasm 1.0.0-beta.26 (745 versions; compiler/wasm). Latest non-nightly GitHub release v1.0.0-beta.26 (2026-07-30); a nightly-YYYY-MM-DD release is cut daily (nightly-2026-09-01); Cargo workspace version 1.0.0-beta.26. https://www.npmjs.com/package/@noir-lang/noir_js",
+			note: "npm @noir-lang/noir_js 1.0.0-rc.0 (2026-09-07; 659 versions since 2023-09-15; repository → this repo, directory tooling/noir_js; MIT OR Apache-2.0) and @noir-lang/noir_wasm 1.0.0-rc.0 (749 versions; compiler/wasm) — the line moved from beta to its first release candidate. Latest non-nightly GitHub release v1.0.0-beta.26 (2026-07-30); a nightly-YYYY-MM-DD release is cut daily (nightly-2026-09-01); Cargo workspace version 1.0.0-beta.26. https://www.npmjs.com/package/@noir-lang/noir_js",
 			triggers: ["noir latest version", "noir js npm"],
 			source: "curated",
-			asOf: "2026-09-02",
+			asOf: "2026-09-07",
 		},
 		{
 			note: "55 published GitHub security advisories (unique GHSA ids across the six advisory pages, read 2026-09-02); newest GHSA-v2q4-prvf-7h73 'Incorrect conditional mutable reference assignment in Brillig' (Moderate, 2026-06-09); a batch of eight on 2026-05-19 incl. High GHSA-j4p3-qjx6-rmvx 'Load Store Forwarding incorrectly eliminates stores'. https://github.com/noir-lang/noir/security/advisories",
@@ -2678,10 +2678,10 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rahul-soshte/rs-soroban-client": [
 		{
-			note: 'Community (non-SDF) Rust client for Stellar RPC: crates.io soroban-client — 0.5.9 (2026-08-26; 46 versions since 0.1.0 on 2023-06-25; ~68.6k downloads; crate repository points here; Apache-2.0). README dependency line: soroban-client = "0.5.9". Not the same as SDF\'s stellar-rpc-client crate. https://crates.io/crates/soroban-client',
+			note: 'Community (non-SDF) Rust client for Stellar RPC: crates.io soroban-client — 0.6.0 (2026-09-05; 47 versions since 0.1.0 on 2023-06-25; crate repository points here; Apache-2.0). The README dependency line still reads soroban-client = "0.5.9", one minor behind what the crate publishes. Not the same as SDF\'s stellar-rpc-client crate. https://crates.io/crates/soroban-client',
 			triggers: ["soroban client crate", "soroban client rust"],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-07",
 		},
 	],
 	"ericmt-98/micopay-mvp": [
@@ -2700,9 +2700,9 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"horizontalsystems/stellar-web-sdk": [
 		{
-			note: "npm stellar-web-sdk — 0.1.2 (2026-08-12; 3 versions, all 2026-08-12; repository points here; MIT). README install: `npm install stellar-web-sdk @stellar/stellar-sdk` (peer dependency on @stellar/stellar-sdk). No GitHub releases or tags. https://www.npmjs.com/package/stellar-web-sdk",
+			note: "npm stellar-web-sdk — 0.2.0 (2026-09-07; 4 versions, the first three all 2026-08-12; repository points here; MIT). README install: `npm install stellar-web-sdk @stellar/stellar-sdk` (peer dependency on @stellar/stellar-sdk). No GitHub releases or tags. https://www.npmjs.com/package/stellar-web-sdk",
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-09-07",
 		},
 	],
 	"horizontalsystems/stellar-kit-android": [
