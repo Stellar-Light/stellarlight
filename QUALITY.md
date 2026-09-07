@@ -111,6 +111,18 @@ weeks** (human reviewed, changed nothing), then the gate opens.
 - **Stage 4 (steady state):** human gates only: contract version
   changes, outward-facing posts, spend, and anything §0-class-new.
 
+**A second condition, added 2026-09-07: the lane must assert its own end
+state.** Weeks measure the absence of correction; they do not measure effect.
+A day of running the guards wide produced five distinct ways for a lane to
+report success while moving nothing, moving the wrong thing, or being silently
+undone hours later (lessons 33–37) — so quiet weeks can accumulate on a lane
+that is not working. Before a lane advances past Stage 1 it must make a claim
+about the world after it ran, checked by itself: a post-execute re-plan that
+must come back zero, a read-back of what it wrote, a count of what it skipped,
+or an explicit could-not-look exit code. `curate-projects` and `enrich-scf`
+have this (their Idempotence step caught three real defects on 2026-09-07);
+most write lanes do not, and that is the actual distance to Stage 2.
+
 **How a week is counted.** A week counts for a lane only when that lane
 executed ITSELF and nothing it wrote was corrected, and the weeks must be
 CONSECUTIVE ISO weeks running up to the current one — four scattered good weeks
@@ -811,6 +823,75 @@ would have merged past.
 API — `getStatus` through Raven returned tonight's `projects.lastUpdatedAt`, so
 the routing misses classed as "catalog-lag" are about its manifest, not stale
 data. Routing holds at **48/65 (74%)**, and the golden set at **51/51**.
+
+## Lessons — 2026-09-07 (five shapes, and what they cost autonomy)
+
+A long day of running the guards wide produced ~20 defects. They are not
+twenty problems; they are five shapes, each recurring across unrelated
+subsystems. Naming the shape is worth more than the twenty fixes.
+
+33. **"X is not moving the data" — five costumes in one day.** Editing the
+    curation map is not moving the data (needs an execute). Arming a cron is
+    not moving the data. **Fixing a scoring formula is not moving the data** —
+    `repoScore` is computed at write time by whichever lane owns a row, and the
+    hackathon rows are graded once at ingest and never again, so the ranking
+    fix reached nothing until `regrade-repos` recomputed 9,056 rows. **Writing
+    a knowledge note is not moving the data** — the backfill lane writes it,
+    and a mixed-case key silently stamped nothing. **Writing the plan is not
+    moving the data** — the board reads a generated artifact, so measured phase
+    text sat unpublished until it was rebuilt. Ask, every time: what reads this,
+    and when does it next run?
+34. **An instrument that cannot fail is not a check.** `check-raven-drift`
+    printed "ok" while skipping its entire catalog half for want of a
+    credential. Two guards exited 1 — the code meaning "the data is wrong" —
+    when the database refused the connection, and no `.catch` could see it
+    because Payload's mongo adapter calls `process.exit(1)` itself. The health
+    guard counted its OWN red streak, reported itself, exited 1 again, and
+    could never reach the green run that would clear it. Each looked healthy or
+    looked broken for reasons that had nothing to do with the data.
+35. **One field, two writers, three different collisions.** Two lanes on
+    different schedules (the feed sync restored 81 dead links the same day
+    curate removed them, because ownership is granted map-by-map by hand). Two
+    maps naming the same value (a status source set and retracted every run).
+    Two sections in ONE run, each spreading a stale copy of the same group, so
+    the second resurrected what the first cleared. The post-execute idempotence
+    gate catches the third and is blind to the first — cross-lane stability
+    needs the ownership declaration, which is now enforced by a test rather
+    than remembered.
+36. **A name is a hypothesis; a link is evidence.** 26 of 31 package matches
+    were collisions until the package had to point back at the row's own repo.
+    6 of 7 fuzzy repo successors were rejected once corroboration was required.
+    A project's site linking `Soneso/as-soroban-sdk` names a **dependency**,
+    not its own repo. The gate is always the same: something outside the name
+    must tie the two together.
+37. **A model that conflates two opposite meanings will report the wrong one.**
+    `broken-link` covered both "our citation is wrong" and "the product died,
+    exactly as we already recorded" — the same finding, the same resolution,
+    indistinguishable. A hackathon judge score meant "good submission" and was
+    read as "canonical reference", putting twelve student projects above every
+    SDK. 4,314 stars earned in another ecosystem counted as Stellar authority.
+    Split the meanings and the numbers start answering the question asked.
+
+**What this costs autonomy, and the adaptation.** The ladder's gate is N
+intervention-free weeks per lane. Every shape above is a way for a lane to
+report success while moving nothing, moving the wrong thing, or being silently
+undone hours later — so clean weeks can accumulate on a lane that is not
+working. Weeks measure *absence of correction*; they do not measure *effect*.
+
+So the promotion bar gains a second condition, and it is one a lane can prove
+about itself:
+
+> **A lane may not advance past Stage 1 until it asserts its own end state.**
+> Not "the run exited 0", but a claim about the world after it ran, checked by
+> the lane itself: a post-execute re-plan that must come back zero, a read-back
+> of what was written, a count of what it skipped, or an explicit
+> could-not-look exit. A lane that cannot say what changed cannot be trusted to
+> run unattended, however many quiet weeks it has.
+
+`curate-projects` and `enrich-scf` already do this (the Idempotence step, which
+caught three real defects today). `regrade-repos` prints its largest moves
+before writing. The rest of the write lanes do not, and that — not elapsed
+time — is what stands between here and Stage 2.
 
 ## Lessons — 2026-09-06 (the instrument speaks first)
 
