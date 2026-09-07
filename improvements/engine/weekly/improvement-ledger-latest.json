@@ -1,20 +1,20 @@
 {
-	"generatedAt": "2026-09-06T23:49:08.841Z",
+	"generatedAt": "2026-09-07T03:56:14.133Z",
 	"total": 650,
 	"open": 2,
-	"refreshQueue": 107,
+	"refreshQueue": 63,
 	"blockedUpstream": 16,
 	"blockedBy": {
 		"raven-scorer": 7,
 		"raven-catalog-lag": 9
 	},
-	"closed": 525,
+	"closed": 569,
 	"verified": 7,
-	"cleared": 518,
+	"cleared": 562,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 302,
+	"clearedOnSilence": 346,
 	"closingRate": 0.34,
-	"silenceShare": 0.46,
+	"silenceShare": 0.53,
 	"recurrence": {
 		"reopened": 5,
 		"reopenedShareOfClosures": 0.01,
