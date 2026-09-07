@@ -125,6 +125,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	for (const p of projects.docs as Array<{
 		slug: string;
 		name: string;
+		status?: string;
 		links?: {
 			website?: string;
 			github?: string;
@@ -136,6 +137,14 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			collection: "projects",
 			recordSlug: p.slug,
 			recordName: p.name,
+			// A broken link means two different things and they were counted as
+			// one. On a LIVE row it is a defect: either our citation is wrong, or
+			// the product died and we have not noticed — both need a human. On a
+			// row we already call Inactive or Draft it is CORROBORATION: the site
+			// is gone because the project is, which is what the row already says.
+			// apay.io is the example — 404, and the row has read "Product dead
+			// (human-confirmed 2026-07-11)" since July.
+			recordStatus: p.status ?? null,
 		};
 		add(p.links?.website, { ...ctx, field: "links.website" });
 		add(p.links?.github, { ...ctx, field: "links.github" });
@@ -642,6 +651,35 @@ async function main() {
 	// project rows, 26 on Live ones — were detected daily and never queued for
 	// anyone. Only `error` is written: a blocked probe proves nothing, and the
 	// escalation for those is the streak below, not this file.
+	// A citation is "only on retired rows" when EVERY record that cites it is
+	// already Inactive or Draft. One live citer is enough to make it a defect —
+	// a shared URL is not excused by the dead rows that also point at it.
+	const RETIRED = new Set(["Inactive", "Draft"]);
+	const brokenRows = results
+		.filter((r) => r.status === "error")
+		.map((r) => {
+			const citers = r.targets.filter((t) => t.collection === "projects");
+			return {
+				onlyOnRetired:
+					citers.length > 0 &&
+					citers.every((t) =>
+						RETIRED.has(String((t as { recordStatus?: string }).recordStatus)),
+					),
+				row: {
+					url: r.url,
+					httpStatus: r.statusCode ?? null,
+					reason: r.errorReason ?? null,
+					targets: r.targets.map(
+						(t) => `${t.collection}/${t.recordSlug}.${t.field}`,
+					),
+					citedByStatus: r.targets.map(
+						(t) =>
+							`${t.recordSlug}: ${(t as { recordStatus?: string }).recordStatus ?? "n/a"}`,
+					),
+				},
+			};
+		});
+
 	{
 		const dir = join(ROOT, "improvements/audits");
 		mkdirSync(dir, { recursive: true });
@@ -660,24 +698,24 @@ async function main() {
 					source: "scripts/check-links.ts",
 					rule: "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
 					checked: results.length,
-					broken: results
-						.filter((r) => r.status === "error")
-						.map((r) => ({
-							url: r.url,
-							httpStatus: r.statusCode ?? null,
-							reason: r.errorReason ?? null,
-							targets: r.targets.map(
-								(t) => `${t.collection}/${t.recordSlug}.${t.field}`,
-							),
-						}))
+					brokenSplit:
+						"broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
+					broken: brokenRows
+						.filter((r) => !r.onlyOnRetired)
+						.map((r) => r.row)
+						.sort((a, b) => a.url.localeCompare(b.url)),
+					brokenOnRetired: brokenRows
+						.filter((r) => r.onlyOnRetired)
+						.map((r) => r.row)
 						.sort((a, b) => a.url.localeCompare(b.url)),
 				},
 				null,
 				1,
 			)}\n`,
 		);
+		const onRetired = brokenRows.filter((r) => r.onlyOnRetired).length;
 		console.log(
-			`Wrote improvements/audits/link-health-latest.json (${error} proven broken).\n`,
+			`Wrote improvements/audits/link-health-latest.json (${error} proven broken: ${error - onRetired} need a human, ${onRetired} only cited by rows already retired).\n`,
 		);
 	}
 
