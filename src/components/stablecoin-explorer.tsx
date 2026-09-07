@@ -1750,7 +1750,12 @@ export function StablecoinExplorer({
 																			</div>
 																			<div className="text-base sm:text-xl font-semibold tabular-nums truncate">
 																				{displaySupply(pooled)}
-																				<span className="ml-1 text-xs sm:text-sm font-normal text-muted-foreground">
+																				{/* 74px of column at 375px: the value alone
+																				    needs 55, the ticker pushes it to 88 and
+																				    truncates mid-word. The sheet header already
+																				    names the asset, so the suffix earns its
+																				    place only once there is room. */}
+																				<span className="ml-1 hidden sm:inline text-sm font-normal text-muted-foreground">
 																					{selectedCoin.ticker}
 																				</span>
 																			</div>
@@ -1763,40 +1768,40 @@ export function StablecoinExplorer({
 																				href={r.url}
 																				target="_blank"
 																				rel="noopener noreferrer"
-																				className="flex items-center justify-between gap-3 text-sm rounded-md px-2 py-2 -mx-2 hover:bg-white/[0.04] transition-colors"
+																				className="block text-sm rounded-md px-2 py-2 -mx-2 hover:bg-white/[0.04] transition-colors"
 																			>
-																				{/* The meta line ("62 pools · top 8
-																				    measured · largest USDC/PYUSD") sat
-																				    beside the venue name on one flex row,
-																				    so on a phone it wrapped to four lines
-																				    and crushed the value column. Name and
-																				    meta now stack, and the meta truncates
-																				    to a single line. */}
-																				<div className="flex items-center gap-2.5 min-w-0 flex-1">
-																					<VenueLogo name={r.name} />
-																					<div className="min-w-0">
-																						<div className="font-medium truncate">
+																				{/* The meta ("64 pools · top 8 measured ·
+																				    largest USDC/PYUSD") used to share a flex
+																				    row with the name and the values, which
+																				    left it 142px of a 261px row — even "1 pool
+																				    · largest USDC/XLM" was clipped. Name and
+																				    values keep the top line; the meta gets the
+																				    whole width underneath. */}
+																				<div className="flex items-center justify-between gap-3">
+																					<div className="flex items-center gap-2.5 min-w-0">
+																						<VenueLogo name={r.name} />
+																						<span className="font-medium truncate">
 																							{r.name}
+																						</span>
+																					</div>
+																					<div className="text-right tabular-nums flex-shrink-0">
+																						<div>
+																							{displaySupply(r.assetPooled)}
 																						</div>
-																						<div className="text-xs text-muted-foreground truncate">
-																							{r.poolCount} pool
-																							{r.poolCount === 1 ? "" : "s"}
-																							{r.measuredPools < r.poolCount
-																								? ` · top ${r.measuredPools} measured`
-																								: ""}
-																							{r.largest
-																								? ` · largest ${selectedCoin.ticker}/${r.largest.counter}`
-																								: ""}
+																						<div className="text-xs text-muted-foreground">
+																							{displayUSD(r.assetPooledUSD)}
 																						</div>
 																					</div>
 																				</div>
-																				<div className="text-right tabular-nums flex-shrink-0">
-																					<div>
-																						{displaySupply(r.assetPooled)}
-																					</div>
-																					<div className="text-xs text-muted-foreground">
-																						{displayUSD(r.assetPooledUSD)}
-																					</div>
+																				<div className="text-xs text-muted-foreground truncate mt-1">
+																					{r.poolCount} pool
+																					{r.poolCount === 1 ? "" : "s"}
+																					{r.measuredPools < r.poolCount
+																						? ` · top ${r.measuredPools} measured`
+																						: ""}
+																					{r.largest
+																						? ` · largest ${selectedCoin.ticker}/${r.largest.counter}`
+																						: ""}
 																				</div>
 																			</a>
 																		))}
