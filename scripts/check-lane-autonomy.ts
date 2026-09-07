@@ -179,6 +179,9 @@ export type LaneRun = {
 	event: string;
 	actorIsBot?: boolean;
 	executeStepConclusion: string | null;
+	/** The commit this run used. The workflow file AT THIS SHA is the honest
+	 *  record of what the run's steps actually ran — today's copy is not. */
+	headSha?: string;
 };
 
 /** A run the lane started by itself. A `schedule` run always is; a dispatch is
@@ -229,8 +232,13 @@ export function interventionFreeWeeks(
 		interventions.map((i) => isoWeek(`${i.date}T12:00:00Z`)),
 	);
 
+	// Count from the last COMPLETE ISO week backwards. The current week is
+	// partial by definition, so requiring it made every lane read 0 whenever
+	// the week was young — at 04:22 on Monday 2026-09-07 all 63 lanes did. A
+	// lane that stops running still stops earning; it just shows up when the
+	// week it skipped completes.
 	let weeks = 0;
-	for (let back = 0; back < maxWeeks; back++) {
+	for (let back = 1; back <= maxWeeks; back++) {
 		const w = isoWeek(new Date(nowMs - back * 7 * 86_400_000).toISOString());
 		if (dirty.has(w) || !earned.has(w)) break;
 		weeks++;
@@ -254,16 +262,74 @@ const BOILERPLATE = /^(Run |Post Run |Set up job$|Complete job$)/;
  *   the backfill-knowledge-notes nightly).
  * null — an author-named step RAN, hiding its command. Unclassifiable.
  */
-async function classifyRun(runId: number): Promise<string | null> {
+/** Step names that carry a write flag in the workflow file AT ONE COMMIT.
+ *  Keyed `${file}@${sha}` — the file as it was for that run, never as it is
+ *  today, which is the distinction the whole prover rests on. */
+const writeStepsAtSha = new Map<string, Set<string> | null>();
+async function writeStepNames(
+	file: string,
+	sha: string,
+): Promise<Set<string> | null> {
+	const key = `${file}@${sha}`;
+	const hit = writeStepsAtSha.get(key);
+	if (hit !== undefined) return hit;
+	let names: Set<string> | null = null;
+	try {
+		const res = await gh(
+			`/repos/${REPO}/contents/.github/workflows/${file}?ref=${sha}`,
+		);
+		const body =
+			typeof res?.content === "string"
+				? Buffer.from(res.content, "base64").toString("utf8")
+				: null;
+		if (body) {
+			// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
+			const doc: any = yaml.load(body) ?? {};
+			const set = new Set<string>();
+			// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
+			for (const job of Object.values(doc.jobs ?? {}) as any[])
+				// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
+				for (const st of (job?.steps ?? []) as any[])
+					if (st?.name && WRITE_FLAG.test(String(st.run ?? "")))
+						set.add(String(st.name));
+			names = set;
+		}
+	} catch {
+		names = null; // could not read that commit: stay honest, stay opaque
+	}
+	writeStepsAtSha.set(key, names);
+	return names;
+}
+
+/**
+ * Did THIS run write? Asked of the run, never of today's YAML.
+ *
+ * Step NAMES come from the jobs API; the command behind a named step comes
+ * from the workflow file AT THE RUN'S OWN COMMIT. Without that second half
+ * every author-named write step was unclassifiable — "Backlog wave
+ * (schedule)" running `--execute` read as opaque — so on 2026-09-07 all 63
+ * lanes reported 0 intervention-free weeks and P3 could not be measured at
+ * all. This is the upgrade path the limitation note has described since the
+ * script was written.
+ */
+async function classifyRun(
+	runId: number,
+	file?: string,
+	sha?: string,
+): Promise<string | null> {
 	const jobs = await gh(`/repos/${REPO}/actions/runs/${runId}/jobs`);
+	const named = file && sha ? await writeStepNames(file, sha) : null;
 	let opaque = false;
 	for (const j of jobs?.jobs ?? [])
 		for (const st of j.steps ?? []) {
 			const name = String(st.name ?? "");
-			if (STEP_WROTE.test(name) && st.conclusion === "success")
-				return "success";
+			const isWrite = STEP_WROTE.test(name) || (named?.has(name) ?? false);
+			if (isWrite && st.conclusion === "success") return "success";
 			// A named step that did not run cannot have written, whatever it hides.
-			if (!BOILERPLATE.test(name) && st.conclusion !== "skipped") opaque = true;
+			if (st.conclusion === "skipped" || BOILERPLATE.test(name)) continue;
+			// Resolved from the run's own file: not a write step, so not opaque.
+			if (named && !named.has(name)) continue;
+			opaque = true;
 		}
 	return opaque ? null : "skipped";
 }
@@ -316,10 +382,27 @@ function derivedRoster(): { workflow: string; cadence: string }[] {
 /** Verdicts already paid for, keyed by run id, carried in the artifact. A run
  * is immutable once completed, so this never expires — it is pruned to the
  * window each sweep so it cannot grow without bound. */
+/** Bump when the classifier's RULES change: a cached verdict was produced by
+ *  the old rules and replaying it hides the fix. Raising this from 1 to 2 on
+ *  2026-09-07 is what let the sha-resolved prover be seen at all — 49 runs
+ *  were cached `null` by the name-only classifier and every one of them was
+ *  replayed as unprovable. */
+const CLASSIFIER_VERSION = 2;
+
 function priorCache(): Record<string, string | null> {
 	if (!existsSync(OUT)) return {};
 	try {
-		return JSON.parse(readFileSync(OUT, "utf8")).runCache ?? {};
+		const prev = JSON.parse(readFileSync(OUT, "utf8"));
+		if ((prev.classifierVersion ?? 1) !== CLASSIFIER_VERSION) return {};
+		// A cached `null` is not a fact about a finished run, it is a record of
+		// our own failure to read one. `success` and `skipped` are permanent;
+		// "could not tell" must be re-asked, or the instrument freezes its own
+		// ignorance in place.
+		return Object.fromEntries(
+			Object.entries(
+				(prev.runCache ?? {}) as Record<string, string | null>,
+			).filter(([, v]) => v !== null),
+		);
 	} catch {
 		return {};
 	}
@@ -429,6 +512,7 @@ async function main() {
 				at: r.created_at,
 				event: String(r.event),
 				actorIsBot: r.actor?.type === "Bot",
+				headSha: r.head_sha ? String(r.head_sha) : undefined,
 				executeStepConclusion: null as string | null,
 				id: r.id as number,
 			}));
@@ -447,7 +531,15 @@ async function main() {
 			}
 		let undercounts = truncated;
 		try {
-			for (let back = 0; back < WINDOW_WEEKS; back++) {
+			// Start at the last COMPLETE ISO week, not the current one. The
+			// current week is partial by definition, so requiring proof inside it
+			// made every lane read 0 for as long as the week was young: at 04:22
+			// on Monday 2026-09-07 all 63 lanes reported zero intervention-free
+			// weeks and the P3 number was a sawtooth that reset every Monday. A
+			// lane that stops running still stops earning — it just shows up when
+			// the week it skipped completes, which is one week of lag rather than
+			// a number nobody can use.
+			for (let back = 1; back <= WINDOW_WEEKS; back++) {
 				const week = isoWeek(
 					new Date(now - back * 7 * 86_400_000).toISOString(),
 				);
@@ -463,7 +555,7 @@ async function main() {
 					const key = String(r.id);
 					let verdict = key in cache ? cache[key] : undefined;
 					if (verdict === undefined) {
-						verdict = await classifyRun(r.id);
+						verdict = await classifyRun(r.id, workflow, r.headSha);
 						calls++;
 					}
 					seen[key] = verdict ?? null;
@@ -549,7 +641,7 @@ async function main() {
 		thresholdWeeks: THRESHOLD_WEEKS,
 		rule: RULE,
 		limitation:
-			"Every counted execute is proven from the run's OWN job steps, never from today's copy of the workflow file. GitHub's jobs API exposes step names, not commands: an unnamed `- run:` step carries the resolved flag, and a named step that was SKIPPED is still proof of a no-op, but a named step that RAN hides what it ran. A lane with such a run — or one that hit the per-lane classify budget — is marked executesAreLowerBound: its numbers are floors. Attended (human-dispatched) runs are reported and never classified, because they cannot earn a week; unattendedRuns/attendedRuns are counts of RUNS, not of writes, because the counter stops paying for job-step reads as soon as a week is proven. The current ISO week is partial by definition, so a weekly-cron lane reads zero until its run for this week lands. The upgrade path for the opaque runs, if the floors ever matter enough to pay for it, is to read each run's workflow file AT ITS OWN head_sha and match the step name there — the file as it was for that run, which is honest, unlike the file as it is today.",
+			"Weeks are counted from the last COMPLETE ISO week backwards; the current week is partial by definition and is never required, so a lane that stops running shows up when its skipped week completes. Every counted execute is proven from the run's OWN job steps plus the workflow file AT THAT RUN'S COMMIT (never today's copy): the jobs API exposes step names, not commands, so a named write step is resolved against the YAML as it was for that run. GitHub's jobs API exposes step names, not commands: an unnamed `- run:` step carries the resolved flag, and a named step that was SKIPPED is still proof of a no-op, but a named step that RAN hides what it ran. A lane with such a run — or one that hit the per-lane classify budget — is marked executesAreLowerBound: its numbers are floors. Attended (human-dispatched) runs are reported and never classified, because they cannot earn a week; unattendedRuns/attendedRuns are counts of RUNS, not of writes, because the counter stops paying for job-step reads as soon as a week is proven. The current ISO week is partial by definition, so a weekly-cron lane reads zero until its run for this week lands. The upgrade path for the opaque runs, if the floors ever matter enough to pay for it, is to read each run's workflow file AT ITS OWN head_sha and match the step name there — the file as it was for that run, which is honest, unlike the file as it is today.",
 		summary: {
 			lanes: rows.length,
 			ok: rows.length - couldNotCheck.length,
@@ -558,8 +650,11 @@ async function main() {
 			jobsApiCalls: calls,
 		},
 		lanes: rows,
+		classifierVersion: CLASSIFIER_VERSION,
 		runCache: Object.fromEntries(
-			Object.entries({ ...cache, ...seen }).filter(([id]) => inWindow.has(id)),
+			Object.entries({ ...cache, ...seen }).filter(
+				([id, v]) => inWindow.has(id) && v !== null,
+			),
 		),
 	};
 
