@@ -1,11 +1,11 @@
 {
-	"generatedAt": "2026-09-07T22:16:07.535Z",
+	"generatedAt": "2026-09-07T23:51:18.072Z",
 	"source": "scripts/check-repo-ranking.ts",
 	"rule": "Written ordering claims about repoScore, graded against the live index. An inversion is a finding for a human; a missing repo is never a pass.",
 	"tally": {
-		"pairs": 6,
-		"holds": 6,
-		"inverted": 0,
+		"pairs": 11,
+		"holds": 8,
+		"inverted": 3,
 		"couldNotCheck": 0
 	},
 	"rows": [
@@ -13,48 +13,88 @@
 			"higher": "stellar/js-stellar-sdk",
 			"lower": "Andy00L/x402-autopilot",
 			"why": "The SDK a stranger should be handed, versus a hackathon submission. This pair inverted on 2026-09-07 (76 vs 85) and is the reason the key exists.",
-			"higherScore": 91,
-			"lowerScore": 68,
+			"higherScore": 93,
+			"lowerScore": 64,
 			"verdict": "holds"
 		},
 		{
 			"higher": "stellar/stellar-core",
 			"lower": "402md/agentcard",
 			"why": "The network's reference implementation must outrank a judged hackathon entry with no project link.",
-			"higherScore": 73,
-			"lowerScore": 68,
+			"higherScore": 96,
+			"lowerScore": 64,
 			"verdict": "holds"
 		},
 		{
 			"higher": "blend-capital/blend-contracts",
 			"lower": "iancoleman/bip39",
 			"why": "A live lending protocol on Stellar (21 stars) over a generic mnemonic tool with 4,314 stars and no Stellar code. Popularity elsewhere is not authority here.",
-			"higherScore": 58,
-			"lowerScore": 21,
+			"higherScore": 53,
+			"lowerScore": 15,
 			"verdict": "holds"
 		},
 		{
 			"higher": "stellar/rs-soroban-sdk",
 			"lower": "OneKeyHQ/app-monorepo",
 			"why": "The Soroban Rust SDK over a multi-chain wallet monorepo the scanner found no Stellar code in.",
-			"higherScore": 79,
-			"lowerScore": 40,
+			"higherScore": 85,
+			"lowerScore": 34,
 			"verdict": "holds"
 		},
 		{
 			"higher": "stellar/js-stellar-sdk",
 			"lower": "keybase/client",
 			"why": "9,248 stars earned in a different ecosystem do not make a better Stellar reference.",
-			"higherScore": 91,
-			"lowerScore": 60,
+			"higherScore": 93,
+			"lowerScore": 68,
 			"verdict": "holds"
 		},
 		{
 			"higher": "soroswap/core",
 			"lower": "ashfrancis/chickenz",
 			"why": "A deployed AMM over a hackathon game, both Soroban, one with a product behind it.",
-			"higherScore": 69,
-			"lowerScore": 68,
+			"higherScore": 53,
+			"lowerScore": 65,
+			"verdict": "INVERTED"
+		},
+		{
+			"higher": "fazzatti/colibri",
+			"lower": "Andy00L/x402-autopilot",
+			"why": "An unfunded, unstarred TypeScript toolkit — 95 commits in 90 days, a release the same day, tests, CI, a supported SDK pin and six knowledge notes — over a judged hackathon submission. Nobody funded colibri and it has 3 stars, which is exactly why it scored 35 while the hackathon entry scored 68. An award is a past funding decision, not evidence the code works.",
+			"higherScore": 62,
+			"lowerScore": 64,
+			"verdict": "INVERTED"
+		},
+		{
+			"higher": "stellar/js-xdr",
+			"lower": "ashfrancis/chickenz",
+			"why": "The XDR codec every Stellar SDK is built on, published by SDF, over a hackathon game. SDF never receives an SCF award — it awards them — so all 212 first-party repos scored as though nothing vouched for them. js-xdr also imports no soroban-sdk (a codec does not), so the relevance filter cut its evidence to a quarter. It scored 31.",
+			"higherScore": 66,
+			"lowerScore": 65,
+			"verdict": "holds"
+		},
+		{
+			"higher": "stellar/stellar-docs",
+			"lower": "402md/agentcard",
+			"why": "The official Stellar documentation over a judged hackathon entry. Tests the same first-party blindness on a repo with no Soroban code at all.",
+			"higherScore": 63,
+			"lowerScore": 64,
+			"verdict": "INVERTED"
+		},
+		{
+			"higher": "smartcontractkit/chainlink-stellar",
+			"lower": "iancoleman/bip39",
+			"why": "Chainlink's official Stellar integration — 167 commits in 90 days, tests, CI, releases, 48 contract methods, 0 stars because the repo is new under a large org — over a generic mnemonic tool with 4,314 stars and no Stellar code. Zero stars is not zero evidence when we have read the code.",
+			"higherScore": 64,
+			"lowerScore": 15,
+			"verdict": "holds"
+		},
+		{
+			"higher": "stellar/stellar-horizon",
+			"lower": "keoyle52/AgentMart",
+			"why": "The API server the whole ecosystem queries (9 stars) over a hackathon repo pinned to a deprecated Stellar SDK. A dead SDK pin is an affirmative finding about a reference's quality, not a missing datum.",
+			"higherScore": 79,
+			"lowerScore": 30,
 			"verdict": "holds"
 		}
 	]
