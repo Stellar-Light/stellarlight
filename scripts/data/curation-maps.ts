@@ -76,6 +76,17 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://ramm.ai/",
 		note: "owner-directed removal 2026-09-06: not a Stellar project. SCF #22 awarded $38,500 and the repo holds Futurenet-only Soroban contracts last touched 2024-04-16; ramm.ai now sells an unrelated AI marketspace (Popupz.ai, waitlist). Evidence kept on the row; the directory entry is withdrawn.",
 	},
+	// Found by the product-integration lane's own PARKED branch (2026-09-07):
+	// it probes for a Stellar integration and reports a domain that answers but
+	// is not a product. Verified in a browser before proposing.
+	triiyo: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "https://triiyo.com/",
+		note: "Weak-basis sweep 2026-09-07: triiyo.com redirects to HugeDomains — \"Triiyo.com … This domain is for sale: $10,795\", rendered read plus a receipt matching \"for sale\" in the served text. SCF #22, $50,303 — the award stands, the product does not.",
+	},
 	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
 	// their own surfaces after the first tranche. A default page TITLE is not a
 	// verdict — zilt's title is the unedited "Create Next App" while the page
