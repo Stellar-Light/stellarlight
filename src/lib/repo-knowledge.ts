@@ -3670,15 +3670,32 @@ export function findRepoByTrigger(q: string): string | null {
 	return hits.size === 1 ? [...hits][0] : null;
 }
 
+/**
+ * The curated notes for a repo, whatever case either side is written in.
+ *
+ * The registry was read as `REPO_KNOWLEDGE_NOTES[fullName.toLowerCase()]`,
+ * which finds an entry only when the KEY is lowercase. Ten entries are written
+ * in GitHub's own casing (Sorosan/sorosan-client, Epta-Node/ai-net, …) and
+ * were therefore never returned: the backfill built an empty note list,
+ * compared it to the row's empty list, called the row "unchanged", and the
+ * board went on listing those repos as un-noted. Indexed once, case-folded, so
+ * neither side's capitalisation can hide a fact again.
+ */
+const NOTES_BY_LOWER_KEY: Map<string, KnowledgeNote[]> = new Map(
+	Object.entries(REPO_KNOWLEDGE_NOTES).map(([k, v]) => [k.toLowerCase(), v]),
+);
+
+export function curatedNotesFor(fullName: string): KnowledgeNote[] | undefined {
+	return NOTES_BY_LOWER_KEY.get(fullName.toLowerCase());
+}
+
 export function buildKnowledgeNotes(
 	fullName: string,
 	projectSlug: string | null,
 	auditsByProject: Map<string, AuditRecord[]>,
 	signals?: RepoSignals,
 ): KnowledgeNote[] {
-	const notes: KnowledgeNote[] = [
-		...(REPO_KNOWLEDGE_NOTES[fullName.toLowerCase()] ?? []),
-	];
+	const notes: KnowledgeNote[] = [...(curatedNotesFor(fullName) ?? [])];
 	const audits = projectSlug ? (auditsByProject.get(projectSlug) ?? []) : [];
 	if (audits.length) {
 		const dated = audits
