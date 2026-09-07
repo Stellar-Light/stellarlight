@@ -1,0 +1,79 @@
+{
+	"generatedAt": "2026-09-07T16:48:52.848Z",
+	"source": "scripts/check-endpoint-agreement.ts",
+	"rule": "Resolution facts — is this alive, what replaced it — must be served on every agent-reachable path to an entity, not only the curated one.",
+	"tally": {
+		"checked": 6,
+		"agree": 0,
+		"missing": 6,
+		"couldNotCheck": 0
+	},
+	"rows": [
+		{
+			"repo": "paltalabs/defindex",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		},
+		{
+			"repo": "kalepail/stellar-raven",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		},
+		{
+			"repo": "stellar/js-stellar-sdk",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		},
+		{
+			"repo": "blend-capital/blend-contracts",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		},
+		{
+			"repo": "soroswap/core",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		},
+		{
+			"repo": "YaleOpenLab/opensolar",
+			"verdict": "missing",
+			"missing": [
+				{
+					"field": "activityState",
+					"servedBy": "search",
+					"why": "is this repo alive, archived or dormant"
+				}
+			]
+		}
+	]
+}

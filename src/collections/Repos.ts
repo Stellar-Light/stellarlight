@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { activityStateOf } from "../lib/repo-grade";
 import { repoSupersession } from "../lib/repo-relations";
 
 /**
@@ -61,6 +62,18 @@ export const Repos: CollectionConfig = {
 				if (doc?.fullName) {
 					const sup = repoSupersession(String(doc.fullName));
 					if (sup) Object.assign(doc, sup);
+				}
+				// activityState alongside it, for the same reason. The endpoint
+				// sweep (2026-09-07) found search serving a derived verdict —
+				// active / maintained / dormant / archived / unknown — that the
+				// collection omitted, so the two paths answered "is this alive?"
+				// differently. Derived here from fields the row already carries,
+				// never stored, so it cannot go stale.
+				if (doc && ("lastCommitAt" in doc || "isArchived" in doc)) {
+					doc.activityState = activityStateOf(
+						doc.lastCommitAt as string | null,
+						doc.isArchived as boolean | null,
+					);
 				}
 				return doc;
 			},
