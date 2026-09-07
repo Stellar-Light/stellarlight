@@ -80,6 +80,85 @@ function Stat({
 	);
 }
 
+/**
+ * One guard, as a scannable row rather than a sentence.
+ *
+ * Nineteen guards rendered as prose bullets ("Name · value · measured date")
+ * read as a wall: every line the same weight, nothing to scan down, and the
+ * figures unaligned so they cannot be compared. Here the state is a shape as
+ * well as a colour, the measure is right-aligned and tabular so the column can
+ * be read vertically, and freshness is its own muted column — the thing this
+ * page is actually about.
+ */
+function GuardLine({
+	title,
+	value,
+	state,
+	ageDays,
+	freshnessDays,
+	href,
+}: {
+	title: string;
+	value: string;
+	state: "holding" | "breached" | "stale";
+	ageDays?: number | null;
+	freshnessDays?: number | null;
+	href?: string;
+}) {
+	// Semantic, and separate from the brand accent: good / needs-attention /
+	// below-target. Never colour alone — the glyph differs too, so a
+	// colour-blind reader and a printed page both still resolve it.
+	const tone =
+		state === "holding"
+			? { dot: "bg-emerald-400/80", glyph: "✓", text: "text-emerald-400/90" }
+			: state === "stale"
+				? { dot: "bg-amber-400/80", glyph: "◷", text: "text-amber-400/90" }
+				: { dot: "bg-red-400/80", glyph: "!", text: "text-red-400/90" };
+	const overdue =
+		typeof ageDays === "number" &&
+		typeof freshnessDays === "number" &&
+		ageDays > freshnessDays;
+	const row = (
+		<div className="flex items-baseline gap-2.5 py-[3px] group">
+			<span
+				className={`shrink-0 w-1.5 h-1.5 rounded-full ${tone.dot} translate-y-[-1px]`}
+				aria-hidden
+			/>
+			<span className="text-xs text-foreground/90 truncate group-hover:text-foreground transition-colors">
+				{title}
+			</span>
+			<span className="flex-1 border-b border-dotted border-border/50 translate-y-[-2px]" />
+			<span className="text-xs text-foreground tabular-nums shrink-0">
+				{value}
+			</span>
+			{typeof ageDays === "number" && (
+				<span
+					className={`text-[11px] tabular-nums shrink-0 w-10 text-right ${
+						overdue ? "text-amber-400/90" : "text-muted-foreground/70"
+					}`}
+					title={
+						overdue
+							? `measured ${ageDays}d ago, past its ${freshnessDays}d window`
+							: `measured ${ageDays}d ago`
+					}
+				>
+					{ageDays}d
+				</span>
+			)}
+			<span className={`text-[11px] shrink-0 ${tone.text}`} aria-hidden>
+				{tone.glyph}
+			</span>
+		</div>
+	);
+	return href ? (
+		<a href={href} target="_blank" rel="noopener noreferrer" className="block">
+			{row}
+		</a>
+	) : (
+		row
+	);
+}
+
 /** bklit-style card with corner crosshair dots, same idiom as /analytics. */
 function Card({
 	title,
@@ -205,95 +284,106 @@ export default function QualityPage() {
 								}))}
 							/>
 						</div>
-						<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-5">
-							<Stat
-								label="At target"
-								value={String(holding.length)}
-								sub="Passing on fresh evidence"
-							/>
-							<Stat
-								label="Below target"
-								value={String(breached.length)}
-								sub="Measured, with an open work queue"
-							/>
-							<Stat
-								label="Needs re-measure"
-								value={String(stale.length)}
-								sub="Evidence older than its own window"
-							/>
+						{/* Five figures, five short labels. Each used to carry a
+						    sentence of its own underneath, so the row read as a
+						    paragraph in five columns; the distinctions they drew now
+						    sit in one caption below, where they are read once. */}
+						<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-4 mb-3">
+							<Stat label="At target" value={String(holding.length)} />
+							<Stat label="Below target" value={String(breached.length)} />
+							<Stat label="Needs re-measure" value={String(stale.length)} />
 							<Stat
 								label="Open findings"
 								value={String(entities.findings.open)}
-								sub="Ours, still reproducing on the latest run"
 							/>
 							<Stat
 								label="Waiting on upstream"
 								value={String(entities.findings.blockedUpstream)}
-								sub="Raven catalog lag or scorer — carried, not ours to fix"
 							/>
 						</div>
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							<div>
-								<p className="text-xs font-medium text-foreground mb-2">
+						<p className="text-xs text-muted-foreground/80 mb-5 max-w-2xl leading-relaxed">
+							At target = passing on fresh evidence. Below target = measured,
+							with an open work queue. Needs re-measure = evidence older than
+							its own window. Open findings are ours and still reproducing;
+							waiting on upstream is carried, not ours to fix.
+						</p>
+						<div>
+							<div className="flex items-baseline justify-between mb-2">
+								<p className="text-xs font-medium text-foreground">
 									Safe to rely on
 								</p>
-								<ul className="space-y-1.5">
-									{holding.map((g) => (
-										<li
-											key={g.key}
-											className="text-xs text-muted-foreground leading-relaxed"
-										>
-											<span className="text-foreground">{g.title}</span> ·{" "}
-											{g.value} · measured {g.asOf}
-										</li>
-									))}
-									<li className="text-xs text-muted-foreground leading-relaxed">
-										<span className="text-foreground">Row coverage</span> · this
-										page reads all {entities.projects.population} project rows
-										from the unranked listing, a census, so no row hides by
-										being hard to retrieve
-									</li>
-								</ul>
+								<p className="text-[11px] text-muted-foreground/70">
+									value · days since measured
+								</p>
 							</div>
-							<div>
+							{/* Two or three columns, because 19 one-line rows in a single
+							    column is a scroll, not a scan. */}
+							<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-0 mb-4">
+								{holding.map((g) => (
+									<GuardLine
+										key={g.key}
+										title={g.title}
+										value={String(g.value)}
+										state="holding"
+										ageDays={g.ageDays}
+										freshnessDays={g.freshnessDays}
+										href={g.artifact ? evidenceUrl(g.artifact) : undefined}
+									/>
+								))}
+							</div>
+							<p className="text-[11px] text-muted-foreground/80 leading-relaxed max-w-2xl">
+								Row coverage: this page reads all {entities.projects.population}{" "}
+								project rows from the unranked listing, a census, so no row
+								hides by being hard to retrieve.
+							</p>
+						</div>
+
+						{(breached.length > 0 ||
+							stale.length > 0 ||
+							((northStar.stale || northStar.belowTarget) &&
+								northStar.warning)) && (
+							<div className="mt-5 pt-4 border-t border-border/60">
 								<p className="text-xs font-medium text-foreground mb-2">
 									Below target, being worked
 								</p>
-								<ul className="space-y-1.5">
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0">
 									{breached.map((g) => (
-										<li
+										<GuardLine
 											key={g.key}
-											className="text-xs text-muted-foreground leading-relaxed"
-										>
-											<span className="text-foreground">{g.title}</span> is
-											below target: {g.value} {g.measure.unit}, measured{" "}
-											{g.asOf}
-										</li>
+											title={g.title}
+											value={`${g.value} ${g.measure.unit}`}
+											state="breached"
+											ageDays={g.ageDays}
+											freshnessDays={g.freshnessDays}
+											href={g.artifact ? evidenceUrl(g.artifact) : undefined}
+										/>
 									))}
 									{stale.map((g) => (
-										<li
+										<GuardLine
 											key={g.key}
-											className="text-xs text-muted-foreground leading-relaxed"
-										>
-											<span className="text-foreground">{g.title}</span> needs a
-											re-measure: last run {g.ageDays}d ago, past its{" "}
-											{g.freshnessDays}d window, so its {g.value} is a reading
-											of the past, not the present
-										</li>
+											title={g.title}
+											value={String(g.value)}
+											state="stale"
+											ageDays={g.ageDays}
+											freshnessDays={g.freshnessDays}
+											href={g.artifact ? evidenceUrl(g.artifact) : undefined}
+										/>
 									))}
-									{/* Only RELIABILITY problems belong in this column: staleness
-									     and below-target. The probe-frame comparability caveat is
-									     about how to read the chart, and it renders at the chart. */}
-									{(northStar.stale || northStar.belowTarget) &&
-										northStar.warning && (
-											<li className="text-xs text-muted-foreground leading-relaxed">
-												<span className="text-foreground">North star</span>:{" "}
-												{northStar.warning}
-											</li>
-										)}
-								</ul>
+								</div>
+								{stale.length > 0 && (
+									<p className="text-[11px] text-muted-foreground/80 mt-2 max-w-2xl leading-relaxed">
+										A stale reading is a reading of the past, not the present —
+										it is never counted as passing.
+									</p>
+								)}
+								{(northStar.stale || northStar.belowTarget) &&
+									northStar.warning && (
+										<p className="text-[11px] text-muted-foreground/80 mt-2 max-w-2xl leading-relaxed">
+											North star: {northStar.warning}
+										</p>
+									)}
 							</div>
-						</div>
+						)}
 					</Card>
 				);
 			})()}
