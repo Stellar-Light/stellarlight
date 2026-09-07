@@ -1,32 +1,20 @@
 {
- "generatedAt": "2026-09-07T07:27:34.328Z",
- "asOf": "2026-09-07T07:27:34.328Z",
+ "generatedAt": "2026-09-07T19:51:12.520Z",
+ "asOf": "2026-09-07T19:51:12.520Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2335,
+ "checked": 2355,
+ "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
-  {
-   "url": "https://assetdesk.xyz",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/assetdesk.links.website"
-   ]
-  },
   {
    "url": "https://blaqshyd.me",
    "httpStatus": null,
    "reason": "fetch failed",
    "targets": [
     "builders/69d19a831a0f3c3e3c27072e.website_url"
-   ]
-  },
-  {
-   "url": "https://chainsatlas.com",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "projects/chainatlas.links.website"
+   ],
+   "citedByStatus": [
+    "69d19a831a0f3c3e3c27072e: n/a"
    ]
   },
   {
@@ -35,6 +23,9 @@
    "reason": "fetch failed",
    "targets": [
     "entities/clickpesa.links.website"
+   ],
+   "citedByStatus": [
+    "clickpesa: n/a"
    ]
   },
   {
@@ -43,6 +34,9 @@
    "reason": "Not Found",
    "targets": [
     "entities/borderless.links.github"
+   ],
+   "citedByStatus": [
+    "borderless: n/a"
    ]
   },
   {
@@ -51,6 +45,9 @@
    "reason": "Not Found",
    "targets": [
     "builders/6a2a4efab6c85e93c7be0090.github_username"
+   ],
+   "citedByStatus": [
+    "6a2a4efab6c85e93c7be0090: n/a"
    ]
   },
   {
@@ -59,6 +56,121 @@
    "reason": "Not Found",
    "targets": [
     "entities/jet-protocol.links.github"
+   ],
+   "citedByStatus": [
+    "jet-protocol: n/a"
+   ]
+  },
+  {
+   "url": "https://github.com/WalletGuruLLC/paystreme",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/wallet-guru.links.github"
+   ],
+   "citedByStatus": [
+    "wallet-guru: n/a"
+   ]
+  },
+  {
+   "url": "https://letsping.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "partner-accounts/anchor-ping.websiteUrl"
+   ],
+   "citedByStatus": [
+    "anchor-ping: n/a"
+   ]
+  },
+  {
+   "url": "https://nebula.eiger.co",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/eiger.links.website"
+   ],
+   "citedByStatus": [
+    "eiger: n/a"
+   ]
+  },
+  {
+   "url": "https://padparadscho.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "builders/6a9a5e6d32df846e8503fdaf.website_url"
+   ],
+   "citedByStatus": [
+    "6a9a5e6d32df846e8503fdaf: n/a"
+   ]
+  },
+  {
+   "url": "https://reflector.world",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "entities/stellar-expert.links.website"
+   ],
+   "citedByStatus": [
+    "stellar-expert: n/a"
+   ]
+  },
+  {
+   "url": "https://slender.fi",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "entities/eq-lab.links.website"
+   ],
+   "citedByStatus": [
+    "eq-lab: n/a"
+   ]
+  },
+  {
+   "url": "https://stex.xycloo.com",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "entities/xycloo.links.website"
+   ],
+   "citedByStatus": [
+    "xycloo: n/a"
+   ]
+  },
+  {
+   "url": "https://techfiesta.dev",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "entities/techfiesta.links.website"
+   ],
+   "citedByStatus": [
+    "techfiesta: n/a"
+   ]
+  },
+  {
+   "url": "https://www.grupoamonet.com.br",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/69d19a821a0f3c3e3c2706e2.website_url"
+   ],
+   "citedByStatus": [
+    "69d19a821a0f3c3e3c2706e2: n/a"
+   ]
+  }
+ ],
+ "brokenOnRetired": [
+  {
+   "url": "https://chainsatlas.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/chainatlas.links.website"
+   ],
+   "citedByStatus": [
+    "chainatlas: Inactive"
    ]
   },
   {
@@ -68,78 +180,10 @@
    "targets": [
     "projects/soroban-optimsitic-oracle.links.website",
     "projects/soroban-optimsitic-oracle.links.github"
-   ]
-  },
-  {
-   "url": "https://github.com/WalletGuruLLC/paystreme",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "entities/wallet-guru.links.github"
-   ]
-  },
-  {
-   "url": "https://letsping.com",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "partner-accounts/anchor-ping.websiteUrl"
-   ]
-  },
-  {
-   "url": "https://nebula.eiger.co",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "entities/eiger.links.website"
-   ]
-  },
-  {
-   "url": "https://padparadscho.com",
-   "httpStatus": 404,
-   "reason": "Not Found",
-   "targets": [
-    "builders/6a9a5e6d32df846e8503fdaf.website_url"
-   ]
-  },
-  {
-   "url": "https://reflector.world",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/stellar-expert.links.website"
-   ]
-  },
-  {
-   "url": "https://slender.fi",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/eq-lab.links.website"
-   ]
-  },
-  {
-   "url": "https://stex.xycloo.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/xycloo.links.website"
-   ]
-  },
-  {
-   "url": "https://techfiesta.dev",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/techfiesta.links.website"
-   ]
-  },
-  {
-   "url": "https://www.grupoamonet.com.br",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "builders/69d19a821a0f3c3e3c2706e2.website_url"
+   ],
+   "citedByStatus": [
+    "soroban-optimsitic-oracle: Draft",
+    "soroban-optimsitic-oracle: Draft"
    ]
   }
  ]
