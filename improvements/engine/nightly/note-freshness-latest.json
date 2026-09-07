@@ -1,10 +1,15 @@
 {
-	"generatedAt": "2026-09-06T09:52:01.262Z",
+	"generatedAt": "2026-09-07T10:58:26.397Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
 			"probe": "note-stale:rahul-soshte/rs-soroban-client:crates:soroban-client",
 			"note": "note (asOf 2026-09-01) cites 0.5.9; registry latest is 0.6.0 (published 2026-09-05)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
+			"note": "note (asOf 2026-09-01) cites 0.1.2; registry latest is 0.2.0 (published 2026-09-07)",
 			"surface": "code"
 		}
 	]
