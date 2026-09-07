@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T05:06:09.670Z",
+ "generatedAt": "2026-09-07T05:59:33.109Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -40,7 +40,7 @@
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 0,
-   "clearedFindings": 133,
+   "clearedFindings": 175,
    "verifiedFindings": 0
   },
   {
@@ -55,13 +55,13 @@
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 650,
   "open": 2,
-  "refreshQueue": 63,
+  "refreshQueue": 21,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 562,
+  "cleared": 604,
   "verified": 7,
   "byFailureMode": [
    {
@@ -72,6 +72,15 @@
     "cleared": 284,
     "verified": 0,
     "surface": "retrieval"
+   },
+   {
+    "mode": "broken-link",
+    "open": 0,
+    "refresh": 20,
+    "blocked": 0,
+    "cleared": 86,
+    "verified": 0,
+    "surface": "directory"
    },
    {
     "mode": "coverage-gap",
@@ -90,15 +99,6 @@
     "cleared": 47,
     "verified": 0,
     "surface": "retrieval"
-   },
-   {
-    "mode": "broken-link",
-    "open": 0,
-    "refresh": 62,
-    "blocked": 0,
-    "cleared": 44,
-    "verified": 0,
-    "surface": "directory"
    },
    {
     "mode": "completeness-residual",
@@ -238,49 +238,49 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "https://github.com/antontat27/interlinked-backend",
+    "probe": "https://0xauth.co",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/argo-navis-dev/js-capacitor-passkey-kit",
+    "probe": "https://adamik.io",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/bingtellar/bingtellar-serverside",
+    "probe": "https://aerochain.wingleet.com/redoc",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/Cartwey001/cartwey-app",
+    "probe": "https://apay.io",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/cedelabs/sdk-examples",
+    "probe": "https://arcturus-gpt.com",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/centiiv/protocol-node",
+    "probe": "https://basement.dev",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/cordilleradev",
+    "probe": "https://benkiko.xyz",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
    },
    {
-    "probe": "https://github.com/darthbenro008/walletban",
+    "probe": "https://biggertech.co",
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-07"
@@ -328,7 +328,7 @@
      {
       "class": "cross-surface-consistency",
       "total": 130,
-      "open": 63,
+      "open": 21,
       "firstSeen": "2026-07-22"
      },
      {
@@ -2985,8 +2985,10 @@
    {
     "slug": "vitreous",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -3435,9 +3437,10 @@
    {
     "slug": "stride",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "linked"
     ],
     "status": "Live"
    },
@@ -3483,8 +3486,10 @@
    {
     "slug": "stellarstrides",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -3568,8 +3573,10 @@
    {
     "slug": "stellar-update",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -3830,8 +3837,10 @@
    {
     "slug": "sorscan",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -3853,8 +3862,10 @@
    {
     "slug": "sorosorcerer",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -3989,8 +4000,10 @@
    {
     "slug": "soroban-assistant",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4074,8 +4087,10 @@
    {
     "slug": "skeeper",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4289,8 +4304,10 @@
    {
     "slug": "rigel",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4575,8 +4592,10 @@
    {
     "slug": "paygo-crypto",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -4605,8 +4624,10 @@
    {
     "slug": "pactta",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "sourced"
+    ],
     "status": "Inactive"
    },
    {
@@ -4884,15 +4905,19 @@
    {
     "slug": "lumens-for-charity",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
     "slug": "lumenaut",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -5396,9 +5421,10 @@
    {
     "slug": "getpaid",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "linked"
     ],
     "status": "Live"
    },
@@ -5487,8 +5513,10 @@
    {
     "slug": "forge",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -5859,8 +5887,10 @@
    {
     "slug": "cryptocannoneer",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -6165,8 +6195,10 @@
    {
     "slug": "canfy",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -6186,9 +6218,10 @@
    {
     "slug": "bravepay",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "linked"
     ],
     "status": "Live"
    },
@@ -7099,9 +7132,10 @@
    {
     "slug": "tribal",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "linked"
     ],
     "status": "Live"
    },
@@ -7176,8 +7210,10 @@
    {
     "slug": "ping",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -7904,8 +7940,10 @@
    {
     "slug": "sorobanide",
     "prominence": 0,
-    "factsPresent": 5,
-    "missing": [],
+    "factsPresent": 4,
+    "missing": [
+     "linked"
+    ],
     "status": "Inactive"
    },
    {
@@ -8110,9 +8148,10 @@
    {
     "slug": "stellar-global",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "linked"
     ],
     "status": "Live"
    },
@@ -8264,7 +8303,7 @@
     "status": "Live"
    }
   ],
-  "meanScore": 90,
+  "meanScore": 89,
   "deploymentMix": [
    {
     "network": "unknown",
@@ -8333,9 +8372,51 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 499,
+  "weakestTotal": 516,
   "weakestTruncated": true,
   "weakest": [
+   {
+    "slug": "bravepay",
+    "name": "BravePay",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
+   {
+    "slug": "getpaid",
+    "name": "GetPaid",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
    {
     "slug": "grip",
     "name": "Grip",
@@ -8486,6 +8567,27 @@
     ]
    },
    {
+    "slug": "stellar-global",
+    "name": "Stellar Global",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Education"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
+   {
     "slug": "stellar-pulse",
     "name": "Stellar Pulse",
     "status": "Live",
@@ -8518,6 +8620,30 @@
     "deploymentApplies": false,
     "types": [
      "Education"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
+   {
+    "slug": "stride",
+    "name": "Stride",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "AI",
+     "Gaming",
+     "NFT",
+     "Payments"
     ],
     "score": 60,
     "factsPresent": 3,
@@ -8593,6 +8719,27 @@
    {
     "slug": "timed-transactions-api",
     "name": "Timed Transactions API",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [
+     "Payments"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "linked"
+    ]
+   },
+   {
+    "slug": "tribal",
+    "name": "Tribal",
     "status": "Live",
     "statusBasis": "source-inherited",
     "prominence": 0,
@@ -9064,109 +9211,6 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "alula",
-    "name": "Alula",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "amber",
-    "name": "Amber",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "RWA"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "amero",
-    "name": "Amero",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "amulets",
-    "name": "Amulets",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "Wallet",
-     "Card Issuing",
-     "Stablecoin"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "anchainai",
-    "name": "AnChain.AI",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security",
-     "AI"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
@@ -9180,7 +9224,7 @@
    },
    {
     "field": "sourced",
-    "count": 5
+    "count": 6
    },
    {
     "field": "typed",
@@ -9188,7 +9232,7 @@
    },
    {
     "field": "linked",
-    "count": 24
+    "count": 45
    }
   ]
  },
@@ -10537,7 +10581,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 133
+    "value": 175
    },
    {
     "id": "f:contract",
@@ -10573,13 +10617,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 562
+    "value": 604
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 81
+    "value": 39
    },
    {
     "id": "o:verified",
@@ -10699,7 +10743,7 @@
     "target": 21,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 133
+    "value": 175
    },
    {
     "source": 5,
@@ -10769,7 +10813,7 @@
     "target": 22,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 62
+    "value": 20
    },
    {
     "source": 14,
@@ -10904,19 +10948,20 @@
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 5,
+    "missing": 6,
     "of": 983,
-    "share": 0.5,
+    "share": 0.6,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 5,
+    "examplePoolSize": 6,
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
      "mydatacoin",
      "the-blue-marble",
      "scam-flagging-system",
+     "pactta",
      "chaincred",
      "stellar-pulse"
     ]

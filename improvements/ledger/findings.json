@@ -3803,7 +3803,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T01:38:08.372Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -3829,7 +3829,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -3855,7 +3855,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-07-23T02:37:05.018Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -5878,7 +5878,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-28T15:54:52.406Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -6557,7 +6557,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-08-31T19:51:18.114Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -7057,7 +7057,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -7070,7 +7070,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -7083,7 +7083,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -7096,7 +7096,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7109,7 +7109,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7122,7 +7122,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z"
 	},
@@ -7134,7 +7134,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-scorer"
@@ -7147,7 +7147,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7160,7 +7160,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7173,7 +7173,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7186,7 +7186,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7199,7 +7199,7 @@
 		"failureMode": "routing-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-05T05:08:19.275Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T23:45:43.789Z",
 		"blockedOn": "raven-catalog-lag"
@@ -7251,7 +7251,7 @@
 		"failureMode": "note-stale",
 		"severity": "low",
 		"firstSeen": "2026-09-06T09:52:07.185Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T09:52:01.262Z"
 	},
@@ -7264,8 +7264,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-adamik-io",
@@ -7276,8 +7277,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-aerochain-wingleet-com-redoc",
@@ -7288,8 +7290,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-apay-io",
@@ -7300,8 +7303,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-arcturus-gpt-com",
@@ -7312,8 +7316,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-assetdesk-xyz",
@@ -7323,9 +7328,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-basement-dev",
@@ -7336,8 +7341,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-benkiko-xyz",
@@ -7348,8 +7354,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-biggertech-co",
@@ -7360,8 +7367,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-biotlabs-africa-projects-ea-kazi",
@@ -7372,8 +7380,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-blaqshyd-me",
@@ -7383,9 +7392,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-blockshangerous-com-cryptocannoneer",
@@ -7396,8 +7405,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-borderdollar-co",
@@ -7408,8 +7418,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-bravepay-net",
@@ -7420,8 +7431,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-canfy-net",
@@ -7432,8 +7444,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-chainsatlas-com",
@@ -7443,9 +7456,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-clickpesadebtfund-com",
@@ -7455,9 +7468,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-cosmic-link",
@@ -7468,8 +7481,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-cosmic-vote",
@@ -7480,8 +7494,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-digicus-dev",
@@ -7492,8 +7507,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-equilibre-io",
@@ -7504,8 +7520,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-forgerpc-com",
@@ -7516,8 +7533,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-getpaid-africa",
@@ -7528,8 +7546,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-github-com-antontat27-interlinked-backend",
@@ -7669,9 +7688,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-explore-beyond-innovations-proo",
@@ -7798,9 +7817,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-imobi-scalps-core-api",
@@ -7836,9 +7855,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-jetpad-digital-limited-jetpad-w",
@@ -7861,9 +7880,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-luisao8-sorobuilder",
@@ -7925,9 +7944,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-muwpay-uniswapper-muwp-stellar",
@@ -7976,9 +7995,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-nobak-net-nobak-mobile",
@@ -8066,9 +8085,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-stellar-merchants",
@@ -8169,9 +8188,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-github-com-wanchain-message-bridge-contrac",
@@ -8207,9 +8226,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-lumensforcharity-tech",
@@ -8220,8 +8239,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-nebula-eiger-co",
@@ -8231,9 +8251,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-ntokens-com-blog-brl-anchor-stellar",
@@ -8244,8 +8264,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-openx-solar",
@@ -8256,8 +8277,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-padparadscho-com",
@@ -8267,9 +8289,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-paygocrypto-io",
@@ -8280,8 +8302,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-pool-lumenaut-net",
@@ -8292,8 +8315,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-qolaq-org",
@@ -8304,8 +8328,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-reflector-world",
@@ -8315,9 +8340,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-rigel-link",
@@ -8328,8 +8353,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-skeeper-xyz",
@@ -8340,8 +8366,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-slender-fi",
@@ -8351,9 +8378,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-snnac-me",
@@ -8364,8 +8391,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-soroban-assistant-herokuapp-com",
@@ -8376,8 +8404,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-sorobanide-com",
@@ -8388,8 +8417,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-sorobanlearn-com",
@@ -8400,8 +8430,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-sorosorcerer-com",
@@ -8412,8 +8443,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-sorscan-org",
@@ -8424,8 +8456,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-stellarglobal-community",
@@ -8436,8 +8469,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-stellarpay-io",
@@ -8448,8 +8482,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-stellarstrides-xyz",
@@ -8460,8 +8495,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-stellarupdate-com",
@@ -8472,8 +8508,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-stex-xycloo-com",
@@ -8483,9 +8520,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-stride-social",
@@ -8496,8 +8533,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-techfiesta-dev",
@@ -8507,9 +8545,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-tribal-credit",
@@ -8520,8 +8558,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-vitreous-co",
@@ -8532,8 +8571,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-websoroban-vercel-app",
@@ -8544,8 +8584,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "link-health:https-www-grupoamonet-com-br",
@@ -8555,9 +8596,9 @@
 		"failureMode": "broken-link",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"evidenceAt": "2026-09-07T05:56:53.236Z"
 	},
 	{
 		"id": "link-health:https-xlet-io",
@@ -8568,8 +8609,9 @@
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
 		"lastSeen": "2026-09-07T03:56:14.131Z",
-		"status": "open",
-		"evidenceAt": "2026-09-07T03:50:08.434Z"
+		"status": "cleared",
+		"evidenceAt": "2026-09-07T05:59:26.097Z",
+		"clearedAt": "2026-09-07T05:59:26.097Z"
 	},
 	{
 		"id": "engine-a-recall:1-result-carries-types-education",
@@ -8579,7 +8621,7 @@
 		"failureMode": "recall-miss",
 		"severity": "medium",
 		"firstSeen": "2026-09-06T17:38:09.840Z",
-		"lastSeen": "2026-09-07T03:56:14.131Z",
+		"lastSeen": "2026-09-07T05:59:26.097Z",
 		"status": "open",
 		"evidenceAt": "2026-09-06T12:49:44Z"
 	}
