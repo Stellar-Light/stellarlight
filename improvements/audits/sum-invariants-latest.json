@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T18:38:36.327Z",
+  "generatedAt": "2026-09-07T19:35:31.395Z",
   "base": "https://stellarlight.xyz",
   "checked": 17,
   "pass": 17,
@@ -95,22 +95,22 @@
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "tenure",
       "status": "pass",
-      "sum": 3092,
-      "total": 3092
+      "sum": 3256,
+      "total": 3256
     },
     {
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "exclusive+multichain",
       "status": "pass",
-      "sum": 3092,
-      "total": 3092
+      "sum": 3256,
+      "total": 3256
     },
     {
       "name": "developer partitions sum to monthlyActiveDevs.total",
       "scope": "geography",
       "status": "pass",
-      "sum": 3092,
-      "total": 3092
+      "sum": 3256,
+      "total": 3256
     },
     {
       "name": "stablecoin byBasis sums to returned",
