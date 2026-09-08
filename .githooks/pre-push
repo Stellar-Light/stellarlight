@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Pre-push gate — runs the CHEAP half of CI, scoped to what you actually changed.
+#
+# Exists because on 2026-09-08 a commit that did not typecheck reached a PR and
+# failed its Vercel preview build. `vitest` had passed it, because vitest strips
+# types and cannot see a `Set<never>`; `tsc` was run two minutes later, after
+# the push. The gap between "tests pass" and "it compiles" is a push away, and
+# a hook closes it for free.
+#
+# What it does NOT run, deliberately: `next build` (minutes), and anything that
+# reads the live API — a production monitor is not a pre-push gate, it goes red
+# on the very change that fixes it.
+#
+#   Install:  pnpm hooks:install
+#   Bypass :  git push --no-verify   (fine for a WIP branch; CI still gates)
+
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+# Compare against the upstream tip when there is one, else the merge-base with
+# main — so a fresh branch checks its own commits, not the whole repo.
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+if [ -n "$UPSTREAM" ]; then BASE=$(git merge-base HEAD "$UPSTREAM" 2>/dev/null); fi
+[ -z "${BASE:-}" ] && BASE=$(git merge-base HEAD origin/main 2>/dev/null)
+[ -z "${BASE:-}" ] && exit 0   # nothing to compare against; don't block
+
+CHANGED=$(git diff --name-only "$BASE"...HEAD 2>/dev/null)
+[ -z "$CHANGED" ] && exit 0
+
+say()  { printf '  %s\n' "$1"; }
+fail() { printf '\n✗ pre-push: %s\n  Fix it, or push with --no-verify if you know why.\n' "$1"; exit 1; }
+
+printf '\npre-push checks (scoped to %s changed file(s))\n' "$(printf '%s\n' "$CHANGED" | wc -l | tr -d ' ')"
+
+# 1. App typecheck — the one that would have caught the Vercel failure.
+if printf '%s\n' "$CHANGED" | grep -qE '\.(ts|tsx)$' && printf '%s\n' "$CHANGED" | grep -qE '^(src|tests)/'; then
+	say "tsc (app)…"
+	OUT=$(npx tsc --noEmit -p tsconfig.json 2>&1) || { printf '%s\n' "$OUT" | head -20; fail "tsc found type errors"; }
+fi
+
+# 2. scripts/ type ratchet. Counting errors is NOT running this: it compares
+#    error IDENTITY (file + code + message), so an edit that changes an existing
+#    error's text is a new signature at an unchanged count.
+if printf '%s\n' "$CHANGED" | grep -qE '^scripts/.*\.ts$'; then
+	say "scripts type ratchet…"
+	OUT=$(npx tsx scripts/check-scripts-types.ts 2>&1) || { printf '%s\n' "$OUT" | tail -12; fail "new type error(s) in scripts/"; }
+fi
+
+# 3. Formatting/lint on the changed files only.
+FILES=$(printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|json|css)$' | while read -r f; do [ -f "$f" ] && printf '%s ' "$f"; done)
+if [ -n "$FILES" ]; then
+	say "biome…"
+	# shellcheck disable=SC2086
+	OUT=$(npx biome check $FILES 2>&1) || { printf '%s\n' "$OUT" | tail -15; fail "biome check failed (npx biome check --write <files>)"; }
+fi
+
+# 4. Unit tests for the library the grading/serving logic lives in.
+if printf '%s\n' "$CHANGED" | grep -qE '^src/lib/'; then
+	say "vitest (src/lib)…"
+	OUT=$(npx vitest run src/lib/__tests__ 2>&1) || { printf '%s\n' "$OUT" | tail -20; fail "unit tests failed"; }
+fi
+
+printf '✓ pre-push checks passed\n\n'

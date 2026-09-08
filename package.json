@@ -27,7 +27,8 @@
 		"contract:write": "tsx scripts/contract/build-contract.ts",
 		"contract:check": "tsx scripts/contract/build-contract.ts --check && tsx scripts/contract/check-schema-opacity.ts && tsx scripts/contract/check-honesty-layer.ts",
 		"typecheck:scripts": "tsc --noEmit -p tsconfig.scripts.json",
-		"openapi:lint:snapshot": "node -e \"process.stdout.write(JSON.stringify(JSON.parse(require(\\\"fs\\\").readFileSync(\\\"specs/openapi.json\\\",\\\"utf8\\\"))))\" > /tmp/openapi.min.json && spectral lint /tmp/openapi.min.json --ruleset .spectral.yaml --fail-severity=error"
+		"openapi:lint:snapshot": "node -e \"process.stdout.write(JSON.stringify(JSON.parse(require(\\\"fs\\\").readFileSync(\\\"specs/openapi.json\\\",\\\"utf8\\\"))))\" > /tmp/openapi.min.json && spectral lint /tmp/openapi.min.json --ruleset .spectral.yaml --fail-severity=error",
+		"hooks:install": "git config core.hooksPath .githooks"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.109.1",
