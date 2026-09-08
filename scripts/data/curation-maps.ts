@@ -58,12 +58,24 @@ export const STATUS_FIX: Record<
 	// whose repo publishes a verified package, SIX last published more than a
 	// year ago — solar-wallet's in 2021, 1,907 days — and a 2021 artifact is
 	// not evidence a product is live now. Those six are deliberately absent.
+	//
+	// SEVEN absent. The curate guard REFUSED moonlight on the first dry run:
+	// jsr.io/@moonlight/moonlight-sdk carries the pre-launch marker "testnet",
+	// and a 200 is not a business. A testnet-only product holding a Live status
+	// is a question for the owner, not something to stamp around — left for a
+	// human read rather than dropped quietly.
+	//
+	// sourceUrl is the registry API, never the human page: www.npmjs.com returns
+	// 403 to the guard's fetch (nine "could not verify" WARNs on that same dry
+	// run) while registry.npmjs.org returns the JSON that actually carries
+	// `repository.url`. The backlink IS the evidence, so the evidence URL should
+	// be the thing a reader — or a guard — can fetch and check.
 	"unstoppable-wallet": {
 		from: "Live",
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-09-07",
-		sourceUrl: "https://www.npmjs.com/package/stellar-web-sdk",
+		sourceUrl: "https://registry.npmjs.org/stellar-web-sdk",
 		note: "stellar-web-sdk@0.2.0 on npm, published 2026-09-07 (1d before the 2026-09-08 sweep). The registry names horizontalsystems/stellar-web-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	"smart-treasury": {
@@ -71,7 +83,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-09-04",
-		sourceUrl: "https://www.npmjs.com/package/sta-sdk",
+		sourceUrl: "https://registry.npmjs.org/sta-sdk",
 		note: "sta-sdk@0.1.1 on npm, published 2026-09-04 (4d before the 2026-09-08 sweep). The registry names Smart-Treasury-Account-STA/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	blockaid: {
@@ -79,7 +91,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-08-25",
-		sourceUrl: "https://www.npmjs.com/package/@blockaid/client",
+		sourceUrl: "https://registry.npmjs.org/@blockaid/client",
 		note: "@blockaid/client@1.8.0 on npm, published 2026-08-25 (14d before the 2026-09-08 sweep). The registry names blockaid-official/blockaid-client-node as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	acta: {
@@ -87,7 +99,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-08-22",
-		sourceUrl: "https://www.npmjs.com/package/@acta-team/credentials",
+		sourceUrl: "https://registry.npmjs.org/@acta-team/credentials",
 		note: "@acta-team/credentials@1.1.10 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names ACTA-Team/acta-credentials as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	defarm: {
@@ -95,23 +107,15 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-08-22",
-		sourceUrl: "https://www.npmjs.com/package/@defarm/mcp",
+		sourceUrl: "https://registry.npmjs.org/@defarm/mcp",
 		note: "@defarm/mcp@0.1.0 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names defarm-repo/defarm-mcp as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
-	},
-	moonlight: {
-		from: "Live",
-		to: "Live",
-		basis: "package-release",
-		asOf: "2026-07-28",
-		sourceUrl: "https://jsr.io/@moonlight/moonlight-sdk",
-		note: "@moonlight/moonlight-sdk@0.13.0 on jsr, published 2026-07-28 (42d before the 2026-09-08 sweep). The registry names Moonlight-Protocol/moonlight-sdk as the package source (jsr.io githubRepository), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	fundable: {
 		from: "Live",
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-07-26",
-		sourceUrl: "https://www.npmjs.com/package/@fundable/sdk",
+		sourceUrl: "https://registry.npmjs.org/@fundable/sdk",
 		note: "@fundable/sdk@0.1.0 on npm, published 2026-07-26 (44d before the 2026-09-08 sweep). The registry names Fundable-Protocol/fundable-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	axis: {
@@ -119,7 +123,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-06-21",
-		sourceUrl: "https://www.npmjs.com/package/@axis-markets/json-storage",
+		sourceUrl: "https://registry.npmjs.org/@axis-markets/json-storage",
 		note: "@axis-markets/json-storage@0.2.0 on npm, published 2026-06-21 (79d before the 2026-09-08 sweep). The registry names axis-markets/json-storage as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	cypher: {
@@ -127,7 +131,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2026-04-28",
-		sourceUrl: "https://www.npmjs.com/package/@cypherhq/agent-pay",
+		sourceUrl: "https://registry.npmjs.org/@cypherhq/agent-pay",
 		note: "@cypherhq/agent-pay@0.1.0-beta.15 on npm, published 2026-04-28 (133d before the 2026-09-08 sweep). The registry names CypherD-IO/agent-pay as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 	drips: {
@@ -135,7 +139,7 @@ export const STATUS_FIX: Record<
 		to: "Live",
 		basis: "package-release",
 		asOf: "2025-11-17",
-		sourceUrl: "https://www.npmjs.com/package/@drips-network/sdk",
+		sourceUrl: "https://registry.npmjs.org/@drips-network/sdk",
 		note: "@drips-network/sdk@0.1.0-alpha.15 on npm, published 2025-11-17 (295d before the 2026-09-08 sweep). The registry names drips-network/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
 
