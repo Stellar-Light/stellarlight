@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8251667022705078,
+      "topScore": 0.8247631788253784,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -477,7 +477,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 70,
+      "topScore": 63,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -485,7 +485,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Shreshtthh/Zk-Seep"
+      "sample": "NethermindEth/stellar-private-payments"
     },
     {
       "id": "repos-x402",
@@ -495,7 +495,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 85,
+      "topScore": 63,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -513,7 +513,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 70,
+      "topScore": 87,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -531,7 +531,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 47,
+      "topScore": 57,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -549,7 +549,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 63,
+      "topScore": 78,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -567,7 +567,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 65,
+      "topScore": 63,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094740867614746,
+      "topScore": 0.7101369500160217,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -765,7 +765,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6715497970581055,
+      "topScore": 0.670104444026947,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-07T10:46:14Z"
+  "generatedAt": "2026-09-08T10:07:10Z"
 }
