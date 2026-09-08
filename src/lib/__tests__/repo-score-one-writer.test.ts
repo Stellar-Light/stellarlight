@@ -72,7 +72,7 @@ describe("every repoScore writer feeds the formula the same inputs", () => {
 		);
 		// Fields a writer legitimately cannot know are listed here, with the
 		// reason. Anything else missing is a signal computing as zero.
-		const NOT_AVAILABLE_TO_REGRADE = new Set([
+		const NOT_AVAILABLE_TO_REGRADE = new Set<string>([
 			// enrich resolves this from the builder record at fetch time; the
 			// regrade lane reads the stored row, which carries it already.
 		]);
