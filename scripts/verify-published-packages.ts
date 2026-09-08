@@ -75,27 +75,44 @@ async function j(url: string, ms = 20_000): Promise<unknown | null> {
  */
 async function declaredNames(
 	full: string,
-): Promise<{ names: string[]; reachable: boolean }> {
+): Promise<{ names: string[]; reachable: boolean; failed: boolean }> {
 	let reachable = false;
 	const names: string[] = [];
+	// A transport failure and a missing file are NOT the same answer, and
+	// collapsing them is what wrote "publishes nothing" onto a repo with nine
+	// packages: one blipped member fetch under concurrency left `names` empty
+	// and the caller could not tell that from a repo that declares none.
+	// `failed` is sticky so the caller can refuse to conclude.
+	let failed = false;
 	const readJson = async (
 		path: string,
 	): Promise<Record<string, unknown> | null> => {
-		try {
-			const r = await fetch(
-				`https://raw.githubusercontent.com/${full}/${path}`,
-				{ headers: UA, signal: AbortSignal.timeout(15_000) },
-			);
-			if (r.status === 404) {
-				reachable = true; // the host answered; this file just isn't there
-				return null;
+		for (let attempt = 0; attempt < 3; attempt++) {
+			try {
+				const r = await fetch(
+					`https://raw.githubusercontent.com/${full}/${path}`,
+					{ headers: UA, signal: AbortSignal.timeout(15_000) },
+				);
+				if (r.status === 404) {
+					reachable = true; // the host answered; this file just isn't there
+					return null;
+				}
+				if (!r.ok) {
+					if (r.status >= 500 || r.status === 429) {
+						await new Promise((res) => setTimeout(res, 300 * (attempt + 1)));
+						continue; // retryable
+					}
+					failed = true;
+					return null;
+				}
+				reachable = true;
+				return (await r.json()) as Record<string, unknown>;
+			} catch {
+				await new Promise((res) => setTimeout(res, 300 * (attempt + 1)));
 			}
-			if (!r.ok) return null;
-			reachable = true;
-			return (await r.json()) as Record<string, unknown>;
-		} catch {
-			return null; // transport — leave reachable as-is
 		}
+		failed = true; // out of attempts — we learned nothing about this path
+		return null;
 	};
 
 	for (const br of ["main", "master"]) {
@@ -103,7 +120,7 @@ async function declaredNames(
 			const m = await readJson(`${br}/${f}`);
 			if (!m) continue;
 			if (typeof m.name === "string" && m.name.trim())
-				return { names: [m.name.trim()], reachable: true };
+				return { names: [m.name.trim()], reachable: true, failed };
 			const members = Array.isArray(m.workspace)
 				? m.workspace
 				: Array.isArray(m.workspaces)
@@ -119,11 +136,11 @@ async function declaredNames(
 						break;
 					}
 				}
-				if (names.length) return { names, reachable: true }; // one is enough
+				if (names.length) return { names, reachable: true, failed }; // one is enough
 			}
 		}
 	}
-	return { names, reachable };
+	return { names, reachable, failed };
 }
 
 /** Does a registry serve this name AND name this repo as its source? */
@@ -240,14 +257,17 @@ async function main() {
 			async (r) => {
 				read++;
 				const full = String(r.fullName);
-				const { names, reachable } = await declaredNames(full);
+				const { names, reachable, failed } = await declaredNames(full);
 				if (ONLY)
 					console.log(
 						`  [${full}] declaredNames -> ${JSON.stringify(names)} reachable=${reachable}`,
 					);
 				// Could not reach GitHub at all: we learned nothing. Writing [] here
 				// would assert "this repo publishes nothing", which we did not check.
-				if (!reachable) {
+				if (!reachable || (failed && !names.length)) {
+					// Either GitHub never answered, or a read failed and left us with
+					// no name to check. Writing [] here would assert "this repo
+					// publishes nothing" on evidence we do not have.
 					blind++;
 					return;
 				}
