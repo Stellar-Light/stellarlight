@@ -47,7 +47,16 @@ if printf '%s\n' "$CHANGED" | grep -qE '^scripts/.*\.ts$'; then
 fi
 
 # 3. Formatting/lint on the changed files only.
-FILES=$(printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|json|css)$' | while read -r f; do [ -f "$f" ] && printf '%s ' "$f"; done)
+#
+# GENERATED files are excluded. Passing a path to biome EXPLICITLY overrides its
+# own ignore config, so a generated file gets linted even when the project has
+# decided not to lint it — and src/payload-types.ts (written by
+# `payload generate:types`) fails noExplicitAny on main today. This hook blocked
+# its own first real push on exactly that: pre-existing debt in a file nobody
+# hand-edits. A gate that fails on debt you did not create teaches people to
+# pass --no-verify, which costs more than it saves.
+GENERATED='^(src/payload-types\.ts|specs/openapi\.json|public/openapi\.json|api-client/src/schema\.ts)$'
+FILES=$(printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|json|css)$' | grep -vE "$GENERATED" | while read -r f; do [ -f "$f" ] && printf '%s ' "$f"; done)
 if [ -n "$FILES" ]; then
 	say "biome…"
 	# shellcheck disable=SC2086

@@ -203,7 +203,7 @@ export async function GET(req: NextRequest) {
 					"repo-activity",
 				],
 				basisStrength:
-					"Strong = human-verified (a person looked), onchain-activity (dated asset/contract/TVL evidence), product-integration (the live product references Stellar infrastructure — an integration observed, never proof it works), repo-activity (the project's own repo committed inside a dated window; awarded to library/SDK rows only). Everything else (operator-announcement, site-liveness, source-inherited, unverified) is weak and counts as the strongBasis fact being ABSENT. site-liveness means only that a page answered. This list and the board's STRONG_BASES are the same list; official-record is an scf.basis value and was never a status tier.",
+					"Strong = human-verified (a person looked), onchain-activity (dated asset/contract/TVL evidence), product-integration (the live product references Stellar infrastructure — an integration observed, never proof it works), repo-activity (the project's own repo committed inside a dated window; awarded to library/SDK rows only), package-release (a versioned artifact shipped to a registry that names this project's own repo as its source — npm repository.url or jsr.io githubRepository — with a recent publish; the SOURCE moving is repo-activity, an ARTIFACT shipping is this). Everything else (operator-announcement, site-liveness, source-inherited, unverified) is weak and counts as the strongBasis fact being ABSENT. site-liveness means only that a page answered. This list and the board's STRONG_BASES are the same list; official-record is an scf.basis value and was never a status tier.",
 				missingByField: e.projects.missingCounts,
 			},
 			repoQuality: {
