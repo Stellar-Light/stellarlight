@@ -45,6 +45,22 @@ import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
 const RESCAN = process.argv.includes("--rescan");
+/**
+ * Retry ONLY the states routine waves exclude: `error` and `incomplete`.
+ *
+ * Those exclusions are right — the same rows re-fail every wave and burn the
+ * budget at the front of each run — but they were one-way. `--rescan` widens to
+ * EVERYTHING and sorts by -repoScore, so with any limit it re-scans the top of
+ * the index and never reaches an error row; nothing scheduled ever retried
+ * them. 433 repos were left permanently unverifiable, among them
+ * x402-foundation/x402 (6,582 stars, `submodule-contracts`), which then carries
+ * its stars into the ranking with no Stellar proof at all.
+ *
+ * Structural reasons DO resolve: a submodule gets inlined, a truncated tree
+ * shrinks, a 404 repo comes back. Monthly is often enough to catch that and
+ * rare enough to cost nothing.
+ */
+const RETRY_EXCLUDED = process.argv.includes("--retry-excluded");
 // Stale-first (gist gap 4): re-scan repos whose code CHANGED after their last
 // scan (lastCommitAt > codeScannedAt) — an SDK 0.7→26 upgrade otherwise keeps
 // its stale versionStatus until a wave happens to reach it. Weekly scheduled
@@ -144,7 +160,7 @@ async function main() {
 		}
 	}
 	console.log(
-		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
+		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls${RETRY_EXCLUDED ? " · mode=retry-excluded (error + incomplete only)" : ""}`,
 	);
 
 	// Wave selection: never-scanned AND pushed-since-scan repos compete on the
@@ -166,9 +182,17 @@ async function main() {
 			// two hours forever: ~70 calls a wave, ~840 a day, and every wave
 			// reported `scanned=0` as a success. A lane that CAN do no work then
 			// looks exactly like a lane that is failing to.
-			...(RESCAN
-				? []
-				: [{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }]),
+			...(RETRY_EXCLUDED
+				? [{ codeScanState: { in: ["error", "incomplete"] } }]
+				: RESCAN
+					? []
+					: [
+							{
+								codeScanState: {
+									not_in: ["scanned", "error", "incomplete"],
+								},
+							},
+						]),
 		],
 	};
 	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
