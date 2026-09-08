@@ -13,6 +13,7 @@
  * fabrication.
  */
 import "../load-env";
+import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
 import { getPayload } from "payload";
 import {
 	parseGithubIdentity,
@@ -2346,18 +2347,21 @@ async function main() {
 		// the status is unchanged, the stored strong provenance IS the better
 		// evidence; there is nothing to write. A status MOVE is a verdict and
 		// still writes as the entry says.
-		const STRONG_STATUS_BASES = new Set([
-			"human-verified",
-			"onchain-activity",
-			"product-integration",
-			"repo-activity",
-		]);
+		// The FIFTH copy of this list, found 2026-09-08 while wiring
+		// package-release. It is a local const inside a loop, so the sweep that
+		// replaced the four exported copies did not see it. Left stale it is a
+		// live bug: a row that had EARNED package-release would not be
+		// recognised as strong, and a weak curated entry could overwrite it —
+		// precisely what this guard exists to prevent, which it learned from
+		// blend having site-liveness re-stamped over onchain-activity on every
+		// execute.
+		const STRONG = new Set<string>(STRONG_STATUS_BASES);
 		if (
 			fix.from === fix.to &&
 			fix.basis &&
 			!fix.withdraw &&
-			!STRONG_STATUS_BASES.has(fix.basis) &&
-			STRONG_STATUS_BASES.has(String(d.statusBasis ?? ""))
+			!STRONG.has(fix.basis) &&
+			STRONG.has(String(d.statusBasis ?? ""))
 		) {
 			console.log(
 				`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
