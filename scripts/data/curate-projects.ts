@@ -2229,9 +2229,29 @@ async function main() {
 	// the marker scan warns on them too, so the diff shows the contradiction.
 	const PRELAUNCH_MARKERS =
 		/\b(testnet[- ]?only|available on testnet|on testnet|TESTNET|join the waitlist|joins? our waitlist|coming soon|mainnet (opens|soon|launch)|funds are not real|not yet (live|launched)|pre-?launch)\b/i;
+	// SCOPE: a PRODUCT page. The markers above are claims when a landing page
+	// makes them ("join the waitlist", "coming soon"); they are ordinary
+	// vocabulary in a package registry document, where TESTNET is a network
+	// constant every Stellar SDK documents beside MAINNET.
+	//
+	// Measured 2026-09-08 across the 59 Live rows that publish a verified
+	// package: this scan fired on 21 of them — soroswap (@soroswap/sdk lists
+	// `SupportedNetworks.MAINNET | SupportedNetworks.TESTNET`, mainnet first),
+	// reflector ("Beam oracle client for Testnet" next to "oracle on Pubnet"),
+	// OpenZeppelin, SDF's own passkey-kit, and stellar-pay, which is ours. All
+	// unambiguously live. A 36% false-positive rate is not a gate, it is noise
+	// that trains people to ignore a REFUSED line.
+	//
+	// So the scan is skipped for registry documents. It is not a weakening: for
+	// basis `package-release` the evidence is that a versioned artifact exists
+	// with a registry-served backlink to this repo, and the README prose was
+	// never the claim being made.
+	const REGISTRY_HOSTS =
+		/^https?:\/\/(registry\.npmjs\.org|jsr\.io\/api|crates\.io\/api|pypi\.org\/pypi)\//i;
 	const prelaunchScan = async (
 		url: string,
 	): Promise<{ hit: string | null; ok: boolean }> => {
+		if (REGISTRY_HOSTS.test(url)) return { hit: null, ok: true };
 		try {
 			const res = await fetch(url, {
 				headers: { "User-Agent": "stellarlight-curator-gate" },
