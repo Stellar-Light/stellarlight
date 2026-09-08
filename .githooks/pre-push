@@ -58,9 +58,16 @@ fi
 GENERATED='^(src/payload-types\.ts|specs/openapi\.json|public/openapi\.json|api-client/src/schema\.ts)$'
 FILES=$(printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|json|css)$' | grep -vE "$GENERATED" | while read -r f; do [ -f "$f" ] && printf '%s ' "$f"; done)
 if [ -n "$FILES" ]; then
-	say "biome…"
+	# FORMAT is blocking: deterministic, auto-fixable, and the thing that makes
+	# a diff noisy to review. LINT is advisory: no workflow runs biome, and the
+	# repo carries ~50 pre-existing noExplicitAny in hand-written files. Failing
+	# a push on debt you did not create teaches people to reach for --no-verify,
+	# and then the gate protects nothing.
+	say "biome format…"
 	# shellcheck disable=SC2086
-	OUT=$(npx biome check $FILES 2>&1) || { printf '%s\n' "$OUT" | tail -15; fail "biome check failed (npx biome check --write <files>)"; }
+	OUT=$(npx biome check --linter-enabled=false $FILES 2>&1) || { printf '%s\n' "$OUT" | tail -15; fail "formatting (npx biome check --write <files>)"; }
+	# shellcheck disable=SC2086
+	LINT=$(npx biome lint $FILES 2>&1) || printf '  ! biome lint has findings (advisory, not blocking):\n%s\n' "$(printf '%s\n' "$LINT" | grep -E 'lint/' | head -5)"
 fi
 
 # 4. Unit tests for the library the grading/serving logic lives in.

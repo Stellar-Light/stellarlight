@@ -9,23 +9,13 @@
  */
 const ASOF_SEED = "2026-08-31";
 
-export type StatusBasis =
-	| "operator-announcement"
-	| "site-liveness"
-	// Mirrors the Projects enum: the row's OWN indexed repo committed inside a
-	// dated window. For a product still in Development the source moving IS
-	// the status claim (row-facts 2026-09-05, raum-network).
-	| "repo-activity"
-	| "onchain-activity"
-	| "human-verified"
-	| "source-inherited"
-	// The two remaining Projects-enum values, missing here until 2026-09-05:
-	// `mydatacoin` already carried basis "unverified" and did not type-check,
-	// and nothing noticed because tsconfig excludes scripts/**. Surfaced by
-	// src/lib/__tests__/packet-stamps-verdict.test.ts pulling this file into the
-	// checked graph. Kept in sync with src/collections/Projects.ts.
-	| "product-integration"
-	| "unverified";
+// Re-exported from the ONE vocabulary (src/lib/project-status.ts) rather than
+// re-listed. This file had its own copy and it went stale the moment
+// package-release landed: every curated entry using the new tier failed to
+// typecheck against a union that predated it. That is the sixth copy of this
+// list found on 2026-09-08 — the type as well as the value.
+import type { StatusBasis } from "../../src/lib/project-status";
+export type { StatusBasis };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
  * launching while allbridge has launched"). Each row is grounded in the
@@ -53,6 +43,102 @@ export const STATUS_FIX: Record<
 		withdraw?: boolean;
 	}
 > = {
+	// -- P4 lever, 2026-09-08: registry-verified package releases --
+	// Basis only; every status stays Live. These rows sat on site-liveness,
+	// which means only that a page answered — a parked domain and a dead
+	// product's marketing site both pass it.
+	//
+	// The evidence is a versioned artifact on a public registry whose OWN
+	// metadata names this project's repo as the source (npm repository.url,
+	// jsr.io githubRepository). That backlink cannot be produced without
+	// controlling both the repo and the namespace, which is what makes it
+	// harder to fake than a page that returns 200.
+	//
+	// Recency-gated, and the gate did real work: of 16 weak-basis Live rows
+	// whose repo publishes a verified package, SIX last published more than a
+	// year ago — solar-wallet's in 2021, 1,907 days — and a 2021 artifact is
+	// not evidence a product is live now. Those six are deliberately absent.
+	"unstoppable-wallet": {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-09-07",
+		sourceUrl: "https://www.npmjs.com/package/stellar-web-sdk",
+		note: "stellar-web-sdk@0.2.0 on npm, published 2026-09-07 (1d before the 2026-09-08 sweep). The registry names horizontalsystems/stellar-web-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	"smart-treasury": {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-09-04",
+		sourceUrl: "https://www.npmjs.com/package/sta-sdk",
+		note: "sta-sdk@0.1.1 on npm, published 2026-09-04 (4d before the 2026-09-08 sweep). The registry names Smart-Treasury-Account-STA/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	blockaid: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-25",
+		sourceUrl: "https://www.npmjs.com/package/@blockaid/client",
+		note: "@blockaid/client@1.8.0 on npm, published 2026-08-25 (14d before the 2026-09-08 sweep). The registry names blockaid-official/blockaid-client-node as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	acta: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-22",
+		sourceUrl: "https://www.npmjs.com/package/@acta-team/credentials",
+		note: "@acta-team/credentials@1.1.10 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names ACTA-Team/acta-credentials as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	defarm: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-22",
+		sourceUrl: "https://www.npmjs.com/package/@defarm/mcp",
+		note: "@defarm/mcp@0.1.0 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names defarm-repo/defarm-mcp as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	moonlight: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-07-28",
+		sourceUrl: "https://jsr.io/@moonlight/moonlight-sdk",
+		note: "@moonlight/moonlight-sdk@0.13.0 on jsr, published 2026-07-28 (42d before the 2026-09-08 sweep). The registry names Moonlight-Protocol/moonlight-sdk as the package source (jsr.io githubRepository), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	fundable: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-07-26",
+		sourceUrl: "https://www.npmjs.com/package/@fundable/sdk",
+		note: "@fundable/sdk@0.1.0 on npm, published 2026-07-26 (44d before the 2026-09-08 sweep). The registry names Fundable-Protocol/fundable-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	axis: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-06-21",
+		sourceUrl: "https://www.npmjs.com/package/@axis-markets/json-storage",
+		note: "@axis-markets/json-storage@0.2.0 on npm, published 2026-06-21 (79d before the 2026-09-08 sweep). The registry names axis-markets/json-storage as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	cypher: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-04-28",
+		sourceUrl: "https://www.npmjs.com/package/@cypherhq/agent-pay",
+		note: "@cypherhq/agent-pay@0.1.0-beta.15 on npm, published 2026-04-28 (133d before the 2026-09-08 sweep). The registry names CypherD-IO/agent-pay as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	drips: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2025-11-17",
+		sourceUrl: "https://www.npmjs.com/package/@drips-network/sdk",
+		note: "@drips-network/sdk@0.1.0-alpha.15 on npm, published 2025-11-17 (295d before the 2026-09-08 sweep). The registry names drips-network/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+
 	// -- Next-100 packets 2026-09-06 (three agents, chunks a/b/c; drafts improvements/drafts/
 	// 2026-09-06-verification-packets-next100-*.md): the Live rows whose product state the
 	// coordinator re-probed with its own instrument the same night (iTunes lookups, Play
@@ -85,7 +171,7 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-09-07",
 		sourceUrl: "https://triiyo.com/",
-		note: "Weak-basis sweep 2026-09-07: triiyo.com redirects to HugeDomains — \"Triiyo.com … This domain is for sale: $10,795\", rendered read plus a receipt matching \"for sale\" in the served text. SCF #22, $50,303 — the award stands, the product does not.",
+		note: 'Weak-basis sweep 2026-09-07: triiyo.com redirects to HugeDomains — "Triiyo.com … This domain is for sale: $10,795", rendered read plus a receipt matching "for sale" in the served text. SCF #22, $50,303 — the award stands, the product does not.',
 	},
 	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
 	// their own surfaces after the first tranche. A default page TITLE is not a
@@ -106,7 +192,7 @@ export const STATUS_FIX: Record<
 		basis: "site-liveness",
 		asOf: "2026-09-06",
 		sourceUrl: "https://paychant.com/",
-		note: "Weak-basis sweep 2026-09-06: probed alive at its own site (\"Fiat On and Off Ramp Solution for Stablecoins\"). Basis was source-inherited — a claim we had never checked; now it is one we have. Not stronger than site-liveness: the site loading is all the evidence this product offers.",
+		note: 'Weak-basis sweep 2026-09-06: probed alive at its own site ("Fiat On and Off Ramp Solution for Stablecoins"). Basis was source-inherited — a claim we had never checked; now it is one we have. Not stronger than site-liveness: the site loading is all the evidence this product offers.',
 	},
 	zilt: {
 		from: "Live",
@@ -114,7 +200,7 @@ export const STATUS_FIX: Record<
 		basis: "site-liveness",
 		asOf: "2026-09-06",
 		sourceUrl: "https://zilt.vercel.app/",
-		note: "Weak-basis sweep 2026-09-06: the page title is the unedited Next.js default (\"Create Next App\"), but the page sells the product — buy and sell USDC with M-Pesa and Eco-cash, on Stellar. Rendered read. Basis was unverified; a lazy title is not a dead product.",
+		note: 'Weak-basis sweep 2026-09-06: the page title is the unedited Next.js default ("Create Next App"), but the page sells the product — buy and sell USDC with M-Pesa and Eco-cash, on Stellar. Rendered read. Basis was unverified; a lazy title is not a dead product.',
 	},
 	// ── Store evidence 2026-09-07 (P4). A weak "the site loaded" basis is
 	// replaced by the product's OWN dated artifact: a store listing the
@@ -125,39 +211,41 @@ export const STATUS_FIX: Record<
 	// impersonate one. Deliberately NOT product-integration: a fresh build
 	// proves the product ships, not that it touches Stellar.
 
-	"akuna": {
+	akuna: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-08-31",
 		sourceUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://akunawallet.com/) links ios listing \"Akuna Wallet\" v3.1.0, released 2026-08-31 (Apple lookup API by id).",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://akunawallet.com/) links ios listing "Akuna Wallet" v3.1.0, released 2026-08-31 (Apple lookup API by id).',
 	},
-	"bousol": {
+	bousol: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-08-26",
-		sourceUrl: "https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://bousolapp.com/) links ios listing \"Bousol Wallet - Paon Bleu Inc.\" v4.2.0, released 2026-08-26 (Apple lookup API by id).",
+		sourceUrl:
+			"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://bousolapp.com/) links ios listing "Bousol Wallet - Paon Bleu Inc." v4.2.0, released 2026-08-26 (Apple lookup API by id).',
 	},
-	"dollarize": {
+	dollarize: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-08-10",
-		sourceUrl: "https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://dollarize.me/) links ios listing \"Dollarize: USD Account\" v1.1.41, released 2026-08-10 (Apple lookup API by id).",
+		sourceUrl:
+			"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://dollarize.me/) links ios listing "Dollarize: USD Account" v1.1.41, released 2026-08-10 (Apple lookup API by id).',
 	},
-	"ebioro": {
+	ebioro: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-09-06",
 		sourceUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://ebioro.com/) links ios listing \"ebioro\" v8.9.4, released 2026-09-06 (Apple lookup API by id).",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://ebioro.com/) links ios listing "ebioro" v8.9.4, released 2026-09-06 (Apple lookup API by id).',
 	},
-	"fastbuka": {
+	fastbuka: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
@@ -165,29 +253,31 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
 		note: "Store evidence 2026-09-07: the project's own site (https://choppaddi.com/) links ios listing \"Choppaddi\" v1.0, released 2026-08-03 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
 	},
-	"fewticket": {
+	fewticket: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-09-02",
 		sourceUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://fewticket.com/) links ios listing \"Fewticket\" v1.0.6, released 2026-09-02 (Apple lookup API by id).",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://fewticket.com/) links ios listing "Fewticket" v1.0.6, released 2026-09-02 (Apple lookup API by id).',
 	},
 	"freedom-pay-wallet": {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-07-16",
-		sourceUrl: "https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://freedompaywallet.com/) links ios listing \"Freedom Pay Wallet\" v2.4, released 2026-07-16 (Apple lookup API by id).",
+		sourceUrl:
+			"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://freedompaywallet.com/) links ios listing "Freedom Pay Wallet" v2.4, released 2026-07-16 (Apple lookup API by id).',
 	},
-	"meru": {
+	meru: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-09-06",
-		sourceUrl: "https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://getmeru.com/) links ios listing \"Meru | Cuenta en dólares\" v4.29.3, released 2026-09-06 (Apple lookup API by id).",
+		sourceUrl:
+			"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://getmeru.com/) links ios listing "Meru | Cuenta en dólares" v4.29.3, released 2026-09-06 (Apple lookup API by id).',
 	},
 	"providencia-onchain": {
 		from: "Live",
@@ -197,23 +287,24 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
 		note: "Store evidence 2026-09-07: the project's own site (https://viio.me/) links ios listing \"VIIO\" v3.2.27, released 2026-08-31 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
 	},
-	"scopex": {
+	scopex: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-08-28",
 		sourceUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://scopex.money/) links ios listing \"Scopex\" v4.1.3, released 2026-08-28 (Apple lookup API by id).",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://scopex.money/) links ios listing "Scopex" v4.1.3, released 2026-08-28 (Apple lookup API by id).',
 	},
-	"seevcash": {
+	seevcash: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-09-06",
-		sourceUrl: "https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://seevcash.com/) links ios listing \"Seevcash: Send Money Anywhere\" v11.5, released 2026-09-06 (Apple lookup API by id).",
+		sourceUrl:
+			"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://seevcash.com/) links ios listing "Seevcash: Send Money Anywhere" v11.5, released 2026-09-06 (Apple lookup API by id).',
 	},
-	"utoken": {
+	utoken: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
@@ -221,13 +312,13 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
 		note: "Store evidence 2026-09-07: the project's own site (https://upesa.app/) links ios listing \"Upesa\" v1.3.0, released 2026-08-19 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
 	},
-	"yolat": {
+	yolat: {
 		from: "Live",
 		to: "Live",
 		basis: "operator-announcement",
 		asOf: "2026-09-04",
 		sourceUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
-		note: "Store evidence 2026-09-07: the project's own site (https://yolat.com/) links ios listing \"Yolat\" v1.0.57, released 2026-09-04 (Apple lookup API by id).",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://yolat.com/) links ios listing "Yolat" v1.0.57, released 2026-09-04 (Apple lookup API by id).',
 	},
 	// Found 2026-09-07 by teaching the packet guard to read a Chrome Web Store
 	// title: the row was Live on the strength of a listing that no longer
@@ -240,7 +331,7 @@ export const STATUS_FIX: Record<
 		asOf: "2026-09-07",
 		sourceUrl:
 			"https://chromewebstore.google.com/detail/stellar-tip/nofpjgocmncmlacjfnniilnckjbhmgdh",
-		note: "Retired 2026-09-07: the Chrome Web Store listing is gone — it renders \"This item is not available\" and its server-rendered title is the bare \"Chrome Web Store\" with no extension name. Checked against a control the same minute: Freighter's listing renders in full and titles itself \"Freighter - Chrome Web Store\", so this is about the item, not a sign-in wall. The only linked repo (MichaelxhJiang/stellar-tip) last committed 2020-05-07. SCF #4 — the award stands, the product does not.",
+		note: 'Retired 2026-09-07: the Chrome Web Store listing is gone — it renders "This item is not available" and its server-rendered title is the bare "Chrome Web Store" with no extension name. Checked against a control the same minute: Freighter\'s listing renders in full and titles itself "Freighter - Chrome Web Store", so this is about the item, not a sign-in wall. The only linked repo (MichaelxhJiang/stellar-tip) last committed 2020-05-07. SCF #4 — the award stands, the product does not.',
 	},
 	// ── The two the broken-link split surfaced 2026-09-07. Both were Live with
 	// a dead site, which is the case the old model buried: a broken link on a
@@ -252,7 +343,7 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-09-07",
 		sourceUrl: "http://assetdesk.xyz/",
-		note: "Retired 2026-09-07: assetdesk.xyz serves Namecheap's \"Domain registration has expired\" notice over http and refuses https entirely; the domain lapsed. The GitHub org github.com/assetdesk still exists with 3 repos, last touched 2023-09-08. SCF #19, $77,000 — the award stands, the product does not. Found because a broken link on a LIVE row is a defect, not corroboration.",
+		note: 'Retired 2026-09-07: assetdesk.xyz serves Namecheap\'s "Domain registration has expired" notice over http and refuses https entirely; the domain lapsed. The GitHub org github.com/assetdesk still exists with 3 repos, last touched 2023-09-08. SCF #19, $77,000 — the award stands, the product does not. Found because a broken link on a LIVE row is a defect, not corroboration.',
 	},
 	kunst21: {
 		from: "Live",
@@ -270,21 +361,21 @@ export const STATUS_FIX: Record<
 	// that merely could not be read are NOT here; eleven more that a first pass
 	// called dead were false deaths from a probe that did not follow 308
 	// redirects (eiger.co, hatom.com, wombat.exchange among them).
-	"sorosplits": {
+	sorosplits: {
 		from: "Live",
 		to: "Inactive",
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://sorosplits.xyz/",
-		note: "Weak-basis sweep 2026-09-06: sorosplits.xyz now renders GoDaddy's \"is for sale\" page ($399); a plain fetch sees only the client-side redirect to /lander, so this was read in a browser. Own repos (findolor) last pushed 2024. SCF #19 + #23, $153,700 — the award stands, the product does not.",
+		note: 'Weak-basis sweep 2026-09-06: sorosplits.xyz now renders GoDaddy\'s "is for sale" page ($399); a plain fetch sees only the client-side redirect to /lander, so this was read in a browser. Own repos (findolor) last pushed 2024. SCF #19 + #23, $153,700 — the award stands, the product does not.',
 	},
-	"sorodrop": {
+	sorodrop: {
 		from: "Live",
 		to: "Inactive",
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://sorodrop.xyz/",
-		note: "Weak-basis sweep 2026-09-06: sorodrop.xyz renders GoDaddy's \"is for sale\" page ($599, or lease-to-own); the raw markup carries only the /lander redirect. Rendered read confirmed the sale page.",
+		note: 'Weak-basis sweep 2026-09-06: sorodrop.xyz renders GoDaddy\'s "is for sale" page ($599, or lease-to-own); the raw markup carries only the /lander redirect. Rendered read confirmed the sale page.',
 	},
 	"soroban-pulse": {
 		from: "Live",
@@ -292,9 +383,9 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-09-06",
 		sourceUrl: "https://sorobanpulse.app/",
-		note: "Weak-basis sweep 2026-09-06: sorobanpulse.app \"has expired and is parked free, courtesy of GoDaddy.com\" — the domain lapsed. Rendered read; the raw markup carries only the /lander redirect.",
+		note: 'Weak-basis sweep 2026-09-06: sorobanpulse.app "has expired and is parked free, courtesy of GoDaddy.com" — the domain lapsed. Rendered read; the raw markup carries only the /lander redirect.',
 	},
-	"qolaq": {
+	qolaq: {
 		from: "Live",
 		to: "Inactive",
 		basis: "human-verified",
@@ -302,7 +393,7 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://qolaq.com/",
 		note: "Weak-basis sweep 2026-09-06: qolaq.org and www.qolaq.org both 404, and qolaq.com serves a two-line document that redirects to a parked /lander. The GitHub org survives with one repo and still links the dead qolaq.org. SCF #13, $150,000 — the award stands, the product does not.",
 	},
-	"stellarpay": {
+	stellarpay: {
 		from: "Live",
 		to: "Inactive",
 		basis: "human-verified",
@@ -318,7 +409,7 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://0xauth.co/",
 		note: "Weak-basis sweep 2026-09-06: 0xauth.co no longer resolves (NXDOMAIN).",
 	},
-	"digicus": {
+	digicus: {
 		from: "Live",
 		to: "Inactive",
 		basis: "human-verified",
@@ -5155,66 +5246,71 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 export const GITHUB_LINK_REMOVE: Record<string, string> = {
 	// ── not a GitHub path (real URL noted; the stored value 404s) ──
 	// real: https://gitlab.com/b4b-world
-	"b4b": "https://github.com/gitlab.com/b4b-world",
+	b4b: "https://github.com/gitlab.com/b4b-world",
 	// real: https://gitlab.com/dolphinze/disbursements
-	"dolphinze": "https://github.com/gitlab.com/dolphinze/disbursements",
+	dolphinze: "https://github.com/gitlab.com/dolphinze/disbursements",
 	// real: a Google Doc, not a repo
-	"payrit": "https://github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
+	payrit:
+		"https://github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
 	// real: https://gitlab.com/rivool-finance/stellar-contracts
-	"rivool-finance": "https://github.com/gitlab.com/rivool-finance/stellar-contracts",
+	"rivool-finance":
+		"https://github.com/gitlab.com/rivool-finance/stellar-contracts",
 	// real: https://dev-api-new.skopadev.com/api (an API endpoint, not a repo)
-	"skopa": "https://github.com/dev-api-new.skopadev.com/api#",
+	skopa: "https://github.com/dev-api-new.skopadev.com/api#",
 	// real: https://gitlab.com/soroban-explorer
 	"soroban-explorer": "https://github.com/gitlab.com/soroban-explorer",
 	// real: https://gitlab.com/tales
 	"source-of-tales": "https://github.com/gitlab.com/tales",
 	// ── repo gone; owner has nothing that passes an intersection check ──
-	"6a2a4efab6c85e93c7be0090": "https://github.com/gustavo-f0ntz",  // owner account gone
-	"ai-transparency-token": "https://github.com/falparis/aitt",  // closest of 3 repos
-	"bingtellar": "https://github.com/bingtellar/bingtellar-serverside",  // owner has 2 repos, none close
-	"cartwey": "https://github.com/Cartwey001/cartwey-app",  // closest of 1 repos
-	"cede": "https://github.com/cedelabs/sdk-examples",  // owner has 5 repos, none close
-	"centiiv": "https://github.com/centiiv/protocol-node",  // owner has 1 repos, none close
-	"coinsender": "https://github.com/megadev-ou/cs-payments",  // owner has 9 repos, none close
-	"didstellar": "https://github.com/mavennet/stellar-did",  // owner has 30 repos, none close
-	"elsa": "https://github.com/elsa-care",  // owner account gone
-	"forestio": "https://github.com/forest-io/ForestConsumerWeb",  // owner has 3 repos, none close
+	"6a2a4efab6c85e93c7be0090": "https://github.com/gustavo-f0ntz", // owner account gone
+	"ai-transparency-token": "https://github.com/falparis/aitt", // closest of 3 repos
+	bingtellar: "https://github.com/bingtellar/bingtellar-serverside", // owner has 2 repos, none close
+	cartwey: "https://github.com/Cartwey001/cartwey-app", // closest of 1 repos
+	cede: "https://github.com/cedelabs/sdk-examples", // owner has 5 repos, none close
+	centiiv: "https://github.com/centiiv/protocol-node", // owner has 1 repos, none close
+	coinsender: "https://github.com/megadev-ou/cs-payments", // owner has 9 repos, none close
+	didstellar: "https://github.com/mavennet/stellar-did", // owner has 30 repos, none close
+	elsa: "https://github.com/elsa-care", // owner account gone
+	forestio: "https://github.com/forest-io/ForestConsumerWeb", // owner has 3 repos, none close
 	// Stored form is the capitalised one; GitHub is case-insensitive so both
 	// 404 identically, and the value guard has to match what the row holds.
-	"gecko-fuzz": "https://github.com/jjjutla/GeckoFuzz",  // owner has 5 repos, none close
-	"interlinked": "https://github.com/antontat27/interlinked-backend",  // closest of 7 repos
-	"jetpad": "https://github.com/jetpad-digital-limited/jetpad-wallet",  // owner has no public repos
-	"js-capacitor-passkey-kit": "https://github.com/argo-navis-dev/js-capacitor-passkey-kit",  // closest of 6 repos
-	"lettuce": "https://github.com/stellar-merchants",  // owner account gone
-	"metafyed": "https://github.com/nasdex-marketplace/md-stellar_wallet_service",  // owner has no public repos
-	"mimoto": "https://github.com/nkoorty/mimoto",  // owner has 14 repos, none close
-	"minah": "https://github.com/gakpe/minah_blockchain_v0.2",  // owner has 14 repos, none close
-	"muwp": "https://github.com/muwpay-uniswapper/muwp-stellar",  // owner has 1 repos, none close
-	"nemorixpay": "https://github.com/nemorixpay",  // owner account gone
-	"nobak": "https://github.com/nobak-net/nobak-mobile",  // owner has 4 repos, none close
-	"paystreme": "https://github.com/walletgurullc/paystreme",  // owner has 10 repos, none close
-	"plutope": "https://github.com/plutopein/plutope-merchant-stellar",  // owner has no public repos
-	"polaris-lend": "https://github.com/jet-lab/polaris",  // owner has 17 repos, none close
-	"proofbridge": "https://github.com/explore-beyond-innovations/proofbridge",  // closest of 19 repos
-	"prophe": "https://github.com/seunsanyaa/prophe",  // owner has 39 repos, none close
-	"satellite": "https://github.com/spaceboatdvlp/hello-soroban",  // owner has 10 repos, none close
-	"scalps": "https://github.com/imobi/scalps-core-api",  // owner has 16 repos, none close
-	"sollpay": "https://github.com/mercury-labs-dev/stellar-sollpay",  // owner has 3 repos, none close
-	"soroban-optimistic-oracle": "https://github.com/stackman27/soroban-opt-oracle",  // owner has 37 repos, none close
-	"soroban-polygon-interop": "https://github.com/wanchain/message-bridge-contracts",  // owner has 13 repos, none close
-	"sorobuilder": "https://github.com/luisao8/sorobuilder",  // owner has 17 repos, none close
-	"sorosorcerer": "https://github.com/nossicasystems/soroban_extend",  // owner has 9 repos, none close
-	"talwex": "https://github.com/talwex-inc/stellar-vault",  // owner has 1 repos, none close
-	"tauvlo": "https://github.com/tauvlo",  // owner account gone
-	"teken": "https://github.com/moonbite-gmbh/multisig-ui",  // owner has 1 repos, none close
-	"tracee": "https://github.com/Tracee1910/tracee-app",  // owner has no public repos
-	"transfermole": "https://github.com/ivandzen/transfermole",  // closest of 35 repos
-	"tumbl": "https://github.com/cordilleradev",  // owner account gone
-	"utoken": "https://github.com/utokens",  // owner account gone
-	"vanna-finance": "https://github.com/vannafinance/protocol_v1_soroban",  // owner has 5 repos, none close
-	"wallet-guru": "https://github.com/WalletGuruLLC/paystreme",  // owner has 10 repos, none close
-	"walletban": "https://github.com/darthbenro008/walletban",  // owner has 100 repos, none close
-	"warmancer": "https://github.com/towa-hi/solid-parakeet",  // owner has 4 repos, none close
+	"gecko-fuzz": "https://github.com/jjjutla/GeckoFuzz", // owner has 5 repos, none close
+	interlinked: "https://github.com/antontat27/interlinked-backend", // closest of 7 repos
+	jetpad: "https://github.com/jetpad-digital-limited/jetpad-wallet", // owner has no public repos
+	"js-capacitor-passkey-kit":
+		"https://github.com/argo-navis-dev/js-capacitor-passkey-kit", // closest of 6 repos
+	lettuce: "https://github.com/stellar-merchants", // owner account gone
+	metafyed: "https://github.com/nasdex-marketplace/md-stellar_wallet_service", // owner has no public repos
+	mimoto: "https://github.com/nkoorty/mimoto", // owner has 14 repos, none close
+	minah: "https://github.com/gakpe/minah_blockchain_v0.2", // owner has 14 repos, none close
+	muwp: "https://github.com/muwpay-uniswapper/muwp-stellar", // owner has 1 repos, none close
+	nemorixpay: "https://github.com/nemorixpay", // owner account gone
+	nobak: "https://github.com/nobak-net/nobak-mobile", // owner has 4 repos, none close
+	paystreme: "https://github.com/walletgurullc/paystreme", // owner has 10 repos, none close
+	plutope: "https://github.com/plutopein/plutope-merchant-stellar", // owner has no public repos
+	"polaris-lend": "https://github.com/jet-lab/polaris", // owner has 17 repos, none close
+	proofbridge: "https://github.com/explore-beyond-innovations/proofbridge", // closest of 19 repos
+	prophe: "https://github.com/seunsanyaa/prophe", // owner has 39 repos, none close
+	satellite: "https://github.com/spaceboatdvlp/hello-soroban", // owner has 10 repos, none close
+	scalps: "https://github.com/imobi/scalps-core-api", // owner has 16 repos, none close
+	sollpay: "https://github.com/mercury-labs-dev/stellar-sollpay", // owner has 3 repos, none close
+	"soroban-optimistic-oracle":
+		"https://github.com/stackman27/soroban-opt-oracle", // owner has 37 repos, none close
+	"soroban-polygon-interop":
+		"https://github.com/wanchain/message-bridge-contracts", // owner has 13 repos, none close
+	sorobuilder: "https://github.com/luisao8/sorobuilder", // owner has 17 repos, none close
+	sorosorcerer: "https://github.com/nossicasystems/soroban_extend", // owner has 9 repos, none close
+	talwex: "https://github.com/talwex-inc/stellar-vault", // owner has 1 repos, none close
+	tauvlo: "https://github.com/tauvlo", // owner account gone
+	teken: "https://github.com/moonbite-gmbh/multisig-ui", // owner has 1 repos, none close
+	tracee: "https://github.com/Tracee1910/tracee-app", // owner has no public repos
+	transfermole: "https://github.com/ivandzen/transfermole", // closest of 35 repos
+	tumbl: "https://github.com/cordilleradev", // owner account gone
+	utoken: "https://github.com/utokens", // owner account gone
+	"vanna-finance": "https://github.com/vannafinance/protocol_v1_soroban", // owner has 5 repos, none close
+	"wallet-guru": "https://github.com/WalletGuruLLC/paystreme", // owner has 10 repos, none close
+	walletban: "https://github.com/darthbenro008/walletban", // owner has 100 repos, none close
+	warmancer: "https://github.com/towa-hi/solid-parakeet", // owner has 4 repos, none close
 };
 
 /**
@@ -5239,56 +5335,57 @@ export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
 	// a GitHub url in the WEBSITE field, and that repo 404s
 	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
 	// a GitHub url in the WEBSITE field, and that repo 404s
-	"teken": "https://github.com/moonbite-gmbh/multisig-ui",
+	teken: "https://github.com/moonbite-gmbh/multisig-ui",
 	// a GitHub url in the WEBSITE field, and that repo 404s
-	"mimoto": "https://github.com/nkoorty/mimoto",
+	mimoto: "https://github.com/nkoorty/mimoto",
 	// a GitHub url in the WEBSITE field, and that repo 404s
-	"soroban-optimistic-oracle": "https://github.com/stackman27/soroban-opt-oracle",
-	"0xauth": "https://0xauth.co",  // domain does not resolve
-	"adamik": "https://adamik.io",  // HTTP 404
-	"aerochain": "https://aerochain.wingleet.com/redoc",  // domain does not resolve
-	"apay": "https://apay.io",  // HTTP 404
-	"arcturus": "https://arcturus-gpt.com",  // domain does not resolve
-	"basement": "https://basement.dev",  // HTTP 404
-	"benkiko": "https://benkiko.xyz",  // domain does not resolve
-	"bigger": "https://biggertech.co",  // "registered with gandi"
-	"borderdollar": "https://borderdollar.co",  // HTTP 404
-	"bravepay": "https://bravepay.net",  // domain does not resolve
-	"canfy": "https://canfy.net",  // domain does not resolve
-	"chainsatlas": "https://chainsatlas.com",  // HTTP 404
-	"cosmiclink": "https://cosmic.link",  // domain does not resolve
-	"cosmicvote": "https://cosmic.vote",  // domain does not resolve
-	"cryptocannoneer": "https://blockshangerous.com/cryptocannoneer",  // domain does not resolve
-	"digicus": "https://digicus.dev",  // HTTP 404
-	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi",  // domain does not resolve
-	"equilibre": "https://equilibre.io",  // domain does not resolve
-	"forge": "https://forgerpc.com",  // domain does not resolve
-	"getpaid": "https://getpaid.africa",  // domain does not resolve
-	"lumenaut": "https://pool.lumenaut.net",  // domain does not resolve
-	"lumens-for-charity": "https://lumensforcharity.tech",  // domain does not resolve
-	"mxlet": "https://xlet.io",  // domain does not resolve
-	"opensolar": "https://openx.solar",  // domain does not resolve
-	"paygo-crypto": "https://paygocrypto.io",  // domain does not resolve
-	"ping": "https://letsping.com",  // HTTP 404
-	"qolaq": "https://qolaq.org",  // HTTP 404
-	"rigel": "https://rigel.link",  // domain does not resolve
-	"skeeper": "https://skeeper.xyz",  // domain does not resolve
-	"slender": "https://slender.fi",  // domain does not resolve
-	"snnac": "https://snnac.me",  // domain does not resolve
-	"soroban-assistant": "https://soroban-assistant.herokuapp.com",  // HTTP 404
-	"soroban-learn": "https://sorobanlearn.com",  // domain does not resolve
-	"sorobanide": "https://sorobanide.com",  // domain does not resolve
-	"sorosorcerer": "https://sorosorcerer.com",  // domain does not resolve
-	"sorscan": "https://sorscan.org",  // domain does not resolve
-	"stellar-global": "https://stellarglobal.community",  // domain does not resolve
-	"stellar-update": "https://stellarupdate.com",  // default nginx welcome page — an unconfigured server, not a pro
-	"stellarpay": "https://stellarpay.io",  // domain does not resolve
-	"stellarstrides": "https://stellarstrides.xyz",  // domain does not resolve
-	"stex": "https://stex.xycloo.com",  // domain does not resolve
-	"stride": "https://stride.social",  // HTTP 404
-	"tribal": "https://tribal.credit",  // "registered with gandi"
-	"vitreous": "https://vitreous.co",  // domain does not resolve
-	"websoroban-ide": "https://websoroban.vercel.app",  // HTTP 404
+	"soroban-optimistic-oracle":
+		"https://github.com/stackman27/soroban-opt-oracle",
+	"0xauth": "https://0xauth.co", // domain does not resolve
+	adamik: "https://adamik.io", // HTTP 404
+	aerochain: "https://aerochain.wingleet.com/redoc", // domain does not resolve
+	apay: "https://apay.io", // HTTP 404
+	arcturus: "https://arcturus-gpt.com", // domain does not resolve
+	basement: "https://basement.dev", // HTTP 404
+	benkiko: "https://benkiko.xyz", // domain does not resolve
+	bigger: "https://biggertech.co", // "registered with gandi"
+	borderdollar: "https://borderdollar.co", // HTTP 404
+	bravepay: "https://bravepay.net", // domain does not resolve
+	canfy: "https://canfy.net", // domain does not resolve
+	chainsatlas: "https://chainsatlas.com", // HTTP 404
+	cosmiclink: "https://cosmic.link", // domain does not resolve
+	cosmicvote: "https://cosmic.vote", // domain does not resolve
+	cryptocannoneer: "https://blockshangerous.com/cryptocannoneer", // domain does not resolve
+	digicus: "https://digicus.dev", // HTTP 404
+	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi", // domain does not resolve
+	equilibre: "https://equilibre.io", // domain does not resolve
+	forge: "https://forgerpc.com", // domain does not resolve
+	getpaid: "https://getpaid.africa", // domain does not resolve
+	lumenaut: "https://pool.lumenaut.net", // domain does not resolve
+	"lumens-for-charity": "https://lumensforcharity.tech", // domain does not resolve
+	mxlet: "https://xlet.io", // domain does not resolve
+	opensolar: "https://openx.solar", // domain does not resolve
+	"paygo-crypto": "https://paygocrypto.io", // domain does not resolve
+	ping: "https://letsping.com", // HTTP 404
+	qolaq: "https://qolaq.org", // HTTP 404
+	rigel: "https://rigel.link", // domain does not resolve
+	skeeper: "https://skeeper.xyz", // domain does not resolve
+	slender: "https://slender.fi", // domain does not resolve
+	snnac: "https://snnac.me", // domain does not resolve
+	"soroban-assistant": "https://soroban-assistant.herokuapp.com", // HTTP 404
+	"soroban-learn": "https://sorobanlearn.com", // domain does not resolve
+	sorobanide: "https://sorobanide.com", // domain does not resolve
+	sorosorcerer: "https://sorosorcerer.com", // domain does not resolve
+	sorscan: "https://sorscan.org", // domain does not resolve
+	"stellar-global": "https://stellarglobal.community", // domain does not resolve
+	"stellar-update": "https://stellarupdate.com", // default nginx welcome page — an unconfigured server, not a pro
+	stellarpay: "https://stellarpay.io", // domain does not resolve
+	stellarstrides: "https://stellarstrides.xyz", // domain does not resolve
+	stex: "https://stex.xycloo.com", // domain does not resolve
+	stride: "https://stride.social", // HTTP 404
+	tribal: "https://tribal.credit", // "registered with gandi"
+	vitreous: "https://vitreous.co", // domain does not resolve
+	"websoroban-ide": "https://websoroban.vercel.app", // HTTP 404
 };
 
 export const WEBSITE_REMOVE: Record<string, string> = {
@@ -5385,15 +5482,27 @@ export const OWNERSHIP_COVERAGE: Array<{
 	name: string;
 	field: string;
 }> = [
-	{ map: DESCRIPTION_FIXES, name: "DESCRIPTION_FIXES", field: "shortDescription" },
+	{
+		map: DESCRIPTION_FIXES,
+		name: "DESCRIPTION_FIXES",
+		field: "shortDescription",
+	},
 	{ map: TYPES_SET, name: "TYPES_SET", field: "types" },
 	{ map: TYPES_ADD, name: "TYPES_ADD", field: "types" },
 	{ map: STATUS_FIX, name: "STATUS_FIX", field: "status" },
 	{ map: NAME_FIXES, name: "NAME_FIXES", field: "name" },
 	{ map: WEBSITE_FIXES, name: "WEBSITE_FIXES", field: "links.website" },
 	{ map: WEBSITE_REMOVE, name: "WEBSITE_REMOVE", field: "links.website" },
-	{ map: WEBSITE_REMOVE_DEAD, name: "WEBSITE_REMOVE_DEAD", field: "links.website" },
-	{ map: GITHUB_LINK_REMOVE, name: "GITHUB_LINK_REMOVE", field: "links.github" },
+	{
+		map: WEBSITE_REMOVE_DEAD,
+		name: "WEBSITE_REMOVE_DEAD",
+		field: "links.website",
+	},
+	{
+		map: GITHUB_LINK_REMOVE,
+		name: "GITHUB_LINK_REMOVE",
+		field: "links.github",
+	},
 	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
 	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
 ];
