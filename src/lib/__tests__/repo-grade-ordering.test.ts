@@ -18,6 +18,7 @@ import { describe, expect, it } from "vitest";
 import { repoGrade,
 	FIRST_PARTY_OWNERS,
 	isFirstParty,
+	vouchingNoteCount,
 } from "../repo-grade";
 
 const NOW = new Date().toISOString();
@@ -484,5 +485,56 @@ describe("audit residue", () => {
 		expect(repoGrade(flagsWithoutScan).score).toBeLessThan(
 			repoGrade({ ...flagsWithoutScan, codeScanned: true }).score,
 		);
+	});
+});
+
+describe("internal triage notes are not an endorsement", () => {
+	it("counts public notes and ignores internal ones", () => {
+		expect(
+			vouchingNoteCount([
+				{ visibility: "public" },
+				{ visibility: "internal" },
+				{ visibility: null },
+				{},
+			]),
+		).toBe(3); // internal excluded; absent/null visibility is a public note
+		expect(vouchingNoteCount([{ visibility: "internal" }])).toBe(0);
+		expect(vouchingNoteCount(null)).toBe(0);
+		expect(vouchingNoteCount(undefined)).toBe(0);
+	});
+
+	it("a repo whose only note says 'not worth surfacing' gains nothing from it", () => {
+		// The live case: Andy00L/x402-autopilot — 0 stars, no tests, no CI, no
+		// release, no project link, one INTERNAL note — was stored as 64 while
+		// its public facts compute to 38, and outranked fazzatti/colibri (62)
+		// and soroswap/core (63) on the index because one triage note bid 0.8
+		// corroboration, the same tier as SCF funding.
+		const f = {
+			lastCommitAt: "2026-04-12T20:52:50.000Z",
+			stargazerCount: 0,
+			hasDescription: true,
+			topicCount: 0,
+			openIssues: 0,
+			commits90d: 0,
+			codeDepth: 0.7,
+			judgeScore: 1,
+			stellarProof: "cargo-sdk",
+			versionStatus: "supported",
+			codeScanned: true,
+			name: "Andy00L/x402-autopilot",
+		};
+		const internalOnly = repoGrade({
+			...f,
+			knowledgeNoteCount: vouchingNoteCount([{ visibility: "internal" }]),
+		});
+		const noNotes = repoGrade({ ...f, knowledgeNoteCount: 0 });
+		expect(internalOnly.score).toBe(noNotes.score);
+		// And a real, public note still counts.
+		expect(
+			repoGrade({
+				...f,
+				knowledgeNoteCount: vouchingNoteCount([{ visibility: "public" }]),
+			}).score,
+		).toBeGreaterThan(noNotes.score);
 	});
 });

@@ -23,6 +23,7 @@ import {
 import { repoGrade,
 	isFirstParty,
 	FIRST_PARTY_OWNERS,
+	vouchingNoteCount,
 } from "../src/lib/repo-grade";
 import {
 	type AuditRecord,
@@ -580,9 +581,9 @@ async function main() {
 							: null,
 					// A curated note is a human recording what this repo IS,
 					// dated and sourced — external validation in its own right.
-					knowledgeNoteCount: Array.isArray(existing?.knowledgeNotes)
-						? existing.knowledgeNotes.length
-						: 0,
+					// Internal notes are triage memory ("not worth surfacing") and must
+					// not read as external validation — see vouchingNoteCount.
+					knowledgeNoteCount: vouchingNoteCount(existing?.knowledgeNotes),
 					// The protocol org publishes the reference implementations
 					// and never receives an SCF award, so first-party repos read
 					// as unvouched-for until this reached the grader.
