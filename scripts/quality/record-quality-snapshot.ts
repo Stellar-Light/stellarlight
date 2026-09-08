@@ -48,6 +48,21 @@ async function provenance(): Promise<{
 } | null> {
 	try {
 		const { rows, total } = await censusProjects();
+		// A census of ZERO is an instrument failure, not a measurement. The
+		// try/catch below already turns a THROWN error into null, but a query
+		// that returns an empty array throws nothing — and on 2026-09-05 this
+		// series recorded `liveRows: 0` on a day the directory served ~870.
+		// That zero is now a permanent point in the chart /quality draws.
+		//
+		// A directory with no rows at all is not a state this project can be in,
+		// so treat it the way a thrown error is treated: we did not measure
+		// today. Null is an admission; zero is a claim.
+		if (rows.length === 0 || total === 0) {
+			console.error(
+				`census returned ${rows.length} rows of ${total} — refusing to record that as a measurement`,
+			);
+			return null;
+		}
 		const live = rows.filter((p) => p.status === "Live");
 		return {
 			sampled: rows.length,
