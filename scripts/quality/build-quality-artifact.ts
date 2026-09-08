@@ -15,6 +15,10 @@ import {
 	MAINTENANCE_MODES,
 	summarizeLedger,
 } from "../../src/lib/improvement-ledger";
+import {
+	isStrongStatusBasis,
+	STRONG_STATUS_BASES,
+} from "../../src/lib/project-status";
 import { REPO_KNOWLEDGE_NOTES } from "../../src/lib/repo-knowledge";
 import { censusProjects, censusRepos, FRAME_METHOD } from "./sample-frame";
 
@@ -249,17 +253,11 @@ const ONCHAIN_PRODUCT_TYPES = [
 // this list serving 0 forever — the board's own definition named a tier no
 // row could hold while omitting two tiers rows do hold (found by a lane agent
 // on 2026-09-05; lesson 1: an enum and every aggregator that classifies it).
-const STRONG_BASES = [
-	"human-verified",
-	"onchain-activity",
-	// the live product itself was observed referencing Stellar infrastructure
-	"product-integration",
-	// the project's own repo committed inside a dated window — awarded only to
-	// library/SDK rows, where the source moving IS the product being alive
-	"repo-activity",
-] as const;
-const isStrongBasis = (b: string | null | undefined) =>
-	!!b && (STRONG_BASES as readonly string[]).includes(b);
+// Imported, not re-listed. This board is where the cost of a second copy was
+// paid: it named "official-record" (an scf.basis value no status row can hold)
+// and omitted two tiers rows did hold, so it reported real work as not done.
+const STRONG_BASES = STRONG_STATUS_BASES;
+const isStrongBasis = isStrongStatusBasis;
 const projectQuality = (p: Project) => {
 	// FIVE BINARY FACTS. Previously provenance contributed a fraction, so
 	// published scores (64, 70) were unreachable under the published

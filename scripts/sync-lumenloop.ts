@@ -12,6 +12,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
+import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 import { withoutCuratedFields } from "../src/lib/utils/curated-fields";
 import {
 	extractEntryId,
@@ -207,13 +208,7 @@ async function main() {
 					// died — losing the one thing an upstream curator is well placed
 					// to notice. The feed keeps refreshing those; it may not touch a
 					// status our own lanes or a human established.
-					const EARNED_STATUS_BASES = new Set([
-						"human-verified",
-						"onchain-activity",
-						"product-integration",
-						"repo-activity",
-						"operator-announcement",
-					]);
+					const EARNED_STATUS_BASES = new Set<string>(STRONG_STATUS_BASES);
 					if (EARNED_STATUS_BASES.has(String(doc.statusBasis)))
 						owned.add("status");
 					const { data: patch, protectedFields } = withoutCuratedFields(

@@ -164,6 +164,7 @@ export const Projects: CollectionConfig = {
 				"operator-announcement",
 				"site-liveness",
 				"repo-activity",
+				"package-release",
 				"product-integration",
 				"onchain-activity",
 				"human-verified",
@@ -172,7 +173,7 @@ export const Projects: CollectionConfig = {
 			],
 			admin: {
 				description:
-					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (a page answered - a parked domain and a dead product's marketing site both pass this), repo-activity (the project's OWN indexed repository committed inside a dated window - for a library or SDK the source moving IS liveness; for a deployed product it would only show the team is working, so it is not awarded there), product-integration (the LIVE product itself references Stellar infrastructure - a SEP-1 toml, a Horizon/RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle; an integration OBSERVED, never a claim the product works), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
+					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (a page answered - a parked domain and a dead product's marketing site both pass this), repo-activity (the project's OWN indexed repository committed inside a dated window - for a library or SDK the source moving IS liveness; for a deployed product it would only show the team is working, so it is not awarded there), package-release (a versioned artifact shipped to a package registry that names this project's OWN repo as its source - npm's repository.url or jsr.io's githubRepository, a backlink nobody can produce without controlling both the repo and the namespace; awarded only when the last publish is inside a dated window, because a 2021 artifact is not evidence a product is live now), product-integration (the LIVE product itself references Stellar infrastructure - a SEP-1 toml, a Horizon/RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle; an integration OBSERVED, never a claim the product works), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
 			},
 		},
 		{
