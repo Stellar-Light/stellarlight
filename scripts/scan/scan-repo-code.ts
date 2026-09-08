@@ -24,6 +24,7 @@
  */
 
 import "../load-env";
+import type { Where } from "payload";
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { deriveCodeDomains } from "../../src/lib/code-domains";
@@ -166,33 +167,30 @@ async function main() {
 	// Wave selection: never-scanned AND pushed-since-scan repos compete on the
 	// same -repoScore,-lastCommitAt key (re-scan policy 2026-08-08); --rescan
 	// widens to everything (error/incomplete always retry).
-	const where = {
+	// Explicitly typed: the three branches below produce different optional keys
+	// (`in` vs `not_in`), and inferring a union of those is what TS2322'd against
+	// Payload's `Where`. Naming the element type keeps the branches honest
+	// without a cast that would hide a real mistake.
+	const stateClauses: Where[] = RETRY_EXCLUDED
+		? // Retry ONLY what routine waves exclude. See --retry-excluded above.
+			[{ codeScanState: { in: ["error", "incomplete"] } }]
+		: RESCAN
+			? [] // --rescan deliberately widens to everything
+			: // error excluded 2026-08-15 (the same ~65 blob-unreadable dead repos
+				// re-erred EVERY wave, burning budget at the front of each run);
+				// incomplete excluded 2026-09-07 for the identical reason — all 14
+				// carry a STRUCTURAL note (`submodule-contracts`, `tree-incomplete`)
+				// so a re-scan produces the identical result every time. They were
+				// re-picked every two hours forever, ~840 calls a day, and every wave
+				// reported `scanned=0` as a success — a lane that CAN do no work then
+				// looks exactly like a lane that is failing to.
+				[{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }];
+	const where: Where = {
 		and: [
-			...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
-			// error rows excluded from routine waves (2026-08-15): the same ~65
-			// blob-unreadable dead repos re-erred EVERY wave, burning budget at
-			// the front of each run. --rescan still retries them deliberately.
-			//
-			// `incomplete` is excluded for the identical reason, found 2026-09-07:
-			// the fix was applied to `error` and never to its sibling. All 14
-			// incomplete rows carry a STRUCTURAL note — `submodule-contracts` (9,
-			// the contracts live in a git submodule we don't follow) or
-			// `tree-incomplete` (5, the tree API truncated) — so a re-scan
-			// produces the identical result every time. They were re-picked every
-			// two hours forever: ~70 calls a wave, ~840 a day, and every wave
-			// reported `scanned=0` as a success. A lane that CAN do no work then
-			// looks exactly like a lane that is failing to.
-			...(RETRY_EXCLUDED
-				? [{ codeScanState: { in: ["error", "incomplete"] } }]
-				: RESCAN
-					? []
-					: [
-							{
-								codeScanState: {
-									not_in: ["scanned", "error", "incomplete"],
-								},
-							},
-						]),
+			...(LANG !== "all"
+				? ([{ primaryLanguage: { equals: LANG } }] as Where[])
+				: []),
+			...stateClauses,
 		],
 	};
 	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
