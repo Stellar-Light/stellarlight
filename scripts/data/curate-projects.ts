@@ -1383,6 +1383,35 @@ const DUPE_MERGES: Array<{
 	fill?: { shortDescription?: string; github?: string };
 	copyScf?: boolean;
 }> = [
+	// ── Same-entity sweep 2026-09-08 ────────────────────────────────────────
+	// Found by grouping active rows on website-host + github-OWNER and keeping
+	// groups whose shortDescription is byte-identical: 21 groups shared both
+	// links, 4 had identical descriptions, 2 survived verification.
+	//
+	// ambergroup.io serves "Amber Group: Building the Future of Digital Assets"
+	// and the string ZET appears ZERO times on it. The rows are otherwise
+	// indistinguishable — same website, same github org, same types ['RWA'],
+	// same category, byte-identical description, neither carrying an SCF award.
+	// Nothing separates them: one entity, seeded twice.
+	{ dupe: "zet", canonical: "amber" },
+	// lulpay.com serves "LulPay - Send Money to Uganda Instantly", so the
+	// canonical is the row whose name the product actually uses. The award
+	// rides across: `lul` holds SCF slug lul-serving-the-unbanked-ckz, rounds 29
+	// and 38, $58,000 — ONE submission across two rounds, not two products —
+	// and lulpay carries none, so copyScf moves it instead of stranding it.
+	{ dupe: "lul", canonical: "lulpay", copyScf: true },
+	//
+	// NOT FOLDED, and the reason is the point: inference + inferera share
+	// inferara.com and github.com/inferara with byte-identical descriptions,
+	// which is exactly what put them on this list. They are not one product.
+	// Their SCF records are two different submissions from one research group:
+	//   inference  → inference-xfj                           round 39  $149,730
+	//   inferera   → soroban-disassembler-working-title-ply   round 41  $100,000
+	// Folding them would have destroyed a $100,000 award record. The identical
+	// description is a seed artifact — both rows inherited the GROUP's blurb —
+	// so on this list "same description" is a reason to LOOK, never a verdict.
+	// Same shape as lightsail/xlm.sh and ultra-stellar/lobstr: one org, several
+	// products, correctly separate rows.
 	// ── Weakest-queue triage 2026-08-28: the dashboard's 40%-score rows were
 	// mostly no-basis DUPLICATES of already-triaged rows. Folding removes them
 	// from every serving surface and from the queue.
