@@ -1,7 +1,7 @@
 {
 	"$comment": "Type errors in scripts/ that predate the guard. A ratchet: entries may be REMOVED (in the PR that fixes them) and never added. Regenerate: pnpm exec tsx scripts/check-scripts-types.ts --update",
-	"updatedAt": "2026-09-05T23:16:54.277Z",
-	"count": 31,
+	"updatedAt": "2026-09-08T00:55:46.700Z",
+	"count": 30,
 	"errors": [
 		"scripts/agents/apply-wallet-availability.ts :: error TS2345 :: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
 		"scripts/agents/apply-wallet-availability.ts :: error TS2769 :: No overload matches this call.",
@@ -27,7 +27,6 @@
 		"scripts/scan/depth-eval.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
 		"scripts/scan/js-depth-probe.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
 		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
-		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type '{ and: ({ primaryLanguage: { equals: string; }; codeScanState?: undefined; } | { codeScanState: { not_in: string[]; }; primaryLanguage?: undefined; })[]; }' is not assignable to type 'Where'.",
 		"scripts/seed-blog-posts.ts :: error TS2322 :: Type '{ title: string; slug: string; author: string; excerpt: string; contentType: \"markdown\"; markdownContent: string; category: string; tags: string[]; featured: boolean; status: \"published\"; publishedAt: string; }' is not assignable to type '(Omit<Blog, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\"> & Partial<Pick<Blog, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\">>) | Partial<...>'.",
 		"scripts/seed-blog-posts.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/seed-partners.ts :: error TS2559 :: Type 'false' has no properties in common with type '{ githubLastCommitAt?: string | null | undefined; githubCommits90d?: number | null | undefined; onchainActive?: boolean | null | undefined; onchainNote?: string | null | undefined; scfInvolvement?: string | ... N more ... | undefined; lastAutoVerifyAt?: string | ... N more ... | undefined; }'.",
@@ -60,7 +59,6 @@
 		"scripts/scan/depth-eval.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 2,
 		"scripts/scan/js-depth-probe.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 1,
 		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 2,
-		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type '{ and: ({ primaryLanguage: { equals: string; }; codeScanState?: undefined; } | { codeScanState: { not_in: string[]; }; primaryLanguage?: undefined; })[]; }' is not assignable to type 'Where'.": 1,
 		"scripts/seed-blog-posts.ts :: error TS2322 :: Type '{ title: string; slug: string; author: string; excerpt: string; contentType: \"markdown\"; markdownContent: string; category: string; tags: string[]; featured: boolean; status: \"published\"; publishedAt: string; }' is not assignable to type '(Omit<Blog, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\"> & Partial<Pick<Blog, \"createdAt\" | \"deletedAt\" | \"id\" | \"sizes\" | \"updatedAt\">>) | Partial<...>'.": 1,
 		"scripts/seed-blog-posts.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/seed-partners.ts :: error TS2559 :: Type 'false' has no properties in common with type '{ githubLastCommitAt?: string | null | undefined; githubCommits90d?: number | null | undefined; onchainActive?: boolean | null | undefined; onchainNote?: string | null | undefined; scfInvolvement?: string | ... N more ... | undefined; lastAutoVerifyAt?: string | ... N more ... | undefined; }'.": 1,

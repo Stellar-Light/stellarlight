@@ -25,6 +25,12 @@ on:
     # firing. GitHub documents that scheduled runs are delayed or dropped
     # under load; an off-peak minute is the only lever we hold.
     - cron: "17 */2 * * *"
+    # Monthly retry of the two states routine waves exclude (error, incomplete).
+    # Those exclusions stop the same rows re-failing every two hours, but they
+    # were one-way: nothing ever retried them, so 433 repos — including
+    # x402-foundation/x402 at 6,582 stars — were permanently unverifiable.
+    # Structural causes do resolve (a submodule gets inlined, a tree shrinks).
+    - cron: "43 3 1 * *"
   workflow_dispatch:
     inputs:
       execute:
@@ -80,8 +86,14 @@ jobs:
       # inputs.* are EMPTY on schedule events (2026-07-08 review, finding 18 —
       # the "weekly stale-first" run was a write-nothing dry run of the wrong
       # wave). Scheduled runs get their own hardcoded step.
+      # github.event.schedule names WHICH cron fired — inputs.* are empty on
+      # every schedule event, so the two scheduled waves cannot be told apart
+      # any other way.
+      - name: Retry-excluded wave (monthly)
+        if: github.event_name == 'schedule' && github.event.schedule == '43 3 1 * *'
+        run: pnpm exec tsx scripts/scan/scan-repo-code.ts --execute --retry-excluded --limit 500 --lang all
       - name: Backlog wave (schedule)
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' && github.event.schedule != '43 3 1 * *'
         # --lang all (2026-07-11): the default is Rust-only, which structurally
         # excluded every JS/TS repo from the daily wave — js-stellar-sdk never
         # got real symbols, so symbol lookups failed for the main SDK.

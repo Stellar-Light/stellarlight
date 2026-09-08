@@ -24,6 +24,7 @@
  */
 
 import "../load-env";
+import type { Where } from "payload";
 import { getPayload } from "payload";
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { deriveCodeDomains } from "../../src/lib/code-domains";
@@ -45,6 +46,22 @@ import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
 const RESCAN = process.argv.includes("--rescan");
+/**
+ * Retry ONLY the states routine waves exclude: `error` and `incomplete`.
+ *
+ * Those exclusions are right — the same rows re-fail every wave and burn the
+ * budget at the front of each run — but they were one-way. `--rescan` widens to
+ * EVERYTHING and sorts by -repoScore, so with any limit it re-scans the top of
+ * the index and never reaches an error row; nothing scheduled ever retried
+ * them. 433 repos were left permanently unverifiable, among them
+ * x402-foundation/x402 (6,582 stars, `submodule-contracts`), which then carries
+ * its stars into the ranking with no Stellar proof at all.
+ *
+ * Structural reasons DO resolve: a submodule gets inlined, a truncated tree
+ * shrinks, a 404 repo comes back. Monthly is often enough to catch that and
+ * rare enough to cost nothing.
+ */
+const RETRY_EXCLUDED = process.argv.includes("--retry-excluded");
 // Stale-first (gist gap 4): re-scan repos whose code CHANGED after their last
 // scan (lastCommitAt > codeScannedAt) — an SDK 0.7→26 upgrade otherwise keeps
 // its stale versionStatus until a wave happens to reach it. Weekly scheduled
@@ -144,31 +161,36 @@ async function main() {
 		}
 	}
 	console.log(
-		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
+		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls${RETRY_EXCLUDED ? " · mode=retry-excluded (error + incomplete only)" : ""}`,
 	);
 
 	// Wave selection: never-scanned AND pushed-since-scan repos compete on the
 	// same -repoScore,-lastCommitAt key (re-scan policy 2026-08-08); --rescan
 	// widens to everything (error/incomplete always retry).
-	const where = {
+	// Explicitly typed: the three branches below produce different optional keys
+	// (`in` vs `not_in`), and inferring a union of those is what TS2322'd against
+	// Payload's `Where`. Naming the element type keeps the branches honest
+	// without a cast that would hide a real mistake.
+	const stateClauses: Where[] = RETRY_EXCLUDED
+		? // Retry ONLY what routine waves exclude. See --retry-excluded above.
+			[{ codeScanState: { in: ["error", "incomplete"] } }]
+		: RESCAN
+			? [] // --rescan deliberately widens to everything
+			: // error excluded 2026-08-15 (the same ~65 blob-unreadable dead repos
+				// re-erred EVERY wave, burning budget at the front of each run);
+				// incomplete excluded 2026-09-07 for the identical reason — all 14
+				// carry a STRUCTURAL note (`submodule-contracts`, `tree-incomplete`)
+				// so a re-scan produces the identical result every time. They were
+				// re-picked every two hours forever, ~840 calls a day, and every wave
+				// reported `scanned=0` as a success — a lane that CAN do no work then
+				// looks exactly like a lane that is failing to.
+				[{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }];
+	const where: Where = {
 		and: [
-			...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
-			// error rows excluded from routine waves (2026-08-15): the same ~65
-			// blob-unreadable dead repos re-erred EVERY wave, burning budget at
-			// the front of each run. --rescan still retries them deliberately.
-			//
-			// `incomplete` is excluded for the identical reason, found 2026-09-07:
-			// the fix was applied to `error` and never to its sibling. All 14
-			// incomplete rows carry a STRUCTURAL note — `submodule-contracts` (9,
-			// the contracts live in a git submodule we don't follow) or
-			// `tree-incomplete` (5, the tree API truncated) — so a re-scan
-			// produces the identical result every time. They were re-picked every
-			// two hours forever: ~70 calls a wave, ~840 a day, and every wave
-			// reported `scanned=0` as a success. A lane that CAN do no work then
-			// looks exactly like a lane that is failing to.
-			...(RESCAN
-				? []
-				: [{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }]),
+			...(LANG !== "all"
+				? ([{ primaryLanguage: { equals: LANG } }] as Where[])
+				: []),
+			...stateClauses,
 		],
 	};
 	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
