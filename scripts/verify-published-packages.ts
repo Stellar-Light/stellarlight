@@ -60,37 +60,74 @@ async function j(url: string, ms = 20_000): Promise<unknown | null> {
 	}
 }
 
-/** The repo's own declared package name, from whichever manifest it uses. */
-async function declaredName(
+/**
+ * The package names this repo declares — plural, because a monorepo declares
+ * none at its root.
+ *
+ * fazzatti/colibri, the repo this lane was built for, publishes NINE packages
+ * on JSR and its root deno.json is a bare `workspace: [...]` with no `name`.
+ * Reading only the root manifest returned null and recorded "publishes
+ * nothing" — the lane missing precisely the case it exists to catch.
+ *
+ * Glob members (`./plugins/*`) are skipped: raw.githubusercontent cannot be
+ * globbed. That costs nothing, because ONE verified member resolves the JSR
+ * scope and the scope listing then yields every sibling (see verify()).
+ */
+async function declaredNames(
 	full: string,
-): Promise<{ name: string | null; reachable: boolean }> {
+): Promise<{ names: string[]; reachable: boolean }> {
 	let reachable = false;
+	const names: string[] = [];
+	const readJson = async (
+		path: string,
+	): Promise<Record<string, unknown> | null> => {
+		try {
+			const r = await fetch(
+				`https://raw.githubusercontent.com/${full}/${path}`,
+				{ headers: UA, signal: AbortSignal.timeout(15_000) },
+			);
+			if (r.status === 404) {
+				reachable = true; // the host answered; this file just isn't there
+				return null;
+			}
+			if (!r.ok) return null;
+			reachable = true;
+			return (await r.json()) as Record<string, unknown>;
+		} catch {
+			return null; // transport — leave reachable as-is
+		}
+	};
+
 	for (const br of ["main", "master"]) {
 		for (const f of ["package.json", "deno.json", "jsr.json"]) {
-			try {
-				const r = await fetch(
-					`https://raw.githubusercontent.com/${full}/${br}/${f}`,
-					{ headers: UA, signal: AbortSignal.timeout(15_000) },
-				);
-				if (r.status === 404) {
-					reachable = true; // the host answered; this file just isn't there
-					continue;
+			const m = await readJson(`${br}/${f}`);
+			if (!m) continue;
+			if (typeof m.name === "string" && m.name.trim())
+				return { names: [m.name.trim()], reachable: true };
+			const members = Array.isArray(m.workspace)
+				? m.workspace
+				: Array.isArray(m.workspaces)
+					? m.workspaces
+					: [];
+			for (const raw of members.slice(0, 12)) {
+				if (typeof raw !== "string" || raw.includes("*")) continue;
+				const dir = raw.replace(/^\.\//, "").replace(/\/$/, "");
+				for (const mf of ["deno.json", "package.json", "jsr.json"]) {
+					const mm = await readJson(`${br}/${dir}/${mf}`);
+					if (mm && typeof mm.name === "string" && mm.name.trim()) {
+						names.push(mm.name.trim());
+						break;
+					}
 				}
-				if (!r.ok) continue;
-				reachable = true;
-				const m = (await r.json()) as { name?: unknown };
-				if (typeof m.name === "string" && m.name.trim())
-					return { name: m.name.trim(), reachable: true };
-			} catch {
-				/* transport — leave reachable as-is */
+				if (names.length) return { names, reachable: true }; // one is enough
 			}
 		}
 	}
-	return { name: null, reachable };
+	return { names, reachable };
 }
 
 /** Does a registry serve this name AND name this repo as its source? */
-async function verify(full: string, name: string): Promise<Found | null> {
+async function verify(full: string, name: string): Promise<Found[] | null> {
 	if (name.startsWith("@") && name.includes("/")) {
 		const [scope, pkg] = name.slice(1).split("/", 2);
 		const d = (await j(
@@ -100,8 +137,36 @@ async function verify(full: string, name: string): Promise<Found | null> {
 			latestVersion?: string;
 		} | null;
 		const g = d?.githubRepository;
-		if (g && `${g.owner}/${g.name}`.toLowerCase() === full.toLowerCase())
-			return { registry: "jsr", name, version: String(d?.latestVersion ?? "") };
+		if (g && `${g.owner}/${g.name}`.toLowerCase() === full.toLowerCase()) {
+			// One member verifies the scope; the scope listing yields its
+			// siblings. Each sibling is re-checked against THIS repo — a scope
+			// can host packages from several repos, and a name stays a
+			// hypothesis until the registry names the source.
+			const listing = (await j(
+				`https://jsr.io/api/scopes/${encodeURIComponent(scope)}/packages`,
+			)) as { items?: Array<{ name?: string }> } | null;
+			const items = Array.isArray(listing) ? listing : (listing?.items ?? []);
+			const siblings: Found[] = [];
+			for (const it of items.slice(0, 30)) {
+				if (!it?.name) continue;
+				const sd = (await j(
+					`https://jsr.io/api/scopes/${encodeURIComponent(scope)}/packages/${encodeURIComponent(it.name)}`,
+				)) as {
+					githubRepository?: { owner?: string; name?: string };
+					latestVersion?: string;
+				} | null;
+				const sg = sd?.githubRepository;
+				if (sg && `${sg.owner}/${sg.name}`.toLowerCase() === full.toLowerCase())
+					siblings.push({
+						registry: "jsr",
+						name: `@${scope}/${it.name}`,
+						version: String(sd?.latestVersion ?? ""),
+					});
+			}
+			return siblings.length
+				? siblings
+				: [{ registry: "jsr", name, version: String(d?.latestVersion ?? "") }];
+		}
 	}
 	const n = (await j(
 		`https://registry.npmjs.org/${name.replace("/", "%2f")}`,
@@ -113,11 +178,13 @@ async function verify(full: string, name: string): Promise<Found | null> {
 		const rep = n.repository;
 		const url = typeof rep === "string" ? rep : (rep?.url ?? "");
 		if (url.toLowerCase().includes(full.toLowerCase()))
-			return {
-				registry: "npm",
-				name,
-				version: String(n["dist-tags"]?.latest ?? ""),
-			};
+			return [
+				{
+					registry: "npm",
+					name,
+					version: String(n["dist-tags"]?.latest ?? ""),
+				},
+			];
 	}
 	return null;
 }
@@ -173,20 +240,26 @@ async function main() {
 			async (r) => {
 				read++;
 				const full = String(r.fullName);
-				const { name, reachable } = await declaredName(full);
+				const { names, reachable } = await declaredNames(full);
 				// Could not reach GitHub at all: we learned nothing. Writing [] here
 				// would assert "this repo publishes nothing", which we did not check.
 				if (!reachable) {
 					blind++;
 					return;
 				}
-				const found = name ? await verify(full, name) : null;
-				const next: Found[] = found ? [found] : [];
-				if (found) {
+				// A monorepo declares several names; the first that the registry
+				// confirms wins, and for JSR that one member brings its siblings.
+				let found: Found[] | null = null;
+				for (const n of names) {
+					found = await verify(full, n);
+					if (found?.length) break;
+				}
+				const next: Found[] = found ?? [];
+				if (next.length) {
 					ships++;
 					if (samples.length < 20)
 						samples.push(
-							`  ${full} → ${found.name}@${found.version} (${found.registry})`,
+							`  ${full} → ${next.map((f) => `${f.name}@${f.version}`).join(", ")} (${next[0].registry}${next.length > 1 ? `, ${next.length} pkgs` : ""})`,
 						);
 				} else none++;
 
