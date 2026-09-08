@@ -363,6 +363,23 @@ export const Repos: CollectionConfig = {
 			// or a CI badge.
 			//
 			// In the same 25-repo hackathon sample: 0 verified-published.
+			// WHEN the registry check last ran. Absent = never checked.
+			//
+			// `publishedPackages: []` cannot carry that meaning: Payload serves an
+			// unset array field as [], so on 2026-09-08 all 13,169 rows read as
+			// either packages-or-empty and NONE as absent — including the 2,578
+			// the lane had explicitly declined to check. The lane's trinary write
+			// rule (verified / checked-none / could-not-check → not written) was
+			// correct and invisible, because the read side collapsed two of the
+			// three into the same value.
+			name: "packagesCheckedAt",
+			type: "text",
+			admin: {
+				description:
+					"When the registry check last ran. Absent = never checked (an empty publishedPackages cannot say that).",
+			},
+		},
+		{
 			name: "publishedPackages",
 			type: "array",
 			admin: {

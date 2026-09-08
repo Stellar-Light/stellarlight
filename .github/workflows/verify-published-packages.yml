@@ -24,6 +24,9 @@ on:
       limit:
         description: "Max repos to read (0 = all)"
         default: "0"
+      only:
+        description: "Pin to ONE repo (owner/name) — diagnoses a single row end to end"
+        default: ""
   schedule:
     - cron: "40 5 * * 2" # weekly, Tuesday 05:40 UTC — off enrich's and the scanner's hours
 
@@ -47,4 +50,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Verify
         # Scheduled runs always execute; manual dispatch stays dry unless ticked.
-        run: pnpm exec tsx scripts/verify-published-packages.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.limit != '0' && format('--limit={0}', inputs.limit) || '' }}
+        run: pnpm exec tsx scripts/verify-published-packages.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.limit != '0' && format('--limit={0}', inputs.limit) || '' }} ${{ inputs.only && format('--only={0}', inputs.only) || '' }}

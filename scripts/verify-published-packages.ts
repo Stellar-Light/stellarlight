@@ -241,6 +241,10 @@ async function main() {
 				read++;
 				const full = String(r.fullName);
 				const { names, reachable } = await declaredNames(full);
+				if (ONLY)
+					console.log(
+						`  [${full}] declaredNames -> ${JSON.stringify(names)} reachable=${reachable}`,
+					);
 				// Could not reach GitHub at all: we learned nothing. Writing [] here
 				// would assert "this repo publishes nothing", which we did not check.
 				if (!reachable) {
@@ -252,6 +256,8 @@ async function main() {
 				let found: Found[] | null = null;
 				for (const n of names) {
 					found = await verify(full, n);
+					if (ONLY)
+						console.log(`  [${full}] verify(${n}) -> ${JSON.stringify(found)}`);
 					if (found?.length) break;
 				}
 				const next: Found[] = found ?? [];
@@ -273,7 +279,9 @@ async function main() {
 						(p, i) =>
 							p?.name === next[i]?.name && p?.registry === next[i]?.registry,
 					);
-				if (same) return;
+				// A row whose result is unchanged still needs stamping the first
+				// time, or it can never be told apart from one we never looked at.
+				if (same && r.packagesCheckedAt) return;
 				if (EXECUTE) {
 					await payload.update({
 						collection: "repos",
@@ -283,6 +291,11 @@ async function main() {
 								...f,
 								verifiedAt: new Date().toISOString(),
 							})),
+							// Stamped on EVERY write, including an empty result: it is
+							// the only thing that separates "we looked and found
+							// nothing" from "we never looked", because Payload serves
+							// an unset array field as [].
+							packagesCheckedAt: new Date().toISOString(),
 						},
 						overrideAccess: true,
 						context: { internal: true },
