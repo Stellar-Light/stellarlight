@@ -150,6 +150,35 @@ export const FIRST_PARTY_OWNERS = new Set([
 	"stellar-experimental",
 ]);
 
+/**
+ * How many knowledge notes actually VOUCH for a repo.
+ *
+ * `knowledgeNotes` holds two opposite kinds of writing under one field. Public
+ * notes describe what a repo IS — external validation. Notes marked `internal`
+ * are triage memory, and the collection says what they are for: "why a
+ * long-tail repo isn't worth surfacing/deep-indexing". They are a verdict
+ * AGAINST the repo.
+ *
+ * Counting them together inverted the signal. The public API strips internal
+ * notes for anonymous reads, so the count looked like 0 from outside; both
+ * grading lanes read with `context.internal` and counted them, and a single
+ * note saying "not worth surfacing" bid 0.8 corroboration — the same tier as
+ * SCF funding. Measured 2026-09-08: Andy00L/x402-autopilot, 0 stars, no tests,
+ * no CI, no release, no project link and one INTERNAL note, was written as 64
+ * where the formula on its public facts gives 38 — and it outranked both
+ * fazzatti/colibri (62) and soroswap/core (63) on the live index because of it.
+ *
+ * An internal note contributes nothing. It is not evidence for, and this
+ * function deliberately does not make it evidence against either — the triage
+ * verdict already has its own field (`triageTags`).
+ */
+export function vouchingNoteCount(
+	notes: ReadonlyArray<{ visibility?: string | null }> | null | undefined,
+): number {
+	if (!Array.isArray(notes)) return 0;
+	return notes.filter((n) => n?.visibility !== "internal").length;
+}
+
 /** Accepts "owner" or "owner/name". */
 export function isFirstParty(owner: string | null | undefined): boolean {
 	if (!owner) return false;

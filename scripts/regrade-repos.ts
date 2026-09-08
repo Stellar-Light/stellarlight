@@ -25,7 +25,11 @@
 import "./load-env";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { isFirstParty, repoGrade } from "../src/lib/repo-grade";
+import {
+	isFirstParty,
+	repoGrade,
+	vouchingNoteCount,
+} from "../src/lib/repo-grade";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -79,6 +83,8 @@ async function main() {
 			read++;
 			const slug = r.projectSlug ? String(r.projectSlug) : null;
 			const proj = slug ? projects.get(slug) : undefined;
+			// Internal notes are triage memory ("not worth surfacing") — a verdict
+			// AGAINST the repo. They must not count as external validation.
 			const notes = Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes : [];
 			const grade = repoGrade({
 				lastCommitAt: (r.lastCommitAt as string) ?? null,
@@ -99,7 +105,7 @@ async function main() {
 				codeDepth: typeof r.codeDepth === "number" ? r.codeDepth : null,
 				judgeScore: typeof r.judgeScore === "number" ? r.judgeScore : null,
 				stellarProof: typeof r.stellarProof === "string" ? r.stellarProof : null,
-				knowledgeNoteCount: notes.length,
+				knowledgeNoteCount: vouchingNoteCount(notes),
 				curatedCanonical: CURATED.has(String(r.fullName ?? "").toLowerCase()),
 				firstParty: isFirstParty(String(r.fullName ?? "")),
 				// Scanned facts. Present on the row since the code scan; they
