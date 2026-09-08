@@ -119,11 +119,11 @@
   "parityPass": 51,
   "openMaps": 0,
   "honestyDebt": 0,
-  "sampled": 0,
-  "population": 0,
-  "liveRows": 0,
-  "liveNoSource": 0,
-  "humanVerified": 0
+  "sampled": null,
+  "population": null,
+  "liveRows": null,
+  "liveNoSource": null,
+  "humanVerified": null
  },
  {
   "date": "2026-09-06",
