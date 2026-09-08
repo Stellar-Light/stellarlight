@@ -1008,6 +1008,33 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// "anchor" collides with Solana's Anchor framework (spl-governance-anchor
 	// surfaced in the top 10). All verified in-index: anchor-platform (the
 	// canonical anchor server), stellar-anchor-tests, php-anchor-sdk.
+	// Web authentication (SEP-10 / SEP-45). There was NO auth vertical at all
+	// until 2026-09-08, though SEP-10 is the most widely implemented SEP in the
+	// ecosystem: q="SEP-10 web authentication" floated stellar/stellar-protocol
+	// (the spec DISCUSSION repo) and then a scatter of frontends.
+	//
+	// Both entries verified in-index with live scores:
+	//   stellar/sep45-reference  SDF's own SEP-45 reference implementation —
+	//                            first, because for the literal SEP-45 question
+	//                            the reference is the answer.
+	//   fazzatti/colibri         @colibri/webauth implements unified SEP-10 AND
+	//                            SEP-45 with deterministic account routing and
+	//                            strict challenge verification — a production
+	//                            library rather than a reference, which is what
+	//                            an agent asking "how do I implement this"
+	//                            needs. Nine registry-verified JSR packages,
+	//                            95 commits/90d, tests + CI + codecov gate.
+	//
+	// colibri's inclusion is the OWNER'S VERDICT, recorded as such (boxy,
+	// 2026-09-08): "the person behind is very credible and i think this repo
+	// just needs a higher grading because i have the human info on it". That is
+	// the intended use of this list — a human writing down domain knowledge the
+	// formula cannot observe — not a coefficient bent until one repo ranks where
+	// it was expected to.
+	{
+		test: /\bsep[\s-]?(?:10|45)\b|\bweb\s*auth(?:entication|n)?\b|\bchallenge\s*transactions?\b/,
+		repos: ["stellar/sep45-reference", "fazzatti/colibri"],
+	},
 	{
 		test: /\banchors?\b|\bon[\s-]?ramps?\b|\boff[\s-]?ramps?\b/,
 		repos: [

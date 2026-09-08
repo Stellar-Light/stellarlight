@@ -197,7 +197,7 @@ export const Repos: CollectionConfig = {
 			type: "number",
 			defaultValue: 0,
 			admin: {
-				description: "0-100 quality grade (freshness + traction + authority)",
+				description: "0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)",
 				position: "sidebar",
 			},
 		},

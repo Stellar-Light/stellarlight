@@ -3,7 +3,8 @@
  * Answers the "has anyone built X / show me zk repos" question project search
  * can't: it indexes GitHub topics + description + language + README, expands
  * synonyms (zk→zero-knowledge/snark...), and ranks by a quality grade
- * (repoScore = freshness + traction + hackathon/SCF/builder authority).
+ * (repoScore = own merit from the code we read + independent corroboration;
+ * see src/lib/repo-grade.ts).
  *
  *   GET /api/repos/search?q=zk
  *   GET /api/repos/search?q=oracle&language=Rust&minScore=40
@@ -176,7 +177,7 @@ export async function GET(req: NextRequest) {
 				// matched, so ranked neighbours are never read as hits.
 				matchMode,
 				matchModeLabel,
-				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
+				note: "Code references graded by repoScore (0-100) = the repo's own merit (code we read: tests, CI, releases, live SDK pin; plus adoption and freshness) lifted by independent corroboration (first-party publication, registry-verified packages, curation, notes, funding), with archived / fork / template / deprecated-SDK demotions. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0
 						? {
