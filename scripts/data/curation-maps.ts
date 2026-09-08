@@ -43,6 +43,30 @@ export const STATUS_FIX: Record<
 		withdraw?: boolean;
 	}
 > = {
+	"smart-treasury": {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-09-04",
+		sourceUrl: "https://registry.npmjs.org/sta-sdk",
+		note: "sta-sdk@0.1.1 on npm, published 2026-09-04 (4d before the 2026-09-08 sweep). The registry names Smart-Treasury-Account-STA/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
+	acta: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-22",
+		sourceUrl: "https://registry.npmjs.org/@acta-team/credentials",
+		note: "@acta-team/credentials@1.1.10 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names ACTA-Team/acta-credentials as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
+	fundable: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-07-26",
+		sourceUrl: "https://registry.npmjs.org/@fundable/sdk",
+		note: "@fundable/sdk@0.1.0 on npm, published 2026-07-26 (44d before the 2026-09-08 sweep). The registry names Fundable-Protocol/fundable-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
 	// -- P4 lever, 2026-09-08: registry-verified package releases --
 	// Basis only; every status stays Live. These rows sat on site-liveness,
 	// which means only that a page answered — a parked domain and a dead
