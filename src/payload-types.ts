@@ -926,6 +926,10 @@ export interface Repo {
    */
   stellarJsDep?: string | null;
   /**
+   * When the registry check last ran. Absent = never checked (an empty publishedPackages cannot say that).
+   */
+  packagesCheckedAt?: string | null;
+  /**
    * Registry-verified packages this repo publishes (the registry names this repo as the source).
    */
   publishedPackages?:
@@ -3126,6 +3130,7 @@ export interface ReposSelect<T extends boolean = true> {
   hasEvents?: T;
   usesNoStd?: T;
   stellarJsDep?: T;
+  packagesCheckedAt?: T;
   publishedPackages?:
     | T
     | {
