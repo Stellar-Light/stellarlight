@@ -13,17 +13,18 @@
  * fabrication.
  */
 import "../load-env";
-import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
 import { getPayload } from "payload";
 import {
 	parseGithubIdentity,
 	parseGithubRepoRef,
 } from "../../src/lib/github-identity";
+import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
+	GITHUB_LINK_REMOVE,
 	GITHUB_REPOS_ADD,
 	NAME_FIXES,
 	PROMINENCE_SET,
@@ -35,7 +36,6 @@ import {
 	TYPES_ADD,
 	TYPES_SET,
 	WEBSITE_FIXES,
-	GITHUB_LINK_REMOVE,
 	WEBSITE_REMOVE,
 	WEBSITE_REMOVE_DEAD,
 } from "./curation-maps";
@@ -781,7 +781,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 	// "Choppaddi", providencia-onchain → "VIIO", utoken → "Upesa") — kept,
 	// because the link came from their own site, and named here so the
 	// mismatch is visible rather than silently resolved.
-	"akuna": [
+	akuna: [
 		{
 			platform: "ios",
 			state: "available",
@@ -790,25 +790,27 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "Akuna Wallet — release 2026-08-31, found via the project's own site",
 		},
 	],
-	"bousol": [
+	bousol: [
 		{
 			platform: "ios",
 			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+			storeUrl:
+				"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
 			checkedAt: "2026-09-07",
 			note: "Bousol Wallet - Paon Bleu Inc. — release 2026-08-26, found via the project's own site",
 		},
 	],
-	"dollarize": [
+	dollarize: [
 		{
 			platform: "ios",
 			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+			storeUrl:
+				"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
 			checkedAt: "2026-09-07",
 			note: "Dollarize: USD Account — release 2026-08-10, found via the project's own site",
 		},
 	],
-	"ebioro": [
+	ebioro: [
 		{
 			platform: "ios",
 			state: "available",
@@ -817,7 +819,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "ebioro — release 2026-09-06, found via the project's own site",
 		},
 	],
-	"fastbuka": [
+	fastbuka: [
 		{
 			platform: "ios",
 			state: "available",
@@ -826,7 +828,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "Choppaddi — release 2026-08-03, found via the project's own site",
 		},
 	],
-	"fewticket": [
+	fewticket: [
 		{
 			platform: "ios",
 			state: "available",
@@ -839,16 +841,18 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 		{
 			platform: "ios",
 			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+			storeUrl:
+				"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
 			checkedAt: "2026-09-07",
 			note: "Freedom Pay Wallet — release 2026-07-16, found via the project's own site",
 		},
 	],
-	"meru": [
+	meru: [
 		{
 			platform: "ios",
 			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+			storeUrl:
+				"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
 			checkedAt: "2026-09-07",
 			note: "Meru | Cuenta en dólares — release 2026-09-06, found via the project's own site",
 		},
@@ -862,7 +866,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "VIIO — release 2026-08-31, found via the project's own site",
 		},
 	],
-	"scopex": [
+	scopex: [
 		{
 			platform: "ios",
 			state: "available",
@@ -871,16 +875,17 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "Scopex — release 2026-08-28, found via the project's own site",
 		},
 	],
-	"seevcash": [
+	seevcash: [
 		{
 			platform: "ios",
 			state: "available",
-			storeUrl: "https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+			storeUrl:
+				"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
 			checkedAt: "2026-09-07",
 			note: "Seevcash: Send Money Anywhere — release 2026-09-06, found via the project's own site",
 		},
 	],
-	"utoken": [
+	utoken: [
 		{
 			platform: "ios",
 			state: "available",
@@ -889,7 +894,7 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 			note: "Upesa — release 2026-08-19, found via the project's own site",
 		},
 	],
-	"yolat": [
+	yolat: [
 		{
 			platform: "ios",
 			state: "available",
@@ -2396,7 +2401,11 @@ async function main() {
 		// flag a consumer needs to hear "this used to be a real product" rather
 		// than silence. Rides the same write, never guessed.
 		if (fix.from === "Live" && fix.to !== "Live")
-			data.lifecycle = { ...(d.lifecycle ?? {}), ...data.lifecycle, wasLive: true };
+			data.lifecycle = {
+				...(d.lifecycle ?? {}),
+				...data.lifecycle,
+				wasLive: true,
+			};
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
 		// served label stops being an unprovenanced bare string.
 		if (fix.asOf) data.statusAsOf = fix.asOf;
@@ -3204,12 +3213,21 @@ async function main() {
 			)) {
 				const cur = stored?.[key];
 				if (
-					val && cur && typeof val === "object" && typeof cur === "object" &&
-					!Array.isArray(val) && !Array.isArray(cur)
+					val &&
+					cur &&
+					typeof val === "object" &&
+					typeof cur === "object" &&
+					!Array.isArray(val) &&
+					!Array.isArray(cur)
 				) {
 					// Group patch: keep only the keys this section actually changed.
-					const base = (data[key] ?? { ...(cur as object) }) as Record<string, unknown>;
-					for (const [k2, v2] of Object.entries(val as Record<string, unknown>)) {
+					const base = (data[key] ?? { ...(cur as object) }) as Record<
+						string,
+						unknown
+					>;
+					for (const [k2, v2] of Object.entries(
+						val as Record<string, unknown>,
+					)) {
 						if ((cur as Record<string, unknown>)[k2] !== v2) base[k2] = v2;
 					}
 					data[key] = base;
