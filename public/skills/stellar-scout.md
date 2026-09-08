@@ -235,7 +235,7 @@ Full docs in `references/api-reference.md`. Quick lookup table:
 | `/api/builders` | GET | Builder directory (Stellar Passport GitHub contributors) — filter by `skill=` (searches bio) or `location=`. For SDF staff/leadership/board, use `/api/people` |
 | `/api/people` | GET | SDF team/people index — leadership, board of directors, advisors (name → role → org). Filter by `q=` (name/role/org) or `section=`. NOT builders — a VP/board member isn't a GitHub contributor |
 | `/api/projects/search` | GET | Project search (tiered `matchMode`) — each result includes its GitHub **repos** + a graded **`codeReferences`** list |
-| `/api/repos/search` | GET | The Stellar repo/code index (2,000+ repos) — ranked by `repoScore` (freshness + traction + authority + hackathon-judge override) |
+| `/api/repos/search` | GET | The Stellar repo/code index (2,000+ repos) — ranked by `repoScore` (code we read — tests, CI, releases, SDK currency — plus adoption and independent corroboration; funding is one input, not a gate) |
 | `/api/rfps` | GET | Open + closed SCF-funded sponsor briefs |
 | `/api/skills` | GET | SDF skills catalog (skills.stellar.org) |
 | `/api/skills/{name}` | GET | Full content of one SDF skill |

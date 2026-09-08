@@ -865,7 +865,7 @@ export interface Repo {
    */
   judgedHackathon?: string | null;
   /**
-   * 0-100 quality grade (freshness + traction + authority)
+   * 0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)
    */
   repoScore?: number | null;
   repoScoreLabel?: string | null;
