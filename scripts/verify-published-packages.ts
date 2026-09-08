@@ -27,7 +27,14 @@ import config from "@payload-config";
 import { getPayload } from "payload";
 
 const EXECUTE = process.argv.includes("--execute");
+// Accepts BOTH `--flag value` and `--flag=value`. The workflow passes the
+// equals form (`--limit=600`) and this read the space form only, so
+// `indexOf("--limit")` never matched: LIMIT fell back to 0 and a run asked for
+// 600 repos silently read all 13,008. It happened to be a useful full pass, but
+// a limit that is quietly ignored is how a dry run becomes an unbounded one.
 const argOf = (n: string, d: string) => {
+	const eq = process.argv.find((a) => a.startsWith(`${n}=`));
+	if (eq) return eq.slice(n.length + 1);
 	const i = process.argv.indexOf(n);
 	return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : d;
 };
@@ -116,6 +123,12 @@ async function verify(full: string, name: string): Promise<Found | null> {
 }
 
 async function main() {
+	// Echo the RESOLVED arguments. The limit was silently ignored for a whole
+	// run because the flag form did not match; a bound you cannot see in the log
+	// is a bound you cannot trust.
+	console.log(
+		`verify-published-packages — ${EXECUTE ? "EXECUTE (writing)" : "DRY RUN"} · limit=${LIMIT || "none"}${ONLY ? ` · only=${ONLY}` : ""}`,
+	);
 	const payload = await getPayload({ config });
 	let read = 0;
 	let ships = 0;
