@@ -601,6 +601,9 @@ async function main() {
 						: 0,
 					codeScanned: existing?.codeScanState === "scanned",
 					name: info.nameWithOwner ?? full,
+					publishedPackageCount: Array.isArray(existing?.publishedPackages)
+						? existing.publishedPackages.length
+						: 0,
 					// The other half of the same divergence: regrade-repos passes
 					// judgeScore and this lane did not, so the 10 judged repos that
 					// ALSO carry a project link scored differently depending on
