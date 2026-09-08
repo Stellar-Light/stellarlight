@@ -46,7 +46,42 @@ function gradeCallKeys(file: string, marker: string): Set<string> {
 	return keys;
 }
 
+/** Every field name declared on RepoGradeInput. */
+function gradeInputFields(): Set<string> {
+	const src = readFileSync(join(ROOT, "src/lib/repo-grade.ts"), "utf8");
+	const start = src.indexOf("export interface RepoGradeInput {");
+	const end = src.indexOf("\n}", start);
+	const body = src.slice(start, end);
+	const keys = new Set<string>();
+	for (const m of body.matchAll(/^\t([A-Za-z][A-Za-z0-9]*)\??\s*:/gm)) keys.add(m[1]);
+	return keys;
+}
+
 describe("every repoScore writer feeds the formula the same inputs", () => {
+	it("the writers pass every field the FORMULA actually reads", () => {
+		// The test below compares the two call sites to EACH OTHER, which cannot
+		// catch a field they BOTH omit. On 2026-09-08 that is exactly what
+		// happened: repo-grade read `publishedPackageCount` in five places and
+		// neither writer passed it, so the registry-verified-package signal —
+		// an entire lane, six PRs — computed as zero for all 13,169 rows while
+		// this suite stayed green.
+		const declared = gradeInputFields();
+		const regrade = gradeCallKeys(
+			"scripts/regrade-repos.ts",
+			"const grade = repoGrade(",
+		);
+		// Fields a writer legitimately cannot know are listed here, with the
+		// reason. Anything else missing is a signal computing as zero.
+		const NOT_AVAILABLE_TO_REGRADE = new Set<string>([
+			// enrich resolves this from the builder record at fetch time; the
+			// regrade lane reads the stored row, which carries it already.
+		]);
+		const missing = [...declared].filter(
+			(f) => !regrade.has(f) && !NOT_AVAILABLE_TO_REGRADE.has(f),
+		);
+		expect(missing.sort()).toEqual([]);
+	});
+
 	it("regrade-repos and enrich-repos pass an identical input key set", () => {
 		const regrade = gradeCallKeys(
 			"scripts/regrade-repos.ts",
