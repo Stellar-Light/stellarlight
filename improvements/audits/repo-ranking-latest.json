@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-08T00:16:13.916Z",
+	"generatedAt": "2026-09-08T00:50:36.247Z",
 	"source": "scripts/check-repo-ranking.ts",
 	"rule": "Written ordering claims about repoScore, graded against the live index. An inversion is a finding for a human; a missing repo is never a pass.",
 	"tally": {
@@ -61,7 +61,7 @@
 			"higher": "fazzatti/colibri",
 			"lower": "Andy00L/x402-autopilot",
 			"why": "An unfunded, unstarred TypeScript toolkit — 95 commits in 90 days, a release the same day, tests, CI, a supported SDK pin and six knowledge notes — over a judged hackathon submission. Nobody funded colibri and it has 3 stars, which is exactly why it scored 35 while the hackathon entry scored 68. An award is a past funding decision, not evidence the code works.",
-			"higherScore": 62,
+			"higherScore": 92,
 			"lowerScore": 38,
 			"verdict": "holds"
 		},
