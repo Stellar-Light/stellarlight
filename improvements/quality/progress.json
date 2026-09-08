@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-07T22:28:33.918Z",
+ "generatedAt": "2026-09-08T12:21:44.901Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -65,19 +65,19 @@
   "P4": {
    "bar": "weak bases under 50% of Live rows",
    "origin": 86,
-   "current": 55.8,
+   "current": 54.7,
    "target": 50,
    "unit": "% of Live rows on a weak basis",
-   "pct": 0.8397435897435896,
+   "pct": 0.8697916666666666,
    "note": "Origin is the share when the phase opened (842/979). The ratchet may only fall."
   },
   "P5": {
    "bar": "the curated-pool note floor, examined or noted",
    "origin": 0,
-   "current": 376,
-   "target": 382,
+   "current": 207,
+   "target": 247,
    "unit": "curated-pool repos",
-   "pct": 0.9842931937172775,
+   "pct": 0.8380566801619433,
    "note": "Counts a repo examined and recorded as yielding no durable public fact — a judged repo is not a gap."
   }
  },
