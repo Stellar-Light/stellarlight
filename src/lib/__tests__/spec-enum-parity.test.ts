@@ -19,6 +19,7 @@ import {
 } from "../project-status";
 import { PROJECT_TYPES } from "../project-types";
 import { REPO_KINDS } from "../repo-grade";
+import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
 /**
@@ -248,6 +249,20 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 				"application/json"
 			].schema.properties.repoMeta.properties.kind.enum;
 		expect(sorted(meta)).toEqual(sorted(REPO_KINDS as readonly string[]));
+	});
+
+	it("Stablecoin.priceBasis is PRICE_BASES, in the spec and in the collection that stores it", () => {
+		expect(
+			sorted(S.components.schemas.Stablecoin.properties.priceBasis.enum),
+		).toEqual(sorted(PRICE_BASES as readonly string[]));
+		expect(spread("PRICE_BASES")).toBe(1);
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Stablecoins.ts"),
+			"utf8",
+		);
+		expect(collection).toMatch(
+			/name:\s*"priceBasis",[\s\S]*?options:\s*\[\.\.\.PRICE_BASES\]/,
+		);
 	});
 
 	it("trust signals, contract code domains and the boolean param values are their constants", () => {

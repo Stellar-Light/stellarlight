@@ -147,6 +147,11 @@ async function main() {
 			assetType: m.assetType,
 			supply: keep(m.supply, prev?.supply),
 			priceUSD: keep(m.priceUSD, prev?.priceUSD),
+			// Moves with priceUSD, never on its own: the pipeline sets priceBasis
+			// null exactly when priceUSD is null, so keep() carries the pair
+			// forward together — a kept-forward price keeps the basis that
+			// produced it, or the pair would describe two runs.
+			priceBasis: keep(m.priceBasis, prev?.priceBasis),
 			marketCapUSD: keep(m.marketCapUSD, prev?.marketCapUSD),
 			holders: keep(m.holders, prev?.holders),
 			volume24hUSD: keep(m.volume24hUSD, prev?.volume24hUSD),
@@ -334,6 +339,18 @@ async function main() {
 		if (got.basis !== m.basis || !got.measuredAt) {
 			console.error(
 				`  ✗ ${m.id} — basis/measuredAt did not land (basis=${got.basis})`,
+			);
+			mismatches++;
+		}
+		// A field the collection doesn't declare is dropped by payload.update
+		// WITHOUT error, so the write reports success and the row keeps the old
+		// number. Prove the measured price landed with the basis that made it.
+		if (
+			m.priceBasis === "measured-market" &&
+			got.priceBasis !== "measured-market"
+		) {
+			console.error(
+				`  ✗ ${m.id} — measured market price did not land (priceBasis=${String(got.priceBasis)}, priceUSD=${String(got.priceUSD)})`,
 			);
 			mismatches++;
 		}

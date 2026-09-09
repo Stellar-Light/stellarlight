@@ -74,6 +74,26 @@ export interface StablecoinAsset {
 	 */
 	skipHorizonValidation?: boolean;
 	/**
+	 * Where one unit's USD price comes from when the PEG IS NOT THE PRICE.
+	 *
+	 * Default for every row is the peg: a stablecoin claims 1 unit = 1 unit of
+	 * its peg, so pricing at the live peg FX rate is the honest read. That is
+	 * WRONG for a unit whose value accrues or trades away from par — Ondo's
+	 * USDY is a share of a Treasury portfolio that was $1.14 on 2026-09-09,
+	 * and pricing it at $1.00 understated the asset by ~$65M (14%) on our own
+	 * dashboard. Set this on any row whose unit is not 1:1 with its peg (in
+	 * practice: every row carrying an `assetType` — a test enforces that), and
+	 * the pipeline prices from the market instead, marking the row
+	 * `priceBasis: "measured-market"`.
+	 *
+	 * `id` is the CoinGecko coin id. The price is the TOKEN's, not one chain's
+	 * venue print: these are multi-chain issuances of one claim (USDY on 8
+	 * chains, USDM1 on 3 incl. Stellar), redeemed against the same reserve, so
+	 * the coin-level price is the right number for the Stellar supply.
+	 */
+	marketPrice?: { source: "coingecko"; id: string };
+
+	/**
 	 * Last-resort figures for an asset no public API reports correctly.
 	 * Carried over verbatim; these are STALE by construction and the row is
 	 * marked so downstream can say when it was last human-checked.
@@ -375,6 +395,10 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		// 200 image/svg+xml with the pipeline's own user agent.
 		fallbackImageUrl:
 			"https://cdn.figure.com/frontend-markets/apps/ylds-marketing/ylds-circle-icon.svg",
+		// Yield is paid out rather than accrued into the unit, so this prints
+		// at ~par today. Declared anyway: what makes the price measurable is
+		// that the unit is not a plain peg, not that it currently drifts.
+		marketPrice: { source: "coingecko", id: "ylds" },
 	},
 	{
 		code: "USDY",
@@ -383,6 +407,9 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		company: "Ondo Finance",
 		peg: "USD",
 		assetType: "Yield Stablecoin",
+		// Accrual token: one unit buys into a Treasury portfolio and its NAV
+		// climbs. $1.14 on 2026-09-09 — pricing it at the peg was a 14% miss.
+		marketPrice: { source: "coingecko", id: "ondo-us-dollar-yield" },
 	},
 	{
 		// Owner-requested twice, and it belongs here for consistency: this is
@@ -423,6 +450,9 @@ export const STABLECOIN_REGISTRY: StablecoinAsset[] = [
 		fallbackImageUrl:
 			"https://cdn.prod.website-files.com/68d09a463613af43eb102966/6a69289f7e793aeb116fdd79_usdm1-brandmark-avatar.png",
 		note: "Sovereign token for a basic-income programme, backed by short-dated US Treasuries; its own site calls it a sovereign Brady-style bond under New York law, not a fiat-redemption claim. The issuer publishes no home_domain and usdm1.com serves no stellar.toml, so identity rests on SDF's launch announcement; ~1.11M issued across 28 trustlines with one account holding ~90% (verified 2026-09-02).",
+		// A bond issued at par, not a redemption-at-$1 claim; it trades above
+		// par as it accrues ($1.016 on 2026-09-09).
+		marketPrice: { source: "coingecko", id: "usdm1" },
 	},
 	// ── Coverage sweep 2026-09-02 (Stellar Expert fiat-code sweep) ─────────
 	// A follow-up sweep of Stellar Expert for fiat-coded assets not yet
