@@ -62,10 +62,12 @@ const WINNER_PLACEMENTS = new Set([
 // as whitespace rather than being invisible. EVERY entry MUST be a real value
 // of the projects `types` select (this list is a subset of it); a label that
 // isn't a `types` value can never appear in any project's types[] and would
-// report a permanent FALSE `absent`. That is why "Oracle" is NOT here: oracles
-// are typed by convention as category=Infrastructure with types=[] (Reflector/
-// Band/RedStone all carry types=[]), and "Oracle" isn't a `types` option at all
-// — its coverage isn't measurable on this axis (use searchProjects/category).
+// report a permanent FALSE `absent`. "Oracle" is NOT here yet, but not for the
+// reason this comment used to give: as of 2026-09-09 "Oracle" IS a `types`
+// value (src/lib/project-types.ts) and ten live rows carry it — Reflector,
+// DIA, Band, Lightecho, RedStone, Pyth among them. Whether oracle coverage
+// belongs on the gaps axis is a product call not yet made; when it is, add
+// the value here and nothing else needs to change.
 // The broad catch-alls (Infrastructure / SDK / Analytics) are excluded because
 // they're not verticals; a caveat in the response says so.
 export const GAP_VERTICALS = [

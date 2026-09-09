@@ -45,6 +45,9 @@ jobs:
       - name: Skill-reference coverage (sk-009 — served skill must not lag the contract)
         if: always()
         run: npx -y tsx scripts/check-skill-reference.ts
+      - name: RWA issuer reconcile (sls-083 — a tracked issuer's toml declares nothing the registry lacks)
+        if: always()
+        run: npx -y tsx scripts/data/reconcile-rwa-issuers.ts
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:

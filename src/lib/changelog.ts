@@ -31,6 +31,46 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-09",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.49",
+		type: "fixed",
+		summary:
+			"searchProjects ?status no longer lists Pre-Development, a status no row can hold; the status and types vocabularies are now one list each, shared by the collection, both validators and the spec.",
+		detail:
+			"Found by the same sweep that closed sls-082 and sls-084: every OpenAPI enum literal was compared against the code's exported vocabularies. One more had drifted. The searchProjects status parameter (spec and handler alike) accepted Pre-Development, which is not a project status — the collection's list is Draft, Development, Pre-Release, Live, Inactive — so a request for it passed validation and returned an empty page with the filter echoed as applied, the silent-empty defect that validator exists to prevent; it now accepts exactly the statuses a public reader can see (Development, Pre-Release, Live, Inactive), spread from the code's list, and Pre-Development is removed from the enum. The types vocabulary was NOT drifted — its five copies (the Payload collection, the searchProjects and getLeaderboard validators, the two spec enums) all held the same 25 values — but five hand-typed copies is how the other three findings happened, so they now spread one exported list and a unit test pins them to it; the served types enum is unchanged.",
+	},
+	{
+		date: "2026-09-09",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.49",
+		type: "fixed",
+		summary:
+			"getRwaAssets: the state enums now carry issued-single-holder, and every RWA enum is built from the registry's own value set (stellar-raven sls-082).",
+		detail:
+			"The state query parameter's enum and the response row's state enum both read live | deployed-no-supply | not-found while the parameter description, the handler and the 400 error all named issued-single-holder — a generated client rejected a valid request and a valid response. The cause was three hand-maintained copies of one list. The registry module now exports RWA_STATES, RWA_VERIFICATION_LEVELS, RWA_KINDS and RWA_PRODUCT_KINDS; the route validates against them and the spec enums are spread from them, so the copies cannot drift apart; a unit test pins the request enum, the response enum and the validator to the same set, and the daily drift guard checks that every state the live endpoint serves is in the live spec's enum.",
+	},
+	{
+		date: "2026-09-09",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.49",
+		type: "fixed",
+		summary:
+			"Project.statusBasis enum gains package-release, the value nine live rows already served (stellar-raven sls-084).",
+		detail:
+			"package-release joined the status vocabulary on 2026-09-08 (a versioned artifact shipped to npm or jsr.io whose registry metadata names the project's own repository as its source, with a recent publish) and was written to nine rows — ACTA, AXIS, Blockaid, Cypher, DeFarm, Drips, Fundable, Smart Treasury, Unstoppable Wallet — but the OpenAPI enum was a hand-typed copy that did not get it. The enum is now spread from STATUS_BASES, the one list in src/lib/project-status.ts that the collection, the quality board and the writers already share; the description defines the value; a unit test pins the spec enum and the collection's option list to that list; and the daily drift guard checks that every statusBasis value in the corpus-wide census /api/quality serves (statusBasisMix), plus a sample of live search rows, is in the live spec's enum.",
+	},
+	{
+		date: "2026-09-09",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.49",
+		type: "fixed",
+		summary:
+			"RWA registry: a tracked issuer is now covered completely — six issuer-declared assets added (Etherfuse MEX, CETESZ, GILTS, MEXe; Franklin FOCGX; Rivool SBRL) — and project rows carry productsCoverage (stellar-raven sls-083).",
+		detail:
+			"Etherfuse's project row served five products while its own stellar.toml declared nine, and nothing on the row said the list was partial. The registry's inclusion rule was rwa.xyz's listing; the four missing Etherfuse assets are not listed there for Stellar (GILTS is listed on Solana, Base, Polygon and Monad only), so this was a scope gap, not a lookup miss. The rule now also admits every asset a TRACKED issuer's own toml declares under a tracked issuer account, and the same reconcile was run across every tracked classic issuer whose toml could be read — 34 issuer accounts behind 16 tomls, all read; 6 more classic issuer accounts are on-chain-only (their home domain serves no readable toml, or they have none — the reconcile script re-tries them daily) and are counted as unreconciled rather than assumed complete: six declared-but-untracked classic assets in total, all now rows, verified from the toml outward and read on Horizon on 2026-09-09 — plus eight zero-supply Spiko contracts from the deployer basis below. Two of them are deployed-no-supply — CETESZ has 16 trustlines and nothing minted, FOCGX is deprecated by its issuer in favour of BENJI — so they are tracked but not served as products; the state's definition now covers a classic asset with trustlines and no supply. Rows carry rwaxyzListed (false on the six; rwa.xyz figures null, not zero), meta.counts splits rwaxyzListed / issuerDeclared, and registryAsOf is the latest verifiedAt rather than a single date every row must share. Project rows gain productsCoverage: declared / tracked / served against the issuer accounts' own toml, complete only when every declared pair is tracked AND every joined issuer account was reconciled (Circle is false: the EURC issuer's home domain serves no toml), and NULL when there is nothing to reconcile against, because null is an admission and 'complete' would be a claim. Soroban issuers have no toml, so their basis is the deployer's own create-contract history on Horizon: Spiko's deployer created 19 contracts — 2 non-token, 9 already rows, and 8 fund-share tokens with zero supply (eurUSTBL, eurUKTBL, and six SAFO share classes deployed 2026-07-29) that rwa.xyz does not list; those 8 are rows now, state deployed-no-supply, so Spiko is complete on the same rule as Etherfuse, and the daily guard re-reads the deployer history. The registry's issuer coverage table is held to the registry by a unit test, and scripts/data/reconcile-rwa-issuers.ts re-reads every toml in the coverage table daily, re-tries the on-chain-only issuers' home domains, and fails when a covered issuer declares something new, the table is stale, a toml could not be read, or an issuer outside the table has started serving one.",
+	},
+	{
 		date: "2026-09-06",
 		surfaces: ["api"],
 		version: "spec@1.9.48",
