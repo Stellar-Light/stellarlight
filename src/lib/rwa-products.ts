@@ -1,4 +1,9 @@
-import { RWA_REGISTRY, type RwaAsset } from "@/data/rwa-registry";
+import {
+	RWA_DEPLOYER_COVERAGE,
+	RWA_ISSUER_COVERAGE,
+	RWA_REGISTRY,
+	type RwaAsset,
+} from "@/data/rwa-registry";
 
 /**
  * The per-product record served on a project row (`products`).
@@ -24,6 +29,8 @@ export interface ProductRecord {
 	assetId?: string | null;
 	verificationLevel?: string | null;
 	registryState?: string | null;
+	/** The issuer toml's own `status` for this asset (live | private | test …) where the toml was read; null = not read. `private` = a restricted offering. */
+	tomlStatus?: string | null;
 	launchedAt?: string | null;
 	/** Issuer flags from Horizon (classic assets): whitelist, freeze, clawback. null on Soroban tokens and hand-curated rows. */
 	controls?: {
@@ -78,9 +85,12 @@ function toProduct(r: RwaAsset): ProductRecord {
 		evidenceUrl: r.evidenceUrl,
 		asOf: r.verifiedAt,
 		note:
-			r.state === "issued-single-holder"
-				? "minted; exactly one holder (the issuer or its custodian); no secondary activity"
-				: null,
+			r.tomlStatus === "private"
+				? "issuer toml status=private: a restricted offering (KYC-gated platform accounts, not publicly tradable per the issuer); minted and held, but not a public market"
+				: r.state === "issued-single-holder"
+					? "minted; exactly one holder (the issuer or its custodian); no secondary activity"
+					: null,
+		tomlStatus: r.tomlStatus,
 		issuer: r.issuerEntity,
 		assetId: r.id,
 		verificationLevel: r.verificationLevel,
@@ -111,6 +121,176 @@ export function mergeProducts(
 		out.push(p);
 	}
 	return out;
+}
+
+/**
+ * Whether a project's registry-fed `products` is COMPLETE for the issuers it
+ * joins (sls-083). Etherfuse served five products while its own toml
+ * declared nine, and nothing on the row said "partial" — a consumer could only
+ * mistake five for the set. This states the comparison: what the tracked
+ * issuer accounts' own stellar.toml declared (RWA_ISSUER_COVERAGE), how many
+ * of those are registry rows, and how many products the row actually serves
+ * (minted states only, a paired tranche once — so served < tracked is normal
+ * and is not incompleteness).
+ *
+ * Null when none of the project's issuer accounts has a reconciled toml
+ * (Soroban issuers, on-chain-only rows, hand-curated products): completeness
+ * cannot be stated, and null says so — never "complete".
+ */
+/**
+ * issuer-stellar-toml — classic assets: what the issuer accounts' own toml
+ * declares. deployer-contracts — Soroban tokens (no toml): every SEP-41
+ * token contract the deployer account behind the project's tokens created,
+ * read from Horizon's create-contract history and attributed through the
+ * registry (see deployerCoverage). The spec spreads this array (the
+ * enum-literal ratchet forbids a second copy).
+ */
+export const PRODUCTS_COVERAGE_BASES = [
+	"issuer-stellar-toml",
+	"deployer-contracts",
+] as const;
+
+export interface ProductsCoverage {
+	basis: (typeof PRODUCTS_COVERAGE_BASES)[number];
+	/** Most recent reconcile date among the project's covered issuers. */
+	asOf: string;
+	/** Issuer accounts joined to this project whose toml has been reconciled. */
+	issuers: number;
+	/** Issuer ACCOUNTS joined to this project the statement does not cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens if it has any (no toml). An issuer whose toml was read and declares nothing under it is reconciled, not counted here. */
+	issuersUnreconciled: number;
+	/** (code, issuer) pairs those tomls declare under the covered accounts. */
+	declared: number;
+	/** Of those declared pairs, registry rows (any state). */
+	tracked: number;
+	/**
+	 * REGISTRY-fed product records on this row: minted states only, one per
+	 * paired tranche. Not `products.length` — the row's `products` may also
+	 * carry hand-curated records merged in. A different count from
+	 * `tracked`, not a subset of it: smaller
+	 * when a declared asset is zero-supply (tracked, not a product), larger
+	 * when the registry tracks an issued asset the toml omits (WisdomTree
+	 * EPXC — verificationLevel on-chain-home-domain).
+	 */
+	served: number;
+	/**
+	 * Every declared pair is a registry row AND every issuer account joined to
+	 * this project was reconciled. False when an issuer's toml could not be
+	 * read (Circle: the EURC issuer's home domain serves no toml) — a
+	 * consumer keying on this boolean must not read a partially-reconciled
+	 * project as closed; that is sls-083's failure mode with a green flag.
+	 */
+	complete: boolean;
+}
+
+export function productsCoverage(
+	slug: string | null | undefined,
+): ProductsCoverage | null {
+	if (!slug) return null;
+	const rows = RWA_REGISTRY.filter((r) => r.projectSlug === slug);
+	if (!rows.length) return null;
+	const issuerAccounts = new Set(
+		rows.map((r) => r.issuer).filter((x): x is string => !!x),
+	);
+	const covered = RWA_ISSUER_COVERAGE.filter((c) =>
+		issuerAccounts.has(c.issuer),
+	);
+	if (!covered.length) return deployerCoverage(slug, rows);
+	const trackedIds = new Set(rows.map((r) => r.id));
+	let declared = 0;
+	let tracked = 0;
+	for (const c of covered)
+		for (const code of c.declared) {
+			declared++;
+			if (trackedIds.has(`${code}-${c.issuer}`)) tracked++;
+		}
+	// Counted in ISSUER ACCOUNTS, not rows: classic issuers with no toml entry,
+	// plus ONE for the project's Soroban tokens if it has any (they have no
+	// toml; a mixed project must not inflate this by its token count). Both
+	// are "cannot state", counted so the reader sees it.
+	const unreconciled =
+		(rows.some((r) => r.kind === "soroban") ? 1 : 0) +
+		[...issuerAccounts].filter((a) => !covered.some((c) => c.issuer === a))
+			.length;
+	return {
+		basis: "issuer-stellar-toml",
+		asOf:
+			covered
+				.map((c) => c.reconciledAt)
+				.sort()
+				.at(-1) ?? "",
+		issuers: covered.length,
+		issuersUnreconciled: unreconciled,
+		declared,
+		tracked,
+		served: registryProducts(slug).length,
+		complete: declared === tracked && unreconciled === 0,
+	};
+}
+
+/**
+ * The Soroban basis. A project whose registry rows are contract tokens has
+ * no toml, but the deployer account behind those contracts has a
+ * create-contract history on Horizon — the issuer's own act, and wider than
+ * rwa.xyz's listing. RWA_DEPLOYER_COVERAGE records, per deployer, every
+ * SEP-41 token contract it created (`declared`) and the ones deliberately
+ * NOT tracked with a reason (`excluded`: test tokens, superseded zero-supply
+ * predecessors) — a deployer can be a PLATFORM creating tokens for several
+ * issuers (Centrifuge deploys for Anemoy and NYLIM too), so attribution goes
+ * through the registry: this project's `declared` are the deployer's tokens
+ * the registry attributes to it, and a created token that is neither a row
+ * nor excluded makes every client of that deployer incomplete, because it
+ * could be theirs. Null when no deployer entry covers the project's tokens.
+ */
+function deployerCoverage(
+	slug: string,
+	rows: RwaAsset[],
+): ProductsCoverage | null {
+	const own = new Set(rows.map((r) => r.id));
+	const covered = RWA_DEPLOYER_COVERAGE.filter((c) =>
+		c.declared.some((id) => own.has(id)),
+	);
+	if (!covered.length) return null;
+	const allIds = new Set(RWA_REGISTRY.map((r) => r.id));
+	let declared = 0;
+	let tracked = 0;
+	let unattributed = 0;
+	for (const c of covered) {
+		const excluded = new Set(c.excluded.map((e) => e.contract));
+		for (const id of c.declared) {
+			if (excluded.has(id)) continue;
+			if (own.has(id)) {
+				declared++;
+				tracked++;
+			} else if (!allIds.has(id)) {
+				// created by this project's deployer, attributed to nobody, not
+				// excluded: it may be this project's — counted as declared and
+				// untracked so `complete` cannot be true.
+				declared++;
+				unattributed++;
+			}
+		}
+	}
+	const classicUncovered = new Set(
+		rows
+			.filter((r) => r.kind === "classic" && r.issuer)
+			.map((r) => r.issuer as string)
+			.filter((a) => !RWA_ISSUER_COVERAGE.some((c) => c.issuer === a)),
+	).size;
+	return {
+		basis: "deployer-contracts",
+		asOf:
+			covered
+				.map((c) => c.reconciledAt)
+				.sort()
+				.at(-1) ?? "",
+		issuers: covered.length,
+		issuersUnreconciled: classicUncovered,
+		declared,
+		tracked,
+		served: registryProducts(slug).length,
+		complete:
+			declared === tracked && unattributed === 0 && classicUncovered === 0,
+	};
 }
 
 export { deploymentFromRegistry } from "@/lib/project-deployment";

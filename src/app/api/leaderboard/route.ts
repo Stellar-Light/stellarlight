@@ -18,6 +18,7 @@ import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { PROJECT_TYPES } from "@/lib/project-types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -184,33 +185,8 @@ export async function GET(req: NextRequest) {
 	// category. Values validate against the same `types` select options the
 	// projects directory uses (src/collections/Projects.ts — mirrors the
 	// /api/projects/search type param); unknown values 400 with the valid list.
-	const VALID_TYPES = [
-		"Wallet",
-		"DEX",
-		"Lending",
-		"Bridge",
-		"Infrastructure",
-		"Payments",
-		"Anchor",
-		"SDK",
-		"Indexer",
-		"Explorer",
-		"Analytics",
-		"AI",
-		"Gaming",
-		"Education",
-		"Security",
-		"NFT",
-		"RWA",
-		"Stablecoin",
-		"Social Impact",
-		"RPC",
-		"Faucet",
-		"Card Issuing",
-		"Exchange",
-		"Oracle",
-		"Yield",
-	] as const;
+	// One list (src/lib/project-types.ts); see the search route.
+	const VALID_TYPES = PROJECT_TYPES;
 	const typeList = sp
 		.getAll("type")
 		.flatMap((v) => v.split(","))

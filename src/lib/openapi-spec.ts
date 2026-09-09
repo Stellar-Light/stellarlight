@@ -10,7 +10,25 @@
  * same PR, run `pnpm contract:write`, and add a changelog entry — CI fails
  * otherwise.
  */
+import {
+	RWA_KINDS,
+	RWA_PRODUCT_KINDS,
+	RWA_STATES,
+	RWA_VERIFICATION_LEVELS,
+} from "../data/rwa-registry";
+import { CODE_DOMAINS } from "./code-domains";
+import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
+import { PARTNER_TYPES } from "./partner-match";
+import { DEPLOYMENT_NETWORKS } from "./project-deployment";
+import {
+	PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+	STATUS_BASES,
+} from "./project-status";
+import { PROJECT_TYPES } from "./project-types";
 import { REPO_KINDS } from "./repo-grade";
+import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
 const SITE_URL = "https://stellarlight.xyz";
@@ -2075,33 +2093,7 @@ export const spec: OpenAPISpec = {
 							"Filter to projects whose `types[]` includes this product type — server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes.",
 						schema: {
 							type: "string",
-							enum: [
-								"Wallet",
-								"DEX",
-								"Lending",
-								"Bridge",
-								"Infrastructure",
-								"Payments",
-								"Anchor",
-								"SDK",
-								"Indexer",
-								"Explorer",
-								"Analytics",
-								"AI",
-								"Gaming",
-								"Education",
-								"Security",
-								"NFT",
-								"RWA",
-								"Stablecoin",
-								"Social Impact",
-								"RPC",
-								"Faucet",
-								"Card Issuing",
-								"Exchange",
-								"Oracle",
-								"Yield",
-							],
+							enum: [...PROJECT_TYPES],
 						},
 					},
 					{
@@ -2117,13 +2109,7 @@ export const spec: OpenAPISpec = {
 							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
 						schema: {
 							type: "string",
-							enum: [
-								"Live",
-								"Inactive",
-								"Development",
-								"Pre-Release",
-								"Pre-Development",
-							],
+							enum: [...RESOLVABLE_PROJECT_STATUSES],
 						},
 					},
 					{ $ref: "#/components/parameters/limit" },
@@ -2885,7 +2871,7 @@ export const spec: OpenAPISpec = {
 							"Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored.",
 						schema: {
 							type: "string",
-							enum: ["1", "true", "yes", "on", "0", "false", "no", "off"],
+							enum: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
 						},
 					},
 					{
@@ -3377,19 +3363,7 @@ export const spec: OpenAPISpec = {
 						description: "Filter by partner type",
 						schema: {
 							type: "string",
-							enum: [
-								"anchor",
-								"on-off-ramp",
-								"infrastructure",
-								"tooling",
-								"protocol",
-								"wallet",
-								"audit-firm",
-								"legal",
-								"agency",
-								"asset-issuer",
-								"other",
-							],
+							enum: [...PARTNER_TYPES],
 						},
 					},
 					{
@@ -4132,19 +4106,7 @@ export const spec: OpenAPISpec = {
 										properties: {
 											partnerType: {
 												type: "string",
-												enum: [
-													"anchor",
-													"on-off-ramp",
-													"infrastructure",
-													"tooling",
-													"protocol",
-													"wallet",
-													"audit-firm",
-													"legal",
-													"agency",
-													"asset-issuer",
-													"other",
-												],
+												enum: [...PARTNER_TYPES],
 											},
 											tagline: { type: "string", maxLength: 140 },
 											description: { type: "string", maxLength: 4000 },
@@ -5178,19 +5140,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: {
 														type: "string",
-														enum: [
-															"scanned",
-															"deep-code",
-															"live-on-mainnet",
-															"verified-contract-id",
-															"publishes-contract-id",
-															"audited",
-															"multi-audited",
-															"code-changed-since-audit",
-															"actively-maintained",
-															"archived",
-															"superseded",
-														],
+														enum: [...TRUST_SIGNALS],
 													},
 													description:
 														"Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven.",
@@ -5272,16 +5222,7 @@ export const spec: OpenAPISpec = {
 							"Filter by code-evidenced domain (closed set; unknown values 400).",
 						schema: {
 							type: "string",
-							enum: [
-								"anchor-ramp",
-								"defi-amm",
-								"defi-lending",
-								"defi-yield",
-								"indexer",
-								"oracle",
-								"payments-x402",
-								"wallet-infra",
-							],
+							enum: [...CODE_DOMAINS],
 						},
 					},
 					{
@@ -7001,33 +6942,7 @@ export const spec: OpenAPISpec = {
 							type: "array",
 							items: {
 								type: "string",
-								enum: [
-									"Wallet",
-									"DEX",
-									"Lending",
-									"Bridge",
-									"Infrastructure",
-									"Payments",
-									"Anchor",
-									"SDK",
-									"Indexer",
-									"Explorer",
-									"Analytics",
-									"AI",
-									"Gaming",
-									"Education",
-									"Security",
-									"NFT",
-									"RWA",
-									"Stablecoin",
-									"Social Impact",
-									"RPC",
-									"Faucet",
-									"Card Issuing",
-									"Exchange",
-									"Oracle",
-									"Yield",
-								],
+								enum: [...PROJECT_TYPES],
 							},
 						},
 						style: "form",
@@ -7367,10 +7282,10 @@ export const spec: OpenAPISpec = {
 						name: "state",
 						in: "query",
 						description:
-							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = the contract exists with zero supply and zero events; not-found = a listing that no longer resolves on mainnet.",
+							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one.",
 						schema: {
 							type: "string",
-							enum: ["live", "deployed-no-supply", "not-found"],
+							enum: [...RWA_STATES],
 						},
 					},
 					{
@@ -7379,13 +7294,7 @@ export const spec: OpenAPISpec = {
 						description: "Filter by verificationLevel (see methodology).",
 						schema: {
 							type: "string",
-							enum: [
-								"toml-bidirectional",
-								"entity-toml",
-								"contract-metadata",
-								"on-chain-home-domain",
-								"on-chain-only",
-							],
+							enum: [...RWA_VERIFICATION_LEVELS],
 						},
 					},
 					{
@@ -7393,7 +7302,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						description:
 							"classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets).",
-						schema: { type: "string", enum: ["classic", "soroban"] },
+						schema: { type: "string", enum: [...RWA_KINDS] },
 					},
 					{
 						name: "project",
@@ -7469,6 +7378,16 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														registry: { type: "integer" },
+														rwaxyzListed: {
+															type: "integer",
+															description:
+																"Rows admitted by rwa.xyz's listing on Stellar.",
+														},
+														issuerDeclared: {
+															type: "integer",
+															description:
+																"Rows admitted because a tracked issuer's own toml declares them (sls-083).",
+														},
 														issuers: { type: "integer" },
 														matched: { type: "integer" },
 														returned: { type: "integer" },
@@ -7509,7 +7428,7 @@ export const spec: OpenAPISpec = {
 													},
 													kind: {
 														type: "string",
-														enum: ["classic", "soroban"],
+														enum: [...RWA_KINDS],
 													},
 													name: { type: "string" },
 													symbol: { type: "string" },
@@ -7533,7 +7452,7 @@ export const spec: OpenAPISpec = {
 													},
 													productKind: {
 														type: "string",
-														enum: ["rwa-asset", "stablecoin"],
+														enum: [...RWA_PRODUCT_KINDS],
 													},
 													assetClass: {
 														type: "string",
@@ -7544,7 +7463,7 @@ export const spec: OpenAPISpec = {
 													network: { type: "string", enum: ["mainnet"] },
 													state: {
 														type: "string",
-														enum: ["live", "deployed-no-supply", "not-found"],
+														enum: [...RWA_STATES],
 													},
 													launchedAt: {
 														type: "string",
@@ -7560,13 +7479,7 @@ export const spec: OpenAPISpec = {
 													},
 													verificationLevel: {
 														type: "string",
-														enum: [
-															"toml-bidirectional",
-															"entity-toml",
-															"contract-metadata",
-															"on-chain-home-domain",
-															"on-chain-only",
-														],
+														enum: [...RWA_VERIFICATION_LEVELS],
 													},
 													basisNote: { type: "string", nullable: true },
 													decimals: { type: "integer", nullable: true },
@@ -7577,6 +7490,17 @@ export const spec: OpenAPISpec = {
 															"Read from the contract's total_supply() (Soroban); null where no such function. Classic supply is served by Horizon/stellar.expert, not here.",
 													},
 													horizonNote: { type: "string", nullable: true },
+													tomlStatus: {
+														type: "string",
+														nullable: true,
+														description:
+															"The issuer toml's own `status` for this asset (SEP-1: live | private | test …) on rows whose toml block was read; null = not read, never 'live'. `private` = the issuer calls it a restricted offering (SBRL: KYC-gated platform accounts, not publicly tradable) and the project row's product record carries that in `note`.",
+													},
+													rwaxyzListed: {
+														type: "boolean",
+														description:
+															"true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account — rwa.xyz figures are null on those rows (not provided, never zero).",
+													},
 													rwaxyzValueUsd: {
 														type: "number",
 														nullable: true,
@@ -8096,19 +8020,7 @@ export const spec: OpenAPISpec = {
 					name: { type: "string" },
 					partnerType: {
 						type: "string",
-						enum: [
-							"anchor",
-							"on-off-ramp",
-							"infrastructure",
-							"tooling",
-							"protocol",
-							"wallet",
-							"audit-firm",
-							"legal",
-							"agency",
-							"asset-issuer",
-							"other",
-						],
+						enum: [...PARTNER_TYPES],
 					},
 					pilot: {
 						type: "boolean",
@@ -8394,7 +8306,7 @@ export const spec: OpenAPISpec = {
 					shortDescription: { type: "string" },
 					status: {
 						type: "string",
-						enum: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
+						enum: [...PROJECT_STATUSES],
 						description:
 							"Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.",
 					},
@@ -8405,7 +8317,7 @@ export const spec: OpenAPISpec = {
 						properties: {
 							network: {
 								type: "string",
-								enum: ["mainnet", "testnet", "unknown"],
+								enum: [...DEPLOYMENT_NETWORKS],
 							},
 							basis: {
 								type: "string",
@@ -8445,18 +8357,11 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						// nullable carries the null case; a null literal in the enum crashes
 						// Spectral's JSONPath engine (see scfAmountStatus).
-						enum: [
-							"operator-announcement",
-							"site-liveness",
-							"repo-activity",
-							"product-integration",
-							"onchain-activity",
-							"human-verified",
-							"source-inherited",
-							"unverified",
-						],
+						// The ONE list (src/lib/project-status.ts): sls-084 found this copy
+						// missing package-release while nine live rows served it.
+						enum: [...STATUS_BASES],
 						description:
-							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
+							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
 					},
 					scfConfidence: {
 						type: "object",
@@ -8538,7 +8443,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa, 97 tokens re-verified on-chain 2026-09-04) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows; only registry rows in state=live are served here (a deployed contract with zero supply is not a live product). Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage` — declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
 						items: {
 							type: "object",
 							properties: {
@@ -8574,6 +8479,12 @@ export const spec: OpenAPISpec = {
 									description:
 										"The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'.",
 								},
+								tomlStatus: {
+									type: "string",
+									nullable: true,
+									description:
+										"The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering — minted and held, not a public market — and `note` says so. Hand-curated records: null.",
+								},
 								launchedAt: {
 									type: "string",
 									nullable: true,
@@ -8593,6 +8504,27 @@ export const spec: OpenAPISpec = {
 									},
 								},
 							},
+						},
+					},
+					productsCoverage: {
+						type: "object",
+						nullable: true,
+						description:
+							"Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0 — a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records) — it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products) — null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml).",
+						properties: {
+							basis: {
+								type: "string",
+								enum: [...PRODUCTS_COVERAGE_BASES],
+								description:
+									"issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.",
+							},
+							asOf: { type: "string" },
+							issuers: { type: "integer" },
+							issuersUnreconciled: { type: "integer" },
+							declared: { type: "integer" },
+							tracked: { type: "integer" },
+							served: { type: "integer" },
+							complete: { type: "boolean" },
 						},
 					},
 					scfRoundAwards: {

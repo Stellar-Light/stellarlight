@@ -13,7 +13,6 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { mergeProducts } from "@/lib/rwa-products";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import { embed } from "@/lib/embed";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
@@ -23,10 +22,6 @@ import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { pickDeployment } from "@/lib/project-deployment";
-import {
-	HIDDEN_PROJECT_STATUSES,
-	RESOLVABLE_PROJECT_STATUSES,
-} from "@/lib/project-status";
 import {
 	anchorIdentityHit,
 	anchorTokens,
@@ -47,7 +42,17 @@ import {
 	termsForToken,
 	tokenize,
 } from "@/lib/project-search-match";
+import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "@/lib/project-status";
+import { PROJECT_TYPES } from "@/lib/project-types";
 import { type RepoResult, searchRepos } from "@/lib/repo-search";
+import {
+	mergeProducts,
+	type ProductsCoverage,
+	productsCoverage,
+} from "@/lib/rwa-products";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -186,6 +191,7 @@ async function semanticProjectRows(
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
 			scfRoundAwards: pickScfRoundAwards(p.scf),
 			products: mergeProducts(pickProducts(p.products), p.slug),
+			productsCoverage: productsCoverage(p.slug),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
 			...deriveNetworks(p),
@@ -388,6 +394,9 @@ interface ProjectRow {
 		asOf: string;
 		note: string | null;
 	}> | null;
+	// sls-083: is `products` COMPLETE for the issuers this project joins? Null
+	// = cannot be stated (no reconciled toml), never "complete".
+	productsCoverage: ProductsCoverage | null;
 	scfRoundAwards: Array<{
 		round: number | null;
 		awardName: string | null;
@@ -835,13 +844,12 @@ export async function GET(req: NextRequest) {
 	// nothing filtered on status, and unknown params were silently ignored, so
 	// ?status=Inactive returned all-Live results "as if filtered".
 	const statusParam = sp.get("status")?.trim() || null;
-	const VALID_STATUSES = [
-		"Live",
-		"Inactive",
-		"Development",
-		"Pre-Release",
-		"Pre-Development",
-	] as const;
+	// The statuses a public reader can see (src/lib/project-status.ts). This
+	// list was hand-typed here and carried "Pre-Development", a status no row
+	// can hold, so ?status=Pre-Development passed validation and returned an
+	// empty page that read as filtered — the exact defect the check above was
+	// written for (found 2026-09-09 while closing the enum-drift class).
+	const VALID_STATUSES = RESOLVABLE_PROJECT_STATUSES;
 	if (
 		statusParam &&
 		!(VALID_STATUSES as readonly string[]).includes(statusParam)
@@ -861,33 +869,9 @@ export async function GET(req: NextRequest) {
 	// mirroring statusParam: DB where clause + semantic-source filter + post-fold
 	// enforcement + echo in meta.filters.
 	const typeParam = sp.get("type")?.trim() || null;
-	const VALID_TYPES = [
-		"Wallet",
-		"DEX",
-		"Lending",
-		"Bridge",
-		"Infrastructure",
-		"Payments",
-		"Anchor",
-		"SDK",
-		"Indexer",
-		"Explorer",
-		"Analytics",
-		"AI",
-		"Gaming",
-		"Education",
-		"Security",
-		"NFT",
-		"RWA",
-		"Stablecoin",
-		"Social Impact",
-		"RPC",
-		"Faucet",
-		"Card Issuing",
-		"Exchange",
-		"Oracle",
-		"Yield",
-	] as const;
+	// One list (src/lib/project-types.ts) — the collection, the leaderboard and
+	// the spec spread the same array.
+	const VALID_TYPES = PROJECT_TYPES;
 	if (typeParam && !(VALID_TYPES as readonly string[]).includes(typeParam)) {
 		return NextResponse.json(
 			{
@@ -1446,6 +1430,7 @@ export async function GET(req: NextRequest) {
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(p.scf),
 					products: mergeProducts(pickProducts(p.products), p.slug),
+					productsCoverage: productsCoverage(p.slug),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -2086,6 +2071,7 @@ export async function GET(req: NextRequest) {
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
 					scfRoundAwards: pickScfRoundAwards(c.scf),
 					products: mergeProducts(pickProducts(c.products), c.slug),
+					productsCoverage: productsCoverage(c.slug),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],

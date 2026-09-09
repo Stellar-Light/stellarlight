@@ -1050,10 +1050,10 @@ export interface components {
                 ageDays?: number | null;
             } | null;
             /**
-             * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
+             * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
              * @enum {string|null}
              */
-            statusBasis?: "operator-announcement" | "site-liveness" | "repo-activity" | "product-integration" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
+            statusBasis?: "operator-announcement" | "site-liveness" | "repo-activity" | "package-release" | "product-integration" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
             /** @description Deterministic trust score for the SCF award facts: basis-class weight × stepwise freshness decay. score 0–1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score — cacheable. */
             scfConfidence?: {
                 score?: number;
@@ -1093,7 +1093,7 @@ export interface components {
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
             /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty — check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa, 97 tokens re-verified on-chain 2026-09-04) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows; only registry rows in state=live are served here (a deployed contract with zero supply is not a live product). Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage` — declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -1111,6 +1111,8 @@ export interface components {
                 verificationLevel?: string | null;
                 /** @description The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'. */
                 registryState?: string | null;
+                /** @description The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering — minted and held, not a public market — and `note` says so. Hand-curated records: null. */
+                tomlStatus?: string | null;
                 /** @description Contract creation date (Soroban); null for classic assets, which Horizon does not date. */
                 launchedAt?: string | null;
                 /** @description Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows. */
@@ -1121,6 +1123,21 @@ export interface components {
                     clawbackEnabled?: boolean;
                 } | null;
             }[] | null;
+            /** @description Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0 — a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records) — it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products) — null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml). */
+            productsCoverage?: {
+                /**
+                 * @description issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.
+                 * @enum {string}
+                 */
+                basis?: "issuer-stellar-toml" | "deployer-contracts";
+                asOf?: string;
+                issuers?: number;
+                issuersUnreconciled?: number;
+                declared?: number;
+                tracked?: number;
+                served?: number;
+                complete?: boolean;
+            } | null;
             /** @description The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate. */
             scfRoundAwards?: {
                 round?: number | null;
@@ -2779,7 +2796,7 @@ export interface operations {
                 /** @description Filter to SCF-funded projects only */
                 scfAwarded?: boolean;
                 /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses. */
-                status?: "Live" | "Inactive" | "Development" | "Pre-Release" | "Pre-Development";
+                status?: "Development" | "Pre-Release" | "Live" | "Inactive";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
@@ -4381,7 +4398,7 @@ export interface operations {
                 /** @description Substring over repo fullName, project slug/name, or contract id. */
                 q?: string;
                 /** @description Filter by code-evidenced domain (closed set; unknown values 400). */
-                domain?: "anchor-ramp" | "defi-amm" | "defi-lending" | "defi-yield" | "indexer" | "oracle" | "payments-x402" | "wallet-infra";
+                domain?: "defi-lending" | "defi-amm" | "defi-yield" | "oracle" | "payments-x402" | "wallet-infra" | "anchor-ramp" | "indexer";
                 limit?: number;
                 offset?: number;
             };
@@ -5207,8 +5224,8 @@ export interface operations {
     getRwaAssets: {
         parameters: {
             query?: {
-                /** @description Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = the contract exists with zero supply and zero events; not-found = a listing that no longer resolves on mainnet. */
-                state?: "live" | "deployed-no-supply" | "not-found";
+                /** @description Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one. */
+                state?: "live" | "issued-single-holder" | "deployed-no-supply" | "not-found";
                 /** @description Filter by verificationLevel (see methodology). */
                 level?: "toml-bidirectional" | "entity-toml" | "contract-metadata" | "on-chain-home-domain" | "on-chain-only";
                 /** @description classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets). */
@@ -5252,6 +5269,10 @@ export interface operations {
                             };
                             counts?: {
                                 registry?: number;
+                                /** @description Rows admitted by rwa.xyz's listing on Stellar. */
+                                rwaxyzListed?: number;
+                                /** @description Rows admitted because a tracked issuer's own toml declares them (sls-083). */
+                                issuerDeclared?: number;
                                 issuers?: number;
                                 matched?: number;
                                 returned?: number;
@@ -5292,7 +5313,7 @@ export interface operations {
                             /** @enum {string} */
                             network?: "mainnet";
                             /** @enum {string} */
-                            state?: "live" | "deployed-no-supply" | "not-found";
+                            state?: "live" | "issued-single-holder" | "deployed-no-supply" | "not-found";
                             /** @description Contract creation date (Soroban). null for classic assets — Horizon does not date issuance. */
                             launchedAt?: string | null;
                             verifiedAt?: string;
@@ -5305,6 +5326,10 @@ export interface operations {
                             /** @description Read from the contract's total_supply() (Soroban); null where no such function. Classic supply is served by Horizon/stellar.expert, not here. */
                             totalSupply?: number | null;
                             horizonNote?: string | null;
+                            /** @description The issuer toml's own `status` for this asset (SEP-1: live | private | test …) on rows whose toml block was read; null = not read, never 'live'. `private` = the issuer calls it a restricted offering (SBRL: KYC-gated platform accounts, not publicly tradable) and the project row's product record carries that in `note`. */
+                            tomlStatus?: string | null;
+                            /** @description true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account — rwa.xyz figures are null on those rows (not provided, never zero). */
+                            rwaxyzListed?: boolean;
                             /** @description rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders. */
                             rwaxyzValueUsd?: number | null;
                             rwaxyzHolders?: number | null;

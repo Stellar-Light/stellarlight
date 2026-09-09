@@ -1,0 +1,4 @@
+{
+	"literalEnumSites": 102,
+	"note": "Hand-typed `enum: [\"...\"]` arrays in src/lib/openapi-spec.ts. May only decrease (scripts/contract/check-enum-literals.ts). Every enum that mirrors an exported `as const` vocabulary is spread from it (enum: [...NAME]) and pinned in spec-enum-parity.test.ts; the literals that remain are spec-only vocabularies. Baselined 2026-09-09 after stellar-raven sls-082/084 (two hand-copied enums drifted) at 103 literal / 20 spread sites. Lowered to 102 literal / 21 spread the same day when productsCoverage.basis was spread from PRODUCTS_COVERAGE_BASES."
+}

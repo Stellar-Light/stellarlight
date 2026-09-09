@@ -457,6 +457,90 @@ async function main() {
 		`enum=${mmEnum.join(",")}`,
 	);
 
+	// live enum values ⊆ spec enum (sls-082 / sls-084): the served value set
+	// is what a generated client validates against. A value the handler
+	// writes or accepts that the spec's enum lacks is drift even when every
+	// field is present.
+	const basisEnum: string[] =
+		spec?.components?.schemas?.Project?.properties?.statusBasis?.enum ?? [];
+	const basisLive = new Set<string>();
+	for (const q of ["ACTA", "soroswap", "blend", "etherfuse", "stellar"]) {
+		const rows = (await getJson(`/api/projects/search?q=${q}&limit=20`)).body
+			?.projects;
+		for (const r of Array.isArray(rows) ? rows : [])
+			if (typeof r?.statusBasis === "string") basisLive.add(r.statusBasis);
+	}
+	const basisMissing = [...basisLive].filter((v) => !basisEnum.includes(v));
+	check(
+		"every statusBasis a SAMPLE of live search rows serves is in the spec enum",
+		basisLive.size > 0 && basisMissing.length === 0,
+		basisLive.size
+			? `live=${[...basisLive].join(",")} missing=${basisMissing.join(",") || "none"}`
+			: "no statusBasis values observed — could not check",
+	);
+	// The census, not a sample: /api/quality serves the corpus-wide histogram
+	// of statusBasis (rowQuality.statusBasisMix). Every basis ANY row carries
+	// must be in the spec enum — this is the check that does not depend on
+	// which five queries happened to return a row with the new value.
+	const mix = (await getJson("/api/quality")).body?.rowQuality?.statusBasisMix;
+	const censusBases = Array.isArray(mix)
+		? mix
+				.map((m: { basis?: unknown }) => m?.basis)
+				.filter((b): b is string => typeof b === "string")
+		: [];
+	const censusMissing = censusBases.filter((b) => !basisEnum.includes(b));
+	check(
+		"every statusBasis in the corpus-wide census (/api/quality statusBasisMix) is in the spec enum",
+		censusBases.length > 0 && censusMissing.length === 0,
+		censusBases.length
+			? `census=${censusBases.join(",")} missing=${censusMissing.join(",") || "none"}`
+			: "statusBasisMix absent — could not check",
+	);
+	// types the live rows carry ⊆ the spec's ?type enum — the direction the
+	// parity tests cannot see: a value the DB holds that the contract lacks.
+	const typeEnum: string[] =
+		spec?.paths?.["/api/projects/search"]?.get?.parameters?.find(
+			(p: { name?: string }) => p.name === "type",
+		)?.schema?.enum ?? [];
+	const typesLive = new Set<string>();
+	for (const q of ["oracle", "wallet", "yield", "bridge", "stablecoin"]) {
+		const rows = (
+			await getJson(`/api/projects/search?q=${q}&limit=20&fields=slug,types`)
+		).body?.projects;
+		for (const r of Array.isArray(rows) ? rows : [])
+			for (const t of Array.isArray(r?.types) ? r.types : [])
+				if (typeof t === "string") typesLive.add(t);
+	}
+	const typesMissing = [...typesLive].filter((t) => !typeEnum.includes(t));
+	check(
+		"every types[] value the live rows carry is in the spec's ?type enum",
+		typesLive.size > 0 && typesMissing.length === 0,
+		typesLive.size
+			? `live=${typesLive.size} values, missing=${typesMissing.join(",") || "none"}`
+			: "no types values observed — could not check",
+	);
+	const rwaOp = spec?.paths?.["/api/rwa"]?.get;
+	const rwaStateEnum: string[] =
+		rwaOp?.parameters?.find((p: { name?: string }) => p.name === "state")
+			?.schema?.enum ?? [];
+	const rwaRowEnum: string[] =
+		rwaOp?.responses?.["200"]?.content?.["application/json"]?.schema?.properties
+			?.assets?.items?.properties?.state?.enum ?? [];
+	const rwaLive = Object.keys(
+		(await getJson("/api/rwa?limit=1")).body?.meta?.counts?.byState ?? {},
+	);
+	check(
+		"every state /api/rwa serves is in BOTH spec enums (param + response)",
+		rwaLive.length > 0 &&
+			rwaLive.every((v) => rwaStateEnum.includes(v) && rwaRowEnum.includes(v)),
+		`live=${rwaLive.join(",") || "none"} param=${rwaStateEnum.join(",")} response=${rwaRowEnum.join(",")}`,
+	);
+	for (const v of rwaLive)
+		check(
+			`/api/rwa?state=${v} is accepted (200)`,
+			(await statusOf(`/api/rwa?state=${v}&limit=1`)) === 200,
+		);
+
 	// ── 11. Responsiveness (catches timeouts/outages, not just wrong data) ──
 	// The guard verified CORRECTNESS but never hit /api/repos/search and had no
 	// latency check — so it missed the day repos/search timed out (it fetched

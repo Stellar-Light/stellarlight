@@ -25,10 +25,12 @@ import {
 function collectionStatusOptions(): string[] {
 	// Read the collection file as text rather than importing it: importing
 	// Payload collection configs pulls in server-only modules under vitest.
+	// Comments stripped first — a `]` inside a comment in an options array
+	// would end the match early (it did, for `types`, on 2026-09-09).
 	const src = readFileSync(
 		resolve(__dirname, "../collections/Projects.ts"),
 		"utf8",
-	);
+	).replace(/^\s*\/\/[^\n]*$/gm, "");
 	const m = src.match(/name:\s*"status",[\s\S]*?options:\s*\[([^\]]+)\]/);
 	if (!m) throw new Error("could not find the status options in Projects.ts");
 	return [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);

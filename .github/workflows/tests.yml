@@ -23,8 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      # src/lib/__tests__ plus component tests that live next to their
-      # component (src/components/**/*.test.tsx). The path-scoped command
-      # silently skipped the latter — a test CI never runs is not a test.
-      # tests/int/** stays out: it needs PAYLOAD_SECRET + a live DB.
-      - run: pnpm exec vitest run src/lib/__tests__/ src/components/
+      # ALL of src/lib (the __tests__ dir AND the *.test.ts files beside their
+      # module — project-status.test.ts, the Keybase-404 guard, had never run
+      # here, 2026-09-09) plus component tests that live next to their
+      # component (src/components/**/*.test.tsx). A path-scoped command
+      # silently skipped both at different times — a test CI never runs is
+      # not a test. tests/int/** stays out: it needs PAYLOAD_SECRET + a live DB.
+      - run: pnpm exec vitest run src/lib/ src/components/
