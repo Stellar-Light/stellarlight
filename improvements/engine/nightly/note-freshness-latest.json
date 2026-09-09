@@ -1,5 +1,31 @@
 {
-	"generatedAt": "2026-09-08T10:16:48.633Z",
+	"generatedAt": "2026-09-09T10:20:22.904Z",
 	"detector": "note-freshness",
-	"failures": []
+	"failures": [
+		{
+			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
+			"note": "note (asOf 2026-09-07) cites 0.0.3; registry latest is 0.0.4 (published 2026-09-08)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
+			"note": "note (asOf 2026-09-01) cites 2026-08-28; registry latest is 2026-09-08 (published 2026-09-08)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
+			"note": "note (asOf 2026-09-01) cites 3.34.0; registry latest is 3.35.0 (published 2026-09-09)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+			"note": "note (asOf 2026-09-04) cites 0.17.2; registry latest is 0.18.3 (published 2026-09-09)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
+			"note": "note (asOf 2026-09-04) cites 0.7.0; registry latest is 0.8.0 (published 2026-09-08)",
+			"surface": "code"
+		}
+	]
 }

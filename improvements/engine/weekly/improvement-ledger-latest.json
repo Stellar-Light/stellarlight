@@ -1,38 +1,38 @@
 {
-	"generatedAt": "2026-09-08T10:16:55.091Z",
-	"total": 651,
-	"open": 2,
-	"refreshQueue": 14,
+	"generatedAt": "2026-09-09T10:20:31.291Z",
+	"total": 656,
+	"open": 3,
+	"refreshQueue": 20,
 	"blockedUpstream": 16,
 	"blockedBy": {
 		"raven-scorer": 7,
 		"raven-catalog-lag": 9
 	},
-	"closed": 619,
+	"closed": 617,
 	"verified": 7,
-	"cleared": 612,
+	"cleared": 610,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 396,
+	"clearedOnSilence": 394,
 	"closingRate": 0.34,
-	"silenceShare": 0.61,
+	"silenceShare": 0.6,
 	"recurrence": {
-		"reopened": 5,
+		"reopened": 7,
 		"reopenedShareOfClosures": 0.01,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 330,
-				"recurred": 141,
-				"ratePct": 42.7
+				"newFindings": 335,
+				"recurred": 146,
+				"ratePct": 43.6
 			},
 			"lifetime": {
-				"newFindings": 651,
-				"recurred": 142,
-				"ratePct": 21.8
+				"newFindings": 656,
+				"recurred": 147,
+				"ratePct": 22.4
 			}
 		}
 	},
-	"oldestOpenDays": 3,
+	"oldestOpenDays": 4,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
@@ -43,6 +43,11 @@
 			"total": 336
 		},
 		{
+			"surface": "directory",
+			"open": 1,
+			"total": 197
+		},
+		{
 			"surface": "consumer",
 			"open": 1,
 			"total": 36
@@ -50,12 +55,7 @@
 		{
 			"surface": "code",
 			"open": 0,
-			"total": 14
-		},
-		{
-			"surface": "directory",
-			"open": 0,
-			"total": 195
+			"total": 17
 		},
 		{
 			"surface": "scf",

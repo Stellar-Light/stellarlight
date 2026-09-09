@@ -1,5 +1,10 @@
 {
-	"generatedAt": "2026-09-08T10:07:35.619Z",
+	"generatedAt": "2026-09-09T10:10:06.790Z",
 	"detector": "record-completeness",
-	"failures": []
+	"failures": [
+		{
+			"probe": "scfRoundAwards empty: lulpay",
+			"note": "rounds=[29,38]"
+		}
+	]
 }
