@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	RWA_DEPLOYER_COVERAGE,
 	RWA_ISSUER_COVERAGE,
 	RWA_REGISTRY,
 	RWA_REGISTRY_AS_OF,
@@ -39,6 +40,9 @@ describe("RWA registry integrity", () => {
 				"plnSAFO",
 				"hufSAFO",
 				"czkSAFO",
+				// Centrifuge's deployer: the NYLIM High Yield Bond Fund pair (zero supply)
+				"HYB",
+				"deHYB",
 			].sort(),
 		);
 		expect(new Set(RWA_REGISTRY.map((r) => r.id)).size).toBe(
@@ -480,8 +484,69 @@ describe("issuer coverage — a tracked issuer is covered completely (sls-083)",
 		expect(registryProducts("spiko").length).toBe(8);
 	});
 
-	it("null — never 'complete' — when there is nothing to reconcile against", () => {
-		expect(productsCoverage("centrifuge")).toBeNull(); // Soroban, no deployer entry yet
+	it("Centrifuge, Liqvid and Matrixdock are covered on the deployer basis too — a platform deployer's tokens attributed through the registry", () => {
+		const cf = productsCoverage("centrifuge");
+		expect(cf?.basis).toBe("deployer-contracts");
+		expect(cf).toMatchObject({
+			declared: 3,
+			tracked: 3,
+			served: 2,
+			complete: true,
+		}); // deJAAA, deJTRSY live; deHYB zero-supply
+		expect(productsCoverage("liqvidxyz")).toMatchObject({
+			basis: "deployer-contracts",
+			declared: 1,
+			tracked: 1,
+			served: 1,
+			complete: true,
+		});
+		expect(productsCoverage("matrixdock")).toMatchObject({
+			basis: "deployer-contracts",
+			declared: 1,
+			tracked: 1,
+			served: 1,
+			complete: true,
+		});
+	});
+
+	it("every SEP-41 contract a covered deployer created is a registry row or an excluded entry with a reason — never silently absent", () => {
+		const ids = new Set(RWA_REGISTRY.map((r) => r.id));
+		for (const c of RWA_DEPLOYER_COVERAGE) {
+			const excluded = new Map(c.excluded.map((e) => [e.contract, e.reason]));
+			for (const id of c.declared)
+				expect(ids.has(id) || excluded.has(id), `${c.issuerEntity} ${id}`).toBe(
+					true,
+				);
+			for (const [id, reason] of excluded) {
+				expect(
+					c.declared,
+					`${c.issuerEntity} excluded ${id} must be declared`,
+				).toContain(id);
+				expect(
+					ids.has(id),
+					`${c.issuerEntity} ${id} is both a row and excluded`,
+				).toBe(false);
+				expect(reason.length, id).toBeGreaterThan(20);
+			}
+			expect(c.deployer).toMatch(/^G[A-Z2-7]{55}$/);
+		}
+		expect(RWA_DEPLOYER_COVERAGE.map((c) => c.issuerEntity).sort()).toEqual([
+			"Centrifuge",
+			"Liqvid",
+			"Matrixdock",
+			"Spiko",
+		]);
+	});
+
+	it("every Soroban-only project has a coverage statement; null is reserved for projects with nothing to reconcile against", () => {
+		const slugs = new Set(
+			RWA_REGISTRY.map((r) => r.projectSlug).filter((x): x is string => !!x),
+		);
+		for (const slug of slugs) {
+			const rows = RWA_REGISTRY.filter((r) => r.projectSlug === slug);
+			if (rows.every((r) => r.kind === "soroban"))
+				expect(productsCoverage(slug)?.basis, slug).toBe("deployer-contracts");
+		}
 		expect(productsCoverage("no-such-project")).toBeNull();
 		expect(productsCoverage(null)).toBeNull();
 	});

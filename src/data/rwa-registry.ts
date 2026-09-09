@@ -543,6 +543,38 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		controlsBasis: null,
 	},
 	{
+		id: "CBNT35PZXQBXKCNKPA6AL6TXHANGLAZMPE35TJUPI2BCO7OGHVKW3WYA",
+		kind: "soroban",
+		name: "NYLIMUSHighYieldBondFund",
+		symbol: "HYB",
+		issuerEntity: null,
+		projectSlug: null,
+		code: null,
+		issuer: null,
+		contract: "CBNT35PZXQBXKCNKPA6AL6TXHANGLAZMPE35TJUPI2BCO7OGHVKW3WYA",
+		productKind: "rwa-asset",
+		assetClass: "Corporate Credit",
+		network: "mainnet",
+		state: "deployed-no-supply",
+		launchedAt: "2026-08-24",
+		verifiedAt: "2026-09-09",
+		evidenceUrl:
+			"https://stellar.expert/explorer/public/contract/CBNT35PZXQBXKCNKPA6AL6TXHANGLAZMPE35TJUPI2BCO7OGHVKW3WYA",
+		verificationLevel: "contract-metadata",
+		basisNote:
+			"soroban on-chain metadata (name/symbol/decimals read from the contract; total_supply via RPC = 0) + deployer-contracts basis: created 2026-08-24 by Centrifuge's platform deployer GASIX3XBHMFJGHOMC2FEELMO2E6JYE5LL2V2QBW3GX23GJI2EHWM4R5E; the contract names the NYLIM US High Yield Bond Fund — the issuing entity is not attributed here until a listing or the manager names it (Anemoy's JAAA/JTRSY are the same shape); not rwa.xyz-listed",
+		decimals: 18,
+		totalSupply: 0,
+		horizonNote: null,
+		tomlStatus: null,
+		rwaxyzListed: false,
+		rwaxyzValueUsd: null,
+		rwaxyzHolders: null,
+		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
+	},
+	{
 		id: "CBQQL6EXGICRS5OXQQMXEG5DGF7SAVH4CAY25RDYWHVBZTQ7RSPASVLA",
 		kind: "soroban",
 		name: "Spiko Amundi Overnight Swap Fund (NOK)",
@@ -660,6 +692,38 @@ export const RWA_REGISTRY: RwaAsset[] = [
 		basisNote:
 			"soroban on-chain metadata (name/symbol/decimals from the contract's constructor args in the create-contract op; total_supply read via RPC = 0) + deployer-contracts basis: created by Spiko's deployer GBYIQXBKEB655EB3WTRITS6RR5GXEP6SQRBLPREZHNFYKT7WBMTMPR3H with the fund-token wasm; not rwa.xyz-listed",
 		decimals: 5,
+		totalSupply: 0,
+		horizonNote: null,
+		tomlStatus: null,
+		rwaxyzListed: false,
+		rwaxyzValueUsd: null,
+		rwaxyzHolders: null,
+		pairedWith: null,
+		controls: null,
+		controlsBasis: null,
+	},
+	{
+		id: "CCRTH4IJKVIBU6VQLRHFKDQYWXBEBJJXKDFNWVETLKUJJ7U62HBAZOIH",
+		kind: "soroban",
+		name: "HYB deRWA",
+		symbol: "deHYB",
+		issuerEntity: "Centrifuge",
+		projectSlug: "centrifuge",
+		code: null,
+		issuer: null,
+		contract: "CCRTH4IJKVIBU6VQLRHFKDQYWXBEBJJXKDFNWVETLKUJJ7U62HBAZOIH",
+		productKind: "rwa-asset",
+		assetClass: "Corporate Credit",
+		network: "mainnet",
+		state: "deployed-no-supply",
+		launchedAt: "2026-08-24",
+		verifiedAt: "2026-09-09",
+		evidenceUrl:
+			"https://stellar.expert/explorer/public/contract/CCRTH4IJKVIBU6VQLRHFKDQYWXBEBJJXKDFNWVETLKUJJ7U62HBAZOIH",
+		verificationLevel: "contract-metadata",
+		basisNote:
+			"soroban on-chain metadata (name/symbol/decimals read from the contract; total_supply via RPC = 0) + deployer-contracts basis: created 2026-08-24 by Centrifuge's platform deployer GASIX3XBHMFJGHOMC2FEELMO2E6JYE5LL2V2QBW3GX23GJI2EHWM4R5E, the deRWA wrapper of HYB, like deJAAA/deJTRSY; not rwa.xyz-listed",
+		decimals: 18,
 		totalSupply: 0,
 		horizonNote: null,
 		tomlStatus: null,
@@ -4231,21 +4295,31 @@ export const RWA_ISSUER_COVERAGE: RwaIssuerCoverage[] = [
 
 /**
  * The Soroban analog of RWA_ISSUER_COVERAGE: an entity whose tokens are
- * contracts has no toml, but its deployer account's create-contract history
- * on Horizon is the issuer's own act. `declared` = every contract that
- * deployer created with the entity's token wasm (ids derived from the
- * envelope's contract-id preimage), on reconciledAt. Spiko: 19 contracts
- * created — 2 with a different wasm (not tokens), 17 fund-share tokens, of
- * which rwa.xyz lists 9 and 8 have zero supply (tracked deployed-no-supply).
- * scripts/data/reconcile-rwa-issuers.ts re-reads the history daily.
+ * contracts has no toml, but the deployer account behind them has a
+ * create-contract history on Horizon — the issuer's own act, and wider than
+ * rwa.xyz's listing. `declared` = every SEP-41 token contract the deployer
+ * created (ids derived from the envelope's contract-id preimage; the
+ * interface read from stellar.expert's `features`, NOT from a wasm hash —
+ * contracts get upgraded and platforms deploy each token with its own build).
+ * A deployer can be a PLATFORM creating tokens for several issuers
+ * (Centrifuge deploys for Anemoy and NYLIM), so a declared contract is
+ * attributed through the registry's own rows, and one that should never be
+ * a row — a test token, a superseded zero-supply predecessor — is listed in
+ * `excluded` WITH ITS REASON. Rule the unit test and the daily guard hold:
+ * declared ⊆ rows ∪ excluded, and nothing is both.
+ *
+ * Read 2026-09-09: Spiko 19 contracts (2 non-token, 17 tokens: 9 listed, 8
+ * zero-supply, all rows); Centrifuge 14 tokens (2 own rows, 2 Anemoy rows,
+ * HYB + deHYB new zero-supply rows, 8 excluded); Liqvid 4 (2 rows under two
+ * issuers, 2 dead duplicates excluded); Matrixdock 2 (XAUM, 1 excluded).
  */
 export interface RwaDeployerCoverage {
 	issuerEntity: string;
 	deployer: string;
-	/** Wasm hashes of the entity's token contracts; a created contract with any other wasm is not a declared asset. */
-	tokenWasmHashes: string[];
-	/** Contract ids the deployer created with those wasms. */
+	/** Every SEP-41 token contract the deployer created, on reconciledAt. */
 	declared: string[];
+	/** Declared contracts deliberately not tracked, each with the reason. */
+	excluded: Array<{ contract: string; reason: string }>;
 	reconciledAt: string;
 }
 
@@ -4253,10 +4327,6 @@ export const RWA_DEPLOYER_COVERAGE: RwaDeployerCoverage[] = [
 	{
 		issuerEntity: "Spiko",
 		deployer: "GBYIQXBKEB655EB3WTRITS6RR5GXEP6SQRBLPREZHNFYKT7WBMTMPR3H",
-		tokenWasmHashes: [
-			"f48f10d9c7d35fc7783b5e27578bf0e764e3a30ff26a3bd7d8e57758c17a9ea8",
-			"83bf0a7fbe1502271f2e14d2a5a46c9cde1aa213be97616bd7c6b102b342692f",
-		],
 		declared: [
 			"CAGYRRKPFSWKM6SJOE4QAAVYMOSHMDS5WOQ4T5A2E6XNCU7LZZKUNQKP",
 			"CAJD2IBSP7VO2VYJQUYJSOGPJINTUYV7MQITINXVPTIH3CCLCUENNMW4",
@@ -4275,6 +4345,109 @@ export const RWA_DEPLOYER_COVERAGE: RwaDeployerCoverage[] = [
 			"CDS2GCAQTNQINSCJUJIVBJXILKBWP5PU7LOBGHMP3X47QCQBFKPMTCNT",
 			"CDT3KU6TQZNOHKNOHNAFFDQZDURVC3MSTL4ML7TUTZGNOPBZCLABP4FR",
 			"CDWOB6T7SVSMMQN5V3P2OPTBAXOP7DAZHGVW3PYTZIKHVFKN6TBSXR6A",
+		],
+		excluded: [],
+		reconciledAt: "2026-09-09",
+	},
+	{
+		issuerEntity: "Centrifuge",
+		deployer: "GASIX3XBHMFJGHOMC2FEELMO2E6JYE5LL2V2QBW3GX23GJI2EHWM4R5E",
+		declared: [
+			"CAEY4QTY6FSOO24AAHIOJNL5APEJUCOY3DI5PDXXRPRXLBX7M53P5DGB",
+			"CATMN7IKF2I4VTQR3KBXNKY22JVELRCITZDT4ZY3HF3E4JZVPAPTFMOY",
+			"CAXPANATOI73KFRI4SNHKNIHUUOOSXF3PPQDLWDHZ6QGWUCLZTTYMXE6",
+			"CBHOEKLWTB6HR2A3IXHIIMQG5FOXWXS6EG4Q5YJDRPMXPCX7M24CYR2O",
+			"CBI7UCH5KGSVQRO5H4SUCZUTZABCITZLRHQQZTWL2TK4RZ72TAR6IHRV",
+			"CBNT35PZXQBXKCNKPA6AL6TXHANGLAZMPE35TJUPI2BCO7OGHVKW3WYA",
+			"CC64WBDGS6QQP22QTTIACYIXT3WF7BBQEYOQPLTP7GTKYY7PZ74QYGSL",
+			"CCRTH4IJKVIBU6VQLRHFKDQYWXBEBJJXKDFNWVETLKUJJ7U62HBAZOIH",
+			"CCUZPFHBPOYKAZONISF6IWBNIUNJ2CQ7M4JJW2PADSSYBKRPEONGQMLV",
+			"CCWYUMW2N7TKJVJZBI3M2MVEH3576FDSFRG4ZGRPI4NOXZ66UZQRQKG4",
+			"CDBCWNOQU2Z6ZI6RZ2YSW3GXOWJR2LHZIVKZQ6D6IJ54A3WQXVSVDYJU",
+			"CDNSO54D35G7BIVWGTHR25IZWXITZWU5233FGMJWGIQ4DI4JPQ7LLIOM",
+			"CDQXZSJKDQI7BYUROYR2SH2MJYJOTRLWSSIOQKB4J6HMAWELFI7TBR3J",
+			"CDV6U7OEVY6KUEJ4WNS63AYB6RFU3BAE7AZJOQ7LPH447C6NWUXEZZSO",
+		],
+		excluded: [
+			{
+				contract: "CCWYUMW2N7TKJVJZBI3M2MVEH3576FDSFRG4ZGRPI4NOXZ66UZQRQKG4",
+				reason:
+					"superseded zero-supply predecessor of deJAAA, deployed 2025-09-25 (live deJAAA is CC64WBDGS6…, 2025-12-01); 4 events",
+			},
+			{
+				contract: "CDQXZSJKDQI7BYUROYR2SH2MJYJOTRLWSSIOQKB4J6HMAWELFI7TBR3J",
+				reason:
+					"superseded zero-supply predecessor of deJAAA, deployed 2025-10-02; 4 events",
+			},
+			{
+				contract: "CAEY4QTY6FSOO24AAHIOJNL5APEJUCOY3DI5PDXXRPRXLBX7M53P5DGB",
+				reason:
+					"superseded zero-supply predecessor of Anemoy's JAAA, deployed 2025-10-29 (live JAAA is CDV6U7OEVY…, 2026-03-26); 4 events",
+			},
+			{
+				contract: "CATMN7IKF2I4VTQR3KBXNKY22JVELRCITZDT4ZY3HF3E4JZVPAPTFMOY",
+				reason:
+					"superseded zero-supply predecessor of Anemoy's JTRSY, deployed 2025-10-29 (live JTRSY is CBHOEKLWTB…, 2026-03-26); its name() even reads JanusHendersonAnemoyAAACLOFund; 6 events",
+			},
+			{
+				contract: "CDNSO54D35G7BIVWGTHR25IZWXITZWU5233FGMJWGIQ4DI4JPQ7LLIOM",
+				reason:
+					"test token: symbol and name are literally 'tst' (supply 110.1, 23 events), deployed 2025-12-01",
+			},
+			{
+				contract: "CCUZPFHBPOYKAZONISF6IWBNIUNJ2CQ7M4JJW2PADSSYBKRPEONGQMLV",
+				reason:
+					"test token: symbol and name are literally 'tst' (supply 0, 5 events), deployed 2025-12-01",
+			},
+			{
+				contract: "CAXPANATOI73KFRI4SNHKNIHUUOOSXF3PPQDLWDHZ6QGWUCLZTTYMXE6",
+				reason:
+					"test token: symbol and name are literally 'tst' (supply 1000, 6 events), deployed 2025-12-01",
+			},
+			{
+				contract: "CDBCWNOQU2Z6ZI6RZ2YSW3GXOWJR2LHZIVKZQ6D6IJ54A3WQXVSVDYJU",
+				reason:
+					"superseded zero-supply deployment of deJAAA on the same day as the live one (2025-12-01); 4 events",
+			},
+		],
+		reconciledAt: "2026-09-09",
+	},
+	{
+		issuerEntity: "Liqvid",
+		deployer: "GAKSXA2BTTNEFUDTZUGICKKXYIEUDTWKWSDVR37Q4AF5UTOJ6VLB5HGL",
+		declared: [
+			"CAA4SZLVEY6FQTO7GA2AIWRPBKHS2F5VXIXWE3YIOIC6A6DI6PKBIP2K",
+			"CAKJDJUEY2WCL6HETBCWKMYPKFXUKR242F2DAUVNLACFQ4KMF4SNEZBO",
+			"CBV4ASJV2DQVTLRI3CKNT5TOQJBZDUAUDQCQWZ7LB6SIWYX7EW7DSMBX",
+			"CDIYF2ZZFABEFPDBSIOQ5IUEHVBD3YUCDJE6FRM2VJ3SANMFWL7QIJSP",
+		],
+		excluded: [
+			{
+				contract: "CAKJDJUEY2WCL6HETBCWKMYPKFXUKR242F2DAUVNLACFQ4KMF4SNEZBO",
+				reason:
+					"duplicate deployment of Liqvid asset #1037 on the same day as the live one (CAA4SZLVEY…, 2026-03-20); 0 events, never used",
+			},
+			{
+				contract: "CDIYF2ZZFABEFPDBSIOQ5IUEHVBD3YUCDJE6FRM2VJ3SANMFWL7QIJSP",
+				reason:
+					"duplicate deployment of Liqvid asset #1037 (2026-04-16); 1 event, never used",
+			},
+		],
+		reconciledAt: "2026-09-09",
+	},
+	{
+		issuerEntity: "Matrixdock",
+		deployer: "GCJVDLCETD55NADDFMAAMA7KROM5MLAOFSUHW4TPR5FZ7JN4JKFDOZQU",
+		declared: [
+			"CBJ4HDRS657QQGHDEOJ2VRMKBE2PXSOAAZDNTPINO6GUVYMHKSVD24KZ",
+			"CC2RBGYNCFBCVENIDL5BFBWPH4OUZM2UA3OD2K2N54GLMWCC4KWPVAGO",
+		],
+		excluded: [
+			{
+				contract: "CBJ4HDRS657QQGHDEOJ2VRMKBE2PXSOAAZDNTPINO6GUVYMHKSVD24KZ",
+				reason:
+					"pre-launch deployment 2026-05-20, one month before XAUM, with XAUM's original wasm: symbol MAUM, name MAUM, supply 999, 44 events, listed nowhere — treated as a rehearsal until Matrixdock says otherwise; surfaced here rather than hidden",
+			},
 		],
 		reconciledAt: "2026-09-09",
 	},

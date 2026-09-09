@@ -11313,7 +11313,7 @@
 									"issuer-stellar-toml",
 									"deployer-contracts"
 								],
-								"description": "issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every contract the entity's deployer account created with its token wasm, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply)."
+								"description": "issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer."
 							},
 							"asOf": {
 								"type": "string"

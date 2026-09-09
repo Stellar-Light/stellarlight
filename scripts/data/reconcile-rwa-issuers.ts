@@ -21,9 +21,10 @@
  *                            completeness is unknown, not green
  *
  *   deployer-drift           a Soroban entity's deployer account has created a
- *                            token-wasm contract the table lacks (Horizon's
- *                            create-contract history, ids derived from the
- *                            envelope preimage) → verify and add a row
+ *                            SEP-41 token contract that is neither a registry
+ *                            row nor excluded with a reason (Horizon history,
+ *                            ids from the envelope preimage, interface from
+ *                            stellar.expert) → verify, then add a row or exclude
  *
  * Exit 1 on any of the five. A could-not-check is a red on purpose: an
  * unread toml cannot be reported as reconciled (a 4xx is a red, not a skip).
@@ -32,7 +33,16 @@
  *
  *   npx tsx scripts/data/reconcile-rwa-issuers.ts
  */
-import { hash, Networks, StrKey, xdr } from "@stellar/stellar-sdk";
+import {
+	Account,
+	Contract,
+	hash,
+	Networks,
+	rpc,
+	StrKey,
+	TransactionBuilder,
+	xdr,
+} from "@stellar/stellar-sdk";
 import {
 	RWA_DEPLOYER_COVERAGE,
 	RWA_ISSUER_COVERAGE,
@@ -78,6 +88,78 @@ async function readToml(url: string): Promise<string | null> {
 		await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
 	}
 	return null;
+}
+
+/**
+ * Is this contract a token? Three sources, none sufficient alone:
+ * stellar.expert's `features` tag ("sep41") is a fast positive but has false
+ * negatives (Spiko's fund tokens carry no tag); a wasm hash changes on upgrade
+ * and platforms build each token separately; a single RPC probe reads a
+ * throttled response as "not a token". So: tag → token; otherwise probe
+ * symbol() and decimals() over RPC with backoff and keep the three outcomes
+ * apart — both answer → token; a host error saying the function is missing →
+ * not-token; transport errors after retries → unknown (could-not-check).
+ */
+const RPC = new rpc.Server("https://mainnet.sorobanrpc.com");
+const PROBE_SOURCE = new Account(
+	"GBYIQXBKEB655EB3WTRITS6RR5GXEP6SQRBLPREZHNFYKT7WBMTMPR3H",
+	"0",
+);
+async function probe(
+	id: string,
+	fn: string,
+): Promise<"ok" | "missing" | "unknown"> {
+	for (let attempt = 0; attempt < 4; attempt++) {
+		try {
+			const tx = new TransactionBuilder(PROBE_SOURCE, {
+				fee: "100",
+				networkPassphrase: Networks.PUBLIC,
+			})
+				.addOperation(new Contract(id).call(fn))
+				.setTimeout(30)
+				.build();
+			const sim = await RPC.simulateTransaction(tx);
+			if (rpc.Api.isSimulationSuccess(sim) && sim.result) return "ok";
+			const err = String((sim as { error?: string }).error ?? "");
+			if (
+				/MissingValue|not found|does not exist|no such|UnexpectedType|InvalidAction/i.test(
+					err,
+				)
+			)
+				return "missing";
+		} catch {
+			/* transport — retry */
+		}
+		await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+	}
+	return "unknown";
+}
+async function classifyToken(
+	id: string,
+): Promise<"token" | "not-token" | "unknown"> {
+	let tagged = false;
+	try {
+		const r = await fetch(
+			`https://api.stellar.expert/explorer/public/contract/${id}`,
+			{
+				headers: UA,
+				signal: AbortSignal.timeout(20_000),
+			},
+		);
+		if (r.ok)
+			tagged = (
+				((await r.json()) as { features?: string[] }).features ?? []
+			).includes("sep41");
+	} catch {
+		/* the tag is only a fast positive; fall through to the probe */
+	}
+	if (tagged) return "token";
+	const sym = await probe(id, "symbol");
+	if (sym === "unknown") return "unknown";
+	if (sym === "missing") return "not-token";
+	const dec = await probe(id, "decimals");
+	if (dec === "unknown") return "unknown";
+	return dec === "ok" ? "token" : "not-token";
 }
 
 async function main() {
@@ -155,12 +237,18 @@ async function main() {
 		);
 	}
 
-	// Soroban entities: re-read each deployer's create-contract history and
-	// derive every contract id it created with the entity's token wasm.
+	// Soroban entities: re-read each deployer's create-contract history,
+	// derive every contract id it created, and classify each as a token with
+	// classifyToken() (tag fast-path, then a trinary RPC probe) — not by wasm
+	// hash (contracts get upgraded; platforms deploy each token with its own
+	// build), not by the tag alone (Spiko's tokens carry none), and not by a
+	// single probe (a throttled probe would read as "not a token"). Rule: every SEP-41 contract the deployer created is
+	// a registry row OR explicitly excluded with a reason. A contract whose
+	// interface could not be read is could-not-check, never "not a token".
 	const deployerDrift: string[] = [];
 	const netId = hash(Buffer.from(Networks.PUBLIC));
 	for (const c of RWA_DEPLOYER_COVERAGE) {
-		let created: string[] = [];
+		const created: string[] = [];
 		try {
 			type Op = { type: string; function?: string; transaction_hash: string };
 			let url: string | null =
@@ -204,12 +292,6 @@ async function main() {
 								? hf.createContract()
 								: null;
 					if (!cc) continue;
-					const ex = cc.executable();
-					const wasm =
-						ex.switch().name === "contractExecutableWasm"
-							? Buffer.from(ex.wasmHash()).toString("hex")
-							: null;
-					if (!wasm || !c.tokenWasmHashes.includes(wasm)) continue;
 					const pre = cc.contractIdPreimage();
 					if (pre.switch().name !== "contractIdPreimageFromAddress") continue;
 					const fa = pre.fromAddress();
@@ -234,21 +316,32 @@ async function main() {
 			);
 			continue;
 		}
-		created = [...new Set(created)];
-		for (const id of created) {
-			if (!ids.has(id))
+		const excluded = new Set(c.excluded.map((e) => e.contract));
+		const tokens: string[] = [];
+		for (const id of [...new Set(created)]) {
+			const kind = await classifyToken(id);
+			if (kind === "unknown") {
+				unreadable.push(
+					`${c.issuerEntity}: interface of ${id} could not be read — not classified (never 'not a token')`,
+				);
+				continue;
+			}
+			if (kind === "token") tokens.push(id);
+		}
+		for (const id of tokens) {
+			if (!ids.has(id) && !excluded.has(id))
 				deployerDrift.push(
-					`${c.issuerEntity}: ${id} created by ${c.deployer} with the token wasm is not a registry row`,
+					`${c.issuerEntity}: SEP-41 contract ${id} created by ${c.deployer} is neither a registry row nor excluded`,
 				);
 			if (!c.declared.includes(id))
 				stale.push(
-					`${c.issuerEntity}: deployer created ${id} but RWA_DEPLOYER_COVERAGE does not list it`,
+					`${c.issuerEntity}: deployer created SEP-41 contract ${id} but RWA_DEPLOYER_COVERAGE.declared does not list it`,
 				);
 		}
 		for (const id of c.declared)
-			if (!created.includes(id))
+			if (!tokens.includes(id))
 				stale.push(
-					`${c.issuerEntity}: table lists ${id} but the deployer history does not show it`,
+					`${c.issuerEntity}: table declares ${id} but the deployer history / interface read does not show it as a SEP-41 token`,
 				);
 	}
 

@@ -139,10 +139,11 @@ export function mergeProducts(
  */
 /**
  * issuer-stellar-toml — classic assets: what the issuer accounts' own toml
- * declares. deployer-contracts — Soroban tokens (no toml): every contract the
- * entity's deployer account created with its token wasm, read from Horizon's
- * create-contract history (Spiko: 19 contracts, 17 tokens). The spec spreads
- * this array (the enum-literal ratchet forbids a second copy).
+ * declares. deployer-contracts — Soroban tokens (no toml): every SEP-41
+ * token contract the deployer account behind the project's tokens created,
+ * read from Horizon's create-contract history and attributed through the
+ * registry (see deployerCoverage). The spec spreads this array (the
+ * enum-literal ratchet forbids a second copy).
  */
 export const PRODUCTS_COVERAGE_BASES = [
 	"issuer-stellar-toml",
@@ -227,35 +228,48 @@ export function productsCoverage(
 }
 
 /**
- * The Soroban basis: a project whose registry rows are contract tokens has no
- * toml to reconcile, but its deployer account's create-contract history is
- * just as declarative — and, unlike rwa.xyz's listing, it is the issuer's own
- * act. `declared` = contracts that deployer created with the entity's token
- * wasm (RWA_DEPLOYER_COVERAGE, read from Horizon on reconciledAt); `tracked`
- * = of those, registry rows in any state. Null when the entity has no
- * deployer entry.
+ * The Soroban basis. A project whose registry rows are contract tokens has
+ * no toml, but the deployer account behind those contracts has a
+ * create-contract history on Horizon — the issuer's own act, and wider than
+ * rwa.xyz's listing. RWA_DEPLOYER_COVERAGE records, per deployer, every
+ * SEP-41 token contract it created (`declared`) and the ones deliberately
+ * NOT tracked with a reason (`excluded`: test tokens, superseded zero-supply
+ * predecessors) — a deployer can be a PLATFORM creating tokens for several
+ * issuers (Centrifuge deploys for Anemoy and NYLIM too), so attribution goes
+ * through the registry: this project's `declared` are the deployer's tokens
+ * the registry attributes to it, and a created token that is neither a row
+ * nor excluded makes every client of that deployer incomplete, because it
+ * could be theirs. Null when no deployer entry covers the project's tokens.
  */
 function deployerCoverage(
 	slug: string,
 	rows: RwaAsset[],
 ): ProductsCoverage | null {
-	const entities = new Set(
-		rows.map((r) => r.issuerEntity).filter((x): x is string => !!x),
-	);
+	const own = new Set(rows.map((r) => r.id));
 	const covered = RWA_DEPLOYER_COVERAGE.filter((c) =>
-		entities.has(c.issuerEntity),
+		c.declared.some((id) => own.has(id)),
 	);
 	if (!covered.length) return null;
-	const trackedIds = new Set(rows.map((r) => r.id));
+	const allIds = new Set(RWA_REGISTRY.map((r) => r.id));
 	let declared = 0;
 	let tracked = 0;
-	for (const c of covered)
+	let unattributed = 0;
+	for (const c of covered) {
+		const excluded = new Set(c.excluded.map((e) => e.contract));
 		for (const id of c.declared) {
-			declared++;
-			if (trackedIds.has(id)) tracked++;
+			if (excluded.has(id)) continue;
+			if (own.has(id)) {
+				declared++;
+				tracked++;
+			} else if (!allIds.has(id)) {
+				// created by this project's deployer, attributed to nobody, not
+				// excluded: it may be this project's — counted as declared and
+				// untracked so `complete` cannot be true.
+				declared++;
+				unattributed++;
+			}
 		}
-	// Classic rows on a Soroban-covered project would need a toml entry; any
-	// without one count as unreconciled, as on the toml side.
+	}
 	const classicUncovered = new Set(
 		rows
 			.filter((r) => r.kind === "classic" && r.issuer)
@@ -274,7 +288,8 @@ function deployerCoverage(
 		declared,
 		tracked,
 		served: registryProducts(slug).length,
-		complete: declared === tracked && classicUncovered === 0,
+		complete:
+			declared === tracked && unattributed === 0 && classicUncovered === 0,
 	};
 }
 
