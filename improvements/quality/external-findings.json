@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-09-09T12:28:10.794Z",
+ "generatedAt": "2026-09-10T12:21:22.463Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
-  "reported-upstream": 6,
+  "reported-upstream": 3,
   "declined-upstream": 1
  },
  "ourResponse": {
@@ -13,13 +13,13 @@
    "sls-029",
    "sls-033"
   ],
-  "fixApplicable": 6,
+  "fixApplicable": 3,
   "declined": 1,
   "distinctIssuesClosed": 3,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
- "total": 7,
+ "total": 4,
  "records": [
   {
    "id": "sls-024",
@@ -79,51 +79,6 @@
     "state": "closed",
     "closedAt": "2026-07-14",
     "url": "https://github.com/Stellar-Light/stellarlight/issues/522"
-   }
-  },
-  {
-   "id": "sls-082",
-   "title": "The RWA state request and response enums omit issued-single-holder",
-   "status": "reported-upstream",
-   "discovered": "2026-09-08",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-082-rwa-state-enums.md",
-   "ourIssue": 1529,
-   "ourResponse": {
-    "issue": 1529,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1529"
-   }
-  },
-  {
-   "id": "sls-083",
-   "title": "The RWA registry omits four current Etherfuse assets and does not mark project coverage partial",
-   "status": "reported-upstream",
-   "discovered": "2026-09-08",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-083-etherfuse-rwa-registry-coverage.md",
-   "ourIssue": 1531,
-   "ourResponse": {
-    "issue": 1531,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1531"
-   }
-  },
-  {
-   "id": "sls-084",
-   "title": "The project response returns package-release outside the documented statusBasis enum",
-   "status": "reported-upstream",
-   "discovered": "2026-09-08",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-084-status-basis-openapi-enum.md",
-   "ourIssue": 1530,
-   "ourResponse": {
-    "issue": 1530,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1530"
    }
   }
  ]

@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-09T12:28:03.615Z",
+ "generatedAt": "2026-09-10T12:21:18.224Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 656,
+  "total": 659,
   "open": 3,
-  "refreshQueue": 20,
+  "refreshQueue": 23,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
@@ -166,7 +166,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 5,
+    "refresh": 8,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -290,14 +290,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 335,
-     "recurred": 146,
-     "ratePct": 43.6
+     "newFindings": 312,
+     "recurred": 139,
+     "ratePct": 44.6
     },
     "lifetime": {
-     "newFindings": 656,
-     "recurred": 147,
-     "ratePct": 22.4
+     "newFindings": 659,
+     "recurred": 150,
+     "ratePct": 22.8
     }
    },
    "reopened": {
@@ -309,13 +309,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 335,
-     "repeats": 335,
+     "newFindings": 312,
+     "repeats": 312,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 656,
-     "repeats": 650,
+     "newFindings": 659,
+     "repeats": 653,
      "ratePct": 99.1
     },
     "byClass": [
@@ -327,8 +327,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 135,
-      "open": 20,
+      "total": 138,
+      "open": 23,
       "firstSeen": "2026-07-22"
      },
      {
@@ -361,7 +361,7 @@
  },
  "projects": {
   "read": 981,
-  "population": 1103,
+  "population": 1105,
   "servedPopulation": 981,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9227,7 +9227,7 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7935
+    "withCodeDepth": 7936
    },
    "knowledgeNotes": {
     "pool": 247,
@@ -9279,7 +9279,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5691,
+    "pool": 5692,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 111
    }
@@ -9335,11 +9335,11 @@
     },
     {
      "label": "slowing",
-     "count": 947
+     "count": 951
     },
     {
      "label": "active",
-     "count": 845
+     "count": 841
     },
     {
      "label": "unknown",
@@ -9394,7 +9394,7 @@
    ],
    "languageOther": 50
   },
-  "withCodeDepth": 10933,
+  "withCodeDepth": 10934,
   "withNotes": 587,
   "withMainnet": 111,
   "top": [
@@ -10371,7 +10371,7 @@
     "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": 83,
+    "codeDepth": 86,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10517,7 +10517,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 12
+    "value": 15
    },
    {
     "id": "s:engine-e-contract",
@@ -10601,7 +10601,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 39
+    "value": 42
    },
    {
     "id": "o:verified",
@@ -10770,14 +10770,14 @@
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 12
+    "value": 15
    },
    {
     "source": 20,
     "target": 22,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 5
+    "value": 8
    },
    {
     "source": 2,
@@ -10811,7 +10811,7 @@
     "missing": 334,
     "of": 347,
     "share": 96.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5344 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5345 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 334,
@@ -10899,13 +10899,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2286,
+    "missing": 2285,
     "of": 13219,
     "share": 17.3,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2286,
+    "examplePoolSize": 2285,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
