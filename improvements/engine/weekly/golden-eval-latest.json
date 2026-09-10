@@ -27,7 +27,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8326529264450073,
+      "topScore": 0.8319849967956543,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -35,7 +35,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Configuration"
+      "sample": "SEP-24: Hosted Deposit and Withdrawal"
     },
     {
       "id": "protocol-trustline",
@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8357760310173035,
+      "topScore": 0.8371003270149231,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.821096658706665,
+      "topScore": 0.8208710551261902,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -657,7 +657,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7234534621238708,
+      "topScore": 0.7228890657424927,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -765,7 +765,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6709855794906616,
+      "topScore": 0.6715497970581055,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -783,7 +783,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6947882175445557,
+      "topScore": 0.6944363117218018,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
+      "topScore": 0.8220105767250061,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-09T10:09:35Z"
+  "generatedAt": "2026-09-10T10:05:07Z"
 }

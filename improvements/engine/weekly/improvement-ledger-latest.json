@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-09-09T10:20:31.291Z",
-	"total": 656,
+	"generatedAt": "2026-09-10T10:15:50.111Z",
+	"total": 659,
 	"open": 3,
-	"refreshQueue": 20,
+	"refreshQueue": 23,
 	"blockedUpstream": 16,
 	"blockedBy": {
 		"raven-scorer": 7,
@@ -21,18 +21,18 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 335,
-				"recurred": 146,
-				"ratePct": 43.6
+				"newFindings": 312,
+				"recurred": 139,
+				"ratePct": 44.6
 			},
 			"lifetime": {
-				"newFindings": 656,
-				"recurred": 147,
-				"ratePct": 22.4
+				"newFindings": 659,
+				"recurred": 150,
+				"ratePct": 22.8
 			}
 		}
 	},
-	"oldestOpenDays": 4,
+	"oldestOpenDays": 5,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
@@ -55,7 +55,7 @@
 		{
 			"surface": "code",
 			"open": 0,
-			"total": 17
+			"total": 20
 		},
 		{
 			"surface": "scf",

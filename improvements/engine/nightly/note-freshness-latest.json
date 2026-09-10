@@ -1,10 +1,25 @@
 {
-	"generatedAt": "2026-09-09T10:20:22.904Z",
+	"generatedAt": "2026-09-10T10:15:42.706Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
 			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
 			"note": "note (asOf 2026-09-07) cites 0.0.3; registry latest is 0.0.4 (published 2026-09-08)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_js",
+			"note": "note (asOf 2026-09-07) cites 1.0.0-rc.0; registry latest is 1.0.0-rc.1 (published 2026-09-09)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_wasm",
+			"note": "note (asOf 2026-09-07) cites 1.0.0-rc.0; registry latest is 1.0.0-rc.1 (published 2026-09-09)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:openzeppelin/openzeppelin-adapters:npm:@openzeppelin/adapter-stellar",
+			"note": "note (asOf 2026-09-02) cites 4.0.1; registry latest is 6.0.0 (published 2026-09-09)",
 			"surface": "code"
 		},
 		{
