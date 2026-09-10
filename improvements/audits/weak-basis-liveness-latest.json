@@ -1,13 +1,13 @@
 {
-	"generatedAt": "2026-09-07T21:50:16.265Z",
+	"generatedAt": "2026-09-10T12:56:24.971Z",
 	"source": "scripts/check-weak-basis-liveness.ts",
 	"rule": "A Live row on a weak basis whose every repo is over a year silent is re-probed at the PRODUCT's own URL. Repo staleness is not death and is never judged here; a contradiction is a queue for a human, never an auto-flip.",
 	"tally": {
 		"poolSize": 88,
 		"checked": 53,
-		"holds": 45,
+		"holds": 44,
 		"contradicted": 0,
-		"couldNotCheck": 8
+		"couldNotCheck": 9
 	},
 	"rows": [
 		{
@@ -17,7 +17,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5371 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:55.962Z"
+			"checkedAt": "2026-09-10T12:56:05.170Z"
 		},
 		{
 			"slug": "amber",
@@ -26,7 +26,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4643 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:56.047Z"
+			"checkedAt": "2026-09-10T12:56:05.059Z"
 		},
 		{
 			"slug": "bidali",
@@ -35,7 +35,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5182 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:55.891Z"
+			"checkedAt": "2026-09-10T12:56:06.074Z"
 		},
 		{
 			"slug": "bitwage",
@@ -44,7 +44,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5744 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:56.982Z"
+			"checkedAt": "2026-09-10T12:56:05.306Z"
 		},
 		{
 			"slug": "solar-wallet",
@@ -53,7 +53,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1289 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:57.684Z"
+			"checkedAt": "2026-09-10T12:56:06.842Z"
 		},
 		{
 			"slug": "soroban-pre-order-contract",
@@ -62,7 +62,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7968 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:57.403Z"
+			"checkedAt": "2026-09-10T12:56:06.741Z"
 		},
 		{
 			"slug": "rehive",
@@ -71,7 +71,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5360 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:57.674Z"
+			"checkedAt": "2026-09-10T12:56:06.872Z"
 		},
 		{
 			"slug": "mica",
@@ -80,7 +80,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"Mica Rent\"",
-			"checkedAt": "2026-09-07T21:49:57.316Z"
+			"checkedAt": "2026-09-10T12:56:06.198Z"
 		},
 		{
 			"slug": "bes-metaverse",
@@ -89,16 +89,16 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 10481 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:58.382Z"
+			"checkedAt": "2026-09-10T12:56:07.438Z"
 		},
 		{
 			"slug": "paychant",
 			"to": "Live",
 			"sourceUrl": "https://paychant.com/",
-			"httpStatus": 200,
-			"verdict": "HOLDS",
-			"reason": "200, 6008 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:58.007Z"
+			"httpStatus": 403,
+			"verdict": "COULD-NOT-CHECK",
+			"reason": "HTTP 403 — refused this probe, not judged (a 401/405 on a GET is an endpoint's method or auth policy, not a product state)",
+			"checkedAt": "2026-09-10T12:56:06.944Z"
 		},
 		{
 			"slug": "walletban",
@@ -107,7 +107,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"Walletban\"",
-			"checkedAt": "2026-09-07T21:49:57.860Z"
+			"checkedAt": "2026-09-10T12:56:07.111Z"
 		},
 		{
 			"slug": "block-time-financial",
@@ -116,7 +116,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (0 chars readable, no head to read) — needs a browser",
-			"checkedAt": "2026-09-07T21:49:58.354Z"
+			"checkedAt": "2026-09-10T12:56:07.749Z"
 		},
 		{
 			"slug": "cyvers",
@@ -125,7 +125,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1681 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:58.749Z"
+			"checkedAt": "2026-09-10T12:56:07.946Z"
 		},
 		{
 			"slug": "stellargpt",
@@ -134,7 +134,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"StellarGPT\"",
-			"checkedAt": "2026-09-07T21:49:58.498Z"
+			"checkedAt": "2026-09-10T12:56:08.080Z"
 		},
 		{
 			"slug": "soroban-copilot",
@@ -143,7 +143,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3485 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:58.777Z"
+			"checkedAt": "2026-09-10T12:56:08.398Z"
 		},
 		{
 			"slug": "bingtellar",
@@ -152,7 +152,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7159 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:59.063Z"
+			"checkedAt": "2026-09-10T12:56:08.526Z"
 		},
 		{
 			"slug": "okashi",
@@ -161,7 +161,7 @@
 			"httpStatus": null,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "fetch failed",
-			"checkedAt": "2026-09-07T21:50:09.155Z"
+			"checkedAt": "2026-09-10T12:56:18.739Z"
 		},
 		{
 			"slug": "chainlink-oracles-relayer",
@@ -170,7 +170,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1557 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:59.501Z"
+			"checkedAt": "2026-09-10T12:56:08.938Z"
 		},
 		{
 			"slug": "sorosan",
@@ -179,7 +179,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell whose head names nothing usable (\"Create Next App\") — needs a browser",
-			"checkedAt": "2026-09-07T21:49:59.217Z"
+			"checkedAt": "2026-09-10T12:56:08.897Z"
 		},
 		{
 			"slug": "blockedenxyz",
@@ -188,7 +188,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2705 chars, no markers",
-			"checkedAt": "2026-09-07T21:49:59.668Z"
+			"checkedAt": "2026-09-10T12:56:08.918Z"
 		},
 		{
 			"slug": "kyc-token",
@@ -197,7 +197,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3474 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:09.774Z"
+			"checkedAt": "2026-09-10T12:56:19.344Z"
 		},
 		{
 			"slug": "chef",
@@ -206,7 +206,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (0 chars readable, no head to read) — needs a browser",
-			"checkedAt": "2026-09-07T21:50:09.368Z"
+			"checkedAt": "2026-09-10T12:56:18.945Z"
 		},
 		{
 			"slug": "cryptoconexin",
@@ -215,7 +215,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 13402 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:10.703Z"
+			"checkedAt": "2026-09-10T12:56:20.120Z"
 		},
 		{
 			"slug": "js-worker-sdk",
@@ -224,7 +224,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 13086 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:09.740Z"
+			"checkedAt": "2026-09-10T12:56:19.311Z"
 		},
 		{
 			"slug": "smart-deploy",
@@ -233,7 +233,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"SmartDeploy || Ready. Set. SmartDeploy!\"",
-			"checkedAt": "2026-09-07T21:50:10.906Z"
+			"checkedAt": "2026-09-10T12:56:20.343Z"
 		},
 		{
 			"slug": "wombat",
@@ -242,7 +242,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (204 chars readable, no head to read) — needs a browser",
-			"checkedAt": "2026-09-07T21:50:11.042Z"
+			"checkedAt": "2026-09-10T12:56:20.244Z"
 		},
 		{
 			"slug": "sanctum",
@@ -251,7 +251,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4499 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:11.426Z"
+			"checkedAt": "2026-09-10T12:56:20.821Z"
 		},
 		{
 			"slug": "stellar-c-sdk",
@@ -260,7 +260,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3742 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:11.155Z"
+			"checkedAt": "2026-09-10T12:56:20.584Z"
 		},
 		{
 			"slug": "mojoflower",
@@ -269,7 +269,7 @@
 			"httpStatus": 200,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "client-rendered shell (241 chars readable, no head to read) — needs a browser",
-			"checkedAt": "2026-09-07T21:50:11.664Z"
+			"checkedAt": "2026-09-10T12:56:21.046Z"
 		},
 		{
 			"slug": "sendin",
@@ -278,7 +278,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4224 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:11.842Z"
+			"checkedAt": "2026-09-10T12:56:21.500Z"
 		},
 		{
 			"slug": "borderless",
@@ -287,7 +287,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"Borderless — Cross-border payments API\"",
-			"checkedAt": "2026-09-07T21:50:11.986Z"
+			"checkedAt": "2026-09-10T12:56:21.610Z"
 		},
 		{
 			"slug": "sstream",
@@ -296,7 +296,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5084 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:11.866Z"
+			"checkedAt": "2026-09-10T12:56:21.493Z"
 		},
 		{
 			"slug": "gladius",
@@ -305,7 +305,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1737 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:12.222Z"
+			"checkedAt": "2026-09-10T12:56:21.998Z"
 		},
 		{
 			"slug": "quasar",
@@ -314,7 +314,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 10994 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:12.249Z"
+			"checkedAt": "2026-09-10T12:56:21.735Z"
 		},
 		{
 			"slug": "stellar-rust-sdk",
@@ -323,7 +323,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7454 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:12.165Z"
+			"checkedAt": "2026-09-10T12:56:21.790Z"
 		},
 		{
 			"slug": "omnilumen",
@@ -332,7 +332,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "body is client-rendered, but the served head names the product: \"OmniLumen: Streamlining Stellar and Soroban Development\"",
-			"checkedAt": "2026-09-07T21:50:12.348Z"
+			"checkedAt": "2026-09-10T12:56:21.758Z"
 		},
 		{
 			"slug": "constellation",
@@ -341,7 +341,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 3723 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:12.658Z"
+			"checkedAt": "2026-09-10T12:56:22.312Z"
 		},
 		{
 			"slug": "domipago",
@@ -350,7 +350,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4968 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:13.328Z"
+			"checkedAt": "2026-09-10T12:56:22.682Z"
 		},
 		{
 			"slug": "zilt",
@@ -359,7 +359,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1560 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:12.494Z"
+			"checkedAt": "2026-09-10T12:56:22.516Z"
 		},
 		{
 			"slug": "autoaction",
@@ -368,7 +368,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5134 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:13.853Z"
+			"checkedAt": "2026-09-10T12:56:23.088Z"
 		},
 		{
 			"slug": "bitgifty",
@@ -377,7 +377,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4456 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:14.058Z"
+			"checkedAt": "2026-09-10T12:56:23.236Z"
 		},
 		{
 			"slug": "legacy-suite",
@@ -386,7 +386,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 4506 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:14.810Z"
+			"checkedAt": "2026-09-10T12:56:23.352Z"
 		},
 		{
 			"slug": "womenbiz",
@@ -395,7 +395,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7130 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:14.339Z"
+			"checkedAt": "2026-09-10T12:56:23.329Z"
 		},
 		{
 			"slug": "ortege",
@@ -404,7 +404,7 @@
 			"httpStatus": null,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "fetch failed",
-			"checkedAt": "2026-09-07T21:50:14.170Z"
+			"checkedAt": "2026-09-10T12:56:23.298Z"
 		},
 		{
 			"slug": "alula",
@@ -413,7 +413,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 883 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.183Z"
+			"checkedAt": "2026-09-10T12:56:23.898Z"
 		},
 		{
 			"slug": "neftwerk",
@@ -422,7 +422,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1625 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.450Z"
+			"checkedAt": "2026-09-10T12:56:23.845Z"
 		},
 		{
 			"slug": "kmac-state-machine-template",
@@ -431,7 +431,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 7352 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.278Z"
+			"checkedAt": "2026-09-10T12:56:24.053Z"
 		},
 		{
 			"slug": "stellarprodev",
@@ -440,7 +440,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 727 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.117Z"
+			"checkedAt": "2026-09-10T12:56:23.547Z"
 		},
 		{
 			"slug": "loto-punto",
@@ -449,7 +449,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 2131 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:16.041Z"
+			"checkedAt": "2026-09-10T12:56:24.658Z"
 		},
 		{
 			"slug": "bondhive",
@@ -458,7 +458,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 1706 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.667Z"
+			"checkedAt": "2026-09-10T12:56:24.489Z"
 		},
 		{
 			"slug": "solarkraft",
@@ -467,7 +467,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 5089 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:15.986Z"
+			"checkedAt": "2026-09-10T12:56:24.630Z"
 		},
 		{
 			"slug": "soroban-react",
@@ -476,7 +476,7 @@
 			"httpStatus": 200,
 			"verdict": "HOLDS",
 			"reason": "200, 8771 chars, no markers",
-			"checkedAt": "2026-09-07T21:50:16.068Z"
+			"checkedAt": "2026-09-10T12:56:24.686Z"
 		},
 		{
 			"slug": "command-robotics",
@@ -485,7 +485,7 @@
 			"httpStatus": 503,
 			"verdict": "COULD-NOT-CHECK",
 			"reason": "HTTP 503 — server error, not a product state",
-			"checkedAt": "2026-09-07T21:50:16.265Z"
+			"checkedAt": "2026-09-10T12:56:24.971Z"
 		}
 	]
 }
