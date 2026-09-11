@@ -27,7 +27,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8319849967956543,
+      "topScore": 0.8326529264450073,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -35,7 +35,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SEP-24: Hosted Deposit and Withdrawal"
+      "sample": "Configuration"
     },
     {
       "id": "protocol-trustline",
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296414017677307,
+      "topScore": 0.8294557929039001,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8208710551261902,
+      "topScore": 0.821096658706665,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -783,7 +783,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6944363117218018,
+      "topScore": 0.6947882175445557,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8220105767250061,
+      "topScore": 0.8228741884231567,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-10T10:05:07Z"
+  "generatedAt": "2026-09-11T10:02:33Z"
 }

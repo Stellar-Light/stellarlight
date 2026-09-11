@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-10T10:15:50.111Z",
+	"generatedAt": "2026-09-11T10:13:31.596Z",
 	"total": 659,
 	"open": 3,
 	"refreshQueue": 23,
@@ -32,7 +32,7 @@
 			}
 		}
 	},
-	"oldestOpenDays": 5,
+	"oldestOpenDays": 6,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
