@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-10T12:21:18.224Z",
+ "generatedAt": "2026-09-11T12:20:30.086Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -361,7 +361,7 @@
  },
  "projects": {
   "read": 981,
-  "population": 1105,
+  "population": 1106,
   "servedPopulation": 981,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9331,15 +9331,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1277
+     "count": 1278
     },
     {
      "label": "slowing",
-     "count": 951
+     "count": 953
     },
     {
      "label": "active",
-     "count": 841
+     "count": 838
     },
     {
      "label": "unknown",
