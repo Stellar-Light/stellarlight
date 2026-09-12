@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-11T10:13:31.596Z",
+	"generatedAt": "2026-09-12T09:47:37.585Z",
 	"total": 659,
 	"open": 3,
 	"refreshQueue": 23,
@@ -21,9 +21,9 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 312,
-				"recurred": 139,
-				"ratePct": 44.6
+				"newFindings": 293,
+				"recurred": 138,
+				"ratePct": 47.1
 			},
 			"lifetime": {
 				"newFindings": 659,
@@ -32,7 +32,7 @@
 			}
 		}
 	},
-	"oldestOpenDays": 6,
+	"oldestOpenDays": 7,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
