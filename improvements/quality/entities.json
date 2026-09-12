@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-11T12:20:30.086Z",
+ "generatedAt": "2026-09-12T11:43:30.610Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -221,11 +221,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 3
+    "count": 2
    },
    {
     "bucket": "8–30d",
-    "count": 0
+    "count": 1
    },
    {
     "bucket": "31–60d",
@@ -290,9 +290,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 312,
-     "recurred": 139,
-     "ratePct": 44.6
+     "newFindings": 293,
+     "recurred": 138,
+     "ratePct": 47.1
     },
     "lifetime": {
      "newFindings": 659,
@@ -309,8 +309,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 312,
-     "repeats": 312,
+     "newFindings": 293,
+     "repeats": 293,
      "ratePct": 100
     },
     "lifetime": {
@@ -9331,15 +9331,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1278
+     "count": 1279
     },
     {
      "label": "slowing",
-     "count": 953
+     "count": 954
     },
     {
      "label": "active",
-     "count": 838
+     "count": 833
     },
     {
      "label": "unknown",
@@ -9347,7 +9347,7 @@
     },
     {
      "label": "archived",
-     "count": 39
+     "count": 42
     }
    ],
    "languageMix": [
