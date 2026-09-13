@@ -1,29 +1,29 @@
 {
-	"generatedAt": "2026-09-12T09:47:37.585Z",
+	"generatedAt": "2026-09-13T10:49:53.291Z",
 	"total": 659,
-	"open": 3,
+	"open": 5,
 	"refreshQueue": 23,
 	"blockedUpstream": 16,
 	"blockedBy": {
 		"raven-scorer": 7,
 		"raven-catalog-lag": 9
 	},
-	"closed": 617,
+	"closed": 615,
 	"verified": 7,
-	"cleared": 610,
+	"cleared": 608,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 394,
+	"clearedOnSilence": 392,
 	"closingRate": 0.34,
-	"silenceShare": 0.6,
+	"silenceShare": 0.59,
 	"recurrence": {
-		"reopened": 7,
+		"reopened": 9,
 		"reopenedShareOfClosures": 0.01,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 293,
+				"newFindings": 292,
 				"recurred": 138,
-				"ratePct": 47.1
+				"ratePct": 47.3
 			},
 			"lifetime": {
 				"newFindings": 659,
@@ -32,11 +32,16 @@
 			}
 		}
 	},
-	"oldestOpenDays": 7,
+	"oldestOpenDays": 31,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
+		{
+			"surface": "corpus",
+			"open": 2,
+			"total": 18
+		},
 		{
 			"surface": "retrieval",
 			"open": 1,
@@ -66,11 +71,6 @@
 			"surface": "contract",
 			"open": 0,
 			"total": 36
-		},
-		{
-			"surface": "corpus",
-			"open": 0,
-			"total": 18
 		}
 	],
 	"unverifiedOpen": 0,
