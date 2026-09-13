@@ -1200,6 +1200,10 @@ export function getLaneAutonomy(): {
 		ok: number;
 		couldNotCheck: number;
 		eligibleForStage2: number;
+		/** Recorded promotions (lanes.json `stage: 2`); absent on artifacts
+		 *  written before 2026-09-13. */
+		atStage2?: number;
+		demotedSincePromotion?: number;
 	};
 	lanes: LaneAutonomyRow[];
 } {

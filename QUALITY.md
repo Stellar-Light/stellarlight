@@ -256,6 +256,19 @@ worked example — it exists to sweep a different pool, and it calls
   board could only ever show a number on a Sunday night. Fixed: **8 lanes
   are eligible at 4+ intervention-free weeks, 3 clean across the full
   window.** Eligibility publishes; the promotion stays a human call.
+  **First promotion, 2026-09-13.** Two lanes to Stage 2 — `enrich-tvl` and
+  `scan-repo-code`, both 8 of 8 weeks clean — recorded in
+  `improvements/lanes/lanes.json` (`stage`, `promotedAt`, `endStateClaim`);
+  the checker now reports `2` for a recorded promotion and `2→1` the moment
+  interventions.json carries a correction dated after it, so the stage can
+  be lost the way it was earned. The third 8/8 lane, `refresh-research-corpus`,
+  was HELD at Stage 1 by the second condition: twelve ingesters, and none
+  reads back what it wrote — an `unchanged (skipped embed)` counter and
+  `exit(1)` on a crash are not a claim about the world. That is its distance,
+  stated. `scan-repo-code` only qualified after its claim was made real:
+  its `--verify` printed persisted rows for a human and asserted nothing, so
+  the scheduled wave now reads back every row it wrote via `verifyWrites`
+  and exits 1 on a mismatch — the same claim `enrich-tvl` already made.
 
 - **P4. Basis strength at scale.** `status: in progress`
   The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
