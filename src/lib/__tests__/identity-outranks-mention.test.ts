@@ -18,6 +18,17 @@ const score = (name: string, slug: string, q: string, aliases?: string[]) =>
 	nameMatchScore(name, slug, q, aliases ?? null, tokenize(q));
 
 describe("exact identity survives natural phrasing", () => {
+	it("a digit-leading camelCase name keeps its identity through filler (0xAuth, 2026-09-13)", () => {
+		// tokenize("what is 0xAuth") → ["auth","0xauth"]: the split fragment sat
+		// beside the joined form and the joined anchors never equalled the name;
+		// the proper-noun rescue needs a capital a digit-leading name lacks.
+		expect(score("0xAuth", "0xauth", "what is 0xAuth")).toBe(3);
+		expect(score("0xAuth", "0xauth", "0xAuth")).toBe(3);
+		// the fragment alone is a MENTION of "auth", not 0xAuth's identity
+		expect(score("0xAuth", "0xauth", "what is auth")).toBe(0);
+		expect(score("Authline", "authline", "what is 0xAuth")).toBe(0);
+	});
+
 	it("scores an exact name hit through question filler", () => {
 		expect(score("Bridge", "bridge", "tell me about Bridge")).toBe(3);
 		expect(score("Bridge", "bridge", "is Bridge live")).toBe(3);
@@ -102,7 +113,11 @@ describe("multi-word names identify themselves (wave-6, the recall misses)", () 
 		nameMatchScore(name, slug, question, null, tokenize(question));
 
 	it.each([
-		["Stellar Wallets Kit", "stellar-wallets-kit", "is Stellar Wallets Kit live"],
+		[
+			"Stellar Wallets Kit",
+			"stellar-wallets-kit",
+			"is Stellar Wallets Kit live",
+		],
 		["Stellar Tools", "stellar-tools", "is Stellar Tools live"],
 		["Rise In", "rise-in", "what is Rise In"],
 		["Block by Block", "block-by-block", "tell me about Block by Block"],
@@ -118,11 +133,19 @@ describe("multi-word names identify themselves (wave-6, the recall misses)", () 
 	it("matches on word boundaries, not substrings", () => {
 		// "Rise In" must not be claimed by "surprise incident" — the containment
 		// test is anchored, so a name buried inside longer words does not count.
-		expect(q("Rise In", "rise-in", "a surprise incident report")).toBeLessThan(3);
+		expect(q("Rise In", "rise-in", "a surprise incident report")).toBeLessThan(
+			3,
+		);
 	});
 
 	it("tolerates the hyphen/space split the slug and the name disagree on", () => {
-		expect(q("Stellar Wallets Kit", "stellar-wallets-kit", "does stellar-wallets-kit still build")).toBe(3);
+		expect(
+			q(
+				"Stellar Wallets Kit",
+				"stellar-wallets-kit",
+				"does stellar-wallets-kit still build",
+			),
+		).toBe(3);
 	});
 });
 
@@ -163,7 +186,9 @@ describe("intercaps is an identity signal (wave-6)", () => {
 	});
 
 	it("ordinary capitalisation still needs the mid-sentence rule", () => {
-		expect(q("Stellar Thing", "stellar", "payments on Stellar today")).toBeLessThan(3);
+		expect(
+			q("Stellar Thing", "stellar", "payments on Stellar today"),
+		).toBeLessThan(3);
 	});
 });
 
@@ -181,15 +206,23 @@ describe("a name used as English is a mention (wave-7, the audit colliders)", ()
 	it.each([
 		["Rise In", "rise-in", "what is the rise in TVL on Stellar"],
 		["Give Credit", "give-credit", "give credit to the auditors"],
-		["Block by Block", "block-by-block", "walk through the transaction block by block"],
+		[
+			"Block by Block",
+			"block-by-block",
+			"walk through the transaction block by block",
+		],
 		["For Yield", "for-yield", "how do I farm for yield on aquarius"],
-	])("%s does not own \"%s\"", (name, slug, question) => {
-		expect(q(name as string, slug as string, question as string)).toBeLessThan(3);
+	])('%s does not own "%s"', (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBeLessThan(
+			3,
+		);
 	});
 
 	it("the same names still answer questions that are about them", () => {
 		expect(q("Rise In", "rise-in", "tell me about Rise In")).toBe(3);
-		expect(q("Block by Block", "block-by-block", "is Block by Block live")).toBe(3);
+		expect(
+			q("Block by Block", "block-by-block", "is Block by Block live"),
+		).toBe(3);
 		expect(q("For Yield", "for-yield", "is For Yield live")).toBe(3);
 	});
 
@@ -220,8 +253,10 @@ describe("articles and shopping words mark the category (wave-7b)", () => {
 		["For Yield", "for-yield", "best options for yield on stellar"],
 		["One Click", "one-click", "buy xlm in one click"],
 		["USDC Swap", "usdc-swap", "cheapest usdc swap on stellar"],
-	])("%s does not own \"%s\"", (name, slug, question) => {
-		expect(q(name as string, slug as string, question as string)).toBeLessThan(3);
+	])('%s does not own "%s"', (name, slug, question) => {
+		expect(q(name as string, slug as string, question as string)).toBeLessThan(
+			3,
+		);
 	});
 
 	it("identity questions without those signals still promote", () => {
