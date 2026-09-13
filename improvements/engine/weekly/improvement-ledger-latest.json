@@ -1,12 +1,12 @@
 {
-	"generatedAt": "2026-09-13T17:14:59.658Z",
+	"generatedAt": "2026-09-13T21:31:59.305Z",
 	"total": 661,
-	"open": 8,
+	"open": 7,
 	"refreshQueue": 23,
-	"blockedUpstream": 16,
+	"blockedUpstream": 17,
 	"blockedBy": {
-		"raven-scorer": 7,
-		"raven-catalog-lag": 9
+		"raven-scorer": 6,
+		"raven-catalog-lag": 11
 	},
 	"closed": 614,
 	"verified": 7,
@@ -32,7 +32,7 @@
 			}
 		}
 	},
-	"oldestOpenDays": 31,
+	"oldestOpenDays": 32,
 	"inWave": 0,
 	"highOpen": 2,
 	"staleHighOpen": 0,
@@ -58,11 +58,6 @@
 			"total": 37
 		},
 		{
-			"surface": "consumer",
-			"open": 1,
-			"total": 36
-		},
-		{
 			"surface": "code",
 			"open": 0,
 			"total": 20
@@ -71,6 +66,11 @@
 			"surface": "scf",
 			"open": 0,
 			"total": 16
+		},
+		{
+			"surface": "consumer",
+			"open": 0,
+			"total": 36
 		}
 	],
 	"unverifiedOpen": 0,

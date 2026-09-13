@@ -7,7 +7,9 @@
 			"!specs/openapi.json",
 			"!api-client/src/schema.ts",
 			"!public/openapi.json",
-			"!improvements/quality/history.json"
+			"!improvements/quality/history.json",
+			"!improvements/ledger/findings.json",
+			"!improvements/quality/entities.json"
 		]
 	},
 	"formatter": {
