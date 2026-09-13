@@ -135,8 +135,17 @@ async function fetchStatus(
 /**
  * 2xx/3xx ok; 403/405 retried with a browser UA and downgraded to warn if
  * persistent (bot-walls return both; a real browser usually loads the page).
- * 0/404/410/5xx = blocker.
+ * 404/410/5xx = blocker.
+ *
+ * 0 (DNS / TLS / timeout — fetchStatus cannot tell them apart) is a
+ * COULD-NOT-CHECK, and on the PR gate it is a warn, not a blocker. On
+ * 2026-09-13 docs.mercurydata.app went unreachable and every PR touching
+ * api-client/** went red on a third-party outage the PR could not have
+ * caused or fixed — a production monitor is not a PR gate. The scheduled
+ * Monday sweep still blocks on 0, because persistence across runs is what
+ * turns "could not reach" into "dead", and that sweep is where it is read.
  */
+const PR_GATE = process.env.GITHUB_EVENT_NAME === "pull_request";
 // Hosts that bot-wall ALL datacenter traffic with inconsistent statuses
 // (x.com answers 200 to a residential IP and 400 to CI on the same minute) —
 // a CI probe can NEVER verify them, so an unreachable result is a warn, not a
@@ -162,6 +171,13 @@ async function checkUrl(url: string, source: string) {
 			warn(
 				url,
 				`HTTP ${status} even with browser UA (likely bot-blocking) — verify manually [${source}]`,
+			);
+			return;
+		}
+		if (status === 0 && PR_GATE) {
+			warn(
+				url,
+				`network-error from CI even on retry (DNS/TLS/timeout) — could not check, which is not a verdict; the Monday sweep re-checks [${source}]`,
 			);
 			return;
 		}
