@@ -6,7 +6,8 @@
 			"**",
 			"!specs/openapi.json",
 			"!api-client/src/schema.ts",
-			"!public/openapi.json"
+			"!public/openapi.json",
+			"!improvements/quality/history.json"
 		]
 	},
 	"formatter": {
