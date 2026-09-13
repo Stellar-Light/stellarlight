@@ -1,6 +1,13 @@
 {
- "generatedAt": "2026-09-12T11:43:30.610Z",
+ "generatedAt": "2026-09-13T12:50:33.140Z",
  "surfaces": [
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 2,
+   "clearedFindings": 16,
+   "verifiedFindings": 0
+  },
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
@@ -42,26 +49,19 @@
    "openFindings": 0,
    "clearedFindings": 12,
    "verifiedFindings": 0
-  },
-  {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 0,
-   "clearedFindings": 18,
-   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 659,
-  "open": 3,
+  "open": 5,
   "refreshQueue": 23,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 610,
+  "cleared": 608,
   "verified": 7,
   "byFailureMode": [
    {
@@ -120,10 +120,10 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 0,
+    "open": 2,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 18,
+    "cleared": 16,
     "verified": 0,
     "surface": "corpus"
    },
@@ -225,11 +225,11 @@
    },
    {
     "bucket": "8–30d",
-    "count": 1
+    "count": 2
    },
    {
     "bucket": "31–60d",
-    "count": 0
+    "count": 1
    },
    {
     "bucket": ">60d",
@@ -290,9 +290,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 293,
+     "newFindings": 292,
      "recurred": 138,
-     "ratePct": 47.1
+     "ratePct": 47.3
     },
     "lifetime": {
      "newFindings": 659,
@@ -301,7 +301,7 @@
     }
    },
    "reopened": {
-    "count": 7,
+    "count": 9,
     "shareOfClosures": 0.01,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -309,8 +309,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 293,
-     "repeats": 293,
+     "newFindings": 292,
+     "repeats": 292,
      "ratePct": 100
     },
     "lifetime": {
@@ -352,7 +352,7 @@
      {
       "class": "meta-eval",
       "total": 19,
-      "open": 0,
+      "open": 2,
       "firstSeen": "2026-07-23"
      }
     ]
@@ -8309,7 +8309,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 374
+    "count": 372
    },
    {
     "basis": "human-verified",
@@ -8321,7 +8321,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 78
+    "count": 80
    },
    {
     "basis": "product-integration",
@@ -9331,15 +9331,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1279
+     "count": 1280
     },
     {
      "label": "slowing",
-     "count": 954
+     "count": 955
     },
     {
      "label": "active",
-     "count": 833
+     "count": 831
     },
     {
      "label": "unknown",
@@ -10595,13 +10595,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 610
+    "value": 608
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 42
+    "value": 44
    },
    {
     "id": "o:verified",
@@ -10742,7 +10742,14 @@
     "target": 21,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 18
+    "value": 16
+   },
+   {
+    "source": 18,
+    "target": 22,
+    "sourceId": "f:corpus",
+    "targetId": "o:open",
+    "value": 2
    },
    {
     "source": 11,
