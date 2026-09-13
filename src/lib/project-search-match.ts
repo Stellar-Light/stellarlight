@@ -22,8 +22,8 @@ import { RESOLVABLE_PROJECT_STATUSES } from "./project-status";
 import { contentTokens, isContentStopword } from "./repo-search";
 import {
 	anchorTokens,
-	GENERIC_QUERY_TOKENS,
 	CORE_SYNONYMS,
+	GENERIC_QUERY_TOKENS,
 	mergeVocabulary,
 	SPELLING_CORRECTIONS,
 } from "./search-vocabulary";
@@ -946,9 +946,20 @@ export function nameMatchScore(
 		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
 		return new RegExp(`\\ban?\\s+${flexible}([^a-z0-9]|$)`, "i").test(qq);
 	};
-	let joined = anchorTokens(tokens ?? [])
-		.join(" ")
-		.trim();
+	// A camelCase split leaves its FRAGMENTS beside the joined form ("0xAuth"
+	// → ["auth","0xauth"]), and the joined anchors "auth 0xauth" can never
+	// equal the name. The tokenizer already treats fragments as subordinate to
+	// the joined word; do the same here for the equality test only: drop an
+	// anchor that is a substring of another anchor. Names that start with a
+	// digit cannot reach the proper-noun rescue below (it requires a capital),
+	// so this was the only door left for them — "what is 0xAuth" scored 0 for
+	// the record named 0xAuth and ranked it #4 behind three "auth" mentions
+	// (engine-a recall miss, 2026-09-13). Mention vetoes still see every token.
+	const anchorsAll = anchorTokens(tokens ?? []);
+	const anchorsNoFragments = anchorsAll.filter(
+		(a) => !anchorsAll.some((b) => b !== a && b.includes(a)),
+	);
+	let joined = anchorsNoFragments.join(" ").trim();
 	// A single content token IS the query's subject even when anchor vocabulary
 	// drops it for length: "what is DD" tokenizes to ["dd"], and anchorTokens'
 	// sub-3-char guard (right for fragment noise in multi-token queries) left
@@ -1043,7 +1054,9 @@ export function nameMatchScore(
 			nameToks.has(t) ||
 			GENERIC_QUERY_TOKENS.has(t) ||
 			(t.length >= 2 && compact.includes(t)) ||
-			t.split("-").every((p) => !p || nameToks.has(p) || GENERIC_QUERY_TOKENS.has(p));
+			t
+				.split("-")
+				.every((p) => !p || nameToks.has(p) || GENERIC_QUERY_TOKENS.has(p));
 		return contentTokens(q).every(covered);
 	};
 	const bounded = (needle: string): boolean => {
@@ -1057,7 +1070,11 @@ export function nameMatchScore(
 		if (mentionVeto(needle)) return false;
 		return queryIsOnlyAbout(needle);
 	};
-	if (bounded(n) || bounded(sl) || (aliases ?? []).some((a) => bounded(a.trim().toLowerCase())))
+	if (
+		bounded(n) ||
+		bounded(sl) ||
+		(aliases ?? []).some((a) => bounded(a.trim().toLowerCase()))
+	)
 		return 3;
 	// Proper-noun promotion (wave-5, the Hermes case): "what happened to
 	// Hermes exchange on Stellar" carries ONE capitalized proper noun

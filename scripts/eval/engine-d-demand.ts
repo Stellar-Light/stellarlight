@@ -166,6 +166,19 @@ type MissClass = "EMPTY" | "FALLBACK" | "GAP" | "WEAK" | "OK";
  * (2026-07-21) — it just never reached this engine. Same rule here: zero rows
  * with somewhere to go is OK; zero rows with nowhere to go is still EMPTY.
  */
+/**
+ * Real queries for which ZERO is the correct answer, each with the evidence.
+ * A demand-miss on one of these can never close by retrieval or curation —
+ * there is nothing to retrieve and nothing to add — so without this list the
+ * row sits open forever at the top of the ledger (planbok: high severity,
+ * open since 2026-08-24). Kept deliberately tiny and reasoned: an entry here
+ * is a claim that we CHECKED and the world holds no such thing.
+ */
+const EXPECTED_ABSENT: Record<string, string> = {
+	planbok:
+		"Swedish common noun (plånbok = 'wallet'), not a project name: GitHub search 2026-09-13 finds only Swedish budgeting/wallet apps (Doverholm/Planboken, icyaiste/E-Wallet 'Digital plånbok'), none on Stellar. Zero results is the correct answer; a consumer typing it wants wallets — searchProjects?type=Wallet answers that.",
+};
+
 function classify(endpoint: string, r: Replay): MissClass {
 	if (r.returned === 0) return r.routed ? "OK" : "EMPTY";
 	if (endpoint === "/api/projects/search" && r.matchMode === "semantic") {
@@ -343,18 +356,21 @@ async function main() {
 				elsewhere = await answeredElsewhere(d.query);
 				if (elsewhere) cls = "OK";
 			}
-			const evidence = elsewhere
-				? `no project row, but /api/${elsewhere} answers it — the corpus holds this, so it is not a directory coverage gap`
-				:
-				cls === "EMPTY"
-					? "0 results"
-					: cls === "FALLBACK"
-						? `matchMode=semantic (${r.semanticRows} fallback rows, NO advisory — neighbours served as answers)`
-						: cls === "GAP"
-							? "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-							: cls === "WEAK"
-								? `top confidence ${r.topConfidence}`
-								: `${r.returned} rows, top confidence ${r.topConfidence ?? "n/a"}`;
+			const absent = EXPECTED_ABSENT[d.query.trim().toLowerCase()];
+			if (absent) cls = "OK";
+			const evidence = absent
+				? `expected absent — ${absent}`
+				: elsewhere
+					? `no project row, but /api/${elsewhere} answers it — the corpus holds this, so it is not a directory coverage gap`
+					: cls === "EMPTY"
+						? "0 results"
+						: cls === "FALLBACK"
+							? `matchMode=semantic (${r.semanticRows} fallback rows, NO advisory — neighbours served as answers)`
+							: cls === "GAP"
+								? "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+								: cls === "WEAK"
+									? `top confidence ${r.topConfidence}`
+									: `${r.returned} rows, top confidence ${r.topConfidence ?? "n/a"}`;
 			results.push({
 				endpoint: d.endpoint,
 				query: d.query,
