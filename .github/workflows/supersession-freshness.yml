@@ -2,9 +2,15 @@ name: Supersession freshness
 
 # P5: an archived curated-pool repo with no REPO_SUPERSESSIONS entry served
 # "archived" with no successor and no date until somebody re-read it. Weekly,
-# from the public repos API. A red at "Check" is the refresh queue, not a
-# broken lane.
-# workflow-health: signal-steps: ^Check$
+# from the public repos API. A red here is the refresh queue, not a broken lane.
+#
+# The declaration must name the step that ACTUALLY carries the red. "Check" is
+# continue-on-error, so it can never fail the job — the job dies at the
+# propagate step below, which the old `^Check$` declaration did not match. So
+# workflow-health correctly read this lane as ALWAYS-RED/broken from the day it
+# was written, and it stayed that way (2026-09-08 → 2026-09-13) with a real
+# finding underneath: 6 archived curated-pool repos with no supersession entry.
+# workflow-health: signal-steps: ^(Check|Propagate the check's exit code)$
 
 on:
   schedule:
@@ -27,7 +33,17 @@ jobs:
       - name: Check
         id: check
         continue-on-error: true
-        run: pnpm exec tsx scripts/check-supersession-freshness.ts --json
+        # The script is trinary — 1 = missing entries (a finding), 2 = the API
+        # did not answer (the run is BLIND). continue-on-error collapses both
+        # into `failure`, so carry the code forward and let the propagate step
+        # say which happened.
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-supersession-freshness.ts --json
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
       - name: Commit the artifact if it changed
         run: |
           set -euo pipefail
@@ -41,5 +57,11 @@ jobs:
       - name: Propagate the check's exit code
         if: steps.check.outcome == 'failure'
         run: |
-          echo "The check found archived curated-pool repos without a supersession entry (or could not look) — see the Check step."
+          if [ "${{ steps.check.outputs.code }}" = "2" ]; then
+            echo "BLIND: the repos API did not answer, so this run checked nothing."
+            echo "That is a could-not-check, NOT a finding — no claim is made about coverage."
+          else
+            echo "FINDING: archived curated-pool repos have no REPO_SUPERSESSIONS entry."
+            echo "A refresh queue, not a defect — see the Check step for the list."
+          fi
           exit 1

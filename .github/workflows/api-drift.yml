@@ -3,7 +3,11 @@
 # had silently diverged as endpoints/params were added. Runs daily + on demand.
 #
 # A red at this step is the drift detector reporting a finding, not the lane
-# breaking. Deliberately NOT declared: the field-population and skill-reference
+# breaking. This lane runs WITHOUT an install — every script it calls reaches
+# the live API with fetch and nothing else. A step needing a package belongs in
+# nightly-health, which installs: the RWA issuer reconcile sat here from
+# 2026-09-09 and failed ERR_MODULE_NOT_FOUND on @stellar/stellar-sdk on every
+# single run, reddening a lane whose own checks were all green. Deliberately NOT declared: the field-population and skill-reference
 # steps — a red there flags the lane (read by scripts/check-workflow-health.ts):
 # workflow-health: signal-steps: ^Propagate the red$
 name: API drift guard
@@ -45,9 +49,6 @@ jobs:
       - name: Skill-reference coverage (sk-009 — served skill must not lag the contract)
         if: always()
         run: npx -y tsx scripts/check-skill-reference.ts
-      - name: RWA issuer reconcile (sls-083 — a tracked issuer's toml declares nothing the registry lacks)
-        if: always()
-        run: npx -y tsx scripts/data/reconcile-rwa-issuers.ts
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:
