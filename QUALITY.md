@@ -269,6 +269,9 @@ worked example — it exists to sweep a different pool, and it calls
   its `--verify` printed persisted rows for a human and asserted nothing, so
   the scheduled wave now reads back every row it wrote via `verifyWrites`
   and exits 1 on a mismatch — the same claim `enrich-tvl` already made.
+  Proven in the lane's own log the same evening (run 34781844815, a
+  `--rescan` wave because the routine backlog was exhausted): `── Read-back
+  (10 written row(s)) ── ✓ all 10 row(s) hold the values written`.
 
 - **P4. Basis strength at scale.** `status: in progress`
   The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
@@ -306,8 +309,10 @@ worked example — it exists to sweep a different pool, and it calls
   product-integration) plus 4 within the pre-existing onchain-activity
   tier: real evidence, and a change in what counts — reported as two
   numbers from now on, never as the ratchet falling.
-  *Remaining:* the done bar is weak bases under 50%; the share is 486 of
-  832 Live rows (58%) as of 2026-09-07, so ~71 rows must move.
+  *Remaining:* the done bar is weak bases under 50%; the share is 453 of
+  830 Live rows (54.6%) as of 2026-09-13 (486/832, 58%, on 09-07), so ~39
+  rows must move — read `strongBasisSplit` for the current figure, this
+  sentence is a dated snapshot.
   **Measured 2026-09-07, the obvious lever awards nothing.** `repo-activity`
   is the basis for rows whose own source moving IS their liveness, and of
   the 114 library-typed weak rows: 74 have **no linked repo at all**, and
