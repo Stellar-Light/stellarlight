@@ -262,10 +262,24 @@ worked example — it exists to sweep a different pool, and it calls
   the checker now reports `2` for a recorded promotion and `2→1` the moment
   interventions.json carries a correction dated after it, so the stage can
   be lost the way it was earned. The third 8/8 lane, `refresh-research-corpus`,
-  was HELD at Stage 1 by the second condition: twelve ingesters, and none
-  reads back what it wrote — an `unchanged (skipped embed)` counter and
-  `exit(1)` on a crash are not a claim about the world. That is its distance,
-  stated. `scan-repo-code` only qualified after its claim was made real:
+  was held at Stage 1 by the second condition that morning — twelve
+  ingesters, and none read back what it wrote — and promoted the same
+  evening once the claim was made real (#1547): every ingester now re-plans
+  right after the execute pass (`--replan` — the same fetch, the same DB
+  diff, no write) and the lane's `Idempotence` step requires `writes=0`
+  from each; an ingester that cannot re-plan is could-not-check, named,
+  never counted clean. Building it showed why the hold was right: eleven of
+  the fifteen dry modes had never touched the DB (a preview, not a plan),
+  and six write paths keyed on the DB handle instead of `--execute` — a
+  re-plan would have written. Proven in the lane's own log the same evening,
+  twice: the first pass (run 34788208252) went RED — 13 of 15 sources
+  `writes=0`, and the two that were not were real: a 66k-char JSON example
+  the chunker never split, which Payload's 40,000-char cap had rejected on
+  every daily refresh ("new: 1" forever), and two Electric Capital PDFs
+  mapped to one document id, rewriting each other's chunks every run.
+  Fixed (#1548), re-dispatched: run 34789494804, `0 writes planned after
+  execute across 15 re-planned source(s)`. A claim that catches two
+  standing defects on its first pass is a claim. `scan-repo-code` only qualified after its claim was made real:
   its `--verify` printed persisted rows for a human and asserted nothing, so
   the scheduled wave now reads back every row it wrote via `verifyWrites`
   and exits 1 on a mismatch — the same claim `enrich-tvl` already made.
