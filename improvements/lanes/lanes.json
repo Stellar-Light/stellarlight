@@ -404,7 +404,11 @@
 			"cadence": "cron 0 6 * * *",
 			"executeInput": "flag",
 			"writeSet": "research-docs upserts from the ingester set (SEPs, CAPs, repo docs, SDF blog/org, papers, incidents, security program, lumenloop) plus the vector index and a junk prune",
-			"since": null
+			"since": null,
+			"stage": 2,
+			"promotedAt": "2026-09-13",
+			"promotedBy": "owner \u2014 8 of 8 intervention-free weeks in the 8-week window, and the end-state claim below",
+			"endStateClaim": "post-execute re-plan of every ingester (--replan: the same fetch, the same DB diff, no write) must print writes=0 \u2014 new + updated + metadata-only + pending deletes/prunes; an ingester with no plan line is could-not-check, named, never counted clean (Idempotence step); then every canonical page present with its signature text intact (exit 1 / could-not-look 2)"
 		},
 		{
 			"id": "refresh-rwa",
