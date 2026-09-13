@@ -109,6 +109,12 @@ type Lane = {
 	cadence: string;
 	writeSet: string | null;
 	since: string | null;
+	/** Recorded promotion (QUALITY.md §3). Absent = Stage 1, whatever the
+	 *  weeks say: eligibility is measured here, promotion is written there. */
+	stage?: number;
+	promotedAt?: string | null;
+	promotedBy?: string | null;
+	endStateClaim?: string | null;
 };
 type Intervention = {
 	date: string;
@@ -133,6 +139,8 @@ type Row = {
 	spanBasis: string;
 	interventionFreeWeeks: number | null;
 	stage: number | string;
+	promotedAt?: string | null;
+	endStateClaim?: string | null;
 	lastInterventionAt: string | null;
 	lastInterventionWhat: string | null;
 	lastInterventionSource: string | null;
@@ -287,8 +295,8 @@ async function writeStepNames(
 			const doc: any = yaml.load(body) ?? {};
 			const set = new Set<string>();
 			// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
+			// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
 			for (const job of Object.values(doc.jobs ?? {}) as any[])
-				// biome-ignore lint/suspicious/noExplicitAny: parsed YAML
 				for (const st of (job?.steps ?? []) as any[])
 					if (st?.name && WRITE_FLAG.test(String(st.run ?? "")))
 						set.add(String(st.name));
@@ -601,7 +609,22 @@ async function main() {
 			executesAreLowerBound: undercounts,
 			spanBasis,
 			interventionFreeWeeks: weeks,
-			stage: !undescribed && weeks >= THRESHOLD_WEEKS ? "eligible-for-2" : 1,
+			// A recorded promotion outranks the week count in both directions: it
+			// reports 2 without re-earning eligibility every week, and it falls
+			// back the moment a correction is logged after promotedAt — the
+			// ladder is earned, and a stage that could not be lost would be a
+			// label, not a measurement.
+			stage: undescribed
+				? 1
+				: lane?.stage === 2 && lane.promotedAt
+					? last?.date && last.date > lane.promotedAt
+						? "2→1 (intervention after promotion)"
+						: 2
+					: weeks >= THRESHOLD_WEEKS
+						? "eligible-for-2"
+						: 1,
+			promotedAt: lane?.promotedAt ?? null,
+			endStateClaim: lane?.endStateClaim ?? null,
 			state: undescribed ? "could-not-check" : "ok",
 			why: `${apiRuns.length} completed run(s) in window · ${unattendedRuns} successful run(s) the lane started itself, ${attendedRuns} a human dispatched (they earn nothing) · ${weeks} consecutive intervention-free week(s) up to this one, each proven from a run's own job steps · reset basis: ${spanBasis}${last ? ` (${last.date})` : ""}${undercounts ? " · at least one run was unclassifiable (a named step that ran hides its command) or the classify budget was reached, so this is a floor" : ""}${truncated ? " · run list truncated at 1,000" : ""}${undescribed ? ` · NOT IN ${REGISTRY}: nobody has written down what this lane writes, so its autonomy is not checkable` : ""}`,
 		});
@@ -647,6 +670,10 @@ async function main() {
 			ok: rows.length - couldNotCheck.length,
 			couldNotCheck: couldNotCheck.length,
 			eligibleForStage2: eligible.length,
+			atStage2: rows.filter((r) => r.stage === 2).length,
+			demotedSincePromotion: rows.filter(
+				(r) => typeof r.stage === "string" && r.stage.startsWith("2→1"),
+			).length,
 			jobsApiCalls: calls,
 		},
 		lanes: rows,

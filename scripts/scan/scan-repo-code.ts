@@ -40,11 +40,31 @@ import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
 import { computeLangDepth } from "../../src/lib/lang-depth";
 import { isAllowlisted } from "../../src/lib/repo-allowlist";
 import { extractStellarDeps } from "../../src/lib/stellar-deps";
+import {
+	formatMismatches,
+	type ReadBackMismatch,
+	verifyWrites,
+} from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
+/** id → the exact payload sent, so the read-back compares against what this
+ *  wave claimed to write, never against what it meant to. */
+const sentById = new Map<string, Record<string, unknown>>();
+/** The scalar half of every outcome's write shape. diffWritten checks a row
+ *  only on the fields it sent, so one list covers scanned / error / incomplete. */
+const VERIFIED_FIELDS = [
+	"codeScanState",
+	"codeScannedAt",
+	"stellarProof",
+	"codeDepth",
+	"farmScore",
+	"codeScanNote",
+	"codeScanError",
+	"mainnetContractId",
+] as const;
 const RESCAN = process.argv.includes("--rescan");
 /**
  * Retry ONLY the states routine waves exclude: `error` and `incomplete`.
@@ -634,6 +654,59 @@ async function main() {
 				data,
 				overrideAccess: true,
 			});
+			sentById.set(String(doc.id), data);
+		}
+	}
+
+	// ── read-back: prove the writes PERSISTED (QUALITY.md §3, second condition)
+	// "wrote N docs" is a statement about the update calls, not about the data:
+	// an update resolves and silently drops keys with no schema field at that
+	// path (#615). (No call syntax in this comment on purpose — the write
+	// discipline test greps this file for update calls.) Re-read every row this wave claimed to write and diff it against
+	// what was sent — the same claim enrich-tvl makes, and the one this lane
+	// lacked while its `--verify` only PRINTED persisted rows for a human.
+	let mismatches: ReadBackMismatch[] = [];
+	if (EXECUTE && sentById.size) {
+		console.log(`\n── Read-back (${sentById.size} written row(s)) ──`);
+		mismatches = await verifyWrites(
+			sentById,
+			async (ids) => {
+				const back = await payload.find({
+					collection: "repos",
+					where: { id: { in: ids } },
+					limit: ids.length,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return new Map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+					back.docs.map((r: any) => [
+						String(r.id),
+						r as Record<string, unknown>,
+					]),
+				);
+			},
+			VERIFIED_FIELDS,
+			200,
+			async (id) => {
+				const one = await payload.findByID({
+					collection: "repos",
+					id,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return (one as unknown as Record<string, unknown>) ?? null;
+			},
+		);
+		if (mismatches.length) {
+			console.error(
+				`  ✗ ${mismatches.length} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${sentById.size} row(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
 		}
 	}
 
@@ -683,7 +756,10 @@ async function main() {
 		);
 		process.exit(1);
 	}
-	process.exit(0);
+	// exitCode, not 0: a read-back mismatch above sets it, and `exit(0)` here
+	// would stomp it — the class-20 bug where a run reports GREEN after 13
+	// writes died. Zero-work and read-back both reach the run's colour.
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

@@ -656,6 +656,15 @@ export default function QualityPage() {
 						sub="eligible — the promotion is still a human call"
 					/>
 					<Stat
+						label="Promoted to Stage 2"
+						value={String(laneAutonomy.summary.atStage2 ?? 0)}
+						sub={
+							(laneAutonomy.summary.demotedSincePromotion ?? 0) > 0
+								? `${laneAutonomy.summary.demotedSincePromotion} fell back after an intervention`
+								: "recorded in improvements/lanes/lanes.json with the lane's own end-state claim"
+						}
+					/>
+					<Stat
 						label="Could not check"
 						value={String(laneAutonomy.summary.couldNotCheck)}
 						sub="API refused; not counted as clean or broken"

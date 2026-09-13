@@ -34,9 +34,7 @@ const phaseBlock = (id: string): string => {
 // so adding a phase to QUALITY.md is sufficient — a hardcoded list here
 // silently dropped P4/P5 the day they were written.
 const PHASE_IDS = [
-	...new Set(
-		[...quality.matchAll(/^- \*\*(P\d+)[.\s-]/gm)].map((m) => m[1]),
-	),
+	...new Set([...quality.matchAll(/^- \*\*(P\d+)[.\s-]/gm)].map((m) => m[1])),
 ];
 const PHASES = PHASE_IDS.map((id) => {
 	const block = phaseBlock(id);
@@ -107,13 +105,14 @@ function phaseMeters(): Record<
 	const lanes = read("improvements/audits/lane-autonomy-latest.json");
 
 	/** Fraction of the journey covered, origin → target. Never below 0 or above 1. */
-	const span = (origin: number | null, current: number | null, target: number) =>
+	const span = (
+		origin: number | null,
+		current: number | null,
+		target: number,
+	) =>
 		origin === null || current === null || origin === target
 			? null
-			: Math.max(
-					0,
-					Math.min(1, (origin - current) / (origin - target)),
-				);
+			: Math.max(0, Math.min(1, (origin - current) / (origin - target)));
 
 	// P4's bar is the phase's own: weak bases under 50% of Live rows. The origin
 	// is the share when the phase opened (842/979 = 86%), quoted in its block.
@@ -137,16 +136,23 @@ function phaseMeters(): Record<
 	// P3: Stage 2 opens per lane at the intervention-free threshold. The meter is
 	// the share of production-writing lanes that have earned it.
 	const laneTotal = lanes?.summary?.lanes ?? null;
+	// Earned = still-eligible + already promoted: a promoted lane leaves the
+	// eligible count (it reports stage 2) and must not read as lost ground.
 	const laneEligible = lanes?.summary?.eligibleForStage2 ?? null;
+	const laneAtStage2 = lanes?.summary?.atStage2 ?? 0;
 	const lanePct =
-		typeof laneTotal === "number" && laneTotal > 0 && typeof laneEligible === "number"
-			? laneEligible / laneTotal
+		typeof laneTotal === "number" &&
+		laneTotal > 0 &&
+		typeof laneEligible === "number"
+			? (laneEligible + laneAtStage2) / laneTotal
 			: null;
 
 	// P5: the curated-pool note floor, which may only rise.
 	const notes = entities?.repos?.coverage?.knowledgeNotes ?? null;
 	const notePct =
-		notes && notes.pool > 0 ? (notes.withNotes + notes.triaged) / notes.pool : null;
+		notes && notes.pool > 0
+			? (notes.withNotes + notes.triaged) / notes.pool
+			: null;
 
 	return {
 		P3: {
@@ -257,7 +263,7 @@ const receipts = readdirSync(join(root, "improvements/receipts"))
 			// says something without anyone authoring new evidence.
 			markers: (r.markers ?? []).map((m) => {
 				const label = `${m.found ? "" : "NOT "}${m.marker}`;
-			// A malformed receipt (wrong marker key, hand-edited) must never
+				// A malformed receipt (wrong marker key, hand-edited) must never
 				// crash the artifact build — skip it visibly instead.
 				if (typeof m.marker !== "string") return "(malformed marker)";
 				if (m.marker.length > 4 || !m.excerpt) return label;

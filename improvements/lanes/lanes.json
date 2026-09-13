@@ -1,5 +1,5 @@
 {
-	"note": "Every workflow in this repo that can WRITE to production data \u2014 built by reading .github/workflows/*.yml for an `execute` input or a literal --execute/--apply/--prune-logs flag, not from anyone's memory of the list. `cadence` is the lane's own clock; `executeInput` is the dispatch input that turns writing on, or \"flag\" when the flag is hardcoded. `since` is the lane's first green run and is null everywhere today: improvements/audits/workflow-health-latest.json records LAST success, not first, so the counter falls back to the 8-week observation window and says so (spanBasis).",
+	"note": "Every workflow in this repo that can WRITE to production data \u2014 built by reading .github/workflows/*.yml for an `execute` input or a literal --execute/--apply/--prune-logs flag, not from anyone's memory of the list. `cadence` is the lane's own clock; `executeInput` is the dispatch input that turns writing on, or \"flag\" when the flag is hardcoded. `since` is the lane's first green run and is null everywhere today: improvements/audits/workflow-health-latest.json records LAST success, not first, so the counter falls back to the 8-week observation window and says so (spanBasis). PROMOTION (2026-09-13): a lane the owner has promoted carries `stage` (2), `promotedAt`, `promotedBy` and `endStateClaim` \u2014 the self-checked claim QUALITY.md \u00a73 requires before Stage 1 is left; the checker reports `2` for it, and `2\u21921 (intervention after promotion)` the moment interventions.json records a correction dated after promotedAt. A lane without these fields is Stage 1 whatever its weeks say.",
 	"source": ".github/workflows/*.yml",
 	"lanes": [
 		{
@@ -272,7 +272,11 @@
 			"cadence": "cron 0 5 * * 1",
 			"executeInput": "flag",
 			"writeSet": "projects tvlUSD / tvlAsOf / tvlSource / tvlMethod from DefiLlama; null means NOT TRACKED, never zero",
-			"since": null
+			"since": null,
+			"stage": 2,
+			"promotedAt": "2026-09-13",
+			"promotedBy": "owner \u2014 8 of 8 intervention-free weeks in the 8-week window, and the end-state claim below",
+			"endStateClaim": "read-back of every written row via verifyWrites (src/lib/utils/read-back) against the exact payload sent, fields tvlUSD / tvlAsOf / tvlSource / tvlMethod; exit 1 on any field that did not persist as sent; skipped rows counted and printed"
 		},
 		{
 			"id": "fix-dev-docs-titles",
@@ -424,7 +428,11 @@
 			"cadence": "cron 17 */2 * * *",
 			"executeInput": "execute",
 			"writeSet": "repos code signals \u2014 stellarProof, codeDepth, code facts, farmScore, codeScanState",
-			"since": null
+			"since": null,
+			"stage": 2,
+			"promotedAt": "2026-09-13",
+			"promotedBy": "owner \u2014 8 of 8 intervention-free weeks in the 8-week window, and the end-state claim below",
+			"endStateClaim": "read-back of every row the wave wrote via verifyWrites against the exact payload sent (codeScanState, codeScannedAt, stellarProof, codeDepth, farmScore, codeScanNote, codeScanError, mainnetContractId); exit 1 on any field that did not persist; zero-work waves already exit 1; skipped-triaged count printed"
 		},
 		{
 			"id": "seed-blog-posts",
