@@ -14,6 +14,16 @@
  *   pnpm exec tsx scripts/check-note-freshness.ts              # network only
  *   pnpm exec tsx scripts/check-note-freshness.ts --self-test  # parser check
  *
+ * Second pass (2026-09-13, QUALITY.md P5's open gap): is the REPO itself
+ * still what the note describes? A note written while a repo was alive is
+ * not covered when the repo is archived afterwards, and a public note about a
+ * repo GitHub now 404s describes something a consumer cannot reach. GraphQL
+ * for `archivedAt` (REST does not expose it), 40 repos a query; a null there
+ * gets ONE REST read to split gone (404) from unreachable. Trinary per repo:
+ * current / predates-archival / gone / unchecked. Internal notes are triage
+ * memory and never a finding. Baseline the day it was written: 630 noted
+ * repos, 24 archived — every one noted AFTER archival — and 16 gone.
+ *
  * Never writes to the DB. Exit 1 only when the run could check NOTHING (an
  * instrument failure, not an absence).
  */
@@ -268,6 +278,154 @@ function verdict(c: Claim, r: Latest | null, asOf: string): Verdict {
 		: "current";
 }
 
+// ── repo state: archived after the note, or gone ─────────────────────
+const GH_TOKEN = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? "";
+type RepoState = { isArchived: boolean; archivedAt: string | null } | null;
+type RepoVerdict = "current" | "predates-archival" | "gone" | "unchecked";
+
+/** Pure: the verdict for one repo given what GitHub said (null = it said
+ *  nothing usable — the caller decides gone vs unchecked from a REST read). */
+/** A note that itself records the repo as unreachable is current, not a
+ *  finding: 13 of the 16 gone repos on 2026-09-13 carried exactly that note
+ *  ("No longer accessible: github.com/… returns 404"). */
+export const NOTE_SAYS_GONE =
+	/\b(404|no longer (accessible|exists|available)|not accessible|repo(sitory)? (is )?(gone|removed|deleted|unavailable))\b/i;
+
+export function repoVerdict(
+	state: RepoState,
+	latestPublicAsOf: string,
+	restStatus: number | null,
+	noteSaysGone = false,
+): RepoVerdict {
+	if (state == null) {
+		if (restStatus !== 404) return "unchecked";
+		return noteSaysGone ? "current" : "gone";
+	}
+	if (!state.isArchived) return "current";
+	const at = (state.archivedAt ?? "").slice(0, 10);
+	// >: archived on the note's own day counts as described-in-time.
+	return at > latestPublicAsOf ? "predates-archival" : "current";
+}
+
+async function repoStates(repos: string[]): Promise<Map<string, RepoState>> {
+	const out = new Map<string, RepoState>();
+	for (let i = 0; i < repos.length; i += 40) {
+		const chunk = repos.slice(i, i + 40);
+		const q = `{${chunk
+			.map((full, j) => {
+				const [owner, name] = full.split("/", 2);
+				return `r${j}: repository(owner:${JSON.stringify(owner)}, name:${JSON.stringify(name)}){ isArchived archivedAt }`;
+			})
+			.join(" ")}}`;
+		try {
+			const res = await fetch("https://api.github.com/graphql", {
+				method: "POST",
+				headers: {
+					authorization: `Bearer ${GH_TOKEN}`,
+					"content-type": "application/json",
+					"user-agent": "stellarlight-note-freshness",
+				},
+				body: JSON.stringify({ query: q }),
+				signal: AbortSignal.timeout(30_000),
+			});
+			const data = ((await res.json()) as { data?: Record<string, RepoState> })
+				.data;
+			chunk.forEach((full, j) => out.set(full, data?.[`r${j}`] ?? null));
+		} catch (e) {
+			console.error(
+				`  could not check ${chunk.length} repos: ${(e as Error).message}`,
+			);
+			// leave them absent → unchecked below, never gone
+		}
+	}
+	return out;
+}
+
+/** One REST read to split "GitHub answered null" into gone vs unreachable. */
+async function restStatus(full: string): Promise<number | null> {
+	try {
+		const res = await fetch(`https://api.github.com/repos/${full}`, {
+			headers: {
+				authorization: `Bearer ${GH_TOKEN}`,
+				"user-agent": "stellarlight-note-freshness",
+			},
+			signal: AbortSignal.timeout(15_000),
+		});
+		return res.status;
+	} catch {
+		return null;
+	}
+}
+
+async function archivalPass(failures: NightlyFailure[]): Promise<{
+	current: number;
+	predates: number;
+	gone: number;
+	unchecked: number;
+	skipped: boolean;
+}> {
+	const latest = new Map<string, { asOf: string; saysGone: boolean }>();
+	for (const [repo, list] of Object.entries(REPO_KNOWLEDGE_NOTES))
+		for (const n of list) {
+			if (n.visibility === "internal") continue;
+			const cur = latest.get(repo);
+			latest.set(repo, {
+				asOf: cur && cur.asOf > n.asOf ? cur.asOf : n.asOf,
+				saysGone: (cur?.saysGone ?? false) || NOTE_SAYS_GONE.test(n.note),
+			});
+		}
+	const repos = [...latest.keys()];
+	const tally = {
+		current: 0,
+		predates: 0,
+		gone: 0,
+		unchecked: 0,
+		skipped: false,
+	};
+	if (!GH_TOKEN) {
+		// GraphQL needs a token. Say so and count every repo as unchecked —
+		// a missing credential is not evidence of anything.
+		console.log(
+			`\nrepo state: SKIPPED — no GITHUB_TOKEN/GH_TOKEN, ${repos.length} repos unchecked`,
+		);
+		tally.unchecked = repos.length;
+		tally.skipped = true;
+		return tally;
+	}
+	const states = await repoStates(repos);
+	for (const repo of repos) {
+		const { asOf, saysGone } = latest.get(repo) ?? {
+			asOf: "",
+			saysGone: false,
+		};
+		const st = states.has(repo) ? (states.get(repo) ?? null) : undefined;
+		// absent from the map = the whole chunk failed → unchecked, no REST read
+		const rest = st === null ? await restStatus(repo) : null;
+		const v =
+			st === undefined ? "unchecked" : repoVerdict(st, asOf, rest, saysGone);
+		if (v === "predates-archival") {
+			tally.predates += 1;
+			failures.push({
+				probe: `note-predates-archival:${repo}`,
+				note: `public note asOf ${asOf}; repo archived ${(st?.archivedAt ?? "").slice(0, 10)} — the note describes a live repo`,
+				surface: "code",
+			});
+		} else if (v === "gone") {
+			tally.gone += 1;
+			failures.push({
+				probe: `note-repo-gone:${repo}`,
+				note: `public note asOf ${asOf}; github.com/${repo} is 404 — the note describes a repo that no longer exists`,
+				surface: "code",
+			});
+		} else if (v === "current") tally.current += 1;
+		else tally.unchecked += 1;
+	}
+	console.log(
+		`\nrepo state: ${repos.length} repos with a public note · current ${tally.current} · archived after their note ${tally.predates} · gone ${tally.gone} · unchecked ${tally.unchecked}`,
+	);
+	return tally;
+}
+
 // ── main ────────────────────────────────────────────────────────────────────
 async function main(): Promise<number> {
 	const rows: Array<{ repo: string; asOf: string; claim: Claim }> = [];
@@ -326,12 +484,18 @@ async function main(): Promise<number> {
 				surface: "code",
 			});
 	}
+	const repoTally = await archivalPass(failures);
 	// Written on clean runs too — an empty array is the auto-clear signal.
 	writeNightlyFindings("note-freshness", failures);
 	console.log(
 		`\nnotes ${notes} · claims ${rows.length} · current ${counts.current} · stale ${counts.stale} · unchecked ${counts.unchecked}`,
 	);
-	return counts.current + counts.stale === 0 ? 1 : 0;
+	// Instrument failure only when NEITHER pass could check anything; a
+	// skipped repo pass (no token) is reported, not red.
+	const registryChecked = counts.current + counts.stale > 0;
+	const repoChecked =
+		repoTally.current + repoTally.predates + repoTally.gone > 0;
+	return registryChecked || repoChecked ? 0 : 1;
 }
 
 /** The smallest check that fails if the parser regresses — real note fragments. */
@@ -412,7 +576,50 @@ function selfTest() {
 	];
 	for (const [note, want] of cases)
 		assert.deepEqual(parseClaims(note), want, note);
-	console.log(`self-test ok (${cases.length} cases)`);
+	// repo verdict: archived after the note → finding; before or same day →
+	// covered; not archived → current; GitHub null → gone only on a REST 404.
+	const rv: Array<[RepoState, string, number | null, RepoVerdict]> = [
+		[
+			{ isArchived: true, archivedAt: "2026-08-29T10:00:00Z" },
+			"2026-08-01",
+			null,
+			"predates-archival",
+		],
+		[
+			{ isArchived: true, archivedAt: "2026-08-29T10:00:00Z" },
+			"2026-09-01",
+			null,
+			"current",
+		],
+		[
+			{ isArchived: true, archivedAt: "2026-08-29T10:00:00Z" },
+			"2026-08-29",
+			null,
+			"current",
+		],
+		[{ isArchived: false, archivedAt: null }, "2026-01-01", null, "current"],
+		[null, "2026-09-01", 404, "gone"],
+		[null, "2026-09-01", 403, "unchecked"],
+		[null, "2026-09-01", null, "unchecked"],
+	];
+	for (const [st, asOf, rest, want] of rv)
+		assert.equal(
+			repoVerdict(st, asOf, rest),
+			want,
+			JSON.stringify([st, asOf, rest]),
+		);
+	// a note that already records the 404 is current, not a finding
+	assert.equal(repoVerdict(null, "2026-09-01", 404, true), "current");
+	assert.equal(
+		NOTE_SAYS_GONE.test(
+			"No longer accessible: github.com/x/y returns 404 with no redirect",
+		),
+		true,
+	);
+	assert.equal(NOTE_SAYS_GONE.test("npm @x/y — 1.2.0 (2026-08-01)"), false);
+	console.log(
+		`self-test ok (${cases.length} parser cases, ${rv.length} repo-verdict cases)`,
+	);
 }
 
 if (process.argv.includes("--self-test")) selfTest();

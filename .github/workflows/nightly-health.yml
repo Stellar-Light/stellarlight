@@ -97,7 +97,12 @@ jobs:
       - name: Note freshness (registry facts re-verified after asOf)
         id: notefresh
         continue-on-error: true
-        env: { FINDINGS_DIR: improvements/engine/nightly }
+        # GITHUB_TOKEN: the repo-state pass reads archivedAt over GraphQL,
+        # which refuses unauthenticated calls; without it that pass reports
+        # itself skipped rather than going red.
+        env:
+          FINDINGS_DIR: improvements/engine/nightly
+          GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: pnpm exec tsx scripts/check-note-freshness.ts 2>&1 | tee /tmp/notefresh.log
 
