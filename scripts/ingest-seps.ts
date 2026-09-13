@@ -26,6 +26,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const GITHUB_API = "https://api.github.com/repos/stellar/stellar-protocol";
 const RAW_BASE =
@@ -200,7 +203,8 @@ async function run() {
 	console.log(`  ${files.length} SEP files found`);
 	stats.sepsFetched = files.length;
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title, publishedAt}>
 	const existingBySep = new Map<
@@ -278,6 +282,7 @@ async function run() {
 						(prev.publishedAt ?? "").slice(0, 10) !== chunk.publishedAt;
 					if (payload && ((prev.title ?? "") !== chunk.title || dateDrift)) {
 						stats.chunksUpdated++;
+						if (!execute) continue; // --replan counts it, never writes it
 						try {
 							await payload.update({
 								collection: "research-docs",
@@ -321,6 +326,10 @@ async function run() {
 	console.log(`  to embed: ${toEmbed.length}`);
 
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${stats.chunksNew + stats.chunksUpdated} new=${stats.chunksNew} updated=${stats.chunksUpdated} unchanged=${stats.chunksUnchanged} errors=${stats.errors}`,
+			);
 		console.log("");
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		return;

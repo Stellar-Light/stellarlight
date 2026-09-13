@@ -29,6 +29,9 @@ import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
 const execute = process.argv.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's Idempotence
+// step (must plan 0 right after the execute pass).
+const replan = process.argv.includes("--replan");
 
 /** Canonical repos whose in-repo docs answer real how-to queries. `include`
  * matches repo-relative paths; boilerplate is excluded globally. */
@@ -192,9 +195,10 @@ async function fetchRaw(repo: string, ref: string, path: string) {
 async function run() {
 	const startedAt = Date.now();
 	console.log(execute ? "EXECUTE MODE — writing to Payload" : "DRY RUN MODE");
-	const payload = execute
-		? await getPayload({ config: await configPromise })
-		: null;
+	const payload =
+		execute || replan
+			? await getPayload({ config: await configPromise })
+			: null;
 
 	// Existing repo-docs chunks for hash-idempotency.
 	const existing = new Map<
@@ -280,6 +284,10 @@ async function run() {
 		process.exit(1);
 	}
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${toEmbed.length} unchanged=${unchanged} errors=${errors}`,
+			);
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		process.exit(errors ? 1 : 0);
 	}

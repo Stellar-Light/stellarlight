@@ -322,8 +322,13 @@ export async function upsertChunks(opts: {
 	source: ResearchSource;
 	chunks: ResearchChunk[];
 	existing: Map<string, Map<number, ExistingChunkRef>>;
+	/** Classify only: print the plan (`replan: writes=N …`) and return the
+	 *  stats without embedding, writing, or re-stamping. The refresh lane's
+	 *  Idempotence step runs every ingester this way right after the execute
+	 *  pass and requires writes=0 (QUALITY.md §3, the second condition). */
+	dryRun?: boolean;
 }): Promise<UpsertStats> {
-	const { payload, source, chunks: rawChunks, existing } = opts;
+	const { payload, source, chunks: rawChunks, existing, dryRun = false } = opts;
 	const stats: UpsertStats = {
 		new: 0,
 		updated: 0,
@@ -378,6 +383,16 @@ export async function upsertChunks(opts: {
 		toEmbed.push(chunk);
 		if (prev) stats.updated += 1;
 		else stats.new += 1;
+	}
+
+	// One line, one format, in both modes — the lane greps `^replan: writes=`.
+	// `updated` already counts the metadata-only rows; the observedAt re-stamp
+	// is not a planned write (it advances every run by design).
+	const planLine = (verb: "replan" | "wrote") =>
+		`${verb}: writes=${stats.new + stats.updated} new=${stats.new} updated=${stats.updated} (meta-only ${metaOnly.length}) unchanged=${stats.unchanged} errors=${stats.errors}`;
+	if (dryRun) {
+		console.log(planLine("replan"));
+		return stats;
 	}
 
 	if (metaOnly.length) {
@@ -439,7 +454,10 @@ export async function upsertChunks(opts: {
 		}
 	}
 
-	if (toEmbed.length === 0) return stats;
+	if (toEmbed.length === 0) {
+		console.log(planLine("wrote"));
+		return stats;
+	}
 
 	console.log(`  Embedding ${toEmbed.length} chunks via Voyage AI…`);
 	const embeddings = await embedBatch(toEmbed.map((c) => c.content));
@@ -494,6 +512,7 @@ export async function upsertChunks(opts: {
 		}
 	}
 
+	console.log(planLine("wrote"));
 	return stats;
 }
 

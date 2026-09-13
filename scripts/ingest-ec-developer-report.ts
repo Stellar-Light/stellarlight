@@ -43,6 +43,9 @@ async function extractPdfText(buf: Buffer): Promise<string> {
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const REPO_API_BASE =
 	"https://api.github.com/repos/electric-capital/developer-reports/contents";
@@ -111,7 +114,8 @@ async function run() {
 	const files = await listReports();
 	console.log(`  ${files.length} PDF reports\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "ec-developer-report")
 		: new Map();
@@ -187,7 +191,7 @@ async function run() {
 		`  to embed: ${stats.toEmbed} | PDF errors: ${pdfErrors} | too short: ${tooShort}`,
 	);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -197,6 +201,7 @@ async function run() {
 		source: "ec-developer-report",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

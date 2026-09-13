@@ -30,6 +30,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const REPO = "lumenloop/awesome-stellar-community-fund";
 const GITHUB_API = `https://api.github.com/repos/${REPO}`;
@@ -220,7 +223,8 @@ async function run() {
 	console.log(`source: github.com/${REPO}`);
 	console.log("");
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash}>
 	const existingByDoc = new Map<
@@ -291,16 +295,18 @@ async function run() {
 						// content-identical rows without re-embedding — otherwise the
 						// 246 existing undated chunks stay undated forever.
 						const prevDay = (prev.publishedAt ?? "").slice(0, 10);
-						if (execute && payload && publishedAt && prevDay !== publishedAt) {
-							try {
-								await payload.update({
-									collection: "research-docs",
-									id: prev.id,
-									data: { publishedAt },
-								});
-								stats.chunksUpdated++;
-							} catch {
-								stats.errors++;
+						if (payload && publishedAt && prevDay !== publishedAt) {
+							stats.chunksUpdated++; // planned in --replan, written on --execute
+							if (execute) {
+								try {
+									await payload.update({
+										collection: "research-docs",
+										id: prev.id,
+										data: { publishedAt },
+									});
+								} catch {
+									stats.errors++;
+								}
 							}
 						}
 						stats.chunksUnchanged++;
@@ -325,6 +331,10 @@ async function run() {
 	console.log(`  to embed: ${toEmbed.length}`);
 
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${stats.chunksNew + stats.chunksUpdated} new=${stats.chunksNew} updated=${stats.chunksUpdated} unchanged=${stats.chunksUnchanged} errors=${stats.errors}`,
+			);
 		console.log("\nDry run complete. Pass --execute to embed + write.");
 		return;
 	}
