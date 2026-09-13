@@ -236,8 +236,17 @@ export function chunkMarkdown(opts: {
 			continue;
 		}
 
-		// Split big sections on paragraph (blank line) boundaries, pack greedily
-		const paras = text.split(/\n\s*\n/);
+		// Split big sections on paragraph (blank line) boundaries, pack greedily.
+		// A paragraph with no blank line inside it (the 66k JSON example on the
+		// getTransactions page) used to ship whole: Payload's textarea cap is
+		// 40,000 (defaultMaxTextLength), so the write failed on every refresh
+		// and the ingester counted that chunk "new" forever — the first thing
+		// the Idempotence re-plan caught (2026-09-13). Oversized paragraphs are
+		// hard-split first (line boundaries, then fixed width), so every chunk
+		// honours MAX_CHARS_PER_CHUNK and the field's own "≤ 1500 tokens".
+		const paras = text
+			.split(/\n\s*\n/)
+			.flatMap((p) => splitOversized(p, MAX_CHARS_PER_CHUNK - prefix.length));
 		let buf = prefix;
 		for (const para of paras) {
 			if ((buf + para + "\n\n").length > MAX_CHARS_PER_CHUNK && buf.length) {
@@ -251,6 +260,31 @@ export function chunkMarkdown(opts: {
 	}
 
 	return chunks;
+}
+
+/** A paragraph longer than `max`: split at line boundaries, then a single
+ *  overlong line at fixed width. Lossless — every character lands in some
+ *  piece, in order. */
+export function splitOversized(text: string, max: number): string[] {
+	if (text.length <= max) return [text];
+	const out: string[] = [];
+	let buf = "";
+	for (const line of text.split("\n")) {
+		if (line.length > max) {
+			if (buf) out.push(buf);
+			buf = "";
+			for (let i = 0; i < line.length; i += max)
+				out.push(line.slice(i, i + max));
+			continue;
+		}
+		if (buf && buf.length + line.length + 1 > max) {
+			out.push(buf);
+			buf = "";
+		}
+		buf = buf ? `${buf}\n${line}` : line;
+	}
+	if (buf) out.push(buf);
+	return out;
 }
 
 /**
