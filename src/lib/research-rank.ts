@@ -309,8 +309,13 @@ function matchesTarget(url: string, targets: string[]): boolean {
 // re-sort with DATED freshness (short half-life, evergreen NOT exempt:
 // undated → 0.35) blended with confidence — structured truth (publishedAt)
 // must drive ranking for the query that asks for it.
+// "current"/"currently" are NOT here: they qualify present STATE ("in the
+// current version", "the currently indexed audits"), not news. As an intent
+// they floated 9-day-old weekly roundups (conf 0.45) above undated audit
+// reports (0.80) and the Java SDK README (0.86) — Raven battery
+// q-tool-soroban-auth-audit-live / q-ti-java-sdk-wallet-feebump, 2026-09-13.
 const RECENCY_INTENT_RE =
-	/\b(latest|newest|most recent|recent(ly)?|current(ly)?|this (year|month|week)|today|new in|202[5-9])\b/i;
+	/\b(latest|newest|most recent|recent(ly)?|this (year|month|week)|today|new in|202[5-9])\b/i;
 const RECENCY_HALF_LIFE_DAYS = 120;
 
 export function recencyIntent(query: string | undefined): boolean {

@@ -6,6 +6,7 @@ import {
 	queryLexTokens,
 	rankResearchChunks,
 	recencyContentTokens,
+	recencyIntent,
 	selectRecencySupplement,
 } from "../research-rank";
 
@@ -991,5 +992,33 @@ describe("USDT0 launch anchor (RESEARCH_ANCHORS usdt0-launch)", () => {
 			expect(anchorDocUrls("how do I bridge USDC to stellar")).not.toContain(u);
 		expect(anchorDocUrls("stablecoins on stellar")).toEqual([]);
 		expect(anchorDocUrls("tether")).toEqual([]);
+	});
+});
+
+describe("recency intent is a news signal, not a present-state qualifier", () => {
+	it("fires on latest/recent phrasing", () => {
+		expect(recencyIntent("latest soroban release")).toBe(true);
+		expect(recencyIntent("recent mainnet upgrade")).toBe(true);
+		expect(
+			recencyIntent("what changed recently in the Stellar Scout API"),
+		).toBe(true);
+	});
+
+	it("does not fire on current/currently — state, not news (battery 2026-09-13)", () => {
+		// Both floated weekly roundups (conf 0.45–0.54) above the undated audit
+		// reports / SDK README (0.80–0.86) that actually answer them.
+		expect(
+			recencyIntent(
+				"What do the currently indexed primary audits say about Soroban authorization recursion or reentrancy risk?",
+			),
+		).toBe(false);
+		expect(
+			recencyIntent(
+				"how do I construct a fee-bump transaction (FeeBumpTransaction) in the current version?",
+			),
+		).toBe(false);
+		expect(
+			recencyIntent("What is the current base reserve on Stellar mainnet?"),
+		).toBe(false);
 	});
 });
