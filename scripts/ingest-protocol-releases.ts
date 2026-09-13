@@ -28,6 +28,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const REPOS = [
 	"stellar/stellar-core",
@@ -97,7 +100,7 @@ async function run() {
 	}
 
 	console.log(`\nChunks: ${allChunks.length} total`);
-	if (!execute) {
+	if (!execute && !replan) {
 		for (const c of allChunks.filter((c) => c.chunkIndex === 0).slice(0, 8)) {
 			console.log(`  ${c.publishedAt?.slice(0, 10)} ${c.title}`);
 		}
@@ -112,6 +115,7 @@ async function run() {
 		source: "release",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`Done in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

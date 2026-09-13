@@ -1,4 +1,5 @@
 name: Refresh Scout research corpus
+# workflow-health: signal-steps: ^(Idempotence|Verify the corpus still holds every canonical page)$
 
 # Daily run hits all 9 ingest scripts. Each script is idempotent via
 # per-chunk SHA-256 contentHash — only NEW or CHANGED chunks get
@@ -44,7 +45,10 @@ env:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 45, not 30 (2026-09-13): the Idempotence re-plan re-runs every ingester
+    # dry, so the job needs roughly double the single-pass 4–10 min. A guard
+    # that cannot finish gives no verdict (curate-projects learned this at 8).
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -158,6 +162,50 @@ jobs:
         if: inputs.source == '' || inputs.source == 'ec-developer-report'
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute
+
+      # Idempotence gate (2026-09-13, the rule curate-projects and enrich-scf
+      # already live by): an execute must leave nothing planned. Every
+      # ingester is re-run with --replan — the same fetch and the same DB diff,
+      # no embed, no write — and must print `replan: writes=0`. A write still
+      # planned right after it was applied is a step that died mid-run under
+      # continue-on-error, a writer whose read-back disagrees with what it
+      # wrote (the normalizeDate class), or two writers on one row. The writes
+      # above already landed; this step only reports, loudly. An ingester that
+      # cannot re-plan (crash, source unreachable) is could-not-check for that
+      # source — named, never counted as clean, never counted as a finding.
+      - name: Idempotence
+        if: inputs.source == ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          planned=0; clean=0; unchecked=""
+          for s in seps caps repo-docs lumenloop lumenloop-research scf-handbook sdf-blog developers-docs papers protocol-releases soroban-security incidents security-program sdf-org ec-developer-report; do
+            pnpm exec tsx "scripts/ingest-$s.ts" --replan > "replan-$s.log" 2>&1
+            line=$(grep -E '^replan: writes=' "replan-$s.log" | tr '\n' ' ')
+            if [ -z "$line" ]; then
+              echo "  ? $s — no plan line (could not re-plan):"
+              tail -n 3 "replan-$s.log" | sed 's/^/      /'
+              unchecked="$unchecked $s"
+              continue
+            fi
+            n=$(grep -oE '^replan: writes=[0-9]+' "replan-$s.log" | cut -d= -f2 | awk '{ t += $1 } END { print t + 0 }')
+            if [ "$n" = "0" ]; then
+              echo "  ✓ $s — $line"; clean=$((clean + 1))
+            else
+              echo "  ✗ $s — $line"
+            fi
+            planned=$((planned + n))
+          done
+          if [ "$planned" != "0" ]; then
+            echo "::error::$planned write(s) still planned after execute — a step that died mid-run, a non-idempotent writer, or two writers on one row; see the ✗ rows"
+            exit 1
+          fi
+          if [ -n "$unchecked" ]; then
+            echo "::warning::could not re-plan:$unchecked — the claim covers the other $clean source(s) only"
+          fi
+          echo "0 writes planned after execute across $clean re-planned source(s)"
 
       # Every ingest above is continue-on-error, so ONE source failing cannot
       # block the rest. The cost of that isolation is that a step which died

@@ -26,6 +26,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 const limitArg = args.find((a) => a.startsWith("--limit="));
 // 2026-09-02: the sitemap listed 568 blog URLs and the default cap was 500,
 // so the USDT0 launch announcement — published that morning — never entered
@@ -184,7 +187,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: ${BASE}/blog\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "sdf-blog")
 		: new Map();
@@ -272,7 +276,7 @@ async function run() {
 	);
 	console.log(`  to embed: ${stats.toEmbed} | post errors: ${postErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -280,7 +284,15 @@ async function run() {
 	// Prune poison: delete chunks of pages we just re-fetched and classified
 	// as listings (targeted — only pages verified non-article THIS run).
 	let pruned = 0;
-	for (const docId of listingDocIds) {
+	// --replan: a prune still pending after execute is a planned write too —
+	// reported on its own line; the lane sums every `replan:` line.
+	const wouldPrune = listingDocIds.reduce(
+		(n, id) => n + (existing.get(id)?.size ?? 0),
+		0,
+	);
+	if (replan && wouldPrune)
+		console.log(`replan: writes=${wouldPrune} (listing-page chunk prunes)`);
+	for (const docId of execute ? listingDocIds : []) {
 		const chunkMap = existing.get(docId);
 		if (!chunkMap) continue;
 		for (const { id } of chunkMap.values()) {
@@ -299,6 +311,7 @@ async function run() {
 		source: "sdf-blog",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

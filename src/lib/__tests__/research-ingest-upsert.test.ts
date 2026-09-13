@@ -5,6 +5,7 @@ vi.mock("../embed", () => ({
 	embedBatch: vi.fn(async (arr: string[]) => arr.map(() => [0.1, 0.2, 0.3])),
 }));
 
+import { embedBatch } from "../embed";
 import { type ResearchChunk, sha256, upsertChunks } from "../research-ingest";
 
 // A valid 24-hex ObjectId string so the raw-Mongo re-stamp path can convert it.
@@ -129,5 +130,80 @@ describe("upsertChunks — observedAt universal re-stamp", () => {
 		);
 		expect(payload._updateMany).not.toHaveBeenCalled();
 		expect(payload.create).not.toHaveBeenCalled();
+	});
+});
+
+describe("upsertChunks — dryRun is the refresh lane's Idempotence re-plan", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("classifies new / changed / meta-drift / unchanged, prints one plan line, writes nothing", async () => {
+		const payload = makePayload();
+		const unchanged = chunk({ parentDocId: "u", content: "same body" });
+		const meta = chunk({
+			parentDocId: "m",
+			content: "same body, new title",
+			title: "New title",
+		});
+		const changed = chunk({ parentDocId: "c", content: "a new body" });
+		const fresh = chunk({ parentDocId: "n", content: "never seen" });
+		const ref = (
+			c: ResearchChunk,
+			over: Partial<{ contentHash: string; title: string }> = {},
+		) => ({
+			id: OID,
+			contentHash: c.contentHash,
+			title: c.title,
+			publishedAt: undefined,
+			...over,
+		});
+		const existing = new Map([
+			["u", new Map([[0, ref(unchanged)]])],
+			["m", new Map([[0, ref(meta, { title: "Old title" })]])],
+			["c", new Map([[0, ref(changed, { contentHash: sha256("old body") })]])],
+		]);
+		const log = vi.spyOn(console, "log").mockImplementation(() => {});
+		const stats = await upsertChunks({
+			payload,
+			source: "dev-docs",
+			chunks: [unchanged, meta, changed, fresh],
+			existing,
+			dryRun: true,
+		});
+		const lines = log.mock.calls.map((c) => String(c[0]));
+		log.mockRestore();
+		expect(stats).toMatchObject({
+			new: 1,
+			updated: 2,
+			unchanged: 1,
+			errors: 0,
+		});
+		// the plan is a claim about the DB, not a write to it
+		expect(payload.create).not.toHaveBeenCalled();
+		expect(payload.update).not.toHaveBeenCalled();
+		expect(payload._updateMany).not.toHaveBeenCalled();
+		expect(embedBatch).not.toHaveBeenCalled();
+		const line = lines.find((l) => l.startsWith("replan: "));
+		expect(line).toBe(
+			"replan: writes=3 new=1 updated=2 (meta-only 1) unchanged=1 errors=0",
+		);
+	});
+
+	it("an execute pass ends on the same line under `wrote:` so the two can be compared", async () => {
+		const payload = makePayload();
+		const fresh = chunk({ parentDocId: "n", content: "never seen" });
+		const log = vi.spyOn(console, "log").mockImplementation(() => {});
+		await upsertChunks({
+			payload,
+			source: "dev-docs",
+			chunks: [fresh],
+			existing: new Map(),
+		});
+		const lines = log.mock.calls.map((c) => String(c[0]));
+		log.mockRestore();
+		expect(payload.create).toHaveBeenCalledTimes(1);
+		const line = lines.find((l) => l.startsWith("wrote: "));
+		expect(line).toBe(
+			"wrote: writes=1 new=1 updated=0 (meta-only 0) unchanged=0 errors=0",
+		);
 	});
 });

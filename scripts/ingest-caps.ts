@@ -28,6 +28,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 // #778: the committed cap-registry (generated via shallow clone, immune to
 // API rate limits) is the status/protocolVersion source of truth. Live-fetch
@@ -231,7 +234,8 @@ async function run() {
 	console.log(`  ${files.length} SEP files found`);
 	stats.sepsFetched = files.length;
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
 	const existingBySep = new Map<
@@ -248,6 +252,8 @@ async function run() {
 			}
 		>
 	>();
+	// Hoisted: the --replan plan line below counts the deletes still pending.
+	let shadowDupes = 0;
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
 		const existing = await payload.find({
@@ -262,7 +268,6 @@ async function run() {
 		// per-doc collapse could still SERVE it. On collision keep the
 		// maintained row (non-null capStatus, tiebreak newest id) and DELETE
 		// the shadowed duplicate (execute mode; dry run reports).
-		let shadowDupes = 0;
 		for (const d of existing.docs as unknown as Array<{
 			id: string;
 			parentDocId: string;
@@ -301,9 +306,9 @@ async function run() {
 			slot.set(d.chunkIndex, keep);
 			shadowDupes++;
 			console.log(
-				`  shadow dupe ${d.parentDocId}#${d.chunkIndex}: ${payload ? "deleting" : "would delete"} ${drop.id} (keeping ${keep.id})`,
+				`  shadow dupe ${d.parentDocId}#${d.chunkIndex}: ${execute ? "deleting" : "would delete"} ${drop.id} (keeping ${keep.id})`,
 			);
-			if (payload) {
+			if (execute && payload) {
 				try {
 					await payload.delete({ collection: "research-docs", id: drop.id });
 				} catch (err) {
@@ -376,7 +381,7 @@ async function run() {
 				byPid ?? REGISTRY_BY_TITLE.get((c.title ?? "").trim().toLowerCase());
 			if (!reg || reg.status === null) continue;
 			registryStamped++;
-			if (payload) {
+			if (execute && payload) {
 				try {
 					await payload.update({
 						collection: "research-docs",
@@ -394,7 +399,7 @@ async function run() {
 		}
 	}
 	console.log(
-		`  registry backfill: ${registryStamped} null-capStatus chunk(s) ${payload ? "stamped" : "would be stamped (dry)"}`,
+		`  registry backfill: ${registryStamped} null-capStatus chunk(s) ${execute ? "stamped" : "would be stamped (dry)"}`,
 	);
 
 	const toEmbed: SepChunk[] = [];
@@ -437,6 +442,7 @@ async function run() {
 						dateDrift;
 					if (payload && ((prev.title ?? "") !== chunk.title || factsDrifted)) {
 						stats.chunksUpdated++;
+						if (!execute) continue; // --replan counts it, never writes it
 						try {
 							await payload.update({
 								collection: "research-docs",
@@ -482,6 +488,10 @@ async function run() {
 	console.log(`  to embed: ${toEmbed.length}`);
 
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${stats.chunksNew + stats.chunksUpdated + registryStamped + shadowDupes} new=${stats.chunksNew} updated=${stats.chunksUpdated} (registry stamps ${registryStamped}, shadow-dupe deletes ${shadowDupes}) unchanged=${stats.chunksUnchanged} errors=${stats.errors}`,
+			);
 		console.log("");
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		return;

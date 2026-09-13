@@ -42,6 +42,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 const limitFlag = args.find((a) => a.startsWith("--limit="));
 const LIMIT = limitFlag ? parseInt(limitFlag.split("=")[1], 10) : Infinity;
 
@@ -337,7 +340,8 @@ async function run() {
 		`  ${list.length} total, ${approved.length} approved, processing ${targets.length}`,
 	);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "audit")
 		: new Map();
@@ -529,7 +533,7 @@ async function run() {
 		);
 	}
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -552,7 +556,9 @@ async function run() {
 
 	let regCreated = 0;
 	let regUpdated = 0;
-	for (const r of registryRows) {
+	// --replan re-plans the research chunks only; the audits registry is
+	// written on --execute alone.
+	for (const r of execute ? registryRows : []) {
 		const { linkMapped: _drop, ...rest } = r;
 		const data = {
 			...rest,
@@ -585,6 +591,7 @@ async function run() {
 		source: "audit",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

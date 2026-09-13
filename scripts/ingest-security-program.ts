@@ -41,6 +41,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const HACKERONE_GRAPHQL = "https://hackerone.com/graphql";
 // sls-055: these pages are registered in the CANONICAL_PAGES registry
@@ -189,7 +192,7 @@ async function run() {
 
 	console.log(`\nChunks: ${allChunks.length} total`);
 
-	if (!execute) {
+	if (!execute && !replan) {
 		console.log("\nDry run — preview (no embed, no write):");
 		for (const c of allChunks) {
 			console.log(
@@ -210,6 +213,7 @@ async function run() {
 		source: "security-program",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — new: ${r.new}, updated: ${r.updated}, unchanged: ${r.unchanged}, errors: ${r.errors + errors}`,
