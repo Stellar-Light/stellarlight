@@ -533,6 +533,59 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		source: "path redirects to github.com/Micopay/micopay-protocol (HTTP 301)",
 		asOf: "2026-09-02",
 	},
+	// -- 2026-09-13 supersession-freshness sweep: the six archived curated-pool repos the
+	// check had been reporting since 09-08 while its lane was misdeclared (#1533). Two batch
+	// archives: stellar-expert on 08-29, idos-network on 08-25. deprecatedAt is GraphQL
+	// archivedAt (the banner date). None names a successor; the stellar-expert three still
+	// ship on npm at their final release, with `repository` pointing at the archived repo.
+	"stellar-expert/claimable-balance-utils": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-29",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-29); README is package usage only, names no successor; npm @stellar-expert/claimable-balance-utils 2.0.0 (published 2026-07-02) still points repository at this repo",
+		asOf: "2026-09-13",
+	},
+	"stellar-expert/asset-descriptor": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-29",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-29); README is package usage only, names no successor; npm @stellar-expert/asset-descriptor 2.0.0 (published 2026-07-02) still points repository at this repo",
+		asOf: "2026-09-13",
+	},
+	"stellar-expert/client-cache": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-29",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-29); no README; npm @stellar-expert/client-cache 1.1.0 (published 2026-01-07) still points repository at this repo",
+		asOf: "2026-09-13",
+	},
+	"idos-network/experiment-canton": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-25",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-25); README: a PoC — 'One Ed25519 key can authenticate to idOS and sign for a Canton external party' — names no successor",
+		asOf: "2026-09-13",
+	},
+	"idos-network/node-staking-gas-tests": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-25",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-25); README names idos-network/contracts as CONTEXT ('Context: https://github.com/idos-network/contracts'), the live repo these gas experiments fed — not a successor",
+		asOf: "2026-09-13",
+	},
+	"idos-network/oauth-proxy": {
+		kind: "archived",
+		supersededBy: null,
+		deprecatedAt: "2026-08-25",
+		source:
+			"GitHub archived:true (archivedAt 2026-08-25); README: 'PoC for an OAuth2 provider server', names no successor",
+		asOf: "2026-09-13",
+	},
 };
 
 /**
