@@ -155,7 +155,7 @@ async function verifyMain() {
 			}),
 		);
 	}
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 
 async function main() {
@@ -738,7 +738,7 @@ async function main() {
 		console.log(
 			`\n· no eligible repos this wave — the routine backlog is exhausted (${eligible} matched the state filter, ${skippedTriaged} of them triaged). Structurally unscannable rows (submodule-contracts, tree-incomplete) and prior errors are retried only under --rescan.`,
 		);
-		process.exit(0);
+		process.exit(process.exitCode ?? 0);
 	}
 	// Zero-work waves are FAILURES, not successes (2026-08-08: a rate-limit
 	// stop 0.8s in exited green — the run looked healthy on every dashboard
