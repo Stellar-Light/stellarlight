@@ -1486,6 +1486,17 @@ export const spec: OpenAPISpec = {
 						"successor",
 						"former name",
 						"old name",
+						// Bare project NAMES route here, per the findings queue's C10
+						// decision: resolveProject exists to turn a name into identity,
+						// and growing searchProjects' name list toward 64+ would recreate
+						// the C7 leak at scale. Measured with the scorer replica over the
+						// full 65-probe bank before editing (2026-09-13): "reflector
+						// oracle on Stellar" resolveProject rank 17 → 2, no other probe
+						// changed. Per-name coverage does not scale — freighter is today's
+						// identical miss — the scalable answer is Raven's per-entry
+						// knownAliases, which is theirs; this carries the name we hold at
+						// confidence 0.97 and lose to the research op's incident cluster.
+						"reflector",
 					],
 					useWhen: [
 						"a name in an old article or repo matches nothing in the current directory",
@@ -2023,6 +2034,12 @@ export const spec: OpenAPISpec = {
 						"block explorers",
 						"stellar.expert",
 						"stellarchain",
+						// Category vocabulary, not a name. "which Stellar wallets support
+						// Soroban contracts" lost to listContracts on its id noun; this
+						// phrase lifts searchProjects 6 → 2 in the replica with no other
+						// probe moving (2026-09-13). "wallets" alone was already covered
+						// and did nothing — the gain is the two-token phrase.
+						"soroban wallet",
 						"rosca",
 						"susu",
 						"chama",

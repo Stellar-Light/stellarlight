@@ -26,6 +26,24 @@
 > correctly-fixed route.
 
 
+> **CORRECTION 2026-09-13 — `notFor` does not route.** Checked against
+> stellar-experimental/stellar-raven as of today: `scripts/build-catalog.mjs`
+> and `src/catalog/extract-keywords.ts` feed `purpose`, `useWhen`,
+> `exampleQuestions` and `keywords` into the catalog text Raven's lexical
+> scorer ranks on; `notFor` is not read. So the `notFor` lines shipped for C5,
+> C6, C8 and C9 changed no rank — whatever cleared those ledger rows was the
+> keyword edits, catalog notes, or Raven-side changes, not the tiebreakers.
+> `notFor` still reaches the model-facing description and stays worth
+> writing, but a routing fix must add TOKENS (keywords / useWhen /
+> exampleQuestions). Re-measured the bank the same day with the scorer
+> replica (205/268 exact vs live): of 17 live misses, 9 are catalog-lag
+> (inside grace), 2 are id-noun collisions no vocabulary outweighs (upstream
+> #124), 3 are stopword-mass losses (the unfiled draft issue), and 2 were ours
+> to clear — `reflector` (C7's fix landed; the probe kept failing as C10's
+> name-coverage mechanism, resolved on resolveProject per C10) and the
+> Soroban-wallets vocabulary row. Both measured before editing: 55 → 57 of 65
+> replica passes, zero probes lost.
+
 Measured 2026-08-30/31 against `origin/main` `improvements/ledger/findings.json` and the live API at
 `https://stellarlight.xyz`. Worktree: `/Users/shubhbrar/Downloads/sl-iso`. Read-only throughout — no edits,
 no commits, no `--write`.

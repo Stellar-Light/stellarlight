@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-13",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.51",
+		type: "changed",
+		summary:
+			"Routing vocabulary: resolveProject carries the bare name `reflector`; searchProjects carries `soroban wallet`. No response shape, parameter or enum changed.",
+		detail:
+			"x-routing is the text Raven's lexical scorer ranks operations on, and two live routing probes were failing on vocabulary we control. `reflector oracle on Stellar` routed to searchResearch's incident cluster although the directory holds Reflector at confidence 0.97 — the bare keyword was removed from searchResearch on 2026-08-31 (C7), but no operation carried the name, so the router had nothing to route to; per the findings queue's C10 decision the name now sits on resolveProject, the operation whose purpose is turning a name into identity, rather than growing searchProjects' name list. `which Stellar wallets support Soroban contracts` lost to listContracts on its id noun; the phrase `soroban wallet` on searchProjects lifts it into the top three. Both edits were measured with the scorer replica over the full 65-probe bank before shipping: 55 → 57 passes, no probe lost. Also recorded in docs/QUALITY-FINDINGS-QUEUE.md: Raven's catalog builder does not read `notFor`, so earlier notFor-only routing fixes changed no rank.",
+	},
+	{
 		date: "2026-09-09",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.50",
