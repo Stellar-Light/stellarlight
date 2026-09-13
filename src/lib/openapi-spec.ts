@@ -28,6 +28,7 @@ import {
 import { PROJECT_TYPES } from "./project-types";
 import { REPO_KINDS } from "./repo-grade";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { PRICE_BASES } from "./stablecoins";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -10097,12 +10098,20 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Supply valued in USD (supply × USD price) — THE comparable ranking metric (default sort). Null = unpriced.",
+							"Supply valued in USD (supply × priceUSD) — THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation.",
 					},
 					priceUSD: {
 						type: "number",
 						nullable: true,
-						description: "USD price of one unit (≈1 for USD pegs).",
+						description:
+							"USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which — do not assume ≈1 on a USD row.",
+					},
+					priceBasis: {
+						type: "string",
+						nullable: true,
+						enum: [...PRICE_BASES],
+						description:
+							"How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg — Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.",
 					},
 					holders: {
 						type: "number",

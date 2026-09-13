@@ -1187,9 +1187,13 @@ export interface Stablecoin {
    */
   supply?: number | null;
   /**
-   * USD per unit AT ITS PEG (live FX). Assumes the peg holds; peg deviation is not measured here.
+   * USD per unit. At the peg (live FX) for a par-redeemable asset; the token's own market price where the unit is not 1:1 with its peg. See priceBasis.
    */
   priceUSD?: number | null;
+  /**
+   * How priceUSD was obtained: assumed-peg = the peg's live FX rate, peg deviation NOT measured; measured-market = the unit's own market price, for units that are not 1:1 with their peg (USDY accrues, USDM1 trades above par). Empty exactly when priceUSD is empty.
+   */
+  priceBasis?: ('assumed-peg' | 'measured-market') | null;
   /**
    * supply × priceUSD — the only cross-asset comparable size metric.
    */
@@ -3220,6 +3224,7 @@ export interface StablecoinsSelect<T extends boolean = true> {
   assetType?: T;
   supply?: T;
   priceUSD?: T;
+  priceBasis?: T;
   marketCapUSD?: T;
   holders?: T;
   volume24hUSD?: T;

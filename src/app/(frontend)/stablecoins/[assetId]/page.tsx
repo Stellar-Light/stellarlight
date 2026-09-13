@@ -264,9 +264,13 @@ export default async function StablecoinDetailPage({
 								: `$${row.priceUSD.toLocaleString("en-US", { maximumFractionDigits: 6 })} per ${row.ticker}`}
 						</Row>
 						<Row label="Unit price basis">
-							{row.peg === "USD"
-								? "USD peg, taken as 1.00"
-								: `live ${row.peg ?? "peg"}/USD rate`}
+							{row.priceBasis === "measured-market"
+								? `market price of one ${row.ticker} — this unit is not 1:1 with its ${row.peg ?? "peg"} peg`
+								: row.priceUSD == null
+									? "—"
+									: row.peg === "USD"
+										? "USD peg, taken as 1.00 — peg deviation not measured"
+										: `live ${row.peg ?? "peg"}/USD rate — peg deviation not measured`}
 						</Row>
 					</CardContent>
 				</Card>

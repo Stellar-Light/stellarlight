@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { PRICE_BASES } from "@/lib/stablecoins";
 
 /**
  * Stellar stablecoin inventory — one row per (asset code, issuer), written by
@@ -85,7 +86,17 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"USD per unit AT ITS PEG (live FX). Assumes the peg holds; peg deviation is not measured here.",
+					"USD per unit. At the peg (live FX) for a par-redeemable asset; the token's own market price where the unit is not 1:1 with its peg. See priceBasis.",
+			},
+		},
+		{
+			name: "priceBasis",
+			type: "select",
+			index: true,
+			options: [...PRICE_BASES],
+			admin: {
+				description:
+					"How priceUSD was obtained: assumed-peg = the peg's live FX rate, peg deviation NOT measured; measured-market = the unit's own market price, for units that are not 1:1 with their peg (USDY accrues, USDM1 trades above par). Empty exactly when priceUSD is empty.",
 			},
 		},
 		{

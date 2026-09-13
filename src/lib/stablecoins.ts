@@ -32,6 +32,7 @@ export interface StoreRow {
 	assetType?: string | null;
 	supply?: number | null;
 	priceUSD?: number | null;
+	priceBasis?: string | null;
 	marketCapUSD?: number | null;
 	holders?: number | null;
 	volume24hUSD?: number | null;
@@ -69,8 +70,14 @@ export interface StablecoinRow {
 	/** Circulating supply valued in USD (supply × USD price). THE comparable
 	 *  ranking metric. Null if unpriced. */
 	marketCapUSD: number | null;
-	/** USD price of one unit at its peg (≈1 for USD, ≈0.0067 for JPY). */
+	/** USD price of one unit. At the peg for a par-redeemable asset (≈1 for
+	 *  USD, ≈0.0067 for JPY); the token's own market price where the unit is
+	 *  not 1:1 with its peg. `priceBasis` says which. */
 	priceUSD: number | null;
+	/** How priceUSD was obtained — assumed-peg (peg FX, deviation NOT measured)
+	 *  or measured-market (the unit's own price, for accrual/above-par units
+	 *  like USDY). Null exactly when priceUSD is null. */
+	priceBasis: PriceBasis | null;
 	/** Trustline holder count. */
 	holders: number | null;
 	/** 24h on-chain TRADE volume in USD (SDEX) — falls back to a 7-day average
@@ -118,7 +125,21 @@ export const STABLECOIN_SORTS: StablecoinSort[] = [
 	"volume",
 ];
 
+/**
+ * How `priceUSD` was obtained.
+ *
+ * assumed-peg — the asset claims 1 unit = 1 unit of its peg and we priced the
+ * peg (live FX). Right for a redemption-at-par stablecoin; peg deviation is
+ * still not measured.
+ * measured-market — the unit is NOT 1:1 with its peg (it accrues, or trades
+ * above par), so the price is the token's own market price. Ondo's USDY was
+ * $1.14 while we priced it at $1.00, understating it by ~$65M.
+ */
+export const PRICE_BASES = ["assumed-peg", "measured-market"] as const;
+export type PriceBasis = (typeof PRICE_BASES)[number];
+
 const BASES = new Set(["live", "curated-static", "unmeasured"]);
+const PRICE_BASIS_SET = new Set<string>(PRICE_BASES);
 
 /** A finite number, or null. Guards against a stored NaN reaching the wire. */
 function num(v: unknown): number | null {
@@ -128,6 +149,14 @@ function num(v: unknown): number | null {
 /** Map one stored row onto the public shape. */
 export function storeRowToApi(d: StoreRow): StablecoinRow {
 	const basis = d.basis && BASES.has(d.basis) ? d.basis : null;
+	const price = num(d.priceUSD);
+	// priceBasis names how priceUSD was obtained, so it is null exactly when
+	// there is no price to describe — a stored basis on a null price would
+	// claim a measurement that never happened.
+	const priceBasis =
+		price != null && d.priceBasis && PRICE_BASIS_SET.has(d.priceBasis)
+			? (d.priceBasis as PriceBasis)
+			: null;
 	return {
 		assetId: d.assetId ?? null,
 		ticker: d.code ?? "",
@@ -141,7 +170,8 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		assetType: d.assetType ?? null,
 		supply: num(d.supply),
 		marketCapUSD: num(d.marketCapUSD),
-		priceUSD: num(d.priceUSD),
+		priceUSD: price,
+		priceBasis,
 		holders: num(d.holders),
 		volume24hUSD: num(d.volume24hUSD),
 		paymentsCount24h: num(d.paymentsCount24h),

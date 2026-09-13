@@ -432,3 +432,34 @@ describe("log-scale zero clamp — never silently coerced into an undefined log 
 		expect(calls).toEqual([500]);
 	});
 });
+
+describe("priceBasis (the USDY understatement, 2026-09-09)", () => {
+	it("carries a measured-market basis through to the wire", () => {
+		const r = storeRowToApi({
+			...USDY,
+			priceUSD: 1.14,
+			marketCapUSD: 467_502_181 * 1.14,
+			priceBasis: "measured-market",
+		});
+		expect(r.priceBasis).toBe("measured-market");
+		expect(r.marketCapUSD).toBeCloseTo(532_952_486, 0);
+	});
+
+	it("is null when there is no price to describe — a basis on a null price claims a measurement that never happened", () => {
+		const r = storeRowToApi({
+			...USDY,
+			priceUSD: null,
+			marketCapUSD: null,
+			priceBasis: "measured-market",
+		});
+		expect(r.priceUSD).toBeNull();
+		expect(r.priceBasis).toBeNull();
+	});
+
+	it("is null for a value outside the vocabulary, and for a pre-migration row that stored none", () => {
+		expect(
+			storeRowToApi({ ...USDC, priceBasis: "coingecko" }).priceBasis,
+		).toBeNull();
+		expect(storeRowToApi(USDC).priceBasis).toBeNull();
+	});
+});

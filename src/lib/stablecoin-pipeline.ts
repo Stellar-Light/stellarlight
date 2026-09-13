@@ -52,6 +52,7 @@ import {
 	type StablecoinAsset,
 	stablecoinId,
 } from "@/data/stablecoin-registry";
+import type { PriceBasis } from "./stablecoins";
 
 const HORIZON = "https://horizon.stellar.org";
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -76,6 +77,9 @@ export interface MeasuredStablecoin {
 	/** supply × priceUSD. The only cross-asset comparable size metric. */
 	marketCapUSD: number | null;
 	priceUSD: number | null;
+	/** How priceUSD was obtained. Null exactly when priceUSD is null — a basis
+	 *  on an absent price would name a measurement that never happened. */
+	priceBasis: PriceBasis | null;
 	holders: number | null;
 	volume24hUSD: number | null;
 	/** Lifetime count of payment operations Stellar Expert has indexed for
@@ -299,6 +303,58 @@ async function priceUSD(peg: string): Promise<number | null> {
 	return rates[peg] ?? null;
 }
 
+/** Last good market read per CoinGecko id, for one measurement cycle. Only
+ *  successes are cached: a failure must not pin a null for 10 minutes. */
+const marketCache = new Map<string, { price: number; at: number }>();
+
+async function marketPriceUSD(id: string): Promise<number | null> {
+	const hit = marketCache.get(id);
+	if (hit && Date.now() - hit.at < 10 * 60_000) return hit.price;
+	try {
+		const d = await fetchJson(
+			`${COINGECKO}/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd`,
+			{ retries: 2, timeoutMs: 8000 },
+		);
+		const v = Number(d?.[id]?.usd);
+		if (!Number.isFinite(v) || v <= 0) return null;
+		marketCache.set(id, { price: v, at: Date.now() });
+		return v;
+	} catch {
+		// A 429 or timeout is a could-not-check, never a $0 asset. Swallowed
+		// here on purpose: the caller falls back to the peg and SAYS SO, and
+		// letting a RateLimitedError escape would blank the whole row (supply
+		// included) through measureStablecoin's outer catch.
+		return null;
+	}
+}
+
+/**
+ * USD price of one unit, and the basis that produced it.
+ *
+ * The peg is the default and is right for a par-redeemable stablecoin. A row
+ * that declares `marketPrice` is one whose unit is NOT 1:1 with its peg, and
+ * those are priced from the market: USDY accrues (it was $1.14 on 2026-09-09
+ * against a $1.00 peg — a 14% / ~$65M understatement of the largest asset on
+ * the board), USDM1 is a bond trading above par. When that read fails we fall
+ * back to the peg and mark the row `assumed-peg` with a note, so an
+ * understated cap is never served as if it were the market's number.
+ */
+async function unitPriceUSD(asset: StablecoinAsset): Promise<{
+	price: number | null;
+	basis: PriceBasis;
+	note?: string;
+}> {
+	if (!asset.marketPrice)
+		return { price: await priceUSD(asset.peg), basis: "assumed-peg" };
+	const market = await marketPriceUSD(asset.marketPrice.id);
+	if (market != null) return { price: market, basis: "measured-market" };
+	return {
+		price: await priceUSD(asset.peg),
+		basis: "assumed-peg",
+		note: `Market price unavailable from ${asset.marketPrice.source} at measurement time, so this unit is priced at its peg. ${asset.code} is not a par-redeemable claim, so the cap is UNDERSTATED while this holds.`,
+	};
+}
+
 const tomlCache = new Map<string, { text: string | null; at: number }>();
 
 async function issuerToml(domain: string): Promise<string | null> {
@@ -454,11 +510,12 @@ export async function measureStablecoin(
 	// An asset carrying human-checked static figures reports them as such —
 	// never dressed up as a live measurement.
 	if (asset.hardcodedData) {
-		const price = await priceUSD(asset.peg);
+		const { price, basis: priceBasis } = await unitPriceUSD(asset);
 		return {
 			...base,
 			supply: asset.hardcodedData.supply,
 			priceUSD: price,
+			priceBasis: price == null ? null : priceBasis,
 			marketCapUSD: price == null ? null : asset.hardcodedData.supply * price,
 			holders: asset.hardcodedData.holders,
 			volume24hUSD: null,
@@ -479,6 +536,7 @@ export async function measureStablecoin(
 					supply: null,
 					marketCapUSD: null,
 					priceUSD: null,
+					priceBasis: null,
 					holders: null,
 					volume24hUSD: null,
 					paymentsCountLifetime: null,
@@ -495,7 +553,11 @@ export async function measureStablecoin(
 			asset.issuer,
 			asset.stellarExpertSuffix ?? "",
 		);
-		const price = await priceUSD(asset.peg);
+		const {
+			price,
+			basis: priceBasis,
+			note: priceNote,
+		} = await unitPriceUSD(asset);
 		const vol = await volume24hUSD(
 			asset.code,
 			asset.issuer,
@@ -507,6 +569,7 @@ export async function measureStablecoin(
 			...base,
 			supply,
 			priceUSD: price,
+			priceBasis: price == null ? null : priceBasis,
 			marketCapUSD: supply != null && price != null ? supply * price : null,
 			holders,
 			volume24hUSD: vol,
@@ -514,11 +577,15 @@ export async function measureStablecoin(
 			logoUrl,
 			logoSource,
 			basis: supply == null ? "unmeasured" : "live",
+			// Urgent first: a missing supply outranks a fallen-back price, and
+			// either outranks the curated caveat already on `base`.
 			...(supply == null
 				? {
 						note: "Supply unavailable from Stellar Expert at measurement time.",
 					}
-				: {}),
+				: priceNote
+					? { note: priceNote }
+					: {}),
 		};
 	} catch (err) {
 		return {
@@ -526,6 +593,7 @@ export async function measureStablecoin(
 			supply: null,
 			marketCapUSD: null,
 			priceUSD: null,
+			priceBasis: null,
 			holders: null,
 			volume24hUSD: null,
 			paymentsCountLifetime: null,

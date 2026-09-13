@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-09-09",
 		surfaces: ["api", "api-client"],
+		version: "spec@1.9.50",
+		type: "fixed",
+		summary:
+			"getStablecoins prices a unit that is not 1:1 with its peg from the market instead of at par — USDY's market cap was understated by ~$65M (14%) — and every row now carries priceBasis.",
+		detail:
+			"priceUSD was the peg's live FX rate for every row. That is right for a par-redeemable stablecoin and wrong for a unit whose value is not 1 peg unit: Ondo's USDY is a claim on a Treasury portfolio whose NAV accrues, and it traded at $1.14 while we valued its 467.5M supply at $1.00 — $467.5M served for a ~$533M asset, on the row that ranks first by market cap. The Republic of the Marshall Islands' USDM1 has the same shape (a bond issued at par, $1.016). Rows whose unit is not a plain peg now declare a market price source in the registry and are priced from it, marked priceBasis=measured-market; every other row keeps the peg and is marked assumed-peg, which still means peg deviation is NOT measured. priceBasis is null exactly when priceUSD is null, so a basis never describes a price that was not obtained; when the market read fails the row falls back to the peg, says so in its note, and is not presented as a market valuation. A unit test requires every registry row carrying an assetType (the qualifier that says 'not a plain peg') to declare a market price source, so the next USDY cannot be added at par by omission.",
+	},
+	{
+		date: "2026-09-09",
+		surfaces: ["api", "api-client"],
 		version: "spec@1.9.49",
 		type: "fixed",
 		summary:
