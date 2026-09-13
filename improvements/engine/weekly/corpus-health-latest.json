@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 10479,
-    "docs": 2151
+    "chunks": 10550,
+    "docs": 2166
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,8 +13,22 @@
     "sample": []
   },
   "s7_coverage": {
+    "dev-docs": {
+      "chunks": 4041,
+      "datedPct": 75,
+      "newestAgeDays": 3,
+      "undated": false,
+      "stalled": false
+    },
+    "lumenloop-research": {
+      "chunks": 498,
+      "datedPct": 100,
+      "newestAgeDays": 2,
+      "undated": false,
+      "stalled": false
+    },
     "repo-docs": {
-      "chunks": 327,
+      "chunks": 344,
       "datedPct": 0,
       "newestAgeDays": null,
       "undated": false,
@@ -22,50 +36,15 @@
       "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
-    "lumenloop-research": {
-      "chunks": 485,
-      "datedPct": 100,
-      "newestAgeDays": 2,
-      "undated": false,
-      "stalled": false
-    },
-    "dev-docs": {
-      "chunks": 4006,
-      "datedPct": 74,
-      "newestAgeDays": 6,
-      "undated": false,
-      "stalled": false
-    },
     "sdf-blog": {
-      "chunks": 2428,
+      "chunks": 2432,
       "datedPct": 100,
       "newestAgeDays": 5,
-      "undated": false,
-      "stalled": false
-    },
-    "release": {
-      "chunks": 197,
-      "datedPct": 100,
-      "newestAgeDays": 5,
-      "undated": false,
-      "stalled": false
-    },
-    "cap": {
-      "chunks": 936,
-      "datedPct": 98,
-      "newestAgeDays": 17,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-org": {
-      "chunks": 80,
-      "datedPct": 29,
-      "newestAgeDays": 168,
       "undated": false,
       "stalled": false
     },
     "scf-handbook": {
-      "chunks": 120,
+      "chunks": 122,
       "datedPct": 0,
       "newestAgeDays": null,
       "undated": false,
@@ -73,52 +52,73 @@
       "reason": "handbook site pages state no publication date",
       "stalled": false
     },
+    "release": {
+      "chunks": 197,
+      "datedPct": 100,
+      "newestAgeDays": 12,
+      "undated": false,
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 936,
+      "datedPct": 98,
+      "newestAgeDays": 24,
+      "undated": false,
+      "stalled": false
+    },
+    "sdf-org": {
+      "chunks": 80,
+      "datedPct": 29,
+      "newestAgeDays": 175,
+      "undated": false,
+      "stalled": false
+    },
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 35,
+      "newestAgeDays": 6,
       "undated": false,
       "stalled": false
     },
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 128,
+      "newestAgeDays": 135,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 123,
+      "newestAgeDays": 130,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 110,
+      "newestAgeDays": 117,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 85,
+      "newestAgeDays": 92,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 37,
       "datedPct": 100,
-      "newestAgeDays": 1345,
+      "newestAgeDays": 1352,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3847,
+      "newestAgeDays": 3854,
       "undated": false,
       "stalled": false
     }
@@ -130,9 +130,9 @@
     "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
     "informational": {
       "templateSiblings": 8,
-      "boilerplateOverlap": 33
+      "boilerplateOverlap": 32
     }
   },
-  "generatedAt": "2026-09-06T12:49:44Z",
+  "generatedAt": "2026-09-13T13:51:22Z",
   "evalKey": "corpus-health"
 }

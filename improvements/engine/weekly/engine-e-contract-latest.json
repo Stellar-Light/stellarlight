@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-09-06T12:49:44Z",
-  "specVersion": "1.9.47",
+  "generatedAt": "2026-09-13T13:51:22Z",
+  "specVersion": "1.9.49",
   "frame": {
     "ops": 38,
     "paramsProbed": 28,
-    "fieldsChecked": 886,
+    "fieldsChecked": 891,
     "postChecked": 5,
     "skipped": [
       "GET /api/verify ?type (baseline 400)",

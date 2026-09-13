@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 95585,
-    "realHits": 13238,
-    "distinctQueries": 4556,
+    "loggedHits": 70952,
+    "realHits": 9825,
+    "distinctQueries": 3583,
     "replayed": 250
   },
   "okRate": 99,
@@ -11,8 +11,8 @@
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 125,
-      "lastSeen": "2026-09-06T09:42:51.674Z",
+      "hits": 97,
+      "lastSeen": "2026-09-13T10:39:23.533Z",
       "days": 14,
       "buckets": [
         "other"
@@ -23,9 +23,21 @@
     {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 54,
-      "lastSeen": "2026-09-06T11:44:17.055Z",
-      "days": 13,
+      "hits": 38,
+      "lastSeen": "2026-09-13T12:49:40.807Z",
+      "days": 14,
+      "buckets": [
+        "other"
+      ],
+      "class": "EMPTY",
+      "evidence": "0 results"
+    },
+    {
+      "endpoint": "/api/repos/search",
+      "query": "planbok",
+      "hits": 5,
+      "lastSeen": "2026-09-01T14:51:31.843Z",
+      "days": 1,
       "buckets": [
         "other"
       ],
@@ -33,6 +45,6 @@
       "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-09-06T12:49:44Z",
+  "generatedAt": "2026-09-13T13:51:22Z",
   "evalKey": "engine-d-demand"
 }

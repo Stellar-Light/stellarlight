@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-06T12:49:44Z",
+  "generatedAt": "2026-09-13T13:51:22Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 984,
-      "total": 984,
+      "ok": 981,
+      "total": 981,
       "rate": 100,
       "floor": 90,
       "status": "OK "
@@ -28,9 +28,9 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 984,
-      "total": 984,
-      "rate": 100,
+      "ok": 980,
+      "total": 981,
+      "rate": 99.9,
       "floor": 60,
       "status": "OK "
     },
@@ -74,6 +74,13 @@
       "probe": "https://stellarlight.xyz/api/projects/search?q=education&limit=10",
       "expected": "#1 result carries types=Education",
       "observed": "#1 = stellar-passport [Security,Wallet]"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%200xAuth&limit=3",
+      "expected": "0xauth in top-3 for 'what is 0xAuth'",
+      "observed": "authline, reapp, stellarguard"
     }
   ],
   "evalKey": "engine-a-recall"
