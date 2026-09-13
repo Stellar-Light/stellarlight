@@ -1,6 +1,13 @@
 {
- "generatedAt": "2026-09-13T12:50:33.140Z",
+ "generatedAt": "2026-09-13T17:44:50.091Z",
  "surfaces": [
+  {
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 3,
+   "clearedFindings": 334,
+   "verifiedFindings": 0
+  },
   {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
@@ -9,11 +16,11 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
+   "surface": "contract",
+   "means": "the OpenAPI contract and its generated artifacts",
    "openFindings": 1,
-   "clearedFindings": 335,
-   "verifiedFindings": 0
+   "clearedFindings": 29,
+   "verifiedFindings": 7
   },
   {
    "surface": "consumer",
@@ -37,13 +44,6 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "contract",
-   "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 0,
-   "clearedFindings": 29,
-   "verifiedFindings": 7
-  },
-  {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
    "openFindings": 0,
@@ -53,20 +53,20 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 659,
-  "open": 5,
+  "total": 661,
+  "open": 8,
   "refreshQueue": 23,
   "blockedUpstream": 16,
   "blockedBy": {
    "raven-catalog-lag": 9,
    "raven-scorer": 7
   },
-  "cleared": 608,
+  "cleared": 607,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 1,
+    "open": 2,
     "refresh": 0,
     "blocked": 0,
     "cleared": 284,
@@ -93,10 +93,10 @@
    },
    {
     "mode": "demand-miss",
-    "open": 0,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 47,
+    "cleared": 46,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -192,7 +192,7 @@
    },
    {
     "mode": "claim-blocker",
-    "open": 0,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
     "cleared": 3,
@@ -221,11 +221,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 2
+    "count": 3
    },
    {
     "bucket": "8–30d",
-    "count": 2
+    "count": 4
    },
    {
     "bucket": "31–60d",
@@ -290,39 +290,39 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 292,
-     "recurred": 138,
-     "ratePct": 47.3
+     "newFindings": 294,
+     "recurred": 140,
+     "ratePct": 47.6
     },
     "lifetime": {
-     "newFindings": 659,
-     "recurred": 150,
-     "ratePct": 22.8
+     "newFindings": 661,
+     "recurred": 152,
+     "ratePct": 23
     }
    },
    "reopened": {
-    "count": 9,
-    "shareOfClosures": 0.01,
+    "count": 10,
+    "shareOfClosures": 0.02,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
    },
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 292,
-     "repeats": 292,
+     "newFindings": 294,
+     "repeats": 294,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 659,
-     "repeats": 653,
+     "newFindings": 661,
+     "repeats": 655,
      "ratePct": 99.1
     },
     "byClass": [
      {
       "class": "identity",
-      "total": 325,
-      "open": 18,
+      "total": 326,
+      "open": 19,
       "firstSeen": "2026-07-22"
      },
      {
@@ -334,7 +334,7 @@
      {
       "class": "taxonomy-coverage",
       "total": 108,
-      "open": 0,
+      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
@@ -345,8 +345,8 @@
      },
      {
       "class": "contract-completeness",
-      "total": 29,
-      "open": 0,
+      "total": 30,
+      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9335,11 +9335,11 @@
     },
     {
      "label": "slowing",
-     "count": 955
+     "count": 956
     },
     {
      "label": "active",
-     "count": 831
+     "count": 830
     },
     {
      "label": "unknown",
@@ -10458,7 +10458,7 @@
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "1 open recall-miss findings",
+   "measurement": "2 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
@@ -10469,7 +10469,7 @@
     "id": "s:engine-a-recall",
     "label": "engine-a-recall",
     "column": 0,
-    "value": 285
+    "value": 286
    },
    {
     "id": "s:engine-d-demand",
@@ -10541,7 +10541,7 @@
     "id": "s:nightly-claims",
     "label": "nightly-claims",
     "column": 0,
-    "value": 3
+    "value": 4
    },
    {
     "id": "s:raven-loop",
@@ -10553,7 +10553,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 336
+    "value": 337
    },
    {
     "id": "f:directory",
@@ -10565,7 +10565,7 @@
     "id": "f:contract",
     "label": "contract",
     "column": 1,
-    "value": 36
+    "value": 37
    },
    {
     "id": "f:consumer",
@@ -10595,13 +10595,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 608
+    "value": 607
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 44
+    "value": 47
    },
    {
     "id": "o:verified",
@@ -10623,7 +10623,7 @@
     "target": 21,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 335
+    "value": 334
    },
    {
     "source": 1,
@@ -10637,7 +10637,7 @@
     "target": 14,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
-    "value": 285
+    "value": 286
    },
    {
     "source": 7,
@@ -10759,6 +10759,13 @@
     "value": 4
    },
    {
+    "source": 14,
+    "target": 22,
+    "sourceId": "f:retrieval",
+    "targetId": "o:open",
+    "value": 3
+   },
+   {
     "source": 4,
     "target": 15,
     "sourceId": "s:nightly-completeness",
@@ -10770,7 +10777,7 @@
     "target": 16,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
-    "value": 3
+    "value": 4
    },
    {
     "source": 8,
@@ -10801,9 +10808,9 @@
     "value": 16
    },
    {
-    "source": 14,
+    "source": 16,
     "target": 22,
-    "sourceId": "f:retrieval",
+    "sourceId": "f:contract",
     "targetId": "o:open",
     "value": 1
    }

@@ -1,8 +1,8 @@
 {
- "generatedAt": "2026-09-13T12:50:25.203Z",
+ "generatedAt": "2026-09-13T17:44:44.406Z",
  "population": {
-  "openRecallMisses": 1,
-  "replayableOpenRecallMisses": 0,
+  "openRecallMisses": 2,
+  "replayableOpenRecallMisses": 1,
   "unclassified": 1,
   "unclassifiedExamples": [
    {
@@ -10,8 +10,8 @@
     "probe": "#1 result carries types=Education"
    }
   ],
-  "coveragePct": 0,
-  "sampled": 0,
+  "coveragePct": 50,
+  "sampled": 1,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."
  },
  "stages": [
@@ -29,9 +29,11 @@
    "label": "returned, but below top-3",
    "owner": "ranking",
    "note": "The row IS retrieved for the query and simply ranks too low. The cheapest class to fix, and the one scoring changes actually move.",
-   "count": 0,
-   "share": 0,
-   "examples": []
+   "count": 1,
+   "share": 100,
+   "examples": [
+    "0xauth"
+   ]
   },
   {
    "stage": "admission",
