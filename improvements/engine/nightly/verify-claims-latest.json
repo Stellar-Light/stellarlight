@@ -1,5 +1,10 @@
 {
-	"generatedAt": "2026-09-13T10:39:25.808Z",
+	"generatedAt": "2026-09-13T17:04:38.878Z",
 	"detector": "verify-claims",
-	"failures": []
+	"failures": [
+		{
+			"probe": "https://docs.mercurydata.app/",
+			"note": "HTTP network-error [curated:mercury-indexer]"
+		}
+	]
 }
