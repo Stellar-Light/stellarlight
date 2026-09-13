@@ -1130,3 +1130,28 @@ export function nameMatchScore(
 	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
 }
+
+/**
+ * Query mode keeps a lineage shadow (canonicalSlug set) as a NAME proxy only:
+ * the old name must still resolve to the canonical (statusAdmissionWhere), so
+ * a shadow lends the canonical its rank when the query matched its name /
+ * slug / aliases — never when it matched stale types or prose the canonical
+ * may not carry. q=education served stellar-passport #1 above 32 typed rows
+ * (2026-09-13): its Draft shadow `passport` still said types [Wallet,
+ * Education] plus the SDF/SCF boosts, ranked first, and the fold swapped in a
+ * canonical that is neither. Non-shadows always keep their rank.
+ */
+export function shadowEarnedRank(
+	p: MatchableProject & {
+		canonicalSlug?: string | null;
+		identity?: { aliases?: string[] | null } | null;
+	},
+	q: string,
+	tokens: string[],
+): boolean {
+	if (!p.canonicalSlug || p.canonicalSlug === p.slug) return true;
+	return (
+		nameMatchScore(p.name ?? "", p.slug ?? "", q, p.identity?.aliases, tokens) >
+		0
+	);
+}
