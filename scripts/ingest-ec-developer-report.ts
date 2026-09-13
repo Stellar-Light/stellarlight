@@ -89,6 +89,7 @@ function parseMeta(name: string): {
 	year: number;
 	reportType: string;
 	title: string;
+	revision: string | null;
 } {
 	const lower = name.toLowerCase();
 	const yearMatch = lower.match(/(20\d{2})/g);
@@ -97,12 +98,19 @@ function parseMeta(name: string): {
 	// 2020 report as 2021.
 	const year = yearMatch ? Number(yearMatch[0]) : 0;
 	const reportType = lower.includes("geography") ? "geography" : "annual";
+	// Two files, one row — the Idempotence re-plan's first catch (2026-09-13):
+	// dev_report_2020.pdf and dev_report_2020_updated_april_2021.pdf both
+	// mapped to ec-2020-annual, so every daily run rewrote the other file's
+	// chunks (6 "updated" on execute, 6 again on re-plan, forever). A revision
+	// keeps its own document id.
+	const revision =
+		lower.match(/updated[_-]?([a-z0-9_]+)/)?.[1]?.replace(/_/g, "-") ?? null;
 	const title = name
 		.replace(/\.pdf$/i, "")
 		.replace(/_/g, " ")
 		.replace(/\s+/g, " ")
 		.trim();
-	return { year, reportType, title };
+	return { year, reportType, title, revision };
 }
 
 async function run() {
@@ -147,7 +155,7 @@ async function run() {
 				tooShort += 1;
 				continue;
 			}
-			const parentDocId = `ec-${meta.year}-${meta.reportType}`;
+			const parentDocId = `ec-${meta.year}-${meta.reportType}${meta.revision ? `-${meta.revision}` : ""}`;
 			const tags = [
 				"electric-capital",
 				"developer-report",
@@ -206,6 +214,32 @@ async function run() {
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,
 	);
+}
+
+// `--test`: the filename → document-id map, no API, no DB. Every file EC has
+// published so far must get a distinct id.
+if (args.includes("--test")) {
+	const names = [
+		"dev_report_H1_2019.pdf",
+		"dev_report_2020.pdf",
+		"dev_report_2020_updated_april_2021.pdf",
+		"dev_report_2021.pdf",
+		"dev_report_2021_updated_012622.pdf",
+		"dev_report_2022.pdf",
+		"Blockchain Developer Geography Analysis 2023.pdf",
+	];
+	const ids = names.map((n) => {
+		const m = parseMeta(n);
+		const id = `ec-${m.year}-${m.reportType}${m.revision ? `-${m.revision}` : ""}`;
+		console.log(`  ${n} → ${id}`);
+		return id;
+	});
+	if (new Set(ids).size !== ids.length) {
+		console.error("✗ two files share a document id");
+		process.exit(1);
+	}
+	console.log(`✓ ${ids.length} distinct document ids`);
+	process.exit(0);
 }
 
 run()
