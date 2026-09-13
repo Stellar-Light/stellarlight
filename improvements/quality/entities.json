@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-13T17:44:50.091Z",
+ "generatedAt": "2026-09-13T21:33:37.581Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -23,13 +23,6 @@
    "verifiedFindings": 7
   },
   {
-   "surface": "consumer",
-   "means": "questions real consumers asked that we answered weakly",
-   "openFindings": 1,
-   "clearedFindings": 19,
-   "verifiedFindings": 0
-  },
-  {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 1,
@@ -44,6 +37,13 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "consumer",
+   "means": "questions real consumers asked that we answered weakly",
+   "openFindings": 0,
+   "clearedFindings": 19,
+   "verifiedFindings": 0
+  },
+  {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
    "openFindings": 0,
@@ -54,12 +54,12 @@
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
   "total": 661,
-  "open": 8,
+  "open": 7,
   "refreshQueue": 23,
-  "blockedUpstream": 16,
+  "blockedUpstream": 17,
   "blockedBy": {
-   "raven-catalog-lag": 9,
-   "raven-scorer": 7
+   "raven-catalog-lag": 11,
+   "raven-scorer": 6
   },
   "cleared": 607,
   "verified": 7,
@@ -155,15 +155,6 @@
     "surface": "contract"
    },
    {
-    "mode": "routing-miss",
-    "open": 1,
-    "refresh": 0,
-    "blocked": 16,
-    "cleared": 6,
-    "verified": 0,
-    "surface": "consumer"
-   },
-   {
     "mode": "note-stale",
     "open": 0,
     "refresh": 8,
@@ -171,6 +162,15 @@
     "cleared": 7,
     "verified": 0,
     "surface": "code"
+   },
+   {
+    "mode": "routing-miss",
+    "open": 0,
+    "refresh": 0,
+    "blocked": 17,
+    "cleared": 6,
+    "verified": 0,
+    "surface": "consumer"
    },
    {
     "mode": "golden-fail",
@@ -225,7 +225,7 @@
    },
    {
     "bucket": "8–30d",
-    "count": 4
+    "count": 3
    },
    {
     "bucket": "31–60d",
@@ -9210,19 +9210,19 @@
   ]
  },
  "repos": {
-  "read": 13219,
-  "population": 13219,
+  "read": 13259,
+  "population": 13259,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13219,
+  "sampled": 13259,
   "coverage": {
    "curatedIndex": {
-    "repos": 3201,
+    "repos": 3241,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
     "withCodeDepth": 2998,
-    "depthPct": 94
+    "depthPct": 93
    },
    "tail": {
     "repos": 10018,
@@ -9230,14 +9230,15 @@
     "withCodeDepth": 7936
    },
    "knowledgeNotes": {
-    "pool": 247,
+    "pool": 249,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 179,
+    "withNotes": 175,
     "triaged": 28,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
      "Creit-Tech/Stellar-Router-SDK",
      "Creit-Tech/sorobandomains-sdk-js",
+     "DcentWallet/dcent-web-connector",
      "Fundable-Protocol/fundable-sdk",
      "Gabrielpatrola/agent-pay-stellar",
      "Gabrielpatrola/stellar-x402-middleware",
@@ -9252,15 +9253,20 @@
      "TrustLine-id/stellar-validation-engine",
      "aguilar1x/stellar-confidential-token-sdk",
      "axis-markets/js-client",
+     "daccred/attestprotocol",
      "duraznito16/stellar-memory",
      "fxjrin/stellar-contracts-kit",
+     "hyperledger-solang/solang",
      "jadonamite/Chessify",
      "karagozemin/QuietBook",
      "lightsail-network/crossmesh-ingress-contracts",
+     "payrouteshq/stellartools",
      "runtimeverification/komet",
      "salazarsebas/stellar-agentgate",
+     "stellar-experimental/stellar-raven",
      "stellar/dashboard",
      "stellar/freighter-backend-v2",
+     "stellar/freighter-developer-docs",
      "stellar/freighter-protocol-icons",
      "stellar/friendbot",
      "stellar/helm-charts",
@@ -9285,27 +9291,27 @@
    }
   },
   "curatedShape": {
-   "repos": 3201,
+   "repos": 3241,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 616
+     "count": 619
     },
     {
      "bucket": "10–19",
-     "count": 823
+     "count": 837
     },
     {
      "bucket": "20–29",
-     "count": 702
+     "count": 706
     },
     {
      "bucket": "30–39",
-     "count": 558
+     "count": 567
     },
     {
      "bucket": "40–49",
-     "count": 255
+     "count": 263
     },
     {
      "bucket": "50–59",
@@ -9313,7 +9319,7 @@
     },
     {
      "bucket": "60–69",
-     "count": 50
+     "count": 52
     },
     {
      "bucket": "70–79",
@@ -9321,25 +9327,25 @@
     },
     {
      "bucket": "80–89",
-     "count": 20
+     "count": 19
     },
     {
      "bucket": "90–99",
-     "count": 11
+     "count": 12
     }
    ],
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1280
+     "count": 1291
     },
     {
      "label": "slowing",
-     "count": 956
+     "count": 961
     },
     {
      "label": "active",
-     "count": 830
+     "count": 854
     },
     {
      "label": "unknown",
@@ -9353,49 +9359,49 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1130
+     "count": 1139
     },
     {
      "label": "Rust",
-     "count": 474
+     "count": 476
     },
     {
      "label": "unknown",
-     "count": 462
+     "count": 472
     },
     {
      "label": "JavaScript",
-     "count": 362
+     "count": 369
     },
     {
      "label": "Go",
-     "count": 110
+     "count": 113
     },
     {
      "label": "Python",
-     "count": 109
+     "count": 111
     },
     {
      "label": "Solidity",
-     "count": 101
+     "count": 103
     },
     {
      "label": "HTML",
-     "count": 87
+     "count": 89
     },
     {
      "label": "Shell",
-     "count": 41
+     "count": 40
     },
     {
-     "label": "PHP",
+     "label": "CSS",
      "count": 24
     }
    ],
    "languageOther": 50
   },
   "withCodeDepth": 10934,
-  "withNotes": 587,
+  "withNotes": 583,
   "withMainnet": 111,
   "top": [
    {
@@ -9490,19 +9496,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "stellar/stellar-galexie",
-    "repoScore": 92,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "Go",
-    "projectSlug": "stellar-development-foundation",
-    "notes": 1,
-    "codeDepth": 24,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "stellar/stellar-horizon",
     "repoScore": 92,
     "tier": "quality",
@@ -9529,6 +9522,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar/stellar-galexie",
+    "repoScore": 91,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Go",
+    "projectSlug": "stellar-development-foundation",
+    "notes": 1,
+    "codeDepth": 24,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "stellar/stellar-protocol",
     "repoScore": 91,
     "tier": "quality",
@@ -9542,6 +9548,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar/stellar-ledger-data-indexer",
+    "repoScore": 90,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Go",
+    "projectSlug": "stellar-development-foundation",
+    "notes": 1,
+    "codeDepth": 24,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "hyperledger-solang/solang",
     "repoScore": 89,
     "tier": "community",
@@ -9549,7 +9568,7 @@
     "activity": "active",
     "language": "Rust",
     "projectSlug": "solang",
-    "notes": 4,
+    "notes": 0,
     "codeDepth": 57,
     "deployable": true,
     "mainnetJoined": false
@@ -9564,19 +9583,6 @@
     "projectSlug": "stellar-development-foundation",
     "notes": 2,
     "codeDepth": 92,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/stellar-ledger-data-indexer",
-    "repoScore": 89,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "Go",
-    "projectSlug": "stellar-development-foundation",
-    "notes": 1,
-    "codeDepth": 24,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -9776,19 +9782,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "blend-capital/blend-contracts-v2",
-    "repoScore": 81,
-    "tier": "quality",
-    "source": "project-link",
-    "activity": "dormant",
-    "language": "Rust",
-    "projectSlug": "blend",
-    "notes": 3,
-    "codeDepth": 72,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "stellar/laboratory",
     "repoScore": 81,
     "tier": "community",
@@ -9799,6 +9792,19 @@
     "notes": 1,
     "codeDepth": 91,
     "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "blend-capital/blend-contracts-v2",
+    "repoScore": 80,
+    "tier": "quality",
+    "source": "project-link",
+    "activity": "dormant",
+    "language": "Rust",
+    "projectSlug": "blend",
+    "notes": 3,
+    "codeDepth": 72,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -9828,8 +9834,21 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "devasignhq/bounty-escrow",
+    "repoScore": 78,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Rust",
+    "projectSlug": "devasign",
+    "notes": 1,
+    "codeDepth": 59,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "Creit-Tech/xBull-Wallet",
-    "repoScore": 79,
+    "repoScore": 78,
     "tier": "quality",
     "source": "project-link",
     "activity": "dormant",
@@ -9841,16 +9860,16 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "devasignhq/bounty-escrow",
+    "fullName": "allbridge-io/allbridge-core-js-sdk",
     "repoScore": 78,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "active",
-    "language": "Rust",
-    "projectSlug": "devasign",
-    "notes": 1,
-    "codeDepth": 59,
-    "deployable": true,
+    "language": "TypeScript",
+    "projectSlug": "estrela",
+    "notes": 2,
+    "codeDepth": 61,
+    "deployable": false,
     "mainnetJoined": false
    },
    {
@@ -9904,22 +9923,22 @@
     "codeDepth": 75,
     "deployable": true,
     "mainnetJoined": false
-   },
-   {
-    "fullName": "blend-capital/blend-sdk-js",
-    "repoScore": 77,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "blend",
-    "notes": 2,
-    "codeDepth": 30,
-    "deployable": false,
-    "mainnetJoined": false
    }
   ],
   "thinnest": [
+   {
+    "fullName": "Bitwage/update-postman-schema-action",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "dormant",
+    "language": "TypeScript",
+    "projectSlug": "bitwage",
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
    {
     "fullName": "luong0928472-maker/soroban-reputation-badge",
     "repoScore": 0,
@@ -10350,19 +10369,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "lightsail-network/sac-resolver",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 49,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "wmendes/stellar-watch",
     "repoScore": 0,
     "tier": "community",
@@ -10452,7 +10458,7 @@
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "179 of 247 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "175 of 249 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   },
   {
@@ -10571,7 +10577,7 @@
     "id": "f:consumer",
     "label": "consumer",
     "column": 1,
-    "value": 20
+    "value": 19
    },
    {
     "id": "f:corpus",
@@ -10822,13 +10828,13 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 334,
-    "of": 347,
+    "missing": 338,
+    "of": 351,
     "share": 96.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5345 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5341 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 334,
+    "examplePoolSize": 338,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -10849,28 +10855,28 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12632,
-    "of": 13219,
+    "missing": 12676,
+    "of": 13259,
     "share": 95.6,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 28,
+    "examplePoolSize": 32,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
+     "hyperledger-solang/solang",
      "theahaco/contract-explorer",
      "duraznito16/stellar-memory",
      "Stellar-Light/stellar-pay",
      "SoroWill/sorowill-sdk",
+     "daccred/attestprotocol",
+     "payrouteshq/stellartools",
      "Certora/CertoraProver",
      "Vellar-Wallet/vellar-sdk",
      "ravendevteam/alternet",
      "hyperledger-cacti/cacti",
-     "fxjrin/stellar-contracts-kit",
-     "AbdulmalikAlayande/sorokeep",
-     "SimplyTokenized/soroban-smart-contracts",
-     "stellar/stellar-dbt-public"
+     "fxjrin/stellar-contracts-kit"
     ]
    },
    {
@@ -10913,28 +10919,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2285,
-    "of": 13219,
-    "share": 17.3,
+    "missing": 2325,
+    "of": 13259,
+    "share": 17.5,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2285,
+    "examplePoolSize": 2325,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "Dione-b/stellarsight",
-     "PatrickKish1/safetrust-ZK",
-     "Galmanus/notewatch",
-     "kingfavourjudah/FundBlock",
-     "leocagli/pontepay",
-     "leocagli/tralalero-contracts",
-     "KingFRANKHOOD/soroban-sql-sync",
-     "KB2410/ai-wallet-manager",
-     "KaruG1999/ocean_request",
-     "karagozemin/frontend-app",
-     "kalepail/stellar-mpp-demo",
-     "kalepail/quarterly-ascension"
+     "stellar-experimental/zig-stellar-xdr",
+     "stellar-experimental/c-soroban-sdk",
+     "stellar-experimental/zig-soroban-sdk",
+     "stellar-experimental/ows-stellar",
+     "stellar-experimental/figma-code-connect",
+     "stellar-experimental/stellar-spec",
+     "stellar-experimental/contract-verifications",
+     "stellar-experimental/meridian-pay-sdp-backend",
+     "stellar-experimental/remote-core-poc",
+     "stellar-experimental/stellar-contract-verify-plugin",
+     "stellar-experimental/mcp-stellar-xdr",
+     "stellar-experimental/stellar-rpc-benchmarks"
     ]
    },
    {
