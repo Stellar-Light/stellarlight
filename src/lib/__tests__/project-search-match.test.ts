@@ -2,10 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-	HIDDEN_PROJECT_STATUSES,
-	RESOLVABLE_PROJECT_STATUSES,
-} from "../project-status";
-import {
 	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
@@ -17,6 +13,7 @@ import {
 	isRampIntent,
 	namedChains,
 	scoreTokens,
+	shadowEarnedRank,
 	statusAdmissionWhere,
 	structuredHit,
 	structuredSelectClauses,
@@ -24,6 +21,10 @@ import {
 	tokenize,
 	typeMatch,
 } from "../project-search-match";
+import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "../project-status";
 
 // Real record shapes (fields that drive retrieval), captured live 2026-07-08.
 const ETHERFUSE = {
@@ -158,15 +159,21 @@ describe("Beacon Q3 class — chain vocabulary + filler tokens", () => {
 
 describe("guard-D 2026-09-01 — auditor questions are Security-category questions", () => {
 	it("'audit firms' carries Security intent; passive audited-by rows are not the vertical", () => {
-		const intent = intentTypesFor(tokenize("smart contract audit firms for Soroban"));
+		const intent = intentTypesFor(
+			tokenize("smart contract audit firms for Soroban"),
+		);
 		expect(intent.has("Security")).toBe(true);
 		// The F2 stemmer folds "audited" → "audit" before intent runs, so even
 		// property-questions carry the category — additive recall only; the
 		// named subject's identity match still dominates its ranking.
-		expect(intentTypesFor(tokenize("is redstone finance audited")).has("Security")).toBe(true);
+		expect(
+			intentTypesFor(tokenize("is redstone finance audited")).has("Security"),
+		).toBe(true);
 	});
 	it("singular 'auditor' folds to the same category", () => {
-		expect(intentTypesFor(tokenize("soroban auditor")).has("Security")).toBe(true);
+		expect(intentTypesFor(tokenize("soroban auditor")).has("Security")).toBe(
+			true,
+		);
 	});
 });
 
@@ -648,6 +655,54 @@ describe("duplicate admission: a shadow is hidden, never dead", () => {
 	});
 });
 
+describe("a shadow lends its canonical a rank only through its NAME", () => {
+	// Live shape 2026-09-13: the Draft shadow of stellar-passport still carried
+	// the types of the record it was merged away from — and q=education served
+	// the canonical #1 above 32 typed-Education rows through it.
+	const shadow = {
+		name: "Stellar Passport",
+		slug: "passport",
+		canonicalSlug: "stellar-passport",
+		types: ["Wallet", "Education"],
+		shortDescription:
+			"Stellar Passport is a Web3 identity and participation layer",
+		identity: null,
+	};
+	const q = (s: string) => [s, tokenize(s)] as const;
+
+	it("a topic query that hit the shadow's stale types does not transfer", () => {
+		expect(shadowEarnedRank(shadow, ...q("education"))).toBe(false);
+	});
+
+	it("the old name still resolves — that is why shadows are indexed", () => {
+		expect(shadowEarnedRank(shadow, ...q("passport"))).toBe(true);
+		expect(shadowEarnedRank(shadow, ...q("stellar passport"))).toBe(true);
+	});
+
+	it("an alias on the shadow counts as its name", () => {
+		const renamed = {
+			...shadow,
+			name: "New Name",
+			slug: "new-name",
+			identity: { aliases: ["Passport"] },
+		};
+		expect(shadowEarnedRank(renamed, ...q("passport"))).toBe(true);
+		expect(shadowEarnedRank(renamed, ...q("education"))).toBe(false);
+	});
+
+	it("a non-shadow always keeps its rank", () => {
+		expect(
+			shadowEarnedRank({ ...shadow, canonicalSlug: null }, ...q("education")),
+		).toBe(true);
+		expect(
+			shadowEarnedRank(
+				{ ...shadow, canonicalSlug: "passport" },
+				...q("education"),
+			),
+		).toBe(true);
+	});
+});
+
 // The route itself needs a live Payload, so these two wiring facts — the only
 // places the admission above can be defeated — are asserted against its source.
 describe("/api/projects/search wires the admission + the Draft belt", () => {
@@ -671,5 +726,12 @@ describe("/api/projects/search wires the admission + the Draft belt", () => {
 		const belt = src.indexOf("HIDDEN_PROJECT_STATUSES as readonly string[]");
 		expect(fold).toBeGreaterThan(0);
 		expect(belt).toBeGreaterThan(fold); // after the fold, or it eats the candidates
+	});
+
+	it("filters non-name shadow hits over the FULL set, before the count", () => {
+		const filt = src.indexOf("shadowEarnedRank(p, nameQ, nameTokens)");
+		const total = src.indexOf("totalMatching = projects.length");
+		expect(filt).toBeGreaterThan(0);
+		expect(total).toBeGreaterThan(filt); // page slicing + total come after
 	});
 });

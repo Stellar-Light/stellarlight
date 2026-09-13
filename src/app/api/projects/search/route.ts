@@ -35,6 +35,7 @@ import {
 	isRampIntent,
 	nameMatchScore,
 	scoreTokens,
+	shadowEarnedRank,
 	splitIdentityGroups,
 	statusAdmissionWhere,
 	structuredHit,
@@ -1766,6 +1767,19 @@ export async function GET(req: NextRequest) {
 				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
 			}
 
+			// A lineage shadow lends the canonical its rank only when the query
+			// matched the shadow's NAME — the reason it is indexed at all
+			// (statusAdmissionWhere). Decided over the FULL ordered set, before
+			// counts and pages, so total and page size stay exact: q=education put
+			// stellar-passport #1 via its Draft shadow's stale types (2026-09-13,
+			// shadowEarnedRank).
+			if (q) {
+				const nameQ = didYouMean?.to ?? q;
+				const nameTokens = tokenize(nameQ);
+				projects = projects.filter((p) =>
+					shadowEarnedRank(p, nameQ, nameTokens),
+				);
+			}
 			totalMatching = projects.length;
 			// A count must not depend on how many rows you asked for. The
 			// shadow-fold below drops a lineage shadow whose canonical is ALSO in
