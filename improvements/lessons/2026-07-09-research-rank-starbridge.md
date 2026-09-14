@@ -1,5 +1,8 @@
 # 2026-07-09 — stale-but-close outranks current (Starbridge)
 
+Guard: src/lib/__tests__/research-rank.test.ts — best-chunk-per-doc collapse and confidence ordering pinned
+Guard: scripts/eval/golden-questions.json — bridge-evm-to-stellar carries forbiddenRegex starbridge; a stale protocol in the top hits turns the golden eval red
+
 **Class 19.** A consumer asked Raven "fastest/cheapest way to bring assets from EVM onto Stellar" and our `/api/research` served **Starbridge** — a 2022 SDF research protocol that was never productionized — twice in the top-5, plus one audit duplicated, while the current answers (CCTP live on Stellar, Allbridge) sat at pool ranks 11–20.
 
 ## Three compounding mechanisms

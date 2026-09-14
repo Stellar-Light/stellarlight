@@ -10,6 +10,11 @@ name: Contract gate
 #      /api/changelog).
 # The daily live checks (api-drift.yml field coverage) remain the backstop
 # for data/deploy drift PR-time can't see.
+#
+# The lessons step exits 1 BY DESIGN while any lesson still says `Guard: none`
+# — that red is the signal (a lesson that never became a check), not the lane
+# breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Every lesson names its guard$
 
 on:
   pull_request:
@@ -39,6 +44,15 @@ jobs:
 
       - name: Writer conformance (read-back, pipefail, exit-stomps, probe coverage)
         run: pnpm exec tsx scripts/check-writer-conformance.ts
+      # A lesson only counts when it became a check. Every improvements/lessons
+      # file names its guard (test / guard script / workflow) or says `none`.
+      # Reported, not blocking, while `none` lines remain — declared as a
+      # signal step in the header so the red reads as "unguarded lessons",
+      # never as a broken lane. Flip continue-on-error to false the day every
+      # lesson is guarded; from then on a new unguarded lesson fails the PR.
+      - name: Every lesson names its guard
+        continue-on-error: true
+        run: pnpm exec tsx scripts/check-lessons-guarded.ts
       - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
         run: pnpm exec tsx scripts/eval/routing-surface-check.ts
 

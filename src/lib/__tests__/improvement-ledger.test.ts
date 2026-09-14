@@ -1,11 +1,17 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	applyWaves,
+	countByKind,
+	DEFAULT_KIND,
 	EVIDENCE_GRACE_DAYS,
 	type Finding,
 	findingId,
 	hasFreshEvidence,
+	isKindMapped,
 	isSyntheticQuery,
+	kindOf,
 	rankFindings,
 	STALE_DAYS,
 	summarizeLedger,
@@ -649,5 +655,76 @@ describe("closure honesty — the metrics that can actually move", () => {
 		expect(s.clearedOnSilence).toBe(0);
 		expect(s.closingRate).toBe(0);
 		expect(s.recurrence.reopened).toBe(1);
+	});
+});
+
+describe("kindOf — a catch is not a breakage", () => {
+	it("maps every (source, failureMode) pair in today's committed ledger explicitly", () => {
+		// The default is explicit, never silent: an unmapped pair defaults to
+		// instrument AND the fold names it. This pins that the committed ledger
+		// hits no default — a new detector must add its row to KIND_OF.
+		const ledger = JSON.parse(
+			readFileSync(
+				join(process.cwd(), "improvements/ledger/findings.json"),
+				"utf8",
+			),
+		) as Finding[];
+		expect(ledger.length).toBeGreaterThan(0);
+		const unmapped = new Set(
+			ledger
+				.filter((x) => !isKindMapped(x.source, x.failureMode))
+				.map((x) => `${x.source}|${x.failureMode}`),
+		);
+		expect([...unmapped]).toEqual([]);
+	});
+
+	it("the owner's examples land on the right side", () => {
+		// world — the product working: it caught something true about the ecosystem
+		expect(kindOf("link-health", "broken-link")).toBe("world");
+		expect(kindOf("nightly-note-freshness", "note-stale")).toBe("world");
+		expect(kindOf("weak-basis-liveness", "status-contradicted")).toBe("world");
+		expect(kindOf("engine-b-sweeps", "dupe")).toBe("world");
+		expect(kindOf("scf-crosscheck", "scf-overstated")).toBe("world");
+		// instrument — our measurement or serving broke
+		expect(kindOf("golden-eval", "golden-fail")).toBe("instrument");
+		expect(kindOf("nightly-drift", "api-drift")).toBe("instrument");
+		expect(kindOf("endpoint-agreement", "endpoint-disagreement")).toBe(
+			"instrument",
+		);
+	});
+
+	it("an unknown pair is our gap: instrument, never the product working", () => {
+		expect(isKindMapped("new-detector", "new-mode")).toBe(false);
+		expect(kindOf("new-detector", "new-mode")).toBe(DEFAULT_KIND);
+		expect(DEFAULT_KIND).toBe("instrument");
+	});
+
+	it("countByKind partitions every row, and open counts all three open buckets", () => {
+		const rows: Finding[] = [
+			f({ id: "a", source: "link-health", failureMode: "broken-link" }), // world, refresh queue
+			f({
+				id: "b",
+				source: "raven-routing",
+				failureMode: "routing-miss",
+				blockedOn: "raven-scorer",
+			}), // instrument, blocked upstream
+			f({ id: "c", source: "golden-eval", failureMode: "golden-fail" }), // instrument, open defect
+			f({
+				id: "d",
+				source: "engine-b-sweeps",
+				failureMode: "dupe",
+				status: "cleared",
+			}), // world, closed
+		];
+		const k = countByKind(rows);
+		expect(k).toEqual({
+			world: { open: 1, total: 2 },
+			instrument: { open: 2, total: 2 },
+		});
+		const s = summarizeLedger(rows, Date.now());
+		expect(k.world.open + k.instrument.open).toBe(
+			s.open + s.refreshQueue + s.blockedUpstream,
+		);
+		expect(k.world.total + k.instrument.total).toBe(rows.length);
 	});
 });

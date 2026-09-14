@@ -1,5 +1,8 @@
 # Intent classes need a mechanism AND a standing eval (2026-07-11)
 
+Guard: scripts/eval/golden-questions.json — protocol-currency ("latest soroban release") and capability-custody-identity cases lock the intent classes
+Guard: .github/workflows/engine-c-health.yml — runs the golden eval weekly and fails on a floor breach
+
 **What failed:** four query-intent classes silently inverted: "latest soroban release" served a Feb-2024 Protocol 20 section (evergreen docs never decay + "latest" treated as a keyword); "highest tvl" returned tvl=null rows (structured field unused); "blend vs yieldblox" dropped a subject (tiered token matching); "custody" matched "NON-custodial"/"self-custodial" (substring synonyms).
 
 **The class:** keyword+evergreen defaults are *correct for topical queries and inverted for intent queries*. Every intent class (recency, superlative, comparison, negation) needs BOTH a ranking mechanism that consults the structured truth the query asks about AND a standing eval probe — no engine tested temporal intent, so the Protocol-20 failure survived three audits.

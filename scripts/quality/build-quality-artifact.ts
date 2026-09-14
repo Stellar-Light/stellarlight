@@ -11,6 +11,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+	countByKind,
 	type Finding,
 	MAINTENANCE_MODES,
 	summarizeLedger,
@@ -489,6 +490,14 @@ const out = {
 		),
 		cleared: findings.filter((f) => f.status === "cleared").length,
 		verified: findings.filter((f) => f.status === "verified").length,
+		/** A catch is not a breakage. Both kinds are still open rows; the
+		 * split says what each one IS (kindOf, src/lib/improvement-ledger.ts).
+		 * Committed-artifact + page only — /api/quality does not serve it. */
+		byKind: {
+			definition:
+				"world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
+			...countByKind(findings),
+		},
 		byFailureMode: [...byMode.entries()]
 			.map(([mode, v]) => ({ mode, ...v }))
 			.sort(

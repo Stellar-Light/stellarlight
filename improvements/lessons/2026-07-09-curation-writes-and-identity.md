@@ -1,5 +1,10 @@
 # 2026-07-09 — the corridor-matrix day: three write-path classes + one process class
 
+Guard: scripts/check-writer-conformance.ts — class 20: C1 read-back on every recurring writer, C3 no process.exit(0) over a set exitCode
+Guard: scripts/data/check-partner-project-identity.ts — class 21: partner→project joins cross-checked by registrable domain, never by name
+Guard: scripts/self-audit.ts — class 22: every Bridge-typed row carries a non-empty supportedNetworks
+Guard: scripts/check-api-drift.ts — class 12 extension: §4 invalid filter values reject with 400 + validX, so a cited probe cannot pass vacuously
+
 One thread (boxy: "same issue for Solana? … some bridges are launching, not launched") surfaced four distinct defect classes while shipping the bridge corridor matrix (#408–#416). Each is a row in the README table; the stories:
 
 ## Class 20 — batch writes fail dark

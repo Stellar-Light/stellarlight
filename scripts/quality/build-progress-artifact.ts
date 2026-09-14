@@ -12,6 +12,7 @@
  */
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { auditLessons } from "../check-lessons-guarded";
 
 const root = process.cwd();
 const quality = readFileSync(join(root, "QUALITY.md"), "utf8");
@@ -228,6 +229,8 @@ const lessons = readdirSync(lessonsDir)
 		};
 	});
 
+const lessonGuards = auditLessons(root);
+
 const audits = readdirSync(join(root, "improvements/audits"))
 	.filter((f) => f.endsWith(".md"))
 	.sort()
@@ -282,11 +285,16 @@ writeFileSync(
 			phases: PHASES,
 			phaseMeters: phaseMeters(),
 			library: { lessons, audits, receipts },
+			/** A lesson only counts when it became a check. Same reader as
+			 * scripts/check-lessons-guarded.ts (the contract-gate step), so the
+			 * board and the gate cannot disagree. Top-level on purpose: `library`
+			 * is served verbatim on /api/quality and its shape is contract. */
+			lessonGuards,
 		},
 		null,
 		1,
 	)}\n`,
 );
 console.log(
-	`progress.json: ${PHASES.map((p) => `${p.id}=${p.state}`).join(" ")} · ${lessons.length} lesson files · ${receipts.length} receipts`,
+	`progress.json: ${PHASES.map((p) => `${p.id}=${p.state}`).join(" ")} · ${lessons.length} lesson files (${lessonGuards.guarded} guarded · ${lessonGuards.unguarded} unguarded · ${lessonGuards.guardMissing} guard missing) · ${receipts.length} receipts`,
 );

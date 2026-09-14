@@ -1,5 +1,10 @@
 # Lessons — the 2026-09-05 night shift (agents in parallel, executes read back, two audits)
 
+Guard: scripts/check-lane-autonomy.ts — rule 13: a lane earns a run only when its execute step concluded success; skipped is a no-op
+Guard: src/lib/__tests__/curated-ownership.test.ts — rule 10: a map that writes a field owns it (WEBSITE_REMOVE included), so a sync cannot write it back
+Guard: src/lib/__tests__/basis-artifact-tier.test.ts — rule 14: an artifact licenses only the tier it can support
+Guard: scripts/check-api-drift.ts — rule 15: §4 a closed-vocabulary filter rejects unknown values with 400 + the vocabulary
+
 Scope: one coordinator, seven bounded agents in isolated worktrees, one
 cross-vendor auditor. Every surface of scout.* touched: projects, repos,
 builders, partners, hackathons, audits, stablecoins. Everything below is a

@@ -1,5 +1,8 @@
 # 2026-08-14 — Three calibrations to one honest signal (+ the battery's four probe lessons)
 
+Guard: scripts/eval/battery-coverage.ts — the four probe-fidelity lessons live in the detector: 429 is an error not a finding, questions route to the surface they target
+Guard: none — the sourceAdvisory calibration has no test: one would feed a positive (weak in-source top, stronger corpus-wide match) and a control (asset clawback → CAP-35) through the same rankResearchChunks path and assert fires / silent
+
 ## What happened
 
 Closing the last battery weak case (an agent-conduct question: "how should

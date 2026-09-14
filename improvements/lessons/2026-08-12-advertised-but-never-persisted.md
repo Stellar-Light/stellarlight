@@ -1,5 +1,9 @@
 # 2026-08-12 — Advertised but never persisted: the sdkCapabilities hole
 
+Guard: scripts/check-writer-conformance.ts — C2 no `| tee` without shell: bash (the mute-alarm class); C4 every field the scanner's write-shape emits is watched by a field-population probe
+Guard: src/lib/__tests__/scan-write-shape.test.ts — the write-shape fixture carries the COMPUTED key set, so write⇄schema agreement cannot hold on a shared omission
+Guard: scripts/check-field-population.ts — rozo-mpprouter must serve x402 in sdkCapabilities (the known-nonempty pin)
+
 ## What happened
 
 `sdkCapabilities` — the JS/TS capability tags advertised in the OpenAPI spec,
