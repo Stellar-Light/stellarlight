@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-09-14T16:06:22Z",
+  "generatedAt": "2026-09-14T16:18:31Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
       "ok": 981,
       "total": 981,
+      "unchecked": 0,
       "rate": 100,
       "floor": 90,
       "status": "OK "
@@ -14,6 +15,7 @@
       "bucket": "P-TYPE",
       "ok": 20,
       "total": 20,
+      "unchecked": 0,
       "rate": 100,
       "floor": 75,
       "status": "OK "
@@ -22,15 +24,17 @@
       "bucket": "P-ORDER",
       "ok": 24,
       "total": 24,
+      "unchecked": 0,
       "rate": 100,
       "floor": 70,
       "status": "OK "
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 981,
+      "ok": 980,
       "total": 981,
-      "rate": 100,
+      "unchecked": 0,
+      "rate": 99.9,
       "floor": 60,
       "status": "OK "
     },
@@ -38,6 +42,7 @@
       "bucket": "P-ATTR",
       "ok": 46,
       "total": 46,
+      "unchecked": 0,
       "rate": 100,
       "floor": 70,
       "status": "OK "
@@ -46,138 +51,50 @@
       "bucket": "PA-CAP",
       "ok": 47,
       "total": 47,
+      "unchecked": 0,
       "rate": 100,
       "floor": 90,
       "status": "OK "
     },
     {
       "bucket": "B-USER",
-      "ok": 87,
+      "ok": 100,
       "total": 100,
-      "rate": 87,
+      "unchecked": 0,
+      "rate": 100,
       "floor": 85,
       "status": "OK "
     },
     {
       "bucket": "R-SYM",
-      "ok": 25,
+      "ok": 20,
       "total": 30,
-      "rate": 83.3,
+      "unchecked": 0,
+      "rate": 66.7,
       "floor": 75,
-      "status": "OK "
+      "status": "RED"
     }
   ],
   "failures": [
     {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=Xaxxoo",
-      "expected": "Xaxxoo retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=0xdevcollins",
-      "expected": "0xdevcollins retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=davedumto",
-      "expected": "davedumto retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=Gabrielpatrola",
-      "expected": "Gabrielpatrola retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=0xVida",
-      "expected": "0xVida retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=ThaisFReis",
-      "expected": "ThaisFReis retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=Benjtalkshow",
-      "expected": "Benjtalkshow retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=manny-uncharted",
-      "expected": "manny-uncharted retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=verxin-online",
-      "expected": "verxin-online retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=esterdelcarmenld-sudo",
-      "expected": "esterdelcarmenld-sudo retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=NovaCorpAI",
-      "expected": "NovaCorpAI retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=Ogbuehi-near",
-      "expected": "Ogbuehi-near retrievable by own username",
-      "observed": "0 rows, absent"
-    },
-    {
-      "bucket": "B-USER",
-      "area": "builders",
-      "probe": "https://stellarlight.xyz/api/builders?q=akillisozlesme",
-      "expected": "akillisozlesme retrievable by own username",
-      "observed": "0 rows, absent"
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=CoinSender%20on%20stellar&limit=3",
+      "expected": "coinsender in top-3 for 'CoinSender on stellar'",
+      "observed": "kotlin-stellar-sdk, honey-coin, coins-ph"
     },
     {
       "bucket": "R-SYM",
       "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=buildTokenTransferHostFunction&limit=5",
-      "expected": "stellar/smart-account-kit in top-5 for its own symbol 'buildTokenTransferHostFunction'",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=HelloContract&limit=5",
+      "expected": "stellar/soroban-quest--pioneer in top-5 for its own symbol 'HelloContract'",
       "observed": "empty"
     },
     {
       "bucket": "R-SYM",
       "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=is_self_removal_context&limit=5",
-      "expected": "stellar/passkey-kit in top-5 for its own symbol 'is_self_removal_context'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=balance_shares&limit=5",
-      "expected": "stellar/soroban-examples in top-5 for its own symbol 'balance_shares'",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=validate_escrow_property_change_conditions&limit=5",
+      "expected": "Trustless-Work/trustlesswork-smart-contract-stellar in top-5 for its own symbol 'validate_escrow_property_change_conditions'",
       "observed": "empty"
     },
     {
@@ -190,10 +107,53 @@
     {
       "bucket": "R-SYM",
       "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=available_super_functions&limit=5",
-      "expected": "hyperledger-solang/solang in top-5 for its own symbol 'available_super_functions'",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=registerGetContractStatusTool&limit=5",
+      "expected": "AbdulmalikAlayande/sorokeep in top-5 for its own symbol 'registerGetContractStatusTool'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=get_distribution_available_funds&limit=5",
+      "expected": "SimplyTokenized/soroban-smart-contracts in top-5 for its own symbol 'get_distribution_available_funds'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=WalletConnectModule&limit=5",
+      "expected": "Creit-Tech/Stellar-Wallets-Kit in top-5 for its own symbol 'WalletConnectModule'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=EndpointRegistry&limit=5",
+      "expected": "davidmaronio/StellarPay402 in top-5 for its own symbol 'EndpointRegistry'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=behavioral_match_pct&limit=5",
+      "expected": "Inferara/soroban-ret in top-5 for its own symbol 'behavioral_match_pct'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=set_agent_registry_contract&limit=5",
+      "expected": "TrusTrove/TrusTrove-contract in top-5 for its own symbol 'set_agent_registry_contract'",
+      "observed": "empty"
+    },
+    {
+      "bucket": "R-SYM",
+      "area": "repos-symbols",
+      "probe": "https://stellarlight.xyz/api/repos/search?q=TwentyOneContract&limit=5",
+      "expected": "kalepail/ohloss in top-5 for its own symbol 'TwentyOneContract'",
       "observed": "empty"
     }
   ],
+  "unchecked": [],
   "evalKey": "engine-a-recall"
 }
