@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-14T05:05:17Z",
+  "generatedAt": "2026-09-14T15:44:41Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 975,
+      "ok": 981,
       "total": 981,
-      "rate": 99.4,
+      "rate": 100,
       "floor": 90,
       "status": "OK "
     },
@@ -28,9 +28,9 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 981,
+      "ok": 978,
       "total": 981,
-      "rate": 100,
+      "rate": 99.7,
       "floor": 60,
       "status": "OK "
     },
@@ -69,46 +69,25 @@
   ],
   "failures": [
     {
-      "bucket": "P-KNOWN",
-      "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=The%20Starship%20Soroban",
-      "expected": "response",
-      "observed": "Error: 500 /api/projects/search?q=The%20Starship%20Soroban&limit=3"
-    },
-    {
-      "bucket": "P-KNOWN",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=iOS%20Stellar%20SDK",
-      "expected": "response",
-      "observed": "Error: 500 /api/projects/search?q=iOS%20Stellar%20SDK&limit=3"
-    },
-    {
-      "bucket": "P-KNOWN",
-      "area": "Tooling",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Soroban%20Hub",
-      "expected": "response",
-      "observed": "Error: 500 /api/projects/search?q=Soroban%20Hub&limit=3"
-    },
-    {
-      "bucket": "P-KNOWN",
+      "bucket": "P-PHRASE",
       "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Binance&limit=3",
-      "expected": "binance in top-3 for its own name",
-      "observed": "empty"
-    },
-    {
-      "bucket": "P-KNOWN",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Klever&limit=3",
-      "expected": "klever in top-3 for its own name",
-      "observed": "merkle-science, kes, ping"
-    },
-    {
-      "bucket": "P-KNOWN",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=Seevcash",
+      "probe": "tell me about TAP4Change",
       "expected": "response",
-      "observed": "Error: 500 /api/projects/search?q=Seevcash&limit=3"
+      "observed": "Error: 500 /api/projects/search?q=tell%20me%20about%20TAP4Change&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "what is Rahat",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=what%20is%20Rahat&limit=3"
+    },
+    {
+      "bucket": "P-PHRASE",
+      "area": "User-Facing App",
+      "probe": "what is Kulipa",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=what%20is%20Kulipa&limit=3"
     }
   ],
   "evalKey": "engine-a-recall"

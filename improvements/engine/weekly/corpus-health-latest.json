@@ -16,14 +16,14 @@
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1352,
+      "newestAgeDays": 1353,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
       "chunks": 4062,
       "datedPct": 75,
-      "newestAgeDays": 3,
+      "newestAgeDays": 4,
       "undated": false,
       "stalled": false
     },
@@ -46,7 +46,7 @@
     "sdf-blog": {
       "chunks": 2432,
       "datedPct": 100,
-      "newestAgeDays": 5,
+      "newestAgeDays": 6,
       "undated": false,
       "stalled": false
     },
@@ -69,56 +69,56 @@
     "cap": {
       "chunks": 936,
       "datedPct": 98,
-      "newestAgeDays": 24,
+      "newestAgeDays": 25,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 175,
+      "newestAgeDays": 176,
       "undated": false,
       "stalled": false
     },
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 6,
+      "newestAgeDays": 7,
       "undated": false,
       "stalled": false
     },
     "audit": {
       "chunks": 922,
       "datedPct": 100,
-      "newestAgeDays": 136,
+      "newestAgeDays": 137,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 130,
+      "newestAgeDays": 131,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 117,
+      "newestAgeDays": 118,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 92,
+      "newestAgeDays": 93,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3854,
+      "newestAgeDays": 3855,
       "undated": false,
       "stalled": false
     }
@@ -133,6 +133,6 @@
       "boilerplateOverlap": 32
     }
   },
-  "generatedAt": "2026-09-14T05:05:17Z",
+  "generatedAt": "2026-09-14T15:44:41Z",
   "evalKey": "corpus-health"
 }

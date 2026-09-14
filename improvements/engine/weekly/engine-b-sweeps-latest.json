@@ -33,12 +33,6 @@
         "missing": "evm"
       },
       {
-        "slug": "agnostic",
-        "field": "supportedNetworks",
-        "prose": "evm",
-        "missing": "evm"
-      },
-      {
         "slug": "subquery",
         "field": "supportedNetworks",
         "prose": "ethereum",
@@ -72,6 +66,12 @@
         "slug": "simbolik",
         "field": "supportedNetworks",
         "prose": "ethereum",
+        "missing": "evm"
+      },
+      {
+        "slug": "agnostic",
+        "field": "supportedNetworks",
+        "prose": "evm",
         "missing": "evm"
       },
       {
@@ -156,10 +156,10 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (198/200)",
-      "types": "100% (200/200)",
-      "supportedNetworks": "56% (111/200)",
-      "logoUrl": "78% (155/200)"
+      "shortDescription": "99% (197/199)",
+      "types": "100% (199/199)",
+      "supportedNetworks": "55% (110/199)",
+      "logoUrl": "77% (154/199)"
     },
     "Tooling": {
       "shortDescription": "98% (178/182)",
@@ -167,10 +167,10 @@
       "logoUrl": "82% (150/182)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (389/393)",
-      "types": "100% (393/393)",
-      "supportedNetworks": "74% (289/393)",
-      "logoUrl": "86% (338/393)"
+      "shortDescription": "99% (390/394)",
+      "types": "100% (394/394)",
+      "supportedNetworks": "74% (290/394)",
+      "logoUrl": "86% (339/394)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -334,12 +334,12 @@
   },
   "s4_staleness": {
     "liveNoDatedSignal": 382,
-    "liveStale365": 129,
+    "liveStale365": 128,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 559,
+        "ageDays": 560,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -367,7 +367,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2327,
+        "ageDays": 2328,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -478,6 +478,6 @@
       }
     ]
   },
-  "generatedAt": "2026-09-14T05:05:17Z",
+  "generatedAt": "2026-09-14T15:44:41Z",
   "evalKey": "engine-b-sweeps"
 }
