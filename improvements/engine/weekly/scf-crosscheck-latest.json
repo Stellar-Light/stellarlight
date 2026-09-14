@@ -1,15 +1,155 @@
 {
-  "generatedAt": "2026-09-14T16:18:31Z",
+  "generatedAt": "2026-09-14T16:31:38Z",
   "frame": {
     "scf": 511,
-    "directory": 0,
-    "matched": 0,
-    "roundsChecked": 0
+    "directory": 981,
+    "matched": 326,
+    "roundsChecked": 325
   },
   "overstated": [],
   "understated": [],
   "roundsBackfill": [],
   "roundsOverstated": [],
-  "roundsUnverifiable": [],
+  "roundsUnverifiable": [
+    {
+      "slug": "palremit",
+      "name": "Palremit",
+      "ourRounds": [
+        "32"
+      ],
+      "url": "https://communityfund.stellar.org/project/palremit-eks",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "wellspring",
+      "name": "Wellspring",
+      "ourRounds": [
+        "30",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/wellspring-xuv",
+      "officialAwardedRounds": [
+        "30"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
+    },
+    {
+      "slug": "cash-abroad",
+      "name": "Cash Abroad",
+      "ourRounds": [
+        "11",
+        "14",
+        "21",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/cashabroad-o7v",
+      "officialAwardedRounds": [
+        "11",
+        "14",
+        "21"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
+    },
+    {
+      "slug": "autoaction",
+      "name": "AutoAction",
+      "ourRounds": [
+        "29"
+      ],
+      "url": "https://communityfund.stellar.org/project/autoaction-ybl",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "janus",
+      "name": "Janus",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/janus-m2t",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "sorted",
+      "name": "Sorted",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/sorted-jqh",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "nouns-builder-protocol",
+      "name": "Nouns Builder Protocol",
+      "ourRounds": [
+        "44"
+      ],
+      "url": "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "yolat",
+      "name": "Yolat",
+      "ourRounds": [
+        "44"
+      ],
+      "url": "https://communityfund.stellar.org/project/yolat-bl5",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "wellspring",
+      "name": "Wellspring",
+      "ourRounds": [
+        "30",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/wellspring-rdo",
+      "officialAwardedRounds": [
+        "41"
+      ],
+      "reason": "no submission verdict found for round(s) #30"
+    },
+    {
+      "slug": "the-strategists",
+      "name": "The Strategists",
+      "ourRounds": [
+        "42"
+      ],
+      "url": "https://communityfund.stellar.org/project/the-strategists-jra",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "lobster",
+      "name": "Lobster",
+      "ourRounds": [
+        "36",
+        "42"
+      ],
+      "url": "https://communityfund.stellar.org/project/lobster-vzw",
+      "officialAwardedRounds": [
+        "36"
+      ],
+      "reason": "no submission verdict found for round(s) #42"
+    },
+    {
+      "slug": "untangled",
+      "name": "Untangled",
+      "ourRounds": [
+        "31",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/untangled-qcs",
+      "officialAwardedRounds": [
+        "31"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
+    }
+  ],
   "evalKey": "scf-crosscheck"
 }

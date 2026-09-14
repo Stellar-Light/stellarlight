@@ -23,14 +23,11 @@
       "id": "standards-anchor-deposit",
       "category": "standards",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "sep-?24|hosted deposit|anchor",
-        "sep-?10|authentication|web auth"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8326529264450073,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -38,20 +35,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Configuration"
     },
     {
       "id": "protocol-trustline",
       "category": "protocol",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "trustline",
-        "asset|issuer"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8371003270149231,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -59,20 +53,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Verify Trustlines"
     },
     {
       "id": "soroban-counter",
       "category": "soroban-build",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "soroban",
-        "contract"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8850044012069702,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -80,20 +71,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Increment a counter and store the incremented value"
     },
     {
       "id": "dapp-freighter",
       "category": "dapp-build",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "freighter|wallet",
-        "transaction|payment|sign"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8108147382736206,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -101,20 +89,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "How-To Guides"
     },
     {
       "id": "assets-clawback",
       "category": "assets",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "clawback",
-        "asset|flag|auth"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.7906394004821777,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -122,20 +107,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Asset Clawback"
     },
     {
       "id": "data-rpc-vs-horizon",
       "category": "chain-data",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "rpc|horizon",
-        "event|indexer|stream"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8225675225257874,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -143,19 +125,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Indexers Overview"
     },
     {
       "id": "orient-remittance",
       "category": "orient",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "anchor|sep-?24|usdc|payment|soroban"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.7824959754943848,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -163,20 +143,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "From Colombia to El Salvador and Beyond: How a Proven Model "
     },
     {
       "id": "dossier-blend-safety",
       "category": "project-dossier",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "blend",
-        "oracle|incident|exploit|attack|audit|security"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8034659624099731,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -184,20 +161,17 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Blend Protocol \u2014 Certora (Blend Security Assessment Report)"
     },
     {
       "id": "audit-reentrancy",
       "category": "security",
       "mode": "research",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "audit|finding|vulnerab",
-        "soroban|contract|auth"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": null,
+      "topScore": 0.8371278047561646,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -205,17 +179,15 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "Stellar Soroban Core \u2014 Veridise (Auditing Report for Soroban"
     },
     {
       "id": "ecosystem-rwa-map",
       "category": "ecosystem-map",
       "mode": "projects",
-      "status": "FAIL",
-      "matched": false,
-      "missingRegexes": [
-        "rwa|real-world|tokeniz|asset"
-      ],
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
       "forbiddenHits": [],
       "topScore": null,
       "urlOk": null,
@@ -225,7 +197,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "\u2014"
+      "sample": "WisdomTree"
     },
     {
       "id": "ecosystem-agent-payments-projects",
@@ -271,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8251667022705078,
+      "topScore": 0.8247631788253784,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -289,7 +261,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8468425273895264,
+      "topScore": 0.8468309640884399,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -307,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8246715068817139,
+      "topScore": 0.824492335319519,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -829,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8532983064651489,
+      "topScore": 0.8535137176513672,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -984,6 +956,6 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-14T16:18:31Z",
+  "generatedAt": "2026-09-14T16:31:38Z",
   "evalKey": "golden-eval"
 }

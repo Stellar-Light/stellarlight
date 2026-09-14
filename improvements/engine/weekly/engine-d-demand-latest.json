@@ -1,17 +1,17 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 76928,
-    "realHits": 9137,
-    "distinctQueries": 3252,
-    "replayed": 249
+    "loggedHits": 83660,
+    "realHits": 9107,
+    "distinctQueries": 3270,
+    "replayed": 250
   },
   "okRate": 99,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 91,
+      "hits": 90,
       "lastSeen": "2026-09-14T13:32:22.549Z",
       "days": 15,
       "buckets": [
@@ -31,20 +31,8 @@
       ],
       "class": "EMPTY",
       "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "smart-account-kit",
-      "hits": 5,
-      "lastSeen": "2026-09-08T07:27:11.816Z",
-      "days": 3,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-09-14T15:44:41Z",
+  "generatedAt": "2026-09-14T16:31:38Z",
   "evalKey": "engine-d-demand"
 }

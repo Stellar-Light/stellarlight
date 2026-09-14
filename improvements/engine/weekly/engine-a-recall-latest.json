@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T16:18:31Z",
+  "generatedAt": "2026-09-14T16:31:38Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
@@ -13,10 +13,10 @@
     },
     {
       "bucket": "P-TYPE",
-      "ok": 20,
+      "ok": 19,
       "total": 20,
       "unchecked": 0,
-      "rate": 100,
+      "rate": 95,
       "floor": 75,
       "status": "OK "
     },
@@ -31,10 +31,10 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 980,
+      "ok": 981,
       "total": 981,
       "unchecked": 0,
-      "rate": 99.9,
+      "rate": 100,
       "floor": 60,
       "status": "OK "
     },
@@ -67,91 +67,21 @@
     },
     {
       "bucket": "R-SYM",
-      "ok": 20,
+      "ok": 30,
       "total": 30,
       "unchecked": 0,
-      "rate": 66.7,
+      "rate": 100,
       "floor": 75,
-      "status": "RED"
+      "status": "OK "
     }
   ],
   "failures": [
     {
-      "bucket": "P-PHRASE",
-      "area": "User-Facing App",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=CoinSender%20on%20stellar&limit=3",
-      "expected": "coinsender in top-3 for 'CoinSender on stellar'",
-      "observed": "kotlin-stellar-sdk, honey-coin, coins-ph"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=HelloContract&limit=5",
-      "expected": "stellar/soroban-quest--pioneer in top-5 for its own symbol 'HelloContract'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=validate_escrow_property_change_conditions&limit=5",
-      "expected": "Trustless-Work/trustlesswork-smart-contract-stellar in top-5 for its own symbol 'validate_escrow_property_change_conditions'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=convertSpecTypeToScValType&limit=5",
-      "expected": "theahaco/contract-explorer in top-5 for its own symbol 'convertSpecTypeToScValType'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=registerGetContractStatusTool&limit=5",
-      "expected": "AbdulmalikAlayande/sorokeep in top-5 for its own symbol 'registerGetContractStatusTool'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=get_distribution_available_funds&limit=5",
-      "expected": "SimplyTokenized/soroban-smart-contracts in top-5 for its own symbol 'get_distribution_available_funds'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=WalletConnectModule&limit=5",
-      "expected": "Creit-Tech/Stellar-Wallets-Kit in top-5 for its own symbol 'WalletConnectModule'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=EndpointRegistry&limit=5",
-      "expected": "davidmaronio/StellarPay402 in top-5 for its own symbol 'EndpointRegistry'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=behavioral_match_pct&limit=5",
-      "expected": "Inferara/soroban-ret in top-5 for its own symbol 'behavioral_match_pct'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=set_agent_registry_contract&limit=5",
-      "expected": "TrusTrove/TrusTrove-contract in top-5 for its own symbol 'set_agent_registry_contract'",
-      "observed": "empty"
-    },
-    {
-      "bucket": "R-SYM",
-      "area": "repos-symbols",
-      "probe": "https://stellarlight.xyz/api/repos/search?q=TwentyOneContract&limit=5",
-      "expected": "kalepail/ohloss in top-5 for its own symbol 'TwentyOneContract'",
-      "observed": "empty"
+      "bucket": "P-TYPE",
+      "area": "Explorer",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=block%20explorer&limit=10",
+      "expected": "\u22653 of top-10 carry types=Explorer (6 exist)",
+      "observed": "2 carry it"
     }
   ],
   "unchecked": [],
