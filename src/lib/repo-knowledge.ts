@@ -5033,6 +5033,495 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			visibility: "internal",
 		},
 	],
+	// ── P5 wave 11 (2026-09-14) — 50 more curated-pool repos with no entry
+	// (424 remained after wave 10). Read 2026-09-14 from each repo's own
+	// metadata, README, releases, or a registry that points back at it.
+	"mericcintosun/lumenia": [
+		{
+			note: "Lumenia (getlumenia.com): send or request USDC by link, where the recipient claims it walletless and seedless and pays no gas — the README's own badge says Stellar testnet plus a CAPPED MAINNET PILOT, and its topics name the primitives it rides on: claimable-balances, sponsored-reserves and fee-bump. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-09-12).",
+			triggers: [
+				"lumenia usdc link",
+				"walletless claim usdc",
+				"claimable balance payment link",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"mpprouter/stellar-agent-wallet-skill": [
+		{
+			note: "stellar-agent-wallet (clawhub.ai/plugins/stellar-agent-wallet): Rozo's agent-side Stellar USDC wallet skill — it pays 402-gated APIs through x402 or the MPP Router, checks balances, adds USDC trustlines, swaps XLM→USDC on the DEX, and sends or bridges USDC to EVM, Solana or back to Stellar via Rozo, with file-based secret storage, a sponsored mode and both networks. Newest tag v1.8.2; nothing is published on npm under `stellar-agent-wallet` as of the read (README read 2026-09-14; no license file; last push 2026-09-04).",
+			triggers: [
+				"stellar agent wallet skill",
+				"pay 402 api agent",
+				"mpp router wallet",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"karagozemin/Solvent": [
+		{
+			note: "Solvent (solvent-web.vercel.app): zero-knowledge proof-of-reserves on Stellar — the README's claim is specific enough to cite, that a holder proves a bank balance clears a threshold FROM A REAL DKIM-SIGNED EMAIL and a Soroban contract verifies it, so the reserve claim rests on the bank's own signature rather than on a screenshot. Newest release v0.1.0 (README read 2026-09-14; no license file; last push 2026-07-04).",
+			triggers: [
+				"solvent proof of reserves",
+				"dkim email proof stellar",
+				"zk proof of reserves soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"runtimeverification/stellar-debugger": [
+		{
+			note: "Runtime Verification's Stellar Debugger: time-travel debugging for Soroban contracts inside the editor — set a breakpoint in a Rust contract and step FORWARD AND BACKWARD through what it did, line by line, instead of redeploy-and-guess. The companion piece to their K-semantics work (komet-node) (README read 2026-09-14; BSD-3-Clause; 1 star; no releases; last push 2026-09-13).",
+			triggers: [
+				"stellar debugger breakpoint",
+				"time travel debugging soroban",
+				"step backward contract",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-expert/refractor": [
+		{
+			note: "Refractor (refractor.stellar.expert): StellarExpert's multisig aggregator and pending-transaction storage for Stellar — where a transaction waits while its signers collect. The README is empty; the GitHub description is the durable statement (metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-07-23).",
+			triggers: [
+				"refractor multisig",
+				"pending transaction storage stellar",
+				"collect signatures stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellarchain/v4": [
+		{
+			note: "The Stellarchain V4 frontend (stellarchain.io): a Next.js App Router application for exploring Stellar and Soroban data — ledgers, transactions, operations and effects, accounts and labels, markets, assets and liquidity pools, and Soroban contracts with their events, metadata and verification (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
+			triggers: [
+				"stellarchain explorer",
+				"soroban contract verification explorer",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/mcp-stellar-xdr": [
+		{
+			note: "SDF's MCP server for Stellar XDR: it exposes XDR-JSON and JSON Schema as tools so an agent can understand what a piece of XDR means, modify its values, and construct new XDR — the canonical answer when an agent needs to read or build XDR without a local SDK (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28). A sibling of the same name lives in stellar-experimental.",
+			triggers: ["mcp stellar xdr", "xdr json mcp server", "agent build xdr"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-experimental/mcp-stellar-xdr": [
+		{
+			note: "The stellar-experimental copy of SDF's XDR MCP server — same README and same purpose as stellar/mcp-stellar-xdr (XDR-JSON and JSON Schema as agent tools), 2 stars and last pushed 2026-09-03, six days after the stellar/ copy. Cite the stellar/ repository unless a question is specifically about the experimental org (README read 2026-09-14; Apache-2.0; no releases).",
+			triggers: ["experimental mcp xdr"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/research": [
+		{
+			note: "The sources of the SDF research website — the README is one line naming exactly that, and the repository is where the published research pages come from rather than the research itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-11).",
+			triggers: ["sdf research website"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/security-tools": [
+		{
+			note: "SDF's repository for PUBLIC security tooling, in Rust — the README states only that, so the contents are the documentation; worth checking directly when a question is about Stellar security tooling published by the foundation (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-28).",
+			triggers: ["stellar security tools sdf"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blend-capital/oracle-aggregator": [
+		{
+			note: "Blend's example Oracle Aggregator: one contract that lets a single Blend pool reach MULTIPLE oracle price sources through one `lastprice` method, with the README stating the assumptions it makes about those oracles. Newest tag v2.0.0_oracle-aggregator_cli22.0.1; last push 2025-04-11, so it documents the pattern rather than a maintained deployment (README read 2026-09-14; MIT; 2 stars).",
+			triggers: [
+				"blend oracle aggregator",
+				"multiple oracle sources pool",
+				"lastprice aggregator soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"kaankacar/stellar-wallet-gallery": [
+		{
+			note: 'Stellar Wallet Gallery: the SAME tiny app built six times, once per wallet kit — Stellar Wallets Kit, Blux, Privy, Para, Passkey Kit and Smart Accounts — with an identical flow and identical UI from a shared package, made for side-by-side comparison at a Stellar Developers Meeting. The most direct answer available to "which wallet kit should I use", because the differences are isolated by construction (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-08-20).',
+			triggers: [
+				"wallet kit comparison stellar",
+				"stellar wallets kit vs blux",
+				"passkey kit comparison",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Dione-b/caatinga": [
+		{
+			note: "npm @caatinga/cli 3.9.2 (published 2026-08-13; the package's repository points back at this repo): Caatinga builds, deploys, versions and interacts with Soroban contracts through one TypeScript experience, with docs at docs-caatinga.netlify.app (README read 2026-09-14; MIT; 7 stars; no GitHub releases; last push 2026-09-08).",
+			triggers: ["caatinga cli soroban", "typescript contract deploy tool"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"alexanderkoh/bookee": [
+		{
+			note: "Bookee: LOCAL-FIRST, read-only bookkeeping for Stellar accounts — a Tauri desktop app over SQLite that turns an account's on-chain history into readable books with no wallet connection, no private keys and no backend, which is what makes it safe to point at a treasury account. Newest release v0.1.4 (README read 2026-09-14; Apache-2.0; 4 stars; last push 2026-09-14).",
+			triggers: [
+				"bookee bookkeeping stellar",
+				"local first accounting stellar",
+				"read only ledger books",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Creit-Tech/SorobanHub-app": [
+		{
+			note: "SorobanHub (sorobanhub.com) by Creit Tech: a UI for managing and monitoring Soroban contracts so an operator does not need scripts or a terminal to interact with them. The README states the app is still in early development and that bugs and unfinished functionality are expected. Newest release v0.7.4; last push 2025-09-04 (README read 2026-09-14; no license file; topics smart-contracts, soroban, stellar).",
+			triggers: ["sorobanhub contract manager", "manage soroban contracts ui"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"clevercon-protocol/clevercon": [
+		{
+			note: "CleverCon (clevercon-dashboard.vercel.app): a non-custodial spending-control layer for AI agents on Stellar — fund a vault, set PRIVATE spending rules, and the agent spends within them with the limits enforced on-chain. The same problem space as agent wallets with spend caps, solved at the vault rather than in the client (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-09-13).",
+			triggers: [
+				"clevercon spending control",
+				"agent vault spending rules",
+				"private spending limits stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"enliven17/talos-stellar": [
+		{
+			note: "Talos Protocol (talos-stellar.vercel.app): autonomous agent corporations on Stellar, where agents register on-chain, sell services and earn USDC via x402 — an agent-commerce design that treats the agent as an economic entity with its own registry entry (README read 2026-09-14; AGPL-3.0; 5 stars; no releases; last push 2026-09-04).",
+			triggers: [
+				"talos agent corporations",
+				"agents earn usdc x402",
+				"onchain agent registry stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CaBsCrypto/stellar-bazaar-x402": [
+		{
+			note: "Stellar Bazaar x402: Stellar-native discovery for paid HTTP APIs and MCP tools using x402 — machine-readable discovery plus atomic micropayments, published bilingually (English and Spanish READMEs). Live at stellar-bazaar-x402.vercel.app (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-09-03).",
+			triggers: [
+				"stellar bazaar x402",
+				"discovery paid apis stellar",
+				"mcp tool discovery x402",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CaBsCrypto/ficha-onchain": [
+		{
+			note: "TrustLeaf (trustleaf-demo.vercel.app): patient-owned medical records on Stellar — the README describes doctor and patient portals over two Soroban contracts with Privy and SPONSORED FEES, keeping the hash on-chain and the data off it, consent-gated. Topics name healthcare, mcp and self-sovereign-identity (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			triggers: [
+				"trustleaf medical records",
+				"patient owned records stellar",
+				"prescriptions soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"defarm-repo/defarm-mcp": [
+		{
+			note: "npm @defarm/mcp 0.1.0 (published 2026-08-22; the package's repository points back at this repo): an MCP server for DeFarm (defarm.net) that lets an agent seal, open, verify and ingest verifiable agri-traceability data by description, built on @defarm/sdk with sealed fields encrypted client-side (README read 2026-09-14; MIT; no GitHub releases; last push 2026-08-22).",
+			triggers: [
+				"defarm mcp traceability",
+				"agri traceability stellar",
+				"sealed fields encrypted mcp",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Rehoboth-Finance/easy-escrow": [
+		{
+			note: "npm @rehobothfinance/easy-escrow-sdk 0.1.2 (published 2026-04-03; the package's repository points back at this repo): Rehoboth's official TypeScript SDK for EasyEscrow (README read 2026-09-14; the README badges Apache-2.0 while GitHub reports no license file; no GitHub releases; last push 2026-04-30).",
+			triggers: ["easy escrow sdk", "rehoboth escrow stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"axis-markets/json-storage": [
+		{
+			note: "npm @axis-markets/json-storage 0.2.0 (published 2026-06-21; the package's repository points back at this repo): a JSON-file-backed `HistoryStorage` for the AXIS indexer that implements the same interface as the reference `InMemoryHistoryStorage` and adds durable persistence to a single file — intended for testing and local use, which the README says plainly (README read 2026-09-14; MIT; last push 2026-06-21).",
+			triggers: ["axis indexer storage", "json history storage indexer"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"bluxcc/demo": [
+		{
+			note: "The demo site for the Blux wallet kit (demo.blux.cc) — it exercises @bluxcc/react, whose published package (npm 0.3.7, 2026-09-13) lives in the separate bluxcc/blux repository, so this repo is the showcase and not the library (README read 2026-09-14; no license file; topics blux, stellar-wallet; no releases; last push 2026-09-03).",
+			triggers: ["blux demo wallet kit"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Socket-Fi/socketfi-react-integration-reference": [
+		{
+			note: "SocketFi's official React integration reference for its embedded smart accounts on Stellar (socket.fi) — React 19, TypeScript 5 and Vite 7 examples; topics name passkey, sdk, smart, soroban, stellar and wallet. Reference implementations rather than the SDK itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-05).",
+			triggers: [
+				"socketfi embedded smart accounts",
+				"socketfi react integration",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reclaimprotocol/stellar-sdk-onchain-integration": [
+		{
+			note: "Reclaim Protocol's Soroban contract for on-chain verification of its cryptographic proofs using WITNESS-BASED EPOCHS — the Stellar end of Reclaim's zkTLS-style attestations, which is what lets a contract act on a claim about off-chain web data (README read 2026-09-14; no license file; no releases; last push 2026-01-27).",
+			triggers: [
+				"reclaim protocol stellar",
+				"witness epoch verification soroban",
+				"onchain proof verification reclaim",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"mystic-finance/Stellar-RFQ": [
+		{
+			note: "Octarine Settlement: a duration-priced RFQ settlement contract in Soroban for real-world assets whose value is a function of TIME TO REDEMPTION — the README tabulates three order types settling through one contract, each with its own price source, signer and custody model (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
+			triggers: [
+				"octarine rfq settlement",
+				"duration priced rwa soroban",
+				"rfq contract stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"untangledfinance/soroban-vault-contract": [
+		{
+			note: "Untangled's Soroban token vault contract: users store tokens, create offers for token trading, and manage redemption requests through one contract, with deposits and withdrawals as the base operations. No description, no release, last push 2026-01-28, so the README is the whole record (README read 2026-09-14; no license file).",
+			triggers: ["untangled vault contract", "token vault redemption soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Phoenix-Protocol-Group/whitelist-claim": [
+		{
+			note: "Phoenix's whitelist-claim contract: approved users claim airdropped tokens from a claimable balance with multiple claimants, each claiming their portion ONCE, with multiple deposits combining claimants and only the admin able to deposit. Last push 2025-05-23, no release (README read 2026-09-14; GPL-3.0).",
+			triggers: [
+				"whitelist claim airdrop",
+				"claimable balance multiple claimants",
+				"phoenix airdrop contract",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Trustless-Work/trustlesswork-backoffice": [
+		{
+			note: "The Trustless Work backoffice at dapp.trustlesswork.com — the INTERNAL admin console for managing the full escrow lifecycle, as distinct from trustlesswork-clonable-backoffice, which is the version meant to be cloned. The most-starred repo in the org at 18 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
+			triggers: ["trustless work dapp backoffice"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ACTA-Team/products-acta": [
+		{
+			note: "ACTA's product monorepo (products-acta.vercel.app): the apps built on top of ACTA's trust-minimised verifiable credentials on Stellar/Soroban — a products catalog and landing at apps/web plus a portable credit-history app for financial inclusion at apps/credit-history (README read 2026-09-14; MIT; no releases; last push 2026-08-28).",
+			triggers: ["acta products monorepo", "portable credit history stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"SCF-Public-Goods-Maintenance/pg-atlas-backend": [
+		{
+			note: "The PG Atlas backend (pgatlas.xyz): the ingestion pipeline, storage, metric computation and REST API behind the SCF Public Goods ecosystem-health data that the pg-atlas-ts-sdk consumes. Newest release v0.7.0 (2026-09-14), the same day as the SDK's (README read 2026-09-14; license NOASSERTION; 3 stars; last push 2026-09-14).",
+			triggers: ["pg atlas backend", "public goods metrics api stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"SCF-Public-Goods-Maintenance/scf-public-goods-maintenance.github.io": [
+		{
+			note: "The documentation site for the SCF Public Goods Maintenance process and tooling (scf-public-goods-maintenance.github.io) — the written process behind PG Atlas, licensed CC-BY-4.0 with an SPDX header, 9 stars (README read 2026-09-14; no releases; last push 2026-09-01).",
+			triggers: ["public goods maintenance process", "scf public goods docs"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellarcarbon/sc-audit": [
+		{
+			note: "Stellarcarbon's audit database: a stand-alone tool with a command-line interface for monitoring and auditing Stellarcarbon accounts, which the README recommends running through Docker rather than managing a Python environment. Newest release v0.14.1 (README read 2026-09-14; MIT; 4 stars; last push 2026-04-14).",
+			triggers: ["stellarcarbon audit db", "carbon account audit stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellarcarbon/sc-website": [
+		{
+			note: "The source of stellarcarbon.io, a Next.js site with a published staging environment at test.stellarcarbon.io — useful to know when verifying what Stellarcarbon states about itself, because the staging host is the project's own (README read 2026-09-14; GPL-3.0; 4 stars; no releases; last push 2026-07-23).",
+			triggers: ["stellarcarbon website source"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"boundlessfi/builders": [
+		{
+			note: "Boundless Builders: a DISPLAY-ONLY sub-app of the Boundless platform served at its own builders subdomain — the read-only surface of the project's bounty and builder data rather than the platform itself. 10 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
+			triggers: ["boundless builders app"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"wmendes/stellar-album-2026": [
+		{
+			note: "stellar-album: an educational sticker-album dApp on Soroban built to teach the FULL SPECTRUM OF FUNGIBILITY in one coherent collectible game — from a purely fungible coin to a purely non-fungible, soulbound album. A teaching artefact for SEP-41 and NFT semantics rather than a product (README read 2026-09-14; no license file; 7 stars; no releases; last push 2026-07-01).",
+			triggers: [
+				"stellar album fungibility",
+				"soulbound album soroban",
+				"teach token standards stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"danielfsha/Card-RPG": [
+		{
+			note: "A card-RPG template from the Stellar Game Studio collection — ecosystem-ready game templates and examples meant to be scaffolded into a builder's own workflow, with the collection's entry point at jamesbachini.github.io/Stellar-Game-Studio. The repo has no description of its own; the README is the Game Studio's (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			triggers: ["stellar game studio template", "card rpg stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"jairoamayac/yield-bounty": [
+		{
+			note: "tesouro.pix: a BRL balance held in TESOURO — Brazilian sovereign debt tokenised by Etherfuse, which the README quotes at 12.76% a year — that is sold ONLY at the moment of a PIX payment and only in the amount that payment needs, so the holder earns up to the second they pay. Cite the yield figure as the README's claim on the read date, not as a current rate (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
+			triggers: [
+				"tesouro pix yield",
+				"brazilian treasury stablebond stellar",
+				"etherfuse tesouro",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"beto-rocha-blockchain/energypay-tesouro-yield": [
+		{
+			note: "A Brazil-first stablebond yield app built for the Stellar Builder Summit São Paulo 2026 whose premise is separating REAL YIELD FROM FX — the README states every number in it was produced by running the repo's code against live networks and that nothing is simulated, which is a checkable claim rather than a pitch (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-06).",
+			triggers: [
+				"energypay tesouro yield",
+				"real yield versus fx brazil",
+				"stablebond yield stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"polsalarm/PadaLock": [
+		{
+			note: "PadaLock (padalock.vercel.app): purpose-locked remittance on Stellar for overseas Filipino workers — money sent home that can only be spent the way it was meant to, which is the spending-control idea applied to remittance rather than to agents (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			triggers: [
+				"padalock remittance",
+				"purpose locked remittance stellar",
+				"ofw remittance stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"karagozemin/sub-rosa-issue": [
+		{
+			note: "Sub Rosa's ecosystem-contribution workspace (sub-rosa-web.vercel.app), created specifically for the Stellar Wave program — the README states in a note box that THE MAIN SUB ROSA REPOSITORY IS MAINTAINED SEPARATELY, so this repo is the contribution surface and not the product's source (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-09-10).",
+			triggers: ["sub rosa stellar wave", "sub rosa contribution workspace"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CopperxHQ/countries": [
+		{
+			note: "npm @koshmoney/countries 1.0.1-beta.1 (published 2026-01-10; the package's repository points back at this repo): a lookup library for ISO-3166-2 subdivisions from Copperx/Kosh. It is general geographic reference data with no Stellar-specific content — useful for an anchor's address forms, not a Stellar library (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-06-05).",
+			triggers: ["iso 3166-2 subdivisions lookup"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"idos-network/idos-sdk-kotlin": [
+		{
+			note: "The idOS Kotlin SDK, released as v0.0.10 on GitHub and badged for Maven Central under org.idos:idos-sdk-kotlin — the Maven Central search API returned no artifact for that coordinate on 2026-09-14, so the badge's availability is unconfirmed and the GitHub release is the reliable source (README read 2026-09-14; MIT; last push 2026-07-20).",
+			triggers: ["idos kotlin sdk"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"idos-network/staking-app": [
+		{
+			note: "The standalone frontend for the $IDOS staking contract (portal.idos.network). Read the prerequisites before assuming a Stellar path: the README asks for a Web3 wallet such as MetaMask or Rabby and access to ARBITRUM Sepolia or Arbitrum mainnet, so this app is the EVM side of idOS (README read 2026-09-14; MIT; no releases; last push 2026-07-08).",
+			triggers: ["idos staking app", "idos token staking arbitrum"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"idos-network/supply": [
+		{
+			note: "The $IDOS supply calculator at supply.idos.network: a small Vercel API that reports circulating supply by querying on-chain IDOS balances of known locked wallets and vesting contracts and subtracting them from the fixed total — on ARBITRUM, which the README states, so it is not a Stellar-side figure (README read 2026-09-14; MIT; no releases; last push 2026-05-14).",
+			triggers: ["idos circulating supply", "idos supply calculator"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"TrustLine-id/evmsdk": [
+		{
+			note: "Trustline's EVM SDK: a SOLIDITY library that protects EVM contracts from unauthorised access and malicious transactions by integrating Trustline's oracle with multiple on-chain data sources. It is the EVM counterpart to Trustline's Stellar work (TrustLine-id/stellar-sdk, TrustLine-id/stellar-validation-engine) — do not cite it for Stellar behaviour (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
+			triggers: ["trustline evm sdk", "trustline oracle solidity"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Xoulomon/Stellar-Spend": [
+		{
+			note: "A GitHub FORK of whiteghost0001/Stellar-Spend — the README's CI badge points at the upstream repository, and the fork carries no description or release of its own, so read the upstream for the project's state (README and metadata read 2026-09-14; MIT; last push 2026-04-27).",
+			triggers: ["stellar spend fork"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"gateway-fm/gasstorm": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm is a local devnet and stress-testing toolkit for EVM SEQUENCERS — it spins up an L1/L2 stack, a block builder and a load generator with a dashboard for throughput, latency and gas. Fourth gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator and ops-indexer): the org was swept into the pool behind the curated gatewayfm project, a genuine Stellar RPC provider. https://github.com/gateway-fm/gasstorm",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"gateway-fm/midenscan-indexer": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo. The Miden Indexer — a blockchain data indexing service for the Miden ecosystem that probes a Miden Node for new blocks and powers Midenscan (newest release v0.16.1). Fifth gateway-fm repo triaged this way; see gasstorm for the cause. https://github.com/gateway-fm/midenscan-indexer",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"idos-network/.github": [
+		{
+			note: "Triage 2026-09-14: GitHub's org profile repository (\"Github Readme Page\"), empty README, no releases. It holds the org's profile card, not code. https://github.com/idos-network/.github",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
 };
 
 /**
