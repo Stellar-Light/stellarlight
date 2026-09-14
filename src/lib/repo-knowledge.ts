@@ -3709,6 +3709,258 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-14",
 		},
 	],
+	// ── P5 wave 7 (2026-09-14): repoScore 40–49 band, top 30 without a note.
+	"stellar/laboratory-backend": [
+		{
+			note: "Contract Data API — SDF's Node.js REST API for managing contract data (Express.js 5 + Prisma ORM on PostgreSQL, TypeScript, pnpm); its API design doc lives in stellar/platform-design-docs (contract-data-api branch) per the README; no license file, no releases (README read 2026-09-14; 1 star; last push 2026-08-27).",
+			triggers: ["contract data api", "laboratory backend"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/freighter-website": [
+		{
+			note: "Examined 2026-09-14: the README is the unmodified create-next-app template; GitHub description 'Freighter website'; no license, no releases; last push 2026-07-01 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Templar-Protocol/contracts": [
+		{
+			note: "Templar Protocol's core repository — an overcollateralized lending protocol (templarfi.org): a Rust workspace holding the deployable contracts, shared protocol logic, off-chain services and bots, operator CLI tools, client libraries, fuzz targets and an audits/ directory of auditor-facing notes; the README carries Test, Kani and Codecov workflow badges; releases are per-crate via release-plz — latest templar-liquidator-v0.1.7 (2026-09-01); tag v1.3.0 (2026-02-11) (README read 2026-09-14; GPL-3.0; 10 stars; last push 2026-09-14).",
+			triggers: ["templar lending protocol", "templar contracts"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-expert/tx-meta-effects-parser": [
+		{
+			note: "npm @stellar-expert/tx-meta-effects-parser 10.1.1 (2026-08-28): StellarExpert's low-level effects parser — `parseTxOperationsMeta({network, tx, result, meta, …})` derives the atomic ledger state changes directly from a transaction's result and meta XDR instead of Horizon's /effects, with options for Soroban system events, SAC mapping, failed-op effects and contract metrics (README read 2026-09-14; MIT; last push 2026-08-28).",
+			triggers: ["tx meta effects parser", "effects from transaction meta"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"armandocodecr/latam-ramp-kit": [
+		{
+			note: "LATAM Ramp Kit — SDK + React components for adding fiat on/off-ramps to apps in Latin America, built for the Stellar 'Brazil Ramps and Regional Kits' sub-lane per its README, which documents BRL in via PIX and out again on Stellar testnet through the Etherfuse sandbox; npm @ramp-kit/core 0.1.7, @ramp-kit/react 0.1.6, @ramp-kit/server 0.1.5 and @ramp-kit/mcp 0.1.9 (all published 2026-08-21), the last an MCP server also listed in the MCP Registry (README read 2026-09-14; MIT; no releases; last push 2026-08-21).",
+			triggers: [
+				"latam ramp kit",
+				"fiat ramp latin america",
+				"brazil pix stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-expert/stellar-tx-signers-inspector": [
+		{
+			note: "npm @stellar-expert/tx-signers-inspector 2.0.0 (2026-08-30): StellarExpert's library to discover the required signers and weights for a Stellar transaction or account and build an optimal signature schema — `inspectTransactionSigners(tx)` / `inspectAccountSigners(…)`, with `getAllPotentialSigners()` listing every signer across the source accounts (README read 2026-09-14; MIT; 5 stars; last push 2026-08-30).",
+			triggers: ["required signers transaction", "signers inspector"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lightsail-network/stellar-inspect": [
+		{
+			note: "npm stellar-inspect 0.1.0 (2026-09-09; = repo tag v0.1.0): Lightsail's library that finds the Stellar Asset Contracts (SACs) referenced by a transaction or by Soroban authorization entries and reports which asset each wraps — `findSacs(input, { networkPassphrase })` walks the invoked contracts, Address-typed arguments, the auth tree, the footprint and createContract ops; ES modules, installed alongside @stellar/stellar-sdk (README read 2026-09-14; MIT; last push 2026-09-09).",
+			triggers: ["find sacs transaction", "stellar inspect"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"TrustLine-id/stellar-sdk": [
+		{
+			note: "Trustline Stellar SDK — crates.io trustline-sdk 0.1.0 (2026-09-03; = repo tag v0.1.0): a Rust/Soroban SDK for guarding contracts against unauthorized access — a contract calls `require_trustline(…)` before sensitive operations against a deployed Validation Engine instance (transaction validation, on-chain sanctions checks, address verification), with Payment Forwarder and Firewall gateway examples; an SCF #44 project per its README (README read 2026-09-14; MIT; last push 2026-09-03).",
+			triggers: ["trustline sdk", "sanctions check soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"mpprouter/rozo-mpprouter": [
+		{
+			note: "MPP Router — a Cloudflare Worker exposing a stable public API for paid services over a Stellar-based (USDC) payment flow, with idempotent automatic refunds on non-delivery and an on-chain escape hatch for channel funders to recover an unused channel balance without the Router; v0.2.2 (2026-09-14) made it a multi-operator router with self-serve provider onboarding, direct settlement to providers' own Stellar keys and a HackenProof security review attached to the release (README read 2026-09-14; BSD-2-Clause; last push 2026-09-14).",
+			triggers: ["mpp router"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"AquariusDeFi/aqua-governance": [
+		{
+			note: "Backend API for the Aquarius DAO (gov.aqua.network): a Python 3.10 / Django 3.2 + DRF + Celery service running the proposal lifecycle — creation, discussion, weekly voting-slot booking, on-chain voting via AQUA / governICE / gdICE claimable balances sent to per-proposal accounts, quorum-checked tallying, and Soroban asset-registry execution for asset proposals; reads Horizon and Soroban RPC (README read 2026-09-14; BUSL-1.1; 2 stars; no releases; last push 2026-09-03).",
+			triggers: ["aquarius governance backend", "aqua dao voting"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Phoenix-Protocol-Group/phoenix-nft-marketplace": [
+		{
+			note: "Examined 2026-09-14: no README; GitHub description 'NFT marketplace with auctions and collections interface'; a Rust workspace (contracts/, helpers/), GPL-3.0, no releases or tags; last push 2026-04-11 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CometDEX/frontend-v1": [
+		{
+			note: "Examined 2026-09-14: the README is a two-line stub ('Comet Pool Frontend — frontend to be able to interact with the soroban contracts'); no description, no license, no releases; last push 2023-08-13 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-broker/router-contract": [
+		{
+			note: "StellarBroker's router contract (Rust/Soroban): executes the multi-hop swaps prepared by the StellarBroker Router service (stellar.broker) across Stellar liquidity-pool protocols — Aquarius, Soroswap, Comet, Phoenix and SushiSwap per its README; audits/ holds a Runtime Verification report dated 2025-04-28; no releases (README read 2026-09-14; MIT; last push 2026-07-26).",
+			triggers: ["stellarbroker router contract", "stellar broker swap router"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-broker/ui": [
+		{
+			note: "Examined 2026-09-14: no README; GitHub description 'Website UI for StellarBroker service' (stellar.broker); JavaScript/webpack, MIT, no releases; last push 2026-03-11 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Trustless-Work/trustlesswork-indexer-go": [
+		{
+			note: "Trustless Work's official indexer (Go 1.25+): follows the Stellar ledger stream over RPC, detects activity on Trustless Work escrow contracts (events, deposits, state changes; escrow discovery by approved WASM hash) and publishes versioned envelopes to RabbitMQ for the core API — with an ordered multi-RPC failover pool, a durable cursor + watchlist, gap evidence for skipped ranges and at-least-once delivery under deterministic message ids; no license file, no releases (README read 2026-09-14; 4 stars; last push 2026-09-04).",
+			triggers: ["trustless work indexer", "escrow indexer stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"untangledfinance/untangled-web": [
+		{
+			note: "npm untangled-web 1.0.134 (2025-12-26; = repo tag 1.0.134): Untangled Finance's TypeScript backend framework for its platform — a Bun.serve HTTP server with decorator-based IoC (@Module / @Controller / @Bean), filters, CORS, MongoDB and PostgreSQL connectors, Redis caching and queues, cron jobs and JWT auth with RBAC; nothing Stellar-specific in the framework itself (README read 2026-09-14; no license file; no GitHub releases; last push 2026-08-27).",
+			triggers: ["untangled web framework"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"soroswap/docs": [
+		{
+			note: "Source of docs.soroswap.finance — a Mintlify site (docs.json, tabs Documentation / API / Smart Contracts) covering, per its GitHub description, the Soroswap AMM, the Soroswap Aggregator and the Spacewalk bridge implementation; content directories getting-started, amm, aggregator, api, concepts, tutorials and resources; no README, no license file (read 2026-09-14; MDX; 2 stars; last push 2026-09-06).",
+			triggers: ["soroswap docs", "soroswap documentation"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-subscription-encryption": [
+		{
+			note: "Examined 2026-09-14: no README; GitHub description 'Encryption primitives for Reflector subscriptions'; JavaScript, no license, tags to v1.1.0 (2024-07-18); last push 2024-07-24 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-stellar-connector": [
+		{
+			note: "@reflector/stellar-connector — the Stellar asset price-feed connector for the Reflector oracle backend: `aggregateTrades({rpcUrl, baseAsset, assets, from, period, limit})` aggregates trades per period from a Soroban RPC that has getTransactions and getLatestLedger enabled; not on npm — the README installs it as a GitHub dependency pinned to a tag; tags reach v4.1.7 (2026-08-27) and v4.2.0-rc2 (2026-09-10) (README read 2026-09-14; MIT; last push 2026-09-10).",
+			triggers: [
+				"reflector stellar connector",
+				"reflector price feed connector",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"kunaldrall29/policywright": [
+		{
+			note: "Policywright turns a transaction a user already performed (or simulated) into the least-privilege OpenZeppelin smart-account authorization that permits exactly that flow — a context rule scoped to the observed (contract, function) pairs plus minimal spending-limit and frequency-limit policies — emitted as spec.json, an installable context-rule.json, a summary and an illustrative Rust policy, with a dry-run simulator; the worked example is a Blend emissions claim followed by a Soroswap BLND→USDC swap; hosted at policywright.lemmalabs.space (README read 2026-09-14; TypeScript; MIT; no releases; last push 2026-09-11).",
+			triggers: ["policywright smart account", "least privilege smart account"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-expert/contract-wasm-interface-parser": [
+		{
+			note: "npm @stellar-expert/contract-wasm-interface-parser 6.0.1 (2026-08-29): StellarExpert's lightweight parser that reads a Soroban contract's interface metadata straight from its binary WASM — `parseContractMetadata(Buffer)` returns the parsed interface (the README's example shows unions and structs with their cases and fields) (README read 2026-09-14; MIT; last push 2026-08-29).",
+			triggers: ["parse contract interface wasm", "wasm interface parser"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/actions": [
+		{
+			note: "SDF's shared GitHub Actions and reusable workflows for @stellar repositories (`uses: stellar/actions/<dir>@main`) — rust-cache, rust-set-rust-version, rust-check-git-rev-deps, rust-bump-version, rust-publish and rust-publish-dry-run(-v2), disk-cleanup, sdf-ecr-login and sdf-pr-preview, plus a README-rust-release guide; the README warns they are not suitable outside @stellar repos and not safe under pull_request_target (README read 2026-09-14; Apache-2.0; 4 stars; no releases; last push 2026-08-30).",
+			triggers: ["stellar github actions", "reusable workflows stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"theahaco/rs-sep5": [
+		{
+			note: "crates.io sep5 0.1.0 (2026-04-10; = GitHub release v0.1.0): a Rust implementation of SEP-0005, Key Derivation Methods for Stellar Keys (the crate's repository URL still uses the repo's former ahalabs/ path, which redirects here) (README read 2026-09-14; Apache-2.0; last push 2026-07-27).",
+			triggers: ["key derivation rust", "sep 5 rust"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"honti0078-code/Hatiin": [
+		{
+			note: "Hatiin (Tagalog for 'to split') — a bill-splitting app on Stellar: a Next.js frontend with a Soroban SplitEscrow contract, live at hatiin-stellar.vercel.app on mainnet (contract and explorer links in the README) alongside a testnet deployment; the README is a program submission checklist (50-user proof, feedback log, pitch deck); v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-27).",
+			triggers: ["hatiin bill split"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"meokhay-ai/Tabungan": [
+		{
+			note: "Tabungan — a Stellar app built around a FamilyVault Soroban contract: a Next.js frontend live at tabungan-stellar.vercel.app; the README is a program submission checklist ('Level 5' evidence, 50-user cohort) whose on-chain proof references the testnet contract, with a mainnet deployment recorded in contracts/DEPLOYMENT.md; v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; 1 star; last push 2026-08-27).",
+			triggers: ["tabungan family vault"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"RozoAI/rozo-checkout-skill": [
+		{
+			note: "npm @rozoai/checkout 0.1.10 (2026-08-11): `npx @rozoai/checkout pay <coinbase-link>` pays an OpenRouter Coinbase Payment Link (which itself accepts only USDC on Base) with BTC over Lightning or USDT/USDC on Solana, BNB Chain, Ethereum, Polygon, Base or Stellar (usdc-stellar, MEMO_TEXT required) by routing through a bridge and a funder wallet — no account, API key or private key; also packaged as a Claude Code skill (SKILL.md); GitHub release v0.1.6 (2026-08-11) (README read 2026-09-14; MIT; last push 2026-08-28).",
+			triggers: ["pay openrouter coinbase link", "rozo checkout"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Scopuly/scopuly-browser-extension": [
+		{
+			note: "Scopuly's Manifest V3 browser extension connecting Stellar dApps to a paired Scopuly signer (iOS/Android via QR pairing, or Scopuly for Mac): it injects `window.scopuly`, reviews transaction, message, Soroban authorization, submit and x402 receipt requests in the browser, forwards them to the signer and verifies the returned result before answering the dApp — secret keys never enter the extension; provider protocol 0.3.0; listed in the Chrome Web Store, Microsoft Edge Add-ons and Firefox Add-ons (the README names 0.3.2 as the store version); latest GitHub release v0.3.4 (2026-08-18) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-18).",
+			triggers: ["scopuly extension", "scopuly browser signer"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"zenith-protocols/relayer-plugin-zenex": [
+		{
+			note: "npm @zenith-protocols/relayer-plugin-zenex 0.1.1 (2026-08-01): an OpenZeppelin Relayer plugin for the Zenex transaction relay — prepares and submits router transactions (auth discovery, Chainlink Data Streams report injection, fee enforcement) and delegates final submission to the embedded @openzeppelin/relayer-plugin-channels handler in-process; ships a typed ZenexClient; requires OpenZeppelin Relayer v1.4.0+ with a Stellar network config and Chainlink Data Streams credentials (README read 2026-09-14; MIT; no releases; last push 2026-09-10).",
+			triggers: ["zenex relayer plugin", "chainlink data streams relayer"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"idos-network/nitro-enclave-experiment": [
+		{
+			note: "idOS's AWS Nitro Enclave experiment — its Trusted Execution Environments: a facesign-service built on the FaceTec SDK and an entropy-service, built as enclave images (EIF) on an EC2 instance provisioned with Terraform, with an operator runbook and an open TODO list in the README; no license, no releases (README read 2026-09-14; TypeScript; last push 2026-09-10).",
+			triggers: ["idos nitro enclave", "idos tee"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"winsznx/routedock": [
+		{
+			note: "RouteDock — a unified payment execution layer for agents on Stellar: `client.pay(url)` selects x402, MPP charge or MPP session channels (incl. WebSocket) from the provider's routedock.json manifest, so one SDK covers the three agent-payment protocols; npm @routedock/routedock 0.1.2 (2026-04-13) while the monorepo keeps moving (last push 2026-09-14); homepage routedock.xyz (README read 2026-09-14; TypeScript; MIT; 7 stars; no releases).",
+			triggers: [
+				"routedock payment",
+				"x402 mpp one call",
+				"unified agent payments stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
 };
 
 /**
