@@ -3291,6 +3291,190 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-08-15",
 		},
 	],
+	// ── P5 wave 4 (2026-09-14): the curated-pool repos (repoScore ≥ 50) that
+	// carried no note; every fact read from the repo / registry that day.
+	"theahaco/contract-explorer": [
+		{
+			note: "npm @theahaco/contract-explorer 1.4.0 (2026-08-19; repo tag v1.4.0 the same day): a React ContractExplorer component + loadContracts utility to browse, simulate and invoke Soroban contracts from inside a dApp, with hot-reloading contract docs in development; built for Scaffold Stellar (scaffoldstellar.org) but configurable for any React app (README read 2026-09-14; Apache-2.0; last push 2026-08-19).",
+			triggers: [
+				"contract explorer scaffold",
+				"explore soroban contracts dapp",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"duraznito16/stellar-memory": [
+		{
+			note: "A `stellar memory` CLI plugin: scans a Soroban repo, links contracts in the tree to what is actually deployed (testnet/mainnet; flags rows 'out of sync with local source') and stores the result as a knowledge graph for humans and AI agents to query (README read 2026-09-14; TypeScript; no releases, 0 stars; last push 2026-08-06).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"fxjrin/stellar-contracts-kit": [
+		{
+			note: "npm stellar-contracts-kit 0.1.1 (2026-06-05; = repo tag v0.1.1): TypeScript SDK for Soroban — `npx sck` generates typed contract clients from any live contract spec, a built-in wallet modal (Freighter, Cyphras, Lobstr), auto / read-only / force-invoke call modes, spec caching and one-call contract restore for expired state (README read 2026-09-14; MIT; last push 2026-06-05 — nothing since the 0.1.1 release).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/stellar-dbt-public": [
+		{
+			note: "SDF's public dbt project — the data-transformation models behind its analytics datasets; releases track a semver stream (v1.15.59 on 2026-09-10) and branches are named major/minor/patch by change type (README read 2026-09-14; Python; last push 2026-09-11).",
+			triggers: ["stellar dbt models", "sdf analytics dbt"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lightsail-network/crossmesh-ingress-contracts": [
+		{
+			note: "Solidity (Foundry) contracts for a trustless EVM → Stellar USDC deposit forwarder: every deposit address is a CREATE2 contract whose only fund-moving action bridges its USDC via Circle CCTP to the Stellar recipient committed inside the address, so no key or admin can divert principal and depositors can self-recover if the operator goes offline (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
+			triggers: [
+				"evm to stellar usdc deposit",
+				"cctp deposit forwarder stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/stellar-demo-wallet": [
+		{
+			note: "SDF's Stellar Demo Wallet, hosted at demo-wallet.stellar.org — a front end for interactively testing anchor SEP interoperability (automated anchor testing lives in stellar/stellar-anchor-tests); defaults to testnet, mainnet via HORIZON_PASSPHRASE/HORIZON_URL in env-config.js; latest release v3.0.0 (2025-09-10); the 'Build a Stellar Wallet' tutorial it was created for moved to stellar/docs-wallet (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
+			triggers: ["demo wallet anchor testing", "test anchor sep flows"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"NethermindEth/stellar-private-payments": [
+		{
+			note: "Nethermind's privacy-pools reference implementation for Stellar — WIP and not audited per its README: Groth16 (BN254) proofs from Circom circuits, browser-side WASM proving, Soroban contracts, SEP-0043 wallet signing, and Association Set Providers (ASPs) as the compliance control; demo at nethermindeth.github.io/stellar-private-payments; npm stellar-private-payments 0.1.0 (2026-09-03); repo tag circuits-v0.3 (2026-09-01) (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-12).",
+			triggers: [
+				"privacy pools stellar",
+				"private payments zero knowledge stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/friendbot": [
+		{
+			note: "Friendbot, the testnet/futurenet XLM faucet: one REST endpoint (GET|POST / with addr=) that creates and funds accounts and — when configured with fund_contract_addresses + rpc_url — contract C… addresses; hosted at friendbot.stellar.org (testnet) and friendbot-futurenet.stellar.org; Quickstart serves it at localhost:8000/friendbot; merges to main deploy to testnet immediately (README read 2026-09-14; Go; Apache-2.0; no tagged releases; last push 2026-08-28).",
+			triggers: [
+				"testnet faucet",
+				"fund a testnet account",
+				"friendbot contract address",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/freighter-backend-v2": [
+		{
+			note: "Freighter's next-generation backend, written in Go, PostgreSQL-backed; the TypeScript stellar/freighter-backend (indexer integration layer) is still active alongside it (last push 2026-09-04). Releases are Docker images cut by a two-step prerelease → promote GitHub Actions flow into an internal registry — no GitHub releases (README read 2026-09-14; last push 2026-09-08).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"gateway-fm/oz-policy-builder": [
+		{
+			note: "OpenZeppelin Accounts Policy Builder for Soroban: record a transaction (on-chain by hash or locally simulated) and synthesize a minimum-permission context rule plus a validated policy composition as human-readable Rust implementing the OpenZeppelin Policy trait — deterministic, fail-closed, nothing deployed automatically. An SCF-funded project; its Tranche 1 surface (recorder → PolicySpec → synthesizer → codegen, a reference evaluator and MCP ops) shipped as v0.1.0 on 2026-09-03 (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-08).",
+			triggers: [
+				"openzeppelin policy builder",
+				"smart account policy from transaction",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Scopuly/x402-stellar-guard": [
+		{
+			note: "npm @scopuly/x402-stellar-guard 0.1.0 (2026-08-13; public preview, not audited per its README): the wallet-side safety layer for x402 v2 payments on Stellar — strict PAYMENT-REQUIRED parsing, HTTPS origin binding, network / SEP-41 asset / recipient / amount / fee-sponsorship policy, exact CAP-71 transfer decoding and byte-level binding of the authorization entry to the reviewed intent; scoped to Stellar 'exact' payments with explicit user approval (README read 2026-09-14; Apache-2.0; last push 2026-09-13).",
+			triggers: ["x402 wallet safety", "x402 payment policy stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Smart-Treasury-Account-STA/sdk": [
+		{
+			note: "npm sta-sdk 0.2.1 (2026-09-10): TypeScript SDK for the Smart Treasury Account Soroban contracts — smart_account custom-authorization (Entry A / Entry B) construction, prepare → simulate → sign → submit → poll, typed #[contractevent] parsing and typed state reads (policy version, replay nonce, recovery state); targets the live testnet and mainnet deployments; peer dependency @stellar/stellar-sdk >= 16 (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-10).",
+			triggers: ["smart treasury account sdk", "sta sdk soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Fundable-Protocol/fundable-sdk": [
+		{
+			note: "npm @fundable/sdk 0.2.1 (2026-09-11; the repo's last tag v0.1.0 of 2026-07-26 lags npm): multichain TypeScript SDK for Fundable token streams and distributions — Stellar is the first implemented chain adapter and the public domain types deliberately carry no Soroban-specific values; 0.x API, docs on GitBook (README read 2026-09-14; MIT; last push 2026-09-13).",
+			triggers: ["fundable token streams", "fundable sdk stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"aguilar1x/stellar-confidential-token-sdk": [
+		{
+			note: "npm stellar-confidential-token-sdk 0.1.9 (2026-08-06; = repo tag v0.1.9): TypeScript client for OpenZeppelin Confidential Tokens on Stellar (OpenZeppelin/stellar-contracts) plus a verifiable archive; its README reports the conformance suite reproduces all 17 of OpenZeppelin's published fixtures byte-for-byte and that building it surfaced three defects, all closed; live demo and docs on Vercel (README read 2026-09-14; Apache-2.0; last push 2026-08-08).",
+			triggers: [
+				"confidential tokens client",
+				"confidential token sdk stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/rs-stellar-archivist": [
+		{
+			note: "crates.io stellar-archivist 28.0.0 (2026-08-21; = repo tag v28.0.0): SDF's Rust tools to scan, mirror and repair Stellar History Archives over HTTP(S) or the filesystem; requires Rust 1.91+ (README read 2026-09-14; Apache-2.0; last push 2026-08-28).",
+			triggers: ["history archive mirror", "stellar archivist"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/rs-stellar-strkey": [
+		{
+			note: "crates.io stellar-strkey 0.0.18 (2026-06-18; = repo tag v0.0.18): Rust library + CLI for encoding and decoding Stellar strkeys; the README still carries the 'early development, API unstable, breaking changes frequently' banner (read 2026-09-14; Apache-2.0; last push 2026-08-30).",
+			triggers: ["strkey rust", "decode strkey"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/dashboard": [
+		{
+			note: "Source of dashboard.stellar.org, SDF's network dashboard — a JavaScript app on Node 22 with no tagged releases (README read 2026-09-14; 238 stars; last push 2026-09-03).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"runtimeverification/komet": [
+		{
+			note: "Runtime Verification's fuzzing + formal-verification framework for Soroban contracts: property tests written in Rust, fuzzing over randomized inputs and symbolic execution to prove properties across all inputs; frequent tagged releases (v0.1.89 on 2026-08-20) (README read 2026-09-14; BSD-3-Clause; 35 stars; last push 2026-08-20).",
+			triggers: ["fuzz soroban contracts", "formal verification soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"subquery/stellar-subql-starter": [
+		{
+			note: "SubQuery's starter/example indexer project for Stellar and Soroban (bootstrap with `npm i -g @subql/cli` and `subql init`; works across Stellar's networks) — a template, not a maintained product: no releases, last push 2026-01-22 (README read 2026-09-14).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Inferara/soroban-ret": [
+		{
+			note: "Soroban smart-contract reverse-engineering tool from Inferara, listed under the Stellar Security Portal dev tools: a five-stage pipeline decompiling contract WASM to Rust that compiles back for wasm32v1-none; its README (read 2026-09-14) states 38 of 39 fixtures round-trip and large mainnet contracts recover correct interfaces but only partial bodies — 'read the output as a reconstruction, not as the original source'; repo tag v0.0.4 (2026-07-26); Apache-2.0; last push 2026-08-06.",
+			triggers: ["decompile soroban wasm", "soroban reverse engineering"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"eq-lab/pipeline": [
+		{
+			note: "Examined 2026-09-14: no README, no description, no topics; a v0.0.2 tag (2026-09-10) exists. Nothing durable to state publicly — revisit if a README lands.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
 };
 
 /**
