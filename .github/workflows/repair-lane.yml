@@ -1,0 +1,178 @@
+name: Repair lane (one ledger row → one PR)
+# workflow-health: signal-steps: ^Verify the end state$
+# The missing rung of the autonomy ladder (QUALITY.md §3): every detector
+# opened improvement-ledger rows and no lane ever worked one — repair was a
+# human-started agent session. This lane works exactly ONE open row per run
+# with an agent (Claude Code, headless) in a checkout that holds NO
+# production secrets, and leaves a PR for a human to merge. It never merges,
+# never pushes to main except its own attempt log, and a diff that touches a
+# protected path (the API contract, the client, the lanes, the collections)
+# is recorded as `blocked` and opens no PR — the human gates stay human by
+# construction, not by prompt. Pure logic + tests: src/lib/repair-lane.ts.
+#
+# Trinary end state, asserted by the lane itself: `fixed` → the PR exists on
+# GitHub (read back) and a wave manifest marks the row in-wave;
+# `already-passing` / `skip` / `blocked` → the attempt is on main; an agent
+# that crashes or overspends → `error`, recorded, the run is red.
+on:
+  schedule:
+    - cron: "47 8 * * *" # daily, after the 07:30 parity lane, away from the 06:00 corpus lane
+  workflow_dispatch:
+    inputs:
+      row:
+        description: "Work this ledger row id instead of the picker's choice"
+        required: false
+        default: ""
+      dry_run:
+        description: "Pick the row and write the prompt, run no agent, open no PR"
+        required: false
+        type: boolean
+        default: false
+      model:
+        description: "Model for the agent"
+        required: false
+        default: "claude-opus-5"
+      budget_usd:
+        description: "Hard spend cap for the agent run"
+        required: false
+        default: "6"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: repair-lane
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Pick one row
+        id: pick
+        run: |
+          pnpm exec tsx scripts/lanes/repair-lane.ts pick ${{ inputs.row != '' && format('--row {0}', inputs.row) || '' }} | tee pick.log
+          if grep -q '^pick: none' pick.log; then echo "picked=" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "picked=$(jq -r .row.id .repair/pick.json)" >> "$GITHUB_OUTPUT"
+          echo "slug=$(jq -r .slug .repair/pick.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Branch + prompt
+        if: steps.pick.outputs.picked != ''
+        id: branch
+        run: |
+          B="repair/${{ steps.pick.outputs.slug }}-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "stellarlight-repair-lane"
+          git config user.email "repair-lane@stellarlight.xyz"
+          git checkout -b "$B"
+          pnpm exec tsx scripts/lanes/repair-lane.ts prompt "$B"
+          echo "branch=$B" >> "$GITHUB_OUTPUT"
+          echo "── prompt head ──"; head -20 .repair/prompt.md
+
+      # The agent. Headless Claude Code with an ALLOWLIST of tools: it can
+      # read, edit, run the gates, curl the live API read-only, and commit.
+      # It cannot push, merge, run anything with --execute, or reach the DB —
+      # this job carries no DATABASE_URI / PAYLOAD_SECRET at all.
+      - name: Agent
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        id: agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        continue-on-error: true
+        run: |
+          set +e
+          npx -y @anthropic-ai/claude-code@2.1.247 -p "$(cat .repair/prompt.md)" \
+            --output-format json \
+            --model "${{ inputs.model || 'claude-opus-5' }}" \
+            --max-budget-usd "${{ inputs.budget_usd || '6' }}" \
+            --allowedTools "Read" "Edit" "Write" "Glob" "Grep" \
+              "Bash(npx vitest run:*)" "Bash(npx tsc:*)" "Bash(npx biome:*)" \
+              "Bash(pnpm exec tsx scripts/eval/:*)" \
+              "Bash(curl:*)" "Bash(cat:*)" "Bash(ls:*)" "Bash(sed:*)" "Bash(grep:*)" "Bash(jq:*)" "Bash(head:*)" "Bash(tail:*)" "Bash(wc:*)" \
+              "Bash(git add:*)" "Bash(git commit:*)" "Bash(git diff:*)" "Bash(git status:*)" "Bash(git log:*)" \
+            --disallowedTools "Bash(git push:*)" "Bash(gh:*)" "Bash(pnpm exec tsx scripts/*:*--execute*)" \
+            > .repair/result.json 2> .repair/agent.err
+          code=$?
+          echo "exit=$code" ; tail -c 600 .repair/agent.err || true
+          jq -r '"cost_usd=\(.total_cost_usd // .cost_usd // "?") turns=\(.num_turns // "?") is_error=\(.is_error // false)"' .repair/result.json 2>/dev/null || echo "no JSON result"
+          echo "── verdict ──"; cat .repair/verdict.json 2>/dev/null || echo "(none written)"
+          exit $code
+
+      - name: Verdict → PR or record
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          B="${{ steps.branch.outputs.branch }}"
+          outcome=$(jq -r '.outcome // "error"' .repair/verdict.json 2>/dev/null || echo error)
+          summary=$(jq -r '.summary // ""' .repair/verdict.json 2>/dev/null)
+          [ "${{ steps.agent.outcome }}" = "failure" ] && [ "$outcome" = "error" ] && summary="agent run failed: $(tail -c 300 .repair/agent.err | tr '\n' ' ')"
+          echo "outcome=$outcome — $summary"
+          pr_url=""
+          if [ "$outcome" = "fixed" ]; then
+            if ! pnpm exec tsx scripts/lanes/repair-lane.ts diff-guard origin/main; then
+              outcome=blocked; summary="touched a protected path — $summary"
+            elif [ -z "$(git log origin/main..HEAD --oneline)" ]; then
+              outcome=skip; summary="verdict fixed but nothing committed — $summary"
+            else
+              git push -u origin "$B"
+              {
+                echo "Repair lane · ledger row \`${{ steps.pick.outputs.picked }}\` · run ${{ github.run_id }}"
+                echo
+                cat .repair/pr-body.md 2>/dev/null || echo "(the agent left no pr-body.md)"
+                echo
+                echo "---"
+                echo "Agent: ${{ inputs.model || 'claude-opus-5' }} · $(jq -r '"cost \(.total_cost_usd // .cost_usd // "?") USD · \(.num_turns // "?") turns"' .repair/result.json 2>/dev/null)"
+                echo "Unattended run; a human merges. The row closes by re-detection after merge (improvements/waves/ledger)."
+                echo
+                echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+              } > .repair/pr.md
+              pr_url=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md --label repair-lane 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+              [ -z "$pr_url" ] && { outcome=error; summary="pushed $B but gh pr create returned no URL"; }
+            fi
+          fi
+          echo "REPAIR_OUTCOME=$outcome" >> "$GITHUB_ENV"
+          echo "REPAIR_PR_URL=$pr_url" >> "$GITHUB_ENV"
+          echo "REPAIR_SUMMARY=$summary" >> "$GITHUB_ENV"
+
+      - name: Record the attempt on main
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          git stash -u -q || true   # the branch's uncommitted scratch stays out of main
+          git checkout -q main && git pull -q --rebase origin main
+          git stash pop -q || true
+          pnpm exec tsx scripts/lanes/repair-lane.ts record "$REPAIR_OUTCOME" "$REPAIR_SUMMARY"
+          git add improvements/lanes/repair-attempts.json improvements/waves/ledger/*.json
+          git -c user.name=stellarlight-repair-lane -c user.email=repair-lane@stellarlight.xyz commit -q -m "chore(repair-lane): ${{ steps.pick.outputs.picked }} → $REPAIR_OUTCOME [skip ci]" || { echo "nothing to record"; exit 0; }
+          git push origin HEAD:main
+
+      # END STATE (QUALITY.md §3): the lane reads back what it claims.
+      - name: Verify the end state
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          echo "row=${{ steps.pick.outputs.picked }} outcome=$REPAIR_OUTCOME pr=${REPAIR_PR_URL:-none}"
+          git fetch -q origin main
+          git show origin/main:improvements/lanes/repair-attempts.json | jq -e --arg id "${{ steps.pick.outputs.picked }}" --arg run "${{ github.run_id }}" '.attempts[] | select(.rowId==$id and .run==$run)' > /dev/null \
+            || { echo "::error::the attempt did not land on main"; exit 1; }
+          if [ "$REPAIR_OUTCOME" = "fixed" ]; then
+            gh pr view "$REPAIR_PR_URL" --json number,state,headRefName --jq '"PR #\(.number) \(.state) \(.headRefName)"' || { echo "::error::verdict fixed but the PR cannot be read back"; exit 1; }
+            git show origin/main:improvements/waves/ledger/$(date -u +%Y-%m-%d)-repair-${{ steps.pick.outputs.slug }}.json | jq -e '.findings[0].status=="in-wave"' > /dev/null || { echo "::error::wave manifest missing"; exit 1; }
+          fi
+          if [ "$REPAIR_OUTCOME" = "error" ]; then echo "::error::the agent run ended in error — see the Agent step"; exit 1; fi
+          echo "end state holds: $REPAIR_OUTCOME recorded$( [ -n "$REPAIR_PR_URL" ] && echo ", $REPAIR_PR_URL open" )"

@@ -517,6 +517,14 @@
 			"executeInput": "execute",
 			"writeSet": "projects.statusBasis on inherited status labels, so a label discriminates instead of being uniform",
 			"since": null
+		},
+		{
+			"id": "repair-lane",
+			"workflow": "repair-lane.yml",
+			"cadence": "cron 47 8 * * *",
+			"executeInput": "none (PR-only)",
+			"writeSet": "pull requests on repair/* branches for ONE open ledger row per run (never merged by the lane); improvements/lanes/repair-attempts.json and a wave manifest per fixed row, committed to main. No production data: the job carries no DATABASE_URI.",
+			"since": "2026-09-14"
 		}
 	]
 }

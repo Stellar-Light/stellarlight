@@ -10,7 +10,8 @@
 			"!improvements/quality/history.json",
 			"!improvements/ledger/findings.json",
 			"!improvements/quality/entities.json",
-			"!improvements/quality/progress.json"
+			"!improvements/quality/progress.json",
+			"!improvements/lanes/repair-attempts.json"
 		]
 	},
 	"formatter": {
