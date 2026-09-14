@@ -34,6 +34,13 @@ import {
 	languageCandidates,
 } from "@/lib/builder-code-language";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	isDegraded,
+	withReadTimeout,
+} from "@/lib/degraded-read";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -193,9 +200,16 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let builders: BuilderRow[] = [];
 	let totalMatching = 0;
+	// Every backend read below that fails or times out adds ONE line here
+	// (degraded-read.ts) and the page is served from whatever did load.
+	// Before this a failed read was a quiet 200 with 0 rows — 13 of 100 login
+	// lookups under the 2026-09-14 eval load — which an agent reads as "no
+	// such builder" and the eval read as a miss.
 	const warnings: string[] = [];
 	const rawByLogin = new Map<string, Record<string, unknown>>();
 
+	if (!payload)
+		warnings.push(degradedWarning("builders roster", "no database handle"));
 	if (payload) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
@@ -228,13 +242,23 @@ export async function GET(req: NextRequest) {
 				}
 			}
 
-			const result = await payload.find({
-				collection: "builders",
-				where,
-				limit: 300,
-				depth: 0,
-				sort: "-is_featured",
-			});
+			// Value form (not the surrounding catch): a failed roster read still
+			// lets the code-derived owner rung below answer a handle query.
+			const roster = await degradedRead(
+				"builders roster",
+				() =>
+					payload.find({
+						collection: "builders",
+						where,
+						limit: 300,
+						depth: 0,
+						sort: "-is_featured",
+					}),
+				{ docs: [] as unknown[] },
+				DEFAULT_READ_TIMEOUT_MS,
+			);
+			if (roster.warning) warnings.push(roster.warning);
+			const result = roster.value;
 
 			// Raw docs by login: the page-level onStellar join needs the Passport
 			// repo declarations + the contributor pass (builders.contributions),
@@ -478,23 +502,26 @@ export async function GET(req: NextRequest) {
 					const byOwner = new Map(
 						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
 					);
-					const rres = await payload.find({
-						collection: "repos",
-						where: { owner: { in: builders.map((b) => b.githubUsername) } },
-						limit: 300,
-						depth: 0,
-						select: {
-							fullName: true,
-							owner: true,
-							url: true,
-							description: true,
-							topics: true,
-							primaryLanguage: true,
-							stars: true,
-							lastCommitAt: true,
-							repoScore: true,
-						},
-					});
+					const rres = await withReadTimeout(
+						payload.find({
+							collection: "repos",
+							where: { owner: { in: builders.map((b) => b.githubUsername) } },
+							limit: 300,
+							depth: 0,
+							select: {
+								fullName: true,
+								owner: true,
+								url: true,
+								description: true,
+								topics: true,
+								primaryLanguage: true,
+								stars: true,
+								lastCommitAt: true,
+								repoScore: true,
+							},
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
 					for (const d of rres.docs as unknown as Array<
 						Record<string, unknown>
 					>) {
@@ -527,8 +554,9 @@ export async function GET(req: NextRequest) {
 							repoScore: typeof d.repoScore === "number" ? d.repoScore : 0,
 						});
 					}
-				} catch {
-					// best-effort — codeEvidence stays [] on error
+				} catch (e) {
+					// best-effort — codeEvidence stays [] on error, and says so
+					warnings.push(degradedWarning("builders code evidence", e));
 				}
 			}
 
@@ -554,25 +582,32 @@ export async function GET(req: NextRequest) {
 			if (q && !location && totalMatching === 0 && derivedHandle) {
 				// `like` is a substring/case-insensitive net; the exact-login filter
 				// below is the precise cut (q="kale" must NOT become owner kalepail).
-				const owned = await payload.find({
-					collection: "repos",
-					where: { owner: { like: derivedHandle } },
-					limit: 200,
-					depth: 0,
-					select: {
-						fullName: true,
-						owner: true,
-						url: true,
-						primaryLanguage: true,
-						stars: true,
-						lastCommitAt: true,
-						repoScore: true,
-						projectSlug: true,
-						projectName: true,
-					},
-				});
+				const owned = await degradedRead(
+					"builders code-derived owner lookup",
+					() =>
+						payload.find({
+							collection: "repos",
+							where: { owner: { like: derivedHandle } },
+							limit: 200,
+							depth: 0,
+							select: {
+								fullName: true,
+								owner: true,
+								url: true,
+								primaryLanguage: true,
+								stars: true,
+								lastCommitAt: true,
+								repoScore: true,
+								projectSlug: true,
+								projectName: true,
+							},
+						}),
+					{ docs: [] as unknown[] },
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				if (owned.warning) warnings.push(owned.warning);
 				const mine = (
-					owned.docs as unknown as Array<Record<string, unknown>>
+					owned.value.docs as unknown as Array<Record<string, unknown>>
 				).filter((d) => String(d.owner ?? "").toLowerCase() === derivedHandle);
 				const row = codeDerivedBuilderRow(derivedHandle, mine);
 				if (row) {
@@ -580,8 +615,10 @@ export async function GET(req: NextRequest) {
 					totalMatching = 1;
 				}
 			}
-		} catch {
-			// fall through
+		} catch (e) {
+			// Every read above is wrapped; this is the filter/sort pass throwing
+			// on a data-shape surprise — still an incomplete page, still said.
+			warnings.push(degradedWarning("builders search", e));
 		}
 
 		// onStellar — what each RETURNED builder has actually shipped, from the
@@ -595,17 +632,20 @@ export async function GET(req: NextRequest) {
 		// best-effort: null on failure, never a block of zeros.
 		if (builders.length) {
 			try {
-				const activity = await builderCodeActivity(
-					payload,
-					builders.map((b) => {
-						const raw = rawByLogin.get(b.githubUsername.toLowerCase());
-						return {
-							github_username: b.githubUsername,
-							projects: (raw?.projects as BuilderLike["projects"]) ?? null,
-							contributions:
-								(raw?.contributions as BuilderLike["contributions"]) ?? null,
-						};
-					}),
+				const activity = await withReadTimeout(
+					builderCodeActivity(
+						payload,
+						builders.map((b) => {
+							const raw = rawByLogin.get(b.githubUsername.toLowerCase());
+							return {
+								github_username: b.githubUsername,
+								projects: (raw?.projects as BuilderLike["projects"]) ?? null,
+								contributions:
+									(raw?.contributions as BuilderLike["contributions"]) ?? null,
+							};
+						}),
+					),
+					DEFAULT_READ_TIMEOUT_MS,
 				);
 				for (const b of builders) {
 					const a = activity.get(b.githubUsername.toLowerCase());
@@ -651,8 +691,10 @@ export async function GET(req: NextRequest) {
 					const b2 = rank(y);
 					return b2[0] - a[0] || b2[1] - a[1] || b2[2] - a[2];
 				});
-			} catch {
-				// leave onStellar null — "could not compute", not "nothing"
+			} catch (e) {
+				// leave onStellar null — "could not compute", not "nothing" — and
+				// say which read could not compute it
+				warnings.push(degradedWarning("builders on-Stellar activity", e));
 			}
 		}
 	}
@@ -672,13 +714,18 @@ export async function GET(req: NextRequest) {
 	let collectionTotal = totalMatching;
 	if (payload && totalMatching === 0) {
 		try {
-			const c = await payload.count({
-				collection: "builders",
-				where: { visibility: { not_equals: "hidden" } },
-			});
+			const c = await withReadTimeout(
+				payload.count({
+					collection: "builders",
+					where: { visibility: { not_equals: "hidden" } },
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			collectionTotal = c.totalDocs;
-		} catch {
-			// keep collectionTotal as-is on a count failure
+		} catch (e) {
+			// keep collectionTotal as-is on a count failure — and say so: the
+			// advisory below reads 0 as "unseeded", which a failed count is not
+			warnings.push(degradedWarning("builders collection count", e));
 		}
 	}
 
@@ -831,7 +878,11 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				// A page a failed read thinned is never pinned — an hour of a
+				// degraded roster served to every caller is the wrong trade.
+				"Cache-Control": isDegraded(warnings)
+					? "no-store"
+					: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);

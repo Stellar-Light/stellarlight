@@ -14,6 +14,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	isDegraded,
+	withReadTimeout,
+} from "@/lib/degraded-read";
 import { embed } from "@/lib/embed";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { findNameMatch } from "@/lib/fuzzy-name";
@@ -61,9 +68,10 @@ import {
  * keyword→semantic rung: when a keyword search comes back thin, this finds
  * conceptually-related projects the literal `like` match misses (the
  * x402-class question: "charge AI agents per API call" → agentic-payments
- * projects, even with no literal term overlap). Returns [] and never throws
- * past the caller's try/catch if the index isn't READY yet or VOYAGE_API_KEY
- * is unset — so the route degrades gracefully to keyword-only.
+ * projects, even with no literal term overlap). Returns [] when
+ * VOYAGE_API_KEY is unset (the rung is off — config, not a failure); an
+ * index that isn't READY or a failed embed call throws to the caller's
+ * catch, which degrades to keyword-only and says so on meta.warnings.
  */
 async function semanticProjectRows(
 	// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
@@ -76,6 +84,9 @@ async function semanticProjectRows(
 	// meta.semantic + the label tell the caller how the results were found.
 	floor = 0.68,
 ) {
+	// No key = the rung is OFF, not a backend failure: [] here, so the caller's
+	// degraded-read warning fires only when embed / $vectorSearch actually fail.
+	if (!process.env.VOYAGE_API_KEY) return [];
 	const queryEmbedding = await embed(q);
 	const db = payload.db?.connection?.db;
 	const collection = db?.collection("projects");
@@ -904,7 +915,10 @@ export async function GET(req: NextRequest) {
 	const unknownParams = [...new Set([...sp.keys()])].filter(
 		(k) => !KNOWN_PARAMS.has(k),
 	);
-	const warnings = unknownParams.length
+	// Also the channel for a backend read that failed or timed out
+	// (degraded-read.ts): each best-effort read below pushes one line here
+	// instead of falling through to a quiet empty or thinner page.
+	const warnings: string[] = unknownParams.length
 		? [
 				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
 			]
@@ -978,6 +992,8 @@ export async function GET(req: NextRequest) {
 	}
 
 	const payload = await getPayloadSafe();
+	if (!payload)
+		warnings.push(degradedWarning("projects search", "no database handle"));
 	let totalMatching = 0;
 	/** Lineage shadows dropped by the fold, counted over the FULL match set so
 	 * `total` is the same number at every `limit` (see the assignment site). */
@@ -1150,13 +1166,32 @@ export async function GET(req: NextRequest) {
 			// a query-shape surprise silently empty ALL search: on any find error,
 			// retry with the proven name/description/category candidate set. Worst
 			// case the endpoint degrades to its prior behavior, never to nothing.
-			let result: Awaited<ReturnType<typeof findCandidates>>;
-			try {
-				result = await findCandidates(where);
-			} catch {
-				result = await findCandidates(
-					tokens.length && !typeParam ? { ...where, or: baseOr } : where,
+			// Each attempt SAYS when it failed (degraded-read.ts → meta.warnings):
+			// a page served by the retry was computed from a THINNER candidate
+			// set (structured clauses dropped) — q="block explorer" carried 2 of
+			// 6 Explorer rows under the 2026-09-14 eval load — and a page both
+			// attempts failed has no keyword candidates at all.
+			const first = await degradedRead(
+				"projects candidate fetch",
+				() => findCandidates(where),
+				null,
+				DEFAULT_READ_TIMEOUT_MS,
+			);
+			let docs: Awaited<ReturnType<typeof findCandidates>>["docs"] =
+				first.value?.docs ?? [];
+			if (first.warning) {
+				warnings.push(first.warning);
+				const retry = await degradedRead(
+					"projects candidate fetch (retry without structured clauses)",
+					() =>
+						findCandidates(
+							tokens.length && !typeParam ? { ...where, or: baseOr } : where,
+						),
+					null,
+					DEFAULT_READ_TIMEOUT_MS,
 				);
+				if (retry.warning) warnings.push(retry.warning);
+				docs = retry.value?.docs ?? [];
 			}
 
 			// ── Fuzzy name recovery (#727) ──────────────────────────────────
@@ -1180,7 +1215,7 @@ export async function GET(req: NextRequest) {
 			// Cost is paid only on a miss: the registry fetch never touches the
 			// hot path, and the corrected re-fetch keeps every caller filter
 			// (?status, ?type, …) so a correction can't smuggle past them.
-			if (result.docs.length === 0 && tokens.length && offset === 0) {
+			if (docs.length === 0 && tokens.length && offset === 0) {
 				try {
 					// limit: 0 + pagination: false = the WHOLE registry. This was
 					// limit: 1000 on a 1000+ collection — an arbitrary Mongo-order
@@ -1190,27 +1225,33 @@ export async function GET(req: NextRequest) {
 					// through to vector neighbours (wave-5 eval, 2026-08-29).
 					// The vet-idea 400-of-500 truncation class, in the rung that
 					// exists to rescue misspellings.
-					const registry = await payload.find({
-						collection: "projects",
-						limit: 0,
-						depth: 0,
-						pagination: false,
-						select: { name: true, slug: true },
-					});
+					const registry = await withReadTimeout(
+						payload.find({
+							collection: "projects",
+							limit: 0,
+							depth: 0,
+							pagination: false,
+							select: { name: true, slug: true },
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
 					const match = findNameMatch(
 						q,
 						registry.docs as Array<{ name: string; slug: string }>,
 					);
 					if (match) {
-						const corrected = await findCandidates({
-							...where,
-							or: [{ slug: { equals: match.slug } }],
-						});
+						const corrected = await withReadTimeout(
+							findCandidates({
+								...where,
+								or: [{ slug: { equals: match.slug } }],
+							}),
+							DEFAULT_READ_TIMEOUT_MS,
+						);
 						// Only adopt the correction if it actually resolves under the
 						// caller's filters. A ?status=Live search for a misspelled
 						// inactive project must stay empty, not quietly widen.
 						if (corrected.docs.length > 0) {
-							result = corrected;
+							docs = corrected.docs;
 							didYouMean = { from: q, to: match.name, slug: match.slug };
 							// Re-derive everything downstream from the corrected name so
 							// the ladder scores against the words we actually searched.
@@ -1219,9 +1260,11 @@ export async function GET(req: NextRequest) {
 							rampIntent = isRampIntent(tokens);
 						}
 					}
-				} catch {
+				} catch (e) {
 					// Recovery is best-effort: a registry hiccup leaves the empty
-					// result exactly as it was, never fails the search.
+					// result exactly as it was, never fails the search — but says
+					// so: an unchecked spelling is an incomplete answer.
+					warnings.push(degradedWarning("projects spelling recovery", e));
 				}
 			}
 
@@ -1233,13 +1276,16 @@ export async function GET(req: NextRequest) {
 			// to semantic. The registry is tiny (~60 rows): one unfiltered fetch
 			// serves BOTH the hay injection below and the response attachment.
 			try {
-				const auditRows = await payload.find({
-					collection: "audits",
-					limit: 500,
-					depth: 0,
-					overrideAccess: true,
-					select: { projectSlug: true, auditor: true, publishedAt: true },
-				});
+				const auditRows = await withReadTimeout(
+					payload.find({
+						collection: "audits",
+						limit: 500,
+						depth: 0,
+						overrideAccess: true,
+						select: { projectSlug: true, auditor: true, publishedAt: true },
+					}),
+					DEFAULT_READ_TIMEOUT_MS,
+				);
 				// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
 				for (const a of auditRows.docs as any[]) {
 					if (!a.projectSlug) continue;
@@ -1258,12 +1304,13 @@ export async function GET(req: NextRequest) {
 					if (at && (!cur.latestAt || at > cur.latestAt)) cur.latestAt = at;
 					auditsBySlug.set(a.projectSlug, cur);
 				}
-			} catch {
+			} catch (e) {
 				// additive best-effort — rows score/serve without audit signal
+				warnings.push(degradedWarning("projects audits rollup", e));
 			}
 
 			projects = (
-				result.docs as Array<{
+				docs as Array<{
 					id: string;
 					name: string;
 					slug: string;
@@ -1809,12 +1856,15 @@ export async function GET(req: NextRequest) {
 			if (projects.length) {
 				try {
 					const pageIds = projects.map((p) => p.id);
-					const pop = await payload.find({
-						collection: "projects",
-						where: { id: { in: pageIds } },
-						depth: 1,
-						limit: pageIds.length,
-					});
+					const pop = await withReadTimeout(
+						payload.find({
+							collection: "projects",
+							where: { id: { in: pageIds } },
+							depth: 1,
+							limit: pageIds.length,
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
 					const byId = new Map(
 						(
 							pop.docs as Array<{
@@ -1842,12 +1892,17 @@ export async function GET(req: NextRequest) {
 							};
 						}
 					}
-				} catch {
+				} catch (e) {
 					// best-effort — ship the page without logo/hackathon populate
+					warnings.push(degradedWarning("projects page populate", e));
 				}
 			}
-		} catch {
-			// fall through
+		} catch (e) {
+			// The keyword stage threw past every wrapped read (a data-shape
+			// surprise in the ranking pass): the page is built without keyword
+			// candidates and the semantic rung may still fill it — the "wrong
+			// page" the 2026-09-14 eval saw. Say so.
+			warnings.push(degradedWarning("projects keyword search", e));
 		}
 	}
 
@@ -1908,11 +1963,14 @@ export async function GET(req: NextRequest) {
 		try {
 			// F3: zero keyword hits = rescue mode (lower floor) — the audit's
 			// misspelling/slug-form probes died at total:0 with no fallback.
-			const sem = await semanticProjectRows(
-				payload,
-				q,
-				limit,
-				scored.length === 0 ? 0.6 : 0.68,
+			const sem = await withReadTimeout(
+				semanticProjectRows(
+					payload,
+					q,
+					limit,
+					scored.length === 0 ? 0.6 : 0.68,
+				),
+				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const have = new Set(scored.map((r) => r.id));
 			semanticAdds = sem
@@ -1930,8 +1988,10 @@ export async function GET(req: NextRequest) {
 						(Array.isArray(r.types) && r.types.includes(typeParam)),
 				)
 				.slice(0, limit - scored.length);
-		} catch {
-			// index not ready / no embedding key — degrade to keyword-only
+		} catch (e) {
+			// index not ready / embed call down — degrade to keyword-only, said
+			// (an unset key never reaches here: semanticProjectRows returns [])
+			warnings.push(degradedWarning("projects semantic fallback", e));
 		}
 	}
 	const usedSemantic = semanticAdds.length > 0;
@@ -1966,18 +2026,23 @@ export async function GET(req: NextRequest) {
 	let codeReferences: RepoResult[] = [];
 	if (q && offset === 0 && payload) {
 		let timer: ReturnType<typeof setTimeout> | undefined;
-		const timeout = new Promise<RepoResult[]>((resolve) => {
-			timer = setTimeout(() => resolve([]), 700);
+		const timeout = new Promise<null>((resolve) => {
+			timer = setTimeout(() => resolve(null), 700);
 		});
 		try {
-			codeReferences = await Promise.race([
-				// Quality surface: archive-tier repos never ride as inline code
-				// references (still reachable via /api/repos/search name lookups).
-				searchRepos(payload, q, { limit: 5 }).then((r) =>
-					r.repos.filter((repo) => repo.tier !== "archive"),
-				),
+			const won = await Promise.race([
+				searchRepos(payload, q, { limit: 5 }),
 				timeout,
 			]);
+			// The 700 ms cut is this enrichment's contract, not a failure — not
+			// warned. A repo read that FAILED inside a search that did finish is
+			// (searchRepos says which).
+			if (won) {
+				warnings.push(...won.warnings);
+				// Quality surface: archive-tier repos never ride as inline code
+				// references (still reachable via /api/repos/search name lookups).
+				codeReferences = won.repos.filter((repo) => repo.tier !== "archive");
+			}
 		} finally {
 			clearTimeout(timer);
 		}
@@ -2018,12 +2083,15 @@ export async function GET(req: NextRequest) {
 			const want = [
 				...new Set(shadowRows.map((s) => s.canonicalSlug as string)),
 			];
-			const canRes = await payload.find({
-				collection: "projects",
-				where: { slug: { in: want } },
-				limit: want.length,
-				depth: 1,
-			});
+			const canRes = await withReadTimeout(
+				payload.find({
+					collection: "projects",
+					where: { slug: { in: want } },
+					limit: want.length,
+					depth: 1,
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
 			const canBySlug = new Map<string, any>(
 				// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
@@ -2131,8 +2199,9 @@ export async function GET(req: NextRequest) {
 				folded.push(effective);
 			}
 			baseProjects = folded;
-		} catch {
+		} catch (e) {
 			// fold is best-effort — serving the shadow beats erroring the search
+			warnings.push(degradedWarning("projects lineage fold", e));
 		}
 	}
 	// Belt on the shadow admission (2026-09-05): a Draft shadow is a candidate
@@ -2194,29 +2263,35 @@ export async function GET(req: NextRequest) {
 	if (payload && baseProjects.length) {
 		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
 		try {
-			const repoRes = await payload.find({
-				collection: "repos",
-				// Quality surface: archive-tier repos never ride inline on project
-				// rows (they stay reachable via /api/repos/search name lookups).
-				where: { projectSlug: { in: slugs }, tier: { not_equals: "archive" } },
-				sort: "-repoScore",
-				limit: Math.min(slugs.length * 8, 500),
-				depth: 0,
-				// Only the fields ProjectRepoRef surfaces — NOT the README excerpt,
-				// which bloated this per-project fetch and timed the endpoint out.
-				select: {
-					fullName: true,
-					url: true,
-					primaryLanguage: true,
-					stars: true,
-					repoScore: true,
-					repoScoreLabel: true,
-					judgeScore: true,
-					hackathonWinner: true,
-					projectSlug: true,
-					lastCommitAt: true,
-				},
-			});
+			const repoRes = await withReadTimeout(
+				payload.find({
+					collection: "repos",
+					// Quality surface: archive-tier repos never ride inline on project
+					// rows (they stay reachable via /api/repos/search name lookups).
+					where: {
+						projectSlug: { in: slugs },
+						tier: { not_equals: "archive" },
+					},
+					sort: "-repoScore",
+					limit: Math.min(slugs.length * 8, 500),
+					depth: 0,
+					// Only the fields ProjectRepoRef surfaces — NOT the README excerpt,
+					// which bloated this per-project fetch and timed the endpoint out.
+					select: {
+						fullName: true,
+						url: true,
+						primaryLanguage: true,
+						stars: true,
+						repoScore: true,
+						repoScoreLabel: true,
+						judgeScore: true,
+						hackathonWinner: true,
+						projectSlug: true,
+						lastCommitAt: true,
+					},
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const bySlug = new Map<string, ProjectRepoRef[]>();
 			for (const r of repoRes.docs as unknown as Array<
 				Record<string, unknown>
@@ -2252,8 +2327,9 @@ export async function GET(req: NextRequest) {
 				);
 				return { ...p, repos, lastActivityAt };
 			});
-		} catch {
+		} catch (e) {
 			// best-effort — ship projects without per-project repos on any error
+			warnings.push(degradedWarning("projects per-project repos", e));
 		}
 	}
 
@@ -2265,12 +2341,15 @@ export async function GET(req: NextRequest) {
 	let builtByMap = new Map<string, { name: string; slug: string }>();
 	if (payload && projectsOut.length) {
 		try {
-			const entRes = await payload.find({
-				collection: "entities",
-				limit: 300,
-				depth: 0,
-				select: { name: true, slug: true, projects: true },
-			});
+			const entRes = await withReadTimeout(
+				payload.find({
+					collection: "entities",
+					limit: 300,
+					depth: 0,
+					select: { name: true, slug: true, projects: true },
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const m = new Map<string, { name: string; slug: string }>();
 			for (const e of entRes.docs as unknown as Array<
 				Record<string, unknown>
@@ -2288,8 +2367,9 @@ export async function GET(req: NextRequest) {
 				}
 			}
 			builtByMap = m;
-		} catch {
+		} catch (e) {
 			// best-effort — results ship without attribution on any error
+			warnings.push(degradedWarning("projects builtBy attribution", e));
 		}
 	}
 	// Anchor corridor data (sls-012): Anchor-typed project records described
@@ -2327,22 +2407,25 @@ export async function GET(req: NextRequest) {
 	const hasAnchorRows = projectsOut.some(isAnchorRow);
 	if (payload && hasAnchorRows) {
 		try {
-			const pRes = await payload.find({
-				collection: "partner-accounts",
-				where: { partnerType: { equals: "anchor" } },
-				limit: 100,
-				depth: 0,
-				select: {
-					name: true,
-					slug: true,
-					country: true,
-					regions: true,
-					assets: true,
-					seps: true,
-					rampTypes: true,
-					lastPartnerUpdateAt: true,
-				},
-			});
+			const pRes = await withReadTimeout(
+				payload.find({
+					collection: "partner-accounts",
+					where: { partnerType: { equals: "anchor" } },
+					limit: 100,
+					depth: 0,
+					select: {
+						name: true,
+						slug: true,
+						country: true,
+						regions: true,
+						assets: true,
+						seps: true,
+						rampTypes: true,
+						lastPartnerUpdateAt: true,
+					},
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const m = new Map<string, AnchorProfile>();
 			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>) {
 				const tags = (arr: unknown): string[] =>
@@ -2381,8 +2464,9 @@ export async function GET(req: NextRequest) {
 				});
 			}
 			anchorProfiles = m;
-		} catch {
+		} catch (e) {
 			// best-effort — rows ship without anchorProfile on any error
+			warnings.push(degradedWarning("projects anchor profiles", e));
 		}
 	}
 
@@ -2652,8 +2736,9 @@ export async function GET(req: NextRequest) {
 				// to every caller for up to 5 minutes (observed 2026-08-17: q=lending
 				// -> total 0, x-vercel-cache STALE, while the origin had 78). Empty
 				// answers are cheap to recompute and expensive to be wrong about.
+				// A page a failed read thinned is the same class: never pinned.
 				"Cache-Control":
-					projectsWithOrg.length === 0
+					projectsWithOrg.length === 0 || isDegraded(warnings)
 						? "no-store"
 						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
