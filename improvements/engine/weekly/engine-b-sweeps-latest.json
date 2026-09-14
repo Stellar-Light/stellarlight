@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 36,
+    "count": 34,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -66,18 +66,6 @@
         "slug": "simbolik",
         "field": "supportedNetworks",
         "prose": "ethereum",
-        "missing": "evm"
-      },
-      {
-        "slug": "agnostic",
-        "field": "supportedNetworks",
-        "prose": "evm",
-        "missing": "evm"
-      },
-      {
-        "slug": "expand-network",
-        "field": "supportedNetworks",
-        "prose": "evm",
         "missing": "evm"
       },
       {
@@ -151,6 +139,18 @@
         "field": "supportedNetworks",
         "prose": "polygon",
         "missing": "evm"
+      },
+      {
+        "slug": "automated-finance",
+        "field": "supportedNetworks",
+        "prose": "base",
+        "missing": "evm"
+      },
+      {
+        "slug": "sollpay",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
       }
     ]
   },
@@ -162,9 +162,9 @@
       "logoUrl": "77% (154/199)"
     },
     "Tooling": {
-      "shortDescription": "98% (178/182)",
-      "types": "100% (182/182)",
-      "logoUrl": "82% (150/182)"
+      "shortDescription": "100% (100/100)",
+      "types": "100% (100/100)",
+      "logoUrl": "87% (87/100)"
     },
     "User-Facing App": {
       "shortDescription": "99% (390/394)",
@@ -231,11 +231,6 @@
           {
             "slug": "soroban-resource-usage-reporter",
             "name": "Soroban Resource Usage Reporter",
-            "scfAwarded": true
-          },
-          {
-            "slug": "autoaction",
-            "name": "AutoAction",
             "scfAwarded": true
           }
         ]
@@ -333,8 +328,8 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 382,
-    "liveStale365": 128,
+    "liveNoDatedSignal": 374,
+    "liveStale365": 113,
     "sample": [
       {
         "slug": "nodies",
@@ -478,6 +473,6 @@
       }
     ]
   },
-  "generatedAt": "2026-09-14T15:44:41Z",
+  "generatedAt": "2026-09-14T16:06:22Z",
   "evalKey": "engine-b-sweeps"
 }
