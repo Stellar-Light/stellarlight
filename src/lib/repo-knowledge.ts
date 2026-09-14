@@ -3569,6 +3569,146 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-14",
 		},
 	],
+	// ── P5 wave 6 (2026-09-14): the last 18 curated-pool repos without a note.
+	"DcentWallet/dcent-web-connector": [
+		{
+			note: "npm dcent-web-connector 2.0.0 (2026-08-27; = repo tag v2.0.0): the connector for integrating the D'CENT biometric hardware wallet into web apps through a popup served from v2bridge.dcentwallet.com; v2 developer guide at dev-docs.dcentwallet.com and a v1 (0.16.x) → v2 migration guide in the repo (README read 2026-09-14; MIT; 14 stars; last push 2026-09-11).",
+			triggers: ["dcent hardware wallet connector"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"HelixLabsDev/helix-mongolian-spring": [
+		{
+			note: "Helix Stellar — Soroban core contracts for cross-chain LST-collateral lending on Stellar; an SCF #41 Build Award project per its README; no releases, no license file, last push 2026-05-15 (read 2026-09-14; Rust).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"TrustLine-id/stellar-validation-engine": [
+		{
+			note: "Trustline's Validation Engine for Stellar: a set of Soroban contracts for compliance and validation solutions, integrating Trustline's oracle with multiple on-chain data sources; developed with Stellar Community Fund support per its README; trust model, key custody and replay protection documented in SECURITY.md (read 2026-09-14; Rust; GPL-2.0; no releases; last push 2026-09-03).",
+			triggers: ["trustline validation engine"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"zenith-protocols/vault-ui": [
+		{
+			note: "Examined 2026-09-14: the README is the unmodified create-next-app template, no description, no releases, last push 2025-07-22 — nothing durable to state publicly.",
+			visibility: "internal",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Gabrielpatrola/stellar-x402-middleware": [
+		{
+			note: "npm stellar-x402-middleware 0.4.0 (2026-08-14; = repo tag v0.4.0): Express and Hono middleware that adds x402-paywalled API routes settled on Stellar — `stellarPaywall({ payTo, price })` (README read 2026-09-14; last push 2026-08-14).",
+			triggers: ["x402 middleware express", "paywall api routes stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"perspectivefi/spectra-stellar-bridge-public": [
+		{
+			note: "Spectra's Principal Token bridge between EVM chains and Stellar (BUSL-1.1), powered by Axelar GMP with a LayerZero V2 adapter available: lock PTs on EVM → wrapped PTs on Stellar, burn wrapped → unlock, and native Stellar PTs → wrapped ERC20s on EVM (Solidity; README read 2026-09-14; no releases; last push 2026-08-03).",
+			triggers: ["spectra bridge stellar", "principal token bridge"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/stellar-community-fund-contracts": [
+		{
+			note: "Neural Quorum Governance contracts — the on-chain voting used by the Stellar Community Fund, plus the Rust 'neurons' modules that feed it; the README states the code is unaudited and under development; last release v1.0.3 (governance pkg 0.1.0, 2026-07-24) (read 2026-09-14; Rust; 12 stars; last push 2026-09-14).",
+			triggers: ["neural quorum governance", "scf voting contracts"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/helm-charts": [
+		{
+			note: "SDF's Helm charts (`helm repo add stellar https://helm.stellar.org/charts`) — the README lists the Horizon API server chart; the last tagged chart release, 0.3.97, dates from 2023-08-09 while the repo still receives pushes (last 2026-09-11) (read 2026-09-14; Go Template; 3 stars).",
+			triggers: ["horizon helm chart"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Gabrielpatrola/agent-pay-stellar": [
+		{
+			note: "npm agent-pay-stellar 1.0.0 (2026-08-09; = repo tag v1.0.0): a CLI + TypeScript library for agents and shell workflows to inspect and pay Stellar x402-gated URLs (request → 402 → inspect → enforce policy → authorize → sign → retry → unlock), built on the official @x402/fetch and @x402/stellar lifecycle with a safety/automation layer around it (README read 2026-09-14; last push 2026-08-09).",
+			triggers: ["agent pay stellar cli"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"soroswap/aggregator": [
+		{
+			note: "Soroswap Aggregator — Soroban contracts that aggregate liquidity across Soroban AMMs through adapters (Soroswap, Phoenix); audited by Runtime Verification (report dated 2024-08-31 in audits/); mainnet addresses published in public/mainnet.json; last push 2025-12-22 (README read 2026-09-14; Rust; Apache-2.0; 6 stars).",
+			triggers: ["soroswap aggregator", "dex aggregator soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/streamhash": [
+		{
+			note: "StreamHash: SDF's Go library for building and querying Minimal Perfect Hash Function indexes over billions of keys with bounded RAM (1B+ keys in roughly 1–75 MB) and streaming, parallel construction; v0.1.0 (2026-08-04) (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
+			triggers: ["minimal perfect hash stellar", "streamhash"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Creit-Tech/Stellar-Router-SDK": [
+		{
+			note: "Stellar Router: a Soroban contract plus SDK to execute several contract calls in one transaction — Soroban allows a single operation per transaction, the router batches the calls; the SDK is published on JSR as @creit-tech/stellar-router-sdk (0.3.0 latest) (README read 2026-09-14; TypeScript; MIT; 6 stars; no GitHub releases; last push 2026-08-23).",
+			triggers: ["batch soroban calls one transaction", "stellar router sdk"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"eq-lab/slender": [
+		{
+			note: "Slender: a pool-based lending protocol on Soroban — suppliers receive interest-accruing sTokens; no releases; last push 2025-10-03 (README read 2026-09-14; Rust; MIT; 7 stars).",
+			triggers: ["slender lending soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/freighter-developer-docs": [
+		{
+			note: "Source of Freighter's developer documentation (Freighter is SDF's non-custodial wallet: browser extension + mobile app) — connecting a dapp with a single call, signing authorization entries for contract calls and arbitrary messages; no releases; last push 2026-06-04 (read 2026-09-14).",
+			triggers: ["freighter developer docs", "integrate freighter dapp"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"karagozemin/QuietBook": [
+		{
+			note: "QuietBook: confidential bookbuilding rounds for tokenized RWAs on Stellar — issuers run a round without exposing investor bids or balances; live demo on Vercel, with a judge runbook and testnet evidence under docs/ (a hackathon-style deliverable) (README read 2026-09-14; TypeScript; 2 stars; no releases; last push 2026-08-07).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/freighter-protocol-icons": [
+		{
+			note: "The icon set Freighter shows for supported protocols — PNG icons at 96×96 plus background images, contributed by pull request under the README's image specs (read 2026-09-14; last push 2026-09-02).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/product-conventions": [
+		{
+			note: "SDF's frontend product conventions — the goals, scope and ethos its product team applies to Stellar user interfaces; last release v2.3.0 (2024-03-13); last push 2026-07-01 (read 2026-09-14; JavaScript; 10 stars).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CometDEX/comet-contracts-v1": [
+		{
+			note: "Comet's Soroban contracts (AGPL-3.0); latest release v1.1.0 (factory pkg 1.0.0, 2026-09-11); the README is a build-and-test stub (read 2026-09-14; Rust; 10 stars; last push 2026-09-11).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
 };
 
 /**
