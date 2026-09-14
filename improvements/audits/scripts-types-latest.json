@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-08-31T01:58:36.621Z",
+	"asOf": "2026-09-14T21:27:06.750Z",
 	"source": "scripts/check-scripts-types.ts",
-	"total": 63,
-	"baselined": 63,
+	"total": 29,
+	"baselined": 29,
 	"added": [],
 	"fixed": []
 }

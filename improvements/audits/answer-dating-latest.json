@@ -1,7 +1,7 @@
 {
-	"asOf": "2026-08-31T15:35:00.921Z",
+	"asOf": "2026-09-14T21:27:15.901Z",
 	"source": "scripts/check-answer-dating.ts",
-	"valuesChecked": 80,
+	"valuesChecked": 83,
 	"undated": 34,
 	"added": [],
 	"fixed": [],
