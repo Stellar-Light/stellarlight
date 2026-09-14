@@ -135,11 +135,12 @@ async function j(path: string): Promise<any> {
  * read, not retrieval; the re-probe separates the two. A non-empty wrong
  * answer is never retried: that IS the finding.
  */
-async function reprobeIfEmpty(
+async function reprobeIfEmpty<T extends Record<string, unknown>>(
 	path: string,
-	first: { projects?: unknown[] },
-): Promise<{ projects?: unknown[] }> {
-	if ((first.projects ?? []).length) return first;
+	first: T,
+	key: "projects" | "builders" | "repos" = "projects",
+): Promise<T> {
+	if (((first[key] as unknown[] | undefined) ?? []).length) return first;
 	await new Promise((r) => setTimeout(r, 2000));
 	return j(path);
 }
@@ -500,7 +501,10 @@ async function main() {
 	await pool(cap(withUser), 4, async (b: any) => {
 		const q = encodeURIComponent(b.githubUsername);
 		try {
-			const d = await j(`/api/builders?q=${q}&limit=10`);
+			// 13 of 100 logins read "0 rows" during the 2026-09-14 16:06Z run and
+			// every one answered live minutes later — the same transient class.
+			const bpath = `/api/builders?q=${q}&limit=10`;
+			const d = await reprobeIfEmpty(bpath, await j(bpath), "builders");
 			const ok = (d.builders ?? []).some(
 				(r: any) => r.githubUsername === b.githubUsername,
 			);
@@ -559,7 +563,8 @@ async function main() {
 		const sym = syms.sort((a, b) => b.length - a.length)[0];
 		const q = encodeURIComponent(sym);
 		try {
-			const d = await j(`/api/repos/search?q=${q}&limit=5`);
+			const rpath = `/api/repos/search?q=${q}&limit=5`;
+			const d = await reprobeIfEmpty(rpath, await j(rpath), "repos");
 			const ok = (d.repos ?? []).some((x: any) => x.fullName === r.fullName);
 			tally("R-SYM", ok, {
 				area: "repos-symbols",
