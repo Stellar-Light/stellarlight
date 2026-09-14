@@ -415,7 +415,7 @@ export default function QualityPage() {
 				}
 				className="mb-6"
 			>
-				<PhaseProgress phases={progress.phases} />
+				<PhaseProgress phases={progress.phases} meters={progress.phaseMeters} />
 			</Card>
 
 			{/* ── the agent door, deliberately at the top, not a footnote ── */}

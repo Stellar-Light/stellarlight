@@ -244,49 +244,9 @@ worked example — it exists to sweep a different pool, and it calls
   computed from the ledger and published on /quality (first measurement:
   30-day rate 100%, 168/168 new findings in already-seen classes; lifetime
   98.7% across 6 classes + meta-eval. The treadmill, now with a number).
-  *Remaining:* one lane is not a system — the gap matrix's other rows
-  (typed, sourced, knowledge notes) still close by hand, and Stage 2
-  requires N intervention-free weeks before auto-merge opens for bounded
-  lanes. **The count is no longer zero, and it never was.** On 2026-09-07
-  the counter read 0 of 63 lanes eligible, and all three causes were the
-  METER: a lane whose write step is NAMED rather than an inline `run:`
-  was unclassifiable and silently uncounted; unknown verdicts were cached
-  so the first fix stayed invisible; and both week walks demanded the
-  CURRENT partial week, so every lane reset to zero each Monday and the
-  board could only ever show a number on a Sunday night. Fixed: **8 lanes
-  are eligible at 4+ intervention-free weeks, 3 clean across the full
-  window.** Eligibility publishes; the promotion stays a human call.
-  **First promotion, 2026-09-13.** Two lanes to Stage 2 — `enrich-tvl` and
-  `scan-repo-code`, both 8 of 8 weeks clean — recorded in
-  `improvements/lanes/lanes.json` (`stage`, `promotedAt`, `endStateClaim`);
-  the checker now reports `2` for a recorded promotion and `2→1` the moment
-  interventions.json carries a correction dated after it, so the stage can
-  be lost the way it was earned. The third 8/8 lane, `refresh-research-corpus`,
-  was held at Stage 1 by the second condition that morning — twelve
-  ingesters, and none read back what it wrote — and promoted the same
-  evening once the claim was made real (#1547): every ingester now re-plans
-  right after the execute pass (`--replan` — the same fetch, the same DB
-  diff, no write) and the lane's `Idempotence` step requires `writes=0`
-  from each; an ingester that cannot re-plan is could-not-check, named,
-  never counted clean. Building it showed why the hold was right: eleven of
-  the fifteen dry modes had never touched the DB (a preview, not a plan),
-  and six write paths keyed on the DB handle instead of `--execute` — a
-  re-plan would have written. Proven in the lane's own log the same evening,
-  twice: the first pass (run 34788208252) went RED — 13 of 15 sources
-  `writes=0`, and the two that were not were real: a 66k-char JSON example
-  the chunker never split, which Payload's 40,000-char cap had rejected on
-  every daily refresh ("new: 1" forever), and two Electric Capital PDFs
-  mapped to one document id, rewriting each other's chunks every run.
-  Fixed (#1548), re-dispatched: run 34789494804, `0 writes planned after
-  execute across 15 re-planned source(s)`. A claim that catches two
-  standing defects on its first pass is a claim. `scan-repo-code` only qualified after its claim was made real:
-  its `--verify` printed persisted rows for a human and asserted nothing, so
-  the scheduled wave now reads back every row it wrote via `verifyWrites`
-  and exits 1 on a mismatch — the same claim `enrich-tvl` already made.
-  Proven in the lane's own log the same evening (run 34781844815, a
-  `--rescan` wave because the routine backlog was exhausted): `── Read-back
-  (10 written row(s)) ── ✓ all 10 row(s) hold the values written`.
+  *Remaining:* three lanes at Stage 2 (enrich-tvl, scan-repo-code, refresh-research-corpus; promoted 2026-09-13, each with an end-state claim proven in its own log), 8 eligible at 4+ clean weeks. Detection is autonomous; repair is not — Stage 3's daily loop that lands root fixes does not exist yet, and every ledger row that needs code is still worked by a human-started agent session.
 
+  *Log (moved off the board 2026-09-14):* one lane is not a system — the gap matrix's other rows (typed, sourced, knowledge notes) still close by hand, and Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes. **The count is no longer zero, and it never was.** On 2026-09-07 the counter read 0 of 63 lanes eligible, and all three causes were the METER: a lane whose write step is NAMED rather than an inline `run:` was unclassifiable and silently uncounted; unknown verdicts were cached so the first fix stayed invisible; and both week walks demanded the CURRENT partial week, so every lane reset to zero each Monday and the board could only ever show a number on a Sunday night. Fixed: **8 lanes are eligible at 4+ intervention-free weeks, 3 clean across the full window.** Eligibility publishes; the promotion stays a human call. **First promotion, 2026-09-13.** Two lanes to Stage 2 — `enrich-tvl` and `scan-repo-code`, both 8 of 8 weeks clean — recorded in `improvements/lanes/lanes.json` (`stage`, `promotedAt`, `endStateClaim`); the checker now reports `2` for a recorded promotion and `2→1` the moment interventions.json carries a correction dated after it, so the stage can be lost the way it was earned. The third 8/8 lane, `refresh-research-corpus`, was held at Stage 1 by the second condition that morning — twelve ingesters, and none read back what it wrote — and promoted the same evening once the claim was made real (#1547): every ingester now re-plans right after the execute pass (`--replan` — the same fetch, the same DB diff, no write) and the lane's `Idempotence` step requires `writes=0` from each; an ingester that cannot re-plan is could-not-check, named, never counted clean. Building it showed why the hold was right: eleven of the fifteen dry modes had never touched the DB (a preview, not a plan), and six write paths keyed on the DB handle instead of `--execute` — a re-plan would have written. Proven in the lane's own log the same evening, twice: the first pass (run 34788208252) went RED — 13 of 15 sources `writes=0`, and the two that were not were real: a 66k-char JSON example the chunker never split, which Payload's 40,000-char cap had rejected on every daily refresh ("new: 1" forever), and two Electric Capital PDFs mapped to one document id, rewriting each other's chunks every run. Fixed (#1548), re-dispatched: run 34789494804, `0 writes planned after execute across 15 re-planned source(s)`. A claim that catches two standing defects on its first pass is a claim. `scan-repo-code` only qualified after its claim was made real: its `--verify` printed persisted rows for a human and asserted nothing, so the scheduled wave now reads back every row it wrote via `verifyWrites` and exits 1 on a mismatch — the same claim `enrich-tvl` already made. Proven in the lane's own log the same evening (run 34781844815, a `--rescan` wave because the routine backlog was exhausted): `── Read-back (10 written row(s)) ── ✓ all 10 row(s) hold the values written`.
 - **P4. Basis strength at scale.** `status: in progress`
   The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
   on the weakest honest bases (site-liveness, source-inherited). P3 proved
@@ -323,30 +283,9 @@ worked example — it exists to sweep a different pool, and it calls
   product-integration) plus 4 within the pre-existing onchain-activity
   tier: real evidence, and a change in what counts — reported as two
   numbers from now on, never as the ratchet falling.
-  *Remaining:* the done bar is weak bases under 50%; the share is 453 of
-  830 Live rows (54.6%) as of 2026-09-13 (486/832, 58%, on 09-07), so ~39
-  rows must move — read `strongBasisSplit` for the current figure, this
-  sentence is a dated snapshot.
-  **Measured 2026-09-07, the obvious lever awards nothing.** `repo-activity`
-  is the basis for rows whose own source moving IS their liveness, and of
-  the 114 library-typed weak rows: 74 have **no linked repo at all**, and
-  the other 40 have repos whose freshest commit is **392 days old**, past
-  the 365-day window. Eligible today: **0**. Those rows are weak because
-  the evidence does not exist, not because a lane has not run — a
-  different problem, and one no lane fixes.
-  Finding the 74 missing repos was tried the same day, by reading each
-  row's OWN site for the GitHub links it publishes: 48 publish none, 9
-  have no website, 8 would not load, 3 resolved, 2 survived an
-  intersection check. That lever is now measured and small.
-  What DID move: 13 rows to operator-announcement from store listings the
-  operator publishes on their own site (Apple lookup by id / Play "Updated
-  on", release inside 90 days), which is the corpus-announcement lever in
-  its cheapest form. 144 weak rows have a website that never answered a
-  successful check — their reason is printed as an owner triage table
-  (relink / Inactive / leave), and that is human work, not a lane. The
-  XLM-denominated channel deposit has no USD ceiling until a price source
-  that path may depend on exists.
+  *Remaining:* done bar is weak bases under 50% of Live rows; 453 of 830 (54.6%) on 2026-09-13 — read `strongBasisSplit` for today's figure. The machine levers are measured out (onchain-eligible 5, repo-activity 0); the ~39 rows that must move are the owner triage table (relink / Inactive / leave), human work.
 
+  *Log (moved off the board 2026-09-14):* the done bar is weak bases under 50%; the share is 453 of 830 Live rows (54.6%) as of 2026-09-13 (486/832, 58%, on 09-07), so ~39 rows must move — read `strongBasisSplit` for the current figure, this sentence is a dated snapshot. **Measured 2026-09-07, the obvious lever awards nothing.** `repo-activity` is the basis for rows whose own source moving IS their liveness, and of the 114 library-typed weak rows: 74 have **no linked repo at all**, and the other 40 have repos whose freshest commit is **392 days old**, past the 365-day window. Eligible today: **0**. Those rows are weak because the evidence does not exist, not because a lane has not run — a different problem, and one no lane fixes. Finding the 74 missing repos was tried the same day, by reading each row's OWN site for the GitHub links it publishes: 48 publish none, 9 have no website, 8 would not load, 3 resolved, 2 survived an intersection check. That lever is now measured and small. What DID move: 13 rows to operator-announcement from store listings the operator publishes on their own site (Apple lookup by id / Play "Updated on", release inside 90 days), which is the corpus-announcement lever in its cheapest form. 144 weak rows have a website that never answered a successful check — their reason is printed as an owner triage table (relink / Inactive / leave), and that is human work, not a lane. The XLM-denominated channel deposit has no USD ceiling until a price source that path may depend on exists.
 - **P5. The knowledge layer consumers keep asking for.** `status: in progress`
   The consumer-measured gap, not a wishlist: knowledgeNotes exist on 16 of
   206 curated-pool repos; supersededBy/deprecatedAt exist nowhere;
@@ -380,28 +319,9 @@ worked example — it exists to sweep a different pool, and it calls
   the prose, 34 became a curated dated map keyed by the superseded repo,
   `successorRepo` is derived from it, and a test holds prose and fields
   together (spec 1.9.36, #1307).
-  *Remaining:* knowledge notes cover **222 of the 382-row curated pool**
-  (2026-09-07); the three still listed carry INTERNAL triage notes, which
-  is the metric's own correct state for a repo examined and found to state
-  no durable public fact. 12,851 indexed repos carry no note — the long
-  tail is by design, the curated pool is the floor that rises.
-  **Two gaps closed by measurement rather than by building, 2026-09-07.**
-  85 of 100 contracts serve no project join — every one of them from a
-  repo that genuinely has no project link, so the join is honest and
-  absent, not missing. And 142 of 171 builders show `projectCount: 0`
-  while the code-derived join under `onStellar.builds` is correct and
-  populated; the api-reference already routes consumers there. A
-  repo-misattribution detector was built the same day and **thrown away**:
-  it flagged 1,789 of 2,361 rows, nearly all correctly attributed, and a
-  guard that cries wolf on three quarters of its population is worse than
-  none.
-  Still open: contracts as first-class joined entities only where the P3
-  lane reached (11 of the 308 expected-tier repos). Supersession is
-  curated (62 entries): a repo archived after its note was written is not
-  covered until the note is, which the note-freshness lane does not yet
-  detect. Supersession now resolves on EVERY read path — it was served by
-  repo-search and withheld by the collection until 2026-09-07, so the same
-  repo answered two different truths depending on the URL.
+  *Remaining:* every curated-pool row (repoScore ≥ 50) carries a public note or a triage verdict as of 2026-09-14 (waves 4–6: 345 → 394 public-noted repos on the detector; the DB floor follows the daily backfill). Still open: contracts as first-class joined entities (11 of the 308 expected-tier repos).
+
+  *Log (moved off the board 2026-09-14):* knowledge notes cover **222 of the 382-row curated pool** (2026-09-07); the three still listed carry INTERNAL triage notes, which is the metric's own correct state for a repo examined and found to state no durable public fact. 12,851 indexed repos carry no note — the long tail is by design, the curated pool is the floor that rises. **Two gaps closed by measurement rather than by building, 2026-09-07.** 85 of 100 contracts serve no project join — every one of them from a repo that genuinely has no project link, so the join is honest and absent, not missing. And 142 of 171 builders show `projectCount: 0` while the code-derived join under `onStellar.builds` is correct and populated; the api-reference already routes consumers there. A repo-misattribution detector was built the same day and **thrown away**: it flagged 1,789 of 2,361 rows, nearly all correctly attributed, and a guard that cries wolf on three quarters of its population is worse than none. Still open: contracts as first-class joined entities only where the P3 lane reached (11 of the 308 expected-tier repos). Supersession is curated (62 entries): a repo archived after its note was written is not covered until the note is, which the note-freshness lane does not yet detect. Supersession now resolves on EVERY read path — it was served by repo-search and withheld by the collection until 2026-09-07, so the same repo answered two different truths depending on the URL.
 
 ## State of the program — as of 2026-09-05
 

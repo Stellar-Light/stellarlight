@@ -1,3 +1,4 @@
+import { clampSentences, plainText } from "@/lib/quality-text";
 /**
  * Quality-page chart primitives. Server-rendered SVG, no client JS, no chart
  * library. Hover tooltips are native <title> elements, which work everywhere
@@ -317,6 +318,7 @@ export function Info({ text }: { text: string }) {
 	return (
 		<span className="group/info relative inline-flex align-middle">
 			<span
+				// biome-ignore lint/a11y/noNoninteractiveTabindex: focusable on purpose — keyboard users reveal the tooltip via focus-within (pre-existing; surfaced by the pre-push lint when this file was next edited, 2026-09-14)
 				tabIndex={0}
 				role="note"
 				aria-label={text}
@@ -523,6 +525,7 @@ export function MissFunnel({
  */
 export function PhaseProgress({
 	phases,
+	meters,
 }: {
 	phases: Array<{
 		id: string;
@@ -532,6 +535,19 @@ export function PhaseProgress({
 		shippedSoFar: string | null;
 		remaining: string | null;
 	}>;
+	/** The phase's own number (build-progress-artifact.ts phaseMeters): the
+	 *  done bar in words, origin → current → target, fraction of the way. */
+	meters?: Record<
+		string,
+		{
+			bar: string;
+			origin: number;
+			current: number;
+			target: number;
+			unit: string;
+			pct: number;
+		}
+	>;
 }) {
 	const done = phases.filter((p) => p.state === "done").length;
 	const tone = (state: string) =>
@@ -579,10 +595,21 @@ export function PhaseProgress({
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-3">
 				{phases.map((p) => {
+					// The card is read in a glance: the live sentence is clamped and
+					// the full paragraph rides behind the disclosure, next to the
+					// evidence — nothing is hidden, nothing walls the page.
+					const rem = p.remaining ? clampSentences(p.remaining) : null;
+					const meter = meters?.[p.id];
 					const detail = [
+						rem?.clamped
+							? {
+									label: "Remaining (full)",
+									text: plainText(p.remaining ?? ""),
+								}
+							: null,
 						p.evidence ? { label: "Evidence", text: p.evidence } : null,
 						p.shippedSoFar
-							? { label: "Shipped so far", text: p.shippedSoFar }
+							? { label: "Shipped so far", text: plainText(p.shippedSoFar) }
 							: null,
 					].filter(Boolean) as Array<{ label: string; text: string }>;
 					return (
@@ -612,11 +639,34 @@ export function PhaseProgress({
 								</span>
 							</span>
 
-							{/* The live part, never folded. */}
-							{p.remaining && (
+							{/* The number first: the phase's own done bar and how far along. */}
+							{meter && (
+								<span className="flex flex-col gap-1">
+									<span className="text-[11px] leading-relaxed text-foreground/80 tabular-nums">
+										<span className="text-muted-foreground">
+											{meter.bar} —{" "}
+										</span>
+										{meter.current} → {meter.target} {meter.unit}
+										<span className="text-muted-foreground">
+											{" "}
+											· {Math.round(meter.pct * 100)}% of the way from{" "}
+											{meter.origin}
+										</span>
+									</span>
+									<span className="h-1 w-full rounded-[2px] bg-[#2F2F2F] overflow-hidden">
+										<span
+											className="block h-full rounded-[2px] bg-amber-400/70"
+											style={{ width: `${Math.round(meter.pct * 100)}%` }}
+										/>
+									</span>
+								</span>
+							)}
+
+							{/* The live part, never folded — but clamped to a glance. */}
+							{rem && (
 								<span className="text-[11px] leading-relaxed text-amber-400/80">
 									<span className="text-amber-400/60">Remaining: </span>
-									{p.remaining}
+									{rem.text}
 								</span>
 							)}
 
