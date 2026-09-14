@@ -248,7 +248,11 @@
 			"cadence": "cron 20 4 * * *",
 			"executeInput": "execute",
 			"writeSet": "repos.activitySignals (commits90d, lastCommitAt, stars, \u2026) on the rows enrich-repos never reaches",
-			"since": null
+			"since": null,
+			"stage": 2,
+			"promotedAt": "2026-09-14",
+			"promotedBy": "owner \u2014 4 of 4 intervention-free weeks (eligible-for-2 in lane-autonomy-latest.json, QUALITY.md \u00a73 entry is 2), and the end-state claim below proven twice in the lane's own log the day it shipped (runs 34876191672 and 34878504746: 232 of 232 rows read back, 0 failed)",
+			"endStateClaim": "read-back of every row whose update resolved via verifyWrites (src/lib/utils/read-back) against the exact payload sent \u2014 activitySignals (commits90d / lastReleaseAt / releaseTag / openPRs / asOf), lastCommitAt, stars, openIssues, isArchived, primaryLanguage \u2014 with a single-key re-fetch before a row is called missing; exit 1 on any field that did not persist or any update that threw; exit 2 when GitHub gave no answer for more than half the candidates (could-not-look, dry runs included); malformed / answered-error / no-answer counts printed every run"
 		},
 		{
 			"id": "enrich-repos",
@@ -424,7 +428,11 @@
 			"cadence": "cron 25 */6 * * *",
 			"executeInput": "execute",
 			"writeSet": "stablecoin registry upserts plus a dated supply / market-cap snapshot",
-			"since": null
+			"since": null,
+			"stage": 2,
+			"promotedAt": "2026-09-14",
+			"promotedBy": "owner \u2014 4 of 4 intervention-free weeks (eligible-for-2 in lane-autonomy-latest.json, QUALITY.md \u00a73 entry is 2), and the end-state claim below proven twice in the lane's own log the day it shipped (runs 34876193891 and 34883298356: 41 stablecoins + 41 snapshots read back, 0 kept-previous on the second)",
+			"endStateClaim": "read-back of every row whose write resolved via verifyWrites (src/lib/utils/read-back) against the exact payload sent, on every key of that payload, in both collections \u2014 stablecoins (current rows and retirements, keyed on assetId) and stablecoin-snapshots (keyed on assetId:day) \u2014 with a single-key re-fetch before a row is called missing; exit 1 on any field that did not persist, any write that threw, or the rate-limit pacing finding; exit 2 when more than half the live-tracked roster came back unmeasured (could-not-look, dry runs included); kept-forward / unmeasured / retired counts printed every run"
 		},
 		{
 			"id": "scan-repo-code",
