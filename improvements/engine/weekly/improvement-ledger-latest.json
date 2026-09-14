@@ -1,46 +1,46 @@
 {
-	"generatedAt": "2026-09-14T11:11:33.588Z",
-	"total": 663,
-	"open": 4,
+	"generatedAt": "2026-09-14T17:22:49.497Z",
+	"total": 664,
+	"open": 2,
 	"refreshQueue": 15,
 	"blockedUpstream": 17,
 	"blockedBy": {
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 627,
+	"closed": 630,
 	"verified": 7,
-	"cleared": 620,
+	"cleared": 623,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 404,
+	"clearedOnSilence": 407,
 	"closingRate": 0.34,
 	"silenceShare": 0.61,
 	"recurrence": {
-		"reopened": 6,
+		"reopened": 5,
 		"reopenedShareOfClosures": 0.01,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 284,
-				"recurred": 133,
-				"ratePct": 46.8
+				"newFindings": 285,
+				"recurred": 134,
+				"ratePct": 47
 			},
 			"lifetime": {
-				"newFindings": 663,
-				"recurred": 154,
-				"ratePct": 23.2
+				"newFindings": 664,
+				"recurred": 155,
+				"ratePct": 23.3
 			}
 		}
 	},
-	"oldestOpenDays": 54,
+	"oldestOpenDays": 5,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
 			"surface": "retrieval",
-			"open": 3,
-			"total": 339
+			"open": 1,
+			"total": 340
 		},
 		{
 			"surface": "directory",
@@ -76,13 +76,6 @@
 	"unverifiedOpen": 0,
 	"quietSources": [],
 	"topOpen": [
-		{
-			"id": "engine-a-recall:response",
-			"surface": "retrieval",
-			"source": "engine-a-recall",
-			"probe": "response",
-			"severity": "medium"
-		},
 		{
 			"id": "raven-routing:top-stellar-projects-by-github-activity",
 			"surface": "consumer",
@@ -130,6 +123,13 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "what can you actually build on Stellar?",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:what-wallet-should-i-use-for-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "what wallet should I use for Stellar?",
 			"severity": "medium"
 		}
 	]
