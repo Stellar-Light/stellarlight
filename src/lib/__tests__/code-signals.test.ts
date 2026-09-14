@@ -528,6 +528,10 @@ describe("allowlist", () => {
 		expect(isAllowlisted("stellar/anything")).toBe(true);
 		expect(isAllowlisted("soroswap/core")).toBe(true);
 		expect(isAllowlisted("randomuser/random-repo")).toBe(false);
+		// SDF's frontier org (2026-09-14): stellar-raven and the Zig/C Soroban
+		// SDKs sat at proof=none depth=0 because the canonical pin skipped them.
+		expect(isAllowlisted("stellar-experimental/stellar-raven")).toBe(true);
+		expect(isAllowlisted("Stellar-Experimental/zig-soroban-sdk")).toBe(true);
 	});
 	it("isProtected honors per-doc curation signals", () => {
 		expect(isProtected({ fullName: "x/y", scfAwarded: true })).toBe(true);
