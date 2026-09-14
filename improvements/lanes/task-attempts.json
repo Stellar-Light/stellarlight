@@ -1,5 +1,4 @@
 {
-	"note": "One entry per unit a task lane (or, before it existed, a hand-run session) worked. The picker leaves a unit and its items alone for 30 days after an attempt; merged work leaves the pool by itself.",
 	"attempts": [
 		{
 			"task": "notes",
@@ -46,7 +45,9 @@
 		{
 			"task": "claims",
 			"unit": "enrich-repo-activity",
-			"items": ["enrich-repo-activity"],
+			"items": [
+				"enrich-repo-activity"
+			],
 			"date": "2026-09-14",
 			"run": "hand-2026-09-14",
 			"outcome": "fixed",
@@ -57,7 +58,9 @@
 		{
 			"task": "claims",
 			"unit": "refresh-stablecoins",
-			"items": ["refresh-stablecoins"],
+			"items": [
+				"refresh-stablecoins"
+			],
 			"date": "2026-09-14",
 			"run": "hand-2026-09-14",
 			"outcome": "fixed",
@@ -154,6 +157,58 @@
 			"pr": "https://github.com/Stellar-Light/stellarlight/pull/1566",
 			"costUsd": null,
 			"note": "6 of 981 unsourced bases by an agent session before the lane existed; merged, applied by curate-projects"
+		},
+		{
+			"task": "packets",
+			"unit": "packets-2026-09-14",
+			"items": [
+				"borderless",
+				"boss-pay",
+				"bp-ventures",
+				"bravepay",
+				"bridge",
+				"brz",
+				"cables",
+				"cantina",
+				"cartwey",
+				"cash-abroad",
+				"cashlink",
+				"cedar",
+				"cede",
+				"centiiv",
+				"certora",
+				"chainless",
+				"chainlink-oracles-relayer",
+				"changera",
+				"chartui",
+				"chats",
+				"cheesecake-labs",
+				"chef",
+				"chimpdao",
+				"chronospay",
+				"cinko",
+				"city-states",
+				"clear",
+				"clickpesa-debt-fund",
+				"clickspesa",
+				"clob",
+				"coala-pay",
+				"coca",
+				"coinme",
+				"coins-ph",
+				"coinsender",
+				"command-robotics",
+				"conomy",
+				"constellation",
+				"copperx",
+				"crebit"
+			],
+			"date": "2026-09-14",
+			"run": "34878742304",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": null,
+			"note": "pushed task/packets-2026-09-14-20260914-1807 but gh pr create returned no URL"
 		}
 	]
 }
