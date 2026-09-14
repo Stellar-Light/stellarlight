@@ -60,6 +60,7 @@ jobs:
 
       - name: Pick one row
         id: pick
+        shell: bash
         run: |
           pnpm exec tsx scripts/lanes/repair-lane.ts pick ${{ inputs.row != '' && format('--row {0}', inputs.row) || '' }} | tee pick.log
           if grep -q '^pick: none' pick.log; then echo "picked=" >> "$GITHUB_OUTPUT"; exit 0; fi
