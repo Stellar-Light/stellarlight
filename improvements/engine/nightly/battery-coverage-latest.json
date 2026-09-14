@@ -1,16 +1,5 @@
 {
-	"generatedAt": "2026-09-13T17:14:16.399Z",
+	"generatedAt": "2026-09-14T11:10:37.415Z",
 	"detector": "battery-coverage",
-	"failures": [
-		{
-			"probe": "battery:q-ti-java-sdk-wallet-feebump",
-			"note": "top 0.54 < 0.6 via research/confidence for \"What's the correct Maven dependency for the Java Stellar SDK (network.lightsail)\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-sep-4-2026",
-			"surface": "corpus"
-		},
-		{
-			"probe": "battery:q-tool-soroban-auth-audit-live",
-			"note": "top 0.45 < 0.6 via research/confidence for \"What do the currently indexed primary audits say about Soroban authorization rec\" (tooling-infra); best: https://lumenloop.com/research/stellar-weekly-roundup-week-sep-4-2026",
-			"surface": "corpus"
-		}
-	]
+	"failures": []
 }
