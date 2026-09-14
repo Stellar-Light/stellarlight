@@ -93,11 +93,23 @@ async function main(): Promise<number> {
 				codeInUse: d.codeInUse ?? null,
 			},
 		);
-		const cur = JSON.stringify(
-			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-			(d.knowledgeNotes ?? []).map((n: any) => n.note),
-		);
-		const next = JSON.stringify(notes.map((n) => n.note));
+		// Compare every STORED subfield, not the text alone: a visibility flip
+		// or a re-dated curated fact (asOf) must reach the row too. `triggers`
+		// are not a stored subfield (Payload drops them) and derived notes carry
+		// a fresh asOf every run — comparing either would churn every row daily.
+		const shape = (n: {
+			note?: string;
+			source?: string;
+			asOf?: string | null;
+			visibility?: string | null;
+		}) => [
+			n.note,
+			n.source,
+			n.source === "curated" ? (n.asOf ?? null) : null,
+			n.visibility ?? "public",
+		];
+		const cur = JSON.stringify((d.knowledgeNotes ?? []).map(shape));
+		const next = JSON.stringify(notes.map(shape));
 		if (cur === next) {
 			same += 1;
 			continue;
