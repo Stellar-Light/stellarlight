@@ -52,13 +52,31 @@ interface Failure {
 }
 
 const failures: Failure[] = [];
-const buckets = new Map<string, { ok: number; total: number }>();
+// Could-not-check: the probe never got an answer (a 5xx after the retry, a
+// network error, a redirect) — the trinary state the recall question cannot
+// grade. It reaches the board and the JSON as `unchecked`, never `failures`:
+// every fetch error used to be tallied as a miss with `expected:
+// "response"`, and the ledger keys rows by `expected`, so they all collapsed
+// into ONE row, engine-a-recall:response, open since 2026-07-22 and revived
+// by any single transient. Retrieval is graded on what was actually read.
+const unchecked: Failure[] = [];
+const buckets = new Map<
+	string,
+	{ ok: number; total: number; unchecked: number }
+>();
 
 function tally(bucket: string, ok: boolean, f?: Omit<Failure, "bucket">) {
-	const b = buckets.get(bucket) ?? { ok: 0, total: 0 };
+	const b = buckets.get(bucket) ?? { ok: 0, total: 0, unchecked: 0 };
 	b.total++;
 	if (ok) b.ok++;
 	else if (f) failures.push({ bucket, ...f });
+	buckets.set(bucket, b);
+}
+
+function couldNotCheck(bucket: string, f: Omit<Failure, "bucket">) {
+	const b = buckets.get(bucket) ?? { ok: 0, total: 0, unchecked: 0 };
+	b.unchecked++;
+	unchecked.push({ bucket, ...f });
 	buckets.set(bucket, b);
 }
 
@@ -201,7 +219,7 @@ async function main() {
 					(d.projects ?? []).map((r: any) => r.slug).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-KNOWN", false, {
+			couldNotCheck("P-KNOWN", {
 				area: p.category ?? "?",
 				probe: `${BASE}/api/projects/search?q=${q}`,
 				expected: "response",
@@ -268,7 +286,7 @@ async function main() {
 				});
 			}
 		} catch (e) {
-			tally("P-TYPE", false, {
+			couldNotCheck("P-TYPE", {
 				area: type,
 				probe: phrase,
 				expected: "response",
@@ -302,7 +320,7 @@ async function main() {
 					: "empty",
 			});
 		} catch (e) {
-			tally("P-ORDER", false, {
+			couldNotCheck("P-ORDER", {
 				area: type,
 				probe: phrase,
 				expected: "response",
@@ -338,7 +356,7 @@ async function main() {
 					(d.projects ?? []).map((r: any) => r.slug).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-PHRASE", false, {
+			couldNotCheck("P-PHRASE", {
 				area: p.category ?? "?",
 				probe: phrase,
 				expected: "response",
@@ -419,7 +437,7 @@ async function main() {
 				observed: returned.slice(0, 5).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-ATTR", false, {
+			couldNotCheck("P-ATTR", {
 				area,
 				probe: q,
 				expected: "response",
@@ -450,7 +468,7 @@ async function main() {
 				observed: `${(d.partners ?? []).length} rows, absent`,
 			});
 		} catch (e) {
-			tally("PA-CAP", false, {
+			couldNotCheck("PA-CAP", {
 				area: desc,
 				probe: path,
 				expected: "response",
@@ -476,7 +494,7 @@ async function main() {
 				observed: `${(d.builders ?? []).length} rows, absent`,
 			});
 		} catch (e) {
-			tally("B-USER", false, {
+			couldNotCheck("B-USER", {
 				area: "builders",
 				probe: String(b.githubUsername),
 				expected: "response",
@@ -534,7 +552,7 @@ async function main() {
 					(d.repos ?? []).map((x: any) => x.fullName).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("R-SYM", false, {
+			couldNotCheck("R-SYM", {
 				area: "repos-symbols",
 				probe: sym,
 				expected: "response",
@@ -567,18 +585,33 @@ async function main() {
 			bucket: k,
 			ok: v.ok,
 			total: v.total,
+			unchecked: v.unchecked,
 			rate: Math.round(rate * 1000) / 10,
 			floor: floor * 100,
 			status,
 		};
 	});
+	// Not red, but not silent: a run that could not read a visible share of
+	// its probes is measuring the API, not retrieval — say so where the lane
+	// log and the artifact both carry it.
+	const probed = board.reduce((n, b) => n + b.total + b.unchecked, 0);
+	if (unchecked.length > probed * 0.02)
+		console.error(
+			`WARN: ${unchecked.length} of ${probed} probes could not be checked (5xx / network) — the API was unwell during this run`,
+		);
 
 	if (JSON_OUT) {
 		console.log(
 			JSON.stringify(
 				// generatedAt travels IN the artifact: the guard derives freshness
 				// from it, and a stampless run previously rendered as ageless.
-				{ generatedAt: new Date().toISOString(), base: BASE, board, failures },
+				{
+					generatedAt: new Date().toISOString(),
+					base: BASE,
+					board,
+					failures,
+					unchecked,
+				},
 				null,
 				1,
 			),
@@ -596,6 +629,11 @@ async function main() {
 			);
 		if (failures.length > 60)
 			console.log(`  … +${failures.length - 60} more (use --json for all)`);
+		if (unchecked.length) {
+			console.log(`\n── could not check (${unchecked.length}) ──`);
+			for (const f of unchecked.slice(0, 20))
+				console.log(`  [${f.bucket}] ${f.observed}`);
+		}
 	}
 	process.exit(red ? 1 : 0);
 }
