@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-14T17:38:15.150Z",
+	"asOf": "2026-09-14T17:43:45.628Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 98,
-	"healthy": 98,
+	"checked": 97,
+	"healthy": 97,
 	"broken": [],
 	"rows": [
 		{
@@ -121,10 +121,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-06T17:36:53Z",
-			"ageDays": 7,
+			"ageDays": 8,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 7d ago (manual tool — age not judged)"
+			"why": "last green 8d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-provenance.yml",
@@ -241,7 +241,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:34:18Z",
+			"lastSuccessAt": "2026-09-14T17:40:07Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -263,10 +263,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:35:51Z",
+			"lastSuccessAt": "2026-09-14T17:40:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -439,10 +439,10 @@
 			"name": "Enrich repo activity (unenriched lane)",
 			"cron": "20 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T09:55:12Z",
+			"lastSuccessAt": "2026-09-14T17:40:36Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 29,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -674,7 +674,7 @@
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 93,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -715,10 +715,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-07T17:38:28Z",
-			"ageDays": 68,
+			"ageDays": 69,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 68d ago (manual tool — age not judged)"
+			"why": "last green 69d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "patch-rozo.yml",
@@ -828,17 +828,6 @@
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 38,
-			"why": "last green 0d ago"
-		},
-		{
-			"file": "refresh-stablecoins.yml",
-			"name": "Refresh stablecoins",
-			"cron": "25 */6 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-14T12:59:55Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1000,10 +989,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:35:51Z",
+			"lastSuccessAt": "2026-09-14T17:41:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 70,
+			"runs": 76,
 			"why": "last green 0d ago"
 		},
 		{
