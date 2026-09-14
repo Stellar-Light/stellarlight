@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-13T10:48:37.048Z",
+	"generatedAt": "2026-09-14T11:15:26.823Z",
 	"source": "scripts/check-repo-ranking.ts",
 	"rule": "Written ordering claims about repoScore, graded against the live index. An inversion is a finding for a human; a missing repo is never a pass.",
 	"tally": {
@@ -77,7 +77,7 @@
 			"higher": "stellar/stellar-docs",
 			"lower": "402md/agentcard",
 			"why": "The official Stellar documentation over a judged hackathon entry. Tests the same first-party blindness on a repo with no Soroban code at all.",
-			"higherScore": 70,
+			"higherScore": 71,
 			"lowerScore": 38,
 			"verdict": "holds"
 		},
