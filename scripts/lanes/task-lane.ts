@@ -174,16 +174,14 @@ async function pick(task: TaskId): Promise<Pick> {
 		};
 	}
 	// packets: the evidence script IS the work — no agent, no prompt.
-	const stem = `improvements/quality/verification-packets-${today}`;
-	console.log(
-		"packets: running scripts/data/verification-packets.ts --limit 40 --skip-packeted",
-	);
-	execSync(
-		"pnpm exec tsx scripts/data/verification-packets.ts --limit 40 --skip-packeted",
-		{
-			stdio: ["ignore", "inherit", "inherit"],
-		},
-	);
+	// one stem per RUN: a same-day dispatch must not overwrite a packet a human
+	// already holds (the first CI run, 2026-09-14 18:07Z, rewrote the hand-built
+	// verification-packets-2026-09-14 pair on its branch)
+	const hhmm = new Date().toISOString().slice(11, 16).replace(":", "");
+	const stem = `improvements/quality/verification-packets-${today}-${hhmm}`;
+	const cmd = `pnpm exec tsx scripts/data/verification-packets.ts --limit 40 --skip-packeted --out ${stem}`;
+	console.log(`packets: running ${cmd}`);
+	execSync(cmd, { stdio: ["ignore", "inherit", "inherit"] });
 	const j = readJson<{
 		population?: number;
 		packets?: { slug: string; proposal: string }[];

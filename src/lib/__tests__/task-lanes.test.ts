@@ -111,6 +111,10 @@ describe("task lane: notes picker", () => {
 			pickNotes(pool, new Set(), [], 1, now).map((r) => r.fullName),
 		).toEqual(["B/Noted"]);
 	});
+	it("does not count an error outcome — the unit was never worked", () => {
+		const err = attempt({ items: ["d/tried"], outcome: "error", pr: null });
+		expect(recentlyAttempted([err], "notes", "d/tried", now)).toBe(false);
+	});
 	it("forgets an attempt after the retry window", () => {
 		const old = attempt({ items: ["d/tried"], date: "2026-07-01" });
 		expect(recentlyAttempted([old], "notes", "d/tried", now)).toBe(false);

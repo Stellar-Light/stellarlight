@@ -3,7 +3,7 @@
  * app-only weak-basis Live rows. READ-ONLY: the public API plus each
  * project's own website. No DB credentials, no writes, ever.
  *
- *   pnpm exec tsx scripts/data/verification-packets.ts [--limit 60] [--offset 0] [--skip-packeted]
+ *   pnpm exec tsx scripts/data/verification-packets.ts [--limit 60] [--offset 0] [--skip-packeted] [--out <stem>]
  *   (--skip-packeted drops every slug already in an improvements/quality/verification-packets-*.json)
  *
  * WHY. The quality board's strongBasis row: ~800 Live rows rest on a weak
@@ -554,7 +554,11 @@ const packets = await pool(batch, CONCURRENCY, async (row) => {
 });
 
 const date = new Date().toISOString().slice(0, 10);
-const stem = `improvements/quality/verification-packets-${date}${OFFSET ? `-o${OFFSET}` : ""}`;
+const outArg = process.argv.indexOf("--out");
+const stem =
+	outArg > 0
+		? process.argv[outArg + 1]
+		: `improvements/quality/verification-packets-${date}${OFFSET ? `-o${OFFSET}` : ""}`;
 mkdirSync("improvements/quality", { recursive: true });
 writeFileSync(
 	`${stem}.json`,

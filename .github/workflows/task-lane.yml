@@ -172,9 +172,17 @@ jobs:
               } > .repair/pr.md
               # the label is repo config; a lane must not lose a fixed row to a missing one
               # (2026-09-14: the repair lane's first real fix ended `error` exactly so)
-              pr_url=$(gh pr create --base main --head "$B" --title "task($T): $summary" --body-file .repair/pr.md --label task-lane 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
-              [ -z "$pr_url" ] && pr_url=$(gh pr create --base main --head "$B" --title "task($T): $summary" --body-file .repair/pr.md 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
-              [ -z "$pr_url" ] && { outcome=error; summary="pushed $B but gh pr create returned no URL"; }
+              pr_out=$(gh pr create --base main --head "$B" --title "task($T): $summary" --body-file .repair/pr.md --label task-lane 2>&1) || true
+              pr_url=$(echo "$pr_out" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+              if [ -z "$pr_url" ]; then
+                echo "gh pr create (with label): $(echo "$pr_out" | tail -2 | tr '\n' ' ')"
+                pr_out=$(gh pr create --base main --head "$B" --title "task($T): $summary" --body-file .repair/pr.md 2>&1) || true
+                pr_url=$(echo "$pr_out" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+              fi
+              # the failure names itself (2026-09-14: two runs recorded "returned no URL" for
+              # "GitHub Actions is not permitted to create or approve pull requests" — a repo
+              # setting, Settings → Actions → General; the branch is pushed, a human can open it)
+              [ -z "$pr_url" ] && { outcome=error; summary="pushed $B; gh pr create failed: $(echo "$pr_out" | tail -1 | cut -c1-160)"; }
             fi
           fi
           echo "TASK_OUTCOME=$outcome" >> "$GITHUB_ENV"
