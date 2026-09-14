@@ -3404,7 +3404,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/fundable-sdk": [
 		{
-			note: "npm @fundable/sdk 0.2.1 (2026-09-11; the repo's last tag v0.1.0 of 2026-07-26 lags npm): multichain TypeScript SDK for Fundable token streams and distributions — Stellar is the first implemented chain adapter and the public domain types deliberately carry no Soroban-specific values; 0.x API, docs on GitBook (README read 2026-09-14; MIT; last push 2026-09-13).",
+			note: "npm @fundable/sdk 0.2.3 (2026-09-14; the repo's last tag v0.1.0 of 2026-07-26 lags npm): multichain TypeScript SDK for Fundable token streams and distributions — Stellar is the first implemented chain adapter and the public domain types deliberately carry no Soroban-specific values; 0.x API, docs on GitBook (README read 2026-09-14; MIT; last push 2026-09-13).",
 			triggers: ["fundable token streams", "fundable sdk stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3959,6 +3959,292 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			],
 			source: "curated",
 			asOf: "2026-09-14",
+		},
+	],
+	// ── P5 wave 8 (2026-09-14) — the next 25 curated-pool repos with no entry,
+	// best-scoring first (pool: source != ec-taxonomy, repoScore >= 30, not
+	// archived; 524 of 1,093 carried none). Every fact below was read on
+	// 2026-09-14 from the repo's own GitHub metadata, its README, its releases,
+	// or a package registry whose `repository` points back at that repo.
+	"axelarnetwork/axelar-amplifier-stellar": [
+		{
+			note: "Axelar's cross-chain gateway protocol (CGP) implemented in Soroban for Stellar — the README points at axelarnetwork/cgp-spec for the reference Solidity contracts, publishes workspace rustdocs at axelarnetwork.github.io/axelar-amplifier-stellar, and pins `cargo install --locked stellar-cli --version 25.2.0` for deployment; newest tag stellar-axelar-example-v1.0.10 (2026-06-15) (README read 2026-09-14; Apache-2.0; 11 stars; last push 2026-09-09).",
+			triggers: [
+				"axelar stellar gateway",
+				"cross-chain gateway soroban",
+				"axelar amplifier stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Trustless-Work/trustlesswork-smart-contract-stellar": [
+		{
+			note: "The Soroban escrow contracts behind Trustless Work (trustlesswork.com): a platform integrates escrows into its own user flow and funds are held until milestones are approved by the client, denominated in stablecoins such as USDC; the README links an API reference (docs.trustlesswork.com) and an on-chain contract reference at docs/CONTRACT_REFERENCE.md (README read 2026-09-14; no license file; 25 stars; no releases; last push 2026-09-09).",
+			triggers: [
+				"trustless work escrow",
+				"milestone escrow stellar",
+				"permissionless escrow soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-dao-contract": [
+		{
+			note: "The DAO contract of the Reflector oracle network (reflector.network). Its README documents the whole interface: `config(e, ContractConfig)` at deployment, `unlock(e, developer, operators)` which releases the weekly token distribution to the developer organisation and operators and requires admin, `available(e, claimant) -> i128`, and a claim entry point; newest tag v1.1.0_reflector-dao-contract_cli22.0.1 (2024-12-11) (README read 2026-09-14; MIT; last push 2025-10-20).",
+			triggers: [
+				"reflector dao contract",
+				"reflector token unlock",
+				"dao weekly unlock stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/contract-client-js": [
+		{
+			note: "npm @reflector/contract-client 2.2.0 (published 2026-09-11; the package's repository field points back at this repo): the JavaScript client for Reflector's contracts — the Pulse and Beam price oracles, DAO governance and Flare price subscriptions. Every client takes the same parameters (publicKey, rpcUrl, a signTransaction callback for writes, contractId) and it declares a peer dependency on @stellar/stellar-sdk >= v17 (README read 2026-09-14; MIT; last push 2026-09-13).",
+			triggers: [
+				"reflector contract client",
+				"pulse beam oracle client",
+				"reflector javascript client",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/dao-client": [
+		{
+			note: "Client for the Reflector DAO contract (GitHub repo description; the README is empty and no package is published under this name as of 2026-09-14) — the DAO contract itself is reflector-network/reflector-dao-contract (metadata read 2026-09-14; MIT; last push 2026-09-04).",
+			triggers: ["reflector dao client"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-node": [
+		{
+			note: "The node server each operator runs in the Reflector cluster, the decentralized Stellar price-feed oracle. Its README states the operating requirements: deploy the Reflector Oracle contract first, then protect it with a multisig account whose every signer is a distinct cluster node and whose master weight is 0, and give the node an app.config.json in its home directory; architecture is documented in docs/how-it-works.md. Newest release v0.12.9 (2026-08-27); nothing is published on npm under @reflector/reflector-node (README read 2026-09-14; MIT; last push 2026-08-27).",
+			triggers: [
+				"reflector node operator",
+				"reflector cluster multisig",
+				"price feed oracle node stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Tellus-Cooperative/stellar-paylink": [
+		{
+			note: "Non-custodial payment links for Stellar, published by Tellus Cooperative — a recipient names an amount and asset, shares a link or QR code, and the payer approves the transaction in their own wallet, with server-side on-chain verification. The README calls the product Stellar HareLink (the repository is named stellar-paylink) and badges it Stellar Testnet at v0.1.0-rc.1, its newest release (2026-09-12); demo at stellar-paylink-lac.vercel.app (README read 2026-09-14; MIT; last push 2026-09-12).",
+			triggers: [
+				"stellar payment link",
+				"payment qr stellar",
+				"harelink paylink",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lumenbro/lumenjoule-sdk": [
+		{
+			note: "npm lumenjoule-sdk 1.2.0 (published 2026-03-13; the package's repository field points back at this repo): an x402 client SDK that gives an AI agent a self-custodial Stellar wallet with on-chain spend limits — the agent calls any x402-enabled API, the SDK detects the 402, signs a payment from the smart wallet and retries. The README states the signing key stays on the caller's device (Secure Enclave, encrypted file, or a Stellar keypair) and the server only wraps transactions for gas sponsorship, contrasting this with MPC wallets that hold key shards (README read 2026-09-14; MIT; last push 2026-03-17).",
+			triggers: [
+				"lumenjoule sdk",
+				"agent spend limits stellar",
+				"x402 self-custodial agent wallet",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"OpenZeppelin/relayer-plugin-x402-facilitator": [
+		{
+			note: "An OpenZeppelin Relayer plugin that implements the x402 facilitator API, exposing /verify, /settle and /supported under the Relayer's plugin router so an operator can serve x402 payments from a Relayer instance; the README states it works with the Coinbase x402 ecosystem (for example @x402/express) and that this version implements x402 v2, with v1 support only in earlier releases. Newest release v0.5.0 (2026-09-10) (README read 2026-09-14; AGPL-3.0; 3 stars; last push 2026-09-10).",
+			triggers: [
+				"x402 facilitator plugin",
+				"openzeppelin relayer x402",
+				"verify settle supported endpoints",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"OpenZeppelin/ui-builder": [
+		{
+			note: "OpenZeppelin's UI Builder (builder.openzeppelin.com): pick a contract function and it generates a React interface with wallet connect and multi-network support that can be exported as a complete app; its GitHub topics list stellar alongside evm, solana and midnight, and the README marks the project as still in development. Newest release v2.0.0 (2026-08-25) (README read 2026-09-14; AGPL-3.0; 48 stars; last push 2026-09-10).",
+			triggers: [
+				"ui builder contract",
+				"generate contract frontend",
+				"openzeppelin ui builder",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"soroswap/sdk": [
+		{
+			note: "npm @soroswap/sdk 0.5.0 (published 2026-08-11; the package's repository field points back at this repo): the official TypeScript SDK for Soroswap.Finance, which the README describes as the first DEX and exchange aggregator built on Stellar with contracts on Soroban. It authenticates with an API key and covers quotes, building transactions, sending them to the network, and liquidity management (README read 2026-09-14; README badges MIT, GitHub reports no license file; last push 2026-09-06).",
+			triggers: [
+				"soroswap sdk",
+				"dex aggregator sdk stellar",
+				"soroswap quote api",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"xycloo/xycloans": [
+		{
+			note: "XycLoans, a flash-loan and liquidity protocol for the Soroban VM by xyclooLabs (xycloo.com), which its README and GitHub description advertise as zero-fee borrowing with a liquidity side where investors earn yield; topics defi, lending, smart-contracts, soroban. No release has ever been published and the last push was 2024-12-09, so anything here describes the 2024 state of the protocol (README read 2026-09-14; no license file; 11 stars).",
+			triggers: [
+				"xycloans flash loan",
+				"flash loans soroban",
+				"zero fee flash loan",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"NibrasD/Stellar-VRF": [
+		{
+			note: "A verifiable-random-function oracle for Soroban built on BLS12-381 and the drand distributed randomness beacon: the README lays the workspace out as soroban-contract/ (the on-chain VRF oracle in Rust), oracle-worker/ (an off-chain TypeScript node), consumer-example/ and docs/, and describes on-chain verification through CAP-0059's `bls12_381_pairing_check` and `bls12_381_hash_to_g1`, drand quicknet binding with a round offset of at least 2 so only future rounds count, and storage TTL extension. No release, no GitHub description and 0 stars as of the read (README read 2026-09-14; no license file; last push 2026-09-14).",
+			triggers: [
+				"verifiable random function stellar",
+				"vrf oracle soroban",
+				"drand randomness stellar",
+				"bls12-381 pairing soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-experimental/stellar-raven": [
+		{
+			note: "Stellar Raven (raven.stellar.org): a remote MCP server on Cloudflare Workers that exposes exactly two tools, `search` and `execute`, over a unified catalog of Stellar ecosystem services and skills. An agent discovers a capability with search, then calls execute with JavaScript that runs in a Dynamic Worker isolate with NO network access — every service call goes through a host-side adapter — and the server instructions carry a generated source-family micro-map so an agent can pick the grounding family before searching; design notes in PLAN.md (README read 2026-09-14; Apache-2.0; 7 stars; no releases; last push 2026-09-11).",
+			triggers: [
+				"stellar raven mcp",
+				"raven search execute",
+				"stellar mcp server agents",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"jadonamite/Chessify": [
+		{
+			note: "Chessify (playchessify.xyz): a free-to-play chess protocol where players stake free-to-mint CHESS tokens, the game is validated off-chain, and escrow, payout and Elo rating all live in one Soroban contract designed against SEP-41 assets. The README is explicit that the live deployments today are Stacks, Celo and Base and that Stellar is where the protocol is headed, so treat Stellar support as stated intent rather than a shipped deployment; the only tag is `stacks` (2026-03-22) (README read 2026-09-14; no license file; 1 star; last push 2026-09-03).",
+			triggers: [
+				"chessify chess wager",
+				"chess elo contract soroban",
+				"onchain chess stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blend-capital/blend-ui": [
+		{
+			note: "The open-source web interface for the Blend lending protocol. Its README documents network-specific builds that all export to out/ — `.env.testnet` with `npm run build:testnet`, `.env.production` with `npm run build:mainnet`, and a standalone configuration — so a self-hosted Blend front end is a config choice, not a fork. Newest release v2.5.3 (2026-08-27) (README read 2026-09-14; MIT; last push 2026-08-27).",
+			triggers: [
+				"blend ui interface",
+				"blend frontend selfhost",
+				"blend protocol interface",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/admin-dashboard": [
+		{
+			note: "The admin dashboard interface for Reflector nodes (@reflector/admin-dashboard); the README is a single title line and nothing is published on npm under that name as of the read, so the repo itself is the only distribution (README read 2026-09-14; MIT; last push 2026-09-11).",
+			triggers: ["reflector admin dashboard"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-subscription-client": [
+		{
+			note: "npm @reflector/subscription-client 0.5.3 (published 2025-08-15; the package's repository field points back at this repo): the client for Reflector's subscriptions service. Its README shows `getAvailableReflectorTickers('pubnet')` and `('exchanges')` for the quotable ticker lists and a SubscriptionClient that creates a subscription with a caller-supplied signing callback over @stellar/stellar-sdk (README read 2026-09-14; MIT; last push 2025-08-15).",
+			triggers: [
+				"reflector subscription client",
+				"reflector tickers list",
+				"price subscription stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"salazarsebas/stellar-agentgate": [
+		{
+			note: "stellar-agentgate: a `stellar-cli` plugin that puts a policy gate between an agent and a contract — the README's own diagram is Agent / MCP → Smart Wallet → agent-policy → target contract — and it records 2nd place in the 'CLI Plugins for Agents' bounty at Stellar Summit São Paulo; docs at acachete.mintlify.site. Newest release v0.2.0 (2026-08-06) (README read 2026-09-14; Apache-2.0; last push 2026-09-07).",
+			triggers: [
+				"agentgate policy plugin",
+				"stellar cli plugin agents",
+				"agent policy smart wallet",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"untangledfinance/credio-agents": [
+		{
+			note: "The Untangled OctoPos Agent (the README's name for this repo, which GitHub names credio-agents and leaves without a description): an autonomous agent that polls the Octopos RMS API at octopos.untangled.finance for risk assessments of Blend lending positions on Stellar and, when a position reaches EMERGENCY risk, builds and broadcasts the close transaction on-chain; it caches pre-signed close transactions and re-signs them every 5 minutes, and runs on Bun with the untangled-web framework (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
+			triggers: [
+				"octopos risk agent",
+				"auto close blend position",
+				"emergency risk blend stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"RozoAI/rozo-rewards-miniapp": [
+		{
+			note: "Rozo Rewards (rewards.rozo.ai), the merchant discovery and cashback surface of Rozo: the README describes it as a stablecoin payment platform for merchants built on Base, where a user discovers merchants and pays with USDC across multiple chains or through the Rozo Wallet on Stellar — so Stellar appears here as one payment path, not as the app's own chain (README read 2026-09-14; no license file; topics cashback, cryptopayments; no releases; last push 2026-09-14).",
+			triggers: [
+				"rozo rewards cashback",
+				"rozo merchant discovery",
+				"rozo wallet stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"soroswap/v2-frontend": [
+		{
+			note: "The Soroswap application front end at app.soroswap.finance: a Next.js 15 / React 19 app (Node >= 22) that provides swaps and liquidity pools through the Soroswap SDK and Stellar Wallets Kit, adds earning and farming through the @defindex/sdk integration, and routes cross-chain bridging through Rozo.ai (README read 2026-09-14; no license file; no releases; last push 2026-09-06).",
+			triggers: [
+				"soroswap frontend app",
+				"soroswap liquidity pools ui",
+				"stellar wallets kit dex",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar-experimental/meridian-pay-sdp-backend": [
+		{
+			note: "A Meridian Pay fork of stellar/stellar-disbursement-platform-backend (the GitHub description states exactly that). Its README is the upstream Stellar Disbursement Platform README unchanged — badges, Swagger link and CI all still point at the stellar/ repository — so nothing in this repo describes what the fork itself changes; read the upstream project for SDP behaviour and the commit history here for the divergence (metadata and README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-13).",
+			triggers: ["meridian pay sdp", "disbursement platform fork"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/reflector-shared": [
+		{
+			note: "Triage 2026-09-14: empty README, no GitHub description, no published package and no releases — the repo states nothing durable about itself. It sits in the reflector-network org beside reflector-node and the client packages, so the name suggests shared internals, but that is an inference the repo does not support. Re-examine if it gains a package, a README or a release. https://github.com/reflector-network/reflector-shared",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"gateway-fm/lez-atomic-swaps": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo — a curation error to correct, not a note to publish. The README describes atomic swaps between native Bitcoin and LEZ using Taproot/MuSig2 adaptor signatures, witnessed escrow on LEZ, offer discovery over Logos Delivery and negotiation over Logos Chat; a GitHub code search for `stellar` across the repository returns 0 hits, and neither the description, the topics nor the release notes mention Stellar or Soroban. It is in the curated pool at repoScore 47 on the strength of the word `swap` alone. https://github.com/gateway-fm/lez-atomic-swaps",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
 		},
 	],
 };
