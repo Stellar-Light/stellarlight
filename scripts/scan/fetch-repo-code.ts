@@ -189,6 +189,24 @@ export function selectDepthPaths(
 		sorobanCrateDirs.some((d) =>
 			d ? p.startsWith(`${d}/src/`) : p.startsWith("src/"),
 		);
+	// A repo whose crates declare NO soroban-sdk gets nothing from that gate:
+	// `sorobanCrateDirs` is empty, so `inSorobanCrate` is false for every path
+	// and not one source file is sampled. Measured live 2026-09-14 that is the
+	// whole Rust half of the flat-0.3 population — stellar/rs-stellar-xdr,
+	// rs-stellar-strkey, rs-stellar-archivist, rs-stellar-rpc-client,
+	// rahul-soshte/rs-soroban-client, OpenZeppelin/openzeppelin-monitor. They
+	// carry the `rust-infra` proof (stellar-xdr / soroban-client rather than
+	// soroban-sdk) and the ONLY .rs the fetch returned for them were the three
+	// files the TEST budget happens to pick: 4,830 lines of rs-stellar-archivist
+	// and 6,635 of openzeppelin-monitor fetched, every line of it test code,
+	// zero source. They are libraries and tools — exactly what depth learned to
+	// grade in #1572 — and the scorer had never seen a line of them. So when
+	// nothing declares soroban-sdk, fall back to every crate's src/. Repos WITH
+	// a soroban crate are untouched: the narrow gate still keeps a vendored
+	// example or a template under someone else's src/ out of the sample.
+	const inScope = sorobanCrateDirs.length
+		? inSorobanCrate
+		: (p: string) => /(^|\/)src\//.test(p);
 	// Test/fixture exclusion, path-segment precise. The old substring rules
 	// missed test-utils/ and inline src/tests.rs (templar's generated
 	// test-utils/src/pyth_price_id.rs ate a top-18 source slot) while WRONGLY
@@ -209,7 +227,7 @@ export function selectDepthPaths(
 	const sizeRanked = rs
 		.filter(
 			(e) =>
-				inSorobanCrate(e.path) &&
+				inScope(e.path) &&
 				!isTest(e.path) &&
 				!isGenerated(e.path) &&
 				(e.size ?? 0) <= 400_000,
@@ -227,7 +245,7 @@ export function selectDepthPaths(
 	const entryFiles = rs
 		.filter(
 			(e) =>
-				inSorobanCrate(e.path) &&
+				inScope(e.path) &&
 				!isTest(e.path) &&
 				/\/src\/(contract|lib)\.rs$/i.test(e.path) &&
 				(e.size ?? 0) <= 400_000,

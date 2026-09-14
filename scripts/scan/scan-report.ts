@@ -13,8 +13,8 @@
  * Safety-gate summary at the end mirrors the circuit breakers the WRITE path
  * will enforce (CB3 new-none-rate ≤10%, archive-rate cap, protected-never-sunk).
  */
-import { computeCodeDepth } from "../../src/lib/code-depth";
 import { codeProofTier, computeFarmScore } from "../../src/lib/code-signals";
+import { routeCodeDepth } from "../../src/lib/depth-route";
 import { createGh, fetchRepoCode } from "./fetch-repo-code";
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
@@ -140,7 +140,14 @@ interface Row {
 async function scoreRepo(s: SampleRepo): Promise<Row | null> {
 	const r = await fetchRepoCode(gh, s.fullName);
 	if (!r) return null;
-	const codeDepth = computeCodeDepth(r.depthInput).codeDepth;
+	// Through the SAME router the scanner uses, or this "what the scanner WOULD
+	// assign" report prints a depth the scanner would not write (it showed the
+	// bare Rust reading for every repo, so every JS/lang repo read as a flat 0.3).
+	const codeDepth = routeCodeDepth({
+		depth: r.depthInput,
+		stellarJsDep: r.facts.stellarJsDep,
+		nameLooksTemplate: r.meta.nameLooksTemplate,
+	}).codeDepth;
 	const farm = computeFarmScore({
 		proof: r.proof,
 		facts: r.facts,

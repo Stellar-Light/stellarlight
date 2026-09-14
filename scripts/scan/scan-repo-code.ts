@@ -26,7 +26,6 @@
 import "../load-env";
 import type { Where } from "payload";
 import { getPayload } from "payload";
-import { computeCodeDepth } from "../../src/lib/code-depth";
 import { deriveCodeDomains } from "../../src/lib/code-domains";
 import { computeFarmScore } from "../../src/lib/code-signals";
 import {
@@ -35,9 +34,8 @@ import {
 	extractContractInterface,
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
-import { computeJsDepth } from "../../src/lib/js-depth";
+import { routeCodeDepth } from "../../src/lib/depth-route";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
-import { computeLangDepth } from "../../src/lib/lang-depth";
 import { isAllowlisted } from "../../src/lib/repo-allowlist";
 import { extractStellarDeps } from "../../src/lib/stellar-deps";
 import {
@@ -466,75 +464,28 @@ async function main() {
 				errored++;
 				line = `  error  ${full.padEnd(44)} no-tree`;
 			} else {
-				let depth =
-					r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
-				// gist gap 1 phase 2: for JS/TS dapps, computeCodeDepth returns a
-				// FLAT 0.3 (it only scores Rust contracts). Replace it with the
-				// calibrated jsDepth when this is a JS repo with actual JS sources —
-				// real dapps rise above 0.3, boilerplate stays at/below it.
-				if (r.outcome === "ok" && r.proof === "js-sdk") {
-					const jd = computeJsDepth({
-						fullName: full,
-						blobs: r.depthInput.blobs,
-						stellarJsDep: r.facts.stellarJsDep,
-						scalars: {
-							isFork: r.meta.isFork,
-							tagCount: r.meta.tagCount,
-							readmeText: r.depthInput.scalars.readmeText,
-							topics: r.depthInput.scalars.topics ?? [],
-							nameLooksTemplate: r.meta.nameLooksTemplate,
-						},
-					});
-					if (!jd.reasons.includes("no-js-sources")) depth = jd.jsDepth;
-				}
-				// code-truth 4B: same replacement for the other-language frontier —
-				// py/go/kotlin/java repos rose out of the flat lang-sdk 0.3 once
-				// slice A gave their capabilities eyes. Deep-side anchored on the
-				// four verified flagships (depth-labels LANG_DEEP); the eval gate
-				// enforces the floor.
-				if (
-					r.outcome === "ok" &&
-					(r.proof === "lang-sdk" ||
-						r.proof === "cargo-sdk" ||
-						r.proof === "contract-macros")
-				) {
-					const ld = computeLangDepth({
-						fullName: full,
-						blobs: r.depthInput.blobs,
-						scalars: {
-							isFork: r.meta.isFork,
-							tagCount: r.meta.tagCount,
-							readmeText: r.depthInput.scalars.readmeText,
-							topics: r.depthInput.scalars.topics ?? [],
-							nameLooksTemplate: r.meta.nameLooksTemplate,
-						},
-					});
-					if (!ld.reasons.includes("no-lang-sources")) {
-						if (r.proof === "lang-sdk") {
-							depth = ld.langDepth;
-						} else {
-							// Hybrid-repo routing (anchor-platform class): a vendored
-							// soroban crate makes the proof cargo-flavored while the
-							// repo's real mass is Kotlin/Java/Go/Python — the Rust model
-							// then scores the vendored sliver, not the product. When the
-							// language sources outweigh the Rust sources, the repo's
-							// depth is its DEEPEST calibrated integration, never the
-							// smaller sliver. Pure-Rust repos with incidental deploy
-							// scripts are untouched (rust sloc dominates).
-							const rsSloc = r.depthInput.blobs
-								.filter((b) => b.path.toLowerCase().endsWith(".rs"))
-								.reduce(
-									(n, b) =>
-										n +
-										(b.text ?? "")
-											.split("\n")
-											.filter((l) => l.trim().length > 0).length,
-									0,
-								);
-							if (ld.langSloc > rsSloc) depth = Math.max(depth, ld.langDepth);
-						}
-					}
-				}
+				// Depth routing lives in ONE place (src/lib/depth-route.ts): the
+				// reader is chosen by the SOURCES ACTUALLY FETCHED, not by the proof
+				// label. Routing by the label meant a mislabelled repo went to a
+				// reader that could not see its files and kept computeCodeDepth's
+				// flat 0.3 forever — live 2026-09-14, 63 of 71 Rust rows, 30 of 44
+				// JavaScript and 19 of 25 TypeScript rows on `lang-sdk` sat at
+				// exactly 0.300 (Creit-Tech/xBull-Wallet-Connect, soroswap/sdk,
+				// stellar/dts-xdr among them). The hybrid-repo rule this replaces —
+				// a vendored soroban crate must not let the Rust model score a
+				// sliver while a Kotlin/Java/Go/Python product is the repo's real
+				// mass — survives as the router's mass gate: a non-Rust reading only
+				// counts when its language leads by fetched non-test SLOC, so a
+				// pure-Rust repo with an incidental deploy script is untouched.
+				const route =
+					r.outcome === "ok"
+						? routeCodeDepth({
+								depth: r.depthInput,
+								stellarJsDep: r.facts.stellarJsDep,
+								nameLooksTemplate: r.meta.nameLooksTemplate,
+							})
+						: null;
+				const depth = route?.codeDepth ?? 0;
 				// Rust pub-surface first; JS/TS exported surface when there is none
 				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
 				const rustSymbols =
@@ -620,7 +571,9 @@ async function main() {
 							: cur;
 					if (predicted > cur)
 						lifts.push({ full, proof: r.proof, depth, cur, predicted });
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
+					// `via=` is the reader the SOURCES chose — a wave log that says
+					// proof=lang-sdk via=js is the mislabel being read correctly.
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;

@@ -124,3 +124,46 @@ describe("orderManifests — the 40-manifest budget reads product crates first",
 		]); // input not mutated
 	});
 });
+
+describe("selectDepthPaths — a repo with no soroban crate still gets its sources", () => {
+	// stellar/rs-stellar-xdr, rs-stellar-strkey, rs-stellar-archivist,
+	// rs-stellar-rpc-client, OpenZeppelin/openzeppelin-monitor: Stellar Rust that
+	// depends on stellar-xdr / soroban-client, never soroban-sdk. With
+	// `sorobanCrateDirs` empty the source gate excluded EVERY .rs, so the only
+	// Rust that reached the scorer was whatever the test budget happened to pick
+	// — 4,830 lines of rs-stellar-archivist, 6,635 of openzeppelin-monitor, all
+	// test code, zero source. They are libraries; #1572 taught depth to grade
+	// libraries; it had nothing to grade.
+	const INFRA: TreeEntry[] = [
+		blob("Cargo.toml", 400),
+		blob("src/lib.rs", 9_000),
+		blob("src/curr.rs", 40_000),
+		blob("tests/str.rs", 12_000),
+	];
+	const NO_SOROBAN = new Map<string, boolean>([["Cargo.toml", false]]);
+
+	it("samples every crate's src/ when nothing declares soroban-sdk", () => {
+		const sel = selectDepthPaths(INFRA, NO_SOROBAN);
+		expect(sel.sources).toContain("src/curr.rs");
+		expect(sel.sources).toContain("src/lib.rs");
+		expect(sel.sources).not.toContain("tests/str.rs"); // still the test budget
+		expect(sel.tests).toContain("tests/str.rs");
+	});
+
+	it("a repo WITH a soroban crate keeps the narrow gate (vendored code stays out)", () => {
+		const tree: TreeEntry[] = [
+			blob("Cargo.toml", 100),
+			blob("contracts/token/Cargo.toml", 100),
+			blob("contracts/token/src/lib.rs", 8_000),
+			blob("vendor/other/src/huge.rs", 90_000), // not a soroban crate
+		];
+		const sel = selectDepthPaths(
+			tree,
+			new Map([
+				["Cargo.toml", false],
+				["contracts/token/Cargo.toml", true],
+			]),
+		);
+		expect(sel.sources).toEqual(["contracts/token/src/lib.rs"]);
+	});
+});
