@@ -22,9 +22,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
 	applyWaves,
+	countByKind,
 	type Finding,
 	findingId,
+	isKindMapped,
 	isSyntheticQuery,
+	kindOf,
 	type Severity,
 	SURFACES,
 	type Surface,
@@ -777,10 +780,28 @@ function main() {
 	const detectedIds = new Set(detected.map((f) => f.id));
 	const waves = readWaveManifests();
 	const {
-		findings: merged,
+		findings: overlaid,
 		unmatched,
 		suspectVerified,
 	} = applyWaves(upserted, waves, detectedIds, nowIso);
+	// Kind is re-derived from (source, failureMode) on EVERY fold — like
+	// blockedOn, a table change must move rows on the next run, never leave a
+	// stale stamp behind. An unmapped pair defaults to instrument (our gap, not
+	// the product's) and is named here rather than absorbed.
+	const unmappedKinds = new Set(
+		overlaid
+			.filter((f) => !isKindMapped(f.source, f.failureMode))
+			.map((f) => `${f.source}|${f.failureMode}`),
+	);
+	if (unmappedKinds.size) {
+		console.warn(
+			`  ⚠ ${unmappedKinds.size} (source, failureMode) pair(s) have no kind mapping — counted as instrument; extend KIND_OF in src/lib/improvement-ledger.ts: ${[...unmappedKinds].join(", ")}`,
+		);
+	}
+	const merged: Finding[] = overlaid.map((f) => ({
+		...f,
+		kind: kindOf(f.source, f.failureMode),
+	}));
 	if (waves.length) {
 		console.log(
 			`  · waves: applied ${waves.length} manifest(s) referencing ${waves.reduce((n, w) => n + w.findings.length, 0)} finding-id(s)`,
@@ -806,6 +827,10 @@ function main() {
 			.map((s) => `${s.surface} ${s.open}/${s.total}`)
 			.join(" · ")}`,
 	);
+	const kinds = countByKind(merged);
+	console.log(
+		`  by kind: world ${kinds.world.open} open / ${kinds.world.total} (caught in the world — the product working) · instrument ${kinds.instrument.open} open / ${kinds.instrument.total} (our measurement or serving broke)`,
+	);
 	if (summary.topOpen.length) {
 		console.log("  top backlog:");
 		for (const t of summary.topOpen.slice(0, 6)) {
@@ -819,7 +844,9 @@ function main() {
 		console.log("\n(--dry: no files written)");
 		return;
 	}
-	writeFileSync(LEDGER_FILE, `${JSON.stringify(merged, null, "\t")}\n`);
+	// 1-space, matching clear-stale-findings (the other writer). With the two
+	// disagreeing, every day rewrote the whole file's whitespace twice.
+	writeFileSync(LEDGER_FILE, `${JSON.stringify(merged, null, 1)}\n`);
 	writeFileSync(SUMMARY_FILE, `${JSON.stringify(summary, null, "\t")}\n`);
 	console.log(
 		`\n  wrote ${merged.length} findings → improvements/ledger/findings.json`,

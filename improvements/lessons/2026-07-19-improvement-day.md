@@ -1,5 +1,10 @@
 # 2026-07-19 — the improvement day (classes 27–30)
 
+Guard: src/lib/__tests__/title-quality.test.ts — class 28: both title templates ("Title | Stellar" and "Stellar | Title") clean to the real title
+Guard: scout-mcp/test/smoke.mjs — class 29: tools/list is compared to the registerTool( count in src/index.ts, never a literal
+Guard: scripts/check-api-drift.ts — class 30: §1b every public GET emits X-API-Version + CORS (the next.config publicApi entry)
+Guard: none — class 27: no test asserts that an audit-metadata filter (auditor/protocol/severity) narrows the FETCH to source=audit and that a contradictory explicit source is a 400
+
 Fifteen PRs in one day (#589–#603): the audits registry + findings extraction,
 the mention-vs-identity ranking fix, engine rolling-issues, protocol-release
 visibility, the mechanical guards, repo-search vertical repair, and the

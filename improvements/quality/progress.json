@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-14T17:11:33.568Z",
+ "generatedAt": "2026-09-14T17:58:20.258Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -88,133 +88,133 @@
     "date": "2026-09-05",
     "title": "Routing on the intended op, and the consumer that had not read our fixes (2026-09-05)",
     "lessonCount": 4,
-    "bytes": 7372
+    "bytes": 7640
    },
    {
     "file": "improvements/lessons/2026-09-05-night-shift.md",
     "date": "2026-09-05",
     "title": "Lessons: the 2026-09-05 night shift (agents in parallel, executes read back, two audits)",
     "lessonCount": null,
-    "bytes": 6141
+    "bytes": 6676
    },
    {
     "file": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
     "date": "2026-08-31",
     "title": "A value wearing provenance that does not cover it (2026-08-31)",
     "lessonCount": null,
-    "bytes": 4956
+    "bytes": 5246
    },
    {
     "file": "improvements/lessons/2026-08-31-consumer-view-and-two-auditor-day.md",
     "date": "2026-08-31",
     "title": "The consumer's view, and the two-auditor loop (2026-08-31)",
     "lessonCount": 5,
-    "bytes": 4533
+    "bytes": 4942
    },
    {
     "file": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
     "date": "2026-08-28",
     "title": "Lessons: 2026-08-28: the deployment queue pass and the fake-issuer farm",
     "lessonCount": 3,
-    "bytes": 2801
+    "bytes": 3270
    },
    {
     "file": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
     "date": "2026-08-27",
     "title": "Lesson: the truth battery's first two runs (2026-08-27)",
     "lessonCount": 11,
-    "bytes": 7314
+    "bytes": 7724
    },
    {
     "file": "improvements/lessons/2026-08-14-advisory-calibration-and-battery-fidelity.md",
     "date": "2026-08-14",
     "title": "2026-08-14: Three calibrations to one honest signal (+ the battery's four probe lessons)",
     "lessonCount": null,
-    "bytes": 4420
+    "bytes": 4837
    },
    {
     "file": "improvements/lessons/2026-08-12-advertised-but-never-persisted.md",
     "date": "2026-08-12",
     "title": "2026-08-12: Advertised but never persisted: the sdkCapabilities hole",
     "lessonCount": null,
-    "bytes": 10018
+    "bytes": 10499
    },
    {
     "file": "improvements/lessons/2026-08-08-zero-work-green-and-population-truth.md",
     "date": "2026-08-08",
     "title": "2026-08-08: Zero-work green runs, and shape ≠ population",
     "lessonCount": null,
-    "bytes": 4066
+    "bytes": 4369
    },
    {
     "file": "improvements/lessons/2026-07-19-improvement-day.md",
     "date": "2026-07-19",
     "title": "2026-07-19: the improvement day (classes 27–30)",
     "lessonCount": null,
-    "bytes": 3256
+    "bytes": 3849
    },
    {
     "file": "improvements/lessons/2026-07-16-slice-truth-floors-and-windows.md",
     "date": "2026-07-16",
     "title": "2026-07-16: slice truth, gated floors, windowed guards (quality-week lessons)",
     "lessonCount": 4,
-    "bytes": 4142
+    "bytes": 4653
    },
    {
     "file": "improvements/lessons/2026-07-11-sls-wave-and-parallel-agents.md",
     "date": "2026-07-11",
     "title": "Lessons: the sls-020..050 wave (2026-07-11)",
     "lessonCount": null,
-    "bytes": 1867
+    "bytes": 2129
    },
    {
     "file": "improvements/lessons/2026-07-11-ops-polling-payload-contract.md",
     "date": "2026-07-11",
     "title": "Ops: polling loops, Payload API shapes, contract gates (2026-07-11)",
     "lessonCount": null,
-    "bytes": 1375
+    "bytes": 1626
    },
    {
     "file": "improvements/lessons/2026-07-11-intent-classes-and-eval-blindspots.md",
     "date": "2026-07-11",
     "title": "Intent classes need a mechanism AND a standing eval (2026-07-11)",
     "lessonCount": null,
-    "bytes": 1582
+    "bytes": 1841
    },
    {
     "file": "improvements/lessons/2026-07-09-research-rank-starbridge.md",
     "date": "2026-07-09",
     "title": "2026-07-09: stale-but-close outranks current (Starbridge)",
     "lessonCount": null,
-    "bytes": 2415
+    "bytes": 2688
    },
    {
     "file": "improvements/lessons/2026-07-09-curation-writes-and-identity.md",
     "date": "2026-07-09",
     "title": "2026-07-09: the corridor-matrix day: three write-path classes + one process class",
     "lessonCount": null,
-    "bytes": 4389
+    "bytes": 4925
    },
    {
     "file": "improvements/lessons/2026-07-08-verify-before-advertise-npm.md",
     "date": "2026-07-08",
     "title": "2026-07-08: The changelog advertised a package version that didn't exist",
     "lessonCount": null,
-    "bytes": 1436
+    "bytes": 1585
    },
    {
     "file": "improvements/lessons/2026-07-08-structured-recall-etherfuse-sushi.md",
     "date": "2026-07-08",
     "title": "2026-07-08: Structured truth must drive INCLUSION, not just ranking",
     "lessonCount": null,
-    "bytes": 2353
+    "bytes": 2613
    },
    {
     "file": "improvements/lessons/2026-07-08-schema-drift-contract-as-code.md",
     "date": "2026-07-08",
     "title": "2026-07-08: Schema drift: the spec lied about the live API",
     "lessonCount": null,
-    "bytes": 2633
+    "bytes": 2990
    }
   ],
   "audits": [
@@ -774,5 +774,192 @@
     ]
    }
   ]
+ },
+ "lessonGuards": {
+  "rows": [
+   {
+    "lesson": "improvements/lessons/2026-07-08-schema-drift-contract-as-code.md",
+    "guards": [
+     ".github/workflows/contract-gate.yml",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-08-structured-recall-etherfuse-sushi.md",
+    "guards": [
+     "src/lib/__tests__/project-search-match.test.ts",
+     "scripts/self-audit.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-08-verify-before-advertise-npm.md",
+    "guards": [
+     "scripts/self-audit.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-09-curation-writes-and-identity.md",
+    "guards": [
+     "scripts/check-writer-conformance.ts",
+     "scripts/data/check-partner-project-identity.ts",
+     "scripts/self-audit.ts",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-09-research-rank-starbridge.md",
+    "guards": [
+     "src/lib/__tests__/research-rank.test.ts",
+     "scripts/eval/golden-questions.json"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-intent-classes-and-eval-blindspots.md",
+    "guards": [
+     "scripts/eval/golden-questions.json",
+     ".github/workflows/engine-c-health.yml"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-ops-polling-payload-contract.md",
+    "guards": [
+     ".github/workflows/contract-gate.yml"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-sls-wave-and-parallel-agents.md",
+    "guards": [
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-16-slice-truth-floors-and-windows.md",
+    "guards": [
+     "src/lib/__tests__/research-rank.test.ts",
+     "scripts/eval/golden-questions.json",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-19-improvement-day.md",
+    "guards": [
+     "src/lib/__tests__/title-quality.test.ts",
+     "scout-mcp/test/smoke.mjs",
+     "scripts/check-api-drift.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-08-zero-work-green-and-population-truth.md",
+    "guards": [
+     "scripts/check-field-population.ts",
+     "scripts/check-writer-conformance.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-12-advertised-but-never-persisted.md",
+    "guards": [
+     "scripts/check-writer-conformance.ts",
+     "src/lib/__tests__/scan-write-shape.test.ts",
+     "scripts/check-field-population.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-14-advisory-calibration-and-battery-fidelity.md",
+    "guards": [
+     "scripts/eval/battery-coverage.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
+    "guards": [
+     "scripts/eval/raven-truth-battery.ts",
+     "src/lib/__tests__/identity-groups.test.ts",
+     "src/lib/__tests__/packet-stamps-verdict.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
+    "guards": [
+     "scripts/data/reconcile-rwa-issuers.ts",
+     "src/lib/__tests__/rwa-registry.test.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-31-consumer-view-and-two-auditor-day.md",
+    "guards": [
+     "scripts/raven-routing.ts",
+     "src/lib/__tests__/scf-verdict-parser.test.ts",
+     "src/lib/__tests__/project-search-match.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
+    "guards": [
+     "scripts/check-answer-dating.ts",
+     "src/lib/__tests__/explain-answer-dating.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-09-05-night-shift.md",
+    "guards": [
+     "scripts/check-lane-autonomy.ts",
+     "src/lib/__tests__/curated-ownership.test.ts",
+     "src/lib/__tests__/basis-artifact-tier.test.ts",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-09-05-routing-on-the-intended-op.md",
+    "guards": [
+     "scripts/raven-routing.ts",
+     "scripts/eval/raven-scorer-replica.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   }
+  ],
+  "total": 19,
+  "guarded": 14,
+  "unguarded": 5,
+  "guardMissing": 0
  }
 }

@@ -1,5 +1,9 @@
 # Lesson — the truth battery's first two runs (2026-08-27)
 
+Guard: scripts/eval/raven-truth-battery.ts — guard D in raven-eval-parity.yml: rotating probes graded against curated truth, probe errors always gate
+Guard: src/lib/__tests__/identity-groups.test.ts — L1: a split word is one identity; a fragment hits as a word, never a substring
+Guard: src/lib/__tests__/packet-stamps-verdict.test.ts — L11: a Live stamp on a page that says waitlist/testnet is refused
+
 Two batteries ran through the live Raven gateway in one day: a hand-run 44-probe
 sweep of all 29 exposed operations, then a wider re-run with different question
 sets after the first round's fixes shipped. Between them: **6 real defects, 3

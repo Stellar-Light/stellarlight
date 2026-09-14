@@ -1,5 +1,8 @@
 # A value wearing provenance that does not cover it (2026-08-31)
 
+Guard: scripts/check-answer-dating.ts — a served value carries a date in its own object or is documented undatable; ratcheted on the contract gate
+Guard: src/lib/__tests__/explain-answer-dating.test.ts — answerAsOf is null on the DeepWiki path and dated from the scan on the scan path
+
 Raven filed [#1134](https://github.com/Stellar-Light/stellarlight/issues/1134):
 `explainRepo` answered `MaxSupportedProtocolVersion = 25` for
 `stellar/stellar-horizon` while the source at our own

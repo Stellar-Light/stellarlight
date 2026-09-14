@@ -103,6 +103,13 @@ export interface Finding {
 	 * as fresh — an unknown age must never read as a recent confirmation.
 	 */
 	evidenceAt?: string;
+	/**
+	 * What the finding IS: something true about the ecosystem that we caught
+	 * (`world`), or our own measurement/serving breaking (`instrument`).
+	 * Stamped on every fold from {@link kindOf} — derived, never hand-set —
+	 * so a table change moves rows on the next run. See KIND_OF.
+	 */
+	kind?: FindingKind;
 }
 
 /** Status values that mean "no longer counts as an open problem". */
@@ -367,6 +374,98 @@ export const isBlocked = (f: Finding) => isOpen(f) && !!f.blockedOn;
 /** An open row that is a real defect — excludes the refresh queue. */
 export const isOpenDefect = (f: Finding) =>
 	isOpen(f) && !isMaintenance(f) && !f.blockedOn;
+
+/**
+ * A catch is not a breakage. Every open row used to read as "a defect", so
+ * the headline added two opposite things: a site being down was counted as
+ * bad when it was the product WORKING — it caught a dead project's link.
+ *
+ *   world       the detector compared our record with the ecosystem and the
+ *               ecosystem differs or moved: a dead link, a stale note, a
+ *               project that shut down, a duplicate row, an overstated SCF
+ *               claim. The product doing its job; the repair is curation.
+ *   instrument  our own measurement or serving broke: a golden question we
+ *               fail, a spec that lies about live behaviour, an op the
+ *               consumer cannot route to, a promised field served empty.
+ *
+ * One mapping per (source, failureMode), keyed exactly as the orchestrator
+ * emits them. An UNMAPPED pair is our gap, not the product's, so it defaults
+ * to `instrument` — and the fold names every unmapped pair on stdout rather
+ * than absorbing it. The ledger test asserts today's ledger hits no default.
+ */
+export type FindingKind = "world" | "instrument";
+export const FINDING_KINDS = ["world", "instrument"] as const;
+export const DEFAULT_KIND: FindingKind = "instrument";
+
+const KIND_OF: Record<string, FindingKind> = {
+	// ── world: the ecosystem differs from or moved past our record ──
+	"link-health|broken-link": "world", // a URL a probe PROVED dead
+	"nightly-note-freshness|note-stale": "world", // upstream published past the note's asOf
+	"supersession-freshness|supersession-unrecorded": "world", // the repo was archived upstream
+	"weak-basis-liveness|status-contradicted": "world", // the product's own page denies our Live claim
+	"packet-recheck|stamp-contradicted": "world", // the deciding page no longer supports the stamp
+	"packet-recheck|stamp-revived": "world", // a project we called dead is answering again
+	"engine-b-sweeps|dupe": "world", // one project under two rows
+	"engine-b-sweeps|domain-dupe": "world",
+	"engine-b-sweeps|stale-record": "world", // a row the world moved past
+	"scf-crosscheck|scf-overstated": "world", // the official SCF record says less than our row
+	"scf-crosscheck|scf-understated": "world", // …or more
+	"scf-crosscheck|scf-round-overclaim": "world",
+	"engine-d-demand|coverage-gap": "world", // real demand for a project we do not hold — a curation add
+	// ── instrument: our measurement or serving broke ──
+	"golden-eval|golden-fail": "instrument",
+	"engine-a-recall|recall-miss": "instrument",
+	"engine-d-demand|demand-miss": "instrument", // we HOLD it and ranked it badly
+	"repo-ranking|ranking-inverted": "instrument",
+	"endpoint-agreement|endpoint-disagreement": "instrument",
+	"engine-e-contract|silent-param": "instrument",
+	"engine-e-contract|invalid-accepted": "instrument",
+	"engine-e-contract|missing-field": "instrument",
+	"engine-e-contract|ambiguous-contract": "instrument",
+	"nightly-drift|api-drift": "instrument", // the spec lies about live behaviour
+	"nightly-field-population|population-miss": "instrument", // a pinned probe served empty
+	"nightly-claims|claim-blocker": "instrument", // a published claim the live surface will not support
+	"nightly-completeness|completeness-residual": "instrument", // a promised field empty on a row we hold
+	"nightly-battery|battery-coverage-weak": "instrument", // our corpus answers the referee weakly
+	"corpus-health|junk-url": "instrument", // our ingest admitted it
+	"corpus-health|bad-title": "instrument", // our extraction produced it
+	"corpus-health|stalled-source": "instrument", // our ingest stopped (engine-b: "a silently-stalled ingest")
+	"corpus-health|mirror-dupe": "instrument", // our dedupe missed it
+	"raven-loop|raven-consumer-miss": "instrument",
+	"raven-loop|consumer-demand-deadend": "instrument",
+	"raven-loop|consumer-code-shallow": "instrument",
+	"raven-routing|routing-miss": "instrument", // ours or their scorer's — machinery either way
+	"raven-routing|demand-routing-miss": "instrument",
+	"raven-drift|op-missing-from-catalog": "instrument",
+};
+
+export const isKindMapped = (source: string, failureMode: string): boolean =>
+	`${source}|${failureMode}` in KIND_OF;
+
+export function kindOf(source: string, failureMode: string): FindingKind {
+	return KIND_OF[`${source}|${failureMode}`] ?? DEFAULT_KIND;
+}
+
+/**
+ * Open and lifetime counts per kind. `open` here is EVERY row still open —
+ * the defect backlog, the refresh queue and the upstream-blocked rows alike —
+ * because the split says what a finding IS, not whether it is ours to act on
+ * today. world.open + instrument.open = open + refreshQueue + blockedUpstream.
+ */
+export function countByKind(
+	findings: Finding[],
+): Record<FindingKind, { open: number; total: number }> {
+	const out = {
+		world: { open: 0, total: 0 },
+		instrument: { open: 0, total: 0 },
+	};
+	for (const f of findings) {
+		const k = out[kindOf(f.source, f.failureMode)];
+		k.total++;
+		if (isOpen(f)) k.open++;
+	}
+	return out;
+}
 
 /** Reduce the full ledger to the numbers /quality and the weekly row render. */
 export function summarizeLedger(

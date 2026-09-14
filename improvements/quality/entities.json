@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-14T17:22:55.860Z",
+ "generatedAt": "2026-09-14T17:58:15.311Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -63,6 +63,17 @@
   },
   "cleared": 623,
   "verified": 7,
+  "byKind": {
+   "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
+   "world": {
+    "open": 15,
+    "total": 199
+   },
+   "instrument": {
+    "open": 19,
+    "total": 465
+   }
+  },
   "byFailureMode": [
    {
     "mode": "recall-miss",

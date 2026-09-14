@@ -812,6 +812,36 @@ export default function QualityPage() {
 					Cleared is NOT confirmation the fix works; only verified means it was
 					deliberately re-probed after a fix.
 				</p>
+				{/* A catch is not a breakage. A site being down used to read as a bad
+				    thing here; it was the product working — it caught a dead project's
+				    link. Every still-open row is one of two opposite things, and the
+				    headline above must not add them. */}
+				<div className="mb-6 pb-5 border-b border-border">
+					<div className="flex flex-wrap items-end gap-x-8 gap-y-4 mb-3">
+						<Stat
+							label="Caught in the world"
+							value={String(entities.findings.byKind.world.open)}
+							sub="The product working: a dead link, a stale note, a project that shut down"
+						/>
+						<Stat
+							label="Our instrument"
+							value={String(entities.findings.byKind.instrument.open)}
+							sub="Measurement or serving broke: a failed golden question, a spec that lies"
+						/>
+					</div>
+					<p className="text-[11px] text-muted-foreground leading-relaxed">
+						Both are still-open rows across all three buckets above (open,
+						waiting on upstream, and the refresh queue), split by what each
+						finding IS rather than whose turn it is. A world finding is repaired
+						by curation and is evidence the detectors do their job; an
+						instrument finding is ours. Lifetime:{" "}
+						{entities.findings.byKind.world.total} world,{" "}
+						{entities.findings.byKind.instrument.total} instrument. The mapping
+						is one table per detector and failure mode in{" "}
+						<code className="font-mono">src/lib/improvement-ledger.ts</code>; an
+						unmapped pair counts as instrument, never as the product working.
+					</p>
+				</div>
 				{/* The closure rule's metric (QUALITY.md §1), stated so it can move.
 				    The old headline here was "repeat-class rate": a new finding counted
 				    as a repeat when its §0 class had ANY prior finding. Across 8 broad
@@ -1321,19 +1351,66 @@ export default function QualityPage() {
 							Lesson write-ups
 							<Info text="Each file records defects found on one day: what broke, the root cause, and the invariant or probe added so the class cannot silently return." />
 						</p>
+						{/* A lesson only counts when it became a check. The same reader
+						    as the contract-gate step (check-lessons-guarded), so this
+						    number and that red cannot disagree. */}
+						<div className="flex flex-wrap items-end gap-x-8 gap-y-4">
+							<Stat
+								label="Guarded"
+								value={`${progress.lessonGuards.guarded}/${progress.lessonGuards.total}`}
+								sub="Every Guard: line names a check that exists"
+							/>
+							<Stat
+								label="Unguarded"
+								value={String(
+									progress.lessonGuards.unguarded +
+										progress.lessonGuards.guardMissing,
+								)}
+								sub={
+									progress.lessonGuards.guardMissing
+										? `${progress.lessonGuards.unguarded} say Guard: none · ${progress.lessonGuards.guardMissing} name a file that does not exist`
+										: "Say Guard: none — written down, never became a check"
+								}
+							/>
+						</div>
+						<p className="text-[11px] text-muted-foreground leading-relaxed">
+							A lesson counts only when it became a check — a test, a guard
+							script or a workflow that goes red when the class returns. Each
+							file names its guard with a{" "}
+							<code className="font-mono">Guard:</code> line;{" "}
+							<a
+								href={evidenceUrl("scripts/check-lessons-guarded.ts")}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline decoration-dotted hover:text-foreground"
+							>
+								check-lessons-guarded
+							</a>{" "}
+							verifies the file exists and fails on any that is unguarded, on
+							every PR.
+						</p>
 						<div className="flex flex-col">
-							{progress.library.lessons.slice(0, 8).map((l) => (
-								<QueueRow
-									key={l.file}
-									href={evidenceUrl(l.file)}
-									primary={l.title.replace(/^Lessons?\s*[--]\s*/i, "")}
-									trailing={
-										l.lessonCount != null
-											? `${l.date} · ${l.lessonCount} lessons`
-											: l.date
-									}
-								/>
-							))}
+							{progress.library.lessons.slice(0, 8).map((l) => {
+								const guard = progress.lessonGuards.rows.find(
+									(r) => r.lesson === l.file,
+								);
+								const when =
+									l.lessonCount != null
+										? `${l.date} · ${l.lessonCount} lessons`
+										: l.date;
+								return (
+									<QueueRow
+										key={l.file}
+										href={evidenceUrl(l.file)}
+										primary={l.title.replace(/^Lessons?\s*[--]\s*/i, "")}
+										trailing={
+											guard && guard.status !== "guarded"
+												? `${when} · ${guard.status}`
+												: when
+										}
+									/>
+								);
+							})}
 						</div>
 					</div>
 					<div className="flex flex-col gap-3">

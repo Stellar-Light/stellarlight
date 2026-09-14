@@ -1,5 +1,9 @@
 # The consumer's view, and the two-auditor loop (2026-08-31)
 
+Guard: scripts/raven-routing.ts — L1: routing graded against the consumer's ACTUAL catalog view, with catalog-lag as its own class
+Guard: src/lib/__tests__/scf-verdict-parser.test.ts — L2: an RSC chunk-split prefix fragment merges into its card, never sums (prism-dxb)
+Guard: src/lib/__tests__/project-search-match.test.ts — L4: a token dropped for genericity ("sol") is not rescued by the length rule
+
 Twelve PRs (#1141–#1152), the ledger 54 → 43 open, Raven routing 76% → 86%,
 and six confirmed defects found in the day's own diffs by independent review.
 Five lessons with teeth.

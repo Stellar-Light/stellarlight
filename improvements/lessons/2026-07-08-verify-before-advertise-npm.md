@@ -1,5 +1,7 @@
 # 2026-07-08 — The changelog advertised a package version that didn't exist
 
+Guard: scripts/self-audit.ts — every npm version the live /api/changelog names must be installable from the registry (advertised versions, daily)
+
 **Class:** 12 (verify-before-advertise)
 
 ## What happened

@@ -46,6 +46,26 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 | 33 | **Provenance that doesn't cover the value** — a value sits beside timestamps describing something ELSE, so a consumer dates it wrongly. Nearby provenance is worse than none: no date makes a reader cautious, a neighbour's date makes them confidently wrong and hands them a citation | [#1134](https://github.com/Stellar-Light/stellarlight/issues/1134) — `explainRepo` served a DeepWiki answer saying `MaxSupportedProtocolVersion = 25` while the source at our own `scannedRef` defined 28, beside three dates (`meta.generatedAt`, `codeVerified.scannedAt`, `repoMeta.lastCommitAt`) that all described the code scan and none the answer | `answerAsOf` (null for DeepWiki — an admission, since it exposes no index date; populated from `scannedAt` on the scan path) + `meta.warnings` naming the three fields that don't date the answer; `scripts/check-answer-dating.ts` ratchets the class at 40/55 on the contract gate, `/quality` row `answer-dating` (see [2026-08-31](./2026-08-31-provenance-that-does-not-cover-the-value.md)) |
 | 34 | **"Some op present" is not a hit, and a fix the consumer never read is not a fix** — a routing battery that passes on any scout op overcounts (32/32 "reachable") while "top hit" undercounts (12/32); three routing fixes were re-measured against a consumer catalog that predated all of them | [2026-09-05](./2026-09-05-routing-on-the-intended-op.md): intended-op re-grade 16/28 persona probes, 48/65 whole bank; Raven's manifest (09-03) carried none of the 09-02/09-03 x-routing words | `scripts/raven-routing.ts` grades the intended operation id with `rank` + per-persona rates; every miss carries a `missClass` with evidence from `scripts/eval/raven-scorer-replica.ts` (Raven's own scoring math over our text AND the text it indexes); `catalog-lag` is a class, so an un-absorbed fix reads "not yet absorbed", never "still broken"; x-routing widenings are pre-flighted for sibling capture (the `soroban` trial: 8/14 Soroban questions shifted → declined) |
 
+## Guard lines — a lesson only counts when it became a check
+
+Every dated lesson file carries one or more `Guard:` lines naming the check that
+goes red when its class comes back — a unit test, a `scripts/check-*.ts` guard,
+or a workflow. Prose does not fail a build; the line makes the claim checkable:
+
+```
+Guard: src/lib/__tests__/research-rank.test.ts — best-chunk-per-doc collapse and confidence ordering pinned
+Guard: none — <what a guard would check, so the next person can write it>
+```
+
+`scripts/check-lessons-guarded.ts` (contract gate, every PR) reads every dated
+file, verifies each named path exists, and prints lesson · guard · status:
+**guarded** (every line resolves), **unguarded** (no line, or any line says
+`none` — the file itself admits one of its lessons has no check), **guard
+missing** (a named path does not exist: a claim of coverage nothing backs). It
+exits 1 on anything but guarded. `/quality` shows the same counts. Name the
+guard for a class only when the check exists and would fail on the class — a
+production function is not a guard; its test is.
+
 ## Detail files
 
 - [2026-07-08 — schema drift → contract-as-code](./2026-07-08-schema-drift-contract-as-code.md)

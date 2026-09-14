@@ -1,5 +1,9 @@
 # Lessons — 2026-08-28: the deployment queue pass and the fake-issuer farm
 
+Guard: scripts/data/reconcile-rwa-issuers.ts — every tracked issuer re-read from its OWN stellar.toml nightly; declared-but-untracked, table-stale and could-not-check reported apart
+Guard: src/lib/__tests__/rwa-registry.test.ts — issuer coverage pinned to the committed toml-declared table (sls-083)
+Guard: none — the lookalike-home_domain detector this lesson proposed (a stranger's home_domain carrying a tracked brand, near-prefix issuer ids) was never built
+
 ## 1. A fake-issuer farm is squatting institutional RWA tickers on mainnet
 
 Working the sls-079 deployment queue, every single on-chain issuance of

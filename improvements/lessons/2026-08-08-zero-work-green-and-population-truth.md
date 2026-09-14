@@ -1,5 +1,8 @@
 # 2026-08-08 — Zero-work green runs, and shape ≠ population
 
+Guard: scripts/check-field-population.ts — every advertised field has a probe pinned to a row where it MUST be non-empty, daily in api-drift.yml
+Guard: scripts/check-writer-conformance.ts — C3: no process.exit(0) in a script that sets process.exitCode (the exit-stomp class, swept across siblings)
+
 ## What happened
 
 The contractInterface backfill wave (post-#774) hit the shared scan PAT's

@@ -1,5 +1,8 @@
 # Routing on the intended op, and the consumer that had not read our fixes (2026-09-05)
 
+Guard: scripts/raven-routing.ts — every bank item graded on its intended operation id with rank and a missClass
+Guard: scripts/eval/raven-scorer-replica.ts — Raven's scoring math over our text and the text it indexes; agreement with live scores printed every run
+
 The 2026-09-03 persona battery asked Raven 32 questions the way four builders
 ask them and scored **"did any scout op appear"**: 12/32 had a scout op as the
 top hit, 32/32 had one somewhere in the ten hits. Both numbers were wrong in
