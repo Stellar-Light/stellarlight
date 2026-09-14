@@ -525,6 +525,14 @@
 			"executeInput": "none (PR-only)",
 			"writeSet": "pull requests on repair/* branches for ONE open ledger row per run (never merged by the lane); improvements/lanes/repair-attempts.json and a wave manifest per fixed row, committed to main. No production data: the job carries no DATABASE_URI.",
 			"since": "2026-09-14"
+		},
+		{
+			"id": "task-lane",
+			"workflow": "task-lane.yml",
+			"cadence": "cron 17 9 * * 2-5 (Tue notes, Wed claims, Thu packets, Fri gap)",
+			"executeInput": "none (PR-only)",
+			"writeSet": "pull requests on task/* branches, ONE bounded unit per run of the four tracks that were run by hand until 2026-09-14: knowledge-note waves (src/lib/repo-knowledge.ts), Stage-2 end-state claims (one lane's workflow + script), verification packets (improvements/quality/, no agent), gap-matrix curation (scripts/data/curation-maps.ts). Never merged by the lane; improvements/lanes/task-attempts.json committed to main. No production data: the job carries no DATABASE_URI.",
+			"since": "2026-09-14"
 		}
 	]
 }

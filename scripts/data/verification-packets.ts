@@ -3,7 +3,8 @@
  * app-only weak-basis Live rows. READ-ONLY: the public API plus each
  * project's own website. No DB credentials, no writes, ever.
  *
- *   pnpm exec tsx scripts/data/verification-packets.ts [--limit 60] [--offset 0]
+ *   pnpm exec tsx scripts/data/verification-packets.ts [--limit 60] [--offset 0] [--skip-packeted]
+ *   (--skip-packeted drops every slug already in an improvements/quality/verification-packets-*.json)
  *
  * WHY. The quality board's strongBasis row: ~800 Live rows rest on a weak
  * basis (site-liveness / source-inherited / unverified) and most have no
@@ -18,7 +19,7 @@
  * (the .md header says how an approval is applied — see APPLY below).
  */
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const ORIGIN = "https://stellarlight.xyz";
 /** Same browser UA scripts/verify-claims.ts uses for external sites. */
@@ -525,7 +526,23 @@ function markdown(packets: Packet[], date: string, total: number): string {
 
 // ── main ────────────────────────────────────────────────────────────────────
 
-const all = await weakAppOnlyRows();
+/** Slugs a human already holds in an earlier packet (any
+ * improvements/quality/verification-packets-*.json on this checkout). */
+const packeted = new Set<string>(
+	process.argv.includes("--skip-packeted")
+		? readdirSync("improvements/quality")
+				.filter((f) => /^verification-packets-.*\.json$/.test(f))
+				.flatMap(
+					(f) =>
+						(
+							JSON.parse(readFileSync(`improvements/quality/${f}`, "utf8")) as {
+								packets?: { slug: string }[];
+							}
+						).packets?.map((x) => x.slug) ?? [],
+				)
+		: [],
+);
+const all = (await weakAppOnlyRows()).filter((r) => !packeted.has(r.slug));
 const batch = all.slice(OFFSET, OFFSET + LIMIT);
 console.log(
 	`${all.length} app-only weak-basis Live rows; packeting ${batch.length} (offset ${OFFSET}, limit ${LIMIT})`,
