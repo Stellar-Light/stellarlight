@@ -3475,6 +3475,100 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-14",
 		},
 	],
+	// ── P5 wave 5 (2026-09-14): next 12 of the curated-pool repos without a note.
+	"OpenZeppelin/role-manager": [
+		{
+			note: "OpenZeppelin's Role Manager (rolemanager.openzeppelin.com): an access-control management interface for OpenZeppelin Access Control contracts across chains — visualize roles and permissions and execute administrative actions; latest release v3.0.0 (2026-08-25); the README marks the project 'currently in development' (read 2026-09-14; TypeScript; AGPL-3.0; 9 stars; last push 2026-09-01).",
+			triggers: ["openzeppelin role manager"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"xcapit/shelter": [
+		{
+			note: "Shelter: humanitarian-aid disbursement on smart contracts — donors fund a Shelter with tokens such as USDC and stewards (NGOs, community partners) control who can access aid, when and how; the README marks it Work in Progress; last release ltw_service-v1.2.0 (2025-09-10) and last push 2025-09-19 — no activity for a year (read 2026-09-14; TypeScript; AGPL-3.0; 17 stars).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"JosueBrenes/stellar-agent-pay": [
+		{
+			note: "npm stellar-agent-pay 0.1.1 (2026-08-03; = repo tag v0.1.1): a Stellar CLI plugin (`stellar agent-pay unlock <url>`) that lets an AI agent pay x402 402-gated HTTP resources in USDC under a user-controlled spending policy with a readable audit trail; the README walkthrough runs on stellar:testnet (read 2026-09-14; MIT; last push 2026-09-14).",
+			triggers: ["agent pay x402 cli", "ai agent pay usdc stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellarchain/io.stellarkey": [
+		{
+			note: "StellarKey (stellarkey.io): an open-source, backend-free self-custodial Stellar wallet and local-first point of sale — Next.js 16, React 19, @stellar/stellar-sdk 17, shipped as a static export so keys, wallet records and merchant data stay on the user's device; v1.0.2 (2026-09-14) (README read 2026-09-14; AGPL-3.0; last push 2026-09-14).",
+			triggers: ["stellarkey wallet", "self-custodial wallet point of sale"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"untangledfinance/oz-policy-builder": [
+		{
+			note: "npm @crediolabs/policy-synth 1.3.0 (2026-09-01): records a Soroban transaction and synthesizes the minimal policy an OpenZeppelin Stellar smart account then enforces on every call ('this key may only call transfer on USDC, never more than 50 at a time, only to these addresses') — an off-chain synthesizer plus the on-chain predicate. Not the same project as gateway-fm/oz-policy-builder (Rust, SCF Tranche 1), which shares the name and the goal (README read 2026-09-14; TypeScript; MIT; no GitHub releases; last push 2026-09-01).",
+			triggers: ["policy synth openzeppelin", "crediolabs policy"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"perspectivefi/spectra-core-stellar-public": [
+		{
+			note: "Public clone of Spectra's Soroban yield-tokenization core contracts; the README states the production contracts correspond to the audited source revision documented in the included Certora audit (audit/README.md); Rust, builds to wasm32v1-none, sibling contracts embedded via include_bytes! (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-08-10).",
+			triggers: ["spectra stellar contracts", "yield tokenization soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Stellar-Light/stellarlight": [
+		{
+			note: "The source of stellarlight.xyz — the Stellar ecosystem data layer (projects, repos, builders, hackathons, a research corpus) served to people and to agents through /api/* with an OpenAPI spec at /api/openapi.json; Next.js 16 + Payload CMS on MongoDB; ARCHITECTURE.md documents the code-verified mechanics (README read 2026-09-14; MIT; no tagged releases; last push 2026-09-14).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/supercluster": [
+		{
+			note: "Stellar Supercluster (SSC): SDF's stellar-core integration-test automation — runs containerized core nodes in self-contained simulated networks on Kubernetes and drives traffic or core's internal load generation; the second-generation tool that replaced the retired Stellar Core Commander (SCC) (README read 2026-09-14; F#; no releases; last push 2026-09-08).",
+			triggers: ["stellar core integration testing", "supercluster"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"axis-markets/js-client": [
+		{
+			note: "npm @axis-markets/client 0.5.0 (2026-09-13): JavaScript SDK for the AXIS Stellar DEX — AxisContractClient wraps the on-chain AXIS contract (sign and send, read orders) and AxisApiClient is a dependency-free HTTP client for the aggregator/indexer REST API (quotes, orderbook depth, candles, ticker, market/order/trade data) (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-13).",
+			triggers: ["axis dex sdk", "axis markets client"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Creit-Tech/sorobandomains-sdk-js": [
+		{
+			note: "@creit-tech/sorobandomains-sdk is published on JSR, not npm (jsr latest 1.0.4 = repo tag v1.0.4, 2026-01-09; installed with `npx jsr add`): an SDK to search registered domains in the SorobanDomains registry contract (sorobandomains.org) (README read 2026-09-14; TypeScript; MIT; last push 2026-01-09).",
+			triggers: ["soroban domains sdk", "sorobandomains lookup"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blend-capital/blend-utils": [
+		{
+			note: "Deployment and utility scripts for the Blend Protocol — deploying the contracts and setting up mock environments; no releases, last push 2025-12-18 (README read 2026-09-14; TypeScript; MIT).",
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"script3/soroban-governor": [
+		{
+			note: "Soroban Governor: a Governor-style DAO governance framework for Soroban modeled on the OpenZeppelin Governance system, with its audits in the repo's audits/ folder; last release v1.1.1 (2024-07-09) and no push since 2024-07-09 — the contracts are dormant while the sibling repos moved on (script3/soroban-governor-ui last push 2026-05-17, soroban-governor-js-sdk 2025-07-18) (README read 2026-09-14; Rust; MIT; 17 stars).",
+			triggers: ["soroban governor dao", "governance framework soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
 };
 
 /**
