@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 70952,
-    "realHits": 9825,
-    "distinctQueries": 3583,
+    "loggedHits": 73974,
+    "realHits": 8949,
+    "distinctQueries": 3029,
     "replayed": 250
   },
   "okRate": 99,
@@ -12,7 +12,7 @@
       "endpoint": "/api/research",
       "query": "test",
       "hits": 97,
-      "lastSeen": "2026-09-13T10:39:23.533Z",
+      "lastSeen": "2026-09-13T17:04:36.547Z",
       "days": 14,
       "buckets": [
         "other"
@@ -23,8 +23,8 @@
     {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 38,
-      "lastSeen": "2026-09-13T12:49:40.807Z",
+      "hits": 39,
+      "lastSeen": "2026-09-13T17:44:01.831Z",
       "days": 14,
       "buckets": [
         "other"
@@ -33,18 +33,18 @@
       "evidence": "0 results"
     },
     {
-      "endpoint": "/api/repos/search",
-      "query": "planbok",
-      "hits": 5,
-      "lastSeen": "2026-09-01T14:51:31.843Z",
-      "days": 1,
+      "endpoint": "/api/projects/search",
+      "query": "is flurboswap live",
+      "hits": 11,
+      "lastSeen": "2026-09-12T11:42:46.802Z",
+      "days": 7,
       "buckets": [
         "other"
       ],
-      "class": "EMPTY",
-      "evidence": "0 results"
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     }
   ],
-  "generatedAt": "2026-09-13T13:51:22Z",
+  "generatedAt": "2026-09-14T05:05:17Z",
   "evalKey": "engine-d-demand"
 }

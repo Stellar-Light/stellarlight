@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-09-13T13:51:22Z",
-  "specVersion": "1.9.49",
+  "generatedAt": "2026-09-14T05:05:17Z",
+  "specVersion": "1.9.51",
   "frame": {
     "ops": 38,
     "paramsProbed": 28,
-    "fieldsChecked": 891,
+    "fieldsChecked": 892,
     "postChecked": 5,
     "skipped": [
       "GET /api/verify ?type (baseline 400)",
@@ -91,7 +91,7 @@
     {
       "op": "GET /api/projects/search",
       "field": "projects[].placementRank",
-      "evidence": "documented optional item property absent from all 98 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/search",

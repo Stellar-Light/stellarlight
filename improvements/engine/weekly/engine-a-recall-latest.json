@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-13T13:51:22Z",
+  "generatedAt": "2026-09-14T05:05:17Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 981,
+      "ok": 975,
       "total": 981,
-      "rate": 100,
+      "rate": 99.4,
       "floor": 90,
       "status": "OK "
     },
@@ -20,17 +20,17 @@
     },
     {
       "bucket": "P-ORDER",
-      "ok": 23,
+      "ok": 24,
       "total": 24,
-      "rate": 95.8,
+      "rate": 100,
       "floor": 70,
       "status": "OK "
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 980,
+      "ok": 981,
       "total": 981,
-      "rate": 99.9,
+      "rate": 100,
       "floor": 60,
       "status": "OK "
     },
@@ -69,18 +69,46 @@
   ],
   "failures": [
     {
-      "bucket": "P-ORDER",
-      "area": "Education",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=education&limit=10",
-      "expected": "#1 result carries types=Education",
-      "observed": "#1 = stellar-passport [Security,Wallet]"
+      "bucket": "P-KNOWN",
+      "area": "Infrastructure",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=The%20Starship%20Soroban",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=The%20Starship%20Soroban&limit=3"
     },
     {
-      "bucket": "P-PHRASE",
-      "area": "Infrastructure",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=what%20is%200xAuth&limit=3",
-      "expected": "0xauth in top-3 for 'what is 0xAuth'",
-      "observed": "authline, reapp, stellarguard"
+      "bucket": "P-KNOWN",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=iOS%20Stellar%20SDK",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=iOS%20Stellar%20SDK&limit=3"
+    },
+    {
+      "bucket": "P-KNOWN",
+      "area": "Tooling",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Soroban%20Hub",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=Soroban%20Hub&limit=3"
+    },
+    {
+      "bucket": "P-KNOWN",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Binance&limit=3",
+      "expected": "binance in top-3 for its own name",
+      "observed": "empty"
+    },
+    {
+      "bucket": "P-KNOWN",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Klever&limit=3",
+      "expected": "klever in top-3 for its own name",
+      "observed": "merkle-science, kes, ping"
+    },
+    {
+      "bucket": "P-KNOWN",
+      "area": "User-Facing App",
+      "probe": "https://stellarlight.xyz/api/projects/search?q=Seevcash",
+      "expected": "response",
+      "observed": "Error: 500 /api/projects/search?q=Seevcash&limit=3"
     }
   ],
   "evalKey": "engine-a-recall"
