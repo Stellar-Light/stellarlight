@@ -219,7 +219,11 @@ export interface RepoResult {
 export interface CodeVerified {
 	/** Strongest→weakest relevance proof from the code: cargo-sdk | contract-macros | lang-sdk | js-sdk | stellar-toml. */
 	stellarProof: string;
-	/** 0-1 substance of the actual contract code (auth/storage/arith/branch, not presence). Null if non-Rust proof. */
+	/** 0-1 substance of the actual Rust code, read as what it is: a contract on
+	 * its entry points, auth-gated writes, cross-calls and state; a library or
+	 * tool (an SDK, a contract library, a CLI) on its public API surface, code
+	 * mass, tests and releases. Substance, not presence — a scaffold, a
+	 * tutorial or an unreleased fork stays low either way. Null if non-Rust proof. */
 	codeDepth: number | null;
 	/** Cargo cdylib — a real deployable Soroban contract (vs tooling/SDK/frontend that merely uses Stellar). */
 	isDeployableContract: boolean;

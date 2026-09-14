@@ -141,6 +141,30 @@ async function fetchBlob(
 	}
 }
 
+/** Dirs whose manifests are read LAST under the manifest budget. */
+const DEFERRED_MANIFEST_DIR =
+	/(^|\/)(examples?|tests?|fixtures?|benches?|test[-_]wasms|templates?)(\/|$)/i;
+
+/**
+ * The order manifests are fetched under fetchRepoCode's 40-manifest budget:
+ * product crates first (shallow before deep), example/test/fixture dirs last.
+ * The tree arrives alphabetically, and `examples/` sorts before `packages/` —
+ * OpenZeppelin/stellar-contracts holds 61 manifests, 53 of them under
+ * examples/, so the budget was spent before a single library crate was read
+ * and its sources were never sampled: the scorer graded the flagship contract
+ * library on eighteen thin example wrappers (2026-09-14). Exported so the
+ * selection tests can pin it.
+ */
+export function orderManifests<T extends { path: string }>(cargos: T[]): T[] {
+	const rank = (p: string) => (DEFERRED_MANIFEST_DIR.test(p) ? 1 : 0);
+	return [...cargos].sort(
+		(a, b) =>
+			rank(a.path) - rank(b.path) ||
+			a.path.split("/").length - b.path.split("/").length ||
+			(a.path < b.path ? -1 : a.path > b.path ? 1 : 0),
+	);
+}
+
 /** THE shared, guarded path selection. Identical for probe/scanner/eval. */
 export function selectDepthPaths(
 	tree: TreeEntry[],
@@ -491,7 +515,7 @@ export async function fetchRepoCode(
 	const cargoIsSoroban = new Map<string, boolean>();
 	const blobRef = scannedRef ?? branch;
 	const acct: BlobAccount = { api: 0, raw: 0 };
-	for (const c of cargos.slice(0, 40)) {
+	for (const c of orderManifests(cargos).slice(0, 40)) {
 		const txt = await fetchBlob(gh, owner, name, c.sha, c.path, blobRef, acct);
 		cargoText.set(c.path, txt ?? "");
 		cargoIsSoroban.set(c.path, /soroban[-_]sdk/i.test(txt ?? ""));

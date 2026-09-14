@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	orderManifests,
 	selectDepthPaths,
 	type TreeEntry,
 } from "../../../scripts/scan/fetch-repo-code";
@@ -79,5 +80,47 @@ describe("selectDepthPaths — tiered JS selection budget rollover", () => {
 		);
 		const sel = selectDepthPaths(tree, new Map());
 		expect(sel.jsSources).toHaveLength(10);
+	});
+});
+
+describe("orderManifests — the 40-manifest budget reads product crates first", () => {
+	it("packages/ come before examples/ even though the tree lists examples/ first", () => {
+		// OpenZeppelin/stellar-contracts: 61 manifests, 53 under examples/. In
+		// tree order the budget was spent before packages/ — the library — was
+		// read, so its sources were never sampled.
+		const tree: TreeEntry[] = [blob("Cargo.toml", 100)];
+		for (let i = 0; i < 53; i++)
+			tree.push(
+				blob(`examples/ex${String(i).padStart(2, "0")}/Cargo.toml`, 100),
+			);
+		for (const p of ["access", "accounts", "governance", "macros", "tokens"])
+			tree.push(blob(`packages/${p}/Cargo.toml`, 100));
+		tree.push(blob("packages/tokens/tests/fixtures/Cargo.toml", 100));
+		const first40 = orderManifests(tree)
+			.slice(0, 40)
+			.map((e) => e.path);
+		expect(first40[0]).toBe("Cargo.toml");
+		for (const p of ["access", "accounts", "governance", "macros", "tokens"])
+			expect(first40).toContain(`packages/${p}/Cargo.toml`);
+		expect(first40).not.toContain("packages/tokens/tests/fixtures/Cargo.toml");
+		expect(first40.filter((p) => p.startsWith("examples/"))).toHaveLength(34);
+	});
+
+	it("is a pure reorder — every manifest survives, and a small tree is untouched in content", () => {
+		const tree: TreeEntry[] = [
+			blob("contracts/token/Cargo.toml", 1),
+			blob("Cargo.toml", 1),
+			blob("tests/fixtures/Cargo.toml", 1),
+		];
+		expect(orderManifests(tree).map((e) => e.path)).toEqual([
+			"Cargo.toml",
+			"contracts/token/Cargo.toml",
+			"tests/fixtures/Cargo.toml",
+		]);
+		expect(tree.map((e) => e.path)).toEqual([
+			"contracts/token/Cargo.toml",
+			"Cargo.toml",
+			"tests/fixtures/Cargo.toml",
+		]); // input not mutated
 	});
 });
