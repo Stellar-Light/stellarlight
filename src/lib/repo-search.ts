@@ -9,6 +9,11 @@
  * the repoScore quality grade.
  */
 
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+} from "@/lib/degraded-read";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
@@ -16,11 +21,11 @@ import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
 import {
 	activityStateOf,
+	isFirstParty,
 	type RepoActivityState,
 	type RepoKind,
 	type RepoKindBasis,
 	repoKindOf,
-	isFirstParty,
 } from "./repo-grade";
 import {
 	anchorTokens,
@@ -1160,6 +1165,9 @@ export async function searchRepos(
 	/** Honest-absence: how well this page actually matched the query. */
 	matchMode: RepoMatchMode;
 	matchModeLabel: string;
+	/** One line per backend read that failed or timed out (degraded-read.ts):
+	 * the page was served from whatever DID load. Empty when every read ran. */
+	warnings: string[];
 }> {
 	const {
 		limit = 20,
@@ -1202,16 +1210,35 @@ export async function searchRepos(
 		tokens,
 		expandedTerms: [...new Set(tokens.flatMap(termsForToken))].slice(0, 40),
 	};
+	// A read that failed or timed out SAYS so (degraded-read.ts): one line per
+	// read on `warnings`, the page served from whatever did load. A failed
+	// supplement thins the pool; a failed main fetch (or no DB handle) is the
+	// `none` shape — "the search failed; this is not evidence of absence".
+	// Before this, any throw in here became a quiet 200 with 0 rows (10 of 30
+	// symbol lookups under the 2026-09-14 eval load).
+	const warnings: string[] = [];
+	const failed = (why: string[]) => ({
+		repos: [],
+		total: 0,
+		canonical: [],
+		searched,
+		matchMode: "none" as RepoMatchMode,
+		matchModeLabel: MATCH_MODE_LABEL.none,
+		warnings: why,
+	});
 	// No DB handle: an infrastructure failure, NOT an absence proof.
 	if (!payload)
-		return {
-			repos: [],
-			total: 0,
-			canonical: [],
-			searched,
-			matchMode: "none" as RepoMatchMode,
-			matchModeLabel: MATCH_MODE_LABEL.none,
-		};
+		return failed([degradedWarning("repos search", "no database handle")]);
+	const find = async (op: string, args: unknown) => {
+		const r = await degradedRead(
+			op,
+			() => payload.find(args),
+			{ docs: [] as unknown[] },
+			DEFAULT_READ_TIMEOUT_MS,
+		);
+		if (r.warning) warnings.push(r.warning);
+		return r.value;
+	};
 	try {
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
 		// repos, not the whole collection. It grew past 2,000 docs and pulling
@@ -1255,7 +1282,7 @@ export async function searchRepos(
 		if (dependsOn) where.stellarDeps = { like: dependsOn };
 		if (capability) where.sdkCapabilities = { like: capability };
 		const hasStructuredFilter = Boolean(domain || dependsOn || capability);
-		const res = await payload.find({
+		const res = await find("repos candidate fetch", {
 			collection: "repos",
 			where,
 			limit: tokens.length || hasStructuredFilter ? 600 : 200,
@@ -1267,6 +1294,8 @@ export async function searchRepos(
 			// win on the repos collection.
 			select: { readmeExcerpt: false },
 		});
+		// The main fetch is the pool; without it there is nothing to rank.
+		if (warnings.length) return failed(warnings);
 		// Curated concept → canonical repo injection. The authoritative SDF repo for
 		// an infra/protocol question often isn't a keyword candidate, so fetch the
 		// curated set and float it to the top in priority order (canonRank).
@@ -1281,7 +1310,7 @@ export async function searchRepos(
 		const injectList = [...new Set([...canonList, ...flagList])];
 		let rawDocs = res.docs as unknown as RepoDoc[];
 		if (injectList.length) {
-			const cres = await payload.find({
+			const cres = await find("repos canonical inject", {
 				collection: "repos",
 				where: { fullName: { in: injectList } },
 				limit: injectList.length,
@@ -1304,7 +1333,7 @@ export async function searchRepos(
 		// key below then ranks them on merit within their stellarness tier.
 		const queryAnchors = anchorTokens(tokens);
 		if (queryAnchors.length) {
-			const ares = await payload.find({
+			const ares = await find("repos identity supplement", {
 				collection: "repos",
 				where: {
 					or: queryAnchors.flatMap((t) => [
@@ -1346,7 +1375,7 @@ export async function searchRepos(
 			(qRaw.split(/\s+/).length >= 3 && normAlias(qRaw).length >= 8);
 		if (qLooksLikeName && qRaw.length >= 5) {
 			const forms = [...new Set([qRaw, qRaw.replace(/\s+/g, "-")])];
-			const nres = await payload.find({
+			const nres = await find("repos exact-name supplement", {
 				collection: "repos",
 				where: {
 					or: forms.flatMap((f) => [
@@ -1820,15 +1849,11 @@ export async function searchRepos(
 			searched,
 			matchMode,
 			matchModeLabel: MATCH_MODE_LABEL[matchMode],
+			warnings,
 		};
-	} catch {
-		return {
-			repos: [],
-			total: 0,
-			canonical: [],
-			searched,
-			matchMode: "none" as RepoMatchMode,
-			matchModeLabel: MATCH_MODE_LABEL.none,
-		};
+	} catch (e) {
+		// Every read is wrapped above, so this is the ranking pass throwing on
+		// a data-shape surprise — still a failed search, still said.
+		return failed([...warnings, degradedWarning("repos search", e)]);
 	}
 }

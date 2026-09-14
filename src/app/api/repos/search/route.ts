@@ -130,17 +130,28 @@ export async function GET(req: NextRequest) {
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
-	const { repos, total, canonical, searched, matchMode, matchModeLabel } =
-		await searchRepos(payload, q, {
-			limit,
-			offset,
-			language,
-			minScore,
-			activity,
-			capability,
-			domain,
-			dependsOn,
-		});
+	const {
+		repos,
+		total,
+		canonical,
+		searched,
+		matchMode,
+		matchModeLabel,
+		warnings: readWarnings,
+	} = await searchRepos(payload, q, {
+		limit,
+		offset,
+		language,
+		minScore,
+		activity,
+		capability,
+		domain,
+		dependsOn,
+	});
+	// A backend read that failed or timed out rides meta.warnings next to the
+	// unknown-param disclosure — the honesty channel the contract documents —
+	// instead of the quiet 200 + 0 rows it used to be (2026-09-14).
+	const warnings = [...(paramWarning ? [paramWarning] : []), ...readWarnings];
 
 	logApiHit({
 		req,
@@ -164,7 +175,7 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(warnings.length ? { warnings } : {}),
 				filters: {
 					q,
 					language: language || null,
@@ -209,9 +220,11 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				// empty pages are never pinned in the edge cache (see projects/search)
+				// empty pages are never pinned in the edge cache (see projects/search);
+				// neither is a page a failed read thinned — it would serve the
+				// degraded set to every caller for the whole s-maxage window
 				"Cache-Control":
-					repos.length === 0
+					repos.length === 0 || readWarnings.length
 						? "no-store"
 						: "public, s-maxage=60, stale-while-revalidate=300",
 			},

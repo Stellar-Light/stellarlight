@@ -30,6 +30,7 @@
  * regression without gating PRs. Engine C later files issues from this.
  */
 
+import { DEGRADED_READ_PREFIX, isDegraded } from "../../src/lib/degraded-read";
 import {
 	ATTR_MAX_WINDOW,
 	gradeAttrProbe,
@@ -53,8 +54,9 @@ interface Failure {
 
 const failures: Failure[] = [];
 // Could-not-check: the probe never got an answer (a 5xx after the retry, a
-// network error, a redirect) — the trinary state the recall question cannot
-// grade. It reaches the board and the JSON as `unchecked`, never `failures`:
+// network error, a redirect, a page whose meta.warnings says a backend read
+// failed) — the trinary state the recall question cannot grade. It reaches
+// the board and the JSON as `unchecked`, never `failures`:
 // every fetch error used to be tallied as a miss with `expected:
 // "response"`, and the ledger keys rows by `expected`, so they all collapsed
 // into ONE row, engine-a-recall:response, open since 2026-07-22 and revived
@@ -78,6 +80,30 @@ function couldNotCheck(bucket: string, f: Omit<Failure, "bucket">) {
 	b.unchecked++;
 	unchecked.push({ bucket, ...f });
 	buckets.set(bucket, b);
+}
+
+/** meta.warnings of a page, or [] when it carries none. */
+function warningsOf(d: unknown): string[] {
+	const w = (d as { meta?: { warnings?: unknown } } | null)?.meta?.warnings;
+	return Array.isArray(w)
+		? w.filter((x): x is string => typeof x === "string")
+		: [];
+}
+
+/**
+ * A page that SAYS a backend read failed (a "backend read failed: …" line on
+ * meta.warnings — src/lib/degraded-read.ts, the serving side of the
+ * 2026-09-14 class) is could-not-check, never a miss: the API itself reports
+ * the rows as incomplete. Thrown, so each bucket's existing catch routes it
+ * through couldNotCheck with the warning as `observed`.
+ */
+function rejectDegraded<T>(d: T): T {
+	const w = warningsOf(d);
+	if (isDegraded(w))
+		throw new Error(
+			`degraded page: ${w.find((x) => x.startsWith(DEGRADED_READ_PREFIX))}`,
+		);
+	return d;
 }
 
 // Vercel preview deployments sit behind SSO deployment protection, so an
@@ -140,9 +166,15 @@ async function reprobeIfEmpty<T extends Record<string, unknown>>(
 	first: T,
 	key: "projects" | "builders" | "repos" = "projects",
 ): Promise<T> {
-	if (((first[key] as unknown[] | undefined) ?? []).length) return first;
+	// A warned page is the same transient class as an empty one: re-probe
+	// once; a second warned page is could-not-check (rejectDegraded).
+	if (
+		!isDegraded(warningsOf(first)) &&
+		((first[key] as unknown[] | undefined) ?? []).length
+	)
+		return first;
 	await new Promise((r) => setTimeout(r, 2000));
-	return j(path);
+	return rejectDegraded(await j(path));
 }
 
 /** Small concurrency pool — be polite to prod. */
@@ -278,7 +310,7 @@ async function main() {
 		if (n < 2) continue; // too thin to grade dominance
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=10`);
+			const d = rejectDegraded(await j(`/api/projects/search?q=${q}&limit=10`));
 			const rows = d.projects ?? [];
 			const carrying = rows.filter((r: any) =>
 				(r.types ?? []).includes(type),
@@ -326,7 +358,7 @@ async function main() {
 		if ((typeCounts.get(type) ?? 0) < 3) continue;
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=5`);
+			const d = rejectDegraded(await j(`/api/projects/search?q=${q}&limit=5`));
 			const rows = d.projects ?? [];
 			const top = rows[0];
 			tally("P-ORDER", !!top && (top.types ?? []).includes(type), {
@@ -434,8 +466,8 @@ async function main() {
 		try {
 			// Fetch the widest window the grader could ask for in one request, so
 			// scaling costs no extra round-trips.
-			const d = await j(
-				`/api/projects/search?q=${eq}&limit=${ATTR_MAX_WINDOW}`,
+			const d = rejectDegraded(
+				await j(`/api/projects/search?q=${eq}&limit=${ATTR_MAX_WINDOW}`),
 			);
 			const returned: string[] = (d.projects ?? []).map((r: any) => r.slug);
 			const impliers = attrSlugs.get(q) ?? new Set([p.slug]);
@@ -477,7 +509,7 @@ async function main() {
 	}
 	await pool(cap(paProbes), 4, async ({ pa, path, desc }) => {
 		try {
-			const d = await j(path);
+			const d = rejectDegraded(await j(path));
 			const ok = (d.partners ?? []).some((r: any) => r.slug === pa.slug);
 			tally("PA-CAP", ok, {
 				area: pa.partnerType ?? "?",
