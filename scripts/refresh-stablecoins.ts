@@ -22,6 +22,15 @@
  * `measuredAt`/`basis` tell you it's stale. The snapshot row still records
  * the null, because that day genuinely has no measurement. Current state
  * answers "what is it"; the series answers "what did we see when".
+ *
+ * END-STATE CLAIM (QUALITY.md §3, second condition): after the writes, every
+ * row this run wrote — current rows, retirements and snapshots — is read back
+ * and compared to the exact payload sent, on every key of that payload
+ * (payload.update silently drops unknown keys and reports success). Exit 1 =
+ * a finding (a field did not persist, a write threw, or the pacing is still
+ * rate-limited). Exit 2 = could not look: more than half the live-tracked
+ * roster came back unmeasured, so the run — dry or not — is not evidence
+ * about the registry. Kept-forward and retired counts are printed every run.
  */
 import "./load-env";
 import { getPayload } from "payload";
@@ -31,6 +40,7 @@ import {
 	measureRegistry,
 	RATE_LIMIT_MARK,
 } from "../src/lib/stablecoin-pipeline";
+import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -94,7 +104,23 @@ async function main() {
 	let created = 0;
 	let updated = 0;
 	let snapshots = 0;
+	let keptRows = 0;
+	let failed = 0;
 	const problems: string[] = [];
+	// What was SENT, per collection, keyed the way each is read back: current
+	// rows and retirements on assetId (a retired asset is never a measured one,
+	// so they share a map), snapshots on `${assetId}:${day}`. Only a write that
+	// resolved is recorded — a throw is counted in `failed`, red on its own.
+	const sentRows = new Map<string, Record<string, unknown>>();
+	const sentSnaps = new Map<string, Record<string, unknown>>();
+	const attempt = async (label: string, fn: () => Promise<void>) => {
+		try {
+			await fn();
+		} catch (e) {
+			failed++;
+			console.error(`  ✗ ${label}: ${e instanceof Error ? e.message : e}`);
+		}
+	};
 
 	for (const m of measured) {
 		// ── 7-day supply change, and ~24h payments-count change, from our own series ──
@@ -169,23 +195,29 @@ async function main() {
 			measuredAt: m.measuredAt,
 			note: m.note ?? null,
 		};
-		if (kept) kept7(m, problems);
+		if (kept) {
+			keptRows++;
+			kept7(m, problems);
+		}
 
 		if (m.basis !== "live")
 			problems.push(`${m.id}: ${m.basis} — ${m.note ?? ""}`);
 
 		if (EXECUTE) {
-			if (prev) {
-				await payload.update({
-					collection: "stablecoins",
-					id: prev.id,
-					data: row,
-				});
-				updated++;
-			} else {
-				await payload.create({ collection: "stablecoins", data: row });
-				created++;
-			}
+			await attempt(`${m.id} current row`, async () => {
+				if (prev) {
+					await payload.update({
+						collection: "stablecoins",
+						id: prev.id,
+						data: row,
+					});
+					updated++;
+				} else {
+					await payload.create({ collection: "stablecoins", data: row });
+					created++;
+				}
+				sentRows.set(m.id, row);
+			});
 
 			// Snapshot records what we ACTUALLY measured today, nulls included.
 			const key = `${m.id}:${day}`;
@@ -205,25 +237,28 @@ async function main() {
 				measuredAt: m.measuredAt,
 				source: "stellarlight",
 			};
-			const had = await payload.find({
-				collection: "stablecoin-snapshots",
-				where: { key: { equals: key } },
-				limit: 1,
-				depth: 0,
+			await attempt(`${key} snapshot`, async () => {
+				const had = await payload.find({
+					collection: "stablecoin-snapshots",
+					where: { key: { equals: key } },
+					limit: 1,
+					depth: 0,
+				});
+				if (had.docs[0]) {
+					await payload.update({
+						collection: "stablecoin-snapshots",
+						id: (had.docs[0] as { id: string }).id,
+						data: snap,
+					});
+				} else {
+					await payload.create({
+						collection: "stablecoin-snapshots",
+						data: snap,
+					});
+				}
+				snapshots++;
+				sentSnaps.set(key, snap);
 			});
-			if (had.docs[0]) {
-				await payload.update({
-					collection: "stablecoin-snapshots",
-					id: (had.docs[0] as { id: string }).id,
-					data: snap,
-				});
-			} else {
-				await payload.create({
-					collection: "stablecoin-snapshots",
-					data: snap,
-				});
-			}
-			snapshots++;
 		}
 	}
 
@@ -255,10 +290,13 @@ async function main() {
 		if (EXECUTE) {
 			const now = new Date().toISOString();
 			for (const d of toRetire)
-				await payload.update({
-					collection: "stablecoins",
-					id: d.id,
-					data: { retiredAt: now },
+				await attempt(`${d.assetId} retire`, async () => {
+					await payload.update({
+						collection: "stablecoins",
+						id: d.id,
+						data: { retiredAt: now },
+					});
+					sentRows.set(String(d.assetId), { retiredAt: now });
 				});
 		}
 	}
@@ -301,69 +339,107 @@ async function main() {
 		);
 		for (const m of stillRateLimited) console.log(`  · ${m.id}`);
 	}
-	const rateLimitFailure = stillRateLimited.length > RATE_LIMIT_EXIT_THRESHOLD;
+	if (stillRateLimited.length > RATE_LIMIT_EXIT_THRESHOLD) {
+		console.error(
+			`${stillRateLimited.length} rows exceed the rate-limit threshold (${RATE_LIMIT_EXIT_THRESHOLD}) — a failing run.`,
+		);
+		process.exitCode = 1;
+	}
+
+	// A run that could not MEASURE most of the roster proves nothing about it.
+	// Every row is still written by design (basis "unmeasured", good values
+	// kept forward — the rule that keeps a bad fetch from reading as a
+	// delisting), and every one of those writes reads back exactly as sent, so
+	// the read-back alone would call a blind run green. Curated-static rows are
+	// never measured and count neither way. Its own exit code (2), so
+	// could-not-look never reads as checked-and-clean; a finding (1) wins.
+	const askable = measured.filter((m) => m.basis !== "curated-static");
+	const blind = askable.filter((m) => m.basis === "unmeasured");
+	console.log(
+		`kept previous value(s) on ${keptRows} row(s) · unmeasured ${blind.length}/${askable.length} live-tracked`,
+	);
+	if (askable.length && blind.length > askable.length / 2) {
+		console.error(
+			`\n✗ FAILED TO MEASURE ${blind.length}/${askable.length} live-tracked asset(s) — do not read this run as evidence about the registry (exit 2 unless a finding sets 1).`,
+		);
+		if (!process.exitCode) process.exitCode = 2;
+	}
 
 	if (!EXECUTE) {
 		console.log(
 			`\nDRY RUN — would upsert ${measured.length} stablecoins and ${measured.length} snapshots for ${day}.`,
 		);
 		console.log("Re-run with --execute to write.");
-		if (rateLimitFailure) {
-			console.error(
-				`${stillRateLimited.length} rows exceed the rate-limit threshold (${RATE_LIMIT_EXIT_THRESHOLD}) — would be a failing run.`,
-			);
-		}
-		process.exit(rateLimitFailure ? 1 : 0);
+		return;
 	}
 
-	// ── read-back: payload.update silently drops unknown keys, so prove it ──
-	const back = await payload.find({
-		collection: "stablecoins",
-		limit: 200,
-		depth: 0,
-	});
-	const byId = new Map(
-		(back.docs as Array<Record<string, unknown>>).map((d) => [
-			String(d.assetId),
-			d,
-		]),
+	// ── read-back: every row this run wrote, against the exact payload sent ──
+	// payload.update() resolves and silently drops keys with no schema field
+	// at that path (#615), so "wrote N" is a claim about the calls, not the
+	// data. Every key of every payload is compared — a field added to `row` or
+	// `snap` is verified without anyone remembering to list it here — and a
+	// row is re-fetched by its own key before it is called missing (the bulk
+	// `in` artifact of 2026-08-13).
+	const rows = (r: { docs: unknown[] }) => r.docs as Record<string, unknown>[];
+	const readBack = async (
+		collection: "stablecoins" | "stablecoin-snapshots",
+		keyField: "assetId" | "key",
+		sent: Map<string, Record<string, unknown>>,
+	) => {
+		if (!sent.size) {
+			console.log(`  · ${collection}: nothing written`);
+			return;
+		}
+		const fields = [...new Set([...sent.values()].flatMap(Object.keys))];
+		const mismatches = await verifyWrites(
+			sent,
+			async (keys) =>
+				new Map(
+					rows(
+						await payload.find({
+							collection,
+							where: { [keyField]: { in: keys } },
+							limit: keys.length,
+							depth: 0,
+						}),
+					).map((d) => [String(d[keyField]), d]),
+				),
+			fields,
+			200,
+			async (key) =>
+				rows(
+					await payload.find({
+						collection,
+						where: { [keyField]: { equals: key } },
+						limit: 1,
+						depth: 0,
+					}),
+				)[0] ?? null,
+		);
+		if (mismatches.length) {
+			console.error(
+				`  ✗ ${collection}: ${mismatches.length} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ ${collection}: all ${sent.size} row(s) hold the values written (${fields.length} fields: ${fields.join(", ")})`,
+			);
+		}
+	};
+	console.log("\n── Read-back ──");
+	await readBack("stablecoins", "assetId", sentRows);
+	await readBack("stablecoin-snapshots", "key", sentSnaps);
+
+	console.log(
+		`\nwrote ${created} new, ${updated} updated, ${snapshots} snapshots for ${day} · retired ${toRetire.length} · ${failed} write(s) threw`,
 	);
-	let mismatches = 0;
-	for (const m of measured) {
-		const got = byId.get(m.id);
-		if (!got) {
-			console.error(`  ✗ ${m.id} — not found after write`);
-			mismatches++;
-			continue;
-		}
-		if (got.basis !== m.basis || !got.measuredAt) {
-			console.error(
-				`  ✗ ${m.id} — basis/measuredAt did not land (basis=${got.basis})`,
-			);
-			mismatches++;
-		}
-		// A field the collection doesn't declare is dropped by payload.update
-		// WITHOUT error, so the write reports success and the row keeps the old
-		// number. Prove the measured price landed with the basis that made it.
-		if (
-			m.priceBasis === "measured-market" &&
-			got.priceBasis !== "measured-market"
-		) {
-			console.error(
-				`  ✗ ${m.id} — measured market price did not land (priceBasis=${String(got.priceBasis)}, priceUSD=${String(got.priceUSD)})`,
-			);
-			mismatches++;
-		}
+	if (failed) {
+		console.error(
+			`✗ ${failed} write(s) threw — exiting 1 so the run shows red.`,
+		);
+		process.exitCode = 1;
 	}
-	console.log(
-		`\nwrote ${created} new, ${updated} updated, ${snapshots} snapshots for ${day}`,
-	);
-	console.log(
-		mismatches === 0
-			? `read-back verified: ${byId.size} rows carry basis + measuredAt`
-			: `read-back FAILED on ${mismatches} rows`,
-	);
-	process.exit(mismatches === 0 && !rateLimitFailure ? 0 : 1);
 }
 
 /** Note when a row kept a previous value because this run couldn't measure it. */
@@ -373,7 +449,12 @@ function kept7(m: MeasuredStablecoin, problems: string[]) {
 	);
 }
 
-main().catch((e) => {
-	console.error("Fatal:", e);
-	process.exit(1);
-});
+// exitCode, not exit(0): a read-back mismatch, a thrown write, the rate-limit
+// finding or a blind run sets it above, and exit(0) here would stomp it — the
+// class-20 bug where a run reports GREEN after its writes died.
+main()
+	.then(() => process.exit(process.exitCode ?? 0))
+	.catch((e) => {
+		console.error("Fatal:", e);
+		process.exit(1);
+	});

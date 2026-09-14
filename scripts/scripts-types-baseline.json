@@ -1,7 +1,7 @@
 {
 	"$comment": "Type errors in scripts/ that predate the guard. A ratchet: entries may be REMOVED (in the PR that fixes them) and never added. Regenerate: pnpm exec tsx scripts/check-scripts-types.ts --update",
-	"updatedAt": "2026-09-08T00:55:46.700Z",
-	"count": 30,
+	"updatedAt": "2026-09-14T17:36:20.015Z",
+	"count": 29,
 	"errors": [
 		"scripts/agents/apply-wallet-availability.ts :: error TS2345 :: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
 		"scripts/agents/apply-wallet-availability.ts :: error TS2769 :: No overload matches this call.",
@@ -23,7 +23,6 @@
 		"scripts/ingest-soroban-security.ts :: error TS2353 :: Object literal may only specify known properties, and 'findingsExtraction' does not exist in type 'RegistryRow'.",
 		"scripts/patch-rozo-cctp.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/refresh-stablecoins.ts :: error TS2352 :: Conversion of type 'Stablecoin' to type 'Record<string, unknown> & { id: string; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.",
-		"scripts/refresh-stablecoins.ts :: error TS2352 :: Conversion of type 'Stablecoin[]' to type 'Record<string, unknown>[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.",
 		"scripts/scan/depth-eval.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
 		"scripts/scan/js-depth-probe.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
 		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.",
@@ -55,7 +54,6 @@
 		"scripts/ingest-soroban-security.ts :: error TS2353 :: Object literal may only specify known properties, and 'findingsExtraction' does not exist in type 'RegistryRow'.": 1,
 		"scripts/patch-rozo-cctp.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/refresh-stablecoins.ts :: error TS2352 :: Conversion of type 'Stablecoin' to type 'Record<string, unknown> & { id: string; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.": 1,
-		"scripts/refresh-stablecoins.ts :: error TS2352 :: Conversion of type 'Stablecoin[]' to type 'Record<string, unknown>[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.": 1,
 		"scripts/scan/depth-eval.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 2,
 		"scripts/scan/js-depth-probe.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 1,
 		"scripts/scan/scan-repo-code.ts :: error TS2322 :: Type 'string | null | undefined' is not assignable to type 'string | null'.": 2,

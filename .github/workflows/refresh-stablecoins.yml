@@ -1,4 +1,14 @@
 name: Refresh stablecoins
+# workflow-health: signal-steps: ^Propagate the red$
+#
+# The script is trinary and the red is designed: 1 = a finding (a written field
+# did not read back as sent, a write threw, or the pacing is rate-limited),
+# 2 = could not look (more than half the live-tracked roster came back
+# unmeasured, so the run is not evidence about the registry). The refresh step
+# runs under continue-on-error so the rolling issue always gets the log; the
+# code is carried forward and "Propagate the red" is the step that goes red.
+# The script reads back every row it wrote — current rows, retirements and
+# snapshots — against the exact payload sent (QUALITY.md §3, second condition).
 
 # Measures the stablecoin registry from public APIs (Horizon, Stellar Expert,
 # CoinGecko, issuer stellar.toml) and writes current state + one dated
@@ -50,11 +60,18 @@ jobs:
         shell: bash
         run: |
           # Scheduled runs always write; manual runs need the box ticked.
+          # set +e so the exit code can be captured (pipefail keeps it the
+          # script's, not tee's); continue-on-error would collapse 1 and 2
+          # into `failure`, so carry the code to the propagate step.
+          set +e
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
             pnpm exec tsx scripts/refresh-stablecoins.ts --execute 2>&1 | tee refresh.log
           else
             pnpm exec tsx scripts/refresh-stablecoins.ts 2>&1 | tee refresh.log
           fi
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
 
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
@@ -65,4 +82,10 @@ jobs:
 
       - name: Propagate the red
         if: steps.refresh.outcome == 'failure'
-        run: exit 1
+        run: |
+          if [ "${{ steps.refresh.outputs.code }}" = "2" ]; then
+            echo "BLIND: most of the live-tracked roster could not be measured — a could-not-look, NOT a finding about any asset."
+          else
+            echo "FINDING: a written field did not read back as sent, a write threw, or the pacing is rate-limited — see the Refresh step."
+          fi
+          exit "${{ steps.refresh.outputs.code || 1 }}"
