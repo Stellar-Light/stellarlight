@@ -90,6 +90,25 @@ async function j(path: string): Promise<any> {
 	return res.json();
 }
 
+/**
+ * A name lookup that comes back EMPTY is re-probed once before it counts as
+ * a miss. Two runs in two days filed exact-name misses that hit at #1
+ * minutes later — 2 of 2,229 probes during a production deploy rollover
+ * (2026-09-13), 6 of 2,229 while the enrich pass was writing repo rows
+ * (2026-09-14, engine-c run 34807578293) — and each would have opened a
+ * ledger row for a week. An empty page under write load is a transient
+ * read, not retrieval; the re-probe separates the two. A non-empty wrong
+ * answer is never retried: that IS the finding.
+ */
+async function reprobeIfEmpty(
+	path: string,
+	first: { projects?: unknown[] },
+): Promise<{ projects?: unknown[] }> {
+	if ((first.projects ?? []).length) return first;
+	await new Promise((r) => setTimeout(r, 2000));
+	return j(path);
+}
+
 /** Small concurrency pool — be polite to prod. */
 async function pool<T>(items: T[], n: number, fn: (t: T) => Promise<void>) {
 	const q = [...items];
@@ -171,7 +190,8 @@ async function main() {
 	await pool(cap(projects), 4, async (p) => {
 		const q = encodeURIComponent(p.name);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=3`);
+			const path = `/api/projects/search?q=${q}&limit=3`;
+			const d = await reprobeIfEmpty(path, await j(path));
 			const ok = (d.projects ?? []).some((r: any) => r.slug === p.slug);
 			tally("P-KNOWN", ok, {
 				area: p.category ?? "?",
@@ -307,7 +327,8 @@ async function main() {
 		const phrase = TEMPLATES[hashIdx(p.slug)](p.name);
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=3`);
+			const path = `/api/projects/search?q=${q}&limit=3`;
+			const d = await reprobeIfEmpty(path, await j(path));
 			const ok = (d.projects ?? []).some((r: any) => r.slug === p.slug);
 			tally("P-PHRASE", ok, {
 				area: p.category ?? "?",
