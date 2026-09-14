@@ -4247,6 +4247,280 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			visibility: "internal",
 		},
 	],
+	// ── P5 wave 9 (2026-09-14) — the next 25 curated-pool repos with no entry
+	// (499 remained after wave 8). Same discipline: every fact read on
+	// 2026-09-14 from the repo's own metadata, README, releases, or a registry
+	// whose `repository` points back at it.
+	"stellar/smart-wallet-demo-app": [
+		{
+			note: "SDF's smart-wallet demo app. Its README opens with a security policy that matters more than the demo: the repository is OUT OF SCOPE for the Stellar HackerOne program, is no longer actively maintained, receives no security patches, and vulnerability reports against it are closed as informational — so it is a reference to read, never a base to fork for production. The walkthrough wires the Stellar Disbursement Platform (create an API key with write permissions) to the wallet (README read 2026-09-14; no license file; 46 stars; no releases; last push 2026-08-26).",
+			triggers: [
+				"smart wallet demo",
+				"passkey wallet demo stellar",
+				"smart wallet demo maintained",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/soroban-quest": [
+		{
+			note: "Soroban Quest (quest.stellar.org/soroban): SDF's gamified Soroban course, where each quest is a Rust exercise completed in a GitHub Codespace and rewarded on completion; the README opens the repo directly in Codespaces and points learners at Discord when stuck. Series 5 art is in the README header; no release has been published (README read 2026-09-14; no license file; 9 stars; last push 2026-08-25).",
+			triggers: [
+				"soroban quest learn",
+				"learn soroban course",
+				"stellar quest soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/binaries": [
+		{
+			note: "The @stellar org's binary cache: this repo precompiles tools and stores them in GitHub Releases for the org's CI jobs, consumed as `uses: stellar/binaries@v10` with a `name` (for example cargo-set-rust-version) where the tag identifies the release to download from. The README states plainly that these binaries are NOT recommended for general-purpose use and exist only to support @stellar CI. Newest tag v86 (2026-08-20) (README read 2026-09-14; no license file; 3 stars; last push 2026-09-07).",
+			triggers: ["stellar binaries action", "precompiled binaries ci stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/crate-git-revision": [
+		{
+			note: "A build-time helper from the @stellar org that embeds a crate's git revision into its build: it reads the revision either from the `.cargo_vcs_info.json` file inside a published crate or from the git repository of an unpublished build, and injects a `GIT_REVISION` environment variable carrying the full revision with a `-dirty` suffix when the working directory is dirty — which is how Stellar's Rust binaries report the commit they were built from. Newest release v0.0.9 (2026-05-28) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-24).",
+			triggers: [
+				"git revision crate",
+				"embed git revision rust",
+				"GIT_REVISION build",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Soneso/stellar_wallet_flutter_sdk": [
+		{
+			note: "pub.dev stellar_wallet_flutter_sdk 1.1.4 (published 2026-08-25; the package's repository points back at this repo): Soneso's Flutter/Dart wallet SDK for building Stellar wallet applications, the Dart counterpart to their stellar_flutter_sdk. Newest GitHub release v1.1.4 (2026-08-25), coverage reported through codecov (README read 2026-09-14; MIT; 6 stars; last push 2026-08-25).",
+			triggers: [
+				"flutter wallet sdk stellar",
+				"dart wallet sdk",
+				"stellar wallet flutter",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ACTA-Team/acta-credentials": [
+		{
+			note: "npm @acta-team/credentials 1.1.10 (published 2026-08-22; the package's repository points back at this repo): a React/TypeScript SDK for ACTA (acta.build) that issues, stores, verifies and revokes verifiable credentials on Stellar through single-tenant vaults, with non-custodial wallet signing and automatic `did:stellar` issuer onboarding; docs at docs.acta.build. The newest GitHub tag is v1.1.2 (2026-06-30), so npm leads the repo's tags (README read 2026-09-14; MIT; last push 2026-08-22).",
+			triggers: [
+				"acta credentials sdk",
+				"verifiable credentials stellar",
+				"did:stellar issuer",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"57blocks/stellar-resource-usage-report": [
+		{
+			note: "npm @57block/stellar-resource-usage 0.0.4 (published 2025-12-23; the package's repository points back at this repo): a tool for Stellar developers that monitors and analyses the resources a smart contract consumes during execution, so a contract's CPU/memory footprint can be inspected before it meets mainnet limits; the README links a CHANGELOG for the version history (README read 2026-09-14; MIT; 4 stars; no GitHub releases; last push 2025-12-23).",
+			triggers: [
+				"resource usage report soroban",
+				"contract resource consumption stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"xycloo/zephyr-vm": [
+		{
+			note: "The Zephyr VM by Xycloo Labs (mercurydata.app/zephyr-vm): a wasmi-based virtual machine for cloud computing over blockchain data — indexing, monitoring and automation — and the execution core of Mercury, though the README states it can also be built and run locally. Docs at docs.mercurydata.app (README read 2026-09-14; MPL-2.0; 3 stars; no releases; last push 2026-09-03).",
+			triggers: [
+				"zephyr vm mercury",
+				"blockchain data vm stellar",
+				"mercury indexing engine",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"xycloo/rs-ingest": [
+		{
+			note: "crates.io `ingest` 0.1.1 (updated 2024-09-27; the crate's repository points back at this repo): Xycloo's Rust ingestion library offering single- and multi-threaded, online and offline ingestion of Stellar ledger data. Read the scope before reaching for it — the README is written for FUTURENET, the network SDF has since retired, and the newest GitHub tag is 0.0.3 (2023-10-04) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-27).",
+			triggers: [
+				"rs-ingest futurenet",
+				"rust ledger ingestion stellar",
+				"ingest crate stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"soroswap/token-list": [
+		{
+			note: "The official Soroswap token list: the curated set of Stellar assets and Soroban tokens that validates swap paths on the Soroswap AMM, which is why an unlisted token can be untradeable through the protocol's own routing. The README documents the entry structure a token must follow and asks contributors to open a PR and then reach out on Discord (README read 2026-09-14; GPL-3.0; 12 stars; no releases; last push 2026-09-06).",
+			triggers: [
+				"soroswap token list",
+				"trusted token list soroban",
+				"add token soroswap",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blend-capital/docs-v2": [
+		{
+			note: "The source of the Blend v2 documentation at docs.blend.capital — user documentation for Blend's lending pools and a separate pool-creator guide for deploying one. Blend is described here as a liquidity protocol primitive on Stellar (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-27).",
+			triggers: ["blend v2 docs", "blend pool creator guide"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"reflector-network/oracle-client": [
+		{
+			note: "Client bindings for the Reflector oracle contract (GitHub repo description; the README is empty and nothing is published under this name as of 2026-09-14) — the richer, published client for Reflector's Pulse and Beam oracles is @reflector/contract-client from reflector-network/contract-client-js (metadata read 2026-09-14; MIT; last push 2026-08-27).",
+			triggers: ["reflector oracle client bindings"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"AquariusDeFi/aqua-voting-tracker": [
+		{
+			note: "The Aquarius voting tracker (Python): the service behind AQUA holders locking tokens to vote for market pairs, with the votes recorded on Stellar itself; the README's own links point at the AquaToken/aqua-voting-tracker path rather than this AquariusDeFi one, so the canonical home is worth confirming before citing a path (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-08-04).",
+			triggers: ["aqua voting tracker", "aqua vote market pairs"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"AquariusDeFi/aqua-marketkeys-tracker": [
+		{
+			note: "The Aquarius market-keys tracker (Python), sibling of aqua-voting-tracker: it tracks the market-key accounts that AQUA votes are cast against, so a pair's votes can be attributed to a specific Stellar market. As with its sibling, the README's badges and logo link resolve to the AquaToken org rather than AquariusDeFi (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-08-04).",
+			triggers: ["aqua market keys", "marketkeys tracker aquarius"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"utkurock/Lusty": [
+		{
+			note: "Lusty (lusty.finance): a DeFi options protocol where a user sells covered calls and cash-secured puts on XLM and receives the premium at deposit, with settlement at expiry against an oracle price. The README states the network is Stellar TESTNET and links a two-minute walkthrough, so treat it as a testnet product until a mainnet deployment is cited (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-13).",
+			triggers: [
+				"lusty options xlm",
+				"covered calls stellar",
+				"cash secured puts xlm",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Foryield/soroban-yield-vault": [
+		{
+			note: "ForYield's open-source Soroban YieldVault contract, submitted for an SCF Build Award and written against EU regulatory requirements. The README is unusually explicit about scope: ForYield is not an authorised crypto-asset service provider, nothing there is an offer of a financial service, and the deployments named are TESTNET only; Tranche 1 covers asset deposit with proportional share minting (shares = amount × total_shares / total_assets) (README read 2026-09-14; MIT; no releases; last push 2026-08-31).",
+			triggers: [
+				"foryield yield vault",
+				"soroban yield vault scf",
+				"eu regulated vault stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ayazabbas/dark-fleet": [
+		{
+			note: "Dark Fleet (darkfleet.ayazabbas.com): a zero-knowledge battleship game built for the Stellar Hacks: ZK Gaming hackathon — two players connect Freighter wallets, commit hidden board states with Pedersen hash commitments, and prove shot results with ZK proofs on-chain without revealing ship positions. Newest release v1.0.0 (2026-02-23) (README read 2026-09-14; no license file; last push 2026-04-15).",
+			triggers: [
+				"dark fleet battleship",
+				"zk gaming stellar",
+				"pedersen commitment game soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Financial-Empowerment-Partners/impala": [
+		{
+			note: "Payala-Impala: a bridge between the Payala OFFLINE payment system and Stellar, so value that moved offline through Payala's network can cross on-chain when a user wants the wider ecosystem. The README describes Soroban contracts plus hardware-protected cryptographic primitives on a JavaCard smartcard and Android bindings — an unusual combination worth citing when the question is offline or smartcard payments on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-09-08).",
+			triggers: [
+				"payala impala offline",
+				"offline payments stellar",
+				"javacard smartcard stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"The-Brookes-Project/soroban-sc": [
+		{
+			note: "Verseprop's Soroban security-token contract: a regulatory-compliant security token whose README lists issuance with configurable parameters, built-in KYC/AML verification and status tracking, multi-admin administration and authorization controls for trading — the compliance-gated end of the token spectrum rather than a plain SEP-41 asset (README read 2026-09-14; no license file; no releases; last push 2025-12-05).",
+			triggers: [
+				"verseprop security token",
+				"compliant security token soroban",
+				"kyc token contract stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Mael-wnb/dig-stellar": [
+		{
+			note: "Dig Stellar (dig-stellar-web.vercel.app): an analytics and portfolio-monitoring module for Stellar DeFi — protocol analytics, pool-level monitoring, multi-wallet portfolio tracking and normalised on-chain data pipelines, with alerts and non-custodial action flows described as future work rather than shipped features (README read 2026-09-14; MIT; no releases; last push 2026-09-05).",
+			triggers: [
+				"dig stellar analytics",
+				"multi wallet portfolio stellar",
+				"pool monitoring stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"luong0928472-maker/Komunitas": [
+		{
+			note: "Komunitas (komunitas-rho.vercel.app): a community treasury dapp where members pool value into one on-chain treasury, propose spending and release funds by open vote rather than through a treasurer, with every contribution, proposal, vote and disbursement made as a Soroban contract call. Topics mark it testnet; newest tag v1.0.0 (2026-08-10) (README read 2026-09-14; MIT; last push 2026-08-27).",
+			triggers: [
+				"komunitas treasury vote",
+				"community treasury soroban",
+				"onchain treasury dapp stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lumtum02-oss/Agos": [
+		{
+			note: 'Agos (agos-stellar.vercel.app), tagline "Payday is every second": a Soroban streaming-payroll dapp where an employer opens a stream and the recipient accrues continuously. The README is written as a hackathon submission checklist — public repo, 20+ commits, live deployment, pitch deck and demo video — so read it as a submission artifact; topics mark it testnet and the newest tag is v1.0.0 (2026-08-10) (README read 2026-09-14; MIT; last push 2026-08-29).',
+			triggers: [
+				"agos payroll stream",
+				"streaming payroll soroban",
+				"payday every second",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"allbridge-io/allbridge-core-soroban-contracts": [
+		{
+			note: "The Soroban contract set of Allbridge Core, the cross-chain bridge's Stellar side (repo name and org; Allbridge Core's JS SDK is allbridge-io/allbridge-core-js-sdk). The README states only `make` to build and `make test` to run tests, and there is no description, release or published package, so nothing here documents the contracts' interface — read the deployed contract metadata instead (README read 2026-09-14; no license file; last push 2026-08-25).",
+			triggers: [
+				"allbridge core soroban contracts",
+				"allbridge stellar bridge contracts",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"gateway-fm/loadgenerator": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm Load Generator — a high-throughput transaction load generator for benchmarking blockchain sequencers and execution layers, shipped as the Docker image gatewayfm/loadgenerator and the Go module github.com/gateway-fm/loadgenerator, used by gateway-fm/gasstorm. A GitHub code search for `stellar` across the repository returns 0 hits. It is in the index because the whole gateway-fm org was swept in behind the curated gatewayfm project (a genuine Stellar RPC provider) by the small-org rule. https://github.com/gateway-fm/loadgenerator",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"gateway-fm/ops-indexer": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo. A standalone EVM chain indexer with a gRPC read API — it polls an EVM node, writes to a private postgres and serves blocks, transactions, logs, tokens, gas stats and OP-Stack deposits to Open Privacy Suite and ops-explorer. A GitHub code search for `stellar` across the repository returns 0 hits. Same cause as gateway-fm/loadgenerator and gateway-fm/lez-atomic-swaps: the org was swept in behind the curated gatewayfm project. https://github.com/gateway-fm/ops-indexer",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
 };
 
 /**
