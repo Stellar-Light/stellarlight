@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-14T17:21:07.753Z",
+	"asOf": "2026-09-14T17:38:15.150Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 98,
 	"healthy": 98,
@@ -241,7 +241,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:15:29Z",
+			"lastSuccessAt": "2026-09-14T17:34:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -263,7 +263,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:18:37Z",
+			"lastSuccessAt": "2026-09-14T17:35:51Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -594,10 +594,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-20T17:34:17Z",
-			"ageDays": 55,
+			"ageDays": 56,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 55d ago (manual tool — age not judged)"
+			"why": "last green 56d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "live-canary.yml",
@@ -670,11 +670,11 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:15:29Z",
+			"lastSuccessAt": "2026-09-14T17:31:28Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 93,
-			"why": "last green 0d ago"
+			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "nightly-health.yml",
@@ -1000,10 +1000,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:18:37Z",
+			"lastSuccessAt": "2026-09-14T17:35:51Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 63,
+			"runs": 70,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1077,11 +1077,11 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-08T01:33:27Z",
-			"ageDays": 6,
+			"lastSuccessAt": "2026-09-14T17:18:37Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 52,
-			"why": "last green 6d ago"
+			"runs": 53,
+			"why": "last green 0d ago"
 		}
 	]
 }
