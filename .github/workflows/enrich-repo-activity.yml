@@ -1,4 +1,12 @@
 name: Enrich repo activity (unenriched lane)
+# workflow-health: signal-steps: ^Enrich repo activity$
+#
+# The Enrich step exits by design: 1 = a finding (a written field did not read
+# back as sent, or an update threw), 2 = could not look (GitHub gave no answer
+# for more than half the candidates — no token, rate limit, outage — so the run
+# is not evidence about the lane). The script reads back every row it wrote
+# against the exact payload sent (QUALITY.md §3, second condition).
+#
 # Stamps activitySignals (commits90d, lastCommitAt, stars) on repos that have
 # none — the ~10k `source: ec-taxonomy` rows enrich-repos.ts never reaches
 # because it walks repos FROM projects and these have no projectSlug.
@@ -48,4 +56,5 @@ jobs:
       # Scheduled runs ALWAYS execute (the point of the daily walk); manual
       # dispatch stays dry-run unless the execute box is ticked. Once the
       # never-stamped lane is empty the schedule keeps rows ≤14 days old.
-      - run: pnpm exec tsx scripts/enrich-repo-activity.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'schedule' && '--stale-days 14' || '' }}
+      - name: Enrich repo activity
+        run: pnpm exec tsx scripts/enrich-repo-activity.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }} ${{ github.event_name == 'schedule' && '--stale-days 14' || '' }}

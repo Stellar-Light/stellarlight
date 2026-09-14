@@ -41,6 +41,7 @@ const bad = (m: string) => {
 console.log("◆ C1 writers → read-back verification");
 const WRITERS: Record<string, "read-back" | string> = {
 	"scripts/enrich-repos.ts": "read-back",
+	"scripts/enrich-repo-activity.ts": "read-back",
 	"scripts/enrich-from-scf.ts":
 		"exemption 2026-08-12: writes verified by self-audit band-lock + " +
 		"record-completeness sweeps (full-corpus, nightly) — stronger than " +

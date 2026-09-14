@@ -14,8 +14,16 @@
  * ride on the same query (stars, openIssues, lastCommitAt, isArchived,
  * primaryLanguage). It never touches projectSlug, repoScore, tier, triage or
  * knowledgeNotes — those are enrich-repos' job and are derived from the
- * project link this lane does not have. Read-back verified (payload.update
- * silently drops unknown keys — prove it landed).
+ * project link this lane does not have.
+ *
+ * END-STATE CLAIM (QUALITY.md §3, second condition): after the writes, every
+ * row this run wrote is read back and compared field-by-field to the exact
+ * payload sent (payload.update silently drops unknown keys and reports
+ * success). Exit 1 = a finding (a field did not persist, or an update threw).
+ * Exit 2 = could not look: GitHub gave no answer for more than half the
+ * candidates (no token, rate limit, outage), so the run — including a dry
+ * run — is not evidence about the lane. Counts of every skipped class are
+ * printed on every run.
  *
  * Budget: one PAT/hour pool is shared with the scanner and enrich passes
  * (the starvation class). fetchRepoInfoBatch puts 15 repos per GraphQL
@@ -118,16 +126,25 @@ async function main() {
 	const sent = new Map<string, Record<string, unknown>>();
 	let ok = 0;
 	let gone = 0;
+	// GitHub ANSWERED, with something other than not-found (private, forbidden).
 	let errored = 0;
+	// GitHub gave NO answer: the chunk failed after its retry (rate limit, bad
+	// token, outage) and fetchRepoInfoBatch leaves the slot undefined. This is
+	// not a fact about the repo — it is the run being blind.
+	let blind = 0;
 	const asOf = new Date().toISOString();
 	for (let i = 0; i < pairs.length; i++) {
 		const { doc } = pairs[i];
 		const r = results[i];
-		if (!r || "error" in r) {
+		if (!r) {
+			blind++;
+			continue;
+		}
+		if ("error" in r) {
 			// "Repository not found" = deleted/renamed/private on GitHub. That
 			// is a FACT worth keeping: stamp asOf so we don't re-ask daily, and
 			// mark it observed-missing rather than leaving null (= never asked).
-			if (r && /not found/i.test(r.error)) {
+			if (/not found/i.test(r.error)) {
 				// A null commits90d with a FRESH asOf reads as "asked, GitHub had
 				// no repo" — distinct from asOf missing (= never asked). No extra
 				// note field: activitySignals has no such key and payload.update
@@ -167,7 +184,7 @@ async function main() {
 		});
 	}
 	console.log(
-		`  fetched ok: ${ok} · not found on GitHub: ${gone} · other errors (left untouched): ${errored}`,
+		`  fetched ok: ${ok} · not found on GitHub: ${gone} · answered with an error (left untouched): ${errored} · no answer from GitHub (left untouched): ${blind}`,
 	);
 
 	// Preview a few so a dry run is inspectable.
@@ -181,6 +198,18 @@ async function main() {
 		);
 	}
 
+	// A run GitHub did not answer proves nothing about the lane. Until now a
+	// tokenless or rate-limited run fetched nothing, wrote 0/0, read back an
+	// empty map as "all writes verified" and exited 0 — a quiet week earned on
+	// a lane that never looked. Its own exit code (2), so could-not-look never
+	// reads as checked-and-clean; a finding below (1) still takes precedence.
+	if (pairs.length && blind > pairs.length / 2) {
+		console.error(
+			`\n✗ FAILED TO LOOK at ${blind}/${pairs.length} candidate(s) — GitHub gave no answer. Do not read this run as evidence about the lane (exit 2 unless a finding sets 1).`,
+		);
+		if (!process.exitCode) process.exitCode = 2;
+	}
+
 	if (!EXECUTE) {
 		console.log(
 			`\nDRY RUN — ${sent.size} row(s) would be updated. Re-run with --execute.`,
@@ -188,7 +217,10 @@ async function main() {
 		return;
 	}
 
-	let written = 0;
+	// Only rows whose update RESOLVED are read back — a row whose update threw
+	// is a failed write, counted and red on its own, not a phantom mismatch.
+	const written = new Map<string, Record<string, unknown>>();
+	let failed = 0;
 	for (const [id, data] of sent) {
 		try {
 			await payload.update({
@@ -197,47 +229,94 @@ async function main() {
 				data,
 				context: { internal: true },
 			});
-			written++;
+			written.set(id, data);
 		} catch (e) {
+			failed++;
 			console.error(
 				`  update failed for ${id}: ${e instanceof Error ? e.message : e}`,
 			);
 		}
 	}
-	console.log(`  wrote ${written}/${sent.size}`);
+	console.log(`  wrote ${written.size}/${sent.size}`);
 
-	// Read back: prove the activity block landed (payload.update drops
-	// unknown keys silently and reports success).
-	const mismatches = await verifyWrites(
-		sent,
-		async (keys) => {
-			const back = await payload.find({
-				collection: "repos",
-				where: { id: { in: keys } },
-				limit: keys.length,
-				depth: 0,
-				select: { activitySignals: true, lastCommitAt: true, stars: true },
-			});
-			const m = new Map<string, Record<string, unknown>>();
-			for (const d of back.docs as Doc[]) m.set(String(d.id), d);
-			return m;
-		},
-		// verifyWrites compares TOP-LEVEL keys (no dotted paths — a dotted
-		// name would compare undefined to undefined and pass vacuously). The
-		// whole activitySignals group is one key; sameValue handles the nesting.
-		["activitySignals", "lastCommitAt"],
-	);
-	if (mismatches.length) {
-		console.error(
-			`  READ-BACK MISMATCHES: ${mismatches.length}\n${formatMismatches(mismatches)}`,
+	// ── read-back: prove the writes PERSISTED (QUALITY.md §3, second condition)
+	// payload.update drops unknown keys silently and reports success (#615), so
+	// "wrote N" is a statement about the calls, not the data. Re-read every row
+	// this run wrote and diff it against the exact payload sent.
+	//
+	// verifyWrites compares TOP-LEVEL keys (no dotted paths — a dotted name
+	// would compare undefined to undefined and pass vacuously). The whole
+	// activitySignals group is one key; sameValue handles the nesting. Every
+	// key this writer sends is listed — a fact it refreshes is a fact it claims.
+	const VERIFIED_FIELDS = [
+		"activitySignals",
+		"lastCommitAt",
+		"stars",
+		"openIssues",
+		"isArchived",
+		"primaryLanguage",
+	] as const;
+	const select = Object.fromEntries(VERIFIED_FIELDS.map((f) => [f, true]));
+	if (written.size) {
+		console.log(`\n── Read-back (${written.size} written row(s)) ──`);
+		const mismatches = await verifyWrites(
+			written,
+			async (keys) => {
+				const back = await payload.find({
+					collection: "repos",
+					where: { id: { in: keys } },
+					limit: keys.length,
+					depth: 0,
+					select,
+					context: { internal: true },
+				});
+				const m = new Map<string, Record<string, unknown>>();
+				for (const d of back.docs as Doc[]) m.set(String(d.id), d);
+				return m;
+			},
+			VERIFIED_FIELDS,
+			200,
+			// Confirm a not-found from a single-key read before accusing: the
+			// 2026-08-13 bulk `in` read reported 310 live rows missing.
+			async (id) => {
+				const one = await payload.find({
+					collection: "repos",
+					where: { id: { equals: id } },
+					limit: 1,
+					depth: 0,
+					select,
+					context: { internal: true },
+				});
+				return (one.docs[0] as Doc | undefined) ?? null;
+			},
 		);
-		process.exit(1);
+		if (mismatches.length) {
+			console.error(
+				`  ✗ ${mismatches.length} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${written.size} row(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
+		}
 	}
-	console.log("  read-back: all writes verified");
+	if (failed) {
+		console.error(
+			`  ✗ ${failed} update(s) threw — exiting 1 so the run shows red.`,
+		);
+		process.exitCode = 1;
+	}
+	console.log(
+		`\nDONE: ${written.size} written, ${failed} failed · skipped: ${skipped} malformed fullName, ${errored} answered with an error, ${blind} no answer.`,
+	);
 }
 
+// exitCode, not exit(0): a read-back mismatch or a blind run sets it above,
+// and exit(0) here would stomp it — the class-20 bug where a run reports
+// GREEN after its writes died.
 main()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
 		process.exit(1);
