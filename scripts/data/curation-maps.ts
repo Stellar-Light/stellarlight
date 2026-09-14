@@ -2063,9 +2063,17 @@ export const STATUS_FIX: Record<
 	// sls-028: domains REPURPOSED to unrelated gambling content (dual-lane
 	// verified 2026-07-10) — a Live row pointing there is unsafe navigation.
 	"the-blue-marble": {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). The retracted https://thebluemarble.io/ is
+		// deliberately not the source: it is the hijacked casino redirect.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Domain repurposed to unrelated content (verified 2026-07-10) — the recorded NFT product is gone; do not follow the historical link.",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://rdap.identitydigital.services/rdap/domain/thebluemarble.io",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: thebluemarble.io 301s to diviandecor.com and on to sexygames666.com (a betting site); the .io registry's RDAP record shows the domain re-registered 2026-04-28 via Sav.com, LLC, so Taskdotio Ltd (GitHub org 'The Blue Marble (Taskdotio Ltd)', last push 2024-01-12) no longer holds it. Last Wayback capture of the product 2025-03-04 ('Craft a community of brand superfans'). Do not follow the historical link.",
 	},
 	octoplace: {
 		from: "Live",
@@ -2152,9 +2160,17 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): canfy.net NXDOMAIN with no Wayback snapshot, no GitHub org, zero product mentions via search \u2014 entire footprint gone.",
 	},
 	chaincred: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). Two facts in the July note were wrong: the
+		// landing page 200s at its real (mixed-case) path and the author still
+		// has the repos. The verdict stands on the repos' dates instead.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded landing page prince29chouhan.github.io/chaincred_landing 404s, author has no chaincred repo left, and search found no footprint at all \u2014 hackathon-grade project.",
+		asOf: "2026-09-14",
+		sourceUrl: "https://github.com/Prince29chouhan/ChainCred",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: the author's ChainCred, ChainCred_landing, ChainCredLanding and ChaiCredLandingPage repos were all last pushed 2024-07-23/24 (one hackathon weekend) and nothing since; prince29chouhan.github.io/ChainCred_landing serves a JS shell titled 'ChainCred' (the July 404 was the lowercased path). Hackathon-grade project with no later footprint.",
 	},
 	cosmiclink: {
 		from: "Live",
@@ -2217,9 +2233,16 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): openx.solar NXDOMAIN, YaleOpenLab repos untouched since Jan 2023, Yale OpenLab's own page frames the effort as concluded/absorbed into Open Earth Foundation \u2014 the Stellar crowdfunding platform no l\u2026",
 	},
 	pactta: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). https://pactta.com/ is retracted (and now a
+		// stranger's parking stub), so the registry record is the source.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): pactta.com fully unregistered (no NS/A records) and searches found no footprint newer than the 2023 Techstars class announcement.",
+		asOf: "2026-09-14",
+		sourceUrl: "https://rdap.verisign.com/com/v1/domain/pactta.com",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: pactta.com is no longer unregistered — Verisign RDAP shows it re-registered 2026-08-11 through West263 International Limited (hkdns.hk) on Afternic parking nameservers, serving a 'Loading...' stub with a Chinese ICP-filing link; the last Wayback capture before the lapse (2024-08-30) was already a Sedo parking page. The operator's domain lapsed and was drop-caught; no product.",
 	},
 	"paygo-crypto": {
 		from: "Live",
@@ -2237,9 +2260,17 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): rigel.link has no DNS record; only footprint is the ~2019 SCF #5 listing/forum thread; recent 'Rigel' hits are an unrelated affiliate tool.",
 	},
 	"scam-flagging-system": {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). The July 404 was a case-mangled sheet id
+		// (retracted); the real sheet IS the product, so it is the source.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded website (a Google Sheet) returns 404 and searches for 'Stellar Scam Flagging System' surface nothing beyond the SCF listing at https://communityfund.stellar.org/projects/scam-flagging-syst\u2026",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://docs.google.com/spreadsheets/d/1JCkWZ3X1h6kJKM6ZCZThDshK_whhNiTyGTV8R24Anho/edit",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: the product is a public Google Sheet, 'Very extensive list of very questionable token domains' (2,700 rows), still served. Its own 'Date last modified' column ends 2023-12-22 and its 'Date first entered' column has a single entry after 2024-01-14 (2025-02-05); no repo, no other footprint beyond the SCF #11 listing ($10k Legacy v3.0 award). Unmaintained for 19 months.",
 	},
 	skeeper: {
 		from: "Live",
@@ -2473,11 +2504,31 @@ export const STATUS_FIX: Record<
 		// stellar/soroban refs); Stellar-era repos last pushed 2023–2024-11.
 		// Candidate for a human Inactive-on-Stellar review — no operator
 		// statement exists, so never-accuse holds the label.
+		// Source filled 2026-09-14 (gap-matrix sourced pool): the org's repo
+		// list, whose pushed_at dates are the whole claim above.
 		from: "Development",
 		to: "Development",
-		asOf: "2026-08-29",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://api.github.com/orgs/MyDataCoin/repos?sort=pushed&per_page=100",
 		basis: "unverified",
-		note: "No artifact evidences the described Stellar ZK-lending/KYC product: site dead (Azure 404), operator's active work is the EVM Atria suite. Basis downgraded to unverified 2026-08-29; flagged for human review.",
+		note: "Re-read 2026-09-14: mydatacoin.io answers HTTP 404 'Site Not Found' (Azure), last Wayback 200 2025-12-05; the org's five atria-* repos (Solidity/C#/JS, EVM) were pushed 2026-09-03..07 while go-mydatacoin, the newest Stellar-era repo, was last pushed 2024-11-23. No artifact evidences the described Stellar ZK-lending/KYC product; basis stays unverified, flagged for human review.",
+	},
+	// ── 2026-09-14 gap-matrix pass: sourced pool (the last row without a
+	// re-checkable source; the other five are rewritten in place above).
+	// Same shape as mydatacoin: keep the label, admit the basis. A Live row
+	// on source-inherited whose site does not answer cannot earn
+	// site-liveness, and a timeout is no verdict either way — so the basis
+	// drops to unverified and the source is the newest dated thing actually
+	// observed (a Wayback capture), never the label's own claim.
+	"stellar-pulse": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://web.archive.org/web/20251013160228/https://stellarpulse.app/",
+		basis: "unverified",
+		note: "Downgrade 2026-09-14: stellarpulse.app resolves (143.198.244.116) but ports 80/443 do not answer (connect timeout), so liveness could not be observed; the newest Wayback 200 is 2025-10-13 (a client-rendered shell titled 'StellarPulse — Offers clarity on the open source Stellar'); the domain is still held by its registrant (RDAP: registered 2023-02-04, expires 2027-02-04); no repo or package matches the product. Basis source-inherited → unverified; a human should decide whether the label is still Live.",
 	},
 	feeprime: {
 		from: "Live",
