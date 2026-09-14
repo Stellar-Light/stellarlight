@@ -1,0 +1,1587 @@
+{
+ "generatedAt": "2026-09-14T18:22:02.236Z",
+ "population": 370,
+ "offset": 0,
+ "limit": 40,
+ "packets": [
+  {
+   "slug": "borderless",
+   "name": "Borderless",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://borderlesspayments.xyz/"
+   },
+   "site": {
+    "url": "https://borderlesspayments.xyz/",
+    "finalUrl": "https://borderlesspayments.xyz/",
+    "status": 200,
+    "title": "Borderless — Cross-border payments API",
+    "description": "Move funds in seconds across 10+ countries on real-time rails and stablecoins, fully compliant.",
+    "namesProduct": "borderless",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2024-07-19T14:54:28.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     20,
+     22
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/borderless-u3x"
+   },
+   "corpus": {
+    "date": "2025-12-16T00:00:00.000Z",
+    "url": "https://lumenloop.com/news/honeycoin-collaborates-tether-expand-stablecoin-access",
+    "title": "HoneyCoin Collaborates with Tether to Expand Stablecoin Access Across Africa"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"borderless\" but freshest signal is 273d old"
+  },
+  {
+   "slug": "boss-pay",
+   "name": "Boss Pay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://bossmoney.com/"
+   },
+   "site": {
+    "url": "https://bossmoney.com/",
+    "finalUrl": "https://www.bossmoney.com/en-us/",
+    "status": 200,
+    "title": "Send Money Online - Transfer Money Overseas | BOSS Money",
+    "description": "Send money worldwide with BOSS Money. Experience hassle-free transfers, best rates, and top-notch security. Make first three $0 FEE money transfers now!",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "bp-ventures",
+   "name": "BP Ventures",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://bpventures.us/"
+   },
+   "site": {
+    "url": "https://bpventures.us/",
+    "finalUrl": "https://www.bpventures.us/",
+    "status": 200,
+    "title": "BPV Turnkey Blockchain Solutions",
+    "description": "Unlock the Future of Finance with Advanced Blockchain & Stablecoin Solutions. From secure wallets to pioneering tools, we empower your digital journey. We make using USDC, PYUSD, Bitcoin Lightning, & USDT secure and effortless.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-03-24T18:21:04.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (commit 174d ago)"
+  },
+  {
+   "slug": "bravepay",
+   "name": "BravePay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-07-10T00:00:00.000Z",
+    "sourceUrl": "https://www.bravepay.net/"
+   },
+   "site": {
+    "url": null,
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     11
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/bravepay-tze"
+   },
+   "corpus": {
+    "date": "2026-06-14T00:00:00.000Z",
+    "url": "https://github.com/lumenloop/awesome-stellar-community-fund/blob/main/docs/scf-history.md",
+    "title": "SCF History: Versions, Award Types, and Program Evolution"
+   },
+   "proposal": "site-down?",
+   "reason": "no website on the row"
+  },
+  {
+   "slug": "bridge",
+   "name": "Bridge",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://bridge.xyz/"
+   },
+   "site": {
+    "url": "https://bridge.xyz/",
+    "finalUrl": "https://bridge.xyz/",
+    "status": 200,
+    "title": "Bridge | Stablecoin Infrastructure and APIs for Developers",
+    "description": "A stablecoin platform built for developers. Enable quick, easy, and cost-effective global money movement that seamlessly integrates with your existing applications.",
+    "namesProduct": "bridge",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26
+    ],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-08-25T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/platforms/stellar-disbursement-platform/admin-guide/user-interface/distribution-accounts",
+    "title": "Distribution Accounts"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"bridge\"; corpus mention 21d ago"
+  },
+  {
+   "slug": "brz",
+   "name": "BRZ",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-07-10T00:00:00.000Z",
+    "sourceUrl": "https://www.transfero.com/"
+   },
+   "site": {
+    "url": "https://transfero.com/",
+    "finalUrl": "https://transfero.com/",
+    "status": 200,
+    "title": "Transfero | Payment infrastructure for banking, crypto and global payments",
+    "description": "We build financial solutions on an infrastructure that integrates banking rails, blockchain networks, liquidity access, and global payments.",
+    "namesProduct": "brz",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cables",
+   "name": "Cables",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://cables.finance/"
+   },
+   "site": {
+    "url": "https://cables.finance/",
+    "finalUrl": "https://www.cables.finance/",
+    "status": 200,
+    "title": "Cables Finance | Trade & Earn Yield on RWAs",
+    "description": "Cables Finance is an onchain trading and liquidity hub for RWAs. Stake to earn yield, trade FX & commodities, and hedge global markets.",
+    "namesProduct": "cables",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cantina",
+   "name": "Cantina",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-09-01T21:47:52.662Z",
+    "sourceUrl": "https://cantina.security/"
+   },
+   "site": {
+    "url": "https://cantina.security/",
+    "finalUrl": "https://www.cantina.security/",
+    "status": 200,
+    "title": "Cantina | Agentic Security Platform",
+    "description": "Cantina is an agentic security platform that helps lean security teams find, prioritize, fix, and verify the issues that matter.",
+    "namesProduct": "cantina",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2025-08-31T15:00:00.000Z",
+    "url": "https://stellarsecurityportal.com/report/41",
+    "title": "Aquarius AMM — Cantina (Cantina Aquarius Competition Security Report)"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cartwey",
+   "name": "Cartwey",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cartwey.com/"
+   },
+   "site": {
+    "url": "https://cartwey.com/",
+    "finalUrl": "https://cartwey.com/",
+    "status": 200,
+    "title": "Cartwey - Official Website",
+    "description": "The official website of the Cartwey\n    organization. Explore more info about our products and services.",
+    "namesProduct": "cartwey",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     38
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cartwey-aku"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cash-abroad",
+   "name": "Cash Abroad",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://cashabroad.one/"
+   },
+   "site": {
+    "url": "https://cashabroad.one/",
+    "finalUrl": "https://www.cashabroad.one/",
+    "status": 200,
+    "title": "CashAbroad",
+    "description": null,
+    "namesProduct": "abroad",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     11,
+     14,
+     21,
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cashabroad-o7v"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cashlink",
+   "name": "Cashlink",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-07-15T04:57:35.551Z",
+    "sourceUrl": "https://cashlink.de/"
+   },
+   "site": {
+    "url": "https://cashlink.de/",
+    "finalUrl": "https://cashlink.de/de/",
+    "status": 200,
+    "title": "Die führende Infrastruktur für den tokenbasierten Kapitalmarkt | Cashlink",
+    "description": "Emission und Abwicklung von tokenbasierten Wertpapieren – mit bis zu 85% Einsparpotenzial entlang der Wertschöpfungskette.",
+    "namesProduct": "cashlink",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-08-03T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/q2-2026-what-stellar-was-built-for-has-arrived",
+    "title": "Q2 2026: What Stellar was built for has arrived"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"cashlink\"; corpus mention 43d ago"
+  },
+  {
+   "slug": "cedar",
+   "name": "CEDAR",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://cedar.money/"
+   },
+   "site": {
+    "url": "https://cedar.money/",
+    "finalUrl": "https://www.cedar.money/",
+    "status": 200,
+    "title": "Fast, reliable cross-border payments for emerging and global markets | Cedar Money",
+    "description": "Send and collect funds across Africa and global markets with clear pricing, next-day settlement, and world-class compliance",
+    "namesProduct": "cedar",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cede",
+   "name": "Cede",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:07.007Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/cede.yaml"
+   },
+   "site": {
+    "url": "https://cede.store/",
+    "finalUrl": "https://cedehub.io/index.html",
+    "status": 403,
+    "title": "Just a moment...",
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     31
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cede-labs-fxy"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 403"
+  },
+  {
+   "slug": "centiiv",
+   "name": "Centiiv",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-09-01T21:47:52.662Z",
+    "sourceUrl": "https://centiiv.io/"
+   },
+   "site": {
+    "url": "https://centiiv.io/",
+    "finalUrl": "https://www.centiiv.io/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": "centiiv",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     36
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/centiiv-j1z"
+   },
+   "corpus": {
+    "date": "2022-04-25T00:00:00.000Z",
+    "url": "https://stellar.org/blog/ecosystem/exploring-real-world-problems-and-solutions-at-our-next-blockchain-bootcamp",
+    "title": "Exploring Real-World Problems and Solutions at our Next Blockchain Bootcamp"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "certora",
+   "name": "Certora",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://certora.com/"
+   },
+   "site": {
+    "url": "https://certora.com/",
+    "finalUrl": "https://www.certora.com/",
+    "status": 200,
+    "title": "Certora",
+    "description": "Industry-leading formal verification tools and smart contract audits.",
+    "namesProduct": "certora",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2025-08-13T15:00:00.000Z",
+    "url": "https://stellarsecurityportal.com/report/40",
+    "title": "Blend Protocol V2 — Certora (Security Assessment DRAFT v3 Report Blend v2)"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "chainless",
+   "name": "Chainless",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://chainless.finance/"
+   },
+   "site": {
+    "url": "https://chainless.finance/",
+    "finalUrl": "https://chainless.finance/",
+    "status": 200,
+    "title": "Chainless | Soberania Patrimonial",
+    "description": "Plataforma de patrimônio com autocustódia: 15.000+ ativos tokenizados, 400+ ações e ETFs dos EUA e empréstimo com bitcoin como garantia. Pix para entrar e sair, com recuperação pela sua conta Google ou Apple.",
+    "namesProduct": "chainless",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/chainless-stellar-integration-j1u"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "chainlink-oracles-relayer",
+   "name": "Chainlink Oracles Relayer",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://docs.relink.services/"
+   },
+   "site": {
+    "url": "https://docs.relink.services/",
+    "finalUrl": "https://docs.relink.services/",
+    "status": 200,
+    "title": "Welcome to Relink Protocol | Relink Protocol",
+    "description": "The Relink protocol provides a trustless way to integrate the bluechip oracle provider Chainlink into your network.",
+    "namesProduct": "chainlink",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2024-02-05T15:26:25.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     15
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/chainlink-oracles-relayer-c5f"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "changera",
+   "name": "Changera",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://changera.co/"
+   },
+   "site": {
+    "url": "https://changera.co/",
+    "finalUrl": "https://changera.co/",
+    "status": 200,
+    "title": "Changera",
+    "description": "Changera - Spend your money freely in one app.",
+    "namesProduct": "changera",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "chartui",
+   "name": "Chartui",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://chartui.com/"
+   },
+   "site": {
+    "url": "https://chartui.com/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "chats",
+   "name": "CHATS",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://chats.cash/"
+   },
+   "site": {
+    "url": "https://chats.cash/",
+    "finalUrl": "https://chats.cash/",
+    "status": 200,
+    "title": "Chats",
+    "description": "CHATS transforms the future of humanitarian efforts with verifiable solutions for cash and voucher aid. Our platform enhances donor confidence and enables NGOs to deliver impactful, transparent campaign",
+    "namesProduct": "chats",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 22,
+    "newestCommit": "2026-09-13T09:54:06.000Z",
+    "newestRelease": "2026-09-02T10:47:24.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"chats\"; commit 1d ago, release 12d ago"
+  },
+  {
+   "slug": "cheesecake-labs",
+   "name": "Cheesecake Labs",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cheesecakelabs.com/"
+   },
+   "site": {
+    "url": "https://cheesecakelabs.com/",
+    "finalUrl": "https://cheesecakelabs.com/",
+    "status": 200,
+    "title": "Cheesecake Labs | From legacy systems to production AI",
+    "description": "We turn complex systems into production AI and modern products. 13+ years, 300+ products shipped, senior nearshore teams in US time zones.",
+    "namesProduct": "cheesecake labs",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 8,
+    "newestCommit": "2026-07-09T19:44:15.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-07-29T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/tools/developer-tools/asset-tools",
+    "title": "Asset Sandbox"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"cheesecake labs\"; commit 67d ago, corpus mention 48d ago"
+  },
+  {
+   "slug": "chef",
+   "name": "Chef",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://stellar-chef.github.io/stellar-chef"
+   },
+   "site": {
+    "url": "https://stellar-chef.github.io/stellar-chef",
+    "finalUrl": "https://stellar-chef.github.io/stellar-chef/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2024-04-18T20:58:00.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     22
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/chef-c8c"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "chimpdao",
+   "name": "ChimpDAO",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://chimpdao.xyz/"
+   },
+   "site": {
+    "url": "https://chimpdao.xyz/",
+    "finalUrl": "https://chimpdao.xyz/",
+    "status": 200,
+    "title": "ChimpDAO - NFC-Powered NFTs on Stellar",
+    "description": "Connect physical merchandise to digital ownership with NFC-powered NFTs on the Stellar blockchain. Buy merch, tap your phone, reveal your NFT.",
+    "namesProduct": "chimpdao",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     38,
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/chimpdao-kzh"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "chronospay",
+   "name": "Chronospay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:08.214Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/chronospay.yaml"
+   },
+   "site": {
+    "url": "https://chronospay.io/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     11
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/chronospay-nrb"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "cinko",
+   "name": "Cinko",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cinko.io/"
+   },
+   "site": {
+    "url": "https://cinko.io/",
+    "finalUrl": "https://cinko.io/",
+    "status": 200,
+    "title": "Recibe, paga y pon tu dinero a crecer",
+    "description": "Recibe, paga y pon tu dinero a crecer de la forma más sencilla. Todo desde un mismo lugar.",
+    "namesProduct": "cinko",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "city-states",
+   "name": "City States",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:08.372Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/city-states.yaml"
+   },
+   "site": {
+    "url": "https://citystatesm.com/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     2
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/city-states-medieval-70v"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "clear",
+   "name": "Clear",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://borderlesspayments.xyz/clear"
+   },
+   "site": {
+    "url": "https://borderlesspayments.xyz/clear",
+    "finalUrl": "https://borderlesspayments.xyz/clear",
+    "status": 200,
+    "title": "Borderless — Cross-border payments API",
+    "description": "Move funds in seconds across 10+ countries on real-time rails and stablecoins, fully compliant.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/clear-4rw"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "clickpesa-debt-fund",
+   "name": "ClickPesa Debt Fund",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:08.514Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/clickpesa-debt-fund.yaml"
+   },
+   "site": {
+    "url": null,
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 18,
+    "newestCommit": "2026-08-24T11:48:25.000Z",
+    "newestRelease": "2022-04-25T21:38:40.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26,
+     28
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/clickpesa-debt-fund-ssc"
+   },
+   "corpus": {
+    "date": "2025-02-19T15:00:00.000Z",
+    "url": "https://stellarsecurityportal.com/report/13",
+    "title": "ClickPesa Oracle Aggregator — Runtime Verification"
+   },
+   "proposal": "site-down?",
+   "reason": "no website on the row"
+  },
+  {
+   "slug": "clickspesa",
+   "name": "Clickspesa",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://clickpesa.com/"
+   },
+   "site": {
+    "url": "https://clickpesa.com/",
+    "finalUrl": "https://clickpesa.com/",
+    "status": 200,
+    "title": "Payment Solutions for Microfinance & SMEs | Payment Gateway - Tanzania",
+    "description": "ClickPesa is a financial platform that provides payments in Tanzania. In addition ClickPesa provides financial and risk management",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "clob",
+   "name": "CLOB",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://ideasoft.io/"
+   },
+   "site": {
+    "url": "https://ideasoft.io/",
+    "finalUrl": "https://ideasoft.io/",
+    "status": 200,
+    "title": "IdeaSoft: Web3 Software Development Experts",
+    "description": "Discover IdeaSoft&#039;s Web3 software development services, offering blockchain, fintech, and NFT solutions for businesses worldwide.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     20,
+     29
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/clob-qoi"
+   },
+   "corpus": {
+    "date": "2026-02-23T00:00:00.000Z",
+    "url": "https://stellar.org/blog/developers/building-a-dark-pool-on-stellar-mpc-fhe-and-tees-compared",
+    "title": "Building a Dark Pool on Stellar: MPC, FHE, and TEEs Compared"
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product"
+  },
+  {
+   "slug": "coala-pay",
+   "name": "Coala Pay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://coalapay.org/"
+   },
+   "site": {
+    "url": "https://coalapay.org/",
+    "finalUrl": "https://www.coalapay.org/",
+    "status": 200,
+    "title": "Coala Pay | Deliver aid in minutes to the world’s most difficult corridors.",
+    "description": "Coala Pay is a blockchain-enabled payment platform purpose-built for aid delivery. We move institutional funds into high-friction corridors with near-instant speed, preserving more value for the frontlines when it matters most.",
+    "namesProduct": "coala pay",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-07-21T20:59:30.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     22,
+     35
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/coala-pay-billy-wallet-9mi"
+   },
+   "corpus": {
+    "date": "2025-03-06T00:00:00.000Z",
+    "url": "https://stellar.org/blog/ecosystem/scf-spotlights-coala-pay",
+    "title": "SCF Spotlights: Coala Pay"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "coca",
+   "name": "Coca",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://coca.xyz/"
+   },
+   "site": {
+    "url": "https://coca.xyz/",
+    "finalUrl": "https://www.coca.xyz/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     25
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cocaxyz-5fk"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "coinme",
+   "name": "Coinme",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://coinme.com/"
+   },
+   "site": {
+    "url": "https://coinme.com/",
+    "finalUrl": "https://coinme.com/",
+    "status": 200,
+    "title": "Coinme: Buy & Sell Crypto with Cash",
+    "description": "Coinme’s regulated crypto exchange offers Bitcoin & more. Buy with cash or debit, store in our secure wallet. Licensed since 2014.",
+    "namesProduct": "coinme",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2023-03-28T12:00:00.000Z",
+    "url": "https://lumenloop.com/news/coinme-integrates-usdc-stellar-enabling-borderless-digital-2",
+    "title": "Coinme Integrates USDC on Stellar, Enabling Borderless Digital Cash and P2P Payments"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "coins-ph",
+   "name": "Coins PH",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://coins.ph/"
+   },
+   "site": {
+    "url": "https://coins.ph/",
+    "finalUrl": "https://www.coins.ph/en-ph",
+    "status": 200,
+    "title": "Coins.ph | The All-in-One E-Wallet & Crypto Super App for Filipinos",
+    "description": "BSP-regulated e-wallet for Filipinos. Pay bills, Use QRPH at 600k+ stores, send money home in seconds, buy & sell crypto in pesos. Download free.",
+    "namesProduct": "coins",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     22
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/coinsph-stellar-remittances-qwo"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "coinsender",
+   "name": "CoinSender",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://coinsender.io/"
+   },
+   "site": {
+    "url": "https://coinsender.io/",
+    "finalUrl": "https://coinsender.io/",
+    "status": 200,
+    "title": "Home | CoinSender",
+    "description": "Experience fast and convenient multi-transaction payouts with CoinSender. With just a few clicks, you can bid farewell to complicated token distribution and effortlessly manage your payouts.",
+    "namesProduct": "coinsender",
+    "prelaunch": "testnet"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     24
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/coinsender-f7q"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"testnet\""
+  },
+  {
+   "slug": "command-robotics",
+   "name": "Command Robotics",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://adaptive-goal-management.herokuapp.com/"
+   },
+   "site": {
+    "url": "https://adaptive-goal-management.herokuapp.com/",
+    "finalUrl": "https://adaptive-goal-management.herokuapp.com/",
+    "status": 503,
+    "title": "Application Error",
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-02-28T02:16:03.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     9
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/command-robotics-2s0"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 503"
+  },
+  {
+   "slug": "conomy",
+   "name": "Conomy",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://conomyhq.com/"
+   },
+   "site": {
+    "url": "https://conomyhq.com/",
+    "finalUrl": "https://conomyhq.com/",
+    "status": 200,
+    "title": "One API to pay & collect across Latin America, on instant rails",
+    "description": "The local payments infrastructure for high-transaction platforms in Latin America. Collect and pay out in local currency on instant rails, with multi-currency accounts.",
+    "namesProduct": "conomy",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/conomypayment4platforms-crg"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "constellation",
+   "name": "Constellation",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/constellation-protocol"
+   },
+   "site": {
+    "url": "https://github.com/constellation-protocol",
+    "finalUrl": "https://github.com/constellation-protocol",
+    "status": 200,
+    "title": "constellation-protocol · GitHub",
+    "description": "constellation-protocol has 3 repositories available. Follow their code on GitHub.",
+    "namesProduct": "constellation",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2024-09-13T22:52:43.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     19,
+     23
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/constellation-protocol-4uv"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "copperx",
+   "name": "Copperx",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://copperx.io/"
+   },
+   "site": {
+    "url": "https://copperx.io/",
+    "finalUrl": "https://copperx.io/",
+    "status": 200,
+    "title": "Copperx | Stablecoin Platform for Cross-Border Payments | Copperx",
+    "description": "Accept stablecoin payments, open financial accounts, and send money globally. USDC/USDT financial accounts for businesses and individuals in 90+ countries.",
+    "namesProduct": "copperx",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-06-05T05:48:50.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     29
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/copperx-gateway-and-payout-yhf"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"copperx\"; commit 102d ago"
+  },
+  {
+   "slug": "crebit",
+   "name": "Crebit",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-31T00:00:00.000Z",
+    "sourceUrl": "https://crebitpay.com"
+   },
+   "site": {
+    "url": "https://crebitpay.com/",
+    "finalUrl": "https://www.crebitpay.com/",
+    "status": 200,
+    "title": "Crebit Pay",
+    "description": "Crebit Pay - The best FX Rates for BRL to USD",
+    "namesProduct": "crebit",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     45
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/crebit-rate-locks-ril"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  }
+ ]
+}
