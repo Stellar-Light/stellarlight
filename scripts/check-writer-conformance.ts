@@ -57,6 +57,7 @@ const WRITERS: Record<string, "read-back" | string> = {
 	"scripts/data/fix-scf-rounds.ts":
 		"exemption 2026-08-12: surgical Action (dry-run default, allowlist " +
 		"clears); every execute is live-verified in the run log",
+	"scripts/refresh-stablecoins.ts": "read-back",
 };
 for (const [file, expectation] of Object.entries(WRITERS)) {
 	let src = "";
