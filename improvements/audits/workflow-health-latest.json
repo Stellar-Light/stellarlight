@@ -1,9 +1,15 @@
 {
-	"asOf": "2026-09-14T18:17:04.470Z",
+	"asOf": "2026-09-14T18:43:28.564Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 98,
-	"healthy": 98,
-	"broken": [],
+	"healthy": 97,
+	"broken": [
+		{
+			"file": "enrich-repos.yml",
+			"state": "failing",
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run pnpm exec tsx scripts/enrich-repos.ts --execute \""
+		}
+	],
 	"rows": [
 		{
 			"file": "aggregate-feedback.yml",
@@ -24,7 +30,7 @@
 			"lastSuccessAt": "2026-09-13T16:50:09Z",
 			"ageDays": 1,
 			"graceDays": 4,
-			"runs": 4,
+			"runs": 5,
 			"why": "last green 1d ago"
 		},
 		{
@@ -241,7 +247,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:11:25Z",
+			"lastSuccessAt": "2026-09-14T18:31:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -263,10 +269,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:14:45Z",
+			"lastSuccessAt": "2026-09-14T18:40:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 4,
+			"runs": 10,
 			"why": "last green 0d ago"
 		},
 		{
@@ -351,7 +357,7 @@
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T10:56:09Z",
+			"lastSuccessAt": "2026-09-14T18:31:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -449,12 +455,12 @@
 			"file": "enrich-repos.yml",
 			"name": "Enrich repos (code-reference index)",
 			"cron": "0 8 * * 1",
-			"state": "ok",
+			"state": "failing",
 			"lastSuccessAt": "2026-09-14T14:32:10Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 20,
-			"why": "last green 0d ago"
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run pnpm exec tsx scripts/enrich-repos.ts --execute \""
 		},
 		{
 			"file": "enrich-scf.yml",
@@ -495,10 +501,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T18:27:15Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-scf-rounds.yml",
@@ -670,7 +676,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:11:25Z",
+			"lastSuccessAt": "2026-09-14T18:24:44Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 92,
@@ -736,10 +742,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:49:26Z",
+			"lastSuccessAt": "2026-09-14T18:31:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 61,
+			"runs": 62,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -846,21 +852,21 @@
 			"name": "Regrade repos (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-08T02:20:45Z",
-			"ageDays": 6,
+			"lastSuccessAt": "2026-09-14T18:40:21Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 16,
-			"why": "last green 6d ago (manual tool — age not judged)"
+			"runs": 18,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "scan-repo-code.yml",
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T12:59:08Z",
+			"lastSuccessAt": "2026-09-14T18:39:29Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 34,
+			"runs": 38,
 			"why": "last green 0d ago"
 		},
 		{
@@ -915,7 +921,7 @@
 			"lastSuccessAt": "2026-09-13T16:55:31Z",
 			"ageDays": 1,
 			"graceDays": 4,
-			"runs": 15,
+			"runs": 16,
 			"why": "last green 1d ago"
 		},
 		{
@@ -1000,10 +1006,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:14:45Z",
+			"lastSuccessAt": "2026-09-14T18:40:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 88,
+			"runs": 94,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1077,10 +1083,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:05:19Z",
+			"lastSuccessAt": "2026-09-14T18:14:46Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 55,
+			"runs": 56,
 			"why": "last green 0d ago"
 		}
 	]
