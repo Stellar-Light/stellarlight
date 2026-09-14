@@ -9,7 +9,8 @@
 			"!public/openapi.json",
 			"!improvements/quality/history.json",
 			"!improvements/ledger/findings.json",
-			"!improvements/quality/entities.json"
+			"!improvements/quality/entities.json",
+			"!improvements/quality/progress.json"
 		]
 	},
 	"formatter": {
