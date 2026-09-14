@@ -151,7 +151,10 @@ jobs:
                 echo
                 echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
               } > .repair/pr.md
+              # the label is repo config; a lane must not lose a fixed row to a missing one
+              # (2026-09-14: the repair lane's first real fix ended `error` exactly so)
               pr_url=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md --label repair-lane 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+              [ -z "$pr_url" ] && pr_url=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
               [ -z "$pr_url" ] && { outcome=error; summary="pushed $B but gh pr create returned no URL"; }
             fi
           fi
