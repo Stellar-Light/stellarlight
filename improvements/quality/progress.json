@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-14T16:54:17.550Z",
+ "generatedAt": "2026-09-14T17:11:33.568Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -33,7 +33,7 @@
    "state": "in-progress",
    "evidence": null,
    "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift. 2026-08-28: the FIRST bounded agent lane is live — the deployment-evidence gap (sls-079) is worked mechanically by the weekly curation pass via the operator-toml chain (the project's own stellar.toml -> declared code+issuer -> confirmed on Horizon mainnet; full chain or abstain, basis labeled \"operator-toml\" so a machine stamp never impersonates a human one). The lane reproduces the 2026-08-28 hand-worked queue's mechanical half; judgment cases (operator docs, bundles) stay human. 2026-08-29: the closure rule's METRIC exists — repeat-class rate is computed from the ledger and published on /quality (first measurement: 30-day rate 100%, 168/168 new findings in already-seen classes; lifetime 98.7% across 6 classes + meta-eval. The treadmill, now with a number).",
-   "remaining": "three lanes at Stage 2 (enrich-tvl, scan-repo-code, refresh-research-corpus; promoted 2026-09-13, each with an end-state claim proven in its own log), 8 eligible at 4+ clean weeks. Detection is autonomous; repair is not — Stage 3's daily loop that lands root fixes does not exist yet, and every ledger row that needs code is still worked by a human-started agent session."
+   "remaining": "three lanes at Stage 2 (enrich-tvl, scan-repo-code, refresh-research-corpus; promoted 2026-09-13, each with an end-state claim proven in its own log), 8 eligible at 4+ clean weeks. Detection is autonomous; repair now has a lane — repair-lane.yml works one open ledger row per day with a headless agent in a checkout that holds no production secrets, and leaves a PR for a human to merge (PR-only; protected paths block the PR by construction; its own attempt log and wave manifest are the end-state claim). Its first unattended run is the proof it has to earn; Stage 3 stays closed until it has weeks."
   },
   {
    "id": "P4",
