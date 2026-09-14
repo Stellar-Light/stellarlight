@@ -20,9 +20,10 @@ import {
 	listOwnerRepos,
 	type OwnerRepo,
 } from "../src/lib/github";
-import { repoGrade,
-	isFirstParty,
+import {
 	FIRST_PARTY_OWNERS,
+	isFirstParty,
+	repoGrade,
 	vouchingNoteCount,
 } from "../src/lib/repo-grade";
 import {
@@ -609,7 +610,9 @@ async function main() {
 					// ALSO carry a project link scored differently depending on
 					// which lane touched them last.
 					judgeScore:
-						typeof existing?.judgeScore === "number" ? existing.judgeScore : null,
+						typeof existing?.judgeScore === "number"
+							? existing.judgeScore
+							: null,
 				})
 			: { score: 0, label: "low" as const };
 
@@ -653,16 +656,28 @@ async function main() {
 			projectSlug: project.slug,
 			projectName: project.name,
 			// sls-064 analog: curated generation relation — wholesale each pass.
-			successorRepo: REPO_SUCCESSIONS[full.toLowerCase()] ?? null,
-			knowledgeNotes: buildKnowledgeNotes(full, project.slug, auditsByProject, {
-				lastCommitAt:
-					info?.lastCommitAt ??
+			// Keyed by the CANONICAL name the row is written under, never by
+			// `full` (the name the project record lists). For a moved or renamed
+			// repo `full` is the OLD path — hyperledger/solang, daccred/attest.so,
+			// gaudiatech/pyved-engine — so the registry lookup missed and this
+			// pass wrote `[]` over the notes backfill-knowledge-notes had stamped
+			// that morning: 7 curated-pool rows lost their notes on every day both
+			// lanes ran, found by the backfill's dry re-plan (2026-09-14).
+			successorRepo: REPO_SUCCESSIONS[writtenFullName.toLowerCase()] ?? null,
+			knowledgeNotes: buildKnowledgeNotes(
+				writtenFullName,
+				project.slug,
+				auditsByProject,
+				{
+					lastCommitAt:
+						info?.lastCommitAt ??
+						// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+						(existing as any)?.lastCommitAt ??
+						null,
 					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-					(existing as any)?.lastCommitAt ??
-					null,
-				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-				codeInUse: (existing as any)?.codeInUse ?? null,
-			}),
+					codeInUse: (existing as any)?.codeInUse ?? null,
+				},
+			),
 			hackathonWinner: !!project.hackathonPlacement,
 			scfAwarded: !!project.scf?.awarded,
 			builderReputation,
