@@ -144,6 +144,8 @@ jobs:
           code=$?
           echo "exit=$code" ; tail -c 600 .repair/agent.err || true
           jq -r '"cost_usd=\(.total_cost_usd // .cost_usd // "?") turns=\(.num_turns // "?") is_error=\(.is_error // false)"' .repair/result.json 2>/dev/null || echo "no JSON result"
+          # an agent that ends in error says why in .result — print it, or the failure is a bare exit=1
+          jq -r 'select(.is_error == true) | "── agent error ──\n" + ((.result // .error // "(no result text)") | tostring | .[0:1200])' .repair/result.json 2>/dev/null || true
           echo "── verdict ──"; cat .repair/verdict.json 2>/dev/null || echo "(none written)"
           exit $code
 
@@ -250,4 +252,5 @@ jobs:
           name: task-lane-${{ github.run_id }}
           path: .repair/
           if-no-files-found: ignore
+          include-hidden-files: true # .repair/ is a dot-directory; without this the upload is silently empty (run 34882326392)
           retention-days: 14
