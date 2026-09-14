@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-14T17:43:45.628Z",
+	"asOf": "2026-09-14T18:08:13.544Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 97,
-	"healthy": 97,
+	"checked": 98,
+	"healthy": 98,
 	"broken": [],
 	"rows": [
 		{
@@ -110,10 +110,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:59:48Z",
-			"ageDays": 70,
+			"ageDays": 71,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 70d ago (manual tool — age not judged)"
+			"why": "last green 71d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-project-github.yml",
@@ -241,10 +241,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:40:07Z",
+			"lastSuccessAt": "2026-09-14T18:05:19Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -263,10 +263,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:40:07Z",
+			"lastSuccessAt": "2026-09-14T18:05:19Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -296,11 +296,11 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-08T16:48:56Z",
-			"ageDays": 6,
+			"lastSuccessAt": "2026-09-14T17:59:16Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 30,
-			"why": "last green 6d ago"
+			"runs": 31,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -439,10 +439,10 @@
 			"name": "Enrich repo activity (unenriched lane)",
 			"cron": "20 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:40:36Z",
+			"lastSuccessAt": "2026-09-14T18:03:46Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -583,10 +583,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:46:08Z",
-			"ageDays": 70,
+			"ageDays": 71,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 70d ago (manual tool — age not judged)"
+			"why": "last green 71d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "link-partner-projects.yml",
@@ -670,10 +670,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:31:28Z",
+			"lastSuccessAt": "2026-09-14T18:01:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 93,
+			"runs": 92,
 			"why": "last green 0d ago"
 		},
 		{
@@ -736,10 +736,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-13T23:21:39Z",
+			"lastSuccessAt": "2026-09-14T17:49:26Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 60,
+			"runs": 61,
 			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
@@ -803,10 +803,10 @@
 			"cron": "0 15 * * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-13T17:49:31Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 4,
 			"runs": 8,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "refresh-research-corpus.yml",
@@ -828,6 +828,17 @@
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 38,
+			"why": "last green 0d ago"
+		},
+		{
+			"file": "refresh-stablecoins.yml",
+			"name": "Refresh stablecoins",
+			"cron": "25 */6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-14T17:40:37Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -913,10 +924,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T17:46:07Z",
-			"ageDays": 70,
+			"ageDays": 71,
 			"graceDays": 45,
 			"runs": 10,
-			"why": "last green 70d ago (manual tool — age not judged)"
+			"why": "last green 71d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "set-prominence.yml",
@@ -989,10 +1000,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:41:38Z",
+			"lastSuccessAt": "2026-09-14T18:05:19Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 76,
+			"runs": 86,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1066,10 +1077,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:18:37Z",
+			"lastSuccessAt": "2026-09-14T17:40:06Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 53,
+			"runs": 54,
 			"why": "last green 0d ago"
 		}
 	]
