@@ -68,7 +68,7 @@ function tally(bucket: string, ok: boolean, f?: Omit<Failure, "bucket">) {
 // automated callers; without it set, this is inert and prod still works.
 const BYPASS = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
 
-async function j(path: string): Promise<any> {
+async function jOnce(path: string): Promise<any> {
 	const res = await fetch(`${BASE}${path}`, {
 		redirect: "manual",
 		headers: {
@@ -88,6 +88,23 @@ async function j(path: string): Promise<any> {
 	}
 	if (!res.ok) throw new Error(`${res.status} ${path}`);
 	return res.json();
+}
+
+/**
+ * One fetch, one retry on a 5xx — the same transient class as an empty page
+ * under write load (see reprobeIfEmpty). The 2026-09-14 15:31Z run filed
+ * three P-PHRASE misses whose `observed` was `Error: 500 …`; all three
+ * answered at strict #1 minutes later. Two 5xx in a row still count: an API
+ * that fails a real query twice is a finding, just not a retrieval one.
+ */
+async function j(path: string): Promise<any> {
+	try {
+		return await jOnce(path);
+	} catch (e) {
+		if (!/^5\d\d /.test(String((e as Error).message))) throw e;
+		await new Promise((r) => setTimeout(r, 2000));
+		return jOnce(path);
+	}
 }
 
 /**
