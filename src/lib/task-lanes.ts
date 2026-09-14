@@ -189,7 +189,7 @@ export function buildTaskPrompt(
 	task: TaskId,
 	unit: string,
 	payload: unknown,
-	opts: { branch: string; date: string },
+	opts: { branch: string; date: string; workflowsPushable?: boolean },
 ): string {
 	const head = rules(task, unit, opts.branch, opts.date);
 	const p = JSON.stringify(payload, null, 1);
@@ -208,6 +208,13 @@ ${p}`;
 
 THE WORK — make the lane \`${unit}\` (.github/workflows/${unit}.yml and the script it runs) assert its own end state so it can be promoted to Stage 2 (QUALITY.md §3, "A second condition"). Read the three shipped precedents first: the endStateClaim entries in improvements/lanes/lanes.json for enrich-tvl, scan-repo-code and refresh-research-corpus, and how scripts/scan/scan-repo-code.ts uses verifyWrites from src/lib/utils/read-back.ts (sentById.set(String(doc.id), data) after each payload.update; process.exit(process.exitCode ?? 0) at the end). After the execute pass the lane must read back EVERY row it wrote against the exact payload sent, count what it skipped and why, and exit 2 (could-not-look: no token, upstream down, DB unreachable) distinctly from 1 (a finding). A run that wrote nothing must say so and must not read an empty map back as "verified". Mind scripts/check-writer-conformance.ts (no bare process.exit(0) where process.exitCode is set; steps that pipe through tee need shell: bash) and declare the by-design red step in the workflow header: # workflow-health: signal-steps: ^<Step name>$. Do NOT edit improvements/lanes/lanes.json — put the proposed endStateClaim sentence and the exit-code table in .repair/pr-body.md; promotion is a human decision after the lane's next CI run proves the claim in its own log.
 
+${
+	opts.workflowsPushable
+		? ""
+		: `
+THIS RUN CANNOT PUSH WORKFLOW FILES (the token has no workflows permission): do NOT edit .github/workflows/. Put the exact workflow change you would make — the signal-steps header line and any step edit — in .repair/pr-body.md under a "Workflow change for a human" heading, and deliver the read-back and the exit-code split in the script alone.
+`
+}
 LANE (the autonomy audit's row and the registry's row):
 ${p}`;
 		case "gap": {

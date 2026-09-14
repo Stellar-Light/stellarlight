@@ -217,6 +217,22 @@ describe("task lane: the prompts", () => {
 		expect(p).toContain("Do NOT edit improvements/lanes/lanes.json");
 		expect(p).toContain("exit 2 (could-not-look");
 	});
+	it("claims: without a PAT the prompt keeps the agent out of .github/workflows", () => {
+		const p = buildTaskPrompt(
+			"claims",
+			"check-links",
+			{ audit: { id: "check-links" } },
+			opts,
+		);
+		expect(p).toContain("CANNOT PUSH WORKFLOW FILES");
+		const q = buildTaskPrompt(
+			"claims",
+			"check-links",
+			{ audit: { id: "check-links" } },
+			{ ...opts, workflowsPushable: true },
+		);
+		expect(q).not.toContain("CANNOT PUSH WORKFLOW FILES");
+	});
 	it("gap: carries the slugs and the downgrade rule for sourced, the description rule for typed", () => {
 		const s = buildTaskPrompt(
 			"gap",
