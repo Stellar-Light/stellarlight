@@ -78,6 +78,7 @@ export function recentlyAttempted(
 	return attempts.some(
 		(a) =>
 			a.task === task &&
+			a.outcome !== "error" && // an infra failure is not an attempt on the unit
 			a.date >= cutoff &&
 			(a.unit === key || a.items.includes(key)),
 	);
