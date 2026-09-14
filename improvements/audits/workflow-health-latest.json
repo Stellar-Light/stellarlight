@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-14T18:08:13.544Z",
+	"asOf": "2026-09-14T18:17:04.470Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 98,
 	"healthy": 98,
@@ -241,10 +241,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:05:19Z",
+			"lastSuccessAt": "2026-09-14T18:11:25Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -263,10 +263,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:05:19Z",
+			"lastSuccessAt": "2026-09-14T18:14:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 2,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -296,10 +296,10 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:59:16Z",
+			"lastSuccessAt": "2026-09-14T18:05:21Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 31,
+			"runs": 32,
 			"why": "last green 0d ago"
 		},
 		{
@@ -670,7 +670,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:01:54Z",
+			"lastSuccessAt": "2026-09-14T18:11:25Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 92,
@@ -1000,10 +1000,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:05:19Z",
+			"lastSuccessAt": "2026-09-14T18:14:45Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 86,
+			"runs": 88,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1077,10 +1077,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:40:06Z",
+			"lastSuccessAt": "2026-09-14T18:05:19Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 54,
+			"runs": 55,
 			"why": "last green 0d ago"
 		}
 	]
