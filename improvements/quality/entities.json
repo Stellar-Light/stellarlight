@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-09-14T14:22:04.738Z",
+ "generatedAt": "2026-09-14T17:22:55.860Z",
  "surfaces": [
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
-   "openFindings": 3,
-   "clearedFindings": 336,
+   "openFindings": 1,
+   "clearedFindings": 339,
    "verifiedFindings": 0
   },
   {
@@ -53,23 +53,23 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 663,
-  "open": 4,
+  "total": 664,
+  "open": 2,
   "refreshQueue": 15,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
    "raven-scorer": 6
   },
-  "cleared": 620,
+  "cleared": 623,
   "verified": 7,
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 3,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 285,
+    "cleared": 288,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -221,7 +221,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 3
+    "count": 2
    },
    {
     "bucket": "8–30d",
@@ -229,7 +229,7 @@
    },
    {
     "bucket": "31–60d",
-    "count": 1
+    "count": 0
    },
    {
     "bucket": ">60d",
@@ -237,6 +237,24 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "response",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-14"
+   },
+   {
+    "probe": "binance in top-3 for its own name",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-14"
+   },
+   {
+    "probe": "klever in top-3 for its own name",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-14"
+   },
    {
     "probe": "battery:q-ti-java-sdk-wallet-feebump",
     "surface": "corpus",
@@ -266,42 +284,24 @@
     "surface": "code",
     "failureMode": "note-stale",
     "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "#1 result carries types=Education",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-14"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 284,
-     "recurred": 133,
-     "ratePct": 46.8
+     "newFindings": 285,
+     "recurred": 134,
+     "ratePct": 47
     },
     "lifetime": {
-     "newFindings": 663,
-     "recurred": 154,
-     "ratePct": 23.2
+     "newFindings": 664,
+     "recurred": 155,
+     "ratePct": 23.3
     }
    },
    "reopened": {
-    "count": 6,
+    "count": 5,
     "shareOfClosures": 0.01,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -309,20 +309,20 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 284,
-     "repeats": 284,
+     "newFindings": 285,
+     "repeats": 285,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 663,
-     "repeats": 657,
+     "newFindings": 664,
+     "repeats": 658,
      "ratePct": 99.1
     },
     "byClass": [
      {
       "class": "identity",
-      "total": 328,
-      "open": 20,
+      "total": 329,
+      "open": 18,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9278,11 +9278,11 @@
     },
     {
      "bucket": "10–19",
-     "count": 839
+     "count": 838
     },
     {
      "bucket": "20–29",
-     "count": 702
+     "count": 703
     },
     {
      "bucket": "30–39",
@@ -9294,15 +9294,15 @@
     },
     {
      "bucket": "50–59",
-     "count": 142
+     "count": 138
     },
     {
      "bucket": "60–69",
-     "count": 54
+     "count": 57
     },
     {
      "bucket": "70–79",
-     "count": 23
+     "count": 24
     },
     {
      "bucket": "80–89",
@@ -9316,15 +9316,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1291
+     "count": 1290
     },
     {
      "label": "slowing",
-     "count": 966
+     "count": 963
     },
     {
      "label": "active",
-     "count": 849
+     "count": 853
     },
     {
      "label": "unknown",
@@ -9338,7 +9338,7 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1139
+     "count": 1140
     },
     {
      "label": "Rust",
@@ -9350,7 +9350,7 @@
     },
     {
      "label": "JavaScript",
-     "count": 369
+     "count": 368
     },
     {
      "label": "Go",
@@ -9537,6 +9537,19 @@
     "notes": 1,
     "codeDepth": 24,
     "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "hyperledger-solang/solang",
+    "repoScore": 89,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Rust",
+    "projectSlug": "solang",
+    "notes": 4,
+    "codeDepth": 57,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -9758,19 +9771,6 @@
     "notes": 1,
     "codeDepth": 91,
     "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "hyperledger-solang/solang",
-    "repoScore": 80,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "Rust",
-    "projectSlug": "solang",
-    "notes": 4,
-    "codeDepth": 57,
-    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10443,7 +10443,7 @@
   {
    "area": "known-item recall",
    "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "3 open recall-miss findings",
+   "measurement": "1 open recall-miss findings",
    "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
@@ -10454,7 +10454,7 @@
     "id": "s:engine-a-recall",
     "label": "engine-a-recall",
     "column": 0,
-    "value": 288
+    "value": 289
    },
    {
     "id": "s:engine-d-demand",
@@ -10538,7 +10538,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 339
+    "value": 340
    },
    {
     "id": "f:directory",
@@ -10580,13 +10580,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 620
+    "value": 623
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 36
+    "value": 34
    },
    {
     "id": "o:verified",
@@ -10608,7 +10608,7 @@
     "target": 21,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 336
+    "value": 339
    },
    {
     "source": 1,
@@ -10622,14 +10622,7 @@
     "target": 14,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
-    "value": 288
-   },
-   {
-    "source": 14,
-    "target": 22,
-    "sourceId": "f:retrieval",
-    "targetId": "o:open",
-    "value": 3
+    "value": 289
    },
    {
     "source": 7,
@@ -10777,6 +10770,13 @@
     "sourceId": "f:directory",
     "targetId": "o:open",
     "value": 16
+   },
+   {
+    "source": 14,
+    "target": 22,
+    "sourceId": "f:retrieval",
+    "targetId": "o:open",
+    "value": 1
    }
   ]
  },
@@ -10799,10 +10799,10 @@
      "fazzatti/colibri",
      "stellar/stellar-horizon",
      "Shamba-Records-Limited/microvault",
+     "hyperledger-solang/solang",
      "Phoenix-Protocol-Group/phoenix-contracts",
      "stellar/sep45-reference",
      "stellar/passkey-kit",
-     "hyperledger-solang/solang",
      "blend-capital/blend-contracts-v2",
      "devasignhq/bounty-escrow",
      "Trustless-Work/trustlesswork-smart-contract-stellar",
