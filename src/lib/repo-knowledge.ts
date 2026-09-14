@@ -6012,6 +6012,476 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			visibility: "internal",
 		},
 	],
+	// ── P5 wave 13 (2026-09-14) — 50 more curated-pool repos with no entry
+	// (324 remained after wave 12). Read 2026-09-14.
+	"alexanderkoh/stellarlight": [
+		{
+			note: "The public repository of Stellar Light itself (stellarlight.xyz) — the data layer for the Stellar ecosystem, a curated index of what has been built and who to work with, served to people through the web app and to agents through the Stellar Scout API, MCP server and skill (README read 2026-09-14; MIT; 4 stars; no releases; last push 2026-09-14).",
+			triggers: ["stellar light data layer", "stellarlight repository"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Stellar-Light/awesome-stellar-community-fund": [
+		{
+			note: "Twelve AI skills plus curated guides for the Stellar Community Fund (stellarlight.xyz/skills) — claim verification, application guidance and reference material for SCF participants. Created by LumenLoop and now maintained by Stellar Light (README read 2026-09-14; MIT; no releases; last push 2026-07-23).",
+			triggers: ["scf skills collection", "awesome stellar community fund"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lumenloop/lumenloop-skills": [
+		{
+			note: "LumenLoop's preconfigured Claude Agent Skills: playbooks that make any MCP-capable assistant useful for researching and building on Stellar, wired to LumenLoop's free read-only ecosystem MCP server. The peer of Stellar Light's own skills collection, and worth citing when comparing what agent tooling the ecosystem already publishes (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-06-16).",
+			triggers: [
+				"lumenloop skills",
+				"stellar agent playbooks",
+				"ecosystem mcp skills",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"kalepail/stellar-mpp-sdk": [
+		{
+			note: "Stellar support for the Machine Payments Protocol (mpp.dev): machine-to-machine payments using Soroban SAC token transfers, with optional support for one-way payment channels — the Stellar payment method inside MPP rather than a wallet. Note this copy is a GitHub FORK, so check the upstream for the current state (README and metadata read 2026-09-14; no license file; no releases; last push 2026-03-20).",
+			triggers: [
+				"stellar mpp sdk",
+				"machine payments protocol stellar",
+				"sac transfer payment channel",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"lumenbro/joule-contracts": [
+		{
+			note: "The Soroban contracts behind JOULE, LumenBro's prepaid AI-compute credit on Stellar, with the unit defined precisely in the README: 1 JOULE = 1,000 Joules of estimated AI inference energy, paid per query through the x402 HTTP payment protocol. Newest tag v0.4.0-se_joule-token_pkg0.2.0_cli22.8.1 (README read 2026-09-14; no license file; last push 2026-02-13).",
+			triggers: [
+				"joule compute credits",
+				"prepaid ai inference stellar",
+				"pay per query x402",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"57blocks/agentsmith-x402": [
+		{
+			note: "agentsmith-x402: open-source x402 payments and discovery for Stellar — agents discover HTTP and MCP services in Bazaar, receive a 402 challenge from the resource server, and pay through a SELF-HOSTED Stellar facilitator, which is the part most x402 stacks leave to a third party (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28).",
+			triggers: [
+				"agentsmith x402",
+				"self hosted stellar facilitator",
+				"bazaar service discovery x402",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Micopay/micopaybridge": [
+		{
+			note: "MicoPay Bridge (micopay.com.mx/bridge): a peer-to-peer market for AI agents secured by escrows — two agents that have never met settle a trade ACROSS XRPL AND STELLAR atomically with no custodian, account or prior registration, and can cash out to physical channels in Mexico. Topics name htlc, atomic-swap, x402 and zero-knowledge (README read 2026-09-14; MIT; no releases; last push 2026-09-04).",
+			triggers: [
+				"micopay bridge agents",
+				"xrpl stellar atomic swap",
+				"htlc agent escrow",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"axis-markets/orderbook": [
+		{
+			note: "The AXIS limit-orderbook DEX contract for Stellar, whose README documents the interface directly — `last() -> u64` for the newest order id and `order(id) -> Option<Order>` to fetch one — so the contract's read surface is citable without decompiling it (README read 2026-09-14; no license file; no releases; last push 2026-09-13).",
+			triggers: ["axis orderbook contract", "limit orderbook dex soroban"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Fundable-Protocol/stellar_indexer": [
+		{
+			note: "The Fundable Indexer: a Bun/Turborepo workspace that reads Soroban CONTRACT EVENTS, turns them into typed application data and stores the result in PostgreSQL — the same event-indexing need that Recall and Fluxity solve, here as an open-source component (README read 2026-09-14; no license file; no releases; last push 2026-07-18).",
+			triggers: [
+				"fundable indexer events",
+				"soroban events to postgres",
+				"typed contract event data",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"withObsrvr/stellar-extract": [
+		{
+			note: "A shared Go library for extracting typed rows from Stellar ledger data, which the README calls the single source of truth for BRONZE-LAYER extraction across the Obsrvr data platform — installable as github.com/withObsrvr/stellar-extract. The ingestion layer beneath Obsrvr's Prism explorer (README read 2026-09-14; no license file; no releases; last push 2026-08-18).",
+			triggers: [
+				"stellar extract go library",
+				"bronze layer ledger extraction",
+				"typed ledger rows go",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"SentinelFi/stellar_wallet_mock": [
+		{
+			note: "stellar-wallet-mock: a Playwright testing library that MOCKS THE FREIGHTER extension so a Stellar/Soroban dApp can be tested headlessly end to end without a real wallet — the missing piece for CI on any wallet-connected front end (README read 2026-09-14; no license file; no releases; last push 2026-04-07).",
+			triggers: [
+				"mock freighter playwright",
+				"e2e test stellar dapp",
+				"wallet mock testing",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"salazarsebas/acachete-faucet": [
+		{
+			note: "Acachete Labs' MULTI-TOKEN faucet for Stellar testnet and futurenet (faucet-stellar.acachete.xyz) — broader than friendbot, which funds XLM only, so it is the answer when a builder needs test assets beyond lumens (README read 2026-09-14; MIT; no releases; last push 2026-03-02).",
+			triggers: [
+				"acachete faucet multi token",
+				"testnet token faucet stellar",
+				"futurenet faucet",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"paltalabs/defindex-sdk": [
+		{
+			note: "The DeFindex SDK, published on npm as @defindex/sdk (the README's badge) with the GitHub release line at v0.3.0 — the client for DeFindex's vaults, and the dependency Soroswap's front end uses for its earning and farming features (README read 2026-09-14; the README badges MIT while GitHub reports no license file; 2 stars; last push 2026-09-04).",
+			triggers: ["defindex sdk vaults", "defindex client library"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"rahimklaber/SStream": [
+		{
+			note: "SStream (s-stream.vercel.app): an early streaming-payments protocol for Soroban whose README states its three functions plainly — create a stream by naming recipient, amount per second, total and end, then the operations around it. Last push 2024-07-24, so it is the 2024 reference implementation of the pattern that Fluxity and Quipay later productised (README read 2026-09-14; no license file; 3 stars; no releases).",
+			triggers: [
+				"sstream streaming payments",
+				"amount per second stream soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"luanlabs/fluxity.finance": [
+		{
+			note: "The landing page for Fluxity (fluxity.finance), the token-streaming and lockup platform on Soroban — the marketing surface whose backend is luanlabs/fluxity-api; topics money-streaming, soroban (README read 2026-09-14; MIT; no releases; last push 2026-08-14).",
+			triggers: ["fluxity landing page", "money streaming stellar site"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"defarm-repo/tooling": [
+		{
+			note: "DeFarm's public developer tooling — a TypeScript SDK and CLI for integrating with the DeFarm platform, whose agricultural traceability the README says is anchored on STELLAR MAINNET (not testnet, which is unusual in this cohort). The repository is a public snapshot of the tooling that ships with the product (README read 2026-09-14; MIT; no releases; last push 2026-09-02).",
+			triggers: ["defarm tooling sdk", "agri traceability mainnet stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"warp-driver/oracle-demo": [
+		{
+			note: "A two-operator WarpDrive oracle that polls CoinGecko every 30 seconds for BTC-USD and ETH-USD and settles quorum-signed rounds into a single on-chain OracleContract on Stellar testnet — the README's value is that it demonstrates WarpDrive's cron, Stellar-event and composition-event triggers in one artefact (README read 2026-09-14; MIT; no releases; last push 2026-06-24).",
+			triggers: [
+				"warpdrive oracle demo",
+				"quorum signed price rounds stellar",
+				"cron trigger oracle soroban",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Kali-Decoder/stellar-crates-tinder": [
+		{
+			note: "swyft.fun (the repo is named stellar-crates-tinder): non-custodial swipe investing for tokenised real-world assets on Stellar — set a budget, swipe assets into a basket, deposit stablecoin on TESTNET through Freighter, and hold vault share tokens, with prices from DIA-compatible oracles (README read 2026-09-14; no license file; no releases; last push 2026-08-24).",
+			triggers: [
+				"swyft swipe investing",
+				"tokenized rwa basket stellar",
+				"dia oracle stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ACTA-Team/ACTA-docs": [
+		{
+			note: "The ACTA documentation site (docs.acta.build): the single reference for issuers, holders, verifiers and integrators building on ACTA's verifiable credentials and `did:stellar` identity, covering the REST API and the rest of the surface. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-08-22).",
+			triggers: [
+				"acta documentation",
+				"did:stellar docs",
+				"verifiable credentials reference stellar",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"SCF-Public-Goods-Maintenance/pg-atlas-frontend": [
+		{
+			note: "The PG Atlas dashboard at pgatlas.xyz — Vite, React, TanStack Router and Query over the metrics backbone for the SCF Public Goods dependency graph; the third piece alongside pg-atlas-backend and pg-atlas-ts-sdk (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-07-30).",
+			triggers: ["pg atlas dashboard", "public goods dependency graph ui"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Brale-xyz/docs": [
+		{
+			note: "The open-source developer documentation for Brale's stablecoin infrastructure API (docs.brale.xyz) — issuing your own stablecoin and moving value, documented publicly, which makes it a citable source for how a regulated issuer's API is shaped (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-09-14).",
+			triggers: ["brale api docs", "issue your own stablecoin api"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blindpaylabs/blindpay-php": [
+		{
+			note: "BlindPay's official PHP SDK for its stablecoin payments API, requiring PHP 8.2+ and installed with `composer require blindpay/php`. GitHub release line v3.4.0, matching the Python SDK's (README read 2026-09-14; MIT; 2 stars; last push 2026-08-08).",
+			triggers: ["blindpay php sdk", "composer blindpay"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blindpaylabs/blindpay-skills": [
+		{
+			note: "BlindPay's agent skills. Note the duplication before citing a path: blindpaylabs/skills is byte-for-byte the same project — same description, same README, same 564 KB, both created 2026-01-30 and neither marked a fork — so one of the two is a rename or a copy, and there is no signal in the metadata for which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
+			triggers: ["blindpay agent skills"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blindpaylabs/skills": [
+		{
+			note: "BlindPay's agent skills — the twin of blindpaylabs/blindpay-skills, identical in description, README, size (564 KB) and creation date (2026-01-30), with neither marked a fork. Cite the pair, not one path, until the org states which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
+			triggers: ["blindpay skills duplicate"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"dfns/dfns-sdk-go": [
+		{
+			note: "The Dfns Go SDK (v2, godoc at github.com/dfns/dfns-sdk-go/v2), newest release v2.2.0 — the custody provider's Go client, sibling of dfns-sdk-java. Treat it as a custody SDK that supports Stellar among other chains, not a Stellar library (README read 2026-09-14; MIT; 8 stars; last push 2026-09-11).",
+			triggers: ["dfns go sdk"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"DcentWallet/info": [
+		{
+			note: "D'CENT's user-facing information repository: the wallet's user guide, its SUPPORTED COIN LIST at dcentwallet.com/SupportedCoin and its firmware version list — the place to check what D'CENT actually supports rather than inferring it (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-06-09).",
+			triggers: ["dcent supported coins", "dcent wallet user guide"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"DcentWallet/biometric-firmware": [
+		{
+			note: "D'CENT's release repository for Biometric Wallet firmware images; newest release v2.36.2 (2026-09-10). Firmware distribution, so the release feed is the fact — there is no source here (README read 2026-09-14; no license file; last push 2026-09-10).",
+			triggers: ["dcent biometric firmware"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"allbridge-io/allbridge-mcp": [
+		{
+			note: "allbridge-mcp: an MCP server for Allbridge bridge workflows that helps an agent plan a transfer, build execution jobs, broadcast signed payloads and track the result WITHOUT HOLDING PRIVATE KEYS — the key-custody boundary is the design point worth citing (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-04).",
+			triggers: ["allbridge mcp server", "agent bridge without keys"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"SwitchlyProtocol/node-launcher": [
+		{
+			note: "Switchly's node launcher: Helm charts plus a Makefile for deploying the SwitchlyNode stack and its tools with predefined configuration per environment. Operations tooling for running a node rather than protocol code (README read 2026-09-14; MIT; no releases; last push 2026-08-15).",
+			triggers: ["switchly node launcher", "helm charts switchlynode"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"btq-ag/QRiNG": [
+		{
+			note: "QRiNG: a hybrid quantum-blockchain protocol for VERIFIABLE QUANTUM RANDOM NUMBER GENERATION — randomness from Hadamard-circuit measurements settled on-chain by majority vote. A GitHub code search finds 0 occurrences of `stellar` in the repository (searched 2026-09-14), so the settlement chain is not evidenced here; cite it for the randomness protocol, not for a Stellar deployment (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-07-22).",
+			triggers: ["qring quantum randomness", "quantum rng blockchain"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"btq-ag/Leonne": [
+		{
+			note: "Leonne: a modular framework for simulating consensus networks using post-quantum topological methods, from BTQ. A GitHub code search finds 0 occurrences of `stellar` (searched 2026-09-14) — consensus research rather than Stellar code (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-04-15).",
+			triggers: [
+				"leonne consensus simulation",
+				"post quantum consensus framework",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"btq-ag/QLDPC": [
+		{
+			note: "QLDPC: an interactive Python toolkit for quantum LDPC error correction — a circuit builder with real-time visualisation, built on Qiskit. Quantum-computing research from BTQ with no Stellar-specific content (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-16).",
+			triggers: ["qldpc error correction toolkit"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"GetBlock-io/rpc-endpoint-benchmark": [
+		{
+			note: "GetBlock's public RPC benchmark resources: profiles for testing endpoint speed, reliability, method compatibility, rate limits and CHAIN FRESHNESS. Its topics list Ethereum, Solana, Polygon, BNB, Base and Arbitrum, and a code search finds 0 occurrences of `stellar` (searched 2026-09-14), so the methodology transfers but no Stellar profile is published here (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-07-31).",
+			triggers: ["rpc endpoint benchmark", "rpc latency methodology"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"nirvana-labs/nirvana-cli": [
+		{
+			note: "The official CLI for the Nirvana Labs REST API, installable through a Homebrew tap, newest release v0.55.0 — the third Nirvana Labs client in the index alongside nirvana-go and nirvana-typescript, all indexed through their owner's project rather than through Stellar code (README read 2026-09-14; Apache-2.0; last push 2026-09-08).",
+			triggers: ["nirvana labs cli"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"blaze-xyz/betterstack-logs-mcp": [
+		{
+			note: "An MCP server for querying and analysing Betterstack logs across multiple sources and source groups with source selection — Blaze's internal observability tooling exposed to agents, with no Stellar-specific content (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-02-20).",
+			triggers: ["betterstack logs mcp"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ondoprotocol/gm-solana-simulator": [
+		{
+			note: "A Rust library for simulating Ondo Global Markets JIT trades through Jupiter RFQ: GM tokens are minted JUST-IN-TIME when a swap occurs, which the README explains breaks standard transaction simulation — the problem this library exists to solve. Solana, not Stellar (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-04).",
+			triggers: ["ondo gm simulator", "jit mint simulation jupiter"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"stellar/.github": [
+		{
+			note: "The @stellar org's default community health files — CODE_OF_CONDUCT, CONTRIBUTING, issue and pull-request templates that GitHub applies across the org's repositories. 14 stars for a repository that contains no product (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
+			triggers: [
+				"stellar community health files",
+				"stellar contributing template",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"OFFER-HUB/OFFER-HUB-Frontend": [
+		{
+			note: "The Offer-Hub front end (offer-hub.org): Next.js 16, TypeScript 5 and Tailwind 4. The README is a quick-start and states nothing about the product or its Stellar integration, so the site itself is the grounding for what Offer-Hub does (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-14).",
+			triggers: ["offer hub frontend"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"viniciorm/culturago-stellar": [
+		{
+			note: "CulturaGO (culturago.vercel.app): a platform of verifiable digital CULTURAL PASSPORTS for artists, schools, teachers, organisations and cultural-sector providers, presented as an FDVC 2026 MVP; the README is in Spanish (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
+			triggers: [
+				"culturago cultural passport",
+				"verifiable cultural credentials",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"0xVida/inter-stellar-battle": [
+		{
+			note: "INTER-STELLAR (inter-stellar-battle.vercel.app): a retro 16-bit wagered fighting game on Stellar where WHICH MOVE YOU THREW never becomes visible to the chain or the public, and in its Blind Duel mode an opponent does not even learn your character or stats — the hidden-information pattern applied to real-time combat rather than turn-based play (README read 2026-09-14; no license file; no releases; last push 2026-07-03).",
+			triggers: [
+				"inter-stellar battle game",
+				"private wagered combat stellar",
+				"blind duel hidden stats",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Clash-Of-Pirates/Clash-of-pirates": [
+		{
+			note: "Clash (clash-of-pirates.vercel.app): a fully on-chain PvP strategy game on Stellar where cryptographic proofs keep play fair without revealing moves until they resolve — another entry in the ecosystem's hidden-information game cluster (README read 2026-09-14; no license file; no releases; last push 2026-06-27).",
+			triggers: ["clash of pirates zk", "onchain pvp strategy stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"ThaisFReis/Proof-of-Life": [
+		{
+			note: "Proof of Life: a two-player asymmetric thriller on Stellar whose README states the mechanic exactly — your position is a secret and your moves are proofs — with a video walkthrough linked. Asymmetric information as the game design rather than as a feature (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-03-02).",
+			triggers: ["proof of life game", "asymmetric hidden position stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"deegalabs/deegagames-zk": [
+		{
+			note: "DeegaGames ZK (deegagames-zk.vercel.app): provably fair games with zero-knowledge proofs on Stellar, built for the Stellar Hacks: ZK Gaming hackathon — the same hackathon that produced Dark Fleet and Poison Game, which is why several independent ZK game repos share a date (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-02-23).",
+			triggers: ["deegagames provably fair", "zk gaming hackathon stellar"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"CaBsCrypto/pizzaninja": [
+		{
+			note: "Slash Slice Arena (slashslice.spicycrust.com): a browser game with 60 FPS MediaPipe HAND TRACKING — you slice with your hands — wired to Stellar through Privy; topics mediapipe, privy, soroban. An unusual input modality for an on-chain game (README read 2026-09-14; no license file; no releases; last push 2026-09-12).",
+			triggers: [
+				"slash slice arena",
+				"hand tracking game stellar",
+				"mediapipe web game",
+			],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Bond-Hive/interface": [
+		{
+			note: "BondHive's main interface repository. The README is the unmodified create-next-app scaffold and the GitHub description says only that it is the new interface, so nothing here documents the product — read Bond-Hive/soroban_contracts for what BondHive does on Stellar (README read 2026-09-14; MIT; no releases; last push 2025-06-16).",
+			triggers: ["bondhive interface"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"Bond-Hive/testnet_interface": [
+		{
+			note: "BondHive's testnet interface — the testnet twin of Bond-Hive/interface, likewise an unmodified create-next-app scaffold README with no product description; last push 2025-06-04 (README read 2026-09-14; MIT; no releases).",
+			triggers: ["bondhive testnet interface"],
+			source: "curated",
+			asOf: "2026-09-14",
+		},
+	],
+	"gateway-fm/miden-agglayer": [
+		{
+			note: "Triage 2026-09-14: NOT a Stellar repo. `miden-agglayer` connects Polygon AggLayer tooling to a MIDEN rollup, exposing an EVM-shaped JSON-RPC service and translating bridge transactions into Miden notes; newest release v0.16.2. SIXTH gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator, ops-indexer, gasstorm and midenscan-indexer) — the whole org was swept into the pool behind the curated gatewayfm project, which is a genuine Stellar RPC provider. https://github.com/gateway-fm/miden-agglayer",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"acta-team/dApp-ACTA": [
+		{
+			note: "Triage 2026-09-14: GONE — `gh api repos/acta-team/dApp-ACTA` returns 404, so the repository was deleted, renamed or made private since indexing. ACTA's live repositories are under the ACTA-Team casing (acta-credentials, products-acta, ACTA-docs), all noted. The row should be retired or re-resolved. https://github.com/acta-team/dApp-ACTA",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"acta-team/website": [
+		{
+			note: "Triage 2026-09-14: GONE — 404 from the GitHub API, same as acta-team/dApp-ACTA. ACTA's live repositories are under the ACTA-Team casing. Retire or re-resolve the row. https://github.com/acta-team/website",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
+	"switchlyprotocol/switchlynode": [
+		{
+			note: "Triage 2026-09-14: GONE — 404 from the GitHub API. The org's node-launcher repository (SwitchlyProtocol/node-launcher) is live and noted; this node repository is not reachable. Retire or re-resolve the row. https://github.com/switchlyprotocol/switchlynode",
+			source: "curated",
+			asOf: "2026-09-14",
+			visibility: "internal",
+		},
+	],
 };
 
 /**
