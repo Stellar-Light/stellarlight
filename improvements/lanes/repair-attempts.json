@@ -8,6 +8,15 @@
    "pr": null,
    "costUsd": 1.2742027499999997,
    "note": "engine-a-recall:response does not reproduce: all four probe URLs return HTTP 200 with the expected project at rank #1, and the fetch-error class that created the row was already routed out of `failures` into `unchecked` by scripts/eval/generated-recall.ts at HEAD."
+  },
+  {
+   "rowId": "nightly-completeness:scfroundawards-empty-lulpay",
+   "date": "2026-09-14",
+   "run": "34875749549",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 5.507265749999999,
+   "note": "pushed repair/nightly-completeness-scfroundawards-empty-lulpay-20260914-1737 but gh pr create returned no URL"
   }
  ]
 }
