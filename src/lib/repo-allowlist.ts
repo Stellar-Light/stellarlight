@@ -22,6 +22,14 @@ export const PROTECTED_OWNERS: ReadonlySet<string> = new Set(
 	[
 		"stellar",
 		"stellar-deprecated", // archived-but-canonical (e.g. reference impls) — still a legit reference
+		// "Experiments at the frontier of the Stellar Development Foundation"
+		// (the org's own description, read 2026-09-14) — SDF's frontier org, 30
+		// public repos. Added 2026-09-14: six of its repos sat at proof=none
+		// depth=0 because the canonical pin never covered them, including
+		// stellar-raven (the MCP server at raven.stellar.org) and the Zig and C
+		// Soroban SDKs — repos that are Soroban by definition in languages no
+		// dependency detector can see.
+		"stellar-experimental",
 		"soroban", // legacy soroban org
 		"soroswap",
 		"blend-capital",
