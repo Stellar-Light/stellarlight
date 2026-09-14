@@ -184,12 +184,24 @@ const crateDirOf = (path: string) => {
 	const s = p.lastIndexOf("/");
 	return s >= 0 ? p.slice(0, s) : "";
 };
-const isTestPath = (p: string) =>
-	/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(
+/** A fetched path that is test/fixture material rather than product source.
+ * Exported because depth ROUTING needs the same answer (depth-route.ts): "which
+ * languages did we actually read SOURCES in" must not be satisfied by test
+ * files. stellar/rs-stellar-archivist fetches 4,830 lines of Rust and every one
+ * of them is test code; OpenZeppelin/openzeppelin-monitor, 6,635. The Rust
+ * rules (`tests?.rs`, `_test.rs`) are joined here by the JS/py/go/JVM idioms the
+ * router must recognise too; for the .rs-only callers inside this file the added
+ * alternatives are inert. */
+export const isTestPath = (p: string) =>
+	/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches|__tests__|e2e|spec)\//i.test(
 		p,
 	) ||
 	/_tests?(\/|\.rs$)/i.test(p) ||
-	/(^|\/)tests?\.rs$/i.test(p);
+	/(^|\/)tests?\.rs$/i.test(p) ||
+	/\.(test|spec)\.[a-z]+$/i.test(p) ||
+	/_test\.(go|py)$/i.test(p) ||
+	/(^|\/)test_[^/]*\.py$/i.test(p) ||
+	/Tests?\.(kt|java)$/.test(p);
 /** Everything from an INLINE `#[cfg(test)] mod x {` to EOF is the test module.
  * A `#[cfg(test)] mod test;` declaration (the idiom at the top of most lib.rs
  * files) drops nothing — the old strip-to-EOF read such a file as empty. */
