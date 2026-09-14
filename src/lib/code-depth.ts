@@ -16,6 +16,22 @@
  * contracts can't earn the multi-crate breadth/cross-call terms, so a
  * single-crate compensation term lifts them; (3) OZ/SEP-41 tokens share template
  * structure, so the clone multiplier gates on code EMPTINESS, not similarity.
+ *
+ * KIND-AWARE (2026-09-14). Depth grades the kind of code it reads. Every crate
+ * is read on the contract terms above — entry points, auth-gated writes,
+ * cross-calls, state — and a crate that DEFINES no contract (#[contract]/
+ * #[contractimpl] absent from its non-test code: an SDK, a contract library,
+ * a CLI, a proc-macro) is read a second time on library terms: its public API
+ * surface, its code mass, its tests and its releases. The repo takes the
+ * better reading, so nothing scores lower than it did. A workspace scores the
+ * best of its crates, never the sum; the example/tutorial cap, the
+ * fork-of-scaffold cap and the clone multiplier still bound it, and an
+ * unreleased fork never earns library depth (its API belongs to its parent).
+ * Measured live 2026-09-14 before this: only the contract terms existed, so
+ * stellar/rs-soroban-sdk read 0.45, stellar/stellar-cli 0.35 and
+ * OpenZeppelin/stellar-contracts 0.39 — the three most-used Rust repos in the
+ * ecosystem graded as shallow contracts — while a hackathon fork of the same
+ * OpenZeppelin code read 0.62.
  */
 
 // ── Inputs ───────────────────────────────────────────────────────────────────
@@ -104,9 +120,13 @@ export const KNOWN_EXAMPLE_REPOS: ReadonlySet<string> = new Set(
 // lesson — nrxschool/stellar-bootcamp (tutorial token + course slides) scored
 // 0.616 and warp-driver/oracle-demo 0.569 purely because their marker words
 // were missing. Still immature-gated: a real released project named "*-demo"
-// keeps full score.
+// keeps full score. 2026-09-14: added template — the JS marker and
+// repo-grade's TEMPLATE_NAME_RE always had it; here it was missing, and
+// bigger-tech/template-stellar-smart-contract (GitHub is_template, "a
+// template for developing smart contracts", never tagged) scored as a
+// contract once its root crate was read whole instead of split by directory.
 const EXAMPLE_NAME_MARKER =
-	/\b(examples?|tutorial|quickstart|workshop|cookbook|getting.started|sample|scaffold|boilerplate|starter|challenge|sorobanathon|demos?|bootcamp|course|academy|classroom|lessons?)\b/i;
+	/\b(examples?|tutorial|template|quickstart|workshop|cookbook|getting.started|sample|scaffold|boilerplate|starter|challenge|sorobanathon|demos?|bootcamp|course|academy|classroom|lessons?)\b/i;
 
 /** Is this repo an example/tutorial by curation or (immaturity-gated) name marker? */
 export function isExampleRepo(
@@ -148,12 +168,33 @@ export const CANON_SCAFFOLD_SHINGLES: ReadonlySet<string> = new Set(
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 const basename = (p: string) => p.slice(p.lastIndexOf("/") + 1);
 const crateDirOf = (path: string) => {
-	// crate dir = the path up to "/src/"; else the file's dir.
-	const i = path.indexOf("/src/");
-	if (i >= 0) return path.slice(0, i);
-	const s = path.lastIndexOf("/");
-	return s >= 0 ? path.slice(0, s) : "";
+	// crate dir = the path up to its LAST "/src/" (a template vendored under a
+	// crate's src/ is its own crate, not the host's — stellar-cli ships a
+	// hello-world under src/utils/contract-template/); a Cargo.toml maps to its
+	// own dir and root-crate files to "", so a manifest resolves to the sources
+	// beside it. Else the file's dir.
+	const p = path.replace(/^\.\//, "");
+	if (/(^|\/)cargo\.toml$/i.test(p)) {
+		const s = p.lastIndexOf("/");
+		return s >= 0 ? p.slice(0, s) : "";
+	}
+	if (p.startsWith("src/")) return "";
+	const i = p.lastIndexOf("/src/");
+	if (i >= 0) return p.slice(0, i);
+	const s = p.lastIndexOf("/");
+	return s >= 0 ? p.slice(0, s) : "";
 };
+const isTestPath = (p: string) =>
+	/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(
+		p,
+	) ||
+	/_tests?(\/|\.rs$)/i.test(p) ||
+	/(^|\/)tests?\.rs$/i.test(p);
+/** Everything from an INLINE `#[cfg(test)] mod x {` to EOF is the test module.
+ * A `#[cfg(test)] mod test;` declaration (the idiom at the top of most lib.rs
+ * files) drops nothing — the old strip-to-EOF read such a file as empty. */
+const dropTestTail = (t: string) =>
+	t.replace(/#\[cfg\(test\)\]\s*(?:pub\s+)?mod\s+\w+\s*\{[\s\S]*$/m, "");
 
 /** Strip Rust comments + string/char literals so bodies compare on structure. */
 export function stripCommentsAndStrings(src: string): string {
@@ -367,7 +408,7 @@ function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 		if (b.text == null) continue;
 		const t = b.text;
 		// SLOC: non-blank, non-comment lines (exclude #[cfg(test)] regions crudely).
-		const noTest = t.replace(/#\[cfg\(test\)\][\s\S]*$/m, "");
+		const noTest = dropTestTail(t);
 		f.rustSloc += noTest.split("\n").filter((l) => {
 			const s = l.trim();
 			return (
@@ -422,6 +463,39 @@ function crateFactsOf(rsBlobs: DepthBlob[]): CrateFacts {
 	return f;
 }
 
+// ── Crate kind + library facts ───────────────────────────────────────────────
+
+/** A crate DEFINES a contract when these appear in its non-test code (comments
+ * and string literals stripped — an SDK's docs and a CLI's templates mention
+ * them constantly). #[contracttype]/#[contracterror] do not count: a library
+ * declares storage keys and errors for the contracts that use it. */
+const RE_ENTRY_MACRO = /#\[\s*contract(?:impl)?\s*\]/g;
+/** Public API surface: what a library exports and a tool's command tree. */
+const RE_PUB_ITEM =
+	/\bpub(?:\s*\([^)\n]{0,64}\))?\s+(?:(?:async|const|unsafe)\s+)*(?:fn|struct|enum|trait|type|const|static|mod)\s+[A-Za-z_]/g;
+const RE_CLI_SURFACE =
+	/#\[\s*(?:command|clap|arg)\s*[(\]]|derive\s*\([^)\n]{0,160}\b(?:Parser|Subcommand|Args)\b/g;
+
+interface KindFacts {
+	entryMacros: number;
+	pubItems: number;
+	sloc: number;
+}
+
+function kindFactsOf(rsBlobs: DepthBlob[]): KindFacts {
+	const f: KindFacts = { entryMacros: 0, pubItems: 0, sloc: 0 };
+	for (const b of rsBlobs) {
+		if (b.text == null || isTestPath(b.path)) continue;
+		const code = dropTestTail(stripCommentsAndStrings(b.text));
+		f.entryMacros += (code.match(RE_ENTRY_MACRO) ?? []).length;
+		f.pubItems +=
+			(code.match(RE_PUB_ITEM) ?? []).length +
+			(code.match(RE_CLI_SURFACE) ?? []).length;
+		f.sloc += code.split("\n").filter((l) => l.trim().length > 0).length;
+	}
+	return f;
+}
+
 // ── The v2 score ─────────────────────────────────────────────────────────────
 
 export interface CodeDepthResult {
@@ -465,13 +539,25 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	);
 
 	// Group .rs blobs by crate dir; score each crate; take MAX for depth terms.
+	// The contract terms read EVERY crate, exactly as they always have — that
+	// reading is the floor no repo loses. A crate that defines no contract
+	// (#[contract]/#[contractimpl] absent from its non-test code) is read a
+	// second time on library terms (see libraryTrack below), and the repo takes
+	// the better reading. Not a one-lens split on purpose: hoops-finance's
+	// depth is carried by a vendored rlib rewards manager whose auth-gated
+	// writes are real contract logic, and filing it as "a library" sank a
+	// DEEP-labelled protocol from 0.60 to 0.44 (2026-09-14).
 	const rs = input.blobs.filter((b) => b.path.toLowerCase().endsWith(".rs"));
 	const byCrate = new Map<string, DepthBlob[]>();
 	for (const b of rs) {
 		const key = crateDirOf(b.path);
 		(byCrate.get(key) ?? byCrate.set(key, []).get(key)!).push(b);
 	}
-	const crateFacts = [...byCrate.values()].map(crateFactsOf);
+	const crates = [...byCrate.values()];
+	const crateFacts = crates.map(crateFactsOf);
+	const libraryFacts = crates
+		.map(kindFactsOf)
+		.filter((kf) => kf.entryMacros === 0);
 	// repo-level shingle union (for clone check) + repo SLOC
 	const repoShingles = new Set<string>();
 	let repoSloc = 0;
@@ -562,43 +648,35 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		0.04 * Math.min(1, best.financialArith / 3) +
 		0.08 * deployedAddr;
 
-	// (C) penalties.
-	let penalty = 0;
+	// (C) penalties — writes-no-auth is a finding about the best CONTRACT crate;
+	// the throwaway window is about the repo and bounds both tracks.
+	let contractPenalty = 0;
 	if (best.writeSites > 0 && best.requireAuthCount === 0) {
-		penalty += 0.05;
+		contractPenalty += 0.05;
 		reasons.push("writes-no-auth");
 	}
+	let repoPenalty = 0;
 	if (input.scalars.singleAuthor && input.scalars.allCommitsWithin48h) {
-		penalty += 0.1;
+		repoPenalty += 0.1;
 		reasons.push("hackathon-throwaway");
 	}
 
-	let raw = clamp01(baseline + substance - penalty);
+	let contractRaw = clamp01(
+		baseline + substance - contractPenalty - repoPenalty,
+	);
 
-	// Example/tutorial cap — an examples repo's code is real but not an
-	// authoritative product; cap it below the 0.6 quality gate so it stays
-	// community-tier (findable) but not surfaced as canonical. Curated set = no
-	// over-filter risk; the name marker only fires on IMMATURE repos so a real
-	// released project named "*-demo" keeps full score.
-	const mature =
-		(input.scalars.releaseCount ?? 0) > 0 || (input.scalars.tagCount ?? 0) > 2;
-	if (isExampleRepo(input.fullName, input.scalars.topics, mature)) {
-		reasons.push("example-repo");
-		raw = Math.min(raw, 0.45);
-	}
-
-	// Tooling/SDK-usage cap — a crate can DEPEND on soroban-sdk (CLI, indexer,
-	// client codegen) and even contain contract-adjacent strings (require_auth
-	// in tx-building code, .storage() in ledger tooling) without BEING a
-	// contract; stellar-cli scored 0.50 from its own application logic this
-	// way. The discriminator tooling can't fake is the contract-macro FAMILY:
-	// zero #[contract]/#[contractimpl]/#[contracttype]/#[contracterror] across
-	// every analyzed .rs ⇒ demonstrably no contract code here ⇒ cap at the
-	// shallow-proof level (0.35, ~js-sdk tier). The family (not just entry
-	// macros) is deliberate: in module-split repos the tiny #[contract] entry
-	// file can fall below the top-N size cut while the big module files carry
-	// #[contracttype] DataKeys (blend does exactly this — entry-macros-only
-	// capping wrongly sank it to 0.35 in the calibration re-probe).
+	// Tooling/SDK-usage cap on the CONTRACT track — a crate can DEPEND on
+	// soroban-sdk (CLI, indexer, client codegen) and even contain
+	// contract-adjacent strings (require_auth in tx-building code, .storage()
+	// in ledger tooling) without BEING a contract; stellar-cli scored 0.50 from
+	// its own application logic this way. Zero #[contract]/#[contractimpl]/
+	// #[contracttype]/#[contracterror] across every analyzed .rs ⇒ demonstrably
+	// no contract code ⇒ the contract reading is capped at the shallow-proof
+	// level (0.35). The family (not just entry macros) is deliberate: in
+	// module-split repos the tiny #[contract] entry file can fall below the
+	// top-N size cut while the big module files carry #[contracttype] DataKeys
+	// (blend does exactly this). Tooling itself is no longer graded here — it
+	// scores on the library track below, which this cap does not touch.
 	const contractFamilyMacros = rs.reduce(
 		(n, b) =>
 			n +
@@ -608,12 +686,66 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	);
 	if (contractFamilyMacros === 0) {
 		reasons.push("no-contract-macros");
-		raw = Math.min(raw, 0.35);
+		contractRaw = Math.min(contractRaw, 0.35);
+	}
+
+	// (B') LIBRARY TRACK — a crate that defines no contract is also graded as
+	// what it is: a library or a tool. Its substance is the public API it exports
+	// (pub fn/struct/enum/trait/type/const/mod, plus a CLI's command tree), its
+	// code mass, its tests and its releases — none of which a hello-world can
+	// fake: a scaffold's helper crate exports a handful of items, ships no
+	// tag and carries one test. Fewer than 8 public items is not a library
+	// sample at all (a vendored script, a build helper) and earns nothing, so
+	// repo-level tests and tags can never carry a surface-less crate. Ceiling
+	// 0.6 + baseline: a broad, tested, released library reads ~0.7-0.8 — the
+	// same "substantial, not a scaffold" band the contract terms give a real
+	// protocol — without competing for the 1.0 a deployed protocol earns.
+	const libraryTrack = (kf: KindFacts) =>
+		kf.pubItems < 8
+			? 0
+			: 0.22 * Math.min(1, kf.pubItems / 80) +
+				0.1 * Math.min(1, Math.log(1 + kf.sloc) / Math.log(3001)) +
+				0.14 * testScore +
+				0.14 * releaseScore;
+	const librarySubstance = libraryFacts.reduce(
+		(acc, kf) => Math.max(acc, libraryTrack(kf)),
+		0,
+	);
+	const libraryRaw =
+		librarySubstance > 0
+			? clamp01(baseline + librarySubstance - repoPenalty)
+			: 0;
+	let libraryWins = libraryRaw > contractRaw;
+	// An IMMATURE fork's API surface belongs to its parent: it keeps whatever
+	// the contract terms read, never the library reading (the clone multiplier
+	// and fork-of-scaffold cap below stay in force for it). A fork that has cut
+	// its own releases is its own library.
+	const mature =
+		(input.scalars.releaseCount ?? 0) > 0 || (input.scalars.tagCount ?? 0) > 2;
+	if (libraryWins && input.scalars.isFork && !mature) {
+		reasons.push("fork:library-track-withheld");
+		libraryWins = false;
+	}
+	if (libraryWins) reasons.push("library-track");
+	let raw = libraryWins ? libraryRaw : contractRaw;
+
+	// Example/tutorial cap — an examples repo's code is real but not an
+	// authoritative product; cap it below the 0.6 quality gate so it stays
+	// community-tier (findable) but not surfaced as canonical. Curated set = no
+	// over-filter risk; the name marker only fires on IMMATURE repos so a real
+	// released project named "*-demo" keeps full score. Applies to whichever
+	// track won — an examples repo with a helper crate is still an examples repo.
+	if (isExampleRepo(input.fullName, input.scalars.topics, mature)) {
+		reasons.push("example-repo");
+		raw = Math.min(raw, 0.45);
 	}
 
 	// (D) CLONE MULTIPLIER — gated on EMPTINESS not similarity (review P8):
 	// a repo full of real non-trivial logic is immune even if it structurally
 	// resembles a template (SEP-41/OZ tokens legitimately share shape).
+	// Contract track only: it compares CONTRACT bodies to the canon scaffolds.
+	// A tool that vendors a hello-world as a fixture is not an empty clone —
+	// the library track is gated on its own surface instead.
 	const jRaw = jaccard(repoShingles, CANON_SCAFFOLD_SHINGLES);
 	const emptiness = 1 - Math.min(1, best.nonTrivialFns / 6);
 	const jEff = jRaw * emptiness;
@@ -642,10 +774,10 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	}
 
 	return {
-		codeDepth: raw * m,
+		codeDepth: libraryWins ? raw : raw * m,
 		baseline,
-		substance,
-		cloneMultiplier: m,
+		substance: libraryWins ? librarySubstance : substance,
+		cloneMultiplier: libraryWins ? 1 : m,
 		nonTrivialFns: best.nonTrivialFns,
 		contractCrates,
 		rustSloc: repoSloc,
