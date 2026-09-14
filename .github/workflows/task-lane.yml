@@ -1,0 +1,211 @@
+name: Task lane (one bounded unit of a track → one PR)
+# workflow-health: signal-steps: ^Verify the end state$
+# The four tracks that were still run by hand after the repair lane shipped
+# (2026-09-14) — knowledge-note waves, Stage-2 end-state claims, verification
+# packets, gap-matrix curation — on the repair lane's skeleton. One task per
+# weekday, ONE bounded unit per run: pick it from committed artifacts or the
+# public API (src/lib/task-lanes.ts, pure + tested), hand it to a headless
+# agent in a checkout that holds NO production secrets (packets need no
+# agent: scripts/data/verification-packets.ts is mechanical and read-only),
+# guard the diff against the task's ALLOWED file set, open a PR, record the
+# attempt on main, read it back. It never merges. A diff outside the allowed
+# set is `blocked` and opens no PR — the human gates stay human by
+# construction: `claims` may touch exactly one lane's workflow, nothing else
+# may touch .github/workflows/, improvements/lanes/, specs/, the collections.
+#
+# Trinary end state, asserted by the lane itself: `fixed` → the PR exists on
+# GitHub (read back); `skip` / `blocked` → the attempt is on main; an agent
+# that crashes or overspends → `error`, recorded, the run is red.
+on:
+  schedule:
+    - cron: "17 9 * * 2" # Tue → notes
+    - cron: "17 9 * * 3" # Wed → claims
+    - cron: "17 9 * * 4" # Thu → packets
+    - cron: "17 9 * * 5" # Fri → gap
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Which track to work"
+        required: true
+        type: choice
+        options: [notes, claims, packets, gap]
+      dry_run:
+        description: "Pick the unit and write the prompt (or the packet), run no agent, open no PR"
+        required: false
+        type: boolean
+        default: false
+      model:
+        description: "Model for the agent"
+        required: false
+        default: "claude-opus-5"
+      budget_usd:
+        description: "Hard spend cap for the agent run"
+        required: false
+        default: "8"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: task-lane
+  cancel-in-progress: false
+
+jobs:
+  task:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      - name: Resolve the task
+        id: task
+        run: |
+          T="${{ inputs.task }}"
+          [ -z "$T" ] && T=$(pnpm exec tsx scripts/lanes/task-lane.ts task-for "${{ github.event.schedule }}")
+          echo "task=$T" >> "$GITHUB_OUTPUT"; echo "task=$T"
+
+      - name: Pick one unit
+        id: pick
+        shell: bash
+        run: |
+          pnpm exec tsx scripts/lanes/task-lane.ts pick "${{ steps.task.outputs.task }}" | tee pick.log
+          if grep -q '^pick: none' pick.log; then echo "picked=" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "picked=$(jq -r .unit .repair/pick.json)" >> "$GITHUB_OUTPUT"
+          echo "slug=$(jq -r .slug .repair/pick.json)" >> "$GITHUB_OUTPUT"
+
+      - name: "Branch + prompt (packets: branch + commit)"
+        if: steps.pick.outputs.picked != ''
+        id: branch
+        run: |
+          T="${{ steps.task.outputs.task }}"
+          B="task/${{ steps.pick.outputs.slug }}-$(date -u +%Y%m%d-%H%M)"
+          git config user.name "stellarlight-task-lane"
+          git config user.email "task-lane@stellarlight.xyz"
+          git checkout -b "$B"
+          if [ "$T" = "packets" ]; then
+            git add improvements/quality/verification-packets-*
+            git commit -q -m "data(quality): $(jq -r .summary .repair/verdict.json)
+
+          Built unattended by the task lane from the public API and each project's own website (read-only). Every row is a proposal; the human decides.
+
+          Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+            git log -1 --stat | head -8
+          else
+            pnpm exec tsx scripts/lanes/task-lane.ts prompt "$B"
+            echo "── prompt head ──"; head -12 .repair/prompt.md
+          fi
+          echo "branch=$B" >> "$GITHUB_OUTPUT"
+
+      # The agent. Headless Claude Code with an ALLOWLIST of tools: read, edit,
+      # the gates, read-only curl and `gh api` GETs (notes read GitHub), commit.
+      # It cannot push, open PRs, run anything with --execute, or reach the DB —
+      # this job carries no DATABASE_URI / PAYLOAD_SECRET at all. GITHUB_TOKEN
+      # is the job's own repo-scoped token, for GitHub reads + the freshness
+      # detector; the PR is opened by the workflow, not the agent.
+      - name: Agent
+        if: steps.pick.outputs.picked != '' && steps.task.outputs.task != 'packets' && inputs.dry_run != true
+        id: agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+        run: |
+          set +e
+          npx -y @anthropic-ai/claude-code@2.1.247 -p "$(cat .repair/prompt.md)" \
+            --output-format json \
+            --model "${{ inputs.model || 'claude-opus-5' }}" \
+            --max-budget-usd "${{ inputs.budget_usd || '8' }}" \
+            --allowedTools "Read" "Edit" "Write" "Glob" "Grep" \
+              "Bash(npx vitest run:*)" "Bash(npx tsc:*)" "Bash(npx biome:*)" \
+              "Bash(pnpm exec tsx scripts/check-note-freshness.ts:*)" \
+              "Bash(pnpm exec tsx scripts/check-writer-conformance.ts:*)" \
+              "Bash(pnpm exec tsx scripts/check-scripts-types.ts:*)" \
+              "Bash(gh api:*)" "Bash(curl:*)" "Bash(base64:*)" \
+              "Bash(cat:*)" "Bash(ls:*)" "Bash(sed:*)" "Bash(grep:*)" "Bash(jq:*)" "Bash(head:*)" "Bash(tail:*)" "Bash(wc:*)" \
+              "Bash(git add:*)" "Bash(git commit:*)" "Bash(git diff:*)" "Bash(git status:*)" "Bash(git log:*)" \
+            --disallowedTools "Bash(git push:*)" "Bash(gh pr:*)" "Bash(gh repo:*)" "Bash(gh run:*)" "Bash(gh workflow:*)" "Bash(gh secret:*)" "Bash(gh api -X:*)" "Bash(gh api --method:*)" "Bash(pnpm exec tsx scripts/*:*--execute*)" \
+            > .repair/result.json 2> .repair/agent.err
+          code=$?
+          echo "exit=$code" ; tail -c 600 .repair/agent.err || true
+          jq -r '"cost_usd=\(.total_cost_usd // .cost_usd // "?") turns=\(.num_turns // "?") is_error=\(.is_error // false)"' .repair/result.json 2>/dev/null || echo "no JSON result"
+          echo "── verdict ──"; cat .repair/verdict.json 2>/dev/null || echo "(none written)"
+          exit $code
+
+      - name: Verdict → PR or record
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          T="${{ steps.task.outputs.task }}"
+          B="${{ steps.branch.outputs.branch }}"
+          outcome=$(jq -r '.outcome // "error"' .repair/verdict.json 2>/dev/null || echo error)
+          summary=$(jq -r '.summary // ""' .repair/verdict.json 2>/dev/null)
+          [ "${{ steps.agent.outcome }}" = "failure" ] && [ "$outcome" = "error" ] && summary="agent run failed: $(tail -c 300 .repair/agent.err | tr '\n' ' ')"
+          echo "outcome=$outcome — $summary"
+          pr_url=""
+          if [ "$outcome" = "fixed" ]; then
+            if ! pnpm exec tsx scripts/lanes/task-lane.ts diff-guard origin/main; then
+              outcome=blocked; summary="left the task's allowed file set — $summary"
+            elif [ -z "$(git log origin/main..HEAD --oneline)" ]; then
+              outcome=skip; summary="verdict fixed but nothing committed — $summary"
+            else
+              git push -u origin "$B"
+              {
+                echo "Task lane · \`$T\` · unit \`${{ steps.pick.outputs.picked }}\` · run ${{ github.run_id }}"
+                echo
+                cat .repair/pr-body.md 2>/dev/null || echo "(no pr-body.md was written)"
+                echo
+                echo "---"
+                if [ "$T" != "packets" ]; then echo "Agent: ${{ inputs.model || 'claude-opus-5' }} · $(jq -r '"cost \(.total_cost_usd // .cost_usd // "?") USD · \(.num_turns // "?") turns"' .repair/result.json 2>/dev/null)"; fi
+                echo "Unattended run; a human merges. Attempt recorded in improvements/lanes/task-attempts.json."
+                echo
+                echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+              } > .repair/pr.md
+              pr_url=$(gh pr create --base main --head "$B" --title "task($T): $summary" --body-file .repair/pr.md --label task-lane 2>&1 | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+              [ -z "$pr_url" ] && { outcome=error; summary="pushed $B but gh pr create returned no URL"; }
+            fi
+          fi
+          echo "TASK_OUTCOME=$outcome" >> "$GITHUB_ENV"
+          echo "TASK_PR_URL=$pr_url" >> "$GITHUB_ENV"
+          echo "TASK_SUMMARY=$summary" >> "$GITHUB_ENV"
+
+      - name: Record the attempt on main
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          git stash -u -q || true   # the branch's uncommitted scratch stays out of main
+          git checkout -q main && git pull -q --rebase origin main
+          git stash pop -q || true
+          git checkout -q -- improvements/quality 2>/dev/null || true   # a packet lives on its PR branch, not on main
+          pnpm exec tsx scripts/lanes/task-lane.ts record "$TASK_OUTCOME" "$TASK_SUMMARY"
+          git add improvements/lanes/task-attempts.json
+          git -c user.name=stellarlight-task-lane -c user.email=task-lane@stellarlight.xyz commit -q -m "chore(task-lane): ${{ steps.task.outputs.task }} ${{ steps.pick.outputs.picked }} → $TASK_OUTCOME [skip ci]" || { echo "nothing to record"; exit 0; }
+          git push origin HEAD:main
+
+      # END STATE (QUALITY.md §3): the lane reads back what it claims.
+      - name: Verify the end state
+        if: steps.pick.outputs.picked != '' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          echo "task=${{ steps.task.outputs.task }} unit=${{ steps.pick.outputs.picked }} outcome=$TASK_OUTCOME pr=${TASK_PR_URL:-none}"
+          git fetch -q origin main
+          git show origin/main:improvements/lanes/task-attempts.json | jq -e --arg u "${{ steps.pick.outputs.picked }}" --arg run "${{ github.run_id }}" '.attempts[] | select(.unit==$u and .run==$run)' > /dev/null \
+            || { echo "::error::the attempt did not land on main"; exit 1; }
+          if [ "$TASK_OUTCOME" = "fixed" ]; then
+            gh pr view "$TASK_PR_URL" --json number,state,headRefName --jq '"PR #\(.number) \(.state) \(.headRefName)"' || { echo "::error::verdict fixed but the PR cannot be read back"; exit 1; }
+          fi
+          if [ "$TASK_OUTCOME" = "error" ]; then echo "::error::the run ended in error — see the Agent step"; exit 1; fi
+          echo "end state holds: $TASK_OUTCOME recorded$( [ -n "$TASK_PR_URL" ] && echo ", $TASK_PR_URL open" )"
