@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-14T18:43:28.564Z",
+	"asOf": "2026-09-14T18:53:45.698Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 98,
 	"healthy": 97,
@@ -247,10 +247,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:31:18Z",
+			"lastSuccessAt": "2026-09-14T18:40:54Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -258,21 +258,21 @@
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-13T16:58:42Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-14T18:42:55Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 29,
-			"why": "last green 1d ago"
+			"runs": 30,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "contract-gate.yml",
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:40:54Z",
+			"lastSuccessAt": "2026-09-14T18:51:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 10,
+			"runs": 12,
 			"why": "last green 0d ago"
 		},
 		{
@@ -841,10 +841,10 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T17:40:37Z",
+			"lastSuccessAt": "2026-09-14T18:50:53Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 1,
+			"runs": 2,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1006,10 +1006,10 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T18:40:54Z",
+			"lastSuccessAt": "2026-09-14T18:51:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 94,
+			"runs": 96,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1086,7 +1086,7 @@
 			"lastSuccessAt": "2026-09-14T18:14:46Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 56,
+			"runs": 57,
 			"why": "last green 0d ago"
 		}
 	]
