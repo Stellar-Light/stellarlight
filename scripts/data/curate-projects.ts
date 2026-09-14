@@ -19,6 +19,7 @@ import {
 	parseGithubRepoRef,
 } from "../../src/lib/github-identity";
 import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
+import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
@@ -1375,8 +1376,11 @@ const VENUE_ROLE: Record<string, string> = {
  * end state the dedup lane writes — a duplicate is hidden, NEVER dead, and
  * Inactive is a death verdict) + a lifecycle note. Nothing is deleted, and a
  * shadow that already carries a human death verdict keeps it. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
- * the award sits on the stale-named record: awarded/rounds copy to the
- * canonical only when the canonical carries no award of its own. */
+ * the award sits on the stale-named record: the shadow's WHOLE SCF record
+ * moves into the canonical's empty award fields (fill-if-empty, citation
+ * atomic — see src/lib/scf-merge.ts). It copied three of nine fields until
+ * 2026-09-14, which left lulpay serving $58,000 with no round records and no
+ * source after the lul→lulpay merge. */
 const DUPE_MERGES: Array<{
 	dupe: string;
 	canonical: string;
@@ -3114,13 +3118,14 @@ async function main() {
 			cData.shortDescription = m.fill.shortDescription;
 		if (m.fill?.github && !canon.links?.github)
 			cData.links = { ...(canon.links ?? {}), github: m.fill.github };
-		if (m.copyScf && !canon.scf?.awarded && dupe.scf?.awarded) {
-			cData.scf = {
-				...(canon.scf ?? {}),
-				awarded: true,
-				totalAwarded: dupe.scf.totalAwarded ?? null,
-				awardedRounds: dupe.scf.awardedRounds ?? [],
-			};
+		if (m.copyScf) {
+			const moved = fillScfFromDupe(canon.scf, dupe.scf);
+			if (moved) {
+				cData.scf = moved.scf;
+				console.log(
+					`  ${m.canonical}: SCF record ← ${m.dupe} (${moved.filled.join(", ")})`,
+				);
+			}
 		}
 		if (Object.keys(cData).length) {
 			console.log(
