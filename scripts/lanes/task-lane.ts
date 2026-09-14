@@ -269,6 +269,8 @@ if (cmd === "prompt") {
 	const p = buildTaskPrompt(current.task, current.unit, current.payload, {
 		branch: rest[0] ?? "task/unknown",
 		date: today,
+		// GITHUB_TOKEN cannot push a workflow file; only a LANE_PAT can
+		workflowsPushable: process.env.LANE_WORKFLOWS_PUSHABLE === "true",
 	});
 	writeFileSync(join(SCRATCH, "prompt.md"), p);
 	console.log(`prompt: ${p.length} chars → .repair/prompt.md`);

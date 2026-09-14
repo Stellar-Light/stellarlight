@@ -51,7 +51,13 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
+          # LANE_PAT (optional; fine-grained, contents + pull-requests + workflows: write)
+          # lets the lane open its own PRs and push a workflow edit. GITHUB_TOKEN can do
+          # neither (2026-09-14: three runs pushed a branch and could not open the PR;
+          # one was refused for carrying a stale workflow file).
+          token: ${{ secrets.LANE_PAT || github.token }}
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
       - uses: actions/setup-node@v4
@@ -124,7 +130,7 @@ jobs:
       - name: Verdict → PR or record
         if: steps.pick.outputs.picked != '' && inputs.dry_run != true
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.LANE_PAT || github.token }}
         run: |
           set +e
           B="${{ steps.branch.outputs.branch }}"
@@ -139,33 +145,44 @@ jobs:
             elif [ -z "$(git log origin/main..HEAD --oneline)" ]; then
               outcome=skip; summary="verdict fixed but nothing committed — $summary"
             else
-              git push -u origin "$B"
-              {
-                echo "Repair lane · ledger row \`${{ steps.pick.outputs.picked }}\` · run ${{ github.run_id }}"
-                echo
-                cat .repair/pr-body.md 2>/dev/null || echo "(the agent left no pr-body.md)"
-                echo
-                echo "---"
-                echo "Agent: ${{ inputs.model || 'claude-opus-5' }} · $(jq -r '"cost \(.total_cost_usd // .cost_usd // "?") USD · \(.num_turns // "?") turns"' .repair/result.json 2>/dev/null)"
-                echo "Unattended run; a human merges. The row closes by re-detection after merge (improvements/waves/ledger)."
-                echo
-                echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
-              } > .repair/pr.md
-              # the label is repo config; a lane must not lose a fixed row to a missing one
-              # (2026-09-14: the repair lane's first real fix ended `error` exactly so)
-              pr_out=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md --label repair-lane 2>&1) || true
-              pr_url=$(echo "$pr_out" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
-              if [ -z "$pr_url" ]; then
-                echo "gh pr create (with label): $(echo "$pr_out" | tail -2 | tr '\n' ' ')"
-                pr_out=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md 2>&1) || true
+              # a branch cut before the newest merge carries a stale workflow file, and
+              # pushing that reads as "update a workflow" — refused without `workflows`
+              # permission (the notes run, 18:20Z 2026-09-14, lost 25 notes this way)
+              git fetch -q origin main
+              if ! git rebase -q origin/main; then
+                git rebase --abort 2>/dev/null; outcome=blocked; summary="does not rebase onto current main — $summary"
+              elif ! git push -u origin "$B" 2> .repair/push.err; then
+                outcome=error; summary="push rejected: $(tail -1 .repair/push.err | cut -c1-200)"; tail -3 .repair/push.err
+              else
+                {
+                  echo "Repair lane · ledger row \`${{ steps.pick.outputs.picked }}\` · run ${{ github.run_id }}"
+                  echo
+                  cat .repair/pr-body.md 2>/dev/null || echo "(the agent left no pr-body.md)"
+                  echo
+                  echo "---"
+                  echo "Agent: ${{ inputs.model || 'claude-opus-5' }} · $(jq -r '"cost \(.total_cost_usd // .cost_usd // "?") USD · \(.num_turns // "?") turns"' .repair/result.json 2>/dev/null)"
+                  echo "Unattended run; a human merges. The row closes by re-detection after merge (improvements/waves/ledger)."
+                  echo
+                  echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+                } > .repair/pr.md
+                # the label is repo config; a lane must not lose a fixed row to a missing one
+                # (2026-09-14: the repair lane's first real fix ended `error` exactly so)
+                pr_out=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md --label repair-lane 2>&1) || true
                 pr_url=$(echo "$pr_out" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+                if [ -z "$pr_url" ]; then
+                  echo "gh pr create (with label): $(echo "$pr_out" | tail -2 | tr '\n' ' ')"
+                  pr_out=$(gh pr create --base main --head "$B" --title "repair: $summary" --body-file .repair/pr.md 2>&1) || true
+                  pr_url=$(echo "$pr_out" | grep -oE 'https://github.com/[^ ]+/pull/[0-9]+' || true)
+                fi
+                # the failure names itself (2026-09-14: two runs recorded "returned no URL" for
+                # "GitHub Actions is not permitted to create or approve pull requests" — a repo
+                # setting, Settings → Actions → General; the branch is pushed, a human can open it)
+                [ -z "$pr_url" ] && { outcome=error; summary="pushed $B; gh pr create failed: $(echo "$pr_out" | tail -1 | cut -c1-160)"; }
               fi
-              # the failure names itself (2026-09-14: two runs recorded "returned no URL" for
-              # "GitHub Actions is not permitted to create or approve pull requests" — a repo
-              # setting, Settings → Actions → General; the branch is pushed, a human can open it)
-              [ -z "$pr_url" ] && { outcome=error; summary="pushed $B; gh pr create failed: $(echo "$pr_out" | tail -1 | cut -c1-160)"; }
             fi
           fi
+          # the work must survive the lane's own failure: the patch rides the run artifact
+          [ "$outcome" = "error" ] && git format-patch origin/main --stdout > .repair/work.patch 2>/dev/null
           echo "REPAIR_OUTCOME=$outcome" >> "$GITHUB_ENV"
           echo "REPAIR_PR_URL=$pr_url" >> "$GITHUB_ENV"
           echo "REPAIR_SUMMARY=$summary" >> "$GITHUB_ENV"
@@ -201,3 +218,15 @@ jobs:
           fi
           if [ "$REPAIR_OUTCOME" = "error" ]; then echo "::error::the agent run ended in error — see the Agent step"; exit 1; fi
           echo "end state holds: $REPAIR_OUTCOME recorded$( [ -n "$REPAIR_PR_URL" ] && echo ", $REPAIR_PR_URL open" )"
+
+      # Everything under .repair/ (prompt, verdict, pr-body, the agent's patch when
+      # the push or the PR failed) is kept 14 days, so a human can open the PR from
+      # the artifact instead of paying for the run again.
+      - name: Keep the run's scratch as an artifact
+        if: always() && steps.pick.outputs.picked != '' && inputs.dry_run != true
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-lane-${{ github.run_id }}
+          path: .repair/
+          if-no-files-found: ignore
+          retention-days: 14
