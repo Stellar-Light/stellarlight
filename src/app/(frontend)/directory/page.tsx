@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { DirectoryFilters } from "@/components/directory-filters";
 import DirectoryProjectsGrid, {
 	DirectoryProjectsGridSkeleton,
 } from "@/components/directory-projects-grid";
+import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 
 export const metadata: Metadata = {
 	title: "Stellar Projects Directory",
@@ -54,6 +56,22 @@ export default async function DirectoryPage({
 				<div className="mb-8">
 					<DirectoryFilters />
 				</div>
+
+				{/* Category links. The filter control writes ?type=, which is a
+				    poor ranking target and a URL nobody shares; these are the
+				    same slices as real pages, and they are how a crawler finds
+				    them at all. */}
+				<nav className="mb-10 flex flex-wrap gap-2" aria-label="Categories">
+					{DIRECTORY_CATEGORIES.map((c) => (
+						<Link
+							key={c.slug}
+							href={`/directory/${c.slug}`}
+							className="text-xs px-3 py-1.5 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+						>
+							{c.heading}
+						</Link>
+					))}
+				</nav>
 
 				{/* Projects Grid — key forces skeleton to show immediately on param change */}
 				<Suspense

@@ -15,6 +15,13 @@ interface DirectoryProjectsGridProps {
 	sortOption?: string;
 	page: number;
 	limit: number;
+	/** Where pagination links point. /directory by default; a category page
+	 *  passes its own path so page 2 stays on that URL instead of bouncing the
+	 *  reader (and the crawler) back to the unfiltered list. */
+	basePath?: string;
+	/** ItemList name for this render — the category heading on a category
+	 *  page, so the markup names the same slice the h1 does. */
+	listName?: string;
 }
 
 /** Map sort option to Payload sort string */
@@ -80,6 +87,8 @@ export default async function DirectoryProjectsGrid({
 	sortOption = "featured",
 	page,
 	limit,
+	basePath = "/directory",
+	listName = "Stellar Projects Directory",
 }: DirectoryProjectsGridProps) {
 	const payload = await getPayloadSafe();
 
@@ -162,8 +171,8 @@ export default async function DirectoryProjectsGrid({
 					__html: JSON.stringify(
 						graph([
 							itemListNode(getAppUrl(), {
-								path: "/directory",
-								name: "Stellar Projects Directory",
+								path: basePath,
+								name: listName,
 								items: result.docs.map((p: any) => ({
 									name: String(p.name ?? p.slug),
 									url: `/project/${p.slug}`,
@@ -194,7 +203,7 @@ export default async function DirectoryProjectsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}
+								href={`${basePath}?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}
 							>
 								<ChevronLeft className="h-3.5 w-3.5" />
 								Previous
@@ -224,7 +233,7 @@ export default async function DirectoryProjectsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}
+								href={`${basePath}?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}
 							>
 								Next
 								<ChevronRight className="h-3.5 w-3.5" />
