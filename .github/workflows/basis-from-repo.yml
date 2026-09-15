@@ -9,6 +9,12 @@ name: Award repo-activity basis (manual)
 # demoted. Dry-run by default.
 
 on:
+  # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
+  # waited on somebody pressing a button — the code scan re-reads repos every two hours; this turns a recent commit into a status basis.
+  # Dry-run dispatches on 2026-09-15 found work waiting in two of the four
+  # lanes in this family after 8-11 days idle.
+  schedule:
+    - cron: "30 9 * * 2"
   workflow_dispatch:
     inputs:
       execute:
@@ -36,4 +42,4 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Award (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/basis-from-repo.ts ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/basis-from-repo.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

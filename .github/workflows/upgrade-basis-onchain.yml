@@ -4,6 +4,12 @@ name: Upgrade status basis from on-chain evidence (manual)
 # statusBasis=onchain-activity. Dry-run by default; execute=true writes.
 # Never changes status; never touches strong bases; refuses stale evidence.
 on:
+  # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
+  # waited on somebody pressing a button — on-chain readings refresh on their own lane; this turns them into a status basis.
+  # Dry-run dispatches on 2026-09-15 found work waiting in two of the four
+  # lanes in this family after 8-11 days idle.
+  schedule:
+    - cron: "0 9 * * 2"
   workflow_dispatch:
     inputs:
       execute: { description: "Write to DB? Leave false for a dry run.", type: boolean, default: false }
@@ -22,4 +28,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/data/upgrade-basis-onchain.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/upgrade-basis-onchain.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
