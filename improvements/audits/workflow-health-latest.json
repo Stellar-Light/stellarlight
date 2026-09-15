@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-15T03:28:20.895Z",
+	"asOf": "2026-09-15T04:55:19.743Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 94,
-	"healthy": 94,
+	"checked": 93,
+	"healthy": 93,
 	"broken": [],
 	"rows": [
 		{
@@ -160,26 +160,15 @@
 			"why": "last green 7d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "basis-from-deployment.yml",
-			"name": "Propagate deployment basis to status (manual)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-09-07T01:05:09Z",
-			"ageDays": 8,
-			"graceDays": 45,
-			"runs": 4,
-			"why": "last green 8d ago (manual tool — age not judged)"
-		},
-		{
 			"file": "basis-from-onchain.yml",
 			"name": "Award onchain-activity basis (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T22:51:25Z",
-			"ageDays": 9,
+			"lastSuccessAt": "2026-09-15T04:51:37Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 12,
-			"why": "last green 9d ago (manual tool — age not judged)"
+			"runs": 13,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -197,11 +186,11 @@
 			"name": "Award repo-activity basis (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-04T03:45:51Z",
-			"ageDays": 10,
+			"lastSuccessAt": "2026-09-15T04:51:41Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 2,
-			"why": "last green 10d ago (manual tool — age not judged)"
+			"runs": 3,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -230,10 +219,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T03:22:39Z",
+			"lastSuccessAt": "2026-09-15T04:49:24Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -252,10 +241,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T03:25:55Z",
+			"lastSuccessAt": "2026-09-15T04:50:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 60,
+			"runs": 67,
 			"why": "last green 0d ago"
 		},
 		{
@@ -319,10 +308,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T04:04:32Z",
-			"ageDays": 17,
+			"ageDays": 18,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 17d ago (manual tool — age not judged)"
+			"why": "last green 18d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "deepwiki-calibrate.yml",
@@ -330,10 +319,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T04:05:47Z",
-			"ageDays": 14,
+			"ageDays": 15,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 14d ago (manual tool — age not judged)"
+			"why": "last green 15d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "depth-eval.yml",
@@ -616,10 +605,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-05T04:18:43Z",
-			"ageDays": 71,
+			"ageDays": 72,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 71d ago (manual tool — age not judged)"
+			"why": "last green 72d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "migrate-research-url-host.yml",
@@ -637,7 +626,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T03:22:39Z",
+			"lastSuccessAt": "2026-09-15T04:46:16Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -869,10 +858,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-29T03:29:14Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "self-audit.yml",
@@ -967,7 +956,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T03:25:55Z",
+			"lastSuccessAt": "2026-09-15T04:53:09Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -978,11 +967,11 @@
 			"name": "Upgrade status basis from on-chain evidence (manual)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-05T05:48:36Z",
-			"ageDays": 9,
+			"lastSuccessAt": "2026-09-15T04:51:43Z",
+			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 11,
-			"why": "last green 9d ago (manual tool — age not judged)"
+			"runs": 12,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -1033,10 +1022,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:57:18Z",
+			"lastSuccessAt": "2026-09-15T03:25:55Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 62,
+			"runs": 63,
 			"why": "last green 0d ago"
 		}
 	]
