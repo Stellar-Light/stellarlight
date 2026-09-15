@@ -16,7 +16,8 @@
  * that cries wolf wastes review time — precision over recall, class 13).
  */
 import { writeFileSync } from "node:fs";
-import { parseRoundVerdicts } from "./scf-official";
+import { registrableDomain } from "../../src/lib/partner-project-identity";
+import { isThirdPartyLink, parseRoundVerdicts } from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -278,15 +279,19 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 				// site is not reliably the first link in the RSC payload (decks,
 				// forms and secondary links precede it on several pages). The
 				// domain-intersection downstream is unordered anyway.
+				//
+				// Which is why the exclusion list has to hold every THIRD-PARTY
+				// SERVICE a project merely uses. Casting the net over all links
+				// means one stray link decides identity: minisend-7tt links a
+				// Dune dashboard and matched our `dune` row; the BWB submission
+				// links a beacons.ai bio and matched `noticias-trading`. Both
+				// projects are genuinely absent from the directory (checked by
+				// name and by domain on 2026-09-14) and both were being reported
+				// as served — a false match does not merely mislabel a row, it
+				// deletes a real gap from the list. Dashboards, link-in-bio
+				// hosts and event pages belong here beside the socials.
 				e.websites = [
-					...new Set(
-						links.filter(
-							(u) =>
-								!/stellar\.org|stellar\.expert|twitter\.com|\/\/x\.com|\/\/www\.x\.com|linkedin\.com|discord|t\.me|medium\.com|docs\.google|airtable|notion\.so|vercel\.app\/api|fonts\.|cdn\.|googleapis|gstatic|cloudfront|w3\.org|sanity\.io|googletagmanager|visualwebsiteoptimizer|gitbook\.io|schema\.org|sentry|segment\.|hotjar|plausible|posthog|apple\.com|play\.google|google\.com|dappradar|defillama|coinmarketcap|coingecko|crunchbase|producthunt|typeform|calendly|mailchimp|substack/i.test(
-									u,
-								),
-						),
-					),
+					...new Set(links.filter((u) => !isThirdPartyLink(u))),
 				].slice(0, 12);
 				e.website = e.websites[0] ?? null;
 			} catch {
@@ -403,8 +408,14 @@ async function main() {
 				)
 			)
 				return h;
-			const parts = h.split(".");
-			return parts.length <= 2 ? h : parts.slice(-2).join(".");
+			// MULTI-LABEL PUBLIC SUFFIXES. This used to be `parts.slice(-2)`,
+			// which turns bwbi.com.br into "com.br" — not a domain but a public
+			// suffix every Brazilian company shares, so the BWB submission
+			// domain-matched our unrelated `mbrl` row and its genuine absence
+			// vanished from the list. src/lib/partner-project-identity.ts
+			// already solved this (com.br is in its suffix set); use that one
+			// helper so a new ccTLD only has to be added in one place.
+			return registrableDomain(h) || h;
 		} catch {
 			return null;
 		}
