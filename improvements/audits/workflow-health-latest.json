@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-15T02:31:23.190Z",
+	"asOf": "2026-09-15T02:59:16.289Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 95,
 	"healthy": 95,
@@ -230,10 +230,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T01:41:40Z",
+			"lastSuccessAt": "2026-09-15T02:53:59Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -252,10 +252,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:29:10Z",
+			"lastSuccessAt": "2026-09-15T02:57:19Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 50,
+			"runs": 52,
 			"why": "last green 0d ago"
 		},
 		{
@@ -428,10 +428,10 @@
 			"name": "Enrich repos (code-reference index)",
 			"cron": "0 8 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:01:13Z",
+			"lastSuccessAt": "2026-09-15T02:06:21Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 25,
+			"runs": 26,
 			"why": "last green 0d ago"
 		},
 		{
@@ -648,7 +648,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T01:34:09Z",
+			"lastSuccessAt": "2026-09-15T02:53:59Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -978,7 +978,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:29:10Z",
+			"lastSuccessAt": "2026-09-15T02:57:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1044,10 +1044,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:16:19Z",
+			"lastSuccessAt": "2026-09-15T02:29:10Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 60,
+			"runs": 61,
 			"why": "last green 0d ago"
 		}
 	]
