@@ -79,8 +79,14 @@ interface DriftReport {
 	catalogOps: string[] | null;
 	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
-	/** In the sandbox but not surfaced by the discovery sweep — ours to fix. */
+	/** In the CATALOG (an exact-name query id-matches it) but not surfaced by
+	 *  the discovery sweep — our routing words are the gap, ours to fix. */
 	undiscoverable: string[];
+	/** Callable in the sandbox but with NO catalog entry: an exact-name query
+	 *  returns only neighbours. No wording of ours can surface an op the index
+	 *  does not hold, so an agent that does not already know the name cannot
+	 *  find it. Theirs to index, once past the re-baseline grace window. */
+	uncataloged: string[];
 	/** Absent but recently shipped — expected re-baseline lag, warn only. */
 	laggingInCatalog: { op: string; addedAt: string; ageDays: number }[];
 	extraInCatalog: string[];
@@ -201,7 +207,8 @@ async function expectedFromSpec(): Promise<{
 			// because this list included it.
 			const sideEffecting =
 				op && typeof op === "object"
-					? (op as { "x-side-effecting"?: boolean })["x-side-effecting"] === true
+					? (op as { "x-side-effecting"?: boolean })["x-side-effecting"] ===
+						true
 					: false;
 			if (id && !CATALOG_EXCLUDED.has(id) && !sideEffecting) {
 				ops.push(id);
@@ -221,6 +228,8 @@ async function catalogOps(specOps: string[]): Promise<{
 	/** Ops the vocabulary sweep missed that the sandbox still exposes — our
 	 *  discoverability gap, never their absence. */
 	callableButUndiscovered: string[];
+	/** Of the suspects, the ones the catalog actually holds an entry for. */
+	cataloguedSuspects: string[];
 	claimed: number | null;
 	auditRouted: boolean | null;
 }> {
@@ -273,6 +282,15 @@ async function catalogOps(specOps: string[]): Promise<{
 	// callable-but-undiscoverable is OUR routing vocabulary, not their catalog.
 	const suspect = specOps.filter((o: string) => !discovered.includes(o));
 	let callable: string[] = [];
+	// Which suspects the catalog actually HOLDS. A catalogued op id-matches its
+	// own name hard — listAudits scores 451 for the query "listAudits" — while
+	// an op with no entry returns only neighbours at ~150. That difference is
+	// what separates "our words do not reach it" from "their index does not
+	// have it", and the two have different owners. Measured 2026-09-15:
+	// getRwaAssets, getQualityReport and verifyClaim were all callable in the
+	// sandbox and all returned zero self-hits, so every wording fix on our side
+	// would have been wasted work.
+	let catalogued: string[] = [];
 	if (suspect.length) {
 		const probe = `const names = ${JSON.stringify(suspect)}; return names.filter(n => typeof scout[n] === "function");`;
 		try {
@@ -282,14 +300,34 @@ async function catalogOps(specOps: string[]): Promise<{
 			});
 			const t: string = res?.result?.content?.[0]?.text ?? "[]";
 			const start = t.indexOf("[");
-			callable = start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
+			callable =
+				start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
 		} catch {
 			callable = [];
+		}
+	}
+	if (suspect.length) {
+		const selfHit = `const names = ${JSON.stringify(suspect)}; const out = []; for (const n of names) { const r = await codemode.search(n, { service: "scout", limit: 5 }); if ((r.hits ?? []).some(h => h.id === "scout." + n)) out.push(n); } return out;`;
+		try {
+			const res = await rpc("tools/call", {
+				name: "execute",
+				arguments: { code: selfHit },
+			});
+			const t: string = res?.result?.content?.[0]?.text ?? "[]";
+			const start = t.indexOf("[");
+			catalogued =
+				start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
+		} catch {
+			// Probe failed → claim nothing. Every suspect stays in the
+			// vocabulary bucket, which is the conservative attribution: it
+			// blames us, not them.
+			catalogued = suspect;
 		}
 	}
 	return {
 		ops: discovered,
 		callableButUndiscovered: callable,
+		cataloguedSuspects: catalogued,
 		claimed,
 		auditRouted,
 	};
@@ -310,6 +348,7 @@ async function main() {
 		catalogOps: null,
 		missingFromCatalog: [],
 		undiscoverable: [],
+		uncataloged: [],
 		laggingInCatalog: [],
 		extraInCatalog: [],
 		claimedOpCount: null,
@@ -349,10 +388,15 @@ async function main() {
 			if (addedAt && ageDays !== null && ageDays <= GRACE_DAYS) {
 				report.laggingInCatalog.push({ op, addedAt, ageDays });
 			} else if (cat.callableButUndiscovered.includes(op)) {
-				// Present in the sandbox, unreachable by our discovery
-				// vocabulary. That is our routing text to fix, not their
-				// catalog to chase.
-				report.undiscoverable.push(op);
+				// Present in the sandbox. Which half of the fix is ours depends
+				// on whether the CATALOG holds an entry at all.
+				if (cat.cataloguedSuspects.includes(op)) {
+					// Indexed, just not reached by our words — our routing text.
+					report.undiscoverable.push(op);
+				} else {
+					// No entry to rank. Nothing we write can surface it.
+					report.uncataloged.push(op);
+				}
 			} else {
 				report.missingFromCatalog.push(op);
 			}
@@ -368,6 +412,10 @@ async function main() {
 		for (const u of report.undiscoverable)
 			console.log(
 				`  ⚠ callable but undiscovered: ${u} — scout.${u} exists in the sandbox; our own discovery vocabulary does not reach it (OUR fix, not theirs)`,
+			);
+		for (const u of report.uncataloged)
+			console.log(
+				`  ⚠ callable but UNCATALOGED: ${u} — scout.${u} runs in the sandbox, but an exact-name query returns no entry for it, so no agent using codemode.search can discover it and no wording of ours can change that (THEIR index, past grace)`,
 			);
 		for (const m of report.missingFromCatalog)
 			console.log(`  ✗ missing beyond grace: ${m}`);
