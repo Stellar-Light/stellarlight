@@ -248,6 +248,11 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 	// every deploy, so their evidence is the build that produced this page, and
 	// dating them to the build is the accurate reading, not a freshness dodge.
 	const BUILD_STAMP = now.toISOString();
+	// How many of the SCF absences SCF actually AWARDED, read from the
+	// submission cards rather than inferred from a round badge. null on
+	// artifacts written before the field existed.
+	const scfAbsentAwarded =
+		(coverageGaps.scf as { absentAwarded?: number }).absentAwarded ?? null;
 
 	return [
 		// SCF membership cross-check, data-truth vs communityfund.stellar.org.
@@ -565,14 +570,19 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 		g({
 			key: "scf-coverage",
 			title: "SCF-funded projects served",
+			// "round-badged, so provably funded" used to stand here. A badge is a
+			// round ENTERED: detail pages badge lost rounds too (blockroll #30,
+			// smilepay #31/#32/#35 are all "Not Awarded"). Award status is read
+			// off the submission cards now, so the promise can cite the thing
+			// that actually proves funding.
 			promise:
-				"Every SCF-funded project (round-badged, so provably funded) is in the directory an agent searches.",
+				"Every SCF-funded project is in the directory an agent searches, with funding read from SCF's own submission records.",
 			measure: {
 				value: coverageGaps.scf.served,
 				of: coverageGaps.scf.total,
 				unit: "projects",
 			},
-			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served — ${coverageGaps.scf.absent} absent, all carrying a funding-round badge`,
+			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served — ${coverageGaps.scf.absent} absent${scfAbsentAwarded === null ? "" : scfAbsentAwarded === coverageGaps.scf.absent ? ", every one an SCF awardee" : `, ${scfAbsentAwarded} of them SCF awardees`}`,
 			details: [
 				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
 				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,

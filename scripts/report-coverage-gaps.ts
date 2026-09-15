@@ -447,7 +447,7 @@ async function main() {
 	// own threshold, so the floor must not silence it.
 	const scfAbsentSet = new Set<string>(
 		(Array.isArray((scf as { absentSlugs?: unknown }).absentSlugs)
-			? ((scf as { absentSlugs: string[] }).absentSlugs)
+			? (scf as { absentSlugs: string[] }).absentSlugs
 			: []
 		).map((s) => s.toLowerCase().replace(/[^a-z0-9]/g, "")),
 	);
@@ -467,7 +467,12 @@ async function main() {
 		/** Below DefiLlama's TVL floor AND on the SCF absent list — two rosters
 		 *  agree we are missing it, so neither lane's threshold should hide it. */
 		corroboratedAbsent: corroborated.map(
-			(m: { name: string; slug: string; stellarTvlUSD: number; url: string | null }) => ({
+			(m: {
+				name: string;
+				slug: string;
+				stellarTvlUSD: number;
+				url: string | null;
+			}) => ({
 				name: m.name,
 				slug: m.slug,
 				stellarTvlUSD: m.stellarTvlUSD,
@@ -477,6 +482,10 @@ async function main() {
 		summary: {
 			missingDefillama: defillama.missing.length,
 			missingScf: typeof scf.absent === "number" ? scf.absent : null,
+			// The roster counts every SUBMISSION, so `missingScf` alone
+			// overstates the gap — carry the awarded split beside it.
+			missingScfAwarded:
+				typeof scf.absentAwarded === "number" ? scf.absentAwarded : null,
 			partnerDocsWithoutOwnContent: partnerDocs.filter(
 				(p) => p.verdict !== "own",
 			).length,
@@ -521,7 +530,7 @@ async function main() {
 		);
 
 	console.log(
-		`\n## SCF roster: ${scf.absent ?? "?"} unmatched (${scf.absentWithRoundBadge ?? "?"} with award badge)${scf.error ? ` - lane error: ${scf.error}` : ""}\n`,
+		`\n## SCF roster: ${scf.absent ?? "?"} unmatched — ${scf.absentAwarded ?? "?"} awarded (the coverage gap), ${scf.absentSubmittedOnly ?? "?"} applied without winning${scf.error ? ` - lane error: ${scf.error}` : ""}\n`,
 	);
 
 	if (corroborated.length) {

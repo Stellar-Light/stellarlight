@@ -16,6 +16,7 @@
  * that cries wolf wastes review time — precision over recall, class 13).
  */
 import { writeFileSync } from "node:fs";
+import { parseRoundVerdicts } from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -52,7 +53,15 @@ const GENERIC = new Set([
 interface ScfEntry {
 	scfSlug: string;
 	base: string;
+	/** AWARDED numeric rounds only (see enrichRounds). */
 	rounds: string[];
+	/** Rounds this project entered and did NOT win — carried so the absence
+	 *  list stays triageable: a rejected applicant is not a coverage gap. */
+	notAwardedRounds?: string[];
+	/** True when ANY submission is Awarded, including awards SCF does not
+	 *  number (Liquidity/Public Goods/Kickstart). `rounds` alone would file
+	 *  those funded projects as unfunded. */
+	awardedAny?: boolean;
 	url: string;
 	website?: string | null;
 	websites?: string[];
@@ -90,7 +99,12 @@ async function fetchScfEntries(): Promise<ScfEntry[]> {
 }
 
 async function fetchDirectory(): Promise<
-	Array<{ slug: string; name: string; aliases: string[]; website: string | null }>
+	Array<{
+		slug: string;
+		name: string;
+		aliases: string[];
+		website: string | null;
+	}>
 > {
 	let cats: string[] = [];
 	try {
@@ -194,10 +208,27 @@ function matches(
 }
 
 /**
- * Round badges render only on DETAIL pages, not the listing grid — fetched
- * ONLY for the unmatched set (bounded: the absence list, not all 547), so
- * award status separates "awardee we're missing" from "submission that went
- * nowhere".
+ * Award status is read from the DETAIL page, fetched ONLY for the unmatched
+ * set (bounded: the absence list, not all 547), so award status separates
+ * "awardee we're missing" from "submission that went nowhere".
+ *
+ * A BADGE IS A ROUND ENTERED, NOT A ROUND WON. This pass used to set `rounds`
+ * from every `SCF #<n>` string on the page. A detail page badges each round
+ * the project ever entered, including the ones it lost: on a 20-page random
+ * sample of the roster, 8 pages carried a badge for a round explicitly marked
+ * "Not Awarded" or "Prescreen Failed" (blockroll #30, crebit #44, dolphinze
+ * #38, liquid #41, lumexo #40, smilepay #31/#32/#35, stallion #38). Publishing
+ * those numbers as award rounds credits a project with funding it did not get
+ * — the same overstatement scf-rounds-guard already polices on directory rows.
+ *
+ * It does NOT follow that a badged project is unfunded. Every project on the
+ * roster sampled so far carries the page's own `"awarded":true`, and a card
+ * sitting in "Information Collection" or "Panel Review" is a DISBURSEMENT
+ * stage after the award, not a pending verdict. Award status therefore comes
+ * from parseRoundVerdicts (scripts/eval/scf-official.ts) — the same parser the
+ * membership crosscheck uses, with the negative vocabulary, the partial-award
+ * "Awarded (50%)" case, the double-embed dedupe, and the page-counter
+ * reconciliation that reads the page's own summary — never from page text.
  */
 async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 	let idx = 0;
@@ -212,9 +243,19 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 				});
 				if (!res.ok) continue;
 				const html = await res.text();
-				e.rounds = [
-					...new Set([...html.matchAll(/SCF\s*#(\d+)/g)].map((m) => m[1])),
-				];
+				const verdicts = parseRoundVerdicts(html);
+				e.rounds = [...verdicts.awarded];
+				e.notAwardedRounds = [...verdicts.notAwarded];
+				// BOTH halves are needed. `awarded` holds numbered rounds,
+				// including ones the parser reconciles from the page's own
+				// awarded/lastAwardedRound/totalAwarded summary when the card
+				// still sits in a post-award pipeline status. `awardedAnyCount`
+				// catches awards SCF does not number (Public Goods, Liquidity,
+				// Kickstart), which land in no round set at all. Testing only
+				// the count filed 7 of the 8 standing absences as unfunded when
+				// every one of them is an awardee.
+				e.awardedAny =
+					verdicts.awarded.size > 0 || verdicts.awardedAnyCount > 0;
 				// The submission's own website link, for the domain-equality pass.
 				// First external http(s) link that is not an SCF/social/platform
 				// domain — the page's product-website field renders as exactly that.
@@ -227,7 +268,11 @@ async function enrichRounds(entries: ScfEntry[]): Promise<void> {
 				const unescaped = html
 					.replace(/\\u002[fF]/g, "/")
 					.replace(/\\\//g, "/");
-				const links = [...unescaped.matchAll(/https?:\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s\\"'<)]*/gi)].map((m) => m[0]);
+				const links = [
+					...unescaped.matchAll(
+						/https?:\/\/[a-z0-9.-]+\.[a-z]{2,}[^\s\\"'<)]*/gi,
+					),
+				].map((m) => m[0]);
 				// ALL surviving external links, not the first. The first-pick
 				// version matched 7 of ~14 known-duplicate pages: the product
 				// site is not reliably the first link in the RSC payload (decks,
@@ -280,7 +325,8 @@ const REVIEWED_ABSENT: Record<
 		evidence: "https://www.enerdao.org/ up, repo silent — review's own verdict",
 	},
 	"soroban-contract-source-verification-service-bax": {
-		verdict: "served under stellar-expert — the RFP's deliverable is StellarExpert's contract source validation",
+		verdict:
+			"served under stellar-expert — the RFP's deliverable is StellarExpert's contract source validation",
 		evidence:
 			"stellar-expert/soroban-build-workflow (the reproducible-build verification pipeline behind stellar.expert's verified-contract badges); row stellar-expert exists",
 		servedAs: "stellar-expert",
@@ -294,13 +340,15 @@ const REVIEWED_ABSENT: Record<
 		evidence: "no website or repo on the SCF page beyond the program itself",
 	},
 	"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh": {
-		verdict: "served under soroban-decompiler; page carries no product link for the matcher",
+		verdict:
+			"served under soroban-decompiler; page carries no product link for the matcher",
 		evidence: "same author (salaheldinsoliman); the row exists and is scanned",
 		servedAs: "soroban-decompiler",
 	},
 	"ctxcom-evm": {
 		verdict: "served under ctx (aliased + rounds linked)",
-		evidence: "domain ctx.com matches the row after the x.com filter fix — kept here in case the page's links change",
+		evidence:
+			"domain ctx.com matches the row after the x.com filter fix — kept here in case the page's links change",
 	},
 	"prices-api-rfp-ctx-1vo": {
 		verdict: "served under ctx (second submission, rounds linked)",
@@ -349,7 +397,11 @@ async function main() {
 			// Hosted-subdomain platforms: the SUBDOMAIN is the identity.
 			// Collapsing foo.github.io to github.io matched a disassembler RFP
 			// to an unrelated project that also publishes on github.io.
-			if (/\.(github\.io|vercel\.app|netlify\.app|pages\.dev|onrender\.com|webflow\.io|framer\.website)$/.test(h))
+			if (
+				/\.(github\.io|vercel\.app|netlify\.app|pages\.dev|onrender\.com|webflow\.io|framer\.website)$/.test(
+					h,
+				)
+			)
 				return h;
 			const parts = h.split(".");
 			return parts.length <= 2 ? h : parts.slice(-2).join(".");
@@ -375,7 +427,10 @@ async function main() {
 			if (!PLATFORM.test(host)) return null;
 			const segs = url.pathname.split("/").filter(Boolean).slice(0, 2);
 			if (!segs.length) return null;
-			return `${host}/${segs.join("/").toLowerCase().replace(/\.git$/, "")}`;
+			return `${host}/${segs
+				.join("/")
+				.toLowerCase()
+				.replace(/\.git$/, "")}`;
 		} catch {
 			return null;
 		}
@@ -422,7 +477,11 @@ async function main() {
 		}
 		const dom = matchedOn;
 		if (hit) {
-			domainMatched.push({ scf: e.scfSlug, slug: hit.slug, domain: dom as string });
+			domainMatched.push({
+				scf: e.scfSlug,
+				slug: hit.slug,
+				domain: dom as string,
+			});
 			return false;
 		}
 		return true;
@@ -435,11 +494,17 @@ async function main() {
 			console.error(`    ${m.scf} -> ${m.slug} (${m.domain})`);
 	}
 	const absentFinal = stillAbsent;
-	const absentAwarded = absentFinal.filter((e) => e.rounds.length > 0);
+	const absentAwarded = absentFinal.filter((e) => e.awardedAny);
 	const report = {
 		frame: { scf: scf.length, directory: dir.length },
 		absent: absentFinal.length,
-		absentWithRoundBadge: absentAwarded.length,
+		/** Absences SCF actually FUNDED. The coverage claim rests on this, not
+		 *  on `absent`: the roster lists every submission, so an absence can be
+		 *  an open or rejected application, which is not a gap in our index. */
+		absentAwarded: absentAwarded.length,
+		/** Absent, but never awarded anything — applied and lost, or still in
+		 *  the pipeline. Reported so the two are never summed into "funded". */
+		absentSubmittedOnly: absentFinal.length - absentAwarded.length,
 		/** Absences carrying a human review verdict vs not. The row is honest
 		 *  debt only while unreviewed > 0 — a reviewed absence is a decision. */
 		reviewedAbsent: absentFinal
@@ -452,7 +517,10 @@ async function main() {
 		domainMatched,
 		sample: absentFinal.slice(0, 40).map((e) => ({
 			scfSlug: e.scfSlug,
+			/** Awarded rounds only. Empty + awarded:false = applied, never won. */
 			rounds: e.rounds,
+			notAwardedRounds: e.notAwardedRounds ?? [],
+			awarded: e.awardedAny === true,
 			url: e.url,
 		})),
 		// The FULL list, uncapped. `sample` is 40 rows of detail and that is
@@ -475,13 +543,13 @@ async function main() {
 		`# SCF absence diff — ${scf.length} SCF-listed projects vs ${dir.length} directory records`,
 	);
 	console.log(
-		`\nUnmatched (no directory record found): ${absent.length} (${absentAwarded.length} carry an award-round badge)\n`,
+		`\nUnmatched (no directory record found): ${absent.length} — ${absentAwarded.length} SCF actually awarded, ${absent.length - absentAwarded.length} applied without winning (open or rejected). Only the awarded ones are coverage gaps.\n`,
 	);
-	console.log("| scf project | rounds | link |");
-	console.log("|---|---|---|");
+	console.log("| scf project | awarded rounds | applied, not awarded | link |");
+	console.log("|---|---|---|---|");
 	for (const e of absent.slice(0, 60))
 		console.log(
-			`| ${e.base} | ${e.rounds.map((r) => `#${r}`).join(" ") || "—"} | ${e.url} |`,
+			`| ${e.base} | ${e.rounds.map((r) => `#${r}`).join(" ") || "—"} | ${(e.notAwardedRounds ?? []).map((r) => `#${r}`).join(" ") || "—"} | ${e.url} |`,
 		);
 	if (absent.length > 60) console.log(`…and ${absent.length - 60} more`);
 }
