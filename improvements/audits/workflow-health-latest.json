@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-15T18:07:17.091Z",
+	"asOf": "2026-09-15T18:14:01.168Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 92,
 	"healthy": 92,
@@ -197,7 +197,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T18:01:47Z",
+			"lastSuccessAt": "2026-09-15T18:08:24Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -219,10 +219,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T18:05:07Z",
+			"lastSuccessAt": "2026-09-15T18:11:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 97,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -340,7 +340,7 @@
 			"name": "enrich entities",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T18:05:17Z",
+			"lastSuccessAt": "2026-09-15T18:11:23Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 1,
@@ -956,7 +956,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T18:05:07Z",
+			"lastSuccessAt": "2026-09-15T18:11:13Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1011,10 +1011,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T17:31:16Z",
+			"lastSuccessAt": "2026-09-15T18:05:07Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 67,
+			"runs": 68,
 			"why": "last green 0d ago"
 		}
 	]
