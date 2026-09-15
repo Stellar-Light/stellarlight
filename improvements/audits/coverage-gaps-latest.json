@@ -1,96 +1,13 @@
 {
-  "asOf": "2026-09-15T03:10:40.134Z",
+  "asOf": "2026-09-15T15:27:08.630Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 514,
-    "absent": 10,
-    "served": 504,
-    "absentAwarded": 10,
+    "absent": 1,
+    "served": 513,
+    "absentAwarded": 1,
     "absentSubmittedOnly": 0,
     "sample": [
-      {
-        "scfSlug": "balance-institutional-custody-and-payments-for-stellar-syw",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/balance-institutional-custody-and-payments-for-stellar-syw"
-      },
-      {
-        "scfSlug": "micro-be-k9o",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/micro-be-k9o"
-      },
-      {
-        "scfSlug": "catlog-ygy",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/catlog-ygy"
-      },
-      {
-        "scfSlug": "urbanflip-compliant-on-chain-real-estate-co-investment-p6d",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/urbanflip-compliant-on-chain-real-estate-co-investment-p6d"
-      },
-      {
-        "scfSlug": "lunar-finance-oir",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/lunar-finance-oir"
-      },
-      {
-        "scfSlug": "minisend-7tt",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/minisend-7tt"
-      },
-      {
-        "scfSlug": "haven-privacy-first-crypto-neobank-rol",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/haven-privacy-first-crypto-neobank-rol"
-      },
-      {
-        "scfSlug": "bwb-brazilian-real-estate-yields-on-stellar-zab",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/bwb-brazilian-real-estate-yields-on-stellar-zab"
-      },
-      {
-        "scfSlug": "enable-duq",
-        "rounds": [
-          "45"
-        ],
-        "notAwardedRounds": [
-          "43"
-        ],
-        "awarded": true,
-        "url": "https://communityfund.stellar.org/project/enable-duq"
-      },
       {
         "scfSlug": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
         "rounds": [
@@ -156,11 +73,6 @@
       "domain": "runtimeverification.com"
     },
     {
-      "scf": "confidential-transfers-and-balances-hdt",
-      "slug": "fairblock",
-      "domain": "fairblock.network"
-    },
-    {
       "scf": "stellar-women-bootcamp-r5v",
       "slug": "womenbiz",
       "domain": "hiwomenbiz.com"
@@ -169,6 +81,11 @@
       "scf": "social-podcast-ini",
       "slug": "roberto-sanz-criptomonedas",
       "domain": "youtube.com/@robertosanzcriptomonedas"
+    },
+    {
+      "scf": "bwb-brazilian-real-estate-yields-on-stellar-zab",
+      "slug": "bwb",
+      "domain": "bwbi.com.br"
     },
     {
       "scf": "agama-dtk",
@@ -212,11 +129,11 @@
     }
   ],
   "reviewedAbsent": [],
-  "unreviewedAbsent": 10,
+  "unreviewedAbsent": 1,
   "summary": {
     "missingDefillama": 1,
-    "missingScf": 10,
-    "missingScfAwarded": 10,
+    "missingScf": 1,
+    "missingScfAwarded": 1,
     "partnerDocsWithoutOwnContent": 3,
     "staleCollections": 1,
     "staleOrEmptyResearchSources": 1,
