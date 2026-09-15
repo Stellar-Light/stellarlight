@@ -20,6 +20,19 @@ name: Propagate deployment basis to status (manual)
 # basis. Every write is read back; a mismatch fails the run. Dry-run by default.
 
 on:
+  # Its PRODUCER runs weekly. backfill-deployment writes deployment.basis
+  # inside curate-projects.yml every Tuesday 07:30 UTC; this pass, which turns
+  # that into a status basis, had workflow_dispatch and nothing else, so a
+  # newly stamped row waited on somebody remembering to press a button — its
+  # last run before 2026-09-15 was 2026-09-07, eight days and one producer
+  # cycle earlier. An hour behind the producer, same day, so each week's
+  # deployment writes are consumed the moment they land.
+  #
+  # (The 2026-09-15 dry run would have written 0: 86 rows unchanged and one
+  # could-not-propagate. Nothing is waiting TODAY — the point is that nothing
+  # would notice when something is.)
+  schedule:
+    - cron: "30 8 * * 2"
   workflow_dispatch:
     inputs:
       execute:
@@ -47,4 +60,6 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Propagate (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/basis-from-deployment.ts ${{ inputs.execute && '--execute' || '' }}
+        # A scheduled run carries no `inputs`, so `inputs.execute` is empty and
+        # the cron would dry-run forever. Same shape curate-projects.yml uses.
+        run: pnpm exec tsx scripts/basis-from-deployment.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
