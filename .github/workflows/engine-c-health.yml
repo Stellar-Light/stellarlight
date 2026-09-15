@@ -158,6 +158,18 @@ jobs:
             /tmp/e.json
             /tmp/coverage.json
           retention-days: 30
+      - name: Through-Raven consumer loop (golden Qs via the live gateway)
+        # The /quality `raven-consumer-path` row reads this artifact, and until
+        # now the ONLY way to refresh it was a human running the script locally
+        # with the token — so the row sat at 2026-08-28 for eighteen days, past
+        # its own freshness budget, looking like a measurement. Read-only: it
+        # asks Raven the curated golden questions and grades the answers.
+        # Weekly, not daily: it is 47 calls into a partner's gateway.
+        continue-on-error: true
+        env:
+          RAVEN_MCP: https://agents.stellar.buzz/mcp
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/raven-loop.ts
       - name: Commit weekly evidence to improvements/engine/weekly/
         # The /quality scoreboard renders ONLY committed artifacts — a CI
         # artifact that expires in 30 days can't back a public number. Each
@@ -203,6 +215,10 @@ jobs:
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
           git add improvements/engine/weekly/
+          # raven-loop.ts writes its own fixed path (the ledger reads it
+          # there too), so it is added alongside rather than routed
+          # through the MAP above.
+          git add improvements/engine/raven-loop-latest.json || true
           # No `git diff --quiet` short-circuit any more. It used to skip the
           # commit when findings were byte-identical — suppressing the one
           # record that proves the detector ran at all, which is exactly the

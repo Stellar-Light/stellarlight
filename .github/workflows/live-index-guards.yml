@@ -58,7 +58,11 @@ jobs:
         if: '!cancelled()'
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
-        run: pnpm exec tsx scripts/check-raven-drift.ts
+        # --json: the guard already RAN daily, but wrote nothing, so the
+        # /quality interlock row read a hand-dated snapshot that nobody
+        # refreshed and went stale at 18 days. The commit step below
+        # already covers improvements/audits/.
+        run: pnpm exec tsx scripts/check-raven-drift.ts --json improvements/audits/raven-drift-latest.json
       - name: Commit the artifact
         if: always()
         run: |

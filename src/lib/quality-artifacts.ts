@@ -19,10 +19,10 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 // Weekly re-probe of every human-verified packet stamp against its own
 // deciding URL (scripts/check-packet-stamps.ts).
 import packetStamps from "../../improvements/audits/packet-stamps-latest.json";
+import ravenDrift from "../../improvements/audits/raven-drift-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
-import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
 // this is what the SDF agent actually experiences.
@@ -681,6 +681,18 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			const missing = ravenDrift.missingFromCatalog.length;
 			const expected = ravenDrift.expectedOps.length;
 			const cataloged = ravenDrift.catalogOps?.length ?? 0;
+			// `checked: false` is the script's could-not-reach-Raven state. Its
+			// count fields are all zero there, so a row that only asked
+			// `missing === 0` would print a confident green off a probe that
+			// never ran — the exact failure the daily-commit change below makes
+			// possible for the first time.
+			const probed = (ravenDrift as { checked?: boolean }).checked !== false;
+			// Callable in the sandbox but unreachable through our own discovery
+			// vocabulary. Not consumer drift — our fix, and worth naming here
+			// because nothing else on the board says it out loud.
+			const undiscoverable =
+				(ravenDrift as { undiscoverable?: unknown[] }).undiscoverable?.length ??
+				0;
 			return g({
 				key: "raven-interlock",
 				title: "Consumer interlock (Raven)",
@@ -689,15 +701,28 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				measure: { value: cataloged, of: expected, unit: "operations" },
 				sub: "operations discoverable in the consumer catalog",
 				details: [
+					...(probed
+						? []
+						: [
+								"the catalog could not be read on this run — the counts below are not a measurement",
+							]),
 					`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
 					`${missing} op(s) missing beyond grace`,
+					...(undiscoverable
+						? [
+								`${undiscoverable} op(s) callable in the sandbox but unreachable through our own discovery vocabulary — our fix, not theirs`,
+							]
+						: []),
 					`contract ${ravenDrift.specVersion} at measurement`,
 				],
 				asOf: ravenDrift.generatedAt,
-				cadence: "on-deploy",
+				// live-index-guards.yml runs this daily and now commits the
+				// artifact, so the row tracks a real cadence instead of a
+				// hand-dated file.
+				cadence: "weekly",
 				severity: "high",
-				artifact: "improvements/engine/raven-drift-2026-08-28.json",
-				passing: missing === 0,
+				artifact: "improvements/audits/raven-drift-latest.json",
+				passing: probed && missing === 0,
 			});
 		})(),
 
@@ -913,7 +938,9 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 								`every gradeable golden question answers correctly through Raven (${rl.frame.graded} checked)`,
 							],
 				asOf: rl.generatedAt,
-				cadence: "on-deploy",
+				// engine-c-health.yml runs raven-loop.ts weekly now and commits
+				// the artifact; before that only a local run could refresh it.
+				cadence: "weekly",
 				severity: "high",
 				artifact: "improvements/engine/raven-loop-latest.json",
 				passing: rl.okRate >= 0.95,
