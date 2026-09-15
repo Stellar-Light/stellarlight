@@ -34,6 +34,9 @@ export default async function CommunityPicksSection() {
 				limit: 20, // Increased limit to show more projects
 				sort: "-lastVerifiedAt",
 				depth: 1, // Populate relationships including logo and links
+				// See projects-grid.tsx: a 1024-dim vector per row with no use in
+				// the browser, serialised into the RSC payload regardless.
+				select: { embedding: false } as never,
 			});
 
 			projects = result.docs;

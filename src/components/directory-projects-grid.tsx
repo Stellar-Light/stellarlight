@@ -120,6 +120,12 @@ export default async function DirectoryProjectsGrid({
 					page,
 					sort: getPayloadSort(sortOption),
 					depth: 1,
+					// Excluded: a 1024-dim vector per row, ~12.7KB each. It has no use in
+					// the browser and Next serialises whatever a server component holds
+					// into the RSC payload — 17 of them were 211KB of the homepage's 566KB.
+					// Exclusion rather than an allowlist so no field a card renders can go
+					// missing. Same shape trending-projects-section.tsx already uses.
+					select: { embedding: false } as never,
 				});
 			}
 		} catch (error) {
