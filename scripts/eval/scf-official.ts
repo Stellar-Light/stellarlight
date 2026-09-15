@@ -109,6 +109,26 @@ export function isNegativeVerdict(status: string): boolean {
  * Join the chunks (each is one JSON string literal) and read the stream the
  * browser would; a page without chunks, or one whose chunk does not parse,
  * is read as it came. */
+/**
+ * Hosts a submission merely LINKS, which are never its identity.
+ *
+ * The SCF absence diff collects every external link on a detail page as a
+ * website candidate, so one stray link can decide who a project is. That is
+ * fine for socials and CDNs — until a third-party DASHBOARD or link-in-bio
+ * page slips through: minisend-7tt links a Dune dashboard and matched our
+ * unrelated `dune` row, the BWB submission links a beacons.ai bio and matched
+ * `noticias-trading`. Both projects are genuinely absent from the directory,
+ * and a false identity match does not merely mislabel a row — it deletes a
+ * real gap from the absence list. Add a host here when it turns up as a
+ * shared destination rather than a product site.
+ */
+export const THIRD_PARTY_LINK =
+	/stellar\.org|stellar\.expert|twitter\.com|\/\/x\.com|\/\/www\.x\.com|linkedin\.com|discord|t\.me|medium\.com|docs\.google|airtable|notion\.so|vercel\.app\/api|fonts\.|cdn\.|googleapis|gstatic|cloudfront|w3\.org|sanity\.io|googletagmanager|visualwebsiteoptimizer|gitbook\.io|schema\.org|sentry|segment\.|hotjar|plausible|posthog|apple\.com|play\.google|google\.com|dappradar|defillama|coinmarketcap|coingecko|crunchbase|producthunt|typeform|calendly|mailchimp|substack|dune\.com|beacons\.ai|linktr\.ee|bio\.link|bento\.me|carrd\.co|about\.me|lu\.ma|eventbrite/i;
+
+export function isThirdPartyLink(url: string): boolean {
+	return THIRD_PARTY_LINK.test(url);
+}
+
 export function rebuildFlight(html: string): string {
 	const chunks = [
 		...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
