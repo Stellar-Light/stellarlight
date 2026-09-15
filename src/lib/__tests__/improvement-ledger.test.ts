@@ -728,3 +728,48 @@ describe("kindOf — a catch is not a breakage", () => {
 		expect(k.world.total + k.instrument.total).toBe(rows.length);
 	});
 });
+
+describe("lagPastGrace", () => {
+	const now = Date.parse("2026-09-15T00:00:00Z");
+	const row = (id: string, firstSeen: string, blockedOn?: string) => ({
+		id,
+		source: "raven-routing",
+		surface: "consumer",
+		mode: "routing-miss",
+		severity: "medium" as const,
+		status: "open" as const,
+		firstSeen,
+		lastSeen: "2026-09-14T00:00:00Z",
+		...(blockedOn ? { blockedOn } : {}),
+	});
+
+	it("counts only lag blocks older than the grace window", () => {
+		const s = summarizeLedger(
+			[
+				// 54 days — the reflector-oracle case.
+				row("a", "2026-07-23T00:00:00Z", "raven-catalog-lag"),
+				// 10 days — a real re-baseline wait, left alone.
+				row("b", "2026-09-05T00:00:00Z", "raven-catalog-lag"),
+				// Past grace but a different blocker: not a lag, not counted.
+				row("c", "2026-07-01T00:00:00Z", "raven-scorer"),
+			] as never,
+			now,
+		);
+		expect(s.lagPastGrace.count).toBe(1);
+		expect(s.lagPastGrace.oldestDays).toBe(54);
+		expect(s.lagPastGrace.probes.map((p) => p.id)).toEqual(["a"]);
+		// The bare total still holds every blocked row — this splits, never drops.
+		expect(s.blockedUpstream).toBe(3);
+		expect(s.blockedBy["raven-catalog-lag"]).toBe(2);
+	});
+
+	it("reports zero when every lag block is inside the window", () => {
+		const s = summarizeLedger(
+			[row("b", "2026-09-05T00:00:00Z", "raven-catalog-lag")] as never,
+			now,
+		);
+		expect(s.lagPastGrace.count).toBe(0);
+		expect(s.lagPastGrace.oldestDays).toBe(0);
+		expect(s.lagPastGrace.probes).toEqual([]);
+	});
+});

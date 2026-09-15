@@ -313,6 +313,28 @@ export default function QualityPage() {
 							its own window. Open findings are ours and still reproducing;
 							waiting on upstream is carried, not ours to fix.
 						</p>
+						{(() => {
+							// "Not ours to fix" is a fair status and a comfortable place
+							// for a finding to sit forever. Say out loud when one has.
+							const lag = (
+								entities.findings as {
+									lagPastGrace?: {
+										count: number;
+										oldestDays: number;
+										graceDays: number;
+									};
+								}
+							).lagPastGrace;
+							if (!lag?.count) return null;
+							return (
+								<p className="text-xs text-muted-foreground/80 mb-5 max-w-2xl leading-relaxed">
+									{lag.count} of those have been waiting longer than{" "}
+									{lag.graceDays} days — the oldest for {lag.oldestDays}. A
+									re-baseline that has not happened in {lag.oldestDays} days is
+									not a wait any more.
+								</p>
+							);
+						})()}
 						<div>
 							<div className="flex items-baseline justify-between mb-2">
 								<p className="text-xs font-medium text-foreground">

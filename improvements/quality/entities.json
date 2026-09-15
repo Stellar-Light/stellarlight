@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-15T02:24:45.418Z",
+ "generatedAt": "2026-09-15T03:52:50.419Z",
  "surfaces": [
   {
    "surface": "retrieval",
@@ -60,6 +60,15 @@
   "blockedBy": {
    "raven-catalog-lag": 11,
    "raven-scorer": 6
+  },
+  "lagPastGrace": {
+   "count": 2,
+   "graceDays": 20,
+   "oldestDays": 54,
+   "probes": [
+    "raven-routing:reflector-oracle-on-stellar",
+    "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con"
+   ]
   },
   "cleared": 623,
   "verified": 7,

@@ -170,6 +170,20 @@ const SEVERITY_WEIGHT: Record<Severity, number> = {
 /** A high-severity finding open longer than this reads as neglected, not backlog. */
 export const STALE_DAYS = 30;
 
+/** How long a "wait for their re-baseline" block stays credible.
+ *
+ * `raven-catalog-lag` means our current text WOULD route the question and the
+ * text upstream indexes has not caught up — correctly "wait, do not fix it
+ * twice". What the class never had was an expiry, so a block that is genuinely
+ * temporary and one that will never resolve looked identical. On 2026-09-15
+ * eleven routing findings sat under it, two of them first seen 2026-07-23 —
+ * 54 days, against a re-baseline cadence the drift guard budgets at 10.
+ *
+ * Matches RAVEN_DRIFT_GRACE_DAYS in scripts/check-raven-drift.ts, doubled: a
+ * cadence can slip once without it meaning anything. Past this, the block is
+ * still not ours to fix, but it is no longer something to wait out. */
+export const UPSTREAM_LAG_GRACE_DAYS = 20;
+
 /**
  * How long a detector's evidence stays trustworthy. The engine detectors run
  * WEEKLY, so 10 days is one full cycle plus slack for a late or retried run —
@@ -330,6 +344,15 @@ export interface LedgerSummary {
 	 *  never dropped. `blockedBy` names the blocker per count. */
 	blockedUpstream: number;
 	blockedBy: Record<string, number>;
+	/** Of `blockedBy["raven-catalog-lag"]`, the ones that have waited longer
+	 *  than any plausible re-baseline. Still not ours to fix — but no longer
+	 *  something to wait out. */
+	lagPastGrace: {
+		count: number;
+		graceDays: number;
+		oldestDays: number;
+		probes: Array<{ id: string; days: number }>;
+	};
 	/** The current top of the ranked backlog (probe + surface + source). */
 	topOpen: Array<{
 		id: string;
@@ -484,6 +507,30 @@ export function summarizeLedger(
 	for (const f of blockedRows)
 		blockedBy[f.blockedOn as string] =
 			(blockedBy[f.blockedOn as string] ?? 0) + 1;
+	// A lag block past the grace window is not a lag any more. Counted apart so
+	// "blocked upstream" cannot absorb findings indefinitely: nobody is going to
+	// notice a 54-day wait inside a bare total, and the two need different
+	// actions — one is patience, the other is a conversation with the consumer.
+	const blockedLagPastGrace = blockedRows.filter(
+		(f) =>
+			f.blockedOn === "raven-catalog-lag" &&
+			ageDays(f.firstSeen, now) > UPSTREAM_LAG_GRACE_DAYS,
+	);
+	const lagPastGrace = {
+		count: blockedLagPastGrace.length,
+		graceDays: UPSTREAM_LAG_GRACE_DAYS,
+		oldestDays: Math.round(
+			blockedLagPastGrace.reduce(
+				(m, f) => Math.max(m, ageDays(f.firstSeen, now)),
+				0,
+			),
+		),
+		probes: blockedLagPastGrace
+			.slice()
+			.sort((a, b) => ageDays(b.firstSeen, now) - ageDays(a.firstSeen, now))
+			.slice(0, 12)
+			.map((f) => ({ id: f.id, days: Math.round(ageDays(f.firstSeen, now)) })),
+	};
 	const verified = findings.filter((f) => f.status === "verified").length;
 	const clearedRows = findings.filter((f) => f.status === "cleared");
 	const cleared = clearedRows.length;
@@ -624,6 +671,7 @@ export function summarizeLedger(
 		open,
 		refreshQueue,
 		blockedUpstream,
+		lagPastGrace,
 		blockedBy,
 		closed,
 		verified,

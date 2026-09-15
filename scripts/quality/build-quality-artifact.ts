@@ -15,6 +15,7 @@ import {
 	type Finding,
 	MAINTENANCE_MODES,
 	summarizeLedger,
+	UPSTREAM_LAG_GRACE_DAYS,
 } from "../../src/lib/improvement-ledger";
 import {
 	isStrongStatusBasis,
@@ -488,6 +489,36 @@ const out = {
 						.length,
 				]),
 		),
+		/** Of the rows blocked on the consumer's catalog lag, the ones that have
+		 * waited longer than any plausible re-baseline. "Waiting on upstream"
+		 * is a legitimate status and a good place for a finding to disappear
+		 * into: on 2026-09-15 two routing misses had been carried there since
+		 * 2026-07-23. Still not ours to fix — but past this line it is a
+		 * conversation to have, not a wait to continue. */
+		lagPastGrace: (() => {
+			const past = findings.filter(
+				(f) =>
+					f.status === "open" &&
+					f.blockedOn === "raven-catalog-lag" &&
+					(Date.now() - new Date(f.firstSeen).getTime()) / 86_400_000 >
+						UPSTREAM_LAG_GRACE_DAYS,
+			);
+			return {
+				count: past.length,
+				graceDays: UPSTREAM_LAG_GRACE_DAYS,
+				oldestDays: Math.round(
+					past.reduce(
+						(m, f) =>
+							Math.max(
+								m,
+								(Date.now() - new Date(f.firstSeen).getTime()) / 86_400_000,
+							),
+						0,
+					),
+				),
+				probes: past.slice(0, 12).map((f) => f.id),
+			};
+		})(),
 		cleared: findings.filter((f) => f.status === "cleared").length,
 		verified: findings.filter((f) => f.status === "verified").length,
 		/** A catch is not a breakage. Both kinds are still open rows; the
