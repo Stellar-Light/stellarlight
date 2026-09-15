@@ -45,6 +45,7 @@ import {
 } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
+import { poolWarning, SCANNED_POOL_CAP } from "./scan-repo-code-pool";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -253,6 +254,14 @@ async function main() {
 	} else if (STALE_FIRST) {
 		// Stale = scanned, but pushed since the scan. Payload where can't compare
 		// two fields, so fetch the scanned set (small select) + filter in memory.
+		// SORT MATTERS (2026-09-15): the fetch is capped, and TypeScript alone has
+		// 4,196 scanned rows against a 3,000 cap — so without an explicit sort the
+		// cap decides WHICH rows are visible by insertion order, and 1,196 of them
+		// can never be picked however stale they are. stellar/js-xdr sat at a
+		// 2026-08-14 scan with a 2026-08-31 push through four waves for exactly
+		// this reason. Ordering by most-recent push puts the rows that CAN be
+		// stale (lastCommitAt > codeScannedAt) inside the window, and matches the
+		// in-memory ranking applied below.
 		const scanned = await payload.find({
 			collection: "repos",
 			where: {
@@ -261,7 +270,8 @@ async function main() {
 					{ codeScanState: { equals: "scanned" } },
 				],
 			},
-			limit: 3000,
+			sort: "-lastCommitAt",
+			limit: SCANNED_POOL_CAP,
 			depth: 0,
 			context: { internal: true },
 			select: {
@@ -285,6 +295,8 @@ async function main() {
 				// Same 24h re-scan cooldown as the default branch (2026-08-15).
 				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
 		);
+		const capWarn = poolWarning(scanned.docs.length, SCANNED_POOL_CAP);
+		if (capWarn) console.log(capWarn);
 		const stale = staleAll.filter(notTriaged);
 		skippedTriaged += staleAll.length - stale.length;
 		stale.sort((a, b) =>
@@ -315,7 +327,9 @@ async function main() {
 							{ codeScanState: { equals: "scanned" } },
 						],
 					},
-					limit: 3000,
+					// Same cap, same reason to sort — see the --stale-first branch.
+					sort: "-lastCommitAt",
+					limit: SCANNED_POOL_CAP,
 					depth: 0,
 					context: { internal: true },
 					select: {
