@@ -116,9 +116,10 @@ async function getShowcaseProjects(): Promise<ShowcaseProject[]> {
 }
 
 export const metadata: Metadata = {
-	title: "Stellar Scout | Stellar Light",
+	title: "Stellar Scout — Ecosystem API for Agents",
 	description:
-		"An AI skill for Stellar builders — validate ideas, surface existing projects, match SCF-funded RFPs. For hackathon entrants, grant applicants, and independent builders. Installs into Claude Code, Codex, Cursor, or any agent that loads SKILL.md.",
+		"A REST API and MCP server that gives AI agents cited answers about Stellar projects, repositories, builders, audits and funding.",
+	alternates: { canonical: "/scout" },
 };
 
 const SAMPLE_PROMPTS = [

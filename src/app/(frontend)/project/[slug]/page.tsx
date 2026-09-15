@@ -18,7 +18,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EntityCard from "@/components/entity-card";
 import { ProjectLogo } from "@/components/project-logo";
-import { projectLogo } from "@/data/project-logos";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import ShareButton from "@/components/share-button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +29,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { projectLogo } from "@/data/project-logos";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { getAppUrl } from "@/lib/utils/app-url";
@@ -111,6 +111,9 @@ export async function generateMetadata({
 	return {
 		title: project.name,
 		description,
+		// 890 project pages had no canonical, so every ?utm= or filter variant
+		// read as its own URL to a crawler.
+		alternates: { canonical: `/project/${slug}` },
 		keywords: [
 			project.name,
 			"Stellar",

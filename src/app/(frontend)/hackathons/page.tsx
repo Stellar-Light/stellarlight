@@ -36,8 +36,10 @@ import {
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const metadata: Metadata = {
-	title: "Hackathons | Stellar Light",
-	description: "Active and past hackathons in the Stellar ecosystem",
+	title: "Stellar Hackathons & Winners",
+	description:
+		"Stellar hackathons with their winning builds, prize tracks and the teams behind them, indexed from the organisers' own results.",
+	alternates: { canonical: "/hackathons" },
 };
 
 // The DoraHacks assembly — 2 org listings + 2 winner-submission fetches, run

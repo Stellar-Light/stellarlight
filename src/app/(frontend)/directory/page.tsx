@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DirectoryFilters } from "@/components/directory-filters";
 import DirectoryProjectsGrid, {
 	DirectoryProjectsGridSkeleton,
 } from "@/components/directory-projects-grid";
+
+export const metadata: Metadata = {
+	title: "Stellar Projects Directory",
+	description:
+		"Browse every project building on Stellar: DeFi protocols, wallets, anchors, payments, RWAs and developer tools, each with its GitHub activity, on-chain footprint, SCF funding and a live or inactive status you can check.",
+	alternates: { canonical: "/directory" },
+};
 
 type SearchParams = Promise<{
 	q?: string;

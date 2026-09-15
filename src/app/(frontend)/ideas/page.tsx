@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { IdeasListing } from "@/components/ideas-listing";
 
 export const metadata: Metadata = {
-	title: "Ideas & RFPs",
+	title: "Stellar Build Ideas & Open RFPs",
 	description:
-		"Discover confirmed RFPs for the Stellar ecosystem. Find opportunities to build and contribute to high-impact projects.",
+		"What to build on Stellar that someone will fund: open SCF requests for proposals, sponsor briefs and gaps in the ecosystem nobody has filled.",
+	alternates: { canonical: "/ideas" },
 };
 
 export default function IdeasPage() {

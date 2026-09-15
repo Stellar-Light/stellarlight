@@ -23,9 +23,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-	title: "Builders | Stellar Light",
+	title: "Stellar Builders & Developers",
 	description:
-		"Discover talented builders and developers in the Stellar ecosystem",
+		"The people building on Stellar, ranked by real code activity across indexed repositories rather than self-reported profiles.",
+	alternates: { canonical: "/builders" },
 };
 
 export default async function BuildersPage() {

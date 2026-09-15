@@ -10,9 +10,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-	title: "Skills Marketplace | Stellar AI Tools | StellarLight",
+	title: "Stellar Skills for AI Agents",
 	description:
-		"The canonical directory of AI skills, MCP servers, and agent tools for Stellar builders. Official SDF skills, Stellarlight tools, lumenloop, and community submissions — all installable via npx in one click.",
+		"Installable skills that teach an AI agent to build on Stellar: smart contracts, assets, payments, data and dapp patterns, each backed by the live docs.",
+	alternates: { canonical: "/skills" },
 };
 
 interface UnifiedSkill {

@@ -16,9 +16,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
  */
 
 export const metadata: Metadata = {
-	title: "Entities & Organizations | Stellar Light",
+	title: "Stellar Organizations & Entities",
 	description:
-		"Organizations building on Stellar — ranked by SCF funding raised, projects shipped, and categories built in. Aggregated from the Stellar Light project directory.",
+		"The companies, foundations and teams behind Stellar projects, with the products each one ships and the repositories they maintain.",
+	alternates: { canonical: "/entities" },
 };
 
 export const revalidate = 300;

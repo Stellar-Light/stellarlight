@@ -10,9 +10,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Developer Activity | Stellar Light",
+	title: "Stellar Developer Activity Leaderboard",
 	description:
-		"Developer activity rankings and ecosystem metrics for Stellar projects.",
+		"Which Stellar projects are actually being built right now, ranked by commits, releases and contributors across indexed repositories.",
+	alternates: { canonical: "/leaderboard" },
 };
 
 type SearchParams = Promise<{

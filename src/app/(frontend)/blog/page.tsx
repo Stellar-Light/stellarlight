@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import BlogPostsGrid, {
@@ -6,6 +7,13 @@ import BlogPostsGrid, {
 } from "@/components/blog-posts-grid";
 import { Button } from "@/components/ui/button";
 import { getPayloadSafe } from "@/lib/payload-client";
+
+export const metadata: Metadata = {
+	title: "Stellar Ecosystem Research & Writing",
+	description:
+		"Research and analysis on the Stellar ecosystem, written from the index: what is shipping, what is funded and what the data actually shows.",
+	alternates: { canonical: "/blog" },
+};
 
 type SearchParams = Promise<{
 	page?: string;
