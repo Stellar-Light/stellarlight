@@ -1,5 +1,18 @@
 # Broken links — verified packet, 2026-09-15
 
+> **Status, updated 2026-09-15.** Six of the eighteen are fixed on production
+> and read back: entities `stellar-expert` → stellar.expert, `eq-lab` →
+> eqlab.io, `clickpesa` → clickpesa.com, `xycloo` cleared (nothing live to
+> point at), and projects `gameduk` and `deb` cleared. `deb` is worth the note:
+> drivedeb.com answers 200 over http, but the page is titled "Welcome to
+> drivedeb.com" with the same string as its description and no mention of
+> Stellar — a parked default page, refused as a replacement.
+>
+> Still open: four builder and partner-account links with no repair map, two
+> entity candidates that are judgement calls (`borderless` → elsa.care is a
+> rename claim, `techfiesta` → ekolance.io points a brand at its parent), and
+> the two Draft rows that are not served.
+
 The 18 links `check-links` proves broken (404/410/DNS-refused), each traced to
 the row and field that carries it, re-probed today, and paired with a
 replacement where one exists and could be confirmed.

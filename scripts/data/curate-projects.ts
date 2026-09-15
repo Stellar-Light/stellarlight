@@ -2685,13 +2685,16 @@ async function main() {
 		}
 		if (norm(d.links.website) !== norm(hijacked)) {
 			console.log(
-				`  ${slug}: website is ${d.links.website}, not the recorded hijacked value — skip (relinked since)`,
+				`  ${slug}: website is ${d.links.website}, not the recorded value — skip (relinked since)`,
 			);
 			continue;
 		}
-		console.log(
-			`  ${slug}: website REMOVED (was ${d.links.website} — hijacked)`,
-		);
+		// Not "hijacked": this map holds BOTH hijacked domains and merely dead
+		// ones (its own section header says so), and most entries are an NXDOMAIN
+		// or a 404. The log is what a reviewer reads before approving a prod
+		// write, so it should not assert a cause the entry does not carry — the
+		// reason lives in the comment beside each entry.
+		console.log(`  ${slug}: website REMOVED (was ${d.links.website})`);
 		writes.push({
 			id: d.id,
 			slug,
