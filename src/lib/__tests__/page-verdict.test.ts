@@ -60,3 +60,33 @@ describe("classifyPage — a 200 is not a business", () => {
 		expect(classifyPage({}).verdict).toBe("unknown");
 	});
 });
+
+describe("offsite redirect across a multi-label public suffix", () => {
+	it("flags a hop between two different .com.br sites", () => {
+		// `parts.slice(-2)` read both of these as "com.br", compared them equal,
+		// and let a page that had moved to somebody else's business go on being
+		// judged on its own content.
+		const v = classifyPage({
+			status: 200,
+			requestedHost: "bwbi.com.br",
+			finalHost: "someoneelse.com.br",
+			title: "Outra empresa",
+			metaDescription: null,
+			bodyText: null,
+		} as never);
+		expect(v.verdict).toBe("offsite-redirect");
+		expect(v.reason).toBe("bwbi.com.br → someoneelse.com.br");
+	});
+
+	it("does not flag a www or subdomain hop inside one .com.br site", () => {
+		const v = classifyPage({
+			status: 200,
+			requestedHost: "www.bwbi.com.br",
+			finalHost: "app.bwbi.com.br",
+			title: "BWB",
+			metaDescription: null,
+			bodyText: null,
+		} as never);
+		expect(v.verdict).not.toBe("offsite-redirect");
+	});
+});
