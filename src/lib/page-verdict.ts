@@ -18,6 +18,7 @@
  * a non-product verdict, because this feeds a basis DOWNGRADE (never a
  * status change) and a false "parked" costs a live project its evidence.
  */
+import { registrableDomain } from "./partner-project-identity";
 
 export type PageVerdict =
 	| "product"
@@ -48,13 +49,19 @@ const SCAFFOLD =
 const PLACEHOLDER =
 	/\b(coming soon|under construction|site is under construction|we('| a)re changing home|changing home|home changing|launching soon|stay tuned|join (our|the) waitlist|waitlist only)\b/i;
 
+/** The offsite-redirect test compares these, so a wrong answer here is a wrong
+ * VERDICT. `parts.slice(-2)` read every Brazilian host as "com.br", so a
+ * redirect from one .com.br site to an unrelated one compared EQUAL and the
+ * hop was never flagged — a page that had moved to somebody else's business
+ * went on being judged on its own content. Same shape for co.uk, com.au and
+ * the rest. src/lib/partner-project-identity.ts already carries the suffix
+ * list and its tests; three directory rows sit on .com.br today. */
 function registrable(host: string | null | undefined): string {
 	const h = (host ?? "")
 		.toLowerCase()
 		.replace(/^www\./, "")
 		.replace(/:\d+$/, "");
-	const parts = h.split(".").filter(Boolean);
-	return parts.length >= 2 ? parts.slice(-2).join(".") : h;
+	return registrableDomain(h) || h;
 }
 
 /** Classify what a URL served. See the file header for why this exists. */
