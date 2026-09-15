@@ -21,22 +21,22 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 import packetStamps from "../../improvements/audits/packet-stamps-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
-import engineE from "../../improvements/engine/engine-e-baseline-2026-08-28.json";
 import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
 import ravenDrift from "../../improvements/engine/raven-drift-2026-08-28.json";
 // Through-Raven consumer path, golden questions graded via the REAL gateway
 // (scripts/raven-loop.ts, local-run). Distinct from the direct-API golden eval:
 // this is what the SDF agent actually experiences.
 import ravenLoop from "../../improvements/engine/raven-loop-latest.json";
-import scfMembership from "../../improvements/engine/scf-membership-2026-08-28.json";
 import corpusHealth from "../../improvements/engine/weekly/corpus-health-latest.json";
 import engineARecall from "../../improvements/engine/weekly/engine-a-recall-latest.json";
 import engineDDemand from "../../improvements/engine/weekly/engine-d-demand-latest.json";
+import engineE from "../../improvements/engine/weekly/engine-e-contract-latest.json";
 import goldenEval from "../../improvements/engine/weekly/golden-eval-latest.json";
 // The improvement ledger, the spine: every detector's findings normalized into
 // one status-tracked backlog (scripts/improvement-ledger.ts). This row is the
 // SYSTEM's own health, not any single engine's.
 import improvementLedger from "../../improvements/engine/weekly/improvement-ledger-latest.json";
+import scfMembership from "../../improvements/engine/weekly/scf-crosscheck-latest.json";
 import qualityEntities from "../../improvements/quality/entities.json";
 import externalFindings from "../../improvements/quality/external-findings.json";
 import qualityHistory from "../../improvements/quality/history.json";
@@ -282,9 +282,15 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				asOf:
 					(scfMembership as { generatedAt?: string }).generatedAt ??
 					"2026-08-28",
-				cadence: "baseline",
+				// Weekly, not baseline. engine-c-health re-runs this check every
+				// Sunday and commits the result; the row was reading a pinned
+				// 2026-08-28 copy of it while the fresh one sat in weekly/, so
+				// the board advertised an 18-day-old frame and a 120-day
+				// staleness budget that would never have fired. Pointing at the
+				// -latest artifact makes the cadence the truth.
+				cadence: "weekly",
 				severity: "high",
-				artifact: "improvements/engine/scf-membership-2026-08-28.json",
+				artifact: "improvements/engine/weekly/scf-crosscheck-latest.json",
 				passing: bad === 0,
 			});
 		})(),
@@ -309,12 +315,18 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				details: [
 					`${silent} param(s) documented but silently ignored`,
 					`${invalid} param(s) accepting values the spec forbids`,
-					`spec ${engineE.specVersion} at measurement; re-run on every deploy`,
+					`spec ${engineE.specVersion} at measurement; probed on every deploy, evidence committed weekly by engine-c-health`,
 				],
 				asOf: (engineE as { generatedAt?: string }).generatedAt ?? "2026-08-28",
-				cadence: "baseline",
+				// Same pinned-artifact bug as scf-crosscheck above: the fresh
+				// run lands in weekly/ every Sunday, so the board was quoting
+				// spec 1.9.1 while the live contract had moved 50 releases on.
+				// post-deploy-eval.yml probes the contract on every deploy, but
+				// only engine-c-health COMMITS the evidence, and a row's
+				// freshness budget has to track the artifact it actually reads.
+				cadence: "weekly",
 				severity: "high",
-				artifact: "improvements/engine/engine-e-baseline-2026-08-28.json",
+				artifact: "improvements/engine/weekly/engine-e-contract-latest.json",
 				passing: silent === 0 && invalid === 0,
 			});
 		})(),
