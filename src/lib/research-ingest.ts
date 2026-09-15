@@ -426,6 +426,27 @@ export async function upsertChunks(opts: {
 		`${verb}: writes=${stats.new + stats.updated} new=${stats.new} updated=${stats.updated} (meta-only ${metaOnly.length}) unchanged=${stats.unchanged} errors=${stats.errors}`;
 	if (dryRun) {
 		console.log(planLine("replan"));
+		// NAME the rows that did not converge. The lane fails the run with "see
+		// the ✗ rows" and then prints only a count, which is not something
+		// anyone can act on: it cannot distinguish a non-idempotent writer from
+		// a source that legitimately changed between the execute pass and this
+		// one, and those have opposite fixes. lumenloop-research has been
+		// re-planning exactly 4 writes with 0 meta-only drift — real content
+		// differences — and its article HTML is byte-stable between fetches,
+		// so the next run needs to say WHICH chunks before anyone can tell
+		// whether they are news URLs (expected to move) or articles (a bug).
+		// Capped: a genuinely broken source would otherwise print thousands.
+		if (toEmbed.length) {
+			const shown = toEmbed.slice(0, 12);
+			for (const c of shown) {
+				const verb = existing.get(c.parentDocId)?.get(c.chunkIndex)
+					? "changed"
+					: "new";
+				console.log(`  ✗ ${verb} · chunk ${c.chunkIndex} · ${c.url}`);
+			}
+			if (toEmbed.length > shown.length)
+				console.log(`  …and ${toEmbed.length - shown.length} more`);
+		}
 		return stats;
 	}
 
