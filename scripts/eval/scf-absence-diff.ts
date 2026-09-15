@@ -355,6 +355,12 @@ const REVIEWED_ABSENT: Record<
 		evidence:
 			"domain ctx.com matches the row after the x.com filter fix — kept here in case the page's links change",
 	},
+	"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu": {
+		verdict:
+			"served under pagfinance (submission-titled page, different domain)",
+		evidence:
+			'our row carries the SCF page\'s description near-verbatim; names and domains both differ (SCF lists pagcrypto.finance, the row carries pag.finance), which is why no pass matched them. Same operator confirmed from brlp.money/.well-known/stellar.toml — ORG_NAME "PagFinance" for BRLP issuer GDD3ZAU3…NPRF, whose Horizon home_domain points back at brlp.money. Paired in enrich-from-scf.ts so the ingest can write the #42 award the row is missing.',
+	},
 	"prices-api-rfp-ctx-1vo": {
 		verdict: "served under ctx (second submission, rounds linked)",
 		evidence: "rates.ctx.com is ctx.com — same company",
