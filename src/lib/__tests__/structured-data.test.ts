@@ -6,6 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+	financialProductNode,
 	graph,
 	itemListNode,
 	organizationNode,
@@ -70,5 +71,38 @@ describe("site nodes", () => {
 		const g = graph([organizationNode(BASE)]);
 		expect(g["@context"]).toBe("https://schema.org");
 		expect((g["@graph"] as unknown[]).length).toBe(1);
+	});
+});
+
+describe("financialProductNode", () => {
+	it("omits provider when the issuer is unknown rather than shipping an empty shell", () => {
+		const n = financialProductNode(BASE, {
+			path: "/stablecoins/AAA-G1",
+			ticker: "AAA",
+			issuer: null,
+		});
+		expect(n.provider).toBeUndefined();
+		expect(n.name).toBe("AAA");
+		expect(n.url).toBe(`${BASE}/stablecoins/AAA-G1`);
+	});
+
+	it("names the issuer when we have one and never invents a rating", () => {
+		const n = financialProductNode(BASE, {
+			path: "/stablecoins/USDY-G1",
+			ticker: "USDY",
+			name: "Ondo US Dollar Yield",
+			issuer: "Ondo Finance",
+			peg: "USD",
+			description: "A yield-bearing dollar asset issued on Stellar.",
+		});
+		expect(n.provider).toEqual({
+			"@type": "Organization",
+			name: "Ondo Finance",
+		});
+		expect(n.name).toBe("USDY — Ondo US Dollar Yield");
+		expect(n.currenciesAccepted).toBe("USD");
+		// The markup must never carry commerce signals we cannot source.
+		expect(n.offers).toBeUndefined();
+		expect(n.aggregateRating).toBeUndefined();
 	});
 });
