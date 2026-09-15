@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-15T03:18:16.722Z",
+	"generatedAt": "2026-09-15T03:26:53.863Z",
 	"specVersion": "1.9.52",
 	"graceDays": 10,
 	"expectedOps": [
@@ -70,7 +70,8 @@
 		"vetIdea"
 	],
 	"missingFromCatalog": [],
-	"undiscoverable": ["getQualityReport", "getRwaAssets", "verifyClaim"],
+	"undiscoverable": [],
+	"uncataloged": ["getQualityReport", "getRwaAssets", "verifyClaim"],
 	"laggingInCatalog": [],
 	"extraInCatalog": [],
 	"claimedOpCount": 30,

@@ -687,12 +687,20 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			// never ran — the exact failure the daily-commit change below makes
 			// possible for the first time.
 			const probed = (ravenDrift as { checked?: boolean }).checked !== false;
-			// Callable in the sandbox but unreachable through our own discovery
-			// vocabulary. Not consumer drift — our fix, and worth naming here
-			// because nothing else on the board says it out loud.
+			// Two different failures with two different owners, so the row names
+			// them separately. `undiscoverable` = the catalog HOLDS an entry and
+			// our routing words do not reach it, ours to rewrite.
+			// `uncataloged` = the catalog holds no entry at all, proven by an
+			// exact-name query returning only neighbours, so an agent that does
+			// not already know the op name cannot find it and no wording of
+			// ours can change that. Measured 2026-09-15: all three sat in the
+			// second bucket while the row credited the first, which would have
+			// sent us rewriting descriptions nobody was going to index.
 			const undiscoverable =
 				(ravenDrift as { undiscoverable?: unknown[] }).undiscoverable?.length ??
 				0;
+			const uncataloged =
+				(ravenDrift as { uncataloged?: string[] }).uncataloged ?? [];
 			return g({
 				key: "raven-interlock",
 				title: "Consumer interlock (Raven)",
@@ -710,7 +718,12 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					`${missing} op(s) missing beyond grace`,
 					...(undiscoverable
 						? [
-								`${undiscoverable} op(s) callable in the sandbox but unreachable through our own discovery vocabulary — our fix, not theirs`,
+								`${undiscoverable} op(s) in the catalog that our own routing words do not reach — our fix`,
+							]
+						: []),
+					...(uncataloged.length
+						? [
+								`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}) — an agent that does not already know the name cannot find them, and no wording of ours can change that`,
 							]
 						: []),
 					`contract ${ravenDrift.specVersion} at measurement`,
@@ -722,7 +735,11 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				cadence: "weekly",
 				severity: "high",
 				artifact: "improvements/audits/raven-drift-latest.json",
-				passing: probed && missing === 0,
+				// An op the index does not HOLD, past the re-baseline grace window,
+				// breaks this row's promise as squarely as a missing one. Leaving it
+				// out was how the row stayed green while its own detail line
+				// printed the failure.
+				passing: probed && missing === 0 && uncataloged.length === 0,
 			});
 		})(),
 
