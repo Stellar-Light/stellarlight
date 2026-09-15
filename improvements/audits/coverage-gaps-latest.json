@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-09-15T15:27:08.630Z",
+  "asOf": "2026-09-15T15:31:39.049Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 514,
@@ -128,8 +128,14 @@
       "domain": "jsr.io/@creit-tech/stellar-router-sdk"
     }
   ],
-  "reviewedAbsent": [],
-  "unreviewedAbsent": 1,
+  "reviewedAbsent": [
+    {
+      "scfSlug": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+      "verdict": "not absent \u2014 served TWICE, as pagcrypto and pagfinance",
+      "evidence": "one company seeded twice: both rows publish pag.finance and the same types. pagcrypto carries the #42 award and github.com/PagCrypto; pagfinance carries the brand name and scf.awarded:false, so an agent finding the brand-named row is told it has no SCF funding. Same operator confirmed from the asset's own anchor \u2014 brlp.money/.well-known/stellar.toml gives ORG_NAME \"PagFinance\" for BRLP issuer GDD3ZAU3\u2026NPRF, whose Horizon home_domain points back at brlp.money. No pass matched the SCF entry because the fund lists pagcrypto.finance while both rows carry pag.finance and the submission title is descriptive. Queued as a DUPE_MERGE in curate-projects.ts (pagcrypto -> pagfinance, copyScf)."
+    }
+  ],
+  "unreviewedAbsent": 0,
   "summary": {
     "missingDefillama": 1,
     "missingScf": 1,
