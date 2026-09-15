@@ -2627,6 +2627,19 @@ export const PROMINENCE_SET: Record<string, number> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// 2026-09-15. Seeded from the SCF page as
+	// https://www.micro-be.com/en/entreprise.htm, which answers 200 — but
+	// Payload strips `www.` on write (curate-projects.ts line ~2643 already
+	// compensates for this when COMPARING), and micro-be.com without the www
+	// serves nothing under /en: the whole English tree 404s there while the
+	// apex root 200s. So the stored value was a 404 the moment it was written,
+	// and check-links caught it the same day.
+	//
+	// The root is the value that survives the strip. Worth remembering when
+	// seeding any row: store a URL that works WITHOUT www, because that is what
+	// will actually be stored.
+	"micro-be": "https://micro-be.com/",
+
 	// check-links 2026-09-07: the cited blog post 404s but the operator's site
 	// is alive — and its own menu now reads "Descontinuação tokens BRL", the
 	// operator saying the BRL tokens are discontinued. Relinked to the site;

@@ -15,11 +15,20 @@
  *     old (or which have no repo at all), and separately the high-star + stale
  *     "borrowed clout" risks. REPORTED ONLY, never auto-marked — a human
  *     confirms before any of these flip.
+ *  3. SITE GONE candidates — an active row whose own website is proven dead or
+ *     is serving somebody else's content. This is the signal repo staleness
+ *     cannot see, and it is the Keybase problem from the other side: a product
+ *     can shut down while its repository keeps getting commits, and the tell is
+ *     that nobody renewed the domain. A parked page, lottery spam or a lapsed
+ *     registration on the URL the project itself cites is good evidence the
+ *     product is gone. Also REPORT ONLY — a domain is evidence about the
+ *     world, and hiding a row stays a human call.
  *
  * House rules: no deletes; dry-run first; run against prod via GitHub Action.
  */
 import "./load-env";
 import { getPayload } from "payload";
+import { NON_PRODUCT_VERDICTS } from "../src/lib/page-verdict";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -225,8 +234,74 @@ async function main() {
 		}
 	}
 
+	// ---- 4. site-gone candidates (report only) ----
+	// Reads link-checks rather than re-probing: check-links already proves a URL
+	// dead (404/410/DNS/refused) and already classifies what a 200 SERVED, via
+	// page-verdict. A bot wall, a 5xx or a timeout is never a verdict there and
+	// so never reaches this list either.
+	const normUrl = (u: string) =>
+		(u ?? "")
+			.trim()
+			.toLowerCase()
+			.replace(/^(https?:\/\/)www\./, "$1")
+			.replace(/\/+$/, "");
+	const byWebsite = new Map<
+		string,
+		{ slug: string; status: string; url: string }
+	>();
+	for (const p of active.docs as Array<Record<string, any>>) {
+		const url = p?.links?.website;
+		if (url)
+			byWebsite.set(normUrl(url), { slug: p.slug, status: p.status, url });
+	}
+	const siteGone: Array<{
+		slug: string;
+		status: string;
+		url: string;
+		why: string;
+	}> = [];
+	if (byWebsite.size) {
+		const checks = await payload.find({
+			collection: "link-checks",
+			limit: 5000,
+			depth: 0,
+			overrideAccess: true,
+		});
+		for (const c of checks.docs as Array<Record<string, any>>) {
+			const hit = byWebsite.get(normUrl(c.url));
+			if (!hit) continue;
+			if (c.status === "broken" || c.status === "dead") {
+				siteGone.push({
+					...hit,
+					why: `dead — ${c.errorReason || c.statusCode || "proven broken"}`,
+				});
+			} else if (c.pageVerdict && NON_PRODUCT_VERDICTS.has(c.pageVerdict)) {
+				// Answers 200 with somebody else's content: parked, spam, a
+				// scaffold, or a redirect off the origin entirely.
+				siteGone.push({
+					...hit,
+					why: `${c.pageVerdict}${c.pageTitle ? ` — "${String(c.pageTitle).slice(0, 48)}"` : ""}`,
+				});
+			}
+		}
+	}
 	console.log(
-		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length}`,
+		`\n=== SITE GONE candidates (report only — the row's own website is dead or serving someone else) ===`,
+	);
+	if (siteGone.length === 0) {
+		console.log("  none — every active row's website still serves its product");
+	} else {
+		for (const r of siteGone)
+			console.log(
+				`  ${r.slug.padEnd(26)} ${r.status.padEnd(12)} ${r.why}\n      ${r.url}`,
+			);
+		console.log(
+			`  ${siteGone.length} row(s). A lapsed or hijacked domain is evidence the product shut down — evidence about the WORLD, so the status flip stays a human call.`,
+		);
+	}
+
+	console.log(
+		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length} · site-gone: ${siteGone.length}`,
 	);
 	process.exit(0);
 }
