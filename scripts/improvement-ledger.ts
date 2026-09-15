@@ -199,7 +199,29 @@ const ENDPOINT_AGREEMENT_SPEC: SourceSpec = {
 	],
 };
 
+/** Gone repos (check-gone-repos, daily). A row we SERVE whose repository
+ *  GitHub 404s — three of them ranked first for their own name on 2026-09-14.
+ *  That is ours and served, not a maintenance refresh, so it files as a real
+ *  defect. Only rows the probe got a 404 status for reach `rows` with
+ *  verdict "gone"; unchecked rows carry their own verdict and never file. */
+const GONE_REPOS_SPEC: SourceSpec = {
+	source: "gone-repos",
+	file: "gone-repos-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "code",
+			mode: "repo-gone",
+			severity: "high",
+			keep: (r) => str(r?.verdict) === "gone" && str(r?.was) !== "gone",
+			probe: (r) => str(r?.fullName),
+		},
+	],
+};
+
 const SPECS: SourceSpec[] = [
+	GONE_REPOS_SPEC,
 	REPO_RANKING_SPEC,
 	ENDPOINT_AGREEMENT_SPEC,
 	WEAK_BASIS_LIVENESS_SPEC,

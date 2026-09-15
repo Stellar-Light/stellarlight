@@ -59,6 +59,7 @@ const WRITERS: Record<string, "read-back" | string> = {
 		"exemption 2026-08-12: surgical Action (dry-run default, allowlist " +
 		"clears); every execute is live-verified in the run log",
 	"scripts/refresh-stablecoins.ts": "read-back",
+	"scripts/check-gone-repos.ts": "read-back",
 };
 for (const [file, expectation] of Object.entries(WRITERS)) {
 	let src = "";
@@ -137,7 +138,8 @@ console.log("◆ C4 write-shape fields → population probes");
 const C4_ALLOW: Record<string, string> = {
 	codeSymbols:
 		"stored as codeSymbols, served as codeVerified.symbols — probed via the rozo pin (2026-08-12)",
-	codeScanState: "scan-state bookkeeping, not a served fact (2026-08-12)",
+	codeScanState:
+		"scan-state bookkeeping; served as codeTruth.scanState on /api/repos/trust and enum-pinned by spec-enum-parity, not separately probed (2026-09-14)",
 	codeScanNote: "scan-state bookkeeping (2026-08-12)",
 	codeScannedAt:
 		"served as scannedAt; probed via codeConfidence pin (2026-08-12)",

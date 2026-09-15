@@ -4072,7 +4072,11 @@ export interface operations {
                                 } | null;
                                 /** @description TrustReport codeTruth minus the full contractInterface (interfaceSize is kept). */
                                 codeTruth?: {
-                                    scanState?: string | null;
+                                    /**
+                                     * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
+                                     * @enum {string|null}
+                                     */
+                                    scanState?: "pending" | "scanned" | "error" | "incomplete" | "gone" | null;
                                     scannedAt?: string | null;
                                     stellarProof?: string | null;
                                     codeDepth?: number | null;
@@ -4330,7 +4334,11 @@ export interface operations {
                                 name?: string | null;
                             } | null;
                             codeTruth?: {
-                                scanState?: string | null;
+                                /**
+                                 * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
+                                 * @enum {string|null}
+                                 */
+                                scanState?: "pending" | "scanned" | "error" | "incomplete" | "gone" | null;
                                 scannedAt?: string | null;
                                 stellarProof?: string | null;
                                 codeDepth?: number | null;

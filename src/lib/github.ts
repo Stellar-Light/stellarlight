@@ -438,3 +438,36 @@ export async function fetchRepoInfoBatch(
 	}
 	return out;
 }
+
+// ── Does this repo still exist? ─────────────────────────────────────────
+/** Trinary-plus: what GitHub said when we asked for the repo itself. */
+export type RepoExistence = "gone" | "empty" | "alive" | "unchecked";
+
+/**
+ * Classify from the HTTP STATUS, never from the body.
+ *
+ * The trap this function exists to make impossible (measured 2026-09-14):
+ * `gh api repos/<x> --jq .full_name` prints GitHub's error JSON to stdout on
+ * a 404, so "the command produced output" reads as proof of existence. That
+ * check reported 162 alive / 0 gone for a population that was 126 gone.
+ *
+ * `gone` means GitHub answered 404 to US — deleted, renamed with no redirect,
+ * or turned private. All three mean the repo we advertise is not reachable by
+ * the reader we advertise it to, which is the fact a serving surface needs.
+ * Every OTHER non-200 (403/429 rate limit, 451, 5xx, a thrown fetch → null)
+ * is `unchecked`: a run that could not look must never read as a run that
+ * found death.
+ *
+ * `sizeKb` is the REST repo object's `size` (KB on disk). 0 is the unborn-HEAD
+ * repo whose git/trees API answers 409 "Git Repository is empty" — one call
+ * instead of two. ponytail: a sub-KB repo can round to 0 and read as empty;
+ * `empty` changes no serving decision, so the cost of that is a label.
+ */
+export function repoExistence(
+	status: number | null,
+	sizeKb?: number | null,
+): RepoExistence {
+	if (status === 404) return "gone";
+	if (status !== 200) return "unchecked";
+	return sizeKb === 0 ? "empty" : "alive";
+}

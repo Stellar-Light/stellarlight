@@ -250,6 +250,41 @@ export const REPO_KINDS: readonly RepoKind[] = [
 	"code",
 ];
 
+/**
+ * Scan lifecycle vocabulary — ONE list, shared by the collection's `options`,
+ * the OpenAPI projection of `codeTruth.scanState` and the detector that writes
+ * it (spec-enum-parity.test.ts pins all three).
+ *
+ * `gone` is the state added 2026-09-14: we asked GitHub for the repo and it
+ * answered 404. "We looked and it is not there" is a scan outcome, not a
+ * scanner error — the 126 rows that carried `error`/`no-tree` were ranking
+ * first for their own names (PatrickKish1/safetrust-ZK, kingfavourjudah/
+ * FundBlock, Dione-b/stellarsight).
+ */
+export const CODE_SCAN_STATES = [
+	"pending",
+	"scanned",
+	"error",
+	"incomplete",
+	"gone",
+] as const;
+export type CodeScanState = (typeof CODE_SCAN_STATES)[number];
+
+/**
+ * Serving filter: a repo GitHub 404s must never be RECOMMENDED. Merge into the
+ * `where` of any query that answers "which repos?" — search, builder evidence.
+ *
+ * Deliberately NOT applied to named-row lookups (/api/repos, /api/repos/explain,
+ * /api/repos/trust) or to counts: asked about one repo by name, the honest
+ * answer is the row saying `codeScanState: "gone"`, not "never heard of it",
+ * and a total that counts rows we hold stays a total of rows we hold.
+ *
+ * `not_equals` keeps rows with no codeScanState at all (Mongo `$ne` matches a
+ * missing field) — same shape as the `tier: { not_equals: "archive" }` filters
+ * already in builder-code and /entities.
+ */
+export const NOT_GONE = { codeScanState: { not_equals: "gone" } } as const;
+
 export type RepoKindBasis =
 	| "isArchived"
 	| "isFork"
@@ -531,8 +566,7 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 		[0.03, engaged],
 	];
 	const baseWeight = meritParts.reduce((a, [w]) => a + w, 0);
-	const baseMerit =
-		meritParts.reduce((a, [w, v]) => a + w * v, 0) / baseWeight;
+	const baseMerit = meritParts.reduce((a, [w, v]) => a + w * v, 0) / baseWeight;
 	// MEASURING MUST NEVER COST A REPO. Adding the code term with a zero value
 	// made a scanned repo with no test directory score BELOW an identical repo
 	// nobody had looked at (1,000 stars, fresh, documented: 57 unscanned vs 40
@@ -571,7 +605,10 @@ export function repoGrade(input: RepoGradeInput): RepoGrade {
 	// Capped low on purpose: notes say somebody looked, not that the ecosystem
 	// depends on it, and the cap keeps a heavily-annotated small repo below a
 	// canonical one.
-	authority += Math.min(0.25, 0.06 * Math.max(0, input.knowledgeNoteCount ?? 0));
+	authority += Math.min(
+		0.25,
+		0.06 * Math.max(0, input.knowledgeNoteCount ?? 0),
+	);
 	// Shipping installable, registry-verified packages is authority a library
 	// earns by being usable. Capped: nine small packages are not nine times the
 	// evidence of one, and a monorepo should not out-authority an SDK.

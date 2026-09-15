@@ -45,6 +45,7 @@ import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { NOT_GONE } from "@/lib/repo-grade";
 import { findPeopleByName } from "@/lib/sdf-people";
 
 export const dynamic = "force-dynamic";
@@ -343,6 +344,9 @@ export async function GET(req: NextRequest) {
 						const langWhere: any = {
 							and: [
 								{ owner: { in: builders.map((b) => b.githubUsername) } },
+								// A 404 repo must not admit a builder to a language
+								// roster — nor be counted in the capped-roster warning.
+								NOT_GONE,
 								{
 									or: langProbes.flatMap((t) =>
 										languageCandidates(t).map((v) => ({
@@ -505,7 +509,10 @@ export async function GET(req: NextRequest) {
 					const rres = await withReadTimeout(
 						payload.find({
 							collection: "repos",
-							where: { owner: { in: builders.map((b) => b.githubUsername) } },
+							where: {
+								...NOT_GONE,
+								owner: { in: builders.map((b) => b.githubUsername) },
+							},
 							limit: 300,
 							depth: 0,
 							select: {
@@ -587,7 +594,7 @@ export async function GET(req: NextRequest) {
 					() =>
 						payload.find({
 							collection: "repos",
-							where: { owner: { like: derivedHandle } },
+							where: { ...NOT_GONE, owner: { like: derivedHandle } },
 							limit: 200,
 							depth: 0,
 							select: {

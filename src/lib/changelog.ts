@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-14",
+		surfaces: ["api", "api-client"],
+		version: "spec@1.9.52",
+		type: "fixed",
+		summary:
+			"Repositories that no longer exist on GitHub are no longer returned by searchRepos or counted as builder code evidence; codeTruth.scanState gains the value `gone` and is now an enum in the spec.",
+		detail:
+			"Live on 2026-09-14, searchRepos answered `safetrust-ZK` with PatrickKish1/safetrust-ZK at rank 1, `FundBlock` with kingfavourjudah/FundBlock at rank 1 and the query stellarsight with Dione-b/stellarsight at rank 2 — all three are 404 on GitHub. They sat at codeScanState `error` with a no-tree/unfetchable scan error, which reads as 'our scanner failed' and is indistinguishable from 'the repository is deleted'. `gone` is now a scan state of its own, written only when GitHub answers 404 to a direct read of the repository (scripts/check-gone-repos.ts, daily): rate limits, 5xx and a missing token classify as unchecked and can never produce it. Rows in that state are excluded from searchRepos (every candidate source, including the canonical/flagship injection and the identity supplements), from the repos injected as codeReferences into searchProjects, and from /api/builders code evidence and language admission. They are NOT hidden from the collection REST, resolveRepo/explainRepo or getRepoTrust: asked about one repo by name the honest answer is the row saying scanState `gone`, not silence. No count changed — /api/status and /api/analytics count rows held, which is still what they count.",
+	},
+	{
 		date: "2026-09-13",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.51",

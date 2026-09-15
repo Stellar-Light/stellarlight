@@ -22,6 +22,7 @@ import { isKnownInfraNotDeployable } from "./known-infra";
 import {
 	activityStateOf,
 	isFirstParty,
+	NOT_GONE,
 	type RepoActivityState,
 	type RepoKind,
 	type RepoKindBasis,
@@ -1251,8 +1252,13 @@ export async function searchRepos(
 		// boundary scoring below is the precise filter — same design as
 		// /api/projects/search. A no-query browse is capped to the top-scored
 		// page instead of the full collection.
+		// NOT_GONE on EVERY candidate source below: a repo GitHub 404s is not an
+		// answer to any query, and it was winning its own name (safetrust-ZK,
+		// FundBlock, stellarsight — measured live 2026-09-14). Applied in the DB
+		// `where` rather than as an in-memory filter so a gone row never takes a
+		// slot in the 600-row candidate window from a live one.
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-		const where: any = {};
+		const where: any = { ...NOT_GONE };
 		if (language) where.primaryLanguage = { like: language };
 		if (tokens.length) {
 			where.or = tokens.flatMap((t) =>
@@ -1316,7 +1322,7 @@ export async function searchRepos(
 		if (injectList.length) {
 			const cres = await find("repos canonical inject", {
 				collection: "repos",
-				where: { fullName: { in: injectList } },
+				where: { ...NOT_GONE, fullName: { in: injectList } },
 				limit: injectList.length,
 				depth: 0,
 				select: { readmeExcerpt: false },
@@ -1340,6 +1346,7 @@ export async function searchRepos(
 			const ares = await find("repos identity supplement", {
 				collection: "repos",
 				where: {
+					...NOT_GONE,
 					or: queryAnchors.flatMap((t) => [
 						{ fullName: { like: t } },
 						{ topics: { like: t } },
@@ -1382,6 +1389,7 @@ export async function searchRepos(
 			const nres = await find("repos exact-name supplement", {
 				collection: "repos",
 				where: {
+					...NOT_GONE,
 					or: forms.flatMap((f) => [
 						{ fullName: { like: f } },
 						{ name: { like: f } },

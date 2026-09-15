@@ -18,7 +18,7 @@ import {
 	STATUS_BASES,
 } from "../project-status";
 import { PROJECT_TYPES } from "../project-types";
-import { REPO_KINDS } from "../repo-grade";
+import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
@@ -91,6 +91,52 @@ describe("statusBasis is ONE list (sls-084)", () => {
 		};
 		walk(S, "spec");
 		expect(rivals).toEqual([]);
+	});
+});
+
+describe("codeScanState is ONE list (the gone state, 2026-09-14)", () => {
+	it("the collection's options are CODE_SCAN_STATES — a state a writer can store is a state the spec documents", () => {
+		const src = readFileSync(
+			resolve(__dirname, "../../collections/Repos.ts"),
+			"utf8",
+		);
+		const m = src.match(
+			/name:\s*"codeScanState",[\s\S]*?options:\s*\[([^\]]+)\]/,
+		);
+		if (!m) throw new Error("codeScanState options not found in Repos.ts");
+		// Either a spread of the constant, or a hand-typed list that must match.
+		if (m[1].includes("...CODE_SCAN_STATES")) return;
+		const options = [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+		expect(sorted(options)).toEqual(sorted(CODE_SCAN_STATES));
+	});
+
+	it("every spec projection of scanState lists the same states", () => {
+		const found: string[][] = [];
+		const walk = (n: unknown): void => {
+			if (Array.isArray(n)) {
+				for (const v of n) walk(v);
+				return;
+			}
+			if (!n || typeof n !== "object") return;
+			for (const [k, v] of Object.entries(n as Record<string, unknown>)) {
+				if (
+					k === "scanState" &&
+					v &&
+					typeof v === "object" &&
+					Array.isArray((v as { enum?: unknown }).enum)
+				)
+					found.push((v as { enum: string[] }).enum);
+				walk(v);
+			}
+		};
+		walk(S);
+		// Both codeTruth projections (trust summary + trust detail) carry it.
+		expect(found.length).toBeGreaterThanOrEqual(2);
+		for (const e of found) expect(sorted(e)).toEqual(sorted(CODE_SCAN_STATES));
+	});
+
+	it("gone is in the list — the state that stops us serving 404 repos", () => {
+		expect(CODE_SCAN_STATES).toContain("gone");
 	});
 });
 

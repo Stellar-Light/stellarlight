@@ -26,7 +26,7 @@ import {
 	STATUS_BASES,
 } from "./project-status";
 import { PROJECT_TYPES } from "./project-types";
-import { REPO_KINDS } from "./repo-grade";
+import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
 import { TRUST_SIGNALS } from "./trust-report";
@@ -4687,6 +4687,9 @@ export const spec: OpenAPISpec = {
 																	scanState: {
 																		type: "string",
 																		nullable: true,
+																		enum: [...CODE_SCAN_STATES],
+																		description:
+																			"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
 																	},
 																	scannedAt: {
 																		type: "string",
@@ -5093,7 +5096,13 @@ export const spec: OpenAPISpec = {
 												codeTruth: {
 													type: "object",
 													properties: {
-														scanState: { type: "string", nullable: true },
+														scanState: {
+															type: "string",
+															nullable: true,
+															enum: [...CODE_SCAN_STATES],
+															description:
+																"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
+														},
 														scannedAt: { type: "string", nullable: true },
 														stellarProof: { type: "string", nullable: true },
 														codeDepth: { type: "number", nullable: true },

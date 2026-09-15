@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { activityStateOf } from "../lib/repo-grade";
+import { activityStateOf, CODE_SCAN_STATES } from "../lib/repo-grade";
 import { repoSupersession } from "../lib/repo-relations";
 
 /**
@@ -197,7 +197,8 @@ export const Repos: CollectionConfig = {
 			type: "number",
 			defaultValue: 0,
 			admin: {
-				description: "0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)",
+				description:
+					"0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)",
 				position: "sidebar",
 			},
 		},
@@ -508,16 +509,18 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		// Scan lifecycle. pending = never successfully scanned (never demoted).
+		// `gone` = GitHub answered 404 for the repo itself; the row stays (its
+		// history is still true) but serving surfaces stop recommending it.
 		{
 			name: "codeScanState",
 			type: "select",
-			options: ["pending", "scanned", "error", "incomplete"],
+			options: [...CODE_SCAN_STATES],
 			defaultValue: "pending",
 			index: true,
 			admin: {
 				position: "sidebar",
 				description:
-					"CTL scan state — pending/error/incomplete are never demoted",
+					"CTL scan state — pending/error/incomplete are never demoted; gone = GitHub 404s the repo",
 			},
 		},
 		{ name: "codeScanError", type: "text", admin: { position: "sidebar" } },

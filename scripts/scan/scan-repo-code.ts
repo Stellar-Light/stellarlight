@@ -202,7 +202,17 @@ async function main() {
 				// re-picked every two hours forever, ~840 calls a day, and every wave
 				// reported `scanned=0` as a success — a lane that CAN do no work then
 				// looks exactly like a lane that is failing to.
-				[{ codeScanState: { not_in: ["scanned", "error", "incomplete"] } }];
+				// `gone` excluded for the same reason it exists (2026-09-14): the
+				// repo is a 404, so every wave would re-pick it as "never scanned"
+				// and spend budget proving the same absence. check-gone-repos.ts
+				// re-probes gone rows and sets them back to `error` if they return.
+				[
+					{
+						codeScanState: {
+							not_in: ["scanned", "error", "incomplete", "gone"],
+						},
+					},
+				];
 	const where: Where = {
 		and: [
 			...(LANG !== "all"
