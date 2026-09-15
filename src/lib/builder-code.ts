@@ -11,6 +11,7 @@
  */
 import type { Payload } from "payload";
 import { ACTIVE_PROJECT_STATUSES } from "./project-status";
+import { NOT_GONE } from "./repo-grade";
 
 export type CodeRepo = {
 	fullName: string;
@@ -145,6 +146,9 @@ export async function builderCodeActivity(
 					],
 				},
 				{ tier: { not_equals: "archive" } },
+				// A repo GitHub 404s is not evidence of anyone's work — same cut as
+				// the archive tier, one state later in the lifecycle.
+				NOT_GONE,
 			],
 		},
 		limit: 5000,

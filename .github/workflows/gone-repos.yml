@@ -1,0 +1,71 @@
+name: gone repos
+
+# Repos we serve that no longer exist on GitHub. Reads every row at
+# codeScanState error/gone from the PUBLIC repos API, asks GitHub once per
+# repo, and classifies from the HTTP status — 404 gone / 200 alive (size 0
+# empty) / anything else unchecked. A row the run could not check is never
+# reported as gone, and a run more than half blind exits 2 having written
+# nothing.
+#
+# REPORT ONLY on the schedule: the red IS the finding (a served repo that
+# 404s), not the lane breaking. The flip to codeScanState `gone` is a
+# dispatch with execute=true — same shape as mark-defunct.yml, because
+# hiding a row is a claim about the world and stays owner-approved.
+# workflow-health: signal-steps: ^Probe$
+
+on:
+  schedule:
+    # 06:40 UTC daily — after the nightly scan waves, before the morning read.
+    - cron: "40 6 * * *"
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write codeScanState=gone for confirmed 404s? Leave false for a report."
+        type: boolean
+        default: false
+      limit:
+        description: "How many rows to probe (unknown state first)"
+        default: "600"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gone-repos
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Pins the classifier before it is trusted to hide anything.
+      - name: Self-test the classifier
+        run: pnpm exec tsx scripts/check-gone-repos.ts --self-test
+      - name: Probe
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          # Only present on an execute dispatch; the scheduled run has no
+          # `inputs`, so it never gets --execute and never needs these.
+          DATABASE_URI: ${{ inputs.execute && secrets.DATABASE_URI || '' }}
+          PAYLOAD_SECRET: ${{ inputs.execute && secrets.PAYLOAD_SECRET || '' }}
+        run: pnpm exec tsx scripts/check-gone-repos.ts --limit=${{ inputs.limit || 600 }} ${{ inputs.execute && '--execute' || '' }}
+      # Only after the probe actually ran — an artifact committed by a skipped
+      # probe is the stale-evidence trap (a quiet detector reads like a clean
+      # one). Runs on the red too: a finding is exactly what must be recorded.
+      - name: Commit the artifact
+        if: success() || failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/gone-repos-latest.json || true
+          git diff --cached --quiet || git commit -m "chore(audit): gone-repos probe [skip ci]"
+          git pull --rebase origin main && git push
