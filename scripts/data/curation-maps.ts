@@ -2794,6 +2794,9 @@ export const WEBSITE_FIXES: Record<string, string> = {
  * "formerly Hermes"); wave-5 found "what happened to Hermes exchange"
  * missing zenex entirely because the alias existed only as prose. */
 export const ALIAS_ADD: Record<string, string[]> = {
+	// The SCF project is "Enable"; the company and website are Humanity Link,
+	// so a reader who knows either name finds the row (packet 2026-09-14).
+	enable: ["Humanity Link"],
 	zenex: ["Hermes"],
 	// ── 2026-08-31 SCF absence review (docs/SCF-SEED-REVIEW-2026-08-31.md):
 	// product names their SCF submissions use, verified by website-domain
@@ -2867,6 +2870,167 @@ export const SEEDS: Array<{
 		| "human-verified"
 		| "source-inherited";
 }> = [
+	// ── SCF absences, 2026-09-14 packet, owner-approved 2026-09-15 ──────────
+	// Nine projects the Stellar Community Fund awarded that the directory did
+	// not serve. Evidence per row is in improvements/quality/
+	// scf-absence-packet-2026-09-14.md: the fund's own submission record
+	// (round, budget, and the page's awarded/lastAwardedRound/totalAwarded
+	// summary, read via scripts/eval/scf-official.ts rather than from a round
+	// badge), plus an HTTP 200 whose page title names the product.
+	//
+	// Every one was checked absent TWICE — by name and by registrable domain
+	// against /api/projects — on 2026-09-14 and again on 2026-09-15 before
+	// this block was written. All nine slugs were free.
+	//
+	// status: "Development" throughout, and the packet argues why: these are
+	// SCF #45 awards still disbursing, and no Stellar deployment, contract,
+	// issued asset or Stellar-facing repo was found for any of them. The
+	// company website being live is not the Stellar product being live — the
+	// same distinction backfill-deployment.ts draws between operating for
+	// users and deployed on mainnet. statusSourceUrl cites the SCF page; the
+	// basis records that a human reviewed the packet on the asOf date.
+
+	{
+		slug: "balance",
+		name: "Balance",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Balance will add institutional-grade custody and payment infrastructure for Stellar assets. The project will enable regulated financial institutions, fintechs, funds, and enterprises to securely hold XLM and Stellar-issued assets, create and manage wallets, enforce transaction policies, and move assets through Balance’s API and institutional interface.",
+		links: { website: "https://balance.ca/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/balance-institutional-custody-and-payments-for-stellar-syw",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "micro-be",
+		name: "Micro Be",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["RWA", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Problem French marinas use clonable RFID cards to distribute water and electricity to boaters, causing ~€385K in annual losses across our 11 contracted marinas. Credit purchases also depend on marina office opening hours: ~25% of high-season arrivals occur outside these hours, limiting access to utilities and representing ~€1.2M in potential annual revenue.",
+		links: { website: "https://www.micro-be.com/en/entreprise.htm" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/micro-be-k9o",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "catlog",
+		name: "Catlog",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Catlog is a commerce operating system for Africa's social sellers. 2,000+ merchants across Nigeria, Ghana, Kenya, and South Africa use us to take orders, manage inventory, and collect payments from their phones. Payments remain their hardest problem. Millions of consumers in our markets hold crypto but must off-ramp to fiat before spending with local merchants.",
+		links: { website: "https://catlog.shop" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/catlog-ygy",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "urbanflip",
+		name: "UrbanFlip",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Urbanflip is a live real estate co-investment platform with over $90M invested through it in the last 12 months. Each operation sits in a Spanish SPV holding legal title to one asset; verified professional investors participate as creditors via private placements.",
+		links: { website: "https://urbanflip.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/urbanflip-compliant-on-chain-real-estate-co-investment-p6d",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "lunar-finance",
+		name: "Lunar Finance",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["DEX", "Bridge"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Lunar Finance is building the execution layer for on-chain transactions: a unified meta-aggregation platform that abstracts the complexity of fragmented liquidity across blockchains and delivers optimal trade and bridging outcomes. Our vision is to become the default infrastructure for value movement across Web3. As liquidity fragments across chains, bridges, and DEXs, inefficiencies increase.",
+		links: { website: "https://lunarfinance.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/lunar-finance-oir",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "haven",
+		name: "Haven",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Wallet", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Haven - privacy-first crypto neobank ------------------------------------------- Everyday banking on public blockchains, without exposing the user's financial life on a public ledger. problem Every on-chain payment exposes the payer. Anyone can look up a wallet and see salary, balances, and purchase history. solution Haven packages private, compliant payments into a product people already know how to use, a neobank.",
+		links: { website: "https://haven.hn" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/haven-privacy-first-crypto-neobank-rol",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "enable",
+		name: "Enable",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments", "Social Impact"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Here’s a tightened version under 1100 characters: Humanity Link is building Enable, a financial infrastructure layer designed to improve how aid and value move globally. Over the past several years, we have worked with organizations such as the Red Cross and Norwegian Refugee Council, supporting more than $70 million in aid delivery through digital communication and cash assistance systems.",
+		links: { website: "https://www.humanity.link/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/enable-duq",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "minisend",
+		name: "Minisend",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Minisend is a cross-chain stablecoin settlement infrastructure for Africa. Users and businesses send USDC or USDT to a single address and settle to M-Pesa, Airtel Money, or a bank account in Kenya, Nigeria, or Ghana in seconds, with an onramp in the other direction. Minisend is live today across 26 EVM chains and solana , serving traders, freelancers, and businesses that receive cross-border payments.",
+		links: { website: "https://minisend.xyz/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/minisend-7tt",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "bwb",
+		name: "BWB Digital Assets",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"BWB Digital Assets is a real estate private equity investment platform that uses tokenization to optimize performance and enhance transparency, financial returns, and user experience. The investments are public offerings compliant with CVM (SEC equivalent).",
+		links: { website: "https://www.bwbi.com.br/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/bwb-brazilian-real-estate-yields-on-stellar-zab",
+		statusBasis: "human-verified",
+	},
+
 	{
 		// Consumer-demand gap (raven gateway, 4 real queries, engine-d 2026-08-28):
 		// verified 2026-08-31 — site live (www.hypertron.space 200), presented as
