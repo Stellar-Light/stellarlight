@@ -355,6 +355,11 @@ const REVIEWED_ABSENT: Record<
 		evidence:
 			"domain ctx.com matches the row after the x.com filter fix — kept here in case the page's links change",
 	},
+	"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu": {
+		verdict: "not absent — served TWICE, as pagcrypto and pagfinance",
+		evidence:
+			'one company seeded twice: both rows publish pag.finance and the same types. pagcrypto carries the #42 award and github.com/PagCrypto; pagfinance carries the brand name and scf.awarded:false, so an agent finding the brand-named row is told it has no SCF funding. Same operator confirmed from the asset\'s own anchor — brlp.money/.well-known/stellar.toml gives ORG_NAME "PagFinance" for BRLP issuer GDD3ZAU3…NPRF, whose Horizon home_domain points back at brlp.money. No pass matched the SCF entry because the fund lists pagcrypto.finance while both rows carry pag.finance and the submission title is descriptive. Queued as a DUPE_MERGE in curate-projects.ts (pagcrypto -> pagfinance, copyScf).',
+	},
 	"prices-api-rfp-ctx-1vo": {
 		verdict: "served under ctx (second submission, rounds linked)",
 		evidence: "rates.ctx.com is ctx.com — same company",
