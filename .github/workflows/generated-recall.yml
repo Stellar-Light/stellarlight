@@ -58,7 +58,21 @@ jobs:
           git add improvements/audits/north-star-series.json || true
           git diff --cached --quiet || git commit -m "data(quality): north-star point from Engine A [skip ci]"
           git diff --quiet HEAD origin/main -- improvements/audits/north-star-series.json 2>/dev/null || {
-            git pull --rebase origin main && git push
+            # Push races and dirty trees both hit this step (2026-09-15): the
+          # gone-repos lane's dry run lost its artifact to `cannot lock ref
+          # 'refs/heads/main'` while another lane pushed, and its execute run to
+          # `cannot pull with rebase: You have unstaged changes` — so the probe's
+          # own record never persisted and every later run would have re-reported
+          # the same 147 findings as new. This is the retry shape lane-autonomy
+          # and packet-stamps already use: push first, and on rejection rebase
+          # keeping THIS run's measurement (`-X theirs` — in a rebase the sides
+          # are swapped, so `theirs` is the commit being replayed). --autostash
+          # covers a working tree the script dirtied after `git add`.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push
           }
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
