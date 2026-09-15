@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-15T02:18:36.676Z",
+	"asOf": "2026-09-15T02:31:23.190Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 95,
 	"healthy": 95,
@@ -252,22 +252,11 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:16:19Z",
+			"lastSuccessAt": "2026-09-15T02:29:10Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 48,
+			"runs": 50,
 			"why": "last green 0d ago"
-		},
-		{
-			"file": "coverage-watch.yml",
-			"name": "coverage-watch",
-			"cron": "0 8 1 * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-01T12:50:12Z",
-			"ageDays": 13,
-			"graceDays": 75,
-			"runs": 1,
-			"why": "last green 13d ago"
 		},
 		{
 			"file": "curate-partners.yml",
@@ -439,10 +428,10 @@
 			"name": "Enrich repos (code-reference index)",
 			"cron": "0 8 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T01:48:49Z",
+			"lastSuccessAt": "2026-09-15T02:01:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 24,
+			"runs": 25,
 			"why": "last green 0d ago"
 		},
 		{
@@ -512,15 +501,26 @@
 			"why": "last green 92d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "gone-repos.yml",
+			"name": "gone repos",
+			"cron": "40 6 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-15T02:16:41Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "import-replit-stablecoin-history.yml",
 			"name": "Import Replit stablecoin history (manual)",
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-22T02:25:42Z",
-			"ageDays": 23,
+			"ageDays": 24,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 23d ago (manual tool — age not judged)"
+			"why": "last green 24d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-dora-evals.yml",
@@ -593,10 +593,10 @@
 			"name": "live-index-guards",
 			"cron": "0 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T11:14:55Z",
+			"lastSuccessAt": "2026-09-15T02:20:52Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 11,
+			"runs": 12,
 			"why": "last green 0d ago"
 		},
 		{
@@ -758,10 +758,10 @@
 			"name": "raven-eval-parity",
 			"cron": "30 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T14:19:39Z",
+			"lastSuccessAt": "2026-09-15T02:22:26Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 37,
+			"runs": 38,
 			"why": "last green 0d ago"
 		},
 		{
@@ -978,7 +978,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:16:19Z",
+			"lastSuccessAt": "2026-09-15T02:29:10Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1044,10 +1044,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T01:40:01Z",
+			"lastSuccessAt": "2026-09-15T02:16:19Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 59,
+			"runs": 60,
 			"why": "last green 0d ago"
 		}
 	]
