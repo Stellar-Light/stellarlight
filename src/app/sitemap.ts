@@ -2,7 +2,8 @@
  * sitemap.xml generator.
  *
  * Static top-level routes + every detail page we can rank: projects,
- * entities, partners, blog posts, skills, stablecoins and hackathons. Next.js
+ * entities, partners, blog posts, skills and stablecoins, plus the directory
+ * category pages. Next.js
  * serves this at /sitemap.xml automatically (App Router convention).
  *
  * Skills inclusion is the SEO unlock — 30+ indexable URLs the moment this
@@ -201,8 +202,15 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 	// Finished detail pages that were never submitted. Each renders a unique
 	// title, description and h1 today — they were simply missing from here, so
 	// discovery depended on a crawler walking in from the list page.
-	//   stablecoins  41 pages, keyed by assetId
-	//   hackathons   26 pages
+	//   stablecoins  46 rows, keyed by assetId — live and submitted
+	//
+	// hackathons stays wired but contributes NOTHING today, and that is worth
+	// stating rather than leaving as a silent zero: /hackathons is served from
+	// the DoraHacks API at request time, the `hackathons` COLLECTION the detail
+	// route queries is empty, and /hackathons/<any dorahacks slug> 404s. There
+	// are no detail pages to submit. Left in place so the day that collection
+	// is populated the pages are submitted without anyone remembering to come
+	// back here — the pull is a no-op until then.
 	await pull("stablecoins", "/stablecoins", {}, 0.6, "assetId");
 	await pull("hackathons", "/hackathons", {}, 0.6);
 	return out;
