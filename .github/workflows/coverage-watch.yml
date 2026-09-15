@@ -96,12 +96,24 @@ jobs:
           miss = lanes.get('defillama', {}).get('missing', [])
           if miss:
               print()
-              print("### DefiLlama missing (by TVL)")
+              print("### DefiLlama missing (by Stellar TVL)")
               print()
-              print("| protocol | category | TVL | site |")
-              print("|---|---|---|---|")
+              print("| protocol | category | Stellar TVL | total TVL | site |")
+              print("|---|---|---|---|---|")
               for m in miss:
-                  print(f"| {m['name']} | {m['category']} | ${m['tvlUSD']:,} | {m.get('url') or '—'} |")
+                  # stellarTvlUSD since #1133 (2026-08-30): the report ranks and
+                  # floors on the STELLAR slice, because a multichain protocol's
+                  # headline TVL says nothing about its Stellar footprint. The
+                  # old `tvlUSD` key crashed this step with a KeyError — but only
+                  # when `miss` was non-empty, so the lane passed on 2026-09-01
+                  # with nothing above the floor and failed on the first run that
+                  # actually had something to report. .get() keeps a future
+                  # rename a blank cell instead of a dead lane.
+                  st = m.get('stellarTvlUSD')
+                  tot = m.get('totalTvlUSD')
+                  stx = f"${st:,}" if isinstance(st, int) else "—"
+                  totx = f"${tot:,}" if isinstance(tot, int) else "—"
+                  print(f"| {m.get('name','?')} | {m.get('category','?')} | {stx} | {totx} | {m.get('url') or '—'} |")
           pd = [p for p in lanes.get('partnerDocs', []) if p.get('verdict') != 'own']
           if pd:
               print()
