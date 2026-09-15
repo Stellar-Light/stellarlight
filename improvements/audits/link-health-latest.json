@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-09-15T07:56:08.013Z",
- "asOf": "2026-09-15T07:56:08.013Z",
+ "generatedAt": "2026-09-15T19:05:52.248Z",
+ "asOf": "2026-09-15T19:05:52.248Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2361,
+ "checked": 2389,
  "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
   {
@@ -15,39 +15,6 @@
    ],
    "citedByStatus": [
     "69d19a831a0f3c3e3c27072e: n/a"
-   ]
-  },
-  {
-   "url": "https://clickpesadebtfund.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/clickpesa.links.website"
-   ],
-   "citedByStatus": [
-    "clickpesa: n/a"
-   ]
-  },
-  {
-   "url": "https://demo.drivedeb.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/deb.links.website"
-   ],
-   "citedByStatus": [
-    "deb: Live"
-   ]
-  },
-  {
-   "url": "https://gameduk.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/gameduk.links.website"
-   ],
-   "citedByStatus": [
-    "gameduk: Live"
    ]
   },
   {
@@ -106,6 +73,17 @@
    ]
   },
   {
+   "url": "https://micro-be.com/en/entreprise.htm",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/micro-be.links.website"
+   ],
+   "citedByStatus": [
+    "micro-be: Development"
+   ]
+  },
+  {
    "url": "https://nebula.eiger.co",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -125,39 +103,6 @@
    ],
    "citedByStatus": [
     "6a9a5e6d32df846e8503fdaf: n/a"
-   ]
-  },
-  {
-   "url": "https://reflector.world",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/stellar-expert.links.website"
-   ],
-   "citedByStatus": [
-    "stellar-expert: n/a"
-   ]
-  },
-  {
-   "url": "https://slender.fi",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/eq-lab.links.website"
-   ],
-   "citedByStatus": [
-    "eq-lab: n/a"
-   ]
-  },
-  {
-   "url": "https://stex.xycloo.com",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "entities/xycloo.links.website"
-   ],
-   "citedByStatus": [
-    "xycloo: n/a"
    ]
   },
   {
