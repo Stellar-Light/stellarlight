@@ -42,9 +42,12 @@ export default async function DirectoryPage({
 			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 				{/* Header */}
 				<div className="mb-8">
-					<h2 className="text-3xl font-medium tracking-tight mb-6">
-						Projects Directory
-					</h2>
+					{/* h1, not h2: this page had no h1 at all, so its strongest
+					    heading was invisible to a crawler ranking it for
+					    "stellar projects directory". */}
+					<h1 className="text-3xl font-medium tracking-tight mb-6">
+						Every project building on Stellar
+					</h1>
 				</div>
 
 				{/* Search and Filter */}
