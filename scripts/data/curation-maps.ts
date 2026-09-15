@@ -5579,7 +5579,15 @@ export const GITHUB_LINK_REMOVE: Record<string, string> = {
  */
 export const ENTITY_LINK_FIXES: Record<
 	string,
-	{ website?: string; github?: string; twitter?: string }
+	{
+		/** A string sets the field. `null` CLEARS it — for a link with no live
+		 *  replacement, where the honest state is no link rather than a dead
+		 *  one. A key left out means "leave this field alone", so the three
+		 *  cases stay distinguishable. */
+		website?: string | null;
+		github?: string | null;
+		twitter?: string | null;
+	}
 > = {
 	// 2026-09-15. Stored website was https://reflector.world/ — NXDOMAIN, and
 	// inherited from the `reflector` project before that project moved to
@@ -5587,6 +5595,26 @@ export const ENTITY_LINK_FIXES: Record<
 	// its own site answers 200 titled "StellarExpert | Stellar XLM block
 	// explorer and analytics platform". The github org is confirmed by albedo's
 	// own repo link, github.com/stellar-expert/albedo.
+	// 2026-09-15. Stored website https://slender.fi/ — NXDOMAIN. Inherited from
+	// the `slender` project, whose own website field is already null. EQ Lab's
+	// own site answers 200 titled "EQ LAB – Web3 & blockchain development |
+	// outsource | digital consulting". The entity's github, eq-lab/slender, is
+	// alive (200, "Lending protocol in Soroban") and is left alone.
+	"eq-lab": { website: "https://eqlab.io" },
+	// 2026-09-15. Stored website https://clickpesadebtfund.com/ — NXDOMAIN; the
+	// debt-fund subdomain went away, the company did not. clickpesa.com answers
+	// 200 titled "Payment Solutions for Microfinance & SMEs | Payment Gateway -
+	// Tanzania".
+	clickpesa: { website: "https://clickpesa.com" },
+	// 2026-09-15. Stored website https://stex.xycloo.com/ — NXDOMAIN, and there
+	// is no replacement to point at: xycloo.com resolves (172.234.102.247) but
+	// serves nothing for that name — HTTPS fails TLSV1_UNRECOGNIZED_NAME and
+	// HTTP returns 404 — and xycloo.dev does not resolve. So the field is
+	// CLEARED rather than redirected: no link is true, a dead link is not.
+	// Their GitHub org github.com/xycloo is alive ("Xycloo Labs") and the
+	// entity's existing github link (xycloo/documents-marketplace-devenv, 200)
+	// still works, so neither is touched here.
+	xycloo: { website: null },
 	"stellar-expert": {
 		website: "https://stellar.expert",
 		github: "https://github.com/stellar-expert",
