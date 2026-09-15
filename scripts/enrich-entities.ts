@@ -24,6 +24,16 @@ const dryRun = !args.includes("--execute");
  *  one: that is a different change, with a different blast radius, and it
  *  should be asked for rather than ride along. */
 const linksOnly = args.includes("--links-only");
+/** --only <slug>: act on ONE entity.
+ *
+ *  The 2026-09-15 dry run is why this exists. A links-only pass over all 47
+ *  entities planned 5 writes, not the 1 asked for: the other four were empty
+ *  fields inheriting from linked projects, and two of those carried values a
+ *  reader should never see — a GitHub URL in a `website` field and
+ *  x.com/github as a `twitter`. Correcting one dead URL must not smuggle in
+ *  four unrelated writes, two of them junk. */
+const onlyIdx = args.indexOf("--only");
+const onlySlug = onlyIdx > -1 ? args[onlyIdx + 1] : null;
 const UNAVATAR_API_KEY = process.env.UNAVATAR_API_KEY || "";
 
 const stats = {
@@ -132,7 +142,7 @@ async function main() {
 
 	// Fetch all entities with their projects populated (depth 2 to get project logos)
 	let page = 1;
-	const entities: any[] = [];
+	let entities: any[] = [];
 	while (true) {
 		const r = await payload.find({
 			collection: "entities",
@@ -143,6 +153,18 @@ async function main() {
 		entities.push(...r.docs);
 		if (!r.hasNextPage) break;
 		page++;
+	}
+
+	if (onlySlug) {
+		const before = entities.length;
+		entities = entities.filter((e: any) => e.slug === onlySlug);
+		console.log(
+			`--only ${onlySlug}: ${entities.length} of ${before} entit${entities.length === 1 ? "y" : "ies"}`,
+		);
+		if (entities.length === 0) {
+			console.error(`no entity with slug "${onlySlug}" — nothing to do`);
+			process.exit(1);
+		}
 	}
 
 	stats.total = entities.length;
