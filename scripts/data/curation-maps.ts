@@ -5622,6 +5622,25 @@ export const ENTITY_LINK_FIXES: Record<
 };
 
 export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
+	// ── 2026-09-15, from improvements/quality/broken-links-packet-2026-09-15.md
+	// The two LIVE project rows check-links has proved dead every day since
+	// 2026-09-06. Each candidate replacement was opened, not guessed:
+	//
+	// gameduk — gameduk.com, www.gameduk.com, gameduk.io and gameduk.xyz all
+	// NXDOMAIN. Nothing to point at.
+	//   NOTE for the owner: this row is Live on a `site-liveness` basis dated
+	//   2026-08-17, and the site it was based on no longer resolves. Removing
+	//   the link removes that evidence. Whether the PROJECT is inactive is a
+	//   status call (mark-inactive-projects.yml), deliberately not made here.
+	gameduk: "https://gameduk.com/",
+	// deb — the stored demo.drivedeb.com is NXDOMAIN. drivedeb.com itself is
+	// NOT a replacement: https times out, http 200s to www.drivedeb.com, and
+	// that page is titled "Welcome to drivedeb.com" with the same string as its
+	// description and no mention of Stellar. That is a parked default page, and
+	// a default page is not proof of life — the same rule page-verdict.ts
+	// applies. So: removal, not a redirect to a placeholder.
+	deb: "https://demo.drivedeb.com/",
+
 	// ── 2026-09-07, second pass: four rows store a GitHub url in
 	// links.website. Same free-text-in-a-typed-field shape as orgLogin,
 	// github.repos[] and links.github before it — fourth field. Each repo
