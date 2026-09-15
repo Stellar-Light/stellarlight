@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-15T17:18:31.708Z",
+	"asOf": "2026-09-15T17:34:26.467Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 91,
 	"healthy": 91,
@@ -197,7 +197,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T16:43:51Z",
+			"lastSuccessAt": "2026-09-15T17:27:38Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -219,10 +219,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T17:15:55Z",
+			"lastSuccessAt": "2026-09-15T17:27:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 91,
+			"runs": 93,
 			"why": "last green 0d ago"
 		},
 		{
@@ -352,10 +352,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-07-20T17:18:49Z",
-			"ageDays": 56,
+			"ageDays": 57,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 56d ago (manual tool — age not judged)"
+			"why": "last green 57d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-partners.yml",
@@ -604,7 +604,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T16:40:03Z",
+			"lastSuccessAt": "2026-09-15T17:24:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -674,7 +674,7 @@
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 64,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -747,11 +747,11 @@
 			"name": "Refresh Scout research corpus",
 			"cron": "0 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-14T11:31:46Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-09-15T17:27:48Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 4,
-			"why": "last green 1d ago"
+			"runs": 5,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "refresh-rwa.yml",
@@ -945,7 +945,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T17:15:55Z",
+			"lastSuccessAt": "2026-09-15T17:27:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1000,10 +1000,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T04:53:09Z",
+			"lastSuccessAt": "2026-09-15T17:15:55Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 65,
+			"runs": 66,
 			"why": "last green 0d ago"
 		}
 	]
