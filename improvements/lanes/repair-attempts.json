@@ -17,6 +17,15 @@
    "pr": null,
    "costUsd": 5.507265749999999,
    "note": "pushed repair/nightly-completeness-scfroundawards-empty-lulpay-20260914-1737 but gh pr create returned no URL"
+  },
+  {
+   "rowId": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
+   "date": "2026-09-15",
+   "run": "34977806120",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
