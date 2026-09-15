@@ -19,6 +19,9 @@ on:
         description: "Skip the logo pass (recommended for a link correction)."
         type: boolean
         default: true
+      only:
+        description: "Act on ONE entity slug. Leave empty for all — but read the dry run first: a links-only pass over all of them plans writes for every entity with an empty field, not just the one you came for."
+        default: ""
 concurrency:
   group: enrich-entities
   cancel-in-progress: false
@@ -39,4 +42,4 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Enrich (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/enrich-entities.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.linksOnly && '--links-only' || '' }}
+        run: pnpm exec tsx scripts/enrich-entities.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.linksOnly && '--links-only' || '' }} ${{ inputs.only && format('--only {0}', inputs.only) || '' }}
