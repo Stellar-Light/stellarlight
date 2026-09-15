@@ -68,4 +68,18 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add improvements/audits/gone-repos-latest.json || true
           git diff --cached --quiet || git commit -m "chore(audit): gone-repos probe [skip ci]"
-          git pull --rebase origin main && git push
+          # Push races and dirty trees both hit this step (2026-09-15): the
+          # gone-repos lane's dry run lost its artifact to `cannot lock ref
+          # 'refs/heads/main'` while another lane pushed, and its execute run to
+          # `cannot pull with rebase: You have unstaged changes` — so the probe's
+          # own record never persisted and every later run would have re-reported
+          # the same 147 findings as new. This is the retry shape lane-autonomy
+          # and packet-stamps already use: push first, and on rejection rebase
+          # keeping THIS run's measurement (`-X theirs` — in a rebase the sides
+          # are swapped, so `theirs` is the commit being replayed). --autostash
+          # covers a working tree the script dirtied after `git add`.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push
