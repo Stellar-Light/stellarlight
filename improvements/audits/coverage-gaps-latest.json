@@ -1,21 +1,85 @@
 {
-  "asOf": "2026-09-01T12:51:08.839Z",
+  "asOf": "2026-09-15T02:30:28.636Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
-    "total": 500,
-    "absent": 0,
-    "served": 500,
-    "absentWithRoundBadge": 0,
-    "sample": []
+    "total": 514,
+    "absent": 8,
+    "served": 506,
+    "absentWithRoundBadge": 8,
+    "sample": [
+      {
+        "scfSlug": "balance-institutional-custody-and-payments-for-stellar-syw",
+        "rounds": [
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/balance-institutional-custody-and-payments-for-stellar-syw"
+      },
+      {
+        "scfSlug": "micro-be-k9o",
+        "rounds": [
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/micro-be-k9o"
+      },
+      {
+        "scfSlug": "catlog-ygy",
+        "rounds": [
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/catlog-ygy"
+      },
+      {
+        "scfSlug": "urbanflip-compliant-on-chain-real-estate-co-investment-p6d",
+        "rounds": [
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/urbanflip-compliant-on-chain-real-estate-co-investment-p6d"
+      },
+      {
+        "scfSlug": "lunar-finance-oir",
+        "rounds": [
+          "46",
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/lunar-finance-oir"
+      },
+      {
+        "scfSlug": "haven-privacy-first-crypto-neobank-rol",
+        "rounds": [
+          "45"
+        ],
+        "url": "https://communityfund.stellar.org/project/haven-privacy-first-crypto-neobank-rol"
+      },
+      {
+        "scfSlug": "enable-duq",
+        "rounds": [
+          "45",
+          "43"
+        ],
+        "url": "https://communityfund.stellar.org/project/enable-duq"
+      },
+      {
+        "scfSlug": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+        "rounds": [
+          "42"
+        ],
+        "url": "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu"
+      }
+    ]
   },
   "defillama": {
-    "stellarListed": 42,
-    "matched": 32,
-    "missing": 0,
+    "stellarListed": 44,
+    "matched": 33,
+    "missing": 1,
     "belowFloor": 2
   },
   "corroboratedAbsent": [],
   "domainMatched": [
+    {
+      "scf": "lul-serving-the-unbanked-ckz",
+      "slug": "lulpay",
+      "domain": "lulpay.com"
+    },
     {
       "scf": "a-real-estate-tokenization-platform-ss1",
       "slug": "verseprop",
@@ -72,6 +136,21 @@
       "domain": "youtube.com/@robertosanzcriptomonedas"
     },
     {
+      "scf": "minisend-7tt",
+      "slug": "dune",
+      "domain": "dune.com"
+    },
+    {
+      "scf": "bwb-brazilian-real-estate-yields-on-stellar-zab",
+      "slug": "noticias-trading",
+      "domain": "beacons.ai"
+    },
+    {
+      "scf": "agama-dtk",
+      "slug": "octarine",
+      "domain": "octarine.finance"
+    },
+    {
       "scf": "embedded-collective-investment-via-soroban-syi",
       "slug": "escala",
       "domain": "escalahq.com"
@@ -92,11 +171,6 @@
       "domain": "theaha.co"
     },
     {
-      "scf": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
-      "slug": "pagcrypto",
-      "domain": "pagcrypto.finance"
-    },
-    {
       "scf": "post-quantum-secure-wallets-for-stellar-97o",
       "slug": "soundness",
       "domain": "soundness.xyz"
@@ -113,12 +187,12 @@
     }
   ],
   "reviewedAbsent": [],
-  "unreviewedAbsent": 0,
+  "unreviewedAbsent": 8,
   "summary": {
-    "missingDefillama": 0,
-    "missingScf": 0,
+    "missingDefillama": 1,
+    "missingScf": 8,
     "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 0,
+    "staleCollections": 1,
     "staleOrEmptyResearchSources": 1,
     "refreshUnmeasurableSources": 3
   }
