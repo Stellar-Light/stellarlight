@@ -1,5 +1,11 @@
 {
-	"generatedAt": "2026-09-14T11:10:55.214Z",
+	"generatedAt": "2026-09-15T10:41:24.916Z",
 	"detector": "note-freshness",
-	"failures": []
+	"failures": [
+		{
+			"probe": "note-repo-gone:comzzy-comzzy/datavend",
+			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		}
+	]
 }

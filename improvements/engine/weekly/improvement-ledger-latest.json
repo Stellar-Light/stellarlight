@@ -1,19 +1,34 @@
 {
-	"generatedAt": "2026-09-14T17:57:47.507Z",
-	"total": 664,
-	"open": 2,
-	"refreshQueue": 15,
+	"generatedAt": "2026-09-15T10:42:08.108Z",
+	"total": 666,
+	"open": 1,
+	"refreshQueue": 17,
 	"blockedUpstream": 17,
+	"lagPastGrace": {
+		"count": 2,
+		"graceDays": 20,
+		"oldestDays": 54,
+		"probes": [
+			{
+				"id": "raven-routing:reflector-oracle-on-stellar",
+				"days": 54
+			},
+			{
+				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
+				"days": 54
+			}
+		]
+	},
 	"blockedBy": {
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 630,
+	"closed": 631,
 	"verified": 7,
-	"cleared": 623,
+	"cleared": 624,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 407,
-	"closingRate": 0.34,
+	"clearedOnSilence": 408,
+	"closingRate": 0.33,
 	"silenceShare": 0.61,
 	"recurrence": {
 		"reopened": 5,
@@ -21,18 +36,18 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 285,
-				"recurred": 134,
-				"ratePct": 47
+				"newFindings": 281,
+				"recurred": 130,
+				"ratePct": 46.3
 			},
 			"lifetime": {
-				"newFindings": 664,
-				"recurred": 155,
-				"ratePct": 23.3
+				"newFindings": 666,
+				"recurred": 157,
+				"ratePct": 23.6
 			}
 		}
 	},
-	"oldestOpenDays": 5,
+	"oldestOpenDays": 1,
 	"inWave": 0,
 	"highOpen": 0,
 	"staleHighOpen": 0,
@@ -43,14 +58,14 @@
 			"total": 340
 		},
 		{
-			"surface": "directory",
-			"open": 1,
-			"total": 197
-		},
-		{
 			"surface": "code",
 			"open": 0,
-			"total": 20
+			"total": 21
+		},
+		{
+			"surface": "directory",
+			"open": 0,
+			"total": 198
 		},
 		{
 			"surface": "scf",
