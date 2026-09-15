@@ -14,6 +14,12 @@ name: Award product-integration basis (manual)
 # --limit on a first run to sample before committing to the whole set.
 
 on:
+  # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
+  # waited on somebody pressing a button — the weekly link check re-reads product pages; this turns a product marker into a status basis.
+  # Dry-run dispatches on 2026-09-15 found work waiting in two of the four
+  # lanes in this family after 8-11 days idle.
+  schedule:
+    - cron: "0 10 * * 2"
   workflow_dispatch:
     inputs:
       execute:
@@ -46,4 +52,4 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Probe (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/basis-from-product.ts --limit=${{ inputs.limit }} ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/basis-from-product.ts --limit=${{ inputs.limit }} ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

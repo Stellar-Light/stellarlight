@@ -11,6 +11,14 @@ name: Award onchain-activity basis (manual)
 # alone — no movement is not proof of death. Dry-run by default.
 
 on:
+  # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
+  # waited on somebody pressing a button — on-chain payments and
+  # subinvocations are re-read continuously; this turns them into a status
+  # basis and, just as importantly, re-dates the ones already carrying it.
+  # Dry run on 2026-09-15, after 10 days idle: 11 rows due a refresh,
+  # including blend, aquarius, reflector and defindex.
+  schedule:
+    - cron: "0 9 * * 2"
   workflow_dispatch:
     inputs:
       execute:
@@ -38,4 +46,4 @@ jobs:
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - name: Award (dry-run unless execute=true)
-        run: pnpm exec tsx scripts/basis-from-onchain.ts ${{ inputs.execute && '--execute' || '' }}
+        run: pnpm exec tsx scripts/basis-from-onchain.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
