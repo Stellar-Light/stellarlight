@@ -226,12 +226,15 @@ async function main() {
 		// exists to replace — the merge below is fill-if-empty, so a non-empty
 		// dead URL always wins otherwise.
 		const fix = ENTITY_LINK_FIXES[entity.slug as string] ?? {};
-		const mergedLinks: Record<string, string | undefined> = {
-			website:
-				fix.website || currentLinks.website || newLinks.website || undefined,
-			github: fix.github || currentLinks.github || newLinks.github || undefined,
-			twitter:
-				fix.twitter || currentLinks.twitter || newLinks.twitter || undefined,
+		// PRESENCE of the key decides, not truthiness: `null` has to mean
+		// "clear this" and `a || b` would quietly fall through to the dead
+		// value the entry exists to remove.
+		const pick = (k: "website" | "github" | "twitter") =>
+			k in fix ? (fix[k] ?? null) : currentLinks[k] || newLinks[k] || undefined;
+		const mergedLinks: Record<string, string | null | undefined> = {
+			website: pick("website"),
+			github: pick("github"),
+			twitter: pick("twitter"),
 		};
 
 		if (
@@ -250,10 +253,12 @@ async function main() {
 
 		if (!linksOnly && !entity.logo) {
 			// Try unavatar first
+			// getAvatarUrls takes string | undefined; a CLEARED link is null and
+			// must read as "no value" here rather than widening its signature.
 			const avatarUrls = getAvatarUrls({
-				twitter: mergedLinks.twitter,
-				github: mergedLinks.github,
-				website: mergedLinks.website,
+				twitter: mergedLinks.twitter ?? undefined,
+				github: mergedLinks.github ?? undefined,
+				website: mergedLinks.website ?? undefined,
 			});
 
 			let gotAvatar = false;
