@@ -20,6 +20,8 @@ import {
 } from "@/lib/stablecoin-series";
 import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
 import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
+import { graph, itemListNode } from "@/lib/structured-data";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
 
@@ -170,6 +172,29 @@ export default async function StablecoinsPage() {
 
 	return (
 		<div className="min-h-screen bg-background pt-16">
+			{/* ItemList for the coins this page lists. "stellar stablecoins" is a
+			    query someone types, and each ticker already has its own page at
+			    /stablecoins/[assetId] — this is what tells a crawler the list
+			    and the detail pages belong together. numberOfItems follows the
+			    array, so it cannot drift from what is rendered. */}
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify output, no user-controlled string in the JSON-LD body
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(
+						graph([
+							itemListNode(getAppUrl(), {
+								path: "/stablecoins",
+								name: "Stellar Stablecoins",
+								items: coins.map((c) => ({
+									name: `${c.ticker}${c.name && c.name !== c.ticker ? ` — ${c.name}` : ""}`,
+									url: `/stablecoins/${c.id}`,
+								})),
+							}),
+						]),
+					),
+				}}
+			/>
 			<StablecoinExplorer
 				coins={coins}
 				marketCapSeries={allDays.map((p) => ({

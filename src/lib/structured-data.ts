@@ -91,3 +91,37 @@ export function itemListNode(
 export function graph(nodes: JsonLdNode[]): Record<string, unknown> {
 	return { "@context": "https://schema.org", "@graph": nodes };
 }
+
+/**
+ * One issued asset. schema.org has no cryptocurrency type, and FinancialProduct
+ * is the honest fit for a pegged, issued token: it carries a name, a
+ * description and a provider without asserting anything we cannot show on the
+ * page. Deliberately NO offers, price or rating — we do not sell these and an
+ * aggregateRating we cannot source is exactly the kind of markup that earns a
+ * manual action.
+ */
+export function financialProductNode(
+	base: string,
+	a: {
+		path: string;
+		ticker: string;
+		name?: string | null;
+		issuer?: string | null;
+		peg?: string | null;
+		description?: string | null;
+	},
+): JsonLdNode {
+	const node: JsonLdNode = {
+		"@type": "FinancialProduct",
+		"@id": `${base}${a.path}#asset`,
+		url: `${base}${a.path}`,
+		name: a.name && a.name !== a.ticker ? `${a.ticker} — ${a.name}` : a.ticker,
+		alternateName: a.ticker,
+	};
+	if (a.description) node.description = a.description;
+	// provider only when we actually know the issuer — an empty Organization
+	// shell is a claim that there is one and we cannot name it.
+	if (a.issuer) node.provider = { "@type": "Organization", name: a.issuer };
+	if (a.peg) node.currenciesAccepted = a.peg;
+	return node;
+}
