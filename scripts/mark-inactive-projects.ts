@@ -21,7 +21,9 @@
  *     can shut down while its repository keeps getting commits, and the tell is
  *     that nobody renewed the domain. A parked page, lottery spam or a lapsed
  *     registration on the URL the project itself cites is good evidence the
- *     product is gone. Also REPORT ONLY — a domain is evidence about the
+ *     product is gone. An OFF-ORIGIN REDIRECT is reported apart: a rebrand and
+ *     an abandoned domain look identical from here, so it is a "go and look",
+ *     never a shutdown claim. Also REPORT ONLY — a domain is evidence about the
  *     world, and hiding a row stays a human call.
  *
  * House rules: no deletes; dry-run first; run against prod via GitHub Action.
@@ -254,12 +256,11 @@ async function main() {
 		if (url)
 			byWebsite.set(normUrl(url), { slug: p.slug, status: p.status, url });
 	}
-	const siteGone: Array<{
-		slug: string;
-		status: string;
-		url: string;
-		why: string;
-	}> = [];
+	type SiteRow = { slug: string; status: string; url: string; why: string };
+	const siteGone: SiteRow[] = [];
+	/** Redirects off-origin: could be a rebrand, could be a parked domain
+	 *  someone else bought. Reported apart so the shutdown claim stays clean. */
+	const movedOrGone: SiteRow[] = [];
 	if (byWebsite.size) {
 		const checks = await payload.find({
 			collection: "link-checks",
@@ -275,9 +276,21 @@ async function main() {
 					...hit,
 					why: `dead — ${c.errorReason || c.statusCode || "proven broken"}`,
 				});
+			} else if (c.pageVerdict === "offsite-redirect") {
+				// NOT shutdown evidence on its own. page-verdict says it plainly:
+				// "a rebrand and a hijack look identical here; both need a human."
+				// The first run of this class proved it — gate.io (a live exchange
+				// redirecting to a regional domain) and benji (human-verified Live,
+				// on its own other domain) both landed in the shutdown list beside
+				// genuinely dead products. Separate bucket, separate claim.
+				movedOrGone.push({
+					...hit,
+					why: `redirects off-origin${c.finalHost ? ` → ${c.finalHost}` : ""}`,
+				});
 			} else if (c.pageVerdict && NON_PRODUCT_VERDICTS.has(c.pageVerdict)) {
-				// Answers 200 with somebody else's content: parked, spam, a
-				// scaffold, or a redirect off the origin entirely.
+				// Answers 200 with content that is not a product: parked, spam, a
+				// placeholder or an unbuilt scaffold. Nobody ships that on purpose
+				// and keeps operating.
 				siteGone.push({
 					...hit,
 					why: `${c.pageVerdict}${c.pageTitle ? ` — "${String(c.pageTitle).slice(0, 48)}"` : ""}`,
@@ -301,7 +314,22 @@ async function main() {
 	}
 
 	console.log(
-		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length} · site-gone: ${siteGone.length}`,
+		`\n=== MOVED OR GONE (report only — the site redirects somewhere else) ===`,
+	);
+	if (movedOrGone.length === 0) {
+		console.log("  none");
+	} else {
+		for (const r of movedOrGone)
+			console.log(
+				`  ${r.slug.padEnd(26)} ${r.status.padEnd(12)} ${r.why}\n      ${r.url}`,
+			);
+		console.log(
+			`  ${movedOrGone.length} row(s). A rebrand and an abandoned domain look identical from here, so this is a "go and look", never a shutdown claim.`,
+		);
+	}
+
+	console.log(
+		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length} · site-gone: ${siteGone.length} · moved-or-gone: ${movedOrGone.length}`,
 	);
 	process.exit(0);
 }
