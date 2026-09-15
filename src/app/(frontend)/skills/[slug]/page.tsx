@@ -84,9 +84,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { slug } = await params;
 	const skill = await loadSkill(slug);
-	if (!skill) return { title: "Skill not found | Stellar Light" };
+	if (!skill) return { title: "Skill not found" };
 
-	const title = `${skill.name} | Stellar Light Skills`;
+	const title = `${skill.name} — Stellar Skill`;
 	const description = skill.tagline ?? truncate(skill.description, 160);
 	const canonical = `${SITE_URL}/skills/${skill.slug}`;
 	const ogUrl = `${SITE_URL}/api/skills/${skill.slug}/og`;

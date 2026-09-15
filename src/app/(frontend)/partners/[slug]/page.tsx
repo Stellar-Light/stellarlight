@@ -270,7 +270,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { slug } = await params;
 	const p = await getPartner(slug);
-	if (!p) return { title: "Partner not found | Stellar Light" };
+	if (!p) return { title: "Partner not found" };
 	const title = `${p.name} | Stellar Partners`;
 	const description = p.tagline ?? `${p.name} — a Stellar ecosystem partner.`;
 	// og:image / twitter:image come from opengraph-image.tsx in this segment.
