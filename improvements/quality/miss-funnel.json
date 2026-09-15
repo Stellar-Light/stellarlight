@@ -1,21 +1,13 @@
 {
- "generatedAt": "2026-09-14T14:21:56.545Z",
+ "generatedAt": "2026-09-15T02:24:37.059Z",
  "population": {
-  "openRecallMisses": 3,
+  "openRecallMisses": 1,
   "replayableOpenRecallMisses": 0,
-  "unclassified": 3,
+  "unclassified": 1,
   "unclassifiedExamples": [
    {
-    "id": "engine-a-recall:response",
-    "probe": "response"
-   },
-   {
-    "id": "engine-a-recall:binance-in-top-3-for-its-own-name",
-    "probe": "binance in top-3 for its own name"
-   },
-   {
-    "id": "engine-a-recall:klever-in-top-3-for-its-own-name",
-    "probe": "klever in top-3 for its own name"
+    "id": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
+    "probe": "≥3 of top-10 carry types=Explorer (6 exist)"
    }
   ],
   "coveragePct": 0,
