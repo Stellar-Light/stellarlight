@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-15T02:59:16.289Z",
+	"asOf": "2026-09-15T03:28:20.895Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 95,
-	"healthy": 95,
+	"checked": 94,
+	"healthy": 94,
 	"broken": [],
 	"rows": [
 		{
@@ -230,7 +230,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:53:59Z",
+			"lastSuccessAt": "2026-09-15T03:22:39Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -252,10 +252,21 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:57:19Z",
+			"lastSuccessAt": "2026-09-15T03:25:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 52,
+			"runs": 60,
+			"why": "last green 0d ago"
+		},
+		{
+			"file": "coverage-watch.yml",
+			"name": "coverage-watch",
+			"cron": "0 8 1 * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-15T03:09:34Z",
+			"ageDays": 0,
+			"graceDays": 75,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -345,17 +356,6 @@
 			"graceDays": 45,
 			"runs": 7,
 			"why": "last green 45d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "engine-c-health.yml",
-			"name": "engine-c-health",
-			"cron": "0 9 * * 0",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-14T16:19:17Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 10,
-			"why": "last green 0d ago"
 		},
 		{
 			"file": "enrich-builder-repos.yml",
@@ -484,10 +484,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-01T03:20:14Z",
-			"ageDays": 13,
+			"ageDays": 14,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 13d ago (manual tool — age not judged)"
+			"why": "last green 14d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-zenex.yml",
@@ -495,10 +495,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-14T03:00:41Z",
-			"ageDays": 92,
+			"ageDays": 93,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 92d ago (manual tool — age not judged)"
+			"why": "last green 93d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "gone-repos.yml",
@@ -589,17 +589,6 @@
 			"why": "last green 0d ago"
 		},
 		{
-			"file": "live-index-guards.yml",
-			"name": "live-index-guards",
-			"cron": "0 6 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:20:52Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 12,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "liveness-watch.yml",
 			"name": "liveness-watch",
 			"cron": "0 7 1 * *",
@@ -648,7 +637,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:53:59Z",
+			"lastSuccessAt": "2026-09-15T03:22:39Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -978,7 +967,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:57:18Z",
+			"lastSuccessAt": "2026-09-15T03:25:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1044,10 +1033,10 @@
 			"name": "workflow-health",
 			"cron": "41 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T02:29:10Z",
+			"lastSuccessAt": "2026-09-15T02:57:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 61,
+			"runs": 62,
 			"why": "last green 0d ago"
 		}
 	]
