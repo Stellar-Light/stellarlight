@@ -56,10 +56,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { assetId } = await params;
 	const data = await load(assetId);
-	if (!data) return { title: "Stablecoin not found | Stellar Light" };
+	if (!data) return { title: "Stablecoin not found" };
 	const { row } = data;
 	return {
-		title: `${row.ticker} — ${row.company ?? "Stellar stablecoin"} | Stellar Light`,
+		title: `${row.ticker} — ${row.company ?? "Stellar stablecoin"}`,
+		alternates: { canonical: `/stablecoins/${row.assetId}` },
 		description: `${row.ticker}, issued by ${row.company ?? "an unnamed issuer"} and pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
 }

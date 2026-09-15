@@ -1,8 +1,9 @@
 /**
  * sitemap.xml generator.
  *
- * Static top-level routes + every skill detail page. Next.js serves this at
- * /sitemap.xml automatically (App Router convention).
+ * Static top-level routes + every detail page we can rank: projects,
+ * entities, partners, blog posts, skills, stablecoins and hackathons. Next.js
+ * serves this at /sitemap.xml automatically (App Router convention).
  *
  * Skills inclusion is the SEO unlock — 30+ indexable URLs the moment this
  * ships. Without sitemap entries Google takes weeks to crawl them via
@@ -122,10 +123,20 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 	if (!payload) return [];
 	const out: MetadataRoute.Sitemap = [];
 	const pull = async (
-		collection: "projects" | "entities" | "partner-accounts" | "blog",
+		collection:
+			| "projects"
+			| "entities"
+			| "partner-accounts"
+			| "blog"
+			| "stablecoins"
+			| "hackathons",
 		prefix: string,
 		where: Record<string, unknown>,
 		priority: number,
+		/** The field the DETAIL ROUTE keys on. Stablecoin pages are
+		 *  /stablecoins/[assetId], not [slug] — defaulting to slug here is how
+		 *  41 finished pages stayed out of the sitemap. */
+		key: "slug" | "assetId" = "slug",
 	) => {
 		try {
 			const res = await payload.find({
@@ -133,15 +144,15 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 				where,
 				limit: 5000,
 				depth: 0,
-				select: { slug: true, updatedAt: true },
+				select: { [key]: true, updatedAt: true },
 			} as any);
-			for (const d of res.docs as Array<{
-				slug?: string;
-				updatedAt?: string;
-			}>) {
-				if (!d.slug) continue;
+			for (const d of res.docs as unknown as Array<
+				Record<string, string | undefined>
+			>) {
+				const id = d[key];
+				if (!id) continue;
 				out.push({
-					url: `${SITE_URL}${prefix}/${d.slug}`,
+					url: `${SITE_URL}${prefix}/${id}`,
 					lastModified: d.updatedAt ? new Date(d.updatedAt) : now,
 					changeFrequency: "weekly",
 					priority,
@@ -175,6 +186,13 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 		},
 		0.6,
 	);
+	// Finished detail pages that were never submitted. Each renders a unique
+	// title, description and h1 today — they were simply missing from here, so
+	// discovery depended on a crawler walking in from the list page.
+	//   stablecoins  41 pages, keyed by assetId
+	//   hackathons   26 pages
+	await pull("stablecoins", "/stablecoins", {}, 0.6, "assetId");
+	await pull("hackathons", "/hackathons", {}, 0.6);
 	return out;
 }
 
