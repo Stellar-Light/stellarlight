@@ -24,9 +24,10 @@ import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	title: "Stellar Stablecoins | Stellar Light",
+	title: "Stellar Stablecoins & Issued Assets",
 	description:
-		"Every tracked Stellar stablecoin — supply, holders, market cap, issuer and peg, measured every six hours and dated.",
+		"Every stablecoin issued on Stellar with its issuer, peg, supply, holders and on-chain activity, read from Horizon rather than a press release.",
+	alternates: { canonical: "/stablecoins" },
 };
 
 export default async function StablecoinsPage() {

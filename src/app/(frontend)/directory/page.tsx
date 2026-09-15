@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DirectoryFilters } from "@/components/directory-filters";
 import DirectoryProjectsGrid, {
 	DirectoryProjectsGridSkeleton,
 } from "@/components/directory-projects-grid";
+
+export const metadata: Metadata = {
+	title: "Stellar Projects Directory",
+	description:
+		"Browse every project building on Stellar: DeFi protocols, wallets, anchors, payments, RWAs and developer tools, each with its GitHub activity, on-chain footprint, SCF funding and a live or inactive status you can check.",
+	alternates: { canonical: "/directory" },
+};
 
 type SearchParams = Promise<{
 	q?: string;
@@ -34,9 +42,12 @@ export default async function DirectoryPage({
 			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 				{/* Header */}
 				<div className="mb-8">
-					<h2 className="text-3xl font-medium tracking-tight mb-6">
-						Projects Directory
-					</h2>
+					{/* h1, not h2: this page had no h1 at all, so its strongest
+					    heading was invisible to a crawler ranking it for
+					    "stellar projects directory". */}
+					<h1 className="text-3xl font-medium tracking-tight mb-6">
+						Every project building on Stellar
+					</h1>
 				</div>
 
 				{/* Search and Filter */}

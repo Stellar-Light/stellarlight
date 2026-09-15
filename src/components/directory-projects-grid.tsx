@@ -5,6 +5,8 @@ import ProjectCardSkeleton from "@/components/project-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
+import { graph, itemListNode } from "@/lib/structured-data";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
@@ -140,6 +142,31 @@ export default async function DirectoryProjectsGrid({
 
 	return (
 		<>
+			{/* ItemList for the rows THIS render actually shows. Emitted here
+			    rather than on the page because the page hands the query to a
+			    Suspense child and never holds the docs itself. numberOfItems
+			    therefore matches the cards below it — a list claiming the whole
+			    collection while showing a page of 24 is a mismatch a crawler
+			    can check against the markup. JSON.stringify output, no
+			    user-controlled string in the body. */}
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify output — see comment above
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(
+						graph([
+							itemListNode(getAppUrl(), {
+								path: "/directory",
+								name: "Stellar Projects Directory",
+								items: result.docs.map((p: any) => ({
+									name: String(p.name ?? p.slug),
+									url: `/project/${p.slug}`,
+								})),
+							}),
+						]),
+					),
+				}}
+			/>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
 				{result.docs.map((project: any) => (
 					<ProjectCard

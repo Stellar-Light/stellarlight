@@ -49,14 +49,19 @@ import {
  */
 
 export const metadata: Metadata = {
-	title: "Data Quality | Stellar Light",
+	title: "Data Quality Report",
 	description:
-		"The StellarLight quality scoreboard, measured recall, data-truth cross-checks, contract honesty and consumer-interlock guards, every number linked to its reproducible run.",
+		"How good this index is, measured rather than claimed: per-guard promises, the evidence behind each one, open findings and what is still missing.",
+	// Deliberately NOT indexed — this is the internal scoreboard, and the
+	// 2026-09-15 metadata pass removed this block by accident before the diff
+	// caught it. It stays noindex; the canonical is here only so a shared link
+	// resolves to one URL.
 	robots: {
 		index: false,
 		follow: false,
 		googleBot: { index: false, follow: false },
 	},
+	alternates: { canonical: "/quality" },
 };
 
 /** Borderless stat, same idiom as /analytics. */
