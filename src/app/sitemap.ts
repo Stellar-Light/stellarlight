@@ -11,6 +11,7 @@
  */
 
 import type { MetadataRoute } from "next";
+import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 import { CURATED_SKILLS } from "@/lib/integrations/curated-skills";
 import { fetchSdfSkillNames } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -108,8 +109,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const communitySkillUrls = await loadCommunitySkillUrls(now);
 	const detailUrls = await loadDetailUrls(now);
 
+	// Category landing pages: /directory/wallets, /directory/anchors, and the
+	// rest. Each is a real slice with its own title, h1 and ItemList — the
+	// queries people type instead of "directory".
+	const categoryUrls: MetadataRoute.Sitemap = DIRECTORY_CATEGORIES.map((c) => ({
+		url: `${SITE_URL}/directory/${c.slug}`,
+		lastModified: now,
+		changeFrequency: "daily" as const,
+		priority: 0.8,
+	}));
+
 	return [
 		...staticRoutes,
+		...categoryUrls,
 		...sdfSkillUrls,
 		...curatedSkillUrls,
 		...communitySkillUrls,
