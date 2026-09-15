@@ -15,9 +15,15 @@
 import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
+import { ENTITY_LINK_FIXES } from "./data/curation-maps";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
+/** Links only — skip the logo pass entirely. A run that exists to correct one
+ *  dead URL should not also be fetching avatars for every entity that lacks
+ *  one: that is a different change, with a different blast radius, and it
+ *  should be asked for rather than ride along. */
+const linksOnly = args.includes("--links-only");
 const UNAVATAR_API_KEY = process.env.UNAVATAR_API_KEY || "";
 
 const stats = {
@@ -193,10 +199,17 @@ async function main() {
 				newLinks.twitter = p.links.twitter;
 		}
 
+		// An explicit correction outranks BOTH the stored value and inheritance.
+		// Without this precedence a curated fix would lose to the stale value it
+		// exists to replace — the merge below is fill-if-empty, so a non-empty
+		// dead URL always wins otherwise.
+		const fix = ENTITY_LINK_FIXES[entity.slug as string] ?? {};
 		const mergedLinks: Record<string, string | undefined> = {
-			website: currentLinks.website || newLinks.website || undefined,
-			github: currentLinks.github || newLinks.github || undefined,
-			twitter: currentLinks.twitter || newLinks.twitter || undefined,
+			website:
+				fix.website || currentLinks.website || newLinks.website || undefined,
+			github: fix.github || currentLinks.github || newLinks.github || undefined,
+			twitter:
+				fix.twitter || currentLinks.twitter || newLinks.twitter || undefined,
 		};
 
 		if (
@@ -213,7 +226,7 @@ async function main() {
 		// --- Fetch logo ---
 		let newLogoId: string | null = null;
 
-		if (!entity.logo) {
+		if (!linksOnly && !entity.logo) {
 			// Try unavatar first
 			const avatarUrls = getAvatarUrls({
 				twitter: mergedLinks.twitter,
@@ -307,7 +320,9 @@ async function main() {
 	}
 
 	console.log("\n=== SUMMARY ===");
-	console.log(`Mode:               ${dryRun ? "DRY RUN" : "EXECUTED"}`);
+	console.log(
+		`Mode:               ${dryRun ? "DRY RUN" : "EXECUTED"}${linksOnly ? " (links only)" : ""}`,
+	);
 	console.log(`Total entities:     ${stats.total}`);
 	console.log(`Links enriched:     ${stats.enrichedLinks}`);
 	console.log(`Logos added:        ${stats.enrichedLogo}`);

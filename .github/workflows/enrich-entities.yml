@@ -1,0 +1,42 @@
+name: enrich entities
+# Entity links + logos. Entity links are INHERITED from linked projects and the
+# merge is fill-if-empty, so a value inherited once is never re-inherited: when
+# the source project moves, the entity keeps the dead URL and no project-keyed
+# repair map reaches it. ENTITY_LINK_FIXES (scripts/data/curation-maps.ts) is
+# the correction path, and this is how it gets applied.
+#
+# links-only by default: correcting a URL should not also fetch avatars for
+# every entity missing one. Dry-run by default; every run prints what it would
+# write first.
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+      linksOnly:
+        description: "Skip the logo pass (recommended for a link correction)."
+        type: boolean
+        default: true
+concurrency:
+  group: enrich-entities
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      UNAVATAR_API_KEY: ${{ secrets.UNAVATAR_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Enrich (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/enrich-entities.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.linksOnly && '--links-only' || '' }}

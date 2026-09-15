@@ -5557,6 +5557,42 @@ export const GITHUB_LINK_REMOVE: Record<string, string> = {
  * nginx welcome page. A probe that only counts readable characters called it
  * alive; it is an unconfigured server, not a product.
  */
+/**
+ * Entity-level link corrections, keyed by ENTITY slug.
+ *
+ * WHY THIS HAD TO EXIST. Entity links are INHERITED from the entity's linked
+ * projects and the merge is fill-if-empty (`currentLinks.website ||
+ * newLinks.website` in scripts/enrich-entities.ts), so a value inherited once
+ * is never re-inherited. When the source project moves, the entity keeps the
+ * dead URL forever — check-links proves it broken every day and no repair map
+ * reaches it, because WEBSITE_FIXES and friends are all keyed by PROJECT slug.
+ *
+ * It also covers the case inheritance CANNOT reach: an organisation whose own
+ * site is not any linked project's site. stellar-expert links `albedo`
+ * (albedo.link) and `reflector` (reflector.network); the org's own site,
+ * stellar.expert, appears on neither, so no amount of re-inheriting produces
+ * it.
+ *
+ * Applied BEFORE the inherit merge, so an explicit fix beats both the stale
+ * stored value and whatever a project would have supplied. Only add a value
+ * you have actually opened — the entries below cite what the page title says.
+ */
+export const ENTITY_LINK_FIXES: Record<
+	string,
+	{ website?: string; github?: string; twitter?: string }
+> = {
+	// 2026-09-15. Stored website was https://reflector.world/ — NXDOMAIN, and
+	// inherited from the `reflector` project before that project moved to
+	// reflector.network. The entity is the ORG behind albedo and reflector, and
+	// its own site answers 200 titled "StellarExpert | Stellar XLM block
+	// explorer and analytics platform". The github org is confirmed by albedo's
+	// own repo link, github.com/stellar-expert/albedo.
+	"stellar-expert": {
+		website: "https://stellar.expert",
+		github: "https://github.com/stellar-expert",
+	},
+};
+
 export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
 	// ── 2026-09-07, second pass: four rows store a GitHub url in
 	// links.website. Same free-text-in-a-typed-field shape as orgLogin,
