@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-15T03:26:53.863Z",
+	"generatedAt": "2026-09-15T17:17:18.868Z",
 	"specVersion": "1.9.52",
 	"graceDays": 10,
 	"expectedOps": [
@@ -71,7 +71,11 @@
 	],
 	"missingFromCatalog": [],
 	"undiscoverable": [],
-	"uncataloged": ["getQualityReport", "getRwaAssets", "verifyClaim"],
+	"uncataloged": [
+		"getQualityReport",
+		"getRwaAssets",
+		"verifyClaim"
+	],
 	"laggingInCatalog": [],
 	"extraInCatalog": [],
 	"claimedOpCount": 30,
