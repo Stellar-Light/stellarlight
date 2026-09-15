@@ -71,5 +71,20 @@ jobs:
           if ! git diff --quiet -- improvements/audits/; then
             git add improvements/audits/
             git commit -m "chore(audit): live-index guard artifacts [skip ci]"
+            # A bare `git push` here was latent until 2026-09-15: the drift check
+            # wrote no artifact, so `git diff --quiet` was true and this branch
+            # almost never ran. Giving that check a --json path made it write
+            # every run, the push started firing, and it failed non-fast-forward
+            # the first time main had moved — which on a daily 06:00 job with a
+            # busy main is most of the time.
+            #
+            # Same push-first retry the other artifact lanes got in #1596: try
+            # the push, rebase onto whatever landed, try again. -X theirs keeps
+            # OUR freshly measured artifact on a conflict, because the file is a
+            # snapshot of this run, not something to merge.
+            for i in 1 2 3; do
+              git push && exit 0
+              git pull --rebase --autostash -X theirs origin main || git rebase --abort
+            done
             git push
           fi
