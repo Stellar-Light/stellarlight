@@ -131,6 +131,10 @@ export async function rankedProjectSearch(
 		limit: 0,
 		depth: 1,
 		sort,
+		// limit: 0 means EVERY matching row is loaded to rank in memory, so the
+		// 1024-dim embedding is the most expensive field here, not the least.
+		// Ranking never reads it; nothing downstream renders it.
+		select: { embedding: false } as never,
 	});
 
 	// Rank: exact/leading name > name contains > type or category match >
