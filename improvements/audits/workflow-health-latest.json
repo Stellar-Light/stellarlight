@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-16T15:06:27.049Z",
+	"asOf": "2026-09-16T15:26:09.369Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 96,
 	"healthy": 95,
@@ -236,7 +236,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:00:41Z",
+			"lastSuccessAt": "2026-09-16T15:20:22Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -258,10 +258,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:00:41Z",
+			"lastSuccessAt": "2026-09-16T15:23:52Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -413,10 +413,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-05T15:15:16Z",
-			"ageDays": 10,
+			"ageDays": 11,
 			"graceDays": 45,
 			"runs": 15,
-			"why": "last green 10d ago (manual tool — age not judged)"
+			"why": "last green 11d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-repo-activity.yml",
@@ -654,7 +654,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:00:41Z",
+			"lastSuccessAt": "2026-09-16T15:20:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -720,10 +720,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T14:34:28Z",
+			"lastSuccessAt": "2026-09-16T15:04:12Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 67,
+			"runs": 68,
 			"why": "last green 0d ago"
 		},
 		{
@@ -992,10 +992,10 @@
 		},
 		{
 			"file": "tansu-anchor.yml",
-			"name": "tansu anchor (mainnet)",
+			"name": "tansu anchor (testnet)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:05:15Z",
+			"lastSuccessAt": "2026-09-16T15:24:27Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 1,
@@ -1006,7 +1006,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:04:12Z",
+			"lastSuccessAt": "2026-09-16T15:23:52Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1064,7 +1064,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 72,
+			"runs": 73,
 			"why": "last green 0d ago"
 		}
 	]
