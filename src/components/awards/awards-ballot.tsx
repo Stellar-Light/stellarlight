@@ -1265,8 +1265,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			</AnimatePresence>
 
 			{/* ── Already-voted notice (returning voter, this session hasn't
-			    resubmitted) — their ballot is on-chain; offer proof + the
-			    reminder that it's still editable. ── */}
+			    resubmitted). Same card and same printed ballot as the moment
+			    they submitted: the receipt they were handed doesn't disappear
+			    because they came back later. ── */}
 			{votedBefore && phase !== "submitted" && address && (
 				<motion.div
 					initial={{ opacity: 0, y: 12 }}
@@ -1274,34 +1275,30 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					transition={{ duration: 0.4, ease: EASE }}
 					className="max-w-2xl mx-auto px-4 sm:px-6 mb-8"
 				>
-					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
-						<span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-100 flex-shrink-0">
-							<Check className="h-3.5 w-3.5 text-black" strokeWidth={3} />
-						</span>
-						<div className="min-w-0">
-							<p className="text-sm text-neutral-200 leading-relaxed">
-								<span className="text-neutral-50 font-medium">
-									You've already voted
-								</span>{" "}
-								— your picks are below.
-								{voting.open && closesLabel && (
-									<>
-										{" "}
-										Pick again and resubmit to change them, up until{" "}
-										<span className="text-neutral-100">{closesLabel}</span>.
-									</>
-								)}
-							</p>
-							<a
-								href={explorerAccountUrl(address)}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-neutral-100 transition-colors"
-							>
-								Verify your ballot on-chain
-								<ArrowUpRight className="h-4 w-4" />
-							</a>
-						</div>
+					<div className="rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 text-center sm:p-7">
+						<VoteReceipt />
+						<h2 className="mb-2 text-xl font-semibold tracking-tight text-neutral-100 sm:text-2xl">
+							You've already voted
+						</h2>
+						<p className="mb-4 text-sm leading-relaxed text-neutral-300">
+							Your picks are below.
+							{voting.open && closesLabel && (
+								<>
+									{" "}
+									Pick again and resubmit to change them, up until{" "}
+									<span className="text-neutral-100">{closesLabel}</span>.
+								</>
+							)}
+						</p>
+						<a
+							href={explorerAccountUrl(address)}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
+						>
+							Verify your ballot on-chain
+							<ArrowUpRight className="h-4 w-4" />
+						</a>
 					</div>
 				</motion.div>
 			)}
