@@ -919,55 +919,6 @@
 	}
 }
 
-/* ── The category is announced: a batten drops in above the name ──────── */
-.awards-sm .sm-batten {
-	display: block;
-	height: 2px;
-	width: 44px;
-	border-radius: 99px;
-	background: #4a4a4a;
-	transform-origin: left center;
-	animation: sm-batten 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes sm-batten {
-	from {
-		transform: scaleX(0);
-	}
-	to {
-		transform: scaleX(1);
-	}
-}
-
-/* ── The winner catches the light: one raked pass over a chosen card ──── */
-.awards-sm .sm-shine {
-	position: absolute;
-	inset: 0;
-	overflow: hidden;
-	border-radius: inherit;
-	pointer-events: none;
-}
-.awards-sm .sm-shine::after {
-	content: "";
-	position: absolute;
-	top: -60%;
-	bottom: -60%;
-	width: 42px;
-	left: -60px;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		rgba(255, 255, 255, 0.16),
-		transparent
-	);
-	transform: rotate(14deg);
-	animation: sm-shine-pass 0.85s cubic-bezier(0.3, 0, 0.2, 1) 0.06s both;
-}
-@keyframes sm-shine-pass {
-	to {
-		left: 115%;
-	}
-}
-
 @media (prefers-reduced-motion: reduce) {
 	.awards-sm .sm-reveal {
 		display: none;
@@ -977,14 +928,11 @@
 	.awards-sm .sm-clickring,
 	.awards-sm .sm-receipt-sheet,
 	.awards-sm .sm-receipt-sheet span,
-	.awards-sm .sm-receipt-stamp,
-	.awards-sm .sm-batten,
-	.awards-sm .sm-shine::after {
+	.awards-sm .sm-receipt-stamp {
 		animation: none !important;
 	}
 	.awards-sm .sm-cursor,
-	.awards-sm .sm-clickring,
-	.awards-sm .sm-shine::after {
+	.awards-sm .sm-clickring {
 		opacity: 0;
 	}
 	.awards-sm .sm-receipt-sheet {
@@ -997,9 +945,6 @@
 	.awards-sm .sm-receipt-stamp {
 		opacity: 1;
 		transform: rotate(-9deg);
-	}
-	.awards-sm .sm-batten {
-		transform: scaleX(1);
 	}
 }
 
@@ -1112,5 +1057,155 @@
 	.awards-sm .sm-nib {
 		animation: none !important;
 		opacity: 0;
+	}
+}
+
+/* ── A name rises into the light ────────────────────────────────────────
+   Replaces a decorative rule that sat above each category meaning nothing.
+   The title itself does the work: it rises under a mask, the way a name is
+   revealed on a stage. Used on the round title and every category. */
+.awards-sm .sm-lift {
+	display: block;
+	overflow: hidden;
+	/* room for descenders, taken back so the mask still hugs the line */
+	padding-bottom: 0.12em;
+	margin-bottom: -0.12em;
+}
+.awards-sm .sm-lift > * {
+	display: block;
+	animation: sm-lift-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation-delay: var(--sm-d, 0ms);
+}
+@keyframes sm-lift-in {
+	from {
+		transform: translateY(108%);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+/* ── The marquee ────────────────────────────────────────────────────────
+   A theatre sign over the round title. The chase RUNS — a light travelling
+   along a row of bulbs is what makes it a marquee; a static row of dots is
+   just another decorative line, which is the mistake this replaces. Slow
+   enough (3.4s a lap) to sit under the title without pulling focus. */
+.awards-sm .sm-marquee {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	margin-bottom: 24px;
+}
+.awards-sm .sm-marquee i {
+	width: 6px;
+	height: 6px;
+	border-radius: 99px;
+	background: #414141;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+	animation: sm-bulb 3.4s linear infinite both;
+	animation-delay: calc(var(--sm-i, 0) * -0.24s);
+}
+@keyframes sm-bulb {
+	0%,
+	22%,
+	100% {
+		background: #414141;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+	}
+	6% {
+		background: #fafafa;
+		box-shadow: 0 0 12px rgba(255, 255, 255, 0.85);
+	}
+}
+
+/* ── The follow-spot ────────────────────────────────────────────────────
+   A pool of light behind the round title, bloomed once on arrival and left
+   sitting there at low level. It is what makes the header read as a stage
+   rather than a page heading. */
+.awards-sm .sm-spot {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: min(760px, 116%);
+	height: 260px;
+	transform: translateX(-50%);
+	pointer-events: none;
+	background: radial-gradient(
+		46% 54% at 50% 42%,
+		rgba(255, 255, 255, 0.11),
+		transparent 72%
+	);
+	animation: sm-spot-on 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+@keyframes sm-spot-on {
+	0% {
+		opacity: 0;
+		transform: translateX(-50%) scale(0.55);
+	}
+	55% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(-50%) scale(1);
+	}
+}
+
+/* ── The medallion is struck ────────────────────────────────────────────
+   The outer ring draws itself once, then the milled edge catches the light
+   in a single pass around it. Repeats on hover — a logo worth poking. */
+.awards-sm .sm-mark-ring {
+	stroke-dasharray: 283;
+	stroke-dashoffset: 283;
+	animation: sm-mark-draw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+}
+@keyframes sm-mark-draw {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+.awards-sm .sm-mark-tick {
+	opacity: 0.18;
+	animation: sm-tick-catch 1.5s ease-in-out 1 both;
+	animation-delay: calc(0.8s + var(--sm-i, 0) * 0.055s);
+}
+.awards-sm .sm-mark:hover .sm-mark-tick {
+	animation: sm-tick-catch 1.1s ease-in-out 1 both;
+	animation-delay: calc(var(--sm-i, 0) * 0.04s);
+}
+@keyframes sm-tick-catch {
+	0%,
+	55%,
+	100% {
+		opacity: 0.18;
+	}
+	16% {
+		opacity: 1;
+	}
+}
+.awards-sm .sm-mark {
+	transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.awards-sm .sm-mark:hover {
+	transform: scale(1.07);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-lift > *,
+	.awards-sm .sm-marquee i,
+	.awards-sm .sm-spot,
+	.awards-sm .sm-mark-ring,
+	.awards-sm .sm-mark-tick {
+		animation: none !important;
+	}
+	.awards-sm .sm-lift > * {
+		transform: none;
+	}
+	.awards-sm .sm-mark-ring {
+		stroke-dashoffset: 0;
+	}
+	.awards-sm .sm-mark:hover {
+		transform: none;
 	}
 }
