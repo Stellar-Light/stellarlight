@@ -158,16 +158,14 @@ async function register(): Promise<number> {
 	// are well inside one friendbot grant (10,000 test XLM).
 	const acct = await fetchTestnetAccount(publicKey);
 	if (acct.funded === false) {
-		if (!EXECUTE) {
-			console.log("  key is unfunded — --execute would friendbot it first");
-		} else {
-			const fund = await fundViaFriendbot(publicKey);
-			if (!fund.ok) {
-				console.error(`  friendbot failed: ${fund.error}`);
-				return 1;
-			}
-			console.log("  friendbot-funded the lane key");
+		// Even a dry-run needs this: a simulation from a non-existent account
+		// fails before the contract runs. Testnet, free, idempotent.
+		const fund = await fundViaFriendbot(publicKey);
+		if (!fund.ok) {
+			console.error(`  friendbot failed: ${fund.error}`);
+			return 1;
 		}
+		console.log("  friendbot-funded the lane key");
 	}
 	const tx = await c.register({
 		maintainer: publicKey,
