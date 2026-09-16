@@ -1,0 +1,58 @@
+name: tansu anchor (mainnet)
+# i³ Awards — anchor a published result on MAINNET through Tansu (tansu.dev).
+#
+# The vote lives on testnet (reset 2–4×/year); the mirror keeps the ballots.
+# This gives the PUBLISHED RESULT a permanent, third-party-verifiable record:
+# register `stellarlight` on Tansu once (5 XLM collateral from the lane's own
+# maintainer key), then commit the git SHA of the results file. Nobody opens a
+# dApp. `status` needs no key; `register`/`commit` simulate with the public
+# key (repo variable TANSU_MAINTAINER_PUBLIC) and execute with the secret.
+# Dry-run by default; every write is read back.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "What to do"
+        type: choice
+        options: [status, register, commit]
+        required: true
+        default: status
+      round:
+        description: "Round slug (commit only)"
+        required: false
+        default: ""
+      sha:
+        description: "Git SHA to anchor (commit only). Empty = this run's main HEAD."
+        required: false
+        default: ""
+      execute:
+        description: "Actually sign + submit on MAINNET. Unchecked = simulate only."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: tansu-anchor
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TANSU_MAINTAINER_SECRET: ${{ secrets.TANSU_MAINTAINER_SECRET }}
+      TANSU_MAINTAINER_PUBLIC: ${{ vars.TANSU_MAINTAINER_PUBLIC }}
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Tansu (${{ inputs.action }}; dry-run unless execute=true)
+        run: |
+          pnpm exec tsx scripts/data/tansu-anchor.ts --${{ inputs.action }} \
+            ${{ inputs.round && format('--round={0}', inputs.round) || '' }} \
+            --sha=${{ inputs.sha || github.sha }} \
+            ${{ inputs.execute && '--execute' || '' }}
