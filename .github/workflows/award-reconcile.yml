@@ -1,0 +1,46 @@
+name: award reconcile mirror
+# i³ Awards — reconcile the award-ballots mirror against the chain.
+#
+# Ballots are manageData entries on TESTNET accounts and the tally reads them
+# from Horizon. Testnet is reset 2–4× a year and a reset clears every ledger
+# entry and all history, so the on-chain record of a round is gone at the first
+# reset after it closes. The mirror is written best-effort after each submit
+# and can silently miss a ballot; this walks Horizon while it still has the
+# data, backfills any gap (with the real tx hash + ledger time), and refuses if
+# the chain already looks reset. Run it after a round closes, before the next
+# reset. Dry-run by default; every write is read back; exits non-zero if any
+# address was unreachable, so a partial run never reads as complete.
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round slug (e.g. i3-2026-test)"
+        required: true
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: award-reconcile
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Reconcile (dry-run unless execute=true)
+        run: |
+          pnpm exec tsx scripts/data/award-reconcile.ts \
+            --round=${{ inputs.round }} \
+            ${{ inputs.execute && '--execute' || '' }}

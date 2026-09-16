@@ -132,3 +132,72 @@ export async function submitToTestnetHorizon(
 		};
 	}
 }
+
+/**
+ * Fetch many testnet accounts with bounded concurrency. Shared by the tally
+ * (results route) and the reconcile script so both walk Horizon the same way.
+ */
+export async function fetchTestnetAccounts(
+	addresses: string[],
+	concurrency = 10,
+): Promise<Array<{ address: string; result: FetchAccountResult }>> {
+	const out: Array<{ address: string; result: FetchAccountResult }> = new Array(
+		addresses.length,
+	);
+	let next = 0;
+	const workers = Array.from(
+		{ length: Math.min(concurrency, addresses.length) },
+		async () => {
+			while (next < addresses.length) {
+				const i = next++;
+				out[i] = {
+					address: addresses[i],
+					result: await fetchTestnetAccount(addresses[i]),
+				};
+			}
+		},
+	);
+	await Promise.all(workers);
+	return out;
+}
+
+/**
+ * The most recent successful manageData op under `prefix` on an account —
+ * its tx hash and ledger close time. The reconcile script uses it so a
+ * backfilled mirror row carries the REAL submission (hash + when) rather
+ * than "now". Null when nothing matches in the last 200 ops or Horizon
+ * misbehaves; the caller degrades to an unhashed row.
+ */
+export async function fetchLatestBallotOp(
+	address: string,
+	prefix: string,
+): Promise<{ txHash: string; at: string } | null> {
+	try {
+		const res = await fetch(
+			`${HORIZON_TESTNET_URL}/accounts/${encodeURIComponent(address)}/operations?order=desc&limit=200`,
+			{ headers: { Accept: "application/json" }, cache: "no-store" },
+		);
+		if (!res.ok) return null;
+		const body = (await res.json()) as {
+			_embedded?: {
+				records?: Array<{
+					type?: string;
+					name?: string;
+					transaction_hash?: string;
+					created_at?: string;
+					transaction_successful?: boolean;
+				}>;
+			};
+		};
+		for (const op of body._embedded?.records ?? []) {
+			if (op.type !== "manage_data" || !op.name?.startsWith(prefix)) continue;
+			if (op.transaction_successful === false) continue;
+			if (op.transaction_hash && op.created_at) {
+				return { txHash: op.transaction_hash, at: op.created_at };
+			}
+		}
+		return null;
+	} catch {
+		return null;
+	}
+}
