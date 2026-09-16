@@ -1,4 +1,4 @@
-name: award round status
+name: award round (create / status)
 # i³ Awards — open, close or draft a round.
 #
 # Every other step of the pipeline has a workflow (award-import, award-test-setup,
@@ -14,6 +14,23 @@ on:
     inputs:
       slug:
         description: "Round slug. Leave empty to just LIST every round and its status."
+        required: false
+        default: ""
+      create:
+        description: "CREATE this slug as a new DRAFT round (needs title; picks = 1 for the vote, N for nominations)."
+        type: boolean
+        required: false
+        default: false
+      title:
+        description: "Title (create only), e.g. i³ Awards 2026 — Nominations"
+        required: false
+        default: ""
+      picks:
+        description: "Picks per category (create only): 1 = the vote, N = nominations"
+        required: false
+        default: "1"
+      closes:
+        description: "Optional closesAt (ISO 8601), for create or a status flip"
         required: false
         default: ""
       status:
@@ -49,9 +66,17 @@ jobs:
         run: |
           if [ -z "${{ inputs.slug }}" ]; then
             pnpm exec tsx scripts/data/award-round.ts --list
+          elif [ "${{ inputs.create }}" = "true" ]; then
+            pnpm exec tsx scripts/data/award-round.ts --create \
+              --slug=${{ inputs.slug }} \
+              --title="${{ inputs.title }}" \
+              --picks=${{ inputs.picks || '1' }} \
+              ${{ inputs.closes && format('--closes={0}', inputs.closes) || '' }} \
+              ${{ inputs.execute && '--execute' || '' }}
           else
             pnpm exec tsx scripts/data/award-round.ts \
               --slug=${{ inputs.slug }} \
               --status=${{ inputs.status }} \
+              ${{ inputs.closes && format('--closes={0}', inputs.closes) || '' }} \
               ${{ inputs.execute && '--execute' || '' }}
           fi

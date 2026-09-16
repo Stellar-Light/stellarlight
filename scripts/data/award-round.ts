@@ -2,8 +2,16 @@
  * i³ Awards — set a round's status, safely.
  *
  *   pnpm exec tsx scripts/data/award-round.ts --list
+ *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026-nominations --title="i³ Awards 2026 — Nominations" --picks=3 [--closes=2026-10-01T00:00:00Z] [--execute]
+ *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026 --title="i³ Awards 2026" [--execute]
  *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026-test --status=draft
- *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026 --status=open --execute
+ *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026 --status=open [--closes=…] --execute
+ *
+ * The real round is TWO rounds: a NOMINATIONS round (Pilots pick up to N
+ * projects per category) and then the VOTE (one pick per category). Both are
+ * ordinary award-rounds records; --create makes one as a DRAFT with the three
+ * canonical categories, testMode off, no dates. Nominees come from
+ * award-import.yml, the flip to open from --status here.
  *
  * WHY THIS EXISTS. Every other step of the awards pipeline has a script and a
  * workflow — importing nominees, importing voters, whitelisting a tester — but
@@ -30,8 +38,39 @@ const arg = (k: string) => {
 };
 const EXECUTE = args.includes("--execute");
 const LIST = args.includes("--list");
+const CREATE = args.includes("--create");
 const SLUG = arg("slug");
 const STATUS = arg("status");
+const TITLE = arg("title");
+const PICKS = Math.max(1, Math.floor(Number(arg("picks") ?? "1") || 1));
+const OPENS = arg("opens");
+const CLOSES = arg("closes");
+
+/** The i³ categories, verbatim from the round SDF reviewed. */
+const CATEGORIES = [
+	{
+		key: "impact",
+		name: "Impact",
+		tagline: "Real-world outcomes for real people",
+	},
+	{
+		key: "innovation",
+		name: "Innovation",
+		tagline: "Pushing what's possible on Stellar",
+	},
+	{
+		key: "interoperability",
+		name: "Interoperability",
+		tagline: "Bridging Stellar to the wider world",
+	},
+];
+
+const iso = (v: string | null): string | null => {
+	if (!v) return null;
+	const d = new Date(v);
+	if (Number.isNaN(d.getTime())) throw new Error(`not a date: ${v}`);
+	return d.toISOString();
+};
 type RoundStatus = "draft" | "open" | "closed";
 const VALID = new Set<RoundStatus>(["draft", "open", "closed"]);
 
@@ -55,9 +94,68 @@ async function main() {
 	}
 	if (LIST) return 0;
 
+	if (CREATE) {
+		if (!SLUG || !TITLE) {
+			console.error(
+				'\nusage: --create --slug=<round> --title="…" [--picks=N] [--opens=<iso>] [--closes=<iso>] [--execute]',
+			);
+			return 2;
+		}
+		if (rounds.find((r) => r.slug === SLUG)) {
+			console.log(`\n${SLUG} already exists — nothing to do.`);
+			return 0;
+		}
+		const data = {
+			slug: SLUG,
+			title: TITLE,
+			status: "draft" as const,
+			ballotMode: "one-per-category" as const,
+			picksPerCategory: PICKS,
+			categories: CATEGORIES,
+			testMode: false,
+			opensAt: iso(OPENS),
+			closesAt: iso(CLOSES),
+		};
+		console.log(
+			`\ncreate ${SLUG} "${TITLE}" · draft · ${PICKS === 1 ? "one pick" : `up to ${PICKS} picks`} per category · opens ${data.opensAt ?? "—"} · closes ${data.closesAt ?? "—"}`,
+		);
+		if (!EXECUTE) {
+			console.log("\nDRY RUN — nothing written. Re-run with --execute.");
+			return 0;
+		}
+		await payload.create({
+			collection: "award-rounds",
+			data,
+			overrideAccess: true,
+		});
+		const created = await payload.find({
+			collection: "award-rounds",
+			where: { slug: { equals: SLUG } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const doc = created.docs[0] as any;
+		if (
+			!doc ||
+			doc.status !== "draft" ||
+			Number(doc.picksPerCategory) !== PICKS
+		) {
+			console.error(
+				`READ-BACK FAILED: ${SLUG} → ${JSON.stringify(doc ?? null)}`,
+			);
+			return 1;
+		}
+		console.log(
+			`✓ read back: ${SLUG} is draft · ${doc.picksPerCategory} pick(s) per category · ${doc.categories?.length ?? 0} categories`,
+		);
+		return 0;
+	}
+
 	if (!SLUG || !STATUS) {
 		console.error(
-			"\nusage: --slug=<round> --status=draft|open|closed [--execute]   (or --list)",
+			"\nusage: --slug=<round> --status=draft|open|closed [--opens=<iso>] [--closes=<iso>] [--execute]   (or --list, or --create)",
 		);
 		return 2;
 	}
@@ -98,7 +196,13 @@ async function main() {
 		}
 	}
 
-	console.log(`\n${SLUG}: ${target.status} → ${STATUS}`);
+	const dates = {
+		...(OPENS ? { opensAt: iso(OPENS) } : {}),
+		...(CLOSES ? { closesAt: iso(CLOSES) } : {}),
+	};
+	console.log(
+		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}`,
+	);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
 		return 0;
@@ -106,7 +210,7 @@ async function main() {
 	await payload.update({
 		collection: "award-rounds",
 		id: target.id,
-		data: { status: STATUS as RoundStatus },
+		data: { status: STATUS as RoundStatus, ...dates },
 		overrideAccess: true,
 	});
 	const back = await payload.find({
