@@ -9,6 +9,7 @@ import {
 	tallyRound,
 } from "../awards/ballot";
 import { mergeAccounts, resultsDocument } from "../awards/publish";
+import { firstBallotSelections } from "../awards/record";
 import type { LoadedRound } from "../awards/round";
 
 const loaded = {
@@ -79,10 +80,14 @@ describe("mergeAccounts", () => {
 		[dataKey(round.slug, "impact")]: b64(slug),
 	});
 
-	it("chain wins per address; the mirror fills what the chain forgot; nobody is counted twice", () => {
+	it("the mirror wins per address, because it holds the FIRST ballot", () => {
+		// G-BOTH is the whole point: they voted decaf, then voted again and the
+		// chain now shows beans. A manageData overwrite destroyed the original
+		// value, so the chain CANNOT tell you decaf ever happened — only the
+		// mirror can, and decaf is what must be counted.
 		const chain = new Map<string, Record<string, string> | null>([
-			["G-BOTH", vote("beans")], // voted again after a reset → chain's ballot
-			["G-CHAIN", vote("decaf")],
+			["G-BOTH", vote("beans")], // revoted; chain shows only the latest
+			["G-CHAIN", vote("decaf")], // no mirror row — voted outside the relay
 			["G-FUNDED-NO-VOTE", {}], // account exists, entries gone
 			["G-WIPED", null], // account gone (reset) or Horizon failed
 			["G-NEVER", null],
@@ -93,13 +98,86 @@ describe("mergeAccounts", () => {
 			["G-WIPED", { impact: ["beans"] }],
 		]);
 		const m = mergeAccounts(round, nominees, [...chain.keys()], chain, mirror);
-		expect(m.chainVoters).toBe(2);
-		expect(m.mirrorVoters).toBe(2);
+		// only G-CHAIN falls through to the chain now
+		expect(m.chainVoters).toBe(1);
+		expect(m.mirrorVoters).toBe(3);
 		const tally = tallyRound(round, nominees, m.accounts);
 		expect(tally.turnout).toEqual({ voted: 4, whitelisted: 5 });
 		const votes = Object.fromEntries(
 			tally.categories[0].results.map((r) => [r.slug, r.votes]),
 		);
-		expect(votes).toEqual({ beans: 2, decaf: 2 });
+		// decaf 3 — G-BOTH's FIRST ballot, plus G-FUNDED-NO-VOTE and G-CHAIN.
+		// beans 1 — G-WIPED only. G-BOTH's revote to beans is not counted at all.
+		expect(votes).toEqual({ decaf: 3, beans: 1 });
+		// and the revote is NOT also counted — nobody is counted twice
+		expect(tally.categories[0].totalVotes).toBe(4);
+	});
+
+	it("counts a voter once when chain and mirror agree", () => {
+		const chain = new Map<string, Record<string, string> | null>([
+			["G-ONE", vote("decaf")],
+		]);
+		const mirror = new Map([["G-ONE", { impact: ["decaf"] }]]);
+		const m = mergeAccounts(round, nominees, ["G-ONE"], chain, mirror);
+		expect(m.mirrorVoters).toBe(1);
+		expect(m.chainVoters).toBe(0);
+		expect(tallyRound(round, nominees, m.accounts).turnout.voted).toBe(1);
+	});
+
+	it("an empty mirror row does not mask a real chain ballot", () => {
+		const chain = new Map<string, Record<string, string> | null>([
+			["G-X", vote("beans")],
+		]);
+		const mirror = new Map([["G-X", {}]]);
+		const m = mergeAccounts(round, nominees, ["G-X"], chain, mirror);
+		expect(m.chainVoters).toBe(1);
+		expect(tallyRound(round, nominees, m.accounts).turnout.voted).toBe(1);
+	});
+});
+
+describe("firstBallotSelections", () => {
+	it("takes history[0] — the first ballot — not the current selections", () => {
+		expect(
+			firstBallotSelections({
+				selections: { impact: ["beans"] }, // the revote
+				history: [
+					{ selections: { impact: ["decaf"] } }, // the one that counts
+					{ selections: { impact: ["beans"] } },
+				],
+			}),
+		).toEqual({ impact: ["decaf"] });
+	});
+
+	it("falls back to selections when there is no history", () => {
+		// rows written before the trail existed, and rows the reconcile lane
+		// creates straight from chain
+		expect(
+			firstBallotSelections({ selections: { impact: ["decaf"] } }),
+		).toEqual({ impact: ["decaf"] });
+		expect(
+			firstBallotSelections({ selections: { impact: ["decaf"] }, history: [] }),
+		).toEqual({ impact: ["decaf"] });
+	});
+
+	it("skips empty history entries rather than zeroing the voter out", () => {
+		expect(
+			firstBallotSelections({
+				selections: { impact: ["beans"] },
+				history: [
+					{ selections: null },
+					{ selections: {} },
+					{ selections: { impact: ["decaf"] } },
+				],
+			}),
+		).toEqual({ impact: ["decaf"] });
+	});
+
+	it("accepts the string shape the JSON column also allows", () => {
+		expect(
+			firstBallotSelections({
+				selections: {},
+				history: [{ selections: { impact: "decaf" } }],
+			}),
+		).toEqual({ impact: ["decaf"] });
 	});
 });

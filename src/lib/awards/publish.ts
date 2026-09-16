@@ -38,10 +38,16 @@ const hasVote = (
 	);
 
 /**
- * Pure. Per address: the chain wins when it carries a vote for this round;
- * otherwise the mirror. A testnet reset or a Horizon outage forgets some or
- * all accounts — the mirror does not — and a voter who voted again after a
- * reset is counted once, with the chain's (latest) ballot. Never both.
+ * Pure. Per address: the MIRROR wins when it holds a ballot, because it holds
+ * the voter's FIRST one — and the first ballot is the only one that counts.
+ *
+ * This is deliberately the opposite of what it used to be. A manageData
+ * overwrite destroys the value it replaces, so the chain can only ever show
+ * the LATEST ballot; reading it first would count a revote. The chain is now
+ * the fallback, for an address that has a vote on chain and no mirror row at
+ * all — someone who wrote their own manageData without going through the
+ * relay. A testnet reset or a Horizon outage forgets accounts; the mirror does
+ * not. Never both, so nobody is counted twice.
  */
 export function mergeAccounts(
 	round: BallotRound,
@@ -53,15 +59,15 @@ export function mergeAccounts(
 	let chainVoters = 0;
 	let mirrorVoters = 0;
 	const accounts = addresses.map((address): VoterAccountData => {
-		const data = chain.get(address) ?? null;
-		if (data && hasVote(round, nominees, data)) {
-			chainVoters++;
-			return { address, data };
-		}
 		const selections = mirror.get(address);
 		if (selections && Object.values(selections).some((s) => s.length > 0)) {
 			mirrorVoters++;
 			return mirrorAccountData(round, { address, selections });
+		}
+		const data = chain.get(address) ?? null;
+		if (data && hasVote(round, nominees, data)) {
+			chainVoters++;
+			return { address, data };
 		}
 		return { address, data: null };
 	});
@@ -148,7 +154,7 @@ export function resultsDocument(
 		})),
 		generatedAt: now.toISOString(),
 		note:
-			"Aggregate only. Ballots are manageData entries on Stellar TESTNET; the award-ballots mirror is the durable record across testnet resets. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=" +
+			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror — not the chain — is what preserves the first ballot, and it is also the durable record across testnet resets. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=" +
 			round.slug,
 	};
 }

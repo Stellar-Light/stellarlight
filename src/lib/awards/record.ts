@@ -36,6 +36,40 @@ export async function findRoundId(
 }
 
 /**
+ * The existing trail, seeded if it is empty.
+ *
+ * A row written before the history field existed keeps its first ballot in
+ * `selections` and NOWHERE else. Appending to an empty trail would make the
+ * incoming ballot history[0] — i.e. would silently promote a revote to "the
+ * first ballot" and change who the round counts. So an empty trail is seeded
+ * from the row's own current state first.
+ */
+function priorTrail(prior: {
+	selections?: BallotSelections | null;
+	txHash?: string | null;
+	firstSubmittedAt?: string | null;
+	history?: Array<{
+		txHash?: string | null;
+		selections?: BallotSelections | null;
+		at?: string | null;
+	}> | null;
+}): Array<{
+	txHash?: string | null;
+	selections?: BallotSelections | null;
+	at?: string | null;
+}> {
+	if (prior.history?.length) return prior.history;
+	if (!prior.selections) return [];
+	return [
+		{
+			txHash: prior.txHash ?? null,
+			selections: prior.selections,
+			at: prior.firstSubmittedAt ?? null,
+		},
+	];
+}
+
+/**
  * Upsert one address's ballot for a round and APPEND to its history trail
  * (a revote never erases what came before). `at` is when the vote landed —
  * the relay passes now; the reconcile script passes the ledger close time.
@@ -62,15 +96,19 @@ export async function writeBallotRecord(
 		overrideAccess: true,
 	});
 
+	type HistoryEntry = {
+		txHash?: string | null;
+		selections?: BallotSelections | null;
+		at?: string | null;
+	};
 	const prior = existing.docs[0] as
 		| {
 				id: string | number;
 				submissions?: number | null;
-				history?: Array<{
-					txHash?: string | null;
-					selections?: BallotSelections | null;
-					at?: string | null;
-				}> | null;
+				selections?: BallotSelections | null;
+				txHash?: string | null;
+				firstSubmittedAt?: string | null;
+				history?: HistoryEntry[] | null;
 		  }
 		| undefined;
 
@@ -85,7 +123,7 @@ export async function writeBallotRecord(
 				txHash,
 				submissions: (prior.submissions ?? 1) + 1,
 				lastSubmittedAt: at,
-				history: [...(prior.history ?? []), entry],
+				history: [...priorTrail(prior), entry],
 			},
 			overrideAccess: true,
 		});
@@ -140,8 +178,102 @@ export async function recordBallot(params: {
 	}
 }
 
-/** Every mirrored ballot for a round: address → current selections. */
+/**
+ * The FIRST ballot this row recorded — the only one that counts.
+ *
+ * `history` is append-only and oldest-first, so history[0] is it. Empty
+ * entries are skipped so a malformed one can't zero a voter out, and a row
+ * with no usable history (written before the trail existed, or created by the
+ * reconcile lane straight from chain) falls back to `selections`.
+ *
+ * This is the whole reason the mirror outranks the chain now: a manageData
+ * overwrite destroys the value it replaces, so the chain can only ever show
+ * the LATEST ballot. Nothing on chain remembers the first one.
+ */
+export function firstBallotSelections(row: {
+	selections?: unknown;
+	history?: Array<{ selections?: unknown } | null> | null;
+}): BallotSelections {
+	for (const entry of row.history ?? []) {
+		const picks = normalizeSelections(entry?.selections);
+		if (Object.values(picks).some((s) => s.length > 0)) return picks;
+	}
+	return normalizeSelections(row.selections);
+}
+
+/**
+ * Has this address already cast a ballot we hold, for this round?
+ *
+ * TRINARY — true / false / **null = could not check**. Null is not "no": the
+ * vote gate refuses on null rather than let a second ballot be signed blind,
+ * because a second ballot would land on chain, overwrite the first on the
+ * voter's account, and then not count. Better a 503 they can retry than a
+ * signature that silently does nothing.
+ */
+export async function hasMirroredBallot(
+	roundSlug: string,
+	address: string,
+): Promise<boolean | null> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return null;
+		const roundId = await findRoundId(payload, roundSlug);
+		if (!roundId) return null;
+		const rows = await payload.find({
+			collection: "award-ballots",
+			where: {
+				and: [{ round: { equals: roundId } }, { address: { equals: address } }],
+			},
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		const row = rows.docs[0];
+		if (!row) return false;
+		return Object.values(firstBallotSelections(row)).some((s) => s.length > 0);
+	} catch (err) {
+		console.error("[awards] hasMirroredBallot failed:", err);
+		return null;
+	}
+}
+
+/**
+ * Every mirrored ballot for a round: address → the address's FIRST ballot.
+ * Not its current one — see firstBallotSelections.
+ */
 export async function readMirroredBallots(
+	payload: Payload,
+	roundId: string,
+): Promise<Map<string, BallotSelections>> {
+	const rows = await payload.find({
+		collection: "award-ballots",
+		where: { round: { equals: roundId } },
+		limit: 2000,
+		depth: 0,
+		overrideAccess: true,
+	});
+	const out = new Map<string, BallotSelections>();
+	for (const row of rows.docs) {
+		const address = String(row.address ?? "")
+			.trim()
+			.toUpperCase();
+		if (!address) continue;
+		out.set(address, firstBallotSelections(row));
+	}
+	return out;
+}
+
+/**
+ * Every mirrored ballot for a round: address → the address's CURRENT ballot.
+ *
+ * The other reader for a different question. The TALLY wants the first ballot
+ * (readMirroredBallots); the RECONCILE lane wants the current one, because its
+ * job is "does the mirror reflect what the chain says right now". Handing it
+ * first-ballots would make every out-of-band revote look like an unfixed
+ * correction on every single run — a daily phantom diff, and a duplicate
+ * history entry appended each time.
+ */
+export async function readCurrentBallots(
 	payload: Payload,
 	roundId: string,
 ): Promise<Map<string, BallotSelections>> {

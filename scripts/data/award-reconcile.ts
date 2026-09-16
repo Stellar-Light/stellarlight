@@ -42,7 +42,7 @@ import {
 } from "../../src/lib/awards/mirror";
 import {
 	findRoundId,
-	readMirroredBallots,
+	readCurrentBallots,
 	writeBallotRecord,
 } from "../../src/lib/awards/record";
 import { type LoadedRound, loadRoundOrThrow } from "../../src/lib/awards/round";
@@ -114,7 +114,7 @@ async function main() {
 		console.error(`\nround ${round.slug} loaded but has no id?!`);
 		return 1;
 	}
-	const mirror = await readMirroredBallots(payload, roundId);
+	const mirror = await readCurrentBallots(payload, roundId);
 	const addresses = [...new Set([...whitelist, ...mirror.keys()])].sort();
 
 	console.log(
@@ -200,7 +200,7 @@ async function main() {
 		);
 	}
 
-	const back = await readMirroredBallots(payload, roundId);
+	const back = await readCurrentBallots(payload, roundId);
 	let mismatches = 0;
 	for (const a of todo) {
 		const now = back.get(a.address);

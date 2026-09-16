@@ -4,14 +4,18 @@ import type { CollectionConfig } from "payload";
  * i³ Awards — a durable record of every ballot that cleared validation and
  * landed on testnet (one row per address per round, upserted on each vote).
  *
- * The CHAIN is still the source of truth: the tally reads whitelisted
- * accounts' manageData entries straight off Horizon, and a voter can revote
- * by overwriting theirs. This collection mirrors that so the round can be
- * read WITHOUT walking Horizon — "who has voted, for what, and when" in one
- * admin query — and so a vote survives in our own store even if a testnet
- * account is later merged or reset. It is written best-effort AFTER the
- * on-chain submit succeeds; a failure here never fails a vote that already
- * exists on-chain.
+ * THIS is what decides the round. One ballot per voter and the FIRST one
+ * counts — and a manageData overwrite destroys the value it replaces, so the
+ * chain can only ever show the LATEST ballot. `history[0]` is the only record
+ * of the first one anywhere, which makes this collection the tally's primary
+ * source; the chain is the fallback, for an address that wrote its own
+ * manageData without going through the relay.
+ *
+ * It also means the round can be read WITHOUT walking Horizon — "who has
+ * voted, for what, and when" in one admin query — and that a vote survives
+ * even if a testnet account is later merged or reset. It is written
+ * best-effort AFTER the on-chain submit succeeds; a failure there never fails
+ * a vote that already exists on-chain, and the reconcile lane closes the gap.
  *
  * Read access is admin-only, matching AwardVoters: public payloads stay
  * aggregate-only (turnout + per-nominee tally, never address→choice).
@@ -27,7 +31,7 @@ export const AwardBallots: CollectionConfig = {
 		defaultColumns: ["address", "round", "submissions", "lastSubmittedAt"],
 		group: "Awards",
 		description:
-			"Recorded ballots (one per address per round, updated on revote). The on-chain testnet entries remain the source of truth; this is the queryable mirror.",
+			"Recorded ballots, one per address per round. The FIRST entry in `history` is the ballot that counts — nothing on chain remembers it, because a manageData overwrite destroys what it replaces.",
 	},
 	access: {
 		read: ({ req }) => !!req.user,

@@ -2,9 +2,14 @@
  * GET /api/awards/eligibility?address=G...[&round=<slug>]
  *
  * Called when a wallet connects on /awards: is this address on the round's
- * whitelist, is the testnet account funded, and what has it already voted
- * for (so a returning voter sees their current ballot pre-selected —
- * "you can change your vote until closesAt" needs the current vote).
+ * whitelist, is the testnet account funded, and has it already voted (and for
+ * what, so a returning voter sees their ballot rather than an empty form).
+ *
+ * `hasVoted` is the union of chain and mirror, and it is what locks the form:
+ * one ballot per voter, the first one counts. It stays true after a testnet
+ * reset has wiped `votes` — the mirror still holds the ballot, so offering a
+ * fresh vote would be offering one that doesn't count. `null` means we could
+ * not check; the UI treats that as "can't vote right now", not "go ahead".
  *
  * A whitelisted address that is NOT funded gets funded here, server-side,
  * through friendbot — the voter's experience is connect → sign, and "fund on
@@ -22,6 +27,7 @@
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { decodeAccountVotes, roundOpenState } from "@/lib/awards/ballot";
+import { hasMirroredBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	fetchTestnetAccount,
@@ -114,6 +120,7 @@ export async function GET(req: NextRequest) {
 				whitelisted: true,
 				funded: false,
 				votes: null,
+				hasVoted: await hasMirroredBallot(loaded.round.slug, address),
 				voting: roundOpenState(loaded.round),
 				friendbot: friendbotFundUrl(address),
 				note: "This testnet account couldn't be funded automatically — hit friendbot, then vote.",
@@ -127,12 +134,17 @@ export async function GET(req: NextRequest) {
 		loaded.nominees,
 		result.account.data,
 	);
+	const onChain = Object.values(votes).some((picks) => picks.length > 0);
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,
 			whitelisted: true,
 			funded: true,
-			votes: Object.keys(votes).length > 0 ? votes : null,
+			votes: onChain ? votes : null,
+			// chain OR mirror — the mirror outlives a reset that clears `votes`
+			hasVoted: onChain
+				? true
+				: await hasMirroredBallot(loaded.round.slug, address),
 			voting: roundOpenState(loaded.round),
 		},
 		{ headers: rateLimitHeaders(limit) },
