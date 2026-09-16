@@ -64,6 +64,15 @@ Read via Soroban RPC simulation on 2026-09-16 (never submitted):
   panics, and with `panic = "abort"` that is exactly `UnreachableCodeReached`.
 - Contract created 2025-10-25; wasm upgraded 2026-05-11, 05-12 and **05-14**
   (current `83feef85…`, 4th version); 63 invocations total, 7 projects.
+- **Pinned.** The deployed wasm `83feef85…` is byte-identical to the
+  `tansu_v2.0.2.wasm` release asset (GitHub's asset digest). v2.0.2's
+  `ContractKey` is `Domain / Collateral / Nqg`. The FIRST deploy (tag `v1`,
+  2025-10) had `DomainContract / CollateralContract` — which is exactly how
+  the refs sit in instance storage today. They were set under v1 and never
+  re-set after the May upgrades, so every `register()` since 2026-05-14 has
+  unwrapped `None`. The fix is one admin call each to `set_domain_contract`
+  and `set_collateral_contract` (both in the deployed interface), or a wasm
+  whose keys match what is stored.
 
 The read paths (`get_project`, `get_commit`) work — our keccak key resolves
 `tansu` to its maintainer and latest hash `7de4027c…` — and `commit()`'s
