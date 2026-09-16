@@ -537,7 +537,6 @@ const CUBE_ORIENTATIONS = [
 	{ rx: 0, ry: -90 }, // "i"
 	{ rx: 0, ry: 180 }, // back
 	{ rx: 0, ry: 90 }, // left
-	{ rx: -90, ry: 0 }, // top
 ] as const;
 
 function CubeMark() {
@@ -577,9 +576,6 @@ function CubeMark() {
 				</span>
 				<span className="sm-cube-face sm-cube-left">
 					<b>3</b>
-				</span>
-				<span className="sm-cube-face sm-cube-top">
-					<b>i</b>
 				</span>
 				<span className="sm-cube-face sm-cube-f">
 					<b>i³</b>

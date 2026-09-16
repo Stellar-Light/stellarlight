@@ -1185,16 +1185,6 @@
 	border-color: #3f3f3f;
 	color: #b4b4b4;
 }
-.awards-sm .sm-cube-top {
-	transform: rotateX(90deg) translateZ(0.53em);
-	background: #363636;
-	border-color: #4d4d4d;
-	color: #d4d4d4;
-}
-.awards-sm .sm-cube-face b {
-	font-size: 0.72em;
-	font-weight: inherit;
-}
 .awards-sm .sm-cube-f {
 	transform: translateZ(0.53em);
 	background: #3d3d3d;
