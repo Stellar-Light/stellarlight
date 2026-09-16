@@ -206,11 +206,14 @@ function I3Mark({ className = "" }: { className?: string }) {
  */
 function ConnectedWallet({
 	address,
+	walletId,
 	onDisconnect,
 }: {
 	address: string;
+	walletId: AwardsWalletId | null;
 	onDisconnect: () => void;
 }) {
+	const wallet = AWARDS_WALLETS.find((w) => w.id === walletId) ?? null;
 	const [open, setOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
@@ -249,7 +252,17 @@ function ConnectedWallet({
 				aria-expanded={open}
 				className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-2.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
 			>
-				<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+				{wallet ? (
+					<Image
+						src={wallet.icon}
+						alt=""
+						width={20}
+						height={20}
+						className="h-5 w-5 flex-shrink-0 rounded-full ring-1 ring-[#3a3a3a]"
+					/>
+				) : (
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+				)}
 				{shortAddress(address)}
 				<ChevronDown
 					className={`h-3.5 w-3.5 text-neutral-400 transition-transform ${
@@ -267,13 +280,28 @@ function ConnectedWallet({
 						role="menu"
 						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
 					>
-						<div className="px-2.5 pt-1.5 pb-2">
-							<p className="text-xs text-neutral-400 mb-1.5">
-								Connected wallet
-							</p>
-							<p className="text-xs font-mono text-neutral-200 break-all leading-relaxed">
-								{address}
-							</p>
+						<div className="flex items-center gap-3 px-2.5 pb-2.5 pt-2">
+							{wallet ? (
+								<Image
+									src={wallet.icon}
+									alt=""
+									width={38}
+									height={38}
+									className="h-[38px] w-[38px] flex-shrink-0 rounded-full ring-1 ring-[#3a3a3a]"
+								/>
+							) : (
+								<span className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-full bg-[#242424] ring-1 ring-[#3a3a3a]">
+									<Wallet className="h-4 w-4 text-neutral-400" />
+								</span>
+							)}
+							<div className="min-w-0">
+								<p className="text-sm font-medium text-neutral-100">
+									{wallet?.name ?? "Connected wallet"}
+								</p>
+								<p className="truncate font-mono text-xs text-neutral-400">
+									{shortAddress(address)}
+								</p>
+							</div>
 						</div>
 						<div className="h-px bg-[#2a2a2a] my-1" />
 						<button
@@ -326,6 +354,7 @@ function TopBar({
 	onHowItWorks: () => void;
 	wallet?: {
 		address: string | null;
+		walletId: AwardsWalletId | null;
 		busy: boolean;
 		onConnect: () => void;
 		onDisconnect: () => void;
@@ -353,6 +382,7 @@ function TopBar({
 						(wallet.address ? (
 							<ConnectedWallet
 								address={wallet.address}
+								walletId={wallet.walletId}
 								onDisconnect={wallet.onDisconnect}
 							/>
 						) : (
@@ -917,6 +947,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	// 1 = the radio ballot (final round). >1 = approval ballot (shortlist round).
 	const picksPerCategory = Math.max(1, Math.floor(round.picksPerCategory ?? 1));
 	const [address, setAddress] = useState<string | null>(null);
+	const [walletId, setWalletId] = useState<AwardsWalletId | null>(null);
 	const [eligibility, setEligibility] = useState<Eligibility | null>(null);
 	const [phase, setPhase] = useState<Phase>("idle");
 	const [walletOpen, setWalletOpen] = useState(false);
@@ -1029,6 +1060,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			try {
 				const addr = await connectAwardsWallet(walletId);
 				setAddress(addr);
+				setWalletId(walletId);
 				setWalletOpen(false);
 				await refreshEligibility(addr);
 			} catch (err) {
@@ -1043,6 +1075,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const handleDisconnect = useCallback(async () => {
 		await disconnectAwardsWallet();
 		setAddress(null);
+		setWalletId(null);
 		setEligibility(null);
 		setTxHash(null);
 		setPhase("idle");
@@ -1225,6 +1258,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				onHowItWorks={() => setHowOpen(true)}
 				wallet={{
 					address,
+					walletId,
 					busy: phase === "connecting",
 					onConnect: () => setWalletOpen(true),
 					onDisconnect: handleDisconnect,
