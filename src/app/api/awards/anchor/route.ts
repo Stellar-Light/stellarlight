@@ -1,14 +1,16 @@
 /**
  * GET /api/awards/anchor?round=<slug> — is this round's published result
- * anchored on MAINNET?
+ * anchored on Tansu (testnet)?
  *
- * The vote is on testnet (reset 2–4×/year). When a round's results file is
+ * Everything about the vote is on testnet. When a round's results file is
  * committed to this public repo, the tansu-anchor lane commits that git SHA
- * to Tansu (tansu.dev) on mainnet and records { commitSha, txHash } on the
+ * to Tansu (tansu.dev) on testnet and records { commitSha, txHash } on the
  * round. This endpoint reads the round's record, reads the chain
  * (`get_commit(keccak256("stellarlight"))` via Soroban RPC simulation), and
- * says whether they agree — so the claim "anchored on mainnet" is checked,
- * not asserted. Public, aggregate-only information; cached 5 minutes.
+ * says whether they agree — so the claim "anchored" is checked, not
+ * asserted. After a testnet reset the chain forgets it (like every ballot)
+ * and this honestly reports `not-registered`; the award-ballots mirror
+ * remains the durable record. Public, aggregate-only; cached 5 minutes.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
@@ -17,8 +19,8 @@ import {
 	anchorVerdict,
 	type ChainState,
 	classifyChainError,
-	mainnetExplorerContractUrl,
-	mainnetExplorerTxUrl,
+	explorerContractUrl,
+	explorerTxUrl,
 	TANSU_PROJECT_NAME,
 	TANSU_PROJECT_URL,
 	type TansuClient,
@@ -116,8 +118,8 @@ export async function GET(req: NextRequest) {
 		onChain,
 		links: {
 			commit: anchor ? `${TANSU_PROJECT_URL}/commit/${anchor.commitSha}` : null,
-			tx: anchor?.txHash ? mainnetExplorerTxUrl(anchor.txHash) : null,
-			contract: mainnetExplorerContractUrl(),
+			tx: anchor?.txHash ? explorerTxUrl(anchor.txHash) : null,
+			contract: explorerContractUrl(),
 			tansu: tansuProjectPageUrl(),
 		},
 		cachedAt: new Date(at).toISOString(),

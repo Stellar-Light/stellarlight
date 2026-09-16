@@ -1,11 +1,20 @@
-# Tansu on mainnet as the notary of the i³ result — proposal (2026-09-16)
+# Tansu as the notary of the i³ result — proposal (2026-09-16)
 
-**Status (2026-09-16, later): BUILT, BLOCKED UPSTREAM.** The lane exists
-(`scripts/data/tansu-anchor.ts`, `tansu-anchor.yml`, `/api/awards/anchor`,
-`award-rounds.anchor`) and its read paths are proven against mainnet — but the
-deployed contract's `register()` traps for every caller. See "Finding" below.
-Owner's rule, restated: nobody opens a dApp — not a voter, not the owner. The
-lane holds its own maintainer key and does registration + commits itself.
+**Status (2026-09-16, final): BUILT ON TESTNET, ready to register.** Owner's
+corrections, both now rules: *everything* about i³ is testnet (Pilots vote
+with testnet-ASSIGNED wallets, not their real ones), and nobody opens a dApp —
+not a voter, not the owner. So the anchor lives where the vote lives: Tansu's
+TESTNET deployment (`CBXKUSLQ…`, the repo's configured id, where Tupui's real
+activity is — 34 projects, 700+ votes). The lane friendbots its own key, so
+there are zero owner steps and zero real XLM. After a testnet reset the chain
+forgets it, like every ballot; the award-ballots mirror is the durable record
+and the lane just registers again. The mainnet section below stays as a
+courtesy bug report for Tupui — it is no longer on our path.
+
+Verified on testnet 2026-09-16 (simulation read properly this time):
+`register(...)` OK from a funded test key (fee 177,649 stroops), `stellarlight`
+free, `get_project(key("tansu"))` resolves to its 5 maintainers and latest
+hash `86f0ce8d…`, commit's maintainer gate refuses a stranger.
 
 ## The role
 
@@ -42,7 +51,7 @@ project on tansu.dev. Nothing about our ballot changes.
   the wallet signature. The dApp shows `LatestCommit` / `CommitHistory` per
   project.
 
-## Finding: mainnet `register()` traps on the current wasm — for everyone
+## Finding (mainnet, courtesy report for Tupui): `register()` traps on the current wasm — for everyone
 
 Read via Soroban RPC simulation on 2026-09-16 (never submitted):
 

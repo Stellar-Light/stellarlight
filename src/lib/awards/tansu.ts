@@ -1,33 +1,39 @@
 /**
- * i³ Awards — Tansu on MAINNET as the notary of a published result.
+ * i³ Awards — Tansu on TESTNET as the notary of a published result.
  *
- * The vote itself is classic manageData on TESTNET: one signature, tallied
- * from Horizon, mirrored to award-ballots and reconciled daily. Testnet is
- * reset 2–4× a year, so nothing on that chain is permanent — the mirror is
- * what survives. This gives the PUBLISHED RESULT a permanent, third-party-
- * verifiable home on mainnet without touching a voter: Tansu (tansu.dev,
- * Tupui's project-versioning contract) records "the latest commit hash of a
- * project". We register `stellarlight` there once and, when a round's results
- * file is committed to this public repo, `commit()` that git SHA. Anyone can
- * read `get_commit(keccak256("stellarlight"))` and open the commit on GitHub.
+ * Everything about the i³ vote lives on testnet by the owner's rule: Pilots
+ * vote with testnet-ASSIGNED wallets (not their real ones), ballots are
+ * manageData on testnet, and the award-ballots mirror is the durable record
+ * because testnet is reset 2–4× a year. The anchor lives where the vote
+ * lives. Tansu (tansu.dev, Tupui's project-versioning contract) records "the
+ * latest commit hash of a project"; its testnet deployment is where Tupui's
+ * real activity is (34 projects, 700+ votes). We register `stellarlight`
+ * there and, when a round's results file is committed to this public repo,
+ * `commit()` that git SHA — so during the round and until the next reset,
+ * anyone can read `get_commit(keccak256("stellarlight"))` and open the commit
+ * on GitHub. After a reset the lane simply registers again (5 test XLM, free).
  *
- * Deployed-contract facts, read via Soroban RPC on 2026-09-16: 41 functions;
- * `register(maintainer, name, maintainers, url, ipfs)` (the older 5-arg form,
- * 5 XLM collateral, name ≤ 30 chars of [A-Za-z0-9]); `commit(maintainer,
+ * Nobody opens a dApp: the lane signs with its own key, friendbot-funded.
+ *
+ * Deployed-contract facts, read via Soroban RPC on 2026-09-16 (testnet wasm
+ * 878662dc…): `register(maintainer, name, maintainers, url, ipfs,
+ * min_voting_period?, execute_delay?, attestation_threshold?)` — 5 XLM
+ * collateral, name ≤ 30 chars of [A-Za-z0-9]; `commit(maintainer,
  * project_key, hash)` with hash = 40 or 64 lowercase hex; `get_commit
  * (project_key) → String`. Tansu keeps only the LATEST hash per project — an
- * older round's proof is the anchoring transaction itself, which mainnet
- * history keeps forever; that is why the tx hash is recorded next to the SHA.
+ * older round's proof is the anchoring transaction, which is why the tx hash
+ * is recorded next to the SHA. (The MAINNET deployment's register() traps for
+ * every caller since its 2026-05-14 upgrade — see the draft doc.)
  */
 
 import { keccak_256 } from "@noble/hashes/sha3";
-import { contract } from "@stellar/stellar-sdk";
+import { contract, Networks } from "@stellar/stellar-sdk";
 
-export const TANSU_MAINNET_CONTRACT =
-	"CDXINK2T3P46M4LWK35FVIXXHJ2XHAS4FOVCGVPJ63YV5OVTM24IY5BI";
-export const MAINNET_PASSPHRASE =
-	"Public Global Stellar Network ; September 2015";
-export const MAINNET_RPC_URL = "https://mainnet.sorobanrpc.com";
+/** Tansu's TESTNET deployment. Testnet resets may move it — --status says. */
+export const TANSU_CONTRACT =
+	"CBXKUSLQPVF35FYURR5C42BPYA5UOVDXX2ELKIM2CAJMCI6HXG2BHGZA";
+export const TANSU_NETWORK_PASSPHRASE: string = Networks.TESTNET;
+export const TANSU_RPC_URL = "https://soroban-testnet.stellar.org";
 export const TANSU_PROJECT_NAME = "stellarlight";
 export const TANSU_PROJECT_URL =
 	"https://github.com/Stellar-Light/stellarlight";
@@ -57,7 +63,7 @@ export type AnchorRecord = {
 	/** hex of tansuProjectKey(project) */
 	projectKey: string;
 	commitSha: string;
-	/** Mainnet tx that made the commit — null only if recorded after the fact. */
+	/** Testnet tx that made the commit — null only if recorded after the fact. */
 	txHash: string | null;
 	at: string;
 };
@@ -65,13 +71,11 @@ export type AnchorRecord = {
 export function tansuProjectPageUrl(name: string = TANSU_PROJECT_NAME): string {
 	return `https://tansu.dev/project?name=${encodeURIComponent(name)}`;
 }
-export function mainnetExplorerTxUrl(hash: string): string {
-	return `https://stellar.expert/explorer/public/tx/${hash}`;
+export function explorerTxUrl(hash: string): string {
+	return `https://stellar.expert/explorer/testnet/tx/${hash}`;
 }
-export function mainnetExplorerContractUrl(
-	id: string = TANSU_MAINNET_CONTRACT,
-): string {
-	return `https://stellar.expert/explorer/public/contract/${id}`;
+export function explorerContractUrl(id: string = TANSU_CONTRACT): string {
+	return `https://stellar.expert/explorer/testnet/contract/${id}`;
 }
 
 export type ChainState = "ok" | "unregistered" | "error";
@@ -156,6 +160,10 @@ export interface TansuClient {
 		maintainers: string[];
 		url: string;
 		ipfs: string;
+		/** Option<u64/u32> on the newer wasm — undefined = contract defaults. */
+		min_voting_period?: bigint | undefined;
+		execute_delay?: bigint | undefined;
+		attestation_threshold?: number | undefined;
 	}): Promise<contract.AssembledTransaction<Buffer>>;
 	commit(a: {
 		maintainer: string;
@@ -168,9 +176,9 @@ export async function tansuClient(
 	opts: { publicKey?: string } & Partial<contract.ClientOptions> = {},
 ): Promise<TansuClient> {
 	const c = await contract.Client.from({
-		contractId: TANSU_MAINNET_CONTRACT,
-		rpcUrl: MAINNET_RPC_URL,
-		networkPassphrase: MAINNET_PASSPHRASE,
+		contractId: TANSU_CONTRACT,
+		rpcUrl: TANSU_RPC_URL,
+		networkPassphrase: TANSU_NETWORK_PASSPHRASE,
 		...opts,
 	});
 	return c as unknown as TansuClient;
