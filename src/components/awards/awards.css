@@ -1296,6 +1296,10 @@
    artwork is a full figure mid-stride and a centred square crop lands on his
    knees. He breathes; he does not bounce. */
 .awards-sm .sm-stroopy {
+	/* It is a <span>. Without this, the inline width/height are ignored, the
+	   tile grows to the image's own size and no crop happens at all — the
+	   same trap the cube box hit. */
+	display: block;
 	position: relative;
 	flex-shrink: 0;
 	border-radius: 999px;
