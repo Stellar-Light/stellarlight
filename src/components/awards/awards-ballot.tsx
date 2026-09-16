@@ -421,6 +421,10 @@ function BallotArt({ step }: { step: number }) {
 						<i />
 						GDNP…HWOE
 					</span>
+					<span className="sm-clickring" />
+					<span className="sm-cursor">
+						<i />
+					</span>
 				</div>
 			)}
 			{step === 1 && (
@@ -451,6 +455,117 @@ function BallotArt({ step }: { step: number }) {
 					<div className="sm-move-ring" />
 				</div>
 			)}
+		</div>
+	);
+}
+
+/**
+ * The house curtain. Covers the page on load and parts to reveal the round —
+ * the one big theatrical moment, and the reason this page reads as an awards
+ * show rather than a form. Fixed, pointer-events:none, and it unmounts itself
+ * when the animation ends so it can never sit in front of the ballot. Hidden
+ * outright under prefers-reduced-motion (see awards.css).
+ */
+function StageReveal() {
+	const [done, setDone] = useState(false);
+	useEffect(() => {
+		const t = setTimeout(() => setDone(true), 1800);
+		return () => clearTimeout(t);
+	}, []);
+	if (done) return null;
+	const panels = [0, 1, 2, 3, 4, 5];
+	return (
+		<div className="sm-reveal" aria-hidden="true">
+			<div className="sm-reveal-glow" />
+			<div className="sm-reveal-half l">
+				{panels.map((n) => (
+					<i key={n} />
+				))}
+			</div>
+			<div className="sm-reveal-half r">
+				{panels.map((n) => (
+					<i key={n} />
+				))}
+			</div>
+		</div>
+	);
+}
+
+/** The same path the stroke draws and the nib rides — one source of truth. */
+const SIGNATURE_PATH =
+	"M6 44 C 16 14, 28 10, 32 26 C 36 42, 24 54, 20 45 C 16 36, 32 22, 48 27 C 64 32, 58 50, 69 45 C 80 40, 77 19, 90 22 C 103 25, 98 48, 110 43 C 121 38, 122 23, 134 30 C 145 36, 140 46, 152 41 L 184 38";
+
+/**
+ * The signing moment. While the wallet popup is open the page held nothing but
+ * a busy button; now it holds a signature writing itself. Covers the three
+ * in-flight phases with the copy that actually tells you what to do.
+ */
+function SigningOverlay({ phase }: { phase: Phase }) {
+	const active =
+		phase === "requesting" || phase === "signing" || phase === "submitting";
+	const title =
+		phase === "requesting"
+			? "Preparing your ballot"
+			: phase === "signing"
+				? "Approve in your wallet"
+				: "Recording on Stellar";
+	const sub =
+		phase === "requesting"
+			? "Building the transaction from your picks."
+			: phase === "signing"
+				? "One signature covers every category. No real funds."
+				: "Sending your signed ballot to testnet.";
+	return (
+		<AnimatePresence>
+			{active && (
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.2 }}
+					className="sm-signing"
+					role="status"
+					aria-live="polite"
+				>
+					<motion.div
+						initial={{ opacity: 0, y: 14, scale: 0.98 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 10, scale: 0.98 }}
+						transition={{ duration: 0.28, ease: EASE }}
+						className="sm-signing-card"
+					>
+						<div className="sm-sig" aria-hidden="true">
+							<svg viewBox="0 0 190 62" role="presentation">
+								<path d={SIGNATURE_PATH} />
+							</svg>
+							<span className="sm-nib" />
+						</div>
+						<div className="sm-sig-rule" aria-hidden="true" />
+						<h2 className="mb-2 text-lg font-semibold tracking-tight text-neutral-50">
+							{title}
+						</h2>
+						<p className="text-sm leading-relaxed text-neutral-400">{sub}</p>
+					</motion.div>
+				</motion.div>
+			)}
+		</AnimatePresence>
+	);
+}
+
+/**
+ * Your ballot prints. The printer belongs HERE rather than in the explainer —
+ * this is a receipt actually being issued, one row per category, stamped.
+ */
+function VoteReceipt() {
+	return (
+		<div className="sm-receipt" aria-hidden="true">
+			<div className="sm-receipt-sheet">
+				{[0, 1, 2].map((r) => (
+					<span key={r} style={{ ["--sm-i" as string]: r }} />
+				))}
+			</div>
+			<div className="sm-receipt-stamp" />
+			<div className="sm-receipt-body" />
 		</div>
 	);
 }
@@ -968,6 +1083,8 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 	return (
 		<>
+			<StageReveal />
+			<SigningOverlay phase={phase} />
 			<TopBar
 				onHowItWorks={() => setHowOpen(true)}
 				wallet={{
@@ -1039,14 +1156,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									/>
 								))}
 							</span>
-							<motion.span
-								initial={{ scale: 0 }}
-								animate={{ scale: 1 }}
-								transition={{ ...SPRING, delay: 0.1 }}
-								className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100"
-							>
-								<Check className="h-6 w-6 text-black" strokeWidth={3} />
-							</motion.span>
+							<VoteReceipt />
 							<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-100 mb-2">
 								Your vote is on-chain
 							</h2>
@@ -1146,6 +1256,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					{categories.map((category) => (
 						<section key={category.key} aria-label={category.name}>
 							<div className="mb-5">
+								<span className="sm-batten mb-3" aria-hidden="true" />
 								<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
 									{category.name}
 								</h2>
@@ -1681,6 +1792,7 @@ function NomineeCard({
 			}`}
 			style={{ transition: "border-color .15s, background-color .15s" }}
 		>
+			{selected && <span className="sm-shine" aria-hidden="true" />}
 			{/* selection badge */}
 			<span
 				className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
