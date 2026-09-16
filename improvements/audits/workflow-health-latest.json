@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-16T13:22:49.767Z",
+	"asOf": "2026-09-16T14:02:46.310Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 93,
-	"healthy": 92,
+	"checked": 94,
+	"healthy": 93,
 	"broken": [
 		{
 			"file": "award-import.yml",
@@ -76,6 +76,17 @@
 			"graceDays": 45,
 			"runs": 1,
 			"why": "1 runs since this file was last edited, zero successes — dies at \"Import\", not a declared signal step"
+		},
+		{
+			"file": "award-round.yml",
+			"name": "award round status",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-16T13:55:15Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 3,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -182,10 +193,10 @@
 			"cron": "30 8 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-15T13:48:53Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -214,7 +225,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:17:38Z",
+			"lastSuccessAt": "2026-09-16T13:56:30Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -236,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:20:28Z",
+			"lastSuccessAt": "2026-09-16T13:59:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -632,7 +643,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T17:24:18Z",
+			"lastSuccessAt": "2026-09-16T13:56:30Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -654,7 +665,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T13:24:55Z",
+			"lastSuccessAt": "2026-09-16T13:24:06Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -702,7 +713,7 @@
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 65,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -819,10 +830,10 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T07:45:02Z",
+			"lastSuccessAt": "2026-09-16T13:33:38Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 80,
+			"runs": 81,
 			"why": "last green 0d ago"
 		},
 		{
@@ -973,7 +984,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:20:27Z",
+			"lastSuccessAt": "2026-09-16T13:59:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1031,7 +1042,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 69,
+			"runs": 70,
 			"why": "last green 0d ago"
 		}
 	]
