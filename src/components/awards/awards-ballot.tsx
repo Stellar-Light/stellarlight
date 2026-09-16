@@ -146,11 +146,29 @@ function I3Mark({ className = "" }: { className?: string }) {
 	return (
 		<svg
 			viewBox="0 0 96 96"
-			className={`inline-block select-none ${className}`}
+			className={`sm-mark inline-block select-none ${className}`}
 			aria-hidden="true"
 			role="img"
 		>
+			<title>i³</title>
+			{/* the milled edge — 24 marks that catch the light once, around */}
+			{Array.from({ length: 24 }, (_, i) => (
+				<line
+					key={i}
+					className="sm-mark-tick"
+					x1="48"
+					y1="6"
+					x2="48"
+					y2="11"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					transform={`rotate(${i * 15} 48 48)`}
+					style={{ ["--sm-i" as string]: i }}
+				/>
+			))}
 			<circle
+				className="sm-mark-ring"
 				cx="48"
 				cy="48"
 				r="45"
@@ -158,6 +176,7 @@ function I3Mark({ className = "" }: { className?: string }) {
 				stroke="currentColor"
 				strokeWidth="1.5"
 				opacity="0.35"
+				transform="rotate(-90 48 48)"
 			/>
 			<circle
 				cx="48"
@@ -173,19 +192,19 @@ function I3Mark({ className = "" }: { className?: string }) {
 				y="66"
 				textAnchor="middle"
 				fontFamily="var(--font-sans), Inter, sans-serif"
+				fontSize="46"
 				fontWeight="600"
-				fontSize="52"
 				fill="currentColor"
 			>
 				i
 			</text>
 			<text
-				x="60"
-				y="46"
+				x="62"
+				y="44"
 				textAnchor="middle"
 				fontFamily="var(--font-sans), Inter, sans-serif"
-				fontWeight="600"
 				fontSize="26"
+				fontWeight="600"
 				fill="currentColor"
 			>
 				3
@@ -1097,13 +1116,22 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 			{/* ── Hero ── */}
 			<motion.header
-				initial={{ opacity: 0, y: 18 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.55, ease: EASE }}
-				className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-10 text-center"
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.45, ease: EASE }}
+				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
+				<span className="sm-spot" aria-hidden="true" />
+				<div className="sm-marquee" aria-hidden="true">
+					{Array.from({ length: 13 }, (_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: fixed bulb row
+						<i key={i} style={{ ["--sm-i" as string]: i }} />
+					))}
+				</div>
 				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
-					{round.title}
+					<span className="sm-lift">
+						<span>{round.title}</span>
+					</span>
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
 					Three categories. One pick in each. SCF Pilots choose the projects
@@ -1256,13 +1284,18 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					{categories.map((category) => (
 						<section key={category.key} aria-label={category.name}>
 							<div className="mb-5">
-								<span className="sm-batten mb-3" aria-hidden="true" />
 								<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
-									{category.name}
+									<span className="sm-lift">
+										<span>{category.name}</span>
+									</span>
 								</h2>
 								{category.tagline && (
 									<p className="mt-0.5 text-sm text-neutral-500">
-										{category.tagline}
+										<span className="sm-lift">
+											<span style={{ ["--sm-d" as string]: "110ms" }}>
+												{category.tagline}
+											</span>
+										</span>
 									</p>
 								)}
 							</div>
@@ -1792,7 +1825,6 @@ function NomineeCard({
 			}`}
 			style={{ transition: "border-color .15s, background-color .15s" }}
 		>
-			{selected && <span className="sm-shine" aria-hidden="true" />}
 			{/* selection badge */}
 			<span
 				className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
