@@ -31,7 +31,7 @@ import {
 	Wallet,
 	X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useIsPresent } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -275,7 +275,12 @@ function ConnectedWallet({
 					<motion.div
 						initial={{ opacity: 0, y: -6, scale: 0.97 }}
 						animate={{ opacity: 1, y: 0, scale: 1 }}
-						exit={{ opacity: 0, y: -6, scale: 0.97 }}
+						exit={{
+							opacity: [1, 1, 0],
+							y: [0, 0, -6],
+							scale: [1, 1, 0.97],
+							transition: { duration: 0.3, times: [0, 0.62, 1], ease: EASE },
+						}}
 						transition={{ duration: 0.16, ease: EASE }}
 						role="menu"
 						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
@@ -1761,10 +1766,13 @@ function AwardsToast({
  * mascot's spirit — visor face, pixel eyes, antenna — not the official art.
  * Sized by the caller; the badge is the connected wallet's own mark.
  */
-function Stroopy({ size, badge }: { size: number; badge?: string }) {
+export function Stroopy({ size, badge }: { size: number; badge?: string }) {
+	// He lives inside the menu's AnimatePresence: while it is leaving this goes
+	// false, and the shutters swing back closed over him.
+	const present = useIsPresent();
 	return (
 		<span
-			className="sm-stroopy"
+			className={`sm-stroopy${present ? "" : " is-shut"}`}
 			style={{ width: size, height: size }}
 			aria-hidden="true"
 		>
