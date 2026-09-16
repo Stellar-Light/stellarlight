@@ -30,6 +30,34 @@ export function friendbotFundUrl(address: string): string {
 	return `${FRIENDBOT_URL}/?addr=${encodeURIComponent(address)}`;
 }
 
+/**
+ * Fund a testnet account through friendbot, server-side. The ballot UI used
+ * to hand the voter a "Fund on testnet" tap; the eligibility route now does
+ * this for a whitelisted address the moment it connects, so the voter's
+ * whole experience is connect → sign. `already` = friendbot says the account
+ * exists (funded between our lookup and this call) — that is success.
+ * Bounded: friendbot waits for the ledger to close before answering.
+ */
+export async function fundViaFriendbot(
+	address: string,
+): Promise<{ ok: true; already: boolean } | { ok: false; error: string }> {
+	try {
+		const res = await fetch(friendbotFundUrl(address), {
+			headers: { Accept: "application/json" },
+			cache: "no-store",
+			signal: AbortSignal.timeout(20_000),
+		});
+		if (res.ok) return { ok: true, already: false };
+		const text = await res.text().catch(() => "");
+		if (res.status === 400 && /already/i.test(text)) {
+			return { ok: true, already: true };
+		}
+		return { ok: false, error: `friendbot responded ${res.status}` };
+	} catch (err) {
+		return { ok: false, error: `friendbot unreachable: ${String(err)}` };
+	}
+}
+
 export interface HorizonAccount {
 	/** Current sequence number as a string (Horizon serves it as a string). */
 	sequence: string;
