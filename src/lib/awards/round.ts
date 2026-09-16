@@ -63,118 +63,129 @@ function projectLogoUrl(project: any): string | null {
  * Load a round with nominees + whitelist.
  * - `slug` given → that round, any status (the page renders closed states).
  * - no slug → the open round; falls back to the most recently updated one.
- * Returns null when nothing exists (page shows its empty state).
+ * Returns null when nothing exists; THROWS on a DB/Payload failure.
  */
-export async function loadRound(
+export async function loadRoundOrThrow(
 	slug?: string | null,
 ): Promise<LoadedRound | null> {
 	const payload = await getPayloadSafe();
-	if (!payload) return null;
-	try {
-		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		let roundDoc: any = null;
-		if (slug) {
-			const bySlug = await payload.find({
+	if (!payload) throw new Error("Payload unavailable");
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	let roundDoc: any = null;
+	if (slug) {
+		const bySlug = await payload.find({
+			collection: "award-rounds",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+		});
+		roundDoc = bySlug.docs[0] ?? null;
+	} else {
+		const open = await payload.find({
+			collection: "award-rounds",
+			where: { status: { equals: "open" } },
+			sort: "-updatedAt",
+			limit: 1,
+			depth: 0,
+		});
+		roundDoc = open.docs[0] ?? null;
+		if (!roundDoc) {
+			const latest = await payload.find({
 				collection: "award-rounds",
-				where: { slug: { equals: slug } },
-				limit: 1,
-				depth: 0,
-			});
-			roundDoc = bySlug.docs[0] ?? null;
-		} else {
-			const open = await payload.find({
-				collection: "award-rounds",
-				where: { status: { equals: "open" } },
 				sort: "-updatedAt",
 				limit: 1,
 				depth: 0,
 			});
-			roundDoc = open.docs[0] ?? null;
-			if (!roundDoc) {
-				const latest = await payload.find({
-					collection: "award-rounds",
-					sort: "-updatedAt",
-					limit: 1,
-					depth: 0,
-				});
-				roundDoc = latest.docs[0] ?? null;
-			}
+			roundDoc = latest.docs[0] ?? null;
 		}
-		if (!roundDoc) return null;
+	}
+	if (!roundDoc) return null;
 
-		const [nomineeDocs, voterDocs] = await Promise.all([
-			payload.find({
-				collection: "award-nominees",
-				where: { round: { equals: roundDoc.id } },
-				// depth 2: nominee → project → logo (media doc), so cards can render
-				// the directory logo without extra queries.
-				depth: 2,
-				limit: 100,
-			}),
-			payload.find({
-				collection: "award-voters",
-				where: { round: { equals: roundDoc.id } },
-				depth: 0,
-				limit: 500,
-				overrideAccess: true,
-			}),
-		]);
+	const [nomineeDocs, voterDocs] = await Promise.all([
+		payload.find({
+			collection: "award-nominees",
+			where: { round: { equals: roundDoc.id } },
+			// depth 2: nominee → project → logo (media doc), so cards can render
+			// the directory logo without extra queries.
+			depth: 2,
+			limit: 100,
+		}),
+		payload.find({
+			collection: "award-voters",
+			where: { round: { equals: roundDoc.id } },
+			depth: 0,
+			limit: 500,
+			overrideAccess: true,
+		}),
+	]);
 
-		const round = toBallotRound(roundDoc);
-		const categoryOrder = new Map(
-			round.categories.map((c, i) => [c.key, i] as const),
-		);
+	const round = toBallotRound(roundDoc);
+	const categoryOrder = new Map(
+		round.categories.map((c, i) => [c.key, i] as const),
+	);
 
-		const nominees: PublicNominee[] =
-			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-			(nomineeDocs.docs as any[])
-				.filter((n) => n.project && typeof n.project === "object")
-				.map((n) => {
-					const project = n.project;
-					// Only surface TVL that's meaningful (> $1k) — filters out the
-					// near-zero mis-mapped values (etherfuse ~$2, allbridge ~$574).
-					const tvlUSD =
-						typeof project.tvlUSD === "number" ? project.tvlUSD : null;
-					return {
-						category: String(n.category),
-						slug: String(project.slug),
-						name: String(project.name ?? project.slug),
-						blurb:
-							(typeof n.customBlurb === "string" && n.customBlurb.trim()) ||
-							project.shortDescription ||
-							null,
-						logoUrl: projectLogoUrl(project),
-						projectUrl: `/project/${project.slug}`,
-						projectCategory: project.category ?? null,
-						tvl:
-							tvlUSD && tvlUSD > 1000
-								? {
-										usd: tvlUSD,
-										source: project.tvlSource ?? null,
-										asOf: project.tvlAsOf ?? null,
-									}
-								: null,
-					};
-				})
-				.sort(
-					(a, b) =>
-						(categoryOrder.get(a.category) ?? 99) -
-							(categoryOrder.get(b.category) ?? 99) ||
-						a.name.localeCompare(b.name),
-				);
+	const nominees: PublicNominee[] =
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		(nomineeDocs.docs as any[])
+			.filter((n) => n.project && typeof n.project === "object")
+			.map((n) => {
+				const project = n.project;
+				// Only surface TVL that's meaningful (> $1k) — filters out the
+				// near-zero mis-mapped values (etherfuse ~$2, allbridge ~$574).
+				const tvlUSD =
+					typeof project.tvlUSD === "number" ? project.tvlUSD : null;
+				return {
+					category: String(n.category),
+					slug: String(project.slug),
+					name: String(project.name ?? project.slug),
+					blurb:
+						(typeof n.customBlurb === "string" && n.customBlurb.trim()) ||
+						project.shortDescription ||
+						null,
+					logoUrl: projectLogoUrl(project),
+					projectUrl: `/project/${project.slug}`,
+					projectCategory: project.category ?? null,
+					tvl:
+						tvlUSD && tvlUSD > 1000
+							? {
+									usd: tvlUSD,
+									source: project.tvlSource ?? null,
+									asOf: project.tvlAsOf ?? null,
+								}
+							: null,
+				};
+			})
+			.sort(
+				(a, b) =>
+					(categoryOrder.get(a.category) ?? 99) -
+						(categoryOrder.get(b.category) ?? 99) ||
+					a.name.localeCompare(b.name),
+			);
 
-		const whitelist = new Set<string>(
-			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-			(voterDocs.docs as any[])
-				.map((v) =>
-					String(v.address ?? "")
-						.trim()
-						.toUpperCase(),
-				)
-				.filter(Boolean),
-		);
+	const whitelist = new Set<string>(
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		(voterDocs.docs as any[])
+			.map((v) =>
+				String(v.address ?? "")
+					.trim()
+					.toUpperCase(),
+			)
+			.filter(Boolean),
+	);
 
-		return { round, nominees, whitelist };
+	return { round, nominees, whitelist };
+}
+
+/**
+ * Request-path wrapper: null on ANY failure so pages render their empty
+ * state. Scripts use loadRoundOrThrow — a swallowed DB error must not read
+ * as "no round" in a lane (award-reconcile run 35106331010 did exactly that).
+ */
+export async function loadRound(
+	slug?: string | null,
+): Promise<LoadedRound | null> {
+	try {
+		return await loadRoundOrThrow(slug);
 	} catch {
 		return null;
 	}

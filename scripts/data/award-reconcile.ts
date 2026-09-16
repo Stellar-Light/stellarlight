@@ -3,6 +3,11 @@
  *
  *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026-test
  *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026-test --execute
+ *   pnpm exec tsx scripts/data/award-reconcile.ts --round=current --execute
+ *
+ * `--round=current` = the open round, else the most recently updated one —
+ * what the daily schedule runs, so the mirror is reconciled every day a round
+ * exists and nobody has to remember to do it before the reset.
  *
  * WHY. Ballots live as manageData entries on each voter's TESTNET account and
  * the tally reads them from Horizon. Testnet is reset 2–4× a year, and a reset
@@ -21,8 +26,9 @@
  * the vote when Horizon still has the operation.
  *
  * If the mirror holds ballots and the chain shows none for anyone, that is
- * what a reset looks like: the run REFUSES — there is nothing to reconcile
- * from, and the mirror rows are the record.
+ * what a reset looks like: nothing is written — there is nothing to reconcile
+ * from, the mirror rows are the record — and the run says so and exits 0,
+ * because a lane that stays red forever after the reset reads as noise.
  *
  * Dry-run by default. Every write is read back; unreachable addresses or a
  * read-back mismatch exit non-zero so a partial run never reads as success.
@@ -39,7 +45,7 @@ import {
 	readMirroredBallots,
 	writeBallotRecord,
 } from "../../src/lib/awards/record";
-import { loadRound } from "../../src/lib/awards/round";
+import { type LoadedRound, loadRoundOrThrow } from "../../src/lib/awards/round";
 import {
 	fetchLatestBallotOp,
 	fetchTestnetAccounts,
@@ -80,17 +86,34 @@ async function main() {
 
 	// getPayload (not the safe wrapper) so a DB failure is FATAL, not "no round".
 	const payload = await getPayload({ config: configPromise });
-	const roundId = await findRoundId(payload, ROUND);
-	if (!roundId) {
-		console.error(`\nno round with slug "${ROUND}"`);
-		return 1;
+
+	// The throwing loader, retried: a transient DB error must surface as the
+	// error it is, not as "no round" (run 35106331010 failed exactly that way).
+	let loaded: LoadedRound | null = null;
+	for (let attempt = 1; ; attempt++) {
+		try {
+			loaded = await loadRoundOrThrow(ROUND === "current" ? null : ROUND);
+			break;
+		} catch (err) {
+			console.error(`loadRound attempt ${attempt}/3 failed:`, err);
+			if (attempt === 3) return 1;
+			await new Promise((r) => setTimeout(r, 2000 * attempt));
+		}
 	}
-	const loaded = await loadRound(ROUND);
 	if (!loaded) {
-		console.error("\nround exists but loadRound returned null");
+		console.error(
+			ROUND === "current"
+				? "\nno round exists"
+				: `\nno round with slug "${ROUND}"`,
+		);
 		return 1;
 	}
 	const { round, nominees, whitelist } = loaded;
+	const roundId = await findRoundId(payload, round.slug);
+	if (!roundId) {
+		console.error(`\nround ${round.slug} loaded but has no id?!`);
+		return 1;
+	}
 	const mirror = await readMirroredBallots(payload, roundId);
 	const addresses = [...new Set([...whitelist, ...mirror.keys()])].sort();
 
@@ -125,16 +148,16 @@ async function main() {
 	}
 
 	if (summary.resetSuspected) {
-		console.error(
-			`\nREFUSED: the mirror holds ${mirror.size} ballot(s) and Horizon answered for ${actions.length - c.unreachable} account(s), yet NONE carries a vote.`,
+		console.log(
+			`\nNOTICE: the mirror holds ${mirror.size} ballot(s) and Horizon answered for ${actions.length - c.unreachable} account(s), yet NONE carries a vote.`,
 		);
-		console.error(
+		console.log(
 			"  That is what testnet looks like after a reset. There is nothing to reconcile FROM —",
 		);
-		console.error(
-			"  the mirror rows ARE the record now, and /api/awards/results serves them.",
+		console.log(
+			"  the mirror rows ARE the record now, and /api/awards/results serves them. Nothing written.",
 		);
-		return 1;
+		return 0;
 	}
 
 	const todo = actions.filter(
