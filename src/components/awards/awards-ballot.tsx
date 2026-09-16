@@ -1757,6 +1757,19 @@ function AwardsToast({
 	);
 }
 
+/** Stroopy, the Stellar mascot — the wallet picker's greeter. */
+function Stroopy({ size }: { size: number }) {
+	return (
+		<span
+			className="sm-stroopy"
+			style={{ width: size, height: size }}
+			aria-hidden="true"
+		>
+			<Image src="/stroopy.webp" alt="" width={size * 2} height={size * 2} />
+		</span>
+	);
+}
+
 // ── Wallet picker (RainbowKit pattern: modal on desktop, drawer on mobile) ──
 
 function WalletList({
@@ -1834,6 +1847,9 @@ function WalletPicker({
 			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader className="text-center sm:text-center">
+						<span className="mx-auto mb-3 block">
+							<Stroopy size={76} />
+						</span>
 						<DrawerTitle className="text-xl font-semibold">
 							Connect a wallet
 						</DrawerTitle>
@@ -1881,13 +1897,16 @@ function WalletPicker({
 						className="relative w-full max-w-sm rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
 						<div className="flex items-start justify-between gap-4 mb-6">
-							<div>
-								<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
-									Connect a wallet
-								</h2>
-								<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
-									You'll sign a Stellar testnet transaction — no real funds.
-								</p>
+							<div className="flex items-start gap-3.5">
+								<Stroopy size={54} />
+								<div>
+									<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
+										Connect a wallet
+									</h2>
+									<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
+										You'll sign a Stellar testnet transaction — no real funds.
+									</p>
+								</div>
 							</div>
 							<button
 								type="button"
