@@ -151,22 +151,6 @@ function I3Mark({ className = "" }: { className?: string }) {
 			role="img"
 		>
 			<title>i³</title>
-			{/* the milled edge — 24 marks that catch the light once, around */}
-			{Array.from({ length: 24 }, (_, i) => (
-				<line
-					key={i}
-					className="sm-mark-tick"
-					x1="48"
-					y1="6"
-					x2="48"
-					y2="11"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					transform={`rotate(${i * 15} 48 48)`}
-					style={{ ["--sm-i" as string]: i }}
-				/>
-			))}
 			<circle
 				className="sm-mark-ring"
 				cx="48"
@@ -507,6 +491,55 @@ function StageReveal() {
 				))}
 			</div>
 		</div>
+	);
+}
+
+/**
+ * The round title, hung rather than typed on. Each word swings in on a pivot
+ * at its top edge; if the title ends in a year, that year is last year's
+ * sticker peeling off to reveal this one — so the header says "it's that time
+ * again" without a word of copy.
+ */
+function HungTitle({ title }: { title: string }) {
+	const m = title.match(/^(.*?)\s*(\d{4})$/);
+	const words = (m ? m[1] : title).split(/\s+/).filter(Boolean);
+	const year = m ? Number(m[2]) : null;
+	const settle = words.length * 90 + 620;
+	return (
+		<>
+			{words.map((w, i) => (
+				<span
+					key={`${w}-${i}`}
+					className="sm-swing"
+					style={{ ["--sm-d" as string]: `${i * 90}ms` }}
+				>
+					{w}
+					{"\u00A0"}
+				</span>
+			))}
+			{year !== null && (
+				<span
+					className="sm-swing"
+					style={{ ["--sm-d" as string]: `${words.length * 90}ms` }}
+				>
+					<span className="sm-peel">
+						{year}
+						<span
+							className="sm-peel-old"
+							aria-hidden="true"
+							style={{ ["--sm-d" as string]: `${settle}ms` }}
+						>
+							{year - 1}
+						</span>
+						<span
+							className="sm-peel-curl"
+							aria-hidden="true"
+							style={{ ["--sm-d" as string]: `${settle}ms` }}
+						/>
+					</span>
+				</span>
+			)}
+		</>
 	);
 }
 
@@ -1121,17 +1154,10 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				transition={{ duration: 0.45, ease: EASE }}
 				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
-				<span className="sm-spot" aria-hidden="true" />
-				<div className="sm-marquee" aria-hidden="true">
-					{Array.from({ length: 13 }, (_, i) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: fixed bulb row
-						<i key={i} style={{ ["--sm-i" as string]: i }} />
-					))}
-				</div>
-				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
-					<span className="sm-lift">
-						<span>{round.title}</span>
-					</span>
+				<span className="sm-beam" aria-hidden="true" />
+				<span className="sm-beam-source" aria-hidden="true" />
+				<h1 className="relative text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
+					<HungTitle title={round.title} />
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
 					Three categories. One pick in each. SCF Pilots choose the projects
