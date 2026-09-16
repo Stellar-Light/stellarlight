@@ -1389,6 +1389,32 @@
 		transform: perspective(600px) rotateY(130deg);
 	}
 }
+/* Dismissing the menu shuts the window again — yui540's close half, straight
+   back from ∓130 to 0 with no overshoot, quicker than the open. The menu holds
+   its opacity while this plays (see the exit transition on the menu) or you
+   would never see it. */
+.awards-sm .sm-stroopy.is-shut .sm-sr-shutter-l {
+	animation: sm-sr-shut-l 0.26s ease-in-out both;
+}
+.awards-sm .sm-stroopy.is-shut .sm-sr-shutter-r {
+	animation: sm-sr-shut-r 0.26s ease-in-out both;
+}
+@keyframes sm-sr-shut-l {
+	from {
+		transform: perspective(600px) rotateY(-130deg);
+	}
+	to {
+		transform: perspective(600px) rotateY(0deg);
+	}
+}
+@keyframes sm-sr-shut-r {
+	from {
+		transform: perspective(600px) rotateY(130deg);
+	}
+	to {
+		transform: perspective(600px) rotateY(0deg);
+	}
+}
 /* the highlight raked across the portrait once he has landed */
 .awards-sm .sm-sr-gloss {
 	position: absolute;
