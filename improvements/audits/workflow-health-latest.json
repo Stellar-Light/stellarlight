@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-16T15:36:35.554Z",
+	"asOf": "2026-09-16T15:44:01.370Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 95,
-	"healthy": 94,
+	"checked": 96,
+	"healthy": 95,
 	"broken": [
 		{
 			"file": "award-import.yml",
@@ -87,6 +87,17 @@
 			"graceDays": 4,
 			"runs": 1,
 			"why": "last green 0d ago"
+		},
+		{
+			"file": "award-round.yml",
+			"name": "award round (create / status)",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-16T15:37:49Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 5,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -225,7 +236,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:31:23Z",
+			"lastSuccessAt": "2026-09-16T15:41:17Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -247,7 +258,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:33:50Z",
+			"lastSuccessAt": "2026-09-16T15:41:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -646,7 +657,7 @@
 			"lastSuccessAt": "2026-09-16T15:20:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 94,
+			"runs": 93,
 			"why": "last green 0d ago"
 		},
 		{
@@ -713,7 +724,7 @@
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 69,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -995,7 +1006,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T15:33:50Z",
+			"lastSuccessAt": "2026-09-16T15:41:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1053,7 +1064,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 74,
+			"runs": 75,
 			"why": "last green 0d ago"
 		}
 	]
