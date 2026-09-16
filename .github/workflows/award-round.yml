@@ -1,0 +1,57 @@
+name: award round status
+# i³ Awards — open, close or draft a round.
+#
+# Every other step of the pipeline has a workflow (award-import, award-test-setup,
+# seed-i3-mock); the round LIFECYCLE was a hand edit in /admin, and it is the one
+# step with a documented foot-gun: /api/awards/round picks THE open round with no
+# slug, so two open rounds collide and the public ballot becomes arbitrary.
+#
+# Opening REFUSES while another round is open and names the one to draft first.
+# Closing and drafting are always allowed. Dry-run by default; every write is
+# read back.
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Round slug. Leave empty to just LIST every round and its status."
+        required: false
+        default: ""
+      status:
+        description: "New status"
+        type: choice
+        options: [draft, open, closed]
+        required: false
+        default: draft
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: award-round
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  round:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Set round status (dry-run unless execute=true)
+        run: |
+          if [ -z "${{ inputs.slug }}" ]; then
+            pnpm exec tsx scripts/data/award-round.ts --list
+          else
+            pnpm exec tsx scripts/data/award-round.ts \
+              --slug=${{ inputs.slug }} \
+              --status=${{ inputs.status }} \
+              ${{ inputs.execute && '--execute' || '' }}
+          fi
