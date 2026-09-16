@@ -10,54 +10,93 @@
  * address, never a tx hash (a tx resolves to a voter account on the explorer).
  */
 
-import { type RoundTally, tallyRound } from "./ballot";
+import {
+	type BallotNominee,
+	type BallotRound,
+	type BallotSelections,
+	decodeAccountVotes,
+	type RoundTally,
+	tallyRound,
+	type VoterAccountData,
+} from "./ballot";
 import { mirrorAccountData } from "./mirror";
 import { loadMirroredBallots } from "./record";
 import type { LoadedRound } from "./round";
 import { fetchTestnetAccounts } from "./stellar";
 
-export type TallySource = "chain" | "mirror";
+export type TallySource = "chain" | "mirror" | "chain+mirror";
 
 const HORIZON_CONCURRENCY = 10;
 
+const hasVote = (
+	round: BallotRound,
+	nominees: BallotNominee[],
+	data: Record<string, string>,
+) =>
+	Object.values(decodeAccountVotes(round, nominees, data)).some(
+		(s) => s.length > 0,
+	);
+
 /**
- * Chain first; when the chain shows NO votes for anyone (testnet reset, or
- * Horizon down), the award-ballots mirror. The whitelist stays the
- * denominator either way.
+ * Pure. Per address: the chain wins when it carries a vote for this round;
+ * otherwise the mirror. A testnet reset or a Horizon outage forgets some or
+ * all accounts — the mirror does not — and a voter who voted again after a
+ * reset is counted once, with the chain's (latest) ballot. Never both.
  */
+export function mergeAccounts(
+	round: BallotRound,
+	nominees: BallotNominee[],
+	addresses: string[],
+	chain: Map<string, Record<string, string> | null>,
+	mirror: Map<string, BallotSelections>,
+): { accounts: VoterAccountData[]; chainVoters: number; mirrorVoters: number } {
+	let chainVoters = 0;
+	let mirrorVoters = 0;
+	const accounts = addresses.map((address): VoterAccountData => {
+		const data = chain.get(address) ?? null;
+		if (data && hasVote(round, nominees, data)) {
+			chainVoters++;
+			return { address, data };
+		}
+		const selections = mirror.get(address);
+		if (selections && Object.values(selections).some((s) => s.length > 0)) {
+			mirrorVoters++;
+			return mirrorAccountData(round, { address, selections });
+		}
+		return { address, data: null };
+	});
+	return { accounts, chainVoters, mirrorVoters };
+}
+
+/** The whitelist stays the denominator either way. */
 export async function liveTally(
 	loaded: LoadedRound,
 ): Promise<{ tally: RoundTally; source: TallySource }> {
 	const addresses = [...loaded.whitelist];
-	const probes = await fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY);
-	let tally = tallyRound(
+	const [probes, mirror] = await Promise.all([
+		fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY),
+		loadMirroredBallots(loaded.round.slug),
+	]);
+	const chain = new Map(
+		probes.map(({ address, result }) => [
+			address,
+			result.funded === true ? result.account.data : null,
+		]),
+	);
+	const { accounts, chainVoters, mirrorVoters } = mergeAccounts(
 		loaded.round,
 		loaded.nominees,
-		probes.map(({ address, result }) => ({
-			address,
-			data: result.funded === true ? result.account.data : null,
-		})),
+		addresses,
+		chain,
+		mirror,
 	);
-	let source: TallySource = "chain";
-	if (tally.turnout.voted === 0) {
-		const mirror = await loadMirroredBallots(loaded.round.slug);
-		if (mirror.size > 0) {
-			const fromMirror = tallyRound(
-				loaded.round,
-				loaded.nominees,
-				addresses.map((address) => {
-					const selections = mirror.get(address);
-					return selections
-						? mirrorAccountData(loaded.round, { address, selections })
-						: { address, data: null };
-				}),
-			);
-			if (fromMirror.turnout.voted > 0) {
-				tally = fromMirror;
-				source = "mirror";
-			}
-		}
-	}
+	const tally = tallyRound(loaded.round, loaded.nominees, accounts);
+	const source: TallySource =
+		chainVoters && mirrorVoters
+			? "chain+mirror"
+			: mirrorVoters
+				? "mirror"
+				: "chain";
 	return { tally, source };
 }
 

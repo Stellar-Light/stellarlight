@@ -35,6 +35,12 @@ async function main() {
 		console.error(`no round with slug "${ROUND}"`);
 		return 1;
 	}
+	if (EXECUTE && loaded.round.status !== "closed") {
+		console.error(
+			`REFUSED: ${ROUND} is ${loaded.round.status}, not closed — a published result is final. Close the round first (dry-run is fine anytime).`,
+		);
+		return 1;
+	}
 	const { tally, source } = await liveTally(loaded);
 	const doc = resultsDocument(loaded, tally, source);
 	const json = `${JSON.stringify(doc, null, "\t")}\n`;
