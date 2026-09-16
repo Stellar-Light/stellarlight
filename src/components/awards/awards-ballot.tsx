@@ -477,7 +477,6 @@ function StageReveal() {
 	const panels = [0, 1, 2, 3, 4, 5];
 	return (
 		<div className="sm-reveal" aria-hidden="true">
-			<div className="sm-reveal-glow" />
 			<div className="sm-reveal-half l">
 				{panels.map((n) => (
 					<i key={n} />

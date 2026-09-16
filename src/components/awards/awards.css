@@ -705,30 +705,6 @@
 	border-radius: 0 0 44% 44%;
 	background: rgba(0, 0, 0, 0.4);
 }
-/* the house light blooms through the parting */
-.awards-sm .sm-reveal-glow {
-	position: absolute;
-	inset: 0;
-	background: radial-gradient(
-		34% 40% at 50% 42%,
-		rgba(255, 255, 255, 0.16),
-		transparent 70%
-	);
-	animation: sm-reveal-bloom 1.3s ease-out 0.35s both;
-}
-@keyframes sm-reveal-bloom {
-	0% {
-		opacity: 0;
-		transform: scale(0.7);
-	}
-	45% {
-		opacity: 1;
-	}
-	100% {
-		opacity: 0;
-		transform: scale(1.5);
-	}
-}
 
 /* ── A pointer clicks the Connect button (explainer step 1) ───────────── */
 .awards-sm .sm-cursor {
