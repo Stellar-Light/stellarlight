@@ -91,6 +91,8 @@ interface Eligibility {
 	whitelisted: boolean;
 	funded: boolean | null;
 	votes: Record<string, string[]> | null;
+	/** chain OR mirror. null = we could not check — treated as "can't vote". */
+	hasVoted?: boolean | null;
 	friendbot?: string;
 }
 
@@ -422,8 +424,8 @@ function hiwSteps(picks: number) {
 			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
 		},
 		{
-			t: "Change your mind anytime",
-			d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
+			t: "Your first ballot is final",
+			d: "One ballot per voter — the first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable.",
 		},
 	];
 }
@@ -984,8 +986,18 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const selectedCount = Object.values(selections).filter(
 		(v) => v.length > 0,
 	).length;
-	const readOnly = eligibility !== null && !eligibility.whitelisted;
-	const votedBefore = Boolean(eligibility?.votes);
+	const notWhitelisted = eligibility !== null && !eligibility.whitelisted;
+	// One ballot per voter: the first one counts. `hasVoted` is chain OR
+	// mirror, so it stays true after a testnet reset has cleared `votes` —
+	// the ballot still exists in our record, and a new one would not count.
+	const votedBefore = Boolean(eligibility?.hasVoted ?? eligibility?.votes);
+	// null = the server could not check. Not a green light.
+	const ballotStatusUnknown = eligibility?.hasVoted === null;
+	// No ballot can be cast from here — either this address isn't on the list,
+	// or it has already voted and that ballot is final. Both mean the picks
+	// stop being editable and the CTA goes away, rather than leaving a live
+	// form behind a button that will refuse.
+	const readOnly = notWhitelisted || votedBefore;
 	const busy =
 		phase === "connecting" ||
 		phase === "requesting" ||
@@ -1221,11 +1233,15 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									? "Submitting…"
 									: selectedCount < categories.length
 										? `Pick all ${categories.length} first`
-										: votedBefore
-											? "Update vote"
+										: ballotStatusUnknown
+											? "Voting unavailable"
 											: "Sign & submit",
 					onClick: handleSubmit,
-					disabled: selectedCount < categories.length || busy,
+					disabled:
+						selectedCount < categories.length ||
+						busy ||
+						votedBefore ||
+						ballotStatusUnknown,
 					loading: busy,
 				};
 
@@ -1333,11 +1349,13 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your vote is on-chain
 							</h2>
 							<p className="text-sm text-neutral-300 leading-relaxed mb-4">
-								Recorded on Stellar testnet.
+								Recorded on Stellar testnet. This is your ballot for the round —
+								the first one cast is the one that counts, so it won't be
+								replaced.
 								{closesLabel && (
 									<>
 										{" "}
-										Changed your mind? Pick again and resubmit any time before{" "}
+										Results are published after voting closes on{" "}
 										<span className="text-neutral-100">{closesLabel}</span>.
 									</>
 								)}
@@ -1373,11 +1391,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							You've already voted
 						</h2>
 						<p className="mb-4 text-sm leading-relaxed text-neutral-300">
-							Your picks are below.
+							Your picks are below. This ballot is final — the first one cast is
+							the one that counts.
 							{voting.open && closesLabel && (
 								<>
 									{" "}
-									Pick again and resubmit to change them, up until{" "}
+									Voting closes{" "}
 									<span className="text-neutral-100">{closesLabel}</span>.
 								</>
 							)}
@@ -1396,7 +1415,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			)}
 
 			{/* ── Read-only notice ── */}
-			{readOnly && (
+			{notWhitelisted && (
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
 					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
 						<Eye className="h-5 w-5 mt-0.5 text-neutral-500 flex-shrink-0" />

@@ -11,11 +11,15 @@
  * nominee, no memo, and a source signature that verifies over the
  * TESTNET-passphrase hash (structurally refusing mainnet-signed payloads).
  * Anything else is rejected with the reasons.
+ *
+ * It also enforces ONE BALLOT PER VOTER. /ballot-xdr refuses to build a second
+ * ballot, but that is a convenience, not a boundary — a hand-rolled
+ * transaction would skip it entirely. This is where it is actually enforced.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import { validateSignedBallot } from "@/lib/awards/ballot";
-import { recordBallot } from "@/lib/awards/record";
+import { hasMirroredBallot, recordBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	submitToTestnetHorizon,
@@ -82,6 +86,31 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
+	// One ballot per voter, re-checked at the relay. /ballot-xdr already
+	// refuses a second ballot, but nothing stops someone building their own
+	// transaction and posting it here — this is the boundary that counts.
+	const mirrored = await hasMirroredBallot(loaded.round.slug, verdict.source);
+	if (mirrored === null) {
+		return NextResponse.json(
+			{
+				error: "ballot_status_unavailable",
+				message:
+					"We can't confirm whether this address has already voted right now. Nothing was submitted — try again in a moment.",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+	if (mirrored) {
+		return NextResponse.json(
+			{
+				error: "already_voted",
+				message:
+					"This address has already cast its ballot for this round. The first ballot is the one that counts, so it can't be replaced.",
+			},
+			{ status: 409, headers: rateLimitHeaders(limit) },
+		);
+	}
+
 	const result = await submitToTestnetHorizon(signedXdr);
 	if (!result.ok) {
 		// Friendlier mapping for the errors a real voter can hit.
@@ -117,7 +146,7 @@ export async function POST(req: NextRequest) {
 			round: loaded.round.slug,
 			selections: verdict.selections,
 			closesAt: loaded.round.closesAt ?? null,
-			note: "You can change your vote any time before the round closes — just submit a new ballot.",
+			note: "This is your ballot for the round. The first ballot is the one that counts — it can't be replaced.",
 		},
 		{ headers: rateLimitHeaders(limit) },
 	);

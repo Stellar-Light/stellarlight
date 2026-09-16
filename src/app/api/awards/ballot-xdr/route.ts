@@ -13,15 +13,24 @@
  * Unfunded testnet account → 409 with a friendbot link so the UI can offer
  * a one-tap "fund on testnet" (test mode only — this whole feature is
  * hardwired to testnet).
+ *
+ * ONE BALLOT PER VOTER. The first ballot is the only one that counts, so an
+ * address that has already voted is refused HERE, before a wallet is ever
+ * asked to sign — handing someone a transaction whose result we would then
+ * ignore is worse than telling them no. "Already voted" is the union of the
+ * chain (this account carries ballot keys) and the mirror (we recorded one,
+ * even if a testnet reset has since wiped the chain).
  */
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	buildBallotTx,
+	decodeAccountVotes,
 	roundOpenState,
 	validateSelections,
 } from "@/lib/awards/ballot";
+import { hasMirroredBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	AWARDS_NETWORK_PASSPHRASE,
@@ -126,6 +135,39 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
+	// ── one ballot per voter ──
+	// Chain first: it needs no DB and settles the common case on its own.
+	const onChain = Object.values(
+		decodeAccountVotes(loaded.round, loaded.nominees, account.account.data),
+	).some((picks) => picks.length > 0);
+	// Then the mirror, which still holds a ballot the chain has forgotten.
+	const mirrored = onChain
+		? true
+		: await hasMirroredBallot(loaded.round.slug, address);
+	if (mirrored === null) {
+		// Trinary: null is "could not check", never "no". Letting a second
+		// ballot through here would overwrite the first on the voter's own
+		// account and then not be counted — a signature that does nothing.
+		return NextResponse.json(
+			{
+				error: "ballot_status_unavailable",
+				message:
+					"We can't confirm whether this address has already voted right now. Nothing was signed — try again in a moment.",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+	if (mirrored) {
+		return NextResponse.json(
+			{
+				error: "already_voted",
+				message:
+					"This address has already cast its ballot for this round. The first ballot is the one that counts, so it can't be replaced.",
+			},
+			{ status: 409, headers: rateLimitHeaders(limit) },
+		);
+	}
+
 	const tx = buildBallotTx({
 		round: loaded.round,
 		address,
@@ -133,6 +175,9 @@ export async function POST(req: NextRequest) {
 		selections: validated.selections,
 		// Only keys that actually exist may be deleted — manageData refuses to
 		// clear a key that was never set, which would fail a first-time ballot.
+		// Every ballot that reaches here IS a first ballot now; this stays
+		// because stray keys under this prefix (a hand-written entry, a partial
+		// tx) must still be cleared for the ballot to be well-formed.
 		existingKeys: new Set(Object.keys(account.account.data ?? {})),
 	});
 

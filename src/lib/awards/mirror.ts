@@ -1,12 +1,13 @@
 /**
  * i³ Awards — the DB mirror as a tally source, and the chain↔mirror diff.
  *
- * The chain is the source of truth while it exists. Stellar resets testnet
- * 2–4× a year, and a reset clears every ledger entry AND all history from
- * Core and Horizon — so at the first reset after a round, every whitelisted
- * account reads unfunded and the chain tally is zero. `award-ballots` (the
- * mirror recordBallot writes after each successful submit) is the only
- * record that outlives the reset.
+ * `award-ballots` outranks the chain for the tally — the first ballot counts
+ * and only the mirror remembers it (see publish.ts). The chain still matters
+ * as public, independently verifiable evidence, and as the fallback for an
+ * address with no mirror row. It is also fragile: Stellar resets testnet 2–4×
+ * a year, and a reset clears every ledger entry AND all history from Core and
+ * Horizon — so at the first reset after a round every whitelisted account
+ * reads unfunded and the chain tally is zero. The mirror outlives that.
  *
  * Two jobs live here, both pure so they are unit-tested offline:
  *
@@ -103,9 +104,20 @@ export interface ChainProbe {
 }
 
 export type ReconcileAction =
-	/** On-chain ballot with no mirror row — the gap this exists to close. */
+	/**
+	 * On-chain ballot with no mirror row — the gap this exists to close. What
+	 * lands becomes that address's `history[0]`, i.e. its first ballot. For a
+	 * relay ballot that is exactly right. For one written by hand and then
+	 * overwritten, the earlier value is already gone from the chain and no
+	 * record of it exists anywhere; the latest is the best obtainable answer.
+	 */
 	| { kind: "create"; address: string; selections: BallotSelections }
-	/** Mirror row disagrees with the chain (a revote that failed to mirror). */
+	/**
+	 * Mirror row disagrees with the chain. Under one-ballot-per-voter this is
+	 * an ANOMALY, not a correction: the relay refuses a second ballot, so a
+	 * divergence means someone wrote manageData themselves. Recording it keeps
+	 * the trail honest — `history[0]`, and therefore the tally, is untouched.
+	 */
 	| {
 			kind: "update";
 			address: string;
