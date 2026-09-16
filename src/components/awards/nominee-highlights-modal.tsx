@@ -315,88 +315,102 @@ export function NomineeHighlightsModal({
 								</motion.p>
 							)}
 
-							{/* highlight moments — each unfolds from a tapered slat */}
-							<ul className="space-y-2.5">
-								{highlights.map((h, i) => {
-									const { Icon, tint } = KIND_META[h.kind];
-									// Real, dated TVL wins for a growth moment; else the authored
-									// count; else the little sparkline.
-									const metric: MetricSpec | null =
-										h.kind === "growth" && data.tvl
-											? {
-													prefix: "$",
-													...compactUsd(data.tvl.usd),
-													caption: tvlCaption(data.tvl),
-												}
-											: h.metric
+							{/* The sheet UNROLLS: the body opens downward from nothing to
+							    its natural height and rolls back up on close. Height has to
+							    be animated for that — clipping alone reveals content but
+							    nothing actually opens, which is what the accordion this is
+							    after is really doing. motion handles the auto-height measure. */}
+							<motion.div
+								initial={{ height: 0, opacity: 0 }}
+								animate={{ height: "auto", opacity: 1 }}
+								exit={{ height: 0, opacity: 0 }}
+								transition={{ duration: 0.44, ease: [0.33, 1, 0.68, 1] }}
+								className="overflow-hidden"
+							>
+								<ul className="space-y-2.5">
+									{highlights.map((h) => {
+										const { Icon, tint } = KIND_META[h.kind];
+										// Real, dated TVL wins for a growth moment; else the authored
+										// count; else the little sparkline.
+										const metric: MetricSpec | null =
+											h.kind === "growth" && data.tvl
 												? {
-														prefix: h.metric.prefix,
-														display: String(h.metric.value),
-														suffix: h.metric.suffix,
-														caption: h.metric.caption,
+														prefix: "$",
+														...compactUsd(data.tvl.usd),
+														caption: tvlCaption(data.tvl),
 													}
-												: null;
-									return (
-										<li
-											key={h.headline}
-											style={{ ["--sm-i" as string]: i }}
-											className="sm-unfold rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
-										>
-											{/* One structure for every moment: icon in the left
+												: h.metric
+													? {
+															prefix: h.metric.prefix,
+															display: String(h.metric.value),
+															suffix: h.metric.suffix,
+															caption: h.metric.caption,
+														}
+													: null;
+										return (
+											<li
+												key={h.headline}
+												className="rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
+											>
+												{/* One structure for every moment: icon in the left
 											    column, all content indented in the right — so a stat's
 											    number lines up with a narrative's text. */}
-											<div className="flex items-start gap-3.5">
-												<span
-													className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
-												>
-													<Icon className="h-[18px] w-[18px]" strokeWidth={2} />
-												</span>
-												<div className="min-w-0 flex-1">
-													<p className="text-[15px] font-semibold leading-snug text-neutral-100">
-														{h.headline}
-													</p>
-													{metric ? (
-														<>
-															<div className="mt-3 flex items-end gap-[0.02em] text-[38px] font-semibold leading-none tracking-tight text-neutral-50">
-																{metric.prefix && (
-																	<span className="leading-none">
-																		{metric.prefix}
-																	</span>
-																)}
-																<Odometer
-																	display={metric.display}
-																	delay={0.4}
-																/>
-																{metric.suffix && (
-																	<span className="leading-none">
-																		{metric.suffix}
-																	</span>
-																)}
-															</div>
-															{metric.caption && (
-																<div className="mt-2 text-xs text-neutral-400">
-																	{metric.caption}
+												<div className="flex items-start gap-3.5">
+													<span
+														className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
+													>
+														<Icon
+															className="h-[18px] w-[18px]"
+															strokeWidth={2}
+														/>
+													</span>
+													<div className="min-w-0 flex-1">
+														<p className="text-[15px] font-semibold leading-snug text-neutral-100">
+															{h.headline}
+														</p>
+														{metric ? (
+															<>
+																<div className="mt-3 flex items-end gap-[0.02em] text-[38px] font-semibold leading-none tracking-tight text-neutral-50">
+																	{metric.prefix && (
+																		<span className="leading-none">
+																			{metric.prefix}
+																		</span>
+																	)}
+																	<Odometer
+																		display={metric.display}
+																		delay={0.4}
+																	/>
+																	{metric.suffix && (
+																		<span className="leading-none">
+																			{metric.suffix}
+																		</span>
+																	)}
 																</div>
-															)}
-														</>
-													) : (
-														<>
-															{h.kind === "growth" && (
-																<div className="mt-2.5 text-emerald-300/90">
-																	<Sparkline />
-																</div>
-															)}
-															<p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
-																{h.detail}
-															</p>
-														</>
-													)}
+																{metric.caption && (
+																	<div className="mt-2 text-xs text-neutral-400">
+																		{metric.caption}
+																	</div>
+																)}
+															</>
+														) : (
+															<>
+																{h.kind === "growth" && (
+																	<div className="mt-2.5 text-emerald-300/90">
+																		<Sparkline />
+																	</div>
+																)}
+																<p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
+																	{h.detail}
+																</p>
+															</>
+														)}
+													</div>
 												</div>
-											</div>
-										</li>
-									);
-								})}
-							</ul>
+											</li>
+										);
+									})}
+								</ul>
+							</motion.div>
 
 							{/* footer: vote CTA + full profile */}
 							<motion.div
