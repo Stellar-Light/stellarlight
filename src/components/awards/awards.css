@@ -1068,102 +1068,102 @@
 	}
 }
 
-/* ── The title hangs on tags ─────────────────────────────────────────────
-   After the hanging letter-tags in yui540's gallery. The mechanism matters
-   and is easy to get wrong: the SWAY is translateX on an outer wrapper, and
-   the DROP is translateY on an inner one that also carries the string. Two
-   axes on two elements — rotating the text instead loses the whole idea,
-   because a thing on a string swings sideways, it does not pivot.
+/* ── The i³ is a cube ───────────────────────────────────────────────────
+   After the tumbling letter-cube in yui540's gallery. The character of it is
+   entirely in the overshoot: every quarter turn goes PAST its face by ~4° and
+   settles back, so the block reads as having weight rather than snapping to a
+   grid. Two quarter turns, landing on the mark: 3 → i → i³.
 
-   One tag per word, so the title stays readable at three tags. */
-.awards-sm .sm-tag {
+   One rotateX on the box; the faces are placed once and never animate. */
+.awards-sm .sm-cube {
 	display: inline-block;
-	margin: 0 6px;
-	animation: sm-tag-sway 0.86s ease-in-out both;
-	animation-delay: var(--sm-d, 0ms);
+	width: 1.06em;
+	height: 1.06em;
+	margin-right: 0.16em;
+	vertical-align: -0.12em;
+	perspective: 700px;
 }
-@keyframes sm-tag-sway {
-	0% {
-		transform: translateX(30%);
-	}
-	40% {
-		transform: translateX(-15%);
-	}
-	70% {
-		transform: translateX(7%);
-	}
-	100% {
-		transform: translateX(0);
-	}
-}
-.awards-sm .sm-tag-drop {
+.awards-sm .sm-cube-box {
+	/* it is a <span>: without this, width/height:100% do not apply and every
+	   face collapses to its own borders (2x2px), which renders as a bare
+	   glyph and no cube at all. */
 	display: block;
 	position: relative;
-	padding-top: 42px;
-	animation: sm-tag-drop 0.86s ease-in-out both;
-	animation-delay: var(--sm-d, 0ms);
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	animation: sm-cube-roll 2.5s cubic-bezier(0.45, 0.05, 0.2, 1) 0.25s both;
 }
-@keyframes sm-tag-drop {
-	0% {
-		transform: translateY(-104px);
-		opacity: 0;
+@keyframes sm-cube-roll {
+	0%,
+	12% {
+		transform: rotateX(0deg);
 	}
-	16% {
-		opacity: 1;
+	30% {
+		transform: rotateX(-94deg);
 	}
-	40% {
-		transform: translateY(11px);
+	38% {
+		transform: rotateX(-90deg);
 	}
-	60% {
-		transform: translateY(0);
+	44% {
+		transform: rotateX(-92deg);
 	}
-	80% {
-		transform: translateY(5px);
+	56% {
+		transform: rotateX(-90deg);
+	}
+	74% {
+		transform: rotateX(-184deg);
+	}
+	84% {
+		transform: rotateX(-180deg);
+	}
+	92% {
+		transform: rotateX(-182deg);
 	}
 	100% {
-		transform: translateY(0);
+		transform: rotateX(-180deg);
 	}
 }
-/* the cord, running down to the punched hole */
-.awards-sm .sm-tag-drop::before {
-	content: "";
+.awards-sm .sm-cube-face {
 	position: absolute;
-	top: 0;
-	left: 50%;
-	width: 3px;
-	height: 52px;
-	margin-left: -1.5px;
-	border-radius: 999px;
-	background: #4a4a4a;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	border-radius: 0.1em;
+	font-size: 0.72em;
+	line-height: 1;
+	backface-visibility: hidden;
+	background: #2a2a2a;
+	border: 1px solid #3f3f3f;
+	color: #fafafa;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
-.awards-sm .sm-tag-face {
-	display: block;
-	position: relative;
-	padding: 0.42em 0.5em 0.3em;
-	border-radius: 16px;
-	background: #242424;
-	border: 1px solid #3b3b3b;
-	box-shadow:
-		0 14px 34px rgba(0, 0, 0, 0.5),
-		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+/* The three faces the roll passes through, each a step lighter, so the block
+   turns INTO the light as it lands. These have to sit clearly above the page
+   ground — at #1d1d1d on #171717 the cube was invisible and read as a bare
+   glyph, which is not a cube at all. */
+.awards-sm .sm-cube-a {
+	transform: translateZ(0.53em);
+	background: #2a2a2a;
+	border-color: #3f3f3f;
+	color: #9a9a9a;
 }
-.awards-sm .sm-tag-face::before {
-	content: "";
-	position: absolute;
-	top: 0.26em;
-	left: 50%;
-	width: 0.17em;
-	height: 0.17em;
-	margin-left: -0.085em;
-	border-radius: 99px;
-	background: #111;
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9);
+.awards-sm .sm-cube-b {
+	transform: rotateX(90deg) translateZ(0.53em);
+	background: #343434;
+	border-color: #4a4a4a;
+	color: #cfcfcf;
+}
+.awards-sm .sm-cube-c {
+	transform: rotateX(180deg) translateZ(0.53em);
+	background: #3d3d3d;
+	border-color: #565656;
+	color: #fafafa;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.awards-sm .sm-tag,
-	.awards-sm .sm-tag-drop {
+	.awards-sm .sm-cube-box {
 		animation: none !important;
-		transform: none;
+		transform: rotateX(-180deg);
 	}
 }
