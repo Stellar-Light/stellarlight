@@ -1284,3 +1284,53 @@
 		animation: none !important;
 	}
 }
+
+/* ── Stroopy ────────────────────────────────────────────────────────────
+   The Stellar mascot, greeting a Pilot at the one screen where a friendly
+   face earns its place: the wallet picker, which is where somebody who has
+   never held a Stellar wallet lands.
+
+   He is framed in a round tile the way an app avatar is, so his own purple
+   ground reads as deliberate rather than as colour leaking into a monochrome
+   page. object-position pulls the crop up to his head and shoulders — the
+   artwork is a full figure mid-stride and a centred square crop lands on his
+   knees. He breathes; he does not bounce. */
+.awards-sm .sm-stroopy {
+	position: relative;
+	flex-shrink: 0;
+	border-radius: 999px;
+	overflow: hidden;
+	background: #b3a3e6;
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+		0 6px 18px rgba(0, 0, 0, 0.4);
+	animation: sm-stroopy-bob 3.6s ease-in-out infinite;
+}
+/* Zoomed to his head and shoulders. object-fit:cover cannot do this: the
+   art is 874x1004, so cover on a square tile shows nearly the whole figure
+   and at 54px he is an unreadable speck. The numbers below place the head
+   (centred at about 60% x, 30% y of the source) in the middle of the tile. */
+.awards-sm .sm-stroopy img {
+	position: absolute;
+	height: 246%;
+	width: auto;
+	max-width: none;
+	top: -23.5%;
+	left: -78.5%;
+}
+@keyframes sm-stroopy-bob {
+	0%,
+	100% {
+		transform: translateY(0) rotate(-1.5deg);
+	}
+	50% {
+		transform: translateY(-5px) rotate(1.5deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-stroopy {
+		animation: none !important;
+		transform: none;
+	}
+}
