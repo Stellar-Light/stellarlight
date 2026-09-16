@@ -496,6 +496,70 @@ const SIGNATURE_PATH =
 	"M6 44 C 16 14, 28 10, 32 26 C 36 42, 24 54, 20 45 C 16 36, 32 22, 48 27 C 64 32, 58 50, 69 45 C 80 40, 77 19, 90 22 C 103 25, 98 48, 110 43 C 121 38, 122 23, 134 30 C 145 36, 140 46, 152 41 L 184 38";
 
 /**
+ * The i³, as a cube. The intro tumbles 3 → i → i³ on two different axes, then
+ * hands control to hover: pointing at it sends the cube to a random face, and
+ * leaving brings it home to the mark. The intro is a keyframe animation and
+ * hover is a transition, so the animation has to be REMOVED once it ends —
+ * a filled animation keeps winning over an inline transform forever.
+ */
+const CUBE_ORIENTATIONS = [
+	{ rx: -90, ry: -90 }, // "3"
+	{ rx: 0, ry: -90 }, // "i"
+	{ rx: 0, ry: 180 }, // back
+	{ rx: 0, ry: 90 }, // left
+	{ rx: -90, ry: 0 }, // top
+] as const;
+
+function CubeMark() {
+	const [live, setLive] = useState(false);
+	const [at, setAt] = useState<{ rx: number; ry: number } | null>(null);
+	const spin = useCallback(() => {
+		const pick =
+			CUBE_ORIENTATIONS[Math.floor(Math.random() * CUBE_ORIENTATIONS.length)];
+		setAt(pick);
+	}, []);
+	return (
+		<span
+			className="sm-cube"
+			onMouseEnter={live ? spin : undefined}
+			onMouseLeave={live ? () => setAt(null) : undefined}
+			aria-hidden="true"
+		>
+			<span
+				className={`sm-cube-box${live ? " is-live" : ""}`}
+				onAnimationEnd={() => setLive(true)}
+				style={
+					live
+						? {
+								transform: `rotateX(${at?.rx ?? 0}deg) rotateY(${at?.ry ?? 0}deg)`,
+							}
+						: undefined
+				}
+			>
+				<span className="sm-cube-face sm-cube-s">
+					<b>3</b>
+				</span>
+				<span className="sm-cube-face sm-cube-r">
+					<b>i</b>
+				</span>
+				<span className="sm-cube-face sm-cube-back">
+					<b>i³</b>
+				</span>
+				<span className="sm-cube-face sm-cube-left">
+					<b>3</b>
+				</span>
+				<span className="sm-cube-face sm-cube-top">
+					<b>i</b>
+				</span>
+				<span className="sm-cube-face sm-cube-f">
+					<b>i³</b>
+				</span>
+			</span>
+		</span>
+	);
+}
+
+/**
  * Waiting on the network. The hourglass from yui540/css-animations (MIT),
  * monochrome — the sand drains and then the glass turns over, which says
  * "this takes a moment" in a way a spinner never does.
@@ -1175,13 +1239,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
 				<h1 className="mb-5 text-4xl font-semibold leading-[1.05] tracking-tight text-neutral-50 sm:text-6xl">
-					<span className="sm-cube" aria-hidden="true">
-						<span className="sm-cube-box">
-							<span className="sm-cube-face sm-cube-a">3</span>
-							<span className="sm-cube-face sm-cube-b">i</span>
-							<span className="sm-cube-face sm-cube-c">i³</span>
-						</span>
-					</span>
+					<CubeMark />
 					<span className="sr-only">{round.title}</span>
 					<span aria-hidden="true">{round.title.replace(/^i³\s*/, "")}</span>
 				</h1>
