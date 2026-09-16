@@ -405,26 +405,52 @@ function hiwSteps(picks: number) {
 }
 
 /**
- * The explainer, as one machine. A wallet clicks in, the ballot feeds out of
- * the slot row by row, a stamp lands when it is signed, and on "change your
- * mind" the sheet flies off and a fresh one prints. Purely decorative — the
- * text carries the meaning, so it is aria-hidden. Motion lives in awards.css
- * (technique after yui540/css-animations, MIT).
+ * Explainer art. Four steps, four different mechanisms — and each shows a REAL
+ * control from this product doing what the step describes: the Connect button
+ * changing state, a nominee card being chosen, the wallet sheet confirming,
+ * the selection ring sliding to another card. Decorative, so aria-hidden; the
+ * copy carries the meaning. Motion lives in awards.css.
  */
 function BallotArt({ step }: { step: number }) {
 	return (
-		<div className="sm-art" data-step={step} aria-hidden="true">
-			<div className="sm-printer">
-				<div className="sm-wallet" />
-				{step === 3 && <div className="sm-sheet sm-sheet--out" />}
-				<div className="sm-sheet" key={step}>
-					{[0, 1, 2].map((r) => (
-						<span key={r} style={{ ["--sm-i" as string]: r }} />
-					))}
+		<div className="sm-art" key={step} aria-hidden="true">
+			{step === 0 && (
+				<div className="sm-connect">
+					<span className="sm-conn-a">Connect wallet</span>
+					<span className="sm-conn-b">
+						<i />
+						GDNP…HWOE
+					</span>
 				</div>
-				<div className="sm-stamp" />
-				<div className="sm-printer-body" />
-			</div>
+			)}
+			{step === 1 && (
+				<div className="sm-pickrow">
+					<i className="sm-nom" />
+					<i className="sm-nom">
+						<span className="sm-check" />
+					</i>
+					<i className="sm-nom" />
+				</div>
+			)}
+			{step === 2 && (
+				<div className="sm-sign">
+					<div className="sm-sign-sheet">
+						<b />
+						<b />
+						<b />
+						<div className="sm-sign-go" />
+					</div>
+					<div className="sm-sign-hash" />
+				</div>
+			)}
+			{step === 3 && (
+				<div className="sm-move">
+					<i className="sm-nom" />
+					<i className="sm-nom" />
+					<i className="sm-nom" />
+					<div className="sm-move-ring" />
+				</div>
+			)}
 		</div>
 	);
 }
@@ -454,8 +480,8 @@ function StageCurtain() {
 	);
 }
 
-// Step-through modal: one step at a time, ‹ dots › navigation, "Got it" on
-// the last. Centered on desktop, bottom sheet on mobile.
+// Step-through explainer. One step at a time, its own art above the copy,
+// dots and a primary action below — the help-card shape, not a slideshow.
 function HowItWorks({
 	open,
 	onClose,
@@ -503,7 +529,7 @@ function HowItWorks({
 		<AnimatePresence>
 			{open && (
 				<div
-					className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+					className="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4"
 					role="dialog"
 					aria-modal="true"
 					aria-label="How voting works"
@@ -523,30 +549,20 @@ function HowItWorks({
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: 16, scale: 0.98 }}
 						transition={{ duration: 0.28, ease: EASE }}
-						className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+						className="relative w-full rounded-t-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:max-w-md sm:rounded-2xl sm:p-6"
 					>
-						<div className="flex items-center justify-between gap-4 mb-1">
-							<div className="flex items-baseline gap-2.5">
-								<span className="text-sm font-medium text-neutral-300">
-									How voting works
-								</span>
-								<span className="text-sm text-neutral-500 tabular-nums">
-									{i + 1} of {steps.length}
-								</span>
-							</div>
-							<button
-								type="button"
-								onClick={onClose}
-								className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 hover:text-neutral-100 hover:border-[#454545] transition-colors flex-shrink-0"
-							>
-								<X className="h-4 w-4" />
-							</button>
-						</div>
+						<button
+							type="button"
+							onClick={onClose}
+							aria-label="Close"
+							className="absolute right-8 top-8 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#3a3a3a] bg-[#1c1c1c]/85 text-neutral-400 backdrop-blur-sm transition-colors hover:border-[#555] hover:text-neutral-100"
+						>
+							<X className="h-4 w-4" />
+						</button>
 
 						<BallotArt step={i} />
 
-						{/* one step, slide-swapped */}
-						<div className="relative min-h-[132px] overflow-hidden">
+						<div className="relative min-h-[128px] overflow-hidden">
 							<AnimatePresence mode="wait" initial={false}>
 								<motion.div
 									key={i}
@@ -555,54 +571,52 @@ function HowItWorks({
 									exit={{ opacity: 0, x: dir * -28 }}
 									transition={{ duration: 0.26, ease: EASE }}
 								>
-									<h2 className="text-2xl font-semibold tracking-tight text-neutral-50 mb-2.5">
-										{step.t}
+									<h2 className="mb-2.5 text-[22px] font-semibold tracking-tight text-neutral-50">
+										{i + 1}. {step.t}
 									</h2>
-									<p className="text-sm text-neutral-400 leading-relaxed">
+									<p className="text-sm leading-relaxed text-neutral-400">
 										{step.d}
 									</p>
 								</motion.div>
 							</AnimatePresence>
 						</div>
 
-						{/* footer: dots + back / next */}
-						<div className="mt-7 flex items-center justify-between gap-3">
-							<div className="flex items-center gap-1.5">
-								{steps.map((s, idx) => (
-									<button
-										key={s.t}
-										type="button"
-										aria-label={`Step ${idx + 1}`}
-										onClick={() => go(idx)}
-										className="h-1.5 rounded-full transition-all duration-200"
-										style={{
-											width: idx === i ? 20 : 6,
-											background:
-												idx === i ? "#fafafa" : "rgba(255,255,255,0.25)",
-										}}
-									/>
-								))}
-							</div>
-							<div className="flex items-center gap-2">
-								{i > 0 && (
-									<button
-										type="button"
-										onClick={() => go(i - 1)}
-										className="inline-flex items-center h-9 rounded-full border border-[#2f2f2f] px-4 text-sm font-medium text-neutral-300 hover:text-neutral-100 hover:border-[#454545] transition-colors"
-									>
-										Back
-									</button>
-								)}
-								<motion.button
+						<div className="mt-5 flex items-center justify-center gap-1.5">
+							{steps.map((s, idx) => (
+								<button
+									key={s.t}
 									type="button"
-									whileTap={{ scale: 0.97 }}
-									onClick={() => (i < last ? go(i + 1) : onClose())}
-									className="inline-flex items-center gap-1.5 h-9 rounded-full bg-neutral-100 px-4 text-sm font-semibold text-black hover:bg-white transition-colors"
+									aria-label={`Step ${idx + 1}`}
+									onClick={() => go(idx)}
+									className="h-1.5 rounded-full transition-all duration-200"
+									style={{
+										width: idx === i ? 20 : 6,
+										background:
+											idx === i ? "#fafafa" : "rgba(255,255,255,0.25)",
+									}}
+								/>
+							))}
+						</div>
+
+						<div className="mt-5 flex items-center gap-2.5">
+							{i > 0 && (
+								<button
+									type="button"
+									onClick={() => go(i - 1)}
+									className="inline-flex h-11 items-center rounded-full border border-[#2f2f2f] px-5 text-sm font-medium text-neutral-300 transition-colors hover:border-[#454545] hover:text-neutral-100"
 								>
-									{i < last ? "Next" : "Got it"}
-									{i < last && <ChevronRight className="h-4 w-4" />}
-								</motion.button>
-							</div>
+									Back
+								</button>
+							)}
+							<motion.button
+								type="button"
+								whileTap={{ scale: 0.98 }}
+								onClick={() => (i < last ? go(i + 1) : onClose())}
+								className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-neutral-100 text-sm font-semibold text-black transition-colors hover:bg-white"
+							>
+								{i < last ? "Next" : "Got it"}
+								{i < last && <ChevronRight className="h-4 w-4" />}
+							</motion.button>
 						</div>
 					</motion.div>
 				</div>
