@@ -496,6 +496,69 @@ const SIGNATURE_PATH =
 	"M6 44 C 16 14, 28 10, 32 26 C 36 42, 24 54, 20 45 C 16 36, 32 22, 48 27 C 64 32, 58 50, 69 45 C 80 40, 77 19, 90 22 C 103 25, 98 48, 110 43 C 121 38, 122 23, 134 30 C 145 36, 140 46, 152 41 L 184 38";
 
 /**
+ * Waiting on the network. The hourglass from yui540/css-animations (MIT),
+ * monochrome — the sand drains and then the glass turns over, which says
+ * "this takes a moment" in a way a spinner never does.
+ */
+function Hourglass() {
+	return (
+		<svg className="sm-hourglass" viewBox="0 0 24 24" aria-hidden="true">
+			<defs>
+				<mask id="sm-hg-m1">
+					<path
+						fill="#fff"
+						d="M6.16174 16.1526L11.9824 12.1111L17.9304 16.1526L17.2949 20.855H6.74632L6.16174 16.1526Z"
+					/>
+				</mask>
+				<mask id="sm-hg-m2">
+					<path
+						fill="#fff"
+						d="M17.9303 8.06956L12.1096 12.1111L6.16169 8.06956L6.79715 3.36718L17.3457 3.36719L17.9303 8.06956Z"
+					/>
+				</mask>
+			</defs>
+			<g className="sm-hg-spin">
+				<g mask="url(#sm-hg-m1)">
+					<rect
+						className="sm-hg-sand1"
+						x="6.16"
+						y="12.11"
+						width="11.77"
+						height="8.74"
+					/>
+				</g>
+				<g mask="url(#sm-hg-m2)">
+					<g className="sm-hg-sand2">
+						<rect
+							x="17.93"
+							y="12.11"
+							width="11.77"
+							height="8.74"
+							transform="rotate(-180 17.93 12.11)"
+						/>
+					</g>
+					<g className="sm-hg-stream">
+						<rect
+							x="12.84"
+							y="12.11"
+							width="1.5"
+							height="8.74"
+							transform="rotate(-180 12.84 12.11)"
+						/>
+					</g>
+				</g>
+				<path
+					className="sm-hg-frame"
+					fillRule="evenodd"
+					clipRule="evenodd"
+					d="M19 5.38028V6.50704C19 7.7277 18.475 8.76056 17.5125 9.32394L13.6632 11.9526L14.0877 12.232L14.0825 12.2398L17.5125 14.5822C18.475 15.2394 19 16.2723 19 17.493V18.6197C19 20.4977 17.6 22 15.85 22H8.15C6.4 22 5 20.4977 5 18.6197V17.493C5 16.2723 5.525 15.1455 6.4875 14.5822L10.3403 12.016L9.39854 11.396C9.3312 11.3708 9.26465 11.3374 9.2 11.2958L6.4875 9.41784C5.525 8.76056 5 7.7277 5 6.50704V5.38028C5 3.50235 6.4 2 8.15 2H15.85C17.6 2 19 3.50235 19 5.38028ZM10.3606 9.77859C10.3054 9.71327 10.2393 9.65511 10.1625 9.60563L7.45 7.7277C7.0125 7.53991 6.75 7.07042 6.75 6.50704V5.38028C6.75 4.53521 7.3625 3.87793 8.15 3.87793H15.85C16.6375 3.87793 17.25 4.53521 17.25 5.38028V6.50704C17.25 7.07042 16.9875 7.53991 16.55 7.8216L12.0356 10.8812L10.3606 9.77859ZM11.9786 13.0944L7.45 16.1784C7.0125 16.4601 6.75 16.9296 6.75 17.493V18.6197C6.75 19.4648 7.3625 20.1221 8.15 20.1221H15.85C16.6375 20.1221 17.25 19.4648 17.25 18.6197V17.493C17.25 16.9296 16.9875 16.4601 16.55 16.1784L13.0561 13.799L13.054 13.8023L11.9786 13.0944Z"
+				/>
+			</g>
+		</svg>
+	);
+}
+
+/**
  * The signing moment. While the wallet popup is open the page held nothing but
  * a busy button; now it holds a signature writing itself. Covers the three
  * in-flight phases with the copy that actually tells you what to do.
@@ -534,13 +597,22 @@ function SigningOverlay({ phase }: { phase: Phase }) {
 						transition={{ duration: 0.28, ease: EASE }}
 						className="sm-signing-card"
 					>
-						<div className="sm-sig" aria-hidden="true">
-							<svg viewBox="0 0 190 62" role="presentation">
-								<path d={SIGNATURE_PATH} />
-							</svg>
-							<span className="sm-nib" />
-						</div>
-						<div className="sm-sig-rule" aria-hidden="true" />
+						{phase === "submitting" ? (
+							// in flight: the sand drains and the glass turns over
+							<div className="mb-5 mt-1" aria-hidden="true">
+								<Hourglass />
+							</div>
+						) : (
+							<>
+								<div className="sm-sig" aria-hidden="true">
+									<svg viewBox="0 0 190 62" role="presentation">
+										<path d={SIGNATURE_PATH} />
+									</svg>
+									<span className="sm-nib" />
+								</div>
+								<div className="sm-sig-rule" aria-hidden="true" />
+							</>
+						)}
 						<h2 className="mb-2 text-lg font-semibold tracking-tight text-neutral-50">
 							{title}
 						</h2>
