@@ -132,7 +132,7 @@ function shortAddress(address: string): string {
 
 export function AwardsBallot({ data }: { data: AwardsRoundData | null }) {
 	if (!data || data.round.status === "draft") {
-		return <EmptyState />;
+		return <EmptyState picks={data?.round.picksPerCategory ?? 1} />;
 	}
 	if (data.round.status === "closed") {
 		return <ClosedRound data={data} />;
@@ -378,31 +378,97 @@ function TopBar({
 
 // ── How-it-works modal ─────────────────────────────────────────────────────
 
-const HIW_STEPS = [
-	{
-		t: "Connect a Pilot wallet",
-		d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only.",
-	},
-	{
-		t: "Pick one per category",
-		d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
-	},
-	{
-		t: "Sign one transaction",
-		d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
-	},
-	{
-		t: "Change your mind anytime",
-		d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
-	},
-];
+function hiwSteps(picks: number) {
+	return [
+		{
+			t: "Connect a Pilot wallet",
+			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
+		},
+		picks > 1
+			? {
+					t: `Nominate up to ${picks} per category`,
+					d: "Put forward the projects that defined the year for Impact, Innovation and Interoperability. The most-nominated become the shortlist.",
+				}
+			: {
+					t: "Pick one per category",
+					d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
+				},
+		{
+			t: "Sign one transaction",
+			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
+		},
+		{
+			t: "Change your mind anytime",
+			d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
+		},
+	];
+}
+
+/**
+ * The explainer, as one machine. A wallet clicks in, the ballot feeds out of
+ * the slot row by row, a stamp lands when it is signed, and on "change your
+ * mind" the sheet flies off and a fresh one prints. Purely decorative — the
+ * text carries the meaning, so it is aria-hidden. Motion lives in awards.css
+ * (technique after yui540/css-animations, MIT).
+ */
+function BallotArt({ step }: { step: number }) {
+	return (
+		<div className="sm-art" data-step={step} aria-hidden="true">
+			<div className="sm-printer">
+				<div className="sm-wallet" />
+				{step === 3 && <div className="sm-sheet sm-sheet--out" />}
+				<div className="sm-sheet" key={step}>
+					{[0, 1, 2].map((r) => (
+						<span key={r} style={{ ["--sm-i" as string]: r }} />
+					))}
+				</div>
+				<div className="sm-stamp" />
+				<div className="sm-printer-body" />
+			</div>
+		</div>
+	);
+}
+
+/**
+ * The closed stage. Panels drop into place on load, then breathe; they never
+ * part, because the round is not open yet — that IS the empty state's message.
+ */
+function StageCurtain() {
+	const panels = [0, 1, 2, 3, 4];
+	return (
+		<div className="sm-stage" aria-hidden="true">
+			<div className="sm-stage-glow" />
+			<div className="sm-curtain sm-curtain--l">
+				{panels.map((i) => (
+					<i key={i} style={{ ["--sm-i" as string]: i }} />
+				))}
+			</div>
+			<div className="sm-curtain sm-curtain--r">
+				{panels.map((i) => (
+					<i key={i} style={{ ["--sm-i" as string]: i }} />
+				))}
+			</div>
+			<div className="sm-stage-seam" />
+			<div className="sm-stage-valance" />
+		</div>
+	);
+}
 
 // Step-through modal: one step at a time, ‹ dots › navigation, "Got it" on
 // the last. Centered on desktop, bottom sheet on mobile.
-function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
+function HowItWorks({
+	open,
+	onClose,
+	picks = 1,
+}: {
+	open: boolean;
+	onClose: () => void;
+	picks?: number;
+}) {
 	const [i, setI] = useState(0);
 	const [dir, setDir] = useState(1);
-	const last = HIW_STEPS.length - 1;
+	const steps = useMemo(() => hiwSteps(picks), [picks]);
+	const last = steps.length - 1;
 
 	// Reset to step 1 each time it opens.
 	useEffect(() => {
@@ -431,7 +497,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 		return () => document.removeEventListener("keydown", onKey);
 	}, [open, onClose, i, last, go]);
 
-	const step = HIW_STEPS[i];
+	const step = steps[i];
 
 	return (
 		<AnimatePresence>
@@ -459,10 +525,15 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 						transition={{ duration: 0.28, ease: EASE }}
 						className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
-						<div className="flex items-center justify-between gap-4 mb-6">
-							<span className="text-sm font-medium text-neutral-300">
-								How voting works
-							</span>
+						<div className="flex items-center justify-between gap-4 mb-1">
+							<div className="flex items-baseline gap-2.5">
+								<span className="text-sm font-medium text-neutral-300">
+									How voting works
+								</span>
+								<span className="text-sm text-neutral-500 tabular-nums">
+									{i + 1} of {steps.length}
+								</span>
+							</div>
 							<button
 								type="button"
 								onClick={onClose}
@@ -471,6 +542,8 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 								<X className="h-4 w-4" />
 							</button>
 						</div>
+
+						<BallotArt step={i} />
 
 						{/* one step, slide-swapped */}
 						<div className="relative min-h-[132px] overflow-hidden">
@@ -495,7 +568,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 						{/* footer: dots + back / next */}
 						<div className="mt-7 flex items-center justify-between gap-3">
 							<div className="flex items-center gap-1.5">
-								{HIW_STEPS.map((s, idx) => (
+								{steps.map((s, idx) => (
 									<button
 										key={s.t}
 										type="button"
@@ -540,7 +613,7 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 // ── Empty / draft state ────────────────────────────────────────────────────
 
-function EmptyState() {
+function EmptyState({ picks = 1 }: { picks?: number }) {
 	const [howOpen, setHowOpen] = useState(false);
 	return (
 		<>
@@ -551,15 +624,20 @@ function EmptyState() {
 				transition={{ duration: 0.5, ease: EASE }}
 				className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-32 text-center"
 			>
-				<I3Mark className="mx-auto mb-8 h-16 w-16 text-neutral-600" />
-				<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-100 mb-3">
+				<I3Mark className="mx-auto mb-8 h-12 w-12 text-neutral-600" />
+				<StageCurtain />
+				<h1 className="mt-10 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-100 mb-3">
 					The stage is being set
 				</h1>
 				<p className="text-neutral-400 leading-relaxed">
 					The i³ Awards ballot isn't live yet. Check back soon.
 				</p>
 			</motion.div>
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={picks}
+			/>
 		</>
 	);
 }
@@ -1290,7 +1368,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				onPick={handleConnect}
 			/>
 
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={data.round.picksPerCategory ?? 1}
+			/>
 
 			<NomineeHighlightsModal
 				nominee={highlightNominee}
@@ -1799,7 +1881,11 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					</div>
 				)}
 			</div>
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={data.round.picksPerCategory ?? 1}
+			/>
 		</>
 	);
 }
