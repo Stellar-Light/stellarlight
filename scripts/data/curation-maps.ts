@@ -2627,6 +2627,23 @@ export const PROMINENCE_SET: Record<string, number> = {
 };
 
 export const WEBSITE_FIXES: Record<string, string> = {
+	// ── 2026-09-15, from the new MOVED OR GONE bucket in
+	// mark-inactive-projects.ts. Both rows still point at a domain that now
+	// redirects somewhere else; both destinations were opened and read.
+	//
+	// jumpa — jumpa.xyz 301s to usejumpa.com, which answers 200 titled "Jumpa".
+	// Same product, new domain.
+	jumpa: "https://usejumpa.com/",
+	// quasar — the row stored its PARENT's site, eiger.co, which now redirects
+	// to equilibrium.co ("Equilibrium - Equilibrium Labs"). Eiger renamed; the
+	// relationship is unchanged, so the parent's live domain is the value.
+	//
+	// NOT equilibrium.co/quasar, which looks like the obvious product page and
+	// is a SOFT 404: it returns HTTP 200 with a body reading "404: This page
+	// could not be found", and so does /zzz-not-a-page. A 200 is not a page —
+	// control for the catch-all before trusting a deep link.
+	quasar: "https://equilibrium.co",
+
 	// 2026-09-15. Seeded from the SCF page as
 	// https://www.micro-be.com/en/entreprise.htm, which answers 200 — but
 	// Payload strips `www.` on write (curate-projects.ts line ~2643 already
