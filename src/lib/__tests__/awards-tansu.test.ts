@@ -7,12 +7,13 @@
  */
 
 import { keccak_256, sha3_256 } from "@noble/hashes/sha3";
-import { contract } from "@stellar/stellar-sdk";
+import { contract, Networks } from "@stellar/stellar-sdk";
 import { describe, expect, it } from "vitest";
 import {
 	anchorVerdict,
 	COMMIT_HASH,
 	classifyChainError,
+	TANSU_NETWORK_PASSPHRASE,
 	tansuProjectKey,
 	tansuProjectPageUrl,
 	unwrapResult,
@@ -115,5 +116,11 @@ describe("unwrapResult", () => {
 			value: { name: "tansu", maintainers: [] },
 		});
 		expect(unwrapResult(null)).toEqual({ ok: true, value: null });
+	});
+});
+
+describe("network", () => {
+	it("is TESTNET — everything about the i³ vote is, by the owner's rule", () => {
+		expect(TANSU_NETWORK_PASSPHRASE).toBe(Networks.TESTNET);
 	});
 });

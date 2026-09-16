@@ -1,22 +1,24 @@
 /**
- * i³ Awards — anchor a published result on MAINNET through Tansu.
+ * i³ Awards — anchor a published result on TESTNET through Tansu.
  *
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --status [--name=tansu]
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --register            [--execute]
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --commit --round=i3-2026 --sha=<git sha> [--execute]
  *
- * WHY. The vote is on testnet, which is reset 2–4× a year; the mirror keeps
- * the ballots, but the PUBLISHED RESULT deserves a permanent, third-party
- * home. Tansu (tansu.dev) records "the latest commit hash of a project" on
- * mainnet. We register `stellarlight` once (5 XLM collateral) and, when a
- * round's results file is committed to this public repo, commit that git SHA.
- * `get_commit(keccak256("stellarlight"))` then points anyone at the commit.
+ * WHY. Everything about the i³ vote is on testnet (owner's rule: Pilots use
+ * testnet-assigned wallets). The PUBLISHED RESULT gets a home where the vote
+ * lives: Tansu (tansu.dev) records "the latest commit hash of a project". We
+ * register `stellarlight` (5 test XLM collateral) and, when a round's results
+ * file is committed to this public repo, commit that git SHA — readable by
+ * anyone via `get_commit(keccak256("stellarlight"))` until the next testnet
+ * reset, after which this simply registers again. The award-ballots mirror
+ * is the durable record; this is the on-chain one.
+ *
  * Nobody — not a voter, not the owner — touches a dApp: the lane signs with
- * its own maintainer key.
+ * its own key and friendbot-funds it itself.
  *
  * Env: TANSU_MAINTAINER_SECRET (S…, execute) or TANSU_MAINTAINER_PUBLIC (G…,
- * dry-run simulation source). --status needs neither. The maintainer account
- * must hold ≥ 5 XLM + reserves for --register.
+ * dry-run simulation source). --status needs neither.
  *
  * Dry-run by default: every write is simulated and printed. --execute signs,
  * submits, reads the chain back, and (commit) records the anchor on the
@@ -25,11 +27,15 @@
 import "../load-env";
 import { contract, Keypair } from "@stellar/stellar-sdk";
 import {
+	fetchTestnetAccount,
+	fundViaFriendbot,
+} from "../../src/lib/awards/stellar";
+import {
 	type AnchorRecord,
 	COMMIT_HASH,
 	classifyChainError,
-	MAINNET_PASSPHRASE,
-	mainnetExplorerTxUrl,
+	explorerTxUrl,
+	TANSU_NETWORK_PASSPHRASE,
 	TANSU_PROJECT_NAME,
 	TANSU_PROJECT_URL,
 	type TansuClient,
@@ -115,7 +121,7 @@ async function status(): Promise<number> {
 	const c = await tansuClient();
 	const project = await readProject(c, key);
 	console.log(
-		`\nTansu mainnet · project "${NAME}" · key ${key.toString("hex")}`,
+		`\nTansu testnet · project "${NAME}" · key ${key.toString("hex")}`,
 	);
 	if (!project) {
 		console.log("  not registered");
@@ -134,7 +140,9 @@ async function register(): Promise<number> {
 	const { publicKey, keypair } = maintainer();
 	const c = await tansuClient({
 		publicKey,
-		...(keypair ? contract.basicNodeSigner(keypair, MAINNET_PASSPHRASE) : {}),
+		...(keypair
+			? contract.basicNodeSigner(keypair, TANSU_NETWORK_PASSPHRASE)
+			: {}),
 	});
 	const existing = await readProject(c, key);
 	if (existing) {
@@ -146,16 +154,37 @@ async function register(): Promise<number> {
 	console.log(
 		`\nregister "${NAME}" from ${publicKey} · url ${TANSU_PROJECT_URL}`,
 	);
+	// Testnet: the lane funds its own key. 5 XLM collateral + reserves + fees
+	// are well inside one friendbot grant (10,000 test XLM).
+	const acct = await fetchTestnetAccount(publicKey);
+	if (acct.funded === false) {
+		if (!EXECUTE) {
+			console.log("  key is unfunded — --execute would friendbot it first");
+		} else {
+			const fund = await fundViaFriendbot(publicKey);
+			if (!fund.ok) {
+				console.error(`  friendbot failed: ${fund.error}`);
+				return 1;
+			}
+			console.log("  friendbot-funded the lane key");
+		}
+	}
 	const tx = await c.register({
 		maintainer: publicKey,
 		name: NAME,
 		maintainers: [publicKey],
 		url: TANSU_PROJECT_URL,
 		ipfs: "",
+		// The SDK requires every declared input to be PRESENT; the newer wasm
+		// declares three Options. undefined = None = contract defaults. Extra keys
+		// are ignored by the SDK, so this also fits the older 5-arg shape.
+		min_voting_period: undefined,
+		execute_delay: undefined,
+		attestation_threshold: undefined,
 	});
 	const sim = assertSimulated(tx);
 	console.log(
-		`  simulated OK · resource fee ${sim.minResourceFee} stroops · 5 XLM collateral leaves the maintainer account · project key ${key.toString("hex")}`,
+		`  simulated OK · resource fee ${sim.minResourceFee} stroops · 5 test XLM collateral leaves the lane key · project key ${key.toString("hex")}`,
 	);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing submitted. Re-run with --execute.");
@@ -168,7 +197,7 @@ async function register(): Promise<number> {
 	const sent = await tx.signAndSend();
 	const hash = txHashOf(sent);
 	console.log(
-		`  submitted ${hash ? mainnetExplorerTxUrl(hash) : "(no hash returned)"}`,
+		`  submitted ${hash ? explorerTxUrl(hash) : "(no hash returned)"}`,
 	);
 	const back = await readProject(c, key);
 	if (!back || back.name !== NAME) {
@@ -190,12 +219,14 @@ async function commit(): Promise<number> {
 	const { publicKey, keypair } = maintainer();
 	const c = await tansuClient({
 		publicKey,
-		...(keypair ? contract.basicNodeSigner(keypair, MAINNET_PASSPHRASE) : {}),
+		...(keypair
+			? contract.basicNodeSigner(keypair, TANSU_NETWORK_PASSPHRASE)
+			: {}),
 	});
 	const project = await readProject(c, key);
 	if (!project) {
 		console.error(
-			`\n"${NAME}" is not registered on Tansu mainnet — run --register first.`,
+			`\n"${NAME}" is not registered on Tansu testnet — run --register first.`,
 		);
 		return 1;
 	}
@@ -234,7 +265,7 @@ async function commit(): Promise<number> {
 		const sent = await tx.signAndSend();
 		txHash = txHashOf(sent);
 		console.log(
-			`  submitted ${txHash ? mainnetExplorerTxUrl(txHash) : "(no hash returned)"}`,
+			`  submitted ${txHash ? explorerTxUrl(txHash) : "(no hash returned)"}`,
 		);
 		const back = await readCommit(c, key);
 		if (back !== SHA) {
@@ -316,7 +347,7 @@ async function main() {
 		return 2;
 	}
 	console.log(
-		`\ntansu-anchor — ${ACTION} — ${EXECUTE ? "EXECUTE" : "DRY-RUN"} — mainnet`,
+		`\ntansu-anchor — ${ACTION} — ${EXECUTE ? "EXECUTE" : "DRY-RUN"} — testnet`,
 	);
 	return ACTION === "status"
 		? status()

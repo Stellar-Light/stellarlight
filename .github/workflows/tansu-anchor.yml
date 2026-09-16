@@ -1,13 +1,15 @@
-name: tansu anchor (mainnet)
-# i³ Awards — anchor a published result on MAINNET through Tansu (tansu.dev).
+name: tansu anchor (testnet)
+# i³ Awards — anchor a published result on TESTNET through Tansu (tansu.dev).
 #
-# The vote lives on testnet (reset 2–4×/year); the mirror keeps the ballots.
-# This gives the PUBLISHED RESULT a permanent, third-party-verifiable record:
-# register `stellarlight` on Tansu once (5 XLM collateral from the lane's own
-# maintainer key), then commit the git SHA of the results file. Nobody opens a
+# Everything about the vote is on testnet (Pilots use testnet-assigned
+# wallets); the award-ballots mirror is the durable record across resets.
+# This gives the PUBLISHED RESULT an on-chain record where the vote lives:
+# register `stellarlight` on Tansu (5 test XLM collateral, the lane friendbots
+# its own key), then commit the git SHA of the results file. Nobody opens a
 # dApp. `status` needs no key; `register`/`commit` simulate with the public
 # key (repo variable TANSU_MAINTAINER_PUBLIC) and execute with the secret.
-# Dry-run by default; every write is read back.
+# After a testnet reset, run `register` again. Dry-run by default; every
+# write is read back.
 on:
   workflow_dispatch:
     inputs:
@@ -26,7 +28,7 @@ on:
         required: false
         default: ""
       execute:
-        description: "Actually sign + submit on MAINNET. Unchecked = simulate only."
+        description: "Actually sign + submit on testnet. Unchecked = simulate only."
         type: boolean
         required: false
         default: false
