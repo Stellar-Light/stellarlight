@@ -9,8 +9,10 @@
  * Testnet is reset 2–4× a year, and a reset clears every ledger entry and
  * all history: at the first reset after a round, every account reads
  * unfunded and the chain tally is zero. When the chain shows NO votes, the
- * tally is rebuilt from the `award-ballots` mirror (see lib/awards/mirror.ts)
- * through the same tallyRound, and `source` says which one you got.
+ * tally is rebuilt from the `award-ballots` mirror through the same
+ * tallyRound (lib/awards/publish.ts — shared with the publish lane, so the
+ * committed results file cannot disagree with this page), and `source` says
+ * which one you got.
  *
  * PRIVACY: the payload is AGGREGATE ONLY — per-category counts and a
  * turnout figure. No address→choice mapping is ever serialized here.
@@ -20,20 +22,16 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { type RoundTally, tallyRound } from "@/lib/awards/ballot";
-import { mirrorAccountData } from "@/lib/awards/mirror";
-import { loadMirroredBallots } from "@/lib/awards/record";
+import type { RoundTally } from "@/lib/awards/ballot";
+import { liveTally, type TallySource } from "@/lib/awards/publish";
 import { loadRound } from "@/lib/awards/round";
-import { fetchTestnetAccounts } from "@/lib/awards/stellar";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const CACHE_TTL_MS = 30_000;
-const HORIZON_CONCURRENCY = 10;
 
-type TallySource = "chain" | "mirror";
 const cache = new Map<
 	string,
 	{ at: number; tally: RoundTally; source: TallySource }
@@ -75,40 +73,7 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const addresses = [...loaded.whitelist];
-	const probes = await fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY);
-	let tally = tallyRound(
-		loaded.round,
-		loaded.nominees,
-		probes.map(({ address, result }) => ({
-			address,
-			data: result.funded === true ? result.account.data : null,
-		})),
-	);
-	let source: TallySource = "chain";
-
-	// Nothing on-chain for anyone → the mirror is what's left. Whitelist stays
-	// the denominator: an address the mirror never saw counts as unvoted, and
-	// a mirrored address outside the whitelist is not a voter.
-	if (tally.turnout.voted === 0) {
-		const mirror = await loadMirroredBallots(loaded.round.slug);
-		if (mirror.size > 0) {
-			const fromMirror = tallyRound(
-				loaded.round,
-				loaded.nominees,
-				addresses.map((address) => {
-					const selections = mirror.get(address);
-					return selections
-						? mirrorAccountData(loaded.round, { address, selections })
-						: { address, data: null };
-				}),
-			);
-			if (fromMirror.turnout.voted > 0) {
-				tally = fromMirror;
-				source = "mirror";
-			}
-		}
-	}
+	const { tally, source } = await liveTally(loaded);
 
 	const at = Date.now();
 	cache.set(loaded.round.slug, { at, tally, source });

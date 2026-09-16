@@ -1,0 +1,66 @@
+name: award publish results (+ Tansu commit)
+# i³ Awards — after a round closes: write awards/results/<round>.json from the
+# live tally (same code as the results page), commit it to main, then commit
+# that SHA on Tansu (testnet) through the lane's own key. Dry-run prints the
+# document and simulates the Tansu commit against this run's main HEAD.
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round slug (e.g. i3-2026)"
+        required: true
+      execute:
+        description: "Write the file, push it to main, and commit its SHA on Tansu. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: award-publish
+  cancel-in-progress: false
+permissions: { contents: write }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      TANSU_MAINTAINER_SECRET: ${{ secrets.TANSU_MAINTAINER_SECRET }}
+      TANSU_MAINTAINER_PUBLIC: ${{ vars.TANSU_MAINTAINER_PUBLIC }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Write the results document (dry-run unless execute=true)
+        run: |
+          pnpm exec tsx scripts/data/award-results-publish.ts \
+            --round=${{ inputs.round }} \
+            ${{ inputs.execute && '--execute' || '' }}
+      - name: Commit + push the results file
+        if: ${{ inputs.execute }}
+        run: |
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add awards/results/
+          if git diff --cached --quiet; then
+            echo "results file unchanged — nothing to commit"
+          else
+            git commit -m "chore(awards): publish ${{ inputs.round }} results [skip ci]"
+            # Push-first retry (#1596): main moves during a run; -X theirs keeps
+            # OUR freshly written file, which is a snapshot, not a merge.
+            for i in 1 2 3; do
+              git push && break
+              git pull --rebase --autostash -X theirs origin main || git rebase --abort
+            done
+            git push || true
+          fi
+          echo "PUBLISH_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Anchor that commit on Tansu (testnet)
+        run: |
+          pnpm exec tsx scripts/data/tansu-anchor.ts --commit \
+            --round=${{ inputs.round }} \
+            --sha=${PUBLISH_SHA:-${{ github.sha }}} \
+            ${{ inputs.execute && '--execute' || '' }}
