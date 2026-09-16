@@ -1074,12 +1074,14 @@
 }
 
 /* ── The i³ is a cube ───────────────────────────────────────────────────
-   After the tumbling letter-cube in yui540's gallery. The character of it is
-   entirely in the overshoot: every quarter turn goes PAST its face by ~4° and
-   settles back, so the block reads as having weight rather than snapping to a
-   grid. Two quarter turns, landing on the mark: 3 → i → i³.
+   After the tumbling letter-cube in yui540's gallery. Two things carry it:
+   every quarter turn goes PAST its face by ~4° and settles back, and the two
+   turns are on DIFFERENT AXES — X then Y — so it tumbles rather than rolling
+   the same way twice. Lands on the mark: 3 → i → i³.
 
-   One rotateX on the box; the faces are placed once and never animate. */
+   Faces are placed at the exact inverse of each orientation the box visits,
+   so the glyph is upright on every one of them, including the compound
+   start. Hover sends it to a random face; leaving brings it home. */
 .awards-sm .sm-cube {
 	display: inline-block;
 	width: 1.06em;
@@ -1090,50 +1092,54 @@
 }
 .awards-sm .sm-cube-box {
 	/* it is a <span>: without this, width/height:100% do not apply and every
-	   face collapses to its own borders (2x2px), which renders as a bare
-	   glyph and no cube at all. */
+	   face collapses to its own borders (2x2px) — a bare glyph, no cube. */
 	display: block;
 	position: relative;
 	width: 100%;
 	height: 100%;
 	transform-style: preserve-3d;
-	/* Waits for the curtain. The reveal finishes parting at ~1.4s and has
-	   faded out by ~1.7s; starting earlier means the first face rolls past
-	   behind the cloth and is never seen. */
-	animation: sm-cube-roll 3.2s cubic-bezier(0.45, 0.05, 0.2, 1) 1.55s both;
+	/* Waits for the curtain: the reveal does not finish parting until ~1.4s,
+	   and anything rolling before that is never seen. */
+	animation: sm-cube-roll 2.5s cubic-bezier(0.45, 0.05, 0.2, 1) 1.55s both;
 }
-/* Each face is HELD — the pauses are what let you read 3, then i, then i³.
-   The quarter turns themselves still overshoot by ~4° and settle back. */
+/* once the intro is done the box is driven by hover instead */
+.awards-sm .sm-cube-box.is-live {
+	animation: none;
+	transition: transform 0.62s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
 @keyframes sm-cube-roll {
+	/* face "3" — a beat, not a pause */
 	0%,
-	20% {
-		transform: rotateX(0deg);
+	13% {
+		transform: rotateX(-90deg) rotateY(-90deg);
 	}
-	32% {
-		transform: rotateX(-94deg);
+	/* turn one, on X */
+	30% {
+		transform: rotateX(4deg) rotateY(-90deg);
 	}
 	38% {
-		transform: rotateX(-90deg);
+		transform: rotateX(0deg) rotateY(-90deg);
 	}
-	42% {
-		transform: rotateX(-92deg);
+	43% {
+		transform: rotateX(2deg) rotateY(-90deg);
 	}
-	46%,
-	64% {
-		transform: rotateX(-90deg);
+	/* face "i" */
+	50%,
+	62% {
+		transform: rotateX(0deg) rotateY(-90deg);
 	}
-	76% {
-		transform: rotateX(-184deg);
-	}
-	83% {
-		transform: rotateX(-180deg);
+	/* turn two, on Y */
+	80% {
+		transform: rotateX(0deg) rotateY(4deg);
 	}
 	88% {
-		transform: rotateX(-182deg);
+		transform: rotateX(0deg) rotateY(0deg);
 	}
-	93%,
+	94% {
+		transform: rotateX(0deg) rotateY(2deg);
+	}
 	100% {
-		transform: rotateX(-180deg);
+		transform: rotateX(0deg) rotateY(0deg);
 	}
 }
 .awards-sm .sm-cube-face {
@@ -1142,7 +1148,10 @@
 	display: grid;
 	place-items: center;
 	border-radius: 0.1em;
-	font-size: 0.72em;
+	/* Type size goes on the INNER glyph, never here: translateZ below is in
+	   em, so shrinking this element's font-size shrinks the cube's half-depth
+	   with it. At 0.72em the faces sat 20px out on a 55px cube that needs 28
+	   — all six bunched inside each other and the wrong one won. */
 	line-height: 1;
 	backface-visibility: hidden;
 	background: #2a2a2a;
@@ -1150,24 +1159,44 @@
 	color: #fafafa;
 	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
-/* The three faces the roll passes through, each a step lighter, so the block
-   turns INTO the light as it lands. These have to sit clearly above the page
-   ground — at #1d1d1d on #171717 the cube was invisible and read as a bare
-   glyph, which is not a cube at all. */
-.awards-sm .sm-cube-a {
-	transform: translateZ(0.53em);
-	background: #2a2a2a;
-	border-color: #3f3f3f;
+/* Each face is the inverse of the orientation that shows it, so text is
+   upright everywhere. The resting face is last and lightest. */
+.awards-sm .sm-cube-s {
+	transform: rotateY(90deg) rotateX(90deg) translateZ(0.53em);
+	background: #262626;
+	border-color: #3a3a3a;
 	color: #9a9a9a;
 }
-.awards-sm .sm-cube-b {
-	transform: rotateX(90deg) translateZ(0.53em);
-	background: #343434;
-	border-color: #4a4a4a;
+.awards-sm .sm-cube-r {
+	transform: rotateY(90deg) translateZ(0.53em);
+	background: #333;
+	border-color: #484848;
 	color: #cfcfcf;
 }
-.awards-sm .sm-cube-c {
-	transform: rotateX(180deg) translateZ(0.53em);
+.awards-sm .sm-cube-back {
+	transform: rotateY(180deg) translateZ(0.53em);
+	background: #303030;
+	border-color: #454545;
+	color: #dadada;
+}
+.awards-sm .sm-cube-left {
+	transform: rotateY(-90deg) translateZ(0.53em);
+	background: #2c2c2c;
+	border-color: #3f3f3f;
+	color: #b4b4b4;
+}
+.awards-sm .sm-cube-top {
+	transform: rotateX(90deg) translateZ(0.53em);
+	background: #363636;
+	border-color: #4d4d4d;
+	color: #d4d4d4;
+}
+.awards-sm .sm-cube-face b {
+	font-size: 0.72em;
+	font-weight: inherit;
+}
+.awards-sm .sm-cube-f {
+	transform: translateZ(0.53em);
 	background: #3d3d3d;
 	border-color: #565656;
 	color: #fafafa;
@@ -1176,7 +1205,8 @@
 @media (prefers-reduced-motion: reduce) {
 	.awards-sm .sm-cube-box {
 		animation: none !important;
-		transform: rotateX(-180deg);
+		transition: none !important;
+		transform: rotateX(0deg) rotateY(0deg);
 	}
 }
 
