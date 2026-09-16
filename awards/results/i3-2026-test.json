@@ -1,0 +1,98 @@
+{
+	"round": "i3-2026-test",
+	"title": "i³ Awards 2026",
+	"status": "draft",
+	"picksPerCategory": 1,
+	"opensAt": "2026-07-21T01:31:48.410Z",
+	"closesAt": "2026-08-04T01:31:48.411Z",
+	"source": "chain",
+	"turnout": {
+		"voted": 2,
+		"whitelisted": 5
+	},
+	"categories": [
+		{
+			"key": "impact",
+			"name": "Impact",
+			"totalVotes": 2,
+			"results": [
+				{
+					"slug": "decaf",
+					"name": "Decaf",
+					"votes": 1
+				},
+				{
+					"slug": "meru",
+					"name": "Meru",
+					"votes": 1
+				},
+				{
+					"slug": "beans",
+					"name": "Beans",
+					"votes": 0
+				},
+				{
+					"slug": "elsa",
+					"name": "Elsa",
+					"votes": 0
+				}
+			]
+		},
+		{
+			"key": "innovation",
+			"name": "Innovation",
+			"totalVotes": 2,
+			"results": [
+				{
+					"slug": "blend",
+					"name": "Blend",
+					"votes": 2
+				},
+				{
+					"slug": "etherfuse",
+					"name": "Etherfuse",
+					"votes": 0
+				},
+				{
+					"slug": "reflector",
+					"name": "Reflector",
+					"votes": 0
+				},
+				{
+					"slug": "sorobanhooks",
+					"name": "SorobanHooks",
+					"votes": 0
+				}
+			]
+		},
+		{
+			"key": "interoperability",
+			"name": "Interoperability",
+			"totalVotes": 2,
+			"results": [
+				{
+					"slug": "allbridge",
+					"name": "Allbridge",
+					"votes": 1
+				},
+				{
+					"slug": "defindex",
+					"name": "DeFindex",
+					"votes": 1
+				},
+				{
+					"slug": "rubic",
+					"name": "Rubic",
+					"votes": 0
+				},
+				{
+					"slug": "usdc-swap",
+					"name": "USDC Swap",
+					"votes": 0
+				}
+			]
+		}
+	],
+	"generatedAt": "2026-09-16T15:43:38.384Z",
+	"note": "Aggregate only. Ballots are manageData entries on Stellar TESTNET; the award-ballots mirror is the durable record across testnet resets. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=i3-2026-test"
+}
