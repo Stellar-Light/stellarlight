@@ -1,8 +1,14 @@
 // @vitest-environment node
 
 import { describe, expect, it } from "vitest";
-import type { RoundTally } from "../awards/ballot";
-import { resultsDocument } from "../awards/publish";
+import {
+	type BallotNominee,
+	type BallotRound,
+	dataKey,
+	type RoundTally,
+	tallyRound,
+} from "../awards/ballot";
+import { mergeAccounts, resultsDocument } from "../awards/publish";
 import type { LoadedRound } from "../awards/round";
 
 const loaded = {
@@ -52,5 +58,48 @@ describe("resultsDocument", () => {
 		for (const addr of loaded.whitelist) expect(text).not.toContain(addr);
 		expect(text).not.toMatch(/txHash|history/);
 		expect(doc.note).toContain("/api/awards/anchor?round=i3-2026");
+	});
+});
+
+describe("mergeAccounts", () => {
+	const round: BallotRound = {
+		slug: "i3-2026",
+		status: "open",
+		ballotMode: "one-per-category",
+		categories: [{ key: "impact", name: "Impact", tagline: null }],
+		opensAt: null,
+		closesAt: null,
+	};
+	const nominees: BallotNominee[] = [
+		{ category: "impact", slug: "decaf", name: "Decaf" },
+		{ category: "impact", slug: "beans", name: "Beans" },
+	];
+	const b64 = (v: string) => Buffer.from(v).toString("base64");
+	const vote = (slug: string) => ({
+		[dataKey(round.slug, "impact")]: b64(slug),
+	});
+
+	it("chain wins per address; the mirror fills what the chain forgot; nobody is counted twice", () => {
+		const chain = new Map<string, Record<string, string> | null>([
+			["G-BOTH", vote("beans")], // voted again after a reset → chain's ballot
+			["G-CHAIN", vote("decaf")],
+			["G-FUNDED-NO-VOTE", {}], // account exists, entries gone
+			["G-WIPED", null], // account gone (reset) or Horizon failed
+			["G-NEVER", null],
+		]);
+		const mirror = new Map([
+			["G-BOTH", { impact: ["decaf"] }],
+			["G-FUNDED-NO-VOTE", { impact: ["decaf"] }],
+			["G-WIPED", { impact: ["beans"] }],
+		]);
+		const m = mergeAccounts(round, nominees, [...chain.keys()], chain, mirror);
+		expect(m.chainVoters).toBe(2);
+		expect(m.mirrorVoters).toBe(2);
+		const tally = tallyRound(round, nominees, m.accounts);
+		expect(tally.turnout).toEqual({ voted: 4, whitelisted: 5 });
+		const votes = Object.fromEntries(
+			tally.categories[0].results.map((r) => [r.slug, r.votes]),
+		);
+		expect(votes).toEqual({ beans: 2, decaf: 2 });
 	});
 });

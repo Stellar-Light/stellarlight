@@ -33,6 +33,12 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
+// One friendbot attempt per address per minute per instance: a failing
+// friendbot (rate limit, outage) must not turn every reconnect into a 20s
+// wait. The manual button stays available in between.
+const FUND_RETRY_MS = 60_000;
+const fundAttempts = new Map<string, number>();
+
 export async function GET(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/eligibility",
@@ -80,7 +86,11 @@ export async function GET(req: NextRequest) {
 	}
 
 	let result = await fetchTestnetAccount(address);
-	if (result.funded === false) {
+	if (
+		result.funded === false &&
+		Date.now() - (fundAttempts.get(address) ?? 0) > FUND_RETRY_MS
+	) {
+		fundAttempts.set(address, Date.now());
 		const fund = await fundViaFriendbot(address);
 		if (fund.ok) {
 			result = await fetchTestnetAccount(address);
