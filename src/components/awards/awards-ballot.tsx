@@ -1102,8 +1102,21 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				transition={{ duration: 0.45, ease: EASE }}
 				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
-				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
-					{round.title}
+				<h1 className="mb-5 flex flex-wrap items-start justify-center text-3xl font-semibold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl">
+					{round.title
+						.split(/\s+/)
+						.filter(Boolean)
+						.map((word, i) => (
+							<span
+								key={`${word}-${i}`}
+								className="sm-tag"
+								style={{ ["--sm-d" as string]: `${i * 130}ms` }}
+							>
+								<span className="sm-tag-drop">
+									<span className="sm-tag-face">{word}</span>
+								</span>
+							</span>
+						))}
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
 					Three categories. One pick in each. SCF Pilots choose the projects

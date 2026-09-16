@@ -1067,3 +1067,103 @@
 		transform: none;
 	}
 }
+
+/* ── The title hangs on tags ─────────────────────────────────────────────
+   After the hanging letter-tags in yui540's gallery. The mechanism matters
+   and is easy to get wrong: the SWAY is translateX on an outer wrapper, and
+   the DROP is translateY on an inner one that also carries the string. Two
+   axes on two elements — rotating the text instead loses the whole idea,
+   because a thing on a string swings sideways, it does not pivot.
+
+   One tag per word, so the title stays readable at three tags. */
+.awards-sm .sm-tag {
+	display: inline-block;
+	margin: 0 6px;
+	animation: sm-tag-sway 0.86s ease-in-out both;
+	animation-delay: var(--sm-d, 0ms);
+}
+@keyframes sm-tag-sway {
+	0% {
+		transform: translateX(30%);
+	}
+	40% {
+		transform: translateX(-15%);
+	}
+	70% {
+		transform: translateX(7%);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+.awards-sm .sm-tag-drop {
+	display: block;
+	position: relative;
+	padding-top: 42px;
+	animation: sm-tag-drop 0.86s ease-in-out both;
+	animation-delay: var(--sm-d, 0ms);
+}
+@keyframes sm-tag-drop {
+	0% {
+		transform: translateY(-104px);
+		opacity: 0;
+	}
+	16% {
+		opacity: 1;
+	}
+	40% {
+		transform: translateY(11px);
+	}
+	60% {
+		transform: translateY(0);
+	}
+	80% {
+		transform: translateY(5px);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+/* the cord, running down to the punched hole */
+.awards-sm .sm-tag-drop::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 3px;
+	height: 52px;
+	margin-left: -1.5px;
+	border-radius: 999px;
+	background: #4a4a4a;
+}
+.awards-sm .sm-tag-face {
+	display: block;
+	position: relative;
+	padding: 0.42em 0.5em 0.3em;
+	border-radius: 16px;
+	background: #242424;
+	border: 1px solid #3b3b3b;
+	box-shadow:
+		0 14px 34px rgba(0, 0, 0, 0.5),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.awards-sm .sm-tag-face::before {
+	content: "";
+	position: absolute;
+	top: 0.26em;
+	left: 50%;
+	width: 0.17em;
+	height: 0.17em;
+	margin-left: -0.085em;
+	border-radius: 99px;
+	background: #111;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-tag,
+	.awards-sm .sm-tag-drop {
+		animation: none !important;
+		transform: none;
+	}
+}
