@@ -38,6 +38,7 @@
 		"@blend-capital/blend-sdk": "^3.3.0",
 		"@creit.tech/stellar-wallets-kit": "^2.5.0",
 		"@next/font": "^14.2.15",
+		"@noble/hashes": "^1.8.0",
 		"@number-flow/react": "^0.6.0",
 		"@payloadcms/db-mongodb": "3.63.0",
 		"@payloadcms/email-resend": "3.63.0",

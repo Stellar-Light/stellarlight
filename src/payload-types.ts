@@ -1035,9 +1035,9 @@ export interface Repo {
    */
   unverifiedStellar?: boolean | null;
   /**
-   * CTL scan state — pending/error/incomplete are never demoted
+   * CTL scan state — pending/error/incomplete are never demoted; gone = GitHub 404s the repo
    */
-  codeScanState?: ('pending' | 'scanned' | 'error' | 'incomplete') | null;
+  codeScanState?: ('pending' | 'scanned' | 'error' | 'incomplete' | 'gone') | null;
   codeScanError?: string | null;
   /**
    * e.g. submodule-contracts, tree-incomplete, blob-unreadable
@@ -1369,6 +1369,18 @@ export interface AwardRound {
    * Optional. After this instant ballots are rejected. Voters may change their vote until then.
    */
   closesAt?: string | null;
+  /**
+   * Mainnet anchor of the PUBLISHED result via Tansu: { project, projectKey, commitSha, txHash, at }. Set by the tansu-anchor lane, not by hand.
+   */
+  anchor?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3301,6 +3313,7 @@ export interface AwardRoundsSelect<T extends boolean = true> {
       };
   opensAt?: T;
   closesAt?: T;
+  anchor?: T;
   updatedAt?: T;
   createdAt?: T;
 }

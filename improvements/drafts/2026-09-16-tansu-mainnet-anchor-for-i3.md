@@ -1,7 +1,11 @@
 # Tansu on mainnet as the notary of the i³ result — proposal (2026-09-16)
 
-**Status: proposal, nothing built.** Answers "we will not use the Tansu platform,
-but maybe in the backend?" with the one role that is real, safe, and visible.
+**Status (2026-09-16, later): BUILT, BLOCKED UPSTREAM.** The lane exists
+(`scripts/data/tansu-anchor.ts`, `tansu-anchor.yml`, `/api/awards/anchor`,
+`award-rounds.anchor`) and its read paths are proven against mainnet — but the
+deployed contract's `register()` traps for every caller. See "Finding" below.
+Owner's rule, restated: nobody opens a dApp — not a voter, not the owner. The
+lane holds its own maintainer key and does registration + commits itself.
 
 ## The role
 
@@ -38,16 +42,51 @@ project on tansu.dev. Nothing about our ballot changes.
   the wallet signature. The dApp shows `LatestCommit` / `CommitHistory` per
   project.
 
+## Finding: mainnet `register()` traps on the current wasm — for everyone
+
+Read via Soroban RPC simulation on 2026-09-16 (never submitted):
+
+- `register(maintainer, "stellarlight", [maintainer], url, "")` fails with
+  `Error(WasmVm, InvalidAction)` — `VM call trapped: UnreachableCodeReached` —
+  from a Kraken hot wallet, from Tupui's own maintainer account
+  `GD4FXNCY…QF3ER`, on `mainnet.sorobanrpc.com` and gateway.fm alike, for every
+  name/url/ipfs variant tried. The diagnostic log shows the trap inside
+  `register` with **no sub-call** (no domain call, no collateral transfer).
+- Registering an EXISTING name (`tansu`) returns the typed
+  `Error(Contract, #201)` = ProjectAlreadyExist. So the trap sits **after** the
+  exists-check: the next thing v2.0.2's `register` does is
+  `retrieve_contract(ContractKey::Domain)`, which is
+  `env.storage().instance().get(&key).unwrap()`.
+- The live instance storage holds the refs under the symbols
+  **`DomainContract`** and **`CollateralContract`**; v2.0.2's `ContractKey` enum
+  is `Domain` / `Collateral` / `Nqg`, and current `main` has dropped `Domain`
+  entirely. A lookup under the wrong symbol returns `None`, the `unwrap()`
+  panics, and with `panic = "abort"` that is exactly `UnreachableCodeReached`.
+- Contract created 2025-10-25; wasm upgraded 2026-05-11, 05-12 and **05-14**
+  (current `83feef85…`, 4th version); 63 invocations total, 7 projects.
+
+The read paths (`get_project`, `get_commit`) work — our keccak key resolves
+`tansu` to its maintainer and latest hash `7de4027c…` — and `commit()`'s
+maintainer gate works (a non-maintainer is refused). Only registration is
+broken, and it is broken upstream. The fix is Tansu's: either re-set the two
+contract refs under the symbols the deployed code reads, or ship a wasm whose
+`ContractKey` matches the stored ones. Our lane fails loudly (`assertSimulated`)
+until then and will register the moment it is fixed.
+
+This is the first thing worth sending Tupui: a reproducible bug on his mainnet
+deployment, found by trying to use it.
+
 ## Two ways to sign, pick one
 
-1. **Owner's wallet, via Tansu's dApp (recommended to start).** Register
-   `stellarlight` on tansu.dev with your wallet (5 XLM), and commit the results
-   SHA the same way. Zero secrets in our infra, and the usage lands in Tupui's
-   product, which is the point.
-2. **A lane with a purpose-made maintainer key.** A fresh keypair holding ~6
-   XLM, listed as a second maintainer at registration, stored as a GitHub
-   secret; `award-anchor.yml` commits the SHA after the results are published.
-   Repeatable and hands-off, at the cost of one funded key in CI.
+~~1. Owner's wallet via Tansu's dApp.~~ Rejected by the owner: no dApp step for
+anyone. The voter flow is connect → sign; the backend does the rest.
+
+2. **A lane with a purpose-made maintainer key — the one we built.** A fresh
+   keypair (secret set straight into the repo secret `TANSU_MAINTAINER_SECRET`,
+   never printed; public key in the repo variable `TANSU_MAINTAINER_PUBLIC`),
+   funded by the owner with ~10 XLM (5 collateral + reserves + fees).
+   `tansu-anchor.yml` registers once and commits the SHA after each round's
+   results are published; dry-run simulates with the public key alone.
 
 ## What we build on our side (small, none of it voter-facing)
 

@@ -177,6 +177,18 @@ export const AwardRounds: CollectionConfig = {
 					"Optional. After this instant ballots are rejected. Voters may change their vote until then.",
 			},
 		},
+		{
+			// Written by the tansu-anchor lane after the results file is committed;
+			// served (and verified against mainnet) by /api/awards/anchor.
+			name: "anchor",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				readOnly: true,
+				description:
+					"Mainnet anchor of the PUBLISHED result via Tansu: { project, projectKey, commitSha, txHash, at }. Set by the tansu-anchor lane, not by hand.",
+			},
+		},
 	],
 	hooks: {
 		beforeValidate: [
