@@ -717,12 +717,15 @@
 }
 .awards-sm .sm-cursor i {
 	display: block;
-	width: 15px;
-	height: 21px;
-	background: #fafafa;
-	filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
-	clip-path: polygon(0 0, 0 76%, 25% 58%, 45% 100%, 66% 90%, 47% 50%, 78% 48%);
+	width: 18px;
+	height: 24px;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
 	animation: sm-cursor-press 0.34s cubic-bezier(0.34, 1.5, 0.64, 1) 0.95s both;
+}
+.awards-sm .sm-cursor svg {
+	display: block;
+	width: 100%;
+	height: 100%;
 }
 @keyframes sm-cursor-in {
 	from {
@@ -1293,126 +1296,161 @@
    He lives in ONE place: the connected-wallet menu, wearing the wallet's own
    badge, the way an account avatar does.
 
-   Avatar treatment after the expression avatars in yui540's gallery: the
-   portrait pops in past its size and settles, a raked highlight sweeps
-   across, a ring pulses out behind, and a few sparks fire off on their own
-   angles. Each spark carries its own --sr-rot and --sr-d. */
+   The circle does NOT animate in — it is just the avatar ground, there from
+   the first frame. What moves is inside it: two shutters that swing open
+   like a window (yui540's window motion — each pane hinged on its OUTER
+   edge, perspective(600px) rotateY(0 → ∓140 → ∓130), the overshoot doing
+   the work), and Stroopy rising up into the opening behind them. Then a
+   few stars twinkle off on their own angles, each carrying its own
+   --sr-rot and --sr-d. */
 .awards-sm .sm-stroopy {
 	display: block;
 	position: relative;
 	flex-shrink: 0;
 	border-radius: 999px;
-	background: radial-gradient(circle at 50% 28%, #b9a9ea, #8f7ccd);
+	background: radial-gradient(circle at 50% 30%, #8471c4, #55468c);
 	box-shadow:
 		inset 0 0 0 1px rgba(255, 255, 255, 0.22),
 		0 6px 18px rgba(0, 0, 0, 0.45);
+	/* stays visible so the stars can leave the circle */
 	overflow: visible;
-	animation: sm-sr-pop 0.85s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
-@keyframes sm-sr-pop {
-	0% {
-		transform: scale(0);
-	}
-	40% {
-		transform: scale(1.3);
-	}
-	60% {
-		transform: scale(1);
-	}
-	80% {
-		transform: scale(1.08);
-	}
-	100% {
-		transform: scale(1);
-	}
-}
-/* the ring that pulses out behind him */
-.awards-sm .sm-stroopy::before {
-	content: "";
+/* everything that happens INSIDE the porthole is clipped to it */
+.awards-sm .sm-sr-window {
 	position: absolute;
 	inset: 0;
-	border-radius: 999px;
-	border: 2px solid rgba(255, 255, 255, 0.55);
-	animation: sm-sr-ring 0.9s ease-out 0.3s both;
-}
-@keyframes sm-sr-ring {
-	0% {
-		opacity: 0.9;
-		transform: scale(0.75);
-	}
-	100% {
-		opacity: 0;
-		transform: scale(1.5);
-	}
-}
-/* The highlight raked across the portrait. It needs its OWN clipping box:
-   the tile itself has to stay overflow:visible so the sparks can leave it,
-   so a sweep drawn on the tile paints outside the circle as a loose streak. */
-.awards-sm .sm-sr-gloss {
-	position: absolute;
-	inset: 0;
-	z-index: 2;
 	border-radius: 999px;
 	overflow: hidden;
-	pointer-events: none;
 }
-.awards-sm .sm-sr-gloss::after {
-	content: "";
+.awards-sm .sm-stroopy svg {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+/* he rises into the opening rather than being there already */
+.awards-sm .sm-sr-rise {
+	animation: sm-sr-rise 0.62s cubic-bezier(0.22, 1.05, 0.36, 1) 0.34s both;
+}
+@keyframes sm-sr-rise {
+	0% {
+		transform: translateY(66%);
+	}
+	62% {
+		transform: translateY(-4%);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
+/* the two panes. Closed they are the circle; hinged on the outer edge they
+   swing right out of it, so the clip takes them away as they finish. */
+.awards-sm .sm-sr-shutter {
+	position: absolute;
+	top: 0;
+	z-index: 4;
+	width: 50%;
+	height: 100%;
+	box-shadow: 0 0 16px rgba(20, 14, 38, 0.45);
+}
+.awards-sm .sm-sr-shutter-l {
+	left: 0;
+	transform-origin: left center;
+	background: linear-gradient(90deg, #cdc0f5, #a08cd9);
+	animation: sm-sr-door-l 0.62s ease-in-out 0.18s both;
+}
+.awards-sm .sm-sr-shutter-r {
+	right: 0;
+	transform-origin: right center;
+	background: linear-gradient(270deg, #cdc0f5, #a08cd9);
+	animation: sm-sr-door-r 0.62s ease-in-out 0.18s both;
+}
+@keyframes sm-sr-door-l {
+	0% {
+		transform: perspective(600px) rotateY(0deg);
+	}
+	60% {
+		transform: perspective(600px) rotateY(-140deg);
+	}
+	100% {
+		transform: perspective(600px) rotateY(-130deg);
+	}
+}
+@keyframes sm-sr-door-r {
+	0% {
+		transform: perspective(600px) rotateY(0deg);
+	}
+	60% {
+		transform: perspective(600px) rotateY(140deg);
+	}
+	100% {
+		transform: perspective(600px) rotateY(130deg);
+	}
+}
+/* the highlight raked across the portrait once he has landed */
+.awards-sm .sm-sr-gloss {
 	position: absolute;
 	inset: -20%;
+	z-index: 3;
+	pointer-events: none;
 	background: linear-gradient(
 		90deg,
 		transparent 38%,
-		rgba(255, 255, 255, 0.5) 50%,
+		rgba(255, 255, 255, 0.45) 50%,
 		transparent 62%
 	);
 	transform: translateX(-110%) skewX(-30deg);
-	animation: sm-sr-shine 0.85s ease-in-out 0.45s both;
+	animation: sm-sr-shine 0.8s ease-in-out 0.95s both;
 }
 @keyframes sm-sr-shine {
 	to {
 		transform: translateX(160%) skewX(-30deg);
 	}
 }
-.awards-sm .sm-stroopy svg {
-	position: relative;
-	z-index: 1;
-	display: block;
-	width: 100%;
-	height: 100%;
-	border-radius: 999px;
-}
-/* sparks */
+/* four-point stars, not dots */
 .awards-sm .sm-spark {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 5px;
-	height: 5px;
-	margin: -2.5px 0 0 -2.5px;
-	border-radius: 999px;
+	z-index: 5;
+	width: 9px;
+	height: 9px;
+	margin: -4.5px 0 0 -4.5px;
 	background: #ffe27a;
+	clip-path: polygon(
+		50% 0%,
+		60% 40%,
+		100% 50%,
+		60% 60%,
+		50% 100%,
+		40% 60%,
+		0% 50%,
+		40% 40%
+	);
 	opacity: 0;
-	animation: sm-sr-spark 0.75s cubic-bezier(0.2, 0.8, 0.3, 1) 0.42s both;
-	animation-delay: calc(0.42s + var(--sr-d, 0ms));
+	animation: sm-sr-spark 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+	animation-delay: calc(0.92s + var(--sr-d, 0ms));
 }
 @keyframes sm-sr-spark {
 	0% {
 		opacity: 0;
-		transform: rotate(var(--sr-rot, 0deg)) translateY(0) scale(0.4);
+		transform: rotate(var(--sr-rot, 0deg)) translateY(-8px) scale(0.2);
 	}
-	35% {
+	40% {
 		opacity: 1;
 	}
 	100% {
 		opacity: 0;
-		transform: rotate(var(--sr-rot, 0deg)) translateY(-26px) scale(1);
+		transform: rotate(var(--sr-rot, 0deg)) translateY(-28px) scale(1)
+			rotate(75deg);
 	}
 }
 /* he breathes, and his antenna is never quite still */
 .awards-sm .sm-sr-bob {
 	transform-origin: 32px 52px;
-	animation: sm-sr-bob 3.4s ease-in-out 1s infinite;
+	animation: sm-sr-bob 3.4s ease-in-out 1.1s infinite;
 }
 @keyframes sm-sr-bob {
 	0%,
@@ -1425,7 +1463,7 @@
 }
 .awards-sm .sm-sr-ant {
 	transform-origin: 32px 16px;
-	animation: sm-sr-ant 2.6s ease-in-out 1.1s infinite;
+	animation: sm-sr-ant 2.6s ease-in-out 1.2s infinite;
 }
 @keyframes sm-sr-ant {
 	0%,
@@ -1438,7 +1476,7 @@
 }
 .awards-sm .sm-sr-eye {
 	transform-origin: center;
-	animation: sm-sr-blink 5.2s ease-in-out 1.6s infinite;
+	animation: sm-sr-blink 5.2s ease-in-out 1.7s infinite;
 }
 @keyframes sm-sr-blink {
 	0%,
@@ -1455,27 +1493,28 @@
 	position: absolute;
 	right: -2px;
 	bottom: -2px;
-	z-index: 2;
+	z-index: 6;
 	border-radius: 999px;
 	box-shadow: 0 0 0 2px #1c1c1c;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.awards-sm .sm-stroopy,
-	.awards-sm .sm-stroopy::before,
-	.awards-sm .sm-sr-gloss::after,
+	.awards-sm .sm-sr-rise,
+	.awards-sm .sm-sr-shutter,
+	.awards-sm .sm-sr-gloss,
 	.awards-sm .sm-spark,
 	.awards-sm .sm-sr-bob,
 	.awards-sm .sm-sr-ant,
 	.awards-sm .sm-sr-eye {
 		animation: none !important;
 	}
-	.awards-sm .sm-stroopy {
+	.awards-sm .sm-sr-rise {
 		transform: none;
 	}
-	.awards-sm .sm-stroopy::before,
+	/* no motion means the shutters never open, so take them out entirely */
+	.awards-sm .sm-sr-shutter,
 	.awards-sm .sm-sr-gloss,
 	.awards-sm .sm-spark {
-		opacity: 0;
+		display: none;
 	}
 }

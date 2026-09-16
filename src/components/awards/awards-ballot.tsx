@@ -442,7 +442,18 @@ function BallotArt({ step }: { step: number }) {
 					</span>
 					<span className="sm-clickring" />
 					<span className="sm-cursor">
-						<i />
+						<i>
+							<svg viewBox="-2 -2 19 25" role="presentation">
+								<path
+									d="M0 0 0 15.96 3.75 12.18 6.75 21 9.9 18.9 7.05 10.5 11.7 10.08Z"
+									fill="#fafafa"
+									stroke="#171327"
+									strokeWidth="2.6"
+									strokeLinejoin="round"
+									paintOrder="stroke"
+								/>
+							</svg>
+						</i>
 					</span>
 				</div>
 			)}
@@ -1763,79 +1774,104 @@ function Stroopy({ size, badge }: { size: number; badge?: string }) {
 					className="sm-spark"
 					style={{
 						["--sr-rot" as string]: `${n * 78 - 40}deg`,
-						["--sr-d" as string]: `${n * 55}ms`,
+						["--sr-d" as string]: `${n * 70}ms`,
 					}}
 				/>
 			))}
-			<span className="sm-sr-gloss" />
-			<svg viewBox="0 0 64 64" role="presentation">
-				<g className="sm-sr-bob">
-					<g className="sm-sr-ant">
+			<span className="sm-sr-window">
+				<svg className="sm-sr-rise" viewBox="0 0 64 64" role="presentation">
+					<g className="sm-sr-bob">
+						{/* shoulders first, so the head sits over them */}
 						<path
-							d="M32 15V8"
-							stroke="#2A2140"
-							strokeWidth="2.6"
-							strokeLinecap="round"
-						/>
-						<circle
-							cx="32"
-							cy="5.6"
-							r="3.6"
+							d="M13 64v-13a19 13 0 0 1 38 0v13z"
 							fill="#F5C518"
 							stroke="#2A2140"
-							strokeWidth="1.8"
+							strokeWidth="2"
 						/>
+						<g className="sm-sr-ant">
+							<path
+								d="M32 15V9"
+								stroke="#2A2140"
+								strokeWidth="2.6"
+								strokeLinecap="round"
+							/>
+							<circle
+								cx="32"
+								cy="5.8"
+								r="4"
+								fill="#F5C518"
+								stroke="#2A2140"
+								strokeWidth="1.8"
+							/>
+						</g>
+						{/* head, with a lighter cap over the crown */}
+						<rect
+							x="10"
+							y="13"
+							width="44"
+							height="39"
+							rx="19"
+							fill="#C6B6F0"
+							stroke="#2A2140"
+							strokeWidth="2"
+						/>
+						<path
+							d="M13.5 26a18.5 12 0 0 1 37 0z"
+							fill="#E6DEFA"
+							stroke="#2A2140"
+							strokeWidth="1.6"
+						/>
+						{/* the visor, wider than the head the way the real one is */}
+						<rect x="7" y="25" width="50" height="22" rx="11" fill="#15111F" />
+						<rect
+							className="sm-sr-eye"
+							x="19"
+							y="29.5"
+							width="7.6"
+							height="8.8"
+							rx="3.5"
+							fill="#F5C518"
+						/>
+						<rect
+							className="sm-sr-eye"
+							x="37.4"
+							y="29.5"
+							width="7.6"
+							height="8.8"
+							rx="3.5"
+							fill="#F5C518"
+						/>
+						{/* a glint in each eye, and pixel blush on the cheeks */}
+						<circle cx="21.5" cy="32.1" r="1.4" fill="#FFF6D6" />
+						<circle cx="39.9" cy="32.1" r="1.4" fill="#FFF6D6" />
+						<rect
+							x="14.4"
+							y="39.4"
+							width="5.6"
+							height="3.4"
+							rx="1.7"
+							fill="#FF8FB4"
+							opacity="0.85"
+						/>
+						<rect
+							x="44"
+							y="39.4"
+							width="5.6"
+							height="3.4"
+							rx="1.7"
+							fill="#FF8FB4"
+							opacity="0.85"
+						/>
+						{/* pixel smile */}
+						<rect x="27" y="40.6" width="3.3" height="3.3" fill="#F5C518" />
+						<rect x="30.35" y="42.4" width="3.3" height="3.3" fill="#F5C518" />
+						<rect x="33.7" y="40.6" width="3.3" height="3.3" fill="#F5C518" />
 					</g>
-					{/* head, with a lighter cap over the crown */}
-					<rect
-						x="13"
-						y="13"
-						width="38"
-						height="33"
-						rx="14"
-						fill="#C6B6F0"
-						stroke="#2A2140"
-						strokeWidth="2"
-					/>
-					<path
-						d="M15 25a17 12 0 0 1 34 0z"
-						fill="#F4F0FD"
-						stroke="#2A2140"
-						strokeWidth="1.6"
-					/>
-					{/* the visor, wider than the head the way the real one is */}
-					<rect x="9" y="24" width="46" height="19" rx="9.5" fill="#15111F" />
-					<rect
-						className="sm-sr-eye"
-						x="22"
-						y="29.5"
-						width="5.2"
-						height="6.4"
-						rx="1.3"
-						fill="#F5C518"
-					/>
-					<rect
-						className="sm-sr-eye"
-						x="36.8"
-						y="29.5"
-						width="5.2"
-						height="6.4"
-						rx="1.3"
-						fill="#F5C518"
-					/>
-					{/* pixel smile */}
-					<rect x="27.6" y="37.6" width="3.1" height="3.1" fill="#F5C518" />
-					<rect x="30.7" y="39.4" width="3.1" height="3.1" fill="#F5C518" />
-					<rect x="33.8" y="37.6" width="3.1" height="3.1" fill="#F5C518" />
-					{/* shoulders in the yellow shirt */}
-					<path
-						d="M17 64v-6a15 11 0 0 1 30 0v6z"
-						fill="#F5C518"
-						stroke="#2A2140"
-						strokeWidth="2"
-					/>
-				</g>
-			</svg>
+				</svg>
+				<span className="sm-sr-gloss" />
+				<span className="sm-sr-shutter sm-sr-shutter-l" />
+				<span className="sm-sr-shutter sm-sr-shutter-r" />
+			</span>
 			{badge && (
 				<Image
 					src={badge}
@@ -1848,8 +1884,6 @@ function Stroopy({ size, badge }: { size: number; badge?: string }) {
 		</span>
 	);
 }
-
-// ── Wallet picker (RainbowKit pattern: modal on desktop, drawer on mobile) ──
 
 function WalletList({
 	connecting,
