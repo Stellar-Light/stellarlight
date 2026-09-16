@@ -26,6 +26,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
+   "date": "2026-09-16",
+   "run": "35103801534",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
