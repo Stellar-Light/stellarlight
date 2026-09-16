@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-16T14:02:46.310Z",
+	"asOf": "2026-09-16T14:23:20.672Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 94,
 	"healthy": 93,
@@ -225,10 +225,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:56:30Z",
+			"lastSuccessAt": "2026-09-16T14:17:30Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 98,
 			"why": "last green 0d ago"
 		},
 		{
@@ -247,7 +247,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:59:55Z",
+			"lastSuccessAt": "2026-09-16T14:20:57Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -643,7 +643,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:56:30Z",
+			"lastSuccessAt": "2026-09-16T14:17:30Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -709,11 +709,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-15T17:27:38Z",
+			"lastSuccessAt": "2026-09-16T13:59:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 65,
-			"why": "last green 0d ago"
+			"runs": 66,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -984,7 +984,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-16T13:59:55Z",
+			"lastSuccessAt": "2026-09-16T14:20:57Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1042,7 +1042,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 70,
+			"runs": 71,
 			"why": "last green 0d ago"
 		}
 	]
