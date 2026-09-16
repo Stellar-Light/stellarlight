@@ -54,10 +54,20 @@ const arg = (k: string) => {
 const EXECUTE = args.includes("--execute");
 const ROUND = arg("round");
 
-const picks = (s: Record<string, string[]>) =>
-	Object.entries(s)
-		.map(([c, slugs]) => `${c}=${slugs.join("+")}`)
-		.join(" ");
+// This log is PUBLIC (public repo → public Actions logs). The results API is
+// aggregate-only by design — no address→choice — and this lane must not be
+// the place that mapping leaks. Addresses are truncated, picks never printed;
+// a diff is described by category name only.
+const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+const cats = (s: Record<string, string[]>) => Object.keys(s).length;
+const differing = (a: Record<string, string[]>, b: Record<string, string[]>) =>
+	[...new Set([...Object.keys(a), ...Object.keys(b)])]
+		.filter(
+			(c) =>
+				[...(a[c] ?? [])].sort().join() !== [...(b[c] ?? [])].sort().join(),
+		)
+		.sort()
+		.join(", ");
 
 async function main() {
 	if (!ROUND) {
@@ -99,17 +109,19 @@ async function main() {
 	);
 	for (const a of actions) {
 		if (a.kind === "create")
-			console.log(`  CREATE      ${a.address}  ${picks(a.selections)}`);
+			console.log(
+				`  CREATE      ${short(a.address)}  ${cats(a.selections)} categor${cats(a.selections) === 1 ? "y" : "ies"}`,
+			);
 		else if (a.kind === "update")
 			console.log(
-				`  UPDATE      ${a.address}  ${picks(a.prior)}  →  ${picks(a.selections)}`,
+				`  UPDATE      ${short(a.address)}  differs in ${differing(a.prior, a.selections)}`,
 			);
 		else if (a.kind === "chain-empty")
 			console.log(
-				`  chain-empty ${a.address}  (mirror has a ballot, chain shows none — kept)`,
+				`  chain-empty ${short(a.address)}  (mirror has a ballot, chain shows none — kept)`,
 			);
 		else if (a.kind === "unreachable")
-			console.log(`  UNREACHABLE ${a.address}  ${a.error}`);
+			console.log(`  UNREACHABLE ${short(a.address)}  ${a.error}`);
 	}
 
 	if (summary.resetSuspected) {
@@ -157,7 +169,7 @@ async function main() {
 			at: op?.at ?? new Date().toISOString(),
 		});
 		console.log(
-			`  ${outcome.padEnd(7)} ${a.address}  ${
+			`  ${outcome.padEnd(7)} ${short(a.address)}  ${
 				op
 					? `tx ${op.txHash.slice(0, 8)}… @ ${op.at}`
 					: "(no ballot op in the last 200 — recorded from account state, no tx hash)"
@@ -172,7 +184,7 @@ async function main() {
 		if (!now || !sameSelections(now, a.selections)) {
 			mismatches++;
 			console.error(
-				`READ-BACK FAILED: ${a.address} holds ${now ? picks(now) : "nothing"}`,
+				`READ-BACK FAILED: ${short(a.address)} holds ${now ? `${cats(now)} categories` : "nothing"}`,
 			);
 		}
 	}
