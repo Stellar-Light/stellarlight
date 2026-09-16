@@ -1294,3 +1294,49 @@
 		animation: none !important;
 	}
 }
+
+/* ── Highlight moments unfold ───────────────────────────────────────────
+   After the accordion in yui540's gallery: a row starts as a thin slat that
+   is TAPERED at its lower edge — narrower at the bottom, the way a folded
+   panel reads edge-on — and opens down into a full rectangle, overshooting
+   slightly before it settles.
+
+   Done with clip-path alone rather than height or scaleY: the reference rows
+   were bare bars, but ours carry an icon, a headline and a number, and
+   scaling a card vertically squashes its type. Clipping unfolds the card
+   without distorting anything inside it. */
+.awards-sm .sm-unfold {
+	--sm-gap: 16%;
+	animation: sm-unfold 0.55s cubic-bezier(0.33, 1.2, 0.58, 1) both;
+	animation-delay: calc(0.14s + var(--sm-i, 0) * 0.075s);
+}
+@keyframes sm-unfold {
+	0% {
+		opacity: 0;
+		clip-path: polygon(
+			0 0,
+			100% 0,
+			calc(100% - var(--sm-gap)) 13%,
+			var(--sm-gap) 13%
+		);
+	}
+	26% {
+		opacity: 1;
+	}
+	72% {
+		opacity: 1;
+		clip-path: polygon(0 0, 100% 0, 100% 107%, 0 107%);
+	}
+	100% {
+		opacity: 1;
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-unfold {
+		animation: none !important;
+		opacity: 1;
+		clip-path: none;
+	}
+}

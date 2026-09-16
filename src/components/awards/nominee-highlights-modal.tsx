@@ -315,19 +315,9 @@ export function NomineeHighlightsModal({
 								</motion.p>
 							)}
 
-							{/* highlight moments — staggered spring-in */}
-							<motion.ul
-								initial="hidden"
-								animate="visible"
-								variants={{
-									hidden: {},
-									visible: {
-										transition: { staggerChildren: 0.07, delayChildren: 0.18 },
-									},
-								}}
-								className="space-y-2.5"
-							>
-								{highlights.map((h) => {
+							{/* highlight moments — each unfolds from a tapered slat */}
+							<ul className="space-y-2.5">
+								{highlights.map((h, i) => {
 									const { Icon, tint } = KIND_META[h.kind];
 									// Real, dated TVL wins for a growth moment; else the authored
 									// count; else the little sparkline.
@@ -347,18 +337,10 @@ export function NomineeHighlightsModal({
 													}
 												: null;
 									return (
-										<motion.li
+										<li
 											key={h.headline}
-											variants={{
-												hidden: { opacity: 0, y: 14, scale: 0.98 },
-												visible: {
-													opacity: 1,
-													y: 0,
-													scale: 1,
-													transition: POP_SPRING,
-												},
-											}}
-											className="rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
+											style={{ ["--sm-i" as string]: i }}
+											className="sm-unfold rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
 										>
 											{/* One structure for every moment: icon in the left
 											    column, all content indented in the right — so a stat's
@@ -411,10 +393,10 @@ export function NomineeHighlightsModal({
 													)}
 												</div>
 											</div>
-										</motion.li>
+										</li>
 									);
 								})}
-							</motion.ul>
+							</ul>
 
 							{/* footer: vote CTA + full profile */}
 							<motion.div
