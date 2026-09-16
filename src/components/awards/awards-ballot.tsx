@@ -281,19 +281,7 @@ function ConnectedWallet({
 						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
 					>
 						<div className="flex items-center gap-3 px-2.5 pb-2.5 pt-2">
-							{wallet ? (
-								<Image
-									src={wallet.icon}
-									alt=""
-									width={38}
-									height={38}
-									className="h-[38px] w-[38px] flex-shrink-0 rounded-full ring-1 ring-[#3a3a3a]"
-								/>
-							) : (
-								<span className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-full bg-[#242424] ring-1 ring-[#3a3a3a]">
-									<Wallet className="h-4 w-4 text-neutral-400" />
-								</span>
-							)}
+							<Stroopy size={44} badge={wallet?.icon} />
 							<div className="min-w-0">
 								<p className="text-sm font-medium text-neutral-100">
 									{wallet?.name ?? "Connected wallet"}
@@ -1757,15 +1745,106 @@ function AwardsToast({
 	);
 }
 
-/** Stroopy, the Stellar mascot — the wallet picker's greeter. */
-function Stroopy({ size }: { size: number }) {
+/**
+ * Stroopy, drawn in vector so he can move. An interpretation in the Stellar
+ * mascot's spirit — visor face, pixel eyes, antenna — not the official art.
+ * Sized by the caller; the badge is the connected wallet's own mark.
+ */
+function Stroopy({ size, badge }: { size: number; badge?: string }) {
 	return (
 		<span
 			className="sm-stroopy"
 			style={{ width: size, height: size }}
 			aria-hidden="true"
 		>
-			<Image src="/stroopy.webp" alt="" width={size * 2} height={size * 2} />
+			{[0, 1, 2, 3].map((n) => (
+				<span
+					key={n}
+					className="sm-spark"
+					style={{
+						["--sr-rot" as string]: `${n * 78 - 40}deg`,
+						["--sr-d" as string]: `${n * 55}ms`,
+					}}
+				/>
+			))}
+			<span className="sm-sr-gloss" />
+			<svg viewBox="0 0 64 64" role="presentation">
+				<g className="sm-sr-bob">
+					<g className="sm-sr-ant">
+						<path
+							d="M32 15V8"
+							stroke="#2A2140"
+							strokeWidth="2.6"
+							strokeLinecap="round"
+						/>
+						<circle
+							cx="32"
+							cy="5.6"
+							r="3.6"
+							fill="#F5C518"
+							stroke="#2A2140"
+							strokeWidth="1.8"
+						/>
+					</g>
+					{/* head, with a lighter cap over the crown */}
+					<rect
+						x="13"
+						y="13"
+						width="38"
+						height="33"
+						rx="14"
+						fill="#C6B6F0"
+						stroke="#2A2140"
+						strokeWidth="2"
+					/>
+					<path
+						d="M15 25a17 12 0 0 1 34 0z"
+						fill="#F4F0FD"
+						stroke="#2A2140"
+						strokeWidth="1.6"
+					/>
+					{/* the visor, wider than the head the way the real one is */}
+					<rect x="9" y="24" width="46" height="19" rx="9.5" fill="#15111F" />
+					<rect
+						className="sm-sr-eye"
+						x="22"
+						y="29.5"
+						width="5.2"
+						height="6.4"
+						rx="1.3"
+						fill="#F5C518"
+					/>
+					<rect
+						className="sm-sr-eye"
+						x="36.8"
+						y="29.5"
+						width="5.2"
+						height="6.4"
+						rx="1.3"
+						fill="#F5C518"
+					/>
+					{/* pixel smile */}
+					<rect x="27.6" y="37.6" width="3.1" height="3.1" fill="#F5C518" />
+					<rect x="30.7" y="39.4" width="3.1" height="3.1" fill="#F5C518" />
+					<rect x="33.8" y="37.6" width="3.1" height="3.1" fill="#F5C518" />
+					{/* shoulders in the yellow shirt */}
+					<path
+						d="M17 64v-6a15 11 0 0 1 30 0v6z"
+						fill="#F5C518"
+						stroke="#2A2140"
+						strokeWidth="2"
+					/>
+				</g>
+			</svg>
+			{badge && (
+				<Image
+					src={badge}
+					alt=""
+					width={Math.round(size * 0.42)}
+					height={Math.round(size * 0.42)}
+					className="sm-stroopy-badge"
+				/>
+			)}
 		</span>
 	);
 }
@@ -1847,9 +1926,6 @@ function WalletPicker({
 			<Drawer open={open} onOpenChange={onOpenChange}>
 				<DrawerContent>
 					<DrawerHeader className="text-center sm:text-center">
-						<span className="mx-auto mb-3 block">
-							<Stroopy size={76} />
-						</span>
 						<DrawerTitle className="text-xl font-semibold">
 							Connect a wallet
 						</DrawerTitle>
@@ -1897,16 +1973,13 @@ function WalletPicker({
 						className="relative w-full max-w-sm rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
 					>
 						<div className="flex items-start justify-between gap-4 mb-6">
-							<div className="flex items-start gap-3.5">
-								<Stroopy size={54} />
-								<div>
-									<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
-										Connect a wallet
-									</h2>
-									<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
-										You'll sign a Stellar testnet transaction — no real funds.
-									</p>
-								</div>
+							<div>
+								<h2 className="text-lg font-semibold tracking-tight text-neutral-100">
+									Connect a wallet
+								</h2>
+								<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
+									You'll sign a Stellar testnet transaction — no real funds.
+								</p>
 							</div>
 							<button
 								type="button"
