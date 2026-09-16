@@ -6,6 +6,13 @@
  * for (so a returning voter sees their current ballot pre-selected —
  * "you can change your vote until closesAt" needs the current vote).
  *
+ * A whitelisted address that is NOT funded gets funded here, server-side,
+ * through friendbot — the voter's experience is connect → sign, and "fund on
+ * testnet" is not a step they should have to know about. Only whitelisted
+ * addresses are ever funded (the list gates it, not the caller). If friendbot
+ * fails the old path remains: `funded:false` + a friendbot link the UI turns
+ * into a one-tap button.
+ *
  * Only the QUERIED address's own votes are returned — the same data anyone
  * can read from public testnet Horizon for that account. The aggregate
  * results endpoint never exposes address→choice; this one requires you to
@@ -16,7 +23,11 @@ import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { decodeAccountVotes, roundOpenState } from "@/lib/awards/ballot";
 import { loadRound } from "@/lib/awards/round";
-import { fetchTestnetAccount, friendbotFundUrl } from "@/lib/awards/stellar";
+import {
+	fetchTestnetAccount,
+	friendbotFundUrl,
+	fundViaFriendbot,
+} from "@/lib/awards/stellar";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -68,7 +79,18 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const result = await fetchTestnetAccount(address);
+	let result = await fetchTestnetAccount(address);
+	if (result.funded === false) {
+		const fund = await fundViaFriendbot(address);
+		if (fund.ok) {
+			result = await fetchTestnetAccount(address);
+			if (result.funded === false) {
+				// Horizon can trail friendbot by a ledger.
+				await new Promise((r) => setTimeout(r, 2500));
+				result = await fetchTestnetAccount(address);
+			}
+		}
+	}
 	if (result.funded === null) {
 		return NextResponse.json(
 			{ error: `could not reach testnet Horizon: ${result.error}` },
@@ -84,7 +106,7 @@ export async function GET(req: NextRequest) {
 				votes: null,
 				voting: roundOpenState(loaded.round),
 				friendbot: friendbotFundUrl(address),
-				note: "This testnet account isn't funded yet — hit friendbot, then vote.",
+				note: "This testnet account couldn't be funded automatically — hit friendbot, then vote.",
 			},
 			{ headers: rateLimitHeaders(limit) },
 		);

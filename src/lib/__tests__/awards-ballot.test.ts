@@ -34,7 +34,11 @@ import {
 	validateSelections,
 	validateSignedBallot,
 } from "../awards/ballot";
-import { fetchTestnetAccount, submitToTestnetHorizon } from "../awards/stellar";
+import {
+	fetchTestnetAccount,
+	fundViaFriendbot,
+	submitToTestnetHorizon,
+} from "../awards/stellar";
 
 const voter = Keypair.random();
 const stranger = Keypair.random();
@@ -752,5 +756,61 @@ describe("multi-pick (shortlist) rounds", () => {
 			[dataKey(shortlist.slug, "impact", 1)]: b64("beans"),
 		});
 		expect(votes.impact).toEqual(["beans"]);
+	});
+});
+
+// ── friendbot, server-side ───────────────────────────────────────────────────
+
+describe("fundViaFriendbot", () => {
+	afterEach(() => vi.unstubAllGlobals());
+
+	it("200 = funded", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => new Response("{}", { status: 200 })),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: true,
+			already: false,
+		});
+	});
+
+	it("400 op_already_exists = someone funded it first, still success", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(
+				async () =>
+					new Response(
+						JSON.stringify({
+							extras: { result_codes: { operations: ["op_already_exists"] } },
+						}),
+						{ status: 400 },
+					),
+			),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: true,
+			already: true,
+		});
+	});
+
+	it("rate-limited or down = not funded, with the reason", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => new Response("slow down", { status: 429 })),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: false,
+			error: "friendbot responded 429",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => {
+				throw new Error("ECONNRESET");
+			}),
+		);
+		const res = await fundViaFriendbot(voter.publicKey());
+		expect(res.ok).toBe(false);
+		if (!res.ok) expect(res.error).toMatch(/unreachable/);
 	});
 });
