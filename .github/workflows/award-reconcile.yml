@@ -7,15 +7,20 @@ name: award reconcile mirror
 # reset after it closes. The mirror is written best-effort after each submit
 # and can silently miss a ballot; this walks Horizon while it still has the
 # data, backfills any gap (with the real tx hash + ledger time), and refuses if
-# the chain already looks reset. Run it after a round closes, before the next
-# reset. Dry-run by default; every write is read back; exits non-zero if any
-# address was unreachable, so a partial run never reads as complete.
+# the chain already looks reset. Runs DAILY in execute mode on the current
+# round (open, else most recently updated) so it cannot be forgotten before the
+# reset; a manual dispatch is dry-run by default. Every write is read back;
+# exits non-zero if any address was unreachable, so a partial run never reads
+# as complete.
 on:
+  schedule:
+    - cron: "30 5 * * *"
   workflow_dispatch:
     inputs:
       round:
-        description: "Round slug (e.g. i3-2026-test)"
-        required: true
+        description: "Round slug (e.g. i3-2026-test). Empty = current round."
+        required: false
+        default: ""
       execute:
         description: "Actually write. Unchecked = dry run."
         type: boolean
@@ -39,8 +44,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - name: Reconcile (dry-run unless execute=true)
+      - name: Reconcile (scheduled = execute; dispatch = dry-run unless execute=true)
         run: |
           pnpm exec tsx scripts/data/award-reconcile.ts \
-            --round=${{ inputs.round }} \
-            ${{ inputs.execute && '--execute' || '' }}
+            --round=${{ inputs.round || 'current' }} \
+            ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
