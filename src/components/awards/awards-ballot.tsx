@@ -687,7 +687,7 @@ function HowItWorks({
 									transition={{ duration: 0.26, ease: EASE }}
 								>
 									<h2 className="mb-2.5 text-[22px] font-semibold tracking-tight text-neutral-50">
-										{i + 1}. {step.t}
+										{step.t}
 									</h2>
 									<p className="text-sm leading-relaxed text-neutral-400">
 										{step.d}
