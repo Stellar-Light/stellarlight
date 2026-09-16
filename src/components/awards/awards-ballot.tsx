@@ -96,6 +96,17 @@ interface Eligibility {
 	friendbot?: string;
 }
 
+/**
+ * The routes send a machine `error` code AND a human `message`. Show the
+ * sentence — a toast reading "already_voted" is the code leaking into the UI.
+ */
+function apiErrorMessage(body: unknown, fallback: string): string {
+	const b = body as { message?: unknown; error?: unknown } | null;
+	if (typeof b?.message === "string" && b.message) return b.message;
+	if (typeof b?.error === "string" && b.error) return b.error;
+	return fallback;
+}
+
 interface ResultsData {
 	categories: Array<{
 		key: string;
@@ -1144,11 +1155,17 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				setPhase("idle");
 				return;
 			}
+			if (xdrRes.status === 409 && xdrBody?.error === "already_voted") {
+				// Not a failure to report — the server is telling us this address
+				// already has a ballot. Record it, and the page locks and shows
+				// the receipt the way it does for any returning voter.
+				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
+				setPhase("idle");
+				return;
+			}
 			if (!xdrRes.ok) {
 				throw new Error(
-					typeof xdrBody?.error === "string"
-						? xdrBody.error
-						: "could not prepare the ballot",
+					apiErrorMessage(xdrBody, "could not prepare the ballot"),
 				);
 			}
 
@@ -1162,16 +1179,21 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				body: JSON.stringify({ signedXdr, round: round.slug }),
 			});
 			const submitBody = await submitRes.json();
+			if (submitRes.status === 409 && submitBody?.error === "already_voted") {
+				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
+				setPhase("idle");
+				return;
+			}
 			if (!submitRes.ok) {
 				throw new Error(
-					typeof submitBody?.error === "string"
-						? submitBody.error
-						: "the vote could not be submitted",
+					apiErrorMessage(submitBody, "the vote could not be submitted"),
 				);
 			}
 			setTxHash(submitBody.hash);
+			// hasVoted too, not just votes: it is what locks the ballot, and
+			// leaving it stale left a live "Sign & submit" under a cast vote.
 			setEligibility((prev) =>
-				prev ? { ...prev, votes: { ...selections } } : prev,
+				prev ? { ...prev, votes: { ...selections }, hasVoted: true } : prev,
 			);
 			setPhase("submitted");
 			window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1545,7 +1567,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 						{voting.open && !readOnly && <PrimaryButton full />}
 						{closesShort && voting.open && (
 							<p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
-								One signature. Change your vote until{" "}
+								One signature, and it's final. Voting closes{" "}
 								<span className="text-neutral-200">{closesShort}</span>.
 							</p>
 						)}
