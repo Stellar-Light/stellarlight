@@ -859,26 +859,20 @@
 		transform: scaleX(1);
 	}
 }
+/* The stamp is the Stellar mark, struck in ink on the ballot. The sheet is
+   light, so the logo's own dark artwork reads correctly as-is — no mask, no
+   recolour, no redrawing a brand mark by hand. */
 .awards-sm .sm-receipt-stamp {
 	position: absolute;
 	left: 50%;
-	bottom: 88px;
-	width: 27px;
-	height: 27px;
-	margin-left: 13px;
+	bottom: 86px;
+	width: 30px;
+	height: 30px;
+	margin-left: 11px;
 	z-index: 2;
-	border-radius: 99px;
-	border: 3px solid #2b2b2b;
+	background: url("/stellar-xlm-logo.png") center / contain no-repeat;
 	opacity: 0;
 	animation: sm-receipt-stamp 0.7s cubic-bezier(0.34, 1.55, 0.64, 1) 0.95s both;
-}
-.awards-sm .sm-receipt-stamp::after {
-	content: "";
-	position: absolute;
-	inset: 3px;
-	border-radius: 99px;
-	border: 1.5px solid #2b2b2b;
-	opacity: 0.45;
 }
 @keyframes sm-receipt-stamp {
 	0% {
@@ -886,12 +880,12 @@
 		transform: scale(2.3) rotate(-20deg);
 	}
 	58% {
-		opacity: 1;
-		transform: scale(0.9) rotate(-9deg);
+		opacity: 0.95;
+		transform: scale(0.9) rotate(-11deg);
 	}
 	100% {
-		opacity: 1;
-		transform: scale(1) rotate(-9deg);
+		opacity: 0.88;
+		transform: scale(1) rotate(-11deg);
 	}
 }
 
@@ -1165,5 +1159,90 @@
 	.awards-sm .sm-cube-box {
 		animation: none !important;
 		transform: rotateX(-180deg);
+	}
+}
+
+/* ── Waiting on the network ─────────────────────────────────────────────
+   The hourglass from yui540/css-animations (MIT), monochrome. It earns its
+   place over a spinner because the sand actually DRAINS and then the whole
+   glass turns over — it says "this takes a moment" rather than "something is
+   happening". Shown only while the signed ballot is in flight. */
+.awards-sm .sm-hourglass {
+	display: block;
+	width: 38px;
+	height: 38px;
+	margin: 0 auto;
+}
+.awards-sm .sm-hg-spin {
+	transform-origin: 12px 12px;
+	animation: sm-hg-turn 1.6s cubic-bezier(0.8, 0.25, 0.16, 1.17) infinite;
+}
+@keyframes sm-hg-turn {
+	0% {
+		transform: rotate(0turn);
+	}
+	47%,
+	100% {
+		transform: rotate(0.5turn);
+	}
+}
+.awards-sm .sm-hg-frame {
+	fill: #7a7a7a;
+}
+.awards-sm .sm-hg-sand1,
+.awards-sm .sm-hg-sand2 rect,
+.awards-sm .sm-hg-stream rect {
+	fill: #fafafa;
+}
+.awards-sm .sm-hg-sand1 {
+	animation: sm-hg-fall1 1.6s ease-in infinite;
+}
+.awards-sm .sm-hg-sand2 {
+	animation: sm-hg-fall2 1.6s ease-in infinite;
+}
+.awards-sm .sm-hg-stream {
+	animation: sm-hg-stream 1.6s ease-in infinite;
+}
+@keyframes sm-hg-fall1 {
+	0%,
+	15.6% {
+		transform: translateY(0);
+	}
+	90.6%,
+	100% {
+		transform: translateY(-9px);
+	}
+}
+@keyframes sm-hg-fall2 {
+	0%,
+	15.6% {
+		transform: translateY(-9px);
+	}
+	90.6%,
+	100% {
+		transform: translateY(0);
+	}
+}
+@keyframes sm-hg-stream {
+	0%,
+	15.6% {
+		transform: translateY(9px);
+	}
+	28.1%,
+	75% {
+		transform: translateY(0);
+	}
+	87.5%,
+	100% {
+		transform: translateY(-9px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-hg-spin,
+	.awards-sm .sm-hg-sand1,
+	.awards-sm .sm-hg-sand2,
+	.awards-sm .sm-hg-stream {
+		animation: none !important;
 	}
 }
