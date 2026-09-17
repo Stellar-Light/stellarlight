@@ -437,9 +437,10 @@ export function validateSignedBallot(
 	if (tx.operations.length === 0) {
 		errors.push("transaction has no operations");
 	}
-	if (tx.operations.length > round.categories.length) {
+	const maxOperations = round.categories.length * picksPerCategory(round);
+	if (tx.operations.length > maxOperations) {
 		errors.push(
-			`too many operations (${tx.operations.length}) for ${round.categories.length} categories`,
+			`too many operations (${tx.operations.length}) for ${round.categories.length} categories at ${picksPerCategory(round)} pick(s) each`,
 		);
 	}
 
@@ -511,6 +512,15 @@ export function validateSignedBallot(
 		}
 		bucket.push(slug);
 		selections[category] = bucket;
+	}
+
+	// A ballot that sets nothing is not a ballot. It was reachable on a
+	// multi-pick round as a transaction of deletes only: every op is skipped
+	// above, `selections` stays empty, and the verdict came back ok — so it
+	// would be relayed and recorded as that voter's FIRST ballot, empty, with
+	// no way for them to cast a real one afterwards.
+	if (errors.length === 0 && Object.keys(selections).length === 0) {
+		errors.push("ballot selects no nominees");
 	}
 
 	for (const [category, picked] of Object.entries(selections)) {

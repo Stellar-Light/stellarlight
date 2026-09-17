@@ -84,6 +84,24 @@ export async function GET(req: NextRequest) {
 
 	const { tally, source, digest } = await liveTally(loaded);
 
+	// A null digest means the first-ballot record could not be READ. Under
+	// one-ballot-per-voter that is not a cosmetic gap: the mirror is the only
+	// thing that knows a voter's first ballot, so without it every revoter is
+	// counted on their LATEST pick — and after a testnet reset the answer is a
+	// confident turnout of zero. Both render as an ordinary `source: "chain"`
+	// tally. The publish lane already refuses to commit in this state; serving
+	// it here as though it were the result is the same mistake, in public.
+	if (!digest) {
+		return NextResponse.json(
+			{
+				error: "tally_unavailable",
+				message:
+					"The ballot record could not be read, so the tally cannot be computed correctly right now. This is temporary — please retry.",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+
 	const at = Date.now();
 	cache.set(loaded.round.slug, { at, tally, source, digest });
 

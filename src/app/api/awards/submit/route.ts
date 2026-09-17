@@ -18,10 +18,11 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { validateSignedBallot } from "@/lib/awards/ballot";
+import { decodeAccountVotes, validateSignedBallot } from "@/lib/awards/ballot";
 import { hasMirroredBallot, recordBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
+	fetchTestnetAccount,
 	submitToTestnetHorizon,
 	testnetExplorerTxUrl,
 } from "@/lib/awards/stellar";
@@ -89,7 +90,32 @@ export async function POST(req: NextRequest) {
 	// One ballot per voter, re-checked at the relay. /ballot-xdr already
 	// refuses a second ballot, but nothing stops someone building their own
 	// transaction and posting it here — this is the boundary that counts.
-	const mirrored = await hasMirroredBallot(loaded.round.slug, verdict.source);
+	// The chain counts too, not just the mirror. recordBallot is best-effort
+	// and swallows its own failures, and Horizon can accept a transaction and
+	// still time out on the response — either leaves a voter whose FIRST
+	// ballot exists only on chain. Gating on the mirror alone would let a
+	// second ballot through, and manageData would destroy the first as it
+	// landed, with nothing anywhere remembering it.
+	const account = await fetchTestnetAccount(verdict.source);
+	if (account.funded === null) {
+		return NextResponse.json(
+			{
+				error: "ballot_status_unavailable",
+				message:
+					"Could not reach testnet to check this account's ballot. Nothing was submitted — try again in a moment.",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const onChain =
+		account.funded === true &&
+		Object.values(
+			decodeAccountVotes(loaded.round, loaded.nominees, account.account.data),
+		).some((picks) => picks.length > 0);
+
+	const mirrored = onChain
+		? true
+		: await hasMirroredBallot(loaded.round.slug, verdict.source);
 	if (mirrored === null) {
 		return NextResponse.json(
 			{
