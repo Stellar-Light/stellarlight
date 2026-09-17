@@ -66,6 +66,17 @@ export type AnchorRecord = {
 	/** Testnet tx that made the commit — null only if recorded after the fact. */
 	txHash: string | null;
 	at: string;
+	/**
+	 * The pre-vote anchor, committed when the round OPENS: a digest of the
+	 * electorate and the ballot (see roundManifestDigest). Tansu holds one hash
+	 * per project, so the results commit later overwrites this on chain — the
+	 * tx hash is what remains provable, which is why it is kept here.
+	 */
+	manifest?: {
+		digest: string;
+		txHash: string | null;
+		at: string;
+	} | null;
 };
 
 export function tansuProjectPageUrl(name: string = TANSU_PROJECT_NAME): string {

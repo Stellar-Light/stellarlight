@@ -175,6 +175,71 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	return { tally, source, digest: record ? ballotsDigest(record) : null };
 }
 
+const MANIFEST_HEADER = "i3-round-manifest-v1";
+
+/**
+ * A fingerprint of the ELECTORATE AND THE BALLOT, as they stood.
+ *
+ * The results digest proves nobody edited the ballots after the fact. It says
+ * nothing about the round they were cast in — a nominee quietly added
+ * mid-round, an address slipped onto the whitelist, a close date moved. Those
+ * are exactly the things a losing party would contest, and until now none of
+ * them was checkable.
+ *
+ * Commit this at OPEN and the round is fixed in public before anyone votes;
+ * recompute it later and any change to the roster, the categories, the pick
+ * count or the dates gives a different hash than the one already on chain.
+ *
+ * It is a hash, so it publishes nothing: the whitelist goes in (that is the
+ * point — the electorate is what is being fixed) but only as an input.
+ *
+ * Recipe (v1):
+ *   round   = slug
+ *   cats    = each `key:name`, sorted by key, joined ";"
+ *   picks   = picksPerCategory
+ *   dates   = `opensAt|closesAt`, null as empty string
+ *   noms    = each `category/slug`, sorted, joined ";"
+ *   voters  = uppercased addresses, sorted, joined ";"
+ *   document = header + "\n" + those six, each on its own line, in that order
+ *   digest   = sha256(document) as lowercase hex
+ */
+export function roundManifestDigest(loaded: LoadedRound): string {
+	const { round, nominees, whitelist } = loaded;
+	const cats = [...round.categories]
+		.map((c) => `${c.key}:${c.name}`)
+		.sort()
+		.join(";");
+	const noms = nominees
+		.map((n) => `${n.category}/${n.slug}`)
+		.sort()
+		.join(";");
+	const voters = [...whitelist]
+		.map((a) => a.trim().toUpperCase())
+		.sort()
+		.join(";");
+	const doc = [
+		MANIFEST_HEADER,
+		round.slug,
+		cats,
+		String(round.picksPerCategory ?? 1),
+		`${round.opensAt ?? ""}|${round.closesAt ?? ""}`,
+		noms,
+		voters,
+	].join("\n");
+	return createHash("sha256").update(doc).digest("hex");
+}
+
+/** What the manifest covers, for a human reading a dry-run. Counts only. */
+export function roundManifestSummary(loaded: LoadedRound): string {
+	return [
+		`${loaded.round.categories.length} categories`,
+		`${loaded.round.picksPerCategory ?? 1} pick(s) each`,
+		`${loaded.nominees.length} nominees`,
+		`${loaded.whitelist.size} whitelisted voters`,
+		`closes ${loaded.round.closesAt ?? "—"}`,
+	].join(" · ");
+}
+
 export interface ResultsDocument {
 	round: string;
 	title: string;

@@ -4,6 +4,14 @@
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --status [--name=tansu]
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --register            [--execute]
  *   pnpm exec tsx scripts/data/tansu-anchor.ts --commit --round=i3-2026 --sha=<git sha> [--execute]
+ *   pnpm exec tsx scripts/data/tansu-anchor.ts --manifest --round=i3-2026 [--execute]
+ *
+ * --manifest is the PRE-VOTE anchor, run when a round opens: it commits a
+ * digest of the electorate and the ballot (nominees, whitelist, categories,
+ * picks, dates) so the round is fixed in public before anyone votes. --commit
+ * is the post-vote anchor of the published results file. Tansu holds one hash
+ * per project, so the second overwrites the first on chain and each one's
+ * transaction is what stays provable — both are recorded on the round.
  *
  * WHY. Everything about the i³ vote is on testnet (owner's rule: Pilots use
  * testnet-assigned wallets). The PUBLISHED RESULT gets a home where the vote
@@ -52,9 +60,11 @@ const arg = (k: string) => {
 	return hit ? hit.slice(k.length + 3) : null;
 };
 const EXECUTE = args.includes("--execute");
-const ACTION = (["status", "register", "commit"] as const).find((a) =>
-	args.includes(`--${a}`),
+const ACTION = (["status", "register", "commit", "manifest"] as const).find(
+	(a) => args.includes(`--${a}`),
 );
+/** --manifest anchors the PRE-VOTE digest (electorate + ballot), not a git SHA. */
+const MANIFEST = ACTION === "manifest";
 const NAME = arg("name") ?? TANSU_PROJECT_NAME;
 const ROUND = arg("round");
 const SHA = (arg("sha") ?? "").toLowerCase();
@@ -207,9 +217,31 @@ async function register(): Promise<number> {
 }
 
 async function commit(): Promise<number> {
-	if (!ROUND || !COMMIT_HASH.test(SHA)) {
+	if (!ROUND) {
 		console.error(
-			"usage: --commit --round=<slug> --sha=<40|64 lowercase hex> [--execute]",
+			"usage: --commit --round=<slug> --sha=<40|64 lowercase hex> | --manifest --round=<slug>   [--execute]",
+		);
+		return 2;
+	}
+	// --manifest derives its hash from the round's own current state, so there
+	// is nothing to pass and nothing to mistype.
+	let hash = SHA;
+	if (MANIFEST) {
+		const { loadRound } = await import("../../src/lib/awards/round");
+		const { roundManifestDigest, roundManifestSummary } = await import(
+			"../../src/lib/awards/publish"
+		);
+		const loaded = await loadRound(ROUND);
+		if (!loaded) {
+			console.error(`\nno round with slug "${ROUND}"`);
+			return 1;
+		}
+		hash = roundManifestDigest(loaded);
+		console.log(`\nmanifest covers: ${roundManifestSummary(loaded)}`);
+	}
+	if (!COMMIT_HASH.test(hash)) {
+		console.error(
+			`hash must be 40 or 64 lowercase hex — got ${hash || "(none)"}`,
 		);
 		return 2;
 	}
@@ -236,17 +268,17 @@ async function commit(): Promise<number> {
 	}
 	const current = await readCommit(c, key);
 	console.log(
-		`\ncommit ${SHA} for round ${ROUND} · latest on-chain ${current ?? "(none)"}`,
+		`\ncommit ${hash} for round ${ROUND} · latest on-chain ${current ?? "(none)"}`,
 	);
 
 	let txHash: string | null = null;
-	if (current === SHA) {
+	if (current === hash) {
 		console.log("  already the latest hash on-chain — no transaction needed.");
 	} else {
 		const tx = await c.commit({
 			maintainer: publicKey,
 			project_key: key,
-			hash: SHA,
+			hash: hash,
 		});
 		const sim = assertSimulated(tx);
 		console.log(`  simulated OK · resource fee ${sim.minResourceFee} stroops`);
@@ -266,13 +298,13 @@ async function commit(): Promise<number> {
 			`  submitted ${txHash ? explorerTxUrl(txHash) : "(no hash returned)"}`,
 		);
 		const back = await readCommit(c, key);
-		if (back !== SHA) {
+		if (back !== hash) {
 			console.error(
-				`READ-BACK FAILED: chain holds ${back ?? "(none)"}, expected ${SHA}`,
+				`READ-BACK FAILED: chain holds ${back ?? "(none)"}, expected ${hash}`,
 			);
 			return 1;
 		}
-		console.log("✓ read back: chain holds the SHA");
+		console.log("✓ read back: chain holds the hash");
 	}
 	if (!EXECUTE) {
 		console.log(
@@ -301,7 +333,42 @@ async function commit(): Promise<number> {
 		return 1;
 	}
 	const prior = (round.anchor ?? null) as AnchorRecord | null;
-	if (prior?.commitSha === SHA && prior.txHash) {
+	if (MANIFEST) {
+		const record: AnchorRecord = {
+			...(prior ?? {
+				project: NAME,
+				projectKey: key.toString("hex"),
+				commitSha: "",
+				txHash: null,
+				at: new Date().toISOString(),
+			}),
+			manifest: {
+				digest: hash,
+				txHash: txHash ?? prior?.manifest?.txHash ?? null,
+				at: new Date().toISOString(),
+			},
+		};
+		await payload.update({
+			collection: "award-rounds",
+			id: round.id,
+			data: { anchor: record },
+			overrideAccess: true,
+		});
+		const back2 = await payload.findByID({
+			collection: "award-rounds",
+			id: round.id,
+			depth: 0,
+			overrideAccess: true,
+		});
+		const got2 = (back2.anchor ?? null) as AnchorRecord | null;
+		if (got2?.manifest?.digest !== hash) {
+			console.error("READ-BACK FAILED: round.anchor.manifest not written");
+			return 1;
+		}
+		console.log(`✓ read back: round ${ROUND} manifest anchored → ${hash}`);
+		return 0;
+	}
+	if (prior?.commitSha === hash && prior.txHash) {
 		console.log(
 			`✓ round already records this anchor (tx ${prior.txHash.slice(0, 8)}…)`,
 		);
@@ -310,7 +377,7 @@ async function commit(): Promise<number> {
 	const record: AnchorRecord = {
 		project: NAME,
 		projectKey: key.toString("hex"),
-		commitSha: SHA,
+		commitSha: hash,
 		txHash: txHash ?? prior?.txHash ?? null,
 		at: new Date().toISOString(),
 	};
@@ -327,12 +394,12 @@ async function commit(): Promise<number> {
 		overrideAccess: true,
 	});
 	const got = (back.anchor ?? null) as AnchorRecord | null;
-	if (got?.commitSha !== SHA) {
-		console.error("READ-BACK FAILED: round.anchor does not hold the SHA");
+	if (got?.commitSha !== hash) {
+		console.error("READ-BACK FAILED: round.anchor does not hold the hash");
 		return 1;
 	}
 	console.log(
-		`✓ read back: round ${ROUND} anchored → ${TANSU_PROJECT_URL}/commit/${SHA}`,
+		`✓ read back: round ${ROUND} anchored → ${TANSU_PROJECT_URL}/commit/${hash}`,
 	);
 	return 0;
 }
@@ -340,7 +407,7 @@ async function commit(): Promise<number> {
 async function main() {
 	if (!ACTION) {
 		console.error(
-			"usage: --status | --register | --commit --round=<slug> --sha=<hex>   [--name=…] [--execute]",
+			"usage: --status | --register | --commit --round=<slug> --sha=<hex> | --manifest --round=<slug>   [--name=…] [--execute]",
 		);
 		return 2;
 	}
