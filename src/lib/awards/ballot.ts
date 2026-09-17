@@ -246,6 +246,23 @@ export function validateSelections(
 		if (bad) continue;
 		normalized[category] = slugs;
 	}
+	// Every category that HAS nominees, not just one. The round is one pick in
+	// each, and the first ballot is the only one that counts — so a partial
+	// ballot is not a smaller vote, it is a permanent one with categories
+	// missing and no way for the voter to fill them in later. The page already
+	// requires all of them; this is the half a direct API call was skipping.
+	//
+	// Scoped to categories that have nominees on purpose: a category whose
+	// nominees are absent (none imported yet, or the roster load dropped them)
+	// is unvotable, and demanding a pick there would refuse EVERY ballot in the
+	// round rather than just that category.
+	for (const category of validCategories) {
+		if (!nomineesByCategory.get(category)?.size) continue;
+		const picked = normalized[category];
+		if (!picked || picked.length === 0) {
+			errors.push(`no pick for "${category}" — every category needs one`);
+		}
+	}
 	if (errors.length > 0) return { ok: false, errors };
 	return { ok: true, selections: normalized };
 }
@@ -521,6 +538,17 @@ export function validateSignedBallot(
 	// no way for them to cast a real one afterwards.
 	if (errors.length === 0 && Object.keys(selections).length === 0) {
 		errors.push("ballot selects no nominees");
+	}
+	// And the same completeness rule as validateSelections — this is the
+	// boundary a hand-rolled transaction actually crosses. Same scoping: only
+	// categories that actually have nominees can be required.
+	if (errors.length === 0) {
+		for (const category of validCategories) {
+			if (!nomineesByCategory.get(category)?.size) continue;
+			if (!selections[category]?.length) {
+				errors.push(`no pick for "${category}" — every category needs one`);
+			}
+		}
 	}
 
 	for (const [category, picked] of Object.entries(selections)) {

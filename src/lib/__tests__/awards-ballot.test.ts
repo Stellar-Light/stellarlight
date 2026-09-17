@@ -170,15 +170,42 @@ describe("validateSelections", () => {
 	it("accepts one valid nominee per category", () => {
 		const res = validateSelections(round, nominees, {
 			impact: ["decaf"],
+			innovation: ["blend"],
 			interoperability: ["rubic"],
 		});
 		expect(res.ok).toBe(true);
 		if (res.ok) {
 			expect(res.selections).toEqual({
 				impact: ["decaf"],
+				innovation: ["blend"],
 				interoperability: ["rubic"],
 			});
 		}
+	});
+
+	// This used to pass. Under one-ballot-per-voter it must not: the first
+	// ballot is the only one that counts, so an incomplete ballot is permanent
+	// and the voter can never fill in the categories they left blank.
+	it("refuses a ballot that leaves a category blank", () => {
+		const res = validateSelections(round, nominees, {
+			impact: ["decaf"],
+			interoperability: ["rubic"],
+		});
+		expect(res.ok).toBe(false);
+		if (!res.ok) {
+			expect(res.errors.join(" ")).toMatch(/no pick for "innovation"/);
+		}
+	});
+
+	it("still requires nothing of a category that has no nominees", () => {
+		// a category whose nominees never imported is unvotable; demanding a
+		// pick there would refuse every ballot in the round, not just that one
+		const res = validateSelections(
+			round,
+			nominees.filter((n) => n.category !== "innovation"),
+			{ impact: ["decaf"], interoperability: ["rubic"] },
+		);
+		expect(res.ok).toBe(true);
 	});
 
 	it("rejects an empty ballot", () => {
@@ -239,7 +266,11 @@ describe("validateSignedBallot", () => {
 
 	it("accepts a well-formed testnet ballot signed by a whitelisted voter", () => {
 		const verdict = validateSignedBallot(
-			signedBallot({ impact: ["decaf"], innovation: ["blend"] }),
+			signedBallot({
+				impact: ["decaf"],
+				innovation: ["blend"],
+				interoperability: ["rubic"],
+			}),
 			ctx,
 		);
 		expect(verdict.ok).toBe(true);
@@ -248,6 +279,7 @@ describe("validateSignedBallot", () => {
 			expect(verdict.selections).toEqual({
 				impact: ["decaf"],
 				innovation: ["blend"],
+				interoperability: ["rubic"],
 			});
 		}
 	});
@@ -580,7 +612,11 @@ describe("test-round memo", () => {
 			round: testRound,
 			address: voter.publicKey(),
 			sequence: "1234567890",
-			selections: { impact: ["decaf"], innovation: ["blend"] },
+			selections: {
+				impact: ["decaf"],
+				innovation: ["blend"],
+				interoperability: ["rubic"],
+			},
 		});
 		tx.sign(voter);
 		const verdict = validateSignedBallot(tx.toXDR(), testCtx);
@@ -589,6 +625,7 @@ describe("test-round memo", () => {
 			expect(verdict.selections).toEqual({
 				impact: ["decaf"],
 				innovation: ["blend"],
+				interoperability: ["rubic"],
 			});
 		}
 	});
