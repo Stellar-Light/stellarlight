@@ -1,6 +1,13 @@
 {
- "generatedAt": "2026-09-16T12:45:18.379Z",
+ "generatedAt": "2026-09-17T12:44:34.509Z",
  "surfaces": [
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 13,
+   "clearedFindings": 15,
+   "verifiedFindings": 0
+  },
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
@@ -30,17 +37,10 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 0,
-   "clearedFindings": 20,
-   "verifiedFindings": 0
-  },
-  {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 0,
-   "clearedFindings": 182,
+   "clearedFindings": 188,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 666,
-  "open": 1,
-  "refreshQueue": 17,
+  "total": 683,
+  "open": 14,
+  "refreshQueue": 20,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,23 +64,23 @@
   "lagPastGrace": {
    "count": 2,
    "graceDays": 20,
-   "oldestDays": 55,
+   "oldestDays": 56,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con"
    ]
   },
-  "cleared": 624,
+  "cleared": 625,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 17,
-    "total": 201
+    "open": 20,
+    "total": 205
    },
    "instrument": {
-    "open": 18,
-    "total": 465
+    "open": 31,
+    "total": 478
    }
   },
   "byFailureMode": [
@@ -96,9 +96,9 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 16,
+    "refresh": 10,
     "blocked": 0,
-    "cleared": 92,
+    "cleared": 98,
     "verified": 0,
     "surface": "directory"
    },
@@ -157,15 +157,6 @@
     "surface": "scf"
    },
    {
-    "mode": "note-stale",
-    "open": 0,
-    "refresh": 1,
-    "blocked": 0,
-    "cleared": 15,
-    "verified": 0,
-    "surface": "code"
-   },
-   {
     "mode": "demand-routing-miss",
     "open": 0,
     "refresh": 0,
@@ -173,6 +164,24 @@
     "cleared": 13,
     "verified": 0,
     "surface": "consumer"
+   },
+   {
+    "mode": "repo-gone",
+    "open": 13,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
+    "mode": "note-stale",
+    "open": 0,
+    "refresh": 10,
+    "blocked": 0,
+    "cleared": 10,
+    "verified": 0,
+    "surface": "code"
    },
    {
     "mode": "missing-field",
@@ -241,7 +250,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 1
+    "count": 14
    },
    {
     "bucket": "8–30d",
@@ -258,6 +267,42 @@
   ],
   "recentlyCleared": [
    {
+    "probe": "https://clickpesadebtfund.com",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
+    "probe": "https://reflector.world",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
+    "probe": "https://slender.fi",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
+    "probe": "https://stex.xycloo.com",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
+    "probe": "https://demo.drivedeb.com",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
+    "probe": "https://gameduk.com",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-09-17"
+   },
+   {
     "probe": "scfRoundAwards empty: lulpay",
     "surface": "directory",
     "failureMode": "completeness-residual",
@@ -268,75 +313,39 @@
     "surface": "retrieval",
     "failureMode": "recall-miss",
     "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "binance in top-3 for its own name",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "klever in top-3 for its own name",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "battery:q-ti-java-sdk-wallet-feebump",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "battery:q-tool-soroban-auth-audit-live",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "planbok",
-    "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-09-14"
-   },
-   {
-    "probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-09-14"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 262,
-     "recurred": 111,
-     "ratePct": 42.4
+     "newFindings": 279,
+     "recurred": 115,
+     "ratePct": 41.2
     },
     "lifetime": {
-     "newFindings": 666,
-     "recurred": 157,
+     "newFindings": 683,
+     "recurred": 161,
      "ratePct": 23.6
     }
    },
    "reopened": {
-    "count": 5,
-    "shareOfClosures": 0.01,
+    "count": 10,
+    "shareOfClosures": 0.02,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
    },
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 262,
-     "repeats": 262,
-     "ratePct": 100
+     "newFindings": 279,
+     "repeats": 278,
+     "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 666,
-     "repeats": 660,
-     "ratePct": 99.1
+     "newFindings": 683,
+     "repeats": 676,
+     "ratePct": 99
     },
     "byClass": [
      {
@@ -347,8 +356,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 140,
-      "open": 17,
+      "total": 144,
+      "open": 20,
       "firstSeen": "2026-07-22"
      },
      {
@@ -374,6 +383,12 @@
       "total": 19,
       "open": 0,
       "firstSeen": "2026-07-23"
+     },
+     {
+      "class": "unclassified",
+      "total": 13,
+      "open": 13,
+      "firstSeen": "2026-09-17"
      }
     ]
    }
@@ -9363,15 +9378,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1302
+     "count": 1310
     },
     {
      "label": "slowing",
-     "count": 960
+     "count": 959
     },
     {
      "label": "active",
-     "count": 864
+     "count": 857
     },
     {
      "label": "unknown",
@@ -9877,7 +9892,7 @@
     "repoScore": 79,
     "tier": "quality",
     "source": "project-link",
-    "activity": "active",
+    "activity": "slowing",
     "language": "Rust",
     "projectSlug": "trustless-work",
     "notes": 2,
@@ -10534,6 +10549,12 @@
     "value": 25
    },
    {
+    "id": "s:nightly-note-freshness",
+    "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 20
+   },
+   {
     "id": "s:nightly-battery",
     "label": "nightly-battery",
     "column": 0,
@@ -10546,10 +10567,10 @@
     "value": 16
    },
    {
-    "id": "s:nightly-note-freshness",
-    "label": "nightly-note-freshness",
+    "id": "s:gone-repos",
+    "label": "gone-repos",
     "column": 0,
-    "value": 16
+    "value": 13
    },
    {
     "id": "s:engine-e-contract",
@@ -10591,7 +10612,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 182
+    "value": 188
    },
    {
     "id": "f:contract",
@@ -10603,7 +10624,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 20
+    "value": 28
    },
    {
     "id": "f:consumer",
@@ -10627,13 +10648,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 624
+    "value": 625
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 35
+    "value": 51
    },
    {
     "id": "o:verified",
@@ -10644,193 +10665,200 @@
   ],
   "links": [
    {
-    "source": 10,
-    "target": 14,
+    "source": 11,
+    "target": 15,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
     "value": 4
    },
    {
-    "source": 14,
-    "target": 21,
+    "source": 15,
+    "target": 22,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
     "value": 339
    },
    {
     "source": 1,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
     "value": 47
    },
    {
     "source": 0,
-    "target": 14,
+    "target": 15,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
     "value": 289
    },
    {
-    "source": 7,
-    "target": 20,
+    "source": 8,
+    "target": 21,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 16
    },
    {
-    "source": 20,
-    "target": 21,
+    "source": 21,
+    "target": 22,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 16
    },
    {
-    "source": 9,
-    "target": 16,
+    "source": 10,
+    "target": 17,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 16,
-    "target": 23,
+    "source": 17,
+    "target": 24,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 16,
-    "target": 21,
+    "source": 17,
+    "target": 22,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 30
    },
    {
     "source": 3,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 36
    },
    {
-    "source": 18,
-    "target": 21,
+    "source": 19,
+    "target": 22,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 18,
-    "target": 22,
+    "source": 19,
+    "target": 23,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 17
    },
    {
-    "source": 13,
-    "target": 17,
+    "source": 14,
+    "target": 18,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 17,
-    "target": 21,
+    "source": 18,
+    "target": 22,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 20
+    "value": 15
    },
    {
     "source": 1,
-    "target": 15,
+    "target": 16,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
     "value": 61
    },
    {
-    "source": 15,
-    "target": 21,
+    "source": 16,
+    "target": 22,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 182
+    "value": 188
    },
    {
     "source": 5,
-    "target": 16,
+    "target": 17,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 25
    },
    {
-    "source": 6,
-    "target": 19,
+    "source": 7,
+    "target": 20,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 18
    },
    {
-    "source": 19,
-    "target": 21,
+    "source": 20,
+    "target": 22,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 18
    },
    {
-    "source": 11,
-    "target": 17,
+    "source": 12,
+    "target": 18,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
    },
    {
     "source": 4,
-    "target": 15,
+    "target": 16,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 29
    },
    {
-    "source": 12,
-    "target": 16,
+    "source": 13,
+    "target": 17,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
     "value": 4
    },
    {
-    "source": 8,
-    "target": 17,
+    "source": 6,
+    "target": 18,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 16
+    "value": 20
+   },
+   {
+    "source": 18,
+    "target": 23,
+    "sourceId": "f:code",
+    "targetId": "o:open",
+    "value": 23
    },
    {
     "source": 2,
-    "target": 15,
+    "target": 16,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
     "value": 108
    },
    {
-    "source": 15,
-    "target": 22,
+    "source": 16,
+    "target": 23,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 16
+    "value": 10
    },
    {
-    "source": 14,
-    "target": 22,
+    "source": 15,
+    "target": 23,
     "sourceId": "f:retrieval",
     "targetId": "o:open",
     "value": 1
    },
    {
-    "source": 17,
-    "target": 22,
-    "sourceId": "f:code",
-    "targetId": "o:open",
-    "value": 1
+    "source": 9,
+    "target": 18,
+    "sourceId": "s:gone-repos",
+    "targetId": "f:code",
+    "value": 13
    }
   ]
  },
