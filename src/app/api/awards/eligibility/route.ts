@@ -27,7 +27,7 @@
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { decodeAccountVotes, roundOpenState } from "@/lib/awards/ballot";
-import { hasMirroredBallot } from "@/lib/awards/record";
+import { readFirstBallotFor } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	fetchTestnetAccount,
@@ -120,7 +120,8 @@ export async function GET(req: NextRequest) {
 				whitelisted: true,
 				funded: false,
 				votes: null,
-				hasVoted: await hasMirroredBallot(loaded.round.slug, address),
+				hasVoted:
+					(await readFirstBallotFor(loaded.round.slug, address))?.voted ?? null,
 				voting: roundOpenState(loaded.round),
 				friendbot: friendbotFundUrl(address),
 				note: "This testnet account couldn't be funded automatically — hit friendbot, then vote.",
@@ -135,16 +136,23 @@ export async function GET(req: NextRequest) {
 		result.account.data,
 	);
 	const onChain = Object.values(votes).some((picks) => picks.length > 0);
+	// The ballot to SHOW is the one that counts. The chain holds the voter's
+	// LATEST manageData, which after a revote is not what the round counts —
+	// prefilling that showed a returning voter picks that are being ignored.
+	const mirrored = await readFirstBallotFor(loaded.round.slug, address);
+	const counted = mirrored?.voted
+		? mirrored.selections
+		: onChain
+			? votes
+			: null;
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,
 			whitelisted: true,
 			funded: true,
-			votes: onChain ? votes : null,
-			// chain OR mirror — the mirror outlives a reset that clears `votes`
-			hasVoted: onChain
-				? true
-				: await hasMirroredBallot(loaded.round.slug, address),
+			votes: counted,
+			// chain OR mirror — the mirror outlives a reset that clears the chain
+			hasVoted: onChain ? true : (mirrored?.voted ?? null),
 			voting: roundOpenState(loaded.round),
 		},
 		{ headers: rateLimitHeaders(limit) },

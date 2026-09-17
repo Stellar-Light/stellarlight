@@ -211,31 +211,49 @@ export function firstBallotSelections(row: {
  * voter's account, and then not count. Better a 503 they can retry than a
  * signature that silently does nothing.
  */
-export async function hasMirroredBallot(
+export async function readFirstBallotFor(
 	roundSlug: string,
 	address: string,
-): Promise<boolean | null> {
+): Promise<{ voted: boolean; selections: BallotSelections } | null> {
 	try {
 		const payload = await getPayloadSafe();
 		if (!payload) return null;
 		const roundId = await findRoundId(payload, roundSlug);
+		// A slug we cannot resolve is NOT "this voter has no ballot" — it is a
+		// read we could not perform, and the gate has to treat it that way.
 		if (!roundId) return null;
 		const rows = await payload.find({
 			collection: "award-ballots",
 			where: {
 				and: [{ round: { equals: roundId } }, { address: { equals: address } }],
 			},
+			// oldest first: if a race ever produced two rows for one address,
+			// the earliest is the one whose history[0] really is first. The
+			// default sort is newest-first, which would pick the wrong one.
+			sort: "createdAt",
 			limit: 1,
 			depth: 0,
 			overrideAccess: true,
 		});
 		const row = rows.docs[0];
-		if (!row) return false;
-		return Object.values(firstBallotSelections(row)).some((s) => s.length > 0);
+		if (!row) return { voted: false, selections: {} };
+		const selections = firstBallotSelections(row);
+		return {
+			voted: Object.values(selections).some((s) => s.length > 0),
+			selections,
+		};
 	} catch (err) {
-		console.error("[awards] hasMirroredBallot failed:", err);
+		console.error("[awards] readFirstBallotFor failed:", err);
 		return null;
 	}
+}
+
+export async function hasMirroredBallot(
+	roundSlug: string,
+	address: string,
+): Promise<boolean | null> {
+	const found = await readFirstBallotFor(roundSlug, address);
+	return found === null ? null : found.voted;
 }
 
 /**
