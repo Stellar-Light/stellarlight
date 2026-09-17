@@ -10,6 +10,7 @@
  * address, never a tx hash (a tx resolves to a voter account on the explorer).
  */
 
+import { createHash } from "node:crypto";
 import {
 	type BallotNominee,
 	type BallotRound,
@@ -20,11 +21,66 @@ import {
 	type VoterAccountData,
 } from "./ballot";
 import { mirrorAccountData } from "./mirror";
-import { loadMirroredBallots } from "./record";
+import { loadFirstBallotRecord } from "./record";
 import type { LoadedRound } from "./round";
 import { fetchTestnetAccounts } from "./stellar";
 
 export type TallySource = "chain" | "mirror" | "chain+mirror";
+
+/** One voter's first ballot, as the record holds it. Never published. */
+export interface FirstBallotEntry {
+	address: string;
+	selections: BallotSelections;
+	txHash: string | null;
+	at: string | null;
+}
+
+const DIGEST_HEADER = "i3-first-ballots-v1";
+
+/**
+ * A fingerprint of the first-ballot record — the thing the round is decided
+ * on, and the thing only WE hold.
+ *
+ * "The first ballot counts" cannot be checked against the chain: a manageData
+ * overwrite destroys the value it replaces, so nothing on chain witnesses a
+ * voter's first ballot. That makes the mirror a trusted component. This is how
+ * it becomes a CHECKED one instead: the digest goes in the results file, whose
+ * git commit is anchored on Tansu, so the record is pinned at publish time. We
+ * cannot later change who voted for what — for anyone holding the underlying
+ * record, a single altered pick, tx hash or timestamp changes this hash, and
+ * the hash is already on chain.
+ *
+ * It is a hash and nothing else, so publishing it discloses no address→choice:
+ * you can only verify it if you were already given the record.
+ *
+ * Recipe (v1), so an auditor can recompute it without this code:
+ *   - one line per voter, sorted by address (uppercase)
+ *   - line = address | categories | txHash | at
+ *   - categories = each `key=slug,slug` with slugs sorted, keys sorted, joined ";"
+ *   - null txHash/at serialize as the empty string
+ *   - document = "i3-first-ballots-v1" + "\n" + lines joined by "\n"
+ *   - digest = sha256(document) as lowercase hex
+ */
+export function ballotsDigest(entries: FirstBallotEntry[]): string {
+	const lines = entries
+		.map((e) => {
+			const cats = Object.entries(e.selections)
+				.filter(([, slugs]) => slugs.length > 0)
+				.map(([key, slugs]): [string, string] => [
+					key,
+					[...new Set(slugs)].sort().join(","),
+				])
+				.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+				.map(([key, slugs]) => `${key}=${slugs}`)
+				.join(";");
+			const address = e.address.trim().toUpperCase();
+			return `${address}|${cats}|${e.txHash ?? ""}|${e.at ?? ""}`;
+		})
+		.sort();
+	return createHash("sha256")
+		.update(`${DIGEST_HEADER}\n${lines.join("\n")}`)
+		.digest("hex");
+}
 
 const HORIZON_CONCURRENCY = 10;
 
@@ -74,15 +130,28 @@ export function mergeAccounts(
 	return { accounts, chainVoters, mirrorVoters };
 }
 
-/** The whitelist stays the denominator either way. */
-export async function liveTally(
-	loaded: LoadedRound,
-): Promise<{ tally: RoundTally; source: TallySource }> {
+/**
+ * The whitelist stays the denominator either way.
+ *
+ * `digest` is null when the first-ballot record could not be READ — never a
+ * digest over an empty read, which would publish "this round has no ballots"
+ * as a fact. When that happens the mirror is also empty here, so the tally
+ * falls back to the chain and `source` says "chain": the two together are the
+ * signal that the counted result is latest-ballot, not first-ballot.
+ */
+export async function liveTally(loaded: LoadedRound): Promise<{
+	tally: RoundTally;
+	source: TallySource;
+	digest: string | null;
+}> {
 	const addresses = [...loaded.whitelist];
-	const [probes, mirror] = await Promise.all([
+	const [probes, record] = await Promise.all([
 		fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY),
-		loadMirroredBallots(loaded.round.slug),
+		loadFirstBallotRecord(loaded.round.slug),
 	]);
+	const mirror = new Map(
+		(record ?? []).map((e) => [e.address, e.selections] as const),
+	);
 	const chain = new Map(
 		probes.map(({ address, result }) => [
 			address,
@@ -103,7 +172,7 @@ export async function liveTally(
 			: mirrorVoters
 				? "mirror"
 				: "chain";
-	return { tally, source };
+	return { tally, source, digest: record ? ballotsDigest(record) : null };
 }
 
 export interface ResultsDocument {
@@ -114,6 +183,8 @@ export interface ResultsDocument {
 	opensAt: string | null;
 	closesAt: string | null;
 	source: TallySource;
+	/** sha256 of the first-ballot record; null = the record could not be read. */
+	ballotsDigest: string | null;
 	turnout: { voted: number; whitelisted: number };
 	categories: Array<{
 		key: string;
@@ -130,6 +201,7 @@ export function resultsDocument(
 	loaded: LoadedRound,
 	tally: RoundTally,
 	source: TallySource,
+	digest: string | null,
 	now: Date = new Date(),
 ): ResultsDocument {
 	const { round } = loaded;
@@ -141,6 +213,7 @@ export function resultsDocument(
 		opensAt: round.opensAt ?? null,
 		closesAt: round.closesAt ?? null,
 		source,
+		ballotsDigest: digest,
 		turnout: { ...tally.turnout },
 		categories: tally.categories.map((c) => ({
 			key: c.key,
@@ -154,7 +227,7 @@ export function resultsDocument(
 		})),
 		generatedAt: now.toISOString(),
 		note:
-			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror — not the chain — is what preserves the first ballot, and it is also the durable record across testnet resets. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=" +
+			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror — not the chain — is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts) — publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=" +
 			round.slug,
 	};
 }

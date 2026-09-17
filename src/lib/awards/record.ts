@@ -20,6 +20,7 @@ import type { Payload } from "payload";
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotSelections } from "./ballot";
 import { normalizeSelections } from "./mirror";
+import type { FirstBallotEntry } from "./publish";
 
 export async function findRoundId(
 	payload: Payload,
@@ -238,13 +239,17 @@ export async function hasMirroredBallot(
 }
 
 /**
- * Every mirrored ballot for a round: address → the address's FIRST ballot.
- * Not its current one — see firstBallotSelections.
+ * The round's first-ballot record: one entry per address, carrying the picks
+ * that count plus the tx hash and timestamp of the submission they came from.
+ *
+ * This is the input to the published digest (see ballotsDigest), so it has to
+ * include everything the digest commits to — changing any of it later must
+ * change the hash.
  */
-export async function readMirroredBallots(
+export async function readFirstBallotRecord(
 	payload: Payload,
 	roundId: string,
-): Promise<Map<string, BallotSelections>> {
+): Promise<FirstBallotEntry[]> {
 	const rows = await payload.find({
 		collection: "award-ballots",
 		where: { round: { equals: roundId } },
@@ -252,22 +257,58 @@ export async function readMirroredBallots(
 		depth: 0,
 		overrideAccess: true,
 	});
-	const out = new Map<string, BallotSelections>();
+	const out: FirstBallotEntry[] = [];
 	for (const row of rows.docs) {
 		const address = String(row.address ?? "")
 			.trim()
 			.toUpperCase();
 		if (!address) continue;
-		out.set(address, firstBallotSelections(row));
+		const trail = (row.history ?? []) as Array<{
+			txHash?: string | null;
+			selections?: unknown;
+			at?: string | null;
+		} | null>;
+		const first = trail.find((e) =>
+			Object.values(normalizeSelections(e?.selections)).some(
+				(s) => s.length > 0,
+			),
+		);
+		out.push({
+			address,
+			selections: firstBallotSelections(row),
+			txHash: (first?.txHash ?? row.txHash ?? null) as string | null,
+			at: (first?.at ?? row.firstSubmittedAt ?? null) as string | null,
+		});
 	}
 	return out;
+}
+
+/**
+ * Safe wrapper: **null means the record could not be read**, which is not the
+ * same as "there are no ballots". An empty array is a claim that the round has
+ * none; publishing a digest computed over a failed read would assert exactly
+ * that, in a file we then anchor on chain.
+ */
+export async function loadFirstBallotRecord(
+	roundSlug: string,
+): Promise<FirstBallotEntry[] | null> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return null;
+		const roundId = await findRoundId(payload, roundSlug);
+		if (!roundId) return null;
+		return await readFirstBallotRecord(payload, roundId);
+	} catch (err) {
+		console.error("[awards] loadFirstBallotRecord failed:", err);
+		return null;
+	}
 }
 
 /**
  * Every mirrored ballot for a round: address → the address's CURRENT ballot.
  *
  * The other reader for a different question. The TALLY wants the first ballot
- * (readMirroredBallots); the RECONCILE lane wants the current one, because its
+ * (readFirstBallotRecord); the RECONCILE lane wants the current one, because its
  * job is "does the mirror reflect what the chain says right now". Handing it
  * first-ballots would make every out-of-band revote look like an unfixed
  * correction on every single run — a daily phantom diff, and a duplicate
@@ -293,20 +334,4 @@ export async function readCurrentBallots(
 		out.set(address, normalizeSelections(row.selections));
 	}
 	return out;
-}
-
-/** Safe wrapper for request paths: empty map when Payload is unavailable. */
-export async function loadMirroredBallots(
-	roundSlug: string,
-): Promise<Map<string, BallotSelections>> {
-	try {
-		const payload = await getPayloadSafe();
-		if (!payload) return new Map();
-		const roundId = await findRoundId(payload, roundSlug);
-		if (!roundId) return new Map();
-		return await readMirroredBallots(payload, roundId);
-	} catch (err) {
-		console.error("[awards] loadMirroredBallots failed:", err);
-		return new Map();
-	}
 }
