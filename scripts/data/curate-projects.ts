@@ -1398,6 +1398,30 @@ const DUPE_MERGES: Array<{
 	// same category, byte-identical description, neither carrying an SCF award.
 	// Nothing separates them: one entity, seeded twice.
 	{ dupe: "zet", canonical: "amber" },
+	// ── 2026-09-15, found while closing the last SCF "absence" ───────────────
+	// One company, seeded twice. Both rows carry the SAME website
+	// (pag.finance) and the same types; pagcrypto is the stale name — the site
+	// titles itself "PagFinance" and the operator's own anchor publishes
+	// ORG_NAME = "PagFinance" at brlp.money/.well-known/stellar.toml for the
+	// BRLP issuer GDD3ZAU3…NPRF, whose Horizon home_domain points back at
+	// brlp.money.
+	//
+	// The split is doing visible damage: pagcrypto holds the SCF #42 / $96,000
+	// award and the github link, while pagfinance answers scf.awarded:false,
+	// so an agent that finds the brand-named row is told the project has no
+	// SCF funding. Exactly the rename case copyScf exists for — the award sits
+	// on the stale-named record.
+	//
+	// The SCF entry also reads ABSENT to scf-absence-diff because the fund
+	// lists pagcrypto.finance while both rows carry pag.finance, and the
+	// submission title is descriptive. Merging does not fix that match; the
+	// reviewed-absent verdict alongside this records why.
+	{
+		dupe: "pagcrypto",
+		canonical: "pagfinance",
+		fill: { github: "https://github.com/PagCrypto" },
+		copyScf: true,
+	},
 	// lulpay.com serves "LulPay - Send Money to Uganda Instantly", so the
 	// canonical is the row whose name the product actually uses. The award
 	// rides across: `lul` holds SCF slug lul-serving-the-unbanked-ckz, rounds 29
