@@ -8,12 +8,20 @@
  * round. This endpoint reads the round's record, reads the chain
  * (`get_commit(keccak256("stellarlight"))` via Soroban RPC simulation), and
  * says whether they agree — so the claim "anchored" is checked, not
- * asserted. After a testnet reset the chain forgets it (like every ballot)
+ * asserted.
+ *
+ * `manifest` is the PRE-VOTE anchor: a digest of the electorate and the ballot
+ * committed when the round opened. It is recomputed here from the round's
+ * CURRENT state and compared, so `matches:false` means the roster, categories,
+ * picks or dates changed after voting opened. `matches:null` means we could
+ * not recompute — not a pass. After a testnet reset the chain forgets it (like every ballot)
  * and this honestly reports `not-registered`; the award-ballots mirror
  * remains the durable record. Public, aggregate-only; cached 5 minutes.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { roundManifestDigest } from "@/lib/awards/publish";
+import { loadRound } from "@/lib/awards/round";
 import {
 	type AnchorRecord,
 	anchorVerdict,
@@ -106,6 +114,26 @@ export async function GET(req: NextRequest) {
 	const { onChain, state } = await readChain();
 	const verdict = anchorVerdict(anchor?.commitSha ?? null, onChain, state);
 
+	// The pre-vote anchor is only worth anything if it is CHECKED: recompute
+	// the round's manifest from its current state and compare. A nominee added
+	// mid-round, an address slipped onto the whitelist, a close date moved —
+	// each gives a different digest than the one already committed on chain.
+	let manifest: Record<string, unknown> | null = null;
+	if (anchor?.manifest?.digest) {
+		const loaded = await loadRound(slug);
+		const recomputed = loaded ? roundManifestDigest(loaded) : null;
+		manifest = {
+			digest: anchor.manifest.digest,
+			txHash: anchor.manifest.txHash,
+			at: anchor.manifest.at,
+			recomputed,
+			// null = we could not recompute, which is not the same as a match
+			matches:
+				recomputed === null ? null : recomputed === anchor.manifest.digest,
+			tx: anchor.manifest.txHash ? explorerTxUrl(anchor.manifest.txHash) : null,
+		};
+	}
+
 	const at = Date.now();
 	const body = {
 		round: slug,
@@ -116,6 +144,7 @@ export async function GET(req: NextRequest) {
 			? { commitSha: anchor.commitSha, txHash: anchor.txHash, at: anchor.at }
 			: null,
 		onChain,
+		manifest,
 		links: {
 			commit: anchor ? `${TANSU_PROJECT_URL}/commit/${anchor.commitSha}` : null,
 			tx: anchor?.txHash ? explorerTxUrl(anchor.txHash) : null,

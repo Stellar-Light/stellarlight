@@ -8,6 +8,14 @@ name: tansu anchor (testnet)
 # its own key), then commit the git SHA of the results file. Nobody opens a
 # dApp. `status` needs no key; `register`/`commit` simulate with the public
 # key (repo variable TANSU_MAINTAINER_PUBLIC) and execute with the secret.
+# `manifest` is the PRE-VOTE anchor — run it when a round OPENS. It commits a
+# digest of the electorate and the ballot (nominees, whitelist, categories,
+# picks, dates) computed from the round itself, so the round is fixed in public
+# before anyone votes; /api/awards/anchor recomputes it later and says whether
+# it still matches. `commit` is the post-vote anchor of the results file.
+# Tansu stores ONE hash per project, so the later anchor overwrites the earlier
+# on chain and each one's transaction is what stays provable — both recorded.
+#
 # After a testnet reset, run `register` again. Dry-run by default; every
 # write is read back.
 on:
@@ -16,11 +24,11 @@ on:
       action:
         description: "What to do"
         type: choice
-        options: [status, register, commit]
+        options: [status, register, commit, manifest]
         required: true
         default: status
       round:
-        description: "Round slug (commit only)"
+        description: "Round slug (commit / manifest)"
         required: false
         default: ""
       sha:
