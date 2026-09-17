@@ -435,6 +435,11 @@ const KIND_OF: Record<string, FindingKind> = {
 	"scf-crosscheck|scf-understated": "world", // …or more
 	"scf-crosscheck|scf-round-overclaim": "world",
 	"engine-d-demand|coverage-gap": "world", // real demand for a project we do not hold — a curation add
+	// check-gone-repos writes `gone` ONLY on a direct GitHub 404; rate limits,
+	// 5xx and a missing token classify as unchecked and can never produce it.
+	// So this is the repository actually deleted upstream, not our scanner
+	// failing — that distinction is the reason the state exists.
+	"gone-repos|repo-gone": "world",
 	// ── instrument: our measurement or serving broke ──
 	"golden-eval|golden-fail": "instrument",
 	"engine-a-recall|recall-miss": "instrument",
