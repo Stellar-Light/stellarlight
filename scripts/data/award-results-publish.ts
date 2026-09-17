@@ -41,8 +41,14 @@ async function main() {
 		);
 		return 1;
 	}
-	const { tally, source } = await liveTally(loaded);
-	const doc = resultsDocument(loaded, tally, source);
+	const { tally, source, digest } = await liveTally(loaded);
+	if (!digest) {
+		console.error(
+			"REFUSED: the first-ballot record could not be read, so the digest that pins it cannot be computed. Publishing now would commit a result with no proof of the record it came from.",
+		);
+		return 1;
+	}
+	const doc = resultsDocument(loaded, tally, source, digest);
 	const json = `${JSON.stringify(doc, null, "\t")}\n`;
 	console.log(
 		`\n${ROUND} (${loaded.round.status}) · source ${source} · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted}`,

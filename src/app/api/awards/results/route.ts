@@ -16,6 +16,9 @@
  *
  * PRIVACY: the payload is AGGREGATE ONLY — per-category counts and a
  * turnout figure. No address→choice mapping is ever serialized here.
+ * `ballotsDigest` is a sha256 of the first-ballot record: it pins that record
+ * without disclosing any of it (only someone already holding the record can
+ * check it). null means the record could not be read — see liveTally.
  *
  * Cached ~30s per round in-memory (Horizon is hit up to ~98 times per
  * recompute; the cache keeps a refreshing results view cheap).
@@ -34,7 +37,12 @@ const CACHE_TTL_MS = 30_000;
 
 const cache = new Map<
 	string,
-	{ at: number; tally: RoundTally; source: TallySource }
+	{
+		at: number;
+		tally: RoundTally;
+		source: TallySource;
+		digest: string | null;
+	}
 >();
 
 export async function GET(req: NextRequest) {
@@ -66,6 +74,7 @@ export async function GET(req: NextRequest) {
 				status: loaded.round.status,
 				closesAt: loaded.round.closesAt ?? null,
 				source: cached.source,
+				ballotsDigest: cached.digest,
 				...cached.tally,
 				cachedAt: new Date(cached.at).toISOString(),
 			},
@@ -73,10 +82,10 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const { tally, source } = await liveTally(loaded);
+	const { tally, source, digest } = await liveTally(loaded);
 
 	const at = Date.now();
-	cache.set(loaded.round.slug, { at, tally, source });
+	cache.set(loaded.round.slug, { at, tally, source, digest });
 
 	return NextResponse.json(
 		{
@@ -84,6 +93,7 @@ export async function GET(req: NextRequest) {
 			status: loaded.round.status,
 			closesAt: loaded.round.closesAt ?? null,
 			source,
+			ballotsDigest: digest,
 			...tally,
 			cachedAt: new Date(at).toISOString(),
 		},

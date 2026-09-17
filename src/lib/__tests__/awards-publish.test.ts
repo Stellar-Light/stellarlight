@@ -8,7 +8,11 @@ import {
 	type RoundTally,
 	tallyRound,
 } from "../awards/ballot";
-import { mergeAccounts, resultsDocument } from "../awards/publish";
+import {
+	ballotsDigest,
+	mergeAccounts,
+	resultsDocument,
+} from "../awards/publish";
 import { firstBallotSelections } from "../awards/record";
 import type { LoadedRound } from "../awards/round";
 
@@ -45,7 +49,7 @@ const tally: RoundTally = {
 
 describe("resultsDocument", () => {
 	it("is aggregate-only and says where the tally came from", () => {
-		const doc = resultsDocument(loaded, tally, "mirror", new Date(0));
+		const doc = resultsDocument(loaded, tally, "mirror", "abc123", new Date(0));
 		expect(doc.round).toBe("i3-2026");
 		expect(doc.source).toBe("mirror");
 		expect(doc.turnout).toEqual({ voted: 2, whitelisted: 3 });
@@ -179,5 +183,68 @@ describe("firstBallotSelections", () => {
 				history: [{ selections: { impact: "decaf" } }],
 			}),
 		).toEqual({ impact: ["decaf"] });
+	});
+});
+
+describe("ballotsDigest", () => {
+	const a = {
+		address: "GA1",
+		selections: { impact: ["decaf"] },
+		txHash: "h1",
+		at: "2026-10-01T00:00:00.000Z",
+	};
+	const b = {
+		address: "GA2",
+		selections: { impact: ["beans"], innovation: ["blend"] },
+		txHash: "h2",
+		at: "2026-10-02T00:00:00.000Z",
+	};
+
+	it("is stable and independent of row order", () => {
+		// the DB returns rows in whatever order it likes; the digest must not
+		expect(ballotsDigest([a, b])).toBe(ballotsDigest([b, a]));
+		expect(ballotsDigest([a, b])).toMatch(/^[0-9a-f]{64}$/);
+	});
+
+	it("changes if any counted fact changes", () => {
+		const base = ballotsDigest([a, b]);
+		// a different pick
+		expect(
+			ballotsDigest([{ ...a, selections: { impact: ["beans"] } }, b]),
+		).not.toBe(base);
+		// a different tx
+		expect(ballotsDigest([{ ...a, txHash: "h9" }, b])).not.toBe(base);
+		// a different timestamp
+		expect(
+			ballotsDigest([{ ...a, at: "2026-10-09T00:00:00.000Z" }, b]),
+		).not.toBe(base);
+		// a voter removed, or added
+		expect(ballotsDigest([a])).not.toBe(base);
+		expect(ballotsDigest([a, b, { ...a, address: "GA3" }])).not.toBe(base);
+	});
+
+	it("ignores orderings that carry no meaning", () => {
+		// pick order within a category, and category order, are not facts
+		expect(
+			ballotsDigest([
+				{ ...a, selections: { impact: ["x", "y"], innovation: ["z"] } },
+			]),
+		).toBe(
+			ballotsDigest([
+				{ ...a, selections: { innovation: ["z"], impact: ["y", "x"] } },
+			]),
+		);
+	});
+
+	it("normalises the address the way the record stores it", () => {
+		expect(ballotsDigest([{ ...a, address: " ga1 " }])).toBe(
+			ballotsDigest([a]),
+		);
+	});
+
+	it("still produces a digest for a round with no ballots", () => {
+		// an empty record is a claim ("nobody voted"), and it gets pinned too
+		expect(ballotsDigest([])).toMatch(/^[0-9a-f]{64}$/);
+		expect(ballotsDigest([])).not.toBe(ballotsDigest([a]));
 	});
 });
