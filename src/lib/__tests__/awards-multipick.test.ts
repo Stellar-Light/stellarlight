@@ -79,7 +79,11 @@ describe("multi-pick round", () => {
 	it("still refuses more picks than the round allows", () => {
 		const kp = Keypair.random();
 		const tx = signedBallot(
-			{ impact: ["impact-a", "impact-b", "impact-c"] },
+			{
+				impact: ["impact-a", "impact-b", "impact-c"],
+				innovation: ["innovation-a"],
+				interoperability: ["interoperability-a"],
+			},
 			kp,
 		);
 		// 3 picks is the cap, so this is legal; a 4th would be trimmed by the
