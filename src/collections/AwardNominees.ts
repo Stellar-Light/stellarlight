@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { isAdmin } from "./access";
 
 /**
  * i³ Awards — nominees on a round's ballot.
@@ -26,9 +27,9 @@ export const AwardNominees: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		create: ({ req }) => isAdmin(req.user),
+		update: ({ req }) => isAdmin(req.user),
+		delete: ({ req }) => isAdmin(req.user),
 	},
 	fields: [
 		{

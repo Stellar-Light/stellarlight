@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { isAdmin } from "./access";
 
 /**
  * i³ Awards — a durable record of every ballot that cleared validation and
@@ -34,10 +35,10 @@ export const AwardBallots: CollectionConfig = {
 			"Recorded ballots, one per address per round. The FIRST entry in `history` is the ballot that counts — nothing on chain remembers it, because a manageData overwrite destroys what it replaces.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: ({ req }) => isAdmin(req.user),
+		create: ({ req }) => isAdmin(req.user),
+		update: ({ req }) => isAdmin(req.user),
+		delete: ({ req }) => isAdmin(req.user),
 	},
 	fields: [
 		{
