@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-16T10:30:32.725Z",
+	"generatedAt": "2026-09-17T10:40:38.716Z",
 	"specVersion": "1.9.52",
 	"graceDays": 10,
 	"expectedOps": [
@@ -43,7 +43,6 @@
 		"explainRepo",
 		"getBuilders",
 		"getChangelog",
-		"getChanges",
 		"getClusters",
 		"getHackathon",
 		"getHackathons",
@@ -54,11 +53,9 @@
 		"getRepoTrust",
 		"getRfps",
 		"getSkill",
-		"getStablecoins",
 		"getStatus",
 		"hackathonBrief",
 		"listAudits",
-		"listContracts",
 		"listSkills",
 		"matchPartners",
 		"resolveProject",
@@ -70,7 +67,11 @@
 		"vetIdea"
 	],
 	"missingFromCatalog": [],
-	"undiscoverable": [],
+	"undiscoverable": [
+		"getChanges",
+		"getStablecoins",
+		"listContracts"
+	],
 	"uncataloged": [
 		"getQualityReport",
 		"getRwaAssets",
