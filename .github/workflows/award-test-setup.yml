@@ -29,6 +29,10 @@ on:
         description: "Friendbot-fund the address on testnet (only with execute)."
         type: boolean
         default: false
+      reset:
+        description: "Delete this address's ballot for the round so it can vote again (test wallets)."
+        type: boolean
+        default: false
       execute:
         description: "Write to the DB? Leave false for a dry run."
         type: boolean
@@ -56,4 +60,5 @@ jobs:
           ${{ inputs.round && format('--round={0}', inputs.round) || '' }}
           ${{ inputs.test_mode && '--test-mode' || '' }}
           ${{ inputs.fund && '--fund' || '' }}
+          ${{ inputs.reset && '--reset' || '' }}
           ${{ inputs.execute && '--execute' || '' }}

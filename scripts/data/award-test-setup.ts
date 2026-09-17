@@ -5,13 +5,22 @@
  *   pnpm exec tsx scripts/data/award-test-setup.ts --address=G... --execute  # write
  *   ... --execute --test-mode   # also flip the round to testMode (i3-test memo on ballots)
  *   ... --execute --fund        # also friendbot-fund the address on testnet
+ *   ... --execute --reset       # delete this address's ballot so it can vote again
  *
  * Idempotent and repeatable — the test wallet is meant to be reset, so this
  * can be re-run to re-whitelist. It ONLY ever:
  *   1. adds one award-voter row (address + round) if it isn't already there,
  *   2. optionally sets round.testMode = true,
- *   3. optionally friendbot-funds the address.
- * It never deletes or touches any other voter/round. Dry-run by default.
+ *   3. optionally friendbot-funds the address,
+ *   4. with --reset, deletes THIS address's ballot rows for THIS round.
+ * It never touches any other voter/round/ballot. Dry-run by default.
+ *
+ * --reset exists because the round is one-ballot-per-voter: once a test wallet
+ * votes it is locked out, and testing the vote path again would otherwise need
+ * a fresh address every time. Note the vote gate is chain OR mirror, so this
+ * only half-unlocks: the account's own i3.* manageData entries still block it,
+ * and clearing those needs the voter's signature — award-test-clear-chain.ts
+ * does that, locally, with a key this script never sees.
  *
  * The address is a PUBLIC Stellar key (safe to pass as a workflow input and
  * appear in logs). No secret is ever handled here.
@@ -29,6 +38,7 @@ const arg = (name: string) =>
 const EXECUTE = process.argv.includes("--execute");
 const TEST_MODE = process.argv.includes("--test-mode");
 const FUND = process.argv.includes("--fund");
+const RESET = process.argv.includes("--reset");
 const ADDRESS = (arg("address") ?? "").trim().toUpperCase();
 const ROUND_SLUG = arg("round") ?? null; // null → the open round
 const LABEL = arg("label") ?? "Pilot — test wallet";
@@ -139,6 +149,53 @@ async function main() {
 			}
 		} else {
 			console.log("• fund: WOULD friendbot-fund");
+		}
+	}
+
+	// 4. Reset this address's ballot so the wallet can vote again.
+	if (RESET) {
+		const ballots = await payload.find({
+			collection: "award-ballots",
+			where: {
+				and: [
+					{ round: { equals: round.id } },
+					{ address: { equals: ADDRESS } },
+				],
+			},
+			limit: 50,
+			depth: 0,
+		});
+		if (ballots.docs.length === 0) {
+			console.log(
+				"• reset: no ballot row for this address — nothing to delete",
+			);
+		} else if (EXECUTE) {
+			for (const doc of ballots.docs) {
+				await payload.delete({ collection: "award-ballots", id: doc.id });
+			}
+			console.log(`• reset: DELETED ${ballots.docs.length} ballot row(s)`);
+		} else {
+			console.log(`• reset: WOULD delete ${ballots.docs.length} ballot row(s)`);
+		}
+
+		// The gate is chain OR mirror, so say plainly whether this is enough.
+		try {
+			const res = await fetch(
+				`https://horizon-testnet.stellar.org/accounts/${ADDRESS}`,
+			);
+			const data = res.ok
+				? (((await res.json()) as { data?: Record<string, string> }).data ?? {})
+				: {};
+			const keys = Object.keys(data).filter((k) =>
+				k.startsWith(`i3.${round.slug}.`),
+			);
+			console.log(
+				keys.length === 0
+					? "• reset: chain is clear — this wallet can vote again"
+					: `• reset: ${keys.length} entr(ies) STILL ON CHAIN (${keys.join(", ")}) — the wallet stays locked until they are cleared. Run, with that wallet's key, locally:\n    pnpm exec tsx scripts/data/award-test-clear-chain.ts --secret=S... --round=${round.slug} --execute`,
+			);
+		} catch {
+			console.log("• reset: could not reach Horizon to check chain entries");
 		}
 	}
 
