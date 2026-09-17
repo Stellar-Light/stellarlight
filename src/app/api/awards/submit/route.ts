@@ -37,7 +37,10 @@ const MAX_XDR_CHARS = 8_192;
 export async function POST(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/submit",
-		limit: 15,
+		// See ballot-xdr: one venue IP for the whole room. 15 would have refused
+		// the 16th ballot of the event. The whitelist and the one-ballot gate are
+		// what actually bound this route.
+		limit: 200,
 		windowMs: 10 * 60 * 1000,
 	});
 	if (!limit.allowed) {

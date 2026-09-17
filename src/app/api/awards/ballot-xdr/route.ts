@@ -45,7 +45,13 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/ballot-xdr",
-		limit: 30,
+		// Per-IP, and Pilots vote from shared laptops at the venue — that is ONE
+		// NAT egress IP for the whole room. At 30 the 31st person in ten minutes
+		// is told "rate limit exceeded" and simply cannot vote. The real controls
+		// here are the whitelist and one-ballot-per-voter (a round has ~98
+		// eligible addresses, each able to vote once), so this only needs to stop
+		// floods, not meter a queue.
+		limit: 300,
 		windowMs: 10 * 60 * 1000,
 	});
 	if (!limit.allowed) {
