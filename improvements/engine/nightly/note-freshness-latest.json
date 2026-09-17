@@ -1,7 +1,52 @@
 {
-	"generatedAt": "2026-09-15T10:41:24.916Z",
+	"generatedAt": "2026-09-17T10:38:30.833Z",
 	"detector": "note-freshness",
 	"failures": [
+		{
+			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.14.0 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_js",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.2 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_wasm",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.2 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:blend-capital/blend-sdk-js:npm:@blend-capital/blend-sdk",
+			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 3.3.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
+			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.35.1 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.13.0 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.7.0 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-09-16 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
+			"note": "note (asOf 2026-09-07) cites 0.2.0; registry latest is 0.2.1 (published 2026-09-16)",
+			"surface": "code"
+		},
 		{
 			"probe": "note-repo-gone:comzzy-comzzy/datavend",
 			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",

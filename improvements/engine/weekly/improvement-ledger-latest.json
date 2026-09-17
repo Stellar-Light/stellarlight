@@ -1,21 +1,21 @@
 {
-	"generatedAt": "2026-09-15T10:42:08.108Z",
-	"total": 666,
-	"open": 1,
-	"refreshQueue": 17,
+	"generatedAt": "2026-09-17T10:38:59.207Z",
+	"total": 683,
+	"open": 14,
+	"refreshQueue": 20,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 2,
 		"graceDays": 20,
-		"oldestDays": 54,
+		"oldestDays": 56,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 54
+				"days": 56
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 54
+				"days": 56
 			}
 		]
 	},
@@ -23,44 +23,44 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 631,
+	"closed": 632,
 	"verified": 7,
-	"cleared": 624,
+	"cleared": 625,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 408,
+	"clearedOnSilence": 409,
 	"closingRate": 0.33,
-	"silenceShare": 0.61,
+	"silenceShare": 0.6,
 	"recurrence": {
-		"reopened": 5,
-		"reopenedShareOfClosures": 0.01,
+		"reopened": 10,
+		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 281,
-				"recurred": 130,
-				"ratePct": 46.3
+				"newFindings": 279,
+				"recurred": 115,
+				"ratePct": 41.2
 			},
 			"lifetime": {
-				"newFindings": 666,
-				"recurred": 157,
+				"newFindings": 683,
+				"recurred": 161,
 				"ratePct": 23.6
 			}
 		}
 	},
-	"oldestOpenDays": 1,
+	"oldestOpenDays": 3,
 	"inWave": 0,
-	"highOpen": 0,
+	"highOpen": 13,
 	"staleHighOpen": 0,
 	"bySurface": [
+		{
+			"surface": "code",
+			"open": 13,
+			"total": 38
+		},
 		{
 			"surface": "retrieval",
 			"open": 1,
 			"total": 340
-		},
-		{
-			"surface": "code",
-			"open": 0,
-			"total": 21
 		},
 		{
 			"surface": "directory",
@@ -92,60 +92,60 @@
 	"quietSources": [],
 	"topOpen": [
 		{
-			"id": "raven-routing:top-stellar-projects-by-github-activity",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "top Stellar projects by GitHub activity",
-			"severity": "medium"
+			"id": "gone-repos:rohit8759-keywe",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "ROHIT8759/KeyWe",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:reflector-oracle-on-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "reflector oracle on Stellar",
-			"severity": "medium"
+			"id": "gone-repos:robertdurst-stellar-rust-sdk",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "robertDurst/stellar-rust-sdk",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "jobs bounties and freelance work for Stellar contributors",
-			"severity": "medium"
+			"id": "gone-repos:rawritude-public-directory",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "rawritude/public-directory",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "how does the Blend lending pool calculate interest rates in the code",
-			"severity": "medium"
+			"id": "gone-repos:rawritude-stellarlight",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "rawritude/stellarlight",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:freighter",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "freighter",
-			"severity": "medium"
+			"id": "gone-repos:rajkumarsharma316-habit-tracker-soroban",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "rajkumarsharma316/Habit-Tracker-Soroban",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:is-anyone-actually-building-on-stellar-or-is-it-",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "is anyone actually building on Stellar or is it dead?",
-			"severity": "medium"
+			"id": "gone-repos:dione-b-lp-stellar-onchain-experience",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "Dione-b/lp-stellar-onchain-experience",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:what-can-you-actually-build-on-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "what can you actually build on Stellar?",
-			"severity": "medium"
+			"id": "gone-repos:klorenn-stellar-paylink",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "Klorenn/stellar-paylink",
+			"severity": "high"
 		},
 		{
-			"id": "raven-routing:what-wallet-should-i-use-for-stellar",
-			"surface": "consumer",
-			"source": "raven-routing",
-			"probe": "what wallet should I use for Stellar?",
-			"severity": "medium"
+			"id": "gone-repos:nursca-backend",
+			"surface": "code",
+			"source": "gone-repos",
+			"probe": "Nursca/backend",
+			"severity": "high"
 		}
 	]
 }
