@@ -1,10 +1,15 @@
 {
-	"generatedAt": "2026-09-17T10:38:30.833Z",
+	"generatedAt": "2026-09-18T10:15:30.862Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
 			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.14.0 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:keybase/client:docker:keybaseio/client",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-09-17 (published 2026-09-17)",
 			"surface": "code"
 		},
 		{
@@ -45,6 +50,16 @@
 		{
 			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
 			"note": "note (asOf 2026-09-07) cites 0.2.0; registry latest is 0.2.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.19.1 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.1.0 (published 2026-09-17)",
 			"surface": "code"
 		},
 		{

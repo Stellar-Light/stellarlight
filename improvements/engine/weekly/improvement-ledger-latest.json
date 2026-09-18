@@ -1,21 +1,25 @@
 {
-	"generatedAt": "2026-09-17T10:38:59.207Z",
-	"total": 683,
+	"generatedAt": "2026-09-18T10:16:00.058Z",
+	"total": 686,
 	"open": 14,
-	"refreshQueue": 20,
+	"refreshQueue": 24,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
-		"count": 2,
+		"count": 3,
 		"graceDays": 20,
-		"oldestDays": 56,
+		"oldestDays": 57,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 56
+				"days": 57
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 56
+				"days": 57
+			},
+			{
+				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+				"days": 21
 			}
 		]
 	},
@@ -23,15 +27,15 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 632,
+	"closed": 631,
 	"verified": 7,
-	"cleared": 625,
+	"cleared": 624,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 409,
+	"clearedOnSilence": 408,
 	"closingRate": 0.33,
-	"silenceShare": 0.6,
+	"silenceShare": 0.59,
 	"recurrence": {
-		"reopened": 10,
+		"reopened": 11,
 		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
@@ -41,13 +45,13 @@
 				"ratePct": 41.2
 			},
 			"lifetime": {
-				"newFindings": 683,
-				"recurred": 161,
-				"ratePct": 23.6
+				"newFindings": 686,
+				"recurred": 164,
+				"ratePct": 23.9
 			}
 		}
 	},
-	"oldestOpenDays": 3,
+	"oldestOpenDays": 4,
 	"inWave": 0,
 	"highOpen": 13,
 	"staleHighOpen": 0,
@@ -55,7 +59,7 @@
 		{
 			"surface": "code",
 			"open": 13,
-			"total": 38
+			"total": 40
 		},
 		{
 			"surface": "retrieval",
@@ -65,7 +69,7 @@
 		{
 			"surface": "directory",
 			"open": 0,
-			"total": 198
+			"total": 199
 		},
 		{
 			"surface": "scf",
