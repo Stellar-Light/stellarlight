@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-18T10:15:30.862Z",
+	"generatedAt": "2026-09-19T09:55:53.088Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -14,12 +14,12 @@
 		},
 		{
 			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_js",
-			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.2 (published 2026-09-16)",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_wasm",
-			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.2 (published 2026-09-16)",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
 			"surface": "code"
 		},
 		{
@@ -53,8 +53,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-18 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
 			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.19.1 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
+			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.5 (published 2026-09-18)",
 			"surface": "code"
 		},
 		{
