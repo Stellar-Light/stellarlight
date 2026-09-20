@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-14T16:31:38Z",
+  "generatedAt": "2026-09-20T13:42:17Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 981,
-      "total": 981,
+      "ok": 990,
+      "total": 990,
       "unchecked": 0,
       "rate": 100,
       "floor": 90,
@@ -13,10 +13,10 @@
     },
     {
       "bucket": "P-TYPE",
-      "ok": 19,
+      "ok": 20,
       "total": 20,
       "unchecked": 0,
-      "rate": 95,
+      "rate": 100,
       "floor": 75,
       "status": "OK "
     },
@@ -31,8 +31,8 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 981,
-      "total": 981,
+      "ok": 990,
+      "total": 990,
       "unchecked": 0,
       "rate": 100,
       "floor": 60,
@@ -75,15 +75,7 @@
       "status": "OK "
     }
   ],
-  "failures": [
-    {
-      "bucket": "P-TYPE",
-      "area": "Explorer",
-      "probe": "https://stellarlight.xyz/api/projects/search?q=block%20explorer&limit=10",
-      "expected": "\u22653 of top-10 carry types=Explorer (6 exist)",
-      "observed": "2 carry it"
-    }
-  ],
+  "failures": [],
   "unchecked": [],
   "evalKey": "engine-a-recall"
 }

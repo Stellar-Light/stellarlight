@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8371003270149231,
+      "topScore": 0.8371003866195679,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7824959754943848,
+      "topScore": 0.7825485467910767,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -161,7 +161,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend Protocol — Certora (Blend Security Assessment Report)"
+      "sample": "Blend Protocol \u2014 Certora (Blend Security Assessment Report)"
     },
     {
       "id": "audit-reentrancy",
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core — Veridise (Auditing Report for Soroban"
+      "sample": "Stellar Soroban Core \u2014 Veridise (Auditing Report for Soroban"
     },
     {
       "id": "ecosystem-rwa-map",
@@ -377,7 +377,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "StellarBroker — Runtime Verification (Security Audit Report "
+      "sample": "StellarBroker \u2014 Runtime Verification (Security Audit Report "
     },
     {
       "id": "ec-developer-count",
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -585,15 +585,15 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.798236608505249,
+      "topScore": 0.79648756980896,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Smart Contract Asset Interoperability with Wrapper"
+      "sample": "Cross-Chain USDC Transfers with CCTP"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.6 — 27.0.6"
+      "sample": "rs-soroban-sdk v27.0.6 \u2014 27.0.6"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6851571202278137,
+      "topScore": 0.7108401656150818,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -683,7 +683,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
+      "sample": "Stellar Weekly Roundup: Week of Sep 11, 2026"
     },
     {
       "id": "blend-incident-facts",
@@ -701,7 +701,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -719,7 +719,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7046095132827759,
+      "topScore": 0.7038456797599792,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -765,7 +765,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6709254384040833,
+      "topScore": 0.6715497970581055,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -837,7 +837,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.813447117805481,
+      "topScore": 0.8134869933128357,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -845,7 +845,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Enterprise Fund — venture-style fund (stellar.org/en"
+      "sample": "Stellar Enterprise Fund \u2014 venture-style fund (stellar.org/en"
     },
     {
       "id": "q-org-sdf-leadership-roles",
@@ -863,7 +863,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF Team — leadership and board of directors (stellar.org/fo"
+      "sample": "SDF Team \u2014 leadership and board of directors (stellar.org/fo"
     },
     {
       "id": "capability-custody-identity",
@@ -956,5 +956,6 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-19T09:45:33Z"
+  "generatedAt": "2026-09-20T13:42:17Z",
+  "evalKey": "golden-eval"
 }

@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 36,
+    "count": 38,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -43,6 +43,18 @@
         "field": "supportedNetworks",
         "prose": "polkadot",
         "missing": "polkadot"
+      },
+      {
+        "slug": "minisend",
+        "field": "supportedNetworks",
+        "prose": "evm",
+        "missing": "evm"
+      },
+      {
+        "slug": "minisend",
+        "field": "supportedNetworks",
+        "prose": "solana",
+        "missing": "solana"
       },
       {
         "slug": "python-stellar-sdk",
@@ -139,27 +151,15 @@
         "field": "supportedNetworks",
         "prose": "aptos",
         "missing": "aptos"
-      },
-      {
-        "slug": "wowmax",
-        "field": "supportedNetworks",
-        "prose": "near",
-        "missing": "near"
-      },
-      {
-        "slug": "automated-finance",
-        "field": "supportedNetworks",
-        "prose": "polygon",
-        "missing": "evm"
       }
     ]
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (197/199)",
-      "types": "100% (199/199)",
-      "supportedNetworks": "55% (110/199)",
-      "logoUrl": "77% (154/199)"
+      "shortDescription": "99% (200/202)",
+      "types": "100% (202/202)",
+      "supportedNetworks": "56% (113/202)",
+      "logoUrl": "76% (154/202)"
     },
     "Tooling": {
       "shortDescription": "98% (178/182)",
@@ -167,10 +167,10 @@
       "logoUrl": "82% (150/182)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (390/394)",
-      "types": "100% (394/394)",
-      "supportedNetworks": "74% (290/394)",
-      "logoUrl": "86% (339/394)"
+      "shortDescription": "99% (395/399)",
+      "types": "100% (399/399)",
+      "supportedNetworks": "74% (295/399)",
+      "logoUrl": "85% (339/399)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -179,11 +179,11 @@
       "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
-      "shortDescription": "100% (153/153)",
-      "types": "100% (153/153)",
-      "supportedNetworks": "78% (119/153)",
-      "logoUrl": "81% (124/153)",
-      "tvlUSD": "9% (14/153)"
+      "shortDescription": "100% (154/154)",
+      "types": "100% (154/154)",
+      "supportedNetworks": "78% (120/154)",
+      "logoUrl": "81% (124/154)",
+      "tvlUSD": "9% (14/154)"
     },
     "Anchor": {
       "shortDescription": "94% (15/16)",
@@ -334,19 +334,19 @@
   },
   "s4_staleness": {
     "liveNoDatedSignal": 382,
-    "liveStale365": 128,
+    "liveStale365": 129,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 560,
+        "ageDays": 566,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 928,
+        "ageDays": 934,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -367,7 +367,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2328,
+        "ageDays": 2334,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -395,7 +395,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 371,
+        "ageDays": 377,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -478,6 +478,6 @@
       }
     ]
   },
-  "generatedAt": "2026-09-14T16:31:38Z",
+  "generatedAt": "2026-09-20T13:42:17Z",
   "evalKey": "engine-b-sweeps"
 }

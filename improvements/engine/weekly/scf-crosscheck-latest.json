@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-14T16:31:38Z",
+  "generatedAt": "2026-09-20T13:42:17Z",
   "frame": {
-    "scf": 511,
-    "directory": 981,
-    "matched": 326,
-    "roundsChecked": 325
+    "scf": 531,
+    "directory": 990,
+    "matched": 332,
+    "roundsChecked": 326
   },
   "overstated": [],
   "understated": [],
@@ -58,6 +58,16 @@
         "29"
       ],
       "url": "https://communityfund.stellar.org/project/autoaction-ybl",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "swiftex",
+      "name": "SwiftEx",
+      "ourRounds": [
+        "35"
+      ],
+      "url": "https://communityfund.stellar.org/project/swiftex-qxc",
       "officialAwardedRounds": [],
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
