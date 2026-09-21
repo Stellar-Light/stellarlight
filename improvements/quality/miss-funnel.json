@@ -1,15 +1,10 @@
 {
- "generatedAt": "2026-09-20T12:35:12.613Z",
+ "generatedAt": "2026-09-21T14:28:40.343Z",
  "population": {
-  "openRecallMisses": 1,
+  "openRecallMisses": 0,
   "replayableOpenRecallMisses": 0,
-  "unclassified": 1,
-  "unclassifiedExamples": [
-   {
-    "id": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
-    "probe": "≥3 of top-10 carry types=Explorer (6 exist)"
-   }
-  ],
+  "unclassified": 0,
+  "unclassifiedExamples": [],
   "coveragePct": 0,
   "sampled": 0,
   "note": "A deterministic every-Nth sample of open engine-a-recall findings, each replayed live. Percentages are of the SAMPLE."

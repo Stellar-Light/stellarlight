@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-20T12:35:23.971Z",
+ "generatedAt": "2026-09-21T14:28:46.057Z",
  "surfaces": [
   {
    "surface": "code",
@@ -11,8 +11,8 @@
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
-   "openFindings": 1,
-   "clearedFindings": 339,
+   "openFindings": 2,
+   "clearedFindings": 340,
    "verifiedFindings": 0
   },
   {
@@ -53,8 +53,8 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 689,
-  "open": 14,
+  "total": 691,
+  "open": 15,
   "refreshQueue": 27,
   "blockedUpstream": 17,
   "blockedBy": {
@@ -64,14 +64,14 @@
   "lagPastGrace": {
    "count": 3,
    "graceDays": 20,
-   "oldestDays": 59,
+   "oldestDays": 60,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
     "raven-routing:how-does-the-blend-lending-pool-calculate-intere"
    ]
   },
-  "cleared": 624,
+  "cleared": 625,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
@@ -80,17 +80,17 @@
     "total": 224
    },
    "instrument": {
-    "open": 18,
-    "total": 465
+    "open": 19,
+    "total": 467
    }
   },
   "byFailureMode": [
    {
     "mode": "recall-miss",
-    "open": 1,
+    "open": 0,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 288,
+    "cleared": 289,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -114,7 +114,7 @@
    },
    {
     "mode": "demand-miss",
-    "open": 0,
+    "open": 2,
     "refresh": 0,
     "blocked": 0,
     "cleared": 47,
@@ -251,7 +251,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 14
+    "count": 15
    },
    {
     "bucket": "8–30d",
@@ -267,6 +267,12 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "≥3 of top-10 carry types=Explorer (6 exist)",
+    "surface": "retrieval",
+    "failureMode": "recall-miss",
+    "clearedAt": "2026-09-21"
+   },
    {
     "probe": "https://clickpesadebtfund.com",
     "surface": "directory",
@@ -308,26 +314,20 @@
     "surface": "directory",
     "failureMode": "completeness-residual",
     "clearedAt": "2026-09-15"
-   },
-   {
-    "probe": "response",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-14"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 280,
-     "recurred": 116,
-     "ratePct": 41.4
+     "newFindings": 282,
+     "recurred": 118,
+     "ratePct": 41.8
     },
     "lifetime": {
-     "newFindings": 689,
-     "recurred": 167,
-     "ratePct": 24.2
+     "newFindings": 691,
+     "recurred": 169,
+     "ratePct": 24.5
     }
    },
    "reopened": {
@@ -339,20 +339,20 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 280,
-     "repeats": 279,
+     "newFindings": 282,
+     "repeats": 281,
      "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 689,
-     "repeats": 682,
+     "newFindings": 691,
+     "repeats": 684,
      "ratePct": 99
     },
     "byClass": [
      {
       "class": "identity",
       "total": 329,
-      "open": 18,
+      "open": 17,
       "firstSeen": "2026-07-22"
      },
      {
@@ -363,8 +363,8 @@
      },
      {
       "class": "taxonomy-coverage",
-      "total": 108,
-      "open": 0,
+      "total": 110,
+      "open": 2,
       "firstSeen": "2026-07-22"
      },
      {
@@ -397,7 +397,7 @@
  },
  "projects": {
   "read": 990,
-  "population": 1115,
+  "population": 1117,
   "servedPopulation": 990,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9327,7 +9327,7 @@
     "missing": []
    },
    "mainnetJoin": {
-    "pool": 5709,
+    "pool": 5710,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 119
    }
@@ -9383,11 +9383,11 @@
     },
     {
      "label": "slowing",
-     "count": 968
+     "count": 969
     },
     {
      "label": "active",
-     "count": 844
+     "count": 843
     },
     {
      "label": "unknown",
@@ -10502,12 +10502,6 @@
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
    "measurement": "334 of 364 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
-  },
-  {
-   "area": "known-item recall",
-   "limit": "Open recall findings: specific named entities that our own generated probes do not return in the top 3.",
-   "measurement": "1 open recall-miss findings",
-   "instead": "For a known name, prefer an exact slug or /api/projects/resolve over a natural-language search, and read meta.matchMode before treating rows as an answer."
   }
  ],
  "flow": {
@@ -10520,16 +10514,16 @@
     "value": 289
    },
    {
-    "id": "s:link-health",
-    "label": "link-health",
+    "id": "s:engine-d-demand",
+    "label": "engine-d-demand",
     "column": 0,
     "value": 110
    },
    {
-    "id": "s:engine-d-demand",
-    "label": "engine-d-demand",
+    "id": "s:link-health",
+    "label": "link-health",
     "column": 0,
-    "value": 108
+    "value": 110
    },
    {
     "id": "s:raven-routing",
@@ -10607,7 +10601,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 340
+    "value": 342
    },
    {
     "id": "f:directory",
@@ -10649,13 +10643,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 624
+    "value": 625
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 58
+    "value": 59
    },
    {
     "id": "o:verified",
@@ -10677,14 +10671,14 @@
     "target": 22,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 339
+    "value": 340
    },
    {
-    "source": 2,
+    "source": 1,
     "target": 15,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
-    "value": 47
+    "value": 49
    },
    {
     "source": 0,
@@ -10764,7 +10758,7 @@
     "value": 14
    },
    {
-    "source": 2,
+    "source": 1,
     "target": 16,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
@@ -10834,7 +10828,7 @@
     "value": 28
    },
    {
-    "source": 1,
+    "source": 2,
     "target": 16,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
@@ -10848,18 +10842,18 @@
     "value": 12
    },
    {
-    "source": 15,
-    "target": 23,
-    "sourceId": "f:retrieval",
-    "targetId": "o:open",
-    "value": 1
-   },
-   {
     "source": 9,
     "target": 18,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
     "value": 13
+   },
+   {
+    "source": 15,
+    "target": 23,
+    "sourceId": "f:retrieval",
+    "targetId": "o:open",
+    "value": 2
    }
   ]
  },
@@ -10872,7 +10866,7 @@
     "missing": 346,
     "of": 365,
     "share": 94.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5344 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5345 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 346,
