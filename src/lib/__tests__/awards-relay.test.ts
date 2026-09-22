@@ -42,11 +42,24 @@ const account = (sequence: string) => (url: string) =>
 			})
 		: null;
 const submit =
-	(body: object, status = 200) =>
+	(body: object, status = 201) =>
 	(url: string, init?: RequestInit) =>
-		url.endsWith("/transactions") && init?.method === "POST"
+		url.endsWith("/transactions_async") && init?.method === "POST"
 			? new Response(JSON.stringify(body), { status })
 			: null;
+const seen = (status: number) => (url: string, init?: RequestInit) =>
+	/\/transactions\/[0-9a-f]{64}$/.test(url) && init?.method !== "POST"
+		? new Response("{}", { status })
+		: null;
+const queued = { tx_status: "PENDING", hash: "h" };
+// real TransactionResult XDR: txBadSeq / txInsufficientFee
+const refused = (errorResultXdr: string) => ({
+	tx_status: "ERROR",
+	hash: "h",
+	errorResultXdr,
+});
+const BAD_SEQ = "AAAAAAAAAGT////7AAAAAA==";
+const NO_FEE = "AAAAAAAAAGT////3AAAAAA==";
 const build = (a: import("@stellar/stellar-sdk").Account) =>
 	new TransactionBuilder(a, {
 		fee: "10000",
@@ -71,48 +84,37 @@ describe("submitFromRelay", () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
 		const f = fetchScript([
 			account("100"),
-			submit({ extras: { result_codes: { transaction: "tx_bad_seq" } } }, 400),
+			submit(refused(BAD_SEQ), 400),
 			account("101"),
-			submit({ hash: "abc123" }),
+			submit(queued),
+			seen(200),
 		]);
 		vi.stubGlobal("fetch", f);
-		const r = await submitFromRelay(build);
-		expect(r).toEqual({ ok: true, hash: "abc123", attempts: 2 });
-		expect(f).toHaveBeenCalledTimes(4);
+		const r = await submitFromRelay(build, { backoffMs: () => 0 });
+		expect(r).toMatchObject({ ok: true, attempts: 2 });
+		if (r.ok) expect(r.hash).toMatch(/^[0-9a-f]{64}$/);
+		expect(f).toHaveBeenCalledTimes(5);
 	});
 
 	it("reports any other refusal immediately", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
-		const f = fetchScript([
-			account("100"),
-			submit(
-				{
-					extras: {
-						result_codes: {
-							transaction: "tx_failed",
-							operations: ["op_underfunded"],
-						},
-					},
-				},
-				400,
-			),
-		]);
+		const f = fetchScript([account("100"), submit(refused(NO_FEE), 400)]);
 		vi.stubGlobal("fetch", f);
 		const r = await submitFromRelay(build);
 		expect(r.ok).toBe(false);
-		if (!r.ok) expect(r.resultCodes).toContain("op_underfunded");
+		if (!r.ok) expect(r.resultCodes).toContain("tx_insufficient_fee");
 		expect(f).toHaveBeenCalledTimes(2);
 	});
 
 	it("gives up after the configured attempts", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
-		const bad = submit(
-			{ extras: { result_codes: { transaction: "tx_bad_seq" } } },
-			400,
-		);
+		const bad = submit(refused(BAD_SEQ), 400);
 		const f = fetchScript([account("1"), bad, account("2"), bad]);
 		vi.stubGlobal("fetch", f);
-		const r = await submitFromRelay(build, { attempts: 2 });
+		const r = await submitFromRelay(build, {
+			attempts: 2,
+			backoffMs: () => 0,
+		});
 		expect(r.ok).toBe(false);
 		if (!r.ok) expect(r.resultCodes).toContain("tx_bad_seq");
 	});
@@ -132,8 +134,10 @@ describe("submitFromRelay", () => {
 				created = true;
 				return new Response("{}", { status: 200 });
 			}
-			if (url.endsWith("/transactions") && init?.method === "POST")
-				return new Response(JSON.stringify({ hash: "h" }), { status: 200 });
+			if (url.endsWith("/transactions_async") && init?.method === "POST")
+				return new Response(JSON.stringify(queued), { status: 201 });
+			if (/\/transactions\/[0-9a-f]{64}$/.test(url))
+				return new Response("{}", { status: 200 });
 			throw new Error(`unexpected ${url}`);
 		});
 		vi.stubGlobal("fetch", f);

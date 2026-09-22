@@ -465,7 +465,7 @@ function hiwSteps(picks: number) {
 				},
 		{
 			t: "Sign one transaction",
-			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds, ever.",
+			d: "One signature authorizes your whole ballot. Our relay writes it to Stellar testnet under a random id, so nothing on chain links it to your address. No real funds, ever.",
 		},
 		{
 			t: "Your first ballot is final",
@@ -1385,9 +1385,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					<span aria-hidden="true">{round.title.replace(/^i³\s*/, "")}</span>
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-					Three categories. One pick in each. SCF Pilots choose the projects
-					that defined the year for their impact, innovation and
-					interoperability.
+					{picksPerCategory > 1
+						? `Three categories. Nominate ${picksPerCategory} in each. SCF Pilots put forward the projects that defined the year for their impact, innovation and interoperability; the four most nominated in each become the shortlist.`
+						: "Three categories. One pick in each. SCF Pilots choose the projects that defined the year for their impact, innovation and interoperability."}
 				</p>
 				<div className="mt-6 flex items-center justify-center gap-3 text-sm">
 					{round.closesAt && voting.open ? (
@@ -2515,8 +2515,14 @@ function PastWinners({ className = "" }: { className?: string }) {
 
 // ── Closed round: results reveal ───────────────────────────────────────────
 
+/** How many per category go through from the nominations round. */
+const SHORTLIST_SIZE = 4;
+
 function ClosedRound({ data }: { data: AwardsRoundData }) {
 	const { round } = data;
+	// A nominations round has no winner: the top four per category are the
+	// shortlist, and a tie at the cut is shown, not silently broken by name.
+	const shortlist = Math.max(1, Math.floor(round.picksPerCategory ?? 1)) > 1;
 	const [howOpen, setHowOpen] = useState(false);
 	const [results, setResults] = useState<ResultsData | null>(null);
 	const [failed, setFailed] = useState(false);
@@ -2547,7 +2553,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					className="text-center mb-14"
 				>
 					<p className="text-sm font-medium text-neutral-400 mb-3">
-						Voting closed
+						{shortlist ? "Nominations closed" : "Voting closed"}
 					</p>
 					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
 						{round.title}
@@ -2555,7 +2561,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					{results && (
 						<p className="mt-4 text-sm text-neutral-500">
 							{results.turnout.voted} of {results.turnout.whitelisted} Pilots
-							voted
+							{shortlist ? " nominated" : " voted"}
 						</p>
 					)}
 				</motion.header>
@@ -2575,9 +2581,41 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 				{results && (
 					<div className="space-y-10">
 						{results.categories.map((category) => {
-							const [winner, ...rest] = category.results;
+							// final round: one winner card, then the rest
+							// nominations: every nominee in one list, top four badged
+							const winner = shortlist ? null : (category.results[0] ?? null);
+							const rest = shortlist
+								? category.results
+								: category.results.slice(1);
+							const ballots = Math.max(1, results.turnout.voted);
 							const total = Math.max(1, category.totalVotes);
-							const pct = (v: number) => Math.round((v / total) * 100);
+							// approval counts are "how many ballots named it", so the
+							// share is of ballots, not of the category's vote total
+							const pct = (v: number) =>
+								shortlist
+									? Math.min(100, Math.round((v / ballots) * 100))
+									: Math.round((v / total) * 100);
+							const label = (v: number) =>
+								shortlist
+									? `${v} of ${results.turnout.voted}`
+									: `${v} · ${pct(v)}%`;
+							const cut = shortlist
+								? (category.results[SHORTLIST_SIZE - 1]?.votes ?? 0)
+								: 0;
+							const badgeFor = (votes: number, rank: number) =>
+								!shortlist
+									? null
+									: rank < SHORTLIST_SIZE
+										? "Shortlist"
+										: votes > 0 && votes === cut
+											? "Tied at the cut"
+											: null;
+							const tied = shortlist
+								? category.results.filter(
+										(r, i) =>
+											i >= SHORTLIST_SIZE && r.votes > 0 && r.votes === cut,
+									).length
+								: 0;
 							return (
 								<section key={category.key}>
 									<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-50 mb-4 flex items-center gap-2.5">
@@ -2602,7 +2640,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 													</p>
 												</div>
 												<span className="text-sm font-semibold tabular-nums text-neutral-300 flex-shrink-0">
-													{winner.votes} · {pct(winner.votes)}%
+													{label(winner.votes)}
 												</span>
 											</div>
 											<div className="sm-bar-track">
@@ -2629,14 +2667,31 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 													ease: EASE,
 													delay: (i + 1) * 0.05,
 												}}
-												className="rounded-xl border border-[#2f2f2f] bg-[#1e1e1e] px-4 py-3"
+												className={`rounded-xl border px-4 py-3 ${
+													badgeFor(r.votes, i) === "Shortlist"
+														? "border-neutral-500/40 bg-[#242424]"
+														: "border-[#2f2f2f] bg-[#1e1e1e]"
+												}`}
 											>
 												<div className="flex items-center justify-between gap-3 mb-2">
-													<span className="text-sm font-medium text-neutral-100 truncate">
-														{r.name}
+													<span className="flex items-center gap-2 min-w-0">
+														{badgeFor(r.votes, i) && (
+															<span
+																className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+																	badgeFor(r.votes, i) === "Shortlist"
+																		? "bg-neutral-100 text-black"
+																		: "border border-neutral-500 text-neutral-300"
+																}`}
+															>
+																{badgeFor(r.votes, i)}
+															</span>
+														)}
+														<span className="text-sm font-medium text-neutral-100 truncate">
+															{r.name}
+														</span>
 													</span>
 													<span className="text-[11px] font-medium tabular-nums text-neutral-500 flex-shrink-0">
-														{r.votes} · {pct(r.votes)}%
+														{label(r.votes)}
 													</span>
 												</div>
 												<div className="sm-bar-track" style={{ height: 6 }}>
@@ -2646,18 +2701,31 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 														whileInView={{ width: `${pct(r.votes)}%` }}
 														viewport={{ once: true }}
 														transition={{ duration: 0.6, ease: EASE }}
-														style={{ background: "rgba(255,255,255,0.28)" }}
+														style={{
+															background:
+																badgeFor(r.votes, i) === "Shortlist"
+																	? "#fafafa"
+																	: "rgba(255,255,255,0.28)",
+														}}
 													/>
 												</div>
 											</motion.li>
 										))}
 									</ul>
+									{tied > 0 && (
+										<p className="mt-3 text-xs text-neutral-500">
+											{tied} more {tied === 1 ? "project ties" : "projects tie"}{" "}
+											with the last shortlist spot. The tie is shown, not broken
+											here.
+										</p>
+									)}
 								</section>
 							);
 						})}
 						<p className="text-center text-xs text-neutral-600 pt-4 leading-relaxed">
-							Tallied directly from Stellar testnet. Every vote is a public,
-							verifiable transaction.
+							Tallied from ballots a relay wrote to Stellar testnet under random
+							ids, so no ballot links back to a Pilot. The record behind this
+							tally is digested and anchored on Tansu.
 						</p>
 					</div>
 				)}
