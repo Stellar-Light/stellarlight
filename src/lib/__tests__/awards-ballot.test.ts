@@ -522,8 +522,37 @@ describe("Horizon helpers", () => {
 		const res = await fetchTestnetAccount(voter.publicKey());
 		expect(res).toEqual({
 			funded: true,
-			account: { sequence: "99", data: { k: b64("v") } },
+			account: { sequence: "99", data: { k: b64("v") }, signers: [] },
 		});
+	});
+
+	it("fetchTestnetAccount: keeps only ed25519 signers with weight", async () => {
+		// the signer set is what lets a delegated or multisig Pilot vote, so a
+		// weight-0 key (revoked master) or a non-ed25519 signer must not be in it
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(
+				async () =>
+					new Response(
+						JSON.stringify({
+							sequence: "99",
+							data: {},
+							signers: [
+								{
+									key: voter.publicKey(),
+									type: "ed25519_public_key",
+									weight: 0,
+								},
+								{ key: "GDELEGATE", type: "ed25519_public_key", weight: 1 },
+								{ key: "XHASH", type: "sha256_hash", weight: 5 },
+							],
+						}),
+						{ status: 200 },
+					),
+			),
+		);
+		const res = await fetchTestnetAccount(voter.publicKey());
+		expect(res.funded === true && res.account.signers).toEqual(["GDELEGATE"]);
 	});
 
 	it("fetchTestnetAccount: 404 means unfunded (friendbot case)", async () => {

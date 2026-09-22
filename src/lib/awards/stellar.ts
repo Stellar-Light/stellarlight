@@ -63,6 +63,15 @@ export interface HorizonAccount {
 	sequence: string;
 	/** manageData entries: key → base64-encoded value. */
 	data: Record<string, string>;
+	/**
+	 * ed25519 signer keys with weight > 0.
+	 *
+	 * Not always just the master key: an account can set its master weight to
+	 * 0 and delegate, or require several signers. The relay used to verify the
+	 * master key alone, which refused those accounts outright even though
+	 * Horizon would have accepted their ballot.
+	 */
+	signers: string[];
 }
 
 export type FetchAccountResult =
@@ -90,6 +99,7 @@ export async function fetchTestnetAccount(
 		const body = (await res.json()) as {
 			sequence?: string;
 			data?: Record<string, string>;
+			signers?: Array<{ key?: string; type?: string; weight?: number }>;
 		};
 		if (typeof body.sequence !== "string") {
 			return {
@@ -99,7 +109,18 @@ export async function fetchTestnetAccount(
 		}
 		return {
 			funded: true,
-			account: { sequence: body.sequence, data: body.data ?? {} },
+			account: {
+				sequence: body.sequence,
+				data: body.data ?? {},
+				signers: (body.signers ?? [])
+					.filter(
+						(sg) =>
+							sg.type === "ed25519_public_key" &&
+							typeof sg.key === "string" &&
+							(sg.weight ?? 0) > 0,
+					)
+					.map((sg) => String(sg.key)),
+			},
 		};
 	} catch (err) {
 		return { funded: null, error: `Horizon unreachable: ${String(err)}` };

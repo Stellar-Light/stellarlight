@@ -54,7 +54,7 @@ const nominees: BallotNominee[] = [
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
 const funded = (data: Record<string, string>): ChainProbe["result"] => ({
 	funded: true,
-	account: { sequence: "1", data },
+	account: { sequence: "1", data, signers: [] },
 });
 
 describe("mirrorAccountData", () => {
