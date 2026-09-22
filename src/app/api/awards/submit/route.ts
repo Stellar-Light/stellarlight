@@ -18,7 +18,11 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { decodeAccountVotes, validateSignedBallot } from "@/lib/awards/ballot";
+import {
+	ballotSourceOf,
+	decodeAccountVotes,
+	validateSignedBallot,
+} from "@/lib/awards/ballot";
 import { hasMirroredBallot, recordBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
@@ -78,10 +82,25 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
+	// Fetch the account BEFORE validating, because validation needs its signer
+	// set: verifying only the master key refuses any Pilot who set their master
+	// weight to 0 or delegated to other signers, even though Horizon would
+	// accept their ballot. Reading the source first breaks that circle — and
+	// the source is still re-checked against the whitelist by the validator,
+	// which is the thing that decides.
+	const claimedSource = ballotSourceOf(signedXdr);
+	const sourceAccount = claimedSource
+		? await fetchTestnetAccount(claimedSource)
+		: null;
+
 	const verdict = validateSignedBallot(signedXdr, {
 		round: loaded.round,
 		nominees: loaded.nominees,
 		whitelist: loaded.whitelist,
+		signers:
+			sourceAccount?.funded === true
+				? sourceAccount.account.signers
+				: undefined,
 	});
 	if (!verdict.ok) {
 		return NextResponse.json(
@@ -99,7 +118,10 @@ export async function POST(req: NextRequest) {
 	// ballot exists only on chain. Gating on the mirror alone would let a
 	// second ballot through, and manageData would destroy the first as it
 	// landed, with nothing anywhere remembering it.
-	const account = await fetchTestnetAccount(verdict.source);
+	const account =
+		sourceAccount && claimedSource === verdict.source
+			? sourceAccount
+			: await fetchTestnetAccount(verdict.source);
 	if (account.funded === null) {
 		return NextResponse.json(
 			{

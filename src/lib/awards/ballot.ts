@@ -35,6 +35,7 @@
 
 import {
 	Account,
+	FeeBumpTransaction,
 	Keypair,
 	Memo,
 	Operation,
@@ -333,6 +334,16 @@ export interface SignedBallotContext {
 	/** Whitelisted voter addresses for this round. */
 	whitelist: Set<string>;
 	now?: Date;
+	/**
+	 * ed25519 signer keys (weight > 0) on the SOURCE account, from Horizon.
+	 *
+	 * Omit and the master key is assumed, which is what this used to check
+	 * unconditionally — and which refuses any account that set its master
+	 * weight to 0 or delegated to other signers, even though Horizon would
+	 * accept its ballot. Supplying the real signer set is what lets a
+	 * multisig or delegated Pilot vote.
+	 */
+	signers?: string[];
 }
 
 export type SignedBallotVerdict =
@@ -350,6 +361,31 @@ export type SignedBallotVerdict =
  * round, valid nominees, testnet signature. See module doc for the threat
  * model — this is what makes POST /api/awards/submit not an open relay.
  */
+/**
+ * The source account of a signed ballot, without validating anything else.
+ *
+ * Exists for one reason: the relay needs the account's SIGNER SET to verify
+ * the signature (so a multisig or master-weight-0 Pilot can vote), and it
+ * needs the source to fetch the account. Parsing the source first breaks that
+ * circle. Returns null on anything unparseable — the full validator is still
+ * the thing that decides whether the ballot is acceptable.
+ */
+export function ballotSourceOf(signedXdr: string): string | null {
+	try {
+		const parsed = TransactionBuilder.fromXDR(
+			signedXdr,
+			AWARDS_NETWORK_PASSPHRASE,
+		);
+		const tx =
+			parsed instanceof FeeBumpTransaction
+				? parsed.innerTransaction
+				: (parsed as Transaction);
+		return tx.source ?? null;
+	} catch {
+		return null;
+	}
+}
+
 export function validateSignedBallot(
 	signedXdr: string,
 	ctx: SignedBallotContext,
@@ -364,22 +400,30 @@ export function validateSignedBallot(
 		return { ok: false, errors: [`voting is not open: ${openState.reason}`] };
 	}
 
-	// Parse strictly as a testnet transaction. Fee-bumps are refused: we only
-	// relay the exact shape we build (a fee-bump wrapper would be someone
-	// else's construction).
+	// Parse strictly as a testnet transaction.
+	//
+	// A fee-bump is UNWRAPPED and its inner transaction validated, rather than
+	// refused. Some wallet kits return a fee-bumped envelope when fee
+	// sponsorship is on, and who paid the fee has no bearing on whether a
+	// ballot is valid — every check below still runs against the inner
+	// transaction, which is the one that writes the data and which the voter
+	// signed. Refusing it blocked a legitimate Pilot for a reason they could
+	// neither see nor fix.
+	//
+	// The old guard was `!("operations" in parsed)`, which never fired:
+	// FeeBumpTransaction exposes an `operations` getter for its inner ops. So
+	// the wrapper fell through, `source` read as the FEE payer, and the voter
+	// was told their address was not on the whitelist.
 	let tx: Transaction;
 	try {
 		const parsed = TransactionBuilder.fromXDR(
 			signedXdr,
 			AWARDS_NETWORK_PASSPHRASE,
 		);
-		if (!("operations" in parsed)) {
-			return {
-				ok: false,
-				errors: ["fee-bump transactions are not accepted by this relay"],
-			};
-		}
-		tx = parsed as Transaction;
+		tx =
+			parsed instanceof FeeBumpTransaction
+				? parsed.innerTransaction
+				: (parsed as Transaction);
 	} catch {
 		return { ok: false, errors: ["could not parse transaction XDR"] };
 	}
@@ -399,19 +443,30 @@ export function validateSignedBallot(
 	// and never verifies here.
 	try {
 		const hash = tx.hash();
-		const kp = Keypair.fromPublicKey(source);
-		const signedBySource = tx.signatures.some((sig) => {
+		// Default to the master key when no signer set was supplied — the pure
+		// tests and any caller without Horizon in hand keep the old behaviour.
+		const allowed = ctx.signers?.length ? ctx.signers : [source];
+		const keys = allowed.flatMap((k) => {
 			try {
-				return kp.verify(hash, sig.signature());
+				return [Keypair.fromPublicKey(k)];
 			} catch {
-				return false;
+				return [];
 			}
 		});
+		const signedBySource = tx.signatures.some((sig) =>
+			keys.some((kp) => {
+				try {
+					return kp.verify(hash, sig.signature());
+				} catch {
+					return false;
+				}
+			}),
+		);
 		if (!signedBySource) {
 			return {
 				ok: false,
 				errors: [
-					"transaction is not signed by the voter account for TESTNET (wrong network or wrong key)",
+					"transaction is not signed by a signer on the voter account for TESTNET (wrong network or wrong key)",
 				],
 			};
 		}
