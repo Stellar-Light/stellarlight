@@ -66,7 +66,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		{
 			kind: "milestone",
 			headline: "Stellar rails, made invisible",
-			detail: "Money that just moves — no jargon, no friction.",
+			detail: "Money that just moves. No jargon, no friction.",
 		},
 	],
 	elsa: [
@@ -200,7 +200,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		{
 			kind: "growth",
 			headline: "Bridged volume climbed",
-			detail: "Value came in, value went out — all year.",
+			detail: "Value came in, value went out, all year.",
 		},
 		{
 			kind: "milestone",

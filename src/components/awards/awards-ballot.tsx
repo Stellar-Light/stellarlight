@@ -2308,59 +2308,116 @@ const WINNERS_2025 = [
 ] as const;
 
 /**
- * Last year, kept at the bottom of the page as context for this year's vote.
- * Deliberately quieter than the live ballot — dimmer borders, muted type, no
- * motion — so it reads as a record and never competes with the thing you came
- * here to do. Several of these names are nominated again this year; that is
- * left to speak for itself.
+ * Last year, at the bottom of the page as context for this year's vote.
+ *
+ * Each winner is a small stage. The card sits behind a closed curtain until
+ * it scrolls into view, then the curtain parts on the winner's name and a
+ * burst of confetti goes up behind it — the same two mechanisms the page
+ * already uses for the opening reveal and the vote receipt, at card size, so
+ * "and the winner is" reads the way it does on the night rather than as a
+ * grey footnote. It plays once per card, on the reader's scroll, never on
+ * page load out of view.
+ *
+ * Several of these names are nominated again this year; that is left to
+ * speak for itself.
  */
+function WinnerCard({
+	winner,
+	index,
+}: {
+	winner: (typeof WINNERS_2025)[number];
+	index: number;
+}) {
+	const [open, setOpen] = useState(false);
+	const panels = [0, 1, 2, 3, 4, 5];
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: 16 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, amount: 0.45 }}
+			onViewportEnter={() => setOpen(true)}
+			transition={{ duration: 0.5, ease: EASE, delay: index * 0.1 }}
+			className={`sm-win relative overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 sm:p-6 ${
+				open ? "is-open" : ""
+			}`}
+			style={{ ["--sm-d" as string]: `${index * 0.16}s` }}
+		>
+			<span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+				{winner.category}
+			</span>
+			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+				{winner.name}
+				{/* the burst goes up behind the name, as the curtain clears it */}
+				{open && (
+					<span className="sm-confetti" aria-hidden="true">
+						{Array.from({ length: 14 }, (_, i) => (
+							<i
+								// biome-ignore lint/suspicious/noArrayIndexKey: static burst
+								key={i}
+								style={{
+									["--sm-i" as string]: i,
+									["--sm-x" as string]: `${(i % 2 ? 1 : -1) * (12 + ((i * 37) % 90))}px`,
+									["--sm-y" as string]: `${-(50 + ((i * 53) % 90))}px`,
+									["--sm-r" as string]: `${140 + ((i * 97) % 320)}deg`,
+									["--sm-c" as string]: i % 2 === 0 ? "#ffffff" : "#8a8a8a",
+								}}
+							/>
+						))}
+					</span>
+				)}
+			</p>
+			<p className="mt-1 text-sm font-medium text-neutral-200">{winner.line}</p>
+			<p className="mt-3 text-sm leading-relaxed text-neutral-300">
+				{winner.blurb}
+			</p>
+			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
+				Also shortlisted: {winner.finalists}
+			</p>
+			{/* the curtain, closed until the card is in view */}
+			<span className="sm-win-curtain" aria-hidden="true">
+				<span className="sm-win-half l">
+					{panels.map((n) => (
+						<i key={n} />
+					))}
+				</span>
+				<span className="sm-win-half r">
+					{panels.map((n) => (
+						<i key={n} />
+					))}
+				</span>
+			</span>
+		</motion.div>
+	);
+}
+
 function PastWinners({ className = "" }: { className?: string }) {
 	return (
 		<section
 			aria-label="2025 winners"
 			className={`max-w-6xl mx-auto px-4 sm:px-6 ${className}`}
 		>
-			<div className="border-t border-[#242424] pt-10">
+			<div className="border-t border-[#2f2f2f] pt-12">
 				<div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-					<h2 className="text-lg font-semibold tracking-tight text-neutral-300">
+					<h2 className="text-2xl font-semibold tracking-tight text-neutral-50">
 						2025 winners
 					</h2>
 					<a
 						href="https://stellar.org/blog/ecosystem/stellar-i-awards-2025"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-1 text-xs font-medium text-neutral-500 transition-colors hover:text-neutral-300"
+						className="inline-flex items-center gap-1 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-50"
 					>
 						The 2025 recap on stellar.org
-						<ArrowUpRight className="h-3.5 w-3.5" />
+						<ArrowUpRight className="h-4 w-4" />
 					</a>
 				</div>
-				<p className="mb-6 max-w-2xl text-sm leading-relaxed text-neutral-500">
+				<p className="mb-7 max-w-2xl text-sm leading-relaxed text-neutral-300">
 					The 2025 round ran at Stellar Meridian: 70+ applications, 98 SCF
 					voters shortlisting 12 finalists, and 9 judges.
 				</p>
-				<div className="grid gap-3 sm:grid-cols-3">
-					{WINNERS_2025.map((winner) => (
-						<div
-							key={winner.category}
-							className="rounded-xl border border-[#242424] bg-[#1a1a1a] p-4"
-						>
-							<span className="text-xs font-medium text-neutral-500">
-								{winner.category}
-							</span>
-							<p className="mt-1 text-base font-semibold tracking-tight text-neutral-200">
-								{winner.name}
-							</p>
-							<p className="mt-0.5 text-[13px] text-neutral-400">
-								{winner.line}
-							</p>
-							<p className="mt-2 text-[13px] leading-relaxed text-neutral-500">
-								{winner.blurb}
-							</p>
-							<p className="mt-3 border-t border-[#242424] pt-2.5 text-xs leading-relaxed text-neutral-600">
-								Also shortlisted: {winner.finalists}
-							</p>
-						</div>
+				<div className="grid gap-4 sm:grid-cols-3">
+					{WINNERS_2025.map((winner, i) => (
+						<WinnerCard key={winner.category} winner={winner} index={i} />
 					))}
 				</div>
 			</div>
