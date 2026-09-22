@@ -53,6 +53,20 @@ describe("highlights sheet CTA", () => {
 		expect(screen.queryByRole("button", { name: /Vote for Beans/ })).toBeNull();
 	});
 
+	it("lets Profile take the row when it is the only button", () => {
+		// with no vote CTA the Profile link was an orphan at its own width;
+		// alone it should fill the row, beside a vote button keep its width
+		open({ canPick: false, onConnect: null });
+		const alone = screen.getByRole("link", { name: /Profile/ });
+		expect(alone.className).toMatch(/\bflex-1\b/);
+		expect(alone.className).not.toMatch(/flex-shrink-0/);
+		cleanup();
+		open({ canPick: true });
+		const beside = screen.getByRole("link", { name: /Profile/ });
+		expect(beside.className).toMatch(/flex-shrink-0/);
+		expect(beside.className).not.toMatch(/\bflex-1\b/);
+	});
+
 	it("offers nothing when the reader could never pick from here", () => {
 		// not a Pilot, or already voted: onConnect is null and there is no CTA,
 		// rather than a button that refuses
