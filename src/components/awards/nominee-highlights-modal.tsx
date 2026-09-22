@@ -190,11 +190,23 @@ export function NomineeHighlightsModal({
 	isSelected,
 	onClose,
 	onVote,
+	canPick = true,
+	onConnect = null,
 }: {
 	nominee: HighlightNominee | null;
 	isSelected: boolean;
 	onClose: () => void;
 	onVote: (slug: string) => void;
+	/** Whether a pick can be made from here at all. */
+	canPick?: boolean;
+	/**
+	 * Set only when the reason picking is unavailable is that no wallet is
+	 * connected — then the CTA offers to connect instead of going dead. When
+	 * picking is unavailable for any other reason (not on the voter list, or
+	 * already voted) this is null and the CTA is simply not rendered, because
+	 * there is nothing the reader can do about it here.
+	 */
+	onConnect?: (() => void) | null;
 }) {
 	// Keep the last nominee around through the exit animation so content
 	// doesn't blank out as the sheet springs away.
@@ -423,25 +435,31 @@ export function NomineeHighlightsModal({
 								}}
 								className="mt-6 flex items-center gap-3"
 							>
-								<motion.button
-									type="button"
-									whileTap={{ scale: 0.97 }}
-									onClick={() => onVote(data.slug)}
-									className={`inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors ${
-										isSelected
-											? "border border-[#3f3f3f] bg-[#242424] text-neutral-100"
-											: "bg-neutral-100 text-black hover:bg-white"
-									}`}
-								>
-									{isSelected ? (
-										<>
-											<Check className="h-4 w-4" strokeWidth={3} />
-											Your pick
-										</>
-									) : (
-										`Vote for ${data.name}`
-									)}
-								</motion.button>
+								{(canPick || onConnect) && (
+									<motion.button
+										type="button"
+										whileTap={{ scale: 0.97 }}
+										onClick={() =>
+											canPick ? onVote(data.slug) : onConnect?.()
+										}
+										className={`inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors ${
+											isSelected
+												? "border border-[#3f3f3f] bg-[#242424] text-neutral-100"
+												: "bg-neutral-100 text-black hover:bg-white"
+										}`}
+									>
+										{!canPick ? (
+											"Connect wallet to vote"
+										) : isSelected ? (
+											<>
+												<Check className="h-4 w-4" strokeWidth={3} />
+												Your pick
+											</>
+										) : (
+											`Vote for ${data.name}`
+										)}
+									</motion.button>
+								)}
 								<a
 									href={data.projectUrl}
 									target="_blank"
