@@ -17,6 +17,7 @@ import {
 	Keypair,
 	Networks,
 	type Transaction,
+	xdr,
 } from "@stellar/stellar-sdk";
 
 /** The ONLY network the awards feature speaks. */
@@ -262,6 +263,96 @@ export function relayKeypair(): Keypair | null {
 	}
 }
 
+/**
+ * Horizon's ASYNC submit: Core's verdict in ~100ms instead of holding the
+ * request until a ledger closes. Two relay instances that read the same
+ * sequence both get PENDING here (Core silently drops the loser later) —
+ * the sync endpoint reported that loser as a 30-second timeout.
+ */
+export type AsyncSubmit =
+	| { status: "queued"; hash: string }
+	| { status: "refused"; resultCodes: string[]; detail: string }
+	| { status: "busy"; detail: string }
+	| { status: "unknown"; detail: string };
+
+export async function submitToTestnetHorizonAsync(
+	signedXdr: string,
+): Promise<AsyncSubmit> {
+	try {
+		const res = await fetch(`${HORIZON_TESTNET_URL}/transactions_async`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Accept: "application/json",
+			},
+			body: `tx=${encodeURIComponent(signedXdr)}`,
+			cache: "no-store",
+			signal: AbortSignal.timeout(15_000),
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Horizon envelope
+		let body: any = null;
+		try {
+			body = await res.json();
+		} catch {
+			/* non-JSON Horizon reply */
+		}
+		const st = typeof body?.tx_status === "string" ? body.tx_status : null;
+		if (
+			(st === "PENDING" || st === "DUPLICATE") &&
+			typeof body?.hash === "string"
+		) {
+			return { status: "queued", hash: body.hash };
+		}
+		if (st === "TRY_AGAIN_LATER" || res.status === 503) {
+			return { status: "busy", detail: "Horizon asked to try again later" };
+		}
+		if (st === "ERROR") {
+			const codes = decodeResultCodes(
+				body?.errorResultXdr ?? body?.error_result_xdr,
+			);
+			return {
+				status: "refused",
+				resultCodes: codes,
+				detail: `Horizon refused: ${codes.join(", ") || "unknown code"}`,
+			};
+		}
+		const detail =
+			typeof body?.detail === "string"
+				? body.detail
+				: `Horizon responded ${res.status}`;
+		if (res.status >= 400 && res.status < 500) {
+			return { status: "refused", resultCodes: [], detail };
+		}
+		return { status: "unknown", detail };
+	} catch (err) {
+		return { status: "unknown", detail: `Horizon unreachable: ${String(err)}` };
+	}
+}
+
+/** "txBadSeq" → "tx_bad_seq", the spelling the sync endpoint uses. */
+const snakeCode = (name: string) =>
+	name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+
+function decodeResultCodes(b64: unknown): string[] {
+	if (typeof b64 !== "string" || !b64) return [];
+	try {
+		const result = xdr.TransactionResult.fromXDR(b64, "base64").result();
+		const codes = [snakeCode(result.switch().name)];
+		if (result.switch().name === "txFailed") {
+			for (const op of result.results()) {
+				try {
+					codes.push(snakeCode(op.tr().value().switch().name));
+				} catch {
+					codes.push(snakeCode(op.switch().name));
+				}
+			}
+		}
+		return codes;
+	} catch {
+		return [];
+	}
+}
+
 export type RelaySubmitResult =
 	| { ok: true; hash: string; attempts: number }
 	| {
@@ -332,7 +423,8 @@ async function submitFromRelayUnlocked(
 			resultCodes: [],
 		};
 	}
-	const attempts = Math.max(1, opts.attempts ?? 5);
+	// 4 × (read + submit + ≤8s poll) + backoffs stays inside the route's 60s
+	const attempts = Math.max(1, opts.attempts ?? 4);
 	const backoff = opts.backoffMs ?? defaultBackoff;
 	let last: RelaySubmitResult = {
 		ok: false,
@@ -372,28 +464,50 @@ async function submitFromRelayUnlocked(
 			};
 		}
 		tx.sign(kp);
-		const res = await submitToTestnetHorizon(tx.toXDR());
-		if (res.ok) return { ok: true, hash: res.hash, attempts: n };
-		last = { ok: false, error: res.detail, resultCodes: res.resultCodes };
-		if (res.resultCodes.includes("tx_bad_seq")) {
+		const hash = tx.hash().toString("hex");
+		const sub = await submitToTestnetHorizonAsync(tx.toXDR());
+		if (sub.status === "refused") {
+			last = { ok: false, error: sub.detail, resultCodes: sub.resultCodes };
+			if (!sub.resultCodes.includes("tx_bad_seq")) return last;
 			// another instance won this sequence; back off, re-read, retry
 			if (n < attempts) await sleep(backoff(n));
 			continue;
 		}
-		if (
-			res.resultCodes.length === 0 &&
-			(res.status === 0 || res.status >= 500)
-		) {
-			// No verdict, after the bytes may have left (Horizon's 504 is
-			// literally "submitted, not yet seen in a ledger"). Poll briefly,
-			// then hand the uncertainty back with the hash.
-			const hash = tx.hash().toString("hex");
-			if (await transactionLanded(hash, opts.pollMs ?? 8_000)) {
-				return { ok: true, hash, attempts: n };
-			}
-			return { ...last, pending: true, hash };
+		if (sub.status === "busy") {
+			last = { ok: false, error: sub.detail, resultCodes: [] };
+			if (n < attempts) await sleep(backoff(n));
+			continue;
 		}
-		return last;
+		// Queued — or no verdict after the bytes may have left. Wait for a
+		// ledger or two.
+		if (await transactionLanded(hash, opts.pollMs ?? 8_000)) {
+			return { ok: true, hash, attempts: n };
+		}
+		// Not seen. If the relay's sequence has moved past ours, a concurrent
+		// write took it and this transaction can never land: safe to build a
+		// fresh one. This is how the loser of a collision finds out in
+		// seconds rather than after a 30s timeout and a three-minute hold.
+		const after = await fetchTestnetAccount(kp.publicKey());
+		if (
+			after.funded === true &&
+			BigInt(after.account.sequence) >= BigInt(tx.sequence)
+		) {
+			last = {
+				ok: false,
+				error: "relay sequence taken by a concurrent write",
+				resultCodes: ["tx_bad_seq"],
+			};
+			if (n < attempts) await sleep(backoff(n));
+			continue;
+		}
+		// Genuinely unknown: it may still land until its time bound.
+		return {
+			ok: false,
+			error: sub.status === "unknown" ? sub.detail : "not confirmed in time",
+			resultCodes: [],
+			pending: true,
+			hash,
+		};
 	}
 	return last;
 }

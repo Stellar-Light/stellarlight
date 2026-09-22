@@ -261,13 +261,15 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 			: null;
 	const post =
 		(body: object, status: number) => (url: string, init?: RequestInit) =>
-			url.endsWith("/transactions") && init?.method === "POST"
+			url.endsWith("/transactions_async") && init?.method === "POST"
 				? new Response(JSON.stringify(body), { status })
 				: null;
 	const lookup = (status: number) => (url: string, init?: RequestInit) =>
 		/\/transactions\/[0-9a-f]{64}$/.test(url) && init?.method !== "POST"
 			? new Response("{}", { status })
 			: null;
+	const queued = { tx_status: "PENDING", hash: "h" };
+	const fast = { pollMs: 0, backoffMs: () => 0 };
 	const build = (a: Account) =>
 		new TransactionBuilder(a, {
 			fee: "10000",
@@ -277,17 +279,18 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 			.setTimeout(60)
 			.build();
 
-	it("reports a Horizon timeout as PENDING with the hash, never as failed", async () => {
+	it("reports a queued-but-unseen write as PENDING with the hash while the sequence is still ours", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
 		vi.stubGlobal(
 			"fetch",
 			fetchScript([
 				account("100"),
-				post({ title: "Timeout" }, 504),
+				post(queued, 201),
 				lookup(404),
+				account("100"), // not consumed: it may still land
 			]),
 		);
-		const r = await submitFromRelay(build, { pollMs: 0 });
+		const r = await submitFromRelay(build, fast);
 		expect(r.ok).toBe(false);
 		if (!r.ok) {
 			expect(r.pending).toBe(true);
@@ -295,7 +298,7 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 		}
 	});
 
-	it("turns a timeout into success when the poll finds the transaction", async () => {
+	it("turns a no-verdict 5xx into success when the poll finds the transaction", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
 		vi.stubGlobal(
 			"fetch",
@@ -305,14 +308,31 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 				lookup(200),
 			]),
 		);
-		const r = await submitFromRelay(build, { pollMs: 0 });
+		const r = await submitFromRelay(build, fast);
 		expect(r.ok).toBe(true);
+	});
+
+	it("retries fresh when a concurrent write took the sequence, instead of holding the voter", async () => {
+		process.env.AWARDS_RELAY_SECRET = relay.secret();
+		const f = fetchScript([
+			account("100"),
+			post(queued, 201),
+			lookup(404),
+			account("101"), // consumed by the other instance: ours can never land
+			account("101"),
+			post(queued, 201),
+			lookup(200),
+		]);
+		vi.stubGlobal("fetch", f);
+		const r = await submitFromRelay(build, fast);
+		expect(r).toMatchObject({ ok: true, attempts: 2 });
+		expect(f).toHaveBeenCalledTimes(7);
 	});
 
 	it("does not call a 4xx pending: the bytes were refused", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
 		vi.stubGlobal("fetch", fetchScript([account("100"), post({}, 429)]));
-		const r = await submitFromRelay(build, { pollMs: 0 });
+		const r = await submitFromRelay(build, fast);
 		expect(r.ok).toBe(false);
 		if (!r.ok) expect(r.pending).toBeUndefined();
 	});
@@ -335,17 +355,19 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 		// call's submit entry and the script would throw
 		const f = fetchScript([
 			account("100"),
-			post({ hash: "a".repeat(64) }, 200),
+			post(queued, 201),
+			lookup(200),
 			account("101"),
-			post({ hash: "b".repeat(64) }, 200),
+			post(queued, 201),
+			lookup(200),
 		]);
 		vi.stubGlobal("fetch", f);
 		const [x, y] = await Promise.all([
-			submitFromRelay(build),
-			submitFromRelay(build),
+			submitFromRelay(build, fast),
+			submitFromRelay(build, fast),
 		]);
 		expect(x.ok && y.ok).toBe(true);
-		expect(f).toHaveBeenCalledTimes(4);
+		expect(f).toHaveBeenCalledTimes(6);
 	});
 });
 
