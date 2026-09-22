@@ -257,6 +257,33 @@ export async function hasMirroredBallot(
 }
 
 /**
+ * Every ballot row for a round, paged.
+ *
+ * A fixed `limit` truncates in silence, and these rows ARE the tally under
+ * one-ballot-per-voter: a dropped row is a voter who silently stops being
+ * counted and starts reading as "hasn't voted". Paging costs one extra query
+ * per 200 rows and removes the cliff entirely.
+ */
+async function allBallotRows(
+	payload: Payload,
+	roundId: string,
+): Promise<Record<string, unknown>[]> {
+	const out: Record<string, unknown>[] = [];
+	for (let page = 1; ; page++) {
+		const res = await payload.find({
+			collection: "award-ballots",
+			where: { round: { equals: roundId } },
+			limit: 200,
+			page,
+			depth: 0,
+			overrideAccess: true,
+		});
+		out.push(...(res.docs as unknown as Record<string, unknown>[]));
+		if (!res.hasNextPage || res.docs.length === 0) return out;
+	}
+}
+
+/**
  * The round's first-ballot record: one entry per address, carrying the picks
  * that count plus the tx hash and timestamp of the submission they came from.
  *
@@ -268,15 +295,9 @@ export async function readFirstBallotRecord(
 	payload: Payload,
 	roundId: string,
 ): Promise<FirstBallotEntry[]> {
-	const rows = await payload.find({
-		collection: "award-ballots",
-		where: { round: { equals: roundId } },
-		limit: 2000,
-		depth: 0,
-		overrideAccess: true,
-	});
+	const rows = await allBallotRows(payload, roundId);
 	const out: FirstBallotEntry[] = [];
-	for (const row of rows.docs) {
+	for (const row of rows) {
 		const address = String(row.address ?? "")
 			.trim()
 			.toUpperCase();
@@ -336,15 +357,9 @@ export async function readCurrentBallots(
 	payload: Payload,
 	roundId: string,
 ): Promise<Map<string, BallotSelections>> {
-	const rows = await payload.find({
-		collection: "award-ballots",
-		where: { round: { equals: roundId } },
-		limit: 2000,
-		depth: 0,
-		overrideAccess: true,
-	});
+	const rows = await allBallotRows(payload, roundId);
 	const out = new Map<string, BallotSelections>();
-	for (const row of rows.docs) {
+	for (const row of rows) {
 		const address = String(row.address ?? "")
 			.trim()
 			.toUpperCase();

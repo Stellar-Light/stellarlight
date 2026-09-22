@@ -101,23 +101,41 @@ export async function loadRoundOrThrow(
 	}
 	if (!roundDoc) return null;
 
-	const [nomineeDocs, voterDocs] = await Promise.all([
-		payload.find({
-			collection: "award-nominees",
-			where: { round: { equals: roundDoc.id } },
-			// depth 2: nominee → project → logo (media doc), so cards can render
-			// the directory logo without extra queries.
-			depth: 2,
-			limit: 100,
-		}),
-		payload.find({
-			collection: "award-voters",
-			where: { round: { equals: roundDoc.id } },
-			depth: 0,
-			limit: 500,
-			overrideAccess: true,
-		}),
+	// Paged, not capped. A fixed `limit` truncates in SILENCE: the 501st
+	// whitelisted Pilot would simply not be in `whitelist`, so the relay would
+	// refuse their ballot as "not on the voter list", they would not appear in
+	// the turnout denominator, and nothing anywhere would say a row had been
+	// dropped. Same for the 101st nominee, whose votes decodeAccountVotes would
+	// then discard as a since-removed slug.
+	const db = payload;
+	const allPages = async (
+		collection: "award-nominees" | "award-voters",
+		depth: number,
+	): Promise<unknown[]> => {
+		const out: unknown[] = [];
+		for (let page = 1; ; page++) {
+			const res = await db.find({
+				collection,
+				where: { round: { equals: roundDoc.id } },
+				depth,
+				limit: 200,
+				page,
+				overrideAccess: true,
+			});
+			out.push(...res.docs);
+			// A malformed page response must not spin forever.
+			if (!res.hasNextPage || res.docs.length === 0) return out;
+		}
+	};
+
+	const [nomineeRows, voterRows] = await Promise.all([
+		// depth 2: nominee → project → logo (media doc), so cards can render
+		// the directory logo without extra queries.
+		allPages("award-nominees", 2),
+		allPages("award-voters", 0),
 	]);
+	const nomineeDocs = { docs: nomineeRows };
+	const voterDocs = { docs: voterRows };
 
 	const round = toBallotRound(roundDoc);
 	const categoryOrder = new Map(
