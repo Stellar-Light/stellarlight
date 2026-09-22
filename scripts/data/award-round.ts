@@ -169,8 +169,27 @@ async function main() {
 		console.error(`\nno round with slug "${SLUG}"`);
 		return 1;
 	}
-	if (target.status === STATUS) {
-		console.log(`\n${SLUG} is already ${STATUS} — nothing to do.`);
+	// --picks on an existing round. Only while it is a DRAFT: changing the slot
+	// count under an open round changes the manageData key shape
+	// (`.<slot>` suffixes appear above 1), so ballots already cast would stop
+	// decoding — a silent loss, not an error.
+	const picksArg = arg("picks");
+	const picks =
+		picksArg === null ? null : Math.max(1, Math.floor(Number(picksArg) || 1));
+	if (picks !== null && (target.status !== "draft" || STATUS !== "draft")) {
+		console.error(
+			`REFUSED: --picks only applies to a round that is and stays draft (${SLUG} is ${target.status} → ${STATUS}). Ballots cast under one slot count do not decode under another.`,
+		);
+		return 1;
+	}
+
+	if (
+		target.status === STATUS &&
+		(picks === null || picks === Number(target.picksPerCategory ?? 1))
+	) {
+		console.log(
+			`\n${SLUG} is already ${STATUS} — nothing to do (pass --picks=N to change the slot count of a draft).`,
+		);
 		return 0;
 	}
 
@@ -201,19 +220,6 @@ async function main() {
 		...(OPENS ? { opensAt: iso(OPENS) } : {}),
 		...(CLOSES ? { closesAt: iso(CLOSES) } : {}),
 	};
-	// --picks on an existing round. Only while it is a DRAFT: changing the slot
-	// count under an open round changes the manageData key shape
-	// (`.<slot>` suffixes appear above 1), so ballots already cast would stop
-	// decoding — a silent loss, not an error.
-	const picksArg = arg("picks");
-	const picks =
-		picksArg === null ? null : Math.max(1, Math.floor(Number(picksArg) || 1));
-	if (picks !== null && (target.status !== "draft" || STATUS !== "draft")) {
-		console.error(
-			`REFUSED: --picks only applies to a round that is and stays draft (${SLUG} is ${target.status} → ${STATUS}). Ballots cast under one slot count do not decode under another.`,
-		);
-		return 1;
-	}
 	console.log(
 		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}${picks !== null ? ` · picks ${target.picksPerCategory ?? 1} → ${picks}` : ""}`,
 	);
