@@ -269,7 +269,7 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 			? new Response("{}", { status })
 			: null;
 	const queued = { tx_status: "PENDING", hash: "h" };
-	const fast = { pollMs: 0, backoffMs: () => 0 };
+	const fast = { pollMs: 0, backoffMs: () => 0, busyWaitMs: 0 };
 	const build = (a: Account) =>
 		new TransactionBuilder(a, {
 			fee: "10000",
@@ -327,6 +327,22 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 		const r = await submitFromRelay(build, fast);
 		expect(r).toMatchObject({ ok: true, attempts: 2 });
 		expect(f).toHaveBeenCalledTimes(7);
+	});
+
+	it("waits out a queued write from another instance (TRY_AGAIN_LATER) and lands on the next sequence", async () => {
+		process.env.AWARDS_RELAY_SECRET = relay.secret();
+		const f = fetchScript([
+			account("100"),
+			post({ tx_status: "TRY_AGAIN_LATER" }, 503),
+			account("101"), // the other instance's write applied
+			account("101"),
+			post(queued, 201),
+			lookup(200),
+		]);
+		vi.stubGlobal("fetch", f);
+		const r = await submitFromRelay(build, fast);
+		expect(r).toMatchObject({ ok: true, attempts: 2 });
+		expect(f).toHaveBeenCalledTimes(6);
 	});
 
 	it("does not call a 4xx pending: the bytes were refused", async () => {

@@ -248,7 +248,11 @@ export async function POST(req: NextRequest) {
 			);
 		}
 		await releaseBallot(reserved.id);
-		const busy = result.resultCodes.includes("tx_bad_seq");
+		// both mean "another ballot was being written at that moment": the
+		// relay already retried; the voter can simply submit again
+		const busy =
+			result.resultCodes.includes("tx_bad_seq") ||
+			result.resultCodes.includes("try_again_later");
 		return NextResponse.json(
 			{
 				error: busy ? "relay_busy" : "relay_failed",
