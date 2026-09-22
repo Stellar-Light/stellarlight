@@ -26,9 +26,9 @@ on:
         required: false
         default: ""
       picks:
-        description: "Picks per category (create only): 1 = the vote, N = nominations"
+        description: "Picks per category. create: the slot count (empty = 1). status=draft on a draft round: change it. LEAVE EMPTY for any other status flip — the script refuses --picks outside draft→draft."
         required: false
-        default: "1"
+        default: ""
       closes:
         description: "Optional closesAt (ISO 8601), for create or a status flip"
         required: false

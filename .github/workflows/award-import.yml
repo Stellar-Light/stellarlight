@@ -59,9 +59,12 @@ jobs:
           # Through the environment, not argv — argv shows up in process lists
           # and in the step's own echoed command line.
           AWARD_IMPORT_CSV: ${{ inputs.csv }}
+          IN_KIND: ${{ inputs.kind }}
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ inputs.execute }}
         shell: bash
         run: |
-          args="--kind=${{ inputs.kind }}"
-          if [ -n "${{ inputs.round }}" ]; then args="$args --round=${{ inputs.round }}"; fi
-          if [ "${{ inputs.execute }}" = "true" ]; then args="$args --execute"; fi
-          pnpm exec tsx scripts/data/award-import.ts $args
+          args=(--kind="$IN_KIND")
+          if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-import.ts "${args[@]}"
