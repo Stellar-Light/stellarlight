@@ -1699,12 +1699,18 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								const depth =
 									(idx - ballotPage + categories.length) % categories.length;
 								const isTop = depth === 0;
-								const pickedSlug = (selections[category.key] ?? [])[0];
-								const pickedNominee = pickedSlug
-									? ((nomineesByCategory.get(category.key) ?? []).find(
-											(n) => n.slug === pickedSlug,
-										) ?? null)
-									: null;
+								const pool = nomineesByCategory.get(category.key) ?? [];
+								const pickedNominees = (selections[category.key] ?? []).flatMap(
+									(sl) => {
+										const n = pool.find((x) => x.slug === sl);
+										return n ? [n] : [];
+									},
+								);
+								const need = requiredFor(category.key);
+								// a card is done when its SLATE is full — on a one-pick round
+								// that is the one pick; on nominations it is all N
+								const full = need > 0 && pickedNominees.length >= need;
+								const pickedNominee = pickedNominees[0] ?? null;
 								return (
 									<motion.div
 										key={category.key}
@@ -1743,14 +1749,19 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 											<span className="text-xs font-medium text-neutral-400">
 												{category.name}
 											</span>
-											{pickedNominee && (
+											{picksPerCategory > 1 && (
+												<span className="ml-auto text-xs tabular-nums text-neutral-500">
+													{pickedNominees.length}/{need}
+												</span>
+											)}
+											{full && (
 												<Check
-													className="ml-auto h-3.5 w-3.5 text-neutral-300"
+													className={`${picksPerCategory > 1 ? "" : "ml-auto "}h-3.5 w-3.5 text-neutral-300`}
 													strokeWidth={3}
 												/>
 											)}
 										</div>
-										{pickedNominee ? (
+										{pickedNominee && picksPerCategory === 1 ? (
 											<div className="flex items-center gap-2.5">
 												<Image
 													src={pickedNominee.logoUrl || "/logo.png"}
@@ -1763,10 +1774,32 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 													{pickedNominee.name}
 												</span>
 											</div>
+										) : pickedNominee ? (
+											// nominations: the whole slate so far — logos overlap,
+											// names truncate, the count above says how many remain
+											<div className="flex min-w-0 items-center gap-2.5">
+												<div className="flex flex-shrink-0 -space-x-1.5">
+													{pickedNominees.map((n) => (
+														<Image
+															key={n.slug}
+															src={n.logoUrl || "/logo.png"}
+															alt=""
+															width={26}
+															height={26}
+															className="h-[26px] w-[26px] rounded-md border border-[#2f2f2f] bg-[#111] object-cover"
+														/>
+													))}
+												</div>
+												<span className="truncate text-sm font-medium text-neutral-100">
+													{pickedNominees.map((n) => n.name).join(", ")}
+												</span>
+											</div>
 										) : (
 											<span className="text-sm text-neutral-500">
 												{address
-													? "Not picked yet. Tap a nominee above."
+													? picksPerCategory > 1
+														? `Not picked yet. Tap ${need} nominees above.`
+														: "Not picked yet. Tap a nominee above."
 													: "Connect a wallet to pick"}
 											</span>
 										)}
@@ -1777,23 +1810,31 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 						{/* dots: tappable, reflect pick state per category */}
 						<div className="flex items-center justify-center gap-1.5 mb-3">
-							{categories.map((category, idx) => (
-								<button
-									key={category.key}
-									type="button"
-									aria-label={category.name}
-									onClick={() => setBallotPage(idx)}
-									className="h-1.5 rounded-full transition-all duration-200"
-									style={{
-										width: idx === ballotPage ? 16 : 6,
-										background: selections[category.key]
-											? "#fafafa"
-											: idx === ballotPage
-												? "#6a6a6a"
-												: "rgba(255,255,255,0.2)",
-									}}
-								/>
-							))}
+							{categories.map((category, idx) => {
+								const got = (selections[category.key] ?? []).length;
+								const need = requiredFor(category.key);
+								return (
+									<button
+										key={category.key}
+										type="button"
+										aria-label={category.name}
+										onClick={() => setBallotPage(idx)}
+										className="h-1.5 rounded-full transition-all duration-200"
+										style={{
+											width: idx === ballotPage ? 16 : 6,
+											// white = slate full, grey = started, dim = untouched
+											background:
+												need > 0 && got >= need
+													? "#fafafa"
+													: got > 0
+														? "#9a9a9a"
+														: idx === ballotPage
+															? "#6a6a6a"
+															: "rgba(255,255,255,0.2)",
+										}}
+									/>
+								);
+							})}
 						</div>
 						<PrimaryButton full />
 					</div>
