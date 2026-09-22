@@ -193,7 +193,7 @@ describe("validateSelections", () => {
 		});
 		expect(res.ok).toBe(false);
 		if (!res.ok) {
-			expect(res.errors.join(" ")).toMatch(/no pick for "innovation"/);
+			expect(res.errors.join(" ")).toMatch(/"innovation" needs 1 pick, got 0/);
 		}
 	});
 
@@ -747,9 +747,24 @@ describe("multi-pick (shortlist) rounds", () => {
 		if (!r.ok) expect(r.errors.join(" ")).toMatch(/picked twice/);
 	});
 
-	it("accepts fewer than the maximum", () => {
+	it("refuses fewer than the slate — the phase asks for a full one", () => {
+		// nominations: "a minimum of 4 per category, so 4 can be shortlisted";
+		// under one-ballot-per-voter a short slate would be permanent
 		const r = validateSelections(shortlist, pool, { impact: ["decaf"] });
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/needs 4 picks, got 1/);
+	});
+
+	it("requires only as many as a thin category has", () => {
+		// two nominees in a 4-pick round: both are the whole slate
+		const thin = pool.slice(0, 2);
+		const r = validateSelections(shortlist, thin, {
+			impact: ["decaf", "beans"],
+		});
 		expect(r.ok).toBe(true);
+		const short = validateSelections(shortlist, thin, { impact: ["decaf"] });
+		expect(short.ok).toBe(false);
+		if (!short.ok) expect(short.errors.join(" ")).toMatch(/needs 2 picks/);
 	});
 
 	it("writes one slotted key per pick", () => {

@@ -429,8 +429,8 @@ function hiwSteps(picks: number) {
 		},
 		picks > 1
 			? {
-					t: `Nominate up to ${picks} per category`,
-					d: "Put forward the projects that defined the year for Impact, Innovation and Interoperability. The most-nominated become the shortlist.",
+					t: `Nominate ${picks} per category`,
+					d: `Put forward ${picks} projects in each of Impact, Innovation and Interoperability. The most-nominated four in each become the shortlist for the final vote.`,
 				}
 			: {
 					t: "Pick one per category",
@@ -1005,9 +1005,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		[nomineesByCategory],
 	);
 
-	const selectedCount = Object.values(selections).filter(
-		(v) => v.length > 0,
-	).length;
+	// A category counts as done when its SLATE is full — picksPerCategory
+	// picks, or every nominee it has if fewer. The nominations phase asks for
+	// four per category so four can be shortlisted; the final phase asks for
+	// one. Same rule as the relay's requiredPicks, mirrored here so the page
+	// never lets someone sign a ballot the relay will refuse.
+	const requiredFor = useCallback(
+		(categoryKey: string) =>
+			Math.min(
+				picksPerCategory,
+				(nomineesByCategory.get(categoryKey) ?? []).length,
+			),
+		[picksPerCategory, nomineesByCategory],
+	);
+	const selectedCount = categories.filter((c) => {
+		const need = requiredFor(c.key);
+		return need > 0 && (selections[c.key] ?? []).length >= need;
+	}).length;
 	const notWhitelisted = eligibility !== null && !eligibility.whitelisted;
 	// One ballot per voter: the first one counts. `hasVoted` is chain OR
 	// mirror, so it stays true after a testnet reset has cleared `votes` —
@@ -1277,7 +1291,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								: phase === "submitting"
 									? "Submitting…"
 									: selectedCount < categories.length
-										? `Pick all ${categories.length} first`
+										? picksPerCategory > 1
+											? `Pick ${picksPerCategory} in each category first`
+											: `Pick all ${categories.length} first`
 										: ballotStatusUnknown
 											? "Voting unavailable"
 											: "Sign & submit",
@@ -1587,6 +1603,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									>
 										<span className="text-xs text-neutral-500 truncate">
 											{c.name}
+											{picksPerCategory > 1 && (
+												<span className="ml-1.5 tabular-nums text-neutral-600">
+													{pickedSlugs.length}/{requiredFor(c.key)}
+												</span>
+											)}
 										</span>
 										<div className="min-w-0 flex-shrink-0 text-right overflow-hidden">
 											<AnimatePresence mode="popLayout" initial={false}>
