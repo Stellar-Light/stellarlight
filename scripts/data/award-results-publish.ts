@@ -41,7 +41,7 @@ async function main() {
 		);
 		return 1;
 	}
-	const { tally, source, digest } = await liveTally(loaded);
+	const { tally, source, digest, afterClose } = await liveTally(loaded);
 	if (!digest) {
 		console.error(
 			"REFUSED: the first-ballot record could not be read, so the digest that pins it cannot be computed. Publishing now would commit a result with no proof of the record it came from.",
@@ -53,6 +53,11 @@ async function main() {
 	console.log(
 		`\n${ROUND} (${loaded.round.status}) · source ${source} · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted}`,
 	);
+	if (afterClose > 0) {
+		console.log(
+			`  ${afterClose} out-of-band ballot(s) NOT counted — written to Horizon after the round closed`,
+		);
+	}
 	for (const c of doc.categories) {
 		console.log(
 			`  ${c.key.padEnd(17)} ${c.totalVotes} vote(s) → ${
