@@ -453,6 +453,36 @@
 			"pr": null,
 			"costUsd": null,
 			"note": "pushed task/packets-2026-09-17-20260917-1417; gh pr create failed: pull request create failed: GraphQL: GitHub Actions is not permitted to create or approve pull requests (createPullRequest)"
+		},
+		{
+			"task": "notes",
+			"unit": "notes-2026-09-22",
+			"items": [
+				"diadata-org/diadata",
+				"diadata-org/decentral-feeder",
+				"diadata-org/decentral-data-feeder",
+				"diadata-org/fair-value",
+				"diadata-org/lumina-library",
+				"diadata-org/lumina-staking",
+				"Crossmint/stellar-smart-account",
+				"Wadzzo2023/wadzz0",
+				"paycashless/qpi.js",
+				"TrustLine-id/websdk",
+				"ConvexityTeam/infra-sdk-typescript",
+				"diadata-org/dia-cardano-oracle",
+				"NoetherDEX/.github",
+				"CertiKProject/zkwasm-fv",
+				"zenith-protocols/zenex-sdk-js",
+				"diadata-org/Spectra-interoperability",
+				"myazahq/kyc-sdk-react",
+				"mobr-ai/icap"
+			],
+			"date": "2026-09-22",
+			"run": "35737746468",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
