@@ -425,7 +425,7 @@ function hiwSteps(picks: number) {
 	return [
 		{
 			t: "Connect a Pilot wallet",
-			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
+			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot. Anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
 		},
 		picks > 1
 			? {
@@ -438,11 +438,11 @@ function hiwSteps(picks: number) {
 				},
 		{
 			t: "Sign one transaction",
-			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
+			d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds, ever.",
 		},
 		{
 			t: "Your first ballot is final",
-			d: "One ballot per voter — the first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable.",
+			d: "One ballot per voter. The first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable.",
 		},
 	];
 }
@@ -1147,7 +1147,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			// CORS or friendbot hiccup — hand the voter the link instead.
 			window.open(eligibility.friendbot, "_blank", "noopener");
 			setError(
-				"Opened friendbot in a new tab — fund the account there, then retry.",
+				"Opened friendbot in a new tab. Fund the account there, then retry.",
 			);
 		} finally {
 			setFunding(false);
@@ -1353,7 +1353,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
 					Three categories. One pick in each. SCF Pilots choose the projects
-					that defined the year — for their impact, innovation and
+					that defined the year for their impact, innovation and
 					interoperability.
 				</p>
 				<div className="mt-6 flex items-center justify-center gap-3 text-sm">
@@ -1370,7 +1370,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					{!voting.open && (
 						<span className="text-neutral-400 rounded-full border border-[#2f2f2f] px-3 py-1">
 							Voting is not open right now
-							{voting.reason ? ` — ${voting.reason}` : ""}
+							{voting.reason ? `: ${voting.reason}` : ""}
 						</span>
 					)}
 				</div>
@@ -1407,8 +1407,8 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your vote is on-chain
 							</h2>
 							<p className="text-sm text-neutral-300 leading-relaxed mb-4">
-								Recorded on Stellar testnet. This is your ballot for the round —
-								the first one cast is the one that counts, so it won't be
+								Recorded on Stellar testnet. This is your ballot for the round.
+								The first one cast is the one that counts, so it won't be
 								replaced.
 								{closesLabel && (
 									<>
@@ -1449,7 +1449,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							You've already voted
 						</h2>
 						<p className="mb-4 text-sm leading-relaxed text-neutral-300">
-							Your picks are below. This ballot is final — the first one cast is
+							Your picks are below. This ballot is final. The first one cast is
 							the one that counts.
 							{voting.open && closesLabel && (
 								<>
@@ -1481,7 +1481,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 							<span className="text-neutral-100 font-medium">
 								Connect a Pilot wallet to pick.
 							</span>{" "}
-							Browse the nominees and their highlights freely — choosing comes
+							Browse the nominees and their highlights freely. Choosing comes
 							after connecting, so a ballot is never built against the wrong
 							address.
 						</p>
@@ -1496,7 +1496,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 						<p className="text-sm text-neutral-400 leading-relaxed">
 							<span className="text-neutral-100 font-medium">Read-only.</span>{" "}
 							{address ? shortAddress(address) : "This address"} isn't on the
-							Pilot voter list — the nominees are still worth a look.
+							Pilot voter list, but the nominees are still worth a look.
 						</p>
 					</div>
 				</div>
@@ -1600,7 +1600,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 														picked ? "text-neutral-100" : "text-neutral-600"
 													}`}
 												>
-													{picked ?? "—"}
+													{picked ?? "Not picked"}
 												</motion.span>
 											</AnimatePresence>
 										</div>
@@ -1719,7 +1719,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										) : (
 											<span className="text-sm text-neutral-500">
 												{address
-													? "Not picked yet — tap a nominee above"
+													? "Not picked yet. Tap a nominee above."
 													: "Connect a wallet to pick"}
 											</span>
 										)}
@@ -2076,7 +2076,7 @@ function WalletPicker({
 							Connect a wallet
 						</DrawerTitle>
 						<DrawerDescription className="text-balance">
-							You'll sign a Stellar <strong>testnet</strong> transaction — no
+							You'll sign a Stellar <strong>testnet</strong> transaction. No
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
@@ -2124,7 +2124,7 @@ function WalletPicker({
 									Connect a wallet
 								</h2>
 								<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
-									You'll sign a Stellar testnet transaction — no real funds.
+									You'll sign a Stellar testnet transaction. No real funds.
 								</p>
 							</div>
 							<button
@@ -2423,7 +2423,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 				)}
 				{failed && (
 					<p className="text-center text-neutral-500">
-						The tally isn't available right now — try again shortly.
+						The tally isn't available right now. Try again shortly.
 					</p>
 				)}
 
@@ -2511,7 +2511,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 							);
 						})}
 						<p className="text-center text-xs text-neutral-600 pt-4 leading-relaxed">
-							Tallied directly from Stellar testnet — every vote is a public,
+							Tallied directly from Stellar testnet. Every vote is a public,
 							verifiable transaction.
 						</p>
 					</div>

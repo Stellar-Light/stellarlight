@@ -245,7 +245,7 @@ export function NomineeHighlightsModal({
 					className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4"
 					role="dialog"
 					aria-modal="true"
-					aria-label={`${data.name} — 2026 highlights`}
+					aria-label={`${data.name}: 2026 highlights`}
 				>
 					<motion.button
 						type="button"
