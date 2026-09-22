@@ -33,6 +33,7 @@
  * in as arguments, which is what makes the unit tests honest.
  */
 
+import { createHash, randomBytes } from "node:crypto";
 import {
 	Account,
 	FeeBumpTransaction,
@@ -774,4 +775,294 @@ export function tallyRound(
 		};
 	});
 	return { categories, turnout: { voted, whitelisted: accounts.length } };
+}
+
+// ── Anonymous ballots: the relay key scheme and the voter's authorization ──
+//
+// A ballot no longer lives on the voter's account. It is written to the RELAY
+// account under a random ballot id, so the chain holds N unlinkable ballots and
+// nothing public connects one to an address. The voter proves eligibility by
+// signing a transaction that can never be submitted; the relay verifies it and
+// does the writing.
+
+/** 8 hex chars, 32 bits: ids never collide within one round's few hundred. */
+export function newBallotId(): string {
+	return randomBytes(4).toString("hex");
+}
+
+const BALLOT_ID = /^[0-9a-f]{8}$/;
+
+/**
+ * `i3.<round>.<ballotId>.<category>[.<slot>]` on the relay account.
+ * Same 64-byte budget as dataKey; the id costs 9 bytes of it.
+ */
+export function relayKey(
+	roundSlug: string,
+	ballotId: string,
+	categoryKey: string,
+	slot?: number,
+): string {
+	const base = `i3.${roundSlug}.${ballotId}.${categoryKey}`;
+	return slot === undefined ? base : `${base}.${slot}`;
+}
+
+/**
+ * Every ballot on the relay for this round: ballotId → selections. Unknown
+ * categories and since-removed nominees are dropped, as decodeAccountVotes
+ * does; a ballot with nothing valid left is omitted, never returned empty.
+ */
+export function decodeRelayBallots(
+	round: BallotRound,
+	nominees: BallotNominee[],
+	data: Record<string, string>,
+): Map<string, BallotSelections> {
+	const prefix = `i3.${round.slug}.`;
+	const valid = new Set(round.categories.map((c) => c.key));
+	const pool = new Map<string, Set<string>>();
+	for (const n of nominees) {
+		const set = pool.get(n.category) ?? new Set<string>();
+		set.add(n.slug);
+		pool.set(n.category, set);
+	}
+	const picks = picksPerCategory(round);
+	// ballotId → category → slot → slug, so slots come out in order
+	const raw = new Map<string, Map<string, Map<number, string>>>();
+	for (const [key, b64] of Object.entries(data)) {
+		if (!key.startsWith(prefix)) continue;
+		const [ballotId, category, slotStr, extra] = key
+			.slice(prefix.length)
+			.split(".");
+		if (extra !== undefined) continue;
+		if (!ballotId || !BALLOT_ID.test(ballotId) || !category) continue;
+		if (!valid.has(category)) continue;
+		if (picks === 1 ? slotStr !== undefined : slotStr === undefined) continue;
+		const slot = slotStr === undefined ? 1 : Number(slotStr);
+		if (!Number.isInteger(slot) || slot < 1 || slot > picks) continue;
+		const slug = Buffer.from(b64, "base64").toString("utf8");
+		if (!pool.get(category)?.has(slug)) continue;
+		const cats = raw.get(ballotId) ?? new Map<string, Map<number, string>>();
+		const slots = cats.get(category) ?? new Map<number, string>();
+		slots.set(slot, slug);
+		cats.set(category, slots);
+		raw.set(ballotId, cats);
+	}
+	const out = new Map<string, BallotSelections>();
+	for (const [ballotId, cats] of raw) {
+		const selections: BallotSelections = {};
+		for (const [category, slots] of cats) {
+			const slugs = [
+				...new Set(
+					[...slots.entries()].sort((a, b) => a[0] - b[0]).map(([, s]) => s),
+				),
+			];
+			if (slugs.length) selections[category] = slugs;
+		}
+		if (Object.keys(selections).length) out.set(ballotId, selections);
+	}
+	return out;
+}
+
+/** The relay's manageData ops for one ballot. */
+export function relayBallotOps(
+	round: BallotRound,
+	ballotId: string,
+	selections: BallotSelections,
+): ReturnType<typeof Operation.manageData>[] {
+	const picks = picksPerCategory(round);
+	const ops: ReturnType<typeof Operation.manageData>[] = [];
+	for (const category of Object.keys(selections).sort()) {
+		const chosen = selections[category];
+		if (picks === 1) {
+			if (chosen[0]) {
+				ops.push(
+					Operation.manageData({
+						name: relayKey(round.slug, ballotId, category),
+						value: chosen[0],
+					}),
+				);
+			}
+			continue;
+		}
+		chosen.slice(0, picks).forEach((slug, i) => {
+			ops.push(
+				Operation.manageData({
+					name: relayKey(round.slug, ballotId, category, i + 1),
+					value: slug,
+				}),
+			);
+		});
+	}
+	return ops;
+}
+
+export const AUTHORIZATION_KEY = "i3-awards.ballot-authorization";
+const AUTHORIZATION_TTL_SECONDS = 600;
+
+/**
+ * What the voter's signature commits to: this round, these exact picks. It
+ * rides in the authorization's memo as a hash, so the relay cannot write a
+ * different ballot than the one that was signed.
+ */
+export function authorizationDigest(
+	roundSlug: string,
+	selections: BallotSelections,
+): Buffer {
+	const cats = Object.entries(selections)
+		.filter(([, slugs]) => slugs.length > 0)
+		.map(([key, slugs]): [string, string] => [
+			key,
+			[...new Set(slugs)].sort().join(","),
+		])
+		.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+		.map(([key, slugs]) => `${key}=${slugs}`)
+		.join(";");
+	return createHash("sha256")
+		.update(`i3-authorization-v1\n${roundSlug}\n${cats}`)
+		.digest();
+}
+
+/**
+ * The transaction the voter signs. It can NEVER be submitted:
+ *   - its sequence number is the account's CURRENT one (a valid transaction
+ *     needs current + 1), or 1 for an account that does not exist on-chain —
+ *     which is also why the voter's account never needs funding;
+ *   - it expires ten minutes after it is built.
+ * It carries one self-describing op, so a wallet shows the voter what they
+ * are signing, and the ballot's digest in the memo. Nothing in it names the
+ * ballot id, so even a submitted copy could never link a voter to a ballot.
+ */
+export function buildAuthorizationTx(params: {
+	round: BallotRound;
+	address: string;
+	/** The account's current sequence from Horizon, or null if unfunded. */
+	sequence: string | null;
+	selections: BallotSelections;
+	now?: Date;
+}): Transaction {
+	const { round, address, sequence, selections } = params;
+	if (!StrKey.isValidEd25519PublicKey(address)) {
+		throw new Error("invalid voter address");
+	}
+	// TransactionBuilder signs base + 1; base = current − 1 ⇒ tx.seq == current.
+	const base = sequence === null ? "0" : (BigInt(sequence) - 1n).toString();
+	const nowSec = Math.floor((params.now ?? new Date()).getTime() / 1000);
+	return new TransactionBuilder(new Account(address, base), {
+		fee: BALLOT_FEE_PER_OP,
+		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
+		memo: Memo.hash(authorizationDigest(round.slug, selections)),
+		timebounds: { minTime: 0, maxTime: nowSec + AUTHORIZATION_TTL_SECONDS },
+	})
+		.addOperation(
+			Operation.manageData({ name: AUTHORIZATION_KEY, value: round.slug }),
+		)
+		.build();
+}
+
+/** Does any signature on `tx` verify for a key allowed to sign for `source`? */
+function signedFor(
+	tx: Transaction,
+	source: string,
+	signers: string[] | undefined,
+): boolean {
+	const hash = tx.hash();
+	const allowed = signers?.length ? signers : [source];
+	const keys = allowed.flatMap((k) => {
+		try {
+			return [Keypair.fromPublicKey(k)];
+		} catch {
+			return [];
+		}
+	});
+	return tx.signatures.some((sig) =>
+		keys.some((kp) => {
+			try {
+				return kp.verify(hash, sig.signature());
+			} catch {
+				return false;
+			}
+		}),
+	);
+}
+
+export type AuthorizationVerdict =
+	| { ok: true; source: string }
+	| { ok: false; errors: string[] };
+
+/**
+ * Check a signed authorization against the ballot it claims to authorize.
+ * Everything the old relay enforced on the ballot transaction is enforced
+ * here on the authorization: testnet passphrase, whitelisted source, and a
+ * signature from a key that controls the account — plus that the memo
+ * commits to exactly these picks and that the transaction is unusable
+ * on-chain. The picks themselves go through validateSelections separately.
+ */
+export function verifyAuthorization(
+	signedXdr: string,
+	ctx: {
+		round: BallotRound;
+		whitelist: Set<string>;
+		selections: BallotSelections;
+		/** The account's current sequence, or null if it does not exist. */
+		sequence: string | null;
+		signers?: string[];
+		now?: Date;
+	},
+): AuthorizationVerdict {
+	let tx: Transaction;
+	try {
+		const parsed = TransactionBuilder.fromXDR(
+			signedXdr,
+			AWARDS_NETWORK_PASSPHRASE,
+		);
+		tx =
+			parsed instanceof FeeBumpTransaction
+				? parsed.innerTransaction
+				: (parsed as Transaction);
+	} catch {
+		return { ok: false, errors: ["could not parse authorization XDR"] };
+	}
+	const source = tx.source;
+	if (!ctx.whitelist.has(source)) {
+		return {
+			ok: false,
+			errors: ["source account is not on the voter whitelist for this round"],
+		};
+	}
+	if (!signedFor(tx, source, ctx.signers)) {
+		return {
+			ok: false,
+			errors: [
+				"authorization is not signed by a signer on the voter account for TESTNET",
+			],
+		};
+	}
+	const errors: string[] = [];
+	try {
+		const seq = BigInt(tx.sequence);
+		if (ctx.sequence !== null && seq >= BigInt(ctx.sequence) + 1n) {
+			errors.push("authorization must not be a submittable transaction");
+		}
+	} catch {
+		errors.push("authorization has no readable sequence");
+	}
+	const maxTime = Number(tx.timeBounds?.maxTime ?? 0);
+	const nowSec = Math.floor((ctx.now ?? new Date()).getTime() / 1000);
+	if (!maxTime || maxTime < nowSec) errors.push("authorization has expired");
+	const op = tx.operations[0];
+	if (
+		tx.operations.length !== 1 ||
+		op?.type !== "manageData" ||
+		op.name !== AUTHORIZATION_KEY
+	) {
+		errors.push("authorization must carry exactly the authorization op");
+	}
+	const expected = authorizationDigest(ctx.round.slug, ctx.selections);
+	// biome-ignore lint/suspicious/noExplicitAny: memo type narrows awkwardly
+	const memo = tx.memo as any;
+	const got: Buffer | null =
+		memo?.type === "hash" && memo.value ? Buffer.from(memo.value) : null;
+	if (!got || !got.equals(expected)) {
+		errors.push("authorization does not commit to these picks");
+	}
+	return errors.length ? { ok: false, errors } : { ok: true, source };
 }

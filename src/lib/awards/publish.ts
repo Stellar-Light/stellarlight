@@ -33,6 +33,8 @@ export interface FirstBallotEntry {
 	selections: BallotSelections;
 	txHash: string | null;
 	at: string | null;
+	/** The id on the relay account. Not part of the digest (v1 recipe). */
+	ballotId?: string | null;
 }
 
 const DIGEST_HEADER = "i3-first-ballots-v1";

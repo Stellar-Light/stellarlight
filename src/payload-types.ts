@@ -1457,6 +1457,7 @@ export interface AwardBallot {
    * Testnet transaction hash of the most recent submission.
    */
   txHash?: string | null;
+  ballotId?: string | null;
   /**
    * How many times this address has cast/changed its ballot.
    */

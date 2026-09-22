@@ -75,6 +75,19 @@ export const AwardBallots: CollectionConfig = {
 			},
 		},
 		{
+			// The random id the ballot was written under on the RELAY account.
+			// This row is the only place it meets an address: the chain shows
+			// ballots by id, the record shows who cast which. Admin-only, like
+			// the rest of the row.
+			name: "ballotId",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"Ballot id on the relay account (i3.<round>.<ballotId>.<category>). The address→ballot link lives here and nowhere public.",
+			},
+		},
+		{
 			name: "txHash",
 			type: "text",
 			index: true,

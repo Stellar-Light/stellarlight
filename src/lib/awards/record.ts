@@ -84,9 +84,11 @@ export async function writeBallotRecord(
 		selections: BallotSelections;
 		txHash: string | null;
 		at: string;
+		/** The id the ballot was written under on the relay account. */
+		ballotId?: string | null;
 	},
 ): Promise<"created" | "updated"> {
-	const { roundId, address, selections, txHash, at } = params;
+	const { roundId, address, selections, txHash, at, ballotId = null } = params;
 	const existing = await payload.find({
 		collection: "award-ballots",
 		where: {
@@ -113,7 +115,7 @@ export async function writeBallotRecord(
 		  }
 		| undefined;
 
-	const entry = { txHash, selections, at };
+	const entry = { txHash, selections, at, ballotId };
 
 	if (prior) {
 		await payload.update({
@@ -122,6 +124,7 @@ export async function writeBallotRecord(
 			data: {
 				selections,
 				txHash,
+				...(ballotId ? { ballotId } : {}),
 				submissions: (prior.submissions ?? 1) + 1,
 				lastSubmittedAt: at,
 				history: [...priorTrail(prior), entry],
@@ -138,6 +141,7 @@ export async function writeBallotRecord(
 			address,
 			selections,
 			txHash,
+			ballotId,
 			submissions: 1,
 			firstSubmittedAt: at,
 			lastSubmittedAt: at,
@@ -153,8 +157,9 @@ export async function recordBallot(params: {
 	address: string;
 	selections: BallotSelections;
 	txHash: string;
+	ballotId?: string | null;
 }): Promise<void> {
-	const { roundSlug, address, selections, txHash } = params;
+	const { roundSlug, address, selections, txHash, ballotId = null } = params;
 	try {
 		const payload = await getPayloadSafe();
 		if (!payload) return;
@@ -167,6 +172,7 @@ export async function recordBallot(params: {
 			address,
 			selections,
 			txHash,
+			ballotId,
 			at: new Date().toISOString(),
 		});
 	} catch (err) {
@@ -322,6 +328,10 @@ export async function readFirstBallotRecord(
 			selections: firstBallotSelections(row),
 			txHash: (first?.txHash ?? row.txHash ?? null) as string | null,
 			at: (first?.at ?? row.firstSubmittedAt ?? null) as string | null,
+			ballotId: ((first as { ballotId?: string | null } | undefined)
+				?.ballotId ??
+				(row as { ballotId?: string | null }).ballotId ??
+				null) as string | null,
 		});
 	}
 	return out;

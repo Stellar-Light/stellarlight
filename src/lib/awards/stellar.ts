@@ -12,7 +12,12 @@
  * tests mock `globalThis.fetch` and nothing else.
  */
 
-import { Networks } from "@stellar/stellar-sdk";
+import {
+	Account,
+	Keypair,
+	Networks,
+	type Transaction,
+} from "@stellar/stellar-sdk";
 
 /** The ONLY network the awards feature speaks. */
 export const AWARDS_NETWORK_PASSPHRASE: string = Networks.TESTNET;
@@ -249,4 +254,93 @@ export async function fetchLatestBallotOp(
 	} catch {
 		return null;
 	}
+}
+
+// ── The relay account ────────────────────────────────────────────────────
+//
+// Every ballot is written to ONE account we hold, under a random ballot id,
+// instead of to the voter's own account. That is the whole anonymity model:
+// the chain shows N unlinkable ballots on the relay; the only address→ballot
+// link is the admin-gated record. The voter never funds anything and never
+// submits anything — they sign an authorization the relay checks, and the
+// relay pays and writes.
+
+/** The relay's signing key, from the environment. null = not configured. */
+export function relayKeypair(): Keypair | null {
+	const secret = process.env.AWARDS_RELAY_SECRET?.trim();
+	if (!secret) return null;
+	try {
+		return Keypair.fromSecret(secret);
+	} catch {
+		return null;
+	}
+}
+
+export type RelaySubmitResult =
+	| { ok: true; hash: string; attempts: number }
+	| { ok: false; error: string; resultCodes: string[] };
+
+const FRIENDBOT = "https://friendbot.stellar.org";
+
+/**
+ * Build, sign and submit one transaction from the relay account, retrying on
+ * a sequence conflict.
+ *
+ * The relay serialises every voter through one sequence number, and the app
+ * runs on more than one instance: two ballots arriving together both read the
+ * same sequence, one lands, the other gets tx_bad_seq. That is not a failed
+ * vote — it is the normal case under load — so it is retried with a fresh
+ * sequence, a few times, before it is reported. Any other Horizon refusal is
+ * returned as-is.
+ *
+ * Testnet only: an unfunded relay (first use, or after a reset) is created via
+ * friendbot before the first attempt.
+ */
+export async function submitFromRelay(
+	build: (relay: Account) => Transaction,
+	opts: { attempts?: number } = {},
+): Promise<RelaySubmitResult> {
+	const kp = relayKeypair();
+	if (!kp) {
+		return {
+			ok: false,
+			error: "relay not configured (AWARDS_RELAY_SECRET)",
+			resultCodes: [],
+		};
+	}
+	const attempts = Math.max(1, opts.attempts ?? 3);
+	let last: RelaySubmitResult = {
+		ok: false,
+		error: "no attempt made",
+		resultCodes: [],
+	};
+	for (let n = 1; n <= attempts; n++) {
+		let acct = await fetchTestnetAccount(kp.publicKey());
+		if (acct.funded === false) {
+			try {
+				await fetch(`${FRIENDBOT}/?addr=${encodeURIComponent(kp.publicKey())}`);
+			} catch {
+				// fall through: the re-fetch below reports the truth
+			}
+			acct = await fetchTestnetAccount(kp.publicKey());
+		}
+		if (acct.funded !== true) {
+			return {
+				ok: false,
+				error:
+					acct.funded === null
+						? `relay account unreachable: ${acct.error}`
+						: "relay account is unfunded and friendbot did not create it",
+				resultCodes: [],
+			};
+		}
+		const tx = build(new Account(kp.publicKey(), acct.account.sequence));
+		tx.sign(kp);
+		const res = await submitToTestnetHorizon(tx.toXDR());
+		if (res.ok) return { ok: true, hash: res.hash, attempts: n };
+		last = { ok: false, error: res.detail, resultCodes: res.resultCodes };
+		if (!res.resultCodes.includes("tx_bad_seq")) return last;
+		// another instance won this sequence; loop re-reads it
+	}
+	return last;
 }
