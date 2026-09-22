@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-21T11:27:17.502Z",
+	"generatedAt": "2026-09-22T10:35:19.027Z",
 	"source": "scripts/check-repo-ranking.ts",
 	"rule": "Written ordering claims about repoScore, graded against the live index. An inversion is a finding for a human; a missing repo is never a pass.",
 	"tally": {
@@ -69,7 +69,7 @@
 			"higher": "stellar/js-xdr",
 			"lower": "ashfrancis/chickenz",
 			"why": "The XDR codec every Stellar SDK is built on, published by SDF, over a hackathon game. SDF never receives an SCF award — it awards them — so all 212 first-party repos scored as though nothing vouched for them. js-xdr also imports no soroban-sdk (a codec does not), so the relevance filter cut its evidence to a quarter. It scored 31.",
-			"higherScore": 66,
+			"higherScore": 74,
 			"lowerScore": 41,
 			"verdict": "holds"
 		},
