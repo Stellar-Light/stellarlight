@@ -1,8 +1,27 @@
 {
-	"generatedAt": "2026-09-15T12:54:36.377Z",
+	"generatedAt": "2026-09-22T12:50:21.068Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 261,
-	"archivedInPool": 40,
+	"archivedTotal": 266,
+	"archivedInPool": 43,
 	"covered": 40,
-	"missing": []
+	"missing": [
+		{
+			"fullName": "idos-network/kwil-db-economy",
+			"projectSlug": "idos",
+			"repoScore": 21,
+			"url": "https://github.com/idos-network/kwil-db-economy"
+		},
+		{
+			"fullName": "idos-network/xrpl-credentials-demo",
+			"projectSlug": "idos",
+			"repoScore": 19,
+			"url": "https://github.com/idos-network/xrpl-credentials-demo"
+		},
+		{
+			"fullName": "dfns/example-scripts",
+			"projectSlug": "dfns",
+			"repoScore": 16,
+			"url": "https://github.com/dfns/example-scripts"
+		}
+	]
 }
