@@ -104,7 +104,7 @@ async function main(): Promise<number> {
 	const summary = summarizeReconcile(actions);
 	const c = summary.counts;
 	console.log(
-		`relay ${relay.size} ballot(s) · record ${rows.length} row(s) → ok ${c.ok} · differs ${c.differs} · chain-empty ${c["chain-empty"]} · unconfirmed ${c.unconfirmed} · orphan ${c.orphan} · legacy ${c.legacy}`,
+		`relay ${relay.size} ballot(s) (${probe.funded === true ? probe.account.subentryCount : "?"}/1000 subentries) · record ${rows.length} row(s) → ok ${c.ok} · differs ${c.differs} · chain-empty ${c["chain-empty"]} · unconfirmed ${c.unconfirmed} · orphan ${c.orphan} · legacy ${c.legacy}`,
 	);
 
 	if (summary.resetSuspected) {

@@ -1,18 +1,24 @@
 /**
  * i³ Awards — ballot encoding, validation, tally, and the anonymous relay.
  *
- * A ballot is written by the RELAY to its own account under a random id:
- *   key   = `i3.<round>.<ballotId>.<category>[.<slot>]`  (≤64 bytes, enforced)
- *   value = nominee slug
+ * A ballot is written by the RELAY to its own account under a random id, one
+ * entry per category:
+ *   key   = `i3.<round>.<ballotId>.<category>`   (≤64 bytes, enforced)
+ *   value = the category's picks, comma-joined   (≤64 bytes, enforced)
+ * Three entries per ballot, because a Stellar account holds at most 1,000
+ * subentries and one-per-pick would have exhausted that inside the real
+ * rounds. Ballots written one-per-pick before 2026-09-23 carry a `.<slot>`
+ * suffix and still decode.
  * The voter never writes to the chain. They sign an AUTHORIZATION — a
  * transaction that can never be submitted (its sequence is already consumed;
  * it expires in ten minutes) whose memo commits to exactly their picks — and
  * the relay verifies that and does the writing. Nothing public links a ballot
  * to an address; the record (address → ballot id) is admin-only.
  *
- * Kept from the original design: the per-category slot encoding, which the
- * record re-encodes through mirrorAccountData so tallyRound has ONE decoder,
- * and the full-slate rule (requiredPicks) that every ballot must satisfy.
+ * Kept from the original design: the voter-account slot encoding (dataKey),
+ * which the record re-encodes through mirrorAccountData so tallyRound has
+ * ONE decoder, and the full-slate rule (requiredPicks) every ballot must
+ * satisfy.
  */
 
 import { createHash, randomBytes } from "node:crypto";
@@ -234,16 +240,22 @@ export function validateSelections(
 			);
 			continue;
 		}
-		// the budget is the RELAY key's (`i3.<round>.<id>.<category>[.<slot>]`),
-		// nine bytes longer than the voter-account key it replaced
-		for (const key of relayKeys(round, "0".repeat(8), category)) {
-			if (byteLength(key) > MANAGE_DATA_MAX_BYTES) {
-				errors.push(`ballot key for "${category}" exceeds 64 bytes`);
-				bad = true;
-				break;
-			}
+		// Stellar's 64-byte budget applies to the RELAY key
+		// (`i3.<round>.<id>.<category>`) and to the value, which holds the
+		// category's picks comma-joined in one entry.
+		if (
+			byteLength(relayKey(round.slug, "0".repeat(8), category)) >
+			MANAGE_DATA_MAX_BYTES
+		) {
+			errors.push(`ballot key for "${category}" exceeds 64 bytes`);
+			continue;
 		}
-		if (bad) continue;
+		if (byteLength(slugs.join(",")) > MANAGE_DATA_MAX_BYTES) {
+			errors.push(
+				`picks in "${category}" exceed 64 bytes together (the relay stores a category's picks in one entry)`,
+			);
+			continue;
+		}
 		normalized[category] = slugs;
 	}
 	// Every category that HAS nominees, not just one. The round is one pick in
@@ -483,19 +495,6 @@ export function relayKey(
 	return slot === undefined ? base : `${base}.${slot}`;
 }
 
-/** Every key one ballot writes for a category: one, or one per slot. */
-export function relayKeys(
-	round: BallotRound,
-	ballotId: string,
-	categoryKey: string,
-): string[] {
-	const picks = picksPerCategory(round);
-	if (picks === 1) return [relayKey(round.slug, ballotId, categoryKey)];
-	return Array.from({ length: picks }, (_, i) =>
-		relayKey(round.slug, ballotId, categoryKey, i + 1),
-	);
-}
-
 /**
  * Every ballot on the relay for this round: ballotId → selections. Unknown
  * categories and since-removed nominees are dropped, as decodeAccountVotes
@@ -515,8 +514,10 @@ export function decodeRelayBallots(
 		pool.set(n.category, set);
 	}
 	const picks = picksPerCategory(round);
-	// ballotId → category → slot → slug, so slots come out in order
-	const raw = new Map<string, Map<string, Map<number, string>>>();
+	// ballotId → category → slot → slugs. Slot 0 is today's form (one entry,
+	// picks comma-joined); slots 1..N are the pre-2026-09-23 one-per-pick
+	// form. Both read back in order.
+	const raw = new Map<string, Map<string, Map<number, string[]>>>();
 	for (const [key, b64] of Object.entries(data)) {
 		if (!key.startsWith(prefix)) continue;
 		const [ballotId, category, slotStr, extra] = key
@@ -525,14 +526,22 @@ export function decodeRelayBallots(
 		if (extra !== undefined) continue;
 		if (!ballotId || !BALLOT_ID.test(ballotId) || !category) continue;
 		if (!valid.has(category)) continue;
-		if (picks === 1 ? slotStr !== undefined : slotStr === undefined) continue;
-		const slot = slotStr === undefined ? 1 : Number(slotStr);
-		if (!Number.isInteger(slot) || slot < 1 || slot > picks) continue;
-		const slug = Buffer.from(b64, "base64").toString("utf8");
-		if (!pool.get(category)?.has(slug)) continue;
-		const cats = raw.get(ballotId) ?? new Map<string, Map<number, string>>();
-		const slots = cats.get(category) ?? new Map<number, string>();
-		slots.set(slot, slug);
+		let slot = 0;
+		if (slotStr !== undefined) {
+			// per-pick slots only ever existed on multi-pick rounds
+			if (picks === 1) continue;
+			slot = Number(slotStr);
+			if (!Number.isInteger(slot) || slot < 1 || slot > picks) continue;
+		}
+		const slugs = Buffer.from(b64, "base64")
+			.toString("utf8")
+			.split(",")
+			.map((x) => x.trim())
+			.filter((x) => pool.get(category)?.has(x));
+		if (!slugs.length) continue;
+		const cats = raw.get(ballotId) ?? new Map<string, Map<number, string[]>>();
+		const slots = cats.get(category) ?? new Map<number, string[]>();
+		slots.set(slot, slugs);
 		cats.set(category, slots);
 		raw.set(ballotId, cats);
 	}
@@ -542,9 +551,11 @@ export function decodeRelayBallots(
 		for (const [category, slots] of cats) {
 			const slugs = [
 				...new Set(
-					[...slots.entries()].sort((a, b) => a[0] - b[0]).map(([, s]) => s),
+					[...slots.entries()]
+						.sort((a, b) => a[0] - b[0])
+						.flatMap(([, list]) => list),
 				),
-			];
+			].slice(0, picks);
 			if (slugs.length) selections[category] = slugs;
 		}
 		if (Object.keys(selections).length) out.set(ballotId, selections);
@@ -558,13 +569,23 @@ export function relayBallotOps(
 	ballotId: string,
 	selections: BallotSelections,
 ): ReturnType<typeof Operation.manageData>[] {
+	// ONE entry per category, the picks comma-joined. A Stellar account holds
+	// at most 1,000 subentries and every entry is one: one-per-pick was
+	// 76 Pilots × 12 = 912 for the nominations round alone, and the final
+	// round on top of it would have failed after the first ballot. Three per
+	// ballot keeps a round near 230. (Ballots written one-per-pick before
+	// 2026-09-23 carry a `.<slot>` suffix; decodeRelayBallots still reads them.)
 	const picks = picksPerCategory(round);
 	const ops: ReturnType<typeof Operation.manageData>[] = [];
 	for (const category of Object.keys(selections).sort()) {
-		const keys = relayKeys(round, ballotId, category);
-		selections[category].slice(0, picks).forEach((slug, i) => {
-			ops.push(Operation.manageData({ name: keys[i], value: slug }));
-		});
+		const slugs = selections[category].slice(0, picks);
+		if (!slugs.length) continue;
+		ops.push(
+			Operation.manageData({
+				name: relayKey(round.slug, ballotId, category),
+				value: slugs.join(","),
+			}),
+		);
 	}
 	return ops;
 }

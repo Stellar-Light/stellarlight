@@ -15,6 +15,7 @@ import {
 	newBallotId,
 	relayBallotOps,
 	relayKey,
+	validateSelections,
 	verifyAuthorization,
 } from "../awards/ballot";
 import { AWARDS_NETWORK_PASSPHRASE } from "../awards/stellar";
@@ -87,6 +88,55 @@ describe("relay key scheme", () => {
 		const decoded = decodeRelayBallots(single, nominees, data);
 		expect([...decoded.keys()].sort()).toEqual(["aaaaaaaa", "bbbbbbbb"]);
 		expect(decoded.get("aaaaaaaa")).toEqual({ impact: ["decaf"] });
+	});
+});
+
+describe("relay storage: one entry per category (1,000-subentry cap)", () => {
+	it("writes one entry per category with the picks comma-joined, not one per pick", () => {
+		const ops = relayBallotOps(round, "abcd1234", picks);
+		expect(ops).toHaveLength(2);
+		// biome-ignore lint/suspicious/noExplicitAny: op shape
+		const body = (o: any) => o.body().value();
+		expect(ops.map((o) => body(o).dataName().toString())).toEqual([
+			"i3.i3-2026-nominations.abcd1234.impact",
+			"i3.i3-2026-nominations.abcd1234.interoperability",
+		]);
+		expect(ops.map((o) => body(o).dataValue().toString())).toEqual([
+			"decaf,beans",
+			"rubic,defindex",
+		]);
+	});
+
+	it("still reads ballots written one entry per pick before the change", () => {
+		const data = {
+			[relayKey(round.slug, "aaaaaaaa", "impact", 1)]: b64("decaf"),
+			[relayKey(round.slug, "aaaaaaaa", "impact", 2)]: b64("beans"),
+			[relayKey(round.slug, "aaaaaaaa", "interoperability", 1)]: b64("rubic"),
+		};
+		expect(decodeRelayBallots(round, nominees, data).get("aaaaaaaa")).toEqual({
+			impact: ["decaf", "beans"],
+			interoperability: ["rubic"],
+		});
+	});
+
+	it("drops unknown slugs inside a joined value and caps at the round's picks", () => {
+		const data = {
+			[relayKey(round.slug, "bbbbbbbb", "impact")]: b64(
+				"decaf,gone,beans,decaf,extra",
+			),
+		};
+		expect(decodeRelayBallots(round, nominees, data).get("bbbbbbbb")).toEqual({
+			impact: ["decaf", "beans"],
+		});
+	});
+
+	it("refuses a slate whose joined picks would not fit the 64-byte entry", () => {
+		const long = Array.from({ length: 4 }, (_, i) => `${"n".repeat(15)}${i}`);
+		const r = { ...round, picksPerCategory: 4 } as BallotRound;
+		const noms = long.map((slug) => ({ category: "impact", slug, name: slug }));
+		const v = validateSelections(r, noms, { impact: long });
+		expect(v.ok).toBe(false);
+		if (!v.ok) expect(v.errors.join()).toMatch(/exceed 64 bytes together/);
 	});
 });
 
