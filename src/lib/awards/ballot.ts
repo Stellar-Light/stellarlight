@@ -162,11 +162,25 @@ export function roundOpenState(
 	if (round.status !== "open") {
 		return { open: false, reason: `round is ${round.status}` };
 	}
-	if (round.opensAt && now < new Date(round.opensAt)) {
-		return { open: false, reason: "voting has not opened yet" };
+	// A date that does not parse fails CLOSED. `now >= Invalid Date` is false,
+	// so an unparseable closesAt used to mean the round never closed.
+	if (round.opensAt) {
+		const opens = Date.parse(round.opensAt);
+		if (Number.isNaN(opens)) {
+			return { open: false, reason: "round's opensAt is not a valid date" };
+		}
+		if (now.getTime() < opens) {
+			return { open: false, reason: "voting has not opened yet" };
+		}
 	}
-	if (round.closesAt && now >= new Date(round.closesAt)) {
-		return { open: false, reason: "voting has closed" };
+	if (round.closesAt) {
+		const closes = Date.parse(round.closesAt);
+		if (Number.isNaN(closes)) {
+			return { open: false, reason: "round's closesAt is not a valid date" };
+		}
+		if (now.getTime() >= closes) {
+			return { open: false, reason: "voting has closed" };
+		}
 	}
 	return { open: true, reason: null };
 }

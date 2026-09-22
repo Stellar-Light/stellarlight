@@ -276,7 +276,7 @@ async function main() {
 			"┌──────────────────────────────────────────────────────────────────┐",
 		);
 		console.log(
-			"│ ⚠  TEST-ONLY TESTNET SECRETS — printed once, stored nowhere.      │",
+			"│ ⚠  Mock voters minted; secrets are NEVER printed (public repo).   │",
 		);
 		console.log(
 			"│    Import into Freighter/xBull (testnet) to exercise the flow.   │",
@@ -292,7 +292,12 @@ async function main() {
 			const label = `Mock pilot voter ${existingVoters.docs.length + i + 1}`;
 			console.log(`\n  ${label}`);
 			console.log(`    public : ${kp.publicKey()}`);
-			console.log(`    secret : ${kp.secret()}   ← TEST ONLY`);
+			// The secret is NOT printed. This repo is public, and an Actions log is
+			// world-readable forever: the one time this line ran it published three
+			// voters' keys, and anyone could cast or overwrite those ballots. Mock
+			// voters are for exercising the relay with a key you hold yourself —
+			// whitelist your own testnet address via award-test-setup instead.
+			console.log("    secret : (not printed — see the comment above)");
 			if (EXECUTE && roundId) {
 				await payload.create({
 					collection: "award-voters",

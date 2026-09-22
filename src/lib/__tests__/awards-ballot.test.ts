@@ -895,3 +895,24 @@ describe("fundViaFriendbot", () => {
 		if (!res.ok) expect(res.error).toMatch(/unreachable/);
 	});
 });
+
+describe("roundOpenState fails closed on a bad date", () => {
+	it("an unparseable closesAt does not mean the round never closes", () => {
+		// `now >= new Date("garbage")` is false, which used to read as OPEN
+		const r = roundOpenState({ ...round, closesAt: "not-a-date" });
+		expect(r.open).toBe(false);
+		expect(r.reason).toMatch(/closesAt/);
+	});
+	it("an unparseable opensAt does not mean the round is already open", () => {
+		const r = roundOpenState({ ...round, opensAt: "soon" });
+		expect(r.open).toBe(false);
+	});
+	it("valid dates still behave", () => {
+		const past = new Date(Date.now() - 60_000).toISOString();
+		const future = new Date(Date.now() + 60_000).toISOString();
+		expect(
+			roundOpenState({ ...round, opensAt: past, closesAt: future }).open,
+		).toBe(true);
+		expect(roundOpenState({ ...round, closesAt: past }).open).toBe(false);
+	});
+});

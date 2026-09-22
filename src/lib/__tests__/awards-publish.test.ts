@@ -276,6 +276,13 @@ describe("ballotCountsAtTime", () => {
 		expect(ballotCountsAtTime("not a date", close)).toBe(false);
 	});
 
+	it("refuses everything when the close date is set but unparseable", () => {
+		// a misconfigured round must not become one with no deadline
+		expect(ballotCountsAtTime("2026-09-23T16:00:00.000Z", "not-a-date")).toBe(
+			false,
+		);
+	});
+
 	it("counts everything when the round has no close date", () => {
 		expect(ballotCountsAtTime("2030-01-01T00:00:00.000Z", null)).toBe(true);
 		expect(ballotCountsAtTime(null, null)).toBe(true);

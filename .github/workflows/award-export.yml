@@ -2,9 +2,12 @@ name: i³ Awards — export ballots (CSV)
 # Exports a round's ballots as CSV for a spreadsheet or Airtable.
 #
 # Every row is an address→choice mapping, which the public surfaces
-# deliberately never serve. So the file is uploaded as a PRIVATE run artifact
-# and is never committed to the repo; the job log prints counts only, never a
-# row. Download it from the run's Artifacts section.
+# deliberately never serve. THIS REPO IS PUBLIC, and an Actions artifact on a
+# public repo can be downloaded by any GitHub account — so the file is
+# encrypted before upload (AES-256, passphrase from the AWARD_EXPORT_PASSPHRASE
+# repo secret) and the job REFUSES to run without that secret. Decrypt with:
+#   gpg --decrypt ballots-<round>.csv.gpg > ballots-<round>.csv
+# The job log prints counts only, never a row. Nothing is committed.
 #
 # The picks exported are each voter's FIRST ballot — the one the round counts.
 # The chain only holds the most recent, so exporting that would disagree with
@@ -30,7 +33,14 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      AWARD_EXPORT_PASSPHRASE: ${{ secrets.AWARD_EXPORT_PASSPHRASE }}
     steps:
+      - name: Refuse without an encryption passphrase
+        run: |
+          if [ -z "$AWARD_EXPORT_PASSPHRASE" ]; then
+            echo "::error::AWARD_EXPORT_PASSPHRASE is not set. This repo is public; an unencrypted artifact of address→choice rows is readable by anyone. Set the secret, then re-run."
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
@@ -42,10 +52,18 @@ jobs:
           pnpm exec tsx scripts/data/award-export.ts \
             --round=${{ inputs.round }} \
             --out=ballots-${{ inputs.round }}.csv
-      - name: Upload (private to this repo's collaborators)
+      - name: Encrypt, then remove the plaintext
+        run: |
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$AWARD_EXPORT_PASSPHRASE" \
+            --output ballots-${{ inputs.round }}.csv.gpg \
+            ballots-${{ inputs.round }}.csv
+          shred -u ballots-${{ inputs.round }}.csv
+          ls -l ballots-${{ inputs.round }}.csv.gpg
+      - name: Upload (encrypted — the artifact itself is public)
         uses: actions/upload-artifact@v4
         with:
           name: ballots-${{ inputs.round }}
-          path: ballots-${{ inputs.round }}.csv
+          path: ballots-${{ inputs.round }}.csv.gpg
           retention-days: ${{ inputs.retention_days }}
           if-no-files-found: error

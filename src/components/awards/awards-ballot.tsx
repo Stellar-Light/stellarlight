@@ -1022,6 +1022,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		const need = requiredFor(c.key);
 		return need > 0 && (selections[c.key] ?? []).length >= need;
 	}).length;
+	// The denominator is the categories that CAN be voted — the relay skips a
+	// category with no nominees, so requiring it here would keep the button
+	// disabled for everyone on a round opened before one category's list
+	// landed, with nothing on screen saying why.
+	const requiredCount = categories.filter((c) => requiredFor(c.key) > 0).length;
 	const notWhitelisted = eligibility !== null && !eligibility.whitelisted;
 	// One ballot per voter: the first one counts. `hasVoted` is chain OR
 	// mirror, so it stays true after a testnet reset has cleared `votes` —
@@ -1173,7 +1178,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		// Pilot feedback: the round is one pick in EACH category. Signing a
 		// partial ballot burns a wallet signature on an incomplete vote, so the
 		// submit path refuses until every category has a pick.
-		if (!address || selectedCount !== categories.length) return;
+		if (!address || selectedCount !== requiredCount) return;
 		setError(null);
 		try {
 			setPhase("requesting");
@@ -1290,16 +1295,16 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								? "Waiting for wallet…"
 								: phase === "submitting"
 									? "Submitting…"
-									: selectedCount < categories.length
+									: selectedCount < requiredCount
 										? picksPerCategory > 1
 											? `Pick ${picksPerCategory} in each category first`
-											: `Pick all ${categories.length} first`
+											: `Pick all ${requiredCount} first`
 										: ballotStatusUnknown
 											? "Voting unavailable"
 											: "Sign & submit",
 					onClick: handleSubmit,
 					disabled:
-						selectedCount < categories.length ||
+						selectedCount < requiredCount ||
 						busy ||
 						votedBefore ||
 						ballotStatusUnknown,
@@ -1587,7 +1592,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your ballot
 							</h3>
 							<span className="text-xs tabular-nums text-neutral-500">
-								{selectedCount}/{categories.length}
+								{selectedCount}/{requiredCount}
 							</span>
 						</div>
 						<ul className="space-y-3 mb-5">
@@ -1663,7 +1668,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your ballot
 							</span>
 							<span className="text-xs tabular-nums text-neutral-500">
-								{selectedCount}/{categories.length}
+								{selectedCount}/{requiredCount}
 							</span>
 						</div>
 

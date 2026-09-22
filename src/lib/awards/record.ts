@@ -273,6 +273,11 @@ async function allBallotRows(
 		const res = await payload.find({
 			collection: "award-ballots",
 			where: { round: { equals: roundId } },
+			// Oldest first. Readers collapse rows by address with last-write-wins
+			// into a Map, so without an order a duplicate row (there is no unique
+			// index on round+address) could win by insertion luck. Ascending means
+			// the earliest row — the real first ballot — is the one that lands.
+			sort: "createdAt",
 			limit: 200,
 			page,
 			depth: 0,
