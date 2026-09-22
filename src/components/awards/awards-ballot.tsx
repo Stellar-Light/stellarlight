@@ -1431,9 +1431,18 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your vote is on-chain
 							</h2>
 							<p className="text-sm text-neutral-300 leading-relaxed mb-4">
-								Recorded on Stellar testnet. This is your ballot for the round.
-								The first one cast is the one that counts, so it won't be
-								replaced.
+								Recorded on Stellar testnet, anonymously: the relay wrote it
+								{ballotId ? (
+									<>
+										{" "}
+										under ballot id{" "}
+										<span className="font-mono text-neutral-100">
+											{ballotId}
+										</span>
+									</>
+								) : null}
+								, and nothing on chain links it to your address. The first
+								ballot cast is the one that counts, so it won't be replaced.
 								{closesLabel && (
 									<>
 										{" "}

@@ -312,7 +312,7 @@ describe("ballotsDigest", () => {
 		);
 	});
 
-	it("still produces a digest for a loaded.round with no ballots", () => {
+	it("still produces a digest for a round with no ballots", () => {
 		// an empty record is a claim ("nobody voted"), and it gets pinned too
 		expect(ballotsDigest([])).toMatch(/^[0-9a-f]{64}$/);
 		expect(ballotsDigest([])).not.toBe(ballotsDigest([a]));
@@ -346,13 +346,13 @@ describe("ballotCountsAtTime", () => {
 	});
 
 	it("refuses everything when the close date is set but unparseable", () => {
-		// a misconfigured loaded.round must not become one with no deadline
+		// a misconfigured round must not become one with no deadline
 		expect(ballotCountsAtTime("2026-09-23T16:00:00.000Z", "not-a-date")).toBe(
 			false,
 		);
 	});
 
-	it("counts everything when the loaded.round has no close date", () => {
+	it("counts everything when the round has no close date", () => {
 		expect(ballotCountsAtTime("2030-01-01T00:00:00.000Z", null)).toBe(true);
 		expect(ballotCountsAtTime(null, null)).toBe(true);
 	});

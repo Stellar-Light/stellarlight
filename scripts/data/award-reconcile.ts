@@ -58,16 +58,6 @@ const ROUND = arg("round");
 // aggregate-only by design — no address→choice — and this lane must not be
 // the place that mapping leaks. Addresses are truncated, picks never printed;
 // a diff is described by category name only.
-const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
-const cats = (s: Record<string, string[]>) => Object.keys(s).length;
-const differing = (a: Record<string, string[]>, b: Record<string, string[]>) =>
-	[...new Set([...Object.keys(a), ...Object.keys(b)])]
-		.filter(
-			(c) =>
-				[...(a[c] ?? [])].sort().join() !== [...(b[c] ?? [])].sort().join(),
-		)
-		.sort()
-		.join(", ");
 
 /** A reservation older than this with nothing on the relay is abandoned. */
 const ABANDONED_AFTER_MS = 15 * 60_000;

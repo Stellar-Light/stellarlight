@@ -1,36 +1,18 @@
 /**
- * i³ Awards — ballot encoding, validation and tallying. Pure logic.
+ * i³ Awards — ballot encoding, validation, tally, and the anonymous relay.
  *
- * The vote encoding (mirrors communityfund.stellar.org's approach, but
- * cleaner because manageData overwrites in place):
+ * A ballot is written by the RELAY to its own account under a random id:
+ *   key   = `i3.<round>.<ballotId>.<category>[.<slot>]`  (≤64 bytes, enforced)
+ *   value = nominee slug
+ * The voter never writes to the chain. They sign an AUTHORIZATION — a
+ * transaction that can never be submitted (its sequence is already consumed;
+ * it expires in ten minutes) whose memo commits to exactly their picks — and
+ * the relay verifies that and does the writing. Nothing public links a ballot
+ * to an address; the record (address → ballot id) is admin-only.
  *
- *   One TESTNET transaction, source = the voter's own account, containing
- *   ONE manageData operation per category voted:
- *
- *     key   = `i3.<roundSlug>.<categoryKey>`   (≤64 bytes, enforced)
- *     value = nominee project slug              (≤64 bytes, enforced)
- *
- *   Changing a vote is just submitting a new ballot — manageData with the
- *   same key overwrites the old value, no delete-then-set dance. The
- *   voter's account IS their ballot; tallying reads every whitelisted
- *   account's data entries straight off Horizon, so the count is
- *   independently verifiable by anyone.
- *
- * Trust boundaries:
- *   - buildBallotTx produces the UNSIGNED tx the wallet signs. Its fee is
- *     modest and the tx is a plain (non-fee-bump) transaction, so SDF
- *     could fee-bump it later if ever needed.
- *   - validateSignedBallot is the relay gate: the submit route accepts an
- *     arbitrary XDR string from the browser, so EVERYTHING is re-checked
- *     server-side — ops are manageData-only under our exact key prefix,
- *     the source is whitelisted, the round is open, one entry per
- *     category, values are real nominees, and at least one signature
- *     verifies against the source key over the TESTNET-passphrase hash
- *     (which structurally refuses mainnet-signed payloads). We never
- *     relay a transaction we couldn't have built ourselves.
- *
- * No Payload, no fetch, no globals — everything the functions need comes
- * in as arguments, which is what makes the unit tests honest.
+ * Kept from the original design: the per-category slot encoding, which the
+ * record re-encodes through mirrorAccountData so tallyRound has ONE decoder,
+ * and the full-slate rule (requiredPicks) that every ballot must satisfy.
  */
 
 import { createHash, randomBytes } from "node:crypto";
@@ -59,7 +41,6 @@ const MANAGE_DATA_MAX_BYTES = 64;
 export const TEST_BALLOT_MEMO = "i3-test";
 
 /** Voter gets 5 minutes to review + sign before the tx expires. */
-const BALLOT_TIMEOUT_SECONDS = 300;
 
 /** 100x base fee per op — pennies of testnet XLM, immune to minor surge. */
 export const BALLOT_FEE_PER_OP = "10000";
@@ -302,66 +283,6 @@ export function validateSelections(
 	return { ok: true, selections: normalized };
 }
 
-/**
- * Build the UNSIGNED ballot transaction the wallet will sign.
- * Caller has already validated round-open, whitelist and selections.
- */
-export function buildBallotTx(params: {
-	round: BallotRound;
-	address: string;
-	/** Current on-chain sequence (Horizon string form). */
-	sequence: string;
-	selections: BallotSelections;
-	/**
-	 * The manageData keys the voter's account already carries. Only used to
-	 * decide which now-unused slots are safe to delete (see below).
-	 */
-	existingKeys?: Set<string>;
-}): Transaction {
-	const { round, address, sequence, selections, existingKeys } = params;
-	if (!StrKey.isValidEd25519PublicKey(address)) {
-		throw new Error("invalid voter address");
-	}
-	const account = new Account(address, sequence);
-	const builder = new TransactionBuilder(account, {
-		fee: BALLOT_FEE_PER_OP,
-		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
-	});
-	// Stable key order → deterministic XDR for the same selections.
-	const picks = picksPerCategory(round);
-	for (const category of Object.keys(selections).sort()) {
-		const chosen = selections[category];
-		if (picks === 1) {
-			builder.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, category),
-					value: chosen[0],
-				}),
-			);
-			continue;
-		}
-		// Multi-pick: write slot 1..N. A slot the voter no longer uses is
-		// DELETED, but only when it actually exists on-chain — manageData
-		// refuses to delete a key that was never set, which would fail the
-		// whole ballot for anyone voting for the first time or picking fewer
-		// than last time.
-		for (let slot = 1; slot <= picks; slot++) {
-			const name = dataKey(round.slug, category, slot);
-			const slug = chosen[slot - 1];
-			if (slug !== undefined) {
-				builder.addOperation(Operation.manageData({ name, value: slug }));
-			} else if (existingKeys?.has(name)) {
-				builder.addOperation(Operation.manageData({ name, value: null }));
-			}
-		}
-	}
-	// Test round → stamp the ballot as a test cast (see TEST_BALLOT_MEMO).
-	if (round.testMode) {
-		builder.addMemo(Memo.text(TEST_BALLOT_MEMO));
-	}
-	return builder.setTimeout(BALLOT_TIMEOUT_SECONDS).build();
-}
-
 export interface SignedBallotContext {
 	round: BallotRound;
 	nominees: BallotNominee[];
@@ -418,244 +339,6 @@ export function ballotSourceOf(signedXdr: string): string | null {
 	} catch {
 		return null;
 	}
-}
-
-export function validateSignedBallot(
-	signedXdr: string,
-	ctx: SignedBallotContext,
-): SignedBallotVerdict {
-	const { round, nominees, whitelist } = ctx;
-	const errors: string[] = [];
-
-	// Round must be open (same wall the ballot-xdr route enforces — a voter
-	// can't sign at 23:59 and relay at 00:01).
-	const openState = roundOpenState(round, ctx.now);
-	if (!openState.open) {
-		return { ok: false, errors: [`voting is not open: ${openState.reason}`] };
-	}
-
-	// Parse strictly as a testnet transaction.
-	//
-	// A fee-bump is UNWRAPPED and its inner transaction validated, rather than
-	// refused. Some wallet kits return a fee-bumped envelope when fee
-	// sponsorship is on, and who paid the fee has no bearing on whether a
-	// ballot is valid — every check below still runs against the inner
-	// transaction, which is the one that writes the data and which the voter
-	// signed. Refusing it blocked a legitimate Pilot for a reason they could
-	// neither see nor fix.
-	//
-	// The old guard was `!("operations" in parsed)`, which never fired:
-	// FeeBumpTransaction exposes an `operations` getter for its inner ops. So
-	// the wrapper fell through, `source` read as the FEE payer, and the voter
-	// was told their address was not on the whitelist.
-	let tx: Transaction;
-	try {
-		const parsed = TransactionBuilder.fromXDR(
-			signedXdr,
-			AWARDS_NETWORK_PASSPHRASE,
-		);
-		tx =
-			parsed instanceof FeeBumpTransaction
-				? parsed.innerTransaction
-				: (parsed as Transaction);
-	} catch {
-		return { ok: false, errors: ["could not parse transaction XDR"] };
-	}
-
-	// Source must be a whitelisted voter for this round.
-	const source = tx.source;
-	if (!whitelist.has(source)) {
-		return {
-			ok: false,
-			errors: ["source account is not on the voter whitelist for this round"],
-		};
-	}
-
-	// Signature check: at least one signature must verify against the SOURCE
-	// account's key over the TESTNET-passphrase hash. This is the structural
-	// mainnet refusal — a tx signed for any other network hashes differently
-	// and never verifies here.
-	try {
-		const hash = tx.hash();
-		// Default to the master key when no signer set was supplied — the pure
-		// tests and any caller without Horizon in hand keep the old behaviour.
-		const allowed = ctx.signers?.length ? ctx.signers : [source];
-		const keys = allowed.flatMap((k) => {
-			try {
-				return [Keypair.fromPublicKey(k)];
-			} catch {
-				return [];
-			}
-		});
-		const signedBySource = tx.signatures.some((sig) =>
-			keys.some((kp) => {
-				try {
-					return kp.verify(hash, sig.signature());
-				} catch {
-					return false;
-				}
-			}),
-		);
-		if (!signedBySource) {
-			return {
-				ok: false,
-				errors: [
-					"transaction is not signed by a signer on the voter account for TESTNET (wrong network or wrong key)",
-				],
-			};
-		}
-	} catch {
-		return { ok: false, errors: ["could not verify transaction signatures"] };
-	}
-
-	// Memo policy. Real round: NO memo (anti-smuggling). Test round: exactly the
-	// TEST_BALLOT_MEMO text, so a test cast self-identifies on-chain while an
-	// arbitrary smuggled memo is still refused.
-	// biome-ignore lint/suspicious/noExplicitAny: memo type narrows awkwardly
-	const memo = tx.memo as any;
-	const memoType = memo?.type as string | undefined;
-	if (round.testMode) {
-		const memoText =
-			memoType === "text"
-				? Buffer.isBuffer(memo.value)
-					? memo.value.toString("utf8")
-					: String(memo.value ?? "")
-				: null;
-		if (memoText !== TEST_BALLOT_MEMO) {
-			errors.push(
-				`test-round ballots must carry the "${TEST_BALLOT_MEMO}" memo`,
-			);
-		}
-	} else if (memoType && memoType !== "none") {
-		errors.push("ballots must not carry a memo");
-	}
-
-	// Every operation must be a manageData under our exact prefix.
-	const prefix = `i3.${round.slug}.`;
-	const validCategories = new Set(round.categories.map((c) => c.key));
-	const nomineesByCategory = new Map<string, Set<string>>();
-	for (const n of nominees) {
-		const set = nomineesByCategory.get(n.category) ?? new Set<string>();
-		set.add(n.slug);
-		nomineesByCategory.set(n.category, set);
-	}
-
-	if (tx.operations.length === 0) {
-		errors.push("transaction has no operations");
-	}
-	const maxOperations = round.categories.length * picksPerCategory(round);
-	if (tx.operations.length > maxOperations) {
-		errors.push(
-			`too many operations (${tx.operations.length}) for ${round.categories.length} categories at ${picksPerCategory(round)} pick(s) each`,
-		);
-	}
-
-	const seenCategories = new Set<string>();
-	const selections: BallotSelections = {};
-	for (const op of tx.operations) {
-		if (op.type !== "manageData") {
-			errors.push(`operation "${op.type}" is not allowed — manageData only`);
-			continue;
-		}
-		// An op-level source could target a different account than the tx source
-		// (it would need that account's signature anyway, but we refuse the
-		// shape outright — ballots only ever write to the voter's own account).
-		if (op.source && op.source !== source) {
-			errors.push("operation source differs from the voter account");
-			continue;
-		}
-		if (!op.name.startsWith(prefix)) {
-			errors.push(`data key "${op.name}" is outside this round's namespace`);
-			continue;
-		}
-		// `<category>` on a one-pick round, `<category>.<slot>` on a multi-pick
-		// one. Anything else is outside the shape we build.
-		const rest = op.name.slice(prefix.length);
-		const picks = picksPerCategory(round);
-		let category = rest;
-		let slot: number | null = null;
-		if (picks > 1) {
-			const m = rest.match(/^(.+)\.(\d+)$/);
-			if (!m) {
-				errors.push(`data key "${op.name}" is not a slotted vote key`);
-				continue;
-			}
-			category = m[1];
-			slot = Number(m[2]);
-			if (slot < 1 || slot > picks) {
-				errors.push(`vote slot ${slot} is outside 1..${picks}`);
-				continue;
-			}
-		}
-		if (!validCategories.has(category)) {
-			errors.push(`"${category}" is not a category of this round`);
-			continue;
-		}
-		const seenKey = slot === null ? category : `${category}.${slot}`;
-		if (seenCategories.has(seenKey)) {
-			errors.push(`duplicate vote for "${seenKey}"`);
-			continue;
-		}
-		seenCategories.add(seenKey);
-		// A multi-pick ballot legitimately CLEARS a slot the voter dropped;
-		// a one-pick ballot has nothing to clear, so a delete there is bogus.
-		if (op.value === undefined || op.value === null) {
-			if (picks > 1) continue;
-			errors.push(
-				`vote for "${category}" deletes the entry — ballots must set a nominee`,
-			);
-			continue;
-		}
-		const slug = Buffer.from(op.value).toString("utf8");
-		if (!nomineesByCategory.get(category)?.has(slug)) {
-			errors.push(`"${slug}" is not a nominee in "${category}"`);
-			continue;
-		}
-		const bucket = selections[category] ?? [];
-		if (bucket.includes(slug)) {
-			errors.push(`"${slug}" appears twice in "${category}"`);
-			continue;
-		}
-		bucket.push(slug);
-		selections[category] = bucket;
-	}
-
-	// A ballot that sets nothing is not a ballot. It was reachable on a
-	// multi-pick round as a transaction of deletes only: every op is skipped
-	// above, `selections` stays empty, and the verdict came back ok — so it
-	// would be relayed and recorded as that voter's FIRST ballot, empty, with
-	// no way for them to cast a real one afterwards.
-	if (errors.length === 0 && Object.keys(selections).length === 0) {
-		errors.push("ballot selects no nominees");
-	}
-	// And the same completeness rule as validateSelections — this is the
-	// boundary a hand-rolled transaction actually crosses. Same scoping: only
-	// categories that actually have nominees can be required.
-	if (errors.length === 0) {
-		for (const category of validCategories) {
-			const pool = nomineesByCategory.get(category)?.size ?? 0;
-			if (!pool) continue;
-			const need = requiredPicks(round, pool);
-			const got = selections[category]?.length ?? 0;
-			if (got < need) {
-				errors.push(
-					`"${category}" needs ${need} pick${need === 1 ? "" : "s"}, got ${got}`,
-				);
-			}
-		}
-	}
-
-	for (const [category, picked] of Object.entries(selections)) {
-		const max = picksPerCategory(round);
-		if (picked.length > max) {
-			errors.push(
-				`"${category}" allows at most ${max} pick${max === 1 ? "" : "s"}, got ${picked.length}`,
-			);
-		}
-	}
-
-	if (errors.length > 0) return { ok: false, errors };
-	return { ok: true, source, selections, xdr: signedXdr };
 }
 
 // ── Tallying ───────────────────────────────────────────────────────────────

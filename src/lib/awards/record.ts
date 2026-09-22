@@ -1,21 +1,17 @@
 /**
- * i³ Awards — mirror a validated, on-chain ballot into Payload.
+ * i³ Awards — the record: address → anonymous ballot, in Payload.
  *
- * The CHAIN is the source of truth while it exists (the tally reads testnet
- * Horizon first). This mirror is how a round can be read — "who voted, for
- * what, when" — without walking Horizon, and it is the ONLY record that
- * outlives a testnet reset, which clears every ledger entry and all history.
- * After the reset following a round, /api/awards/results serves the tally
- * from here (see mirror.ts).
+ * Ballots live on the relay account under random ids; this record is the only
+ * place an id meets an address, and it is what the tally counts (a voter's
+ * FIRST ballot) and what survives a testnet reset. It is also the one-ballot
+ * gate, which is why the relay path RESERVES a row before writing and
+ * confirms it after — a gate checked now and written later is a race.
  *
- * `recordBallot` is strictly best-effort: called AFTER the testnet submit
- * succeeds, it must never throw, because the vote already exists on-chain and
- * a DB hiccup must not make the API report failure for a vote that landed.
- * That is also why it can silently miss a ballot — scripts/data/award-reconcile.ts
- * closes those gaps while the chain still exists, through the same writer
- * (`writeBallotRecord`), which DOES throw so a script run is loud.
+ * Writers: reserveBallot / confirmBallot / releaseBallot (the relay path) and
+ * writeBallotRecord (the legacy upsert, kept for the reconcile lane's
+ * repairs). Readers return the FIRST ballot per address, never the latest,
+ * and skip unconfirmed reservations.
  */
-
 import type { Payload } from "payload";
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotSelections } from "./ballot";

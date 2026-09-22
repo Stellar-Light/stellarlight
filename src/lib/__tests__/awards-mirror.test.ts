@@ -51,19 +51,6 @@ const nominees: BallotNominee[] = [
 	{ category: "innovation", slug: "reflector", name: "Reflector" },
 ];
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
-const funded = (
-	data: Record<string, string>,
-): {
-	funded: true;
-	account: {
-		sequence: string;
-		data: Record<string, string>;
-		signers: string[];
-	};
-} => ({
-	funded: true,
-	account: { sequence: "1", data, signers: [] },
-});
 
 describe("mirrorAccountData", () => {
 	it("round-trips a single-pick ballot through decodeAccountVotes", () => {

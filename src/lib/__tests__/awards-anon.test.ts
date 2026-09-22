@@ -203,6 +203,56 @@ describe("voter authorization", () => {
 		expect(expired.ok).toBe(false);
 	});
 
+	it("accepts an authorization a wallet wrapped in a fee-bump, crediting the inner source", () => {
+		// some wallet kits return a fee-bumped envelope when sponsorship is on;
+		// the inner transaction is what the voter signed and what is checked
+		const inner = buildAuthorizationTx({
+			round,
+			address: voter.publicKey(),
+			sequence: seq,
+			selections: picks,
+		});
+		inner.sign(voter);
+		const payer = Keypair.random();
+		const bumped = TransactionBuilder.buildFeeBumpTransaction(
+			payer,
+			"100000",
+			inner,
+			AWARDS_NETWORK_PASSPHRASE,
+		);
+		bumped.sign(payer);
+		const v = verifyAuthorization(bumped.toXDR(), {
+			round,
+			whitelist,
+			selections: picks,
+			sequence: seq,
+		});
+		expect(v.ok ? null : v.errors).toBeNull();
+		expect(v.ok && v.source).toBe(voter.publicKey());
+		// the payer signing the WRAPPER is not the voter signing the ballot
+		const unsigned = buildAuthorizationTx({
+			round,
+			address: voter.publicKey(),
+			sequence: seq,
+			selections: picks,
+		});
+		const wrapped = TransactionBuilder.buildFeeBumpTransaction(
+			payer,
+			"100000",
+			unsigned,
+			AWARDS_NETWORK_PASSPHRASE,
+		);
+		wrapped.sign(payer);
+		expect(
+			verifyAuthorization(wrapped.toXDR(), {
+				round,
+				whitelist,
+				selections: picks,
+				sequence: seq,
+			}).ok,
+		).toBe(false);
+	});
+
 	it("refuses an outsider and a stranger's signature, accepts a listed delegate", () => {
 		const stranger = Keypair.random();
 		const tx = buildAuthorizationTx({

@@ -138,7 +138,7 @@ export type SubmitTxResult =
 
 /**
  * Relay an already-validated, signed XDR to testnet Horizon.
- * Callers MUST run validateSignedBallot first — this function only ships bytes.
+ * Callers MUST validate first — this function only ships bytes.
  */
 export async function submitToTestnetHorizon(
 	signedXdr: string,
@@ -185,34 +185,6 @@ export async function submitToTestnetHorizon(
 			detail: `Horizon unreachable: ${String(err)}`,
 		};
 	}
-}
-
-/**
- * Fetch many testnet accounts with bounded concurrency. Shared by the tally
- * (results route) and the reconcile script so both walk Horizon the same way.
- */
-export async function fetchTestnetAccounts(
-	addresses: string[],
-	concurrency = 10,
-): Promise<Array<{ address: string; result: FetchAccountResult }>> {
-	const out: Array<{ address: string; result: FetchAccountResult }> = new Array(
-		addresses.length,
-	);
-	let next = 0;
-	const workers = Array.from(
-		{ length: Math.min(concurrency, addresses.length) },
-		async () => {
-			while (next < addresses.length) {
-				const i = next++;
-				out[i] = {
-					address: addresses[i],
-					result: await fetchTestnetAccount(addresses[i]),
-				};
-			}
-		},
-	);
-	await Promise.all(workers);
-	return out;
 }
 
 /**
