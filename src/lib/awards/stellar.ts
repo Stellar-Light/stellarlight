@@ -405,6 +405,8 @@ export interface RelaySubmitOptions {
 	backoffMs?: (attempt: number) => number;
 	/** how long to poll for a transaction Horizon gave no verdict on */
 	pollMs?: number;
+	/** how long to wait for a queued write from another instance to apply */
+	busyWaitMs?: number;
 }
 
 const defaultBackoff = (attempt: number) =>
@@ -474,8 +476,22 @@ async function submitFromRelayUnlocked(
 			continue;
 		}
 		if (sub.status === "busy") {
-			last = { ok: false, error: sub.detail, resultCodes: [] };
-			if (n < attempts) await sleep(backoff(n));
+			// TRY_AGAIN_LATER: a relay write is already queued (another
+			// instance's) and Core takes no second one until it applies, at
+			// the next ledger. Wait for the sequence to move, then rebuild on
+			// the fresh one — this is the common case for two voters at once.
+			last = {
+				ok: false,
+				error: sub.detail,
+				resultCodes: ["try_again_later"],
+			};
+			if (n < attempts) {
+				await sequenceAdvanced(
+					kp.publicKey(),
+					acct.account.sequence,
+					opts.busyWaitMs ?? 8_000,
+				);
+			}
 			continue;
 		}
 		// Queued — or no verdict after the bytes may have left. Wait for a
@@ -510,6 +526,23 @@ async function submitFromRelayUnlocked(
 		};
 	}
 	return last;
+}
+
+/** Poll until the account's sequence moves past `from`, or the budget ends. */
+async function sequenceAdvanced(
+	address: string,
+	from: string,
+	budgetMs: number,
+): Promise<boolean> {
+	const until = Date.now() + budgetMs;
+	for (;;) {
+		const a = await fetchTestnetAccount(address);
+		if (a.funded === true && BigInt(a.account.sequence) > BigInt(from)) {
+			return true;
+		}
+		if (Date.now() >= until) return false;
+		await sleep(Math.min(1_000, until - Date.now()));
+	}
 }
 
 /** Poll Horizon for a transaction by hash for up to `budgetMs`. */
