@@ -1,14 +1,9 @@
 {
-	"asOf": "2026-09-22T20:40:55.232Z",
+	"asOf": "2026-09-22T21:13:49.098Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 99,
-	"healthy": 96,
+	"checked": 100,
+	"healthy": 98,
 	"broken": [
-		{
-			"file": "award-import.yml",
-			"state": "always-red",
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Import\", not a declared signal step"
-		},
 		{
 			"file": "gone-repos.yml",
 			"state": "standing-signal",
@@ -77,15 +72,26 @@
 			"why": "last green 38d ago (manual tool — age not judged)"
 		},
 		{
-			"file": "award-import.yml",
-			"name": "i3 awards — import nominees / voters",
-			"cron": null,
-			"state": "always-red",
-			"lastSuccessAt": null,
-			"ageDays": null,
-			"graceDays": 45,
+			"file": "award-reconcile.yml",
+			"name": "award reconcile mirror",
+			"cron": "30 5 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-22T20:41:52Z",
+			"ageDays": 0,
+			"graceDays": 4,
 			"runs": 1,
-			"why": "1 runs since this file was last edited, zero successes — dies at \"Import\", not a declared signal step"
+			"why": "last green 0d ago"
+		},
+		{
+			"file": "award-test-setup.yml",
+			"name": "i³ Awards — whitelist a pilot test wallet",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-22T20:43:26Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 4,
+			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -246,7 +252,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T20:35:18Z",
+			"lastSuccessAt": "2026-09-22T21:08:20Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -268,7 +274,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T20:38:21Z",
+			"lastSuccessAt": "2026-09-22T21:11:37Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -489,10 +495,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-18T20:48:32Z",
-			"ageDays": 34,
+			"ageDays": 35,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 34d ago (manual tool — age not judged)"
+			"why": "last green 35d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "fix-research-titles.yml",
@@ -577,10 +583,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-14T20:55:47Z",
-			"ageDays": 38,
+			"ageDays": 39,
 			"graceDays": 45,
 			"runs": 9,
-			"why": "last green 38d ago (manual tool — age not judged)"
+			"why": "last green 39d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "lane-autonomy.yml",
@@ -686,7 +692,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T20:35:18Z",
+			"lastSuccessAt": "2026-09-22T21:08:20Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -752,11 +758,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T19:58:22Z",
+			"lastSuccessAt": "2026-09-22T20:38:21Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 80,
-			"why": "last green 0d ago"
+			"runs": 81,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -1027,7 +1033,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T20:38:21Z",
+			"lastSuccessAt": "2026-09-22T21:11:37Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1107,7 +1113,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 7,
 			"graceDays": 21,
-			"runs": 83,
+			"runs": 84,
 			"why": "last green 7d ago"
 		}
 	]
