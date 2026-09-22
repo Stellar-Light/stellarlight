@@ -370,7 +370,13 @@ function TopBar({
 		<div className="sticky top-0 z-40 border-b border-[#2a2a2a] bg-[#171717]/80 backdrop-blur-xl">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5 min-w-0">
-					<I3Mark className="h-6 w-6 text-neutral-200 flex-shrink-0" />
+					{/* The cube, not the flat medallion — the same mark the hero rolls.
+					    It takes its size from the font-size, so the wrapper carries one:
+					    the cube's edge and its half-depth are both in em off this, and
+					    22px lands it on the 24px the medallion occupied. */}
+					<span className="flex-shrink-0 text-[22px] leading-none">
+						<CubeMark />
+					</span>
 					<span className="text-sm font-semibold tracking-tight text-neutral-100 truncate">
 						i³ Awards
 					</span>
@@ -445,8 +451,9 @@ function hiwSteps(picks: number) {
  * Explainer art. Four steps, four different mechanisms — and each shows a REAL
  * control from this product doing what the step describes: the Connect button
  * changing state, a nominee card being chosen, the wallet sheet confirming,
- * the selection ring sliding to another card. Decorative, so aria-hidden; the
- * copy carries the meaning. Motion lives in awards.css.
+ * the receipt's Stellar stamp pressing down on the finished ballot.
+ * Decorative, so aria-hidden; the copy carries the meaning. Motion lives in
+ * awards.css.
  */
 function BallotArt({ step }: { step: number }) {
 	return (
@@ -496,11 +503,15 @@ function BallotArt({ step }: { step: number }) {
 				</div>
 			)}
 			{step === 3 && (
-				<div className="sm-move">
-					<i className="sm-nom" />
-					<i className="sm-nom" />
-					<i className="sm-nom" />
-					<div className="sm-move-ring" />
+				<div className="sm-seal">
+					<div className="sm-seal-sheet">
+						<b />
+						<b />
+						<b />
+						<b />
+						<b />
+					</div>
+					<div className="sm-seal-stamp" />
 				</div>
 			)}
 		</div>
@@ -1322,6 +1333,19 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				transition={{ duration: 0.45, ease: EASE }}
 				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
+				{/* Whose awards these are, said before the headline says which ones.
+				    The mark is black artwork, so it needs the same light ground the
+				    receipt stamp gives it — bare, it disappears into the page. */}
+				<span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#2f2f2f] px-2.5 py-1 text-xs font-medium text-neutral-400">
+					<Image
+						src="/stellar-xlm-logo.png"
+						alt=""
+						width={14}
+						height={14}
+						className="h-3.5 w-3.5 rounded-full bg-neutral-100 p-0.5"
+					/>
+					SCF
+				</span>
 				<h1 className="mb-5 text-4xl font-semibold leading-[1.05] tracking-tight text-neutral-50 sm:text-6xl">
 					<CubeMark />
 					<span className="sr-only">{round.title}</span>
@@ -1479,16 +1503,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			)}
 
 			{/* ── Two-column: grid + ballot rail ── */}
-			{/* When the mobile ballot deck is shown it's `fixed` (~230px tall) and
-			    would overlap the last nominees (the Interoperability tail —
-			    rubic/usdc-swap). Reserve room below the grid so they clear it;
-			    fall back to normal padding when the deck is absent (read-only /
-			    voting closed) so there's no dead space. */}
-			<div
-				className={`max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 lg:pb-20 ${
-					ballotOpen ? "pb-[17rem]" : "pb-32"
-				}`}
-			>
+			<div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 pb-14 lg:pb-20">
 				{/* nominee grid */}
 				<div className="lg:col-span-8 space-y-14">
 					{categories.map((category) => (
@@ -1523,6 +1538,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									<NomineeCard
 										key={nominee.slug}
 										nominee={nominee}
+										needsConnect={!address}
 										selected={(selections[category.key] ?? []).includes(
 											nominee.slug,
 										)}
@@ -1602,6 +1618,14 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					</div>
 				</aside>
 			</div>
+
+			{/* ── Last year, as history ── */}
+			{/* The clearance rides the LAST block on the page: when the mobile
+			    ballot deck is shown it's `fixed` (~230px tall) and would cover
+			    whatever ends the page — which is now the 2025 source link rather
+			    than the Interoperability nominees. Normal padding when the deck is
+			    absent (not a Pilot / already voted) so there's no dead space. */}
+			<PastWinners className={ballotOpen ? "pb-[17rem]" : "pb-32"} />
 
 			{/* ── Mobile ballot deck (whole-card swipe, stacked like a deck) ── */}
 			{ballotOpen && (
@@ -1694,7 +1718,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 											</div>
 										) : (
 											<span className="text-sm text-neutral-500">
-												Not picked yet — tap a nominee above
+												{address
+													? "Not picked yet — tap a nominee above"
+													: "Connect a wallet to pick"}
 											</span>
 										)}
 									</motion.div>
@@ -2122,12 +2148,16 @@ function WalletPicker({
 function NomineeCard({
 	nominee,
 	selected,
+	needsConnect,
 	disabled,
 	onToggle,
 	onHighlights,
 }: {
 	nominee: Nominee;
 	selected: boolean;
+	// A card is inert for several reasons, but only one of them has something
+	// the visitor can do about it — so only that one gets its own hint.
+	needsConnect: boolean;
 	disabled: boolean;
 	onToggle: () => void;
 	onHighlights: () => void;
@@ -2221,7 +2251,11 @@ function NomineeCard({
 						selected ? "text-neutral-100" : "text-neutral-500"
 					}`}
 				>
-					{selected ? "Selected" : "Tap to select"}
+					{selected
+						? "Selected"
+						: needsConnect
+							? "Connect to pick"
+							: "Tap to select"}
 				</span>
 				<button
 					type="button"
@@ -2236,6 +2270,101 @@ function NomineeCard({
 				</button>
 			</span>
 		</motion.div>
+	);
+}
+
+// ── Last year's winners ────────────────────────────────────────────────────
+
+/**
+ * The 2025 result, from stellar.org's own recap of the round (linked from the
+ * section). Facts as published and nothing else: no descriptions, numbers or
+ * quotes of our own, because this is a record rather than a write-up.
+ */
+const WINNERS_2025 = [
+	{
+		category: "Impact",
+		name: "Decaf",
+		line: "Stablecoins you can actually use.",
+		blurb:
+			"Non-custodial app to send, receive, invest and spend stablecoins; cash-out in 180+ countries via MoneyGram.",
+		finalists: "Beans App, Blend, Meru",
+	},
+	{
+		category: "Innovation",
+		name: "Etherfuse",
+		line: "RWAs as usable rails.",
+		blurb:
+			"Brings Stablebonds (tokenized government treasuries) natively to Stellar, plus MXNe, a peso-denominated stable value backed by CETES.",
+		finalists: "Almanax, Soroswap Finance, Dogstar",
+	},
+	{
+		category: "Interoperability",
+		name: "DeFindex",
+		line: "One integration, many protocols.",
+		blurb:
+			"Wallets integrate one API and launch vaults that turn complex DeFi strategies into simple savings accounts.",
+		finalists: "Hana Wallet, Reflector, Stellarcarbon",
+	},
+] as const;
+
+/**
+ * Last year, kept at the bottom of the page as context for this year's vote.
+ * Deliberately quieter than the live ballot — dimmer borders, muted type, no
+ * motion — so it reads as a record and never competes with the thing you came
+ * here to do. Several of these names are nominated again this year; that is
+ * left to speak for itself.
+ */
+function PastWinners({ className = "" }: { className?: string }) {
+	return (
+		<section
+			aria-label="2025 winners"
+			className={`max-w-6xl mx-auto px-4 sm:px-6 ${className}`}
+		>
+			<div className="border-t border-[#242424] pt-10">
+				<div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+					<h2 className="text-lg font-semibold tracking-tight text-neutral-300">
+						2025 winners
+					</h2>
+					<a
+						href="https://stellar.org/blog/ecosystem/stellar-i-awards-2025"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-xs font-medium text-neutral-500 transition-colors hover:text-neutral-300"
+					>
+						The 2025 recap on stellar.org
+						<ArrowUpRight className="h-3.5 w-3.5" />
+					</a>
+				</div>
+				<p className="mb-6 max-w-2xl text-sm leading-relaxed text-neutral-500">
+					The 2025 round ran at Stellar Meridian: 70+ applications, 98 SCF
+					voters shortlisting 12 finalists, and 9 judges.
+				</p>
+				<div className="grid gap-3 sm:grid-cols-3">
+					{WINNERS_2025.map((winner) => (
+						<div
+							key={winner.category}
+							className="rounded-xl border border-[#242424] bg-[#1a1a1a] p-4"
+						>
+							<span className="text-xs font-medium text-neutral-500">
+								{winner.category}
+							</span>
+							<p className="mt-1 text-base font-semibold tracking-tight text-neutral-200">
+								{winner.name}
+							</p>
+							<p className="mt-0.5 text-[13px] text-neutral-400">
+								{winner.line}
+							</p>
+							<p className="mt-2 text-[13px] leading-relaxed text-neutral-500">
+								{winner.blurb}
+							</p>
+							<p className="mt-3 border-t border-[#242424] pt-2.5 text-xs leading-relaxed text-neutral-600">
+								Also shortlisted: {winner.finalists}
+							</p>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
 	);
 }
 

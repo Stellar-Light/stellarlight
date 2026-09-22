@@ -261,13 +261,13 @@
    control from this product, not an abstract shape. A working control
    demonstrating itself is what makes a help card explain rather than
    decorate. Mechanisms are the UI-motion family from yui540's gallery (a
-   button changing state, a card being chosen, a sheet confirming, an active
-   marker sliding between positions), rebuilt on our own tokens.
+   button changing state, a card being chosen, a sheet confirming, a stamp
+   coming down on a sheet), rebuilt on our own tokens.
 
      1 connect  the Connect button morphs into a connected address chip
      2 pick     a nominee card is chosen: it lifts and takes a check badge
      3 sign     the wallet sheet rises, Approve is pressed, a tx hash wipes in
-     4 change   the selection ring SLIDES to another card, squashing on land
+     4 final    the Stellar stamp presses down on the ballot and settles
 
    The panel is fixed-height and clips, so art can never push into the header
    again. Transform / opacity / clip-path only. Resting states at EOF. */
@@ -283,7 +283,7 @@
 	margin-bottom: 22px;
 }
 
-/* a nominee card, shared by steps 2 and 4 */
+/* a nominee card — step 2's subject */
 .awards-sm .sm-nom {
 	position: relative;
 	display: block;
@@ -538,39 +538,90 @@
 	}
 }
 
-/* 4 ── Change your mind: the selection slides -------------------------- */
-.awards-sm .sm-move {
+/* 4 ── Final: the stamp comes down and stays --------------------------- */
+/* This step used to show the selection ring sliding from one card to another,
+   which is what "change your mind" looked like — the opposite of the caption
+   it now carries. The mechanism that means final is already on this page: the
+   vote receipt's Stellar sticker, pressed down onto the ballot. */
+.awards-sm .sm-seal {
 	position: relative;
-	display: flex;
-	gap: 12px;
-	align-items: center;
+	width: 104px;
+	height: 128px;
 }
-.awards-sm .sm-move-ring {
+.awards-sm .sm-seal-sheet {
 	position: absolute;
-	top: -5px;
-	left: -5px;
-	width: 64px;
-	height: 84px;
-	border-radius: 12px;
-	border: 2px solid #fafafa;
+	inset: 0;
+	border-radius: 4px;
+	background: #ededed;
+	padding: 15px 14px 0;
 	box-sizing: border-box;
-	animation: sm-ring-slide 0.85s cubic-bezier(0.34, 1.35, 0.64, 1) 0.6s both;
+	/* A press needs something that gives, or it reads as a badge fading in:
+	   the sheet takes the hit on the frame the stamp lands. The stamp is
+	   positioned against the wrapper, not the sheet, so only the paper moves. */
+	animation: sm-seal-take 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) 0.7s both;
 }
-/* Card pitch is 54 + 12 = 66px. It starts on the MIDDLE card — the one
-   step 2 just picked — and moves to the third, so the four steps tell one
-   continuous story rather than four unrelated ones. */
-@keyframes sm-ring-slide {
+.awards-sm .sm-seal-sheet b {
+	display: block;
+	height: 7px;
+	border-radius: 99px;
+	background: #2f2f2f;
+	margin-bottom: 9px;
+}
+.awards-sm .sm-seal-sheet b:nth-child(2) {
+	width: 74%;
+}
+.awards-sm .sm-seal-sheet b:nth-child(4) {
+	width: 88%;
+}
+.awards-sm .sm-seal-sheet b:last-child {
+	width: 52%;
+}
+@keyframes sm-seal-take {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(0.965, 0.95);
+	}
+}
+/* The same die-cut sticker as the receipt stamp: the mark brings its own
+   white ground, so it reads over whatever it lands on, and it rests
+   off-square the way a hand-pressed stamp does. */
+.awards-sm .sm-seal-stamp {
+	position: absolute;
+	/* Bottom corner, half off the edge — where a seal actually goes, and it
+	   keeps the mark clear of the ballot's own rows. */
+	right: -12px;
+	bottom: 6px;
+	width: 54px;
+	height: 54px;
+	border-radius: 99px;
+	background: #fafafa;
+	box-shadow:
+		0 3px 8px rgba(0, 0, 0, 0.4),
+		inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+	opacity: 0;
+	animation: sm-seal-press 0.8s cubic-bezier(0.34, 1.5, 0.64, 1) 0.45s both;
+}
+.awards-sm .sm-seal-stamp::after {
+	content: "";
+	position: absolute;
+	inset: 22%;
+	background: url("/stellar-xlm-logo.png") center / contain no-repeat;
+}
+@keyframes sm-seal-press {
 	0% {
-		transform: translateX(66px) scale(1, 1);
+		opacity: 0;
+		transform: scale(2.6) rotate(-24deg);
 	}
-	45% {
-		transform: translateX(99px) scale(0.9, 1.05);
-	}
-	78% {
-		transform: translateX(132px) scale(1.07, 0.94);
+	55% {
+		opacity: 1;
+		transform: scale(0.92) rotate(-10deg);
 	}
 	100% {
-		transform: translateX(132px) scale(1, 1);
+		opacity: 1;
+		transform: scale(1) rotate(-10deg);
 	}
 }
 
@@ -585,12 +636,13 @@
 	.awards-sm .sm-sign-sheet,
 	.awards-sm .sm-sign-go,
 	.awards-sm .sm-sign-hash,
-	.awards-sm .sm-move-ring {
+	.awards-sm .sm-seal-sheet,
+	.awards-sm .sm-seal-stamp {
 		animation: none !important;
 	}
 	/* Each of these is parked by a filled keyframe, so killing the animation
 	   would leave the START frame on screen — an unconnected button, an
-	   unpicked card, a ring on the wrong card. Spell out the END state. */
+	   unpicked card, a stamp that never landed. Spell out the END state. */
 	.awards-sm .sm-curtain i {
 		transform: none;
 	}
@@ -619,8 +671,9 @@
 	.awards-sm .sm-sign-hash {
 		clip-path: inset(0 0 0 0);
 	}
-	.awards-sm .sm-move-ring {
-		transform: translateX(132px);
+	.awards-sm .sm-seal-stamp {
+		opacity: 1;
+		transform: rotate(-9deg);
 	}
 }
 
