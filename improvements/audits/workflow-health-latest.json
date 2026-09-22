@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-22T20:01:01.162Z",
+	"asOf": "2026-09-22T20:40:55.232Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 101,
-	"healthy": 98,
+	"checked": 99,
+	"healthy": 96,
 	"broken": [
 		{
 			"file": "award-import.yml",
@@ -86,17 +86,6 @@
 			"graceDays": 45,
 			"runs": 1,
 			"why": "1 runs since this file was last edited, zero successes — dies at \"Import\", not a declared signal step"
-		},
-		{
-			"file": "award-round.yml",
-			"name": "award round (create / status)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-09-22T18:32:42Z",
-			"ageDays": 0,
-			"graceDays": 45,
-			"runs": 3,
-			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -257,7 +246,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T19:04:29Z",
+			"lastSuccessAt": "2026-09-22T20:35:18Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -279,7 +268,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T19:58:22Z",
+			"lastSuccessAt": "2026-09-22T20:38:21Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -697,7 +686,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T19:04:29Z",
+			"lastSuccessAt": "2026-09-22T20:35:18Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -763,10 +752,10 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T09:21:00Z",
+			"lastSuccessAt": "2026-09-22T19:58:22Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 79,
+			"runs": 80,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1023,17 +1012,6 @@
 			"why": "last green 21d ago"
 		},
 		{
-			"file": "tansu-anchor.yml",
-			"name": "tansu anchor (testnet)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-09-17T03:23:41Z",
-			"ageDays": 5,
-			"graceDays": 45,
-			"runs": 3,
-			"why": "last green 5d ago (manual tool — age not judged)"
-		},
-		{
 			"file": "task-lane.yml",
 			"name": "Task lane (one bounded unit of a track → one PR)",
 			"cron": "17 9 * * 2",
@@ -1049,7 +1027,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T19:58:22Z",
+			"lastSuccessAt": "2026-09-22T20:38:21Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1129,7 +1107,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 7,
 			"graceDays": 21,
-			"runs": 82,
+			"runs": 83,
 			"why": "last green 7d ago"
 		}
 	]
