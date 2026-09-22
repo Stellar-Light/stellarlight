@@ -353,6 +353,32 @@ describe("submitFromRelay — no verdict is not a refusal", () => {
 		if (!r.ok) expect(r.pending).toBeUndefined();
 	});
 
+	it("refuses to write past Stellar's 1,000-subentry cap instead of failing mid-round", async () => {
+		process.env.AWARDS_RELAY_SECRET = relay.secret();
+		const f = fetchScript([
+			(url: string) =>
+				url.includes("/accounts/")
+					? new Response(
+							JSON.stringify({
+								sequence: "100",
+								data: {},
+								signers: [],
+								subentry_count: 1000, // full: even one more entry is over
+							}),
+							{ status: 200 },
+						)
+					: null,
+		]);
+		vi.stubGlobal("fetch", f);
+		const r = await submitFromRelay(build, fast);
+		expect(r.ok).toBe(false);
+		if (!r.ok) {
+			expect(r.resultCodes).toContain("relay_full");
+			expect(r.error).toMatch(/1000-subentry/);
+		}
+		expect(f).toHaveBeenCalledTimes(1);
+	});
+
 	it("reports a build that throws instead of letting it escape", async () => {
 		process.env.AWARDS_RELAY_SECRET = relay.secret();
 		const f = fetchScript([account("100")]);

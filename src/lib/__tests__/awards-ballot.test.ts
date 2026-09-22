@@ -231,7 +231,12 @@ describe("Horizon helpers", () => {
 		const res = await fetchTestnetAccount(voter.publicKey());
 		expect(res).toEqual({
 			funded: true,
-			account: { sequence: "99", data: { k: b64("v") }, signers: [] },
+			account: {
+				sequence: "99",
+				data: { k: b64("v") },
+				signers: [],
+				subentryCount: 0,
+			},
 		});
 	});
 

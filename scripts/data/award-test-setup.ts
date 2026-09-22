@@ -192,36 +192,50 @@ async function main() {
 		}>;
 		const ids = rows.map((d) => d.ballotId).filter((x): x is string => !!x);
 		if (ids.length && EXECUTE) {
-			const { relayBallotOps, BALLOT_FEE_PER_OP } = await import(
-				"../../src/lib/awards/ballot"
-			);
-			const { submitFromRelay, AWARDS_NETWORK_PASSPHRASE } = await import(
-				"../../src/lib/awards/stellar"
-			);
+			const { BALLOT_FEE_PER_OP } = await import("../../src/lib/awards/ballot");
+			const {
+				submitFromRelay,
+				AWARDS_NETWORK_PASSPHRASE,
+				fetchTestnetAccount,
+				relayKeypair,
+			} = await import("../../src/lib/awards/stellar");
 			const { Operation, TransactionBuilder } = await import(
 				"@stellar/stellar-sdk"
 			);
-			const res = await submitFromRelay((relay) => {
-				const b = new TransactionBuilder(relay, {
-					fee: BALLOT_FEE_PER_OP,
-					networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
-				});
-				for (const id of ids) {
-					const sel = rows.find((d) => d.ballotId === id)?.selections ?? {};
-					for (const op of relayBallotOps(round as never, id, sel as never)) {
-						// same keys, value null = delete
-						// biome-ignore lint/suspicious/noExplicitAny: op shape
-						const name = (op as any).body().value().dataName().toString();
+			// Delete whatever the relay ACTUALLY holds under each ballot id — one
+			// entry per category today, one per pick for ballots written before
+			// 2026-09-23 — rather than re-deriving keys from the row.
+			const relayPub = relayKeypair()?.publicKey();
+			const probe = relayPub ? await fetchTestnetAccount(relayPub) : null;
+			const names =
+				probe?.funded === true
+					? Object.keys(probe.account.data).filter((k) =>
+							ids.some((id) => k.startsWith(`i3.${round.slug}.${id}.`)),
+						)
+					: [];
+			if (!names.length) {
+				console.log(
+					probe?.funded === true
+						? "• reset: the relay holds no entries under this ballot id — nothing to clear"
+						: `• reset: could not read the relay (${probe?.funded === null ? probe.error : "no relay key"}) — the row is gone; the reconcile lane reports an orphan if entries remain`,
+				);
+			} else {
+				const res = await submitFromRelay((relay) => {
+					const b = new TransactionBuilder(relay, {
+						fee: BALLOT_FEE_PER_OP,
+						networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
+					});
+					for (const name of names) {
 						b.addOperation(Operation.manageData({ name, value: null }));
 					}
-				}
-				return b.setTimeout(120).build();
-			});
-			console.log(
-				res.ok
-					? `• reset: cleared ${ids.length} ballot(s) off the relay (tx ${res.hash.slice(0, 8)}…)`
-					: `• reset: relay entries NOT cleared (${res.error}) — the row is gone so the wallet can vote; the reconcile lane reports it as an orphan until it is cleared by hand`,
-			);
+					return b.setTimeout(120).build();
+				});
+				console.log(
+					res.ok
+						? `• reset: cleared ${names.length} entr${names.length === 1 ? "y" : "ies"} (${ids.length} ballot(s)) off the relay (tx ${res.hash.slice(0, 8)}…)`
+						: `• reset: relay entries NOT cleared (${res.error}) — the row is gone so the wallet can vote; the reconcile lane reports it as an orphan until it is cleared by hand`,
+				);
+			}
 		} else if (ids.length) {
 			console.log(`• reset: WOULD clear ${ids.length} ballot(s) off the relay`);
 		}

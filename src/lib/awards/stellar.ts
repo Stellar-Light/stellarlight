@@ -78,7 +78,12 @@ export interface HorizonAccount {
 	 * Horizon would have accepted their ballot.
 	 */
 	signers: string[];
+	/** Trustlines + offers + signers + data entries. Stellar caps it at 1,000. */
+	subentryCount: number;
 }
+
+/** Stellar's hard cap on subentries per account. */
+export const ACCOUNT_SUBENTRY_LIMIT = 1000;
 
 export type FetchAccountResult =
 	| { funded: true; account: HorizonAccount }
@@ -106,6 +111,7 @@ export async function fetchTestnetAccount(
 			sequence?: string;
 			data?: Record<string, string>;
 			signers?: Array<{ key?: string; type?: string; weight?: number }>;
+			subentry_count?: number;
 		};
 		if (typeof body.sequence !== "string") {
 			return {
@@ -118,6 +124,7 @@ export async function fetchTestnetAccount(
 			account: {
 				sequence: body.sequence,
 				data: body.data ?? {},
+				subentryCount: Number(body.subentry_count ?? 0),
 				signers: (body.signers ?? [])
 					.filter(
 						(sg) =>
@@ -463,6 +470,19 @@ async function submitFromRelayUnlocked(
 				ok: false,
 				error: `could not build the relay transaction: ${String(err)}`,
 				resultCodes: [],
+			};
+		}
+		// Every manageData entry is a subentry and an account holds at most
+		// 1,000 of them. Refuse here, loudly, rather than let Core answer
+		// op_too_many_subentries in the middle of a round.
+		if (
+			acct.account.subentryCount + tx.operations.length >
+			ACCOUNT_SUBENTRY_LIMIT
+		) {
+			return {
+				ok: false,
+				error: `relay account is at Stellar's ${ACCOUNT_SUBENTRY_LIMIT}-subentry limit (${acct.account.subentryCount} used); clear a finished round off the relay`,
+				resultCodes: ["relay_full"],
 			};
 		}
 		tx.sign(kp);
