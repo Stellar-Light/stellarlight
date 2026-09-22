@@ -1622,6 +1622,39 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								const picked = pickedSlugs.length
 									? pickedSlugs.map((sl) => nomineeName(c.key, sl)).join(", ")
 									: "";
+								// One pick sits on the label's line. A slate of four does
+								// not: it goes underneath as pills that wrap, so the label
+								// and its n/4 never get squeezed out of the row.
+								if (picksPerCategory > 1) {
+									return (
+										<li key={c.key}>
+											<div className="flex items-center justify-between gap-3">
+												<span className="text-xs text-neutral-500 truncate">
+													{c.name}
+												</span>
+												<span className="text-xs tabular-nums text-neutral-600 flex-shrink-0">
+													{pickedSlugs.length}/{requiredFor(c.key)}
+												</span>
+											</div>
+											{pickedSlugs.length ? (
+												<div className="mt-1.5 flex flex-wrap gap-1.5">
+													{pickedSlugs.map((sl) => (
+														<span
+															key={sl}
+															className="rounded-md border border-[#2f2f2f] bg-[#242424] px-2 py-0.5 text-xs font-medium text-neutral-100"
+														>
+															{nomineeName(c.key, sl)}
+														</span>
+													))}
+												</div>
+											) : (
+												<p className="mt-1 text-sm font-medium text-neutral-600">
+													Not picked
+												</p>
+											)}
+										</li>
+									);
+								}
 								return (
 									<li
 										key={c.key}
@@ -1629,16 +1662,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									>
 										<span className="text-xs text-neutral-500 truncate">
 											{c.name}
-											{picksPerCategory > 1 && (
-												<span className="ml-1.5 tabular-nums text-neutral-600">
-													{pickedSlugs.length}/{requiredFor(c.key)}
-												</span>
-											)}
 										</span>
 										<div className="min-w-0 flex-shrink-0 text-right overflow-hidden">
 											<AnimatePresence mode="popLayout" initial={false}>
 												<motion.span
-													key={picked ?? "empty"}
+													key={picked || "empty"}
 													initial={{ opacity: 0, y: 6 }}
 													animate={{ opacity: 1, y: 0 }}
 													exit={{ opacity: 0, y: -6 }}
@@ -1647,7 +1675,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 														picked ? "text-neutral-100" : "text-neutral-600"
 													}`}
 												>
-													{picked ?? "Not picked"}
+													{picked || "Not picked"}
 												</motion.span>
 											</AnimatePresence>
 										</div>
