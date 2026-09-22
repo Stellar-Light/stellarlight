@@ -42,6 +42,7 @@ const cache = new Map<
 		tally: RoundTally;
 		source: TallySource;
 		digest: string | null;
+		afterClose: number;
 	}
 >();
 
@@ -75,6 +76,7 @@ export async function GET(req: NextRequest) {
 				closesAt: loaded.round.closesAt ?? null,
 				source: cached.source,
 				ballotsDigest: cached.digest,
+				afterClose: cached.afterClose,
 				...cached.tally,
 				cachedAt: new Date(cached.at).toISOString(),
 			},
@@ -82,7 +84,7 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const { tally, source, digest } = await liveTally(loaded);
+	const { tally, source, digest, afterClose } = await liveTally(loaded);
 
 	// A null digest means the first-ballot record could not be READ. Under
 	// one-ballot-per-voter that is not a cosmetic gap: the mirror is the only
@@ -103,7 +105,7 @@ export async function GET(req: NextRequest) {
 	}
 
 	const at = Date.now();
-	cache.set(loaded.round.slug, { at, tally, source, digest });
+	cache.set(loaded.round.slug, { at, tally, source, digest, afterClose });
 
 	return NextResponse.json(
 		{
@@ -112,6 +114,7 @@ export async function GET(req: NextRequest) {
 			closesAt: loaded.round.closesAt ?? null,
 			source,
 			ballotsDigest: digest,
+			afterClose,
 			...tally,
 			cachedAt: new Date(at).toISOString(),
 		},

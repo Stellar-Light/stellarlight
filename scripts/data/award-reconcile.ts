@@ -40,6 +40,7 @@ import {
 	sameSelections,
 	summarizeReconcile,
 } from "../../src/lib/awards/mirror";
+import { ballotCountsAtTime } from "../../src/lib/awards/publish";
 import {
 	findRoundId,
 	readCurrentBallots,
@@ -182,8 +183,25 @@ async function main() {
 	}
 
 	const prefix = `i3.${round.slug}.`;
+	const refusedAfterClose = new Set<string>();
 	for (const a of todo) {
 		const op = await fetchLatestBallotOp(a.address, prefix);
+		// This lane is the one path by which an out-of-band ballot enters the
+		// mirror — and the tally PREFERS the mirror. Writing a post-close
+		// ballot here would launder it past the close-time guard in liveTally,
+		// which only ever inspects addresses with no mirror row. So the guard
+		// has to hold on both sides of that door.
+		if (!ballotCountsAtTime(op?.at, round.closesAt ?? null)) {
+			refusedAfterClose.add(a.address);
+			console.log(
+				`  refused ${short(a.address)}  ${
+					op
+						? `ballot op @ ${op.at} is after the round closed (${round.closesAt})`
+						: "no datable ballot op — cannot show it was cast in time"
+				}`,
+			);
+			continue;
+		}
 		const outcome = await writeBallotRecord(payload, {
 			roundId,
 			address: a.address,
@@ -203,6 +221,10 @@ async function main() {
 	const back = await readCurrentBallots(payload, roundId);
 	let mismatches = 0;
 	for (const a of todo) {
+		// A refused ballot was deliberately not written; it is not a failure to
+		// find it missing, and reporting it as one would train the reader to
+		// ignore this lane's loudest signal.
+		if (refusedAfterClose.has(a.address)) continue;
 		const now = back.get(a.address);
 		if (!now || !sameSelections(now, a.selections)) {
 			mismatches++;
@@ -210,6 +232,11 @@ async function main() {
 				`READ-BACK FAILED: ${short(a.address)} holds ${now ? `${cats(now)} categories` : "nothing"}`,
 			);
 		}
+	}
+	if (refusedAfterClose.size > 0) {
+		console.log(
+			`\n${refusedAfterClose.size} ballot(s) REFUSED — written to Horizon after the round closed, so they were not mirrored and are not counted.`,
+		);
 	}
 	console.log(
 		`\n✓ read back: ${todo.length - mismatches}/${todo.length} written rows match the chain · mirror now holds ${back.size} ballot(s)`,

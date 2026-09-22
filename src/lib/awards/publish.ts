@@ -23,7 +23,7 @@ import {
 import { mirrorAccountData } from "./mirror";
 import { loadFirstBallotRecord } from "./record";
 import type { LoadedRound } from "./round";
-import { fetchTestnetAccounts } from "./stellar";
+import { fetchLatestBallotOp, fetchTestnetAccounts } from "./stellar";
 
 export type TallySource = "chain" | "mirror" | "chain+mirror";
 
@@ -143,6 +143,8 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	tally: RoundTally;
 	source: TallySource;
 	digest: string | null;
+	/** Chain-only ballots refused because they post-date the round's close. */
+	afterClose: number;
 }> {
 	const addresses = [...loaded.whitelist];
 	const [probes, record] = await Promise.all([
@@ -152,12 +154,45 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	const mirror = new Map(
 		(record ?? []).map((e) => [e.address, e.selections] as const),
 	);
+
 	const chain = new Map(
 		probes.map(({ address, result }) => [
 			address,
 			result.funded === true ? result.account.data : null,
 		]),
 	);
+	// A ballot the RELAY accepted was checked against the round's close time
+	// before it was built. A ballot written straight to Horizon was not — the
+	// account is the voter's own, so nothing stops a manageData op landing the
+	// day after voting shut. Those reach the tally through the chain fallback
+	// (an address with no mirror row), and until now they counted.
+	//
+	// Only chain-fallback addresses need dating, which is normally none of
+	// them: everyone who used the page has a mirror row, whose timestamp came
+	// from a submission the relay had already gated. So this costs one Horizon
+	// call per out-of-band voter, not per voter.
+	let afterClose = 0;
+	if (loaded.round.closesAt) {
+		const prefix = `i3.${loaded.round.slug}.`;
+		const chainOnly = addresses.filter((a) => {
+			if (mirror.has(a)) return false;
+			const data = chain.get(a);
+			return !!data && hasVote(loaded.round, loaded.nominees, data);
+		});
+		const dated = await Promise.all(
+			chainOnly.map(async (address) => ({
+				address,
+				op: await fetchLatestBallotOp(address, prefix),
+			})),
+		);
+		for (const { address, op } of dated) {
+			if (!ballotCountsAtTime(op?.at, loaded.round.closesAt)) {
+				chain.set(address, null);
+				afterClose++;
+			}
+		}
+	}
+
 	const { accounts, chainVoters, mirrorVoters } = mergeAccounts(
 		loaded.round,
 		loaded.nominees,
@@ -172,7 +207,32 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 			: mirrorVoters
 				? "mirror"
 				: "chain";
-	return { tally, source, digest: record ? ballotsDigest(record) : null };
+	return {
+		tally,
+		source,
+		digest: record ? ballotsDigest(record) : null,
+		afterClose,
+	};
+}
+
+/**
+ * Should a ballot dated `opAt` count in a round closing at `closesAt`?
+ *
+ * Pure, because the interesting case is the one that is easy to get backwards:
+ * a ballot we cannot DATE does not count. This is only ever asked about
+ * out-of-band ballots — ones written straight to Horizon, which no close-time
+ * check has ever seen — so "we could not read when it happened" is not grounds
+ * to admit it. A round with no closesAt has no deadline to miss.
+ */
+export function ballotCountsAtTime(
+	opAt: string | null | undefined,
+	closesAt: string | null | undefined,
+): boolean {
+	const close = closesAt ? Date.parse(closesAt) : Number.NaN;
+	if (Number.isNaN(close)) return true;
+	const at = opAt ? Date.parse(opAt) : Number.NaN;
+	if (Number.isNaN(at)) return false;
+	return at <= close;
 }
 
 const MANIFEST_HEADER = "i3-round-manifest-v1";
