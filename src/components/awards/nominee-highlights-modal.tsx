@@ -464,7 +464,11 @@ export function NomineeHighlightsModal({
 									href={data.projectUrl}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="inline-flex h-11 flex-shrink-0 items-center gap-1 rounded-full border border-[#333] px-4 text-sm font-medium text-neutral-300 transition-colors hover:border-[#4d4d4d] hover:text-neutral-100"
+									// Alone (not a Pilot, or already voted) it takes the row;
+									// otherwise it sits at its own width beside the vote button.
+									className={`inline-flex h-11 items-center justify-center gap-1 rounded-full border border-[#333] px-4 text-sm font-medium text-neutral-300 transition-colors hover:border-[#4d4d4d] hover:text-neutral-100 ${
+										canPick || onConnect ? "flex-shrink-0" : "flex-1"
+									}`}
 								>
 									Profile
 									<ArrowUpRight className="h-4 w-4" />

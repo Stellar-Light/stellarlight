@@ -81,6 +81,12 @@
 		transition: none;
 		opacity: 1;
 	}
+	/* a curtain that never parts would hide the winner; a burst that never
+	   moves is just clutter over the name */
+	.awards-sm .sm-win-curtain,
+	.awards-sm .sm-win .sm-confetti {
+		display: none;
+	}
 }
 
 /* ══ Stage + ballot motion ═══════════════════════════════════════════════
@@ -682,6 +688,80 @@
    category is announced, the winner catches the light, and you leave with a
    stub in your hand. These are those moments. Techniques from yui540's
    gallery (MIT repo for code); all monochrome, all with resting states. */
+
+/* ── 2025 winners: a small stage each ───────────────────────────────────
+   The same curtain as the opening reveal, at card size — same panels, same
+   scallop and hem, the same sm-reveal-l / sm-reveal-r / sm-reveal-fade
+   keyframes — closed over the card until it scrolls into view and parting
+   on the winner's name. --sm-d staggers the three cards. The confetti behind
+   the name is the receipt's burst, delayed so it goes up as the curtain
+   clears. Both play once, on the reader's scroll. */
+.awards-sm .sm-win-curtain {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	overflow: hidden;
+	border-radius: inherit;
+	pointer-events: none;
+}
+.awards-sm .sm-win-half {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 51%;
+	display: flex;
+}
+.awards-sm .sm-win-half.l {
+	left: 0;
+}
+.awards-sm .sm-win-half.r {
+	right: 0;
+	transform: scaleX(-1);
+}
+.awards-sm .sm-win-half i {
+	position: relative;
+	flex: 1 1 20%;
+	background: linear-gradient(180deg, #2e2e2e 0%, #222 46%, #131313 100%);
+}
+.awards-sm .sm-win-half i:nth-child(even) {
+	background: linear-gradient(180deg, #232323 0%, #191919 46%, #0e0e0e 100%);
+}
+.awards-sm .sm-win-half i::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 18px;
+	border-radius: 0 0 38% 38%;
+	background: rgba(255, 255, 255, 0.07);
+}
+.awards-sm .sm-win-half i::after {
+	content: "";
+	position: absolute;
+	inset: auto 0 0;
+	height: 12px;
+	border-radius: 0 0 44% 44%;
+	background: rgba(0, 0, 0, 0.4);
+}
+.awards-sm .sm-win.is-open .sm-win-half.l {
+	animation: sm-reveal-l 1.1s cubic-bezier(0.7, 0, 0.2, 1) var(--sm-d, 0s) both;
+}
+.awards-sm .sm-win.is-open .sm-win-half.r {
+	animation: sm-reveal-r 1.1s cubic-bezier(0.7, 0, 0.2, 1) var(--sm-d, 0s) both;
+}
+.awards-sm .sm-win.is-open .sm-win-curtain {
+	animation: sm-reveal-fade 0.4s ease calc(var(--sm-d, 0s) + 1s) both;
+}
+/* the burst waits for the curtain to be half open before it goes up */
+.awards-sm .sm-win .sm-confetti {
+	inset: -40px -20px auto;
+	height: 90px;
+	overflow: visible;
+	z-index: 2;
+}
+.awards-sm .sm-win .sm-confetti i {
+	top: 70%;
+	animation-delay: calc(var(--sm-d, 0s) + 0.45s + var(--sm-i, 0) * 28ms);
+}
 
 /* ── Curtain reveal: the page opens ─────────────────────────────────────
    Plays once per tab on an open round. Fixed over everything, pointer-events
