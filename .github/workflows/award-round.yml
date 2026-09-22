@@ -78,5 +78,6 @@ jobs:
               --slug=${{ inputs.slug }} \
               --status=${{ inputs.status }} \
               ${{ inputs.closes && format('--closes={0}', inputs.closes) || '' }} \
+              ${{ inputs.picks && format('--picks={0}', inputs.picks) || '' }} \
               ${{ inputs.execute && '--execute' || '' }}
           fi
