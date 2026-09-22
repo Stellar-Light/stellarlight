@@ -1,5 +1,5 @@
 /**
- * CSV reading for the i³ awards import (nominee and voter rosters).
+ * CSV reading and writing for the i³ awards (roster import, ballot export).
  *
  * Pure and dependency-free so the parser can be tested without a database —
  * it lives here rather than in the script because importing the script pulls
@@ -67,4 +67,29 @@ export function normalizeName(s: string): string {
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, " ")
 		.trim();
+}
+
+/**
+ * RFC-4180 writer, the mirror of parseCsv above.
+ *
+ * Quotes a field only when it needs it (comma, quote, CR or LF), doubling
+ * embedded quotes. A leading `=`, `+`, `-` or `@` is prefixed with a single
+ * quote: spreadsheets treat those as formulas, and a ballot export is read in
+ * Airtable and Excel. Nothing in a Stellar address or a project slug starts
+ * that way today, which is exactly why it would go unnoticed if it ever did.
+ */
+export function toCsv(
+	rows: Array<Record<string, string | number | null | undefined>>,
+	columns?: string[],
+): string {
+	const cols =
+		columns ?? [...new Set(rows.flatMap((r) => Object.keys(r)))].sort();
+	const cell = (v: unknown): string => {
+		let s = v === null || v === undefined ? "" : String(v);
+		if (/^[=+\-@]/.test(s)) s = `'${s}`;
+		return /[",\r\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
+	};
+	const lines = [cols.join(",")];
+	for (const row of rows) lines.push(cols.map((c) => cell(row[c])).join(","));
+	return `${lines.join("\r\n")}\r\n`;
 }

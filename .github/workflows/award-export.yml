@@ -1,0 +1,51 @@
+name: i³ Awards — export ballots (CSV)
+# Exports a round's ballots as CSV for a spreadsheet or Airtable.
+#
+# Every row is an address→choice mapping, which the public surfaces
+# deliberately never serve. So the file is uploaded as a PRIVATE run artifact
+# and is never committed to the repo; the job log prints counts only, never a
+# row. Download it from the run's Artifacts section.
+#
+# The picks exported are each voter's FIRST ballot — the one the round counts.
+# The chain only holds the most recent, so exporting that would disagree with
+# the published result for anyone who changed their mind.
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round slug (e.g. i3-2026)"
+        required: true
+      retention_days:
+        description: "How long to keep the artifact (1–90)."
+        required: false
+        default: "7"
+concurrency:
+  group: award-export
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Export ${{ inputs.round }}
+        run: |
+          pnpm exec tsx scripts/data/award-export.ts \
+            --round=${{ inputs.round }} \
+            --out=ballots-${{ inputs.round }}.csv
+      - name: Upload (private to this repo's collaborators)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ballots-${{ inputs.round }}
+          path: ballots-${{ inputs.round }}.csv
+          retention-days: ${{ inputs.retention_days }}
+          if-no-files-found: error
