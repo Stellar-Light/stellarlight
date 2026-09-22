@@ -108,6 +108,21 @@ export function picksPerCategory(round: BallotRound): number {
 }
 
 /**
+ * How many picks a category requires: the round's picksPerCategory, or every
+ * nominee the category has if it has fewer than that.
+ *
+ * The nominations phase asks each Pilot for a full slate — "a minimum of 4 per
+ * category, so 4 can be shortlisted from each" — and the final phase asks for
+ * exactly one. Both are "fill every slot", so the rule is the same in both:
+ * required = picks, with the pool as the ceiling so a thin category cannot
+ * make the whole ballot impossible. A category with no nominees requires
+ * nothing (see the callers).
+ */
+export function requiredPicks(round: BallotRound, poolSize: number): number {
+	return Math.min(picksPerCategory(round), Math.max(0, poolSize));
+}
+
+/**
  * The manageData key for one vote.
  *
  * A single-pick round keeps the ORIGINAL unslotted key — the encoding that is
@@ -258,10 +273,14 @@ export function validateSelections(
 	// is unvotable, and demanding a pick there would refuse EVERY ballot in the
 	// round rather than just that category.
 	for (const category of validCategories) {
-		if (!nomineesByCategory.get(category)?.size) continue;
-		const picked = normalized[category];
-		if (!picked || picked.length === 0) {
-			errors.push(`no pick for "${category}" — every category needs one`);
+		const pool = nomineesByCategory.get(category)?.size ?? 0;
+		if (!pool) continue;
+		const need = requiredPicks(round, pool);
+		const got = normalized[category]?.length ?? 0;
+		if (got < need) {
+			errors.push(
+				`"${category}" needs ${need} pick${need === 1 ? "" : "s"}, got ${got}`,
+			);
 		}
 	}
 	if (errors.length > 0) return { ok: false, errors };
@@ -599,9 +618,14 @@ export function validateSignedBallot(
 	// categories that actually have nominees can be required.
 	if (errors.length === 0) {
 		for (const category of validCategories) {
-			if (!nomineesByCategory.get(category)?.size) continue;
-			if (!selections[category]?.length) {
-				errors.push(`no pick for "${category}" — every category needs one`);
+			const pool = nomineesByCategory.get(category)?.size ?? 0;
+			if (!pool) continue;
+			const need = requiredPicks(round, pool);
+			const got = selections[category]?.length ?? 0;
+			if (got < need) {
+				errors.push(
+					`"${category}" needs ${need} pick${need === 1 ? "" : "s"}, got ${got}`,
+				);
 			}
 		}
 	}

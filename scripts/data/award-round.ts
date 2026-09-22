@@ -6,6 +6,7 @@
  *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026 --title="i³ Awards 2026" [--execute]
  *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026-test --status=draft
  *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026 --status=open [--closes=…] --execute
+ *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026-nominations --status=draft --picks=4 --execute
  *
  * The real round is TWO rounds: a NOMINATIONS round (Pilots pick up to N
  * projects per category) and then the VOTE (one pick per category). Both are
@@ -200,8 +201,21 @@ async function main() {
 		...(OPENS ? { opensAt: iso(OPENS) } : {}),
 		...(CLOSES ? { closesAt: iso(CLOSES) } : {}),
 	};
+	// --picks on an existing round. Only while it is a DRAFT: changing the slot
+	// count under an open round changes the manageData key shape
+	// (`.<slot>` suffixes appear above 1), so ballots already cast would stop
+	// decoding — a silent loss, not an error.
+	const picksArg = arg("picks");
+	const picks =
+		picksArg === null ? null : Math.max(1, Math.floor(Number(picksArg) || 1));
+	if (picks !== null && (target.status !== "draft" || STATUS !== "draft")) {
+		console.error(
+			`REFUSED: --picks only applies to a round that is and stays draft (${SLUG} is ${target.status} → ${STATUS}). Ballots cast under one slot count do not decode under another.`,
+		);
+		return 1;
+	}
 	console.log(
-		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}`,
+		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}${picks !== null ? ` · picks ${target.picksPerCategory ?? 1} → ${picks}` : ""}`,
 	);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
@@ -210,7 +224,11 @@ async function main() {
 	await payload.update({
 		collection: "award-rounds",
 		id: target.id,
-		data: { status: STATUS as RoundStatus, ...dates },
+		data: {
+			status: STATUS as RoundStatus,
+			...dates,
+			...(picks !== null ? { picksPerCategory: picks } : {}),
+		},
 		overrideAccess: true,
 	});
 	const back = await payload.find({
@@ -221,12 +239,21 @@ async function main() {
 		overrideAccess: true,
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-	const now = (back.docs[0] as any)?.status;
+	const doc = back.docs[0] as any;
+	const now = doc?.status;
 	if (now !== STATUS) {
 		console.error(`READ-BACK FAILED: ${SLUG} is ${now}, expected ${STATUS}`);
 		return 1;
 	}
-	console.log(`✓ read back: ${SLUG} is ${now}`);
+	if (picks !== null && Number(doc?.picksPerCategory) !== picks) {
+		console.error(
+			`READ-BACK FAILED: ${SLUG} picksPerCategory is ${doc?.picksPerCategory}, expected ${picks}`,
+		);
+		return 1;
+	}
+	console.log(
+		`✓ read back: ${SLUG} is ${now}${picks !== null ? ` · ${picks} pick(s) per category` : ""}`,
+	);
 	return 0;
 }
 

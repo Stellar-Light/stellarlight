@@ -59,14 +59,18 @@ function signedBallot(selections: Record<string, string[]>, kp: Keypair) {
 describe("multi-pick round", () => {
 	it("accepts a ballot our own builder produced", () => {
 		const kp = Keypair.random();
-		// two of the three allowed picks in each of three categories
+		// a full slate: three picks in each of three categories
 		const selections = {
-			impact: ["impact-a", "impact-b"],
-			innovation: ["innovation-a", "innovation-b"],
-			interoperability: ["interoperability-a", "interoperability-b"],
+			impact: ["impact-a", "impact-b", "impact-c"],
+			innovation: ["innovation-a", "innovation-b", "innovation-c"],
+			interoperability: [
+				"interoperability-a",
+				"interoperability-b",
+				"interoperability-c",
+			],
 		};
 		const tx = signedBallot(selections, kp);
-		expect(tx.operations.length).toBe(6); // 6 ops, 3 categories
+		expect(tx.operations.length).toBe(9); // 9 ops, 3 categories
 		const verdict = validateSignedBallot(tx.toXDR(), {
 			round,
 			nominees,
@@ -86,15 +90,19 @@ describe("multi-pick round", () => {
 			},
 			kp,
 		);
-		// 3 picks is the cap, so this is legal; a 4th would be trimmed by the
-		// builder — the guard that matters is the relay refusing an over-cap
-		// hand-rolled ballot, covered by the op cap below.
+		// a short slate in two categories is refused now: the phase asks every
+		// Pilot for the full number, and the first ballot is final
 		const verdict = validateSignedBallot(tx.toXDR(), {
 			round,
 			nominees,
 			whitelist: new Set([kp.publicKey()]),
 		});
-		expect(verdict.ok).toBe(true);
+		expect(verdict.ok).toBe(false);
+		if (!verdict.ok) {
+			expect(verdict.errors.join(" ")).toMatch(
+				/"innovation" needs 3 picks, got 1/,
+			);
+		}
 	});
 
 	it("refuses a ballot with more operations than picks could justify", () => {
