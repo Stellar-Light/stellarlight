@@ -198,10 +198,10 @@ describe("planReconcile — relay ↔ record", () => {
 		);
 	});
 
-	it("a row with no ballot id is skipped, not misfiled", () => {
+	it("a row with no ballot id is reported as legacy, not misfiled", () => {
 		expect(
 			planReconcile([row("GA1", null, { impact: ["decaf"] })], new Map()),
-		).toEqual([]);
+		).toEqual([{ kind: "legacy", address: "GA1" }]);
 	});
 
 	it("suspects a reset only when confirmed rows exist and the relay holds none of them", () => {

@@ -12,7 +12,6 @@
 
 import { createHash } from "node:crypto";
 import {
-	type BallotNominee,
 	type BallotRound,
 	type BallotSelections,
 	decodeRelayBallots,
@@ -136,7 +135,7 @@ export function mergeBallots(
 }
 
 /**
- * The whitelist stays the denominator either way.
+ * The whitelist is the turnout denominator (passed to tallyRound): `accounts` is the ballot list here and would read as 100% turnout.
  *
  * `digest` is null when the first-ballot record could not be READ — never a
  * digest over an empty read, which would publish "this round has no ballots"
@@ -202,7 +201,12 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 		entries,
 		relay,
 	);
-	const tally = tallyRound(loaded.round, loaded.nominees, accounts);
+	const tally = tallyRound(
+		loaded.round,
+		loaded.nominees,
+		accounts,
+		loaded.whitelist.size,
+	);
 	const source: TallySource =
 		recordVoters && relayOnly.length
 			? "chain+mirror"

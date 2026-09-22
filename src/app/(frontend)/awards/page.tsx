@@ -12,8 +12,9 @@ import { loadRound, toPublicRound } from "@/lib/awards/round";
  *
  * SDF's Pilot shortlisting vote: ~98 SCF Pilots pick one nominee per
  * category (Impact / Innovation / Interoperability) with whitelisted
- * Stellar addresses; each ballot is a real TESTNET transaction (manageData
- * entries on the voter's own account — see src/lib/awards/ballot.ts).
+ * Stellar addresses; each ballot is written to TESTNET by a relay under a
+ * random id, so nothing on chain links it to the voter — see
+ * src/lib/awards/ballot.ts.
  *
  * Hidden by design until SDF says go:
  *   - no nav/footer links point here

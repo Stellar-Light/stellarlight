@@ -40,6 +40,10 @@ export const AwardBallots: CollectionConfig = {
 		update: ({ req }) => isAdmin(req.user),
 		delete: ({ req }) => isAdmin(req.user),
 	},
+	// The one-ballot gate, enforced by the database: two reserves racing past
+	// the find-then-create in reserveBallot both reach create, and exactly one
+	// gets the duplicate-key error. Without this the gate is a race.
+	indexes: [{ fields: ["round", "address"], unique: true }],
 	fields: [
 		{
 			name: "round",
@@ -127,6 +131,9 @@ export const AwardBallots: CollectionConfig = {
 				{ name: "txHash", type: "text" },
 				{ name: "selections", type: "json" },
 				{ name: "at", type: "date" },
+				// which relay ballot this submission became; Payload drops keys
+				// the config does not declare, so this has to be here
+				{ name: "ballotId", type: "text" },
 			],
 		},
 	],

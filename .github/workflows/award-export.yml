@@ -47,19 +47,25 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # The round reaches the shell through the environment, never by
+      # interpolation into the command: this job holds secrets.
       - name: Export ${{ inputs.round }}
+        env:
+          IN_ROUND: ${{ inputs.round }}
         run: |
           pnpm exec tsx scripts/data/award-export.ts \
-            --round=${{ inputs.round }} \
-            --out=ballots-${{ inputs.round }}.csv
+            --round="$IN_ROUND" \
+            --out="ballots-$IN_ROUND.csv"
       - name: Encrypt, then remove the plaintext
+        env:
+          IN_ROUND: ${{ inputs.round }}
         run: |
           gpg --batch --yes --symmetric --cipher-algo AES256 \
             --passphrase "$AWARD_EXPORT_PASSPHRASE" \
-            --output ballots-${{ inputs.round }}.csv.gpg \
-            ballots-${{ inputs.round }}.csv
-          shred -u ballots-${{ inputs.round }}.csv
-          ls -l ballots-${{ inputs.round }}.csv.gpg
+            --output "ballots-$IN_ROUND.csv.gpg" \
+            "ballots-$IN_ROUND.csv"
+          shred -u "ballots-$IN_ROUND.csv"
+          ls -l "ballots-$IN_ROUND.csv.gpg"
       - name: Upload (encrypted — the artifact itself is public)
         uses: actions/upload-artifact@v4
         with:

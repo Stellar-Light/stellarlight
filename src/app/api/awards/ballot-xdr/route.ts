@@ -12,7 +12,9 @@
  * signature at /api/awards/submit and does the writing itself.
  *
  * Validates round-open + whitelist + selections (a full slate in every
- * category, every nominee real), reads the voter's current sequence from
+ * category, every nominee real) — but NOT whether the address has voted:
+ * unsigned, that answer is a participation oracle (see below) — reads the
+ * voter's current sequence from
  * Horizon if the account exists — an unfunded account is fine, it signs at
  * sequence 1 — and returns the unsigned XDR the wallet signs. No funding step
  * exists any more; the relay pays.
@@ -25,7 +27,6 @@ import {
 	roundOpenState,
 	validateSelections,
 } from "@/lib/awards/ballot";
-import { hasMirroredBallot } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	AWARDS_NETWORK_PASSPHRASE,
@@ -127,32 +128,13 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	// ── one ballot per voter ──
-	// The record is the only place a ballot meets an address now (the chain
-	// shows ballots by id), so it is the gate — and the relay reserves the row
-	// BEFORE it writes, so two attempts cannot both get past this.
-	const mirrored = await hasMirroredBallot(loaded.round.slug, address);
-	if (mirrored === null) {
-		// Trinary: null is "could not check", never "no".
-		return NextResponse.json(
-			{
-				error: "ballot_status_unavailable",
-				message:
-					"We can't confirm whether this address has already voted right now. Nothing was signed — try again in a moment.",
-			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
-		);
-	}
-	if (mirrored) {
-		return NextResponse.json(
-			{
-				error: "already_voted",
-				message:
-					"This address has already cast its ballot for this round. The first ballot is the one that counts, so it can't be replaced.",
-			},
-			{ status: 409, headers: rateLimitHeaders(limit) },
-		);
-	}
+	// Whether this address has ALREADY voted is deliberately not answered
+	// here. This route takes no signature, so an answer would be a
+	// participation oracle: anyone could sweep the whitelist to learn who has
+	// voted, and time the flips against the relay's transactions to learn
+	// what. /api/awards/submit answers already_voted — behind the signature.
+	// A returning voter spends one wallet signature to hear it; that is the
+	// documented cost of the anonymity.
 
 	const tx = buildAuthorizationTx({
 		round: loaded.round,

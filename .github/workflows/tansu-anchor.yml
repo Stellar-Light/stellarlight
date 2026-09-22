@@ -60,9 +60,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds the maintainer key.
       - name: Tansu (${{ inputs.action }}; dry-run unless execute=true)
+        env:
+          IN_ACTION: ${{ inputs.action }}
+          IN_ROUND: ${{ inputs.round }}
+          IN_SHA: ${{ inputs.sha || github.sha }}
+          IN_EXECUTE: ${{ inputs.execute }}
         run: |
-          pnpm exec tsx scripts/data/tansu-anchor.ts --${{ inputs.action }} \
-            ${{ inputs.round && format('--round={0}', inputs.round) || '' }} \
-            --sha=${{ inputs.sha || github.sha }} \
-            ${{ inputs.execute && '--execute' || '' }}
+          args=("--$IN_ACTION" --sha="$IN_SHA")
+          if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/tansu-anchor.ts "${args[@]}"

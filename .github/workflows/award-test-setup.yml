@@ -55,11 +55,22 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: >-
-          pnpm exec tsx scripts/data/award-test-setup.ts
-          --address=${{ inputs.address }}
-          ${{ inputs.round && format('--round={0}', inputs.round) || '' }}
-          ${{ inputs.test_mode && '--test-mode' || '' }}
-          ${{ inputs.fund && '--fund' || '' }}
-          ${{ inputs.reset && '--reset' || '' }}
-          ${{ inputs.execute && '--execute' || '' }}
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets, and an input pasted into
+      # `run:` is a command injection for anyone who can dispatch it.
+      - name: Test setup (dry-run unless execute=true)
+        env:
+          IN_ADDRESS: ${{ inputs.address }}
+          IN_ROUND: ${{ inputs.round }}
+          IN_TEST_MODE: ${{ inputs.test_mode }}
+          IN_FUND: ${{ inputs.fund }}
+          IN_RESET: ${{ inputs.reset }}
+          IN_EXECUTE: ${{ inputs.execute }}
+        run: |
+          args=(--address="$IN_ADDRESS")
+          if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_TEST_MODE" = "true" ]; then args+=(--test-mode); fi
+          if [ "$IN_FUND" = "true" ]; then args+=(--fund); fi
+          if [ "$IN_RESET" = "true" ]; then args+=(--reset); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-test-setup.ts "${args[@]}"

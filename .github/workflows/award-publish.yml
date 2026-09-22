@@ -34,13 +34,20 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets and pushes to main.
       - name: Write the results document (dry-run unless execute=true)
+        env:
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ inputs.execute }}
         run: |
-          pnpm exec tsx scripts/data/award-results-publish.ts \
-            --round=${{ inputs.round }} \
-            ${{ inputs.execute && '--execute' || '' }}
+          args=(--round="$IN_ROUND")
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-results-publish.ts "${args[@]}"
       - name: Commit + push the results file
         if: ${{ inputs.execute }}
+        env:
+          IN_ROUND: ${{ inputs.round }}
         run: |
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
@@ -48,7 +55,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "results file unchanged — nothing to commit"
           else
-            git commit -m "chore(awards): publish ${{ inputs.round }} results [skip ci]"
+            git commit -m "chore(awards): publish $IN_ROUND results [skip ci]"
             # Push-first retry (#1596): main moves during a run; -X theirs keeps
             # OUR freshly written file, which is a snapshot, not a merge.
             for i in 1 2 3; do
@@ -59,8 +66,11 @@ jobs:
           fi
           echo "PUBLISH_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
       - name: Anchor that commit on Tansu (testnet)
+        env:
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ inputs.execute }}
+          GH_SHA: ${{ github.sha }}
         run: |
-          pnpm exec tsx scripts/data/tansu-anchor.ts --commit \
-            --round=${{ inputs.round }} \
-            --sha=${PUBLISH_SHA:-${{ github.sha }}} \
-            ${{ inputs.execute && '--execute' || '' }}
+          args=(--commit --round="$IN_ROUND" --sha="${PUBLISH_SHA:-$GH_SHA}")
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/tansu-anchor.ts "${args[@]}"

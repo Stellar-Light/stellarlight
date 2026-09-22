@@ -220,7 +220,7 @@ async function main() {
 			console.log(
 				res.ok
 					? `• reset: cleared ${ids.length} ballot(s) off the relay (tx ${res.hash.slice(0, 8)}…)`
-					: `• reset: relay entries NOT cleared (${res.error}) — the row is gone so the wallet can vote; the tally reports an orphan until reconcile clears it`,
+					: `• reset: relay entries NOT cleared (${res.error}) — the row is gone so the wallet can vote; the reconcile lane reports it as an orphan until it is cleared by hand`,
 			);
 		} else if (ids.length) {
 			console.log(`• reset: WOULD clear ${ids.length} ballot(s) off the relay`);
@@ -237,7 +237,7 @@ async function main() {
 
 	console.log(
 		EXECUTE
-			? "\nDone. Check GET /api/awards/eligibility?address=… to confirm whitelisted+funded."
+			? "\nDone. Check GET /api/awards/eligibility?address=… to confirm whitelisted."
 			: "\nDry-run only. Re-run with --execute to write.",
 	);
 	process.exit(0);

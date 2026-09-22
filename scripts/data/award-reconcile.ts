@@ -104,7 +104,7 @@ async function main(): Promise<number> {
 	const summary = summarizeReconcile(actions);
 	const c = summary.counts;
 	console.log(
-		`relay ${relay.size} ballot(s) · record ${rows.length} row(s) → ok ${c.ok} · differs ${c.differs} · chain-empty ${c["chain-empty"]} · unconfirmed ${c.unconfirmed} · orphan ${c.orphan}`,
+		`relay ${relay.size} ballot(s) · record ${rows.length} row(s) → ok ${c.ok} · differs ${c.differs} · chain-empty ${c["chain-empty"]} · unconfirmed ${c.unconfirmed} · orphan ${c.orphan} · legacy ${c.legacy}`,
 	);
 
 	if (summary.resetSuspected) {
@@ -115,7 +115,12 @@ async function main(): Promise<number> {
 	}
 	if (c.differs > 0) {
 		console.error(
-			`\n${c.differs} row(s) DIFFER from the relay. The relay writes exactly what was signed, so the record changed after the fact. Not touched; a human decides.`,
+			`\n${c.differs} row(s) DIFFER from the relay. The relay writes exactly what was signed, so one side was changed after the fact — the record by an admin, or the relay by whoever holds its key. Not touched; a human decides.`,
+		);
+	}
+	if (c.orphan > 0) {
+		console.error(
+			`\n${c.orphan} ballot(s) on the relay have NO record row: either a row was deleted, or someone holding the relay key wrote them. The tally counts them as anonymous relay-only ballots; a human decides whether they stand.`,
 		);
 	}
 
@@ -129,15 +134,16 @@ async function main(): Promise<number> {
 		const row = rows.find((r) => r.ballotId === a.ballotId);
 		if (!row) continue;
 		if (a.onRelay) {
+			// The relay holds it, so the write landed: confirm. The hash is a
+			// nicety — past Horizon's reachable history, mark it rather than
+			// leave the voter locked out and the ballot uncounted.
 			const op = await fetchLatestBallotOp(
 				relayPub,
 				`i3.${round.slug}.${a.ballotId}.`,
 			);
-			if (!op) {
-				left++;
-				continue;
+			if (EXECUTE) {
+				await confirmBallot(row.id, op?.txHash ?? `relay:${a.ballotId}`);
 			}
-			if (EXECUTE) await confirmBallot(row.id, op.txHash);
 			confirmed++;
 			continue;
 		}
@@ -151,12 +157,12 @@ async function main(): Promise<number> {
 	}
 	if (c.unconfirmed > 0) {
 		console.log(
-			`unconfirmed: ${confirmed} ${EXECUTE ? "confirmed" : "would confirm"} from the relay · ${released} ${EXECUTE ? "released" : "would release"} (abandoned) · ${left} left (in flight, or undatable)`,
+			`unconfirmed: ${confirmed} ${EXECUTE ? "confirmed" : "would confirm"} from the relay · ${released} ${EXECUTE ? "released" : "would release"} (abandoned) · ${left} left (in flight)`,
 		);
 	}
 	if (!EXECUTE)
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-	return c.differs > 0 ? 1 : 0;
+	return c.differs > 0 || c.orphan > 0 ? 1 : 0;
 }
 
 main()
