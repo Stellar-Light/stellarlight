@@ -62,7 +62,7 @@ export const TEST_BALLOT_MEMO = "i3-test";
 const BALLOT_TIMEOUT_SECONDS = 300;
 
 /** 100x base fee per op — pennies of testnet XLM, immune to minor surge. */
-const BALLOT_FEE_PER_OP = "10000";
+export const BALLOT_FEE_PER_OP = "10000";
 
 export interface RoundCategory {
 	key: string;

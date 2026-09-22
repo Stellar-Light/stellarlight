@@ -1,32 +1,27 @@
 /**
- * POST /api/awards/ballot-xdr — build the unsigned TESTNET ballot.
+ * POST /api/awards/ballot-xdr — build the voter's AUTHORIZATION.
  *
  *   { "address": "G...", "selections": { "impact": "decaf", ... },
  *     "round": "i3-2026-test" (optional — defaults to the open round) }
  *
- * Validates round-open + whitelist + selections (one nominee per category,
- * every nominee real), pulls the voter's current sequence from testnet
- * Horizon, and returns the unsigned XDR the wallet signs. The transaction
- * is a plain (fee-bump-friendly) tx of manageData ops only — see
- * src/lib/awards/ballot.ts for the encoding.
+ * Ballots are anonymous: they are written to a relay account under a random
+ * id, never to the voter's own account. So what the voter signs is not a
+ * ballot transaction but an authorization — a transaction that can never be
+ * submitted (its sequence is already consumed, and it expires in ten minutes)
+ * whose memo commits to exactly these picks. The relay verifies that
+ * signature at /api/awards/submit and does the writing itself.
  *
- * Unfunded testnet account → 409 with a friendbot link so the UI can offer
- * a one-tap "fund on testnet" (test mode only — this whole feature is
- * hardwired to testnet).
- *
- * ONE BALLOT PER VOTER. The first ballot is the only one that counts, so an
- * address that has already voted is refused HERE, before a wallet is ever
- * asked to sign — handing someone a transaction whose result we would then
- * ignore is worse than telling them no. "Already voted" is the union of the
- * chain (this account carries ballot keys) and the mirror (we recorded one,
- * even if a testnet reset has since wiped the chain).
+ * Validates round-open + whitelist + selections (a full slate in every
+ * category, every nominee real), reads the voter's current sequence from
+ * Horizon if the account exists — an unfunded account is fine, it signs at
+ * sequence 1 — and returns the unsigned XDR the wallet signs. No funding step
+ * exists any more; the relay pays.
  */
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import {
-	buildBallotTx,
-	decodeAccountVotes,
+	buildAuthorizationTx,
 	roundOpenState,
 	validateSelections,
 } from "@/lib/awards/ballot";
@@ -35,7 +30,6 @@ import { loadRound } from "@/lib/awards/round";
 import {
 	AWARDS_NETWORK_PASSPHRASE,
 	fetchTestnetAccount,
-	friendbotFundUrl,
 } from "@/lib/awards/stellar";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -122,6 +116,9 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
+	// The voter's current sequence, if the account exists. 404 is not a
+	// problem any more: an account with no on-chain footprint signs at
+	// sequence 1, which is just as unsubmittable. Only Horizon being down is.
 	const account = await fetchTestnetAccount(address);
 	if (account.funded === null) {
 		return NextResponse.json(
@@ -129,31 +126,14 @@ export async function POST(req: NextRequest) {
 			{ status: 502, headers: rateLimitHeaders(limit) },
 		);
 	}
-	if (account.funded === false) {
-		return NextResponse.json(
-			{
-				error: "account_unfunded",
-				message:
-					"This testnet account has no on-chain footprint yet. Fund it via friendbot, then request the ballot again.",
-				friendbot: friendbotFundUrl(address),
-			},
-			{ status: 409, headers: rateLimitHeaders(limit) },
-		);
-	}
 
 	// ── one ballot per voter ──
-	// Chain first: it needs no DB and settles the common case on its own.
-	const onChain = Object.values(
-		decodeAccountVotes(loaded.round, loaded.nominees, account.account.data),
-	).some((picks) => picks.length > 0);
-	// Then the mirror, which still holds a ballot the chain has forgotten.
-	const mirrored = onChain
-		? true
-		: await hasMirroredBallot(loaded.round.slug, address);
+	// The record is the only place a ballot meets an address now (the chain
+	// shows ballots by id), so it is the gate — and the relay reserves the row
+	// BEFORE it writes, so two attempts cannot both get past this.
+	const mirrored = await hasMirroredBallot(loaded.round.slug, address);
 	if (mirrored === null) {
-		// Trinary: null is "could not check", never "no". Letting a second
-		// ballot through here would overwrite the first on the voter's own
-		// account and then not be counted — a signature that does nothing.
+		// Trinary: null is "could not check", never "no".
 		return NextResponse.json(
 			{
 				error: "ballot_status_unavailable",
@@ -174,17 +154,11 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	const tx = buildBallotTx({
+	const tx = buildAuthorizationTx({
 		round: loaded.round,
 		address,
-		sequence: account.account.sequence,
+		sequence: account.funded ? account.account.sequence : null,
 		selections: validated.selections,
-		// Only keys that actually exist may be deleted — manageData refuses to
-		// clear a key that was never set, which would fail a first-time ballot.
-		// Every ballot that reaches here IS a first ballot now; this stays
-		// because stray keys under this prefix (a hand-written entry, a partial
-		// tx) must still be cleared for the ballot to be well-formed.
-		existingKeys: new Set(Object.keys(account.account.data ?? {})),
 	});
 
 	return NextResponse.json(
@@ -193,7 +167,9 @@ export async function POST(req: NextRequest) {
 			networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
 			round: loaded.round.slug,
 			selections: validated.selections,
-			expiresInSeconds: 300,
+			expiresInSeconds: 600,
+			// what the wallet will show: one self-describing op, nothing on-chain
+			note: "This signature authorizes your ballot. It is not a transaction you pay for and it never touches your account; the relay writes the ballot anonymously.",
 		},
 		{ headers: rateLimitHeaders(limit) },
 	);

@@ -1,55 +1,48 @@
 /**
- * i³ Awards — reconcile the DB mirror against the chain, before testnet resets.
+ * i³ Awards — reconcile the RELAY against the record, daily.
  *
- *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026-test
- *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026-test --execute
- *   pnpm exec tsx scripts/data/award-reconcile.ts --round=current --execute
+ *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026            # dry run
+ *   pnpm exec tsx scripts/data/award-reconcile.ts --round=i3-2026 --execute  # repair
+ *   pnpm exec tsx scripts/data/award-reconcile.ts --round=current [--execute]
  *
- * `--round=current` = the open round, else the most recently updated one —
- * what the daily schedule runs, so the mirror is reconciled every day a round
- * exists and nobody has to remember to do it before the reset.
+ * Ballots live on ONE relay account under random ids; the record is the only
+ * place an id meets an address. The two can disagree in exactly these ways:
  *
- * WHY. Ballots live as manageData entries on each voter's TESTNET account and
- * the tally reads them from Horizon. Testnet is reset 2–4× a year, and a reset
- * clears every ledger entry and all history — the round's on-chain record is
- * gone at the first reset after it closes. `award-ballots` is written after
- * each successful submit, best-effort by design (a DB hiccup must never fail a
- * vote that already landed on-chain), so it can silently miss a ballot. While
- * the chain still exists this script finds those gaps and fills them; once the
- * chain is gone, the mirror is what /api/awards/results serves.
+ *   unconfirmed  a row was RESERVED (the one-ballot gate) and the relay's
+ *                confirmation never landed. If the relay holds the id, the
+ *                ballot is real and the row is confirmed with its tx hash. If
+ *                not, and the reservation is older than a submit could
+ *                possibly take, it is released so the voter can vote.
+ *   orphan       a ballot on the relay that no row names. Counted by the
+ *                tally as an anonymous voter; it cannot be attributed here.
+ *   chain-empty  a confirmed row whose ballot the relay no longer holds —
+ *                after a testnet reset that is every row, and those rows are
+ *                the point. Kept, reported.
+ *   differs      confirmed row and relay hold different picks. The relay
+ *                writes exactly what was signed, so the RECORD changed.
+ *                Reported loudly, never overwritten.
  *
- * Every whitelisted address (plus any the mirror knows) is read from Horizon
- * and classified: create (on-chain, not mirrored), update (mirror is stale),
- * ok, no-vote, chain-empty (mirrored but the chain shows nothing — NEVER
- * deleted), unfunded, unreachable (Horizon failed — the run cannot claim
- * completeness). A backfilled row carries the real tx hash and ledger time of
- * the vote when Horizon still has the operation.
- *
- * If the mirror holds ballots and the chain shows none for anyone, that is
- * what a reset looks like: nothing is written — there is nothing to reconcile
- * from, the mirror rows are the record — and the run says so and exits 0,
- * because a lane that stays red forever after the reset reads as noise.
- *
- * Dry-run by default. Every write is read back; unreachable addresses or a
- * read-back mismatch exit non-zero so a partial run never reads as success.
+ * This log is world-readable (public repo): counts only, never an address.
+ * Dry-run by default; --execute confirms and releases as described and
+ * nothing else. Exits non-zero on `differs`, on unreachable Horizon, or on
+ * a suspected reset, so a red run means a human should look.
  */
+
 import "../load-env";
 import { getPayload } from "payload";
+import { decodeRelayBallots } from "../../src/lib/awards/ballot";
+import { planReconcile, summarizeReconcile } from "../../src/lib/awards/mirror";
 import {
-	planReconcile,
-	sameSelections,
-	summarizeReconcile,
-} from "../../src/lib/awards/mirror";
-import { ballotCountsAtTime } from "../../src/lib/awards/publish";
-import {
+	confirmBallot,
 	findRoundId,
-	readCurrentBallots,
-	writeBallotRecord,
+	readRecordRows,
+	releaseBallot,
 } from "../../src/lib/awards/record";
-import { type LoadedRound, loadRoundOrThrow } from "../../src/lib/awards/round";
+import { loadRoundOrThrow } from "../../src/lib/awards/round";
 import {
 	fetchLatestBallotOp,
-	fetchTestnetAccounts,
+	fetchTestnetAccount,
+	relayKeypair,
 } from "../../src/lib/awards/stellar";
 import configPromise from "../../src/payload.config";
 
@@ -76,180 +69,109 @@ const differing = (a: Record<string, string[]>, b: Record<string, string[]>) =>
 		.sort()
 		.join(", ");
 
-async function main() {
+/** A reservation older than this with nothing on the relay is abandoned. */
+const ABANDONED_AFTER_MS = 15 * 60_000;
+
+async function main(): Promise<number> {
 	if (!ROUND) {
-		console.error("usage: --round=<slug> [--execute]");
+		console.error("usage: --round=<slug|current> [--execute]");
 		return 2;
 	}
-	console.log(
-		`\ni³ awards reconcile — ${ROUND} — ${EXECUTE ? "EXECUTE" : "DRY-RUN (pass --execute to write)"}`,
-	);
-
-	// getPayload (not the safe wrapper) so a DB failure is FATAL, not "no round".
 	const payload = await getPayload({ config: configPromise });
-
-	// The throwing loader, retried: a transient DB error must surface as the
-	// error it is, not as "no round" (run 35106331010 failed exactly that way).
-	let loaded: LoadedRound | null = null;
-	for (let attempt = 1; ; attempt++) {
-		try {
-			loaded = await loadRoundOrThrow(ROUND === "current" ? null : ROUND);
-			break;
-		} catch (err) {
-			console.error(`loadRound attempt ${attempt}/3 failed:`, err);
-			if (attempt === 3) return 1;
-			await new Promise((r) => setTimeout(r, 2000 * attempt));
-		}
-	}
+	const loaded = await loadRoundOrThrow(ROUND === "current" ? null : ROUND);
 	if (!loaded) {
-		console.error(
-			ROUND === "current"
-				? "\nno round exists"
-				: `\nno round with slug "${ROUND}"`,
-		);
+		console.error(`no round for "${ROUND}"`);
 		return 1;
 	}
-	const { round, nominees, whitelist } = loaded;
+	const { round, nominees } = loaded;
 	const roundId = await findRoundId(payload, round.slug);
 	if (!roundId) {
-		console.error(`\nround ${round.slug} loaded but has no id?!`);
+		console.error(`no round with slug "${round.slug}"`);
 		return 1;
 	}
-	const mirror = await readCurrentBallots(payload, roundId);
-	const addresses = [...new Set([...whitelist, ...mirror.keys()])].sort();
-
 	console.log(
-		`round ${round.slug} (${round.status}) · ${nominees.length} nominees · whitelist ${whitelist.size} · walking ${addresses.length} accounts on testnet`,
+		`\naward-reconcile — ${EXECUTE ? "EXECUTE" : "DRY-RUN"} — round ${round.slug} (${round.status}) · ${nominees.length} nominees`,
 	);
 
-	const probes = await fetchTestnetAccounts(addresses, 10);
-	const actions = planReconcile(round, nominees, probes, mirror);
-	const summary = summarizeReconcile(actions, mirror.size);
-	const c = summary.counts;
-
-	console.log(
-		`\nchain voters ${summary.chainVoters}: ok ${c.ok} · CREATE ${c.create} · UPDATE ${c.update}` +
-			` │ no-vote ${c["no-vote"]} · unfunded ${c.unfunded} · chain-empty ${c["chain-empty"]} · unreachable ${c.unreachable}`,
-	);
-	// Counts only. This log is world-readable (public repo), and a truncated
-	// address re-identifies uniquely against a ~98-address whitelist that is
-	// itself derived from a public contract — so a per-address line here was
-	// the round's participation roll, published daily. Unreachable addresses
-	// are the one class an operator needs to act on; they get a count and the
-	// distinct error strings, not the addresses.
-	const unreachableErrors = [
-		...new Set(
-			actions.flatMap((a) => (a.kind === "unreachable" ? [a.error] : [])),
-		),
-	];
-	if (unreachableErrors.length) {
-		console.log(`  unreachable errors: ${unreachableErrors.join(" | ")}`);
+	const relayPub = relayKeypair()?.publicKey() ?? null;
+	if (!relayPub) {
+		console.error("AWARDS_RELAY_SECRET is not set — cannot read the relay.");
+		return 1;
 	}
+	const probe = await fetchTestnetAccount(relayPub);
+	if (probe.funded === null) {
+		console.error(
+			`relay unreachable: ${probe.error} — this run cannot judge anything (exit 1).`,
+		);
+		return 1;
+	}
+	const relay =
+		probe.funded === true
+			? decodeRelayBallots(round, nominees, probe.account.data)
+			: new Map();
+	const rows = await readRecordRows(payload, roundId);
+	const actions = planReconcile(rows, relay);
+	const summary = summarizeReconcile(actions);
+	const c = summary.counts;
+	console.log(
+		`relay ${relay.size} ballot(s) · record ${rows.length} row(s) → ok ${c.ok} · differs ${c.differs} · chain-empty ${c["chain-empty"]} · unconfirmed ${c.unconfirmed} · orphan ${c.orphan}`,
+	);
 
 	if (summary.resetSuspected) {
-		console.log(
-			`\nNOTICE: the mirror holds ${mirror.size} ballot(s) and Horizon answered for ${actions.length - c.unreachable} account(s), yet NONE carries a vote.`,
+		console.error(
+			`\nRESET SUSPECTED: the record holds confirmed ballots and the relay holds none of them. Nothing to reconcile from; the record IS the round now. Exit 1 so someone reads this.`,
 		);
-		console.log(
-			"  That is what testnet looks like after a reset. There is nothing to reconcile FROM —",
+		return 1;
+	}
+	if (c.differs > 0) {
+		console.error(
+			`\n${c.differs} row(s) DIFFER from the relay. The relay writes exactly what was signed, so the record changed after the fact. Not touched; a human decides.`,
 		);
-		console.log(
-			"  the mirror rows ARE the record now, and /api/awards/results serves them. Nothing written.",
-		);
-		return 0;
 	}
 
-	const todo = actions.filter(
-		(a): a is Extract<typeof a, { kind: "create" | "update" }> =>
-			a.kind === "create" || a.kind === "update",
-	);
-	if (todo.length === 0)
-		console.log("\nmirror matches the chain — nothing to write.");
-
-	if (!EXECUTE) {
-		if (todo.length)
-			console.log(
-				`\nDRY RUN — ${todo.length} row(s) would be written. Re-run with --execute.`,
+	// the only writes this lane makes: confirm or release a reservation
+	let confirmed = 0;
+	let released = 0;
+	let left = 0;
+	const now = Date.now();
+	for (const a of actions) {
+		if (a.kind !== "unconfirmed") continue;
+		const row = rows.find((r) => r.ballotId === a.ballotId);
+		if (!row) continue;
+		if (a.onRelay) {
+			const op = await fetchLatestBallotOp(
+				relayPub,
+				`i3.${round.slug}.${a.ballotId}.`,
 			);
-		if (c.unreachable) {
-			console.error(
-				`\n${c.unreachable} address(es) unreachable — this run cannot claim the mirror is complete (exit 1).`,
-			);
-			return 1;
-		}
-		return 0;
-	}
-
-	const prefix = `i3.${round.slug}.`;
-	const refusedAfterClose = new Set<string>();
-	for (const a of todo) {
-		const op = await fetchLatestBallotOp(a.address, prefix);
-		// This lane is the one path by which an out-of-band ballot enters the
-		// mirror — and the tally PREFERS the mirror. Writing a post-close
-		// ballot here would launder it past the close-time guard in liveTally,
-		// which only ever inspects addresses with no mirror row. So the guard
-		// has to hold on both sides of that door.
-		if (!ballotCountsAtTime(op?.at, round.closesAt ?? null)) {
-			refusedAfterClose.add(a.address);
-			console.log(
-				`  refused ${short(a.address)}  ${
-					op
-						? `ballot op @ ${op.at} is after the round closed (${round.closesAt})`
-						: "no datable ballot op — cannot show it was cast in time"
-				}`,
-			);
+			if (!op) {
+				left++;
+				continue;
+			}
+			if (EXECUTE) await confirmBallot(row.id, op.txHash);
+			confirmed++;
 			continue;
 		}
-		const outcome = await writeBallotRecord(payload, {
-			roundId,
-			address: a.address,
-			selections: a.selections,
-			txHash: op?.txHash ?? null,
-			at: op?.at ?? new Date().toISOString(),
-		});
-		console.log(
-			`  ${outcome.padEnd(7)} ${short(a.address)}  ${
-				op
-					? `tx ${op.txHash.slice(0, 8)}… @ ${op.at}`
-					: "(no ballot op in the last 200 — recorded from account state, no tx hash)"
-			}`,
-		);
-	}
-
-	const back = await readCurrentBallots(payload, roundId);
-	let mismatches = 0;
-	for (const a of todo) {
-		// A refused ballot was deliberately not written; it is not a failure to
-		// find it missing, and reporting it as one would train the reader to
-		// ignore this lane's loudest signal.
-		if (refusedAfterClose.has(a.address)) continue;
-		const now = back.get(a.address);
-		if (!now || !sameSelections(now, a.selections)) {
-			mismatches++;
-			console.error(
-				`READ-BACK FAILED: ${short(a.address)} holds ${now ? `${cats(now)} categories` : "nothing"}`,
-			);
+		const age = row.reservedAt ? now - Date.parse(row.reservedAt) : Number.NaN;
+		if (Number.isNaN(age) || age < ABANDONED_AFTER_MS) {
+			left++; // may still be in flight
+			continue;
 		}
+		if (EXECUTE) await releaseBallot(row.id);
+		released++;
 	}
-	if (refusedAfterClose.size > 0) {
+	if (c.unconfirmed > 0) {
 		console.log(
-			`\n${refusedAfterClose.size} ballot(s) REFUSED — written to Horizon after the round closed, so they were not mirrored and are not counted.`,
+			`unconfirmed: ${confirmed} ${EXECUTE ? "confirmed" : "would confirm"} from the relay · ${released} ${EXECUTE ? "released" : "would release"} (abandoned) · ${left} left (in flight, or undatable)`,
 		);
 	}
-	console.log(
-		`\n✓ read back: ${todo.length - mismatches}/${todo.length} written rows match the chain · mirror now holds ${back.size} ballot(s)`,
-	);
-	if (c.unreachable) {
-		console.error(
-			`${c.unreachable} address(es) unreachable — mirror may still be incomplete (exit 1).`,
-		);
-	}
-	return mismatches || c.unreachable ? 1 : 0;
+	if (!EXECUTE)
+		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
+	return c.differs > 0 ? 1 : 0;
 }
 
 main()
 	.then((code) => process.exit(code))
-	.catch((e) => {
-		console.error("FATAL:", e);
+	.catch((err) => {
+		console.error(err);
 		process.exit(1);
 	});

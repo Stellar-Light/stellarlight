@@ -1476,6 +1476,7 @@ export interface AwardBallot {
   history?:
     | {
         txHash?: string | null;
+        ballotId?: string | null;
         selections?:
           | {
               [k: string]: unknown;

@@ -1,55 +1,33 @@
 /**
  * GET /api/awards/eligibility?address=G...[&round=<slug>]
  *
- * Called when a wallet connects on /awards: is this address on the round's
- * whitelist, is the testnet account funded, and has it already voted (and for
- * what, so a returning voter sees their ballot rather than an empty form).
+ * Is this address on the round's voter list, and is voting open? Nothing
+ * else. This endpoint is unauthenticated and the ballot is anonymous, so it
+ * must never answer "has this address voted" or "what did it vote" — it used
+ * to do both, which made it a participation-and-choice oracle for the whole
+ * electorate. Whether an address has voted is learned only by trying:
+ * /api/awards/submit answers already_voted, and the page locks on that.
  *
- * `hasVoted` is the union of chain and mirror, and it is what locks the form:
- * one ballot per voter, the first one counts. It stays true after a testnet
- * reset has wiped `votes` — the mirror still holds the ballot, so offering a
- * fresh vote would be offering one that doesn't count. `null` means we could
- * not check; the UI treats that as "can't vote right now", not "go ahead".
+ * No funding here any more either. Ballots are written by the relay, which
+ * pays; a voter's account never needs to exist on-chain.
  *
- * A whitelisted address that is NOT funded gets funded here, server-side,
- * through friendbot — the voter's experience is connect → sign, and "fund on
- * testnet" is not a step they should have to know about. Only whitelisted
- * addresses are ever funded (the list gates it, not the caller). If friendbot
- * fails the old path remains: `funded:false` + a friendbot link the UI turns
- * into a one-tap button.
- *
- * Only the QUERIED address's own votes are returned — the same data anyone
- * can read from public testnet Horizon for that account. The aggregate
- * results endpoint never exposes address→choice; this one requires you to
- * name the address you're asking about.
+ * Membership itself is public information (the list derives from the public
+ * SCF voting contract), so answering it is not a leak.
  */
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { decodeAccountVotes, roundOpenState } from "@/lib/awards/ballot";
-import { readFirstBallotFor } from "@/lib/awards/record";
+import { roundOpenState } from "@/lib/awards/ballot";
 import { loadRound } from "@/lib/awards/round";
-import {
-	fetchTestnetAccount,
-	friendbotFundUrl,
-	fundViaFriendbot,
-} from "@/lib/awards/stellar";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-// One friendbot attempt per address per minute per instance: a failing
-// friendbot (rate limit, outage) must not turn every reconnect into a 20s
-// wait. The manual button stays available in between.
-const FUND_RETRY_MS = 60_000;
-const fundAttempts = new Map<string, number>();
-
 export async function GET(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/eligibility",
 		// Per-IP, and the whole room shares one NAT at the venue: see ballot-xdr.
-		// At 60 the ballot never became usable for the 61st Pilot in 5 minutes.
 		limit: 300,
 		windowMs: 5 * 60 * 1000,
 	});
@@ -59,17 +37,15 @@ export async function GET(req: NextRequest) {
 			{ status: 429, headers: rateLimitHeaders(limit) },
 		);
 	}
-
 	const address = (req.nextUrl.searchParams.get("address") ?? "")
 		.trim()
 		.toUpperCase();
 	if (!StrKey.isValidEd25519PublicKey(address)) {
 		return NextResponse.json(
-			{ error: "provide a valid Stellar address (?address=G...)" },
+			{ error: "provide a valid Stellar address as ?address=" },
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
-
 	const loaded = await loadRound(req.nextUrl.searchParams.get("round"));
 	if (!loaded) {
 		return NextResponse.json(
@@ -77,84 +53,10 @@ export async function GET(req: NextRequest) {
 			{ status: 404, headers: rateLimitHeaders(limit) },
 		);
 	}
-
-	const whitelisted = loaded.whitelist.has(address);
-	if (!whitelisted) {
-		// Not on the list → read-only mode. No Horizon lookup needed.
-		return NextResponse.json(
-			{
-				round: loaded.round.slug,
-				whitelisted: false,
-				funded: null,
-				votes: null,
-				voting: roundOpenState(loaded.round),
-			},
-			{ headers: rateLimitHeaders(limit) },
-		);
-	}
-
-	let result = await fetchTestnetAccount(address);
-	if (
-		result.funded === false &&
-		Date.now() - (fundAttempts.get(address) ?? 0) > FUND_RETRY_MS
-	) {
-		fundAttempts.set(address, Date.now());
-		const fund = await fundViaFriendbot(address);
-		if (fund.ok) {
-			result = await fetchTestnetAccount(address);
-			if (result.funded === false) {
-				// Horizon can trail friendbot by a ledger.
-				await new Promise((r) => setTimeout(r, 2500));
-				result = await fetchTestnetAccount(address);
-			}
-		}
-	}
-	if (result.funded === null) {
-		return NextResponse.json(
-			{ error: `could not reach testnet Horizon: ${result.error}` },
-			{ status: 502, headers: rateLimitHeaders(limit) },
-		);
-	}
-	if (result.funded === false) {
-		return NextResponse.json(
-			{
-				round: loaded.round.slug,
-				whitelisted: true,
-				funded: false,
-				votes: null,
-				hasVoted:
-					(await readFirstBallotFor(loaded.round.slug, address))?.voted ?? null,
-				voting: roundOpenState(loaded.round),
-				friendbot: friendbotFundUrl(address),
-				note: "This testnet account couldn't be funded automatically — hit friendbot, then vote.",
-			},
-			{ headers: rateLimitHeaders(limit) },
-		);
-	}
-
-	const votes = decodeAccountVotes(
-		loaded.round,
-		loaded.nominees,
-		result.account.data,
-	);
-	const onChain = Object.values(votes).some((picks) => picks.length > 0);
-	// This endpoint is unauthenticated, so it may only ever return what the
-	// chain already shows anyone. It used to serve the mirror's FIRST ballot —
-	// the one thing the chain forgets after a revote or a reset — which made it
-	// an address→counted-ballot oracle for the whole electorate. Showing a
-	// returning voter their counted picks needs proof they hold the key (a
-	// wallet-signed challenge); until then the page shows chain state, or
-	// nothing.
-	const mirrored = await readFirstBallotFor(loaded.round.slug, address);
-	const counted = onChain ? votes : null;
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,
-			whitelisted: true,
-			funded: true,
-			votes: counted,
-			// chain OR mirror — the mirror outlives a reset that clears the chain
-			hasVoted: onChain ? true : (mirrored?.voted ?? null),
+			whitelisted: loaded.whitelist.has(address),
 			voting: roundOpenState(loaded.round),
 		},
 		{ headers: rateLimitHeaders(limit) },

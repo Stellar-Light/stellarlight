@@ -20,7 +20,6 @@ import {
 	tallyRound,
 } from "../awards/ballot";
 import {
-	type ChainProbe,
 	mirrorAccountData,
 	normalizeSelections,
 	planReconcile,
@@ -52,7 +51,16 @@ const nominees: BallotNominee[] = [
 	{ category: "innovation", slug: "reflector", name: "Reflector" },
 ];
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
-const funded = (data: Record<string, string>): ChainProbe["result"] => ({
+const funded = (
+	data: Record<string, string>,
+): {
+	funded: true;
+	account: {
+		sequence: string;
+		data: Record<string, string>;
+		signers: string[];
+	};
+} => ({
 	funded: true,
 	account: { sequence: "1", data, signers: [] },
 });
@@ -156,112 +164,78 @@ describe("normalizeSelections / sameSelections", () => {
 	});
 });
 
-describe("planReconcile", () => {
-	const impact = (slug: string) => ({
-		[dataKey(round.slug, "impact")]: b64(slug),
-	});
+describe("planReconcile — relay ↔ record", () => {
+	const row = (
+		address: string,
+		ballotId: string | null,
+		selections: Record<string, string[]>,
+		confirmed = true,
+	) => ({ address, ballotId, selections, confirmed });
 
-	it("classifies every address into exactly one explicit class", () => {
-		const probes: ChainProbe[] = [
-			{ address: "G-CREATE", result: funded(impact("decaf")) },
-			{ address: "G-UPDATE", result: funded(impact("beans")) },
-			{ address: "G-OK", result: funded(impact("decaf")) },
-			{ address: "G-NOVOTE", result: funded({}) },
-			{ address: "G-CHAINEMPTY", result: funded({}) },
-			{ address: "G-MERGED", result: { funded: false } },
-			{ address: "G-UNFUNDED", result: { funded: false } },
-			{
-				address: "G-DOWN",
-				result: { funded: null, error: "Horizon responded 503" },
-			},
+	it("classifies every way the two can disagree", () => {
+		const rows = [
+			row("GA1", "aaaaaaaa", { impact: ["decaf"] }),
+			row("GA2", "bbbbbbbb", { impact: ["decaf"] }),
+			row("GA3", "cccccccc", { impact: ["decaf"] }),
+			row("GA4", "dddddddd", { impact: ["decaf"] }, false),
+			row("GA5", "eeeeeeee", { impact: ["decaf"] }, false),
 		];
-		const mirror = new Map<string, BallotSelections>([
-			["G-UPDATE", { impact: ["decaf"] }],
-			["G-OK", { impact: ["decaf"] }],
-			["G-CHAINEMPTY", { impact: ["decaf"] }],
-			["G-MERGED", { impact: ["beans"] }],
+		const relay = new Map([
+			["aaaaaaaa", { impact: ["decaf"] }], // ok
+			["bbbbbbbb", { impact: ["beans"] }], // differs
+			// cccccccc missing → chain-empty
+			["dddddddd", { impact: ["decaf"] }], // unconfirmed, on relay → confirmable
+			// eeeeeeee missing → unconfirmed, abandoned
+			["ffffffff", { impact: ["beans"] }], // orphan
 		]);
-		const actions = planReconcile(round, nominees, probes, mirror);
-		expect(actions).toEqual([
-			{
-				kind: "create",
-				address: "G-CREATE",
-				selections: { impact: ["decaf"] },
-			},
-			{
-				kind: "update",
-				address: "G-UPDATE",
-				selections: { impact: ["beans"] },
-				prior: { impact: ["decaf"] },
-			},
-			{ kind: "ok", address: "G-OK" },
-			{ kind: "no-vote", address: "G-NOVOTE" },
-			{ kind: "chain-empty", address: "G-CHAINEMPTY" },
-			{ kind: "chain-empty", address: "G-MERGED" },
-			{ kind: "unfunded", address: "G-UNFUNDED" },
-			{
-				kind: "unreachable",
-				address: "G-DOWN",
-				error: "Horizon responded 503",
-			},
-		]);
-		const summary = summarizeReconcile(actions, mirror.size);
-		expect(summary.counts).toEqual({
-			create: 1,
-			update: 1,
-			ok: 1,
-			"no-vote": 1,
-			"chain-empty": 2,
-			unfunded: 1,
-			unreachable: 1,
-		});
-		expect(summary.chainVoters).toBe(3);
-		expect(summary.resetSuspected).toBe(false);
-	});
-
-	it("a vote for a since-removed nominee is not a ballot", () => {
-		const [a] = planReconcile(
-			round,
-			nominees,
-			[{ address: "G1", result: funded(impact("ghost")) }],
-			new Map(),
+		const actions = planReconcile(rows, relay);
+		const kinds = Object.fromEntries(
+			actions.map((a) => ["ballotId" in a ? a.ballotId : "", a.kind]),
 		);
-		expect(a).toEqual({ kind: "no-vote", address: "G1" });
+		expect(kinds).toEqual({
+			aaaaaaaa: "ok",
+			bbbbbbbb: "differs",
+			cccccccc: "chain-empty",
+			dddddddd: "unconfirmed",
+			eeeeeeee: "unconfirmed",
+			ffffffff: "orphan",
+		});
+		const unconfirmed = actions.filter(
+			(a) => a.kind === "unconfirmed",
+		) as Array<{ ballotId: string; onRelay: boolean }>;
+		expect(unconfirmed.find((a) => a.ballotId === "dddddddd")?.onRelay).toBe(
+			true,
+		);
+		expect(unconfirmed.find((a) => a.ballotId === "eeeeeeee")?.onRelay).toBe(
+			false,
+		);
 	});
 
-	it("suspects a reset when the mirror has ballots and a reachable chain has none", () => {
-		const mirror = new Map<string, BallotSelections>([
-			["G1", { impact: ["decaf"] }],
-			["G2", { impact: ["beans"] }],
-		]);
-		const wiped: ChainProbe[] = [
-			{ address: "G1", result: { funded: false } },
-			{ address: "G2", result: { funded: false } },
-			{ address: "G3", result: { funded: false } },
-		];
+	it("a row with no ballot id is skipped, not misfiled", () => {
 		expect(
-			summarizeReconcile(
-				planReconcile(round, nominees, wiped, mirror),
-				mirror.size,
-			).resetSuspected,
-		).toBe(true);
+			planReconcile([row("GA1", null, { impact: ["decaf"] })], new Map()),
+		).toEqual([]);
+	});
 
-		// Horizon entirely down is an outage, not a reset.
-		const down: ChainProbe[] = wiped.map(({ address }) => ({
-			address,
-			result: { funded: null, error: "unreachable" },
-		}));
+	it("suspects a reset only when confirmed rows exist and the relay holds none of them", () => {
+		const rows = [row("GA1", "aaaaaaaa", { impact: ["decaf"] })];
+		expect(
+			summarizeReconcile(planReconcile(rows, new Map())).resetSuspected,
+		).toBe(true);
 		expect(
 			summarizeReconcile(
-				planReconcile(round, nominees, down, mirror),
-				mirror.size,
+				planReconcile(rows, new Map([["aaaaaaaa", { impact: ["decaf"] }]])),
 			).resetSuspected,
 		).toBe(false);
-
-		// An empty mirror on an empty chain is just a round nobody voted in.
+		// an orphan on the relay means the relay was NOT wiped
 		expect(
-			summarizeReconcile(planReconcile(round, nominees, wiped, new Map()), 0)
-				.resetSuspected,
+			summarizeReconcile(
+				planReconcile(rows, new Map([["zzzzzzzz", { impact: ["decaf"] }]])),
+			).resetSuspected,
+		).toBe(false);
+		// no confirmed rows at all is not a reset, it is an empty round
+		expect(
+			summarizeReconcile(planReconcile([], new Map())).resetSuspected,
 		).toBe(false);
 	});
 });

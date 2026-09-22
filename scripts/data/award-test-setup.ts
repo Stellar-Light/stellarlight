@@ -18,9 +18,8 @@
  * --reset exists because the round is one-ballot-per-voter: once a test wallet
  * votes it is locked out, and testing the vote path again would otherwise need
  * a fresh address every time. Note the vote gate is chain OR mirror, so this
- * only half-unlocks: the account's own i3.* manageData entries still block it,
- * and clearing those needs the voter's signature — award-test-clear-chain.ts
- * does that, locally, with a key this script never sees.
+ * also clears the ballot off the relay account: ballots live there under the
+ * row's id, and the row is the only thing that links one to an address.
  *
  * The address is a PUBLIC Stellar key (safe to pass as a workflow input and
  * appear in logs). No secret is ever handled here.
@@ -184,24 +183,47 @@ async function main() {
 			console.log(`• reset: WOULD delete ${ballots.docs.length} ballot row(s)`);
 		}
 
-		// The gate is chain OR mirror, so say plainly whether this is enough.
-		try {
-			const res = await fetch(
-				`https://horizon-testnet.stellar.org/accounts/${ADDRESS}`,
+		// The ballot itself lives on the RELAY under the row's ballot id. The
+		// row is the only link, so deleting it is what unlocks the wallet; the
+		// relay entries are cleared too so the tally does not keep an orphan.
+		const rows = ballots.docs as Array<{
+			ballotId?: string | null;
+			selections?: Record<string, string[]>;
+		}>;
+		const ids = rows.map((d) => d.ballotId).filter((x): x is string => !!x);
+		if (ids.length && EXECUTE) {
+			const { relayBallotOps, BALLOT_FEE_PER_OP } = await import(
+				"../../src/lib/awards/ballot"
 			);
-			const data = res.ok
-				? (((await res.json()) as { data?: Record<string, string> }).data ?? {})
-				: {};
-			const keys = Object.keys(data).filter((k) =>
-				k.startsWith(`i3.${round.slug}.`),
+			const { submitFromRelay, AWARDS_NETWORK_PASSPHRASE } = await import(
+				"../../src/lib/awards/stellar"
 			);
+			const { Operation, TransactionBuilder } = await import(
+				"@stellar/stellar-sdk"
+			);
+			const res = await submitFromRelay((relay) => {
+				const b = new TransactionBuilder(relay, {
+					fee: BALLOT_FEE_PER_OP,
+					networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
+				});
+				for (const id of ids) {
+					const sel = rows.find((d) => d.ballotId === id)?.selections ?? {};
+					for (const op of relayBallotOps(round as never, id, sel as never)) {
+						// same keys, value null = delete
+						// biome-ignore lint/suspicious/noExplicitAny: op shape
+						const name = (op as any).body().value().dataName().toString();
+						b.addOperation(Operation.manageData({ name, value: null }));
+					}
+				}
+				return b.setTimeout(120).build();
+			});
 			console.log(
-				keys.length === 0
-					? "• reset: chain is clear — this wallet can vote again"
-					: `• reset: ${keys.length} entr(ies) STILL ON CHAIN (${keys.join(", ")}) — the wallet stays locked until they are cleared. Run, with that wallet's key, locally:\n    pnpm exec tsx scripts/data/award-test-clear-chain.ts --secret=S... --round=${round.slug} --execute`,
+				res.ok
+					? `• reset: cleared ${ids.length} ballot(s) off the relay (tx ${res.hash.slice(0, 8)}…)`
+					: `• reset: relay entries NOT cleared (${res.error}) — the row is gone so the wallet can vote; the tally reports an orphan until reconcile clears it`,
 			);
-		} catch {
-			console.log("• reset: could not reach Horizon to check chain entries");
+		} else if (ids.length) {
+			console.log(`• reset: WOULD clear ${ids.length} ballot(s) off the relay`);
 		}
 	}
 

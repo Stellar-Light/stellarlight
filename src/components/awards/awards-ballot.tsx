@@ -88,18 +88,45 @@ export interface AwardsRoundData {
 }
 
 interface Eligibility {
+	round: string;
 	whitelisted: boolean;
-	funded: boolean | null;
-	votes: Record<string, string[]> | null;
-	/** chain OR mirror. null = we could not check — treated as "can't vote". */
-	hasVoted?: boolean | null;
-	friendbot?: string;
+	voting: { open: boolean; reason: string | null };
+	/**
+	 * Client-side only. The server never says whether an address has voted
+	 * (the ballot is anonymous); the page learns it from a submit that
+	 * answers already_voted, or from a receipt it stored itself.
+	 */
+	hasVoted?: boolean;
+	votes?: Record<string, string[]> | null;
 }
 
 /**
  * The routes send a machine `error` code AND a human `message`. Show the
  * sentence — a toast reading "already_voted" is the code leaking into the UI.
  */
+interface StoredReceipt {
+	ballotId: string | null;
+	hash: string;
+	selections: Record<string, string[]>;
+}
+const receiptKey = (address: string, round: string) =>
+	`i3:receipt:${round}:${address}`;
+function rememberReceipt(address: string, round: string, r: StoredReceipt) {
+	try {
+		localStorage.setItem(receiptKey(address, round), JSON.stringify(r));
+	} catch {
+		// storage blocked: the receipt is still on screen for this session
+	}
+}
+function readReceipt(address: string, round: string): StoredReceipt | null {
+	try {
+		const raw = localStorage.getItem(receiptKey(address, round));
+		return raw ? (JSON.parse(raw) as StoredReceipt) : null;
+	} catch {
+		return null;
+	}
+}
+
 function apiErrorMessage(body: unknown, fallback: string): string {
 	const b = body as { message?: unknown; error?: unknown } | null;
 	if (typeof b?.message === "string" && b.message) return b.message;
@@ -978,7 +1005,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const [howOpen, setHowOpen] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [txHash, setTxHash] = useState<string | null>(null);
-	const [funding, setFunding] = useState(false);
+	const [ballotId, setBallotId] = useState<string | null>(null);
 	const prefilled = useRef(false);
 	const [ballotPage, setBallotPage] = useState(0);
 	const [highlightNominee, setHighlightNominee] = useState<Nominee | null>(
@@ -1032,8 +1059,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	// mirror, so it stays true after a testnet reset has cleared `votes` —
 	// the ballot still exists in our record, and a new one would not count.
 	const votedBefore = Boolean(eligibility?.hasVoted ?? eligibility?.votes);
-	// null = the server could not check. Not a green light.
-	const ballotStatusUnknown = eligibility?.hasVoted === null;
 	// No ballot can be cast from here — no wallet is connected, or this address
 	// isn't on the list, or it has already voted and that ballot is final. All
 	// three mean the picks stop being editable and the CTA goes away, rather
@@ -1088,6 +1113,20 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	);
 
 	// ── eligibility ──
+	// A receipt stored by this browser is the only way a returning voter sees
+	// their ballot: the server never says who voted. On a new device the page
+	// learns it from a submit that answers already_voted, and locks then.
+	useEffect(() => {
+		if (!address) return;
+		const r = readReceipt(address, round.slug);
+		if (!r) return;
+		setTxHash(r.hash);
+		setBallotId(r.ballotId);
+		setEligibility((prev) =>
+			prev ? { ...prev, hasVoted: true, votes: r.selections } : prev,
+		);
+	}, [address, round.slug]);
+
 	const refreshEligibility = useCallback(
 		async (addr: string) => {
 			const res = await fetch(
@@ -1153,27 +1192,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		setBallotPage(0);
 	}, []);
 
-	// ── friendbot (test mode only — the whole feature is testnet) ──
-	const handleFund = useCallback(async () => {
-		if (!address || !eligibility?.friendbot) return;
-		setFunding(true);
-		setError(null);
-		try {
-			const res = await fetch(eligibility.friendbot);
-			if (!res.ok) throw new Error(`friendbot responded ${res.status}`);
-			await refreshEligibility(address);
-		} catch {
-			// CORS or friendbot hiccup — hand the voter the link instead.
-			window.open(eligibility.friendbot, "_blank", "noopener");
-			setError(
-				"Opened friendbot in a new tab. Fund the account there, then retry.",
-			);
-		} finally {
-			setFunding(false);
-		}
-	}, [address, eligibility, refreshEligibility]);
-
-	// ── sign & submit ──
 	const handleSubmit = useCallback(async () => {
 		// Pilot feedback: the round is one pick in EACH category. Signing a
 		// partial ballot burns a wallet signature on an incomplete vote, so the
@@ -1188,15 +1206,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				body: JSON.stringify({ address, selections, round: round.slug }),
 			});
 			const xdrBody = await xdrRes.json();
-			if (xdrRes.status === 409 && xdrBody?.error === "account_unfunded") {
-				setEligibility((prev) =>
-					prev
-						? { ...prev, funded: false, friendbot: xdrBody.friendbot }
-						: prev,
-				);
-				setPhase("idle");
-				return;
-			}
 			if (xdrRes.status === 409 && xdrBody?.error === "already_voted") {
 				// Not a failure to report — the server is telling us this address
 				// already has a ballot. Record it, and the page locks and shows
@@ -1218,7 +1227,8 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			const submitRes = await fetch("/api/awards/submit", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ signedXdr, round: round.slug }),
+				// the picks travel alongside; the signature's memo commits to them
+				body: JSON.stringify({ signedXdr, round: round.slug, selections }),
 			});
 			const submitBody = await submitRes.json();
 			if (submitRes.status === 409 && submitBody?.error === "already_voted") {
@@ -1232,6 +1242,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				);
 			}
 			setTxHash(submitBody.hash);
+			setBallotId(submitBody.ballotId ?? null);
+			rememberReceipt(address, round.slug, {
+				ballotId: submitBody.ballotId ?? null,
+				hash: submitBody.hash,
+				selections,
+			});
 			// hasVoted too, not just votes: it is what locks the ballot, and
 			// leaving it stale left a live "Sign & submit" under a cast vote.
 			setEligibility((prev) =>
@@ -1280,36 +1296,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				disabled: false,
 				loading: phase === "connecting",
 			}
-		: eligibility?.funded === false
-			? {
-					label: funding ? "Funding…" : "Fund on testnet",
-					onClick: handleFund,
-					disabled: funding,
-					loading: funding,
-				}
-			: {
-					label:
-						phase === "requesting"
-							? "Preparing…"
-							: phase === "signing"
-								? "Waiting for wallet…"
-								: phase === "submitting"
-									? "Submitting…"
-									: selectedCount < requiredCount
-										? picksPerCategory > 1
-											? `Pick ${picksPerCategory} in each category first`
-											: `Pick all ${requiredCount} first`
-										: ballotStatusUnknown
-											? "Voting unavailable"
-											: "Sign & submit",
-					onClick: handleSubmit,
-					disabled:
-						selectedCount < requiredCount ||
-						busy ||
-						votedBefore ||
-						ballotStatusUnknown,
-					loading: busy,
-				};
+		: {
+				label:
+					phase === "requesting"
+						? "Preparing…"
+						: phase === "signing"
+							? "Waiting for wallet…"
+							: phase === "submitting"
+								? "Submitting…"
+								: selectedCount < requiredCount
+									? picksPerCategory > 1
+										? `Pick ${picksPerCategory} in each category first`
+										: `Pick all ${requiredCount} first`
+									: "Sign & submit",
+				onClick: handleSubmit,
+				disabled: selectedCount < requiredCount || busy || votedBefore,
+				loading: busy,
+			};
 
 	function PrimaryButton({ full = false }: { full?: boolean }) {
 		return (
@@ -1839,7 +1842,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 }
 
 // ── Error toast (Family.co-style) ──────────────────────────────────────────
-// One surface for every ballot message — connect, funding, sign, submit all
+// One surface for every ballot message — connect, sign, submit all
 // route here. A dark pill that springs up, auto-dismisses (~6.5s), and clears
 // on tap; on mobile it floats ABOVE the fixed ballot deck so it never covers
 // the picks. Replaces the inline red-text that used to sit in three places.
