@@ -153,6 +153,12 @@ async function main() {
 	}
 
 	// 4. Reset this address's ballot so the wallet can vote again.
+	if (RESET && !round.testMode) {
+		console.error(
+			`✗ --reset refused: ${round.slug} is not a testMode round. A ballot row's history[0] is the only record of a first ballot once the chain has moved on; deleting one on a real round destroys it, and the reconcile lane would then re-create the row from chain-LATEST — laundering a revote into first place.`,
+		);
+		process.exit(1);
+	}
 	if (RESET) {
 		const ballots = await payload.find({
 			collection: "award-ballots",

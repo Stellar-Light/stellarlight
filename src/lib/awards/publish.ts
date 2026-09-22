@@ -151,8 +151,13 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 		fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY),
 		loadFirstBallotRecord(loaded.round.slug),
 	]);
+	// Rows arrive oldest-first; Map keeps the last write per key, so build it
+	// from the newest backwards and the OLDEST row for an address is what
+	// remains. A duplicate row is a race we have no unique index against yet.
 	const mirror = new Map(
-		(record ?? []).map((e) => [e.address, e.selections] as const),
+		[...(record ?? [])]
+			.reverse()
+			.map((e) => [e.address, e.selections] as const),
 	);
 
 	const chain = new Map(
@@ -228,8 +233,12 @@ export function ballotCountsAtTime(
 	opAt: string | null | undefined,
 	closesAt: string | null | undefined,
 ): boolean {
-	const close = closesAt ? Date.parse(closesAt) : Number.NaN;
-	if (Number.isNaN(close)) return true;
+	// No closesAt at all: no deadline to miss. A closesAt that does not PARSE
+	// is a misconfigured round, and the safe reading is that nothing after
+	// "the close" can be shown to be in time — so nothing out-of-band counts.
+	if (!closesAt) return true;
+	const close = Date.parse(closesAt);
+	if (Number.isNaN(close)) return false;
 	const at = opAt ? Date.parse(opAt) : Number.NaN;
 	if (Number.isNaN(at)) return false;
 	return at <= close;

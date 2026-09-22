@@ -48,6 +48,12 @@ async function main() {
 		);
 		return 1;
 	}
+	if (tally.turnout.voted === 0) {
+		console.error(
+			`REFUSED: ${ROUND} shows ZERO ballots (whitelist ${tally.turnout.whitelisted}). After a testnet reset an unmirrored round reads exactly like this, and the digest over an empty record is a valid hash — publishing would commit and anchor "nobody voted" as the final result.`,
+		);
+		return 1;
+	}
 	const doc = resultsDocument(loaded, tally, source, digest);
 	const json = `${JSON.stringify(doc, null, "\t")}\n`;
 	console.log(

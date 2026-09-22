@@ -48,7 +48,9 @@ const fundAttempts = new Map<string, number>();
 export async function GET(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/eligibility",
-		limit: 60,
+		// Per-IP, and the whole room shares one NAT at the venue: see ballot-xdr.
+		// At 60 the ballot never became usable for the 61st Pilot in 5 minutes.
+		limit: 300,
 		windowMs: 5 * 60 * 1000,
 	});
 	if (!limit.allowed) {
@@ -136,15 +138,15 @@ export async function GET(req: NextRequest) {
 		result.account.data,
 	);
 	const onChain = Object.values(votes).some((picks) => picks.length > 0);
-	// The ballot to SHOW is the one that counts. The chain holds the voter's
-	// LATEST manageData, which after a revote is not what the round counts —
-	// prefilling that showed a returning voter picks that are being ignored.
+	// This endpoint is unauthenticated, so it may only ever return what the
+	// chain already shows anyone. It used to serve the mirror's FIRST ballot —
+	// the one thing the chain forgets after a revote or a reset — which made it
+	// an address→counted-ballot oracle for the whole electorate. Showing a
+	// returning voter their counted picks needs proof they hold the key (a
+	// wallet-signed challenge); until then the page shows chain state, or
+	// nothing.
 	const mirrored = await readFirstBallotFor(loaded.round.slug, address);
-	const counted = mirrored?.voted
-		? mirrored.selections
-		: onChain
-			? votes
-			: null;
+	const counted = onChain ? votes : null;
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,

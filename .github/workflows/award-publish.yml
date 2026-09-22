@@ -55,7 +55,7 @@ jobs:
               git push && break
               git pull --rebase --autostash -X theirs origin main || git rebase --abort
             done
-            git push || true
+            git push  # a failed push fails the job: anchoring a commit nobody can fetch is worse than not publishing
           fi
           echo "PUBLISH_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
       - name: Anchor that commit on Tansu (testnet)

@@ -119,7 +119,7 @@ async function main() {
 	const addresses = [...new Set([...whitelist, ...mirror.keys()])].sort();
 
 	console.log(
-		`round ${round.slug} (${round.status}) · ${nominees.length} nominees · whitelist ${whitelist.size} · mirror ${mirror.size} · walking ${addresses.length} accounts on testnet`,
+		`round ${round.slug} (${round.status}) · ${nominees.length} nominees · whitelist ${whitelist.size} · walking ${addresses.length} accounts on testnet`,
 	);
 
 	const probes = await fetchTestnetAccounts(addresses, 10);
@@ -131,21 +131,19 @@ async function main() {
 		`\nchain voters ${summary.chainVoters}: ok ${c.ok} · CREATE ${c.create} · UPDATE ${c.update}` +
 			` │ no-vote ${c["no-vote"]} · unfunded ${c.unfunded} · chain-empty ${c["chain-empty"]} · unreachable ${c.unreachable}`,
 	);
-	for (const a of actions) {
-		if (a.kind === "create")
-			console.log(
-				`  CREATE      ${short(a.address)}  ${cats(a.selections)} categor${cats(a.selections) === 1 ? "y" : "ies"}`,
-			);
-		else if (a.kind === "update")
-			console.log(
-				`  UPDATE      ${short(a.address)}  differs in ${differing(a.prior, a.selections)}`,
-			);
-		else if (a.kind === "chain-empty")
-			console.log(
-				`  chain-empty ${short(a.address)}  (mirror has a ballot, chain shows none — kept)`,
-			);
-		else if (a.kind === "unreachable")
-			console.log(`  UNREACHABLE ${short(a.address)}  ${a.error}`);
+	// Counts only. This log is world-readable (public repo), and a truncated
+	// address re-identifies uniquely against a ~98-address whitelist that is
+	// itself derived from a public contract — so a per-address line here was
+	// the round's participation roll, published daily. Unreachable addresses
+	// are the one class an operator needs to act on; they get a count and the
+	// distinct error strings, not the addresses.
+	const unreachableErrors = [
+		...new Set(
+			actions.flatMap((a) => (a.kind === "unreachable" ? [a.error] : [])),
+		),
+	];
+	if (unreachableErrors.length) {
+		console.log(`  unreachable errors: ${unreachableErrors.join(" | ")}`);
 	}
 
 	if (summary.resetSuspected) {

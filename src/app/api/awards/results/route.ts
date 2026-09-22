@@ -25,7 +25,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import type { RoundTally } from "@/lib/awards/ballot";
+import { type RoundTally, roundOpenState } from "@/lib/awards/ballot";
 import { liveTally, type TallySource } from "@/lib/awards/publish";
 import { loadRound } from "@/lib/awards/round";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -64,6 +64,21 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{ error: "no award round exists" },
 			{ status: 404, headers: rateLimitHeaders(limit) },
+		);
+	}
+
+	// No running totals while voting is open. The page only renders results
+	// on a closed round, so nobody would notice this endpoint answering — but
+	// polled every 30s against Horizon it made each incoming ballot attributable
+	// in near-real-time, and a live count changes how the undecided vote.
+	if (roundOpenState(loaded.round).open) {
+		return NextResponse.json(
+			{
+				error: "voting_open",
+				message: "Results are published when voting closes.",
+				closesAt: loaded.round.closesAt ?? null,
+			},
+			{ status: 403, headers: rateLimitHeaders(limit) },
 		);
 	}
 
