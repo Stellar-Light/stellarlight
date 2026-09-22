@@ -36,10 +36,10 @@ export function friendbotFundUrl(address: string): string {
 }
 
 /**
- * Fund a testnet account through friendbot, server-side. The ballot UI used
- * to hand the voter a "Fund on testnet" tap; the eligibility route now does
- * this for a whitelisted address the moment it connects, so the voter's
- * whole experience is connect → sign. `already` = friendbot says the account
+ * Fund a testnet account through friendbot, server-side. Nothing in the
+ * ballot path funds anyone any more — the relay pays and the voter's account
+ * is never touched — so the only caller left is the Tansu lane, which
+ * friendbots its own maintainer key. `already` = friendbot says the account
  * exists (funded between our lookup and this call) — that is success.
  * Bounded: friendbot waits for the ledger to close before answering.
  */
@@ -197,30 +197,44 @@ export async function submitToTestnetHorizon(
 export async function fetchLatestBallotOp(
 	address: string,
 	prefix: string,
+	opts: { maxPages?: number } = {},
 ): Promise<{ txHash: string; at: string } | null> {
+	// One page is 200 ops and every ballot is 3–16 of them, so a single page
+	// only ever reaches the newest few dozen ballots. Walk back until found.
+	// ponytail: 25 pages = 5,000 ops ≈ 300 nomination ballots; index the
+	// history once per tally instead if the relay ever carries more.
+	const maxPages = Math.max(1, opts.maxPages ?? 25);
+	let url = `${HORIZON_TESTNET_URL}/accounts/${encodeURIComponent(address)}/operations?order=desc&limit=200`;
 	try {
-		const res = await fetch(
-			`${HORIZON_TESTNET_URL}/accounts/${encodeURIComponent(address)}/operations?order=desc&limit=200`,
-			{ headers: { Accept: "application/json" }, cache: "no-store" },
-		);
-		if (!res.ok) return null;
-		const body = (await res.json()) as {
-			_embedded?: {
-				records?: Array<{
-					type?: string;
-					name?: string;
-					transaction_hash?: string;
-					created_at?: string;
-					transaction_successful?: boolean;
-				}>;
+		for (let page = 0; page < maxPages; page++) {
+			const res = await fetch(url, {
+				headers: { Accept: "application/json" },
+				cache: "no-store",
+			});
+			if (!res.ok) return null;
+			const body = (await res.json()) as {
+				_links?: { next?: { href?: string } };
+				_embedded?: {
+					records?: Array<{
+						type?: string;
+						name?: string;
+						transaction_hash?: string;
+						created_at?: string;
+						transaction_successful?: boolean;
+					}>;
+				};
 			};
-		};
-		for (const op of body._embedded?.records ?? []) {
-			if (op.type !== "manage_data" || !op.name?.startsWith(prefix)) continue;
-			if (op.transaction_successful === false) continue;
-			if (op.transaction_hash && op.created_at) {
-				return { txHash: op.transaction_hash, at: op.created_at };
+			const records = body._embedded?.records ?? [];
+			for (const op of records) {
+				if (op.type !== "manage_data" || !op.name?.startsWith(prefix)) continue;
+				if (op.transaction_successful === false) continue;
+				if (op.transaction_hash && op.created_at) {
+					return { txHash: op.transaction_hash, at: op.created_at };
+				}
 			}
+			const next = body._links?.next?.href;
+			if (records.length < 200 || !next) return null;
+			url = next;
 		}
 		return null;
 	} catch {
@@ -250,7 +264,22 @@ export function relayKeypair(): Keypair | null {
 
 export type RelaySubmitResult =
 	| { ok: true; hash: string; attempts: number }
-	| { ok: false; error: string; resultCodes: string[] };
+	| {
+			ok: false;
+			error: string;
+			resultCodes: string[];
+			/** Horizon gave no verdict (timeout, 5xx, unreachable): the
+			 *  transaction was handed over and may still land until its time
+			 *  bound. NOT "never happened" — the caller must keep whatever it
+			 *  reserved and settle it later. */
+			pending?: boolean;
+			hash?: string;
+	  };
+
+/** Relay writes are serialised within this instance: the relay has ONE
+ *  sequence number, and two builds from the same read of it always collide.
+ *  Other instances still collide; that is what the retry below is for. */
+let relayChain: Promise<unknown> = Promise.resolve();
 
 const FRIENDBOT = "https://friendbot.stellar.org";
 
@@ -262,15 +291,38 @@ const FRIENDBOT = "https://friendbot.stellar.org";
  * runs on more than one instance: two ballots arriving together both read the
  * same sequence, one lands, the other gets tx_bad_seq. That is not a failed
  * vote — it is the normal case under load — so it is retried with a fresh
- * sequence, a few times, before it is reported. Any other Horizon refusal is
- * returned as-is.
+ * sequence, a few times with a jittered backoff, before it is reported. Any
+ * other Horizon refusal is returned as-is — except no refusal at all: a
+ * timeout or 5xx after the bytes left comes back as `pending` with the hash,
+ * because the transaction may still land.
  *
  * Testnet only: an unfunded relay (first use, or after a reset) is created via
  * friendbot before the first attempt.
  */
-export async function submitFromRelay(
+export function submitFromRelay(
 	build: (relay: Account) => Transaction,
-	opts: { attempts?: number } = {},
+	opts: RelaySubmitOptions = {},
+): Promise<RelaySubmitResult> {
+	const run = relayChain.then(() => submitFromRelayUnlocked(build, opts));
+	relayChain = run.catch(() => undefined);
+	return run;
+}
+
+export interface RelaySubmitOptions {
+	attempts?: number;
+	/** ms to wait after attempt n on a sequence conflict */
+	backoffMs?: (attempt: number) => number;
+	/** how long to poll for a transaction Horizon gave no verdict on */
+	pollMs?: number;
+}
+
+const defaultBackoff = (attempt: number) =>
+	250 * 2 ** (attempt - 1) + Math.random() * 250;
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+async function submitFromRelayUnlocked(
+	build: (relay: Account) => Transaction,
+	opts: RelaySubmitOptions,
 ): Promise<RelaySubmitResult> {
 	const kp = relayKeypair();
 	if (!kp) {
@@ -280,7 +332,8 @@ export async function submitFromRelay(
 			resultCodes: [],
 		};
 	}
-	const attempts = Math.max(1, opts.attempts ?? 3);
+	const attempts = Math.max(1, opts.attempts ?? 5);
+	const backoff = opts.backoffMs ?? defaultBackoff;
 	let last: RelaySubmitResult = {
 		ok: false,
 		error: "no attempt made",
@@ -306,13 +359,62 @@ export async function submitFromRelay(
 				resultCodes: [],
 			};
 		}
-		const tx = build(new Account(kp.publicKey(), acct.account.sequence));
+		let tx: Transaction;
+		try {
+			tx = build(new Account(kp.publicKey(), acct.account.sequence));
+		} catch (err) {
+			// a build that throws is a bug, not a Horizon verdict: report it
+			// rather than let it escape as a 500 with the caller's row reserved
+			return {
+				ok: false,
+				error: `could not build the relay transaction: ${String(err)}`,
+				resultCodes: [],
+			};
+		}
 		tx.sign(kp);
 		const res = await submitToTestnetHorizon(tx.toXDR());
 		if (res.ok) return { ok: true, hash: res.hash, attempts: n };
 		last = { ok: false, error: res.detail, resultCodes: res.resultCodes };
-		if (!res.resultCodes.includes("tx_bad_seq")) return last;
-		// another instance won this sequence; loop re-reads it
+		if (res.resultCodes.includes("tx_bad_seq")) {
+			// another instance won this sequence; back off, re-read, retry
+			if (n < attempts) await sleep(backoff(n));
+			continue;
+		}
+		if (
+			res.resultCodes.length === 0 &&
+			(res.status === 0 || res.status >= 500)
+		) {
+			// No verdict, after the bytes may have left (Horizon's 504 is
+			// literally "submitted, not yet seen in a ledger"). Poll briefly,
+			// then hand the uncertainty back with the hash.
+			const hash = tx.hash().toString("hex");
+			if (await transactionLanded(hash, opts.pollMs ?? 8_000)) {
+				return { ok: true, hash, attempts: n };
+			}
+			return { ...last, pending: true, hash };
+		}
+		return last;
 	}
 	return last;
+}
+
+/** Poll Horizon for a transaction by hash for up to `budgetMs`. */
+async function transactionLanded(
+	hash: string,
+	budgetMs: number,
+): Promise<boolean> {
+	const until = Date.now() + budgetMs;
+	for (;;) {
+		try {
+			const res = await fetch(`${HORIZON_TESTNET_URL}/transactions/${hash}`, {
+				headers: { Accept: "application/json" },
+				cache: "no-store",
+			});
+			if (res.ok) return true;
+		} catch {
+			// unreachable counts as not seen
+		}
+		if (Date.now() >= until) return false;
+		await sleep(Math.min(2_000, until - Date.now()));
+	}
 }

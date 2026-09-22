@@ -40,8 +40,6 @@ const MANAGE_DATA_MAX_BYTES = 64;
  */
 export const TEST_BALLOT_MEMO = "i3-test";
 
-/** Voter gets 5 minutes to review + sign before the tx expires. */
-
 /** 100x base fee per op — pennies of testnet XLM, immune to minor surge. */
 export const BALLOT_FEE_PER_OP = "10000";
 
@@ -120,18 +118,6 @@ export function dataKey(
 ): string {
 	const base = `i3.${roundSlug}.${categoryKey}`;
 	return slot === undefined ? base : `${base}.${slot}`;
-}
-
-/** Every key a category can occupy for a round, slot order. */
-export function categoryKeys(
-	round: BallotRound,
-	categoryKey: string,
-): string[] {
-	const picks = picksPerCategory(round);
-	if (picks === 1) return [dataKey(round.slug, categoryKey)];
-	return Array.from({ length: picks }, (_, i) =>
-		dataKey(round.slug, categoryKey, i + 1),
-	);
 }
 
 const byteLength = (s: string) => new TextEncoder().encode(s).length;
@@ -248,9 +234,11 @@ export function validateSelections(
 			);
 			continue;
 		}
-		for (const key of categoryKeys(round, category)) {
+		// the budget is the RELAY key's (`i3.<round>.<id>.<category>[.<slot>]`),
+		// nine bytes longer than the voter-account key it replaced
+		for (const key of relayKeys(round, "0".repeat(8), category)) {
 			if (byteLength(key) > MANAGE_DATA_MAX_BYTES) {
-				errors.push(`vote key for "${category}" exceeds 64 bytes`);
+				errors.push(`ballot key for "${category}" exceeds 64 bytes`);
 				bad = true;
 				break;
 			}
@@ -418,6 +406,9 @@ export function tallyRound(
 	round: BallotRound,
 	nominees: BallotNominee[],
 	accounts: VoterAccountData[],
+	/** Turnout denominator. `accounts` is the BALLOT list on the relay path,
+	 *  so without this every round would publish 100% turnout. */
+	whitelisted?: number,
 ): RoundTally {
 	const nomineeNames = new Map(nominees.map((n) => [n.slug, n.name]));
 	const counts = new Map<string, Map<string, number>>(); // category → slug → votes
@@ -457,7 +448,10 @@ export function tallyRound(
 			results,
 		};
 	});
-	return { categories, turnout: { voted, whitelisted: accounts.length } };
+	return {
+		categories,
+		turnout: { voted, whitelisted: whitelisted ?? accounts.length },
+	};
 }
 
 // ── Anonymous ballots: the relay key scheme and the voter's authorization ──
@@ -487,6 +481,19 @@ export function relayKey(
 ): string {
 	const base = `i3.${roundSlug}.${ballotId}.${categoryKey}`;
 	return slot === undefined ? base : `${base}.${slot}`;
+}
+
+/** Every key one ballot writes for a category: one, or one per slot. */
+export function relayKeys(
+	round: BallotRound,
+	ballotId: string,
+	categoryKey: string,
+): string[] {
+	const picks = picksPerCategory(round);
+	if (picks === 1) return [relayKey(round.slug, ballotId, categoryKey)];
+	return Array.from({ length: picks }, (_, i) =>
+		relayKey(round.slug, ballotId, categoryKey, i + 1),
+	);
 }
 
 /**
@@ -554,25 +561,9 @@ export function relayBallotOps(
 	const picks = picksPerCategory(round);
 	const ops: ReturnType<typeof Operation.manageData>[] = [];
 	for (const category of Object.keys(selections).sort()) {
-		const chosen = selections[category];
-		if (picks === 1) {
-			if (chosen[0]) {
-				ops.push(
-					Operation.manageData({
-						name: relayKey(round.slug, ballotId, category),
-						value: chosen[0],
-					}),
-				);
-			}
-			continue;
-		}
-		chosen.slice(0, picks).forEach((slug, i) => {
-			ops.push(
-				Operation.manageData({
-					name: relayKey(round.slug, ballotId, category, i + 1),
-					value: slug,
-				}),
-			);
+		const keys = relayKeys(round, ballotId, category);
+		selections[category].slice(0, picks).forEach((slug, i) => {
+			ops.push(Operation.manageData({ name: keys[i], value: slug }));
 		});
 	}
 	return ops;
@@ -580,6 +571,8 @@ export function relayBallotOps(
 
 export const AUTHORIZATION_KEY = "i3-awards.ballot-authorization";
 const AUTHORIZATION_TTL_SECONDS = 600;
+/** Verify-side slack on the expiry bound, for the builder's clock vs ours. */
+const CLOCK_SKEW_SECONDS = 60;
 
 /**
  * What the voter's signature commits to: this round, these exact picks. It
@@ -722,7 +715,13 @@ export function verifyAuthorization(
 	const errors: string[] = [];
 	try {
 		const seq = BigInt(tx.sequence);
-		if (ctx.sequence !== null && seq >= BigInt(ctx.sequence) + 1n) {
+		if (ctx.sequence === null) {
+			// no account on chain: the builder signs at sequence 1 — anything
+			// else was not built here
+			if (seq !== 1n) {
+				errors.push("authorization for a new account must sign at sequence 1");
+			}
+		} else if (seq >= BigInt(ctx.sequence) + 1n) {
 			errors.push("authorization must not be a submittable transaction");
 		}
 	} catch {
@@ -730,7 +729,16 @@ export function verifyAuthorization(
 	}
 	const maxTime = Number(tx.timeBounds?.maxTime ?? 0);
 	const nowSec = Math.floor((ctx.now ?? new Date()).getTime() / 1000);
-	if (!maxTime || maxTime < nowSec) errors.push("authorization has expired");
+	if (!maxTime || maxTime < nowSec) {
+		errors.push("authorization has expired");
+	} else if (
+		maxTime >
+		nowSec + AUTHORIZATION_TTL_SECONDS + CLOCK_SKEW_SECONDS
+	) {
+		// the builder gives ten minutes; a hand-made one that lasts longer is
+		// a standing permission, and a captured one would work until the vote
+		errors.push("authorization lasts longer than the ten minutes it is given");
+	}
 	const op = tx.operations[0];
 	if (
 		tx.operations.length !== 1 ||

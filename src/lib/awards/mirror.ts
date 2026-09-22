@@ -25,7 +25,6 @@
  */
 
 import {
-	type BallotNominee,
 	type BallotRound,
 	type BallotSelections,
 	dataKey,
@@ -100,8 +99,9 @@ export type ReconcileAction =
 	/** Record row confirmed and the relay holds its ballot, matching. */
 	| { kind: "ok"; address: string; ballotId: string }
 	/** Record row confirmed, relay holds the id, but the picks DIFFER. The relay
-	 *  writes exactly what was signed, so this means the record was edited —
-	 *  reported loudly, never overwritten. */
+	 *  writes exactly what was signed, so one side was changed after the fact —
+	 *  the record by an admin, or the relay by whoever holds its key; this lane
+	 *  cannot tell which. Reported loudly, never overwritten. */
 	| { kind: "differs"; address: string; ballotId: string }
 	/** Record row confirmed, relay does not hold the id. After a reset that is
 	 *  every row, and those rows are the point. Kept. */
@@ -113,7 +113,11 @@ export type ReconcileAction =
 	| { kind: "unconfirmed"; address: string; ballotId: string; onRelay: boolean }
 	/** A ballot on the relay that no record row names. Counted by the tally
 	 *  as an anonymous voter; cannot be attributed from here. */
-	| { kind: "orphan"; ballotId: string };
+	| { kind: "orphan"; ballotId: string }
+	/** A row from before the relay (no ballot id): its ballot sits on the
+	 *  voter's own account, not the relay. The tally counts it through the
+	 *  record; there is nothing on the relay to check it against. */
+	| { kind: "legacy"; address: string };
 
 export interface RecordRow {
 	address: string;
@@ -133,7 +137,10 @@ export function planReconcile(
 	const actions: ReconcileAction[] = [];
 	const seen = new Set<string>();
 	for (const r of rows) {
-		if (!r.ballotId) continue;
+		if (!r.ballotId) {
+			actions.push({ kind: "legacy", address: r.address });
+			continue;
+		}
 		seen.add(r.ballotId);
 		const onRelay = relay.get(r.ballotId);
 		if (!r.confirmed) {
@@ -185,6 +192,7 @@ export function summarizeReconcile(
 		"chain-empty": 0,
 		unconfirmed: 0,
 		orphan: 0,
+		legacy: 0,
 	};
 	for (const a of actions) counts[a.kind]++;
 	const confirmedRows = counts.ok + counts.differs + counts["chain-empty"];

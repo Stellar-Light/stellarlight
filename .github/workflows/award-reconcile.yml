@@ -1,17 +1,18 @@
 name: award reconcile mirror
-# i³ Awards — reconcile the award-ballots mirror against the chain.
+# i³ Awards — reconcile the award-ballots record against the relay.
 #
-# Ballots are manageData entries on TESTNET accounts and the tally reads them
-# from Horizon. Testnet is reset 2–4× a year and a reset clears every ledger
-# entry and all history, so the on-chain record of a round is gone at the first
-# reset after it closes. The mirror is written best-effort after each submit
-# and can silently miss a ballot; this walks Horizon while it still has the
-# data, backfills any gap (with the real tx hash + ledger time), and refuses if
-# the chain already looks reset. Runs DAILY in execute mode on the current
-# round (open, else most recently updated) so it cannot be forgotten before the
-# reset; a manual dispatch is dry-run by default. Every write is read back;
-# exits non-zero if any address was unreachable, so a partial run never reads
-# as complete.
+# Every ballot is written by the relay account under a random ballot id; the
+# record (award-ballots) is the only place an id meets an address, and it is
+# what the tally counts. This lane diffs the two: rows whose ballot the relay
+# holds (ok / differs), rows whose ballot it does not (chain-empty — every
+# row, after a testnet reset), reservations the relay never confirmed
+# (confirmed from the relay, or released once abandoned), ballots on the
+# relay no row names (orphan), and pre-relay rows (legacy). Its only writes
+# are confirm/release of reservations; nothing is ever backfilled or deleted.
+# Runs DAILY in execute mode on the current round (open, else most recently
+# updated); a manual dispatch is dry-run by default. Exits non-zero on
+# differs or orphans so someone reads it; counts only in the log — this repo
+# is public.
 on:
   schedule:
     - cron: "30 5 * * *"
@@ -45,8 +46,13 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets.
       - name: Reconcile (scheduled = execute; dispatch = dry-run unless execute=true)
+        env:
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ github.event_name == 'schedule' || inputs.execute }}
         run: |
-          pnpm exec tsx scripts/data/award-reconcile.ts \
-            --round=${{ inputs.round || 'current' }} \
-            ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+          args=(--round="${IN_ROUND:-current}")
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-reconcile.ts "${args[@]}"

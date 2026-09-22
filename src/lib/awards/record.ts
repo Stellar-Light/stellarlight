@@ -7,16 +7,18 @@
  * gate, which is why the relay path RESERVES a row before writing and
  * confirms it after — a gate checked now and written later is a race.
  *
- * Writers: reserveBallot / confirmBallot / releaseBallot (the relay path) and
- * writeBallotRecord (the legacy upsert, kept for the reconcile lane's
- * repairs). Readers return the FIRST ballot per address, never the latest,
- * and skip unconfirmed reservations.
+ * Writers: reserveBallot / confirmBallot / releaseBallot (the relay path).
+ * writeBallotRecord / recordBallot / readCurrentBallots are the pre-relay
+ * upsert with no runtime caller left (writeBallotRecord stays pinned by its
+ * tests). Readers return the FIRST ballot per address, never the latest, and
+ * report an unconfirmed reservation as pending, not as a ballot.
  */
 import type { Payload } from "payload";
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotSelections } from "./ballot";
 import { normalizeSelections } from "./mirror";
 import type { FirstBallotEntry } from "./publish";
+import { fetchLatestBallotOp, fetchTestnetAccount } from "./stellar";
 
 export async function findRoundId(
 	payload: Payload,
@@ -185,6 +187,9 @@ export async function reserveBallot(params: {
 			overrideAccess: true,
 		});
 		if (existing.docs[0]) return { ok: false, reason: "already_voted" };
+		// The find above is a courtesy; the compound unique index on
+		// (round, address) is the gate — two reserves racing past the find both
+		// reach create, and exactly one of them gets the duplicate-key error.
 		const at = new Date().toISOString();
 		const doc = await payload.create({
 			collection: "award-ballots",
@@ -210,9 +215,22 @@ export async function reserveBallot(params: {
 		});
 		return { ok: true, id: doc.id };
 	} catch (err) {
+		if (isDuplicateKey(err)) return { ok: false, reason: "already_voted" };
 		console.error("[awards] reserveBallot failed:", err);
 		return { ok: false, reason: "database error" };
 	}
+}
+
+/** Mongo's E11000, or the ValidationError Payload's adapter turns it into. */
+function isDuplicateKey(err: unknown): boolean {
+	const e = err as {
+		code?: unknown;
+		message?: unknown;
+		data?: unknown;
+	} | null;
+	if (e?.code === 11000) return true;
+	const text = `${String(e?.message ?? "")} ${JSON.stringify(e?.data ?? "")}`;
+	return /E11000|duplicate key|must be unique/i.test(text);
 }
 
 /** The relay landed: stamp the hash on the row and its trail entry. */
@@ -248,18 +266,68 @@ export async function confirmBallot(
 }
 
 /** The relay refused: give the address its turn back. */
-export async function releaseBallot(id: string | number): Promise<void> {
+export async function releaseBallot(id: string | number): Promise<boolean> {
 	try {
 		const payload = await getPayloadSafe();
-		if (!payload) return;
+		if (!payload) return false;
 		await payload.delete({
 			collection: "award-ballots",
 			id,
 			overrideAccess: true,
 		});
+		return true;
 	} catch (err) {
 		console.error("[awards] releaseBallot failed:", err);
+		return false;
 	}
+}
+
+/** A reserved row the relay has not confirmed: not a ballot, not nothing. */
+export interface PendingReservation {
+	id: string | number;
+	ballotId: string | null;
+	reservedAt: string | null;
+}
+
+/** Past this the relay transaction behind a reservation (120s time bound)
+ *  can no longer land, so an unconfirmed row is settled, not waited on. */
+export const PENDING_STALE_MS = 3 * 60_000;
+
+/**
+ * Settle a reservation the relay never confirmed, against the relay itself.
+ * Younger than PENDING_STALE_MS it may still be in flight and is left alone.
+ * Older: if the relay holds the ballot id, the write landed and only the
+ * confirmation was lost — confirm it (with the op's hash, or a `relay:<id>`
+ * marker when Horizon's reachable history no longer has it); if the relay
+ * does not hold it, the write never happened and never can — release the
+ * row so the voter's next attempt goes through. The ballot id joins the two
+ * sides, so nothing here can count a vote twice.
+ */
+export async function settlePendingBallot(
+	roundSlug: string,
+	pending: PendingReservation,
+	relayPub: string | null,
+): Promise<"in-flight" | "confirmed" | "released" | "unknown"> {
+	const age = pending.reservedAt
+		? Date.now() - Date.parse(pending.reservedAt)
+		: Number.NaN;
+	if (Number.isNaN(age) || age < PENDING_STALE_MS) return "in-flight";
+	if (!relayPub || !pending.ballotId) return "unknown";
+	const probe = await fetchTestnetAccount(relayPub);
+	if (probe.funded === null) return "unknown";
+	const prefix = `i3.${roundSlug}.${pending.ballotId}.`;
+	const onRelay =
+		probe.funded === true &&
+		Object.keys(probe.account.data).some((k) => k.startsWith(prefix));
+	if (!onRelay) {
+		return (await releaseBallot(pending.id)) ? "released" : "unknown";
+	}
+	const op = await fetchLatestBallotOp(relayPub, prefix);
+	const ok = await confirmBallot(
+		pending.id,
+		op?.txHash ?? `relay:${pending.ballotId}`,
+	);
+	return ok ? "confirmed" : "unknown";
 }
 
 export async function recordBallot(params: {
@@ -330,7 +398,11 @@ export function firstBallotSelections(row: {
 export async function readFirstBallotFor(
 	roundSlug: string,
 	address: string,
-): Promise<{ voted: boolean; selections: BallotSelections } | null> {
+): Promise<{
+	voted: boolean;
+	selections: BallotSelections;
+	pending: PendingReservation | null;
+} | null> {
 	try {
 		const payload = await getPayloadSafe();
 		if (!payload) return null;
@@ -352,24 +424,34 @@ export async function readFirstBallotFor(
 			overrideAccess: true,
 		});
 		const row = rows.docs[0];
-		if (!row) return { voted: false, selections: {} };
+		if (!row) return { voted: false, selections: {}, pending: null };
+		const trail = (row.history ?? []) as Array<{
+			txHash?: string | null;
+		} | null>;
+		if (!(trail[0]?.txHash ?? row.txHash)) {
+			// reserved, never confirmed: nothing is known to be on chain yet
+			return {
+				voted: false,
+				selections: {},
+				pending: {
+					id: row.id as string | number,
+					ballotId: ((row as { ballotId?: string | null }).ballotId ?? null) as
+						| string
+						| null,
+					reservedAt: (row.firstSubmittedAt ?? null) as string | null,
+				},
+			};
+		}
 		const selections = firstBallotSelections(row);
 		return {
 			voted: Object.values(selections).some((s) => s.length > 0),
 			selections,
+			pending: null,
 		};
 	} catch (err) {
 		console.error("[awards] readFirstBallotFor failed:", err);
 		return null;
 	}
-}
-
-export async function hasMirroredBallot(
-	roundSlug: string,
-	address: string,
-): Promise<boolean | null> {
-	const found = await readFirstBallotFor(roundSlug, address);
-	return found === null ? null : found.voted;
 }
 
 /**
@@ -418,11 +500,14 @@ export async function readFirstBallotRecord(
 ): Promise<FirstBallotEntry[]> {
 	const rows = await allBallotRows(payload, roundId);
 	const out: FirstBallotEntry[] = [];
+	// rows arrive oldest-first; one entry per address, the earliest, so the
+	// digest and the tally read the same list
+	const seen = new Set<string>();
 	for (const row of rows) {
 		const address = String(row.address ?? "")
 			.trim()
 			.toUpperCase();
-		if (!address) continue;
+		if (!address || seen.has(address)) continue;
 		const trail = (row.history ?? []) as Array<{
 			txHash?: string | null;
 			selections?: unknown;
@@ -438,6 +523,7 @@ export async function readFirstBallotRecord(
 				),
 		);
 		if (!first) continue;
+		seen.add(address);
 		out.push({
 			address,
 			selections: firstBallotSelections(row),

@@ -1190,7 +1190,16 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		setSelections({});
 		setError(null);
 		setBallotPage(0);
-	}, []);
+		// ...and the stored receipt: it names the ballot id and the picks, and
+		// on that shared laptop the next person could read it back.
+		if (address) {
+			try {
+				localStorage.removeItem(receiptKey(address, round.slug));
+			} catch {
+				/* storage unavailable */
+			}
+		}
+	}, [address, round.slug]);
 
 	const handleSubmit = useCallback(async () => {
 		// Pilot feedback: the round is one pick in EACH category. Signing a
@@ -1259,7 +1268,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			setError(walletErrorMessage(err));
 			setPhase("idle");
 		}
-	}, [address, selections, selectedCount, round.slug]);
+	}, [address, selections, selectedCount, requiredCount, round.slug]);
 
 	// React #418 (text-content mismatch) on every load came from HERE, not the
 	// countdown: date-fns `format` uses the runtime's timezone, so the server

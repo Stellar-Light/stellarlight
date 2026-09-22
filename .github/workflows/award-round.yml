@@ -62,22 +62,29 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets, and an input pasted into
+      # `run:` is a command injection for anyone who can dispatch it.
       - name: Set round status (dry-run unless execute=true)
+        env:
+          IN_SLUG: ${{ inputs.slug }}
+          IN_TITLE: ${{ inputs.title }}
+          IN_PICKS: ${{ inputs.picks }}
+          IN_CLOSES: ${{ inputs.closes }}
+          IN_STATUS: ${{ inputs.status }}
+          IN_CREATE: ${{ inputs.create }}
+          IN_EXECUTE: ${{ inputs.execute }}
         run: |
-          if [ -z "${{ inputs.slug }}" ]; then
+          if [ -z "$IN_SLUG" ]; then
             pnpm exec tsx scripts/data/award-round.ts --list
-          elif [ "${{ inputs.create }}" = "true" ]; then
-            pnpm exec tsx scripts/data/award-round.ts --create \
-              --slug=${{ inputs.slug }} \
-              --title="${{ inputs.title }}" \
-              --picks=${{ inputs.picks || '1' }} \
-              ${{ inputs.closes && format('--closes={0}', inputs.closes) || '' }} \
-              ${{ inputs.execute && '--execute' || '' }}
-          else
-            pnpm exec tsx scripts/data/award-round.ts \
-              --slug=${{ inputs.slug }} \
-              --status=${{ inputs.status }} \
-              ${{ inputs.closes && format('--closes={0}', inputs.closes) || '' }} \
-              ${{ inputs.picks && format('--picks={0}', inputs.picks) || '' }} \
-              ${{ inputs.execute && '--execute' || '' }}
+            exit 0
           fi
+          if [ "$IN_CREATE" = "true" ]; then
+            args=(--create --slug="$IN_SLUG" --title="$IN_TITLE" --picks="${IN_PICKS:-1}")
+          else
+            args=(--slug="$IN_SLUG" --status="$IN_STATUS")
+            if [ -n "$IN_PICKS" ]; then args+=(--picks="$IN_PICKS"); fi
+          fi
+          if [ -n "$IN_CLOSES" ]; then args+=(--closes="$IN_CLOSES"); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-round.ts "${args[@]}"

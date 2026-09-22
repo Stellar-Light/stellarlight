@@ -28,14 +28,16 @@ import {
 } from "@/lib/awards/ballot";
 import {
 	confirmBallot,
-	hasMirroredBallot,
+	readFirstBallotFor,
 	releaseBallot,
 	reserveBallot,
+	settlePendingBallot,
 } from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
 	AWARDS_NETWORK_PASSPHRASE,
 	fetchTestnetAccount,
+	relayKeypair,
 	submitFromRelay,
 	testnetExplorerTxUrl,
 } from "@/lib/awards/stellar";
@@ -43,6 +45,9 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+// The relay may wait on Horizon's 30s submission timeout and poll after it;
+// the default function limit would cut that off with the reservation open.
+export const maxDuration = 60;
 
 /** One-op authorization is ~600 chars signed; anything huge is not one. */
 const MAX_XDR_CHARS = 8_192;
@@ -138,10 +143,12 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	// One ballot per voter, re-checked here, then RESERVED before the relay
-	// writes — a gate checked now and written later is a race.
-	const mirrored = await hasMirroredBallot(loaded.round.slug, verdict.source);
-	if (mirrored === null) {
+	// One ballot per voter — checked here, behind the signature (this is the
+	// ONLY place the server says already_voted: unsigned, that answer is a
+	// participation oracle), then RESERVED before the relay writes, because a
+	// gate checked now and written later is a race.
+	const first = await readFirstBallotFor(loaded.round.slug, verdict.source);
+	if (first === null) {
 		return NextResponse.json(
 			{
 				error: "ballot_status_unavailable",
@@ -151,8 +158,8 @@ export async function POST(req: NextRequest) {
 			{ status: 503, headers: rateLimitHeaders(limit) },
 		);
 	}
-	if (mirrored) {
-		return NextResponse.json(
+	const alreadyVoted = () =>
+		NextResponse.json(
 			{
 				error: "already_voted",
 				message:
@@ -160,6 +167,34 @@ export async function POST(req: NextRequest) {
 			},
 			{ status: 409, headers: rateLimitHeaders(limit) },
 		);
+	if (first.voted) return alreadyVoted();
+	if (first.pending) {
+		// A reservation the relay never confirmed: that earlier write is still
+		// in flight, or landed and the confirmation was lost, or never happened.
+		// Settle it against the relay now rather than lock the voter out until
+		// the daily reconcile.
+		const settled = await settlePendingBallot(
+			loaded.round.slug,
+			first.pending,
+			relayKeypair()?.publicKey() ?? null,
+		);
+		if (settled === "confirmed") return alreadyVoted();
+		if (settled !== "released") {
+			return NextResponse.json(
+				{
+					error: "ballot_pending",
+					message:
+						settled === "in-flight"
+							? "Your earlier ballot is still being written. Nothing to sign again — wait a couple of minutes, then try once more."
+							: "We can't tell yet whether your earlier ballot landed. Nothing was submitted — try again in a few minutes.",
+				},
+				{
+					status: settled === "in-flight" ? 409 : 503,
+					headers: rateLimitHeaders(limit),
+				},
+			);
+		}
+		// released: the earlier write never landed and no longer can
 	}
 	const ballotId = newBallotId();
 	const reserved = await reserveBallot({
@@ -198,6 +233,20 @@ export async function POST(req: NextRequest) {
 		return b.setTimeout(120).build();
 	});
 	if (!result.ok) {
+		if (result.pending) {
+			// Horizon took the transaction but did not see it land in time. It
+			// may still land (until its 120s time bound), so the reservation
+			// STAYS: releasing it here is exactly how one voter ends up with two
+			// ballots. The voter's next attempt settles it against the relay.
+			return NextResponse.json(
+				{
+					error: "ballot_pending",
+					message:
+						"Your ballot reached the network but was not confirmed in time. Do not sign again right away: wait three minutes and try once more. If it landed, the page will say so; if not, the retry goes through.",
+				},
+				{ status: 503, headers: rateLimitHeaders(limit) },
+			);
+		}
 		await releaseBallot(reserved.id);
 		const busy = result.resultCodes.includes("tx_bad_seq");
 		return NextResponse.json(
