@@ -1004,11 +1004,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const votedBefore = Boolean(eligibility?.hasVoted ?? eligibility?.votes);
 	// null = the server could not check. Not a green light.
 	const ballotStatusUnknown = eligibility?.hasVoted === null;
-	// No ballot can be cast from here — either this address isn't on the list,
-	// or it has already voted and that ballot is final. Both mean the picks
-	// stop being editable and the CTA goes away, rather than leaving a live
-	// form behind a button that will refuse.
-	const readOnly = notWhitelisted || votedBefore;
+	// No ballot can be cast from here — no wallet is connected, or this address
+	// isn't on the list, or it has already voted and that ballot is final. All
+	// three mean the picks stop being editable and the CTA goes away, rather
+	// than leaving a live form behind a button that will refuse.
+	//
+	// Disconnected counts. Letting a visitor build a whole ballot first reads
+	// as progress and is not: connect, and the picks are either overwritten by
+	// whatever the record already holds, or thrown away because the address
+	// isn't a Pilot or has already voted. The ask is one click and it comes
+	// first.
+	const readOnly = !address || notWhitelisted || votedBefore;
+	// The ballot surfaces (rail, mobile deck, CTA) stay up while a ballot is
+	// still POSSIBLE — which includes "no wallet yet", whose call to action is
+	// the connect button itself. Gating those on readOnly would have hidden the
+	// one control a disconnected visitor needs. They come down only when this
+	// address can never cast one: not a Pilot, or already voted.
+	const ballotOpen = voting.open && !notWhitelisted && !votedBefore;
 	const busy =
 		phase === "connecting" ||
 		phase === "requesting" ||
@@ -1437,6 +1449,22 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			)}
 
 			{/* ── Read-only notice ── */}
+			{!address && voting.open && (
+				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
+					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
+						<Eye className="h-5 w-5 mt-0.5 text-neutral-500 flex-shrink-0" />
+						<p className="text-sm text-neutral-400 leading-relaxed">
+							<span className="text-neutral-100 font-medium">
+								Connect a Pilot wallet to pick.
+							</span>{" "}
+							Browse the nominees and their highlights freely — choosing comes
+							after connecting, so a ballot is never built against the wrong
+							address.
+						</p>
+					</div>
+				</div>
+			)}
+
 			{notWhitelisted && (
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
 					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
@@ -1458,7 +1486,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			    voting closed) so there's no dead space. */}
 			<div
 				className={`max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 lg:pb-20 ${
-					voting.open && !readOnly ? "pb-[17rem]" : "pb-32"
+					ballotOpen ? "pb-[17rem]" : "pb-32"
 				}`}
 			>
 				{/* nominee grid */}
@@ -1564,7 +1592,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								);
 							})}
 						</ul>
-						{voting.open && !readOnly && <PrimaryButton full />}
+						{ballotOpen && <PrimaryButton full />}
 						{closesShort && voting.open && (
 							<p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
 								One signature, and it's final. Voting closes{" "}
@@ -1576,7 +1604,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			</div>
 
 			{/* ── Mobile ballot deck (whole-card swipe, stacked like a deck) ── */}
-			{voting.open && !readOnly && (
+			{ballotOpen && (
 				<motion.div
 					initial={{ y: 24, opacity: 0 }}
 					animate={{ y: 0, opacity: 1 }}
@@ -1724,6 +1752,15 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 						: false
 				}
 				onClose={() => setHighlightNominee(null)}
+				canPick={!readOnly && voting.open}
+				onConnect={
+					!address && voting.open
+						? () => {
+								setHighlightNominee(null);
+								setWalletOpen(true);
+							}
+						: null
+				}
 				onVote={(slug) => {
 					if (highlightNominee && !readOnly && voting.open) {
 						const cat = highlightNominee.category;
@@ -1743,7 +1780,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<AwardsToast
 				message={error}
 				onDismiss={() => setError(null)}
-				raised={voting.open && !readOnly}
+				raised={ballotOpen}
 			/>
 		</>
 	);
