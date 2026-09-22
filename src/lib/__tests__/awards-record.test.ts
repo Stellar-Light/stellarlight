@@ -43,7 +43,12 @@ describe("writeBallotRecord", () => {
 		expect(await writeBallotRecord(payload, params)).toBe("created");
 		expect(writes[0].op).toBe("create");
 		expect(writes[0].data.history).toEqual([
-			{ txHash: "hash2", selections: { impact: ["beans"] }, at: params.at },
+			{
+				txHash: "hash2",
+				selections: { impact: ["beans"] },
+				at: params.at,
+				ballotId: null,
+			},
 		]);
 		expect(writes[0].data.firstSubmittedAt).toBe(params.at);
 	});
