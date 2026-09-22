@@ -29,11 +29,9 @@ import {
 	type BallotRound,
 	type BallotSelections,
 	dataKey,
-	decodeAccountVotes,
 	picksPerCategory,
 	type VoterAccountData,
 } from "./ballot";
-import type { FetchAccountResult } from "./stellar";
 
 export interface MirroredBallot {
 	address: string;
@@ -98,102 +96,103 @@ export function mirrorAccountData(
 	return { address: ballot.address, data };
 }
 
-export interface ChainProbe {
+export type ReconcileAction =
+	/** Record row confirmed and the relay holds its ballot, matching. */
+	| { kind: "ok"; address: string; ballotId: string }
+	/** Record row confirmed, relay holds the id, but the picks DIFFER. The relay
+	 *  writes exactly what was signed, so this means the record was edited —
+	 *  reported loudly, never overwritten. */
+	| { kind: "differs"; address: string; ballotId: string }
+	/** Record row confirmed, relay does not hold the id. After a reset that is
+	 *  every row, and those rows are the point. Kept. */
+	| { kind: "chain-empty"; address: string; ballotId: string }
+	/** Record row RESERVED but never confirmed (txHash null): the relay was
+	 *  asked and the confirmation was lost, or the write never happened. If the
+	 *  relay holds the id it can be confirmed; if not, the reservation should
+	 *  be released so the voter can vote. */
+	| { kind: "unconfirmed"; address: string; ballotId: string; onRelay: boolean }
+	/** A ballot on the relay that no record row names. Counted by the tally
+	 *  as an anonymous voter; cannot be attributed from here. */
+	| { kind: "orphan"; ballotId: string };
+
+export interface RecordRow {
 	address: string;
-	result: FetchAccountResult;
+	ballotId: string | null;
+	selections: BallotSelections;
+	confirmed: boolean;
 }
 
-export type ReconcileAction =
-	/**
-	 * On-chain ballot with no mirror row — the gap this exists to close. What
-	 * lands becomes that address's `history[0]`, i.e. its first ballot. For a
-	 * relay ballot that is exactly right. For one written by hand and then
-	 * overwritten, the earlier value is already gone from the chain and no
-	 * record of it exists anywhere; the latest is the best obtainable answer.
-	 */
-	| { kind: "create"; address: string; selections: BallotSelections }
-	/**
-	 * Mirror row disagrees with the chain. Under one-ballot-per-voter this is
-	 * an ANOMALY, not a correction: the relay refuses a second ballot, so a
-	 * divergence means someone wrote manageData themselves. Recording it keeps
-	 * the trail honest — `history[0]`, and therefore the tally, is untouched.
-	 */
-	| {
-			kind: "update";
-			address: string;
-			selections: BallotSelections;
-			prior: BallotSelections;
-	  }
-	| { kind: "ok"; address: string }
-	/** Funded, whitelisted, never voted. */
-	| { kind: "no-vote"; address: string }
-	/** Mirror has a ballot the chain no longer shows. Reported, never deleted. */
-	| { kind: "chain-empty"; address: string }
-	/** Horizon 404 and nothing mirrored — never on-network. */
-	| { kind: "unfunded"; address: string }
-	/** Horizon failed — this address could not be judged. */
-	| { kind: "unreachable"; address: string; error: string };
-
+/**
+ * Diff the relay against the record. Reads only; the script decides what
+ * to do about "unconfirmed", and nothing else is ever written back.
+ */
 export function planReconcile(
-	round: BallotRound,
-	nominees: BallotNominee[],
-	probes: ChainProbe[],
-	mirror: Map<string, BallotSelections>,
+	rows: RecordRow[],
+	relay: Map<string, BallotSelections>,
 ): ReconcileAction[] {
-	return probes.map(({ address, result }): ReconcileAction => {
-		const mirrored = mirror.get(address);
-		if (result.funded === null) {
-			return { kind: "unreachable", address, error: result.error };
+	const actions: ReconcileAction[] = [];
+	const seen = new Set<string>();
+	for (const r of rows) {
+		if (!r.ballotId) continue;
+		seen.add(r.ballotId);
+		const onRelay = relay.get(r.ballotId);
+		if (!r.confirmed) {
+			actions.push({
+				kind: "unconfirmed",
+				address: r.address,
+				ballotId: r.ballotId,
+				onRelay: !!onRelay,
+			});
+			continue;
 		}
-		const onChain =
-			result.funded === true
-				? decodeAccountVotes(round, nominees, result.account.data)
-				: {};
-		const hasVotes = Object.values(onChain).some((s) => s.length > 0);
-		if (!hasVotes) {
-			if (mirrored) return { kind: "chain-empty", address };
-			return result.funded
-				? { kind: "no-vote", address }
-				: { kind: "unfunded", address };
+		if (!onRelay) {
+			actions.push({
+				kind: "chain-empty",
+				address: r.address,
+				ballotId: r.ballotId,
+			});
+			continue;
 		}
-		if (!mirrored) return { kind: "create", address, selections: onChain };
-		if (sameSelections(mirrored, onChain)) return { kind: "ok", address };
-		return { kind: "update", address, selections: onChain, prior: mirrored };
-	});
+		actions.push({
+			kind: sameSelections(r.selections, onRelay) ? "ok" : "differs",
+			address: r.address,
+			ballotId: r.ballotId,
+		});
+	}
+	for (const ballotId of relay.keys()) {
+		if (!seen.has(ballotId)) actions.push({ kind: "orphan", ballotId });
+	}
+	return actions;
 }
 
 export interface ReconcileSummary {
 	counts: Record<ReconcileAction["kind"], number>;
-	/** Addresses the chain shows a ballot for (create + update + ok). */
-	chainVoters: number;
 	/**
-	 * The mirror holds ballots, Horizon answered for at least one account, and
-	 * NOT ONE of them carries a vote. That is what the chain looks like after a
-	 * testnet reset — there is nothing left to reconcile FROM, and treating the
-	 * mirror rows as stale would be exactly wrong.
+	 * The record holds confirmed ballots and the relay holds NONE of them.
+	 * That is what the relay looks like after a testnet reset — there is
+	 * nothing to reconcile FROM, and treating the rows as stale would be
+	 * exactly wrong.
 	 */
 	resetSuspected: boolean;
 }
 
 export function summarizeReconcile(
 	actions: ReconcileAction[],
-	mirrorSize: number,
 ): ReconcileSummary {
 	const counts: ReconcileSummary["counts"] = {
-		create: 0,
-		update: 0,
 		ok: 0,
-		"no-vote": 0,
+		differs: 0,
 		"chain-empty": 0,
-		unfunded: 0,
-		unreachable: 0,
+		unconfirmed: 0,
+		orphan: 0,
 	};
 	for (const a of actions) counts[a.kind]++;
-	const chainVoters = counts.create + counts.update + counts.ok;
-	const reachable = actions.length - counts.unreachable;
+	const confirmedRows = counts.ok + counts.differs + counts["chain-empty"];
 	return {
 		counts,
-		chainVoters,
-		resetSuspected: mirrorSize > 0 && chainVoters === 0 && reachable > 0,
+		resetSuspected:
+			confirmedRows > 0 &&
+			counts.ok + counts.differs === 0 &&
+			counts.orphan === 0,
 	};
 }

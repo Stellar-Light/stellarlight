@@ -1,33 +1,42 @@
 /**
- * POST /api/awards/submit — validate a signed ballot and relay it to
- * TESTNET Horizon.
+ * POST /api/awards/submit — verify a voter's authorization and relay their
+ * ballot ANONYMOUSLY.
  *
- *   { "signedXdr": "AAAA..." }
+ *   { "signedXdr": "AAAA...", "selections": { ... }, "round": "i3-2026" }
  *
- * THIS IS NOT AN OPEN RELAY. validateSignedBallot re-checks everything
- * server-side before a byte reaches Horizon: manageData-only operations
- * under this round's exact `i3.<round>.` key prefix, source account on the
- * voter whitelist, round open, one vote per category, every value a real
- * nominee, no memo, and a source signature that verifies over the
- * TESTNET-passphrase hash (structurally refusing mainnet-signed payloads).
- * Anything else is rejected with the reasons.
- *
- * It also enforces ONE BALLOT PER VOTER. /ballot-xdr refuses to build a second
- * ballot, but that is a convenience, not a boundary — a hand-rolled
- * transaction would skip it entirely. This is where it is actually enforced.
+ * THIS IS NOT AN OPEN RELAY. Before anything is written: the round is open;
+ * the picks are a full, valid slate; the signed authorization's source is on
+ * the whitelist; its signature verifies for a key that controls that account
+ * over the TESTNET hash (a mainnet-signed payload structurally fails); its
+ * memo commits to exactly these picks; it is unusable on-chain and unexpired;
+ * and the address has not voted. Then the relay reserves the record row,
+ * writes the ballot to its own account under a random id, and confirms the
+ * row with the hash. The chain never learns the address.
  */
 
+import { Memo, TransactionBuilder } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import {
+	BALLOT_FEE_PER_OP,
 	ballotSourceOf,
-	decodeAccountVotes,
-	validateSignedBallot,
+	newBallotId,
+	relayBallotOps,
+	roundOpenState,
+	TEST_BALLOT_MEMO,
+	validateSelections,
+	verifyAuthorization,
 } from "@/lib/awards/ballot";
-import { hasMirroredBallot, recordBallot } from "@/lib/awards/record";
+import {
+	confirmBallot,
+	hasMirroredBallot,
+	releaseBallot,
+	reserveBallot,
+} from "@/lib/awards/record";
 import { loadRound } from "@/lib/awards/round";
 import {
+	AWARDS_NETWORK_PASSPHRASE,
 	fetchTestnetAccount,
-	submitToTestnetHorizon,
+	submitFromRelay,
 	testnetExplorerTxUrl,
 } from "@/lib/awards/stellar";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -35,15 +44,14 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-/** A 3-op manageData tx is ~1KB signed; anything huge is not a ballot. */
+/** One-op authorization is ~600 chars signed; anything huge is not one. */
 const MAX_XDR_CHARS = 8_192;
 
 export async function POST(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/submit",
-		// See ballot-xdr: one venue IP for the whole room. 15 would have refused
-		// the 16th ballot of the event. The whitelist and the one-ballot gate are
-		// what actually bound this route.
+		// See ballot-xdr: one venue IP for the whole room. The whitelist and
+		// the one-ballot gate are what actually bound this route.
 		limit: 200,
 		windowMs: 10 * 60 * 1000,
 	});
@@ -54,7 +62,7 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	let body: { signedXdr?: unknown; round?: unknown };
+	let body: { signedXdr?: unknown; round?: unknown; selections?: unknown };
 	try {
 		body = await req.json();
 	} catch {
@@ -63,11 +71,10 @@ export async function POST(req: NextRequest) {
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
-
 	const signedXdr = typeof body.signedXdr === "string" ? body.signedXdr : "";
 	if (!signedXdr || signedXdr.length > MAX_XDR_CHARS) {
 		return NextResponse.json(
-			{ error: "provide the signed ballot as `signedXdr`" },
+			{ error: "provide the signed authorization as `signedXdr`" },
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
@@ -81,66 +88,59 @@ export async function POST(req: NextRequest) {
 			{ status: 404, headers: rateLimitHeaders(limit) },
 		);
 	}
-
-	// Fetch the account BEFORE validating, because validation needs its signer
-	// set: verifying only the master key refuses any Pilot who set their master
-	// weight to 0 or delegated to other signers, even though Horizon would
-	// accept their ballot. Reading the source first breaks that circle — and
-	// the source is still re-checked against the whitelist by the validator,
-	// which is the thing that decides.
-	const claimedSource = ballotSourceOf(signedXdr);
-	const sourceAccount = claimedSource
-		? await fetchTestnetAccount(claimedSource)
-		: null;
-
-	const verdict = validateSignedBallot(signedXdr, {
-		round: loaded.round,
-		nominees: loaded.nominees,
-		whitelist: loaded.whitelist,
-		signers:
-			sourceAccount?.funded === true
-				? sourceAccount.account.signers
-				: undefined,
-	});
-	if (!verdict.ok) {
+	const openState = roundOpenState(loaded.round);
+	if (!openState.open) {
 		return NextResponse.json(
-			{ error: "ballot rejected", details: verdict.errors },
-			{ status: 422, headers: rateLimitHeaders(limit) },
+			{ error: `voting is not open: ${openState.reason}` },
+			{ status: 409, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const validated = validateSelections(
+		loaded.round,
+		loaded.nominees,
+		body.selections,
+	);
+	if (!validated.ok) {
+		return NextResponse.json(
+			{ error: "invalid selections", details: validated.errors },
+			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
 
-	// One ballot per voter, re-checked at the relay. /ballot-xdr already
-	// refuses a second ballot, but nothing stops someone building their own
-	// transaction and posting it here — this is the boundary that counts.
-	// The chain counts too, not just the mirror. recordBallot is best-effort
-	// and swallows its own failures, and Horizon can accept a transaction and
-	// still time out on the response — either leaves a voter whose FIRST
-	// ballot exists only on chain. Gating on the mirror alone would let a
-	// second ballot through, and manageData would destroy the first as it
-	// landed, with nothing anywhere remembering it.
-	const account =
-		sourceAccount && claimedSource === verdict.source
-			? sourceAccount
-			: await fetchTestnetAccount(verdict.source);
-	if (account.funded === null) {
+	// The account is read for its signer set and current sequence. 404 is
+	// fine — an account with no footprint signs at sequence 1 and its only
+	// signer is its master key. Only Horizon being down blocks.
+	const claimedSource = ballotSourceOf(signedXdr);
+	const account = claimedSource
+		? await fetchTestnetAccount(claimedSource)
+		: null;
+	if (account?.funded === null) {
 		return NextResponse.json(
 			{
 				error: "ballot_status_unavailable",
 				message:
-					"Could not reach testnet to check this account's ballot. Nothing was submitted — try again in a moment.",
+					"Could not reach testnet to check this account. Nothing was submitted — try again in a moment.",
 			},
 			{ status: 503, headers: rateLimitHeaders(limit) },
 		);
 	}
-	const onChain =
-		account.funded === true &&
-		Object.values(
-			decodeAccountVotes(loaded.round, loaded.nominees, account.account.data),
-		).some((picks) => picks.length > 0);
+	const verdict = verifyAuthorization(signedXdr, {
+		round: loaded.round,
+		whitelist: loaded.whitelist,
+		selections: validated.selections,
+		sequence: account?.funded === true ? account.account.sequence : null,
+		signers: account?.funded === true ? account.account.signers : undefined,
+	});
+	if (!verdict.ok) {
+		return NextResponse.json(
+			{ error: "authorization rejected", details: verdict.errors },
+			{ status: 422, headers: rateLimitHeaders(limit) },
+		);
+	}
 
-	const mirrored = onChain
-		? true
-		: await hasMirroredBallot(loaded.round.slug, verdict.source);
+	// One ballot per voter, re-checked here, then RESERVED before the relay
+	// writes — a gate checked now and written later is a race.
+	const mirrored = await hasMirroredBallot(loaded.round.slug, verdict.source);
 	if (mirrored === null) {
 		return NextResponse.json(
 			{
@@ -161,43 +161,67 @@ export async function POST(req: NextRequest) {
 			{ status: 409, headers: rateLimitHeaders(limit) },
 		);
 	}
-
-	const result = await submitToTestnetHorizon(signedXdr);
-	if (!result.ok) {
-		// Friendlier mapping for the errors a real voter can hit.
-		const seqStale = result.resultCodes.includes("tx_bad_seq");
-		const underfunded = result.resultCodes.includes("tx_insufficient_balance");
+	const ballotId = newBallotId();
+	const reserved = await reserveBallot({
+		roundSlug: loaded.round.slug,
+		address: verdict.source,
+		ballotId,
+		selections: validated.selections,
+	});
+	if (!reserved.ok) {
+		const dup = reserved.reason === "already_voted";
 		return NextResponse.json(
 			{
-				error: seqStale
-					? "ballot expired or out of date — request a fresh one and sign again"
-					: underfunded
-						? "the voting account doesn't have enough testnet XLM — fund it via friendbot and retry"
-						: "testnet Horizon rejected the transaction",
-				resultCodes: result.resultCodes,
-				detail: result.detail,
+				error: dup ? "already_voted" : "ballot_status_unavailable",
+				message: dup
+					? "This address has already cast its ballot for this round."
+					: `Could not record the ballot (${reserved.reason}). Nothing was submitted — try again in a moment.`,
 			},
-			{ status: seqStale || underfunded ? 409 : 502 },
+			{ status: dup ? 409 : 503, headers: rateLimitHeaders(limit) },
 		);
 	}
 
-	// Mirror the on-chain vote into Payload (best-effort — the vote already
-	// landed on testnet; recordBallot swallows its own errors and never throws).
-	await recordBallot({
-		roundSlug: loaded.round.slug,
-		address: verdict.source,
-		selections: verdict.selections,
-		txHash: result.hash,
+	const result = await submitFromRelay((relay) => {
+		const b = new TransactionBuilder(relay, {
+			fee: BALLOT_FEE_PER_OP,
+			networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
+			// a test round's ballots self-identify on the relay, as before
+			...(loaded.round.testMode ? { memo: Memo.text(TEST_BALLOT_MEMO) } : {}),
+		});
+		for (const op of relayBallotOps(
+			loaded.round,
+			ballotId,
+			validated.selections,
+		)) {
+			b.addOperation(op);
+		}
+		return b.setTimeout(120).build();
 	});
+	if (!result.ok) {
+		await releaseBallot(reserved.id);
+		const busy = result.resultCodes.includes("tx_bad_seq");
+		return NextResponse.json(
+			{
+				error: busy ? "relay_busy" : "relay_failed",
+				message: busy
+					? "The relay is busy — try again in a few seconds. Nothing was recorded."
+					: `The relay could not write the ballot: ${result.error}. Nothing was recorded.`,
+				resultCodes: result.resultCodes,
+			},
+			{ status: busy ? 409 : 502, headers: rateLimitHeaders(limit) },
+		);
+	}
+	await confirmBallot(reserved.id, result.hash);
 
 	return NextResponse.json(
 		{
+			ballotId,
 			hash: result.hash,
 			explorerUrl: testnetExplorerTxUrl(result.hash),
 			round: loaded.round.slug,
-			selections: verdict.selections,
+			selections: validated.selections,
 			closesAt: loaded.round.closesAt ?? null,
-			note: "This is your ballot for the round. The first ballot is the one that counts — it can't be replaced.",
+			note: "This is your ballot for the round. It was written anonymously by the relay under the id above; nothing on chain links it to your address. The first ballot cast is the one that counts.",
 		},
 		{ headers: rateLimitHeaders(limit) },
 	);

@@ -2,26 +2,26 @@ import type { CollectionConfig } from "payload";
 import { isAdmin } from "./access";
 
 /**
- * i³ Awards — a durable record of every ballot that cleared validation and
- * landed on testnet (one row per address per round, upserted on each vote).
+ * i³ Awards — the record of every ballot: WHO cast WHICH anonymous ballot.
  *
- * THIS is what decides the round. One ballot per voter and the FIRST one
- * counts — and a manageData overwrite destroys the value it replaces, so the
- * chain can only ever show the LATEST ballot. `history[0]` is the only record
- * of the first one anywhere, which makes this collection the tally's primary
- * source; the chain is the fallback, for an address that wrote its own
- * manageData without going through the relay.
+ * Ballots are written by the relay to ITS account under a random ballot id,
+ * so the chain shows N unlinkable ballots and nothing public connects one to
+ * an address. This collection is the only place an id meets an address, which
+ * makes it three things at once:
  *
- * It also means the round can be read WITHOUT walking Horizon — "who has
- * voted, for what, and when" in one admin query — and that a vote survives
- * even if a testnet account is later merged or reset. It is written
- * best-effort AFTER the on-chain submit succeeds; a failure there never fails
- * a vote that already exists on-chain, and the reconcile lane closes the gap.
+ *   - the one-ballot gate: a row is RESERVED before the relay writes, so two
+ *     submissions cannot both get through;
+ *   - the source of truth for the tally: it alone knows a voter's FIRST
+ *     ballot (the counted one), and it alone survives a testnet reset, which
+ *     clears every ledger entry and all history;
+ *   - the private half of the anonymity: readable by admins only. Public
+ *     surfaces stay aggregate — turnout and per-nominee counts, never
+ *     address→choice — and what gets anchored on Tansu is a DIGEST of this
+ *     record, which pins it without disclosing it.
  *
- * Read access is admin-only, matching AwardVoters: public payloads stay
- * aggregate-only (turnout + per-nominee tally, never address→choice).
+ * A row whose history[0] has no txHash is a reservation the relay never
+ * confirmed; it is not counted, and the reconcile lane confirms or releases it.
  */
-
 const ED25519_PUBLIC_KEY = /^G[A-Z2-7]{55}$/;
 
 export const AwardBallots: CollectionConfig = {
@@ -72,6 +72,19 @@ export const AwardBallots: CollectionConfig = {
 			admin: {
 				description:
 					"The validated ballot as { categoryKey: nomineeSlug }, mirroring the on-chain manageData entries.",
+			},
+		},
+		{
+			// The random id the ballot was written under on the RELAY account.
+			// This row is the only place it meets an address: the chain shows
+			// ballots by id, the record shows who cast which. Admin-only, like
+			// the rest of the row.
+			name: "ballotId",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"Ballot id on the relay account (i3.<round>.<ballotId>.<category>). The address→ballot link lives here and nowhere public.",
 			},
 		},
 		{

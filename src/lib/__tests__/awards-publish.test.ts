@@ -11,7 +11,7 @@ import {
 import {
 	ballotCountsAtTime,
 	ballotsDigest,
-	mergeAccounts,
+	mergeBallots,
 	resultsDocument,
 } from "../awards/publish";
 import { firstBallotSelections } from "../awards/record";
@@ -67,76 +67,145 @@ describe("resultsDocument", () => {
 	});
 });
 
-describe("mergeAccounts", () => {
-	const round: BallotRound = {
-		slug: "i3-2026",
-		status: "open",
-		ballotMode: "one-per-category",
-		categories: [{ key: "impact", name: "Impact", tagline: null }],
-		opensAt: null,
-		closesAt: null,
-	};
-	const nominees: BallotNominee[] = [
-		{ category: "impact", slug: "decaf", name: "Decaf" },
-		{ category: "impact", slug: "beans", name: "Beans" },
-	];
-	const b64 = (v: string) => Buffer.from(v).toString("base64");
-	const vote = (slug: string) => ({
-		[dataKey(round.slug, "impact")]: b64(slug),
+describe("resultsDocument", () => {
+	it("is aggregate-only and says where the tally came from", () => {
+		const doc = resultsDocument(loaded, tally, "mirror", "abc123", new Date(0));
+		expect(doc.round).toBe("i3-2026");
+		expect(doc.source).toBe("mirror");
+		expect(doc.turnout).toEqual({ voted: 2, whitelisted: 3 });
+		expect(doc.categories[0].results[0]).toEqual({
+			slug: "decaf",
+			name: "Decaf",
+			votes: 2,
+		});
+		expect(doc.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+		const text = JSON.stringify(doc);
+		for (const addr of loaded.whitelist) expect(text).not.toContain(addr);
+		expect(text).not.toMatch(/txHash|history/);
+		expect(doc.note).toContain("/api/awards/anchor?round=i3-2026");
+	});
+});
+
+describe("resultsDocument", () => {
+	it("is aggregate-only and says where the tally came from", () => {
+		const doc = resultsDocument(loaded, tally, "mirror", "abc123", new Date(0));
+		expect(doc.round).toBe("i3-2026");
+		expect(doc.source).toBe("mirror");
+		expect(doc.turnout).toEqual({ voted: 2, whitelisted: 3 });
+		expect(doc.categories[0].results[0]).toEqual({
+			slug: "decaf",
+			name: "Decaf",
+			votes: 2,
+		});
+		expect(doc.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+		const text = JSON.stringify(doc);
+		for (const addr of loaded.whitelist) expect(text).not.toContain(addr);
+		expect(text).not.toMatch(/txHash|history/);
+		expect(doc.note).toContain("/api/awards/anchor?round=i3-2026");
+	});
+});
+
+describe("resultsDocument", () => {
+	it("is aggregate-only and says where the tally came from", () => {
+		const doc = resultsDocument(loaded, tally, "mirror", "abc123", new Date(0));
+		expect(doc.round).toBe("i3-2026");
+		expect(doc.source).toBe("mirror");
+		expect(doc.turnout).toEqual({ voted: 2, whitelisted: 3 });
+		expect(doc.categories[0].results[0]).toEqual({
+			slug: "decaf",
+			name: "Decaf",
+			votes: 2,
+		});
+		expect(doc.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+		const text = JSON.stringify(doc);
+		for (const addr of loaded.whitelist) expect(text).not.toContain(addr);
+		expect(text).not.toMatch(/txHash|history/);
+		expect(doc.note).toContain("/api/awards/anchor?round=i3-2026");
+	});
+});
+
+describe("mergeBallots", () => {
+	const rec = (
+		address: string,
+		selections: Record<string, string[]>,
+		ballotId: string | null,
+	) => ({
+		address,
+		selections,
+		txHash: "h",
+		at: "2026-10-01T00:00:00.000Z",
+		ballotId,
 	});
 
-	it("the mirror wins per address, because it holds the FIRST ballot", () => {
-		// G-BOTH is the whole point: they voted decaf, then voted again and the
-		// chain now shows beans. A manageData overwrite destroyed the original
-		// value, so the chain CANNOT tell you decaf ever happened — only the
-		// mirror can, and decaf is what must be counted.
-		const chain = new Map<string, Record<string, string> | null>([
-			["G-BOTH", vote("beans")], // revoted; chain shows only the latest
-			["G-CHAIN", vote("decaf")], // no mirror row — voted outside the relay
-			["G-FUNDED-NO-VOTE", {}], // account exists, entries gone
-			["G-WIPED", null], // account gone (reset) or Horizon failed
-			["G-NEVER", null],
-		]);
-		const mirror = new Map([
-			["G-BOTH", { impact: ["decaf"] }],
-			["G-FUNDED-NO-VOTE", { impact: ["decaf"] }],
-			["G-WIPED", { impact: ["beans"] }],
-		]);
-		const m = mergeAccounts(round, nominees, [...chain.keys()], chain, mirror);
-		// only G-CHAIN falls through to the chain now
-		expect(m.chainVoters).toBe(1);
-		expect(m.mirrorVoters).toBe(3);
-		const tally = tallyRound(round, nominees, m.accounts);
-		expect(tally.turnout).toEqual({ voted: 4, whitelisted: 5 });
-		const votes = Object.fromEntries(
-			tally.categories[0].results.map((r) => [r.slug, r.votes]),
+	it("counts every confirmed record row, by its first ballot", () => {
+		const { accounts, recordVoters, relayOnly } = mergeBallots(
+			loaded.round,
+			[
+				rec("GA1", { impact: ["decaf"] }, "aaaaaaaa"),
+				rec("GA2", { impact: ["beans"] }, "bbbbbbbb"),
+			],
+			new Map([
+				["aaaaaaaa", { impact: ["decaf"] }],
+				["bbbbbbbb", { impact: ["beans"] }],
+			]),
 		);
-		// decaf 3 — G-BOTH's FIRST ballot, plus G-FUNDED-NO-VOTE and G-CHAIN.
-		// beans 1 — G-WIPED only. G-BOTH's revote to beans is not counted at all.
-		expect(votes).toEqual({ decaf: 3, beans: 1 });
-		// and the revote is NOT also counted — nobody is counted twice
-		expect(tally.categories[0].totalVotes).toBe(4);
+		expect(recordVoters).toBe(2);
+		expect(relayOnly).toEqual([]);
+		expect(accounts.map((a) => a.address).sort()).toEqual(["GA1", "GA2"]);
 	});
 
-	it("counts a voter once when chain and mirror agree", () => {
-		const chain = new Map<string, Record<string, string> | null>([
-			["G-ONE", vote("decaf")],
-		]);
-		const mirror = new Map([["G-ONE", { impact: ["decaf"] }]]);
-		const m = mergeAccounts(round, nominees, ["G-ONE"], chain, mirror);
-		expect(m.mirrorVoters).toBe(1);
-		expect(m.chainVoters).toBe(0);
-		expect(tallyRound(round, nominees, m.accounts).turnout.voted).toBe(1);
+	it("the record wins over the relay for an id it holds — never both", () => {
+		// the relay holds the id with different picks (the record was edited,
+		// or the relay wrote what was signed and the row drifted): the row is
+		// what is counted here, and reconcile is what flags the difference
+		const { accounts } = mergeBallots(
+			loaded.round,
+			[rec("GA1", { impact: ["decaf"] }, "aaaaaaaa")],
+			new Map([["aaaaaaaa", { impact: ["beans"] }]]),
+		);
+		expect(accounts).toHaveLength(1);
+		expect(accounts[0].address).toBe("GA1");
 	});
 
-	it("an empty mirror row does not mask a real chain ballot", () => {
-		const chain = new Map<string, Record<string, string> | null>([
-			["G-X", vote("beans")],
-		]);
-		const mirror = new Map([["G-X", {}]]);
-		const m = mergeAccounts(round, nominees, ["G-X"], chain, mirror);
-		expect(m.chainVoters).toBe(1);
-		expect(tallyRound(round, nominees, m.accounts).turnout.voted).toBe(1);
+	it("counts a relay ballot the record does not hold, anonymously, and reports it", () => {
+		const { accounts, relayOnly } = mergeBallots(
+			loaded.round,
+			[rec("GA1", { impact: ["decaf"] }, "aaaaaaaa")],
+			new Map([
+				["aaaaaaaa", { impact: ["decaf"] }],
+				["cccccccc", { impact: ["beans"] }],
+			]),
+		);
+		expect(relayOnly).toEqual(["cccccccc"]);
+		expect(accounts.map((a) => a.address)).toEqual(["GA1", "relay:cccccccc"]);
+	});
+
+	it("a record row with no picks is not a voter", () => {
+		const { recordVoters } = mergeBallots(
+			loaded.round,
+			[rec("GA1", {}, "aaaaaaaa")],
+			new Map(),
+		);
+		expect(recordVoters).toBe(0);
+	});
+});
+
+describe("resultsDocument", () => {
+	it("is aggregate-only and says where the tally came from", () => {
+		const doc = resultsDocument(loaded, tally, "mirror", "abc123", new Date(0));
+		expect(doc.round).toBe("i3-2026");
+		expect(doc.source).toBe("mirror");
+		expect(doc.turnout).toEqual({ voted: 2, whitelisted: 3 });
+		expect(doc.categories[0].results[0]).toEqual({
+			slug: "decaf",
+			name: "Decaf",
+			votes: 2,
+		});
+		expect(doc.generatedAt).toBe("1970-01-01T00:00:00.000Z");
+		const text = JSON.stringify(doc);
+		for (const addr of loaded.whitelist) expect(text).not.toContain(addr);
+		expect(text).not.toMatch(/txHash|history/);
+		expect(doc.note).toContain("/api/awards/anchor?round=i3-2026");
 	});
 });
 

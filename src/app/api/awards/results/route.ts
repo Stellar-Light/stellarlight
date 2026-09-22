@@ -1,29 +1,21 @@
 /**
  * GET /api/awards/results[?round=<slug>] — aggregate tally.
  *
- * For every whitelisted address, reads its testnet account data entries
- * from Horizon, decodes the `i3.<round>.<category>` votes, and aggregates.
- * While the chain exists it is the source of truth — anyone can recompute
- * the same numbers from public Horizon.
+ * Ballots are anonymous: written by the relay to its own account under random
+ * ids. The tally reads that one account (one Horizon call) and the record
+ * (address → first ballot), preferring the record wherever it holds an id —
+ * it alone knows a voter's FIRST ballot, and it alone survives a testnet
+ * reset. A relay ballot the record does not name is counted anonymously and
+ * reported. `source` says which side carried the round.
  *
- * Testnet is reset 2–4× a year, and a reset clears every ledger entry and
- * all history: at the first reset after a round, every account reads
- * unfunded and the chain tally is zero. When the chain shows NO votes, the
- * tally is rebuilt from the `award-ballots` mirror through the same
- * tallyRound (lib/awards/publish.ts — shared with the publish lane, so the
- * committed results file cannot disagree with this page), and `source` says
- * which one you got.
+ * PRIVACY: the payload is AGGREGATE ONLY — per-category counts and a turnout
+ * figure. No address→choice mapping is ever serialized here, and nothing is
+ * served while voting is open. `ballotsDigest` is a sha256 of the first-ballot
+ * record: it pins that record without disclosing any of it. null means the
+ * record could not be read — see liveTally.
  *
- * PRIVACY: the payload is AGGREGATE ONLY — per-category counts and a
- * turnout figure. No address→choice mapping is ever serialized here.
- * `ballotsDigest` is a sha256 of the first-ballot record: it pins that record
- * without disclosing any of it (only someone already holding the record can
- * check it). null means the record could not be read — see liveTally.
- *
- * Cached ~30s per round in-memory (Horizon is hit up to ~98 times per
- * recompute; the cache keeps a refreshing results view cheap).
+ * Cached ~30s per round in-memory.
  */
-
 import { type NextRequest, NextResponse } from "next/server";
 import { type RoundTally, roundOpenState } from "@/lib/awards/ballot";
 import { liveTally, type TallySource } from "@/lib/awards/publish";

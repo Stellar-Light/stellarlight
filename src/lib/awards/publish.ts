@@ -15,7 +15,7 @@ import {
 	type BallotNominee,
 	type BallotRound,
 	type BallotSelections,
-	decodeAccountVotes,
+	decodeRelayBallots,
 	type RoundTally,
 	tallyRound,
 	type VoterAccountData,
@@ -23,7 +23,11 @@ import {
 import { mirrorAccountData } from "./mirror";
 import { loadFirstBallotRecord } from "./record";
 import type { LoadedRound } from "./round";
-import { fetchLatestBallotOp, fetchTestnetAccounts } from "./stellar";
+import {
+	fetchLatestBallotOp,
+	fetchTestnetAccount,
+	relayKeypair,
+} from "./stellar";
 
 export type TallySource = "chain" | "mirror" | "chain+mirror";
 
@@ -33,6 +37,8 @@ export interface FirstBallotEntry {
 	selections: BallotSelections;
 	txHash: string | null;
 	at: string | null;
+	/** The id on the relay account. Not part of the digest (v1 recipe). */
+	ballotId?: string | null;
 }
 
 const DIGEST_HEADER = "i3-first-ballots-v1";
@@ -82,52 +88,51 @@ export function ballotsDigest(entries: FirstBallotEntry[]): string {
 		.digest("hex");
 }
 
-const HORIZON_CONCURRENCY = 10;
-
-const hasVote = (
-	round: BallotRound,
-	nominees: BallotNominee[],
-	data: Record<string, string>,
-) =>
-	Object.values(decodeAccountVotes(round, nominees, data)).some(
-		(s) => s.length > 0,
-	);
-
 /**
- * Pure. Per address: the MIRROR wins when it holds a ballot, because it holds
- * the voter's FIRST one — and the first ballot is the only one that counts.
+ * Pure. The counted ballots of a round, from the two places a ballot can be:
  *
- * This is deliberately the opposite of what it used to be. A manageData
- * overwrite destroys the value it replaces, so the chain can only ever show
- * the LATEST ballot; reading it first would count a revote. The chain is now
- * the fallback, for an address that has a vote on chain and no mirror row at
- * all — someone who wrote their own manageData without going through the
- * relay. A testnet reset or a Horizon outage forgets accounts; the mirror does
- * not. Never both, so nobody is counted twice.
+ *   the record   address → first ballot (+ the id it was written under)
+ *   the relay    ballot id → selections, decoded off the relay account
+ *
+ * The record wins wherever it has a confirmed row: it is the only thing that
+ * knows a voter's FIRST ballot and the only thing that survives a testnet
+ * reset. A relay ballot whose id the record does not hold is one the relay
+ * wrote and the record missed (confirmBallot failed after the chain landed);
+ * it is counted, as an anonymous voter with no address, and reported so the
+ * reconcile lane can attribute it. Never both for one id.
  */
-export function mergeAccounts(
+export function mergeBallots(
 	round: BallotRound,
-	nominees: BallotNominee[],
-	addresses: string[],
-	chain: Map<string, Record<string, string> | null>,
-	mirror: Map<string, BallotSelections>,
-): { accounts: VoterAccountData[]; chainVoters: number; mirrorVoters: number } {
-	let chainVoters = 0;
-	let mirrorVoters = 0;
-	const accounts = addresses.map((address): VoterAccountData => {
-		const selections = mirror.get(address);
-		if (selections && Object.values(selections).some((s) => s.length > 0)) {
-			mirrorVoters++;
-			return mirrorAccountData(round, { address, selections });
-		}
-		const data = chain.get(address) ?? null;
-		if (data && hasVote(round, nominees, data)) {
-			chainVoters++;
-			return { address, data };
-		}
-		return { address, data: null };
-	});
-	return { accounts, chainVoters, mirrorVoters };
+	record: FirstBallotEntry[],
+	relay: Map<string, BallotSelections>,
+): {
+	accounts: VoterAccountData[];
+	recordVoters: number;
+	relayOnly: string[];
+} {
+	const accounts: VoterAccountData[] = [];
+	const seenIds = new Set<string>();
+	let recordVoters = 0;
+	for (const e of record) {
+		if (!Object.values(e.selections).some((s) => s.length > 0)) continue;
+		recordVoters++;
+		if (e.ballotId) seenIds.add(e.ballotId);
+		accounts.push(
+			mirrorAccountData(round, {
+				address: e.address,
+				selections: e.selections,
+			}),
+		);
+	}
+	const relayOnly: string[] = [];
+	for (const [ballotId, selections] of relay) {
+		if (seenIds.has(ballotId)) continue;
+		relayOnly.push(ballotId);
+		accounts.push(
+			mirrorAccountData(round, { address: `relay:${ballotId}`, selections }),
+		);
+	}
+	return { accounts, recordVoters, relayOnly };
 }
 
 /**
@@ -143,73 +148,65 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	tally: RoundTally;
 	source: TallySource;
 	digest: string | null;
-	/** Chain-only ballots refused because they post-date the round's close. */
+	/** Relay ballots refused because they post-date the round's close. */
 	afterClose: number;
+	/** Relay ballots the record does not hold — counted, unattributed. */
+	relayOnly: number;
 }> {
-	const addresses = [...loaded.whitelist];
-	const [probes, record] = await Promise.all([
-		fetchTestnetAccounts(addresses, HORIZON_CONCURRENCY),
+	const relayPub = relayKeypair()?.publicKey() ?? null;
+	const [probe, record] = await Promise.all([
+		relayPub ? fetchTestnetAccount(relayPub) : Promise.resolve(null),
 		loadFirstBallotRecord(loaded.round.slug),
 	]);
-	// Rows arrive oldest-first; Map keeps the last write per key, so build it
-	// from the newest backwards and the OLDEST row for an address is what
-	// remains. A duplicate row is a race we have no unique index against yet.
-	const mirror = new Map(
-		[...(record ?? [])]
-			.reverse()
-			.map((e) => [e.address, e.selections] as const),
-	);
+	// One Horizon call for the whole round: every ballot is on the relay.
+	// No relay configured, or the relay unfunded (never used, or reset) both
+	// read as "the chain holds nothing" — the record carries the round.
+	const relay =
+		probe?.funded === true
+			? decodeRelayBallots(loaded.round, loaded.nominees, probe.account.data)
+			: new Map<string, BallotSelections>();
 
-	const chain = new Map(
-		probes.map(({ address, result }) => [
-			address,
-			result.funded === true ? result.account.data : null,
-		]),
-	);
-	// A ballot the RELAY accepted was checked against the round's close time
-	// before it was built. A ballot written straight to Horizon was not — the
-	// account is the voter's own, so nothing stops a manageData op landing the
-	// day after voting shut. Those reach the tally through the chain fallback
-	// (an address with no mirror row), and until now they counted.
-	//
-	// Only chain-fallback addresses need dating, which is normally none of
-	// them: everyone who used the page has a mirror row, whose timestamp came
-	// from a submission the relay had already gated. So this costs one Horizon
-	// call per out-of-band voter, not per voter.
+	// Rows arrive oldest-first; keep the OLDEST per address (a duplicate row
+	// is a race we have no unique index against yet).
+	const byAddress = new Map<string, FirstBallotEntry>();
+	for (const e of record ?? [])
+		if (!byAddress.has(e.address)) byAddress.set(e.address, e);
+	const entries = [...byAddress.values()];
+
+	// A ballot the relay wrote was gated on the close time before it was
+	// written, so only record-less relay ballots need dating — and those are
+	// normally none. Undatable means refused (see ballotCountsAtTime).
 	let afterClose = 0;
-	if (loaded.round.closesAt) {
-		const prefix = `i3.${loaded.round.slug}.`;
-		const chainOnly = addresses.filter((a) => {
-			if (mirror.has(a)) return false;
-			const data = chain.get(a);
-			return !!data && hasVote(loaded.round, loaded.nominees, data);
-		});
+	const known = new Set(entries.map((e) => e.ballotId).filter(Boolean));
+	if (loaded.round.closesAt && relayPub) {
+		const unknown = [...relay.keys()].filter((id) => !known.has(id));
 		const dated = await Promise.all(
-			chainOnly.map(async (address) => ({
-				address,
-				op: await fetchLatestBallotOp(address, prefix),
+			unknown.map(async (id) => ({
+				id,
+				op: await fetchLatestBallotOp(
+					relayPub,
+					`i3.${loaded.round.slug}.${id}.`,
+				),
 			})),
 		);
-		for (const { address, op } of dated) {
+		for (const { id, op } of dated) {
 			if (!ballotCountsAtTime(op?.at, loaded.round.closesAt)) {
-				chain.set(address, null);
+				relay.delete(id);
 				afterClose++;
 			}
 		}
 	}
 
-	const { accounts, chainVoters, mirrorVoters } = mergeAccounts(
+	const { accounts, recordVoters, relayOnly } = mergeBallots(
 		loaded.round,
-		loaded.nominees,
-		addresses,
-		chain,
-		mirror,
+		entries,
+		relay,
 	);
 	const tally = tallyRound(loaded.round, loaded.nominees, accounts);
 	const source: TallySource =
-		chainVoters && mirrorVoters
+		recordVoters && relayOnly.length
 			? "chain+mirror"
-			: mirrorVoters
+			: recordVoters
 				? "mirror"
 				: "chain";
 	return {
@@ -217,6 +214,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 		source,
 		digest: record ? ballotsDigest(record) : null,
 		afterClose,
+		relayOnly: relayOnly.length,
 	};
 }
 

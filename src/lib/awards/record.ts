@@ -1,21 +1,17 @@
 /**
- * i³ Awards — mirror a validated, on-chain ballot into Payload.
+ * i³ Awards — the record: address → anonymous ballot, in Payload.
  *
- * The CHAIN is the source of truth while it exists (the tally reads testnet
- * Horizon first). This mirror is how a round can be read — "who voted, for
- * what, when" — without walking Horizon, and it is the ONLY record that
- * outlives a testnet reset, which clears every ledger entry and all history.
- * After the reset following a round, /api/awards/results serves the tally
- * from here (see mirror.ts).
+ * Ballots live on the relay account under random ids; this record is the only
+ * place an id meets an address, and it is what the tally counts (a voter's
+ * FIRST ballot) and what survives a testnet reset. It is also the one-ballot
+ * gate, which is why the relay path RESERVES a row before writing and
+ * confirms it after — a gate checked now and written later is a race.
  *
- * `recordBallot` is strictly best-effort: called AFTER the testnet submit
- * succeeds, it must never throw, because the vote already exists on-chain and
- * a DB hiccup must not make the API report failure for a vote that landed.
- * That is also why it can silently miss a ballot — scripts/data/award-reconcile.ts
- * closes those gaps while the chain still exists, through the same writer
- * (`writeBallotRecord`), which DOES throw so a script run is loud.
+ * Writers: reserveBallot / confirmBallot / releaseBallot (the relay path) and
+ * writeBallotRecord (the legacy upsert, kept for the reconcile lane's
+ * repairs). Readers return the FIRST ballot per address, never the latest,
+ * and skip unconfirmed reservations.
  */
-
 import type { Payload } from "payload";
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotSelections } from "./ballot";
@@ -84,9 +80,11 @@ export async function writeBallotRecord(
 		selections: BallotSelections;
 		txHash: string | null;
 		at: string;
+		/** The id the ballot was written under on the relay account. */
+		ballotId?: string | null;
 	},
 ): Promise<"created" | "updated"> {
-	const { roundId, address, selections, txHash, at } = params;
+	const { roundId, address, selections, txHash, at, ballotId = null } = params;
 	const existing = await payload.find({
 		collection: "award-ballots",
 		where: {
@@ -113,7 +111,7 @@ export async function writeBallotRecord(
 		  }
 		| undefined;
 
-	const entry = { txHash, selections, at };
+	const entry = { txHash, selections, at, ballotId };
 
 	if (prior) {
 		await payload.update({
@@ -122,6 +120,7 @@ export async function writeBallotRecord(
 			data: {
 				selections,
 				txHash,
+				...(ballotId ? { ballotId } : {}),
 				submissions: (prior.submissions ?? 1) + 1,
 				lastSubmittedAt: at,
 				history: [...priorTrail(prior), entry],
@@ -138,6 +137,7 @@ export async function writeBallotRecord(
 			address,
 			selections,
 			txHash,
+			ballotId,
 			submissions: 1,
 			firstSubmittedAt: at,
 			lastSubmittedAt: at,
@@ -148,13 +148,128 @@ export async function writeBallotRecord(
 	return "created";
 }
 
+/**
+ * Reserve, confirm, release: the relay's write in three steps.
+ *
+ * With ballots on a relay account the RECORD is the one-ballot gate — the
+ * chain shows ballots by id, not by address — and a gate that is checked and
+ * then written later is a race: two submissions read "no row" together and
+ * both get relayed. So the row is created FIRST, empty of a tx hash, before
+ * anything reaches Horizon. A second attempt now finds it. If the relay then
+ * fails, the row is released; if it lands, the row is confirmed with the hash.
+ * A row left reserved by a crash in between has txHash null and is not
+ * counted (readFirstBallotRecord skips unconfirmed entries) — the reconcile
+ * lane reports it.
+ */
+export async function reserveBallot(params: {
+	roundSlug: string;
+	address: string;
+	ballotId: string;
+	selections: BallotSelections;
+}): Promise<{ ok: true; id: string | number } | { ok: false; reason: string }> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return { ok: false, reason: "database unavailable" };
+		const roundId = await findRoundId(payload, params.roundSlug);
+		if (!roundId) return { ok: false, reason: "round not found" };
+		const existing = await payload.find({
+			collection: "award-ballots",
+			where: {
+				and: [
+					{ round: { equals: roundId } },
+					{ address: { equals: params.address } },
+				],
+			},
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		if (existing.docs[0]) return { ok: false, reason: "already_voted" };
+		const at = new Date().toISOString();
+		const doc = await payload.create({
+			collection: "award-ballots",
+			data: {
+				round: roundId,
+				address: params.address,
+				selections: params.selections,
+				txHash: null,
+				ballotId: params.ballotId,
+				submissions: 1,
+				firstSubmittedAt: at,
+				lastSubmittedAt: at,
+				history: [
+					{
+						txHash: null,
+						selections: params.selections,
+						at,
+						ballotId: params.ballotId,
+					},
+				],
+			},
+			overrideAccess: true,
+		});
+		return { ok: true, id: doc.id };
+	} catch (err) {
+		console.error("[awards] reserveBallot failed:", err);
+		return { ok: false, reason: "database error" };
+	}
+}
+
+/** The relay landed: stamp the hash on the row and its trail entry. */
+export async function confirmBallot(
+	id: string | number,
+	txHash: string,
+): Promise<boolean> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return false;
+		const row = (await payload.findByID({
+			collection: "award-ballots",
+			id,
+			depth: 0,
+			overrideAccess: true,
+		})) as { history?: Array<Record<string, unknown>> | null };
+		const history = (row.history ?? []).map((e, i, all) =>
+			i === all.length - 1 ? { ...e, txHash } : e,
+		);
+		await payload.update({
+			collection: "award-ballots",
+			id,
+			data: { txHash, history },
+			overrideAccess: true,
+		});
+		return true;
+	} catch (err) {
+		// The ballot IS on chain. Reconcile finds a reserved row whose ballot id
+		// the relay holds and confirms it; the vote is not lost, only late.
+		console.error("[awards] confirmBallot failed (ballot is on chain):", err);
+		return false;
+	}
+}
+
+/** The relay refused: give the address its turn back. */
+export async function releaseBallot(id: string | number): Promise<void> {
+	try {
+		const payload = await getPayloadSafe();
+		if (!payload) return;
+		await payload.delete({
+			collection: "award-ballots",
+			id,
+			overrideAccess: true,
+		});
+	} catch (err) {
+		console.error("[awards] releaseBallot failed:", err);
+	}
+}
+
 export async function recordBallot(params: {
 	roundSlug: string;
 	address: string;
 	selections: BallotSelections;
 	txHash: string;
+	ballotId?: string | null;
 }): Promise<void> {
-	const { roundSlug, address, selections, txHash } = params;
+	const { roundSlug, address, selections, txHash, ballotId = null } = params;
 	try {
 		const payload = await getPayloadSafe();
 		if (!payload) return;
@@ -167,6 +282,7 @@ export async function recordBallot(params: {
 			address,
 			selections,
 			txHash,
+			ballotId,
 			at: new Date().toISOString(),
 		});
 	} catch (err) {
@@ -312,16 +428,25 @@ export async function readFirstBallotRecord(
 			selections?: unknown;
 			at?: string | null;
 		} | null>;
-		const first = trail.find((e) =>
-			Object.values(normalizeSelections(e?.selections)).some(
-				(s) => s.length > 0,
-			),
+		// A reservation the relay never confirmed (txHash null) is not a ballot:
+		// nothing landed on chain for it. Skipped here, reported by reconcile.
+		const first = trail.find(
+			(e) =>
+				!!e?.txHash &&
+				Object.values(normalizeSelections(e?.selections)).some(
+					(s) => s.length > 0,
+				),
 		);
+		if (!first) continue;
 		out.push({
 			address,
 			selections: firstBallotSelections(row),
 			txHash: (first?.txHash ?? row.txHash ?? null) as string | null,
 			at: (first?.at ?? row.firstSubmittedAt ?? null) as string | null,
+			ballotId: ((first as { ballotId?: string | null } | undefined)
+				?.ballotId ??
+				(row as { ballotId?: string | null }).ballotId ??
+				null) as string | null,
 		});
 	}
 	return out;
@@ -346,6 +471,51 @@ export async function loadFirstBallotRecord(
 		console.error("[awards] loadFirstBallotRecord failed:", err);
 		return null;
 	}
+}
+
+/**
+ * Every record row for a round as the RECONCILE lane sees it: the first
+ * ballot's picks and id, whether the relay ever confirmed it, and when it
+ * was reserved — so an abandoned reservation can be told from one in flight.
+ */
+export async function readRecordRows(
+	payload: Payload,
+	roundId: string,
+): Promise<
+	Array<{
+		id: string | number;
+		address: string;
+		ballotId: string | null;
+		selections: BallotSelections;
+		confirmed: boolean;
+		reservedAt: string | null;
+	}>
+> {
+	const rows = await allBallotRows(payload, roundId);
+	const out: Awaited<ReturnType<typeof readRecordRows>> = [];
+	for (const row of rows) {
+		const address = String(row.address ?? "")
+			.trim()
+			.toUpperCase();
+		if (!address) continue;
+		const trail = (row.history ?? []) as Array<{
+			txHash?: string | null;
+			selections?: unknown;
+			ballotId?: string | null;
+		} | null>;
+		const first = trail[0] ?? null;
+		out.push({
+			id: row.id as string | number,
+			address,
+			ballotId: (first?.ballotId ??
+				(row as { ballotId?: string | null }).ballotId ??
+				null) as string | null,
+			selections: normalizeSelections(first?.selections ?? row.selections),
+			confirmed: !!(first?.txHash ?? row.txHash),
+			reservedAt: (row.firstSubmittedAt ?? null) as string | null,
+		});
+	}
+	return out;
 }
 
 /**
