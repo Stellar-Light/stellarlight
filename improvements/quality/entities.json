@@ -1,10 +1,10 @@
 {
- "generatedAt": "2026-09-21T14:28:46.057Z",
+ "generatedAt": "2026-09-22T12:47:51.261Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 13,
+   "openFindings": 14,
    "clearedFindings": 14,
    "verifiedFindings": 0
   },
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 691,
-  "open": 15,
-  "refreshQueue": 27,
+  "total": 694,
+  "open": 16,
+  "refreshQueue": 29,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 3,
    "graceDays": 20,
-   "oldestDays": 60,
+   "oldestDays": 61,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -76,8 +76,8 @@
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 40,
-    "total": 224
+    "open": 43,
+    "total": 227
    },
    "instrument": {
     "open": 19,
@@ -158,6 +158,15 @@
     "surface": "scf"
    },
    {
+    "mode": "repo-gone",
+    "open": 14,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
     "mode": "demand-routing-miss",
     "open": 0,
     "refresh": 0,
@@ -167,18 +176,9 @@
     "surface": "consumer"
    },
    {
-    "mode": "repo-gone",
-    "open": 13,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "code"
-   },
-   {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 15,
+    "refresh": 17,
     "blocked": 0,
     "cleared": 9,
     "verified": 0,
@@ -251,7 +251,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 15
+    "count": 16
    },
    {
     "bucket": "8–30d",
@@ -320,14 +320,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 282,
-     "recurred": 118,
-     "ratePct": 41.8
+     "newFindings": 285,
+     "recurred": 120,
+     "ratePct": 42.1
     },
     "lifetime": {
-     "newFindings": 691,
-     "recurred": 169,
-     "ratePct": 24.5
+     "newFindings": 694,
+     "recurred": 171,
+     "ratePct": 24.6
     }
    },
    "reopened": {
@@ -339,13 +339,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 282,
-     "repeats": 281,
+     "newFindings": 285,
+     "repeats": 284,
      "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 691,
-     "repeats": 684,
+     "newFindings": 694,
+     "repeats": 687,
      "ratePct": 99
     },
     "byClass": [
@@ -357,8 +357,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 150,
-      "open": 27,
+      "total": 152,
+      "open": 29,
       "firstSeen": "2026-07-22"
      },
      {
@@ -387,8 +387,8 @@
      },
      {
       "class": "unclassified",
-      "total": 13,
-      "open": 13,
+      "total": 14,
+      "open": 14,
       "firstSeen": "2026-09-17"
      }
     ]
@@ -397,7 +397,7 @@
  },
  "projects": {
   "read": 990,
-  "population": 1117,
+  "population": 1118,
   "servedPopulation": 990,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -8410,7 +8410,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 76
+    "count": 77
    },
    {
     "basis": "product-integration",
@@ -8430,7 +8430,7 @@
    },
    {
     "basis": "unverified",
-    "count": 6
+    "count": 5
    }
   ],
   "weakestReturned": 40,
@@ -9299,18 +9299,18 @@
   ]
  },
  "repos": {
-  "read": 13294,
-  "population": 13294,
+  "read": 13351,
+  "population": 13351,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13294,
+  "sampled": 13351,
   "coverage": {
    "curatedIndex": {
-    "repos": 3276,
+    "repos": 3333,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3058,
+    "withCodeDepth": 3106,
     "depthPct": 93
    },
    "tail": {
@@ -9319,25 +9319,31 @@
     "withCodeDepth": 7938
    },
    "knowledgeNotes": {
-    "pool": 364,
+    "pool": 376,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
-    "withNotes": 334,
-    "triaged": 30,
+    "withNotes": 342,
+    "triaged": 29,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
-    "missing": []
+    "missing": [
+     "diadata-org/decentral-data-feeder",
+     "diadata-org/decentral-feeder",
+     "diadata-org/diadata",
+     "diadata-org/fair-value",
+     "diadata-org/lumina-library"
+    ]
    },
    "mainnetJoin": {
-    "pool": 5710,
+    "pool": 5727,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 119
+    "joined": 121
    }
   },
   "curatedShape": {
-   "repos": 3276,
+   "repos": 3333,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 610
+     "count": 647
     },
     {
      "bucket": "10–19",
@@ -9345,31 +9351,31 @@
     },
     {
      "bucket": "20–29",
-     "count": 703
+     "count": 710
     },
     {
      "bucket": "30–39",
-     "count": 440
+     "count": 447
     },
     {
      "bucket": "40–49",
-     "count": 297
+     "count": 291
     },
     {
      "bucket": "50–59",
-     "count": 226
+     "count": 233
     },
     {
      "bucket": "60–69",
-     "count": 79
+     "count": 81
     },
     {
      "bucket": "70–79",
-     "count": 27
+     "count": 29
     },
     {
      "bucket": "80–89",
-     "count": 20
+     "count": 21
     },
     {
      "bucket": "90–99",
@@ -9379,53 +9385,53 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1314
+     "count": 1321
     },
     {
      "label": "slowing",
-     "count": 969
+     "count": 962
     },
     {
      "label": "active",
-     "count": 843
+     "count": 864
     },
     {
      "label": "unknown",
-     "count": 106
+     "count": 141
     },
     {
      "label": "archived",
-     "count": 44
+     "count": 45
     }
    ],
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1149
+     "count": 1150
     },
     {
      "label": "unknown",
-     "count": 488
+     "count": 525
     },
     {
      "label": "Rust",
-     "count": 478
+     "count": 480
     },
     {
      "label": "JavaScript",
-     "count": 370
-    },
-    {
-     "label": "Python",
-     "count": 115
+     "count": 374
     },
     {
      "label": "Go",
-     "count": 113
+     "count": 119
+    },
+    {
+     "label": "Python",
+     "count": 118
     },
     {
      "label": "Solidity",
-     "count": 104
+     "count": 109
     },
     {
      "label": "HTML",
@@ -9436,15 +9442,15 @@
      "count": 40
     },
     {
-     "label": "CSS",
+     "label": "PHP",
      "count": 24
     }
    ],
-   "languageOther": 50
+   "languageOther": 48
   },
-  "withCodeDepth": 10996,
+  "withCodeDepth": 11044,
   "withNotes": 1047,
-  "withMainnet": 119,
+  "withMainnet": 121,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
@@ -9616,19 +9622,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "stellar/js-stellar-base",
-    "repoScore": 89,
-    "tier": "quality",
-    "source": "project-link",
-    "activity": "active",
-    "language": "JavaScript",
-    "projectSlug": "stellar-development-foundation",
-    "notes": 2,
-    "codeDepth": 92,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "stellar/stellar-etl",
     "repoScore": 89,
     "tier": "community",
@@ -9665,6 +9658,19 @@
     "notes": 2,
     "codeDepth": 75,
     "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "stellar/js-stellar-base",
+    "repoScore": 88,
+    "tier": "quality",
+    "source": "project-link",
+    "activity": "active",
+    "language": "JavaScript",
+    "projectSlug": "stellar-development-foundation",
+    "notes": 2,
+    "codeDepth": 92,
+    "deployable": false,
     "mainnetJoined": false
    },
    {
@@ -9785,15 +9791,15 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "lightsail-network/java-stellar-sdk",
+    "fullName": "stellar/rs-stellar-xdr",
     "repoScore": 86,
-    "tier": "community",
+    "tier": "quality",
     "source": "project-link",
     "activity": "active",
-    "language": "Java",
-    "projectSlug": "java-stellar-sdk",
+    "language": "Rust",
+    "projectSlug": "stellar-development-foundation",
     "notes": 2,
-    "codeDepth": 96,
+    "codeDepth": 69,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -9819,26 +9825,26 @@
     "language": "TypeScript",
     "projectSlug": "stellar-development-foundation",
     "notes": 2,
-    "codeDepth": 73,
+    "codeDepth": 78,
     "deployable": true,
     "mainnetJoined": false
    },
    {
-    "fullName": "stellar/rs-stellar-xdr",
+    "fullName": "stellar/smart-account-kit",
     "repoScore": 85,
-    "tier": "quality",
+    "tier": "community",
     "source": "project-link",
     "activity": "active",
-    "language": "Rust",
+    "language": "TypeScript",
     "projectSlug": "stellar-development-foundation",
     "notes": 2,
-    "codeDepth": 70,
+    "codeDepth": 100,
     "deployable": false,
     "mainnetJoined": false
    },
    {
     "fullName": "stellar/stellar-xdr",
-    "repoScore": 84,
+    "repoScore": 85,
     "tier": "quality",
     "source": "project-link",
     "activity": "active",
@@ -9846,6 +9852,19 @@
     "projectSlug": "stellar-development-foundation",
     "notes": 1,
     "codeDepth": 30,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "lightsail-network/java-stellar-sdk",
+    "repoScore": 85,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Java",
+    "projectSlug": "java-stellar-sdk",
+    "notes": 2,
+    "codeDepth": 96,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -9889,19 +9908,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "Trustless-Work/trustlesswork-smart-contract-stellar",
-    "repoScore": 79,
-    "tier": "quality",
-    "source": "project-link",
-    "activity": "slowing",
-    "language": "Rust",
-    "projectSlug": "trustless-work",
-    "notes": 2,
-    "codeDepth": 75,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "daccred/attestprotocol",
     "repoScore": 79,
     "tier": "community",
@@ -9924,6 +9930,19 @@
     "projectSlug": "devasign",
     "notes": 1,
     "codeDepth": 59,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "Trustless-Work/trustlesswork-smart-contract-stellar",
+    "repoScore": 78,
+    "tier": "quality",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Rust",
+    "projectSlug": "trustless-work",
+    "notes": 2,
+    "codeDepth": 70,
     "deployable": true,
     "mainnetJoined": false
    },
@@ -9952,22 +9971,464 @@
     "codeDepth": 61,
     "deployable": false,
     "mainnetJoined": false
-   },
-   {
-    "fullName": "chatch/stellarexplorer",
-    "repoScore": 78,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "steepx",
-    "notes": 1,
-    "codeDepth": 30,
-    "deployable": false,
-    "mainnetJoined": false
    }
   ],
   "thinnest": [
+   {
+    "fullName": "zzzbedream/mi-identidad-stellar",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/soroban-stellar-tests",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 25,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/TareasBiggerHackathon",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/Crowdfunding-MaeLabs",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 23,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/Stellar_workshop",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/ImpactaBootcamp-ExampleRepos",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 32,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/Umbra",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 25,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/sierpe-web",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zkCaleb-dev/sierpe",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 30,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zenith-protocols/ownable-timelock",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 59,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zeekman/StellarVault",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 78,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "zaber-dev/ovrl-sdk",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "ysfadm/LiraShield",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 79,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/stellar-export",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 31,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/utility-contracts",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/soroban-preview-docker",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/stellar-router-sdk-aggregator-fee",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 76,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yripper/n8n-nodes-stellar",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 36,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yahia008/stellar-txwatch-contracts",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 60,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "yahia008/Checkmate-Escrow",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 82,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "DiegoPoveda01/local402",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 63,
+    "deployable": true,
+    "mainnetJoined": true
+   },
+   {
+    "fullName": "viniciorm/nexaplus",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 28,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "andrewsoloh/soroban-age-verification",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 60,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "Gabrululu/Proyecto-Stellar",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 34,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "salazarsebas/bienstar",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "murat48/soroswap-quote-traders",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 83,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "hsankc/RiverAir",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 78,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "andresanemic/vespi",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "Galmanus/procyon",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "devodii/soroshares",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 46,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "carlos-israelj/link2pay-sdk",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "carlos-israelj/veraz-proof-of-solvency",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 65,
+    "deployable": true,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "Cbiux/Zcore-Landing",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": null,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "Cbiux/rifas",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 0,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "MattPoblete/soroban-allow-wasm-policy",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": null,
+    "language": null,
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 30,
+    "deployable": true,
+    "mainnetJoined": false
+   },
    {
     "fullName": "rylsherdamz-rgb/stellarFlow",
     "repoScore": 0,
@@ -10032,475 +10493,20 @@
     "codeDepth": null,
     "deployable": false,
     "mainnetJoined": false
-   },
-   {
-    "fullName": "robertDurst/stellar-rust-sdk",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Robeartt/blend-contracts-v3",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "dormant",
-    "language": "Rust",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 67,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "richardstrmiska/Universal-Estate-Index",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "dormant",
-    "language": "HTML",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "richardstrmiska/Stellar-Wide-Sovereign-Broadcast-Protocol",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "dormant",
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "REAL8-crypto/real8-wallet",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "dormant",
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "rawritude/stellar-expert-skills",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "Python",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "rawritude/stellar-expert-mcp",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "Python",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "rawritude/public-directory",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "rawritude/stellarlight",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "rajkumarsharma316/Habit-Tracker-Soroban",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Dione-b/lp-stellar-onchain-experience",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Klorenn/stellar-paylink",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Bran18/reflector-market-board",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 39,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "paul-motron/SwapIT",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "Rust",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 84,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "kauevictor30/lp-stellar-onchain-experience",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "JavaScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "NovaCorpAI/agentpos-alexa",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "vicentewolde/AgentPey",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 76,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "0xVida/whales-of-wallstreet",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Nursca/backend",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Nursca/surface",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Nursca/contracts",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "charleschidera1-bit/lumi-stellar",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "Python",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 66,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Mackenzie-OO7/reflector-docs",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "dormant",
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 0,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Mackenzie-OO7/Stellar-X-Web3Bridge",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Mackenzie-OO7/stellar-oss-issues",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Timi16/Stellarsignal",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "slowing",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 53,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Timi16/Paylink-sdk",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "robertocarlous/Stellar-Mastery-LV1",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 63,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "robertocarlous/NeuroWealth",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 75,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "Dione-b/stellarsight",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "PatrickKish1/safetrust-ZK",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "kingfavourjudah/FundBlock",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "leocagli/pontepay",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "leocagli/tralalero-contracts",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "KingFRANKHOOD/soroban-sql-sync",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": null,
-    "language": null,
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
-    "mainnetJoined": false
    }
   ]
  },
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "450 of 990 rows (census)",
+   "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "451 of 990 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "334 of 364 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "342 of 376 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -10538,16 +10544,16 @@
     "value": 29
    },
    {
+    "id": "s:nightly-note-freshness",
+    "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 26
+   },
+   {
     "id": "s:nightly-drift",
     "label": "nightly-drift",
     "column": 0,
     "value": 25
-   },
-   {
-    "id": "s:nightly-note-freshness",
-    "label": "nightly-note-freshness",
-    "column": 0,
-    "value": 24
    },
    {
     "id": "s:nightly-battery",
@@ -10565,7 +10571,7 @@
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 13
+    "value": 14
    },
    {
     "id": "s:engine-e-contract",
@@ -10619,7 +10625,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 27
+    "value": 28
    },
    {
     "id": "f:consumer",
@@ -10649,7 +10655,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 59
+    "value": 62
    },
    {
     "id": "o:verified",
@@ -10772,7 +10778,7 @@
     "value": 188
    },
    {
-    "source": 5,
+    "source": 6,
     "target": 17,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
@@ -10814,18 +10820,18 @@
     "value": 4
    },
    {
-    "source": 6,
+    "source": 5,
     "target": 18,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 24
+    "value": 26
    },
    {
     "source": 18,
     "target": 23,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 28
+    "value": 31
    },
    {
     "source": 2,
@@ -10846,7 +10852,7 @@
     "target": 18,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 13
+    "value": 14
    },
    {
     "source": 15,
@@ -10866,7 +10872,7 @@
     "missing": 346,
     "of": 365,
     "share": 94.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5345 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5362 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 346,
@@ -10881,25 +10887,26 @@
      "stellar/sep45-reference",
      "stellar/passkey-kit",
      "blend-capital/blend-contracts-v2",
-     "Trustless-Work/trustlesswork-smart-contract-stellar",
      "devasignhq/bounty-escrow",
-     "stellar/stellar-disbursement-platform-backend",
-     "theahaco/contract-explorer"
+     "Trustless-Work/trustlesswork-smart-contract-stellar",
+     "Soneso/stellar-ios-mac-sdk",
+     "stellar/stellar-disbursement-platform-backend"
     ]
    },
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12247,
-    "of": 13294,
-    "share": 92.1,
+    "missing": 12304,
+    "of": 13351,
+    "share": 92.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
     "exampleSource": "repoScore >= 60 only",
-    "examplePoolSize": 18,
+    "examplePoolSize": 19,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
+     "diadata-org/diadata",
      "Stellar-Light/stellar-pay",
      "SoroWill/sorowill-sdk",
      "Certora/CertoraProver",
@@ -10910,8 +10917,7 @@
      "SimplyTokenized/soroban-smart-contracts",
      "vowena/sdk",
      "UltravioletaDAO/uvd-x402-sdk-typescript",
-     "Smart-Treasury-Account-STA/dApp",
-     "Inferara/inference"
+     "Smart-Treasury-Account-STA/dApp"
     ]
    },
    {
@@ -10954,28 +10960,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2298,
-    "of": 13294,
+    "missing": 2307,
+    "of": 13351,
     "share": 17.3,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2298,
+    "examplePoolSize": 2307,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
+     "zkCaleb-dev/Stellar_workshop",
+     "zaber-dev/ovrl-sdk",
+     "yripper/utility-contracts",
+     "yripper/soroban-preview-docker",
+     "Galmanus/procyon",
+     "carlos-israelj/link2pay-sdk",
+     "Cbiux/Zcore-Landing",
+     "diadata-org/Spectra-interoperability",
+     "Foryield/arc-yield-vault",
      "ROHIT8759/KeyWe",
      "robertDurst/stellar-rust-sdk",
-     "REAL8-crypto/real8-wallet",
-     "rawritude/public-directory",
-     "rawritude/stellarlight",
-     "rajkumarsharma316/Habit-Tracker-Soroban",
-     "Dione-b/lp-stellar-onchain-experience",
-     "Klorenn/stellar-paylink",
-     "Nursca/backend",
-     "Nursca/surface",
-     "Nursca/contracts",
-     "Mackenzie-OO7/Stellar-X-Web3Bridge"
+     "REAL8-crypto/real8-wallet"
     ]
    },
    {
