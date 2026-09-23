@@ -1,9 +1,9 @@
 /**
- * i³ Awards — nominee "2026 in review" highlights.
+ * i³ Awards, nominee "2026 in review" highlights.
  *
  * Two kinds of entry live here:
  *   - the 2026 NOMINEES (imported 2026-09-23 from Emir's intake): each set is
- *     written from that project's own i³ submission — stage, category answers
+ *     written from that project's own i³ submission, stage, category answers
  *     and figures are the project's statements, quoted faithfully, not
  *     verified by us. Numbers appear as an odometer only where the submission
  *     gave one.
@@ -232,7 +232,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 			detail: "A new lane into the ecosystem, opened up.",
 		},
 	],
-	// ── 2026 nominations round — from each project's i³ submission ──
+	// ── 2026 nominations round, from each project's i³ submission ──
 	// Impact
 	abroad: [
 		{

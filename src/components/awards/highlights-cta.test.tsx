@@ -4,7 +4,7 @@
  * The highlights sheet's CTA has three states, and the difference between them
  * is the whole point of the fix: a reader with no wallet can do something about
  * it, a reader who isn't a Pilot (or has already voted) cannot. Offering the
- * first a button and the second silence is deliberate — the earlier version
+ * first a button and the second silence is deliberate, the earlier version
  * showed everyone "Vote for X" and, once picks were gated, would have left a
  * button that silently did nothing.
  */

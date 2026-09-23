@@ -1,8 +1,7 @@
 /**
  * CSV reading and writing for the i³ awards (roster import, ballot export).
  *
- * Pure and dependency-free so the parser can be tested without a database —
- * it lives here rather than in the script because importing the script pulls
+ * Pure and dependency-free so the parser can be tested without a database, * it lives here rather than in the script because importing the script pulls
  * in Payload and a live connection.
  */
 

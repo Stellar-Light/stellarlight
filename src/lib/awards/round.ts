@@ -1,10 +1,10 @@
 /**
- * i³ Awards — round + nominee + whitelist loading (Payload local API).
+ * i³ Awards, round + nominee + whitelist loading (Payload local API).
  *
  * One loader shared by the /awards page and every /api/awards/* route so
  * the ballot the page renders and the ballot the relay validates are
  * always the same data. Nominee display fields (name, logo, description)
- * resolve LIVE from the projects directory record — the nominee row only
+ * resolve LIVE from the projects directory record, the nominee row only
  * points; the directory speaks.
  */
 
@@ -19,14 +19,14 @@ export interface PublicNominee extends BallotNominee {
 	/** Directory detail page, e.g. /project/decaf. */
 	projectUrl: string;
 	projectCategory: string | null;
-	/** Real, dated TVL from the directory (DeFiLlama-sourced) — null unless meaningful. */
+	/** Real, dated TVL from the directory (DeFiLlama-sourced), null unless meaningful. */
 	tvl: { usd: number; source: string | null; asOf: string | null } | null;
 }
 
 export interface LoadedRound {
 	round: BallotRound & { title: string };
 	nominees: PublicNominee[];
-	/** Whitelisted voter addresses (SERVER-side only — never serve raw). */
+	/** Whitelisted voter addresses (SERVER-side only, never serve raw). */
 	whitelist: Set<string>;
 }
 
@@ -149,7 +149,7 @@ export async function loadRoundOrThrow(
 			.filter((n) => n.project && typeof n.project === "object")
 			.map((n) => {
 				const project = n.project;
-				// Only surface TVL that's meaningful (> $1k) — filters out the
+				// Only surface TVL that's meaningful (> $1k), filters out the
 				// near-zero mis-mapped values (etherfuse ~$2, allbridge ~$574).
 				const tvlUSD =
 					typeof project.tvlUSD === "number" ? project.tvlUSD : null;
@@ -199,7 +199,7 @@ export async function loadRoundOrThrow(
 
 /**
  * Request-path wrapper: null on ANY failure so pages render their empty
- * state. Scripts use loadRoundOrThrow — a swallowed DB error must not read
+ * state. Scripts use loadRoundOrThrow, a swallowed DB error must not read
  * as "no round" in a lane (award-reconcile run 35106331010 did exactly that).
  */
 export async function loadRound(
@@ -212,7 +212,7 @@ export async function loadRound(
 	}
 }
 
-/** Public projection of a loaded round — safe to serve as-is. */
+/** Public projection of a loaded round, safe to serve as-is. */
 export function toPublicRound(loaded: LoadedRound) {
 	const { round, nominees } = loaded;
 	return {

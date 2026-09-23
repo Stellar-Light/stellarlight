@@ -3,7 +3,7 @@
  *
  * Is this address on the round's voter list, and is voting open? Nothing
  * else. This endpoint is unauthenticated and the ballot is anonymous, so it
- * must never answer "has this address voted" or "what did it vote" — it used
+ * must never answer "has this address voted" or "what did it vote", it used
  * to do both, which made it a participation-and-choice oracle for the whole
  * electorate. Whether an address has voted is learned only by trying:
  * /api/awards/submit answers already_voted, and the page locks on that.

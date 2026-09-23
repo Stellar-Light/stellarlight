@@ -1,5 +1,5 @@
 /**
- * GET /api/awards/round[?round=<slug>] — current i³ Awards round + nominees.
+ * GET /api/awards/round[?round=<slug>], current i³ Awards round + nominees.
  *
  * Backend for the hidden /awards page (NOT part of the public Scout data
  * API: deliberately absent from the OpenAPI spec, /api/status.endpoints

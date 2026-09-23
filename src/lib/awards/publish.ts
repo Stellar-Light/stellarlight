@@ -1,12 +1,12 @@
 /**
- * i³ Awards — the live tally (chain, else mirror) and the published results
+ * i³ Awards, the live tally (chain, else mirror) and the published results
  * document.
  *
  * ONE implementation of "what does this round's tally say right now", used by
  * /api/awards/results and by the publish lane, so the file we commit to the
  * repo and anchor on Tansu can never disagree with what the page shows.
  *
- * The document is AGGREGATE ONLY — per-category counts and turnout, never an
+ * The document is AGGREGATE ONLY, per-category counts and turnout, never an
  * address, never a tx hash (a tx resolves to a voter account on the explorer).
  */
 
@@ -43,7 +43,7 @@ export interface FirstBallotEntry {
 const DIGEST_HEADER = "i3-first-ballots-v1";
 
 /**
- * A fingerprint of the first-ballot record — the thing the round is decided
+ * A fingerprint of the first-ballot record, the thing the round is decided
  * on, and the thing only WE hold.
  *
  * "The first ballot counts" cannot be checked against the chain: a manageData
@@ -51,7 +51,7 @@ const DIGEST_HEADER = "i3-first-ballots-v1";
  * voter's first ballot. That makes the mirror a trusted component. This is how
  * it becomes a CHECKED one instead: the digest goes in the results file, whose
  * git commit is anchored on Tansu, so the record is pinned at publish time. We
- * cannot later change who voted for what — for anyone holding the underlying
+ * cannot later change who voted for what, for anyone holding the underlying
  * record, a single altered pick, tx hash or timestamp changes this hash, and
  * the hash is already on chain.
  *
@@ -137,7 +137,7 @@ export function mergeBallots(
 /**
  * The whitelist is the turnout denominator (passed to tallyRound): `accounts` is the ballot list here and would read as 100% turnout.
  *
- * `digest` is null when the first-ballot record could not be READ — never a
+ * `digest` is null when the first-ballot record could not be READ, never a
  * digest over an empty read, which would publish "this round has no ballots"
  * as a fact. When that happens the mirror is also empty here, so the tally
  * falls back to the chain and `source` says "chain": the two together are the
@@ -149,7 +149,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	digest: string | null;
 	/** Relay ballots refused because they post-date the round's close. */
 	afterClose: number;
-	/** Relay ballots the record does not hold — counted, unattributed. */
+	/** Relay ballots the record does not hold, counted, unattributed. */
 	relayOnly: number;
 }> {
 	const relayPub = relayKeypair()?.publicKey() ?? null;
@@ -159,7 +159,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	]);
 	// One Horizon call for the whole round: every ballot is on the relay.
 	// No relay configured, or the relay unfunded (never used, or reset) both
-	// read as "the chain holds nothing" — the record carries the round.
+	// read as "the chain holds nothing", the record carries the round.
 	const relay =
 		probe?.funded === true
 			? decodeRelayBallots(loaded.round, loaded.nominees, probe.account.data)
@@ -173,7 +173,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	const entries = [...byAddress.values()];
 
 	// A ballot the relay wrote was gated on the close time before it was
-	// written, so only record-less relay ballots need dating — and those are
+	// written, so only record-less relay ballots need dating, and those are
 	// normally none. Undatable means refused (see ballotCountsAtTime).
 	let afterClose = 0;
 	const known = new Set(entries.map((e) => e.ballotId).filter(Boolean));
@@ -227,8 +227,8 @@ export async function liveTally(loaded: LoadedRound): Promise<{
  *
  * Pure, because the interesting case is the one that is easy to get backwards:
  * a ballot we cannot DATE does not count. This is only ever asked about
- * out-of-band ballots — ones written straight to Horizon, which no close-time
- * check has ever seen — so "we could not read when it happened" is not grounds
+ * out-of-band ballots, ones written straight to Horizon, which no close-time
+ * check has ever seen, so "we could not read when it happened" is not grounds
  * to admit it. A round with no closesAt has no deadline to miss.
  */
 export function ballotCountsAtTime(
@@ -237,7 +237,7 @@ export function ballotCountsAtTime(
 ): boolean {
 	// No closesAt at all: no deadline to miss. A closesAt that does not PARSE
 	// is a misconfigured round, and the safe reading is that nothing after
-	// "the close" can be shown to be in time — so nothing out-of-band counts.
+	// "the close" can be shown to be in time, so nothing out-of-band counts.
 	if (!closesAt) return true;
 	const close = Date.parse(closesAt);
 	if (Number.isNaN(close)) return false;
@@ -252,7 +252,7 @@ const MANIFEST_HEADER = "i3-round-manifest-v1";
  * A fingerprint of the ELECTORATE AND THE BALLOT, as they stood.
  *
  * The results digest proves nobody edited the ballots after the fact. It says
- * nothing about the round they were cast in — a nominee quietly added
+ * nothing about the round they were cast in, a nominee quietly added
  * mid-round, an address slipped onto the whitelist, a close date moved. Those
  * are exactly the things a losing party would contest, and until now none of
  * them was checkable.
@@ -262,7 +262,7 @@ const MANIFEST_HEADER = "i3-round-manifest-v1";
  * count or the dates gives a different hash than the one already on chain.
  *
  * It is a hash, so it publishes nothing: the whitelist goes in (that is the
- * point — the electorate is what is being fixed) but only as an input.
+ * point, the electorate is what is being fixed) but only as an input.
  *
  * Recipe (v1):
  *   round   = slug
@@ -307,7 +307,7 @@ export function roundManifestSummary(loaded: LoadedRound): string {
 		`${loaded.round.picksPerCategory ?? 1} pick(s) each`,
 		`${loaded.nominees.length} nominees`,
 		`${loaded.whitelist.size} whitelisted voters`,
-		`closes ${loaded.round.closesAt ?? "—"}`,
+		`closes ${loaded.round.closesAt ?? ", "}`,
 	].join(" · ");
 }
 
@@ -368,7 +368,7 @@ export function resultsDocument(
 		})),
 		generatedAt: now.toISOString(),
 		note:
-			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror — not the chain — is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts) — publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=" +
+			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror, not the chain, is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts), publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet), see /api/awards/anchor?round=" +
 			round.slug,
 	};
 }

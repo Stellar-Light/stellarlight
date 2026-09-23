@@ -1,22 +1,22 @@
 /**
- * POST /api/awards/ballot-xdr — build the voter's AUTHORIZATION.
+ * POST /api/awards/ballot-xdr, build the voter's AUTHORIZATION.
  *
  *   { "address": "G...", "selections": { "impact": "decaf", ... },
- *     "round": "i3-2026-test" (optional — defaults to the open round) }
+ *     "round": "i3-2026-test" (optional, defaults to the open round) }
  *
  * Ballots are anonymous: they are written to a relay account under a random
  * id, never to the voter's own account. So what the voter signs is not a
- * ballot transaction but an authorization — a transaction that can never be
+ * ballot transaction but an authorization, a transaction that can never be
  * submitted (its sequence is already consumed, and it expires in ten minutes)
  * whose memo commits to exactly these picks. The relay verifies that
  * signature at /api/awards/submit and does the writing itself.
  *
  * Validates round-open + whitelist + selections (a full slate in every
- * category, every nominee real) — but NOT whether the address has voted:
- * unsigned, that answer is a participation oracle (see below) — reads the
+ * category, every nominee real), but NOT whether the address has voted:
+ * unsigned, that answer is a participation oracle (see below), reads the
  * voter's current sequence from
- * Horizon if the account exists — an unfunded account is fine, it signs at
- * sequence 1 — and returns the unsigned XDR the wallet signs. No funding step
+ * Horizon if the account exists, an unfunded account is fine, it signs at
+ * sequence 1, and returns the unsigned XDR the wallet signs. No funding step
  * exists any more; the relay pays.
  */
 
@@ -40,7 +40,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/ballot-xdr",
-		// Per-IP, and Pilots vote from shared laptops at the venue — that is ONE
+		// Per-IP, and Pilots vote from shared laptops at the venue, that is ONE
 		// NAT egress IP for the whole room. At 30 the 31st person in ten minutes
 		// is told "rate limit exceeded" and simply cannot vote. The real controls
 		// here are the whitelist and one-ballot-per-voter (a round has ~98
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
 	// here. This route takes no signature, so an answer would be a
 	// participation oracle: anyone could sweep the whitelist to learn who has
 	// voted, and time the flips against the relay's transactions to learn
-	// what. /api/awards/submit answers already_voted — behind the signature.
+	// what. /api/awards/submit answers already_voted, behind the signature.
 	// A returning voter spends one wallet signature to hear it; that is the
 	// documented cost of the anonymity.
 

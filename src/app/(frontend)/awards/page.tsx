@@ -8,12 +8,12 @@ import { roundOpenState } from "@/lib/awards/ballot";
 import { loadRound, toPublicRound } from "@/lib/awards/round";
 
 /**
- * /awards — the i³ Awards voting experience (HIDDEN page).
+ * /awards, the i³ Awards voting experience (HIDDEN page).
  *
  * SDF's Pilot shortlisting vote: ~98 SCF Pilots pick one nominee per
  * category (Impact / Innovation / Interoperability) with whitelisted
  * Stellar addresses; each ballot is written to TESTNET by a relay under a
- * random id, so nothing on chain links it to the voter — see
+ * random id, so nothing on chain links it to the voter, see
  * src/lib/awards/ballot.ts.
  *
  * Hidden by design until SDF says go:
@@ -26,7 +26,7 @@ import { loadRound, toPublicRound } from "@/lib/awards/round";
 export const metadata: Metadata = {
 	title: "i³ Awards",
 	description:
-		"The Stellar i³ Awards — Pilots vote for the year's most impactful, innovative and interoperable projects.",
+		"The Stellar i³ Awards: Pilots vote for the year's most impactful, innovative and interoperable projects.",
 	robots: {
 		index: false,
 		follow: false,

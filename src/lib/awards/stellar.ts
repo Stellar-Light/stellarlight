@@ -1,10 +1,10 @@
 /**
- * i³ Awards — Stellar TESTNET plumbing.
+ * i³ Awards, Stellar TESTNET plumbing.
  *
  * Everything here is HARDCODED to testnet on purpose: the i³ Pilot vote is
  * a testnet exercise (like communityfund.stellar.org's vote), and no code
  * path in the awards feature may ever touch mainnet. There is no
- * passphrase/horizon config knob to misconfigure — the constants ARE the
+ * passphrase/horizon config knob to misconfigure, the constants ARE the
  * safety rail. If the vote ever graduates to mainnet, that's a deliberate
  * code change with its own review, not an env flip.
  *
@@ -38,10 +38,10 @@ export function friendbotFundUrl(address: string): string {
 
 /**
  * Fund a testnet account through friendbot, server-side. Nothing in the
- * ballot path funds anyone any more — the relay pays and the voter's account
- * is never touched — so the only caller left is the Tansu lane, which
+ * ballot path funds anyone any more, the relay pays and the voter's account
+ * is never touched, so the only caller left is the Tansu lane, which
  * friendbots its own maintainer key. `already` = friendbot says the account
- * exists (funded between our lookup and this call) — that is success.
+ * exists (funded between our lookup and this call), that is success.
  * Bounded: friendbot waits for the ledger to close before answering.
  */
 export async function fundViaFriendbot(
@@ -91,7 +91,7 @@ export type FetchAccountResult =
 	| { funded: null; error: string };
 
 /**
- * Fetch a testnet account. `funded:false` means Horizon 404 — the account
+ * Fetch a testnet account. `funded:false` means Horizon 404, the account
  * exists as a keypair but was never created on-network (friendbot fixes
  * that); `funded:null` means Horizon itself misbehaved.
  */
@@ -146,7 +146,7 @@ export type SubmitTxResult =
 
 /**
  * Relay an already-validated, signed XDR to testnet Horizon.
- * Callers MUST validate first — this function only ships bytes.
+ * Callers MUST validate first, this function only ships bytes.
  */
 export async function submitToTestnetHorizon(
 	signedXdr: string,
@@ -196,8 +196,7 @@ export async function submitToTestnetHorizon(
 }
 
 /**
- * The most recent successful manageData op under `prefix` on an account —
- * its tx hash and ledger close time. The reconcile script uses it so a
+ * The most recent successful manageData op under `prefix` on an account, * its tx hash and ledger close time. The reconcile script uses it so a
  * backfilled mirror row carries the REAL submission (hash + when) rather
  * than "now". Null when nothing matches in the last 200 ops or Horizon
  * misbehaves; the caller degrades to an unhashed row.
@@ -207,7 +206,7 @@ export async function fetchLatestBallotOp(
 	prefix: string,
 	opts: { maxPages?: number } = {},
 ): Promise<{ txHash: string; at: string } | null> {
-	// One page is 200 ops and every ballot is 3–16 of them, so a single page
+	// One page is 200 ops and every ballot is 3-16 of them, so a single page
 	// only ever reaches the newest few dozen ballots. Walk back until found.
 	// ponytail: 25 pages = 5,000 ops ≈ 300 nomination ballots; index the
 	// history once per tally instead if the relay ever carries more.
@@ -256,7 +255,7 @@ export async function fetchLatestBallotOp(
 // instead of to the voter's own account. That is the whole anonymity model:
 // the chain shows N unlinkable ballots on the relay; the only address→ballot
 // link is the admin-gated record. The voter never funds anything and never
-// submits anything — they sign an authorization the relay checks, and the
+// submits anything, they sign an authorization the relay checks, and the
 // relay pays and writes.
 
 /** The relay's signing key, from the environment. null = not configured. */
@@ -273,8 +272,7 @@ export function relayKeypair(): Keypair | null {
 /**
  * Horizon's ASYNC submit: Core's verdict in ~100ms instead of holding the
  * request until a ledger closes. Two relay instances that read the same
- * sequence both get PENDING here (Core silently drops the loser later) —
- * the sync endpoint reported that loser as a 30-second timeout.
+ * sequence both get PENDING here (Core silently drops the loser later), * the sync endpoint reported that loser as a 30-second timeout.
  */
 export type AsyncSubmit =
 	| { status: "queued"; hash: string }
@@ -368,7 +366,7 @@ export type RelaySubmitResult =
 			resultCodes: string[];
 			/** Horizon gave no verdict (timeout, 5xx, unreachable): the
 			 *  transaction was handed over and may still land until its time
-			 *  bound. NOT "never happened" — the caller must keep whatever it
+			 *  bound. NOT "never happened", the caller must keep whatever it
 			 *  reserved and settle it later. */
 			pending?: boolean;
 			hash?: string;
@@ -388,9 +386,9 @@ const FRIENDBOT = "https://friendbot.stellar.org";
  * The relay serialises every voter through one sequence number, and the app
  * runs on more than one instance: two ballots arriving together both read the
  * same sequence, one lands, the other gets tx_bad_seq. That is not a failed
- * vote — it is the normal case under load — so it is retried with a fresh
+ * vote, it is the normal case under load, so it is retried with a fresh
  * sequence, a few times with a jittered backoff, before it is reported. Any
- * other Horizon refusal is returned as-is — except no refusal at all: a
+ * other Horizon refusal is returned as-is, except no refusal at all: a
  * timeout or 5xx after the bytes left comes back as `pending` with the hash,
  * because the transaction may still land.
  *
@@ -499,7 +497,7 @@ async function submitFromRelayUnlocked(
 			// TRY_AGAIN_LATER: a relay write is already queued (another
 			// instance's) and Core takes no second one until it applies, at
 			// the next ledger. Wait for the sequence to move, then rebuild on
-			// the fresh one — this is the common case for two voters at once.
+			// the fresh one, this is the common case for two voters at once.
 			last = {
 				ok: false,
 				error: sub.detail,
@@ -514,7 +512,7 @@ async function submitFromRelayUnlocked(
 			}
 			continue;
 		}
-		// Queued — or no verdict after the bytes may have left. Wait for a
+		// Queued, or no verdict after the bytes may have left. Wait for a
 		// ledger or two.
 		if (await transactionLanded(hash, opts.pollMs ?? 8_000)) {
 			return { ok: true, hash, attempts: n };

@@ -1,11 +1,11 @@
 /**
- * i³ Awards — the record: address → anonymous ballot, in Payload.
+ * i³ Awards, the record: address → anonymous ballot, in Payload.
  *
  * Ballots live on the relay account under random ids; this record is the only
  * place an id meets an address, and it is what the tally counts (a voter's
  * FIRST ballot) and what survives a testnet reset. It is also the one-ballot
  * gate, which is why the relay path RESERVES a row before writing and
- * confirms it after — a gate checked now and written later is a race.
+ * confirms it after, a gate checked now and written later is a race.
  *
  * Writers: reserveBallot / confirmBallot / releaseBallot (the relay path).
  * writeBallotRecord / recordBallot / readCurrentBallots are the pre-relay
@@ -39,7 +39,7 @@ export async function findRoundId(
  *
  * A row written before the history field existed keeps its first ballot in
  * `selections` and NOWHERE else. Appending to an empty trail would make the
- * incoming ballot history[0] — i.e. would silently promote a revote to "the
+ * incoming ballot history[0], i.e. would silently promote a revote to "the
  * first ballot" and change who the round counts. So an empty trail is seeded
  * from the row's own current state first.
  */
@@ -70,8 +70,7 @@ function priorTrail(prior: {
 
 /**
  * Upsert one address's ballot for a round and APPEND to its history trail
- * (a revote never erases what came before). `at` is when the vote landed —
- * the relay passes now; the reconcile script passes the ledger close time.
+ * (a revote never erases what came before). `at` is when the vote landed, * the relay passes now; the reconcile script passes the ledger close time.
  * Throws on failure.
  */
 export async function writeBallotRecord(
@@ -153,14 +152,14 @@ export async function writeBallotRecord(
 /**
  * Reserve, confirm, release: the relay's write in three steps.
  *
- * With ballots on a relay account the RECORD is the one-ballot gate — the
- * chain shows ballots by id, not by address — and a gate that is checked and
+ * With ballots on a relay account the RECORD is the one-ballot gate, the
+ * chain shows ballots by id, not by address, and a gate that is checked and
  * then written later is a race: two submissions read "no row" together and
  * both get relayed. So the row is created FIRST, empty of a tx hash, before
  * anything reaches Horizon. A second attempt now finds it. If the relay then
  * fails, the row is released; if it lands, the row is confirmed with the hash.
  * A row left reserved by a crash in between has txHash null and is not
- * counted (readFirstBallotRecord skips unconfirmed entries) — the reconcile
+ * counted (readFirstBallotRecord skips unconfirmed entries), the reconcile
  * lane reports it.
  */
 export async function reserveBallot(params: {
@@ -188,7 +187,7 @@ export async function reserveBallot(params: {
 		});
 		if (existing.docs[0]) return { ok: false, reason: "already_voted" };
 		// The find above is a courtesy; the compound unique index on
-		// (round, address) is the gate — two reserves racing past the find both
+		// (round, address) is the gate, two reserves racing past the find both
 		// reach create, and exactly one of them gets the duplicate-key error.
 		const at = new Date().toISOString();
 		const doc = await payload.create({
@@ -297,9 +296,9 @@ export const PENDING_STALE_MS = 3 * 60_000;
  * Settle a reservation the relay never confirmed, against the relay itself.
  * Younger than PENDING_STALE_MS it may still be in flight and is left alone.
  * Older: if the relay holds the ballot id, the write landed and only the
- * confirmation was lost — confirm it (with the op's hash, or a `relay:<id>`
+ * confirmation was lost, confirm it (with the op's hash, or a `relay:<id>`
  * marker when Horizon's reachable history no longer has it); if the relay
- * does not hold it, the write never happened and never can — release the
+ * does not hold it, the write never happened and never can, release the
  * row so the voter's next attempt goes through. The ballot id joins the two
  * sides, so nothing here can count a vote twice.
  */
@@ -354,7 +353,7 @@ export async function recordBallot(params: {
 			at: new Date().toISOString(),
 		});
 	} catch (err) {
-		// The vote is already on-chain — recording is a mirror, so a failure here
+		// The vote is already on-chain, recording is a mirror, so a failure here
 		// is logged and swallowed, never surfaced to the voter.
 		console.error(
 			"[awards] recordBallot failed (vote is still on-chain):",
@@ -364,7 +363,7 @@ export async function recordBallot(params: {
 }
 
 /**
- * The FIRST ballot this row recorded — the only one that counts.
+ * The FIRST ballot this row recorded, the only one that counts.
  *
  * `history` is append-only and oldest-first, so history[0] is it. Empty
  * entries are skipped so a malformed one can't zero a voter out, and a row
@@ -389,7 +388,7 @@ export function firstBallotSelections(row: {
 /**
  * Has this address already cast a ballot we hold, for this round?
  *
- * TRINARY — true / false / **null = could not check**. Null is not "no": the
+ * TRINARY, true / false / **null = could not check**. Null is not "no": the
  * vote gate refuses on null rather than let a second ballot be signed blind,
  * because a second ballot would land on chain, overwrite the first on the
  * voter's account, and then not count. Better a 503 they can retry than a
@@ -407,7 +406,7 @@ export async function readFirstBallotFor(
 		const payload = await getPayloadSafe();
 		if (!payload) return null;
 		const roundId = await findRoundId(payload, roundSlug);
-		// A slug we cannot resolve is NOT "this voter has no ballot" — it is a
+		// A slug we cannot resolve is NOT "this voter has no ballot", it is a
 		// read we could not perform, and the gate has to treat it that way.
 		if (!roundId) return null;
 		const rows = await payload.find({
@@ -474,7 +473,7 @@ async function allBallotRows(
 			// Oldest first. Readers collapse rows by address with last-write-wins
 			// into a Map, so without an order a duplicate row (there is no unique
 			// index on round+address) could win by insertion luck. Ascending means
-			// the earliest row — the real first ballot — is the one that lands.
+			// the earliest row, the real first ballot, is the one that lands.
 			sort: "createdAt",
 			limit: 200,
 			page,
@@ -491,7 +490,7 @@ async function allBallotRows(
  * that count plus the tx hash and timestamp of the submission they came from.
  *
  * This is the input to the published digest (see ballotsDigest), so it has to
- * include everything the digest commits to — changing any of it later must
+ * include everything the digest commits to, changing any of it later must
  * change the hash.
  */
 export async function readFirstBallotRecord(
@@ -562,7 +561,7 @@ export async function loadFirstBallotRecord(
 /**
  * Every record row for a round as the RECONCILE lane sees it: the first
  * ballot's picks and id, whether the relay ever confirmed it, and when it
- * was reserved — so an abandoned reservation can be told from one in flight.
+ * was reserved, so an abandoned reservation can be told from one in flight.
  */
 export async function readRecordRows(
 	payload: Payload,
@@ -611,7 +610,7 @@ export async function readRecordRows(
  * (readFirstBallotRecord); the RECONCILE lane wants the current one, because its
  * job is "does the mirror reflect what the chain says right now". Handing it
  * first-ballots would make every out-of-band revote look like an unfixed
- * correction on every single run — a daily phantom diff, and a duplicate
+ * correction on every single run, a daily phantom diff, and a duplicate
  * history entry appended each time.
  */
 export async function readCurrentBallots(
