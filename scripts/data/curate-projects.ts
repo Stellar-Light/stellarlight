@@ -2628,7 +2628,22 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { name } });
 	}
 
+	const r2Ready = !!(
+		process.env.R2_ACCESS_KEY_ID &&
+		process.env.R2_SECRET_ACCESS_KEY &&
+		process.env.R2_BUCKET &&
+		process.env.R2_ENDPOINT
+	);
+	if (Object.keys(LOGO_SET).length && EXECUTE && !r2Ready) {
+		// 2026-09-23: two logos were "set" this way and 404ed — the files went
+		// to the runner's disk and vanished with the job.
+		console.error(
+			"  LOGO_SET: REFUSED — R2 is not configured here (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_ENDPOINT). An upload would land on the runner's disk and vanish. Add the secrets (enrich-scf.yml names them) and re-run.",
+		);
+		process.exitCode = 1;
+	}
 	for (const [slug, spec] of Object.entries(LOGO_SET)) {
+		if (EXECUTE && !r2Ready) break;
 		const r = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: slug } },
@@ -2655,9 +2670,24 @@ async function main() {
 					.catch(() => null)
 			: null;
 		// biome-ignore lint/suspicious/noExplicitAny: media doc shape
-		if (String((current as any)?.alt ?? "").includes(spec.url)) {
-			console.log(`  ${slug}: logo already from ${spec.url}, skip`);
-			continue;
+		const cur = current as any;
+		if (String(cur?.alt ?? "").includes(spec.url)) {
+			// the record says so; make sure the file actually serves before
+			// trusting it — an upload that missed R2 leaves a doc and no bytes
+			const served = cur?.filename
+				? await fetch(
+						`https://stellarlight.xyz/api/media/file/${encodeURIComponent(String(cur.filename))}`,
+					)
+						.then((res) => res.ok)
+						.catch(() => false)
+				: false;
+			if (served) {
+				console.log(`  ${slug}: logo already from ${spec.url}, skip`);
+				continue;
+			}
+			console.log(
+				`  ${slug}: logo record points at ${spec.url} but the file does not serve — re-uploading`,
+			);
 		}
 		console.log(`  ${slug}: logo ← ${spec.url} (${spec.note})`);
 		if (!EXECUTE) continue;
