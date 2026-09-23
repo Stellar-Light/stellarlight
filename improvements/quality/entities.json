@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-22T12:47:51.261Z",
+ "generatedAt": "2026-09-23T12:56:59.078Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 3,
    "graceDays": 20,
-   "oldestDays": 61,
+   "oldestDays": 62,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -320,9 +320,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 285,
-     "recurred": 120,
-     "ratePct": 42.1
+     "newFindings": 257,
+     "recurred": 92,
+     "ratePct": 35.8
     },
     "lifetime": {
      "newFindings": 694,
@@ -339,8 +339,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 285,
-     "repeats": 284,
+     "newFindings": 257,
+     "repeats": 256,
      "ratePct": 99.6
     },
     "lifetime": {
@@ -396,14 +396,23 @@
   }
  },
  "projects": {
-  "read": 990,
-  "population": 1118,
-  "servedPopulation": 990,
+  "read": 991,
+  "population": 1120,
+  "servedPopulation": 991,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 990,
+  "sampled": 991,
   "scatter": [
+   {
+    "slug": "choppaddi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
    {
     "slug": "bwb",
     "prominence": 0,
@@ -1010,10 +1019,8 @@
    {
     "slug": "remi",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -4903,10 +4910,8 @@
    {
     "slug": "minah",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8356,11 +8361,11 @@
     "status": "Live"
    }
   ],
-  "meanScore": 89,
+  "meanScore": 90,
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 903
+    "count": 904
    },
    {
     "network": "mainnet",
@@ -8372,33 +8377,33 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 903,
+   "unknown": 904,
    "applicableUnknown": 199,
-   "notApplicable": 704,
+   "notApplicable": 705,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
    "human-verified": 281,
    "onchain-activity": 49,
-   "product-integration": 63,
+   "product-integration": 65,
    "repo-activity": 117,
    "package-release": 9
   },
   "strongBasisSplit": {
-   "population": 990,
+   "population": 991,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
-   "livePopulation": 830,
-   "weakLiveOnly": 452,
-   "weakLiveRows": 471,
+   "livePopulation": 831,
+   "weakLiveOnly": 451,
+   "weakLiveRows": 470,
    "onchainEligible": 5,
-   "appOnly": 466,
+   "appOnly": 465,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 374
+    "count": 372
    },
    {
     "basis": "human-verified",
@@ -8414,7 +8419,7 @@
    },
    {
     "basis": "product-integration",
-    "count": 63
+    "count": 65
    },
    {
     "basis": "onchain-activity",
@@ -8422,7 +8427,7 @@
    },
    {
     "basis": "operator-announcement",
-    "count": 15
+    "count": 16
    },
    {
     "basis": "package-release",
@@ -8434,7 +8439,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 500,
+  "weakestTotal": 499,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9278,7 +9283,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 471
+    "count": 470
    },
    {
     "field": "dated",
@@ -9385,19 +9390,19 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1321
+     "count": 1327
     },
     {
      "label": "slowing",
-     "count": 962
+     "count": 971
     },
     {
      "label": "active",
-     "count": 864
+     "count": 877
     },
     {
      "label": "unknown",
-     "count": 141
+     "count": 113
     },
     {
      "label": "archived",
@@ -9407,23 +9412,23 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1150
+     "count": 1162
     },
     {
      "label": "unknown",
-     "count": 525
+     "count": 499
     },
     {
      "label": "Rust",
-     "count": 480
+     "count": 489
     },
     {
      "label": "JavaScript",
-     "count": 374
+     "count": 375
     },
     {
      "label": "Go",
-     "count": 119
+     "count": 121
     },
     {
      "label": "Python",
@@ -9431,11 +9436,11 @@
     },
     {
      "label": "Solidity",
-     "count": 109
+     "count": 110
     },
     {
      "label": "HTML",
-     "count": 90
+     "count": 91
     },
     {
      "label": "Shell",
@@ -9979,7 +9984,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -9992,8 +9997,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 25,
@@ -10005,7 +10010,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "dormant",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10018,8 +10023,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 23,
@@ -10044,8 +10049,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 32,
@@ -10057,8 +10062,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Go",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 25,
@@ -10070,8 +10075,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "HTML",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10083,8 +10088,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Go",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 30,
@@ -10096,8 +10101,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 59,
@@ -10109,8 +10114,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 78,
@@ -10135,8 +10140,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 79,
@@ -10148,8 +10153,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 31,
@@ -10187,8 +10192,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 76,
@@ -10200,8 +10205,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 36,
@@ -10213,8 +10218,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 60,
@@ -10226,8 +10231,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 82,
@@ -10239,8 +10244,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 63,
@@ -10252,8 +10257,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 28,
@@ -10265,8 +10270,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 60,
@@ -10278,8 +10283,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 34,
@@ -10291,8 +10296,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10304,8 +10309,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 83,
@@ -10317,8 +10322,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 78,
@@ -10330,7 +10335,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "active",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10356,8 +10361,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 46,
@@ -10382,8 +10387,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 65,
@@ -10408,8 +10413,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10421,8 +10426,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 30,
@@ -10499,8 +10504,8 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "451 of 990 rows (census)",
+   "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "449 of 991 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10923,10 +10928,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 903,
-    "of": 990,
+    "missing": 904,
+    "of": 991,
     "share": 91.2,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 704 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 904 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 705 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -10941,10 +10946,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 471,
-    "of": 990,
-    "share": 47.6,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 466 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "missing": 470,
+    "of": 991,
+    "share": 47.4,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 465 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -10988,7 +10993,7 @@
     "entity": "project",
     "field": "sourced",
     "missing": 0,
-    "of": 990,
+    "of": 991,
     "share": 0,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
@@ -11002,7 +11007,7 @@
     "entity": "project",
     "field": "typed",
     "missing": 0,
-    "of": 990,
+    "of": 991,
     "share": 0,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
