@@ -1,5 +1,5 @@
 /**
- * i³ Awards — ballot encoding, validation, tally, and the anonymous relay.
+ * i³ Awards, ballot encoding, validation, tally, and the anonymous relay.
  *
  * A ballot is written by the RELAY to its own account under a random id, one
  * entry per category:
@@ -10,9 +10,9 @@
  * 1,000 subentries and one-per-pick would have exhausted that inside the
  * real rounds. Ballots written one-per-pick before 2026-09-23 carry a
  * `.<slot>` suffix holding a single slug and still decode.
- * The voter never writes to the chain. They sign an AUTHORIZATION — a
+ * The voter never writes to the chain. They sign an AUTHORIZATION, a
  * transaction that can never be submitted (its sequence is already consumed;
- * it expires in ten minutes) whose memo commits to exactly their picks — and
+ * it expires in ten minutes) whose memo commits to exactly their picks, and
  * the relay verifies that and does the writing. Nothing public links a ballot
  * to an address; the record (address → ballot id) is admin-only.
  *
@@ -40,14 +40,14 @@ const MANAGE_DATA_MAX_BYTES = 64;
 
 /**
  * Memo stamped on ballots for a TEST round (round.testMode). It marks the
- * transaction on-chain as a test cast — the whole thing already runs on
+ * transaction on-chain as a test cast, the whole thing already runs on
  * testnet, but this makes a throwaway pilot-wallet vote obvious in the tx
  * history and distinct from the real round's ballots, which carry NO memo.
  * MEMO_TEXT caps at 28 bytes; this is 7.
  */
 export const TEST_BALLOT_MEMO = "i3-test";
 
-/** 100x base fee per op — pennies of testnet XLM, immune to minor surge. */
+/** 100x base fee per op, pennies of testnet XLM, immune to minor surge. */
 export const BALLOT_FEE_PER_OP = "10000";
 
 export interface RoundCategory {
@@ -71,7 +71,7 @@ export interface BallotRound {
 	opensAt?: string | null;
 	closesAt?: string | null;
 	/**
-	 * Test round — ballots are stamped with the TEST_BALLOT_MEMO and the relay
+	 * Test round, ballots are stamped with the TEST_BALLOT_MEMO and the relay
 	 * requires it. Defaults false; the real round carries no memo.
 	 */
 	testMode?: boolean;
@@ -80,7 +80,7 @@ export interface BallotRound {
 export interface BallotNominee {
 	/** Category KEY this nominee runs in. */
 	category: string;
-	/** Directory project slug — the on-chain vote value. */
+	/** Directory project slug, the on-chain vote value. */
 	slug: string;
 	name: string;
 }
@@ -98,8 +98,8 @@ export function picksPerCategory(round: BallotRound): number {
  * How many picks a category requires: the round's picksPerCategory, or every
  * nominee the category has if it has fewer than that.
  *
- * The nominations phase asks each Pilot for a full slate — "a minimum of 4 per
- * category, so 4 can be shortlisted from each" — and the final phase asks for
+ * The nominations phase asks each Pilot for a full slate, "a minimum of 4 per
+ * category, so 4 can be shortlisted from each", and the final phase asks for
  * exactly one. Both are "fill every slot", so the rule is the same in both:
  * required = picks, with the pool as the ceiling so a thin category cannot
  * make the whole ballot impossible. A category with no nominees requires
@@ -112,7 +112,7 @@ export function requiredPicks(round: BallotRound, poolSize: number): number {
 /**
  * The manageData key for one vote.
  *
- * A single-pick round keeps the ORIGINAL unslotted key — the encoding that is
+ * A single-pick round keeps the ORIGINAL unslotted key, the encoding that is
  * already signed on-chain and covered by the existing tests, so the final
  * round runs on untouched code. Multi-pick rounds address a fixed slot per
  * category, which keeps overwrite semantics (re-voting rewrites slot 1..N in
@@ -163,7 +163,7 @@ export function roundOpenState(
 /**
  * Validate a selections object against the round + nominee list.
  * Returns normalized selections (only valid category keys, trimmed values)
- * or a list of everything wrong — never partially trusts input.
+ * or a list of everything wrong, never partially trusts input.
  */
 export function validateSelections(
 	round: BallotRound,
@@ -202,7 +202,7 @@ export function validateSelections(
 			errors.push(`unknown category "${category}"`);
 			continue;
 		}
-		// Accept a bare slug or a list — the wire form of a one-pick round is
+		// Accept a bare slug or a list, the wire form of a one-pick round is
 		// still a plain string, so an older client keeps working unchanged.
 		const raw = Array.isArray(value) ? value : [value];
 		const slugs: string[] = [];
@@ -261,7 +261,7 @@ export function validateSelections(
 		normalized[category] = slugs;
 	}
 	// Every category that HAS nominees, not just one. The round is one pick in
-	// each, and the first ballot is the only one that counts — so a partial
+	// each, and the first ballot is the only one that counts, so a partial
 	// ballot is not a smaller vote, it is a permanent one with categories
 	// missing and no way for the voter to fill them in later. The page already
 	// requires all of them; this is the half a direct API call was skipping.
@@ -295,7 +295,7 @@ export interface SignedBallotContext {
 	 * ed25519 signer keys (weight > 0) on the SOURCE account, from Horizon.
 	 *
 	 * Omit and the master key is assumed, which is what this used to check
-	 * unconditionally — and which refuses any account that set its master
+	 * unconditionally, and which refuses any account that set its master
 	 * weight to 0 or delegated to other signers, even though Horizon would
 	 * accept its ballot. Supplying the real signer set is what lets a
 	 * multisig or delegated Pilot vote.
@@ -316,7 +316,7 @@ export type SignedBallotVerdict =
  * The relay gate. Rejects anything that is not exactly a ballot we could
  * have built: manageData-only, our key prefix, whitelisted source, open
  * round, valid nominees, testnet signature. See module doc for the threat
- * model — this is what makes POST /api/awards/submit not an open relay.
+ * model, this is what makes POST /api/awards/submit not an open relay.
  */
 /**
  * The source account of a signed ballot, without validating anything else.
@@ -324,7 +324,7 @@ export type SignedBallotVerdict =
  * Exists for one reason: the relay needs the account's SIGNER SET to verify
  * the signature (so a multisig or master-weight-0 Pilot can vote), and it
  * needs the source to fetch the account. Parsing the source first breaks that
- * circle. Returns null on anything unparseable — the full validator is still
+ * circle. Returns null on anything unparseable, the full validator is still
  * the thing that decides whether the ballot is acceptable.
  */
 export function ballotSourceOf(signedXdr: string): string | null {
@@ -404,7 +404,7 @@ export function decodeAccountVotes(
 		// A vote for a since-removed nominee simply stops counting.
 		if (!nomineesByCategory.get(category)?.has(slug)) continue;
 		const bucket = votes[category] ?? [];
-		// Two slots holding the same nominee count once — one voter, one voice.
+		// Two slots holding the same nominee count once, one voter, one voice.
 		if (!bucket.includes(slug)) bucket.push(slug);
 		votes[category] = bucket;
 	}
@@ -412,7 +412,7 @@ export function decodeAccountVotes(
 }
 
 /**
- * Aggregate tally across all whitelisted accounts. AGGREGATE ONLY — the
+ * Aggregate tally across all whitelisted accounts. AGGREGATE ONLY, the
  * public results payload never maps an address to its choices (anyone can
  * read the chain themselves, but we don't hand it out pre-joined).
  */
@@ -434,7 +434,7 @@ export function tallyRound(
 		if (entries.length === 0) continue;
 		voted++;
 		// Approval tally: every pick is one vote for that nominee. A voter with
-		// four picks in a category adds one to each of four nominees — nobody
+		// four picks in a category adds one to each of four nominees, nobody
 		// gets four votes, and the top N by count are the finalists.
 		for (const [category, slugs] of entries) {
 			const perCat = counts.get(category) ?? new Map<string, number>();
@@ -586,7 +586,7 @@ export function relayBallotOps(
 		// under the category key, the rest under `.1`, `.2`, … There are never
 		// more chunks than picks, so a continuation slot stays inside what the
 		// decoder accepts. (Four long slugs on the real slate did not fit one
-		// value — audit 2026-09-23 — and were being refused outright.)
+		// value, audit 2026-09-23, and were being refused outright.)
 		const chunks: string[] = [];
 		for (const slug of slugs) {
 			const last = chunks[chunks.length - 1];
@@ -645,8 +645,7 @@ export function authorizationDigest(
 /**
  * The transaction the voter signs. It can NEVER be submitted:
  *   - its sequence number is the account's CURRENT one (a valid transaction
- *     needs current + 1), or 1 for an account that does not exist on-chain —
- *     which is also why the voter's account never needs funding;
+ *     needs current + 1), or 1 for an account that does not exist on-chain, *     which is also why the voter's account never needs funding;
  *   - it expires ten minutes after it is built.
  * It carries one self-describing op, so a wallet shows the voter what they
  * are signing, and the ballot's digest in the memo. Nothing in it names the
@@ -713,7 +712,7 @@ export type AuthorizationVerdict =
  * Check a signed authorization against the ballot it claims to authorize.
  * Everything the old relay enforced on the ballot transaction is enforced
  * here on the authorization: testnet passphrase, whitelisted source, and a
- * signature from a key that controls the account — plus that the memo
+ * signature from a key that controls the account, plus that the memo
  * commits to exactly these picks and that the transaction is unusable
  * on-chain. The picks themselves go through validateSelections separately.
  */
@@ -761,7 +760,7 @@ export function verifyAuthorization(
 	try {
 		const seq = BigInt(tx.sequence);
 		if (ctx.sequence === null) {
-			// no account on chain: the builder signs at sequence 1 — anything
+			// no account on chain: the builder signs at sequence 1, anything
 			// else was not built here
 			if (seq !== 1n) {
 				errors.push("authorization for a new account must sign at sequence 1");

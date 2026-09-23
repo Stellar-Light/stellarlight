@@ -1,26 +1,26 @@
 /**
- * i³ Awards — the DB mirror as a tally source, and the chain↔mirror diff.
+ * i³ Awards, the DB mirror as a tally source, and the chain↔mirror diff.
  *
- * `award-ballots` outranks the chain for the tally — the first ballot counts
+ * `award-ballots` outranks the chain for the tally, the first ballot counts
  * and only the mirror remembers it (see publish.ts). The chain still matters
  * as public, independently verifiable evidence, and as the fallback for an
- * address with no mirror row. It is also fragile: Stellar resets testnet 2–4×
+ * address with no mirror row. It is also fragile: Stellar resets testnet 2-4×
  * a year, and a reset clears every ledger entry AND all history from Core and
- * Horizon — so at the first reset after a round every whitelisted account
+ * Horizon, so at the first reset after a round every whitelisted account
  * reads unfunded and the chain tally is zero. The mirror outlives that.
  *
  * Two jobs live here, both pure so they are unit-tested offline:
  *
- *   mirrorAccountData — re-encode a mirrored ballot as the exact Horizon
+ *   mirrorAccountData, re-encode a mirrored ballot as the exact Horizon
  *     data map the chain carried, so tallyRound has ONE implementation and
  *     the mirror-backed tally cannot drift from the chain-backed one.
  *
- *   planReconcile — diff what the chain says against what the mirror holds,
+ *   planReconcile, diff what the chain says against what the mirror holds,
  *     per address, into explicit classes. The mirror is best-effort by
  *     design (a DB hiccup must never fail a vote that already landed), so it
  *     can silently miss a ballot; the reconcile script backfills those gaps
  *     while the chain still exists. It never deletes: a mirror row the chain
- *     no longer shows is reported, not removed — after a reset that is every
+ *     no longer shows is reported, not removed, after a reset that is every
  *     row, and those rows are the point.
  */
 
@@ -41,7 +41,7 @@ export interface MirroredBallot {
  * The mirror's `selections` is a JSON column: normally the validated
  * `{ category: [slug, ...] }` the relay recorded, but it is admin-editable
  * and one early description documented it as `{ category: slug }`. Accept
- * both, drop anything else — the DB is an input here, not a trusted shape.
+ * both, drop anything else, the DB is an input here, not a trusted shape.
  */
 export function normalizeSelections(raw: unknown): BallotSelections {
 	if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
@@ -99,8 +99,7 @@ export type ReconcileAction =
 	/** Record row confirmed and the relay holds its ballot, matching. */
 	| { kind: "ok"; address: string; ballotId: string }
 	/** Record row confirmed, relay holds the id, but the picks DIFFER. The relay
-	 *  writes exactly what was signed, so one side was changed after the fact —
-	 *  the record by an admin, or the relay by whoever holds its key; this lane
+	 *  writes exactly what was signed, so one side was changed after the fact, *  the record by an admin, or the relay by whoever holds its key; this lane
 	 *  cannot tell which. Reported loudly, never overwritten. */
 	| { kind: "differs"; address: string; ballotId: string }
 	/** Record row confirmed, relay does not hold the id. After a reset that is
@@ -187,7 +186,7 @@ export interface ReconcileSummary {
 	counts: Record<ReconcileAction["kind"], number>;
 	/**
 	 * The record holds confirmed ballots and the relay holds NONE of them.
-	 * That is what the relay looks like after a testnet reset — there is
+	 * That is what the relay looks like after a testnet reset, there is
 	 * nothing to reconcile FROM, and treating the rows as stale would be
 	 * exactly wrong.
 	 */

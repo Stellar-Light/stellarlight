@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * i³ Awards — the voting experience.
+ * i³ Awards, the voting experience.
  *
  * Design: monochrome + prediction-market layout (Polymarket / godly.website),
  * built on Stellar Light's WARM layered dark (bg #171717, raised cards, solid
- * #2f2f2f borders — never flat black or white hairlines) and animated with
+ * #2f2f2f borders, never flat black or white hairlines) and animated with
  * framer-motion for the stellar-markets fluidity (scroll fade-up + stagger,
  * spring tap/hover, crossfading ballot values, spring selection checks).
  *
@@ -102,7 +102,7 @@ interface Eligibility {
 
 /**
  * The routes send a machine `error` code AND a human `message`. Show the
- * sentence — a toast reading "already_voted" is the code leaking into the UI.
+ * sentence, a toast reading "already_voted" is the code leaking into the UI.
  */
 interface StoredReceipt {
 	ballotId: string | null;
@@ -250,7 +250,7 @@ function I3Mark({ className = "" }: { className?: string }) {
 /**
  * Connected-wallet control: the address pill opens a small menu (full address,
  * copy, verify-on-chain, disconnect). Previously a bare click on the pill
- * disconnected instantly with no affordance — easy to trigger by accident and
+ * disconnected instantly with no affordance, easy to trigger by accident and
  * with no way to see or copy the full key. This is the RainbowKit pattern:
  * the pill is a disclosure, the destructive action lives one step in.
  */
@@ -289,7 +289,7 @@ function ConnectedWallet({
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1600);
 		} catch {
-			// clipboard blocked — the address is visible to select by hand.
+			// clipboard blocked, the address is visible to select by hand.
 		}
 	}, [address]);
 
@@ -407,7 +407,7 @@ function TopBar({
 		<div className="sticky top-0 z-40 border-b border-[#2a2a2a] bg-[#171717]/80 backdrop-blur-xl">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5 min-w-0">
-					{/* The cube, not the flat medallion — the same mark the hero rolls.
+					{/* The cube, not the flat medallion, the same mark the hero rolls.
 					    It takes its size from the font-size, so the wrapper carries one:
 					    the cube's edge and its half-depth are both in em off this, and
 					    22px lands it on the 24px the medallion occupied. */}
@@ -485,7 +485,7 @@ function hiwSteps(picks: number) {
 }
 
 /**
- * Explainer art. Four steps, four different mechanisms — and each shows a REAL
+ * Explainer art. Four steps, four different mechanisms, and each shows a REAL
  * control from this product doing what the step describes: the Connect button
  * changing state, a nominee card being chosen, the wallet sheet confirming,
  * the receipt's Stellar stamp pressing down on the finished ballot.
@@ -556,8 +556,7 @@ function BallotArt({ step }: { step: number }) {
 }
 
 /**
- * The house curtain. Covers the page on load and parts to reveal the round —
- * the one big theatrical moment, and the reason this page reads as an awards
+ * The house curtain. Covers the page on load and parts to reveal the round, * the one big theatrical moment, and the reason this page reads as an awards
  * show rather than a form. Fixed, pointer-events:none, and it unmounts itself
  * when the animation ends so it can never sit in front of the ballot. Hidden
  * outright under prefers-reduced-motion (see awards.css).
@@ -586,7 +585,7 @@ function StageReveal() {
 	);
 }
 
-/** The same path the stroke draws and the nib rides — one source of truth. */
+/** The same path the stroke draws and the nib rides, one source of truth. */
 const SIGNATURE_PATH =
 	"M6 44 C 16 14, 28 10, 32 26 C 36 42, 24 54, 20 45 C 16 36, 32 22, 48 27 C 64 32, 58 50, 69 45 C 80 40, 77 19, 90 22 C 103 25, 98 48, 110 43 C 121 38, 122 23, 134 30 C 145 36, 140 46, 152 41 L 184 38";
 
@@ -594,8 +593,7 @@ const SIGNATURE_PATH =
  * The i³, as a cube. The intro tumbles 3 → i → i³ on two different axes, then
  * hands control to hover: pointing at it sends the cube to a random face, and
  * leaving brings it home to the mark. The intro is a keyframe animation and
- * hover is a transition, so the animation has to be REMOVED once it ends —
- * a filled animation keeps winning over an inline transform forever.
+ * hover is a transition, so the animation has to be REMOVED once it ends, * a filled animation keeps winning over an inline transform forever.
  */
 const CUBE_ORIENTATIONS = [
 	{ rx: -90, ry: -90 }, // "3"
@@ -652,7 +650,7 @@ function CubeMark() {
 
 /**
  * Waiting on the network. The hourglass from yui540/css-animations (MIT),
- * monochrome — the sand drains and then the glass turns over, which says
+ * monochrome, the sand drains and then the glass turns over, which says
  * "this takes a moment" in a way a spinner never does.
  */
 function Hourglass() {
@@ -780,8 +778,7 @@ function SigningOverlay({ phase }: { phase: Phase }) {
 }
 
 /**
- * Your ballot prints. The printer belongs HERE rather than in the explainer —
- * this is a receipt actually being issued, one row per category, stamped.
+ * Your ballot prints. The printer belongs HERE rather than in the explainer, * this is a receipt actually being issued, one row per category, stamped.
  */
 function VoteReceipt() {
 	return (
@@ -799,7 +796,7 @@ function VoteReceipt() {
 
 /**
  * The closed stage. Panels drop into place on load, then breathe; they never
- * part, because the round is not open yet — that IS the empty state's message.
+ * part, because the round is not open yet, that IS the empty state's message.
  */
 function StageCurtain() {
 	const panels = [0, 1, 2, 3, 4];
@@ -823,7 +820,7 @@ function StageCurtain() {
 }
 
 // Step-through explainer. One step at a time, its own art above the copy,
-// dots and a primary action below — the help-card shape, not a slideshow.
+// dots and a primary action below, the help-card shape, not a slideshow.
 function HowItWorks({
 	open,
 	onClose,
@@ -1042,7 +1039,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		[nomineesByCategory],
 	);
 
-	// A category counts as done when its SLATE is full — picksPerCategory
+	// A category counts as done when its SLATE is full, picksPerCategory
 	// picks, or every nominee it has if fewer. The nominations phase asks for
 	// four per category so four can be shortlisted; the final phase asks for
 	// one. Same rule as the relay's requiredPicks, mirrored here so the page
@@ -1059,17 +1056,16 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		const need = requiredFor(c.key);
 		return need > 0 && (selections[c.key] ?? []).length >= need;
 	}).length;
-	// The denominator is the categories that CAN be voted — the relay skips a
+	// The denominator is the categories that CAN be voted, the relay skips a
 	// category with no nominees, so requiring it here would keep the button
 	// disabled for everyone on a round opened before one category's list
 	// landed, with nothing on screen saying why.
 	const requiredCount = categories.filter((c) => requiredFor(c.key) > 0).length;
 	const notWhitelisted = eligibility !== null && !eligibility.whitelisted;
 	// One ballot per voter: the first one counts. `hasVoted` is chain OR
-	// mirror, so it stays true after a testnet reset has cleared `votes` —
-	// the ballot still exists in our record, and a new one would not count.
+	// mirror, so it stays true after a testnet reset has cleared `votes`, // the ballot still exists in our record, and a new one would not count.
 	const votedBefore = Boolean(eligibility?.hasVoted ?? eligibility?.votes);
-	// No ballot can be cast from here — no wallet is connected, or this address
+	// No ballot can be cast from here, no wallet is connected, or this address
 	// isn't on the list, or it has already voted and that ballot is final. All
 	// three mean the picks stop being editable and the CTA goes away, rather
 	// than leaving a live form behind a button that will refuse.
@@ -1081,7 +1077,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	// first.
 	const readOnly = !address || notWhitelisted || votedBefore;
 	// The ballot surfaces (rail, mobile deck, CTA) stay up while a ballot is
-	// still POSSIBLE — which includes "no wallet yet", whose call to action is
+	// still POSSIBLE, which includes "no wallet yet", whose call to action is
 	// the connect button itself. Gating those on readOnly would have hidden the
 	// one control a disconnected visitor needs. They come down only when this
 	// address can never cast one: not a Pilot, or already voted.
@@ -1195,7 +1191,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		setPhase("idle");
 		prefilled.current = false;
 		// Pilot feedback: disconnect must clear the BALLOT too, not just the
-		// session. Pilots vote from shared laptops at the venue — voter #2 was
+		// session. Pilots vote from shared laptops at the venue, voter #2 was
 		// seeing voter #1's picks and success banner still on screen.
 		setSelections({});
 		setError(null);
@@ -1226,7 +1222,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			});
 			const xdrBody = await xdrRes.json();
 			if (xdrRes.status === 409 && xdrBody?.error === "already_voted") {
-				// Not a failure to report — the server is telling us this address
+				// Not a failure to report, the server is telling us this address
 				// already has a ballot. Record it, and the page locks and shows
 				// the receipt the way it does for any returning voter.
 				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
@@ -1299,7 +1295,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	// pass rendered UTC and the browser rendered the visitor's local time. The
 	// two HTML strings disagreed and React threw on hydrate.
 	//
-	// Fixed by rendering the deadline only AFTER mount — server HTML and the
+	// Fixed by rendering the deadline only AFTER mount, server HTML and the
 	// first client render now both omit it, so there is nothing to mismatch, and
 	// the local-time string appears a tick later. Both labels derive from the
 	// same gate so they can never disagree with each other.
@@ -1309,7 +1305,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		mounted && round.closesAt
 			? format(new Date(round.closesAt), "MMMM d, yyyy 'at' h:mm a")
 			: null;
-	/** Short form for helper lines — a full timestamp there is noise. */
+	/** Short form for helper lines, a full timestamp there is noise. */
 	const closesShort =
 		mounted && round.closesAt
 			? format(new Date(round.closesAt), "MMM d")
@@ -1392,7 +1388,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			>
 				{/* Whose awards these are, said before the headline says which ones.
 				    The mark is black artwork, so it needs the same light ground the
-				    receipt stamp gives it — bare, it disappears into the page. */}
+				    receipt stamp gives it, bare, it disappears into the page. */}
 				<span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#2f2f2f] px-2.5 py-1 text-xs font-medium text-neutral-400">
 					<Image
 						src="/stellar-xlm-logo.png"
@@ -1721,7 +1717,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			{/* ── Last year, as history ── */}
 			{/* The clearance rides the LAST block on the page: when the mobile
 			    ballot deck is shown it's `fixed` (~230px tall) and would cover
-			    whatever ends the page — which is now the 2025 source link rather
+			    whatever ends the page, which is now the 2025 source link rather
 			    than the Interoperability nominees. Normal padding when the deck is
 			    absent (not a Pilot / already voted) so there's no dead space. */}
 			<PastWinners className={ballotOpen ? "pb-[17rem]" : "pb-32"} />
@@ -1759,7 +1755,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									},
 								);
 								const need = requiredFor(category.key);
-								// a card is done when its SLATE is full — on a one-pick round
+								// a card is done when its SLATE is full, on a one-pick round
 								// that is the one pick; on nominations it is all N
 								const full = need > 0 && pickedNominees.length >= need;
 								const pickedNominee = pickedNominees[0] ?? null;
@@ -1827,7 +1823,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 												</span>
 											</div>
 										) : pickedNominee ? (
-											// nominations: the whole slate so far — logos overlap,
+											// nominations: the whole slate so far, logos overlap,
 											// names truncate, the count above says how many remain
 											<div className="flex min-w-0 items-center gap-2.5">
 												<div className="flex flex-shrink-0 -space-x-1.5">
@@ -1953,7 +1949,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 }
 
 // ── Error toast (Family.co-style) ──────────────────────────────────────────
-// One surface for every ballot message — connect, sign, submit all
+// One surface for every ballot message, connect, sign, submit all
 // route here. A dark pill that springs up, auto-dismisses (~6.5s), and clears
 // on tap; on mobile it floats ABOVE the fixed ballot deck so it never covers
 // the picks. Replaces the inline red-text that used to sit in three places.
@@ -1964,7 +1960,7 @@ function AwardsToast({
 }: {
 	message: string | null;
 	onDismiss: () => void;
-	/** true while the mobile ballot deck is on screen — lift clear of it. */
+	/** true while the mobile ballot deck is on screen, lift clear of it. */
 	raised: boolean;
 }) {
 	useEffect(() => {
@@ -2007,7 +2003,7 @@ function AwardsToast({
 
 /**
  * Stroopy, drawn in vector so he can move. An interpretation in the Stellar
- * mascot's spirit — visor face, pixel eyes, antenna — not the official art.
+ * mascot's spirit, visor face, pixel eyes, antenna, not the official art.
  * Sized by the caller; the badge is the connected wallet's own mark.
  */
 export function Stroopy({ size, badge }: { size: number; badge?: string }) {
@@ -2220,7 +2216,7 @@ function WalletPicker({
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
-					{/* mt-5 lets the description breathe above the list — without it
+					{/* mt-5 lets the description breathe above the list, without it
 					    the drawer's flex-col butts the copy against the first wallet
 					    button (the "clamped" look). No eyebrow label; the buttons
 					    speak for themselves. */}
@@ -2296,7 +2292,7 @@ function NomineeCard({
 	nominee: Nominee;
 	selected: boolean;
 	// A card is inert for several reasons, but only one of them has something
-	// the visitor can do about it — so only that one gets its own hint.
+	// the visitor can do about it, so only that one gets its own hint.
 	needsConnect: boolean;
 	disabled: boolean;
 	onToggle: () => void;
@@ -2455,7 +2451,7 @@ const WINNERS_2025 = [
  *
  * Each winner is a small stage. The card sits behind a closed curtain until
  * it scrolls into view, then the curtain parts on the winner's name and a
- * burst of confetti goes up behind it — the same two mechanisms the page
+ * burst of confetti goes up behind it, the same two mechanisms the page
  * already uses for the opening reveal and the vote receipt, at card size, so
  * "and the winner is" reads the way it does on the night rather than as a
  * grey footnote. It plays once per card, on the reader's scroll, never on

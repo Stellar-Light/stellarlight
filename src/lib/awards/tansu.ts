@@ -1,15 +1,15 @@
 /**
- * i³ Awards — Tansu on TESTNET as the notary of a published result.
+ * i³ Awards, Tansu on TESTNET as the notary of a published result.
  *
  * Everything about the i³ vote lives on testnet by the owner's rule: Pilots
  * vote with testnet-ASSIGNED wallets (not their real ones), ballots are
  * manageData on testnet, and the award-ballots mirror is the durable record
- * because testnet is reset 2–4× a year. The anchor lives where the vote
+ * because testnet is reset 2-4× a year. The anchor lives where the vote
  * lives. Tansu (tansu.dev, Tupui's project-versioning contract) records "the
  * latest commit hash of a project"; its testnet deployment is where Tupui's
  * real activity is (34 projects, 700+ votes). We register `stellarlight`
  * there and, when a round's results file is committed to this public repo,
- * `commit()` that git SHA — so during the round and until the next reset,
+ * `commit()` that git SHA, so during the round and until the next reset,
  * anyone can read `get_commit(keccak256("stellarlight"))` and open the commit
  * on GitHub. After a reset the lane simply registers again (5 test XLM, free).
  *
@@ -17,19 +17,19 @@
  *
  * Deployed-contract facts, read via Soroban RPC on 2026-09-16 (testnet wasm
  * 878662dc…): `register(maintainer, name, maintainers, url, ipfs,
- * min_voting_period?, execute_delay?, attestation_threshold?)` — 5 XLM
+ * min_voting_period?, execute_delay?, attestation_threshold?)`, 5 XLM
  * collateral, name ≤ 30 chars of [A-Za-z0-9]; `commit(maintainer,
  * project_key, hash)` with hash = 40 or 64 lowercase hex; `get_commit
- * (project_key) → String`. Tansu keeps only the LATEST hash per project — an
+ * (project_key) → String`. Tansu keeps only the LATEST hash per project, an
  * older round's proof is the anchoring transaction, which is why the tx hash
  * is recorded next to the SHA. (The MAINNET deployment's register() traps for
- * every caller since its 2026-05-14 upgrade — see the draft doc.)
+ * every caller since its 2026-05-14 upgrade, see the draft doc.)
  */
 
 import { keccak_256 } from "@noble/hashes/sha3";
 import { contract, Networks } from "@stellar/stellar-sdk";
 
-/** Tansu's TESTNET deployment. Testnet resets may move it — --status says. */
+/** Tansu's TESTNET deployment. Testnet resets may move it, --status says. */
 export const TANSU_CONTRACT =
 	"CBXKUSLQPVF35FYURR5C42BPYA5UOVDXX2ELKIM2CAJMCI6HXG2BHGZA";
 export const TANSU_NETWORK_PASSPHRASE: string = Networks.TESTNET;
@@ -43,11 +43,11 @@ export const COMMIT_HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 /** register() panics outside this. */
 export const TANSU_PROJECT_NAME_RULE = /^[A-Za-z0-9]{1,30}$/;
 
-/** Tansu's project key: keccak256 of the name (NOT sha3-256 — see the test). */
+/** Tansu's project key: keccak256 of the name (NOT sha3-256, see the test). */
 export function tansuProjectKey(name: string = TANSU_PROJECT_NAME): Buffer {
 	if (!TANSU_PROJECT_NAME_RULE.test(name)) {
 		throw new Error(
-			`invalid Tansu project name "${name}" — 1–30 chars of [A-Za-z0-9]`,
+			`invalid Tansu project name "${name}", 1-30 chars of [A-Za-z0-9]`,
 		);
 	}
 	return Buffer.from(keccak_256(name));
@@ -63,13 +63,13 @@ export type AnchorRecord = {
 	/** hex of tansuProjectKey(project) */
 	projectKey: string;
 	commitSha: string;
-	/** Testnet tx that made the commit — null only if recorded after the fact. */
+	/** Testnet tx that made the commit, null only if recorded after the fact. */
 	txHash: string | null;
 	at: string;
 	/**
 	 * The pre-vote anchor, committed when the round OPENS: a digest of the
 	 * electorate and the ballot (see roundManifestDigest). Tansu holds one hash
-	 * per project, so the results commit later overwrites this on chain — the
+	 * per project, so the results commit later overwrites this on chain, the
 	 * tx hash is what remains provable, which is why it is kept here.
 	 */
 	manifest?: {
@@ -171,7 +171,7 @@ export interface TansuClient {
 		maintainers: string[];
 		url: string;
 		ipfs: string;
-		/** Option<u64/u32> on the newer wasm — undefined = contract defaults. */
+		/** Option<u64/u32> on the newer wasm, undefined = contract defaults. */
 		min_voting_period?: bigint | undefined;
 		execute_delay?: bigint | undefined;
 		attestation_threshold?: number | undefined;

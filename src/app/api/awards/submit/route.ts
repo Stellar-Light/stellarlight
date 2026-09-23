@@ -1,5 +1,5 @@
 /**
- * POST /api/awards/submit — verify a voter's authorization and relay their
+ * POST /api/awards/submit, verify a voter's authorization and relay their
  * ballot ANONYMOUSLY.
  *
  *   { "signedXdr": "AAAA...", "selections": { ... }, "round": "i3-2026" }
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
 	}
 
 	// The account is read for its signer set and current sequence. 404 is
-	// fine — an account with no footprint signs at sequence 1 and its only
+	// fine, an account with no footprint signs at sequence 1 and its only
 	// signer is its master key. Only Horizon being down blocks.
 	const claimedSource = ballotSourceOf(signedXdr);
 	const account = claimedSource
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
 			{
 				error: "ballot_status_unavailable",
 				message:
-					"Could not reach testnet to check this account. Nothing was submitted — try again in a moment.",
+					"Could not reach testnet to check this account. Nothing was submitted. Try again in a moment.",
 			},
 			{ status: 503, headers: rateLimitHeaders(limit) },
 		);
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	// One ballot per voter — checked here, behind the signature (this is the
+	// One ballot per voter, checked here, behind the signature (this is the
 	// ONLY place the server says already_voted: unsigned, that answer is a
 	// participation oracle), then RESERVED before the relay writes, because a
 	// gate checked now and written later is a race.
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
 			{
 				error: "ballot_status_unavailable",
 				message:
-					"We can't confirm whether this address has already voted right now. Nothing was submitted — try again in a moment.",
+					"We can't confirm whether this address has already voted right now. Nothing was submitted. Try again in a moment.",
 			},
 			{ status: 503, headers: rateLimitHeaders(limit) },
 		);
@@ -185,8 +185,8 @@ export async function POST(req: NextRequest) {
 					error: "ballot_pending",
 					message:
 						settled === "in-flight"
-							? "Your earlier ballot is still being written. Nothing to sign again — wait a couple of minutes, then try once more."
-							: "We can't tell yet whether your earlier ballot landed. Nothing was submitted — try again in a few minutes.",
+							? "Your earlier ballot is still being written. Nothing to sign again. Wait a couple of minutes, then try once more."
+							: "We can't tell yet whether your earlier ballot landed. Nothing was submitted. Try again in a few minutes.",
 				},
 				{
 					status: settled === "in-flight" ? 409 : 503,
@@ -210,7 +210,7 @@ export async function POST(req: NextRequest) {
 				error: dup ? "already_voted" : "ballot_status_unavailable",
 				message: dup
 					? "This address has already cast its ballot for this round."
-					: `Could not record the ballot (${reserved.reason}). Nothing was submitted — try again in a moment.`,
+					: `Could not record the ballot (${reserved.reason}). Nothing was submitted. Try again in a moment.`,
 			},
 			{ status: dup ? 409 : 503, headers: rateLimitHeaders(limit) },
 		);
@@ -257,7 +257,7 @@ export async function POST(req: NextRequest) {
 			{
 				error: busy ? "relay_busy" : "relay_failed",
 				message: busy
-					? "The relay is busy — try again in a few seconds. Nothing was recorded."
+					? "The relay is busy. Try again in a few seconds; nothing was recorded."
 					: `The relay could not write the ballot: ${result.error}. Nothing was recorded.`,
 				resultCodes: result.resultCodes,
 			},

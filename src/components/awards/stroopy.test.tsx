@@ -4,7 +4,7 @@
  * Both halves are CSS keyframes, but WHICH half plays is React: Stroopy reads
  * useIsPresent() from the wallet menu's AnimatePresence, so `is-shut` appears
  * only while the menu is leaving. And the menu unmounts between openings,
- * which is what lets the open keyframes restart — an avatar that stayed
+ * which is what lets the open keyframes restart, an avatar that stayed
  * mounted would play its reveal once and then sit there forever.
  *
  * Neither fact is visible to a screenshot, and I got the second one wrong by
@@ -42,7 +42,7 @@ describe("Stroopy in the wallet menu", () => {
 	it("shuts the window while the menu is leaving", () => {
 		const { rerender } = render(<Menu open />);
 		rerender(<Menu open={false} />);
-		// AnimatePresence holds the node for the exit — that is the only window
+		// AnimatePresence holds the node for the exit, that is the only window
 		// in which the close keyframes can play.
 		expect(tile()).not.toBeNull();
 		expect(tile()?.className).toContain("is-shut");

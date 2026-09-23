@@ -1,5 +1,5 @@
 /**
- * GET /api/awards/anchor?round=<slug> — is this round's published result
+ * GET /api/awards/anchor?round=<slug>, is this round's published result
  * anchored on Tansu (testnet)?
  *
  * Everything about the vote is on testnet. When a round's results file is
@@ -7,14 +7,14 @@
  * to Tansu (tansu.dev) on testnet and records { commitSha, txHash } on the
  * round. This endpoint reads the round's record, reads the chain
  * (`get_commit(keccak256("stellarlight"))` via Soroban RPC simulation), and
- * says whether they agree — so the claim "anchored" is checked, not
+ * says whether they agree, so the claim "anchored" is checked, not
  * asserted.
  *
  * `manifest` is the PRE-VOTE anchor: a digest of the electorate and the ballot
  * committed when the round opened. It is recomputed here from the round's
  * CURRENT state and compared, so `matches:false` means the roster, categories,
  * picks or dates changed after voting opened. `matches:null` means we could
- * not recompute — not a pass. After a testnet reset the chain forgets it (like every ballot)
+ * not recompute, not a pass. After a testnet reset the chain forgets it (like every ballot)
  * and this honestly reports `not-registered`; the award-ballots mirror
  * remains the durable record. Public, aggregate-only; cached 5 minutes.
  */
@@ -116,8 +116,7 @@ export async function GET(req: NextRequest) {
 
 	// The pre-vote anchor is only worth anything if it is CHECKED: recompute
 	// the round's manifest from its current state and compare. A nominee added
-	// mid-round, an address slipped onto the whitelist, a close date moved —
-	// each gives a different digest than the one already committed on chain.
+	// mid-round, an address slipped onto the whitelist, a close date moved, // each gives a different digest than the one already committed on chain.
 	let manifest: Record<string, unknown> | null = null;
 	if (anchor?.manifest?.digest) {
 		const loaded = await loadRound(slug);

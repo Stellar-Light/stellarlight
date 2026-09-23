@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Nominee "2026 in review" — a Family.co-style highlights sheet.
+ * Nominee "2026 in review", a Family.co-style highlights sheet.
  *
  * Opens in place of navigating to the project page: tap a nominee's Highlights
  * chip and their year springs up as a stack of playful moments. Motion is the
- * point — spring physics (haptics.lochie.me / family.co), staggered reveals,
+ * point, spring physics (haptics.lochie.me / family.co), staggered reveals,
  * a self-drawing sparkline for growth. Bottom sheet on mobile, centered on
  * desktop. Content is qualitative by design (see highlights.ts).
  */
@@ -92,7 +92,7 @@ const KIND_META: Record<
 	milestone: { Icon: Trophy, tint: "text-amber-300/90" },
 };
 
-// A small self-drawing rising line — decorative momentum, not a plotted value.
+// A small self-drawing rising line, decorative momentum, not a plotted value.
 function Sparkline() {
 	return (
 		<svg
@@ -124,7 +124,7 @@ function Sparkline() {
 	);
 }
 
-// Rolling-digit odometer — each digit column rolls up from 0 to its final
+// Rolling-digit odometer, each digit column rolls up from 0 to its final
 // digit (torph.lochie / family.co). Takes an already-formatted string so
 // separators like "." and "," stay put while the digits scroll. em-sized.
 function Odometer({ display, delay = 0 }: { display: string; delay?: number }) {
@@ -201,7 +201,7 @@ export function NomineeHighlightsModal({
 	canPick?: boolean;
 	/**
 	 * Set only when the reason picking is unavailable is that no wallet is
-	 * connected — then the CTA offers to connect instead of going dead. When
+	 * connected, then the CTA offers to connect instead of going dead. When
 	 * picking is unavailable for any other reason (not on the voter list, or
 	 * already voted) this is null and the CTA is simply not rendered, because
 	 * there is nothing the reader can do about it here.
@@ -229,7 +229,7 @@ export function NomineeHighlightsModal({
 	// Lead every sheet with the growth moment so the big TVL number lands in the
 	// SAME place across nominees. highlights.ts authors moments per-project, so
 	// the growth moment (the one carrying the TVL odometer) sat 1st for some and
-	// 3rd/last for others — the number jumping top↔bottom read as a bug. Stable
+	// 3rd/last for others, the number jumping top↔bottom read as a bug. Stable
 	// sort: growth to the front, everything else keeps its authored order.
 	const highlights = data
 		? [...highlightsFor(data.slug)].sort(
@@ -329,7 +329,7 @@ export function NomineeHighlightsModal({
 
 							{/* The sheet UNROLLS: the body opens downward from nothing to
 							    its natural height and rolls back up on close. Height has to
-							    be animated for that — clipping alone reveals content but
+							    be animated for that, clipping alone reveals content but
 							    nothing actually opens, which is what the accordion this is
 							    after is really doing. motion handles the auto-height measure. */}
 							<motion.div
@@ -365,7 +365,7 @@ export function NomineeHighlightsModal({
 												className="rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
 											>
 												{/* One structure for every moment: icon in the left
-											    column, all content indented in the right — so a stat's
+											    column, all content indented in the right, so a stat's
 											    number lines up with a narrative's text. */}
 												<div className="flex items-start gap-3.5">
 													<span
