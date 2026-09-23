@@ -225,21 +225,56 @@ async function importNominees(
 		collection: "projects",
 		limit: 5000,
 		depth: 0,
-		select: { slug: true, name: true },
+		select: { slug: true, name: true, status: true, canonicalSlug: true },
 	});
-	const bySlug = new Map<string, { id: string; slug: string; name: string }>();
-	const byName = new Map<string, Array<{ id: string; slug: string }>>();
-	for (const p of projects.docs as Array<{
+	type Row = {
 		id: string;
 		slug?: string;
 		name?: string;
-	}>) {
-		const slug = String(p.slug ?? "");
-		const name = String(p.name ?? "");
-		if (slug) bySlug.set(slug.toLowerCase(), { id: p.id, slug, name });
+		status?: string;
+		canonicalSlug?: string | null;
+	};
+	const rows_ = projects.docs as Row[];
+	const idBySlug = new Map(rows_.map((p) => [String(p.slug ?? ""), p]));
+	// A row parked as a duplicate (Draft + canonicalSlug) folds to its
+	// canonical record: on 2026-09-23 "Liqvid" matched the hidden Draft
+	// shadow `liqvid` instead of the live `liqvidxyz`. Draft rows never win a
+	// name collision against a served one.
+	const fold = (p: Row): Row => {
+		const seen = new Set<string>();
+		let cur = p;
+		while (cur.canonicalSlug && !seen.has(cur.canonicalSlug)) {
+			seen.add(cur.canonicalSlug);
+			const next = idBySlug.get(cur.canonicalSlug);
+			if (!next) break;
+			cur = next;
+		}
+		return cur;
+	};
+	const bySlug = new Map<string, { id: string; slug: string; name: string }>();
+	const byName = new Map<string, Array<{ id: string; slug: string }>>();
+	for (const raw of rows_) {
+		const p = fold(raw);
+		const slug = String(raw.slug ?? "");
+		const name = String(raw.name ?? "");
+		const target = { id: p.id, slug: String(p.slug ?? slug), name };
+		if (slug) bySlug.set(slug.toLowerCase(), target);
 		if (name) {
 			const k = normalizeName(name);
-			byName.set(k, [...(byName.get(k) ?? []), { id: p.id, slug }]);
+			const list = byName.get(k) ?? [];
+			if (!list.some((x) => x.id === target.id)) {
+				// a served row outranks a Draft one carrying the same name
+				if (raw.status === "Draft" && list.length) continue;
+				byName.set(
+					k,
+					raw.status === "Draft"
+						? [...list, { id: target.id, slug: target.slug }]
+						: [
+								{ id: target.id, slug: target.slug },
+								...list.filter((x) => x.id !== target.id),
+							],
+				);
+			}
 		}
 	}
 
