@@ -2880,6 +2880,10 @@ export const LOGO_SET: Record<
 		url: "https://swiftexchange.io/images/logo.png",
 		note: "site's logo (og:image); the stored logo was a GitHub identicon",
 	},
+	"rivool-finance": {
+		url: "https://unavatar.io/x/rivool_finance",
+		note: "the blue flag mark the owner sent (2026-09-23); the project's X avatar, the site itself only serves a 60px favicon and a wordmark",
+	},
 	"stellar-security-portal": {
 		file: "public/awards/logos/stellar-security-portal.png",
 		note: "the site only serves an .ico (logo.ico); converted to PNG by hand, committed with the awards overrides; the stored file 404s",
