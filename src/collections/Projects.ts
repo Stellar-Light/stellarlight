@@ -1086,6 +1086,39 @@ export const Projects: CollectionConfig = {
 				return data;
 			},
 		],
+		beforeChange: [
+			// An awards ballot names nominees by slug; renaming a nominated
+			// project under an open or closed round silently zeroes its votes.
+			async ({ data, originalDoc, operation, req }) => {
+				if (
+					operation !== "update" ||
+					!originalDoc ||
+					!data?.slug ||
+					data.slug === originalDoc.slug
+				) {
+					return data;
+				}
+				const noms = await req.payload.find({
+					collection: "award-nominees",
+					where: { project: { equals: originalDoc.id } },
+					limit: 20,
+					depth: 1,
+					overrideAccess: true,
+				});
+				const live = noms.docs
+					// biome-ignore lint/suspicious/noExplicitAny: relationship shape
+					.map((n: any) =>
+						n.round && typeof n.round === "object" ? n.round : null,
+					)
+					.filter((r) => r && r.status !== "draft");
+				if (live.length) {
+					throw new Error(
+						`Cannot rename slug "${originalDoc.slug}": it is a nominee on ${live.map((r) => r.slug).join(", ")} and ballots name nominees by slug. Draft the round first.`,
+					);
+				}
+				return data;
+			},
+		],
 		afterChange: [
 			async ({ doc, operation, req, previousDoc }) => {
 				if (!req.payload) return;

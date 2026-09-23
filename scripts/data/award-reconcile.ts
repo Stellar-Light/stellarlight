@@ -99,8 +99,39 @@ async function main(): Promise<number> {
 		probe.funded === true
 			? decodeRelayBallots(round, nominees, probe.account.data)
 			: new Map();
+	// presence by RAW key: a ballot whose picks no longer decode is still here
+	const present = new Set<string>();
+	if (probe.funded === true) {
+		const prefix = `i3.${round.slug}.`;
+		for (const k of Object.keys(probe.account.data)) {
+			if (!k.startsWith(prefix)) continue;
+			const id = k.slice(prefix.length).split(".")[0] ?? "";
+			if (/^[0-9a-f]{8}$/.test(id)) present.add(id);
+		}
+	}
+	// The one-ballot gate is the compound unique index on (round, address).
+	// If it never built (duplicate rows predating it), reserve is a race
+	// again — read it, do not assume it.
+	let indexMissing = false;
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: adapter internals
+		const model = (payload.db as any).collections?.["award-ballots"];
+		const idx: Array<{ key?: Record<string, number>; unique?: boolean }> =
+			(await model?.collection?.indexes?.()) ?? [];
+		const gate = idx.find((i) => i.key?.round === 1 && i.key?.address === 1);
+		if (!gate?.unique) {
+			indexMissing = true;
+			console.error(
+				"\nUNIQUE INDEX MISSING on award-ballots (round, address): the database is not enforcing one ballot per voter. Check for duplicate (round, address) rows, let Payload build the index, re-run.",
+			);
+		} else {
+			console.log("unique index (round, address): present");
+		}
+	} catch (err) {
+		console.log(`unique index check skipped: ${String(err)}`);
+	}
 	const rows = await readRecordRows(payload, roundId);
-	const actions = planReconcile(rows, relay);
+	const actions = planReconcile(rows, relay, present);
 	const summary = summarizeReconcile(actions);
 	const c = summary.counts;
 	console.log(
@@ -162,7 +193,7 @@ async function main(): Promise<number> {
 	}
 	if (!EXECUTE)
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
-	return c.differs > 0 || c.orphan > 0 ? 1 : 0;
+	return c.differs > 0 || c.orphan > 0 || indexMissing ? 1 : 0;
 }
 
 main()

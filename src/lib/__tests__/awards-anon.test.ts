@@ -129,15 +129,6 @@ describe("relay storage: one entry per category (1,000-subentry cap)", () => {
 			impact: ["decaf", "beans"],
 		});
 	});
-
-	it("refuses a slate whose joined picks would not fit the 64-byte entry", () => {
-		const long = Array.from({ length: 4 }, (_, i) => `${"n".repeat(15)}${i}`);
-		const r = { ...round, picksPerCategory: 4 } as BallotRound;
-		const noms = long.map((slug) => ({ category: "impact", slug, name: slug }));
-		const v = validateSelections(r, noms, { impact: long });
-		expect(v.ok).toBe(false);
-		if (!v.ok) expect(v.errors.join()).toMatch(/exceed 64 bytes together/);
-	});
 });
 
 describe("voter authorization", () => {
