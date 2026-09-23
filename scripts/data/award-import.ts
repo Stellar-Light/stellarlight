@@ -3,6 +3,12 @@
  *
  *   pnpm exec tsx scripts/data/award-import.ts --kind=nominees --file=noms.csv
  *   pnpm exec tsx scripts/data/award-import.ts --kind=voters --file=keys.csv --execute
+ *   pnpm exec tsx scripts/data/award-import.ts --kind=nominees --file=wrong.csv --remove [--execute]
+ *
+ * --remove (nominees only) deletes the listed (project, category) rows from
+ * the round instead of adding them — for a nominee that resolved to the
+ * wrong directory record. Refused on an OPEN round: ballots already name
+ * their nominees, and removing one would strand them.
  *
  * Dry-run by default: it resolves everything, prints exactly what it WOULD
  * write, and exits without touching the database.
@@ -53,6 +59,7 @@ const arg = (name: string) =>
 	process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
 
 const EXECUTE = process.argv.includes("--execute");
+const REMOVE = process.argv.includes("--remove");
 const KIND = (arg("kind") ?? "").trim();
 const FILE = arg("file") ?? "";
 const ROUND_SLUG = arg("round") ?? null; // null → the open round
@@ -64,6 +71,10 @@ async function main() {
 	);
 	if (KIND !== "nominees" && KIND !== "voters") {
 		console.error("✗ --kind must be 'nominees' or 'voters'");
+		process.exit(1);
+	}
+	if (REMOVE && KIND !== "nominees") {
+		console.error("✗ --remove applies to nominees only");
 		process.exit(1);
 	}
 	const text = INLINE || (FILE ? readFileSync(FILE, "utf8") : "");
@@ -105,6 +116,7 @@ async function main() {
 	const round = found.docs[0] as {
 		id: string;
 		slug: string;
+		status?: string;
 		categories?: Array<{ key?: string }>;
 	};
 	console.log(`round: ${round.slug}\n`);
@@ -193,7 +205,12 @@ async function importVoters(
 
 async function importNominees(
 	payload: Payload,
-	round: { id: string; slug: string; categories?: Array<{ key?: string }> },
+	round: {
+		id: string;
+		slug: string;
+		status?: string;
+		categories?: Array<{ key?: string }>;
+	},
 	rows: Array<Record<string, string>>,
 ) {
 	const categoryKeys = new Set(
@@ -232,20 +249,22 @@ async function importNominees(
 		limit: 1000,
 		depth: 0,
 	});
-	const have = new Set(
-		(
-			existing.docs as Array<{
-				category?: string;
-				project?: string | { id?: string };
-			}>
-		).map((d) => {
-			const pid =
-				typeof d.project === "object" && d.project
-					? String(d.project.id)
-					: String(d.project);
-			return `${d.category}::${pid}`;
-		}),
-	);
+	// key → nominee row id, so --remove can name the exact row
+	const haveIds = new Map<string, string>();
+	for (const d of existing.docs as Array<{
+		id: string;
+		category?: string;
+		project?: string | { id?: string };
+	}>) {
+		const pid =
+			typeof d.project === "object" && d.project
+				? String(d.project.id)
+				: String(d.project);
+		haveIds.set(`${d.category}::${pid}`, String(d.id));
+	}
+	const have = new Set(haveIds.keys());
+	const removals: Array<{ id: string; cell: string; category: string }> = [];
+	const absent: string[] = [];
 
 	const add: Array<{ category: string; project: string; blurb: string }> = [];
 	const unresolved: Array<{ cell: string; why: string }> = [];
@@ -287,12 +306,60 @@ async function importNominees(
 		const key = `${category}::${hit.id}`;
 		if (seen.has(key)) continue; // same pair twice in the CSV
 		seen.add(key);
+		if (REMOVE) {
+			const id = haveIds.get(key);
+			if (id) removals.push({ id, cell, category });
+			else absent.push(`${cell} (${category})`);
+			continue;
+		}
 		if (have.has(key)) continue; // already a nominee
 		add.push({
 			category,
 			project: hit.id,
 			blurb: (r.blurb ?? r.description ?? r.why ?? "").trim(),
 		});
+	}
+
+	if (REMOVE) {
+		console.log(`nominees now     : ${have.size}`);
+		console.log(`to remove        : ${removals.length}`);
+		for (const x of removals) console.log(`   − ${x.cell} (${x.category})`);
+		if (absent.length) {
+			console.log(`
+✗ ${absent.length} row(s) are not nominees of this round:`);
+			for (const a of absent) console.log(`   ${a}`);
+		}
+		if (unresolved.length) {
+			console.log(`
+✗ ${unresolved.length} row(s) could not be resolved:`);
+			for (const u of unresolved) console.log(`   ${u.cell}  —  ${u.why}`);
+		}
+		const bad = absent.length + unresolved.length + badCategory.length;
+		if (round.status === "open") {
+			console.error(
+				`
+✗ REFUSED: ${round.slug} is OPEN — ballots already name their nominees, and removing one would strand them. Close or draft the round first.`,
+			);
+			process.exit(1);
+		}
+		if (!EXECUTE) {
+			console.log("\nDRY-RUN — nothing removed. Re-run with --execute.");
+			process.exit(bad > 0 ? 1 : 0);
+		}
+		for (const x of removals) {
+			await payload.delete({ collection: "award-nominees", id: x.id });
+		}
+		const left = await payload.find({
+			collection: "award-nominees",
+			where: { round: { equals: round.id } },
+			limit: 1000,
+			depth: 0,
+		});
+		console.log(
+			`
+removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
+		);
+		process.exit(bad > 0 ? 1 : 0);
 	}
 
 	console.log(`already nominees : ${have.size}`);

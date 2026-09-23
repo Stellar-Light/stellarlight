@@ -29,6 +29,11 @@ on:
         type: string
         required: false
         default: ""
+      remove:
+        description: "Nominees only: REMOVE the listed project,category rows from the round instead of adding them. Refused on an open round."
+        type: boolean
+        required: false
+        default: false
       execute:
         description: "Actually write. Unchecked = dry run."
         type: boolean
@@ -62,9 +67,11 @@ jobs:
           IN_KIND: ${{ inputs.kind }}
           IN_ROUND: ${{ inputs.round }}
           IN_EXECUTE: ${{ inputs.execute }}
+          IN_REMOVE: ${{ inputs.remove }}
         shell: bash
         run: |
           args=(--kind="$IN_KIND")
           if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_REMOVE" = "true" ]; then args+=(--remove); fi
           if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
           pnpm exec tsx scripts/data/award-import.ts "${args[@]}"

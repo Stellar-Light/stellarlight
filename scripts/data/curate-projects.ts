@@ -23,6 +23,7 @@ import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import configPromise from "../../src/payload.config";
 import {
 	ALIAS_ADD,
+	CANONICAL_SET,
 	DESCRIPTION_FIXES,
 	DOCS_LINKS,
 	GITHUB_LINK_REMOVE,
@@ -2624,6 +2625,30 @@ async function main() {
 		}
 		console.log(`  ${slug}: name "${d.name}" → "${name}"`);
 		writes.push({ id: d.id, slug, data: { name } });
+	}
+
+	for (const [slug, canonical] of Object.entries(CANONICAL_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.canonicalSlug === canonical) {
+			console.log(`  ${slug}: already a shadow of ${canonical}, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: canonicalSlug "${d.canonicalSlug ?? ""}" → "${canonical}"`,
+		);
+		writes.push({ id: d.id, slug, data: { canonicalSlug: canonical } });
 	}
 
 	for (const [slug, website] of Object.entries(WEBSITE_FIXES)) {

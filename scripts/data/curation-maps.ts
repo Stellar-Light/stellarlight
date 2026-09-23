@@ -43,6 +43,17 @@ export const STATUS_FIX: Record<
 		withdraw?: boolean;
 	}
 > = {
+	// 2026-09-23: seeded as a new record from the i³ intake before noticing the
+	// directory already held it as fastbuka (site choppaddi.com, "FKA FastBuka",
+	// alias). A duplicate is hidden, never dead: Draft + canonicalSlug →
+	// fastbuka (CANONICAL_SET), so a lookup of either name folds to one row.
+	choppaddi: {
+		from: "Live",
+		to: "Draft",
+		asOf: "2026-09-23",
+		basis: "human-verified",
+		note: "Duplicate of fastbuka, created 2026-09-23 by a nominee seed that misread a hit under the old name as an absence.",
+	},
 	"smart-treasury": {
 		from: "Live",
 		to: "Live",
@@ -2592,6 +2603,10 @@ export const STATUS_FIX: Record<
  * silently undid curation for weeks (#730). Equality no-ops keep reruns clean.
  * Pair with IDENTITY_FIX (curate-projects.ts) so the old name stays an alias. */
 export const NAME_FIXES: Record<string, string> = {
+	// i³ 2026 intake (2026-09-23): the row's own site is choppaddi.com and its
+	// description says "Choppaddi (FKA FastBuka)"; fastbuka.com answers 503.
+	// The product is Choppaddi now; the former name stays as an alias.
+	fastbuka: "Choppaddi",
 	// Raven #39: the Stellar Playbook lists "Wirex" (wirexapp.com). Our row
 	// was named for the Wirex Pay product; wirexpaychain.com now 301s to
 	// wirexapp.com. The company is the entity; Wirex Pay stays as an alias.
@@ -2823,6 +2838,13 @@ export const WEBSITE_FIXES: Record<string, string> = {
  * zenex: the project launched as Hermes (its own description says
  * "formerly Hermes"); wave-5 found "what happened to Hermes exchange"
  * missing zenex entirely because the alias existed only as prose. */
+/** Shadow → canonical: rows that are a duplicate or former name of another
+ *  project. Sets `canonicalSlug` (never deletes; pair with STATUS_FIX → Draft
+ *  to hide the duplicate from listings while search still folds to it). */
+export const CANONICAL_SET: Record<string, string> = {
+	choppaddi: "fastbuka", // 2026-09-23 duplicate seed; see STATUS_FIX
+};
+
 export const ALIAS_ADD: Record<string, string[]> = {
 	// The SCF project is "Enable"; the company and website are Humanity Link,
 	// so a reader who knows either name finds the row (packet 2026-09-14).
@@ -2833,7 +2855,7 @@ export const ALIAS_ADD: Record<string, string[]> = {
 	// equality between the SCF page and the row. Only PRODUCT names — the
 	// descriptive submission titles ("a real estate tokenization platform")
 	// are not identities and are not aliased.
-	fastbuka: ["Choppaddi"], // row's own site is choppaddi.com, desc says "FKA FastBuka"
+	fastbuka: ["Fastbuka"], // renamed to Choppaddi (NAME_FIXES); the former name still finds the row
 	obsrvr: ["Flow"], // OBSRVR's pipeline product; SCF site = withobsrvr.com
 	untangled: ["OctoPos"], // Untangled's vault infra submission (stellar.untangled.finance)
 	"dfs-labs": ["Stellar Surge"], // row desc literally describes Surge; dfslab.net
@@ -4794,27 +4816,6 @@ export const SEEDS: Array<{
 		statusBasis: "human-verified",
 		statusSourceUrl:
 			"https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
-	},
-	// ── i³ Awards 2026 nominee absent from the directory, 2026-09-23 ─────
-	// Nominated (Impact) in Emir's Airtable intake; checked absent by name and
-	// domain via /api/projects/search. Status from the operator's own
-	// submission ("live and operational on Stellar for 7 months, launched
-	// February 2026") plus a live storefront at choppaddi.com.
-	{
-		slug: "choppaddi",
-		name: "Choppaddi",
-		category: "User-Facing App",
-		status: "Live",
-		types: ["Payments"],
-		supportedNetworks: ["stellar"],
-		shortDescription:
-			"One marketplace to shop everything and pay anyone securely across Africa. Choppaddi is a Stellar-based marketplace and logistics platform connecting consumers, local merchants and delivery couriers, combining fiat payment methods with USDC to take payment friction out of everyday transactions.",
-		links: { website: "https://choppaddi.com/" },
-		provenance: { source: "AdminEdit" },
-		statusAsOf: "2026-09-23",
-		statusSourceUrl:
-			"https://airtable.com/appA9j4YNmiZBQWNg/shrmGnkCRXQiUOW2m/tblLZOLa4li01gZXx/viw9yEufDNZNrP3Bw",
-		statusBasis: "operator-announcement",
 	},
 ];
 
