@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-23T13:04:53.962Z",
+	"asOf": "2026-09-23T13:45:46.153Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 102,
 	"healthy": 100,
@@ -72,6 +72,17 @@
 			"why": "last green 39d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "award-import.yml",
+			"name": "i3 awards — import nominees / voters",
+			"cron": null,
+			"state": "ok",
+			"lastSuccessAt": "2026-09-23T13:21:58Z",
+			"ageDays": 0,
+			"graceDays": 45,
+			"runs": 6,
+			"why": "last green 0d ago (manual tool — age not judged)"
+		},
+		{
 			"file": "award-publish.yml",
 			"name": "award publish results (+ Tansu commit)",
 			"cron": null,
@@ -98,10 +109,10 @@
 			"name": "award round (create / status)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T21:53:08Z",
+			"lastSuccessAt": "2026-09-23T13:26:44Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 14,
+			"runs": 18,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -209,10 +220,10 @@
 			"cron": "30 8 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-22T13:36:52Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "basis-from-onchain.yml",
@@ -274,7 +285,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T12:59:23Z",
+			"lastSuccessAt": "2026-09-23T13:40:03Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -296,7 +307,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:02:00Z",
+			"lastSuccessAt": "2026-09-23T13:43:17Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -312,17 +323,6 @@
 			"graceDays": 45,
 			"runs": 23,
 			"why": "last green 20d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "curate-projects.yml",
-			"name": "Curate projects (manual)",
-			"cron": "30 7 * * 2",
-			"state": "ok",
-			"lastSuccessAt": "2026-09-23T12:47:32Z",
-			"ageDays": 0,
-			"graceDays": 21,
-			"runs": 41,
-			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -396,10 +396,10 @@
 			"cron": "0 9 * * 0",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-20T13:27:08Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 2d ago"
+			"why": "last green 3d ago"
 		},
 		{
 			"file": "enrich-builder-repos.yml",
@@ -736,7 +736,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T13:20:11Z",
+			"lastSuccessAt": "2026-09-23T13:33:44Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -901,7 +901,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T07:49:04Z",
+			"lastSuccessAt": "2026-09-23T13:41:57Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -1045,17 +1045,17 @@
 			"cron": "17 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-18T13:36:58Z",
-			"ageDays": 4,
+			"ageDays": 5,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 4d ago"
+			"why": "last green 5d ago"
 		},
 		{
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:02:00Z",
+			"lastSuccessAt": "2026-09-23T13:43:17Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1100,10 +1100,10 @@
 			"cron": "0 7 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-21T13:30:27Z",
-			"ageDays": 1,
+			"ageDays": 2,
 			"graceDays": 21,
 			"runs": 100,
-			"why": "last green 1d ago"
+			"why": "last green 2d ago"
 		},
 		{
 			"file": "verify-published-packages.yml",
@@ -1122,10 +1122,10 @@
 			"cron": "17 8 * * 4",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-17T13:26:34Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "workflow-health.yml",
@@ -1135,7 +1135,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 7,
 			"graceDays": 21,
-			"runs": 85,
+			"runs": 86,
 			"why": "last green 7d ago"
 		}
 	]
