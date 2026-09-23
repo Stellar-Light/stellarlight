@@ -2842,7 +2842,12 @@ export const WEBSITE_FIXES: Record<string, string> = {
  *  it, rasterises an SVG to a padded 512px PNG (next/image serves no SVG),
  *  uploads it to the media collection and points `logo` at it. The media
  *  doc's alt carries the source URL, which is how a re-run knows to skip. */
-export const LOGO_SET: Record<string, { url: string; note: string }> = {
+export const LOGO_SET: Record<
+	string,
+	// `url` is downloaded by the lane; `file` is read from the checkout (for a
+	// mark that had to be converted by hand, e.g. from an .ico). One of the two.
+	{ url?: string; file?: string; note: string }
+> = {
 	// i³ 2026 nominees, owner-named 2026-09-23. The stored Abroad logo was a
 	// GitHub identicon; the stored Tansu logo was another project's mark.
 	abroad: {
@@ -2852,6 +2857,32 @@ export const LOGO_SET: Record<string, { url: string; note: string }> = {
 	tansu: {
 		url: "https://tansu.dev/img/logo.svg",
 		note: "tansu.dev's own logo, owner-named",
+	},
+	// The other six the owner flagged as missing on the ballot (2026-09-23):
+	// stored as an .ico saved as .png, a 404, or a GitHub identicon.
+	bousol: {
+		url: "https://www.bousolapp.com/icon.png",
+		note: "site's 512px app icon; the stored 'png' was an .ico",
+	},
+	rahat: {
+		url: "https://rahat.io/RahatSymbol.png",
+		note: "site's own symbol; the stored logo was a GitHub identicon",
+	},
+	tucambio: {
+		url: "https://www.tucambio.app/logo.svg",
+		note: "site's logo (og:image); the stored logo was a GitHub identicon",
+	},
+	liqvid: {
+		url: "https://static.tildacdn.com/tild6332-3164-4961-a264-663836636439/Liqvid-logo-primary.svg",
+		note: "the logo the site itself loads (Tilda CDN); the stored file 404s",
+	},
+	swiftex: {
+		url: "https://swiftexchange.io/images/logo.png",
+		note: "site's logo (og:image); the stored logo was a GitHub identicon",
+	},
+	"stellar-security-portal": {
+		file: "public/awards/logos/stellar-security-portal.png",
+		note: "the site only serves an .ico (logo.ico); converted to PNG by hand, committed with the awards overrides; the stored file 404s",
 	},
 };
 

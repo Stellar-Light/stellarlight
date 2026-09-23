@@ -2669,9 +2669,15 @@ async function main() {
 					})
 					.catch(() => null)
 			: null;
+		const source = spec.url ?? (spec.file ? `file:${spec.file}` : "");
+		if (!source) {
+			console.error(`  ${slug}: LOGO_SET entry has neither url nor file`);
+			process.exitCode = 1;
+			continue;
+		}
 		// biome-ignore lint/suspicious/noExplicitAny: media doc shape
 		const cur = current as any;
-		if (String(cur?.alt ?? "").includes(spec.url)) {
+		if (String(cur?.alt ?? "").includes(source)) {
 			// the record says so; make sure the file actually serves before
 			// trusting it — an upload that missed R2 leaves a doc and no bytes
 			const served = cur?.filename
@@ -2682,25 +2688,37 @@ async function main() {
 						.catch(() => false)
 				: false;
 			if (served) {
-				console.log(`  ${slug}: logo already from ${spec.url}, skip`);
+				console.log(`  ${slug}: logo already from ${source}, skip`);
 				continue;
 			}
 			console.log(
-				`  ${slug}: logo record points at ${spec.url} but the file does not serve — re-uploading`,
+				`  ${slug}: logo record points at ${source} but the file does not serve — re-uploading`,
 			);
 		}
-		console.log(`  ${slug}: logo ← ${spec.url} (${spec.note})`);
+		console.log(`  ${slug}: logo ← ${source} (${spec.note})`);
 		if (!EXECUTE) continue;
-		const res = await fetch(spec.url, {
-			headers: { "User-Agent": "Mozilla/5.0 (stellarlight curate)" },
-		});
-		if (!res.ok) {
-			console.error(`  ${slug}: logo download failed — HTTP ${res.status}`);
-			process.exitCode = 1;
-			continue;
+		let buffer: Buffer;
+		let type: string;
+		if (spec.file) {
+			const { readFileSync } = await import("node:fs");
+			buffer = readFileSync(spec.file);
+			type = spec.file.endsWith(".png")
+				? "image/png"
+				: spec.file.endsWith(".svg")
+					? "image/svg+xml"
+					: "image/jpeg";
+		} else {
+			const res = await fetch(spec.url as string, {
+				headers: { "User-Agent": "Mozilla/5.0 (stellarlight curate)" },
+			});
+			if (!res.ok) {
+				console.error(`  ${slug}: logo download failed — HTTP ${res.status}`);
+				process.exitCode = 1;
+				continue;
+			}
+			type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
+			buffer = Buffer.from(await res.arrayBuffer());
 		}
-		const type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
-		let buffer = Buffer.from(await res.arrayBuffer());
 		let mimetype = type;
 		let ext =
 			type === "image/png"
@@ -2710,7 +2728,7 @@ async function main() {
 					: type === "image/webp"
 						? ".webp"
 						: "";
-		if (type === "image/svg+xml" || spec.url.endsWith(".svg")) {
+		if (type === "image/svg+xml" || source.endsWith(".svg")) {
 			// next/image serves no SVG: rasterise to a padded 512px PNG
 			const sharp = (await import("sharp")).default;
 			const inner = await sharp(buffer, { density: 600 })
@@ -2737,7 +2755,7 @@ async function main() {
 		}
 		const media = await payload.create({
 			collection: "media",
-			data: { alt: `${d.name} logo (${spec.url})` },
+			data: { alt: `${d.name} logo (${source})` },
 			file: {
 				data: buffer,
 				name: `${slug}-logo${ext}`,
