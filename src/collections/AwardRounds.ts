@@ -192,6 +192,52 @@ export const AwardRounds: CollectionConfig = {
 		},
 	],
 	hooks: {
+		beforeChange: [
+			// The lane (award-round.ts) enforces these; /admin did not. Ballots
+			// cast under one slot count do not decode under another, two open
+			// rounds make /awards arbitrary, and a round with no close date has
+			// nothing to date a late ballot against.
+			async ({ data, originalDoc, operation, req }) => {
+				if (operation !== "update" || !originalDoc) return data;
+				const was = String(originalDoc.status ?? "draft");
+				const now = String(data?.status ?? was);
+				if (
+					data?.picksPerCategory !== undefined &&
+					Number(data.picksPerCategory) !==
+						Number(originalDoc.picksPerCategory ?? 1) &&
+					!(was === "draft" && now === "draft")
+				) {
+					throw new Error(
+						`picksPerCategory can only change while the round is and stays draft (this round is ${was}${was !== now ? ` → ${now}` : ""}).`,
+					);
+				}
+				if (now === "open" && was !== "open") {
+					if (!(data?.closesAt ?? originalDoc.closesAt)) {
+						throw new Error(
+							"An open round needs closesAt: without a close date nothing dates a late ballot. Set it, then open.",
+						);
+					}
+					const others = await req.payload.find({
+						collection: "award-rounds",
+						where: {
+							and: [
+								{ status: { equals: "open" } },
+								{ id: { not_equals: originalDoc.id } },
+							],
+						},
+						limit: 1,
+						depth: 0,
+						overrideAccess: true,
+					});
+					if (others.docs[0]) {
+						throw new Error(
+							`Another round is already open (${String(others.docs[0].slug)}); /awards serves THE open round, so draft it first.`,
+						);
+					}
+				}
+				return data;
+			},
+		],
 		beforeValidate: [
 			({ data }) => {
 				// The on-chain key is `i3.<roundSlug>.<categoryKey>` and manageData

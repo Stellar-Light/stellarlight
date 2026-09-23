@@ -13,7 +13,10 @@
  * Returns one record per data row, keyed by the lower-cased header, so a
  * spreadsheet export with "Project Name" and "project name" reads the same.
  */
-export function parseCsv(text: string): Array<Record<string, string>> {
+export function parseCsv(input: string): Array<Record<string, string>> {
+	// Excel prepends a byte-order mark; without this the header reads
+	// "\uFEFFaddress" and every row's address is empty.
+	const text = input.replace(/^\uFEFF/, "");
 	const rows: string[][] = [];
 	let row: string[] = [];
 	let field = "";

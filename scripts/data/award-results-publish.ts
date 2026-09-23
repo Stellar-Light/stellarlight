@@ -23,6 +23,7 @@ const arg = (k: string) => {
 	return hit ? hit.slice(k.length + 3) : null;
 };
 const EXECUTE = args.includes("--execute");
+const ACCEPT_DRIFT = args.includes("--accept-manifest-drift");
 const ROUND = arg("round");
 
 async function main() {
@@ -41,7 +42,30 @@ async function main() {
 		);
 		return 1;
 	}
-	const { tally, source, digest, afterClose } = await liveTally(loaded);
+	const { tally, source, digest, afterClose, relayOnly } =
+		await liveTally(loaded);
+	// The pre-vote manifest pins the electorate and ballot shape the votes were
+	// cast under. Publish only a result whose round still matches it, or say
+	// in the log that the operator accepted the drift.
+	const anchorRes = await fetch(
+		`https://stellarlight.xyz/api/awards/anchor?round=${encodeURIComponent(ROUND)}`,
+	)
+		.then((r) => r.json())
+		.catch(() => null);
+	const manifest = anchorRes?.manifest as { matches?: boolean | null } | null;
+	if (!manifest) {
+		console.error(
+			`${ACCEPT_DRIFT ? "WARNING" : "REFUSED"}: no pre-vote manifest is anchored for ${ROUND} (tansu-anchor.yml --manifest). Nothing pins the roster and ballot shape the votes were cast under.${ACCEPT_DRIFT ? "" : " Pass --accept-manifest-drift to publish anyway."}`,
+		);
+		if (!ACCEPT_DRIFT) return 1;
+	} else if (manifest.matches !== true) {
+		console.error(
+			`${ACCEPT_DRIFT ? "WARNING" : "REFUSED"}: the round's manifest ${manifest.matches === null ? "could not be recomputed" : "changed since it was anchored"}: roster, nominees, picks or dates moved after voting opened.${ACCEPT_DRIFT ? "" : " Pass --accept-manifest-drift to publish anyway."}`,
+		);
+		if (!ACCEPT_DRIFT) return 1;
+	} else {
+		console.log("manifest: matches the anchored pre-vote digest");
+	}
 	if (!digest) {
 		console.error(
 			"REFUSED: the first-ballot record could not be read, so the digest that pins it cannot be computed. Publishing now would commit a result with no proof of the record it came from.",
@@ -54,10 +78,17 @@ async function main() {
 		);
 		return 1;
 	}
-	const doc = resultsDocument(loaded, tally, source, digest);
+	const doc = resultsDocument(
+		loaded,
+		tally,
+		source,
+		digest,
+		new Date(),
+		relayOnly,
+	);
 	const json = `${JSON.stringify(doc, null, "\t")}\n`;
 	console.log(
-		`\n${ROUND} (${loaded.round.status}) · source ${source} · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted}`,
+		`\n${ROUND} (${loaded.round.status}) · source ${source} · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted} · relay-only ${relayOnly}`,
 	);
 	if (afterClose > 0) {
 		console.log(

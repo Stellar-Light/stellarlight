@@ -9,6 +9,11 @@ on:
       round:
         description: "Round slug (e.g. i3-2026)"
         required: true
+      accept_manifest_drift:
+        description: "Publish even if the pre-vote manifest is missing or no longer matches (roster/nominees/picks/dates changed after opening). Say why in the run."
+        type: boolean
+        required: false
+        default: false
       execute:
         description: "Write the file, push it to main, and commit its SHA on Tansu. Unchecked = dry run."
         type: boolean
@@ -40,9 +45,11 @@ jobs:
         env:
           IN_ROUND: ${{ inputs.round }}
           IN_EXECUTE: ${{ inputs.execute }}
+          IN_ACCEPT_DRIFT: ${{ inputs.accept_manifest_drift }}
         run: |
           args=(--round="$IN_ROUND")
           if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          if [ "$IN_ACCEPT_DRIFT" = "true" ]; then args+=(--accept-manifest-drift); fi
           pnpm exec tsx scripts/data/award-results-publish.ts "${args[@]}"
       - name: Commit + push the results file
         if: ${{ inputs.execute }}

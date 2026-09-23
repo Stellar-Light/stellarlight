@@ -4,11 +4,12 @@
  * A ballot is written by the RELAY to its own account under a random id, one
  * entry per category:
  *   key   = `i3.<round>.<ballotId>.<category>`   (≤64 bytes, enforced)
- *   value = the category's picks, comma-joined   (≤64 bytes, enforced)
- * Three entries per ballot, because a Stellar account holds at most 1,000
- * subentries and one-per-pick would have exhausted that inside the real
- * rounds. Ballots written one-per-pick before 2026-09-23 carry a `.<slot>`
- * suffix and still decode.
+ *   value = the category's picks, comma-joined; when four long slugs do not
+ *           fit 64 bytes the rest continue under `.1`, `.2`, … (same key + slot)
+ * About three entries per ballot, because a Stellar account holds at most
+ * 1,000 subentries and one-per-pick would have exhausted that inside the
+ * real rounds. Ballots written one-per-pick before 2026-09-23 carry a
+ * `.<slot>` suffix holding a single slug and still decode.
  * The voter never writes to the chain. They sign an AUTHORIZATION — a
  * transaction that can never be submitted (its sequence is already consumed;
  * it expires in ten minutes) whose memo commits to exactly their picks — and
@@ -223,6 +224,13 @@ export function validateSelections(
 				bad = true;
 				break;
 			}
+			// the relay joins a category's picks with commas; a slug carrying
+			// one would split into two nominees on the way back
+			if (slug.includes(",")) {
+				errors.push(`nominee slug "${slug}" contains a comma`);
+				bad = true;
+				break;
+			}
 			// Picking the same nominee twice is a client bug, not a double vote:
 			// refuse it rather than silently collapsing it, so the voter's ballot
 			// never means something different from what they saw.
@@ -248,12 +256,6 @@ export function validateSelections(
 			MANAGE_DATA_MAX_BYTES
 		) {
 			errors.push(`ballot key for "${category}" exceeds 64 bytes`);
-			continue;
-		}
-		if (byteLength(slugs.join(",")) > MANAGE_DATA_MAX_BYTES) {
-			errors.push(
-				`picks in "${category}" exceed 64 bytes together (the relay stores a category's picks in one entry)`,
-			);
 			continue;
 		}
 		normalized[category] = slugs;
@@ -580,12 +582,34 @@ export function relayBallotOps(
 	for (const category of Object.keys(selections).sort()) {
 		const slugs = selections[category].slice(0, picks);
 		if (!slugs.length) continue;
-		ops.push(
-			Operation.manageData({
-				name: relayKey(round.slug, ballotId, category),
-				value: slugs.join(","),
-			}),
-		);
+		// Pack the picks into as few ≤64-byte values as they fit: the first
+		// under the category key, the rest under `.1`, `.2`, … There are never
+		// more chunks than picks, so a continuation slot stays inside what the
+		// decoder accepts. (Four long slugs on the real slate did not fit one
+		// value — audit 2026-09-23 — and were being refused outright.)
+		const chunks: string[] = [];
+		for (const slug of slugs) {
+			const last = chunks[chunks.length - 1];
+			if (
+				last !== undefined &&
+				byteLength(`${last},${slug}`) <= MANAGE_DATA_MAX_BYTES
+			) {
+				chunks[chunks.length - 1] = `${last},${slug}`;
+			} else {
+				chunks.push(slug);
+			}
+		}
+		chunks.forEach((value, i) => {
+			ops.push(
+				Operation.manageData({
+					name:
+						i === 0
+							? relayKey(round.slug, ballotId, category)
+							: relayKey(round.slug, ballotId, category, i),
+					value,
+				}),
+			);
+		});
 	}
 	return ops;
 }

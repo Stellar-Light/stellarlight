@@ -133,22 +133,32 @@ export interface RecordRow {
 export function planReconcile(
 	rows: RecordRow[],
 	relay: Map<string, BallotSelections>,
+	/**
+	 * Ballot ids the relay holds by RAW key. A ballot whose picks no longer
+	 * decode (a nominee removed or renamed) is still ON the relay; judged by
+	 * the decoded map alone it read as missing, and the lane would then have
+	 * released its reservation and let the voter cast a second, counted ballot.
+	 * Omitted = the decoded map's keys (tests, older callers).
+	 */
+	present?: ReadonlySet<string>,
 ): ReconcileAction[] {
 	const actions: ReconcileAction[] = [];
 	const seen = new Set<string>();
+	const held = present ?? new Set(relay.keys());
 	for (const r of rows) {
 		if (!r.ballotId) {
 			actions.push({ kind: "legacy", address: r.address });
 			continue;
 		}
 		seen.add(r.ballotId);
-		const onRelay = relay.get(r.ballotId);
+		const decoded = relay.get(r.ballotId);
+		const onRelay = held.has(r.ballotId);
 		if (!r.confirmed) {
 			actions.push({
 				kind: "unconfirmed",
 				address: r.address,
 				ballotId: r.ballotId,
-				onRelay: !!onRelay,
+				onRelay,
 			});
 			continue;
 		}
@@ -160,13 +170,14 @@ export function planReconcile(
 			});
 			continue;
 		}
+		// present but undecodable is a disagreement, not an absence
 		actions.push({
-			kind: sameSelections(r.selections, onRelay) ? "ok" : "differs",
+			kind: decoded && sameSelections(r.selections, decoded) ? "ok" : "differs",
 			address: r.address,
 			ballotId: r.ballotId,
 		});
 	}
-	for (const ballotId of relay.keys()) {
+	for (const ballotId of held) {
 		if (!seen.has(ballotId)) actions.push({ kind: "orphan", ballotId });
 	}
 	return actions;

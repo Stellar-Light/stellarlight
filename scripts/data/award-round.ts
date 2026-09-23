@@ -185,7 +185,9 @@ async function main() {
 
 	if (
 		target.status === STATUS &&
-		(picks === null || picks === Number(target.picksPerCategory ?? 1))
+		(picks === null || picks === Number(target.picksPerCategory ?? 1)) &&
+		!CLOSES &&
+		!OPENS
 	) {
 		console.log(
 			`\n${SLUG} is already ${STATUS} — nothing to do (pass --picks=N to change the slot count of a draft).`,

@@ -322,6 +322,9 @@ export interface ResultsDocument {
 	/** sha256 of the first-ballot record; null = the record could not be read. */
 	ballotsDigest: string | null;
 	turnout: { voted: number; whitelisted: number };
+	/** Ballots counted from the relay that the record does not name (anonymous,
+	 *  not covered by ballotsDigest). Normally 0. */
+	relayOnly: number;
 	categories: Array<{
 		key: string;
 		name: string;
@@ -339,6 +342,7 @@ export function resultsDocument(
 	source: TallySource,
 	digest: string | null,
 	now: Date = new Date(),
+	relayOnly = 0,
 ): ResultsDocument {
 	const { round } = loaded;
 	return {
@@ -351,6 +355,7 @@ export function resultsDocument(
 		source,
 		ballotsDigest: digest,
 		turnout: { ...tally.turnout },
+		relayOnly,
 		categories: tally.categories.map((c) => ({
 			key: c.key,
 			name: c.name,
