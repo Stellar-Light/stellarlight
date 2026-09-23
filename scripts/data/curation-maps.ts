@@ -4795,6 +4795,27 @@ export const SEEDS: Array<{
 		statusSourceUrl:
 			"https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
 	},
+	// ── i³ Awards 2026 nominee absent from the directory, 2026-09-23 ─────
+	// Nominated (Impact) in Emir's Airtable intake; checked absent by name and
+	// domain via /api/projects/search. Status from the operator's own
+	// submission ("live and operational on Stellar for 7 months, launched
+	// February 2026") plus a live storefront at choppaddi.com.
+	{
+		slug: "choppaddi",
+		name: "Choppaddi",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"One marketplace to shop everything and pay anyone securely across Africa. Choppaddi is a Stellar-based marketplace and logistics platform connecting consumers, local merchants and delivery couriers, combining fiat payment methods with USDC to take payment friction out of everyday transactions.",
+		links: { website: "https://choppaddi.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-23",
+		statusSourceUrl:
+			"https://airtable.com/appA9j4YNmiZBQWNg/shrmGnkCRXQiUOW2m/tblLZOLa4li01gZXx/viw9yEufDNZNrP3Bw",
+		statusBasis: "operator-announcement",
+	},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
