@@ -128,7 +128,17 @@ function readReceipt(address: string, round: string): StoredReceipt | null {
 }
 
 function apiErrorMessage(body: unknown, fallback: string): string {
-	const b = body as { message?: unknown; error?: unknown } | null;
+	const b = body as {
+		message?: unknown;
+		error?: unknown;
+		details?: unknown;
+	} | null;
+	// A refusal's `details` carry the actual reason ("innovation needs 4
+	// picks, got 3"); without them the toast read as a bare code.
+	const details = Array.isArray(b?.details)
+		? b.details.filter((d): d is string => typeof d === "string" && !!d)
+		: [];
+	if (details.length) return details.join(" · ");
 	if (typeof b?.message === "string" && b.message) return b.message;
 	if (typeof b?.error === "string" && b.error) return b.error;
 	return fallback;
@@ -1233,13 +1243,27 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			const signedXdr = await signAwardsBallot(xdrBody.xdr, address);
 
 			setPhase("submitting");
-			const submitRes = await fetch("/api/awards/submit", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				// the picks travel alongside; the signature's memo commits to them
-				body: JSON.stringify({ signedXdr, round: round.slug, selections }),
-			});
-			const submitBody = await submitRes.json();
+			// The relay serialises every voter through one sequence number; a
+			// collision answers relay_busy with nothing recorded. The signed
+			// authorization is good for ten minutes, so resubmit it instead of
+			// asking the wallet to sign again.
+			let submitRes: Response | null = null;
+			// biome-ignore lint/suspicious/noExplicitAny: route envelope
+			let submitBody: any = null;
+			for (let attempt = 1; attempt <= 4; attempt++) {
+				submitRes = await fetch("/api/awards/submit", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					// the picks travel alongside; the signature's memo commits to them
+					body: JSON.stringify({ signedXdr, round: round.slug, selections }),
+				});
+				submitBody = await submitRes.json();
+				const busy =
+					submitRes.status === 409 && submitBody?.error === "relay_busy";
+				if (!busy || attempt === 4) break;
+				await new Promise((r) => setTimeout(r, 4000 * attempt));
+			}
+			if (!submitRes) throw new Error("the vote could not be submitted");
 			if (submitRes.status === 409 && submitBody?.error === "already_voted") {
 				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
 				setPhase("idle");
@@ -2400,6 +2424,7 @@ const WINNERS_2025 = [
 	{
 		category: "Impact",
 		name: "Decaf",
+		logo: "/awards/winners-2025/decaf.jpg",
 		line: "Stablecoins you can actually use.",
 		blurb:
 			"Non-custodial app to send, receive, invest and spend stablecoins; cash-out in 180+ countries via MoneyGram.",
@@ -2408,6 +2433,7 @@ const WINNERS_2025 = [
 	{
 		category: "Innovation",
 		name: "Etherfuse",
+		logo: "/awards/winners-2025/etherfuse.jpg",
 		line: "RWAs as usable rails.",
 		blurb:
 			"Brings Stablebonds (tokenized government treasuries) natively to Stellar, plus MXNe, a peso-denominated stable value backed by CETES.",
@@ -2416,6 +2442,7 @@ const WINNERS_2025 = [
 	{
 		category: "Interoperability",
 		name: "DeFindex",
+		logo: "/awards/winners-2025/defindex.png",
 		line: "One integration, many protocols.",
 		blurb:
 			"Wallets integrate one API and launch vaults that turn complex DeFi strategies into simple savings accounts.",
@@ -2458,9 +2485,18 @@ function WinnerCard({
 			}`}
 			style={{ ["--sm-d" as string]: `${index * 0.16}s` }}
 		>
-			<span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
-				{winner.category}
-			</span>
+			<div className="flex items-center justify-between gap-3">
+				<span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+					{winner.category}
+				</span>
+				<Image
+					src={winner.logo}
+					alt=""
+					width={40}
+					height={40}
+					className="h-10 w-10 flex-shrink-0 rounded-lg border border-[#2f2f2f] bg-[#111] object-cover"
+				/>
+			</div>
 			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
 				{winner.name}
 				{/* the burst goes up behind the name, as the curtain clears it */}
@@ -2487,7 +2523,7 @@ function WinnerCard({
 				{winner.blurb}
 			</p>
 			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
-				Also shortlisted: {winner.finalists}
+				Nominees: {winner.finalists}
 			</p>
 			{/* the curtain, closed until the card is in view */}
 			<span className="sm-win-curtain" aria-hidden="true">

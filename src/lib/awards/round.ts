@@ -10,6 +10,7 @@
 
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotNominee, BallotRound } from "./ballot";
+import { AWARD_LOGO_OVERRIDES } from "./logo-overrides";
 
 export interface PublicNominee extends BallotNominee {
 	/** Ballot blurb: customBlurb if set, else the project's shortDescription. */
@@ -160,7 +161,9 @@ export async function loadRoundOrThrow(
 						(typeof n.customBlurb === "string" && n.customBlurb.trim()) ||
 						project.shortDescription ||
 						null,
-					logoUrl: projectLogoUrl(project),
+					logoUrl:
+						AWARD_LOGO_OVERRIDES[String(project.slug)] ??
+						projectLogoUrl(project),
 					projectUrl: `/project/${project.slug}`,
 					projectCategory: project.category ?? null,
 					tvl:
