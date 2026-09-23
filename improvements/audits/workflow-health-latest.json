@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-09-23T13:45:46.153Z",
+	"asOf": "2026-09-23T14:29:55.414Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 102,
 	"healthy": 100,
@@ -76,21 +76,10 @@
 			"name": "i3 awards — import nominees / voters",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:21:58Z",
+			"lastSuccessAt": "2026-09-23T13:55:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 6,
-			"why": "last green 0d ago (manual tool — age not judged)"
-		},
-		{
-			"file": "award-publish.yml",
-			"name": "award publish results (+ Tansu commit)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-09-22T21:24:02Z",
-			"ageDays": 0,
-			"graceDays": 45,
-			"runs": 1,
+			"runs": 7,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -98,10 +87,10 @@
 			"name": "award reconcile mirror",
 			"cron": "30 5 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T10:07:40Z",
+			"lastSuccessAt": "2026-09-23T13:59:07Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 4,
+			"runs": 5,
 			"why": "last green 0d ago"
 		},
 		{
@@ -109,10 +98,10 @@
 			"name": "award round (create / status)",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:26:44Z",
+			"lastSuccessAt": "2026-09-23T14:00:55Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 18,
+			"runs": 22,
 			"why": "last green 0d ago (manual tool — age not judged)"
 		},
 		{
@@ -231,10 +220,10 @@
 			"cron": "0 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-22T13:47:44Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -242,10 +231,10 @@
 			"cron": "0 10 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-22T14:20:32Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "basis-from-repo.yml",
@@ -253,10 +242,10 @@
 			"cron": "30 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-22T14:06:42Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -285,7 +274,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:40:03Z",
+			"lastSuccessAt": "2026-09-23T14:23:54Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -307,10 +296,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:43:17Z",
+			"lastSuccessAt": "2026-09-23T14:23:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -323,6 +312,17 @@
 			"graceDays": 45,
 			"runs": 23,
 			"why": "last green 20d ago (manual tool — age not judged)"
+		},
+		{
+			"file": "curate-projects.yml",
+			"name": "Curate projects (manual)",
+			"cron": "30 7 * * 2",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-23T13:49:42Z",
+			"ageDays": 0,
+			"graceDays": 21,
+			"runs": 2,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -714,10 +714,10 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-22T23:38:33Z",
+			"lastSuccessAt": "2026-09-23T14:23:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 97,
+			"runs": 98,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1047,7 +1047,7 @@
 			"lastSuccessAt": "2026-09-18T13:36:58Z",
 			"ageDays": 5,
 			"graceDays": 21,
-			"runs": 6,
+			"runs": 7,
 			"why": "last green 5d ago"
 		},
 		{
@@ -1055,7 +1055,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-23T13:43:17Z",
+			"lastSuccessAt": "2026-09-23T14:27:37Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1067,10 +1067,10 @@
 			"cron": "0 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-22T13:47:14Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 1,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
@@ -1135,7 +1135,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 7,
 			"graceDays": 21,
-			"runs": 86,
+			"runs": 87,
 			"why": "last green 7d ago"
 		}
 	]
