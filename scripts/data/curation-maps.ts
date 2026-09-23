@@ -2838,6 +2838,23 @@ export const WEBSITE_FIXES: Record<string, string> = {
  * zenex: the project launched as Hermes (its own description says
  * "formerly Hermes"); wave-5 found "what happened to Hermes exchange"
  * missing zenex entirely because the alias existed only as prose. */
+/** Replace a project's logo from a URL the owner named. The lane downloads
+ *  it, rasterises an SVG to a padded 512px PNG (next/image serves no SVG),
+ *  uploads it to the media collection and points `logo` at it. The media
+ *  doc's alt carries the source URL, which is how a re-run knows to skip. */
+export const LOGO_SET: Record<string, { url: string; note: string }> = {
+	// i³ 2026 nominees, owner-named 2026-09-23. The stored Abroad logo was a
+	// GitHub identicon; the stored Tansu logo was another project's mark.
+	abroad: {
+		url: "https://abroad.finance/assets/abroad-favicon.png",
+		note: "the teal chevron mark the owner sent; the site's own favicon",
+	},
+	tansu: {
+		url: "https://tansu.dev/img/logo.svg",
+		note: "tansu.dev's own logo, owner-named",
+	},
+};
+
 /** Shadow → canonical: rows that are a duplicate or former name of another
  *  project. Sets `canonicalSlug` (never deletes; pair with STATUS_FIX → Draft
  *  to hide the duplicate from listings while search still folds to it). */

@@ -28,6 +28,7 @@ import {
 	DOCS_LINKS,
 	GITHUB_LINK_REMOVE,
 	GITHUB_REPOS_ADD,
+	LOGO_SET,
 	NAME_FIXES,
 	PROMINENCE_SET,
 	SEEDS,
@@ -2625,6 +2626,105 @@ async function main() {
 		}
 		console.log(`  ${slug}: name "${d.name}" → "${name}"`);
 		writes.push({ id: d.id, slug, data: { name } });
+	}
+
+	for (const [slug, spec] of Object.entries(LOGO_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const logoId =
+			d.logo && typeof d.logo === "object" ? d.logo.id : (d.logo ?? null);
+		const current = logoId
+			? await payload
+					.findByID({
+						collection: "media",
+						id: logoId,
+						depth: 0,
+						overrideAccess: true,
+					})
+					.catch(() => null)
+			: null;
+		// biome-ignore lint/suspicious/noExplicitAny: media doc shape
+		if (String((current as any)?.alt ?? "").includes(spec.url)) {
+			console.log(`  ${slug}: logo already from ${spec.url}, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: logo ← ${spec.url} (${spec.note})`);
+		if (!EXECUTE) continue;
+		const res = await fetch(spec.url, {
+			headers: { "User-Agent": "Mozilla/5.0 (stellarlight curate)" },
+		});
+		if (!res.ok) {
+			console.error(`  ${slug}: logo download failed — HTTP ${res.status}`);
+			process.exitCode = 1;
+			continue;
+		}
+		const type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
+		let buffer = Buffer.from(await res.arrayBuffer());
+		let mimetype = type;
+		let ext =
+			type === "image/png"
+				? ".png"
+				: type === "image/jpeg"
+					? ".jpg"
+					: type === "image/webp"
+						? ".webp"
+						: "";
+		if (type === "image/svg+xml" || spec.url.endsWith(".svg")) {
+			// next/image serves no SVG: rasterise to a padded 512px PNG
+			const sharp = (await import("sharp")).default;
+			const inner = await sharp(buffer, { density: 600 })
+				.resize(400, 400, { fit: "inside" })
+				.png()
+				.toBuffer();
+			buffer = await sharp({
+				create: {
+					width: 512,
+					height: 512,
+					channels: 4,
+					background: { r: 0, g: 0, b: 0, alpha: 0 },
+				},
+			})
+				.composite([{ input: inner, gravity: "center" }])
+				.png()
+				.toBuffer();
+			mimetype = "image/png";
+			ext = ".png";
+		} else if (!ext) {
+			console.error(`  ${slug}: unsupported logo type "${type}"`);
+			process.exitCode = 1;
+			continue;
+		}
+		const media = await payload.create({
+			collection: "media",
+			data: { alt: `${d.name} logo (${spec.url})` },
+			file: {
+				data: buffer,
+				name: `${slug}-logo${ext}`,
+				mimetype,
+				size: buffer.length,
+			},
+			overrideAccess: true,
+		});
+		await payload.update({
+			collection: "projects",
+			id: d.id,
+			data: { logo: media.id },
+			overrideAccess: true,
+		});
+		console.log(
+			`  ${slug}: logo set (media ${media.id}, ${buffer.length} bytes)`,
+		);
 	}
 
 	for (const [slug, canonical] of Object.entries(CANONICAL_SET)) {
