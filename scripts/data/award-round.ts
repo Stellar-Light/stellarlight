@@ -2,7 +2,8 @@
  * i³ Awards — set a round's status, safely.
  *
  *   pnpm exec tsx scripts/data/award-round.ts --list
- *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026-nominations --title="i³ Awards 2026 — Nominations" --picks=3 [--closes=2026-10-01T00:00:00Z] [--execute]
+ *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026-nominations --title="i³ Awards 2026: Nominations" --picks=3 [--closes=2026-10-01T00:00:00Z] [--execute]
+ *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026-nominations --status=open --title="New title" --execute   (rename, any status)
  *   pnpm exec tsx scripts/data/award-round.ts --create --slug=i3-2026 --title="i³ Awards 2026" [--execute]
  *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026-test --status=draft
  *   pnpm exec tsx scripts/data/award-round.ts --slug=i3-2026 --status=open [--closes=…] --execute
@@ -183,14 +184,18 @@ async function main() {
 		return 1;
 	}
 
+	// A title is display only, nothing on chain or in a ballot names it, so it
+	// can change in any status.
+	const title = TITLE && TITLE !== String(target.title ?? "") ? TITLE : null;
 	if (
 		target.status === STATUS &&
 		(picks === null || picks === Number(target.picksPerCategory ?? 1)) &&
 		!CLOSES &&
-		!OPENS
+		!OPENS &&
+		title === null
 	) {
 		console.log(
-			`\n${SLUG} is already ${STATUS} — nothing to do (pass --picks=N to change the slot count of a draft).`,
+			`\n${SLUG} is already ${STATUS}, nothing to do (pass --picks=N to change the slot count of a draft, --title to rename).`,
 		);
 		return 0;
 	}
@@ -223,7 +228,7 @@ async function main() {
 		...(CLOSES ? { closesAt: iso(CLOSES) } : {}),
 	};
 	console.log(
-		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}${picks !== null ? ` · picks ${target.picksPerCategory ?? 1} → ${picks}` : ""}`,
+		`\n${SLUG}: ${target.status} → ${STATUS}${dates.opensAt ? ` · opens ${dates.opensAt}` : ""}${dates.closesAt ? ` · closes ${dates.closesAt}` : ""}${picks !== null ? ` · picks ${target.picksPerCategory ?? 1} → ${picks}` : ""}${title !== null ? ` · title "${String(target.title ?? "")}" → "${title}"` : ""}`,
 	);
 	if (!EXECUTE) {
 		console.log("\nDRY RUN — nothing written. Re-run with --execute.");
@@ -236,6 +241,7 @@ async function main() {
 			status: STATUS as RoundStatus,
 			...dates,
 			...(picks !== null ? { picksPerCategory: picks } : {}),
+			...(title !== null ? { title } : {}),
 		},
 		overrideAccess: true,
 	});

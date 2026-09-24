@@ -22,7 +22,7 @@ on:
         required: false
         default: false
       title:
-        description: "Title (create only), e.g. i³ Awards 2026 — Nominations"
+        description: "Title. create: the new round\'s title. Any status flip: a new title for the round (display only, safe in any status)."
         required: false
         default: ""
       picks:
@@ -84,6 +84,7 @@ jobs:
           else
             args=(--slug="$IN_SLUG" --status="$IN_STATUS")
             if [ -n "$IN_PICKS" ]; then args+=(--picks="$IN_PICKS"); fi
+            if [ -n "$IN_TITLE" ]; then args+=(--title="$IN_TITLE"); fi
           fi
           if [ -n "$IN_CLOSES" ]; then args+=(--closes="$IN_CLOSES"); fi
           if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
