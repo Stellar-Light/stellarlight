@@ -22,7 +22,7 @@ on:
         required: false
         default: false
       title:
-        description: "Title. create: the new round\'s title. Any status flip: a new title for the round (display only, safe in any status)."
+        description: "Title. create: the title of the new round. Any status flip: a new title for the round (display only, safe in any status)."
         required: false
         default: ""
       picks:
