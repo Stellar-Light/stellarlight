@@ -134,6 +134,13 @@ export const AwardBallots: CollectionConfig = {
 				// which relay ballot this submission became; Payload drops keys
 				// the config does not declare, so this has to be here
 				{ name: "ballotId", type: "text" },
+				// The Pilot's own signed authorization (base64 transaction XDR):
+				// their key's signature over a memo that commits to exactly these
+				// picks. The chain shows only the relay's write; this is the proof
+				// that the Pilot asked for it, and an auditor with access to this
+				// record can re-verify it (verifyAuthorization) without anything
+				// being published. Never public: this collection is admin-only.
+				{ name: "authorization", type: "textarea" },
 			],
 		},
 	],

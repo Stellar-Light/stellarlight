@@ -447,6 +447,7 @@ describe("record — the reserve is atomic and a reservation is not a ballot", (
 		reserveBallot({
 			roundSlug: round.slug,
 			address: voter.publicKey(),
+			authorization: "AAAAAgAAAAB-test-authorization",
 			ballotId: "abcd1234",
 			selections: picks,
 		});

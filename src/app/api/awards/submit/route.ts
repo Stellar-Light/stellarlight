@@ -213,6 +213,7 @@ export async function POST(req: NextRequest) {
 		address: verdict.source,
 		ballotId,
 		selections: validated.selections,
+		authorization: signedXdr,
 	});
 	if (!reserved.ok) {
 		const dup = reserved.reason === "already_voted";
