@@ -84,7 +84,7 @@ const KIND_TINT: Record<HighlightKind, string> = {
 /**
  * A moment's glyph is a small mechanism from yui540's gallery (awards.css,
  * "Highlight glyphs"), not a stock icon: the bar chart, the pop and burst,
- * the ripple, the stomp. Each plays once as the sheet unrolls; `delay`
+ * the orbit, the bookmark. Each plays as the sheet unrolls; `delay`
  * staggers them down the list.
  */
 function KindGlyph({ kind, delay }: { kind: HighlightKind; delay: number }) {
@@ -106,15 +106,16 @@ function KindGlyph({ kind, delay }: { kind: HighlightKind; delay: number }) {
 			</>
 		) : kind === "reach" ? (
 			<>
-				<i className="sm-hk-wave" />
-				<i className="sm-hk-wave" />
 				<i className="sm-hk-orbit" />
 				<i className="sm-hk-dot" />
+				<i className="sm-hk-wave" />
 			</>
 		) : (
 			<>
-				<i className="sm-hk-base" />
 				<i className="sm-hk-block" />
+				<i className="sm-hk-spark" />
+				<i className="sm-hk-spark" />
+				<i className="sm-hk-spark" />
 			</>
 		);
 	return (
