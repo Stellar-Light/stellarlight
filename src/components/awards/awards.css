@@ -1657,14 +1657,17 @@
 }
 
 /* ── Highlight glyphs: a moment's icon is a small mechanism ─────────────
-   The "2026 in review" sheet marked each moment with a stock icon. Each
-   moment now names its own mechanism from yui540's gallery (the gallery
-   collection is noted per glyph), each the size of the icon it replaces,
-   each a one-shot that plays as the sheet unrolls (--sm-d staggers them
-   down the list). Colour is currentColor, so the moment's tint carries. At
-   rest every glyph is a still mark, and that rest state is the static
-   style, which is also what reduced motion shows. Two glyphs paint the
-   icon box's own ground (#171717) for a hole or a stripe; the box is fixed. */
+   Every "2026 in review" moment names its own mechanism, each one taken
+   from yui540's gallery, page 4 (collections 59, 58, 57, 55, 53, 56, 38,
+   29 and 28; the collection and the piece's Japanese name are noted per
+   glyph), redrawn at 20px from the piece's own parts and keyframes. Each
+   is a one-shot that plays as the sheet unrolls (--sm-d staggers them down
+   the list; every part's delay is var(--sm-d) plus its own offset). Colour
+   is currentColor, so the moment's tint carries. The static style of every
+   part is its resting pose, which is where each animation ends, so reduced
+   motion (animation: none) shows the finished mark. #171717 is the icon
+   box's own ground, used where a piece needs a hole or a gap. Parts are
+   addressed by nth-child; the sheet renders N empty <i> per glyph. */
 .awards-sm .sm-hk {
 	position: relative;
 	display: block;
@@ -1674,278 +1677,1882 @@
 .awards-sm .sm-hk i {
 	position: absolute;
 	display: block;
+	background: currentColor;
 }
 
-/* chart (gallery 43 "icon", the bar chart): bars land with the 40/110/100 overshoot */
-.awards-sm .sm-hk-chart i {
-	bottom: 1px;
-	width: 4px;
-	border-radius: 2px;
-	background: currentColor;
-	transform-origin: bottom;
-	animation: sm-hk-bar 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) var(--sm-d, 0s) both;
+/* pour (59 牛乳): the carton tips over the glass, the glass fills */
+.awards-sm .sm-hk-pour i:nth-child(1) {
+	left: 9px;
+	top: 6px;
+	width: 8px;
+	height: 12px;
+	background: none;
+	border: 2px solid currentColor;
+	border-top: 0;
+	border-radius: 0 0 2px 2px;
 }
-.awards-sm .sm-hk-chart i:nth-child(1) {
-	left: 2px;
-	height: 8px;
+.awards-sm .sm-hk-pour i:nth-child(2) {
+	left: 12px;
+	bottom: 3px;
+	width: 3px;
+	height: 7px;
+	animation: sm-g-pour-fill 0.9s ease-out calc(var(--sm-d, 0s) + 0.25s) both;
 }
-.awards-sm .sm-hk-chart i:nth-child(2) {
+.awards-sm .sm-hk-pour i:nth-child(3) {
+	left: 1px;
+	top: 3px;
+	width: 6px;
+	height: 9px;
+	border-radius: 1px;
+	transform-origin: 100% 100%;
+	animation: sm-g-pour-tip 1.1s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-pour i:nth-child(4) {
 	left: 8px;
-	height: 13px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.09s);
+	top: 2px;
+	width: 2px;
+	height: 6px;
+	opacity: 0;
+	animation: sm-g-pour-stream 1.1s ease-in-out var(--sm-d, 0s) both;
 }
-.awards-sm .sm-hk-chart i:nth-child(3) {
-	left: 14px;
-	height: 18px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.18s);
+@keyframes sm-g-pour-tip {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	30%,
+	70% {
+		transform: rotate(48deg);
+	}
 }
-@keyframes sm-hk-bar {
+@keyframes sm-g-pour-stream {
+	0%,
+	25%,
+	80%,
+	100% {
+		opacity: 0;
+	}
+	35%,
+	65% {
+		opacity: 1;
+	}
+}
+@keyframes sm-g-pour-fill {
 	from {
-		transform: scaleY(0.4);
+		height: 0;
+	}
+	to {
+		height: 7px;
+	}
+}
+
+/* flip (59 ひっくり返す): the card turns over; its other face is the mark */
+.awards-sm .sm-hk-flip i {
+	left: 4px;
+	top: 3px;
+	width: 12px;
+	height: 14px;
+	border-radius: 2px;
+	backface-visibility: hidden;
+}
+.awards-sm .sm-hk-flip i:nth-child(1) {
+	transform: perspective(60px) rotateY(180deg);
+	animation: sm-g-flip-front 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-flip i:nth-child(2) {
+	background: none;
+	border: 2px solid currentColor;
+	transform: perspective(60px) rotateY(0deg);
+	animation: sm-g-flip-back 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-flip-front {
+	from {
+		transform: perspective(60px) rotateY(0deg);
+	}
+	to {
+		transform: perspective(60px) rotateY(180deg);
+	}
+}
+@keyframes sm-g-flip-back {
+	from {
+		transform: perspective(60px) rotateY(-180deg);
+	}
+	to {
+		transform: perspective(60px) rotateY(0deg);
+	}
+}
+
+/* fan (59 じゃじゃーん): three cards spring out of one, ta-da */
+.awards-sm .sm-hk-fan i {
+	left: 6.5px;
+	top: 5px;
+	width: 7px;
+	height: 11px;
+	border-radius: 1.5px;
+	transform-origin: 50% 130%;
+	animation: sm-g-fan 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--sm-d, 0s)
+		both;
+}
+.awards-sm .sm-hk-fan i:nth-child(1) {
+	--sm-r: -30deg;
+	opacity: 0.55;
+	animation-delay: calc(var(--sm-d, 0s) + 0.12s);
+}
+.awards-sm .sm-hk-fan i:nth-child(2) {
+	--sm-r: 0deg;
+}
+.awards-sm .sm-hk-fan i:nth-child(3) {
+	--sm-r: 30deg;
+	opacity: 0.55;
+	animation-delay: calc(var(--sm-d, 0s) + 0.12s);
+}
+.awards-sm .sm-hk-fan i {
+	transform: rotate(var(--sm-r, 0deg));
+}
+@keyframes sm-g-fan {
+	from {
+		transform: rotate(0deg) scale(0.5);
+	}
+	to {
+		transform: rotate(var(--sm-r, 0deg)) scale(1);
+	}
+}
+
+/* fold (59 紙を折りたたむ): the top half folds down onto the bottom half */
+.awards-sm .sm-hk-fold i {
+	left: 4px;
+	width: 12px;
+	height: 7px;
+}
+.awards-sm .sm-hk-fold i:nth-child(1) {
+	top: 10px;
+	border-radius: 0 0 2px 2px;
+}
+.awards-sm .sm-hk-fold i:nth-child(2) {
+	top: 3px;
+	border-radius: 2px 2px 0 0;
+	opacity: 0.6;
+	transform-origin: 50% 100%;
+	transform: perspective(50px) rotateX(-180deg);
+	animation: sm-g-fold 0.9s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-fold {
+	0%,
+	20% {
+		opacity: 1;
+		transform: perspective(50px) rotateX(0deg);
+	}
+	75% {
+		opacity: 0.6;
+		transform: perspective(50px) rotateX(-190deg);
+	}
+	100% {
+		opacity: 0.6;
+		transform: perspective(50px) rotateX(-180deg);
+	}
+}
+
+/* charge (59 充電): the battery fills bar by bar */
+.awards-sm .sm-hk-charge i:nth-child(1) {
+	left: 1px;
+	top: 6px;
+	width: 15px;
+	height: 8px;
+	background: none;
+	border: 2px solid currentColor;
+	border-radius: 2px;
+}
+.awards-sm .sm-hk-charge i:nth-child(2) {
+	left: 17px;
+	top: 8.5px;
+	width: 2px;
+	height: 3px;
+	border-radius: 0 1px 1px 0;
+}
+.awards-sm .sm-hk-charge i:nth-child(n + 3) {
+	top: 8.5px;
+	width: 3px;
+	height: 3px;
+	transform-origin: 0 50%;
+	animation: sm-g-charge 0.35s ease-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-charge i:nth-child(3) {
+	left: 3.5px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.15s);
+}
+.awards-sm .sm-hk-charge i:nth-child(4) {
+	left: 7.5px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.45s);
+}
+.awards-sm .sm-hk-charge i:nth-child(5) {
+	left: 11.5px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.75s);
+}
+@keyframes sm-g-charge {
+	from {
+		transform: scaleX(0);
 	}
 	60% {
-		transform: scaleY(1.1);
+		transform: scaleX(1.25);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+/* mic (59 音声入力): the microphone listens, sound waves pulse beside it */
+.awards-sm .sm-hk-mic i:nth-child(1) {
+	left: 7.5px;
+	top: 2px;
+	width: 5px;
+	height: 9px;
+	border-radius: 3px;
+}
+.awards-sm .sm-hk-mic i:nth-child(2) {
+	left: 9px;
+	top: 12px;
+	width: 2px;
+	height: 4px;
+}
+.awards-sm .sm-hk-mic i:nth-child(3) {
+	left: 6px;
+	top: 16px;
+	width: 8px;
+	height: 2px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-mic i:nth-child(n + 4) {
+	top: 5px;
+	width: 2px;
+	height: 6px;
+	border-radius: 1px;
+	opacity: 0.55;
+	animation: sm-g-mic 0.5s ease-in-out calc(var(--sm-d, 0s) + 0.15s) 2 both;
+}
+.awards-sm .sm-hk-mic i:nth-child(4) {
+	left: 3px;
+}
+.awards-sm .sm-hk-mic i:nth-child(5) {
+	left: 15px;
+}
+@keyframes sm-g-mic {
+	0%,
+	100% {
+		opacity: 0.55;
+		transform: scaleY(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scaleY(1.5);
+	}
+}
+
+/* curtain (58 カーテン): the curtains draw open on their rod */
+.awards-sm .sm-hk-curtain i:nth-child(1) {
+	left: 1px;
+	top: 2px;
+	width: 18px;
+	height: 2px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-curtain i:nth-child(n + 2) {
+	top: 5px;
+	width: 8px;
+	height: 13px;
+	border-radius: 1px;
+	transform: scaleX(0.3);
+	animation: sm-g-curtain 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+.awards-sm .sm-hk-curtain i:nth-child(2) {
+	left: 2px;
+	transform-origin: 0 50%;
+}
+.awards-sm .sm-hk-curtain i:nth-child(3) {
+	left: 10px;
+	transform-origin: 100% 50%;
+}
+@keyframes sm-g-curtain {
+	from {
+		transform: scaleX(1);
+	}
+	60% {
+		transform: scaleX(0.22);
+	}
+	to {
+		transform: scaleX(0.3);
+	}
+}
+
+/* boil (58 沸騰した鍋): the lid hops on the pot, bubbles rise */
+.awards-sm .sm-hk-boil i:nth-child(1) {
+	left: 3px;
+	top: 10px;
+	width: 14px;
+	height: 8px;
+	border-radius: 0 0 3px 3px;
+}
+.awards-sm .sm-hk-boil i:nth-child(2) {
+	left: 2px;
+	top: 8px;
+	width: 16px;
+	height: 2.5px;
+	border-radius: 1px;
+	animation: sm-g-boil-lid 0.45s ease-in-out calc(var(--sm-d, 0s) + 0.2s) 2 both;
+}
+.awards-sm .sm-hk-boil i:nth-child(n + 3) {
+	width: 2.5px;
+	height: 2.5px;
+	border-radius: 50%;
+	opacity: 0.6;
+	animation: sm-g-boil-bubble 0.7s ease-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-boil i:nth-child(3) {
+	left: 5px;
+	top: 3px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-boil i:nth-child(4) {
+	left: 9px;
+	top: 1px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.35s);
+}
+.awards-sm .sm-hk-boil i:nth-child(5) {
+	left: 13px;
+	top: 4px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.6s);
+}
+@keyframes sm-g-boil-lid {
+	0%,
+	100% {
+		transform: translateY(0) rotate(0deg);
+	}
+	50% {
+		transform: translateY(-2px) rotate(-4deg);
+	}
+}
+@keyframes sm-g-boil-bubble {
+	from {
+		opacity: 0;
+		transform: translateY(6px) scale(0.4);
+	}
+	to {
+		opacity: 0.6;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* tap (58 蛇口): the handle turns, water runs from the spout */
+.awards-sm .sm-hk-tap i:nth-child(1) {
+	left: 3px;
+	top: 5px;
+	width: 13px;
+	height: 3px;
+	border-radius: 1.5px;
+}
+.awards-sm .sm-hk-tap i:nth-child(2) {
+	left: 13px;
+	top: 5px;
+	width: 3px;
+	height: 6px;
+	border-radius: 0 0 1.5px 1.5px;
+}
+.awards-sm .sm-hk-tap i:nth-child(3) {
+	left: 6px;
+	top: 1px;
+	width: 5px;
+	height: 3px;
+	border-radius: 1px;
+	transform: rotate(90deg);
+	animation: sm-g-tap-handle 0.4s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-tap i:nth-child(4) {
+	left: 13.75px;
+	top: 11px;
+	width: 1.5px;
+	height: 7px;
+	transform-origin: 50% 0;
+	animation: sm-g-tap-stream 0.5s ease-out calc(var(--sm-d, 0s) + 0.45s) both;
+}
+.awards-sm .sm-hk-tap i:nth-child(5) {
+	left: 11px;
+	top: 17px;
+	width: 7px;
+	height: 2px;
+	border-radius: 1px;
+	opacity: 0.55;
+	animation: sm-g-tap-splash 0.4s ease-out calc(var(--sm-d, 0s) + 0.85s) both;
+}
+@keyframes sm-g-tap-handle {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(90deg);
+	}
+}
+@keyframes sm-g-tap-stream {
+	from {
+		transform: scaleY(0);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+@keyframes sm-g-tap-splash {
+	from {
+		opacity: 0;
+		transform: scaleX(0.3);
+	}
+	to {
+		opacity: 0.55;
+		transform: scaleX(1);
+	}
+}
+
+/* peel (58 ぺりぺり剥がす): a corner of the sticker lifts and peels back */
+.awards-sm .sm-hk-peel i:nth-child(1) {
+	left: 3px;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 2px;
+}
+.awards-sm .sm-hk-peel i:nth-child(2) {
+	left: 9px;
+	top: 3px;
+	width: 8px;
+	height: 8px;
+	background: #171717;
+	clip-path: polygon(0 0, 100% 0, 100% 100%);
+	transform-origin: 100% 0;
+	animation: sm-g-peel 0.7s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+.awards-sm .sm-hk-peel i:nth-child(3) {
+	left: 9px;
+	top: 3px;
+	width: 8px;
+	height: 8px;
+	opacity: 0.55;
+	clip-path: polygon(0 0, 0 100%, 100% 100%);
+	transform-origin: 100% 0;
+	animation: sm-g-peel 0.7s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+@keyframes sm-g-peel {
+	from {
+		transform: scale(0);
+	}
+	60% {
+		transform: scale(1.12);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+
+/* torch (58 懐中電灯): the flashlight switches on and its beam sweeps */
+.awards-sm .sm-hk-torch i:nth-child(1) {
+	left: 1px;
+	top: 8px;
+	width: 7px;
+	height: 4px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-torch i:nth-child(2) {
+	left: 7px;
+	top: 7px;
+	width: 3px;
+	height: 6px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-torch i:nth-child(3) {
+	left: 10px;
+	top: 3px;
+	width: 9px;
+	height: 14px;
+	opacity: 0.45;
+	clip-path: polygon(0 36%, 100% 0, 100% 100%, 0 64%);
+	transform-origin: 0 50%;
+	animation: sm-g-torch 1s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-torch {
+	0% {
+		opacity: 0;
+		transform: scaleX(0.2) rotate(0deg);
+	}
+	25% {
+		opacity: 0.45;
+		transform: scaleX(1) rotate(0deg);
+	}
+	50% {
+		transform: scaleX(1) rotate(-9deg);
+	}
+	80% {
+		transform: scaleX(1) rotate(7deg);
+	}
+	100% {
+		opacity: 0.45;
+		transform: scaleX(1) rotate(0deg);
+	}
+}
+
+/* door (58 ふすま): the sliding door slides open along its rails */
+.awards-sm .sm-hk-door i:nth-child(1),
+.awards-sm .sm-hk-door i:nth-child(2) {
+	left: 1px;
+	width: 18px;
+	height: 2px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-door i:nth-child(1) {
+	top: 2px;
+}
+.awards-sm .sm-hk-door i:nth-child(2) {
+	top: 16px;
+}
+.awards-sm .sm-hk-door i:nth-child(3),
+.awards-sm .sm-hk-door i:nth-child(4) {
+	top: 5px;
+	width: 8px;
+	height: 10px;
+	border-radius: 1px;
+}
+.awards-sm .sm-hk-door i:nth-child(3) {
+	left: 2px;
+	opacity: 0.5;
+}
+.awards-sm .sm-hk-door i:nth-child(4) {
+	left: 10px;
+	box-shadow: -2px 0 0 #171717;
+	transform: translateX(-7px);
+	animation: sm-g-door 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+@keyframes sm-g-door {
+	from {
+		transform: translateX(0);
+	}
+	65% {
+		transform: translateX(-8px);
+	}
+	to {
+		transform: translateX(-7px);
+	}
+}
+
+/* book (57 本): the book lies open, a page turns over */
+.awards-sm .sm-hk-book i:nth-child(1),
+.awards-sm .sm-hk-book i:nth-child(2) {
+	top: 4px;
+	width: 8px;
+	height: 12px;
+}
+.awards-sm .sm-hk-book i:nth-child(1) {
+	left: 2px;
+	border-radius: 2px 0 0 2px;
+	opacity: 0.6;
+}
+.awards-sm .sm-hk-book i:nth-child(2) {
+	left: 10px;
+	border-radius: 0 2px 2px 0;
+}
+.awards-sm .sm-hk-book i:nth-child(3) {
+	left: 10px;
+	top: 4px;
+	width: 8px;
+	height: 12px;
+	border-radius: 0 2px 2px 0;
+	opacity: 0.85;
+	transform-origin: 0 50%;
+	transform: perspective(50px) rotateY(-180deg);
+	animation: sm-g-book 0.9s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+.awards-sm .sm-hk-book i:nth-child(4) {
+	left: 9px;
+	top: 3px;
+	width: 2px;
+	height: 14px;
+	background: #171717;
+}
+@keyframes sm-g-book {
+	from {
+		transform: perspective(50px) rotateY(0deg);
+	}
+	to {
+		transform: perspective(50px) rotateY(-180deg);
+	}
+}
+
+/* unbox (57 箱を開く): the box squashes and both lids swing open */
+.awards-sm .sm-hk-unbox i:nth-child(1) {
+	left: 3px;
+	top: 8px;
+	width: 14px;
+	height: 10px;
+	border-radius: 1px;
+	transform-origin: 50% 100%;
+	animation: sm-g-unbox-body 0.8s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-unbox i:nth-child(2),
+.awards-sm .sm-hk-unbox i:nth-child(3) {
+	top: 6px;
+	width: 7px;
+	height: 2.5px;
+	border-radius: 1px;
+	animation: sm-g-unbox-lid 0.6s ease-in-out calc(var(--sm-d, 0s) + 0.35s) both;
+}
+.awards-sm .sm-hk-unbox i:nth-child(2) {
+	left: 3px;
+	transform-origin: 0 50%;
+	--sm-r: -125deg;
+}
+.awards-sm .sm-hk-unbox i:nth-child(3) {
+	left: 10px;
+	transform-origin: 100% 50%;
+	--sm-r: 125deg;
+}
+.awards-sm .sm-hk-unbox i:nth-child(n + 2) {
+	transform: rotate(var(--sm-r));
+}
+@keyframes sm-g-unbox-body {
+	0%,
+	100% {
+		transform: scale(1, 1);
+	}
+	40% {
+		transform: scale(1.18, 0.82);
+	}
+	70% {
+		transform: scale(0.94, 1.08);
+	}
+}
+@keyframes sm-g-unbox-lid {
+	from {
+		transform: rotate(0deg);
+	}
+	60% {
+		transform: rotate(calc(var(--sm-r) * 1.15));
+	}
+	to {
+		transform: rotate(var(--sm-r));
+	}
+}
+
+/* gather (57 マウスが集まる): cursors arrive from every side and meet */
+.awards-sm .sm-hk-gather i {
+	left: 7px;
+	top: 6px;
+	width: 6px;
+	height: 8px;
+	clip-path: polygon(
+		0 0,
+		100% 55%,
+		55% 65%,
+		70% 100%,
+		45% 100%,
+		30% 70%,
+		0 90%
+	);
+	transform: translate(var(--sm-x), var(--sm-y));
+	animation: sm-g-gather 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--sm-d, 0s)
+		both;
+}
+.awards-sm .sm-hk-gather i:nth-child(1) {
+	--sm-x: 0px;
+	--sm-y: 0px;
+}
+.awards-sm .sm-hk-gather i:nth-child(2) {
+	--sm-x: -5px;
+	--sm-y: -4px;
+	--sm-fx: -10px;
+	--sm-fy: -9px;
+	opacity: 0.45;
+	animation-delay: calc(var(--sm-d, 0s) + 0.08s);
+}
+.awards-sm .sm-hk-gather i:nth-child(3) {
+	--sm-x: 5px;
+	--sm-y: -3px;
+	--sm-fx: 10px;
+	--sm-fy: -9px;
+	opacity: 0.45;
+	animation-delay: calc(var(--sm-d, 0s) + 0.16s);
+}
+.awards-sm .sm-hk-gather i:nth-child(4) {
+	--sm-x: -4px;
+	--sm-y: 5px;
+	--sm-fx: -10px;
+	--sm-fy: 9px;
+	opacity: 0.45;
+	animation-delay: calc(var(--sm-d, 0s) + 0.24s);
+}
+.awards-sm .sm-hk-gather i:nth-child(5) {
+	--sm-x: 5px;
+	--sm-y: 5px;
+	--sm-fx: 10px;
+	--sm-fy: 9px;
+	opacity: 0.45;
+	animation-delay: calc(var(--sm-d, 0s) + 0.32s);
+}
+@keyframes sm-g-gather {
+	from {
+		transform: translate(var(--sm-fx, 0px), var(--sm-fy, -12px));
+	}
+	to {
+		transform: translate(var(--sm-x), var(--sm-y));
+	}
+}
+
+/* orbit (57 回る): a body turns, a moon circles it, a mote circles inside */
+.awards-sm .sm-hk-orbit i:nth-child(1) {
+	left: 5px;
+	top: 5px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	opacity: 0.55;
+}
+.awards-sm .sm-hk-orbit i:nth-child(2) {
+	left: 1px;
+	top: 1px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: none;
+	animation: sm-g-orbit 1.4s linear var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-orbit i:nth-child(2)::before {
+	content: "";
+	position: absolute;
+	left: 7px;
+	top: -1px;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: currentColor;
+}
+.awards-sm .sm-hk-orbit i:nth-child(3) {
+	left: 5px;
+	top: 5px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: none;
+	animation: sm-g-orbit-back 1.1s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-orbit i:nth-child(3)::before {
+	content: "";
+	position: absolute;
+	left: 3.5px;
+	top: 0.5px;
+	width: 3px;
+	height: 3px;
+	border-radius: 50%;
+	background: #171717;
+}
+@keyframes sm-g-orbit {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes sm-g-orbit-back {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(-360deg);
+	}
+}
+
+/* snap (57 吸着): the tile lifts, slides across and clicks into its slot */
+.awards-sm .sm-hk-snap i:nth-child(1) {
+	left: 11px;
+	top: 6px;
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+	background: none;
+	border: 2px dashed currentColor;
+	opacity: 0.5;
+}
+.awards-sm .sm-hk-snap i:nth-child(2) {
+	left: 1px;
+	top: 6px;
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+	transform: translate(10px, 0) scale(1);
+	animation: sm-g-snap 1s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-snap {
+	0% {
+		transform: translate(0, 0) scale(1);
+	}
+	25% {
+		transform: translate(0, -2px) scale(1.15);
+		box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+	}
+	65% {
+		transform: translate(10px, -2px) scale(1.15);
+		box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+	}
+	82% {
+		transform: translate(10px, 0) scale(0.88);
+		box-shadow: none;
+	}
+	100% {
+		transform: translate(10px, 0) scale(1);
+	}
+}
+
+/* clink (55 ワイン): two glasses tip toward each other and touch */
+.awards-sm .sm-hk-clink i:nth-child(1),
+.awards-sm .sm-hk-clink i:nth-child(2) {
+	top: 2px;
+	width: 6px;
+	height: 16px;
+	clip-path: polygon(
+		0 0,
+		100% 0,
+		100% 40%,
+		62% 55%,
+		62% 85%,
+		100% 85%,
+		100% 100%,
+		0 100%,
+		0 85%,
+		38% 85%,
+		38% 55%,
+		0 40%
+	);
+	animation: sm-g-clink 0.9s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-clink i:nth-child(1) {
+	left: 3px;
+	transform-origin: 50% 100%;
+	--sm-r: 14deg;
+}
+.awards-sm .sm-hk-clink i:nth-child(2) {
+	left: 11px;
+	transform-origin: 50% 100%;
+	--sm-r: -14deg;
+	opacity: 0.6;
+}
+.awards-sm .sm-hk-clink i:nth-child(n + 1) {
+	transform: rotate(var(--sm-r, 0deg));
+}
+.awards-sm .sm-hk-clink i:nth-child(3) {
+	left: 8.5px;
+	top: 1px;
+	width: 3px;
+	height: 3px;
+	border-radius: 50%;
+	opacity: 0.85;
+	animation: sm-g-clink-spark 0.5s ease-out calc(var(--sm-d, 0s) + 0.55s) both;
+}
+@keyframes sm-g-clink {
+	from {
+		transform: rotate(0deg);
+	}
+	55% {
+		transform: rotate(calc(var(--sm-r, 0deg) * 1.15));
+	}
+	to {
+		transform: rotate(var(--sm-r, 0deg));
+	}
+}
+@keyframes sm-g-clink-spark {
+	from {
+		opacity: 0;
+		transform: scale(0);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.6);
+	}
+	to {
+		opacity: 0.85;
+		transform: scale(1);
+	}
+}
+
+/* download (55 ダウンロード): the arrow drops into the tray, the tray bounces */
+.awards-sm .sm-hk-download i:nth-child(1) {
+	left: 2px;
+	top: 12px;
+	width: 16px;
+	height: 6px;
+	background: none;
+	border: 2px solid currentColor;
+	border-top: 0;
+	border-radius: 0 0 2px 2px;
+	animation: sm-g-download-tray 0.4s ease-out calc(var(--sm-d, 0s) + 0.5s) both;
+}
+.awards-sm .sm-hk-download i:nth-child(2) {
+	left: 9px;
+	top: 1px;
+	width: 2px;
+	height: 8px;
+	animation: sm-g-download-arrow 0.55s cubic-bezier(0.5, 0, 0.9, 0.6)
+		var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-download i:nth-child(3) {
+	left: 6px;
+	top: 6px;
+	width: 8px;
+	height: 5px;
+	clip-path: polygon(0 0, 100% 0, 50% 100%);
+	animation: sm-g-download-arrow 0.55s cubic-bezier(0.5, 0, 0.9, 0.6)
+		var(--sm-d, 0s) both;
+}
+@keyframes sm-g-download-arrow {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	20% {
+		opacity: 1;
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+@keyframes sm-g-download-tray {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(2px) scaleX(1.06);
+	}
+}
+
+/* pip (55 PiP): a small window pops out of the screen into the corner */
+.awards-sm .sm-hk-pip i:nth-child(1) {
+	left: 1px;
+	top: 3px;
+	width: 18px;
+	height: 14px;
+	background: none;
+	border: 2px solid currentColor;
+	border-radius: 2px;
+}
+.awards-sm .sm-hk-pip i:nth-child(2) {
+	left: 10px;
+	top: 9px;
+	width: 7px;
+	height: 6px;
+	border-radius: 1px;
+	transform-origin: 100% 100%;
+	animation: sm-g-pip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-pip {
+	from {
+		opacity: 0.3;
+		transform: translate(-6px, -4px) scale(1.7);
+	}
+	to {
+		opacity: 1;
+		transform: translate(0, 0) scale(1);
+	}
+}
+
+/* expand (55 拡大・縮小): the window grows to full size, then settles */
+.awards-sm .sm-hk-expand i:nth-child(1) {
+	left: 4px;
+	top: 4px;
+	width: 12px;
+	height: 12px;
+	border-radius: 2px;
+	animation: sm-g-expand 1s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-expand i:nth-child(2),
+.awards-sm .sm-hk-expand i:nth-child(3) {
+	width: 6px;
+	height: 6px;
+	background: none;
+	border: 2px solid currentColor;
+	animation: sm-g-expand-corner 1s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-expand i:nth-child(2) {
+	left: 0;
+	top: 0;
+	border-right: 0;
+	border-bottom: 0;
+	--sm-x: 3px;
+	--sm-y: 3px;
+}
+.awards-sm .sm-hk-expand i:nth-child(3) {
+	right: 0;
+	bottom: 0;
+	border-left: 0;
+	border-top: 0;
+	--sm-x: -3px;
+	--sm-y: -3px;
+}
+@keyframes sm-g-expand {
+	0% {
+		transform: scale(0.55);
+	}
+	45% {
+		transform: scale(1.1);
+	}
+	70% {
+		transform: scale(0.95);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+@keyframes sm-g-expand-corner {
+	0% {
+		transform: translate(var(--sm-x), var(--sm-y));
+	}
+	45% {
+		transform: translate(0, 0);
+	}
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+/* puzzle (55 拡張機能): the extension piece slides in and clicks into the app */
+.awards-sm .sm-hk-puzzle i:nth-child(1) {
+	left: 1px;
+	top: 4px;
+	width: 9px;
+	height: 12px;
+	border-radius: 2px 0 0 2px;
+	opacity: 0.55;
+}
+.awards-sm .sm-hk-puzzle i:nth-child(2) {
+	left: 10px;
+	top: 4px;
+	width: 9px;
+	height: 12px;
+	border-radius: 0 2px 2px 0;
+	animation: sm-g-puzzle 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-puzzle i:nth-child(3) {
+	left: 7.5px;
+	top: 8px;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	animation: sm-g-puzzle 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-puzzle {
+	from {
+		opacity: 0;
+		transform: translateX(9px);
+	}
+	30% {
+		opacity: 1;
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* menu (53 メニュー): the three lines spread apart into a list */
+.awards-sm .sm-hk-menu i {
+	left: 3px;
+	width: 14px;
+	height: 2.5px;
+	border-radius: 1.5px;
+	animation: sm-g-menu 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--sm-d, 0s)
+		both;
+}
+.awards-sm .sm-hk-menu i:nth-child(1) {
+	top: 3.5px;
+	--sm-y: -5px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-menu i:nth-child(2) {
+	top: 8.75px;
+	--sm-y: 0px;
+	width: 10px;
+}
+.awards-sm .sm-hk-menu i:nth-child(3) {
+	top: 14px;
+	--sm-y: 5px;
+	width: 12px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+@keyframes sm-g-menu {
+	from {
+		transform: translateY(calc(var(--sm-y) * -1)) scaleX(0.6);
+	}
+	to {
+		transform: translateY(0) scaleX(1);
+	}
+}
+
+/* dpad (53 十字キー): the cross's arms press in turn */
+.awards-sm .sm-hk-dpad i {
+	border-radius: 1.5px;
+	animation: sm-g-dpad 0.35s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-dpad i:nth-child(1) {
+	left: 7px;
+	top: 1px;
+	width: 6px;
+	height: 6px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-dpad i:nth-child(2) {
+	left: 13px;
+	top: 7px;
+	width: 6px;
+	height: 6px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.4s);
+}
+.awards-sm .sm-hk-dpad i:nth-child(3) {
+	left: 7px;
+	top: 13px;
+	width: 6px;
+	height: 6px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.7s);
+}
+.awards-sm .sm-hk-dpad i:nth-child(4) {
+	left: 1px;
+	top: 7px;
+	width: 6px;
+	height: 6px;
+	animation-delay: calc(var(--sm-d, 0s) + 1s);
+}
+.awards-sm .sm-hk-dpad i:nth-child(5) {
+	left: 7px;
+	top: 7px;
+	width: 6px;
+	height: 6px;
+	opacity: 0.55;
+	animation: none;
+}
+@keyframes sm-g-dpad {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scale(0.7);
+		opacity: 0.6;
+	}
+}
+
+/* share (53 共有): the two outer nodes fly out of the first and the links draw */
+.awards-sm .sm-hk-share i:nth-child(1),
+.awards-sm .sm-hk-share i:nth-child(2),
+.awards-sm .sm-hk-share i:nth-child(3) {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+}
+.awards-sm .sm-hk-share i:nth-child(1) {
+	left: 1px;
+	top: 7.5px;
+}
+.awards-sm .sm-hk-share i:nth-child(2) {
+	left: 14px;
+	top: 1px;
+	animation: sm-g-share-node 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+	--sm-fx: -13px;
+	--sm-fy: 6.5px;
+}
+.awards-sm .sm-hk-share i:nth-child(3) {
+	left: 14px;
+	top: 14px;
+	animation: sm-g-share-node 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)
+		calc(var(--sm-d, 0s) + 0.2s) both;
+	--sm-fx: -13px;
+	--sm-fy: -6.5px;
+}
+.awards-sm .sm-hk-share i:nth-child(4),
+.awards-sm .sm-hk-share i:nth-child(5) {
+	left: 3.5px;
+	top: 9.25px;
+	width: 13px;
+	height: 1.5px;
+	transform-origin: 0 50%;
+	opacity: 0.7;
+	animation: sm-g-share-link 0.4s ease-out calc(var(--sm-d, 0s) + 0.35s) both;
+}
+.awards-sm .sm-hk-share i:nth-child(4) {
+	--sm-r: -30deg;
+}
+.awards-sm .sm-hk-share i:nth-child(5) {
+	--sm-r: 30deg;
+}
+.awards-sm .sm-hk-share i:nth-child(n + 4) {
+	transform: rotate(var(--sm-r)) scaleX(1);
+}
+@keyframes sm-g-share-node {
+	from {
+		transform: translate(var(--sm-fx), var(--sm-fy)) scale(0.5);
+	}
+	to {
+		transform: translate(0, 0) scale(1);
+	}
+}
+@keyframes sm-g-share-link {
+	from {
+		transform: rotate(var(--sm-r)) scaleX(0);
+	}
+	to {
+		transform: rotate(var(--sm-r)) scaleX(1);
+	}
+}
+
+/* press (53 ボタン/ホバー): the button lifts on hover, then presses down */
+.awards-sm .sm-hk-press i:nth-child(1) {
+	left: 2px;
+	top: 8px;
+	width: 16px;
+	height: 9px;
+	border-radius: 3px;
+	opacity: 0.45;
+}
+.awards-sm .sm-hk-press i:nth-child(2) {
+	left: 2px;
+	top: 5px;
+	width: 16px;
+	height: 9px;
+	border-radius: 3px;
+	animation: sm-g-press 1s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-press i:nth-child(3) {
+	left: 7px;
+	top: 8.5px;
+	width: 6px;
+	height: 2px;
+	border-radius: 1px;
+	background: #171717;
+	animation: sm-g-press 1s ease-in-out var(--sm-d, 0s) both;
+}
+@keyframes sm-g-press {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	30% {
+		transform: translateY(-2px);
+	}
+	55% {
+		transform: translateY(2.5px);
+	}
+	75% {
+		transform: translateY(0);
+	}
+}
+
+/* reload (53 リロード): the circular arrow spins once and lands */
+.awards-sm .sm-hk-reload i:nth-child(1) {
+	left: 3px;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: none;
+	border: 2.5px solid currentColor;
+	border-right-color: transparent;
+	animation: sm-g-reload 0.9s cubic-bezier(0.5, 0, 0.3, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-reload i:nth-child(2) {
+	left: 12px;
+	top: 1px;
+	width: 6px;
+	height: 6px;
+	clip-path: polygon(0 0, 100% 50%, 30% 100%);
+	transform-origin: -2px 9px;
+	animation: sm-g-reload-tip 0.9s cubic-bezier(0.5, 0, 0.3, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+@keyframes sm-g-reload {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes sm-g-reload-tip {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* keypad (53 キーパッド): the keys press one after another */
+.awards-sm .sm-hk-keypad i {
+	width: 4px;
+	height: 4px;
+	border-radius: 1px;
+	opacity: 0.55;
+}
+.awards-sm .sm-hk-keypad i:nth-child(3n + 1) {
+	left: 2.5px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(3n + 2) {
+	left: 8px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(3n) {
+	left: 13.5px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(-n + 3) {
+	top: 2.5px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(n + 4):nth-child(-n + 6) {
+	top: 8px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(n + 7) {
+	top: 13.5px;
+}
+.awards-sm .sm-hk-keypad i:nth-child(2),
+.awards-sm .sm-hk-keypad i:nth-child(6),
+.awards-sm .sm-hk-keypad i:nth-child(7) {
+	opacity: 1;
+	animation: sm-g-keypad 0.4s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-keypad i:nth-child(2) {
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-keypad i:nth-child(6) {
+	animation-delay: calc(var(--sm-d, 0s) + 0.45s);
+}
+.awards-sm .sm-hk-keypad i:nth-child(7) {
+	animation-delay: calc(var(--sm-d, 0s) + 0.8s);
+}
+@keyframes sm-g-keypad {
+	0% {
+		opacity: 0.55;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(0.6);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* launch (56 アプリ起動): the app icon taps, then grows to fill the screen */
+.awards-sm .sm-hk-launch i:nth-child(1) {
+	left: 1px;
+	top: 1px;
+	width: 18px;
+	height: 18px;
+	border-radius: 2px;
+	opacity: 0.35;
+}
+.awards-sm .sm-hk-launch i:nth-child(2) {
+	left: 1px;
+	top: 1px;
+	width: 18px;
+	height: 18px;
+	border-radius: 2px;
+	animation: sm-g-launch 1s ease-in-out var(--sm-d, 0s) both;
+}
+@keyframes sm-g-launch {
+	0% {
+		transform: scale(0.45);
+		border-radius: 5px;
+	}
+	25% {
+		transform: scale(0.38);
+		border-radius: 5px;
+	}
+	60% {
+		transform: scale(1.04);
+		border-radius: 2px;
+	}
+	100% {
+		transform: scale(1);
+		border-radius: 2px;
+	}
+}
+
+/* layout (56 レイアウト切り替え): two columns rearrange into three rows */
+.awards-sm .sm-hk-layout i {
+	border-radius: 1.5px;
+	animation: sm-g-layout 0.7s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
+}
+.awards-sm .sm-hk-layout i:nth-child(1) {
+	left: 2px;
+	top: 2px;
+	width: 16px;
+	height: 4px;
+	--sm-from: translate(0, 0) scale(0.45, 4);
+	transform-origin: 0 0;
+}
+.awards-sm .sm-hk-layout i:nth-child(2) {
+	left: 2px;
+	top: 8px;
+	width: 16px;
+	height: 4px;
+	opacity: 0.65;
+	--sm-from: translate(8.5px, -6px) scale(0.45, 1.5);
+	transform-origin: 0 0;
+}
+.awards-sm .sm-hk-layout i:nth-child(3) {
+	left: 2px;
+	top: 14px;
+	width: 16px;
+	height: 4px;
+	opacity: 0.65;
+	--sm-from: translate(8.5px, -4px) scale(0.45, 1.5);
+	transform-origin: 0 0;
+}
+@keyframes sm-g-layout {
+	from {
+		transform: var(--sm-from);
+	}
+	to {
+		transform: translate(0, 0) scale(1, 1);
+	}
+}
+
+/* shutter (56 シャッター): the shop shutter rolls up, slat by slat */
+.awards-sm .sm-hk-shutter i:nth-child(n + 1):nth-child(-n + 4) {
+	left: 2px;
+	width: 16px;
+	height: 2.5px;
+	transform-origin: 50% 0;
+	animation: sm-g-shutter 0.5s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-shutter i:nth-child(1) {
+	top: 2px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.55s);
+}
+.awards-sm .sm-hk-shutter i:nth-child(2) {
+	top: 5.5px;
+	opacity: 0.8;
+	animation-delay: calc(var(--sm-d, 0s) + 0.4s);
+}
+.awards-sm .sm-hk-shutter i:nth-child(3) {
+	top: 9px;
+	opacity: 0.6;
+	animation-delay: calc(var(--sm-d, 0s) + 0.25s);
+}
+.awards-sm .sm-hk-shutter i:nth-child(4) {
+	top: 12.5px;
+	opacity: 0.4;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-shutter i:nth-child(5) {
+	left: 2px;
+	top: 16px;
+	width: 16px;
+	height: 3px;
+	border-radius: 0 0 1.5px 1.5px;
+}
+.awards-sm .sm-hk-shutter i:nth-child(6) {
+	left: 8px;
+	top: 16.5px;
+	width: 4px;
+	height: 2px;
+	border-radius: 1px;
+	background: #171717;
+	opacity: 0.8;
+}
+@keyframes sm-g-shutter {
+	from {
+		opacity: 1;
+		transform: scaleY(3.2);
 	}
 	to {
 		transform: scaleY(1);
 	}
 }
 
-/* burst (gallery 7): the pop, the ring, eight sparks */
-.awards-sm .sm-hk-burst .sm-hk-ring {
-	inset: -3px;
-	border-radius: 50%;
-	border: 1px solid currentColor;
-	opacity: 0.3;
-	animation: sm-hk-ring 1.1s cubic-bezier(0, 0.06, 0.29, 1)
-		calc(var(--sm-d, 0s) + 0.1s) both;
+/* cards (56 カード): the hand of cards fans out, then squares up */
+.awards-sm .sm-hk-cards i {
+	left: 7px;
+	top: 3px;
+	width: 6px;
+	height: 9px;
+	border-radius: 1.5px;
+	transform-origin: 50% 190%;
+	animation: sm-g-cards 1.1s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
 }
-.awards-sm .sm-hk-burst .sm-hk-dot {
-	top: 6px;
-	left: 6px;
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: currentColor;
-	animation: sm-hk-pop 0.6s ease-in-out var(--sm-d, 0s) both;
+.awards-sm .sm-hk-cards i:nth-child(1) {
+	--sm-r: -28deg;
+	opacity: 0.4;
 }
-.awards-sm .sm-hk-burst .sm-hk-spark {
-	top: 9px;
-	left: 9px;
-	width: 2px;
-	height: 2px;
-	border-radius: 50%;
-	background: currentColor;
-	opacity: 0;
-	animation: sm-hk-particle 0.65s cubic-bezier(0.63, -0.01, 0.29, 1)
-		calc(var(--sm-d, 0s) + 0.15s) both;
+.awards-sm .sm-hk-cards i:nth-child(2) {
+	--sm-r: -14deg;
+	opacity: 0.7;
 }
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(3) {
-	--r: 0deg;
+.awards-sm .sm-hk-cards i:nth-child(3) {
+	--sm-r: 0deg;
 }
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(4) {
-	--r: 45deg;
+.awards-sm .sm-hk-cards i:nth-child(4) {
+	--sm-r: 14deg;
+	opacity: 0.7;
 }
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(5) {
-	--r: 90deg;
+.awards-sm .sm-hk-cards i:nth-child(5) {
+	--sm-r: 28deg;
+	opacity: 0.4;
 }
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(6) {
-	--r: 135deg;
+.awards-sm .sm-hk-cards i {
+	transform: rotate(var(--sm-r));
 }
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(7) {
-	--r: 180deg;
-}
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(8) {
-	--r: 225deg;
-}
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(9) {
-	--r: 270deg;
-}
-.awards-sm .sm-hk-burst .sm-hk-spark:nth-child(10) {
-	--r: 315deg;
-}
-@keyframes sm-hk-pop {
-	from {
-		opacity: 0;
-		transform: scale(0);
+@keyframes sm-g-cards {
+	0% {
+		transform: rotate(0deg);
 	}
-	20%,
-	to {
-		opacity: 1;
+	45% {
+		transform: rotate(calc(var(--sm-r) * 1.1));
 	}
-	50% {
-		transform: scale(1.2, 1.25);
-	}
-	75% {
-		transform: scale(0.9, 0.95);
-	}
-	to {
-		transform: scale(1);
-	}
-}
-@keyframes sm-hk-ring {
-	from {
-		opacity: 0;
-		transform: scale(0);
-	}
-	50%,
-	80% {
-		opacity: 0.45;
-	}
-	to {
-		opacity: 0.3;
-		transform: scale(1);
-	}
-}
-@keyframes sm-hk-particle {
-	from {
-		opacity: 0;
-		transform: rotate(var(--r, 0deg)) translateY(0) scale(0);
-	}
-	40% {
-		opacity: 1;
-		transform: rotate(var(--r, 0deg)) translateY(-8px) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: rotate(var(--r, 0deg)) translateY(-11px) scale(0);
+	100% {
+		transform: rotate(var(--sm-r));
 	}
 }
 
-/* orbit (gallery 57 "mawaru"): a moon revolves on a ring around the disc */
-.awards-sm .sm-hk-orbit .sm-hk-orbit {
-	inset: 1px;
-	border-radius: 50%;
-	border: 1px solid currentColor;
-	opacity: 0.35;
+/* focus (56 フォーカス): the frame's corners jump from one target to the next */
+.awards-sm .sm-hk-focus i:nth-child(1),
+.awards-sm .sm-hk-focus i:nth-child(2),
+.awards-sm .sm-hk-focus i:nth-child(3) {
+	top: 8px;
+	width: 4px;
+	height: 4px;
+	border-radius: 1px;
+	opacity: 0.45;
 }
-.awards-sm .sm-hk-orbit .sm-hk-dot {
+.awards-sm .sm-hk-focus i:nth-child(1) {
+	left: 1.5px;
+}
+.awards-sm .sm-hk-focus i:nth-child(2) {
+	left: 8px;
+}
+.awards-sm .sm-hk-focus i:nth-child(3) {
+	left: 14.5px;
+}
+.awards-sm .sm-hk-focus i:nth-child(4) {
+	left: 12.5px;
 	top: 6px;
-	left: 6px;
 	width: 8px;
 	height: 8px;
-	border-radius: 50%;
-	background: currentColor;
-	animation: sm-hk-pop 0.6s ease-in-out var(--sm-d, 0s) both;
+	background: none;
+	animation: sm-g-focus 1.4s steps(1, end) var(--sm-d, 0s) both;
 }
-.awards-sm .sm-hk-orbit .sm-hk-wave {
-	inset: 1px;
-	animation: sm-hk-revolve 2.4s ease-in-out calc(var(--sm-d, 0s) + 0.3s)
-		infinite;
-}
-.awards-sm .sm-hk-orbit .sm-hk-wave::before {
+.awards-sm .sm-hk-focus i:nth-child(4)::before,
+.awards-sm .sm-hk-focus i:nth-child(4)::after {
 	content: "";
 	position: absolute;
-	top: -1.5px;
-	left: 50%;
 	width: 3px;
 	height: 3px;
-	margin-left: -1.5px;
-	border-radius: 50%;
-	background: currentColor;
+	border: 1.5px solid currentColor;
 }
-@keyframes sm-hk-revolve {
-	from {
-		transform: rotate(0);
+.awards-sm .sm-hk-focus i:nth-child(4)::before {
+	left: -1.5px;
+	top: -1.5px;
+	border-right: 0;
+	border-bottom: 0;
+}
+.awards-sm .sm-hk-focus i:nth-child(4)::after {
+	right: -1.5px;
+	bottom: -1.5px;
+	border-left: 0;
+	border-top: 0;
+}
+@keyframes sm-g-focus {
+	0% {
+		transform: translateX(-13px);
 	}
-	80%,
-	to {
-		transform: rotate(360deg);
+	35% {
+		transform: translateX(-6.5px);
+	}
+	70% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(0);
 	}
 }
 
-/* bookmark (gallery 6): the ribbon pops in, three sparkles twinkle */
-.awards-sm .sm-hk-bookmark .sm-hk-block {
-	top: 2px;
-	left: 5px;
-	width: 10px;
-	height: 15px;
-	background: currentColor;
-	clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
-	animation: sm-hk-mark 1s ease-in-out var(--sm-d, 0s) both;
+/* thataway (29 そっちそっち): the chevrons slide into the disc and point the way */
+.awards-sm .sm-hk-thataway {
+	overflow: hidden;
+	border-radius: 50%;
 }
-.awards-sm .sm-hk-bookmark .sm-hk-spark {
-	width: 3px;
-	height: 3px;
-	background: currentColor;
-	opacity: 0.9;
-	transform: rotate(45deg) scale(0);
-	animation: sm-hk-twinkle 0.6s ease-in-out both;
+.awards-sm .sm-hk-thataway i:nth-child(1) {
+	left: 0;
+	top: 0;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	opacity: 0.3;
 }
-.awards-sm .sm-hk-bookmark .sm-hk-spark:nth-child(2) {
-	top: 1px;
-	left: 1px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.55s);
+.awards-sm .sm-hk-thataway i:nth-child(2),
+.awards-sm .sm-hk-thataway i:nth-child(3) {
+	top: 6.5px;
+	width: 7px;
+	height: 7px;
+	background: none;
+	border-right: 2.5px solid currentColor;
+	border-top: 2.5px solid currentColor;
+	transform: rotate(45deg);
+	animation: sm-g-thataway 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)
+		var(--sm-d, 0s) both;
 }
-.awards-sm .sm-hk-bookmark .sm-hk-spark:nth-child(3) {
-	top: 9px;
-	right: 0;
-	animation-delay: calc(var(--sm-d, 0s) + 0.75s);
+.awards-sm .sm-hk-thataway i:nth-child(2) {
+	left: 3px;
+	opacity: 0.5;
+	animation-delay: calc(var(--sm-d, 0s) + 0.12s);
 }
-.awards-sm .sm-hk-bookmark .sm-hk-spark:nth-child(4) {
-	bottom: 1px;
-	left: 2px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.95s);
+.awards-sm .sm-hk-thataway i:nth-child(3) {
+	left: 8px;
 }
-@keyframes sm-hk-mark {
+@keyframes sm-g-thataway {
 	from {
-		transform: scale(0);
+		transform: translateX(-16px) rotate(45deg);
 	}
-	40% {
-		transform: scale(1.55);
+	to {
+		transform: translateX(0) rotate(45deg);
+	}
+}
+
+/* steps (38 段差): the columns settle into a staircase, each with a hop */
+.awards-sm .sm-hk-steps i {
+	bottom: 2px;
+	width: 3.5px;
+	border-radius: 1px 1px 0 0;
+	transform-origin: 50% 100%;
+	animation: sm-g-steps 0.6s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-steps i:nth-child(1) {
+	left: 1.5px;
+	height: 5px;
+	opacity: 0.45;
+}
+.awards-sm .sm-hk-steps i:nth-child(2) {
+	left: 6px;
+	height: 9px;
+	opacity: 0.65;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-steps i:nth-child(3) {
+	left: 10.5px;
+	height: 13px;
+	opacity: 0.85;
+	animation-delay: calc(var(--sm-d, 0s) + 0.2s);
+}
+.awards-sm .sm-hk-steps i:nth-child(4) {
+	left: 15px;
+	height: 17px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.3s);
+}
+@keyframes sm-g-steps {
+	from {
+		transform: scaleY(0.25);
 	}
 	60% {
-		transform: scale(1);
-	}
-	80% {
-		transform: scale(1.05);
+		transform: scaleY(1.08);
 	}
 	to {
-		transform: scale(1);
-	}
-}
-@keyframes sm-hk-twinkle {
-	from,
-	to {
-		transform: rotate(45deg) scale(0);
-	}
-	50% {
-		transform: rotate(45deg) scale(1);
+		transform: scaleY(1);
 	}
 }
 
-/* switch (gallery 63): the knob slides on with an overshoot, the track fills */
-.awards-sm .sm-hk-switch .sm-hk-track {
-	top: 6px;
-	left: 2px;
-	width: 16px;
-	height: 8px;
-	box-sizing: border-box;
-	border-radius: 4px;
-	border: 1px solid currentColor;
-	opacity: 0.5;
+/* domino (38 ドミノ): the tiles drop in, then topple one into the next */
+.awards-sm .sm-hk-domino i {
+	top: 8.5px;
+	width: 2.5px;
+	height: 8.5px;
+	border-radius: 1px;
+	transform-origin: 100% 100%;
+	transform: rotate(var(--sm-r));
+	animation:
+		sm-g-domino-drop 0.4s ease-out calc(var(--sm-d, 0s) + var(--sm-s)) both,
+		sm-g-domino-tip 0.45s ease-in calc(var(--sm-d, 0s) + var(--sm-t)) both;
 }
-.awards-sm .sm-hk-switch .sm-hk-fill {
-	top: 6px;
-	left: 2px;
-	width: 16px;
-	height: 8px;
-	border-radius: 4px;
-	background: currentColor;
-	opacity: 0.35;
-	transform-origin: left center;
-	animation: sm-hk-fill 0.25s ease-out var(--sm-d, 0s) both;
+.awards-sm .sm-hk-domino i:nth-child(1) {
+	left: 0.5px;
+	--sm-r: 50deg;
+	--sm-s: 0s;
+	--sm-t: 0.55s;
 }
-.awards-sm .sm-hk-switch .sm-hk-knob {
-	top: 7px;
+.awards-sm .sm-hk-domino i:nth-child(2) {
+	left: 4px;
+	opacity: 0.8;
+	--sm-r: 55deg;
+	--sm-s: 0.08s;
+	--sm-t: 0.68s;
+}
+.awards-sm .sm-hk-domino i:nth-child(3) {
+	left: 7.5px;
+	--sm-r: 60deg;
+	--sm-s: 0.16s;
+	--sm-t: 0.81s;
+}
+.awards-sm .sm-hk-domino i:nth-child(4) {
 	left: 11px;
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background: currentColor;
-	animation: sm-hk-slide 0.55s ease-in-out var(--sm-d, 0s) both;
+	opacity: 0.8;
+	--sm-r: 90deg;
+	--sm-s: 0.24s;
+	--sm-t: 0.94s;
 }
-@keyframes sm-hk-fill {
+@keyframes sm-g-domino-drop {
+	from {
+		opacity: 0;
+		top: 2px;
+	}
+	55% {
+		opacity: 1;
+		top: 9px;
+	}
+	75% {
+		top: 8px;
+	}
+	to {
+		top: 8.5px;
+	}
+}
+@keyframes sm-g-domino-tip {
+	from {
+		transform: rotate(0deg);
+	}
+	60% {
+		transform: rotate(calc(var(--sm-r) * 1.06));
+	}
+	80% {
+		transform: rotate(calc(var(--sm-r) * 0.94));
+	}
+	to {
+		transform: rotate(var(--sm-r));
+	}
+}
+
+/* chain (38 連鎖): one tile pops and the pop ripples across the grid */
+.awards-sm .sm-hk-chain i {
+	width: 4px;
+	height: 4px;
+	border-radius: 1px;
+	opacity: 0.7;
+	animation: sm-g-chain 0.55s ease-in-out
+		calc(var(--sm-d, 0s) + var(--sm-s, 0s)) both;
+}
+.awards-sm .sm-hk-chain i:nth-child(3n + 1) {
+	left: 2.5px;
+}
+.awards-sm .sm-hk-chain i:nth-child(3n + 2) {
+	left: 8px;
+}
+.awards-sm .sm-hk-chain i:nth-child(3n) {
+	left: 13.5px;
+}
+.awards-sm .sm-hk-chain i:nth-child(-n + 3) {
+	top: 2.5px;
+}
+.awards-sm .sm-hk-chain i:nth-child(n + 4):nth-child(-n + 6) {
+	top: 8px;
+}
+.awards-sm .sm-hk-chain i:nth-child(n + 7) {
+	top: 13.5px;
+}
+.awards-sm .sm-hk-chain i:nth-child(2),
+.awards-sm .sm-hk-chain i:nth-child(4) {
+	--sm-s: 0.12s;
+}
+.awards-sm .sm-hk-chain i:nth-child(3),
+.awards-sm .sm-hk-chain i:nth-child(5),
+.awards-sm .sm-hk-chain i:nth-child(7) {
+	--sm-s: 0.24s;
+}
+.awards-sm .sm-hk-chain i:nth-child(6),
+.awards-sm .sm-hk-chain i:nth-child(8) {
+	--sm-s: 0.36s;
+}
+.awards-sm .sm-hk-chain i:nth-child(9) {
+	--sm-s: 0.48s;
+}
+@keyframes sm-g-chain {
+	0% {
+		opacity: 0.7;
+		transform: scale(1);
+		border-radius: 1px;
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.5);
+		border-radius: 50%;
+	}
+	75% {
+		transform: scale(0.85);
+		border-radius: 50%;
+	}
+	100% {
+		opacity: 0.7;
+		transform: scale(1);
+		border-radius: 1px;
+	}
+}
+
+/* memo (38 めも): a dot grows into a note, then the lines write themselves */
+.awards-sm .sm-hk-memo i:nth-child(1) {
+	left: 3px;
+	top: 1px;
+	width: 14px;
+	height: 18px;
+	border-radius: 2px;
+	background: none;
+	border: 2px solid currentColor;
+	transform-origin: 0 0;
+	animation: sm-g-memo-open 0.5s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-memo i:nth-child(n + 2) {
+	left: 6.5px;
+	height: 2px;
+	border-radius: 1px;
+	transform-origin: 0 50%;
+	animation: sm-g-memo-line 0.35s ease-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-memo i:nth-child(2) {
+	top: 5.5px;
+	width: 7px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.5s);
+}
+.awards-sm .sm-hk-memo i:nth-child(3) {
+	top: 9px;
+	width: 5.5px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.65s);
+}
+.awards-sm .sm-hk-memo i:nth-child(4) {
+	top: 12.5px;
+	width: 6px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.8s);
+}
+@keyframes sm-g-memo-open {
+	0% {
+		transform: scale(0.2, 0.15);
+		border-radius: 6px;
+	}
+	40% {
+		transform: scale(0.2, 1.05);
+		border-radius: 4px;
+	}
+	75% {
+		transform: scale(1.05, 1);
+		border-radius: 2px;
+	}
+	100% {
+		transform: scale(1, 1);
+		border-radius: 2px;
+	}
+}
+@keyframes sm-g-memo-line {
 	from {
 		transform: scaleX(0);
 	}
@@ -1953,587 +3560,93 @@
 		transform: scaleX(1);
 	}
 }
-@keyframes sm-hk-slide {
-	from {
-		transform: translateX(-8px);
+
+/* stamp (28 ペタペタ): the stamp comes down twice, each print settling in */
+.awards-sm .sm-hk-stamp i {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: none;
+	border: 2.5px solid currentColor;
+	animation: sm-g-stamp 0.5s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-stamp i:nth-child(1) {
+	left: 2px;
+	top: 2px;
+	opacity: 0.55;
+	animation-delay: calc(var(--sm-d, 0s) + 0.1s);
+}
+.awards-sm .sm-hk-stamp i:nth-child(2) {
+	left: 9px;
+	top: 9px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.55s);
+}
+@keyframes sm-g-stamp {
+	0% {
+		opacity: 0;
+		transform: scale(1.6);
 	}
 	50% {
-		transform: translateX(0.5px);
+		opacity: 1;
+		transform: scale(0.9);
 	}
-	75% {
-		transform: translateX(-0.2px);
-	}
-	to {
-		transform: translateX(0);
+	100% {
+		transform: scale(1);
 	}
 }
 
-/* lock (gallery 62 "lock it"): the shackle drops shut with a bounce */
-.awards-sm .sm-hk-lock .sm-hk-body {
-	bottom: 2px;
-	left: 4px;
-	width: 12px;
-	height: 9px;
-	border-radius: 2px;
-	background: currentColor;
-}
-.awards-sm .sm-hk-lock .sm-hk-shackle {
-	top: 2px;
-	left: 6px;
+/* tab (38 タブ): the tile turns a quarter as the active label swaps */
+.awards-sm .sm-hk-tab i:nth-child(1) {
+	left: 1px;
+	top: 6px;
 	width: 8px;
 	height: 8px;
-	box-sizing: border-box;
-	border: 2px solid currentColor;
-	border-bottom: 0;
-	border-radius: 4px 4px 0 0;
-	animation: sm-hk-shut 0.6s ease-in-out calc(var(--sm-d, 0s) + 0.2s) both;
+	border-radius: 2px 2px 2px 0;
+	transform: rotate(90deg);
+	animation: sm-g-tab-turn 0.5s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
 }
-@keyframes sm-hk-shut {
-	from {
-		transform: translateY(-4px);
-	}
-	60% {
-		transform: translateY(0.6px);
-	}
-	to {
-		transform: translateY(0);
-	}
-}
-
-/* search (gallery 62 "search box"): the lens pops, the handle extends */
-.awards-sm .sm-hk-search .sm-hk-lens {
-	top: 2px;
-	left: 2px;
-	width: 11px;
-	height: 11px;
-	box-sizing: border-box;
-	border: 2px solid currentColor;
-	border-radius: 50%;
-	animation: sm-hk-lens 0.6s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-search .sm-hk-handle {
-	top: 10.4px;
-	left: 11.4px;
-	width: 6px;
-	height: 2px;
-	border-radius: 1px;
-	background: currentColor;
-	transform-origin: left center;
-	transform: rotate(45deg);
-	animation: sm-hk-handle 0.4s ease-out calc(var(--sm-d, 0s) + 0.3s) both;
-}
-@keyframes sm-hk-lens {
-	from {
-		transform: scale(0.6);
-	}
-	60% {
-		transform: scale(1.15);
-	}
-	to {
-		transform: scale(1);
-	}
-}
-@keyframes sm-hk-handle {
-	from {
-		transform: rotate(45deg) scaleX(0);
-	}
-	60% {
-		transform: rotate(45deg) scaleX(1.2);
-	}
-	to {
-		transform: rotate(45deg) scaleX(1);
-	}
-}
-
-/* gather (gallery 57 "the cursors gather"): six dots converge into a cluster */
-.awards-sm .sm-hk-gather i {
-	width: 5px;
-	height: 5px;
-	border-radius: 50%;
-	background: currentColor;
-	animation: sm-hk-gather 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) var(--sm-d, 0s)
-		both;
-}
-.awards-sm .sm-hk-gather i:nth-child(1) {
-	top: 7.5px;
-	left: 12.5px;
-	--fx: 9px;
-	--fy: 0px;
-}
-.awards-sm .sm-hk-gather i:nth-child(2) {
-	top: 11.8px;
-	left: 10px;
-	--fx: 5px;
-	--fy: 8px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.08s);
-}
-.awards-sm .sm-hk-gather i:nth-child(3) {
-	top: 11.8px;
-	left: 5px;
-	--fx: -5px;
-	--fy: 8px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.24s);
-}
-.awards-sm .sm-hk-gather i:nth-child(4) {
-	top: 7.5px;
-	left: 2.5px;
-	--fx: -9px;
-	--fy: 0px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.32s);
-}
-.awards-sm .sm-hk-gather i:nth-child(5) {
-	top: 3.2px;
-	left: 5px;
-	--fx: -5px;
-	--fy: -8px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.4s);
-}
-.awards-sm .sm-hk-gather i:nth-child(6) {
-	top: 3.2px;
-	left: 10px;
-	--fx: 5px;
-	--fy: -8px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.48s);
-}
-@keyframes sm-hk-gather {
-	from {
-		opacity: 0;
-		transform: translate(var(--fx, 0), var(--fy, 0)) scale(0.6);
-	}
-	1% {
-		opacity: 1;
-	}
-	to {
-		transform: translate(0, 0) scale(1);
-	}
-}
-
-/* bell (gallery 47 "notification badge"): the bell swings, the badge pops */
-.awards-sm .sm-hk-bell .sm-hk-body {
-	top: 3px;
-	left: 5px;
-	width: 10px;
-	height: 11px;
-	border-radius: 5px 5px 2px 2px;
-	background: currentColor;
-	transform-origin: 50% 0;
-	animation: sm-hk-swing 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.2s) both;
-}
-.awards-sm .sm-hk-bell .sm-hk-clapper {
-	top: 15px;
-	left: 8.5px;
-	width: 3px;
-	height: 3px;
-	border-radius: 50%;
-	background: currentColor;
-	transform-origin: 50% -12px;
-	animation: sm-hk-swing 0.8s ease-in-out calc(var(--sm-d, 0s) + 0.25s) both;
-}
-.awards-sm .sm-hk-bell .sm-hk-badge {
-	top: 1px;
-	left: 13px;
-	width: 5px;
-	height: 5px;
-	border-radius: 50%;
-	background: currentColor;
-	opacity: 0.9;
-	animation: sm-hk-pop 0.6s ease-in-out calc(var(--sm-d, 0s) + 0.6s) both;
-}
-@keyframes sm-hk-swing {
-	0%,
-	100% {
-		transform: rotate(0);
-	}
-	10% {
-		transform: rotate(-9deg);
-	}
-	40% {
-		transform: rotate(9deg);
-	}
-	60% {
-		transform: rotate(-5deg);
-	}
-	80% {
-		transform: rotate(3deg);
-	}
-}
-
-/* box (gallery 57 "open the box"): the box squashes, both flaps swing open */
-.awards-sm .sm-hk-box .sm-hk-body {
-	bottom: 2px;
-	left: 3px;
-	width: 14px;
-	height: 10px;
-	border-radius: 1px 1px 2px 2px;
-	background: currentColor;
-	transform-origin: bottom center;
-	animation: sm-hk-boing 0.8s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-box .sm-hk-flap {
-	top: 7px;
+.awards-sm .sm-hk-tab i:nth-child(2),
+.awards-sm .sm-hk-tab i:nth-child(3) {
+	left: 11.5px;
 	width: 7px;
-	height: 2px;
-	border-radius: 1px;
-	background: currentColor;
-	opacity: 0.85;
-}
-.awards-sm .sm-hk-box .sm-hk-flap:nth-child(2) {
-	left: 3px;
-	transform-origin: left center;
-	transform: rotate(-120deg);
-	animation: sm-hk-flap-l 0.55s ease-in-out calc(var(--sm-d, 0s) + 0.45s) both;
-}
-.awards-sm .sm-hk-box .sm-hk-flap:nth-child(3) {
-	left: 10px;
-	transform-origin: right center;
-	transform: rotate(120deg);
-	animation: sm-hk-flap-r 0.55s ease-in-out calc(var(--sm-d, 0s) + 0.5s) both;
-}
-@keyframes sm-hk-boing {
-	0%,
-	100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.3, 0.8);
-	}
-	75% {
-		transform: scale(0.9, 1.1);
-	}
-}
-@keyframes sm-hk-flap-l {
-	from {
-		transform: rotate(0);
-	}
-	60% {
-		transform: rotate(-140deg);
-	}
-	to {
-		transform: rotate(-120deg);
-	}
-}
-@keyframes sm-hk-flap-r {
-	from {
-		transform: rotate(0);
-	}
-	60% {
-		transform: rotate(140deg);
-	}
-	to {
-		transform: rotate(120deg);
-	}
-}
-
-/* arrows (gallery 44 "back and forth"): two arrows cross with an overshoot */
-.awards-sm .sm-hk-arrows i {
-	width: 11px;
-	height: 2px;
-	border-radius: 1px;
-	background: currentColor;
-}
-.awards-sm .sm-hk-arrows i::after {
-	content: "";
-	position: absolute;
-	top: -2px;
-	width: 5px;
-	height: 5px;
-	box-sizing: border-box;
-	border-top: 2px solid currentColor;
-	border-right: 2px solid currentColor;
-}
-.awards-sm .sm-hk-arrows .sm-hk-to {
-	top: 6px;
-	left: 2px;
-	animation: sm-hk-to 0.5s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-arrows .sm-hk-to::after {
-	right: -1px;
-	transform: rotate(45deg);
-}
-.awards-sm .sm-hk-arrows .sm-hk-fro {
-	top: 12px;
-	left: 7px;
-	animation: sm-hk-fro 0.5s ease-in-out calc(var(--sm-d, 0s) + 0.1s) both;
-}
-.awards-sm .sm-hk-arrows .sm-hk-fro::after {
-	left: -1px;
-	transform: rotate(-135deg);
-}
-@keyframes sm-hk-to {
-	from {
-		transform: translateX(-6px);
-	}
-	60% {
-		transform: translateX(0.6px);
-	}
-	to {
-		transform: translateX(0);
-	}
-}
-@keyframes sm-hk-fro {
-	from {
-		transform: translateX(6px);
-	}
-	60% {
-		transform: translateX(-0.6px);
-	}
-	to {
-		transform: translateX(0);
-	}
-}
-
-/* coin (the brick drop, 2026-04-25): a coin falls in and lands with a squash */
-.awards-sm .sm-hk-coin .sm-hk-disc {
-	top: 3px;
-	left: 3px;
-	width: 14px;
-	height: 14px;
-	border-radius: 50%;
-	background: currentColor;
-	transform-origin: bottom center;
-	animation: sm-hk-drop 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-coin .sm-hk-disc::after {
-	content: "";
-	position: absolute;
-	inset: 3px;
-	border-radius: 50%;
-	border: 1.5px solid #171717;
-	opacity: 0.7;
-}
-@keyframes sm-hk-drop {
-	from {
-		opacity: 0;
-		transform: translateY(-14px);
-	}
-	20% {
-		opacity: 1;
-	}
-	55% {
-		transform: translateY(0) scale(1.15, 0.85);
-	}
-	75% {
-		transform: translateY(-2px) scale(0.95, 1.05);
-	}
-	to {
-		transform: translateY(0) scale(1);
-	}
-}
-
-/* card (gallery 43 "count", the tile that flips in): a card slides in and settles */
-.awards-sm .sm-hk-card .sm-hk-face {
-	top: 4px;
-	left: 2px;
-	width: 16px;
-	height: 11px;
-	border-radius: 2px;
-	background: currentColor;
-	animation: sm-hk-cardin 0.6s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-card .sm-hk-face::after {
-	content: "";
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 3px;
-	height: 2px;
-	background: #171717;
-	opacity: 0.7;
-}
-@keyframes sm-hk-cardin {
-	from {
-		opacity: 0;
-		transform: translateX(14px) rotate(60deg);
-	}
-	20% {
-		opacity: 1;
-	}
-	60% {
-		transform: translateX(-1px) rotate(-6deg);
-	}
-	to {
-		transform: translateX(0) rotate(0);
-	}
-}
-
-/* clock (the overshoot turn, gallery 63 and 47): the minute hand sweeps once */
-.awards-sm .sm-hk-clock .sm-hk-face {
-	inset: 1px;
-	box-sizing: border-box;
-	border-radius: 50%;
-	border: 1.5px solid currentColor;
-	opacity: 0.6;
-}
-.awards-sm .sm-hk-clock .sm-hk-hour {
-	top: 6px;
-	left: 9.25px;
-	width: 1.5px;
-	height: 4.5px;
-	border-radius: 1px;
-	background: currentColor;
-	transform-origin: 50% 100%;
-	transform: rotate(60deg);
-	animation: sm-hk-hour 1s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-clock .sm-hk-minute {
-	top: 4px;
-	left: 9.25px;
-	width: 1.5px;
-	height: 6.5px;
-	border-radius: 1px;
-	background: currentColor;
-	transform-origin: 50% 100%;
-	animation: sm-hk-sweep 1s ease-in-out var(--sm-d, 0s) both;
-}
-@keyframes sm-hk-sweep {
-	from {
-		transform: rotate(0);
-	}
-	60% {
-		transform: rotate(370deg);
-	}
-	75% {
-		transform: rotate(355deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
-}
-@keyframes sm-hk-hour {
-	from {
-		transform: rotate(30deg);
-	}
-	60% {
-		transform: rotate(66deg);
-	}
-	to {
-		transform: rotate(60deg);
-	}
-}
-
-/* list (the panel stack, 2026-06-08): rows slide in one under the other */
-.awards-sm .sm-hk-list i {
-	left: 2px;
-	width: 16px;
-	height: 3px;
+	height: 2.5px;
 	border-radius: 1.5px;
-	background: currentColor;
-	animation: sm-hk-row 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) var(--sm-d, 0s) both;
+	animation: 0.5s ease-in-out calc(var(--sm-d, 0s) + 0.15s) both;
 }
-.awards-sm .sm-hk-list i:nth-child(1) {
-	top: 3px;
-}
-.awards-sm .sm-hk-list i:nth-child(2) {
-	top: 8.5px;
-	width: 12px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.12s);
-}
-.awards-sm .sm-hk-list i:nth-child(3) {
-	top: 14px;
-	width: 14px;
-	animation-delay: calc(var(--sm-d, 0s) + 0.24s);
-}
-@keyframes sm-hk-row {
-	from {
-		opacity: 0;
-		transform: translateX(-8px);
-	}
-	60% {
-		transform: translateX(1px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-/* gear (gallery 40 "gears"): a cog turns into place with an overshoot */
-.awards-sm .sm-hk-gear .sm-hk-cog {
-	top: 3px;
-	left: 3px;
-	width: 14px;
-	height: 14px;
-	animation: sm-hk-turn 0.9s ease-in-out var(--sm-d, 0s) both;
-}
-.awards-sm .sm-hk-gear .sm-hk-cog::before,
-.awards-sm .sm-hk-gear .sm-hk-cog::after {
-	content: "";
-	position: absolute;
-	inset: 2px;
-	border-radius: 2px;
-	background: currentColor;
-}
-.awards-sm .sm-hk-gear .sm-hk-cog::after {
-	transform: rotate(45deg);
-}
-.awards-sm .sm-hk-gear .sm-hk-hole {
-	top: 8px;
-	left: 8px;
-	width: 4px;
-	height: 4px;
-	border-radius: 50%;
-	background: #171717;
-}
-@keyframes sm-hk-turn {
-	from {
-		transform: rotate(-90deg);
-	}
-	60% {
-		transform: rotate(8deg);
-	}
-	to {
-		transform: rotate(0);
-	}
-}
-
-/* pin (the brick drop, 2026-04-25): a map pin drops onto its shadow */
-.awards-sm .sm-hk-pin .sm-hk-shadow {
-	bottom: 2px;
-	left: 6px;
-	width: 8px;
-	height: 2px;
-	border-radius: 50%;
-	background: currentColor;
+.awards-sm .sm-hk-tab i:nth-child(2) {
+	top: 6.5px;
 	opacity: 0.35;
-	animation: sm-hk-shadow 0.7s ease-out var(--sm-d, 0s) both;
+	animation-name: sm-g-tab-off;
 }
-.awards-sm .sm-hk-pin .sm-hk-head {
-	top: 2px;
-	left: 5px;
-	width: 10px;
-	height: 10px;
-	border-radius: 50% 50% 50% 0;
-	background: currentColor;
-	transform: rotate(-45deg);
-	animation: sm-hk-pindrop 0.7s cubic-bezier(0.3, 1.3, 0.5, 1) var(--sm-d, 0s)
-		both;
+.awards-sm .sm-hk-tab i:nth-child(3) {
+	top: 11px;
+	animation-name: sm-g-tab-on;
 }
-@keyframes sm-hk-pindrop {
+@keyframes sm-g-tab-turn {
 	from {
-		opacity: 0;
-		transform: translateY(-12px) rotate(-45deg);
-	}
-	20% {
-		opacity: 1;
+		transform: rotate(0deg);
 	}
 	60% {
-		transform: translateY(1px) rotate(-45deg);
+		transform: rotate(98deg);
 	}
 	to {
-		transform: translateY(0) rotate(-45deg);
+		transform: rotate(90deg);
 	}
 }
-@keyframes sm-hk-shadow {
+@keyframes sm-g-tab-off {
 	from {
-		opacity: 0;
-		transform: scaleX(0.3);
-	}
-	60% {
-		transform: scaleX(1.2);
+		opacity: 1;
 	}
 	to {
 		opacity: 0.35;
-		transform: scaleX(1);
+	}
+}
+@keyframes sm-g-tab-on {
+	from {
+		opacity: 0.35;
+	}
+	to {
+		opacity: 1;
 	}
 }
 

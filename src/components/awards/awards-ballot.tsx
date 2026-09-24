@@ -1166,7 +1166,15 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				`/api/awards/eligibility?address=${encodeURIComponent(addr)}&round=${encodeURIComponent(round.slug)}`,
 			);
 			if (!res.ok) throw new Error("could not check eligibility");
-			const body = (await res.json()) as Eligibility;
+			const raw = (await res.json()) as Eligibility;
+			// The receipt this browser stored when the ballot was cast is the
+			// only record that this address voted: the server never says. Merge
+			// it here, not only in the mount effect, or a reconnect that resolves
+			// after that effect ran would replace it with the bare server answer.
+			const receipt = readReceipt(addr, round.slug);
+			const body: Eligibility = receipt
+				? { ...raw, hasVoted: true, votes: receipt.selections }
+				: raw;
 			setEligibility(body);
 			// Not a Pilot address → the ballot goes read-only. Clear any picks
 			// they made while browsing disconnected: leaving them selected under
@@ -1535,28 +1543,62 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					<div className="rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 text-center sm:p-7">
 						<VoteReceipt />
 						<h2 className="mb-2 text-xl font-semibold tracking-tight text-neutral-100 sm:text-2xl">
-							You've already voted
+							{picksPerCategory > 1
+								? "Your nominations are in"
+								: "You've already voted"}
 						</h2>
 						<p className="mb-4 text-sm leading-relaxed text-neutral-300">
-							Your picks are below. This ballot is final. The first one cast is
-							the one that counts.
-							{voting.open && closesLabel && (
+							{picksPerCategory > 1 ? (
 								<>
-									{" "}
-									Voting closes{" "}
-									<span className="text-neutral-100">{closesLabel}</span>.
+									Your picks are marked on the ballot below. This ballot is
+									final; the first one cast is the one that counts.
+									{voting.open && closesLabel && (
+										<>
+											{" "}
+											Nominations close{" "}
+											<span className="text-neutral-100">{closesLabel}</span>.
+										</>
+									)}
+								</>
+							) : (
+								<>
+									Your picks are marked on the ballot below. This ballot is
+									final; the first one cast is the one that counts.
+									{voting.open && closesLabel && (
+										<>
+											{" "}
+											Voting closes{" "}
+											<span className="text-neutral-100">{closesLabel}</span>.
+										</>
+									)}{" "}
+									Results are published when voting closes.
 								</>
 							)}
 						</p>
-						<a
-							href={explorerAccountUrl(address)}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
-						>
-							Verify your ballot on-chain
-							<ArrowUpRight className="h-4 w-4" />
-						</a>
+						{picksPerCategory > 1 && (
+							<p className="mb-4 text-sm leading-relaxed text-neutral-300">
+								<span className="text-neutral-100">What happens next:</span>{" "}
+								when nominations close, the four most nominated projects in each
+								category become the finalists. Phase 2 is the final vote, one
+								pick per category, and every Pilot votes again then.
+							</p>
+						)}
+						{/* The ballot lives on the relay under its id, not on the voter's
+						    account; only the receipt knows the transaction. */}
+						{txHash && (
+							<a
+								href={explorerTxUrl(txHash)}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
+							>
+								Verify your ballot on-chain
+								{ballotId && (
+									<span className="text-neutral-500">· ballot {ballotId}</span>
+								)}
+								<ArrowUpRight className="h-4 w-4" />
+							</a>
+						)}
 					</div>
 				</motion.div>
 			)}

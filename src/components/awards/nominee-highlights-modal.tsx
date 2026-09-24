@@ -14,6 +14,7 @@ import { ArrowUpRight, Check, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { GLYPH_PARTS } from "./glyphs";
 import {
 	type HighlightGlyph,
 	type HighlightKind,
@@ -85,44 +86,10 @@ const KIND_TINT: Record<HighlightKind, string> = {
 	milestone: "text-amber-300/90",
 };
 
-/** A kind's glyph when the moment names none of its own. */
-const KIND_GLYPH: Record<HighlightKind, HighlightGlyph> = {
-	growth: "chart",
-	launch: "burst",
-	reach: "orbit",
-	milestone: "bookmark",
-};
-
-/** The parts each mechanism is drawn from, as `<i>` class names, in order
- *  (awards.css addresses some by nth-child). */
-const GLYPH_PARTS: Record<HighlightGlyph, string[]> = {
-	chart: ["", "", ""],
-	burst: [
-		"sm-hk-ring",
-		"sm-hk-dot",
-		...Array.from({ length: 8 }, () => "sm-hk-spark"),
-	],
-	orbit: ["sm-hk-orbit", "sm-hk-dot", "sm-hk-wave"],
-	bookmark: ["sm-hk-block", "sm-hk-spark", "sm-hk-spark", "sm-hk-spark"],
-	switch: ["sm-hk-track", "sm-hk-fill", "sm-hk-knob"],
-	lock: ["sm-hk-body", "sm-hk-shackle"],
-	search: ["sm-hk-lens", "sm-hk-handle"],
-	gather: ["", "", "", "", "", ""],
-	bell: ["sm-hk-body", "sm-hk-clapper", "sm-hk-badge"],
-	box: ["sm-hk-body", "sm-hk-flap", "sm-hk-flap"],
-	arrows: ["sm-hk-to", "sm-hk-fro"],
-	coin: ["sm-hk-disc"],
-	card: ["sm-hk-face"],
-	clock: ["sm-hk-face", "sm-hk-hour", "sm-hk-minute"],
-	list: ["", "", ""],
-	gear: ["sm-hk-cog", "sm-hk-hole"],
-	pin: ["sm-hk-shadow", "sm-hk-head"],
-};
-
 /**
- * A moment's glyph is a small mechanism from yui540's gallery (awards.css,
- * "Highlight glyphs"), not a stock icon. Each moment names its own; `delay`
- * staggers them down the list as the sheet unrolls.
+ * A moment's glyph is a small mechanism redrawn from yui540's gallery
+ * (awards.css, "Highlight glyphs"), not a stock icon. Each moment names its
+ * own; `delay` staggers them down the list as the sheet unrolls.
  */
 function Glyph({ name, delay }: { name: HighlightGlyph; delay: number }) {
 	return (
@@ -131,11 +98,32 @@ function Glyph({ name, delay }: { name: HighlightGlyph; delay: number }) {
 			style={{ ["--sm-d" as string]: `${delay}s` }}
 			aria-hidden="true"
 		>
-			{GLYPH_PARTS[name].map((cls, i) => (
-				// biome-ignore lint/suspicious/noArrayIndexKey: a fixed part list
-				<i key={i} className={cls || undefined} />
+			{Array.from({ length: GLYPH_PARTS[name] }, (_, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: a fixed part count
+				<i key={i} />
 			))}
 		</span>
+	);
+}
+
+/**
+ * The sheet slides in on a transform. A lazily loaded logo inside it waits
+ * for a scroll or layout that never comes (WebKit checks lazy images on
+ * scroll, not on transforms), so the sheet's logo loads eagerly, and a file
+ * that fails falls back to the site mark the way the ballot cards do.
+ */
+function SheetLogo({ src }: { src: string | null }) {
+	const [failed, setFailed] = useState(false);
+	return (
+		<Image
+			src={!failed && src ? src : "/logo.png"}
+			alt=""
+			width={56}
+			height={56}
+			loading="eager"
+			className="h-14 w-14 object-cover"
+			onError={() => setFailed(true)}
+		/>
 	);
 }
 
@@ -335,13 +323,7 @@ export function NomineeHighlightsModal({
 									transition={{ ...POP_SPRING, delay: 0.05 }}
 									className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#333] bg-[#111]"
 								>
-									<Image
-										src={data.logoUrl || "/logo.png"}
-										alt=""
-										width={56}
-										height={56}
-										className="h-14 w-14 object-cover"
-									/>
+									<SheetLogo src={data.logoUrl} />
 								</motion.span>
 								<div className="min-w-0">
 									<motion.p
@@ -418,10 +400,7 @@ export function NomineeHighlightsModal({
 													<span
 														className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
 													>
-														<Glyph
-															name={h.glyph ?? KIND_GLYPH[h.kind]}
-															delay={0.35 + i * 0.1}
-														/>
+														<Glyph name={h.glyph} delay={0.35 + i * 0.1} />
 													</span>
 													<div className="min-w-0 flex-1">
 														<p className="text-[15px] font-semibold leading-snug text-neutral-100">
