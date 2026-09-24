@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-09-24T22:27:19.121Z",
+	"asOf": "2026-09-24T22:34:09.909Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 103,
-	"healthy": 97,
+	"healthy": 98,
 	"broken": [
 		{
 			"file": "gone-repos.yml",
@@ -28,11 +28,6 @@
 			"file": "task-lane.yml",
 			"state": "standing-signal",
 			"why": "3 run(s) red at its declared signal step since its last green 6d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
-		},
-		{
-			"file": "tests.yml",
-			"state": "failing",
-			"why": "2 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run pnpm exec vitest run src/lib/ src/components/\""
 		}
 	],
 	"rows": [
@@ -196,10 +191,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 43,
+			"ageDays": 44,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 43d ago (manual tool — age not judged)"
+			"why": "last green 44d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -294,10 +289,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-24T22:23:33Z",
+			"lastSuccessAt": "2026-09-24T22:25:01Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -316,7 +311,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-09-24T22:25:00Z",
+			"lastSuccessAt": "2026-09-24T22:31:52Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1085,12 +1080,12 @@
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
-			"state": "failing",
-			"lastSuccessAt": "2026-09-24T22:03:29Z",
+			"state": "ok",
+			"lastSuccessAt": "2026-09-24T22:31:52Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 99,
-			"why": "2 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run pnpm exec vitest run src/lib/ src/components/\""
+			"runs": 100,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "upgrade-basis-onchain.yml",
@@ -1166,7 +1161,7 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 9,
 			"graceDays": 21,
-			"runs": 89,
+			"runs": 90,
 			"why": "last green 9d ago"
 		}
 	]
