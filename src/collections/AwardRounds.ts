@@ -212,9 +212,19 @@ export const AwardRounds: CollectionConfig = {
 					);
 				}
 				if (now === "open" && was !== "open") {
-					if (!(data?.closesAt ?? originalDoc.closesAt)) {
+					const closes = data?.closesAt ?? originalDoc.closesAt;
+					if (!closes) {
 						throw new Error(
 							"An open round needs closesAt: without a close date nothing dates a late ballot. Set it, then open.",
+						);
+					}
+					// A round re-opened with last time's close date still on it is
+					// open in name only: roundOpenState refuses every ballot as
+					// "closed", and the lane's read-back sees status=open and calls
+					// it done. Caught in the 2026-09-24 rehearsal.
+					if (Date.parse(String(closes)) <= Date.now()) {
+						throw new Error(
+							`closesAt (${String(closes)}) is already in the past: an open round with an expired close date accepts no ballots. Set a future close date, then open.`,
 						);
 					}
 					const others = await req.payload.find({
