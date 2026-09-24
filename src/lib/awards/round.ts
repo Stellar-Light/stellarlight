@@ -212,6 +212,25 @@ export async function loadRound(
 	}
 }
 
+/**
+ * The same load, keeping "no such round" and "could not read" apart. A
+ * route that folds the two into 404 tells a Pilot mid-vote that the round
+ * does not exist when the database merely blinked; the page then shows
+ * "the stage is being set" over a live round. Verified 2026-09-24: two of
+ * ten simultaneous voters hit exactly that on one Atlas reset.
+ */
+export async function loadRoundResult(
+	slug?: string | null,
+): Promise<
+	{ ok: true; loaded: LoadedRound | null } | { ok: false; error: string }
+> {
+	try {
+		return { ok: true, loaded: await loadRoundOrThrow(slug) };
+	} catch (err) {
+		return { ok: false, error: String(err) };
+	}
+}
+
 /** Public projection of a loaded round, safe to serve as-is. */
 export function toPublicRound(loaded: LoadedRound) {
 	const { round, nominees } = loaded;

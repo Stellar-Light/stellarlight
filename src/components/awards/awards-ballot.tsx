@@ -180,7 +180,15 @@ function shortAddress(address: string): string {
 
 // ── Root component ─────────────────────────────────────────────────────────
 
-export function AwardsBallot({ data }: { data: AwardsRoundData | null }) {
+export function AwardsBallot({
+	data,
+	unavailable = false,
+}: {
+	data: AwardsRoundData | null;
+	/** The round could not be read (database blip): say so, do not say "not live yet". */
+	unavailable?: boolean;
+}) {
+	if (unavailable) return <UnavailableState />;
 	if (!data || data.round.status === "draft") {
 		return <EmptyState picks={data?.round.picksPerCategory ?? 1} />;
 	}
@@ -965,6 +973,25 @@ function HowItWorks({
 }
 
 // ── Empty / draft state ────────────────────────────────────────────────────
+
+/** The database did not answer. Nothing about the round is known, so nothing
+ *  about it is claimed; a reload is the whole remedy. */
+function UnavailableState() {
+	return (
+		<>
+			<TopBar onHowItWorks={() => {}} />
+			<div className="mx-auto max-w-xl px-4 pt-32 text-center sm:px-6">
+				<h1 className="text-3xl font-semibold tracking-tight text-neutral-50">
+					One moment
+				</h1>
+				<p className="mt-3 text-neutral-400">
+					The awards page could not load the round just now. Reload in a few
+					seconds; nothing you did was lost.
+				</p>
+			</div>
+		</>
+	);
+}
 
 function EmptyState({ picks = 1 }: { picks?: number }) {
 	const [howOpen, setHowOpen] = useState(false);

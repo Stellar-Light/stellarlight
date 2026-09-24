@@ -11,7 +11,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { roundOpenState } from "@/lib/awards/ballot";
-import { loadRound, toPublicRound } from "@/lib/awards/round";
+import { loadRoundResult, toPublicRound } from "@/lib/awards/round";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -31,7 +31,19 @@ export async function GET(req: NextRequest) {
 	}
 
 	const slug = req.nextUrl.searchParams.get("round");
-	const loaded = await loadRound(slug);
+	const read = await loadRoundResult(slug);
+	if (!read.ok) {
+		return NextResponse.json(
+			{
+				round: null,
+				nominees: [],
+				error: "round_unavailable",
+				note: "the round could not be read right now; try again in a moment",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const loaded = read.loaded;
 	if (!loaded) {
 		return NextResponse.json(
 			{ round: null, nominees: [], note: "no award round exists yet" },
