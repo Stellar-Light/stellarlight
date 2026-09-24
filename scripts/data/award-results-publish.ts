@@ -14,8 +14,14 @@
  */
 import "../load-env";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { liveTally, resultsDocument } from "../../src/lib/awards/publish";
+import { getPayload } from "payload";
+import {
+	liveTally,
+	resultsDocument,
+	roundManifestDigest,
+} from "../../src/lib/awards/publish";
 import { loadRoundOrThrow } from "../../src/lib/awards/round";
+import configPromise from "../../src/payload.config";
 
 const args = process.argv.slice(2);
 const arg = (k: string) => {
@@ -45,26 +51,37 @@ async function main() {
 	const { tally, source, digest, afterClose, relayOnly } =
 		await liveTally(loaded);
 	// The pre-vote manifest pins the electorate and ballot shape the votes were
-	// cast under. Publish only a result whose round still matches it, or say
-	// in the log that the operator accepted the drift.
-	const anchorRes = await fetch(
-		`https://stellarlight.xyz/api/awards/anchor?round=${encodeURIComponent(ROUND)}`,
-	)
-		.then((r) => r.json())
-		.catch(() => null);
-	const manifest = anchorRes?.manifest as { matches?: boolean | null } | null;
-	if (!manifest) {
+	// cast under. Recomputed HERE from the round's current state and compared
+	// to the digest the anchor lane wrote on the round: the anchor API serves
+	// the same verdict, but from a five-minute cache, which is not what a
+	// publish gate should read.
+	const payload = await getPayload({ config: configPromise });
+	const rows = await payload.find({
+		collection: "award-rounds",
+		where: { slug: { equals: ROUND } },
+		limit: 1,
+		depth: 0,
+		overrideAccess: true,
+	});
+	const anchoredDigest =
+		// biome-ignore lint/suspicious/noExplicitAny: anchor is a json field
+		((rows.docs[0] as any)?.anchor?.manifest?.digest as string | undefined) ??
+		null;
+	const recomputed = roundManifestDigest(loaded);
+	if (!anchoredDigest) {
 		console.error(
 			`${ACCEPT_DRIFT ? "WARNING" : "REFUSED"}: no pre-vote manifest is anchored for ${ROUND} (tansu-anchor.yml --manifest). Nothing pins the roster and ballot shape the votes were cast under.${ACCEPT_DRIFT ? "" : " Pass --accept-manifest-drift to publish anyway."}`,
 		);
 		if (!ACCEPT_DRIFT) return 1;
-	} else if (manifest.matches !== true) {
+	} else if (recomputed !== anchoredDigest) {
 		console.error(
-			`${ACCEPT_DRIFT ? "WARNING" : "REFUSED"}: the round's manifest ${manifest.matches === null ? "could not be recomputed" : "changed since it was anchored"}: roster, nominees, picks or dates moved after voting opened.${ACCEPT_DRIFT ? "" : " Pass --accept-manifest-drift to publish anyway."}`,
+			`${ACCEPT_DRIFT ? "WARNING" : "REFUSED"}: the round's manifest changed since it was anchored (anchored ${anchoredDigest.slice(0, 12)}, now ${recomputed.slice(0, 12)}): roster, nominees, picks or dates moved after voting opened.${ACCEPT_DRIFT ? "" : " Pass --accept-manifest-drift to publish anyway."}`,
 		);
 		if (!ACCEPT_DRIFT) return 1;
 	} else {
-		console.log("manifest: matches the anchored pre-vote digest");
+		console.log(
+			`manifest: matches the anchored pre-vote digest (${recomputed.slice(0, 12)}, recomputed locally)`,
+		);
 	}
 	if (!digest) {
 		console.error(
