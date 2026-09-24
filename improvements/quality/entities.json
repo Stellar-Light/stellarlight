@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-24T11:16:46.762Z",
+ "generatedAt": "2026-09-24T12:52:03.087Z",
  "surfaces": [
   {
    "surface": "code",
@@ -8415,7 +8415,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 77
+    "count": 78
    },
    {
     "basis": "product-integration",
@@ -8435,7 +8435,7 @@
    },
    {
     "basis": "unverified",
-    "count": 7
+    "count": 6
    }
   ],
   "weakestReturned": 40,
@@ -10505,7 +10505,7 @@
   {
    "area": "project status",
    "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "447 of 990 rows (census)",
+   "measurement": "448 of 990 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
