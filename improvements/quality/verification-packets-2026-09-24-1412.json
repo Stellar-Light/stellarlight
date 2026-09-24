@@ -1,0 +1,1597 @@
+{
+ "generatedAt": "2026-09-24T14:12:54.199Z",
+ "population": 327,
+ "offset": 0,
+ "limit": 40,
+ "packets": [
+  {
+   "slug": "credible",
+   "name": "Credible",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://credible.finance/"
+   },
+   "site": {
+    "url": "https://credible.finance/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/credible-finance-515"
+   },
+   "corpus": {
+    "date": "2026-06-14T00:00:00.000Z",
+    "url": "https://github.com/lumenloop/awesome-stellar-community-fund/blob/main/docs/submission-template.md",
+    "title": "SCF Build Award Submission Template"
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "crediolabs-ai",
+   "name": "CredioLabs.AI",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-31T00:00:00.000Z",
+    "sourceUrl": "https://crediolabs.ai/"
+   },
+   "site": {
+    "url": "https://crediolabs.ai/",
+    "finalUrl": "https://crediolabs.ai/",
+    "status": 200,
+    "title": "Credio Labs - Digital Asset AI Infrastructure",
+    "description": "Credio Labs brings over a decade of tokenization experience and purpose-built AI agents to help you launch, manage, and scale your digital asset products with confidence.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/crediolabsai-ut9"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "cross-platform-soroban-rpc-sdk",
+   "name": "Cross platform Soroban RPC SDK",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://github.com/frankszendzielarz/sorobanrpcsdk"
+   },
+   "site": {
+    "url": "https://github.com/frankszendzielarz/sorobanrpcsdk",
+    "finalUrl": "https://github.com/frankszendzielarz/sorobanrpcsdk",
+    "status": 200,
+    "title": "GitHub - FrankSzendzielarz/SorobanRPCSDK: A lightweight SDK for cross platform and native consumption of the Stellar Soroban RPC gateway · GitHub",
+    "description": "A lightweight SDK for cross platform and native consumption of the Stellar Soroban RPC gateway - FrankSzendzielarz/SorobanRPCSDK",
+    "namesProduct": "cross",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-04-10T12:05:43.000Z",
+    "newestRelease": "2025-03-21T12:37:19.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     32
+    ],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cryptix",
+   "name": "Cryptix",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "unverified",
+    "asOf": "2026-08-10T03:58:44.124Z",
+    "sourceUrl": "https://tokenlaunchpad.eu/"
+   },
+   "site": {
+    "url": "https://tokenlaunchpad.eu/",
+    "finalUrl": "https://cryptix.ag/",
+    "status": 200,
+    "title": "Cryptix - Three Pillars. One End-to-End Partner.",
+    "description": "Cryptix is a Web3 venture builder in Zug, Switzerland. End-to-end from idea to operations - director mandates and Crypto Valley office space included.",
+    "namesProduct": "cryptix",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "crypto-link",
+   "name": "Crypto Link",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:10.402Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/crypto-link.yaml"
+   },
+   "site": {
+    "url": null,
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-04-07T08:39:22.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "no website on the row"
+  },
+  {
+   "slug": "cryptoconexin",
+   "name": "Cryptoconexión",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://cryptoconexion.com/stellar-edu"
+   },
+   "site": {
+    "url": "https://cryptoconexion.com/stellar-edu",
+    "finalUrl": "https://cryptoconexion.com/stellar-edu/",
+    "status": 200,
+    "title": "StellarEdu • CryptoConexión",
+    "description": "CryptoConexión crece en conjunto con alianzas y colaboraciones. Estamos orgullosos de establecer alianzas con importantes personajes",
+    "namesProduct": "cryptoconexión",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2024-04-23T01:15:39.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     25
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cryptoconexin-oij"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cryptomate",
+   "name": "CryptoMate",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cryptomate.me/"
+   },
+   "site": {
+    "url": "https://cryptomate.me/",
+    "finalUrl": "https://cryptomate.me/",
+    "status": 200,
+    "title": "CryptoMate - Blockchain power Fintech - CryptoMate - Blockchain power Fintech",
+    "description": "Integrate web3 functionalities in any product. Create in minutes, launch in days.",
+    "namesProduct": "cryptomate",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     43
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cryptomate-bgq"
+   },
+   "corpus": {
+    "date": "2025-10-01T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+    "title": "The Blueprint Comes to Life: Building the Future of Finance at Meridian 2025"
+   },
+   "proposal": "review",
+   "reason": "site 200 names \"cryptomate\" but freshest signal is 359d old"
+  },
+  {
+   "slug": "ctx",
+   "name": "CTX",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://ctx.com/"
+   },
+   "site": {
+    "url": "https://ctx.com/",
+    "finalUrl": "https://ctx.com/",
+    "status": 200,
+    "title": "CTX.com - Novel Payment Solutions",
+    "description": "Powering gift cards and innovative payment solutions that simplify spending, rewards, and digital commerce for modern businesses.",
+    "namesProduct": "ctx",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     19,
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/ctxcom-evm"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "cushion",
+   "name": "Cushion",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://cushion.trade/"
+   },
+   "site": {
+    "url": "https://cushion.trade/",
+    "finalUrl": "https://www.cushion.trade/",
+    "status": 200,
+    "title": "Cushion | Quantitative Strategies",
+    "description": "Cushion brings capital-protected strategies, offering high-return solutions with advanced risk management",
+    "namesProduct": "cushion",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-09-17T06:36:43.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     41
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cushion-capital-protection-6zk"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"cushion\"; commit 7d ago"
+  },
+  {
+   "slug": "cyvers",
+   "name": "CyVers",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://cyvers.ai/"
+   },
+   "site": {
+    "url": "https://cyvers.ai/",
+    "finalUrl": "https://cyvers.ai/",
+    "status": 200,
+    "title": "Cyvers | Digital Asset Threat Prevention",
+    "description": "Cyvers | Digital Asset Threat Prevention manages 4 data types including testimonials.",
+    "namesProduct": "cyvers",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2023-09-21T09:02:38.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/cyvers-5qi"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "dapp-world",
+   "name": "Dapp World",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:10.973Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/dapp-world.yaml"
+   },
+   "site": {
+    "url": "https://dapp-world.com/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     27
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dapp-world-9ye"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "dashx",
+   "name": "DashX",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://dashx.xyz/"
+   },
+   "site": {
+    "url": "https://dashx.xyz/",
+    "finalUrl": "https://dashx.xyz/",
+    "status": 200,
+    "title": "DashX | Lightning fast payments for everyone",
+    "description": "Get paid by international clients in 55+ currencies — fiat or stablecoins — settled into your Indian bank account with FIRA-backed compliance.",
+    "namesProduct": "dashx",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     42
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dashx-payments-7dz"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "dcent",
+   "name": "D'CENT",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://dcentwallet.com/en"
+   },
+   "site": {
+    "url": "https://dcentwallet.com/en",
+    "finalUrl": "https://dcentwallet.com/",
+    "status": 200,
+    "title": "DCENT | Fingerprint Hardware Wallet · 10,000+ Tokens Supported",
+    "description": "Maker of the world",
+    "namesProduct": "d'cent",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 16,
+    "newestCommit": "2023-02-23T02:23:23.000Z",
+    "newestRelease": "2022-06-13T08:59:57.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     43
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dcent-wallet-u4x"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "dd",
+   "name": "DD",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:11.401Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/dd.yaml"
+   },
+   "site": {
+    "url": "https://dapp.webacy.com/",
+    "finalUrl": "https://dapp.webacy.com/",
+    "status": 403,
+    "title": "Just a moment...",
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 403"
+  },
+  {
+   "slug": "deb",
+   "name": "DEB",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:11.477Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/deb.yaml"
+   },
+   "site": {
+    "url": null,
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     6
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/deb-sj5"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "no website on the row"
+  },
+  {
+   "slug": "derisk",
+   "name": "DeRisk",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "source-inherited",
+    "asOf": "2026-08-19T07:29:11.787Z",
+    "sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/derisk.yaml"
+   },
+   "site": {
+    "url": null,
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2023-11-30T20:59:24.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     20
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/derisk-esf"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "site-down?",
+   "reason": "no website on the row"
+  },
+  {
+   "slug": "diameter-pay",
+   "name": "Diameter Pay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://diameterpay.com/"
+   },
+   "site": {
+    "url": "https://diameterpay.com/",
+    "finalUrl": "https://diameterpay.com/",
+    "status": 200,
+    "title": "Diameter Pay &#8211; Global Payments for Banks and FIs",
+    "description": "Services About Contact Services About Contact The Shortest Distance Across the Globe Diameter provides embedded payments to banks and financial institutions. Our APIs enable global and local payments across multiple payment systems and currencies. Our compliance automation ensures safe and secure processing. learn more © 2023 SendFriend, Inc. DBA Diameter Pay. All Rights Reserved.SendFriend is&hellip;",
+    "namesProduct": "diameter pay",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     40
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/diameter-pay-c96"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "digibank",
+   "name": "Digibank",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://digibankar.com/"
+   },
+   "site": {
+    "url": "https://digibankar.com/",
+    "finalUrl": "https://digibankar.com/",
+    "status": 200,
+    "title": "دجي بناكر (البنك الرقمي) - خدمات مالية للجميع",
+    "description": "منصة مبتكرة توفر تداول العملات المشفّرة (USDC و USDT و البتكوين) و التبديل بينها و بين العملات النقدية، و الدفع الإلكتروني في الشرق الأوسط وشمال إفريقيا.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     35
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/digibank-non-custodial-n1t"
+   },
+   "corpus": {
+    "date": "2026-06-05T14:38:42.220Z",
+    "url": "https://lumenloop.com/research/stellar-weekly-roundup-week-29-2026",
+    "title": "Stellar Weekly Roundup — week of May 29, 2026"
+   },
+   "proposal": "review",
+   "reason": "site 200 but page does not name the product (corpus mention 111d ago)"
+  },
+  {
+   "slug": "digitpay-finance",
+   "name": "Digitpay Finance",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://digitpay.finance/"
+   },
+   "site": {
+    "url": "https://digitpay.finance/",
+    "finalUrl": "https://digitpay.finance/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": "digitpay",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     42
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/digitpay-finance-nhb"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "dobprotocol",
+   "name": "Dobprotocol",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://linktr.ee/dobprotocol"
+   },
+   "site": {
+    "url": "https://linktr.ee/dobprotocol",
+    "finalUrl": "https://linktr.ee/dobprotocol",
+    "status": 200,
+    "title": "Dobprotocol Official: Instagram, X | Linktree",
+    "description": "We turn the revenue of solar, compute, mining and EV\ninfrastructure into financial assets.",
+    "namesProduct": "dobprotocol",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2026-08-07T01:38:09.000Z",
+    "newestRelease": "2026-08-07T01:17:14.000Z",
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     37
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dobprotocol-6wq"
+   },
+   "corpus": {
+    "date": "2025-10-23",
+    "url": "https://developers.stellar.org/meetings/2025/10/23",
+    "title": "Stellar Developer Meeting 2025-10-23"
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"dobprotocol\"; commit 49d ago, release 49d ago"
+  },
+  {
+   "slug": "dolphinze",
+   "name": "dolphinze",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://dolphinze.com/"
+   },
+   "site": {
+    "url": "https://dolphinze.com/",
+    "finalUrl": "https://dolphinze.com/",
+    "status": 200,
+    "title": "Dolphinze — Global Contractor Payments in Fiat or Crypto",
+    "description": "Send, receive and settle payments for your contractors in local currencies or crypto. No bank details stored. FinCEN & FINTRAC registered. 2–3% fees.",
+    "namesProduct": "dolphinze",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     39
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/dolphinze-yjr"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "domipago",
+   "name": "DomiPago",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://domipago.com/"
+   },
+   "site": {
+    "url": "https://domipago.com/",
+    "finalUrl": "https://domipago.com/",
+    "status": 200,
+    "title": "DomiPago - Remesas Digitales",
+    "description": "Remesas, enviar y recibir dinero de manera inmediata, directo a una tarjeta de débito VISA desde los Estados Unidos a República Dominicana.",
+    "namesProduct": "domipago",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2024-10-05T15:47:43.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     37
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/domipago-r4y"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "dune",
+   "name": "Dune",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-09-05T00:00:00.000Z",
+    "sourceUrl": "https://docs.dune.com/data-catalog/stellar/overview.md"
+   },
+   "site": {
+    "url": "https://dune.com/home",
+    "finalUrl": "https://dune.com/home",
+    "status": 403,
+    "title": "Just a moment...",
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": "2026-07-22T00:00:00.000Z",
+    "url": "https://developers.stellar.org/docs/tools/developer-tools/analytics-platforms",
+    "title": "Analytics Platforms"
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 403"
+  },
+  {
+   "slug": "eara",
+   "name": "Eara",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://earaglobal.com/"
+   },
+   "site": {
+    "url": "https://earaglobal.com/",
+    "finalUrl": "https://earaglobal.com/",
+    "status": 200,
+    "title": "Eara - Digital Asset Revolution",
+    "description": "Descubre un nuevo paradigma financiero, donde los activos tradicionales se convierten en oportunidades digitalizadas. #RealWorldAssets #RWA",
+    "namesProduct": "eara",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     40
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/eara-european-regulated-rwa-ecosystem-dmu"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "easya",
+   "name": "EasyA",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://easya.io/"
+   },
+   "site": {
+    "url": "https://easya.io/",
+    "finalUrl": "https://www.easya.io/",
+    "status": 200,
+    "title": "Learn about web3 and earn | EasyA",
+    "description": "Complete quests and start learning in minutes! Join 1M+ developers learning about the world&#x27;s best blockchains and protocols, right now!",
+    "namesProduct": "easya",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     17,
+     23
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/easya-4eg"
+   },
+   "corpus": {
+    "date": "2024-06-12T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/cash-to-defi-the-consensus-x-easya-2024-stellar-hackathon",
+    "title": "Cash-to-DeFi: the Consensus X EasyA 2024 Stellar Hackathon"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "elementpay",
+   "name": "ElementPay",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://elementpay.net/"
+   },
+   "site": {
+    "url": "https://elementpay.net/",
+    "finalUrl": "https://www.elementpay.net/",
+    "status": 200,
+    "title": "Cross-Border Stablecoin Payments & Agentic Rails for Africa",
+    "description": "ElementPay: agentic payment infrastructure and B2B stablecoin rails for Africa. USDC invoicing, AI-ready off-ramps, crypto-to-mobile-money APIs, and cross-border settlement for Kenya, Nigeria, Ghana, and global corridors.",
+    "namesProduct": "elementpay",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 4,
+    "newestCommit": "2026-09-16T12:51:15.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/elementpay-hq1"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"elementpay\"; commit 8d ago"
+  },
+  {
+   "slug": "elroy",
+   "name": "Elroy",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://elroy.app/"
+   },
+   "site": {
+    "url": "https://elroy.app/",
+    "finalUrl": "https://www.elroy.app/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "elsa",
+   "name": "Elsa",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://elsa.care/"
+   },
+   "site": {
+    "url": "https://elsa.care/",
+    "finalUrl": "https://elsa.care/",
+    "status": 200,
+    "title": "Elsa Care Technologies — Payments technology",
+    "description": "Elsa Care Technologies is a payments technology company building Borderless and UrbanPay, plus custom payments architecture for ambitious teams.",
+    "namesProduct": "elsa",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     11
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/elsa-wallet-banking-filipinos-hcg"
+   },
+   "corpus": {
+    "date": "2022-08-02T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/the-marketing-grants-programs-first-million",
+    "title": "The Marketing Grants Program’s First Million"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "emigro",
+   "name": "Emigro",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://emigro.co/"
+   },
+   "site": {
+    "url": "https://emigro.co/",
+    "finalUrl": "https://emigro.co/",
+    "status": 200,
+    "title": "Emigro — Your move to Brazil, in one place",
+    "description": "Understand your visa, organize every step, and find trusted professionals for your move to Brazil.",
+    "namesProduct": "emigro",
+    "prelaunch": "waitlist"
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     17,
+     20,
+     25
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/emigro-jp6"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "pre-launch?",
+   "reason": "HTTP 200; page carries \"waitlist\""
+  },
+  {
+   "slug": "encode-club",
+   "name": "Encode Club",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-09-01T21:47:52.662Z",
+    "sourceUrl": "https://encodeclub.com/"
+   },
+   "site": {
+    "url": "https://encodeclub.com/",
+    "finalUrl": "https://www.encodeclub.com/",
+    "status": 200,
+    "title": "Encode Club - Build your startup in Web3 & AI",
+    "description": "Join a community of innovators and future-proof your skills with cutting-edge technologies that are reshaping our digital landscape.",
+    "namesProduct": "encode club",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     22
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/encode-club-utb"
+   },
+   "corpus": {
+    "date": "2021-10-13T00:00:00.000Z",
+    "url": "https://stellar.org/blog/foundation-news/the-stellar-development-foundation-launches-initiative-to-accelerate-blockchain-education",
+    "title": "The Stellar Development Foundation Launches Initiative to Accelerate Blockchain Education"
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "equitx",
+   "name": "EquitX",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://equitx.com/"
+   },
+   "site": {
+    "url": "https://equitx.com/",
+    "finalUrl": null,
+    "status": 0,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 1,
+    "newestCommit": "2025-12-16T14:38:29.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     26,
+     31
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/equitx-v4s"
+   },
+   "corpus": {
+    "date": "2025-11-16T23:00:00.000Z",
+    "url": "https://stellarsecurityportal.com/report/55",
+    "title": "EquitX — Runtime Verification (EquitX - Security Audit Report)"
+   },
+   "proposal": "site-down?",
+   "reason": "HTTP 0 (transport failure)"
+  },
+  {
+   "slug": "etesia",
+   "name": "Etesia",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-31T00:00:00.000Z",
+    "sourceUrl": "https://www.etesiar.com/"
+   },
+   "site": {
+    "url": "https://etesiar.com/",
+    "finalUrl": "https://www.etesiar.com/",
+    "status": 200,
+    "title": "Etesia Research — Institutional Quant Strategies, Onchain",
+    "description": "Etesia Research democratizes access to institutional-grade quantitative strategies for stablecoins — fully automated and onchain.",
+    "namesProduct": "etesia",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 2,
+    "newestCommit": "2026-09-19T14:04:28.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/etesia-rgj"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"etesia\"; commit 5d ago"
+  },
+  {
+   "slug": "eurau",
+   "name": "EURAU",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://allunity.com/"
+   },
+   "site": {
+    "url": "https://allunity.com/",
+    "finalUrl": "https://allunity.com/",
+    "status": 200,
+    "title": "Regulated Stablecoins for Global Settlement | AllUnity",
+    "description": "Discover AllUnity’s regulated, 1:1 fiat-backed stablecoins built in Europe for fast, secure, and seamless global payments, liquidity, and settlement.",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "eurx",
+   "name": "EURx",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://fxdao.io/"
+   },
+   "site": {
+    "url": "https://fxdao.io/",
+    "finalUrl": "https://fxdao.io/",
+    "status": 200,
+    "title": "Hello from FxDAO | FxDAO",
+    "description": "FxDAO - A Decentralized borrowing protocol for the issuance of stablecoins backed by XLMs",
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "fiatsend",
+   "name": "Fiatsend",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://fiatsend.com/"
+   },
+   "site": {
+    "url": "https://fiatsend.com/",
+    "finalUrl": "https://fiatsend.com/",
+    "status": 200,
+    "title": "Power payouts across Africa in seconds | Fiatsend",
+    "description": "Instant African payouts for fintechs, exchanges, payroll, remittance, and marketplaces. Launch in days with free sandbox — compliance included, no local banking integrations.",
+    "namesProduct": "fiatsend",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 5,
+    "newestCommit": "2026-05-28T13:12:01.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     43
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/fiatsend-kfw"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"fiatsend\"; commit 119d ago"
+  },
+  {
+   "slug": "figo",
+   "name": "Figo",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://spendfigo.com/"
+   },
+   "site": {
+    "url": "https://spendfigo.com/",
+    "finalUrl": "https://spendfigo.com/",
+    "status": 200,
+    "title": "Figo — The Dollar Card That Actually Works",
+    "description": "Get a virtual dollar card, fund with bank transfer or crypto, and spend wherever Visa is accepted — 150M+ merchants. No more declined transactions.",
+    "namesProduct": "figo",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     43
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/figo-9fh"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "figure",
+   "name": "Figure",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://figure.com/"
+   },
+   "site": {
+    "url": "https://figure.com/",
+    "finalUrl": "https://www.figure.com/",
+    "status": 200,
+    "title": "Figure - Fast, Easy Online HELOC Lender",
+    "description": "See how a Home Equity Line of Credit with Figure can help you plan a home renovation project, consolidate high-interest debt, or fund your dream vacation!",
+    "namesProduct": "figure",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": false,
+    "rounds": [],
+    "sourceUrl": null
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "fijicoin",
+   "name": "FijiCoin",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://mai.money/"
+   },
+   "site": {
+    "url": "https://mai.money/",
+    "finalUrl": "https://mai.money/",
+    "status": 200,
+    "title": null,
+    "description": null,
+    "namesProduct": null,
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     8
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/fijicoin-frq"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d; page does not name the product"
+  },
+  {
+   "slug": "flux",
+   "name": "Flux",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-17T03:02:29.060Z",
+    "sourceUrl": "https://iflux.app/"
+   },
+   "site": {
+    "url": "https://iflux.app/",
+    "finalUrl": "https://iflux.app/",
+    "status": 200,
+    "title": "Home Page - Flux",
+    "description": null,
+    "namesProduct": "flux",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 0,
+    "newestCommit": null,
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     22
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/flux-yu0"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "stale?",
+   "reason": "site 200 but no code/corpus signal within 365d"
+  },
+  {
+   "slug": "for-yield",
+   "name": "For Yield",
+   "prominence": 0,
+   "statusNow": {
+    "status": "Live",
+    "basis": "site-liveness",
+    "asOf": "2026-08-27T17:11:33.588Z",
+    "sourceUrl": "https://for-yield.com/"
+   },
+   "site": {
+    "url": "https://for-yield.com/",
+    "finalUrl": "https://www.for-yield.com/",
+    "status": 200,
+    "title": "ForYield - Gestion de crypto-actifs | Dossier d'agrément MiCA en préparation",
+    "description": "ForYield prépare une offre de gestion de portefeuille de crypto-actifs avec des stratégies de rendement individualisées. Services proposés sous réserve d",
+    "namesProduct": "yield",
+    "prelaunch": null
+   },
+   "code": {
+    "repos": 3,
+    "newestCommit": "2026-09-22T08:36:08.000Z",
+    "newestRelease": null,
+    "archived": 0
+   },
+   "scf": {
+    "awarded": true,
+    "rounds": [
+     44
+    ],
+    "sourceUrl": "https://communityfund.stellar.org/project/for-yield-2oz"
+   },
+   "corpus": {
+    "date": null,
+    "url": null,
+    "title": null
+   },
+   "proposal": "confirm-live",
+   "reason": "site 200 names \"yield\"; commit 2d ago"
+  }
+ ]
+}
