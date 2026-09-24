@@ -33,7 +33,7 @@ import {
 	reserveBallot,
 	settlePendingBallot,
 } from "@/lib/awards/record";
-import { loadRound } from "@/lib/awards/round";
+import { loadRoundResult } from "@/lib/awards/round";
 import {
 	AWARDS_NETWORK_PASSPHRASE,
 	fetchTestnetAccount,
@@ -84,9 +84,20 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	const loaded = await loadRound(
+	const read = await loadRoundResult(
 		typeof body.round === "string" ? body.round : null,
 	);
+	if (!read.ok) {
+		return NextResponse.json(
+			{
+				error: "round_unavailable",
+				message:
+					"The round could not be read right now. Nothing was changed. Try again in a moment.",
+			},
+			{ status: 503, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const loaded = read.loaded;
 	if (!loaded) {
 		return NextResponse.json(
 			{ error: "no award round exists" },

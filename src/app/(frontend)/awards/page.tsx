@@ -5,7 +5,7 @@ import {
 } from "@/components/awards/awards-ballot";
 import "@/components/awards/awards.css";
 import { roundOpenState } from "@/lib/awards/ballot";
-import { loadRound, toPublicRound } from "@/lib/awards/round";
+import { loadRoundResult, toPublicRound } from "@/lib/awards/round";
 
 /**
  * /awards, the i³ Awards voting experience (HIDDEN page).
@@ -36,8 +36,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function getRoundData(): Promise<AwardsRoundData | null> {
-	const loaded = await loadRound();
+async function getRoundData(): Promise<AwardsRoundData | null | "unavailable"> {
+	const read = await loadRoundResult();
+	// A failed read is not "no round yet": the empty stage over a live round
+	// would tell a Pilot the vote has not started.
+	if (!read.ok) return "unavailable";
+	const loaded = read.loaded;
 	if (!loaded) return null;
 	const openState = roundOpenState(loaded.round);
 	const pub = toPublicRound(loaded);
@@ -52,7 +56,10 @@ export default async function AwardsPage() {
 	const data = await getRoundData();
 	return (
 		<div className="awards-sm min-h-screen relative">
-			<AwardsBallot data={data} />
+			<AwardsBallot
+				data={data === "unavailable" ? null : data}
+				unavailable={data === "unavailable"}
+			/>
 		</div>
 	);
 }
