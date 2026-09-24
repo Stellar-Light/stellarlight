@@ -98,6 +98,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:defindex-tvl-exact-product-lineup",
+   "date": "2026-09-24",
+   "run": "36008060508",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
