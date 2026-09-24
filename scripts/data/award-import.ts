@@ -5,6 +5,10 @@
  *   pnpm exec tsx scripts/data/award-import.ts --kind=voters --file=keys.csv --execute
  *   pnpm exec tsx scripts/data/award-import.ts --kind=nominees --file=wrong.csv --remove [--execute]
  *
+ * --update (nominees only) rewrites the blurb of rows that already exist when
+ * the CSV gives a different one. Only the card's text changes, never the slug
+ * a ballot names, so it is safe on an open round (a typo on the day).
+ *
  * --remove (nominees only) deletes the listed (project, category) rows from
  * the round instead of adding them — for a nominee that resolved to the
  * wrong directory record. Refused on an OPEN round: ballots already name
@@ -60,6 +64,7 @@ const arg = (name: string) =>
 
 const EXECUTE = process.argv.includes("--execute");
 const REMOVE = process.argv.includes("--remove");
+const UPDATE = process.argv.includes("--update");
 const KIND = (arg("kind") ?? "").trim();
 const FILE = arg("file") ?? "";
 const ROUND_SLUG = arg("round") ?? null; // null → the open round
@@ -73,8 +78,8 @@ async function main() {
 		console.error("✗ --kind must be 'nominees' or 'voters'");
 		process.exit(1);
 	}
-	if (REMOVE && KIND !== "nominees") {
-		console.error("✗ --remove applies to nominees only");
+	if ((REMOVE || UPDATE) && KIND !== "nominees") {
+		console.error("✗ --remove and --update apply to nominees only");
 		process.exit(1);
 	}
 	const text = INLINE || (FILE ? readFileSync(FILE, "utf8") : "");
@@ -284,20 +289,30 @@ async function importNominees(
 		limit: 1000,
 		depth: 0,
 	});
-	// key → nominee row id, so --remove can name the exact row
+	// key → nominee row id (and its blurb), so --remove and --update can name
+	// the exact row
 	const haveIds = new Map<string, string>();
+	const blurbByKey = new Map<string, string>();
 	for (const d of existing.docs as Array<{
 		id: string;
 		category?: string;
 		project?: string | { id?: string };
+		customBlurb?: string | null;
 	}>) {
 		const pid =
 			typeof d.project === "object" && d.project
 				? String(d.project.id)
 				: String(d.project);
 		haveIds.set(`${d.category}::${pid}`, String(d.id));
+		blurbByKey.set(`${d.category}::${pid}`, (d.customBlurb ?? "").trim());
 	}
 	const have = new Set(haveIds.keys());
+	const updates: Array<{
+		id: string;
+		cell: string;
+		category: string;
+		blurb: string;
+	}> = [];
 	const removals: Array<{ id: string; cell: string; category: string }> = [];
 	const absent: string[] = [];
 
@@ -347,7 +362,15 @@ async function importNominees(
 			else absent.push(`${cell} (${category})`);
 			continue;
 		}
-		if (have.has(key)) continue; // already a nominee
+		if (have.has(key)) {
+			// already a nominee; with --update, a different blurb is rewritten
+			const blurb = (r.blurb ?? r.description ?? r.why ?? "").trim();
+			const id = haveIds.get(key);
+			if (UPDATE && id && blurb && blurb !== blurbByKey.get(key)) {
+				updates.push({ id, cell, category, blurb });
+			}
+			continue;
+		}
 		add.push({
 			category,
 			project: hit.id,
@@ -399,6 +422,10 @@ removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
 
 	console.log(`already nominees : ${have.size}`);
 	console.log(`to add           : ${add.length}`);
+	if (UPDATE) {
+		console.log(`to update        : ${updates.length}`);
+		for (const u of updates) console.log(`   ~ ${u.cell} (${u.category})`);
+	}
 	if (badCategory.length) {
 		console.log(`\n✗ ${badCategory.length} row(s) with an unknown category:`);
 		for (const b of badCategory.slice(0, 10)) console.log(`   ${b}`);
@@ -421,6 +448,16 @@ removed ${removals.length} — round now has ${left.totalDocs} nominee(s)`,
 		console.log("\nDRY-RUN — nothing written. Re-run with --execute.");
 		process.exit(problems > 0 ? 1 : 0);
 	}
+	let updated = 0;
+	for (const u of updates) {
+		await payload.update({
+			collection: "award-nominees",
+			id: u.id,
+			data: { customBlurb: u.blurb },
+		});
+		updated++;
+	}
+	if (UPDATE) console.log(`updated ${updated} blurb(s)`);
 	let wrote = 0;
 	for (const n of add) {
 		await payload.create({
