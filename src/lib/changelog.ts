@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-24",
+		surfaces: ["api"],
+		version: "spec@1.9.53",
+		type: "changed",
+		summary:
+			"Rate limits are now documented as enforced, and a partner key lifts a caller onto a per-key tier of 1,200 requests a minute and 200,000 a day. No response shape, parameter or enum changed.",
+		detail:
+			"The description's rate-limit section said none were enforced; per-IP, per-endpoint, per-minute floors have been live on the cost-bearing routes for a while (60 a minute on /api/research and most routes), advertised on every response through X-RateLimit-Limit, X-RateLimit-Remaining and X-RateLimit-Reset and on a 429 through Retry-After. That stopped an agent platform cold: every one of its users leaves through one egress IP, so the platform counted as a single caller. A partner key, sent as Authorization: Bearer <key> or x-api-key, is now metered per key instead of per IP at 1,200 a minute and 200,000 a day; an unknown key changes nothing, and keys are issued by hand on request to support@stellarlight.xyz. Documentation and metering only: no field, parameter or status code changed.",
+	},
+	{
 		date: "2026-09-14",
 		surfaces: ["api", "api-client"],
 		version: "spec@1.9.52",
