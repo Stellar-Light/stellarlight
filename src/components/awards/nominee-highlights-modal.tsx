@@ -14,7 +14,11 @@ import { ArrowUpRight, Check, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { type HighlightKind, highlightsFor } from "./highlights";
+import {
+	type HighlightGlyph,
+	type HighlightKind,
+	highlightsFor,
+} from "./highlights";
 
 // stellar-markets ease + two springs: a settling one for the panel, a snappier
 // one with a touch of overshoot for the logo pop and taps.
@@ -81,50 +85,56 @@ const KIND_TINT: Record<HighlightKind, string> = {
 	milestone: "text-amber-300/90",
 };
 
+/** A kind's glyph when the moment names none of its own. */
+const KIND_GLYPH: Record<HighlightKind, HighlightGlyph> = {
+	growth: "chart",
+	launch: "burst",
+	reach: "orbit",
+	milestone: "bookmark",
+};
+
+/** The parts each mechanism is drawn from, as `<i>` class names, in order
+ *  (awards.css addresses some by nth-child). */
+const GLYPH_PARTS: Record<HighlightGlyph, string[]> = {
+	chart: ["", "", ""],
+	burst: [
+		"sm-hk-ring",
+		"sm-hk-dot",
+		...Array.from({ length: 8 }, () => "sm-hk-spark"),
+	],
+	orbit: ["sm-hk-orbit", "sm-hk-dot", "sm-hk-wave"],
+	bookmark: ["sm-hk-block", "sm-hk-spark", "sm-hk-spark", "sm-hk-spark"],
+	switch: ["sm-hk-track", "sm-hk-fill", "sm-hk-knob"],
+	lock: ["sm-hk-body", "sm-hk-shackle"],
+	search: ["sm-hk-lens", "sm-hk-handle"],
+	gather: ["", "", "", "", "", ""],
+	bell: ["sm-hk-body", "sm-hk-clapper", "sm-hk-badge"],
+	box: ["sm-hk-body", "sm-hk-flap", "sm-hk-flap"],
+	arrows: ["sm-hk-to", "sm-hk-fro"],
+	coin: ["sm-hk-disc"],
+	card: ["sm-hk-face"],
+	clock: ["sm-hk-face", "sm-hk-hour", "sm-hk-minute"],
+	list: ["", "", ""],
+	gear: ["sm-hk-cog", "sm-hk-hole"],
+	pin: ["sm-hk-shadow", "sm-hk-head"],
+};
+
 /**
  * A moment's glyph is a small mechanism from yui540's gallery (awards.css,
- * "Highlight glyphs"), not a stock icon: the bar chart, the pop and burst,
- * the orbit, the bookmark. Each plays as the sheet unrolls; `delay`
- * staggers them down the list.
+ * "Highlight glyphs"), not a stock icon. Each moment names its own; `delay`
+ * staggers them down the list as the sheet unrolls.
  */
-function KindGlyph({ kind, delay }: { kind: HighlightKind; delay: number }) {
-	const parts =
-		kind === "growth" ? (
-			<>
-				<i />
-				<i />
-				<i />
-			</>
-		) : kind === "launch" ? (
-			<>
-				<i className="sm-hk-ring" />
-				<i className="sm-hk-dot" />
-				{Array.from({ length: 8 }, (_, n) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: fixed burst
-					<i key={n} className="sm-hk-spark" />
-				))}
-			</>
-		) : kind === "reach" ? (
-			<>
-				<i className="sm-hk-orbit" />
-				<i className="sm-hk-dot" />
-				<i className="sm-hk-wave" />
-			</>
-		) : (
-			<>
-				<i className="sm-hk-block" />
-				<i className="sm-hk-spark" />
-				<i className="sm-hk-spark" />
-				<i className="sm-hk-spark" />
-			</>
-		);
+function Glyph({ name, delay }: { name: HighlightGlyph; delay: number }) {
 	return (
 		<span
-			className={`sm-hk sm-hk-${kind}`}
+			className={`sm-hk sm-hk-${name}`}
 			style={{ ["--sm-d" as string]: `${delay}s` }}
 			aria-hidden="true"
 		>
-			{parts}
+			{GLYPH_PARTS[name].map((cls, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: a fixed part list
+				<i key={i} className={cls || undefined} />
+			))}
 		</span>
 	);
 }
@@ -408,7 +418,10 @@ export function NomineeHighlightsModal({
 													<span
 														className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
 													>
-														<KindGlyph kind={h.kind} delay={0.35 + i * 0.1} />
+														<Glyph
+															name={h.glyph ?? KIND_GLYPH[h.kind]}
+															delay={0.35 + i * 0.1}
+														/>
 													</span>
 													<div className="min-w-0 flex-1">
 														<p className="text-[15px] font-semibold leading-snug text-neutral-100">

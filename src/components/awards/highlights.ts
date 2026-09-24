@@ -16,6 +16,30 @@
 export type HighlightKind = "growth" | "launch" | "reach" | "milestone";
 
 /**
+ * The mechanism drawn beside a moment (awards.css, "Highlight glyphs"), each
+ * from yui540's gallery. A moment names its own; absent, the kind's default
+ * is used (growth chart, launch burst, reach orbit, milestone bookmark).
+ */
+export type HighlightGlyph =
+	| "chart"
+	| "burst"
+	| "orbit"
+	| "bookmark"
+	| "switch"
+	| "lock"
+	| "search"
+	| "gather"
+	| "bell"
+	| "box"
+	| "arrows"
+	| "coin"
+	| "card"
+	| "clock"
+	| "list"
+	| "gear"
+	| "pin";
+
+/**
  * An optional metric renders as a rolling-digit odometer that counts up when
  * the sheet opens. `grounded` marks values taken straight from the project's
  * blurb (e.g. "nearly 200 countries"); anything else is illustrative demo
@@ -32,6 +56,8 @@ export interface HighlightMetric {
 
 export interface Highlight {
 	kind: HighlightKind;
+	/** The specific mechanism for this moment; the kind's default if absent. */
+	glyph?: HighlightGlyph;
 	headline: string;
 	detail: string;
 	metric?: HighlightMetric;
@@ -237,6 +263,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	abroad: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "3,139 payments settled",
 			detail:
 				"About $314K paid from Stellar wallets and received as BRL and COP.",
@@ -244,12 +271,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "PIX live at Meridian 2025",
 			detail:
 				"Attendees paid like locals in Brazil straight from Beans, Lobstr, Zypto and Freighter.",
 		},
 		{
 			kind: "reach",
+			glyph: "arrows",
 			headline: "Two corridors, one flow",
 			detail:
 				"PIX in Brazil and Bre-B in Colombia; Stellar carries 91% of the volume.",
@@ -258,6 +287,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	agtrail: [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "6,000+ farmers and users",
 			detail:
 				"Across 25+ cooperatives and 150+ agribusiness partners in 8+ Nigerian states.",
@@ -265,12 +295,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Live on mainnet, May 2026",
 			detail:
 				"SCF #38 Build Award completed; a production app with measurable on-chain activity.",
 		},
 		{
 			kind: "milestone",
+			glyph: "coin",
 			headline: "Farmers paid in NGNC",
 			detail:
 				"Buyers settle verified trades on Stellar; farmers cash out to a Nigerian bank account.",
@@ -279,6 +311,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	bousol: [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "7,000+ funded wallets",
 			detail:
 				"About 150 new signups a day from Africa alone, on top of the Haiti and Caribbean base.",
@@ -286,12 +319,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "orbit",
 			headline: "Sòl circles, on-chain",
 			detail:
 				"The rotating-savings tradition as a non-custodial USDC wallet with a verifiable record.",
 		},
 		{
 			kind: "milestone",
+			glyph: "card",
 			headline: "Registered MSB, real on-ramps",
 			detail:
 				"MoneyGram, Stripe and PayPal live, plus a signed TSA with MoneyGram.",
@@ -300,18 +335,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	fastbuka: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "More merchants, less commission",
 			detail:
 				"Low-cost rails keep more of each sale with neighbourhood vendors.",
 		},
 		{
 			kind: "launch",
+			glyph: "box",
 			headline: "Marketplace live on mainnet",
 			detail:
 				"Consumers, local merchants and couriers across Africa since February 2026.",
 		},
 		{
 			kind: "milestone",
+			glyph: "clock",
 			headline: "Riders paid in under 60 seconds",
 			detail: "Delivery earnings land the same day instead of weekly.",
 		},
@@ -319,6 +357,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"coala-pay": [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "2,955 people reached in Somalia",
 			detail:
 				"Funds delivered in under 24 hours, inside the critical 72-hour window.",
@@ -326,12 +365,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Anticipatory aid went live",
 			detail:
 				"Smart-contract subgrants for NRC Somalia, triggered by weather data since late 2025.",
 		},
 		{
 			kind: "milestone",
+			glyph: "bell",
 			headline: "Over $1M standing by",
 			detail:
 				"WFP funds on Stellar release the moment a pre-disaster threshold is crossed, for 39,610 people.",
@@ -340,18 +381,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	codelnpay: [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "70,000+ young Africans reached",
 			detail: "Training, quests, hackathons and job placement since inception.",
 			metric: { value: 70000, suffix: "+", caption: "young people reached" },
 		},
 		{
 			kind: "milestone",
+			glyph: "clock",
 			headline: "Two years live on Stellar",
 			detail:
 				"Cross-border payroll so remote workers keep what employers abroad pay them.",
 		},
 		{
 			kind: "reach",
+			glyph: "coin",
 			headline: "Income without the cuts",
 			detail:
 				"Stablecoin salaries land on-chain, lifting household income in overlooked regions.",
@@ -360,6 +404,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	domipago: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "5,600+ transactions",
 			detail:
 				"More than $1.5M moved on the U.S. to Dominican Republic corridor since November 2023.",
@@ -367,12 +412,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Mainnet on Stellar, July 2026",
 			detail:
 				"SCF Build Award completed; production hardening for end-to-end payouts in the DR.",
 		},
 		{
 			kind: "milestone",
+			glyph: "arrows",
 			headline: "Remittances inside WhatsApp",
 			detail:
 				"Recipients request and receive money in the channel families already use.",
@@ -381,18 +428,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	findtruman: [
 		{
 			kind: "growth",
+			glyph: "clock",
 			headline: "Building on Stellar since 2024",
 			detail:
 				"Creator incentives, copyright records and player reputation, all live.",
 		},
 		{
 			kind: "launch",
+			glyph: "box",
 			headline: "Games from a sentence",
 			detail:
 				"An agentic framework turns natural-language ideas into playable 3D games in hours.",
 		},
 		{
 			kind: "reach",
+			glyph: "lock",
 			headline: "Web2 sign-in, on-chain ownership",
 			detail:
 				"Google login with an automatically linked Stellar address; assets recorded on-chain.",
@@ -401,6 +451,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"freedom-pay-wallet": [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "$100,000 USDC in aid delivered",
 			detail:
 				"To more than 1,200 people in The Gambia, Tanzania, Uganda and Ethiopia.",
@@ -408,12 +459,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "reach",
+			glyph: "card",
 			headline: "Aid that becomes access",
 			detail:
 				"Cash-out, airtime, utilities, gift cards and a prepaid Visa from one wallet.",
 		},
 		{
 			kind: "milestone",
+			glyph: "gather",
 			headline: "Women entrepreneurs funded",
 			detail:
 				"Grants in Uganda helped recipients restock, start and grow small businesses.",
@@ -422,18 +475,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	giveth: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "Every donation arrives in full",
 			detail:
 				"No platform fee, so grassroots projects anywhere can fundraise without a bank.",
 		},
 		{
 			kind: "launch",
+			glyph: "gather",
 			headline: "Stellar QF round in 2025",
 			detail:
 				"SDF-matched quadratic funding where donors decided which projects got matched.",
 		},
 		{
 			kind: "milestone",
+			glyph: "burst",
 			headline: "Scan and give",
 			detail: "Donate on Stellar by QR code: no wallet connection, no account.",
 		},
@@ -441,17 +497,20 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	jetpad: [
 		{
 			kind: "growth",
+			glyph: "pin",
 			headline: "Nigeria, Kenya and Ghana live",
 			detail: "Hold dollars, pay bills, cash out to a bank or mobile money.",
 		},
 		{
 			kind: "launch",
+			glyph: "box",
 			headline: "iOS app shipped October 2025",
 			detail:
 				"Then KYC and referrals, fiat pay to naira, and XLM for airtime and data.",
 		},
 		{
 			kind: "milestone",
+			glyph: "lock",
 			headline: "No seed phrase, no gas",
 			detail:
 				"Email or biometrics; JetPad sponsors the fees and the USDC trustline.",
@@ -460,6 +519,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	liqvid: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "$10.13M of RWAs issued on Stellar",
 			detail: "Two deals, zero defaults, verified on RWA.xyz and RWA.io.",
 			metric: {
@@ -471,11 +531,13 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "chart",
 			headline: "First issuance closed at $5.75M",
 			detail: "Nearly double the volume committed in the SCF grant.",
 		},
 		{
 			kind: "milestone",
+			glyph: "bookmark",
 			headline: "Second deal, no grant behind it",
 			detail: "$4.3M closed after the award ended.",
 		},
@@ -483,18 +545,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"public-node": [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "A nonprofit voice in governance",
 			detail:
 				"The only 501(c)(3) dedicated to Stellar, weighing in on quorum and consensus.",
 		},
 		{
 			kind: "milestone",
+			glyph: "clock",
 			headline: "Seven years of uptime",
 			detail:
 				"Independent Tier 1 validation since the first Meridian in Mexico City.",
 		},
 		{
 			kind: "reach",
+			glyph: "lock",
 			headline: "Recovery you don't have to trust",
 			detail:
 				"An independent participant in decentralized wallet recovery for Beans users.",
@@ -503,18 +568,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	rahat: [
 		{
 			kind: "growth",
+			glyph: "bell",
 			headline: "14,032 people warned before floods",
 			detail: "SMS and voice early warnings across Nepal's Terai river basins.",
 			metric: { value: 14032, caption: "people warned" },
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Stellar since July 2025",
 			detail:
 				"From one municipality to more than 15, with the Nepal Red Cross and Mercy Corps.",
 		},
 		{
 			kind: "milestone",
+			glyph: "coin",
 			headline: "$200K+ of aid, 180+ local vendors",
 			detail:
 				"Relief spent in the community, with 40 women-run vendors on the network.",
@@ -523,6 +591,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"stellar-passport": [
 		{
 			kind: "growth",
+			glyph: "pin",
 			headline: "71 events run on Passport",
 			detail:
 				"15 country organizations and 19 ambassador chapters on one platform.",
@@ -530,12 +599,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Live since Meridian 2025",
 			detail:
 				"More than 2,500 challenges completed with passkey smart wallets and on-chain stamps.",
 		},
 		{
 			kind: "reach",
+			glyph: "lock",
 			headline: "No app, no seed phrase",
 			detail:
 				"Join with a fingerprint or face scan; organizers get a no-code admin panel.",
@@ -544,18 +615,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"stellar-security-portal": [
 		{
 			kind: "growth",
+			glyph: "search",
 			headline: "840 findings, searchable",
 			detail: "From 60 audit reports across 52 protocols, classified and free.",
 			metric: { value: 840, caption: "vulnerability findings" },
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Public since July 2025",
 			detail:
 				"Born as Soroban Security Portal, serving the ecosystem for over a year.",
 		},
 		{
 			kind: "reach",
+			glyph: "list",
 			headline: "Security knowledge for small teams",
 			detail:
 				"Learn from audits others paid for before spending a dollar on your own.",
@@ -564,6 +638,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"token-terminal": [
 		{
 			kind: "growth",
+			glyph: "chart",
 			headline: "42 standardized Stellar metrics",
 			detail:
 				"Chain and app dashboards outside the paywall since September 2025.",
@@ -571,12 +646,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "milestone",
+			glyph: "bookmark",
 			headline: "#4 globally for tokenized funds",
 			detail:
 				"$3.22B in tokenized fund market cap, ahead of Solana and Avalanche.",
 		},
 		{
 			kind: "reach",
+			glyph: "list",
 			headline: "Same data in Lagos and on Bloomberg",
 			detail:
 				"Institutional-grade financials, free, so the inclusion case rests on evidence.",
@@ -585,17 +662,20 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	tucambio: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "14,024 transactions",
 			detail: "580 Stellar wallets created, as of September 2026.",
 			metric: { value: 14024, caption: "transactions" },
 		},
 		{
 			kind: "launch",
+			glyph: "bookmark",
 			headline: "Build Award completed June 2026",
 			detail: "SCF #37 from MVP to testnet to mainnet; live on Stellar since.",
 		},
 		{
 			kind: "reach",
+			glyph: "clock",
 			headline: "Dollars that wait for you",
 			detail:
 				"Receive USDC, hold value, convert only when spending, even under 387% inflation.",
@@ -605,17 +685,20 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	centiiv: [
 		{
 			kind: "growth",
+			glyph: "clock",
 			headline: "Building on Stellar since 2022",
 			detail: "Sourcing, matching and payment execution in a single workflow.",
 		},
 		{
 			kind: "launch",
+			glyph: "arrows",
 			headline: "Liquidity on demand",
 			detail:
 				"Pick verified providers by currency, price and settlement speed through one integration.",
 		},
 		{
 			kind: "reach",
+			glyph: "pin",
 			headline: "Emerging markets, made viable",
 			detail:
 				"Lower cost of expansion for fintechs facing FX and compliance bottlenecks.",
@@ -624,18 +707,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	eara: [
 		{
 			kind: "growth",
+			glyph: "pin",
 			headline: "Regulated Europe, on Stellar",
 			detail:
 				"Institutional rails for tokenized investment products, backed by a licensed securities agency.",
 		},
 		{
 			kind: "launch",
+			glyph: "card",
 			headline: "CompliantID",
 			detail:
 				"A privacy-first KYC passport that verifies eligibility without personal data on-chain.",
 		},
 		{
 			kind: "milestone",
+			glyph: "lock",
 			headline: "Secure Custodian",
 			detail:
 				"Multisignature governance for critical operations on regulated assets.",
@@ -644,18 +730,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	inference: [
 		{
 			kind: "growth",
+			glyph: "box",
 			headline: "Five releases in nine weeks",
 			detail:
 				"v0.0.1 shipped May 2026: compiler, CLI, docs and a VS Code extension.",
 		},
 		{
 			kind: "launch",
+			glyph: "list",
 			headline: "Specs a developer can write",
 			detail:
 				"Rust-like syntax compiled through WebAssembly into Rocq proof obligations.",
 		},
 		{
 			kind: "reach",
+			glyph: "search",
 			headline: "Prove absence, not just presence",
 			detail:
 				"Specification-first development that slots into audit preparation.",
@@ -664,18 +753,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	irl: [
 		{
 			kind: "growth",
+			glyph: "pin",
 			headline: "A loyalty network across cities",
 			detail:
 				"Venues, promoters, festivals and artists share one portable record of participation.",
 		},
 		{
 			kind: "launch",
+			glyph: "bookmark",
 			headline: "Build Award, all three tranches",
 			detail:
 				"City guides, check-ins, loyalty, embedded wallets and stablecoin payments, live.",
 		},
 		{
 			kind: "milestone",
+			glyph: "burst",
 			headline: "Featured by Stellar",
 			detail:
 				"Bringing culture onchain, invisibly: rewards and payments that feel like a normal app.",
@@ -684,17 +776,20 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"rivool-finance": [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "40,000 advisors, one gap",
 			detail:
 				"Dollar accounts, yield, tokenized assets and payments through the advisor's own relationship.",
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Mainnet since December 2025",
 			detail: "An on-chain neobank for financial advisors in Brazil.",
 		},
 		{
 			kind: "milestone",
+			glyph: "coin",
 			headline: "Fees settled by smart contract",
 			detail:
 				"Advisory fees and revenue splits settle per client on Soroban, no custodian in between.",
@@ -703,18 +798,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"soroban-resource-usage-reporter": [
 		{
 			kind: "growth",
+			glyph: "box",
 			headline: "Growing into Blocksmith",
 			detail:
 				"An all-in-one Soroban toolkit from local testing to source verification, in private beta.",
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Live since January 2025",
 			detail:
 				"CPU, memory and ledger reads and writes reported before a contract hits a limit.",
 		},
 		{
 			kind: "milestone",
+			glyph: "gear",
 			headline: "Rebuilt in Rust",
 			detail:
 				"Runs inside a standard contract test suite; began on npm as @57block/stellar-resource-usage.",
@@ -723,18 +821,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	stellarchain: [
 		{
 			kind: "growth",
+			glyph: "clock",
 			headline: "Twelve years of Stellar history",
 			detail:
 				"An explorer live since 2014, now covering Mainnet, Testnet and Futurenet.",
 		},
 		{
 			kind: "launch",
+			glyph: "list",
 			headline: "Classic and Soroban in one view",
 			detail:
 				"Contract events, storage, metadata and source verification beside ledgers and markets.",
 		},
 		{
 			kind: "reach",
+			glyph: "search",
 			headline: "Soroban Auditor, open source",
 			detail:
 				"Reconstructs source-like Rust from compiled WASM when the original is unavailable.",
@@ -743,18 +844,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	tansu: [
 		{
 			kind: "growth",
+			glyph: "list",
 			headline: "Built for the Cyber Resilience Act",
 			detail:
 				"A public place for the approved commit, its SBOM and CVE scans, readable by any auditor.",
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Mainnet since October 2025",
 			detail:
 				"On testnet since May 2024; SCF membership NFT and Public Goods deployments added in 2026.",
 		},
 		{
 			kind: "milestone",
+			glyph: "lock",
 			headline: "Commits approved on-chain",
 			detail:
 				"A project's own decision to release, recorded on a public chain, independent of the forge.",
@@ -763,18 +867,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"volta-circuit": [
 		{
 			kind: "growth",
+			glyph: "clock",
 			headline: "Live across chains since 2023",
 			detail:
 				"The Gnosis Safe model, brought to Stellar under an SDF Integration Support Grant.",
 		},
 		{
 			kind: "launch",
+			glyph: "lock",
 			headline: "Multisig on Soroban, in production",
 			detail:
 				"Role-based permissions, policy controls and SDK automation, with public developer docs.",
 		},
 		{
 			kind: "reach",
+			glyph: "gear",
 			headline: "Custody's complement",
 			detail:
 				"Contract-callable multisig for protocols expanding from EVM to Stellar.",
@@ -783,18 +890,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	"webacy-inc": [
 		{
 			kind: "growth",
+			glyph: "lock",
 			headline: "Billions protected since 2021",
 			detail:
 				"Hundreds of security, compliance and market signals, updated as conditions change.",
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Stellar integration live, May 2026",
 			detail:
 				"Live risk scores across wallets, transactions, contracts, protocols and assets.",
 		},
 		{
 			kind: "reach",
+			glyph: "bell",
 			headline: "Risk checks agents can call",
 			detail:
 				"APIs and agent tooling that allow, block or escalate before a transaction happens.",
@@ -804,6 +914,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	blux: [
 		{
 			kind: "growth",
+			glyph: "gather",
 			headline: "300+ accounts signed in",
 			detail:
 				"July to September 2026; one integration onboarded 100+ users with passkeys.",
@@ -811,12 +922,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "switch",
 			headline: "Mainnet since March 2025",
 			detail:
 				"Email, social and passkey login, or an existing wallet, through one SDK.",
 		},
 		{
 			kind: "reach",
+			glyph: "arrows",
 			headline: "One integration, every wallet",
 			detail:
 				"JavaScript and React SDKs for signing, balances and on/off-ramp flows.",
@@ -825,18 +938,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	reflector: [
 		{
 			kind: "growth",
+			glyph: "chart",
 			headline: "$200M+ TVL secured",
 			detail: "Live on mainnet since April 2024, in development since 2022.",
 			metric: { value: 200, prefix: "$", suffix: "M+", caption: "TVL secured" },
 		},
 		{
 			kind: "milestone",
+			glyph: "list",
 			headline: "The default oracle for Blend",
 			detail:
 				"Also Etherfuse, OrbitCDP, DeFindex, Laina, EquitX and SorobanDomains.",
 		},
 		{
 			kind: "reach",
+			glyph: "gather",
 			headline: "Consensus by the community",
 			detail:
 				"Script3, CreitTech, UltraStellar, xyclooLabs, PublicNode, LightSail and StellarExpert.",
@@ -845,17 +961,20 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	rozo: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "18,500+ Stellar transactions sponsored",
 			detail: "A core cross-chain route measures a P95 of about 10 seconds.",
 			metric: { value: 18500, suffix: "+", caption: "transactions sponsored" },
 		},
 		{
 			kind: "launch",
+			glyph: "box",
 			headline: "Checkout, CLI, npm and agent skill",
 			detail: "Pay from Stellar even when the merchant settles on Base.",
 		},
 		{
 			kind: "reach",
+			glyph: "arrows",
 			headline: "Scan to pay, any network",
 			detail:
 				"SEP-7, Solana Pay, EVM requests and plain addresses in one wallet.",
@@ -864,6 +983,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	seevcash: [
 		{
 			kind: "growth",
+			glyph: "chart",
 			headline: "$3.4M in total volume",
 			detail:
 				"Five consecutive quarters of growth since launching in October 2024.",
@@ -871,12 +991,14 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 		},
 		{
 			kind: "launch",
+			glyph: "card",
 			headline: "Visa card fully live",
 			detail:
 				"Beta in July 2026, $18,500 transacted, then general availability in September.",
 		},
 		{
 			kind: "reach",
+			glyph: "arrows",
 			headline: "US dollars to MTN Mobile Money",
 			detail:
 				"Bridge, OwlPay and BlindPay route value through Stellar into Ghana; SeevPlus sends cedis out.",
@@ -885,18 +1007,21 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 	swiftex: [
 		{
 			kind: "growth",
+			glyph: "coin",
 			headline: "1,568 transactions in 30 days",
 			detail: "About $103K of volume across iOS, Android and web.",
 			metric: { value: 1568, caption: "transactions, last 30 days" },
 		},
 		{
 			kind: "launch",
+			glyph: "arrows",
 			headline: "Eight chains into Stellar",
 			detail:
 				"NEAR Intents bridging; account creation and the trustline inside the same flow.",
 		},
 		{
 			kind: "reach",
+			glyph: "chart",
 			headline: "146 bridges, 243 trustlines",
 			detail:
 				"Capital and accounts arriving on Stellar from five EVM chains in one month.",
