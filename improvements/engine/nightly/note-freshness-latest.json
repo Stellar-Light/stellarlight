@@ -1,7 +1,12 @@
 {
-	"generatedAt": "2026-09-22T10:34:11.836Z",
+	"generatedAt": "2026-09-24T10:44:26.135Z",
 	"detector": "note-freshness",
 	"failures": [
+		{
+			"probe": "note-stale:dfns/dfns-sdk-ts:npm:@dfns/sdk",
+			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.30 (published 2026-09-23)",
+			"surface": "code"
+		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-mcp:npm:@blindpay/mcp",
 			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.8.0 (published 2026-09-21)",
@@ -28,6 +33,16 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:rango-exchange/rango-sdk:npm:rango-sdk",
+			"note": "note (asOf 2026-09-02) cites 0.5.0; registry latest is 0.6.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:rango-exchange/rango-sdk:npm:rango-sdk-basic",
+			"note": "note (asOf 2026-09-02) cites 0.5.0; registry latest is 0.6.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:blend-capital/blend-sdk-js:npm:@blend-capital/blend-sdk",
 			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 3.3.1 (published 2026-09-16)",
 			"surface": "code"
@@ -49,7 +64,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-09-16 (published 2026-09-16)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-09-23 (published 2026-09-23)",
 			"surface": "code"
 		},
 		{
@@ -59,12 +74,22 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
-			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-18 (published 2026-09-18)",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-22 (published 2026-09-22)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
 			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.19.1 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:creit-tech/stellar-wallets-kit:npm:@creit.tech/stellar-wallets-kit",
+			"note": "note (asOf 2026-09-01) cites 2.6.0; registry latest is 2.7.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:creit-tech/xbull-wallet:npm:@creit.tech/stellar-wallets-kit",
+			"note": "note (asOf 2026-09-01) cites 2.6.0; registry latest is 2.7.0 (published 2026-09-23)",
 			"surface": "code"
 		},
 		{
