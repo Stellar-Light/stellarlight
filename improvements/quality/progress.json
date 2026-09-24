@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-23T12:56:59.680Z",
+ "generatedAt": "2026-09-24T11:16:47.347Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -65,10 +65,10 @@
   "P4": {
    "bar": "weak bases under 50% of Live rows",
    "origin": 86,
-   "current": 54.3,
+   "current": 54.2,
    "target": 50,
    "unit": "% of Live rows on a weak basis",
-   "pct": 0.8813344029950527,
+   "pct": 0.8828647925033467,
    "note": "Origin is the share when the phase opened (842/979). The ratchet may only fall."
   },
   "P5": {
