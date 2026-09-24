@@ -8,13 +8,12 @@
  *
  * Creates (idempotently):
  *   - award round  `i3-2026-test` (status: open, closes in 14 days)
- *   - 12 nominees — 4 per category, all REAL directory projects. Every slug
+ *   - 12 nominees, 4 per category, all REAL directory projects. Every slug
  *     is verified against the LIVE API before anything is written; a slug
  *     that doesn't resolve aborts the run (fail closed, no partial ballot).
  *   - 3 mock voters with freshly generated TESTNET keypairs. The SECRET
  *     keys are printed to the console ONCE for wallet testing (import into
- *     Freighter/xBull on testnet) and are stored NOWHERE. ⚠ TEST ONLY —
- *     these are throwaway testnet keys; never fund them on mainnet, never
+ *     Freighter/xBull on testnet) and are stored NOWHERE. ⚠ TEST ONLY, *     these are throwaway testnet keys; never fund them on mainnet, never
  *     commit them anywhere.
  *
  * The real shortlist + ~98-address whitelist come from SDF later and will
@@ -23,7 +22,7 @@
  * the admin, or just flip its status to draft.
  *
  * DB target follows the standard rule (feedback_run_prod_mutations_via_action):
- * local .env.local points wherever it points — run against prod ONLY via the
+ * local .env.local points wherever it points, run against prod ONLY via the
  * GitHub Action with repo secrets, dry-run first.
  */
 
@@ -74,7 +73,7 @@ const NOMINEES: Record<string, Array<[slug: string, blurb: string]>> = {
 		],
 		[
 			"beans",
-			"A payments app so simple your family already knows how to use it — Beans puts Stellar rails behind everyday money.",
+			"A payments app so simple your family already knows how to use it. Beans puts Stellar rails behind everyday money.",
 		],
 		[
 			"elsa",
@@ -88,7 +87,7 @@ const NOMINEES: Record<string, Array<[slug: string, blurb: string]>> = {
 	innovation: [
 		[
 			"etherfuse",
-			"Tokenized government bonds (CETES) on-chain — Etherfuse made real-world yield a Stellar primitive.",
+			"Tokenized government bonds (CETES) on-chain. Etherfuse made real-world yield a Stellar primitive.",
 		],
 		[
 			"blend",
@@ -96,11 +95,11 @@ const NOMINEES: Record<string, Array<[slug: string, blurb: string]>> = {
 		],
 		[
 			"sorobanhooks",
-			"Event-driven automation for Soroban contracts — SorobanHooks lets contracts react to the world.",
+			"Event-driven automation for Soroban contracts. SorobanHooks lets contracts react to the world.",
 		],
 		[
 			"reflector",
-			"Reflector became the ecosystem's canonical oracle — decentralized price feeds every Soroban protocol leans on.",
+			"Reflector became the ecosystem's canonical oracle: decentralized price feeds every Soroban protocol leans on.",
 		],
 	],
 	interoperability: [
@@ -110,7 +109,7 @@ const NOMINEES: Record<string, Array<[slug: string, blurb: string]>> = {
 		],
 		[
 			"allbridge",
-			"Allbridge connects Stellar liquidity to a dozen chains — value flows in, value flows out.",
+			"Allbridge connects Stellar liquidity to a dozen chains. Value flows in, value flows out.",
 		],
 		[
 			"usdc-swap",
@@ -143,7 +142,7 @@ async function verifySlugLive(slug: string): Promise<boolean> {
 
 async function main() {
 	console.log(
-		`i³ mock seed — ${EXECUTE ? "EXECUTE" : "DRY-RUN (pass --execute to write)"}\n`,
+		`i³ mock seed, ${EXECUTE ? "EXECUTE" : "DRY-RUN (pass --execute to write)"}\n`,
 	);
 
 	// ── 1. Verify every nominee slug against the LIVE directory API ────────
@@ -197,7 +196,7 @@ async function main() {
 	});
 	let roundId = existingRound.docs[0] ? String(existingRound.docs[0].id) : null;
 	if (roundId) {
-		console.log(`\nRound "${ROUND.slug}" exists (${roundId}) — leaving as-is.`);
+		console.log(`\nRound "${ROUND.slug}" exists (${roundId}), leaving as-is.`);
 	} else if (EXECUTE) {
 		const created = await payload.create({
 			collection: "award-rounds",
@@ -229,7 +228,7 @@ async function main() {
 	for (const [category, list] of Object.entries(NOMINEES)) {
 		for (const [slug, blurb] of list) {
 			const projectId = idBySlug.get(slug);
-			if (!projectId) continue; // unreachable — verified above
+			if (!projectId) continue; // unreachable, verified above
 			if (roundId && have.has(`${category}:${projectId}`)) {
 				console.log(`  = nominee exists: ${category}/${slug}`);
 				continue;
@@ -264,7 +263,7 @@ async function main() {
 		: { docs: [] as Array<{ address?: string }> };
 	if (existingVoters.docs.length >= MOCK_VOTER_COUNT) {
 		console.log(
-			`\n${existingVoters.docs.length} voters already whitelisted — not adding more.`,
+			`\n${existingVoters.docs.length} voters already whitelisted, not adding more.`,
 		);
 		console.log(
 			"(Secrets were only printed when they were created; re-run with a fresh round to mint new ones.)",
@@ -295,9 +294,8 @@ async function main() {
 			// The secret is NOT printed. This repo is public, and an Actions log is
 			// world-readable forever: the one time this line ran it published three
 			// voters' keys, and anyone could cast or overwrite those ballots. Mock
-			// voters are for exercising the relay with a key you hold yourself —
-			// whitelist your own testnet address via award-test-setup instead.
-			console.log("    secret : (not printed — see the comment above)");
+			// voters are for exercising the relay with a key you hold yourself, // whitelist your own testnet address via award-test-setup instead.
+			console.log("    secret : (not printed, see the comment above)");
 			if (EXECUTE && roundId) {
 				await payload.create({
 					collection: "award-voters",
@@ -313,14 +311,14 @@ async function main() {
 						console.log(
 							res.ok
 								? "    ✓ funded via friendbot"
-								: `    ✗ friendbot responded ${res.status} — fund manually`,
+								: `    ✗ friendbot responded ${res.status}, fund manually`,
 						);
 					} catch {
-						console.log("    ✗ friendbot unreachable — fund manually");
+						console.log("    ✗ friendbot unreachable, fund manually");
 					}
 				} else {
 					console.log(
-						"    (unfunded — pass --fund, or use the page's 'Fund on testnet' button)",
+						"    (unfunded, pass --fund, or use the page's 'Fund on testnet' button)",
 					);
 				}
 			} else {
