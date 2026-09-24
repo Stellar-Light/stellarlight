@@ -38,7 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"Published types catch up with the spec: codeTruth.scanState includes `gone` (repositories that no longer exist on GitHub, spec 1.9.52). No runtime behaviour changed.",
 		detail:
-			"The generated schema in the repo gained the `gone` scan state on 2026-09-14 but the npm package was last published on 2026-08-24, so a consumer typing against 1.9.0 saw a value the API can serve but the union did not name. Additive: every existing value stays, and the client's methods and options are unchanged. The partner-key tier added in spec 1.9.53 needs no client change; pass the key through the existing `headers` option.",
+			"The generated schema in the repo gained the `gone` scan state on 2026-09-14 but the npm package was last published on 2026-08-24, so a consumer typing against 1.9.0 saw a value the API can serve but the union did not name. Additive: every existing value stays, and the client's methods and options are unchanged. The partner-key tier added in spec 1.9.53 needs no client change; pass the key through the client's existing headers option.",
 	},
 	{
 		date: "2026-09-24",
