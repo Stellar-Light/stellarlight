@@ -1,13 +1,13 @@
 /**
- * i³ Awards — scoped animation utilities.
+ * i³ Awards, scoped animation utilities.
  *
  * The look is monochrome and editorial (Polymarket / godly.website): it
  * inherits the site's Inter stack, hairline borders, white-as-only-ink. This
  * file carries only the small motion primitives the results reveal and the
- * submit confirmation use — no color, no font override.
+ * submit confirmation use, no color, no font override.
  */
 
-/* Results share bar — width animates on reveal. */
+/* Results share bar, width animates on reveal. */
 .awards-sm .sm-bar-track {
 	height: 8px;
 	border-radius: 99px;
@@ -37,7 +37,7 @@
 	}
 }
 
-/* Confetti burst on ballot submission — monochrome shards, pure CSS. */
+/* Confetti burst on ballot submission, monochrome shards, pure CSS. */
 .awards-sm .sm-confetti {
 	position: absolute;
 	inset: 0;
@@ -94,12 +94,12 @@
    a row of panels whose WIDTH breathes with per-panel offsets reads as fabric;
    pseudo-element scallops give a fold its weight; a sheet that grows in HEIGHT
    while its BOTTOM rises reads as paper feeding out of a slot. Both are
-   re-implemented here on our own tokens — monochrome, warm dark, no gold.
+   re-implemented here on our own tokens, monochrome, warm dark, no gold.
 
    Everything is off under prefers-reduced-motion (block at the end of file). */
 
 /* ── The closed stage: "the stage is being set" ──────────────────────────
-   Curtains DROP into place on load and then breathe. They never part — the
+   Curtains DROP into place on load and then breathe. They never part, the
    show hasn't started, and that is the whole message of the empty state. */
 .awards-sm .sm-stage {
 	position: relative;
@@ -112,7 +112,7 @@
 	border: 1px solid #2f2f2f;
 	background: #121212;
 }
-/* Warm light behind the cloth — something is happening back there. */
+/* Warm light behind the cloth, something is happening back there. */
 .awards-sm .sm-stage-glow {
 	position: absolute;
 	inset: 0;
@@ -164,7 +164,7 @@
 	flex: 1 1 20%;
 	background: linear-gradient(180deg, #303030 0%, #252525 44%, #151515 100%);
 	transform: translateY(-104%);
-	/* drop animates TRANSFORM, breathe animates FLEX-BASIS — different
+	/* drop animates TRANSFORM, breathe animates FLEX-BASIS, different
 	   properties, so the infinite one never fights the entrance. */
 	animation:
 		sm-curtain-drop 0.75s cubic-bezier(0.16, 1, 0.3, 1) both,
@@ -263,7 +263,7 @@
 }
 
 /* ── Explainer step art ─────────────────────────────────────────────────
-   Four steps, four different mechanisms — and the subject of each is a REAL
+   Four steps, four different mechanisms, and the subject of each is a REAL
    control from this product, not an abstract shape. A working control
    demonstrating itself is what makes a help card explain rather than
    decorate. Mechanisms are the UI-motion family from yui540's gallery (a
@@ -289,7 +289,7 @@
 	margin-bottom: 22px;
 }
 
-/* a nominee card — step 2's subject */
+/* a nominee card, step 2's subject */
 .awards-sm .sm-nom {
 	position: relative;
 	display: block;
@@ -546,7 +546,7 @@
 
 /* 4 ── Final: the stamp comes down and stays --------------------------- */
 /* This step used to show the selection ring sliding from one card to another,
-   which is what "change your mind" looked like — the opposite of the caption
+   which is what "change your mind" looked like, the opposite of the caption
    it now carries. The mechanism that means final is already on this page: the
    vote receipt's Stellar sticker, pressed down onto the ballot. */
 .awards-sm .sm-seal {
@@ -596,7 +596,7 @@
    off-square the way a hand-pressed stamp does. */
 .awards-sm .sm-seal-stamp {
 	position: absolute;
-	/* Bottom corner, half off the edge — where a seal actually goes, and it
+	/* Bottom corner, half off the edge, where a seal actually goes, and it
 	   keeps the mark clear of the ballot's own rows. */
 	right: -12px;
 	bottom: 6px;
@@ -647,7 +647,7 @@
 		animation: none !important;
 	}
 	/* Each of these is parked by a filled keyframe, so killing the animation
-	   would leave the START frame on screen — an unconnected button, an
+	   would leave the START frame on screen, an unconnected button, an
 	   unpicked card, a stamp that never landed. Spell out the END state. */
 	.awards-sm .sm-curtain i {
 		transform: none;
@@ -690,9 +690,9 @@
    gallery (MIT repo for code); all monochrome, all with resting states. */
 
 /* ── 2025 winners: a small stage each ───────────────────────────────────
-   The same curtain as the opening reveal, at card size — same panels, same
+   The same curtain as the opening reveal, at card size, same panels, same
    scallop and hem, the same sm-reveal-l / sm-reveal-r / sm-reveal-fade
-   keyframes — closed over the card until it scrolls into view and parting
+   keyframes, closed over the card until it scrolls into view and parting
    on the winner's name. --sm-d staggers the three cards. The confetti behind
    the name is the receipt's burst, delayed so it goes up as the curtain
    clears. Both play once, on the reader's scroll. */
@@ -907,7 +907,7 @@
 }
 
 /* ── The vote receipt: your ballot prints ──────────────────────────────
-   The printer earns its place here rather than in the explainer — this IS a
+   The printer earns its place here rather than in the explainer, this IS a
    receipt being issued. Sheet grows in height while its bottom rises out of
    the slot; the stamp lands on the corner. */
 .awards-sm .sm-receipt {
@@ -997,7 +997,7 @@
 }
 /* The Stellar mark as a die-cut STICKER slapped on the ballot, not bare ink.
    Bare artwork was legible on the light sheet but vanished wherever it
-   crossed the sheet's own dark rows — a stamp has to read over whatever it
+   crossed the sheet's own dark rows, a stamp has to read over whatever it
    lands on, so it brings its own ground with it. */
 .awards-sm .sm-receipt-stamp {
 	position: absolute;
@@ -1212,7 +1212,7 @@
 /* ── The i³ is a cube ───────────────────────────────────────────────────
    After the tumbling letter-cube in yui540's gallery. Two things carry it:
    every quarter turn goes PAST its face by ~4° and settles back, and the two
-   turns are on DIFFERENT AXES — X then Y — so it tumbles rather than rolling
+   turns are on DIFFERENT AXES, X then Y, so it tumbles rather than rolling
    the same way twice. Lands on the mark: 3 → i → i³.
 
    Faces are placed at the exact inverse of each orientation the box visits,
@@ -1228,7 +1228,7 @@
 }
 .awards-sm .sm-cube-box {
 	/* it is a <span>: without this, width/height:100% do not apply and every
-	   face collapses to its own borders (2x2px) — a bare glyph, no cube. */
+	   face collapses to its own borders (2x2px), a bare glyph, no cube. */
 	display: block;
 	position: relative;
 	width: 100%;
@@ -1244,7 +1244,7 @@
 	transition: transform 0.62s cubic-bezier(0.34, 1.25, 0.64, 1);
 }
 @keyframes sm-cube-roll {
-	/* face "3" — a beat, not a pause */
+	/* face "3", a beat, not a pause */
 	0%,
 	13% {
 		transform: rotateX(-90deg) rotateY(-90deg);
@@ -1286,8 +1286,7 @@
 	border-radius: 0.1em;
 	/* Type size goes on the INNER glyph, never here: translateZ below is in
 	   em, so shrinking this element's font-size shrinks the cube's half-depth
-	   with it. At 0.72em the faces sat 20px out on a 55px cube that needs 28
-	   — all six bunched inside each other and the wrong one won. */
+	   with it. At 0.72em the faces sat 20px out on a 55px cube that needs 28, all six bunched inside each other and the wrong one won. */
 	line-height: 1;
 	backface-visibility: hidden;
 	background: #2a2a2a;
@@ -1339,7 +1338,7 @@
 /* ── Waiting on the network ─────────────────────────────────────────────
    The hourglass from yui540/css-animations (MIT), monochrome. It earns its
    place over a spinner because the sand actually DRAINS and then the whole
-   glass turns over — it says "this takes a moment" rather than "something is
+   glass turns over, it says "this takes a moment" rather than "something is
    happening". Shown only while the signed ballot is in flight. */
 .awards-sm .sm-hourglass {
 	display: block;
@@ -1422,16 +1421,16 @@
 }
 
 /* ── Stroopy ────────────────────────────────────────────────────────────
-   The Stellar mascot, drawn in vector so he can actually move — a cropped
+   The Stellar mascot, drawn in vector so he can actually move, a cropped
    raster with a bob bolted on is a photo that wobbles, not a character.
    This is an interpretation in his spirit, not the official artwork.
 
    He lives in ONE place: the connected-wallet menu, wearing the wallet's own
    badge, the way an account avatar does.
 
-   The circle does NOT animate in — it is just the avatar ground, there from
+   The circle does NOT animate in, it is just the avatar ground, there from
    the first frame. What moves is inside it: two shutters that swing open
-   like a window (yui540's window motion — each pane hinged on its OUTER
+   like a window (yui540's window motion, each pane hinged on its OUTER
    edge, perspective(600px) rotateY(0 → ∓140 → ∓130), the overshoot doing
    the work), and Stroopy rising up into the opening behind them. Then a
    few stars twinkle off on their own angles, each carrying its own
@@ -1522,7 +1521,7 @@
 		transform: perspective(600px) rotateY(130deg);
 	}
 }
-/* Dismissing the menu shuts the window again — yui540's close half, straight
+/* Dismissing the menu shuts the window again, yui540's close half, straight
    back from ∓130 to 0 with no overshoot, quicker than the open. The menu holds
    its opacity while this plays (see the exit transition on the menu) or you
    would never see it. */
@@ -1657,7 +1656,258 @@
 	box-shadow: 0 0 0 2px #1c1c1c;
 }
 
+/* ── Highlight glyphs: a moment's icon is a small mechanism ─────────────
+   The "2026 in review" sheet marked each moment with a stock icon (trend
+   arrow, rocket, globe, trophy). Four mechanisms from yui540's gallery
+   instead, each the size of the icon it replaces, each a one-shot that
+   plays as the sheet unrolls (--sm-d staggers them down the list):
+     growth     the bar chart: three bars land on their value with the
+                40 > 110 > 100 overshoot, rewritten from height to scaleY
+     launch     the overshoot pop, with the burst ring and radial particles
+     reach      the ripple: two discs spread from a centre dot, twice
+     milestone  the stomp: a block drops onto a plinth, which compresses
+                and springs back, rewritten from height to scaleY
+   Colour is currentColor, so the moment's tint carries through. At rest
+   each is a still glyph, and that rest state is what reduced motion shows. */
+.awards-sm .sm-hk {
+	position: relative;
+	display: block;
+	width: 20px;
+	height: 20px;
+}
+.awards-sm .sm-hk i {
+	position: absolute;
+	display: block;
+}
+
+/* growth: the bar chart */
+.awards-sm .sm-hk-growth i {
+	bottom: 1px;
+	width: 4px;
+	border-radius: 2px;
+	background: currentColor;
+	transform-origin: bottom;
+	animation: sm-hk-bar 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-growth i:nth-child(1) {
+	left: 2px;
+	height: 8px;
+}
+.awards-sm .sm-hk-growth i:nth-child(2) {
+	left: 8px;
+	height: 13px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.09s);
+}
+.awards-sm .sm-hk-growth i:nth-child(3) {
+	left: 14px;
+	height: 18px;
+	animation-delay: calc(var(--sm-d, 0s) + 0.18s);
+}
+@keyframes sm-hk-bar {
+	from {
+		transform: scaleY(0.4);
+	}
+	60% {
+		transform: scaleY(1.1);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
+/* launch: the pop, the ring, the burst */
+.awards-sm .sm-hk-launch .sm-hk-ring {
+	inset: -3px;
+	border-radius: 50%;
+	border: 1px solid currentColor;
+	opacity: 0.3;
+	animation: sm-hk-ring 1.1s cubic-bezier(0, 0.06, 0.29, 1)
+		calc(var(--sm-d, 0s) + 0.1s) both;
+}
+.awards-sm .sm-hk-launch .sm-hk-dot {
+	top: 6px;
+	left: 6px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	animation: sm-hk-pop 0.6s ease-in-out var(--sm-d, 0s) both;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark {
+	top: 9px;
+	left: 9px;
+	width: 2px;
+	height: 2px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: 0;
+	animation: sm-hk-particle 0.65s cubic-bezier(0.63, -0.01, 0.29, 1)
+		calc(var(--sm-d, 0s) + 0.15s) both;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(3) {
+	--r: 0deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(4) {
+	--r: 45deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(5) {
+	--r: 90deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(6) {
+	--r: 135deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(7) {
+	--r: 180deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(8) {
+	--r: 225deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(9) {
+	--r: 270deg;
+}
+.awards-sm .sm-hk-launch .sm-hk-spark:nth-child(10) {
+	--r: 315deg;
+}
+@keyframes sm-hk-pop {
+	from {
+		opacity: 0;
+		transform: scale(0);
+	}
+	20%,
+	to {
+		opacity: 1;
+	}
+	50% {
+		transform: scale(1.2, 1.25);
+	}
+	75% {
+		transform: scale(0.9, 0.95);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+@keyframes sm-hk-ring {
+	from {
+		opacity: 0;
+		transform: scale(0);
+	}
+	50%,
+	80% {
+		opacity: 0.45;
+	}
+	to {
+		opacity: 0.3;
+		transform: scale(1);
+	}
+}
+@keyframes sm-hk-particle {
+	from {
+		opacity: 0;
+		transform: rotate(var(--r, 0deg)) translateY(0) scale(0);
+	}
+	40% {
+		opacity: 1;
+		transform: rotate(var(--r, 0deg)) translateY(-8px) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: rotate(var(--r, 0deg)) translateY(-11px) scale(0);
+	}
+}
+
+/* reach: the ripple */
+.awards-sm .sm-hk-reach .sm-hk-wave {
+	inset: -2px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: 0;
+	animation: sm-hk-ripple 1.6s ease-out var(--sm-d, 0s) 2 both;
+}
+.awards-sm .sm-hk-reach .sm-hk-wave:nth-child(2) {
+	animation-delay: calc(var(--sm-d, 0s) + 0.4s);
+}
+.awards-sm .sm-hk-reach .sm-hk-orbit {
+	inset: -2px;
+	border-radius: 50%;
+	border: 1px solid currentColor;
+	opacity: 0.25;
+}
+.awards-sm .sm-hk-reach .sm-hk-dot {
+	top: 7px;
+	left: 7px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+@keyframes sm-hk-ripple {
+	from {
+		opacity: 0.5;
+		transform: scale(0);
+	}
+	80%,
+	to {
+		opacity: 0;
+		transform: scale(1);
+	}
+}
+
+/* milestone: the stomp */
+.awards-sm .sm-hk-milestone .sm-hk-base {
+	bottom: 2px;
+	left: 2px;
+	width: 16px;
+	height: 4px;
+	border-radius: 2px;
+	background: currentColor;
+	transform-origin: bottom center;
+	animation: sm-hk-push 0.5s ease-in-out calc(var(--sm-d, 0s) + 0.2s) both;
+}
+.awards-sm .sm-hk-milestone .sm-hk-block {
+	bottom: 8px;
+	left: 5px;
+	width: 10px;
+	height: 9px;
+	border-radius: 2px;
+	background: currentColor;
+	opacity: 0.85;
+	transform-origin: bottom center;
+	animation: sm-hk-jump 0.7s ease-in-out calc(var(--sm-d, 0s) + 0.3s) both;
+}
+@keyframes sm-hk-jump {
+	from {
+		transform: translateY(0);
+	}
+	40% {
+		transform: translateY(-40%) rotate(6deg);
+	}
+	60% {
+		transform: translateY(0);
+	}
+	80% {
+		transform: translateY(-20%) rotate(-3deg);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+@keyframes sm-hk-push {
+	from {
+		transform: scaleY(0);
+	}
+	60% {
+		transform: scaleY(1.2);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.awards-sm .sm-hk i {
+		animation: none;
+	}
 	.awards-sm .sm-sr-rise,
 	.awards-sm .sm-sr-shutter,
 	.awards-sm .sm-sr-gloss,
