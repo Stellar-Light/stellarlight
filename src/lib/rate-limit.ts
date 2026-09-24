@@ -9,6 +9,8 @@
  *
  * If real abuse shows up: swap the in-memory Map for @upstash/ratelimit
  * + Upstash Redis. The interface stays the same.
+ *
+ * Partner keys (see partnerOf) lift a caller onto a per-key tier.
  */
 
 import type { NextRequest } from "next/server";
@@ -46,21 +48,37 @@ export interface RateLimitResult {
 }
 
 /**
- * Allow `limit` requests per `windowMs` per (endpoint, client-IP) pair.
- *
- * Returns headers-friendly metadata so callers can surface
- * `X-RateLimit-Remaining` and `Retry-After` to clients.
+ * Partner keys. `SCOUT_PARTNER_KEYS="name:key,name2:key2"` (Vercel env). A
+ * request carrying one, as `Authorization: Bearer <key>` or `x-api-key`, is
+ * metered per key instead of per IP, at 1,200 a minute and 200,000 a day:
+ * an agent platform whose users all leave through one egress IP is not one
+ * IP to us. The env is parsed per call, it is a short string and the test
+ * sets it; no key is ever logged.
  */
-export function rateLimit(
-	req: NextRequest,
-	opts: { endpoint: string; limit: number; windowMs: number },
-): RateLimitResult {
-	const { endpoint, limit, windowMs } = opts;
-	const ip = getClientIp(req);
-	const key = `${endpoint}:${ip}`;
-	const now = Date.now();
-	sweepExpired(now - SWEEP_AFTER);
+const PARTNER_PER_MINUTE = 1200;
+const PARTNER_PER_DAY = 200_000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
+export function partnerOf(req: NextRequest): string | null {
+	const auth = req.headers.get("authorization") ?? "";
+	const key =
+		req.headers.get("x-api-key")?.trim() ||
+		(auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : "");
+	if (!key) return null;
+	for (const pair of (process.env.SCOUT_PARTNER_KEYS ?? "").split(",")) {
+		const i = pair.indexOf(":");
+		if (i > 0 && pair.slice(i + 1).trim() === key)
+			return pair.slice(0, i).trim();
+	}
+	return null;
+}
+
+function take(
+	key: string,
+	limit: number,
+	windowMs: number,
+	now: number,
+): RateLimitResult {
 	const existing = BUCKETS.get(key);
 	if (!existing || existing.resetAt < now) {
 		const fresh: Bucket = { count: 1, resetAt: now + windowMs };
@@ -72,16 +90,9 @@ export function rateLimit(
 			resetAt: fresh.resetAt,
 		};
 	}
-
 	if (existing.count >= limit) {
-		return {
-			allowed: false,
-			limit,
-			remaining: 0,
-			resetAt: existing.resetAt,
-		};
+		return { allowed: false, limit, remaining: 0, resetAt: existing.resetAt };
 	}
-
 	existing.count += 1;
 	return {
 		allowed: true,
@@ -89,6 +100,35 @@ export function rateLimit(
 		remaining: Math.max(0, limit - existing.count),
 		resetAt: existing.resetAt,
 	};
+}
+
+/**
+ * Allow `limit` requests per `windowMs` per (endpoint, client-IP) pair.
+ *
+ * Returns headers-friendly metadata so callers can surface
+ * `X-RateLimit-Remaining` and `Retry-After` to clients.
+ */
+export function rateLimit(
+	req: NextRequest,
+	opts: { endpoint: string; limit: number; windowMs: number },
+): RateLimitResult {
+	const { endpoint, limit, windowMs } = opts;
+	const now = Date.now();
+	sweepExpired(now - SWEEP_AFTER);
+
+	const partner = partnerOf(req);
+	if (partner) {
+		const minute = take(
+			`${endpoint}:key:${partner}`,
+			PARTNER_PER_MINUTE,
+			60_000,
+			now,
+		);
+		if (!minute.allowed) return minute;
+		const day = take(`key:${partner}:day`, PARTNER_PER_DAY, DAY_MS, now);
+		return day.allowed ? minute : day;
+	}
+	return take(`${endpoint}:${getClientIp(req)}`, limit, windowMs, now);
 }
 
 /** Convert a RateLimitResult into the standard X-RateLimit headers. */
