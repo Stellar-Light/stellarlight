@@ -10,15 +10,7 @@
  * desktop. Content is qualitative by design (see highlights.ts).
  */
 
-import {
-	ArrowUpRight,
-	Check,
-	Globe,
-	Rocket,
-	TrendingUp,
-	Trophy,
-	X,
-} from "lucide-react";
+import { ArrowUpRight, Check, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -82,15 +74,60 @@ function tvlCaption(tvl: NonNullable<HighlightNominee["tvl"]>): string {
 	return `TVL${src ? ` · ${src}` : ""}${when}`;
 }
 
-const KIND_META: Record<
-	HighlightKind,
-	{ Icon: typeof TrendingUp; tint: string }
-> = {
-	growth: { Icon: TrendingUp, tint: "text-emerald-300/90" },
-	launch: { Icon: Rocket, tint: "text-sky-300/90" },
-	reach: { Icon: Globe, tint: "text-violet-300/90" },
-	milestone: { Icon: Trophy, tint: "text-amber-300/90" },
+const KIND_TINT: Record<HighlightKind, string> = {
+	growth: "text-emerald-300/90",
+	launch: "text-sky-300/90",
+	reach: "text-violet-300/90",
+	milestone: "text-amber-300/90",
 };
+
+/**
+ * A moment's glyph is a small mechanism from yui540's gallery (awards.css,
+ * "Highlight glyphs"), not a stock icon: the bar chart, the pop and burst,
+ * the orbit, the bookmark. Each plays as the sheet unrolls; `delay`
+ * staggers them down the list.
+ */
+function KindGlyph({ kind, delay }: { kind: HighlightKind; delay: number }) {
+	const parts =
+		kind === "growth" ? (
+			<>
+				<i />
+				<i />
+				<i />
+			</>
+		) : kind === "launch" ? (
+			<>
+				<i className="sm-hk-ring" />
+				<i className="sm-hk-dot" />
+				{Array.from({ length: 8 }, (_, n) => (
+					// biome-ignore lint/suspicious/noArrayIndexKey: fixed burst
+					<i key={n} className="sm-hk-spark" />
+				))}
+			</>
+		) : kind === "reach" ? (
+			<>
+				<i className="sm-hk-orbit" />
+				<i className="sm-hk-dot" />
+				<i className="sm-hk-wave" />
+			</>
+		) : (
+			<>
+				<i className="sm-hk-block" />
+				<i className="sm-hk-spark" />
+				<i className="sm-hk-spark" />
+				<i className="sm-hk-spark" />
+			</>
+		);
+	return (
+		<span
+			className={`sm-hk sm-hk-${kind}`}
+			style={{ ["--sm-d" as string]: `${delay}s` }}
+			aria-hidden="true"
+		>
+			{parts}
+		</span>
+	);
+}
 
 // A small self-drawing rising line, decorative momentum, not a plotted value.
 function Sparkline() {
@@ -340,8 +377,8 @@ export function NomineeHighlightsModal({
 								className="overflow-hidden"
 							>
 								<ul className="space-y-2.5">
-									{highlights.map((h) => {
-										const { Icon, tint } = KIND_META[h.kind];
+									{highlights.map((h, i) => {
+										const tint = KIND_TINT[h.kind];
 										// Real, dated TVL wins for a growth moment; else the authored
 										// count; else the little sparkline.
 										const metric: MetricSpec | null =
@@ -371,10 +408,7 @@ export function NomineeHighlightsModal({
 													<span
 														className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
 													>
-														<Icon
-															className="h-[18px] w-[18px]"
-															strokeWidth={2}
-														/>
+														<KindGlyph kind={h.kind} delay={0.35 + i * 0.1} />
 													</span>
 													<div className="min-w-0 flex-1">
 														<p className="text-[15px] font-semibold leading-snug text-neutral-100">
