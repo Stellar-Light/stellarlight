@@ -167,6 +167,8 @@ export async function reserveBallot(params: {
 	address: string;
 	ballotId: string;
 	selections: BallotSelections;
+	/** The Pilot's signed authorization, kept as proof of authorship. */
+	authorization: string;
 }): Promise<{ ok: true; id: string | number } | { ok: false; reason: string }> {
 	try {
 		const payload = await getPayloadSafe();
@@ -207,6 +209,7 @@ export async function reserveBallot(params: {
 						selections: params.selections,
 						at,
 						ballotId: params.ballotId,
+						authorization: params.authorization,
 					},
 				],
 			},
@@ -574,6 +577,8 @@ export async function readRecordRows(
 		selections: BallotSelections;
 		confirmed: boolean;
 		reservedAt: string | null;
+		/** The first submission carries the Pilot's signed authorization. */
+		authorized: boolean;
 	}>
 > {
 	const rows = await allBallotRows(payload, roundId);
@@ -587,6 +592,7 @@ export async function readRecordRows(
 			txHash?: string | null;
 			selections?: unknown;
 			ballotId?: string | null;
+			authorization?: string | null;
 		} | null>;
 		const first = trail[0] ?? null;
 		out.push({
@@ -598,6 +604,9 @@ export async function readRecordRows(
 			selections: normalizeSelections(first?.selections ?? row.selections),
 			confirmed: !!(first?.txHash ?? row.txHash),
 			reservedAt: (row.firstSubmittedAt ?? null) as string | null,
+			authorized:
+				typeof first?.authorization === "string" &&
+				first.authorization.length > 0,
 		});
 	}
 	return out;
