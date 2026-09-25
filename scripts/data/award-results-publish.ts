@@ -50,6 +50,14 @@ async function main() {
 	}
 	const { tally, source, digest, afterClose, relayOnly } =
 		await liveTally(loaded);
+	if (loaded.round.status === "open") {
+		// This log is public (the repo is): a per-nominee tally of an OPEN round
+		// would publish the live standings to anyone. Counts only, then stop.
+		console.log(
+			`\n${ROUND} is open · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted} · live standings are not printed while a round is open (this log is public). Close the round, then publish.`,
+		);
+		return 0;
+	}
 	// The pre-vote manifest pins the electorate and ballot shape the votes were
 	// cast under. Recomputed HERE from the round's current state and compared
 	// to the digest the anchor lane wrote on the round: the anchor API serves
