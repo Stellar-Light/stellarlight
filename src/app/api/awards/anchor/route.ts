@@ -94,7 +94,10 @@ export async function GET(req: NextRequest) {
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "database unavailable" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const rounds = await payload.find({

@@ -19,7 +19,10 @@
  * it against the function that actually applies it.
  */
 import { describe, expect, it } from "vitest";
-import { curatedFieldsFor, OWNERSHIP_COVERAGE } from "../../../scripts/data/curation-maps";
+import {
+	curatedFieldsFor,
+	OWNERSHIP_COVERAGE,
+} from "../../../scripts/data/curation-maps";
 
 describe("a map that writes a field owns it", () => {
 	for (const { map, name, field } of OWNERSHIP_COVERAGE) {

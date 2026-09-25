@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 				advisory:
 					"The datastore was unreachable. This is an outage, NOT a claim that Stellar has no stablecoins, and NOT a claim that any asset was delisted. Retry shortly.",
 			},
-			{ status: 503, headers: CORS },
+			{ status: 503, headers: { ...CORS, "Retry-After": "2" } },
 		);
 	}
 

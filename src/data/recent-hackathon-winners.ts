@@ -58,7 +58,8 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			description:
 				"Confidential-token, private-payment wallet built on OpenZeppelin's Stellar stack.",
 			prizeUsd: 1250,
-			dorahacksBuidlUrl: "https://stellarlight.xyz/project/openzeppelin-stellar-privacy-wallet",
+			dorahacksBuidlUrl:
+				"https://stellarlight.xyz/project/openzeppelin-stellar-privacy-wallet",
 		},
 		{
 			rank: 1,
@@ -130,7 +131,8 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "aguilar1x",
 			description: "SDK for confidential tokens on Stellar.",
 			prizeUsd: 750,
-			dorahacksBuidlUrl: "https://stellarlight.xyz/project/stellar-confidential-token-sdk",
+			dorahacksBuidlUrl:
+				"https://stellarlight.xyz/project/stellar-confidential-token-sdk",
 		},
 		{
 			rank: 2,
@@ -148,7 +150,8 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 			builder: "Fenix",
 			description: "Brazilian treasury-yield energy-payments build.",
 			prizeUsd: 500,
-			dorahacksBuidlUrl: "https://stellarlight.xyz/project/energypay-tesouro-yield",
+			dorahacksBuidlUrl:
+				"https://stellarlight.xyz/project/energypay-tesouro-yield",
 		},
 		{
 			rank: 2,
@@ -161,7 +164,6 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 	],
 };
-
 
 /**
  * Fallback when a winner doesn't have a direct BUIDL URL — link to the

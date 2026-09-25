@@ -96,7 +96,10 @@ export async function POST(req: NextRequest) {
 				message:
 					"The round could not be read right now. Nothing was changed. Try again in a moment.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const loaded = read.loaded;
@@ -139,7 +142,10 @@ export async function POST(req: NextRequest) {
 				message:
 					"Could not reach testnet to check this account. Nothing was submitted. Try again in a moment.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const verdict = verifyAuthorization(signedXdr, {
@@ -168,7 +174,10 @@ export async function POST(req: NextRequest) {
 				message:
 					"We can't confirm whether this address has already voted right now. Nothing was submitted. Try again in a moment.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const alreadyVoted = () =>
@@ -258,7 +267,10 @@ export async function POST(req: NextRequest) {
 					message:
 						"Your ballot reached the network but was not confirmed in time. Do not sign again right away: wait three minutes and try once more. If it landed, the page will say so; if not, the retry goes through.",
 				},
-				{ status: 503, headers: rateLimitHeaders(limit) },
+				{
+					status: 503,
+					headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				},
 			);
 		}
 		await releaseBallot(reserved.id);

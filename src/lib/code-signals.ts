@@ -15,10 +15,7 @@
  */
 
 import { isProtected, type ProtectionSignals } from "./repo-allowlist";
-import {
-	combinedVersionStatus,
-	type VersionStatus,
-} from "./soroban-versions";
+import { combinedVersionStatus, type VersionStatus } from "./soroban-versions";
 
 // ── Inputs ───────────────────────────────────────────────────────────────────
 

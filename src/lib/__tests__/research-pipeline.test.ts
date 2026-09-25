@@ -79,3 +79,65 @@ describe("cosineVectorScore", () => {
 		expect(cosineVectorScore([], [])).toBeNull();
 	});
 });
+
+describe("small sources", () => {
+	it("deep pass: a bounded survey inside Atlas' ceilings, never the whole index", async () => {
+		const { buildResearchVectorPipeline, VECTOR_DEEP_LIMIT } = await import(
+			"../research-pipeline"
+		);
+		const [stage] = buildResearchVectorPipeline({
+			queryEmbedding: [0, 1],
+			limit: 5,
+			sourceFilter: "paper",
+			deep: true,
+		}) as Array<{
+			$vectorSearch: { limit: number; numCandidates: number; filter?: unknown };
+		}>;
+		expect(stage.$vectorSearch.limit).toBe(VECTOR_DEEP_LIMIT);
+		expect(VECTOR_DEEP_LIMIT).toBeLessThanOrEqual(4_000);
+		expect(stage.$vectorSearch.numCandidates).toBeLessThanOrEqual(10_000);
+		expect(stage.$vectorSearch.filter).toBeUndefined();
+	});
+
+	it("with the index filter: filters inside $vectorSearch at the plain pool size", async () => {
+		const { buildResearchVectorPipeline, researchOverfetch } = await import(
+			"../research-pipeline"
+		);
+		const p = buildResearchVectorPipeline({
+			queryEmbedding: [0, 1],
+			limit: 5,
+			sourceFilter: "paper",
+			indexFilter: true,
+		}) as Array<{ $vectorSearch: { limit: number; filter?: unknown } }>;
+		expect(p[0].$vectorSearch.limit).toBe(researchOverfetch(5));
+		expect(p[0].$vectorSearch.filter).toEqual({ source: { $eq: "paper" } });
+	});
+
+	it("reads the served index's filter paths once and caches them", async () => {
+		const { vectorIndexFilterPaths } = await import("../research-pipeline");
+		let calls = 0;
+		const coll = {
+			listSearchIndexes: () => ({
+				toArray: async () => {
+					calls++;
+					return [
+						{
+							name: "research_vector_index",
+							queryable: true,
+							status: "READY",
+							latestDefinition: {
+								fields: [
+									{ type: "vector", path: "embedding" },
+									{ type: "filter", path: "source" },
+								],
+							},
+						},
+					];
+				},
+			}),
+		};
+		expect((await vectorIndexFilterPaths(coll)).has("source")).toBe(true);
+		expect((await vectorIndexFilterPaths(coll)).has("source")).toBe(true);
+		expect(calls).toBe(1);
+	});
+});

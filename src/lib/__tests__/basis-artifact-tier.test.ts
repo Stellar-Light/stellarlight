@@ -55,15 +55,17 @@ describe("artifactSupports", () => {
  */
 describe("operator-toml translation", () => {
 	it("the raw label is never a tier any artifact can license", () => {
-		for (const kind of ALL) expect(artifactSupports("operator-toml", kind)).toBe(false);
+		for (const kind of ALL)
+			expect(artifactSupports("operator-toml", kind)).toBe(false);
 	});
 
 	it("the tier it translates INTO is backed by the toml URL itself", () => {
-		expect(artifactSupports("product-integration", "deployment.sourceUrl")).toBe(true);
+		expect(
+			artifactSupports("product-integration", "deployment.sourceUrl"),
+		).toBe(true);
 	});
 
 	it("translation never reaches human-verified from an on-chain artifact", () => {
 		expect(artifactSupports("human-verified", "asset payments")).toBe(false);
 	});
 });
-

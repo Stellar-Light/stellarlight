@@ -70,7 +70,7 @@ jobs:
         # Without this index, /api/research's $vectorSearch silently
         # returns 0 docs and falls back to keyword mode.
         continue-on-error: true
-        run: pnpm exec tsx scripts/create-vector-index.ts
+        run: pnpm exec tsx scripts/create-vector-index.ts --execute
 
       - name: Ingest SEPs (stellar/stellar-protocol)
         if: inputs.source == '' || inputs.source == 'sep'

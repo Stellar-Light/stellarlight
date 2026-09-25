@@ -53,7 +53,8 @@ function gradeInputFields(): Set<string> {
 	const end = src.indexOf("\n}", start);
 	const body = src.slice(start, end);
 	const keys = new Set<string>();
-	for (const m of body.matchAll(/^\t([A-Za-z][A-Za-z0-9]*)\??\s*:/gm)) keys.add(m[1]);
+	for (const m of body.matchAll(/^\t([A-Za-z][A-Za-z0-9]*)\??\s*:/gm))
+		keys.add(m[1]);
 	return keys;
 }
 

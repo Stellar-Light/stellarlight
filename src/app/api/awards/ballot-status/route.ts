@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 				message:
 					"The round could not be read right now. Nothing was changed. Try again in a moment.",
 			},
-			{ status: 503, headers },
+			{ status: 503, headers: { ...headers, "Retry-After": "2" } },
 		);
 	}
 	const loaded = read.loaded;
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
 				message:
 					"We can't read your ballot status right now. Try again in a moment.",
 			},
-			{ status: 503, headers },
+			{ status: 503, headers: { ...headers, "Retry-After": "2" } },
 		);
 	}
 	return NextResponse.json(

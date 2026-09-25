@@ -29,10 +29,10 @@ import { Projects } from "./collections/Projects";
 import { Repos } from "./collections/Repos";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
+import { RwaAssets } from "./collections/RwaAssets";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
 import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
-import { RwaAssets } from "./collections/RwaAssets";
 import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
@@ -174,6 +174,14 @@ export default buildConfig({
 			// MongoDB Atlas recommended options
 			retryWrites: true,
 			w: "majority",
+			// A dropped Atlas node used to hold a request for the driver's default
+			// 30 s server selection (a partner measured research calls open past
+			// 10 s while every other route answered). Fail fast instead: the
+			// routes turn it into a 503 with Retry-After, the client retries.
+			serverSelectionTimeoutMS: 5_000,
+			connectTimeoutMS: 5_000,
+			// ...and a node that stops answering mid-query is abandoned too.
+			socketTimeoutMS: 20_000,
 		},
 		// Disable file storage in MongoDB - files stored on disk in /media directory
 		// On Vercel (read-only filesystem), uploads will fail but admin panel works

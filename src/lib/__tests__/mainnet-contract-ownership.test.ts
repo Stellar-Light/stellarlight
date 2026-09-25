@@ -25,7 +25,8 @@ describe("verifyMainnetContract ownership", () => {
 		stub({
 			[ID_A]: {
 				contract: ID_A,
-				asset: "USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN-1",
+				asset:
+					"USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN-1",
 			},
 		});
 		expect(
@@ -43,7 +44,10 @@ describe("verifyMainnetContract ownership", () => {
 			},
 		});
 		expect(
-			await verifyMainnetContract(`price feed ${ID_A}`, "ELDEVODE/synapse-trade"),
+			await verifyMainnetContract(
+				`price feed ${ID_A}`,
+				"ELDEVODE/synapse-trade",
+			),
 		).toBeNull();
 	});
 
@@ -52,7 +56,8 @@ describe("verifyMainnetContract ownership", () => {
 			[ID_A]: {
 				contract: ID_A,
 				validation: {
-					repository: "https://github.com/reflector-network/reflector-contract.git",
+					repository:
+						"https://github.com/reflector-network/reflector-contract.git",
 				},
 			},
 		});
@@ -66,9 +71,9 @@ describe("verifyMainnetContract ownership", () => {
 
 	it("keeps an unvalidated, non-token address but marks the basis published", async () => {
 		stub({ [ID_A]: { contract: ID_A } });
-		expect(await verifyMainnetContract(`ours: ${ID_A}`, "kalepail/ohloss")).toEqual(
-			{ id: ID_A, basis: "published" },
-		);
+		expect(
+			await verifyMainnetContract(`ours: ${ID_A}`, "kalepail/ohloss"),
+		).toEqual({ id: ID_A, basis: "published" });
 	});
 
 	it("prefers a self-validated id over a merely published sibling", async () => {
@@ -79,15 +84,17 @@ describe("verifyMainnetContract ownership", () => {
 				validation: { repository: "https://github.com/acme/vault" },
 			},
 		});
-		expect(await verifyMainnetContract(`${ID_A} and ${ID_B}`, "acme/vault")).toEqual(
-			{ id: ID_B, basis: "self-validated" },
-		);
+		expect(
+			await verifyMainnetContract(`${ID_A} and ${ID_B}`, "acme/vault"),
+		).toEqual({ id: ID_B, basis: "self-validated" });
 	});
 
 	it("returns null on 429 rather than falling through to another candidate", async () => {
 		// Half of a 137-row audit came back 429 in one burst. Could-not-look
 		// must not read as could-not-find, or a worse id gets promoted.
 		stub({ [ID_A]: { contract: ID_A }, [ID_B]: { contract: ID_B } }, 429);
-		expect(await verifyMainnetContract(`${ID_A} ${ID_B}`, "acme/vault")).toBeNull();
+		expect(
+			await verifyMainnetContract(`${ID_A} ${ID_B}`, "acme/vault"),
+		).toBeNull();
 	});
 });

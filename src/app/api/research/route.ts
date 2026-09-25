@@ -36,6 +36,7 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import {
 	buildResearchVectorPipeline,
 	cosineVectorScore,
+	vectorIndexFilterPaths,
 } from "@/lib/research-pipeline";
 import {
 	anchorDocUrls,
@@ -55,6 +56,8 @@ import {
 } from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
+// Long enough for a slow vector pass plus the keyword fallback, never a hang.
+export const maxDuration = 30;
 export const revalidate = 60;
 
 const RATE_LIMIT_MAX = 60;
@@ -86,6 +89,7 @@ interface ResearchRow {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	// Rate-limit first so abusers don't even reach the embedding call.
 	const limit = rateLimit(req, {
 		endpoint: "/api/research",
@@ -250,11 +254,18 @@ export async function GET(req: NextRequest) {
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "payload unavailable" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 
 	let mode: "vector" | "keyword" = "vector";
+	// Why the response is keyword when it is: the label used to say "vector
+	// search unavailable" for every fallback, including a source that simply
+	// had no rows in the pool while the embedding worked fine.
+	let vectorNote: string | null = null;
 	let chunks: ResearchRow[] = [];
 	// Kept in scope past the try so the recency pool supplement can score
 	// direct-fetched chunks with the same cosine scale as the vector pool.
@@ -321,21 +332,49 @@ export async function GET(req: NextRequest) {
 		// pool keeps enough DISTINCT in-source documents for the per-doc
 		// collapse (sls-019: a starved cap pool made the refill serve
 		// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
+		const indexFilter = effectiveSource
+			? (await vectorIndexFilterPaths(collection)).has("source")
+			: false;
 		const pipeline = buildResearchVectorPipeline({
 			queryEmbedding,
 			limit: limitParam,
 			sourceFilter: effectiveSource,
+			indexFilter,
 		});
 
-		const docs = await collection.aggregate(pipeline).toArray();
+		let docs = await collection.aggregate(pipeline).toArray();
+		if (docs.length === 0 && effectiveSource && !indexFilter) {
+			// A small source can be absent from the generic top pool entirely;
+			// survey a deeper pool once before calling it a miss.
+			docs = await collection
+				.aggregate(
+					buildResearchVectorPipeline({
+						queryEmbedding,
+						limit: limitParam,
+						sourceFilter: effectiveSource,
+						deep: true,
+					}),
+				)
+				.toArray();
+		}
 		// If Atlas Vector Search index isn't created yet, $vectorSearch
 		// silently returns []. Force-fall-through to keyword in that case so
 		// the endpoint stays useful before the index is set up.
 		if (docs.length === 0) {
+			vectorNote = effectiveSource
+				? `vector: the query was embedded, but no chunk of source "${effectiveSource}" is in the vector index; keyword ranking was used`
+				: "vector: the query was embedded, but the vector index returned nothing; keyword ranking was used";
 			throw new Error("vector search returned 0 results — falling back");
 		}
 		chunks = docs.map(rowOfDoc);
-	} catch {
+	} catch (err) {
+		if (!vectorNote) {
+			const why =
+				err instanceof Error && /abort|timeout/i.test(err.message)
+					? "the embedding service did not answer within 8 s"
+					: "the embedding or vector stage failed";
+			vectorNote = `vector: ${why}; keyword ranking was used`;
+		}
 		// Fall back to keyword search using Payload's standard find.
 		// Ranking is BM25-lite: term frequency × field-position weight,
 		// with length normalization and a phrase-proximity bonus.
@@ -988,7 +1027,9 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(paramWarning || vectorNote
+					? { warnings: [paramWarning, vectorNote].filter(Boolean) }
+					: {}),
 				...(sourceAdvisory ? { sourceAdvisory } : {}),
 				...(exactMiss ? { exactMiss } : {}),
 				query: q,
@@ -1027,6 +1068,10 @@ export async function GET(req: NextRequest) {
 		{
 			headers: {
 				...rateLimitHeaders(limit),
+				// The mechanism, readable without parsing the body; and our own
+				// wall time, so a consumer can tell our latency from the network's.
+				"X-Scout-Match-Mode": mode,
+				"Server-Timing": `total;dur=${Date.now() - startedAt}`,
 				// Don't aggressively cache — query strings vary by user
 				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
 			},

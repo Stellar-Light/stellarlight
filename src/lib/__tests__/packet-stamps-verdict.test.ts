@@ -202,9 +202,9 @@ describe("failures that are not verdicts (weak-basis sweep, 2026-09-06)", () => 
 	});
 
 	it("does not read a 5xx as confirmation of an Inactive row either", () => {
-		expect(judgeStamp({ ...base, to: "Inactive", httpStatus: 503 }).verdict).toBe(
-			"COULD-NOT-CHECK",
-		);
+		expect(
+			judgeStamp({ ...base, to: "Inactive", httpStatus: 503 }).verdict,
+		).toBe("COULD-NOT-CHECK");
 	});
 
 	it("names a domain that no longer resolves, and still refuses to flip it", () => {
@@ -243,7 +243,12 @@ describe("failures that are not verdicts (weak-basis sweep, 2026-09-06)", () => 
 });
 
 describe("the dash test measures a stats ROW, not punctuation", () => {
-	const base = { slug: "x", to: "Live", sourceUrl: "https://example.com/", httpStatus: 200 };
+	const base = {
+		slug: "x",
+		to: "Live",
+		sourceUrl: "https://example.com/",
+		httpStatus: 200,
+	};
 	const pad = "Real product copy that carries the page. ".repeat(12);
 
 	it("holds a live page whose em-dashes are prose punctuation", () => {
@@ -253,8 +258,11 @@ describe("the dash test measures a stats ROW, not punctuation", () => {
 		const fold =
 			"Women Biz es el lugar donde las mujeres latinoamericanas aprenden a invertir, se conectan con su tribu y construyen su poder financiero — desde el bootcamp hasta el club. " +
 			"Pages Admin — Admin on Women Biz. Guias Educativas — Guias Educativas on Women Biz. " +
-			"Recursos — Recursos on Women Biz. Eventos — Eventos on Women Biz. " + pad;
-		expect(judgeStamp({ ...base, html: `<body>${fold}</body>` }).verdict).toBe("HOLDS");
+			"Recursos — Recursos on Women Biz. Eventos — Eventos on Women Biz. " +
+			pad;
+		expect(judgeStamp({ ...base, html: `<body>${fold}</body>` }).verdict).toBe(
+			"HOLDS",
+		);
 	});
 
 	it("still contradicts a stats block whose every value is a dash", () => {
@@ -266,26 +274,36 @@ describe("the dash test measures a stats ROW, not punctuation", () => {
 });
 
 describe("a pre-launch product may say it is pre-launch", () => {
-	const base = { slug: "x", sourceUrl: "https://example.com/", httpStatus: 200 };
+	const base = {
+		slug: "x",
+		sourceUrl: "https://example.com/",
+		httpStatus: 200,
+	};
 	const body = (lead: string) =>
 		`<body>${lead} ${"Real product copy carrying the page. ".repeat(12)}</body>`;
 
 	it("holds a Development row whose page advertises a waitlist", () => {
-		const v = judgeStamp({ ...base, to: "Development", html: body("Join the waitlist.") });
+		const v = judgeStamp({
+			...base,
+			to: "Development",
+			html: body("Join the waitlist."),
+		});
 		expect(v.verdict).toBe("HOLDS");
 		expect(v.reason).toMatch(/consistent with Development/);
 	});
 
 	it("holds a Pre-Release row that says coming soon", () => {
 		expect(
-			judgeStamp({ ...base, to: "Pre-Release", html: body("Coming soon.") }).verdict,
+			judgeStamp({ ...base, to: "Pre-Release", html: body("Coming soon.") })
+				.verdict,
 		).toBe("HOLDS");
 	});
 
 	it("still contradicts a Live row that says the same thing", () => {
-		expect(judgeStamp({ ...base, to: "Live", html: body("Join the waitlist.") }).verdict).toBe(
-			"CONTRADICTED",
-		);
+		expect(
+			judgeStamp({ ...base, to: "Live", html: body("Join the waitlist.") })
+				.verdict,
+		).toBe("CONTRADICTED");
 	});
 });
 
@@ -344,7 +362,11 @@ describe("a Chrome Web Store listing is readable without a browser", () => {
 describe("a client-rendered page still serves a head", () => {
 	const shell = (head: string) =>
 		`<html><head>${head}</head><body><div id="root"></div><script src="/a.js"></script></body></html>`;
-	const base = { slug: "x", sourceUrl: "https://example.com/", httpStatus: 200 };
+	const base = {
+		slug: "x",
+		sourceUrl: "https://example.com/",
+		httpStatus: 200,
+	};
 
 	it("holds when the served title names the product", () => {
 		// albedo, obsrvr, StellarBroker: 15 of the 20 rows stuck on
@@ -352,7 +374,9 @@ describe("a client-rendered page still serves a head", () => {
 		const v = judgeStamp({
 			...base,
 			to: "Live",
-			html: shell("<title>Obsrvr — Structured data infrastructure for Stellar</title>"),
+			html: shell(
+				"<title>Obsrvr — Structured data infrastructure for Stellar</title>",
+			),
 		});
 		expect(v.verdict).toBe("HOLDS");
 		expect(v.reason).toMatch(/head names the product/);

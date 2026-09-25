@@ -198,20 +198,11 @@ export async function GET(req: NextRequest) {
 			}
 		}
 	}
-
-	// 2. Live DoraHacks feed — which also carries the code-curated events
-	// (src/data/curated-hackathons.ts), each keeping `source: "curated"`.
-	// Skipping this fetch for `source=curated` therefore dropped exactly the
-	// rows the caller asked for: `?source=curated` served 0 while the
-	// unfiltered response carried 6 of them. The source filter is applied to
-	// the MERGED rows below, where every row's own `source` is visible.
-	{
-		try {
-			const doraHackathons = await fetchAllDoraHacksHackathons();
-			dora = doraHackathons.map(doraToRow);
-		} catch {
-			// fall through
-		}
+	try {
+		const doraHackathons = await fetchAllDoraHacksHackathons();
+		dora = doraHackathons.map(doraToRow);
+	} catch {
+		// fall through
 	}
 
 	// 3. Merge. De-duplicate by externalUrl — if a curated entry already
@@ -325,8 +316,7 @@ export async function GET(req: NextRequest) {
 					// `curated.length` (the Payload collection, empty) reported 0 —
 					// beside six served rows whose own source said "curated".
 					curated: matchedRows.filter((h) => h.source === "curated").length,
-					dorahacks: matchedRows.filter((h) => h.source === "dorahacks")
-						.length,
+					dorahacks: matchedRows.filter((h) => h.source === "dorahacks").length,
 					returned: hackathons.length,
 					total: matchedBeforeLimit,
 				},

@@ -25,10 +25,17 @@ function reduceToIntent(
 		for (const [key, val] of Object.entries(w.data)) {
 			const cur = stored[key];
 			if (
-				val && cur && typeof val === "object" && typeof cur === "object" &&
-				!Array.isArray(val) && !Array.isArray(cur)
+				val &&
+				cur &&
+				typeof val === "object" &&
+				typeof cur === "object" &&
+				!Array.isArray(val) &&
+				!Array.isArray(cur)
 			) {
-				const base = (data[key] ?? { ...(cur as object) }) as Record<string, unknown>;
+				const base = (data[key] ?? { ...(cur as object) }) as Record<
+					string,
+					unknown
+				>;
 				for (const [k2, v2] of Object.entries(val as Record<string, unknown>)) {
 					if ((cur as Record<string, unknown>)[k2] !== v2) base[k2] = v2;
 				}
@@ -45,7 +52,10 @@ describe("planned writes coalesce per row", () => {
 	it("keeps BOTH nulls when two sections clear two links on one row", () => {
 		// The exact mimoto case: stored links carry a dead website AND a dead
 		// github; two sections each clear one, each spreading what it read.
-		const links = { website: "https://github.com/nkoorty/mimoto", github: "https://github.com/nkoorty/mimoto" };
+		const links = {
+			website: "https://github.com/nkoorty/mimoto",
+			github: "https://github.com/nkoorty/mimoto",
+		};
 		const out = reduceToIntent({ links }, [
 			{ id: "1", data: { links: { ...links, github: null } } },
 			{ id: "1", data: { links: { ...links, website: null } } },

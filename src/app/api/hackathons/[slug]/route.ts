@@ -207,7 +207,10 @@ export async function GET(
 	const { slug } = await params;
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json({ error: "payload unavailable" }, { status: 503 });
+		return NextResponse.json(
+			{ error: "payload unavailable" },
+			{ status: 503, headers: { "Retry-After": "2" } },
+		);
 	}
 
 	try {

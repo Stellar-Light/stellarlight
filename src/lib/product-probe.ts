@@ -16,10 +16,22 @@
  *  network, so it appears on every page that merely mentions it. */
 const MARKERS: Array<{ re: RegExp; kind: string }> = [
 	{ re: /horizon(?:-testnet)?\.stellar\.org/i, kind: "horizon-endpoint" },
-	{ re: /soroban[-.]rpc|rpc\.stellar\.org|mainnet\.sorobanrpc\.com/i, kind: "soroban-rpc" },
-	{ re: /@stellar\/stellar-sdk|stellar-base|js-stellar-sdk|stellar_sdk/i, kind: "stellar-sdk" },
-	{ re: /Public Global Stellar Network ; September 2015/, kind: "network-passphrase" },
-	{ re: /@creit\.tech\/stellar-wallets-kit|freighter-api|albedo\.link/i, kind: "wallet-integration" },
+	{
+		re: /soroban[-.]rpc|rpc\.stellar\.org|mainnet\.sorobanrpc\.com/i,
+		kind: "soroban-rpc",
+	},
+	{
+		re: /@stellar\/stellar-sdk|stellar-base|js-stellar-sdk|stellar_sdk/i,
+		kind: "stellar-sdk",
+	},
+	{
+		re: /Public Global Stellar Network ; September 2015/,
+		kind: "network-passphrase",
+	},
+	{
+		re: /@creit\.tech\/stellar-wallets-kit|freighter-api|albedo\.link/i,
+		kind: "wallet-integration",
+	},
 	{ re: /\bG[A-Z2-7]{55}\b/, kind: "stellar-address" },
 	{ re: /\bC[A-Z2-7]{55}\b/, kind: "contract-id" },
 ];
@@ -109,13 +121,23 @@ export async function probeProduct(
 	try {
 		origin = new URL(rawUrl).origin;
 	} catch {
-		return { kind: null, detail: "unparseable url", url: null, couldNotCheck: true };
+		return {
+			kind: null,
+			detail: "unparseable url",
+			url: null,
+			couldNotCheck: true,
+		};
 	}
 
 	// SEP-1 first: a stellar.toml is the strongest single signal a product can
 	// publish, and it is a Stellar-specific file nothing else serves by accident.
 	const toml = await get(origin + TOML_PATH, timeoutMs);
-	if (toml?.ok && /\[\[CURRENCIES\]\]|ACCOUNTS|SIGNING_KEY|NETWORK_PASSPHRASE/i.test(toml.body))
+	if (
+		toml?.ok &&
+		/\[\[CURRENCIES\]\]|ACCOUNTS|SIGNING_KEY|NETWORK_PASSPHRASE/i.test(
+			toml.body,
+		)
+	)
 		return {
 			kind: "sep1-toml",
 			detail: "publishes a SEP-1 stellar.toml",
@@ -124,7 +146,13 @@ export async function probeProduct(
 		};
 
 	const page = await get(rawUrl, timeoutMs);
-	if (!page) return { kind: null, detail: "unreachable", url: null, couldNotCheck: true };
+	if (!page)
+		return {
+			kind: null,
+			detail: "unreachable",
+			url: null,
+			couldNotCheck: true,
+		};
 	if (!page.ok)
 		return {
 			kind: null,

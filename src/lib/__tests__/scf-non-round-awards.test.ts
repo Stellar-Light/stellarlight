@@ -6,12 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { parseRoundVerdicts } from "../../../scripts/eval/scf-official";
 
-const card = (
-	id: string,
-	status: string,
-	roundName: string,
-	budget?: number,
-) =>
+const card = (id: string, status: string, roundName: string, budget?: number) =>
 	`{"id":"${id}","status":"${status}","project":"recX","roundName":"${roundName}","awardType":"Build"${budget !== undefined ? `,"budget":${budget}` : ""}}`;
 
 describe("SCF awards outside the numbered rounds", () => {

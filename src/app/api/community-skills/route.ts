@@ -160,7 +160,10 @@ export async function POST(req: NextRequest) {
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "data layer unavailable; try again shortly" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 
