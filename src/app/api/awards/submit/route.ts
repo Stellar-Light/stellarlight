@@ -56,8 +56,10 @@ export async function POST(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/submit",
 		// See ballot-xdr: one venue IP for the whole room. The whitelist and
-		// the one-ballot gate are what actually bound this route.
-		limit: 200,
+		// the one-ballot gate are what actually bound this route. 600, not 200:
+		// a relay_busy answer makes the page resubmit the same signed ballot up
+		// to four times, so 76 Pilots in one ten-minute burst can be 300 calls.
+		limit: 600,
 		windowMs: 10 * 60 * 1000,
 	});
 	if (!limit.allowed) {
