@@ -97,6 +97,9 @@ export const AUDIT_PROJECT_ALIASES: Record<
 		slug: "clickpesa-debt-fund",
 		basis: "alias",
 	},
+	// Portal report 81 (Veridise, "Centiiv Audit Report"): scope names the
+	// Centiiv Protocol contracts; the directory row `centiiv` is that protocol.
+	centiiv: { slug: "centiiv", basis: "name-exact" },
 	"comet-contracts-v1": { slug: "comet", basis: "name-exact" },
 	crossmint: { slug: "crossmint", basis: "name-exact" },
 	equitx: { slug: "equitx", basis: "name-exact" },
@@ -111,6 +114,14 @@ export const AUDIT_PROJECT_ALIASES: Record<
 	"hot bridge": { slug: "hot-protocol", basis: "alias" },
 	"huma protocol": { slug: "huma", basis: "name-exact" },
 	"icon xcall": { slug: null, basis: "unmatched" },
+	// Portal report 78 (Runtime Verification, "Moonlight Stellar", delivered
+	// 2026-07-24): the audit text names the Stellar privacy protocol; the
+	// directory row `moonlight` is that protocol (ZK privacy on Stellar).
+	// Portal reports 79 (OtterSec) and 80 (Runtime Verification), both
+	// "Matrixdock Gold XAUm": the tokenized-gold product of the directory row
+	// `matrixdock`, which is the issuer.
+	"matrixdock gold xuam": { slug: "matrixdock", basis: "name-exact" },
+	moonlight: { slug: "moonlight", basis: "name-exact" },
 	"normal finance": { slug: "normal", basis: "name-exact" },
 	// The report's own title reads "OctoLend - Untangled - Security Audit
 	// Report" (Runtime Verification 2026-03-20): OctoLend is Untangled's
@@ -143,6 +154,9 @@ export const AUDIT_PROJECT_ALIASES: Record<
 	"soroswap core": { slug: "soroswap", basis: "name-exact" },
 	"spectra finance": { slug: "spectra-finance", basis: "name-exact" },
 	spiko: { slug: "spiko", basis: "name-exact" },
+	// Portal report 82 (Hashlock, "SODAX Icon Foundation (Soroban)"): the
+	// directory row `sodax` is that protocol (the ICON Foundation rebrand).
+	sodax: { slug: "sodax", basis: "name-exact" },
 	"stellar soroban core": { slug: null, basis: "unmatched" },
 	"stellar soroban integration with the tricorn bridge": {
 		slug: "tricorn",
