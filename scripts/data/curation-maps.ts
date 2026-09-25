@@ -2603,6 +2603,7 @@ export const STATUS_FIX: Record<
  * silently undid curation for weeks (#730). Equality no-ops keep reruns clean.
  * Pair with IDENTITY_FIX (curate-projects.ts) so the old name stays an alias. */
 export const NAME_FIXES: Record<string, string> = {
+	liqvidxyz: "Liqvid",
 	// i³ 2026 intake (2026-09-23): the row's own site is choppaddi.com and its
 	// description says "Choppaddi (FKA FastBuka)"; fastbuka.com answers 503.
 	// The product is Choppaddi now; the former name stays as an alias.
