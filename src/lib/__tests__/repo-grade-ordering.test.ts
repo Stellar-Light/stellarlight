@@ -15,9 +15,10 @@
  *      a C++ network implementation never has.
  */
 import { describe, expect, it } from "vitest";
-import { repoGrade,
+import {
 	FIRST_PARTY_OWNERS,
 	isFirstParty,
+	repoGrade,
 	vouchingNoteCount,
 } from "../repo-grade";
 
@@ -339,9 +340,9 @@ describe("code evidence outranks institutional recognition", () => {
 		const bare = repoGrade(lib).score;
 		// A registry serving this repo's packages: 0 of 25 sampled hackathon
 		// repos had one, though 18 declared a package.json name.
-		expect(repoGrade({ ...lib, publishedPackageCount: 9 }).score).toBeGreaterThan(
-			bare,
-		);
+		expect(
+			repoGrade({ ...lib, publishedPackageCount: 9 }).score,
+		).toBeGreaterThan(bare);
 		// A human naming it canonical is domain knowledge a star count proxies badly.
 		expect(repoGrade({ ...lib, curatedCanonical: true }).score).toBeGreaterThan(
 			bare,
@@ -349,7 +350,8 @@ describe("code evidence outranks institutional recognition", () => {
 	});
 
 	it("a release decays rather than falling off a cliff at one year", () => {
-		const d = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+		const d = (n: number) =>
+			new Date(Date.now() - n * 86_400_000).toISOString();
 		const base = {
 			lastCommitAt: new Date().toISOString(),
 			stargazerCount: 50,
@@ -458,18 +460,26 @@ describe("audit residue", () => {
 		// repoKindOf has classified hello-world/template/starter/example since it
 		// was written, and repoGrade ignored it — so an agent could be handed
 		// `hello-world` as production architecture.
-		expect(repoGrade({ ...strong, name: "someone/soroban-hello-world" }).score).toBeLessThan(
+		expect(
+			repoGrade({ ...strong, name: "someone/soroban-hello-world" }).score,
+		).toBeLessThan(
 			repoGrade({ ...strong, name: "someone/lending-protocol" }).score,
 		);
 	});
 
 	it("first-party scaffolds are demoted too — that is where the risk is highest", () => {
 		expect(
-			repoGrade({ ...strong, firstParty: true, name: "stellar/soroban-examples" })
-				.score,
+			repoGrade({
+				...strong,
+				firstParty: true,
+				name: "stellar/soroban-examples",
+			}).score,
 		).toBeLessThan(
-			repoGrade({ ...strong, firstParty: true, name: "stellar/anchor-platform" })
-				.score,
+			repoGrade({
+				...strong,
+				firstParty: true,
+				name: "stellar/anchor-platform",
+			}).score,
 		);
 	});
 

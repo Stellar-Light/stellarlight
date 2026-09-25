@@ -24,7 +24,45 @@ const DIMS = 1024;
  * API error — fail loud during ingestion rather than silently producing
  * a corrupt corpus.
  */
+/**
+ * A query embedding call never waits longer than this: a slow embedding
+ * upstream used to hold a /api/research request open for as long as it
+ * liked (a partner measured 24.7 s), while every other route answered in
+ * under a second. Past it the route falls back to keyword ranking.
+ */
+export const EMBED_TIMEOUT_MS = 8_000;
+/** Per-instance memo of query embeddings: an agent asking one question
+ *  across 16 sources sends the same text 16 times; and a retry of a
+ *  question that just ran costs nothing. Bounded, oldest evicted. */
+const CACHE_MAX = 500;
+const cache = new Map<string, number[]>();
+const inflight = new Map<string, Promise<number[]>>();
+
 export async function embed(text: string): Promise<number[]> {
+	const k = text.trim();
+	const hit = cache.get(k);
+	if (hit) {
+		cache.delete(k);
+		cache.set(k, hit); // LRU touch
+		return hit;
+	}
+	const pending = inflight.get(k);
+	if (pending) return pending;
+	const p = embedUncached(text)
+		.then((vec) => {
+			cache.set(k, vec);
+			if (cache.size > CACHE_MAX) {
+				const oldest = cache.keys().next().value;
+				if (oldest !== undefined) cache.delete(oldest);
+			}
+			return vec;
+		})
+		.finally(() => inflight.delete(k));
+	inflight.set(k, p);
+	return p;
+}
+
+async function embedUncached(text: string): Promise<number[]> {
 	const key = process.env.VOYAGE_API_KEY;
 	if (!key) {
 		throw new Error(
@@ -39,6 +77,7 @@ export async function embed(text: string): Promise<number[]> {
 			Authorization: `Bearer ${key}`,
 		},
 		body: JSON.stringify({ model: MODEL, input: text }),
+		signal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
 	});
 
 	if (!res.ok) {
@@ -88,6 +127,7 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
 			Authorization: `Bearer ${key}`,
 		},
 		body: JSON.stringify({ model: MODEL, input: texts }),
+		signal: AbortSignal.timeout(60_000),
 	});
 
 	if (!res.ok) {

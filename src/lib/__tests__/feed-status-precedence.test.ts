@@ -27,13 +27,20 @@ const EARNED = new Set([
 const earned = (basis: string | null | undefined) => EARNED.has(String(basis));
 
 /** owned = curation-map ownership, plus status when the row earned it. */
-function ownedFor(mapOwned: string[], basis: string | null | undefined): Set<string> {
+function ownedFor(
+	mapOwned: string[],
+	basis: string | null | undefined,
+): Set<string> {
 	const owned = new Set(mapOwned);
 	if (earned(basis)) owned.add("status");
 	return owned;
 }
 
-const feedPatch = { status: "Live", name: "Whatever", links: { website: "https://feed" } };
+const feedPatch = {
+	status: "Live",
+	name: "Whatever",
+	links: { website: "https://feed" },
+};
 
 describe("feed status precedence", () => {
 	for (const basis of [
@@ -55,7 +62,10 @@ describe("feed status precedence", () => {
 
 	for (const basis of [null, undefined, "source-inherited", "unverified"]) {
 		it(`still refreshes a ${String(basis)} status — the feed is the best we have`, () => {
-			const { data } = withoutCuratedFields({ ...feedPatch }, ownedFor([], basis));
+			const { data } = withoutCuratedFields(
+				{ ...feedPatch },
+				ownedFor([], basis),
+			);
 			expect(data.status).toBe("Live");
 		});
 	}
@@ -65,7 +75,10 @@ describe("feed status precedence", () => {
 		// often months stale. Protecting it would mean the feed could never tell
 		// us a project died — the one thing an upstream curator is well placed
 		// to notice. This is a deliberate trade, not an oversight.
-		const { data } = withoutCuratedFields({ ...feedPatch }, ownedFor([], "site-liveness"));
+		const { data } = withoutCuratedFields(
+			{ ...feedPatch },
+			ownedFor([], "site-liveness"),
+		);
 		expect(data.status).toBe("Live");
 	});
 

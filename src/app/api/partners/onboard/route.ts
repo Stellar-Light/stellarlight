@@ -269,7 +269,7 @@ export async function POST(req: NextRequest) {
 				error: "AI onboarding isn't available right now — use the form below.",
 				unavailable: true,
 			},
-			{ status: 503 },
+			{ status: 503, headers: { "Retry-After": "2" } },
 		);
 	}
 
@@ -394,7 +394,7 @@ export async function POST(req: NextRequest) {
 						"AI onboarding isn't available right now — use the form below.",
 					unavailable: true,
 				},
-				{ status: 503 },
+				{ status: 503, headers: { "Retry-After": "2" } },
 			);
 		}
 		if (err instanceof Anthropic.APIError) {

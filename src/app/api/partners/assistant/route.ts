@@ -202,7 +202,10 @@ export async function POST(req: NextRequest) {
 					"The assistant isn't available right now — browse /partners or use the form.",
 				unavailable: true,
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 
@@ -345,7 +348,10 @@ export async function POST(req: NextRequest) {
 						"The assistant isn't available right now — browse /partners or use the form.",
 					unavailable: true,
 				},
-				{ status: 503, headers: rateLimitHeaders(limit) },
+				{
+					status: 503,
+					headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				},
 			);
 		}
 		if (err instanceof Anthropic.APIError) {

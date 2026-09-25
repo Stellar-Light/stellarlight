@@ -165,7 +165,10 @@ export async function POST(req: NextRequest) {
 				error: "payload unavailable",
 				hint: "Server-side data layer is down; try again in a minute.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 

@@ -151,7 +151,10 @@ export async function GET(req: NextRequest) {
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "backing store unavailable" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 

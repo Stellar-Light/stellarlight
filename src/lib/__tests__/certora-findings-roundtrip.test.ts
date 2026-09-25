@@ -47,7 +47,10 @@ describe("certora findings extraction", () => {
 		// An id in the table but not the contents means we are reading prose,
 		// not the report's structure. Not-extracted beats a confident subset.
 		expect(
-			extractFindings("Certora", `${BLEND_V2}\nM-09 Invented row Medium Fixed\n`),
+			extractFindings(
+				"Certora",
+				`${BLEND_V2}\nM-09 Invented row Medium Fixed\n`,
+			),
 		).toBeNull();
 	});
 
@@ -55,8 +58,10 @@ describe("certora findings extraction", () => {
 		expect(
 			extractFindings(
 				"Certora",
-				BLEND_V2.replace("H-02 Users can create nearly unfillable auctions High Fixed",
-					"H-02 Users can create nearly unfillable auctions Low Fixed"),
+				BLEND_V2.replace(
+					"H-02 Users can create nearly unfillable auctions High Fixed",
+					"H-02 Users can create nearly unfillable auctions Low Fixed",
+				),
 			),
 		).toBeNull();
 	});

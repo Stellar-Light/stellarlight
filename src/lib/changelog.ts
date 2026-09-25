@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-09-25",
+		surfaces: ["api"],
+		version: "spec@1.9.54",
+		type: "changed",
+		summary:
+			"searchResearch: a 503 carries Retry-After; responses carry X-Scout-Match-Mode and Server-Timing headers; a keyword fallback says why in meta.warnings; small sources no longer fall back to keyword by construction.",
+		detail:
+			"A partner running about 39,000 requests over two days reported three things. Stalls: research calls held open past 10 s while other routes answered; the embedding call had no timeout and the database driver waited its default 30 s for a server during a provider blip, so both now fail fast (8 s and 5 s, plus a 20 s socket bound) into the keyword fallback or a 503. Error bodies: every rate-limited 503 now carries Retry-After (seconds). Fallback: six sources (scf-handbook, paper, scf-proposal, lumenloop, incident, ec-developer-report) answered keyword on every query at zero load, because a source-scoped vector query kept only that source's rows out of a generic top-1,200 pool and small sources never reached it; the vector index now carries source as a filter field, so a source-scoped query is filtered inside the index, and when a fallback still happens the reason is stated in meta.warnings instead of a blanket vector unavailable. Query embeddings are memoised per instance, so one question fanned out across sources is embedded once. Headers are additive; no field, parameter or enum changed.",
+	},
+	{
 		date: "2026-09-24",
 		surfaces: ["api-client"],
 		version: "api-client@1.9.1",

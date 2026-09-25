@@ -216,8 +216,7 @@ export async function buildVetIdea(
 		// this is what lets a dashboard, an explorer or an analytics tool
 		// compete with an idea whose noun happens to name a product type.
 		projDocs = projDocs.filter((p) => inVertical(p) || (p.__anchor ?? 0) > 0);
-		for (const p of projDocs)
-			p.__via = inVertical(p) ? "vertical" : "scored";
+		for (const p of projDocs) p.__via = inVertical(p) ? "vertical" : "scored";
 		// Score the vertical path TOO. Membership decides who is eligible; it
 		// does not decide who leads. Without this, __rel is undefined for every
 		// row and the display sort falls through to ALPHABETICAL — which is why

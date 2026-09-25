@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 				advisory:
 					"The datastore was unreachable. This is an outage — NOT a resolution miss, and NOT a claim the name is untracked. Retry before concluding anything about it.",
 			},
-			{ status: 503, headers: CORS },
+			{ status: 503, headers: { ...CORS, "Retry-After": "2" } },
 		);
 	}
 

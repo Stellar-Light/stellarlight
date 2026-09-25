@@ -18,7 +18,9 @@ describe("JS SDK version status", () => {
 		// The trap this table exists for: 17 < SUPPORTED_FLOOR_MAJOR (21), so the
 		// Rust classifier calls the newest JS SDK in the ecosystem deprecated.
 		expect(versionStatusOf("17.0.1")).toBe("deprecated");
-		expect(jsSdkVersionStatusOf("@stellar/stellar-sdk@^17.0.1")).toBe("current");
+		expect(jsSdkVersionStatusOf("@stellar/stellar-sdk@^17.0.1")).toBe(
+			"current",
+		);
 	});
 
 	it("reads the npm dist-tag line: 17 current, 16/15/14 supported", () => {
@@ -85,17 +87,15 @@ describe("JS SDK version status", () => {
 
 	it("current major stays in step with the tabled latest", () => {
 		expect(
-			jsSdkVersionStatusOf(
-				`@stellar/stellar-sdk@^${JS_SDK_LATEST_MAJOR}.0.0`,
-			),
+			jsSdkVersionStatusOf(`@stellar/stellar-sdk@^${JS_SDK_LATEST_MAJOR}.0.0`),
 		).toBe("current");
 	});
 
 	describe("combined with the Rust crate", () => {
 		it("prefers the Rust crate when both are readable", () => {
-			expect(combinedVersionStatus("22.0.8", "@stellar/stellar-sdk@^16.3.0")).toBe(
-				"supported",
-			);
+			expect(
+				combinedVersionStatus("22.0.8", "@stellar/stellar-sdk@^16.3.0"),
+			).toBe("supported");
 		});
 
 		it("keeps a deprecated reading from either side", () => {

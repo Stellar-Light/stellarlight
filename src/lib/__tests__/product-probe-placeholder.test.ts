@@ -12,21 +12,27 @@ const REAL_COPY = "Send money across borders in seconds. ".repeat(60);
 
 describe("placeholderReason", () => {
 	it("flags an unambiguously parked domain", () => {
-		expect(placeholderReason(page("This domain is for sale. Buy this domain."))).toMatch(
-			/parked page/,
-		);
+		expect(
+			placeholderReason(page("This domain is for sale. Buy this domain.")),
+		).toMatch(/parked page/);
 		expect(placeholderReason(page("Welcome to nginx!"))).toMatch(/parked page/);
 	});
 
 	it("does NOT flag a shipping product that labels one section Coming Soon", () => {
 		// The sendana case, verbatim in shape.
 		expect(
-			placeholderReason(page(`<h1>Sendana</h1>${REAL_COPY}<div>Businesses <span>Coming Soon</span></div>`)),
+			placeholderReason(
+				page(
+					`<h1>Sendana</h1>${REAL_COPY}<div>Businesses <span>Coming Soon</span></div>`,
+				),
+			),
 		).toBeNull();
 	});
 
 	it("still flags a bare splash whose only content is Coming Soon", () => {
-		expect(placeholderReason(page("<h1>Coming Soon</h1>"))).toMatch(/splash page/);
+		expect(placeholderReason(page("<h1>Coming Soon</h1>"))).toMatch(
+			/splash page/,
+		);
 	});
 
 	it("does not flag an ordinary product page", () => {

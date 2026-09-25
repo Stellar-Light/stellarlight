@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 		if (!payload) {
 			return NextResponse.json(
 				{ message: "Service unavailable" },
-				{ status: 503 },
+				{ status: 503, headers: { "Retry-After": "2" } },
 			);
 		}
 

@@ -40,7 +40,10 @@ export async function GET(req: NextRequest) {
 				error: "round_unavailable",
 				note: "the round could not be read right now; try again in a moment",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const loaded = read.loaded;

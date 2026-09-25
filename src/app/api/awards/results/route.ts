@@ -58,7 +58,10 @@ export async function GET(req: NextRequest) {
 				message:
 					"The round could not be read right now. Nothing was changed. Try again in a moment.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 	const loaded = read.loaded;
@@ -117,7 +120,10 @@ export async function GET(req: NextRequest) {
 				message:
 					"The ballot record could not be read, so the tally cannot be computed correctly right now. This is temporary. Please retry.",
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 

@@ -94,7 +94,7 @@ export async function GET(
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "directory temporarily unavailable" },
-			{ status: 503 },
+			{ status: 503, headers: { "Retry-After": "2" } },
 		);
 	}
 

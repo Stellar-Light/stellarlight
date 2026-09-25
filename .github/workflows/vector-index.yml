@@ -1,0 +1,36 @@
+# Reconcile the Atlas Vector Search index on research-docs with the
+# definition in scripts/create-vector-index.ts (creates it on a fresh
+# cluster, adds missing fields in place on an existing one; Atlas keeps
+# serving the old definition while it rebuilds). Dry-run by default.
+name: vector index (reconcile)
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Apply (create or update the index, then wait for the rebuild). Unchecked = dry run."
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Reconcile the vector index (dry-run unless execute=true)
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          IN_EXECUTE: ${{ inputs.execute }}
+        run: |
+          args=()
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/create-vector-index.ts "${args[@]}"

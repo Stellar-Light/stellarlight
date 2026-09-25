@@ -46,7 +46,10 @@ describe("explainRepo dates its answer, or admits it cannot (#1134)", () => {
 	const scanArm = FLAT.slice(scanSplit, exprEnd);
 
 	it("answerAsOf is null on the deepwiki path — an admission, not a guess", () => {
-		expect(exprStart, "the three-armed answerAsOf expression must exist").toBeGreaterThan(-1);
+		expect(
+			exprStart,
+			"the three-armed answerAsOf expression must exist",
+		).toBeGreaterThan(-1);
 		expect(dwArm.replace(": dwAnswer ?", "").trim()).toMatch(/^null$/);
 	});
 
