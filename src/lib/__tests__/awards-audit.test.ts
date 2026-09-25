@@ -486,6 +486,8 @@ describe("record — the reserve is atomic and a reservation is not a ballot", (
 		fake({ ballots: [reserved] });
 		expect(await readFirstBallotFor(round.slug, voter.publicKey())).toEqual({
 			voted: false,
+			ballotId: null,
+			txHash: null,
 			selections: {},
 			pending: {
 				id: "b1",

@@ -1198,6 +1198,44 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	);
 
 	// ── connect ──
+	// A browser with no receipt for this address asks the server, behind the
+	// owner's signature, whether it already voted: connecting a wallet only
+	// hands the page an address, which anyone could type in, so the wallet
+	// signs a short status check (no transaction, nothing on chain) and the
+	// server answers the owner alone. A declined signature just means a fresh
+	// ballot; submit still answers already_voted if it was.
+	const checkBallotStatus = useCallback(
+		async (addr: string) => {
+			const ask = async (body: Record<string, string>) => {
+				const res = await fetch("/api/awards/ballot-status", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ ...body, round: round.slug }),
+				});
+				return res.ok ? await res.json() : null;
+			};
+			const unsigned = await ask({ address: addr });
+			if (!unsigned?.xdr) return;
+			const signedXdr = await signAwardsBallot(unsigned.xdr, addr);
+			const status = await ask({ signedXdr });
+			if (!status?.voted) return;
+			const receipt: StoredReceipt = {
+				ballotId: status.ballotId ?? null,
+				hash: status.txHash ?? "",
+				selections: status.selections ?? {},
+			};
+			rememberReceipt(addr, round.slug, receipt);
+			setTxHash(receipt.hash || null);
+			setBallotId(receipt.ballotId);
+			prefilled.current = true;
+			setSelections({ ...receipt.selections });
+			setEligibility((prev) =>
+				prev ? { ...prev, hasVoted: true, votes: receipt.selections } : prev,
+			);
+		},
+		[round.slug],
+	);
+
 	const handleConnect = useCallback(
 		async (walletId: AwardsWalletId) => {
 			setError(null);
@@ -1207,14 +1245,21 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				setAddress(addr);
 				setWalletId(walletId);
 				setWalletOpen(false);
-				await refreshEligibility(addr);
+				const body = await refreshEligibility(addr);
+				if (body.whitelisted && !readReceipt(addr, round.slug)) {
+					try {
+						await checkBallotStatus(addr);
+					} catch {
+						// the wallet declined or the check failed: a fresh ballot
+					}
+				}
 			} catch (err) {
 				setError(walletErrorMessage(err));
 			} finally {
 				setPhase("idle");
 			}
 		},
-		[refreshEligibility],
+		[refreshEligibility, checkBallotStatus, round.slug],
 	);
 
 	const handleDisconnect = useCallback(async () => {

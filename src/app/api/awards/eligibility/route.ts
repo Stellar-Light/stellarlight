@@ -5,8 +5,9 @@
  * else. This endpoint is unauthenticated and the ballot is anonymous, so it
  * must never answer "has this address voted" or "what did it vote", it used
  * to do both, which made it a participation-and-choice oracle for the whole
- * electorate. Whether an address has voted is learned only by trying:
- * /api/awards/submit answers already_voted, and the page locks on that.
+ * electorate. Whether an address has voted is learned only behind the
+ * owner's signature: /api/awards/ballot-status answers a signed check, and
+ * /api/awards/submit answers already_voted; the page locks on either.
  *
  * No funding here any more either. Ballots are written by the relay, which
  * pays; a voter's account never needs to exist on-chain.
