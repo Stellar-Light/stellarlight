@@ -182,6 +182,17 @@ export default buildConfig({
 			connectTimeoutMS: 5_000,
 			// ...and a node that stops answering mid-query is abandoned too.
 			socketTimeoutMS: 20_000,
+			// Serverless: every warm Vercel instance is its own client, and the
+			// driver's default pool (100) plus one monitor socket per replica-set
+			// node means a burst of cold starts can hold hundreds of Atlas
+			// connections between them. A shared tier caps the whole cluster at
+			// 500 and drops the TLS handshake past it, which is what "tlsv1 alert
+			// internal error" and the 503s under a 48-request burst were
+			// (2026-09-26). An instance serves a handful of requests at once at
+			// most; keep its pool small and let idle sockets go.
+			maxPoolSize: 5,
+			minPoolSize: 0,
+			maxIdleTimeMS: 15_000,
 		},
 		// Disable file storage in MongoDB - files stored on disk in /media directory
 		// On Vercel (read-only filesystem), uploads will fail but admin panel works
