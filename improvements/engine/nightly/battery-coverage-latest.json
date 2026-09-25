@@ -1,5 +1,31 @@
 {
-	"generatedAt": "2026-09-24T10:43:43.342Z",
+	"generatedAt": "2026-09-25T10:45:53.588Z",
 	"detector": "battery-coverage",
-	"failures": []
+	"failures": [
+		{
+			"probe": "battery:q-pc-doc-category-validator-search",
+			"note": "top 0.00 < 0.6 via research/confidence for \"General docs search mixes unrelated pages. How do I restrict a quorum query to S\" (protocol-core); best: none",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-pc-fee-bump-channel-accounts-feepool",
+			"note": "top 0.00 < 0.6 via research/confidence for \"How do fee-bump transactions and channel or fee-paying accounts work, does the f\" (protocol-core); best: none",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-pc-l2-payment-channels-starlight",
+			"note": "top 0.00 < 0.6 via research/confidence for \"What state/payment-channel and Layer-2 options exist on Stellar, such as Starlig\" (protocol-core); best: none",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-pc-memos-reference",
+			"note": "top 0.00 < 0.6 via research/confidence for \"How do memos work on Stellar: types, size limit, case-sensitivity, whether one t\" (protocol-core); best: none",
+			"surface": "corpus"
+		},
+		{
+			"probe": "battery:q-pc-multisig-setup-lifecycle",
+			"note": "top 0.00 < 0.6 via research/confidence for \"How do I set up and manage classic Stellar multisig, including SetOptions 2-of-3\" (protocol-core); best: none",
+			"surface": "corpus"
+		}
+	]
 }

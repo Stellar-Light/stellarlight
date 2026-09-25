@@ -1,25 +1,57 @@
 {
-	"generatedAt": "2026-09-24T10:45:08.456Z",
-	"total": 708,
-	"open": 23,
-	"refreshQueue": 36,
+	"generatedAt": "2026-09-25T10:46:57.238Z",
+	"total": 718,
+	"open": 28,
+	"refreshQueue": 41,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
-		"count": 3,
+		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 63,
+		"oldestDays": 64,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 63
+				"days": 64
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 63
+				"days": 64
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 27
+				"days": 28
+			},
+			{
+				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:which-anchors-actually-implement-sep-24",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
+				"days": 20
+			},
+			{
+				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
+				"days": 20
 			}
 		]
 	},
@@ -33,25 +65,25 @@
 	"clearedByReprobe": 216,
 	"clearedOnSilence": 409,
 	"closingRate": 0.31,
-	"silenceShare": 0.58,
+	"silenceShare": 0.57,
 	"recurrence": {
 		"reopened": 11,
 		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 271,
-				"recurred": 96,
-				"ratePct": 35.4
+				"newFindings": 281,
+				"recurred": 106,
+				"ratePct": 37.7
 			},
 			"lifetime": {
-				"newFindings": 708,
-				"recurred": 175,
-				"ratePct": 24.7
+				"newFindings": 718,
+				"recurred": 185,
+				"ratePct": 25.8
 			}
 		}
 	},
-	"oldestOpenDays": 7,
+	"oldestOpenDays": 8,
 	"inWave": 0,
 	"highOpen": 23,
 	"staleHighOpen": 0,
@@ -59,7 +91,12 @@
 		{
 			"surface": "code",
 			"open": 21,
-			"total": 59
+			"total": 63
+		},
+		{
+			"surface": "corpus",
+			"open": 5,
+			"total": 23
 		},
 		{
 			"surface": "retrieval",
@@ -69,7 +106,7 @@
 		{
 			"surface": "directory",
 			"open": 0,
-			"total": 200
+			"total": 201
 		},
 		{
 			"surface": "scf",
@@ -85,15 +122,16 @@
 			"surface": "consumer",
 			"open": 0,
 			"total": 36
-		},
-		{
-			"surface": "corpus",
-			"open": 0,
-			"total": 18
 		}
 	],
-	"unverifiedOpen": 0,
-	"quietSources": [],
+	"unverifiedOpen": 17,
+	"quietSources": [
+		{
+			"source": "raven-routing",
+			"open": 17,
+			"days": 11
+		}
+	],
 	"topOpen": [
 		{
 			"id": "gone-repos:rohit8759-keywe",

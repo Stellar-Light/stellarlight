@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-24T10:44:26.135Z",
+	"generatedAt": "2026-09-25T10:46:31.358Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -15,6 +15,11 @@
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
 			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.14.0 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:airgap-it/airgap-coin-lib:npm:@airgap/stellar",
+			"note": "note (asOf 2026-09-02) cites 0.13.47; registry latest is 0.14.0 (published 2026-09-24)",
 			"surface": "code"
 		},
 		{
@@ -93,6 +98,16 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:Fundable-Protocol/fundable-sdk:npm:@fundable/sdk",
+			"note": "note (asOf 2026-09-14) cites 0.2.3; registry latest is 0.3.0 (published 2026-09-24)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.11 (published 2026-09-24)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
 			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.5 (published 2026-09-18)",
 			"surface": "code"
@@ -110,6 +125,11 @@
 		{
 			"probe": "note-repo-gone:comzzy-comzzy/datavend",
 			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:stellar/mcp-stellar-xdr",
+			"note": "public note asOf 2026-09-14; repo archived 2026-09-24 — the note describes a live repo",
 			"surface": "code"
 		}
 	]
