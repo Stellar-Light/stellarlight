@@ -548,6 +548,24 @@
 			"pr": null,
 			"costUsd": null,
 			"note": "pushed task/packets-2026-09-24-20260924-1412; gh pr create failed: pull request create failed: GraphQL: GitHub Actions is not permitted to create or approve pull requests (createPullRequest)"
+		},
+		{
+			"task": "gap",
+			"unit": "typed",
+			"items": [
+				"tilt-pay",
+				"stellar-vrf",
+				"rail402",
+				"pigfi",
+				"lendwise",
+				"lendoor"
+			],
+			"date": "2026-09-25",
+			"run": "36148665054",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
