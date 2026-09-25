@@ -1,11 +1,18 @@
 {
- "generatedAt": "2026-09-24T12:52:03.087Z",
+ "generatedAt": "2026-09-25T12:54:44.475Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
    "openFindings": 21,
    "clearedFindings": 14,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 5,
+   "clearedFindings": 18,
    "verifiedFindings": 0
   },
   {
@@ -42,33 +49,34 @@
    "openFindings": 0,
    "clearedFindings": 188,
    "verifiedFindings": 0
-  },
-  {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 0,
-   "clearedFindings": 18,
-   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 708,
-  "open": 23,
-  "refreshQueue": 36,
+  "total": 718,
+  "open": 28,
+  "refreshQueue": 41,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
    "raven-scorer": 6
   },
   "lagPastGrace": {
-   "count": 3,
+   "count": 11,
    "graceDays": 20,
-   "oldestDays": 63,
+   "oldestDays": 64,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-    "raven-routing:how-does-the-blend-lending-pool-calculate-intere"
+    "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+    "raven-routing:who-gives-out-grants-for-building-on-stellar",
+    "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
+    "raven-routing:which-stellar-wallets-support-soroban-contracts",
+    "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
+    "raven-routing:how-does-blend-calculate-interest-accrual",
+    "raven-routing:which-anchors-actually-implement-sep-24",
+    "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
+    "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
   "cleared": 625,
@@ -76,12 +84,12 @@
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 57,
-    "total": 241
+    "open": 62,
+    "total": 246
    },
    "instrument": {
-    "open": 19,
-    "total": 467
+    "open": 24,
+    "total": 472
    }
   },
   "byFailureMode": [
@@ -97,7 +105,7 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 12,
+    "refresh": 13,
     "blocked": 0,
     "cleared": 98,
     "verified": 0,
@@ -140,6 +148,15 @@
     "surface": "contract"
    },
    {
+    "mode": "battery-coverage-weak",
+    "open": 5,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 18,
+    "verified": 0,
+    "surface": "corpus"
+   },
+   {
     "mode": "repo-gone",
     "open": 21,
     "refresh": 0,
@@ -147,15 +164,6 @@
     "cleared": 0,
     "verified": 0,
     "surface": "code"
-   },
-   {
-    "mode": "battery-coverage-weak",
-    "open": 0,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 18,
-    "verified": 0,
-    "surface": "corpus"
    },
    {
     "mode": "scf-round-overclaim",
@@ -178,7 +186,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 21,
+    "refresh": 25,
     "blocked": 0,
     "cleared": 9,
     "verified": 0,
@@ -260,7 +268,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 10
+    "count": 15
    },
    {
     "bucket": "8–30d",
@@ -329,14 +337,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 271,
-     "recurred": 96,
-     "ratePct": 35.4
+     "newFindings": 281,
+     "recurred": 106,
+     "ratePct": 37.7
     },
     "lifetime": {
-     "newFindings": 708,
-     "recurred": 175,
-     "ratePct": 24.7
+     "newFindings": 718,
+     "recurred": 185,
+     "ratePct": 25.8
     }
    },
    "reopened": {
@@ -348,13 +356,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 271,
-     "repeats": 270,
+     "newFindings": 281,
+     "repeats": 280,
      "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 708,
-     "repeats": 701,
+     "newFindings": 718,
+     "repeats": 711,
      "ratePct": 99
     },
     "byClass": [
@@ -366,8 +374,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 156,
-      "open": 33,
+      "total": 161,
+      "open": 38,
       "firstSeen": "2026-07-22"
      },
      {
@@ -389,30 +397,153 @@
       "firstSeen": "2026-07-22"
      },
      {
+      "class": "meta-eval",
+      "total": 24,
+      "open": 5,
+      "firstSeen": "2026-07-23"
+     },
+     {
       "class": "unclassified",
       "total": 24,
       "open": 24,
       "firstSeen": "2026-09-17"
-     },
-     {
-      "class": "meta-eval",
-      "total": 19,
-      "open": 0,
-      "firstSeen": "2026-07-23"
      }
     ]
    }
   }
  },
  "projects": {
-  "read": 990,
-  "population": 1120,
-  "servedPopulation": 990,
+  "read": 1004,
+  "population": 1133,
+  "servedPopulation": 1004,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 990,
+  "sampled": 1004,
   "scatter": [
+   {
+    "slug": "tilt-pay",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "stellar-vrf",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "slimepay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "rail402",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "pigfi",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "nouns",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lifi",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lendwise",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "lendoor",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "humanitylink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "crebit-pay",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "bvnk",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "agama",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
    {
     "slug": "bwb",
     "prominence": 0,
@@ -1169,6 +1300,15 @@
     "status": "Live"
    },
    {
+    "slug": "neko",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
     "slug": "defa-invoicemate",
     "prominence": 0,
     "factsPresent": 5,
@@ -1450,7 +1590,7 @@
     "missing": [
      "strongBasis"
     ],
-    "status": "Development"
+    "status": "Live"
    },
    {
     "slug": "prism",
@@ -8361,11 +8501,11 @@
     "status": "Live"
    }
   ],
-  "meanScore": 90,
+  "meanScore": 89,
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 903
+    "count": 917
    },
    {
     "network": "mainnet",
@@ -8377,9 +8517,9 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 903,
-   "applicableUnknown": 199,
-   "notApplicable": 704,
+   "unknown": 917,
+   "applicableUnknown": 202,
+   "notApplicable": 715,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
@@ -8390,20 +8530,20 @@
    "package-release": 9
   },
   "strongBasisSplit": {
-   "population": 990,
+   "population": 1004,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
-   "livePopulation": 830,
-   "weakLiveOnly": 450,
-   "weakLiveRows": 469,
+   "livePopulation": 845,
+   "weakLiveOnly": 465,
+   "weakLiveRows": 483,
    "onchainEligible": 5,
-   "appOnly": 464,
+   "appOnly": 478,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 370
+    "count": 372
    },
    {
     "basis": "human-verified",
@@ -8415,7 +8555,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 78
+    "count": 91
    },
    {
     "basis": "product-integration",
@@ -8435,11 +8575,11 @@
    },
    {
     "basis": "unverified",
-    "count": 6
+    "count": 5
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 498,
+  "weakestTotal": 512,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8571,6 +8711,82 @@
     ]
    },
    {
+    "slug": "lendoor",
+    "name": "Lendoor",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "lendwise",
+    "name": "LendWise",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "pigfi",
+    "name": "PigFi",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
+    "slug": "rail402",
+    "name": "Rail402",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ]
+   },
+   {
     "slug": "relax",
     "name": "Relax",
     "status": "Live",
@@ -8673,6 +8889,25 @@
     "missing": [
      "strongBasis",
      "linked"
+    ]
+   },
+   {
+    "slug": "stellar-vrf",
+    "name": "Stellar-VRF",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
     ]
    },
    {
@@ -8781,6 +9016,25 @@
     "missing": [
      "strongBasis",
      "linked"
+    ]
+   },
+   {
+    "slug": "tilt-pay",
+    "name": "Tilt Pay",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": false,
+    "types": [],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "typed"
     ]
    },
    {
@@ -9114,6 +9368,26 @@
     ]
    },
    {
+    "slug": "agama",
+    "name": "Agama",
+    "status": "Live",
+    "statusBasis": "source-inherited",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "RWA"
+    ],
+    "score": 80,
+    "factsPresent": 4,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis"
+    ]
+   },
+   {
     "slug": "ai-transparency-token",
     "name": "AI Transparency Token",
     "status": "Live",
@@ -9133,157 +9407,12 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "aida",
-    "name": "AIDA",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "AI",
-     "DEX"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "airswift",
-    "name": "Airswift",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "Payments",
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "airtm",
-    "name": "Airtm",
-    "status": "Live",
-    "statusBasis": "source-inherited",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "akuna",
-    "name": "Akuna",
-    "status": "Live",
-    "statusBasis": "operator-announcement",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Wallet",
-     "Payments"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "alfred",
-    "name": "Alfred",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Payments",
-     "Anchor"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "almanax",
-    "name": "Almanax",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": false,
-    "types": [
-     "Security",
-     "AI"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
-   },
-   {
-    "slug": "alula",
-    "name": "Alula",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 469
+    "count": 483
    },
    {
     "field": "dated",
@@ -9295,7 +9424,7 @@
    },
    {
     "field": "typed",
-    "count": 0
+    "count": 6
    },
    {
     "field": "linked",
@@ -9390,15 +9519,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1327
+     "count": 1331
     },
     {
      "label": "slowing",
-     "count": 977
+     "count": 979
     },
     {
      "label": "active",
-     "count": 871
+     "count": 865
     },
     {
      "label": "unknown",
@@ -10504,9 +10633,15 @@
  "knownLimitations": [
   {
    "area": "project status",
-   "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "448 of 990 rows (census)",
+   "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
+   "measurement": "463 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
+  },
+  {
+   "area": "project types",
+   "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
+   "measurement": "6 of 1004 sampled rows untyped",
+   "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
    "area": "repo knowledge notes",
@@ -10525,14 +10660,14 @@
     "value": 289
    },
    {
-    "id": "s:engine-d-demand",
-    "label": "engine-d-demand",
-    "column": 0,
-    "value": 110
-   },
-   {
     "id": "s:link-health",
     "label": "link-health",
+    "column": 0,
+    "value": 111
+   },
+   {
+    "id": "s:engine-d-demand",
+    "label": "engine-d-demand",
     "column": 0,
     "value": 110
    },
@@ -10546,7 +10681,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 30
+    "value": 34
    },
    {
     "id": "s:nightly-completeness",
@@ -10561,16 +10696,16 @@
     "value": 25
    },
    {
+    "id": "s:nightly-battery",
+    "label": "nightly-battery",
+    "column": 0,
+    "value": 23
+   },
+   {
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
     "value": 21
-   },
-   {
-    "id": "s:nightly-battery",
-    "label": "nightly-battery",
-    "column": 0,
-    "value": 18
    },
    {
     "id": "s:scf-crosscheck",
@@ -10639,16 +10774,16 @@
     "value": 35
    },
    {
+    "id": "f:corpus",
+    "label": "corpus",
+    "column": 1,
+    "value": 23
+   },
+   {
     "id": "f:consumer",
     "label": "consumer",
     "column": 1,
     "value": 19
-   },
-   {
-    "id": "f:corpus",
-    "label": "corpus",
-    "column": 1,
-    "value": 18
    },
    {
     "id": "f:scf",
@@ -10666,7 +10801,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 76
+    "value": 86
    },
    {
     "id": "o:verified",
@@ -10691,7 +10826,7 @@
     "value": 340
    },
    {
-    "source": 1,
+    "source": 2,
     "target": 16,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
@@ -10741,20 +10876,20 @@
    },
    {
     "source": 3,
-    "target": 20,
+    "target": 21,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 36
    },
    {
-    "source": 20,
+    "source": 21,
     "target": 23,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 20,
+    "source": 21,
     "target": 24,
     "sourceId": "f:consumer",
     "targetId": "o:open",
@@ -10775,7 +10910,7 @@
     "value": 14
    },
    {
-    "source": 1,
+    "source": 2,
     "target": 17,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
@@ -10796,14 +10931,14 @@
     "value": 25
    },
    {
-    "source": 8,
-    "target": 21,
+    "source": 7,
+    "target": 20,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
-    "value": 18
+    "value": 23
    },
    {
-    "source": 21,
+    "source": 20,
     "target": 23,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
@@ -10835,31 +10970,31 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 30
+    "value": 34
    },
    {
     "source": 19,
     "target": 24,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 45
+    "value": 49
    },
    {
-    "source": 2,
+    "source": 1,
     "target": 17,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 110
+    "value": 111
    },
    {
     "source": 17,
     "target": 24,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 12
+    "value": 13
    },
    {
-    "source": 7,
+    "source": 8,
     "target": 19,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
@@ -10878,6 +11013,13 @@
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
     "value": 3
+   },
+   {
+    "source": 20,
+    "target": 24,
+    "sourceId": "f:corpus",
+    "targetId": "o:open",
+    "value": 5
    }
   ]
  },
@@ -10941,10 +11083,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 903,
-    "of": 990,
-    "share": 91.2,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 903 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 704 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "missing": 917,
+    "of": 1004,
+    "share": 91.3,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 917 unknown rows, 202 are on-chain product types where the question applies and an agent will ask it; the other 715 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -10959,10 +11101,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 469,
-    "of": 990,
-    "share": 47.4,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 464 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "missing": 483,
+    "of": 1004,
+    "share": 48.1,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 478 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -11004,27 +11146,34 @@
    },
    {
     "entity": "project",
+    "field": "typed",
+    "missing": 6,
+    "of": 1004,
+    "share": 0.6,
+    "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
+    "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
+    "exampleSource": "highest-prominence rows carrying no type",
+    "examplePoolSize": 6,
+    "exampleCap": 12,
+    "exampleTruncated": false,
+    "examples": [
+     "tilt-pay",
+     "stellar-vrf",
+     "rail402",
+     "pigfi",
+     "lendwise",
+     "lendoor"
+    ]
+   },
+   {
+    "entity": "project",
     "field": "sourced",
     "missing": 0,
-    "of": 990,
+    "of": 1004,
     "share": 0,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 0,
-    "exampleCap": 12,
-    "exampleTruncated": false,
-    "examples": []
-   },
-   {
-    "entity": "project",
-    "field": "typed",
-    "missing": 0,
-    "of": 990,
-    "share": 0,
-    "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
-    "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
-    "exampleSource": "highest-prominence rows carrying no type",
     "examplePoolSize": 0,
     "exampleCap": 12,
     "exampleTruncated": false,
