@@ -1,98 +1,155 @@
 {
 	"round": "i3-2026-test",
 	"title": "i³ Awards 2026",
-	"status": "draft",
-	"picksPerCategory": 1,
+	"status": "closed",
+	"picksPerCategory": 4,
 	"opensAt": "2026-07-21T01:31:48.410Z",
-	"closesAt": "2026-08-04T01:31:48.411Z",
-	"source": "chain",
+	"closesAt": "2026-10-02T22:00:00.000Z",
+	"source": "mirror",
+	"ballotsDigest": "dec6fd81bc14a40fd4149c2cf4ffbcc2f5453b3eb2d41f73a5de959eee17424b",
 	"turnout": {
-		"voted": 2,
-		"whitelisted": 5
+		"voted": 23,
+		"whitelisted": 34
 	},
+	"relayOnly": 0,
 	"categories": [
 		{
 			"key": "impact",
 			"name": "Impact",
-			"totalVotes": 2,
+			"totalVotes": 86,
 			"results": [
 				{
 					"slug": "decaf",
 					"name": "Decaf",
-					"votes": 1
-				},
-				{
-					"slug": "meru",
-					"name": "Meru",
-					"votes": 1
-				},
-				{
-					"slug": "beans",
-					"name": "Beans",
-					"votes": 0
+					"votes": 17
 				},
 				{
 					"slug": "elsa",
 					"name": "Elsa",
-					"votes": 0
+					"votes": 17
+				},
+				{
+					"slug": "beans",
+					"name": "Beans",
+					"votes": 13
+				},
+				{
+					"slug": "meru",
+					"name": "Meru",
+					"votes": 13
+				},
+				{
+					"slug": "aquarius",
+					"name": "Aquarius",
+					"votes": 8
+				},
+				{
+					"slug": "phoenix",
+					"name": "Phoenix",
+					"votes": 8
+				},
+				{
+					"slug": "soroswap",
+					"name": "Soroswap",
+					"votes": 6
+				},
+				{
+					"slug": "vibrant",
+					"name": "Vibrant",
+					"votes": 4
 				}
 			]
 		},
 		{
 			"key": "innovation",
 			"name": "Innovation",
-			"totalVotes": 2,
+			"totalVotes": 86,
 			"results": [
 				{
-					"slug": "blend",
-					"name": "Blend",
-					"votes": 2
+					"slug": "lobstr",
+					"name": "Lobstr",
+					"votes": 17
+				},
+				{
+					"slug": "freighter",
+					"name": "Freighter",
+					"votes": 16
+				},
+				{
+					"slug": "mercury",
+					"name": "Mercury",
+					"votes": 14
 				},
 				{
 					"slug": "etherfuse",
 					"name": "Etherfuse",
-					"votes": 0
+					"votes": 12
+				},
+				{
+					"slug": "blend",
+					"name": "Blend",
+					"votes": 9
 				},
 				{
 					"slug": "reflector",
 					"name": "Reflector",
-					"votes": 0
+					"votes": 8
 				},
 				{
 					"slug": "sorobanhooks",
 					"name": "SorobanHooks",
-					"votes": 0
+					"votes": 6
+				},
+				{
+					"slug": "xbull",
+					"name": "xBull",
+					"votes": 4
 				}
 			]
 		},
 		{
 			"key": "interoperability",
 			"name": "Interoperability",
-			"totalVotes": 2,
+			"totalVotes": 86,
 			"results": [
 				{
-					"slug": "allbridge",
-					"name": "Allbridge",
-					"votes": 1
+					"slug": "lumenswap",
+					"name": "Lumenswap",
+					"votes": 18
+				},
+				{
+					"slug": "litemint",
+					"name": "Litemint",
+					"votes": 15
 				},
 				{
 					"slug": "defindex",
 					"name": "DeFindex",
-					"votes": 1
+					"votes": 14
 				},
 				{
 					"slug": "rubic",
 					"name": "Rubic",
-					"votes": 0
+					"votes": 14
+				},
+				{
+					"slug": "stellarx",
+					"name": "StellarX",
+					"votes": 10
+				},
+				{
+					"slug": "allbridge",
+					"name": "Allbridge",
+					"votes": 9
 				},
 				{
 					"slug": "usdc-swap",
 					"name": "USDC Swap",
-					"votes": 0
+					"votes": 6
 				}
 			]
 		}
 	],
-	"generatedAt": "2026-09-16T15:43:38.384Z",
-	"note": "Aggregate only. Ballots are manageData entries on Stellar TESTNET; the award-ballots mirror is the durable record across testnet resets. This file's git commit is anchored on Tansu (testnet) — see /api/awards/anchor?round=i3-2026-test"
+	"generatedAt": "2026-09-25T11:09:59.893Z",
+	"note": "Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror, not the chain, is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts), publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet), see /api/awards/anchor?round=i3-2026-test"
 }
