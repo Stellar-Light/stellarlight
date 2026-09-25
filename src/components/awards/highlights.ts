@@ -573,7 +573,7 @@ export const NOMINEE_HIGHLIGHTS: Record<string, Highlight[]> = {
 				"Email or biometrics; JetPad sponsors the fees and the USDC trustline.",
 		},
 	],
-	liqvid: [
+	liqvidxyz: [
 		{
 			kind: "growth",
 			glyph: "cards",
