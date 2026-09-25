@@ -257,9 +257,14 @@ async function importNominees(
 		return cur;
 	};
 	const bySlug = new Map<string, { id: string; slug: string; name: string }>();
+	// The unfolded row too: a nominee row that already points at a parked
+	// shadow can only be REMOVED by naming the shadow, and folding would send
+	// the CSV cell to the canonical row instead (2026-09-25, liqvid → liqvidxyz).
+	const rawIdBySlug = new Map<string, string>();
 	const byName = new Map<string, Array<{ id: string; slug: string }>>();
 	for (const raw of rows_) {
 		const p = fold(raw);
+		if (raw.slug) rawIdBySlug.set(String(raw.slug).toLowerCase(), raw.id);
 		const slug = String(raw.slug ?? "");
 		const name = String(raw.name ?? "");
 		const target = { id: p.id, slug: String(p.slug ?? slug), name };
@@ -357,7 +362,10 @@ async function importNominees(
 		if (seen.has(key)) continue; // same pair twice in the CSV
 		seen.add(key);
 		if (REMOVE) {
-			const id = haveIds.get(key);
+			const rawId = rawIdBySlug.get(slugFromCell(cell).toLowerCase());
+			const id =
+				haveIds.get(key) ??
+				(rawId ? haveIds.get(`${category}::${rawId}`) : undefined);
 			if (id) removals.push({ id, cell, category });
 			else absent.push(`${cell} (${category})`);
 			continue;
