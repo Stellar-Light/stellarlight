@@ -36,8 +36,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function getRoundData(): Promise<AwardsRoundData | null | "unavailable"> {
-	const read = await loadRoundResult();
+async function getRoundData(
+	slug: string | null,
+): Promise<AwardsRoundData | null | "unavailable"> {
+	// No slug: THE open round. ?round=<slug> serves a named one (a closed or
+	// draft round for a rehearsal), the same as /api/awards/round?round=.
+	const read = await loadRoundResult(slug);
 	// A failed read is not "no round yet": the empty stage over a live round
 	// would tell a Pilot the vote has not started.
 	if (!read.ok) return "unavailable";
@@ -52,8 +56,13 @@ async function getRoundData(): Promise<AwardsRoundData | null | "unavailable"> {
 	};
 }
 
-export default async function AwardsPage() {
-	const data = await getRoundData();
+export default async function AwardsPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ round?: string | string[] }>;
+}) {
+	const { round } = await searchParams;
+	const data = await getRoundData(typeof round === "string" ? round : null);
 	return (
 		<div className="awards-sm min-h-screen relative">
 			<AwardsBallot

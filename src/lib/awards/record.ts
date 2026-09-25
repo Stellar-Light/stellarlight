@@ -404,6 +404,9 @@ export async function readFirstBallotFor(
 	voted: boolean;
 	selections: BallotSelections;
 	pending: PendingReservation | null;
+	/** The first ballot's relay id and transaction, for the voter's receipt. */
+	ballotId: string | null;
+	txHash: string | null;
 } | null> {
 	try {
 		const payload = await getPayloadSafe();
@@ -426,15 +429,25 @@ export async function readFirstBallotFor(
 			overrideAccess: true,
 		});
 		const row = rows.docs[0];
-		if (!row) return { voted: false, selections: {}, pending: null };
+		if (!row)
+			return {
+				voted: false,
+				selections: {},
+				pending: null,
+				ballotId: null,
+				txHash: null,
+			};
 		const trail = (row.history ?? []) as Array<{
 			txHash?: string | null;
+			ballotId?: string | null;
 		} | null>;
 		if (!(trail[0]?.txHash ?? row.txHash)) {
 			// reserved, never confirmed: nothing is known to be on chain yet
 			return {
 				voted: false,
 				selections: {},
+				ballotId: null,
+				txHash: null,
 				pending: {
 					id: row.id as string | number,
 					ballotId: ((row as { ballotId?: string | null }).ballotId ?? null) as
@@ -449,6 +462,10 @@ export async function readFirstBallotFor(
 			voted: Object.values(selections).some((s) => s.length > 0),
 			selections,
 			pending: null,
+			ballotId: (trail[0]?.ballotId ??
+				(row as { ballotId?: string | null }).ballotId ??
+				null) as string | null,
+			txHash: (trail[0]?.txHash ?? row.txHash ?? null) as string | null,
 		};
 	} catch (err) {
 		console.error("[awards] readFirstBallotFor failed:", err);

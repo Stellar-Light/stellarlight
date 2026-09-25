@@ -615,6 +615,8 @@ export function relayBallotOps(
 }
 
 export const AUTHORIZATION_KEY = "i3-awards.ballot-authorization";
+/** The op a status check carries; self-describing in the wallet, like the ballot's. */
+export const STATUS_KEY = "i3-awards.ballot-status";
 const AUTHORIZATION_TTL_SECONDS = 600;
 /** Verify-side slack on the expiry bound, for the builder's clock vs ours. */
 const CLOCK_SKEW_SECONDS = 60;
@@ -640,6 +642,15 @@ export function authorizationDigest(
 	return createHash("sha256")
 		.update(`i3-authorization-v1\n${roundSlug}\n${cats}`)
 		.digest();
+}
+
+/**
+ * What a status check commits to: this round, nothing else. A Pilot on a
+ * browser with no receipt signs this so the server may tell THEM, and no one
+ * else, whether their address has voted and what it picked.
+ */
+export function statusDigest(roundSlug: string): Buffer {
+	return createHash("sha256").update(`i3-status-v1\n${roundSlug}`).digest();
 }
 
 /**
@@ -675,6 +686,33 @@ export function buildAuthorizationTx(params: {
 		.addOperation(
 			Operation.manageData({ name: AUTHORIZATION_KEY, value: round.slug }),
 		)
+		.build();
+}
+
+/**
+ * The status check a returning voter signs on connect: the same unsubmittable
+ * shape as the authorization, a different op and memo, so a signed check can
+ * never pass as a ballot and a signed ballot can never pass as a check.
+ */
+export function buildStatusTx(params: {
+	round: BallotRound;
+	address: string;
+	sequence: string | null;
+	now?: Date;
+}): Transaction {
+	const { round, address, sequence } = params;
+	if (!StrKey.isValidEd25519PublicKey(address)) {
+		throw new Error("invalid voter address");
+	}
+	const base = sequence === null ? "0" : (BigInt(sequence) - 1n).toString();
+	const nowSec = Math.floor((params.now ?? new Date()).getTime() / 1000);
+	return new TransactionBuilder(new Account(address, base), {
+		fee: BALLOT_FEE_PER_OP,
+		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
+		memo: Memo.hash(statusDigest(round.slug)),
+		timebounds: { minTime: 0, maxTime: nowSec + AUTHORIZATION_TTL_SECONDS },
+	})
+		.addOperation(Operation.manageData({ name: STATUS_KEY, value: round.slug }))
 		.build();
 }
 
@@ -726,6 +764,49 @@ export function verifyAuthorization(
 		sequence: string | null;
 		signers?: string[];
 		now?: Date;
+	},
+): AuthorizationVerdict {
+	return verifySignedIntent(signedXdr, {
+		...ctx,
+		opName: AUTHORIZATION_KEY,
+		expectedMemo: authorizationDigest(ctx.round.slug, ctx.selections),
+		memoError: "authorization does not commit to these picks",
+	});
+}
+
+/**
+ * A signed status check: the same rules as an authorization (whitelisted
+ * source, a real signature, unsubmittable, ten minutes), committing to the
+ * round and nothing else.
+ */
+export function verifyStatusCheck(
+	signedXdr: string,
+	ctx: {
+		round: BallotRound;
+		whitelist: Set<string>;
+		sequence: string | null;
+		signers?: string[];
+		now?: Date;
+	},
+): AuthorizationVerdict {
+	return verifySignedIntent(signedXdr, {
+		...ctx,
+		opName: STATUS_KEY,
+		expectedMemo: statusDigest(ctx.round.slug),
+		memoError: "status check does not commit to this round",
+	});
+}
+
+function verifySignedIntent(
+	signedXdr: string,
+	ctx: {
+		whitelist: Set<string>;
+		sequence: string | null;
+		signers?: string[];
+		now?: Date;
+		opName: string;
+		expectedMemo: Buffer;
+		memoError: string;
 	},
 ): AuthorizationVerdict {
 	let tx: Transaction;
@@ -787,17 +868,16 @@ export function verifyAuthorization(
 	if (
 		tx.operations.length !== 1 ||
 		op?.type !== "manageData" ||
-		op.name !== AUTHORIZATION_KEY
+		op.name !== ctx.opName
 	) {
 		errors.push("authorization must carry exactly the authorization op");
 	}
-	const expected = authorizationDigest(ctx.round.slug, ctx.selections);
 	// biome-ignore lint/suspicious/noExplicitAny: memo type narrows awkwardly
 	const memo = tx.memo as any;
 	const got: Buffer | null =
 		memo?.type === "hash" && memo.value ? Buffer.from(memo.value) : null;
-	if (!got || !got.equals(expected)) {
-		errors.push("authorization does not commit to these picks");
+	if (!got || !got.equals(ctx.expectedMemo)) {
+		errors.push(ctx.memoError);
 	}
 	return errors.length ? { ok: false, errors } : { ok: true, source };
 }
