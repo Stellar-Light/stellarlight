@@ -21,6 +21,7 @@ import {
 	fetchSitemapUrls,
 	loadExistingChunks,
 	stripHtml,
+	stripTrailingTeaser,
 	upsertChunks,
 } from "../src/lib/research-ingest";
 import { JUNK_URL_RE } from "../src/lib/research-rank";
@@ -98,7 +99,9 @@ async function fetchArticle(url: string): Promise<Article> {
 	const main =
 		html.match(/<article[\s\S]*?<\/article>/i) ||
 		html.match(/<main[\s\S]*?<\/main>/i);
-	const body = stripHtml(main ? main[0] : html);
+	// The teaser block after the article changes on every request; see
+	// stripTrailingTeaser.
+	const body = stripTrailingTeaser(stripHtml(main ? main[0] : html));
 	return { url, title, body, publishedAt };
 }
 

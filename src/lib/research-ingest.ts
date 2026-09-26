@@ -623,6 +623,28 @@ export async function fetchSitemapUrls(
 }
 
 /** Strip HTML to a markdown-ish text blob (no proper parser, just regex). */
+/**
+ * Cut a site's "more from …" teaser off the end of an article body.
+ *
+ * lumenloop.com renders a related-post teaser INSIDE <article>: "View →
+ * More from research · 6d ago · 5 min · <another post's title and blurb>".
+ * The post it picks changes on every request, so the article's last chunk
+ * hashed differently on every ingest run (the corpus refresh's Idempotence
+ * step was red five days out of seven on exactly this), and every page
+ * carried a random teaser for an unrelated article as its own content.
+ * Cut at the teaser header; everything after it is the teaser.
+ */
+export function stripTrailingTeaser(body: string): string {
+	const m = body.match(
+		/(?:-\s*)?View\s*→\s*More from (?:research|news)|More from (?:research|news)(?=\s*(?:\d+[dhm] ago|today|yesterday))/i,
+	);
+	if (!m || m.index === undefined) return body;
+	return body
+		.slice(0, m.index)
+		.replace(/[\s\-–—·]+$/, "")
+		.trimEnd();
+}
+
 export function stripHtml(html: string): string {
 	return (
 		html
