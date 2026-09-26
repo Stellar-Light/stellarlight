@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-25T12:54:44.475Z",
+ "generatedAt": "2026-09-26T12:22:12.053Z",
  "surfaces": [
   {
    "surface": "code",
@@ -9,17 +9,17 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 5,
-   "clearedFindings": 18,
-   "verifiedFindings": 0
-  },
-  {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
    "openFindings": 2,
    "clearedFindings": 340,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 1,
+   "clearedFindings": 23,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 718,
-  "open": 28,
-  "refreshQueue": 41,
+  "total": 721,
+  "open": 24,
+  "refreshQueue": 43,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 64,
+   "oldestDays": 65,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,17 +79,17 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 625,
+  "cleared": 630,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 62,
-    "total": 246
+    "open": 64,
+    "total": 248
    },
    "instrument": {
-    "open": 24,
-    "total": 472
+    "open": 20,
+    "total": 473
    }
   },
   "byFailureMode": [
@@ -149,10 +149,10 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 5,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 18,
+    "cleared": 23,
     "verified": 0,
     "surface": "corpus"
    },
@@ -186,7 +186,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 25,
+    "refresh": 27,
     "blocked": 0,
     "cleared": 9,
     "verified": 0,
@@ -268,7 +268,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 15
+    "count": 11
    },
    {
     "bucket": "8–30d",
@@ -284,6 +284,36 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "battery:q-pc-doc-category-validator-search",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-26"
+   },
+   {
+    "probe": "battery:q-pc-fee-bump-channel-accounts-feepool",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-26"
+   },
+   {
+    "probe": "battery:q-pc-l2-payment-channels-starlight",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-26"
+   },
+   {
+    "probe": "battery:q-pc-memos-reference",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-26"
+   },
+   {
+    "probe": "battery:q-pc-multisig-setup-lifecycle",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-26"
+   },
    {
     "probe": "≥3 of top-10 carry types=Explorer (6 exist)",
     "surface": "retrieval",
@@ -301,50 +331,20 @@
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-09-17"
-   },
-   {
-    "probe": "https://slender.fi",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
-   },
-   {
-    "probe": "https://stex.xycloo.com",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
-   },
-   {
-    "probe": "https://demo.drivedeb.com",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
-   },
-   {
-    "probe": "https://gameduk.com",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
-   },
-   {
-    "probe": "scfRoundAwards empty: lulpay",
-    "surface": "directory",
-    "failureMode": "completeness-residual",
-    "clearedAt": "2026-09-15"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 281,
-     "recurred": 106,
-     "ratePct": 37.7
+     "newFindings": 284,
+     "recurred": 109,
+     "ratePct": 38.4
     },
     "lifetime": {
-     "newFindings": 718,
-     "recurred": 185,
-     "ratePct": 25.8
+     "newFindings": 721,
+     "recurred": 188,
+     "ratePct": 26.1
     }
    },
    "reopened": {
@@ -356,13 +356,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 281,
-     "repeats": 280,
+     "newFindings": 284,
+     "repeats": 283,
      "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 718,
-     "repeats": 711,
+     "newFindings": 721,
+     "repeats": 714,
      "ratePct": 99
     },
     "byClass": [
@@ -374,8 +374,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 161,
-      "open": 38,
+      "total": 163,
+      "open": 40,
       "firstSeen": "2026-07-22"
      },
      {
@@ -398,8 +398,8 @@
      },
      {
       "class": "meta-eval",
-      "total": 24,
-      "open": 5,
+      "total": 25,
+      "open": 1,
       "firstSeen": "2026-07-23"
      },
      {
@@ -8543,7 +8543,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 372
+    "count": 385
    },
    {
     "basis": "human-verified",
@@ -8555,7 +8555,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 91
+    "count": 77
    },
    {
     "basis": "product-integration",
@@ -8575,7 +8575,7 @@
    },
    {
     "basis": "unverified",
-    "count": 5
+    "count": 6
    }
   ],
   "weakestReturned": 40,
@@ -8714,7 +8714,7 @@
     "slug": "lendoor",
     "name": "Lendoor",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -8733,7 +8733,7 @@
     "slug": "lendwise",
     "name": "LendWise",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -8752,7 +8752,7 @@
     "slug": "pigfi",
     "name": "PigFi",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -8771,7 +8771,7 @@
     "slug": "rail402",
     "name": "Rail402",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -8895,7 +8895,7 @@
     "slug": "stellar-vrf",
     "name": "Stellar-VRF",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -9022,7 +9022,7 @@
     "slug": "tilt-pay",
     "name": "Tilt Pay",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -9371,7 +9371,7 @@
     "slug": "agama",
     "name": "Agama",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -9519,15 +9519,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1331
+     "count": 1335
     },
     {
      "label": "slowing",
-     "count": 979
+     "count": 976
     },
     {
      "label": "active",
-     "count": 865
+     "count": 864
     },
     {
      "label": "unknown",
@@ -10634,7 +10634,7 @@
   {
    "area": "project status",
    "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "463 of 1004 rows (census)",
+   "measurement": "462 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10681,7 +10681,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 34
+    "value": 36
    },
    {
     "id": "s:nightly-completeness",
@@ -10699,7 +10699,7 @@
     "id": "s:nightly-battery",
     "label": "nightly-battery",
     "column": 0,
-    "value": 23
+    "value": 24
    },
    {
     "id": "s:gone-repos",
@@ -10777,7 +10777,7 @@
     "id": "f:corpus",
     "label": "corpus",
     "column": 1,
-    "value": 23
+    "value": 24
    },
    {
     "id": "f:consumer",
@@ -10795,13 +10795,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 625
+    "value": 630
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 86
+    "value": 84
    },
    {
     "id": "o:verified",
@@ -10935,14 +10935,14 @@
     "target": 20,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
-    "value": 23
+    "value": 24
    },
    {
     "source": 20,
     "target": 23,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 18
+    "value": 23
    },
    {
     "source": 12,
@@ -10970,14 +10970,14 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 34
+    "value": 36
    },
    {
     "source": 19,
     "target": 24,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 49
+    "value": 51
    },
    {
     "source": 1,
@@ -11019,7 +11019,7 @@
     "target": 24,
     "sourceId": "f:corpus",
     "targetId": "o:open",
-    "value": 5
+    "value": 1
    }
   ]
  },
