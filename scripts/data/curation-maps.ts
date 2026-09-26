@@ -2592,6 +2592,23 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://docs.dune.com/data-catalog/stellar/overview.md",
 		basis: "site-liveness",
 	},
+	// Owner 2026-09-26: "spectra is now live". Row-facts: Spectra's own product
+	// API serves seven Stellar Principal Token markets
+	// (app.spectra.finance/api/v1/stellar/pools, chainId 1500000000): PTs on
+	// Blend-wrapped USDC and EURC, earnUSDC, earnXLM and Centrifuge deJTRSY,
+	// $750k TVL across the three deJTRSY maturities; DefiLlama lists Stellar
+	// among Spectra V2's chains with the same $750k slice; stellar.expert shows
+	// the first PT contracts created 2026-08-03/05 and the deJTRSY PTs
+	// 2026-09-16, all by deployer GCNC7GXV…, the EVM<->Stellar bridge and
+	// messenger created 2026-05-27. Launch coverage 2026-08-30 (Blockonomi).
+	"spectra-finance": {
+		from: "Development",
+		to: "Live",
+		asOf: "2026-08-03", // first Stellar PT market contract created (stellar.expert), the evidence date
+		sourceUrl: "https://app.spectra.finance/api/v1/stellar/pools",
+		basis: "onchain-activity",
+		note: "Live on Stellar mainnet: seven PT markets served by the operator's own API with on-chain contracts and $750k TVL; the row's earlier text said the Stellar bridge was in development.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -4969,6 +4986,15 @@ export const DESCRIPTION_FIXES: Record<string, string> = {
 	// stale platform claim is removed instead of the status.
 	xbull:
 		"xBull is an open-source, non-custodial Stellar wallet by Creit Tech, available as a browser extension and web app. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps. Its formerly listed iOS and Android store apps are no longer available on either app store (store listings checked 2026-07-13).",
+	// 2026-09-26: the stored text still said the Stellar bridge was "in
+	// development" and "Not yet launched on Stellar". Facts from the operator's
+	// own API and repos (see STATUS_FIX): seven Stellar PT markets live, on
+	// Blend-wrapped USDC/EURC, earnUSDC, earnXLM and Centrifuge deJTRSY;
+	// bridge + core + oracle contracts audited by Certora in May 2026
+	// (perspectivefi/spectra-core-stellar-public, -stellar-bridge-public,
+	// -oracles-stellar-public). No em dashes (copy rule).
+	"spectra-finance":
+		"Spectra (by Perspective, spectra.finance) is a permissionless interest-rate derivatives protocol: a yield-bearing asset is split into a Principal Token (fixed rate) and a Yield Token (variable yield). Live on Stellar/Soroban since August 2026 with Principal Token markets on Blend-wrapped USDC and EURC, earnUSDC, earnXLM and the Centrifuge tokenized treasury fund deJTRSY, next to its EVM deployments, plus an EVM to Stellar bridge for Spectra PTs. The Soroban core, bridge and oracle contracts were audited by Certora in May 2026.",
 };
 
 // Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
@@ -4983,6 +5009,7 @@ export const DOCS_LINKS: Record<string, string> = {
 	// 2026-09-02, owner-requested: SDF's developer launch page for USDT0 —
 	// asset + issuer, SAC and OFT contract IDs, LayerZero endpoint ID.
 	usdt0: "https://developers.stellar.org/launch/usdt0",
+	"spectra-finance": "https://docs.spectra.finance/", // 2026-09-26, the site's own Docs nav link
 };
 
 // sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
@@ -5052,6 +5079,14 @@ export const GITHUB_REPOS_ADD: Record<
 	// 2026-05-30) is the repo the Development status now rests on (see
 	// STATUS_FIX) — attach it so enrich-repos indexes it.
 	"raum-network": [{ owner: "Raum-Network", name: "raum-raumfi-v3" }],
+	// 2026-09-26: the row links github.com/perspectivefi (from the site's own
+	// GitHub nav link); these are that org's Stellar/Soroban repos, each
+	// describing itself as Spectra's Stellar core, PT bridge, or PT oracle.
+	"spectra-finance": [
+		{ owner: "perspectivefi", name: "spectra-core-stellar-public" },
+		{ owner: "perspectivefi", name: "spectra-stellar-bridge-public" },
+		{ owner: "perspectivefi", name: "spectra-oracles-stellar-public" },
+	],
 };
 
 export const TYPES_ADD: Record<string, string[]> = {
@@ -5190,6 +5225,7 @@ export const TYPES_ADD: Record<string, string[]> = {
 	// demo (demo.drivedeb.com) times out and drivedeb.com serves a bare
 	// directory index (owner note in the 2026-09-05 row-facts PR).
 	deb: ["Payments"],
+	"spectra-finance": ["Yield"], // 2026-09-26: fixed-rate yield / PT-YT markets live on Stellar (keeps Bridge)
 };
 
 export const TYPES_SET: Record<string, string[]> = {
