@@ -90,6 +90,16 @@ interface ResearchRow {
 
 export async function GET(req: NextRequest) {
 	const startedAt = Date.now();
+	// Phase timings for the Server-Timing header: where a request spends its
+	// time, so a slow answer can be read as cold start, embedding, vector
+	// search or ranking without a log dive. Durations in ms.
+	const phases: Array<[string, number]> = [];
+	let phaseStart = startedAt;
+	const mark = (name: string) => {
+		const now = Date.now();
+		phases.push([name, now - phaseStart]);
+		phaseStart = now;
+	};
 	// Rate-limit first so abusers don't even reach the embedding call.
 	const limit = rateLimit(req, {
 		endpoint: "/api/research",
@@ -251,6 +261,7 @@ export async function GET(req: NextRequest) {
 	const effectiveSource = auditScoped ? "audit" : sourceFilter;
 
 	const payload = await getPayloadSafe();
+	mark("init");
 	if (!payload) {
 		return NextResponse.json(
 			{ error: "payload unavailable" },
@@ -315,6 +326,7 @@ export async function GET(req: NextRequest) {
 	// or the corpus is empty, fall back to keyword.
 	try {
 		queryEmbedding = await embed(q);
+		mark("embed");
 
 		// We use the underlying mongoose connection to run the $vectorSearch
 		// aggregation since Payload's `find()` doesn't expose vector ops.
@@ -360,6 +372,7 @@ export async function GET(req: NextRequest) {
 		// If Atlas Vector Search index isn't created yet, $vectorSearch
 		// silently returns []. Force-fall-through to keyword in that case so
 		// the endpoint stays useful before the index is set up.
+		mark("vector");
 		if (docs.length === 0) {
 			vectorNote = effectiveSource
 				? `vector: the query was embedded, but no chunk of source "${effectiveSource}" is in the vector index; keyword ranking was used`
@@ -1071,7 +1084,11 @@ export async function GET(req: NextRequest) {
 				// The mechanism, readable without parsing the body; and our own
 				// wall time, so a consumer can tell our latency from the network's.
 				"X-Scout-Match-Mode": mode,
-				"Server-Timing": `total;dur=${Date.now() - startedAt}`,
+				"Server-Timing": [
+					...phases.map(([n, d]) => `${n};dur=${d}`),
+					`rank;dur=${Date.now() - phaseStart}`,
+					`total;dur=${Date.now() - startedAt}`,
+				].join(", "),
 				// Don't aggressively cache — query strings vary by user
 				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
 			},
