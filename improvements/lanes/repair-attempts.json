@@ -116,6 +116,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-horizontalsystems-stellar-web-sdk-npm",
+   "date": "2026-09-26",
+   "run": "36244965867",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
