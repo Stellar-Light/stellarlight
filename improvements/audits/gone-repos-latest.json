@@ -1,84 +1,21 @@
 {
-	"generatedAt": "2026-09-25T22:18:40.784Z",
+	"generatedAt": "2026-09-26T11:43:49.780Z",
 	"source": "scripts/check-gone-repos.ts",
 	"rule": "Every repos row at codeScanState error/gone gets ONE GitHub read. The verdict comes from the HTTP status, never the body: 404 = gone, 200 = alive (size 0 = empty), anything else = unchecked. An unchecked row is never reported as gone, and a run more than half blind writes nothing and exits 2.",
-	"mode": "execute",
+	"mode": "report-only",
 	"blind": false,
 	"truncated": false,
 	"tally": {
 		"poolSize": 447,
 		"checked": 447,
-		"gone": 166,
+		"gone": 167,
 		"empty": 43,
-		"alive": 238,
+		"alive": 237,
 		"unchecked": 0,
-		"newlyGone": 21,
-		"resurrected": 2
+		"newlyGone": 1,
+		"resurrected": 0
 	},
 	"rows": [
-		{
-			"fullName": "zkCaleb-dev/Stellar_workshop",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.234Z"
-		},
-		{
-			"fullName": "zaber-dev/ovrl-sdk",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.222Z"
-		},
-		{
-			"fullName": "yripper/utility-contracts",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.246Z"
-		},
-		{
-			"fullName": "yripper/soroban-preview-docker",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.221Z"
-		},
-		{
-			"fullName": "Galmanus/procyon",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.395Z"
-		},
-		{
-			"fullName": "carlos-israelj/link2pay-sdk",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.406Z"
-		},
-		{
-			"fullName": "Cbiux/Zcore-Landing",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.404Z"
-		},
 		{
 			"fullName": "Foryield/arc-yield-vault",
 			"was": "error",
@@ -86,25 +23,7 @@
 			"httpStatus": 200,
 			"sizeKb": 2208,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.580Z"
-		},
-		{
-			"fullName": "ROHIT8759/KeyWe",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.736Z"
-		},
-		{
-			"fullName": "robertDurst/stellar-rust-sdk",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.689Z"
+			"checkedAt": "2026-09-26T11:43:25.734Z"
 		},
 		{
 			"fullName": "REAL8-crypto/real8-wallet",
@@ -113,106 +32,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.828Z"
-		},
-		{
-			"fullName": "rawritude/public-directory",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.724Z"
-		},
-		{
-			"fullName": "rawritude/stellarlight",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.999Z"
-		},
-		{
-			"fullName": "rajkumarsharma316/Habit-Tracker-Soroban",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.978Z"
-		},
-		{
-			"fullName": "Dione-b/lp-stellar-onchain-experience",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.987Z"
-		},
-		{
-			"fullName": "Klorenn/stellar-paylink",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:13.985Z"
-		},
-		{
-			"fullName": "Nursca/backend",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.155Z"
-		},
-		{
-			"fullName": "Nursca/surface",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.122Z"
-		},
-		{
-			"fullName": "Nursca/contracts",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.146Z"
-		},
-		{
-			"fullName": "Mackenzie-OO7/Stellar-X-Web3Bridge",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.160Z"
-		},
-		{
-			"fullName": "Mackenzie-OO7/stellar-oss-issues",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.311Z"
-		},
-		{
-			"fullName": "Timi16/Paylink-sdk",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.320Z"
+			"checkedAt": "2026-09-26T11:43:25.777Z"
 		},
 		{
 			"fullName": "stellar-experimental/figma-code-connect",
@@ -221,7 +41,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.394Z"
+			"checkedAt": "2026-09-26T11:43:25.736Z"
 		},
 		{
 			"fullName": "Galmanus/notewatch",
@@ -230,7 +50,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.402Z"
+			"checkedAt": "2026-09-26T11:43:25.739Z"
 		},
 		{
 			"fullName": "JOHED-Velca/CycleBuddy-stellar",
@@ -239,7 +59,7 @@
 			"httpStatus": 200,
 			"sizeKb": 67160,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:14.646Z"
+			"checkedAt": "2026-09-26T11:43:26.031Z"
 		},
 		{
 			"fullName": "JakeUrban/wallet-backend-testing",
@@ -248,7 +68,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.603Z"
+			"checkedAt": "2026-09-26T11:43:26.021Z"
 		},
 		{
 			"fullName": "jadonamite/Stellara-Networks",
@@ -257,7 +77,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.689Z"
+			"checkedAt": "2026-09-26T11:43:25.991Z"
 		},
 		{
 			"fullName": "imloama/stellar-identicon-go",
@@ -266,16 +86,16 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.655Z"
+			"checkedAt": "2026-09-26T11:43:26.094Z"
 		},
 		{
 			"fullName": "Haroldwonder/TrustLink",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 29749,
+			"sizeKb": 29843,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:14.961Z"
+			"checkedAt": "2026-09-26T11:43:26.366Z"
 		},
 		{
 			"fullName": "hanifhiros/Build-Stellar-Hanif",
@@ -284,7 +104,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.930Z"
+			"checkedAt": "2026-09-26T11:43:26.345Z"
 		},
 		{
 			"fullName": "hanifhiros/build-soroban",
@@ -293,7 +113,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.939Z"
+			"checkedAt": "2026-09-26T11:43:26.352Z"
 		},
 		{
 			"fullName": "peejay-git/stellarswap",
@@ -302,7 +122,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:14.979Z"
+			"checkedAt": "2026-09-26T11:43:26.324Z"
 		},
 		{
 			"fullName": "DNO8/culturago-stellar",
@@ -311,7 +131,7 @@
 			"httpStatus": 200,
 			"sizeKb": 544,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.278Z"
+			"checkedAt": "2026-09-26T11:43:26.672Z"
 		},
 		{
 			"fullName": "pedro-pelicioni/Soroban",
@@ -320,7 +140,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.246Z"
+			"checkedAt": "2026-09-26T11:43:26.599Z"
 		},
 		{
 			"fullName": "pedro-pelicioni/stellar-tusst",
@@ -329,7 +149,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.181Z"
+			"checkedAt": "2026-09-26T11:43:26.606Z"
 		},
 		{
 			"fullName": "blessedux/soon",
@@ -338,7 +158,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.199Z"
+			"checkedAt": "2026-09-26T11:43:26.676Z"
 		},
 		{
 			"fullName": "blessedux/sozu_capital_privacy_protocol",
@@ -347,7 +167,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.537Z"
+			"checkedAt": "2026-09-26T11:43:26.912Z"
 		},
 		{
 			"fullName": "delfinacorr/Tarea-2--Implementaci-n-de-la-creaci-n-de-cuentas-y-pagos-XLM-en-Testnet",
@@ -356,7 +176,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.526Z"
+			"checkedAt": "2026-09-26T11:43:26.912Z"
 		},
 		{
 			"fullName": "zneright/aranova",
@@ -365,7 +185,7 @@
 			"httpStatus": 200,
 			"sizeKb": 409193,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:15.494Z"
+			"checkedAt": "2026-09-26T11:43:26.864Z"
 		},
 		{
 			"fullName": "Ze0ro99/project-unity-sphere-0e2c810d",
@@ -374,7 +194,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1232083,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:15.482Z"
+			"checkedAt": "2026-09-26T11:43:26.921Z"
 		},
 		{
 			"fullName": "yusatrn/StellarChoice",
@@ -383,7 +203,7 @@
 			"httpStatus": 200,
 			"sizeKb": 206041,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:15.804Z"
+			"checkedAt": "2026-09-26T11:43:27.162Z"
 		},
 		{
 			"fullName": "ysfadm/StellarCard",
@@ -392,7 +212,7 @@
 			"httpStatus": 200,
 			"sizeKb": 130135,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:15.811Z"
+			"checkedAt": "2026-09-26T11:43:27.105Z"
 		},
 		{
 			"fullName": "youthisguy/escrow-vaultX",
@@ -401,7 +221,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83598,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:15.762Z"
+			"checkedAt": "2026-09-26T11:43:27.127Z"
 		},
 		{
 			"fullName": "Yogiiitnr/hash-locked-envelopes",
@@ -410,7 +230,7 @@
 			"httpStatus": 200,
 			"sizeKb": 128,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:15.751Z"
+			"checkedAt": "2026-09-26T11:43:27.134Z"
 		},
 		{
 			"fullName": "YieldWave-Finance/YieldTrust-Contracts",
@@ -419,7 +239,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1173950,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.019Z"
+			"checkedAt": "2026-09-26T11:43:27.380Z"
 		},
 		{
 			"fullName": "whoTuhin007/Confidential-Will-System",
@@ -428,7 +248,7 @@
 			"httpStatus": 200,
 			"sizeKb": 97285,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.021Z"
+			"checkedAt": "2026-09-26T11:43:27.393Z"
 		},
 		{
 			"fullName": "welson-ai/stellar-mini-hackathon",
@@ -437,7 +257,7 @@
 			"httpStatus": 200,
 			"sizeKb": 145634,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.193Z"
+			"checkedAt": "2026-09-26T11:43:27.587Z"
 		},
 		{
 			"fullName": "welson-ai/Belt-4",
@@ -446,16 +266,16 @@
 			"httpStatus": 200,
 			"sizeKb": 184461,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.234Z"
+			"checkedAt": "2026-09-26T11:43:27.619Z"
 		},
 		{
 			"fullName": "Web3Novalabs/predifi",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 18144,
+			"sizeKb": 18249,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.436Z"
+			"checkedAt": "2026-09-26T11:43:27.840Z"
 		},
 		{
 			"fullName": "wagatoken/stellar-defi-vault",
@@ -464,7 +284,7 @@
 			"httpStatus": 200,
 			"sizeKb": 322563,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.473Z"
+			"checkedAt": "2026-09-26T11:43:27.865Z"
 		},
 		{
 			"fullName": "W8jonas/meridian-hackers",
@@ -473,7 +293,7 @@
 			"httpStatus": 200,
 			"sizeKb": 240830,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.513Z"
+			"checkedAt": "2026-09-26T11:43:27.812Z"
 		},
 		{
 			"fullName": "vishvajitbhagave-dev/Stellar_Poll",
@@ -482,7 +302,7 @@
 			"httpStatus": 200,
 			"sizeKb": 119581,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.458Z"
+			"checkedAt": "2026-09-26T11:43:27.815Z"
 		},
 		{
 			"fullName": "Vesting-Vault/Contracts",
@@ -491,7 +311,7 @@
 			"httpStatus": 200,
 			"sizeKb": 189036,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.775Z"
+			"checkedAt": "2026-09-26T11:43:28.061Z"
 		},
 		{
 			"fullName": "vedantd/AidLoop",
@@ -500,7 +320,7 @@
 			"httpStatus": 200,
 			"sizeKb": 500278,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.743Z"
+			"checkedAt": "2026-09-26T11:43:28.136Z"
 		},
 		{
 			"fullName": "VanshDeo/SplitBill",
@@ -509,7 +329,7 @@
 			"httpStatus": 200,
 			"sizeKb": 198134,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.790Z"
+			"checkedAt": "2026-09-26T11:43:28.072Z"
 		},
 		{
 			"fullName": "VanshDeo/OnChainTodoList",
@@ -518,7 +338,7 @@
 			"httpStatus": 200,
 			"sizeKb": 339127,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:16.965Z"
+			"checkedAt": "2026-09-26T11:43:28.062Z"
 		},
 		{
 			"fullName": "VanshDeo/ConfidentialWillSystem",
@@ -527,7 +347,7 @@
 			"httpStatus": 200,
 			"sizeKb": 360932,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.204Z"
+			"checkedAt": "2026-09-26T11:43:28.444Z"
 		},
 		{
 			"fullName": "vanbarros76/desafio30k-token",
@@ -536,7 +356,7 @@
 			"httpStatus": 200,
 			"sizeKb": 164471,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.204Z"
+			"checkedAt": "2026-09-26T11:43:28.367Z"
 		},
 		{
 			"fullName": "val-levy/ZKHealth",
@@ -545,7 +365,7 @@
 			"httpStatus": 200,
 			"sizeKb": 283937,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.230Z"
+			"checkedAt": "2026-09-26T11:43:28.358Z"
 		},
 		{
 			"fullName": "vaishnavi-87/stellar-crowdfunding",
@@ -554,7 +374,7 @@
 			"httpStatus": 200,
 			"sizeKb": 113125,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.203Z"
+			"checkedAt": "2026-09-26T11:43:28.431Z"
 		},
 		{
 			"fullName": "vaiii05-hub/Stellar-Internship-Level-4",
@@ -563,7 +383,7 @@
 			"httpStatus": 200,
 			"sizeKb": 365536,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.503Z"
+			"checkedAt": "2026-09-26T11:43:28.661Z"
 		},
 		{
 			"fullName": "vaibhavgeek/commandhive-graph",
@@ -572,7 +392,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:17.443Z"
+			"checkedAt": "2026-09-26T11:43:28.649Z"
 		},
 		{
 			"fullName": "vaibhavbaviskar21/Stellar-Hacktahons",
@@ -581,7 +401,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82967,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.512Z"
+			"checkedAt": "2026-09-26T11:43:28.651Z"
 		},
 		{
 			"fullName": "VAIBHAV13S/StellarNFT",
@@ -590,7 +410,7 @@
 			"httpStatus": 200,
 			"sizeKb": 90588,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.503Z"
+			"checkedAt": "2026-09-26T11:43:28.650Z"
 		},
 		{
 			"fullName": "usernem123/HarvestGuard",
@@ -599,7 +419,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83546,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.734Z"
+			"checkedAt": "2026-09-26T11:43:28.914Z"
 		},
 		{
 			"fullName": "upranjali/Stelllink",
@@ -608,7 +428,7 @@
 			"httpStatus": 200,
 			"sizeKb": 407464,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.739Z"
+			"checkedAt": "2026-09-26T11:43:28.881Z"
 		},
 		{
 			"fullName": "UnrealAnkit/skillbond",
@@ -617,7 +437,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82686,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.720Z"
+			"checkedAt": "2026-09-26T11:43:28.881Z"
 		},
 		{
 			"fullName": "UncleTom29/StellarVault",
@@ -626,7 +446,7 @@
 			"httpStatus": 200,
 			"sizeKb": 335727,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.756Z"
+			"checkedAt": "2026-09-26T11:43:28.887Z"
 		},
 		{
 			"fullName": "Thorigix/StellarMicroLend",
@@ -635,7 +455,7 @@
 			"httpStatus": 200,
 			"sizeKb": 318120,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.039Z"
+			"checkedAt": "2026-09-26T11:43:29.135Z"
 		},
 		{
 			"fullName": "theahaco/frontend-experimentation",
@@ -644,7 +464,7 @@
 			"httpStatus": 200,
 			"sizeKb": 125132,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.961Z"
+			"checkedAt": "2026-09-26T11:43:29.166Z"
 		},
 		{
 			"fullName": "thanchanb/Stellar-Nexus",
@@ -653,7 +473,7 @@
 			"httpStatus": 200,
 			"sizeKb": 77742,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.963Z"
+			"checkedAt": "2026-09-26T11:43:29.154Z"
 		},
 		{
 			"fullName": "Tanmay1369/Stellar-Level-2-DApp",
@@ -662,7 +482,7 @@
 			"httpStatus": 200,
 			"sizeKb": 127808,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:17.980Z"
+			"checkedAt": "2026-09-26T11:43:29.122Z"
 		},
 		{
 			"fullName": "sylvia-barick/nexus_shield_3",
@@ -671,7 +491,7 @@
 			"httpStatus": 200,
 			"sizeKb": 102676,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.241Z"
+			"checkedAt": "2026-09-26T11:43:29.341Z"
 		},
 		{
 			"fullName": "sylvia-barick/nexus_shield_2",
@@ -680,7 +500,7 @@
 			"httpStatus": 200,
 			"sizeKb": 91885,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.245Z"
+			"checkedAt": "2026-09-26T11:43:29.413Z"
 		},
 		{
 			"fullName": "SydneyWamalwa/StellarPay",
@@ -689,7 +509,7 @@
 			"httpStatus": 200,
 			"sizeKb": 108123,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.308Z"
+			"checkedAt": "2026-09-26T11:43:29.502Z"
 		},
 		{
 			"fullName": "SwayamTakkamore/Soroban-Hello-World",
@@ -698,7 +518,7 @@
 			"httpStatus": 200,
 			"sizeKb": 98321,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.244Z"
+			"checkedAt": "2026-09-26T11:43:29.389Z"
 		},
 		{
 			"fullName": "Suraj-pal34/EcoCredit-Hub",
@@ -707,7 +527,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:18.562Z"
+			"checkedAt": "2026-09-26T11:43:29.712Z"
 		},
 		{
 			"fullName": "Subho4531/eventhorizon",
@@ -716,7 +536,7 @@
 			"httpStatus": 200,
 			"sizeKb": 97475,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.507Z"
+			"checkedAt": "2026-09-26T11:43:29.701Z"
 		},
 		{
 			"fullName": "stellar-network-builders/wavelum-core",
@@ -725,7 +545,7 @@
 			"httpStatus": 200,
 			"sizeKb": 189269,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.516Z"
+			"checkedAt": "2026-09-26T11:43:29.754Z"
 		},
 		{
 			"fullName": "stellar-network-builders/wavelum-backend",
@@ -734,7 +554,7 @@
 			"httpStatus": 200,
 			"sizeKb": 493948,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.537Z"
+			"checkedAt": "2026-09-26T11:43:29.758Z"
 		},
 		{
 			"fullName": "Stellar-Insightss/contracts",
@@ -743,7 +563,7 @@
 			"httpStatus": 200,
 			"sizeKb": 830,
 			"priorError": "fetch failed",
-			"checkedAt": "2026-09-25T22:18:19.063Z"
+			"checkedAt": "2026-09-26T11:43:30.165Z"
 		},
 		{
 			"fullName": "Stellar-Hack-Vyn/stellar-hack-vinculo-creditto",
@@ -752,7 +572,7 @@
 			"httpStatus": 200,
 			"sizeKb": 101869,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.825Z"
+			"checkedAt": "2026-09-26T11:43:30.015Z"
 		},
 		{
 			"fullName": "Stellabill/stellabill-contracts",
@@ -761,7 +581,7 @@
 			"httpStatus": 200,
 			"sizeKb": 9243,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.748Z"
+			"checkedAt": "2026-09-26T11:43:29.951Z"
 		},
 		{
 			"fullName": "sparky0520/agents.ai",
@@ -770,7 +590,7 @@
 			"httpStatus": 200,
 			"sizeKb": 84589,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:18.792Z"
+			"checkedAt": "2026-09-26T11:43:30.008Z"
 		},
 		{
 			"fullName": "soumyacodes007/sangini",
@@ -779,7 +599,7 @@
 			"httpStatus": 200,
 			"sizeKb": 159444,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.334Z"
+			"checkedAt": "2026-09-26T11:43:30.334Z"
 		},
 		{
 			"fullName": "SistemasTecTlaxiaco/CRUD",
@@ -788,7 +608,7 @@
 			"httpStatus": 200,
 			"sizeKb": 711709,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.298Z"
+			"checkedAt": "2026-09-26T11:43:30.435Z"
 		},
 		{
 			"fullName": "SirKitoGio/KapeLink",
@@ -797,7 +617,7 @@
 			"httpStatus": 200,
 			"sizeKb": 334561,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.283Z"
+			"checkedAt": "2026-09-26T11:43:30.406Z"
 		},
 		{
 			"fullName": "SiLioLabs/PayFlow",
@@ -806,7 +626,7 @@
 			"httpStatus": 200,
 			"sizeKb": 5571,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.286Z"
+			"checkedAt": "2026-09-26T11:43:30.362Z"
 		},
 		{
 			"fullName": "buildvest/BuildVestZK",
@@ -815,7 +635,7 @@
 			"httpStatus": 200,
 			"sizeKb": 91465,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.575Z"
+			"checkedAt": "2026-09-26T11:43:30.640Z"
 		},
 		{
 			"fullName": "Siddharth-Suri/Stellar-T3",
@@ -824,7 +644,7 @@
 			"httpStatus": 200,
 			"sizeKb": 481864,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.651Z"
+			"checkedAt": "2026-09-26T11:43:30.635Z"
 		},
 		{
 			"fullName": "Siddharth-Suri/Stellar-T2",
@@ -833,7 +653,7 @@
 			"httpStatus": 200,
 			"sizeKb": 75914,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.569Z"
+			"checkedAt": "2026-09-26T11:43:30.671Z"
 		},
 		{
 			"fullName": "shwetta124/stellar-live-poll",
@@ -842,7 +662,7 @@
 			"httpStatus": 200,
 			"sizeKb": 176245,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.530Z"
+			"checkedAt": "2026-09-26T11:43:30.647Z"
 		},
 		{
 			"fullName": "Shubhham-golekar/Level-4---Green-Belt-Submission-",
@@ -851,7 +671,7 @@
 			"httpStatus": 200,
 			"sizeKb": 299288,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.289Z"
+			"checkedAt": "2026-09-26T11:43:30.897Z"
 		},
 		{
 			"fullName": "ShriramMasalge/live-poll",
@@ -860,7 +680,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82399,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.916Z"
+			"checkedAt": "2026-09-26T11:43:30.925Z"
 		},
 		{
 			"fullName": "Shantanu112-bd/safe_deal",
@@ -869,7 +689,7 @@
 			"httpStatus": 200,
 			"sizeKb": 286555,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.866Z"
+			"checkedAt": "2026-09-26T11:43:30.904Z"
 		},
 		{
 			"fullName": "Shantanu112-bd/Lumilend",
@@ -878,7 +698,7 @@
 			"httpStatus": 200,
 			"sizeKb": 73967,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:19.852Z"
+			"checkedAt": "2026-09-26T11:43:30.921Z"
 		},
 		{
 			"fullName": "ShadeProtocol/shade-node",
@@ -887,7 +707,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:20.573Z"
+			"checkedAt": "2026-09-26T11:43:31.119Z"
 		},
 		{
 			"fullName": "SealProjectDAO/seal-dao-public",
@@ -896,7 +716,7 @@
 			"httpStatus": 200,
 			"sizeKb": 2254268,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.499Z"
+			"checkedAt": "2026-09-26T11:43:31.163Z"
 		},
 		{
 			"fullName": "SBerkeB/DJai_Stellar_Hack_Pera",
@@ -905,7 +725,7 @@
 			"httpStatus": 200,
 			"sizeKb": 72371,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.571Z"
+			"checkedAt": "2026-09-26T11:43:31.181Z"
 		},
 		{
 			"fullName": "SATISH-JALAN/Weft",
@@ -914,7 +734,7 @@
 			"httpStatus": 200,
 			"sizeKb": 85830,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.481Z"
+			"checkedAt": "2026-09-26T11:43:31.101Z"
 		},
 		{
 			"fullName": "Samuel1-ona/Hunty-contract",
@@ -923,7 +743,7 @@
 			"httpStatus": 200,
 			"sizeKb": 12272,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.807Z"
+			"checkedAt": "2026-09-26T11:43:31.374Z"
 		},
 		{
 			"fullName": "sabil-fairus/stellar-guestbook",
@@ -932,7 +752,7 @@
 			"httpStatus": 200,
 			"sizeKb": 75059,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.866Z"
+			"checkedAt": "2026-09-26T11:43:31.392Z"
 		},
 		{
 			"fullName": "Runavphate/Steller-Orange-Belt",
@@ -941,7 +761,7 @@
 			"httpStatus": 200,
 			"sizeKb": 87171,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.861Z"
+			"checkedAt": "2026-09-26T11:43:31.431Z"
 		},
 		{
 			"fullName": "rue19/bloodchain",
@@ -950,7 +770,7 @@
 			"httpStatus": 200,
 			"sizeKb": 81869,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:20.883Z"
+			"checkedAt": "2026-09-26T11:43:31.417Z"
 		},
 		{
 			"fullName": "RudrakshSJoshi/StellarOrbit",
@@ -959,7 +779,7 @@
 			"httpStatus": 200,
 			"sizeKb": 72732,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.096Z"
+			"checkedAt": "2026-09-26T11:43:31.618Z"
 		},
 		{
 			"fullName": "Rohit-tiwari9/stellar-livepoll",
@@ -968,7 +788,7 @@
 			"httpStatus": 200,
 			"sizeKb": 73629,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.131Z"
+			"checkedAt": "2026-09-26T11:43:31.695Z"
 		},
 		{
 			"fullName": "Rllybro/ShipSures",
@@ -977,7 +797,7 @@
 			"httpStatus": 200,
 			"sizeKb": 96234,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.124Z"
+			"checkedAt": "2026-09-26T11:43:31.668Z"
 		},
 		{
 			"fullName": "rosemary21/Stella-Risein-Project",
@@ -986,7 +806,7 @@
 			"httpStatus": 200,
 			"sizeKb": 178099,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.115Z"
+			"checkedAt": "2026-09-26T11:43:31.639Z"
 		},
 		{
 			"fullName": "RevoraOrg/Revora-Contracts",
@@ -995,7 +815,7 @@
 			"httpStatus": 200,
 			"sizeKb": 288241,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.353Z"
+			"checkedAt": "2026-09-26T11:43:31.934Z"
 		},
 		{
 			"fullName": "resulcetin09/Digital-Will-Protocol",
@@ -1004,7 +824,7 @@
 			"httpStatus": 200,
 			"sizeKb": 287401,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.348Z"
+			"checkedAt": "2026-09-26T11:43:31.894Z"
 		},
 		{
 			"fullName": "renzeusss2/StudyLend",
@@ -1013,7 +833,7 @@
 			"httpStatus": 200,
 			"sizeKb": 331614,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.369Z"
+			"checkedAt": "2026-09-26T11:43:31.890Z"
 		},
 		{
 			"fullName": "Protox-Labs/protox-core",
@@ -1022,7 +842,7 @@
 			"httpStatus": 200,
 			"sizeKb": 924306,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.344Z"
+			"checkedAt": "2026-09-26T11:43:31.944Z"
 		},
 		{
 			"fullName": "PrithvirajSinghChauhan/stakeleetcode",
@@ -1031,7 +851,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82757,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.623Z"
+			"checkedAt": "2026-09-26T11:43:32.122Z"
 		},
 		{
 			"fullName": "Pritam9078/stellar_crowdfunding_dapp",
@@ -1040,7 +860,7 @@
 			"httpStatus": 200,
 			"sizeKb": 176117,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.583Z"
+			"checkedAt": "2026-09-26T11:43:32.157Z"
 		},
 		{
 			"fullName": "Predictify-org/predictify-docs",
@@ -1049,7 +869,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:21.630Z"
+			"checkedAt": "2026-09-26T11:43:32.196Z"
 		},
 		{
 			"fullName": "prathamesh-71/Stellar-Skill-Badge-Fauce",
@@ -1058,7 +878,7 @@
 			"httpStatus": 200,
 			"sizeKb": 122545,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.579Z"
+			"checkedAt": "2026-09-26T11:43:32.174Z"
 		},
 		{
 			"fullName": "pkprajapati7402/Lume",
@@ -1067,7 +887,7 @@
 			"httpStatus": 200,
 			"sizeKb": 84800,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.863Z"
+			"checkedAt": "2026-09-26T11:43:32.388Z"
 		},
 		{
 			"fullName": "Pi-Defi-world/Wpi",
@@ -1076,7 +896,7 @@
 			"httpStatus": 200,
 			"sizeKb": 191042,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.860Z"
+			"checkedAt": "2026-09-26T11:43:32.395Z"
 		},
 		{
 			"fullName": "Phynxxx/StellarLend",
@@ -1085,7 +905,7 @@
 			"httpStatus": 200,
 			"sizeKb": 68467,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:21.875Z"
+			"checkedAt": "2026-09-26T11:43:32.417Z"
 		},
 		{
 			"fullName": "paulomarinato/Decentralized-Quilombola-Bank",
@@ -1094,7 +914,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:21.839Z"
+			"checkedAt": "2026-09-26T11:43:32.478Z"
 		},
 		{
 			"fullName": "ozgesyvs/stellar-nano-escrow",
@@ -1103,7 +923,7 @@
 			"httpStatus": 200,
 			"sizeKb": 118730,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.111Z"
+			"checkedAt": "2026-09-26T11:43:32.693Z"
 		},
 		{
 			"fullName": "owusuadanquah/fundStella",
@@ -1112,7 +932,7 @@
 			"httpStatus": 200,
 			"sizeKb": 621590,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.136Z"
+			"checkedAt": "2026-09-26T11:43:32.681Z"
 		},
 		{
 			"fullName": "onuralpArsln/stellarSoroban",
@@ -1121,7 +941,7 @@
 			"httpStatus": 200,
 			"sizeKb": 79615,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.118Z"
+			"checkedAt": "2026-09-26T11:43:32.699Z"
 		},
 		{
 			"fullName": "omefeye/Stellar-BozokHackathon",
@@ -1130,7 +950,7 @@
 			"httpStatus": 200,
 			"sizeKb": 192565,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.125Z"
+			"checkedAt": "2026-09-26T11:43:32.679Z"
 		},
 		{
 			"fullName": "omefeye/GreenPoints",
@@ -1139,7 +959,7 @@
 			"httpStatus": 200,
 			"sizeKb": 193029,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.346Z"
+			"checkedAt": "2026-09-26T11:43:32.944Z"
 		},
 		{
 			"fullName": "OmcarSN/novadex",
@@ -1148,7 +968,7 @@
 			"httpStatus": 200,
 			"sizeKb": 87394,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.350Z"
+			"checkedAt": "2026-09-26T11:43:32.915Z"
 		},
 		{
 			"fullName": "OM150808/Digital-Tip-Jar-on-Stellar",
@@ -1157,7 +977,7 @@
 			"httpStatus": 200,
 			"sizeKb": 257874,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.371Z"
+			"checkedAt": "2026-09-26T11:43:32.910Z"
 		},
 		{
 			"fullName": "OM150808/Coin-Flip-Game-On-Blockchain",
@@ -1166,7 +986,7 @@
 			"httpStatus": 200,
 			"sizeKb": 50886,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.345Z"
+			"checkedAt": "2026-09-26T11:43:32.960Z"
 		},
 		{
 			"fullName": "Oluwatomilola/StellaPay",
@@ -1175,7 +995,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:22.597Z"
+			"checkedAt": "2026-09-26T11:43:33.208Z"
 		},
 		{
 			"fullName": "nsdBRoficial/stellar-stake-house",
@@ -1184,7 +1004,7 @@
 			"httpStatus": 200,
 			"sizeKb": 110630,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.560Z"
+			"checkedAt": "2026-09-26T11:43:33.174Z"
 		},
 		{
 			"fullName": "Noahflx/ghost-wallets",
@@ -1193,16 +1013,16 @@
 			"httpStatus": 200,
 			"sizeKb": 74055,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.627Z"
+			"checkedAt": "2026-09-26T11:43:33.151Z"
 		},
 		{
 			"fullName": "Navin-xmr/navin-contracts",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 9049,
+			"sizeKb": 9177,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.607Z"
+			"checkedAt": "2026-09-26T11:43:33.194Z"
 		},
 		{
 			"fullName": "Nathaniel1024/sari-sari-micro-ledger",
@@ -1211,7 +1031,7 @@
 			"httpStatus": 200,
 			"sizeKb": 387865,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.846Z"
+			"checkedAt": "2026-09-26T11:43:33.418Z"
 		},
 		{
 			"fullName": "Naisah/ProofPay",
@@ -1220,7 +1040,7 @@
 			"httpStatus": 200,
 			"sizeKb": 330054,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.862Z"
+			"checkedAt": "2026-09-26T11:43:33.419Z"
 		},
 		{
 			"fullName": "n0tnow/Swave",
@@ -1229,7 +1049,7 @@
 			"httpStatus": 200,
 			"sizeKb": 345018,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.866Z"
+			"checkedAt": "2026-09-26T11:43:33.438Z"
 		},
 		{
 			"fullName": "n0tnow/SaveX",
@@ -1238,7 +1058,7 @@
 			"httpStatus": 200,
 			"sizeKb": 127213,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:22.859Z"
+			"checkedAt": "2026-09-26T11:43:33.395Z"
 		},
 		{
 			"fullName": "murat48/StellarPays",
@@ -1247,7 +1067,7 @@
 			"httpStatus": 200,
 			"sizeKb": 73463,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.045Z"
+			"checkedAt": "2026-09-26T11:43:33.618Z"
 		},
 		{
 			"fullName": "murat48/stellar-voting-dapp",
@@ -1256,7 +1076,7 @@
 			"httpStatus": 200,
 			"sizeKb": 202079,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.094Z"
+			"checkedAt": "2026-09-26T11:43:33.663Z"
 		},
 		{
 			"fullName": "murat48/payment-tracker",
@@ -1265,7 +1085,7 @@
 			"httpStatus": 200,
 			"sizeKb": 75785,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.118Z"
+			"checkedAt": "2026-09-26T11:43:33.646Z"
 		},
 		{
 			"fullName": "MuhamadHamzah/The-On-Chain-Status---stellar",
@@ -1274,7 +1094,7 @@
 			"httpStatus": 200,
 			"sizeKb": 75112,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.087Z"
+			"checkedAt": "2026-09-26T11:43:33.663Z"
 		},
 		{
 			"fullName": "mugeysl/stellar_wallet",
@@ -1283,7 +1103,7 @@
 			"httpStatus": 200,
 			"sizeKb": 91439,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.343Z"
+			"checkedAt": "2026-09-26T11:43:33.859Z"
 		},
 		{
 			"fullName": "MrunalGhorpade13/Stellar-split-calculator",
@@ -1292,7 +1112,7 @@
 			"httpStatus": 200,
 			"sizeKb": 84708,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.330Z"
+			"checkedAt": "2026-09-26T11:43:33.875Z"
 		},
 		{
 			"fullName": "mohammedfaazk/Swap",
@@ -1301,7 +1121,7 @@
 			"httpStatus": 200,
 			"sizeKb": 133392,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.360Z"
+			"checkedAt": "2026-09-26T11:43:33.866Z"
 		},
 		{
 			"fullName": "MohamedAshiq09/erc246-stellar",
@@ -1310,7 +1130,7 @@
 			"httpStatus": 200,
 			"sizeKb": 75576,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.358Z"
+			"checkedAt": "2026-09-26T11:43:33.873Z"
 		},
 		{
 			"fullName": "MIRACULOUS65/Sentinel_Ts_Rust_Sdk",
@@ -1319,7 +1139,7 @@
 			"httpStatus": 200,
 			"sizeKb": 72204,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.566Z"
+			"checkedAt": "2026-09-26T11:43:34.076Z"
 		},
 		{
 			"fullName": "MindBlockLabs/mindblock_contract",
@@ -1328,7 +1148,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:23.576Z"
+			"checkedAt": "2026-09-26T11:43:34.102Z"
 		},
 		{
 			"fullName": "Mikael1206/ScholarAID-Pay",
@@ -1337,7 +1157,7 @@
 			"httpStatus": 200,
 			"sizeKb": 349993,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.566Z"
+			"checkedAt": "2026-09-26T11:43:34.059Z"
 		},
 		{
 			"fullName": "MiguelSotelo19/Hackaton",
@@ -1346,7 +1166,7 @@
 			"httpStatus": 200,
 			"sizeKb": 84622,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.569Z"
+			"checkedAt": "2026-09-26T11:43:34.079Z"
 		},
 		{
 			"fullName": "MerveAltnsk/Single_Offer",
@@ -1355,7 +1175,7 @@
 			"httpStatus": 200,
 			"sizeKb": 107410,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.817Z"
+			"checkedAt": "2026-09-26T11:43:34.298Z"
 		},
 		{
 			"fullName": "MerveAltnsk/Digital_Content_Access_Keys_DApp",
@@ -1364,7 +1184,7 @@
 			"httpStatus": 200,
 			"sizeKb": 132441,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.794Z"
+			"checkedAt": "2026-09-26T11:43:34.316Z"
 		},
 		{
 			"fullName": "vMcCharlie/borrowhoodapp",
@@ -1373,7 +1193,7 @@
 			"httpStatus": 200,
 			"sizeKb": 88931,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.773Z"
+			"checkedAt": "2026-09-26T11:43:34.282Z"
 		},
 		{
 			"fullName": "masterxolos/HackPera",
@@ -1382,7 +1202,7 @@
 			"httpStatus": 200,
 			"sizeKb": 80066,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:23.773Z"
+			"checkedAt": "2026-09-26T11:43:34.299Z"
 		},
 		{
 			"fullName": "MarketXpress/MarketX-mobile",
@@ -1391,7 +1211,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:24.039Z"
+			"checkedAt": "2026-09-26T11:43:34.558Z"
 		},
 		{
 			"fullName": "Lumina-etwork/Lumina-Backend",
@@ -1400,7 +1220,7 @@
 			"httpStatus": 200,
 			"sizeKb": 504158,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.070Z"
+			"checkedAt": "2026-09-26T11:43:34.532Z"
 		},
 		{
 			"fullName": "ldcasilang/tixsigurado",
@@ -1409,7 +1229,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82614,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.110Z"
+			"checkedAt": "2026-09-26T11:43:34.520Z"
 		},
 		{
 			"fullName": "jishnu-baruah/ScholarYield",
@@ -1418,7 +1238,7 @@
 			"httpStatus": 200,
 			"sizeKb": 103951,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.014Z"
+			"checkedAt": "2026-09-26T11:43:34.511Z"
 		},
 		{
 			"fullName": "kritikamandale/Stellar_Aidchain",
@@ -1427,7 +1247,7 @@
 			"httpStatus": 200,
 			"sizeKb": 262948,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.315Z"
+			"checkedAt": "2026-09-26T11:43:34.763Z"
 		},
 		{
 			"fullName": "kritikabaghel-coder/KYC-Attestation-Contract-",
@@ -1436,7 +1256,7 @@
 			"httpStatus": 200,
 			"sizeKb": 197459,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.325Z"
+			"checkedAt": "2026-09-26T11:43:34.788Z"
 		},
 		{
 			"fullName": "krbvk/RemitGrade",
@@ -1445,7 +1265,7 @@
 			"httpStatus": 200,
 			"sizeKb": 94033,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.320Z"
+			"checkedAt": "2026-09-26T11:43:34.774Z"
 		},
 		{
 			"fullName": "khanhlebao26-star/stellar-locktime",
@@ -1454,7 +1274,7 @@
 			"httpStatus": 200,
 			"sizeKb": 18,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.353Z"
+			"checkedAt": "2026-09-26T11:43:34.799Z"
 		},
 		{
 			"fullName": "kaixwayvan/stellar-project",
@@ -1463,7 +1283,7 @@
 			"httpStatus": 200,
 			"sizeKb": 253534,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.616Z"
+			"checkedAt": "2026-09-26T11:43:34.987Z"
 		},
 		{
 			"fullName": "justrhey/capstone",
@@ -1472,7 +1292,7 @@
 			"httpStatus": 200,
 			"sizeKb": 298516,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.563Z"
+			"checkedAt": "2026-09-26T11:43:35.021Z"
 		},
 		{
 			"fullName": "JulianaHansen/hack-meridian",
@@ -1481,7 +1301,7 @@
 			"httpStatus": 200,
 			"sizeKb": 151981,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.584Z"
+			"checkedAt": "2026-09-26T11:43:35.015Z"
 		},
 		{
 			"fullName": "JsMelix/stellair-green",
@@ -1490,7 +1310,7 @@
 			"httpStatus": 200,
 			"sizeKb": 91066,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.609Z"
+			"checkedAt": "2026-09-26T11:43:34.999Z"
 		},
 		{
 			"fullName": "JoseCToscano/strooper-wallet",
@@ -1499,7 +1319,7 @@
 			"httpStatus": 200,
 			"sizeKb": 215123,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.848Z"
+			"checkedAt": "2026-09-26T11:43:35.226Z"
 		},
 		{
 			"fullName": "JoseCToscano/policies-playground",
@@ -1508,7 +1328,7 @@
 			"httpStatus": 200,
 			"sizeKb": 234962,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.795Z"
+			"checkedAt": "2026-09-26T11:43:35.250Z"
 		},
 		{
 			"fullName": "johannguyen015/trustless-freelance-escrow",
@@ -1517,7 +1337,7 @@
 			"httpStatus": 200,
 			"sizeKb": 137940,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.833Z"
+			"checkedAt": "2026-09-26T11:43:35.270Z"
 		},
 		{
 			"fullName": "jcruzfff/ramp-up",
@@ -1526,7 +1346,7 @@
 			"httpStatus": 200,
 			"sizeKb": 243388,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:24.802Z"
+			"checkedAt": "2026-09-26T11:43:35.208Z"
 		},
 		{
 			"fullName": "Janhavim04/stellar-staked-poll",
@@ -1535,7 +1355,7 @@
 			"httpStatus": 200,
 			"sizeKb": 163372,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.128Z"
+			"checkedAt": "2026-09-26T11:43:35.459Z"
 		},
 		{
 			"fullName": "Janhavim04/stellar-poll-l3",
@@ -1544,7 +1364,7 @@
 			"httpStatus": 200,
 			"sizeKb": 116115,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.095Z"
+			"checkedAt": "2026-09-26T11:43:35.502Z"
 		},
 		{
 			"fullName": "Janhavim04/stellar-live-poll",
@@ -1553,7 +1373,7 @@
 			"httpStatus": 200,
 			"sizeKb": 111496,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.135Z"
+			"checkedAt": "2026-09-26T11:43:35.482Z"
 		},
 		{
 			"fullName": "janhavilipare17/poolup",
@@ -1562,16 +1382,16 @@
 			"httpStatus": 200,
 			"sizeKb": 84438,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.047Z"
+			"checkedAt": "2026-09-26T11:43:35.471Z"
 		},
 		{
 			"fullName": "Jagadeeshftw/grainlify",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 294774,
+			"sizeKb": 296209,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.397Z"
+			"checkedAt": "2026-09-26T11:43:35.689Z"
 		},
 		{
 			"fullName": "ishant25100/Basic-Token-Swap-Interface",
@@ -1580,7 +1400,7 @@
 			"httpStatus": 200,
 			"sizeKb": 117952,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:25.349Z"
+			"checkedAt": "2026-09-26T11:43:35.743Z"
 		},
 		{
 			"fullName": "IkbalKulahcioglu/RustFinalProject",
@@ -1589,7 +1409,7 @@
 			"httpStatus": 200,
 			"sizeKb": 152672,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.362Z"
+			"checkedAt": "2026-09-26T11:43:35.746Z"
 		},
 		{
 			"fullName": "hoangon1z/UniCertToken-Stellar",
@@ -1598,7 +1418,7 @@
 			"httpStatus": 200,
 			"sizeKb": 296514,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.388Z"
+			"checkedAt": "2026-09-26T11:43:35.717Z"
 		},
 		{
 			"fullName": "HarshitTiwari-20/Ping",
@@ -1607,7 +1427,7 @@
 			"httpStatus": 200,
 			"sizeKb": 332447,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.626Z"
+			"checkedAt": "2026-09-26T11:43:35.939Z"
 		},
 		{
 			"fullName": "harshaljagdale0222/stellar-yellow-belt",
@@ -1616,7 +1436,7 @@
 			"httpStatus": 200,
 			"sizeKb": 256317,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.624Z"
+			"checkedAt": "2026-09-26T11:43:35.940Z"
 		},
 		{
 			"fullName": "harshaljagdale0222/stellar-prediction-market",
@@ -1625,16 +1445,16 @@
 			"httpStatus": 200,
 			"sizeKb": 86631,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.932Z"
+			"checkedAt": "2026-09-26T11:43:35.939Z"
 		},
 		{
 			"fullName": "Trustlink-1/TrustLink",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 29749,
+			"sizeKb": 29843,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:25.806Z"
+			"checkedAt": "2026-09-26T11:43:36.175Z"
 		},
 		{
 			"fullName": "HamzaAhmed26/AI-Enhanced-Equitable-Urban-Mobility-Finance-Platform",
@@ -1643,7 +1463,25 @@
 			"httpStatus": 200,
 			"sizeKb": 133329,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.173Z"
+			"checkedAt": "2026-09-26T11:43:36.469Z"
+		},
+		{
+			"fullName": "Grainlify/Grainlify-Frontend",
+			"was": "error",
+			"verdict": "alive",
+			"httpStatus": 200,
+			"sizeKb": 19757,
+			"priorError": "reachable again on 2026-09-25 (alive) — requeued for scan",
+			"checkedAt": "2026-09-26T11:43:36.362Z"
+		},
+		{
+			"fullName": "Grainlify/Grainlify-Backend",
+			"was": "error",
+			"verdict": "alive",
+			"httpStatus": 200,
+			"sizeKb": 3745,
+			"priorError": "reachable again on 2026-09-25 (alive) — requeued for scan",
+			"checkedAt": "2026-09-26T11:43:36.407Z"
 		},
 		{
 			"fullName": "Goldii-locks/escrow-contract",
@@ -1652,7 +1490,7 @@
 			"httpStatus": 200,
 			"sizeKb": 2205,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.134Z"
+			"checkedAt": "2026-09-26T11:43:36.390Z"
 		},
 		{
 			"fullName": "goingmeri/InterIskolar-End-to-End-Digital-Disbursement-for-Government-Scholarships",
@@ -1661,7 +1499,7 @@
 			"httpStatus": 200,
 			"sizeKb": 386583,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.167Z"
+			"checkedAt": "2026-09-26T11:43:36.765Z"
 		},
 		{
 			"fullName": "GibranVasquez/Cruds",
@@ -1670,7 +1508,7 @@
 			"httpStatus": 200,
 			"sizeKb": 738193,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.265Z"
+			"checkedAt": "2026-09-26T11:43:36.713Z"
 		},
 		{
 			"fullName": "gear5labs/chenpilot",
@@ -1679,7 +1517,7 @@
 			"httpStatus": 200,
 			"sizeKb": 349022,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.481Z"
+			"checkedAt": "2026-09-26T11:43:36.670Z"
 		},
 		{
 			"fullName": "garvit-arora/grampay",
@@ -1688,7 +1526,7 @@
 			"httpStatus": 200,
 			"sizeKb": 224487,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.506Z"
+			"checkedAt": "2026-09-26T11:43:36.672Z"
 		},
 		{
 			"fullName": "ferrarif1/MyNote",
@@ -1697,7 +1535,7 @@
 			"httpStatus": 200,
 			"sizeKb": 413860,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.566Z"
+			"checkedAt": "2026-09-26T11:43:36.979Z"
 		},
 		{
 			"fullName": "fatihuysalx/Stellar-SingleOfferWork",
@@ -1706,7 +1544,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82610,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.457Z"
+			"checkedAt": "2026-09-26T11:43:36.983Z"
 		},
 		{
 			"fullName": "Faro-T/Faro",
@@ -1715,7 +1553,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83090,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.784Z"
+			"checkedAt": "2026-09-26T11:43:36.976Z"
 		},
 		{
 			"fullName": "faheem-mukri/stellar-quickpay",
@@ -1724,7 +1562,7 @@
 			"httpStatus": 200,
 			"sizeKb": 76747,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.799Z"
+			"checkedAt": "2026-09-26T11:43:37.008Z"
 		},
 		{
 			"fullName": "Ewrnlleh/learning-stellar",
@@ -1733,7 +1571,7 @@
 			"httpStatus": 200,
 			"sizeKb": 154266,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.802Z"
+			"checkedAt": "2026-09-26T11:43:37.212Z"
 		},
 		{
 			"fullName": "ErginTIRAVOGLU/soroban-token-contract-master",
@@ -1742,7 +1580,7 @@
 			"httpStatus": 200,
 			"sizeKb": 391396,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:26.841Z"
+			"checkedAt": "2026-09-26T11:43:37.196Z"
 		},
 		{
 			"fullName": "EmsGarbino/tigil-gastos",
@@ -1751,7 +1589,7 @@
 			"httpStatus": 200,
 			"sizeKb": 283722,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.095Z"
+			"checkedAt": "2026-09-26T11:43:37.217Z"
 		},
 		{
 			"fullName": "Qiuyuan26/SplitSweldo",
@@ -1760,16 +1598,16 @@
 			"httpStatus": 200,
 			"sizeKb": 309965,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.041Z"
+			"checkedAt": "2026-09-26T11:43:37.218Z"
 		},
 		{
 			"fullName": "Elcare-care/elcare-care-app",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 6039,
+			"sizeKb": 6058,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.069Z"
+			"checkedAt": "2026-09-26T11:43:37.462Z"
 		},
 		{
 			"fullName": "EfeAkkurt/FanFlow",
@@ -1778,7 +1616,7 @@
 			"httpStatus": 200,
 			"sizeKb": 64054,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.026Z"
+			"checkedAt": "2026-09-26T11:43:37.446Z"
 		},
 		{
 			"fullName": "edyeluandrew/Orrbit",
@@ -1787,7 +1625,7 @@
 			"httpStatus": 200,
 			"sizeKb": 98266,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.342Z"
+			"checkedAt": "2026-09-26T11:43:37.501Z"
 		},
 		{
 			"fullName": "Dyuloka/Rock-Paper-Scissors",
@@ -1796,7 +1634,7 @@
 			"httpStatus": 200,
 			"sizeKb": 37993,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.357Z"
+			"checkedAt": "2026-09-26T11:43:37.413Z"
 		},
 		{
 			"fullName": "dvvrtmshra/reputation_system",
@@ -1805,7 +1643,7 @@
 			"httpStatus": 200,
 			"sizeKb": 161250,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.344Z"
+			"checkedAt": "2026-09-26T11:43:37.678Z"
 		},
 		{
 			"fullName": "Durvesh452/fundflow-level-03",
@@ -1814,7 +1652,7 @@
 			"httpStatus": 200,
 			"sizeKb": 672950,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.349Z"
+			"checkedAt": "2026-09-26T11:43:37.730Z"
 		},
 		{
 			"fullName": "Durvesh452/fundflow",
@@ -1823,7 +1661,7 @@
 			"httpStatus": 200,
 			"sizeKb": 664389,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.604Z"
+			"checkedAt": "2026-09-26T11:43:37.692Z"
 		},
 		{
 			"fullName": "Boopi7/strooper-wallet-stellar-",
@@ -1832,7 +1670,7 @@
 			"httpStatus": 200,
 			"sizeKb": 215175,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.579Z"
+			"checkedAt": "2026-09-26T11:43:37.707Z"
 		},
 		{
 			"fullName": "Dragoon4002/crash-frontend",
@@ -1841,7 +1679,7 @@
 			"httpStatus": 200,
 			"sizeKb": 80524,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.563Z"
+			"checkedAt": "2026-09-26T11:43:37.915Z"
 		},
 		{
 			"fullName": "DiveshK007/StellrFlow",
@@ -1850,7 +1688,7 @@
 			"httpStatus": 200,
 			"sizeKb": 81657,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.600Z"
+			"checkedAt": "2026-09-26T11:43:38.004Z"
 		},
 		{
 			"fullName": "diptomoy-das/BondFi",
@@ -1859,7 +1697,7 @@
 			"httpStatus": 200,
 			"sizeKb": 126229,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.785Z"
+			"checkedAt": "2026-09-26T11:43:37.934Z"
 		},
 		{
 			"fullName": "DGuedz/rota",
@@ -1868,7 +1706,7 @@
 			"httpStatus": 200,
 			"sizeKb": 115629,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:27.823Z"
+			"checkedAt": "2026-09-26T11:43:37.933Z"
 		},
 		{
 			"fullName": "Devo-Mind/Remitra-Frontend",
@@ -1877,7 +1715,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:27.878Z"
+			"checkedAt": "2026-09-26T11:43:38.274Z"
 		},
 		{
 			"fullName": "Devo-Mind/Dewfix-frontend",
@@ -1886,7 +1724,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:27.821Z"
+			"checkedAt": "2026-09-26T11:43:38.252Z"
 		},
 		{
 			"fullName": "denizhanMisirlioglu/PaymentAndMessagingSystem",
@@ -1895,7 +1733,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83894,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.143Z"
+			"checkedAt": "2026-09-26T11:43:38.193Z"
 		},
 		{
 			"fullName": "demirmelekhan/CertChain",
@@ -1904,7 +1742,7 @@
 			"httpStatus": 200,
 			"sizeKb": 210316,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.120Z"
+			"checkedAt": "2026-09-26T11:43:38.213Z"
 		},
 		{
 			"fullName": "debojyoti10CC/pmpfun",
@@ -1913,7 +1751,7 @@
 			"httpStatus": 200,
 			"sizeKb": 207589,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.145Z"
+			"checkedAt": "2026-09-26T11:43:38.470Z"
 		},
 		{
 			"fullName": "debjit-1004/SplitBill",
@@ -1922,7 +1760,7 @@
 			"httpStatus": 200,
 			"sizeKb": 200983,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.074Z"
+			"checkedAt": "2026-09-26T11:43:38.505Z"
 		},
 		{
 			"fullName": "Dead-Bytes/kale-pool",
@@ -1931,7 +1769,7 @@
 			"httpStatus": 200,
 			"sizeKb": 18433,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.377Z"
+			"checkedAt": "2026-09-26T11:43:38.462Z"
 		},
 		{
 			"fullName": "damlalper/StellarHackathonProject",
@@ -1940,7 +1778,7 @@
 			"httpStatus": 200,
 			"sizeKb": 85540,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.372Z"
+			"checkedAt": "2026-09-26T11:43:38.494Z"
 		},
 		{
 			"fullName": "cybernisa/stellar_hackathon_carbon",
@@ -1949,7 +1787,7 @@
 			"httpStatus": 200,
 			"sizeKb": 106075,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.364Z"
+			"checkedAt": "2026-09-26T11:43:38.758Z"
 		},
 		{
 			"fullName": "Crypto-Jaguars/issues-backend",
@@ -1958,7 +1796,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:28.368Z"
+			"checkedAt": "2026-09-26T11:43:38.749Z"
 		},
 		{
 			"fullName": "crowdpass-live/tokenbound_impl",
@@ -1967,7 +1805,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1062961,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.623Z"
+			"checkedAt": "2026-09-26T11:43:38.776Z"
 		},
 		{
 			"fullName": "Cracked-CEE/cee-devpulsar",
@@ -1976,7 +1814,7 @@
 			"httpStatus": 200,
 			"sizeKb": 16997,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:28.579Z"
+			"checkedAt": "2026-09-26T11:43:38.710Z"
 		},
 		{
 			"fullName": "CoralSwap-Finance/coralswap-sdk",
@@ -1985,7 +1823,7 @@
 			"httpStatus": 200,
 			"sizeKb": 234049,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.583Z"
+			"checkedAt": "2026-09-26T11:43:38.984Z"
 		},
 		{
 			"fullName": "ChielokaCode/stellar_ecommerce_project",
@@ -1994,7 +1832,7 @@
 			"httpStatus": 200,
 			"sizeKb": 225294,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.585Z"
+			"checkedAt": "2026-09-26T11:43:38.986Z"
 		},
 		{
 			"fullName": "Chaitanya6006/Reward-App",
@@ -2003,7 +1841,7 @@
 			"httpStatus": 200,
 			"sizeKb": 86886,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.829Z"
+			"checkedAt": "2026-09-26T11:43:38.986Z"
 		},
 		{
 			"fullName": "chainaim3003/Agent-InterStellarTradeX",
@@ -2012,7 +1850,7 @@
 			"httpStatus": 200,
 			"sizeKb": 260792,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.845Z"
+			"checkedAt": "2026-09-26T11:43:38.966Z"
 		},
 		{
 			"fullName": "Certora/aquarius-cantina-fv",
@@ -2021,7 +1859,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1023,
 			"priorError": "fetch failed",
-			"checkedAt": "2026-09-25T22:18:28.884Z"
+			"checkedAt": "2026-09-26T11:43:39.191Z"
 		},
 		{
 			"fullName": "carlosvillalba06/Turismo",
@@ -2030,7 +1868,7 @@
 			"httpStatus": 200,
 			"sizeKb": 170336,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:28.838Z"
+			"checkedAt": "2026-09-26T11:43:39.239Z"
 		},
 		{
 			"fullName": "cannaydinn/Stellar-FullStack-Developer",
@@ -2039,7 +1877,7 @@
 			"httpStatus": 200,
 			"sizeKb": 246904,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.133Z"
+			"checkedAt": "2026-09-26T11:43:39.192Z"
 		},
 		{
 			"fullName": "Cambar-Solutions/StellarHackathon2025CompletoLevsek",
@@ -2048,7 +1886,7 @@
 			"httpStatus": 200,
 			"sizeKb": 84035,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.113Z"
+			"checkedAt": "2026-09-26T11:43:39.204Z"
 		},
 		{
 			"fullName": "Cambar-Solutions/service-stellar",
@@ -2057,7 +1895,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83291,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.119Z"
+			"checkedAt": "2026-09-26T11:43:39.452Z"
 		},
 		{
 			"fullName": "caelum0x/stellar-oracle",
@@ -2066,7 +1904,7 @@
 			"httpStatus": 200,
 			"sizeKb": 106121,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.108Z"
+			"checkedAt": "2026-09-26T11:43:39.463Z"
 		},
 		{
 			"fullName": "cadalt0/Protein-Swap",
@@ -2075,7 +1913,7 @@
 			"httpStatus": 200,
 			"sizeKb": 239202,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.321Z"
+			"checkedAt": "2026-09-26T11:43:39.426Z"
 		},
 		{
 			"fullName": "bytes06runner/web_3",
@@ -2084,7 +1922,7 @@
 			"httpStatus": 200,
 			"sizeKb": 191572,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.354Z"
+			"checkedAt": "2026-09-26T11:43:39.477Z"
 		},
 		{
 			"fullName": "bytes06runner/Web3",
@@ -2093,7 +1931,7 @@
 			"httpStatus": 200,
 			"sizeKb": 168524,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.376Z"
+			"checkedAt": "2026-09-26T11:43:39.694Z"
 		},
 		{
 			"fullName": "BTCsLove1/StrApp",
@@ -2102,7 +1940,7 @@
 			"httpStatus": 200,
 			"sizeKb": 105828,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.326Z"
+			"checkedAt": "2026-09-26T11:43:39.681Z"
 		},
 		{
 			"fullName": "Bruin-Block/green-pass-on-stellar",
@@ -2111,7 +1949,7 @@
 			"httpStatus": 200,
 			"sizeKb": 76499,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.629Z"
+			"checkedAt": "2026-09-26T11:43:39.731Z"
 		},
 		{
 			"fullName": "Bra-AM/CycleBuddy-stellar",
@@ -2120,7 +1958,7 @@
 			"httpStatus": 200,
 			"sizeKb": 67160,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.588Z"
+			"checkedAt": "2026-09-26T11:43:39.690Z"
 		},
 		{
 			"fullName": "Blanca-estela-valerio-rivero/Cryptostream",
@@ -2129,7 +1967,7 @@
 			"httpStatus": 200,
 			"sizeKb": 335852,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.596Z"
+			"checkedAt": "2026-09-26T11:43:39.945Z"
 		},
 		{
 			"fullName": "bigmarh/nostrpass",
@@ -2138,7 +1976,7 @@
 			"httpStatus": 200,
 			"sizeKb": 98434,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.586Z"
+			"checkedAt": "2026-09-26T11:43:39.942Z"
 		},
 		{
 			"fullName": "beyzanrkeskinnn/tokenArt",
@@ -2147,7 +1985,7 @@
 			"httpStatus": 200,
 			"sizeKb": 325831,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.844Z"
+			"checkedAt": "2026-09-26T11:43:39.964Z"
 		},
 		{
 			"fullName": "Beg-m/AidChain",
@@ -2156,7 +1994,7 @@
 			"httpStatus": 200,
 			"sizeKb": 69074,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.863Z"
+			"checkedAt": "2026-09-26T11:43:39.996Z"
 		},
 		{
 			"fullName": "ayushh0406/TrustLynk",
@@ -2165,7 +2003,7 @@
 			"httpStatus": 200,
 			"sizeKb": 85154,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.905Z"
+			"checkedAt": "2026-09-26T11:43:40.213Z"
 		},
 		{
 			"fullName": "ayush78490/MintSpace",
@@ -2174,7 +2012,7 @@
 			"httpStatus": 200,
 			"sizeKb": 733269,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:29.834Z"
+			"checkedAt": "2026-09-26T11:43:40.181Z"
 		},
 		{
 			"fullName": "atharvalade/ConsensusToronto-Stellar",
@@ -2183,7 +2021,7 @@
 			"httpStatus": 200,
 			"sizeKb": 96520,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.115Z"
+			"checkedAt": "2026-09-26T11:43:40.177Z"
 		},
 		{
 			"fullName": "arlettemsalase/BigBlackBox",
@@ -2192,7 +2030,7 @@
 			"httpStatus": 200,
 			"sizeKb": 354337,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.116Z"
+			"checkedAt": "2026-09-26T11:43:40.192Z"
 		},
 		{
 			"fullName": "caelum0x/stellar-estate",
@@ -2201,7 +2039,7 @@
 			"httpStatus": 200,
 			"sizeKb": 565881,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.123Z"
+			"checkedAt": "2026-09-26T11:43:40.381Z"
 		},
 		{
 			"fullName": "caelum0x/EstateChain",
@@ -2210,16 +2048,7 @@
 			"httpStatus": 200,
 			"sizeKb": 567109,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.150Z"
-		},
-		{
-			"fullName": "ANSHSINGH5999/stellar-protocol-analytics",
-			"was": "error",
-			"verdict": "gone",
-			"httpStatus": 404,
-			"sizeKb": null,
-			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.285Z"
+			"checkedAt": "2026-09-26T11:43:40.409Z"
 		},
 		{
 			"fullName": "Anmol-345/stellar-challenge-level-2",
@@ -2228,7 +2057,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1489,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.405Z"
+			"checkedAt": "2026-09-26T11:43:40.404Z"
 		},
 		{
 			"fullName": "AnkithSVaidya/EcoStellar",
@@ -2237,7 +2066,7 @@
 			"httpStatus": 200,
 			"sizeKb": 355691,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.354Z"
+			"checkedAt": "2026-09-26T11:43:40.439Z"
 		},
 		{
 			"fullName": "ankitagarwal546/Decentralized-Lending-Platform",
@@ -2246,7 +2075,7 @@
 			"httpStatus": 200,
 			"sizeKb": 282419,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.363Z"
+			"checkedAt": "2026-09-26T11:43:40.634Z"
 		},
 		{
 			"fullName": "anilyagiz/TrafficPulse",
@@ -2255,7 +2084,7 @@
 			"httpStatus": 200,
 			"sizeKb": 268436,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.637Z"
+			"checkedAt": "2026-09-26T11:43:40.660Z"
 		},
 		{
 			"fullName": "alicelikbag/SubSor-On-chain-Subscription-Revenue-Split-main",
@@ -2264,7 +2093,7 @@
 			"httpStatus": 200,
 			"sizeKb": 71768,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.607Z"
+			"checkedAt": "2026-09-26T11:43:40.657Z"
 		},
 		{
 			"fullName": "alexanderkoh/flashpool-protocol",
@@ -2273,7 +2102,7 @@
 			"httpStatus": 200,
 			"sizeKb": 109996,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.607Z"
+			"checkedAt": "2026-09-26T11:43:40.648Z"
 		},
 		{
 			"fullName": "akankshapatil99/stellar-level-2",
@@ -2282,7 +2111,7 @@
 			"httpStatus": 200,
 			"sizeKb": 194734,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.651Z"
+			"checkedAt": "2026-09-26T11:43:40.925Z"
 		},
 		{
 			"fullName": "aimadhav/time.fun",
@@ -2291,7 +2120,7 @@
 			"httpStatus": 200,
 			"sizeKb": 316522,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.930Z"
+			"checkedAt": "2026-09-26T11:43:40.886Z"
 		},
 		{
 			"fullName": "aimadhav/code-streak-bet",
@@ -2300,7 +2129,7 @@
 			"httpStatus": 200,
 			"sizeKb": 82322,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.873Z"
+			"checkedAt": "2026-09-26T11:43:40.846Z"
 		},
 		{
 			"fullName": "AhmetRasB/QuestFi",
@@ -2309,7 +2138,7 @@
 			"httpStatus": 200,
 			"sizeKb": 376182,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.892Z"
+			"checkedAt": "2026-09-26T11:43:40.883Z"
 		},
 		{
 			"fullName": "ahastig/WhiteCloak",
@@ -2318,7 +2147,7 @@
 			"httpStatus": 200,
 			"sizeKb": 132449,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:30.864Z"
+			"checkedAt": "2026-09-26T11:43:41.197Z"
 		},
 		{
 			"fullName": "adr1el-m/stellar-PasadaFund",
@@ -2327,7 +2156,7 @@
 			"httpStatus": 200,
 			"sizeKb": 383526,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.160Z"
+			"checkedAt": "2026-09-26T11:43:41.130Z"
 		},
 		{
 			"fullName": "aditya-17-eth/Stellar-Simple-Payment-dApp",
@@ -2336,7 +2165,7 @@
 			"httpStatus": 200,
 			"sizeKb": 109162,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.127Z"
+			"checkedAt": "2026-09-26T11:43:41.133Z"
 		},
 		{
 			"fullName": "abreujean/eduChain",
@@ -2345,7 +2174,7 @@
 			"httpStatus": 200,
 			"sizeKb": 65281,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.147Z"
+			"checkedAt": "2026-09-26T11:43:41.125Z"
 		},
 		{
 			"fullName": "abhiramsakaray/chainpe-backend",
@@ -2354,7 +2183,7 @@
 			"httpStatus": 200,
 			"sizeKb": 108303,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.193Z"
+			"checkedAt": "2026-09-26T11:43:41.402Z"
 		},
 		{
 			"fullName": "Abhicoder189/build_wise",
@@ -2363,7 +2192,7 @@
 			"httpStatus": 200,
 			"sizeKb": 91984,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.419Z"
+			"checkedAt": "2026-09-26T11:43:41.456Z"
 		},
 		{
 			"fullName": "aaxonxn/stellar-nft-minter",
@@ -2372,7 +2201,7 @@
 			"httpStatus": 200,
 			"sizeKb": 191204,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.442Z"
+			"checkedAt": "2026-09-26T11:43:41.407Z"
 		},
 		{
 			"fullName": "aairyy123/Automated-royalty-system",
@@ -2381,7 +2210,7 @@
 			"httpStatus": 200,
 			"sizeKb": 90505,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.422Z"
+			"checkedAt": "2026-09-26T11:43:41.416Z"
 		},
 		{
 			"fullName": "22620229Angel/Tu-comida-a-un-CLICK-Token-Eats-2",
@@ -2390,7 +2219,7 @@
 			"httpStatus": 200,
 			"sizeKb": 381204,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.415Z"
+			"checkedAt": "2026-09-26T11:43:41.684Z"
 		},
 		{
 			"fullName": "06piyush13/Crowdfunding-Platform-with-Milestone-Based-Releases",
@@ -2399,7 +2228,7 @@
 			"httpStatus": 200,
 			"sizeKb": 158959,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.691Z"
+			"checkedAt": "2026-09-26T11:43:41.716Z"
 		},
 		{
 			"fullName": "constellation-protocol/constellation-pseudocode",
@@ -2408,7 +2237,7 @@
 			"httpStatus": 200,
 			"sizeKb": 151404,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:31.701Z"
+			"checkedAt": "2026-09-26T11:43:41.692Z"
 		},
 		{
 			"fullName": "linkioafrica/linkio.github.io",
@@ -2417,7 +2246,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.655Z"
+			"checkedAt": "2026-09-26T11:43:41.638Z"
 		},
 		{
 			"fullName": "almanax-ai/Almanax-marketing-site-copy-MIT",
@@ -2426,7 +2255,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.673Z"
+			"checkedAt": "2026-09-26T11:43:41.952Z"
 		},
 		{
 			"fullName": "Blade-Labs/tokenization-wizard",
@@ -2435,7 +2264,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.914Z"
+			"checkedAt": "2026-09-26T11:43:41.954Z"
 		},
 		{
 			"fullName": "btq-ag/POW-difficulty-research",
@@ -2444,7 +2273,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.995Z"
+			"checkedAt": "2026-09-26T11:43:41.930Z"
 		},
 		{
 			"fullName": "ConvexityTeam/chats-donor",
@@ -2453,7 +2282,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.938Z"
+			"checkedAt": "2026-09-26T11:43:41.934Z"
 		},
 		{
 			"fullName": "neovestor-tech/Aptos-Code-Collision",
@@ -2462,7 +2291,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:31.939Z"
+			"checkedAt": "2026-09-26T11:43:42.174Z"
 		},
 		{
 			"fullName": "zenith-protocols/orbit-ui-updated",
@@ -2471,7 +2300,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.224Z"
+			"checkedAt": "2026-09-26T11:43:42.170Z"
 		},
 		{
 			"fullName": "Ilanklim/Ilanklim",
@@ -2480,7 +2309,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.228Z"
+			"checkedAt": "2026-09-26T11:43:42.181Z"
 		},
 		{
 			"fullName": "paltalabs/defindex-ybx-incident",
@@ -2489,7 +2318,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.204Z"
+			"checkedAt": "2026-09-26T11:43:42.155Z"
 		},
 		{
 			"fullName": "BoostyLabs/watchtower",
@@ -2498,7 +2327,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.226Z"
+			"checkedAt": "2026-09-26T11:43:42.381Z"
 		},
 		{
 			"fullName": "VenerezHugo/V",
@@ -2507,7 +2336,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.453Z"
+			"checkedAt": "2026-09-26T11:43:42.389Z"
 		},
 		{
 			"fullName": "womenbiz/Women-Biz-Web3-revolution-tour-",
@@ -2516,7 +2345,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.448Z"
+			"checkedAt": "2026-09-26T11:43:42.388Z"
 		},
 		{
 			"fullName": "LiquidsFi/fUSD-token",
@@ -2525,7 +2354,7 @@
 			"httpStatus": 200,
 			"sizeKb": 135605,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:32.504Z"
+			"checkedAt": "2026-09-26T11:43:42.387Z"
 		},
 		{
 			"fullName": "ambergroup-io/ambergroup-io",
@@ -2534,7 +2363,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.479Z"
+			"checkedAt": "2026-09-26T11:43:42.625Z"
 		},
 		{
 			"fullName": "NoetherDEX/docs",
@@ -2543,7 +2372,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.712Z"
+			"checkedAt": "2026-09-26T11:43:42.667Z"
 		},
 		{
 			"fullName": "NoetherDEX/brand",
@@ -2552,16 +2381,16 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.767Z"
+			"checkedAt": "2026-09-26T11:43:42.652Z"
 		},
 		{
 			"fullName": "NoetherDEX/noether",
 			"was": "error",
-			"verdict": "alive",
-			"httpStatus": 200,
-			"sizeKb": 24761,
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.745Z"
+			"checkedAt": "2026-09-26T11:43:42.525Z"
 		},
 		{
 			"fullName": "satoshipay/stellar-payment-channels",
@@ -2570,7 +2399,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:32.749Z"
+			"checkedAt": "2026-09-26T11:43:42.886Z"
 		},
 		{
 			"fullName": "RaulHdezAvi3101/Nexo",
@@ -2579,7 +2408,7 @@
 			"httpStatus": 200,
 			"sizeKb": 148164,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.005Z"
+			"checkedAt": "2026-09-26T11:43:42.870Z"
 		},
 		{
 			"fullName": "bigabe001/zk-leaderboard",
@@ -2588,7 +2417,7 @@
 			"httpStatus": 200,
 			"sizeKb": 358263,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:32.983Z"
+			"checkedAt": "2026-09-26T11:43:42.891Z"
 		},
 		{
 			"fullName": "Padom2020/batship",
@@ -2597,7 +2426,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83766,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.017Z"
+			"checkedAt": "2026-09-26T11:43:42.856Z"
 		},
 		{
 			"fullName": "Humzy01/chainway",
@@ -2606,7 +2435,7 @@
 			"httpStatus": 200,
 			"sizeKb": 180525,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:32.954Z"
+			"checkedAt": "2026-09-26T11:43:43.186Z"
 		},
 		{
 			"fullName": "seniormugambe/StellaPath",
@@ -2615,7 +2444,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1030,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:33.225Z"
+			"checkedAt": "2026-09-26T11:43:43.096Z"
 		},
 		{
 			"fullName": "prasadv06/ZeroWar",
@@ -2624,7 +2453,7 @@
 			"httpStatus": 200,
 			"sizeKb": 111423,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.268Z"
+			"checkedAt": "2026-09-26T11:43:43.086Z"
 		},
 		{
 			"fullName": "Nathasan1410/MinesweeperZK",
@@ -2633,7 +2462,7 @@
 			"httpStatus": 200,
 			"sizeKb": 277612,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.244Z"
+			"checkedAt": "2026-09-26T11:43:43.095Z"
 		},
 		{
 			"fullName": "kaksv/uber-for-agents",
@@ -2642,7 +2471,7 @@
 			"httpStatus": 200,
 			"sizeKb": 79569,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.237Z"
+			"checkedAt": "2026-09-26T11:43:43.388Z"
 		},
 		{
 			"fullName": "Jennycruzy/geotruth",
@@ -2651,7 +2480,7 @@
 			"httpStatus": 200,
 			"sizeKb": 72241,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.473Z"
+			"checkedAt": "2026-09-26T11:43:43.394Z"
 		},
 		{
 			"fullName": "nickthelegend/fund402",
@@ -2660,7 +2489,7 @@
 			"httpStatus": 200,
 			"sizeKb": 83468,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.472Z"
+			"checkedAt": "2026-09-26T11:43:43.375Z"
 		},
 		{
 			"fullName": "lumenloop/lumenloop-overview",
@@ -2669,7 +2498,7 @@
 			"httpStatus": 200,
 			"sizeKb": 10,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:33.539Z"
+			"checkedAt": "2026-09-26T11:43:43.396Z"
 		},
 		{
 			"fullName": "paltalabs/self-cross-contract-call-soroban",
@@ -2678,7 +2507,7 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:33.481Z"
+			"checkedAt": "2026-09-26T11:43:43.593Z"
 		},
 		{
 			"fullName": "taskdotio/roadmap",
@@ -2687,16 +2516,16 @@
 			"httpStatus": 200,
 			"sizeKb": 0,
 			"priorError": "no-tree/unfetchable",
-			"checkedAt": "2026-09-25T22:18:33.767Z"
+			"checkedAt": "2026-09-26T11:43:43.611Z"
 		},
 		{
 			"fullName": "calimero-network/core",
 			"was": "error",
 			"verdict": "alive",
 			"httpStatus": 200,
-			"sizeKb": 64832,
+			"sizeKb": 65708,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.792Z"
+			"checkedAt": "2026-09-26T11:43:43.597Z"
 		},
 		{
 			"fullName": "hurley87/refraction",
@@ -2705,7 +2534,7 @@
 			"httpStatus": 200,
 			"sizeKb": 1394535,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.758Z"
+			"checkedAt": "2026-09-26T11:43:43.622Z"
 		},
 		{
 			"fullName": "naveed-siddiqi/lumos-dao",
@@ -2714,7 +2543,187 @@
 			"httpStatus": 200,
 			"sizeKb": 365299,
 			"priorError": null,
-			"checkedAt": "2026-09-25T22:18:33.717Z"
+			"checkedAt": "2026-09-26T11:43:43.802Z"
+		},
+		{
+			"fullName": "zkCaleb-dev/Stellar_workshop",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.735Z"
+		},
+		{
+			"fullName": "zaber-dev/ovrl-sdk",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.730Z"
+		},
+		{
+			"fullName": "yripper/utility-contracts",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.736Z"
+		},
+		{
+			"fullName": "yripper/soroban-preview-docker",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.913Z"
+		},
+		{
+			"fullName": "Galmanus/procyon",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.930Z"
+		},
+		{
+			"fullName": "carlos-israelj/link2pay-sdk",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.916Z"
+		},
+		{
+			"fullName": "Cbiux/Zcore-Landing",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:43.943Z"
+		},
+		{
+			"fullName": "ROHIT8759/KeyWe",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.061Z"
+		},
+		{
+			"fullName": "robertDurst/stellar-rust-sdk",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.074Z"
+		},
+		{
+			"fullName": "rawritude/public-directory",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.077Z"
+		},
+		{
+			"fullName": "rawritude/stellarlight",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.186Z"
+		},
+		{
+			"fullName": "rajkumarsharma316/Habit-Tracker-Soroban",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.297Z"
+		},
+		{
+			"fullName": "Dione-b/lp-stellar-onchain-experience",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.301Z"
+		},
+		{
+			"fullName": "Klorenn/stellar-paylink",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.286Z"
+		},
+		{
+			"fullName": "Nursca/backend",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.300Z"
+		},
+		{
+			"fullName": "Nursca/surface",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.415Z"
+		},
+		{
+			"fullName": "Nursca/contracts",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.414Z"
+		},
+		{
+			"fullName": "Mackenzie-OO7/Stellar-X-Web3Bridge",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.443Z"
+		},
+		{
+			"fullName": "Mackenzie-OO7/stellar-oss-issues",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.410Z"
+		},
+		{
+			"fullName": "Timi16/Paylink-sdk",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:44.550Z"
 		},
 		{
 			"fullName": "Dione-b/stellarsight",
@@ -2723,7 +2732,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:33.903Z"
+			"checkedAt": "2026-09-26T11:43:44.555Z"
 		},
 		{
 			"fullName": "PatrickKish1/safetrust-ZK",
@@ -2732,7 +2741,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:33.913Z"
+			"checkedAt": "2026-09-26T11:43:44.565Z"
 		},
 		{
 			"fullName": "kingfavourjudah/FundBlock",
@@ -2741,7 +2750,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:33.916Z"
+			"checkedAt": "2026-09-26T11:43:44.564Z"
 		},
 		{
 			"fullName": "leocagli/pontepay",
@@ -2750,7 +2759,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:33.894Z"
+			"checkedAt": "2026-09-26T11:43:44.674Z"
 		},
 		{
 			"fullName": "leocagli/tralalero-contracts",
@@ -2759,7 +2768,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.070Z"
+			"checkedAt": "2026-09-26T11:43:44.672Z"
 		},
 		{
 			"fullName": "KingFRANKHOOD/soroban-sql-sync",
@@ -2768,7 +2777,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.036Z"
+			"checkedAt": "2026-09-26T11:43:44.680Z"
 		},
 		{
 			"fullName": "KB2410/ai-wallet-manager",
@@ -2777,7 +2786,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.029Z"
+			"checkedAt": "2026-09-26T11:43:44.668Z"
 		},
 		{
 			"fullName": "KaruG1999/ocean_request",
@@ -2786,7 +2795,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.151Z"
+			"checkedAt": "2026-09-26T11:43:44.789Z"
 		},
 		{
 			"fullName": "karagozemin/frontend-app",
@@ -2795,7 +2804,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.267Z"
+			"checkedAt": "2026-09-26T11:43:44.800Z"
 		},
 		{
 			"fullName": "kalepail/stellar-mpp-demo",
@@ -2804,7 +2813,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.281Z"
+			"checkedAt": "2026-09-26T11:43:44.791Z"
 		},
 		{
 			"fullName": "kalepail/quarterly-ascension",
@@ -2813,7 +2822,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.278Z"
+			"checkedAt": "2026-09-26T11:43:44.798Z"
 		},
 		{
 			"fullName": "justmert/sora",
@@ -2822,7 +2831,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.268Z"
+			"checkedAt": "2026-09-26T11:43:44.900Z"
 		},
 		{
 			"fullName": "JulioMh/dogstar-bridge-stellar",
@@ -2831,7 +2840,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.432Z"
+			"checkedAt": "2026-09-26T11:43:44.907Z"
 		},
 		{
 			"fullName": "JFWooten4/TAD3-core",
@@ -2840,7 +2849,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.411Z"
+			"checkedAt": "2026-09-26T11:43:44.913Z"
 		},
 		{
 			"fullName": "jadonamite/meno-frontend",
@@ -2849,7 +2858,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.385Z"
+			"checkedAt": "2026-09-26T11:43:44.906Z"
 		},
 		{
 			"fullName": "immaculate-munde/last-mile",
@@ -2858,7 +2867,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.400Z"
+			"checkedAt": "2026-09-26T11:43:45.039Z"
 		},
 		{
 			"fullName": "ilesoviy/payqin_stellar-anchor",
@@ -2867,7 +2876,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.547Z"
+			"checkedAt": "2026-09-26T11:43:45.039Z"
 		},
 		{
 			"fullName": "ilesoviy/payqin_stellar-web",
@@ -2876,7 +2885,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.566Z"
+			"checkedAt": "2026-09-26T11:43:45.015Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/reflector-aqua-pool-proxy-contract",
@@ -2885,7 +2894,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.546Z"
+			"checkedAt": "2026-09-26T11:43:45.031Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/reflector-fx-connector",
@@ -2894,7 +2903,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.552Z"
+			"checkedAt": "2026-09-26T11:43:45.155Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/admin-dashboard",
@@ -2903,7 +2912,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.725Z"
+			"checkedAt": "2026-09-26T11:43:45.152Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/reflector-stellar-connector",
@@ -2912,7 +2921,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.683Z"
+			"checkedAt": "2026-09-26T11:43:45.206Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/oracle-client",
@@ -2921,7 +2930,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.684Z"
+			"checkedAt": "2026-09-26T11:43:45.148Z"
 		},
 		{
 			"fullName": "hawthorne-abendsen/reflector-node",
@@ -2930,7 +2939,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.715Z"
+			"checkedAt": "2026-09-26T11:43:45.350Z"
 		},
 		{
 			"fullName": "fxjrin/soroban-ide",
@@ -2939,7 +2948,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.838Z"
+			"checkedAt": "2026-09-26T11:43:45.324Z"
 		},
 		{
 			"fullName": "fnando/stellar-contract-verify-plugin",
@@ -2948,7 +2957,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.855Z"
+			"checkedAt": "2026-09-26T11:43:45.322Z"
 		},
 		{
 			"fullName": "Klorenn/bookee",
@@ -2957,7 +2966,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.835Z"
+			"checkedAt": "2026-09-26T11:43:45.315Z"
 		},
 		{
 			"fullName": "blessedux/sozu-pay",
@@ -2966,7 +2975,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.842Z"
+			"checkedAt": "2026-09-26T11:43:45.459Z"
 		},
 		{
 			"fullName": "samjay8/SPulse",
@@ -2975,7 +2984,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.964Z"
+			"checkedAt": "2026-09-26T11:43:45.451Z"
 		},
 		{
 			"fullName": "samjay8/invofi",
@@ -2984,7 +2993,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.966Z"
+			"checkedAt": "2026-09-26T11:43:45.452Z"
 		},
 		{
 			"fullName": "therealjhay/stellar-wave",
@@ -2993,7 +3002,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.970Z"
+			"checkedAt": "2026-09-26T11:43:45.453Z"
 		},
 		{
 			"fullName": "0xVida/xlm-paymaster",
@@ -3002,7 +3011,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:34.968Z"
+			"checkedAt": "2026-09-26T11:43:45.596Z"
 		},
 		{
 			"fullName": "Xoulomon/settu-official",
@@ -3011,7 +3020,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.091Z"
+			"checkedAt": "2026-09-26T11:43:45.564Z"
 		},
 		{
 			"fullName": "theboycoder/stellar-pay",
@@ -3020,7 +3029,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.089Z"
+			"checkedAt": "2026-09-26T11:43:45.567Z"
 		},
 		{
 			"fullName": "UmutKDev/bound",
@@ -3029,7 +3038,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.096Z"
+			"checkedAt": "2026-09-26T11:43:45.575Z"
 		},
 		{
 			"fullName": "rafliad/payoes",
@@ -3038,7 +3047,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.096Z"
+			"checkedAt": "2026-09-26T11:43:45.701Z"
 		},
 		{
 			"fullName": "orbitlens/stellar-expert-id-keystore-mongodb",
@@ -3047,7 +3056,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.214Z"
+			"checkedAt": "2026-09-26T11:43:45.711Z"
 		},
 		{
 			"fullName": "orbitlens/operations-notifier",
@@ -3056,7 +3065,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.206Z"
+			"checkedAt": "2026-09-26T11:43:45.704Z"
 		},
 		{
 			"fullName": "ofwonogodwin/Market-Connect-Ug",
@@ -3065,7 +3074,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.224Z"
+			"checkedAt": "2026-09-26T11:43:45.709Z"
 		},
 		{
 			"fullName": "Obiajulu-gif/Stellar-TrustQuest",
@@ -3074,7 +3083,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.217Z"
+			"checkedAt": "2026-09-26T11:43:45.819Z"
 		},
 		{
 			"fullName": "neelpote/Orakel",
@@ -3083,7 +3092,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.362Z"
+			"checkedAt": "2026-09-26T11:43:45.850Z"
 		},
 		{
 			"fullName": "Maycon-Rodrigues/rn-latam-anchor-kit",
@@ -3092,7 +3101,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.353Z"
+			"checkedAt": "2026-09-26T11:43:45.813Z"
 		},
 		{
 			"fullName": "MattPoblete/soroban-preview-docker",
@@ -3101,7 +3110,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.340Z"
+			"checkedAt": "2026-09-26T11:43:45.812Z"
 		},
 		{
 			"fullName": "marwen-abid/meridian-pay-sdp-frontend",
@@ -3110,7 +3119,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.340Z"
+			"checkedAt": "2026-09-26T11:43:45.964Z"
 		},
 		{
 			"fullName": "marwen-abid/meridian-pay-sdp-backend",
@@ -3119,7 +3128,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.474Z"
+			"checkedAt": "2026-09-26T11:43:45.980Z"
 		},
 		{
 			"fullName": "marcelosalloum/stellar-mpp-sdk",
@@ -3128,7 +3137,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.487Z"
+			"checkedAt": "2026-09-26T11:43:45.956Z"
 		},
 		{
 			"fullName": "Mackenzie-OO7/builders-circle",
@@ -3137,7 +3146,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.477Z"
+			"checkedAt": "2026-09-26T11:43:45.956Z"
 		},
 		{
 			"fullName": "aolieman/tansu-vault",
@@ -3146,7 +3155,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.484Z"
+			"checkedAt": "2026-09-26T11:43:46.151Z"
 		},
 		{
 			"fullName": "ceciliaromao/soroban-dapps",
@@ -3155,7 +3164,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.606Z"
+			"checkedAt": "2026-09-26T11:43:46.089Z"
 		},
 		{
 			"fullName": "ceciliaromao/stellar-token-factory",
@@ -3164,7 +3173,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.603Z"
+			"checkedAt": "2026-09-26T11:43:46.098Z"
 		},
 		{
 			"fullName": "ceciliaromao/meridian-pay-sdp-frontend",
@@ -3173,7 +3182,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.599Z"
+			"checkedAt": "2026-09-26T11:43:46.092Z"
 		},
 		{
 			"fullName": "ceciliaromao/stellar-anchor-tests",
@@ -3182,7 +3191,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.639Z"
+			"checkedAt": "2026-09-26T11:43:46.269Z"
 		},
 		{
 			"fullName": "ceciliaromao/meridian-pay-sdp-backend",
@@ -3191,7 +3200,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.748Z"
+			"checkedAt": "2026-09-26T11:43:46.259Z"
 		},
 		{
 			"fullName": "ceciliaromao/anchor-platform",
@@ -3200,7 +3209,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.758Z"
+			"checkedAt": "2026-09-26T11:43:46.294Z"
 		},
 		{
 			"fullName": "wmendes/stellar-docs",
@@ -3209,7 +3218,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.792Z"
+			"checkedAt": "2026-09-26T11:43:46.261Z"
 		},
 		{
 			"fullName": "matheusbrasilaguiar/rn-latam-anchor-kit",
@@ -3218,7 +3227,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.765Z"
+			"checkedAt": "2026-09-26T11:43:46.399Z"
 		},
 		{
 			"fullName": "CarolTea/rn-latam-anchor-kit",
@@ -3227,7 +3236,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.910Z"
+			"checkedAt": "2026-09-26T11:43:46.405Z"
 		},
 		{
 			"fullName": "miguelnietoa/stellarview-explorer",
@@ -3236,7 +3245,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.913Z"
+			"checkedAt": "2026-09-26T11:43:46.401Z"
 		},
 		{
 			"fullName": "miguelnietoa/lumenwipe",
@@ -3245,7 +3254,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.912Z"
+			"checkedAt": "2026-09-26T11:43:46.418Z"
 		},
 		{
 			"fullName": "alex0tico/PixelKale",
@@ -3254,7 +3263,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:35.910Z"
+			"checkedAt": "2026-09-26T11:43:46.521Z"
 		},
 		{
 			"fullName": "alex0tico/batterytrack-stellar-soroban",
@@ -3263,7 +3272,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:36.031Z"
+			"checkedAt": "2026-09-26T11:43:46.528Z"
 		},
 		{
 			"fullName": "Dione-b/Battleship-Hackathon---Stellar-Hacks-ZK-Gaming",
@@ -3272,7 +3281,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:36.030Z"
+			"checkedAt": "2026-09-26T11:43:46.542Z"
 		},
 		{
 			"fullName": "Dione-b/x402-agents-stellar-project",
@@ -3281,7 +3290,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.022Z"
+			"checkedAt": "2026-09-26T11:43:46.533Z"
 		},
 		{
 			"fullName": "Dione-b/social-forests-protocol",
@@ -3290,7 +3299,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:36.030Z"
+			"checkedAt": "2026-09-26T11:43:46.668Z"
 		},
 		{
 			"fullName": "Dione-b/ParaDevs-AgenticPaymentsX402",
@@ -3299,7 +3308,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.129Z"
+			"checkedAt": "2026-09-26T11:43:46.657Z"
 		},
 		{
 			"fullName": "Dione-b/TrustGate",
@@ -3308,7 +3317,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.147Z"
+			"checkedAt": "2026-09-26T11:43:46.651Z"
 		},
 		{
 			"fullName": "Dione-b/stellar-constellation",
@@ -3317,7 +3326,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.139Z"
+			"checkedAt": "2026-09-26T11:43:46.652Z"
 		},
 		{
 			"fullName": "wrever/PixelKale",
@@ -3326,7 +3335,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.197Z"
+			"checkedAt": "2026-09-26T11:43:46.837Z"
 		},
 		{
 			"fullName": "alexanderkoh/sorobounty.xyz",
@@ -3335,7 +3344,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.309Z"
+			"checkedAt": "2026-09-26T11:43:46.774Z"
 		},
 		{
 			"fullName": "alexanderkoh/consensus2024",
@@ -3344,7 +3353,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.316Z"
+			"checkedAt": "2026-09-26T11:43:46.777Z"
 		},
 		{
 			"fullName": "sergiotechx/Wallet-Balance",
@@ -3353,7 +3362,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.313Z"
+			"checkedAt": "2026-09-26T11:43:46.770Z"
 		},
 		{
 			"fullName": "sergiotechx/StellarHarmony",
@@ -3362,7 +3371,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.331Z"
+			"checkedAt": "2026-09-26T11:43:46.978Z"
 		},
 		{
 			"fullName": "fazzatti/stellar-private-payments",
@@ -3371,7 +3380,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.452Z"
+			"checkedAt": "2026-09-26T11:43:46.941Z"
 		},
 		{
 			"fullName": "salazarsebas/stellarview-explorer",
@@ -3380,7 +3389,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.442Z"
+			"checkedAt": "2026-09-26T11:43:47.001Z"
 		},
 		{
 			"fullName": "salazarsebas/lumenwipe",
@@ -3389,7 +3398,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.439Z"
+			"checkedAt": "2026-09-26T11:43:46.951Z"
 		},
 		{
 			"fullName": "theboycoder/meridian-stellar-hot-potato-frontend-svelte",
@@ -3398,7 +3407,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.433Z"
+			"checkedAt": "2026-09-26T11:43:47.112Z"
 		},
 		{
 			"fullName": "theboycoder/stellarlight",
@@ -3407,7 +3416,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.591Z"
+			"checkedAt": "2026-09-26T11:43:47.147Z"
 		},
 		{
 			"fullName": "Robson20019/wave-v2",
@@ -3416,7 +3425,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.574Z"
+			"checkedAt": "2026-09-26T11:43:47.107Z"
 		},
 		{
 			"fullName": "josiasdev/sylopay",
@@ -3425,7 +3434,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.573Z"
+			"checkedAt": "2026-09-26T11:43:47.120Z"
 		},
 		{
 			"fullName": "heliocarrara/players---team1",
@@ -3434,7 +3443,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.569Z"
+			"checkedAt": "2026-09-26T11:43:47.273Z"
 		},
 		{
 			"fullName": "ThaisFReis/plinafinance",
@@ -3443,7 +3452,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.702Z"
+			"checkedAt": "2026-09-26T11:43:47.250Z"
 		},
 		{
 			"fullName": "vanbarros76/smart-pig-defi",
@@ -3452,7 +3461,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.714Z"
+			"checkedAt": "2026-09-26T11:43:47.279Z"
 		},
 		{
 			"fullName": "Villarley/Stellar-Landing-Page",
@@ -3461,7 +3470,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.705Z"
+			"checkedAt": "2026-09-26T11:43:47.260Z"
 		},
 		{
 			"fullName": "E-Okelloh/SMS-DeFi-Assistant---PesaText",
@@ -3470,7 +3479,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.701Z"
+			"checkedAt": "2026-09-26T11:43:47.417Z"
 		},
 		{
 			"fullName": "aleregex/vaquita-stellar",
@@ -3479,7 +3488,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.833Z"
+			"checkedAt": "2026-09-26T11:43:47.403Z"
 		},
 		{
 			"fullName": "aleregex/woopi",
@@ -3488,7 +3497,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.830Z"
+			"checkedAt": "2026-09-26T11:43:47.386Z"
 		},
 		{
 			"fullName": "aleregex/StellarSummerFriday",
@@ -3497,7 +3506,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.834Z"
+			"checkedAt": "2026-09-26T11:43:47.431Z"
 		},
 		{
 			"fullName": "Wesley534/stellar-frontend",
@@ -3506,7 +3515,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.833Z"
+			"checkedAt": "2026-09-26T11:43:47.544Z"
 		},
 		{
 			"fullName": "Hurt4do/stellar-integration-hub",
@@ -3515,7 +3524,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.957Z"
+			"checkedAt": "2026-09-26T11:43:47.541Z"
 		},
 		{
 			"fullName": "0xdevcollins/Klyra",
@@ -3524,7 +3533,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.971Z"
+			"checkedAt": "2026-09-26T11:43:47.568Z"
 		},
 		{
 			"fullName": "delfinacorr/BIOCHAIN",
@@ -3533,7 +3542,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.958Z"
+			"checkedAt": "2026-09-26T11:43:47.564Z"
 		},
 		{
 			"fullName": "kaankacar/smart-account-kit",
@@ -3542,7 +3551,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:37.949Z"
+			"checkedAt": "2026-09-26T11:43:47.708Z"
 		},
 		{
 			"fullName": "kaankacar/passkey-kit",
@@ -3551,7 +3560,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.094Z"
+			"checkedAt": "2026-09-26T11:43:47.676Z"
 		},
 		{
 			"fullName": "mertcicekci0/HopeChainV2",
@@ -3560,7 +3569,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.159Z"
+			"checkedAt": "2026-09-26T11:43:47.708Z"
 		},
 		{
 			"fullName": "kingmon6996/record-management",
@@ -3569,7 +3578,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.081Z"
+			"checkedAt": "2026-09-26T11:43:47.686Z"
 		},
 		{
 			"fullName": "JAY007-think/Expense-Splitter",
@@ -3578,7 +3587,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.099Z"
+			"checkedAt": "2026-09-26T11:43:47.826Z"
 		},
 		{
 			"fullName": "Grainlify/Grainlify-Stellar-Contracts",
@@ -3587,25 +3596,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.267Z"
-		},
-		{
-			"fullName": "Grainlify/Grainlify-Frontend",
-			"was": "gone",
-			"verdict": "alive",
-			"httpStatus": 200,
-			"sizeKb": 19772,
-			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.370Z"
-		},
-		{
-			"fullName": "Grainlify/Grainlify-Backend",
-			"was": "gone",
-			"verdict": "alive",
-			"httpStatus": 200,
-			"sizeKb": 3722,
-			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.367Z"
+			"checkedAt": "2026-09-26T11:43:47.810Z"
 		},
 		{
 			"fullName": "GNS-Foundation/gns-mobile",
@@ -3614,7 +3605,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.300Z"
+			"checkedAt": "2026-09-26T11:43:47.848Z"
 		},
 		{
 			"fullName": "GNS-Foundation/gns-desktop",
@@ -3623,7 +3614,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.502Z"
+			"checkedAt": "2026-09-26T11:43:47.850Z"
 		},
 		{
 			"fullName": "gabrielrondon/finance-go",
@@ -3632,7 +3623,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.522Z"
+			"checkedAt": "2026-09-26T11:43:47.986Z"
 		},
 		{
 			"fullName": "gabrielrondon/defarm-escrow",
@@ -3641,7 +3632,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.530Z"
+			"checkedAt": "2026-09-26T11:43:48.026Z"
 		},
 		{
 			"fullName": "fahmmin/nft-battle-game",
@@ -3650,7 +3641,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.479Z"
+			"checkedAt": "2026-09-26T11:43:47.969Z"
 		},
 		{
 			"fullName": "diadonquixote/PWD-MEDICATION-WALLET",
@@ -3659,7 +3650,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.688Z"
+			"checkedAt": "2026-09-26T11:43:47.991Z"
 		},
 		{
 			"fullName": "DeepSaha25/TaskChain-Mini",
@@ -3668,7 +3659,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.651Z"
+			"checkedAt": "2026-09-26T11:43:48.126Z"
 		},
 		{
 			"fullName": "DeepSaha25/RakshaCircle-Level-6",
@@ -3677,7 +3668,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.668Z"
+			"checkedAt": "2026-09-26T11:43:48.176Z"
 		},
 		{
 			"fullName": "codepavan-py/CryptoBridge-Loyalty",
@@ -3686,7 +3677,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.635Z"
+			"checkedAt": "2026-09-26T11:43:48.146Z"
 		},
 		{
 			"fullName": "capitaharlock/sync",
@@ -3695,7 +3686,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.862Z"
+			"checkedAt": "2026-09-26T11:43:48.161Z"
 		},
 		{
 			"fullName": "BitGo/key-recovery-service-v2",
@@ -3704,7 +3695,16 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.860Z"
+			"checkedAt": "2026-09-26T11:43:48.320Z"
+		},
+		{
+			"fullName": "ANSHSINGH5999/stellar-protocol-analytics",
+			"was": "gone",
+			"verdict": "gone",
+			"httpStatus": 404,
+			"sizeKb": null,
+			"priorError": "repo not found on GitHub (404) as of 2026-09-25",
+			"checkedAt": "2026-09-26T11:43:48.311Z"
 		},
 		{
 			"fullName": "abhinavsaini5192/Partnership-Dissolution",
@@ -3713,7 +3713,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.799Z"
+			"checkedAt": "2026-09-26T11:43:48.294Z"
 		},
 		{
 			"fullName": "A-Faris14/quicknotes",
@@ -3722,7 +3722,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:38.823Z"
+			"checkedAt": "2026-09-26T11:43:48.311Z"
 		},
 		{
 			"fullName": "ConvexityTeam/.github",
@@ -3731,7 +3731,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.028Z"
+			"checkedAt": "2026-09-26T11:43:48.492Z"
 		},
 		{
 			"fullName": "inventure/Test_Developer_Portal",
@@ -3740,7 +3740,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.027Z"
+			"checkedAt": "2026-09-26T11:43:48.456Z"
 		},
 		{
 			"fullName": "inventure/Test_Credit_Portal",
@@ -3749,7 +3749,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.043Z"
+			"checkedAt": "2026-09-26T11:43:48.472Z"
 		},
 		{
 			"fullName": "devasignhq/soroban-escrow",
@@ -3758,7 +3758,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.009Z"
+			"checkedAt": "2026-09-26T11:43:48.490Z"
 		},
 		{
 			"fullName": "acta-team/website",
@@ -3767,7 +3767,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.213Z"
+			"checkedAt": "2026-09-26T11:43:48.625Z"
 		},
 		{
 			"fullName": "acta-team/dApp-ACTA",
@@ -3776,7 +3776,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.183Z"
+			"checkedAt": "2026-09-26T11:43:48.621Z"
 		},
 		{
 			"fullName": "convexityteam/mintlify-docs",
@@ -3785,7 +3785,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.178Z"
+			"checkedAt": "2026-09-26T11:43:48.619Z"
 		},
 		{
 			"fullName": "convexityteam/documentation",
@@ -3794,7 +3794,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.191Z"
+			"checkedAt": "2026-09-26T11:43:48.619Z"
 		},
 		{
 			"fullName": "convexityteam/mintlify-starter",
@@ -3803,7 +3803,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.342Z"
+			"checkedAt": "2026-09-26T11:43:48.804Z"
 		},
 		{
 			"fullName": "convexityteam/docs-starter",
@@ -3812,7 +3812,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.335Z"
+			"checkedAt": "2026-09-26T11:43:48.743Z"
 		},
 		{
 			"fullName": "convexityteam/docs-bobbette",
@@ -3821,7 +3821,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.327Z"
+			"checkedAt": "2026-09-26T11:43:48.733Z"
 		},
 		{
 			"fullName": "devasignhq/apps",
@@ -3830,7 +3830,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.387Z"
+			"checkedAt": "2026-09-26T11:43:48.776Z"
 		},
 		{
 			"fullName": "switchlyprotocol/validator-poc",
@@ -3839,7 +3839,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.546Z"
+			"checkedAt": "2026-09-26T11:43:48.953Z"
 		},
 		{
 			"fullName": "switchlyprotocol/switchlyapp",
@@ -3848,7 +3848,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.542Z"
+			"checkedAt": "2026-09-26T11:43:48.934Z"
 		},
 		{
 			"fullName": "switchlyprotocol/midgard",
@@ -3857,7 +3857,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.544Z"
+			"checkedAt": "2026-09-26T11:43:48.938Z"
 		},
 		{
 			"fullName": "switchlyprotocol/switchly-swap",
@@ -3866,7 +3866,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.552Z"
+			"checkedAt": "2026-09-26T11:43:48.937Z"
 		},
 		{
 			"fullName": "NoetherDEX/noetherkeeperbot",
@@ -3875,7 +3875,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.749Z"
+			"checkedAt": "2026-09-26T11:43:49.091Z"
 		},
 		{
 			"fullName": "NoetherDEX/yahya_development",
@@ -3884,7 +3884,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.799Z"
+			"checkedAt": "2026-09-26T11:43:49.139Z"
 		},
 		{
 			"fullName": "NoetherDEX/noetherkeeperbotv2",
@@ -3893,7 +3893,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.815Z"
+			"checkedAt": "2026-09-26T11:43:49.096Z"
 		},
 		{
 			"fullName": "Reinasboo/Flash",
@@ -3902,7 +3902,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.681Z"
+			"checkedAt": "2026-09-26T11:43:49.060Z"
 		},
 		{
 			"fullName": "0xbhoomi/agentmesh",
@@ -3911,7 +3911,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.936Z"
+			"checkedAt": "2026-09-26T11:43:49.266Z"
 		},
 		{
 			"fullName": "TheSupermanish/superpage-stellar",
@@ -3920,7 +3920,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.970Z"
+			"checkedAt": "2026-09-26T11:43:49.272Z"
 		},
 		{
 			"fullName": "gdalabs/autorepay-stellar",
@@ -3929,7 +3929,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.974Z"
+			"checkedAt": "2026-09-26T11:43:49.348Z"
 		},
 		{
 			"fullName": "GatoGroZero/devengo",
@@ -3938,7 +3938,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:39.955Z"
+			"checkedAt": "2026-09-26T11:43:49.272Z"
 		},
 		{
 			"fullName": "envexx/Lument-Trust",
@@ -3947,7 +3947,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.118Z"
+			"checkedAt": "2026-09-26T11:43:49.455Z"
 		},
 		{
 			"fullName": "TKCollective/x402-research-skill",
@@ -3956,7 +3956,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.120Z"
+			"checkedAt": "2026-09-26T11:43:49.478Z"
 		},
 		{
 			"fullName": "big14way/stellar-agent-gateway",
@@ -3965,7 +3965,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.487Z"
+			"checkedAt": "2026-09-26T11:43:49.474Z"
 		},
 		{
 			"fullName": "0xNana/SearchPay",
@@ -3974,7 +3974,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.285Z"
+			"checkedAt": "2026-09-26T11:43:49.490Z"
 		},
 		{
 			"fullName": "ALFA117/MongliAgent",
@@ -3983,7 +3983,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.626Z"
+			"checkedAt": "2026-09-26T11:43:49.628Z"
 		},
 		{
 			"fullName": "Nsuccess/AgentMarket",
@@ -3992,7 +3992,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.617Z"
+			"checkedAt": "2026-09-26T11:43:49.632Z"
 		},
 		{
 			"fullName": "soroswap/stellar-101",
@@ -4001,7 +4001,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.593Z"
+			"checkedAt": "2026-09-26T11:43:49.591Z"
 		},
 		{
 			"fullName": "Falparis/AITT",
@@ -4010,7 +4010,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.623Z"
+			"checkedAt": "2026-09-26T11:43:49.637Z"
 		},
 		{
 			"fullName": "coindisco/galaxy-ramp",
@@ -4019,7 +4019,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.772Z"
+			"checkedAt": "2026-09-26T11:43:49.780Z"
 		},
 		{
 			"fullName": "EquitXCompany/equitx-project",
@@ -4028,7 +4028,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.779Z"
+			"checkedAt": "2026-09-26T11:43:49.765Z"
 		},
 		{
 			"fullName": "gakpe/minah_blockchain_v0.2",
@@ -4037,7 +4037,7 @@
 			"httpStatus": 404,
 			"sizeKb": null,
 			"priorError": "repo not found on GitHub (404) as of 2026-09-15",
-			"checkedAt": "2026-09-25T22:18:40.783Z"
+			"checkedAt": "2026-09-26T11:43:49.774Z"
 		}
 	]
 }
