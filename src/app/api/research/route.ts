@@ -56,6 +56,8 @@ import {
 } from "@/lib/research-rank";
 
 export const dynamic = "force-dynamic";
+/** A source-scoped request runs the lexical refill scan only for queries this short. */
+const LEXICAL_REFILL_MAX_TOKENS_SCOPED = 3;
 // Long enough for a slow vector pass plus the keyword fallback, never a hang.
 export const maxDuration = 30;
 export const revalidate = 60;
@@ -803,7 +805,16 @@ export async function GET(req: NextRequest) {
 		const poolCovered =
 			!lexTokens.length ||
 			chunks.some((c) => hasFullLexicalCoverage(c, lexTokens));
-		if (!poolCovered) {
+		// The refill is a `contains` regex over every chunk's content, a full
+		// scan of the source. It exists for lookup-shaped queries (a product
+		// name, a ticker), which are short. A long question fanned out across
+		// every source by an agent almost never has full coverage inside one
+		// source, so it paid the scan sixteen times per question for a
+		// supplement that ranking then had no use for. Scoped requests run it
+		// only for short queries; unscoped requests keep it.
+		const refillWorthIt =
+			!effectiveSource || lexTokens.length <= LEXICAL_REFILL_MAX_TOKENS_SCOPED;
+		if (!poolCovered && refillWorthIt) {
 			try {
 				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
 				const lexWhere: any = {
