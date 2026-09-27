@@ -156,21 +156,21 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (200/202)",
-      "types": "100% (202/202)",
-      "supportedNetworks": "56% (113/202)",
-      "logoUrl": "76% (154/202)"
+      "shortDescription": "99% (202/204)",
+      "types": "100% (204/204)",
+      "supportedNetworks": "55% (113/204)",
+      "logoUrl": "75% (154/204)"
     },
     "Tooling": {
-      "shortDescription": "98% (178/182)",
-      "types": "100% (182/182)",
-      "logoUrl": "82% (150/182)"
+      "shortDescription": "96% (176/183)",
+      "types": "99% (181/183)",
+      "logoUrl": "81% (149/183)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (395/399)",
-      "types": "100% (399/399)",
-      "supportedNetworks": "74% (295/399)",
-      "logoUrl": "85% (339/399)"
+      "shortDescription": "97% (397/408)",
+      "types": "99% (405/408)",
+      "supportedNetworks": "73% (297/408)",
+      "logoUrl": "83% (340/408)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -179,17 +179,17 @@
       "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
-      "shortDescription": "100% (154/154)",
-      "types": "100% (154/154)",
-      "supportedNetworks": "78% (120/154)",
-      "logoUrl": "81% (124/154)",
-      "tvlUSD": "9% (14/154)"
+      "shortDescription": "99% (155/157)",
+      "types": "99% (156/157)",
+      "supportedNetworks": "76% (120/157)",
+      "logoUrl": "80% (125/157)",
+      "tvlUSD": "9% (14/157)"
     },
     "Anchor": {
-      "shortDescription": "94% (15/16)",
-      "types": "100% (16/16)",
-      "supportedNetworks": "75% (12/16)",
-      "logoUrl": "88% (14/16)"
+      "shortDescription": "93% (14/15)",
+      "types": "100% (15/15)",
+      "supportedNetworks": "73% (11/15)",
+      "logoUrl": "87% (13/15)"
     },
     "Partner Integration": {
       "shortDescription": "100% (1/1)",
@@ -203,7 +203,7 @@
     "groups": []
   },
   "s3b_domain_duplicates": {
-    "count": 7,
+    "count": 9,
     "groups": [
       {
         "apex": "jsr.io",
@@ -301,6 +301,21 @@
         ]
       },
       {
+        "apex": "nouns.build",
+        "records": [
+          {
+            "slug": "nouns",
+            "name": "Nouns",
+            "scfAwarded": false
+          },
+          {
+            "slug": "nouns-builder-protocol",
+            "name": "Nouns Builder Protocol",
+            "scfAwarded": true
+          }
+        ]
+      },
+      {
         "apex": "bossmoney.com",
         "records": [
           {
@@ -329,24 +344,39 @@
             "scfAwarded": false
           }
         ]
+      },
+      {
+        "apex": "crebitpay.com",
+        "records": [
+          {
+            "slug": "crebit",
+            "name": "Crebit",
+            "scfAwarded": true
+          },
+          {
+            "slug": "crebit-pay",
+            "name": "Crebit Pay",
+            "scfAwarded": false
+          }
+        ]
       }
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 382,
-    "liveStale365": 129,
+    "liveNoDatedSignal": 397,
+    "liveStale365": 130,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 566,
+        "ageDays": 573,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 934,
+        "ageDays": 941,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -367,7 +397,7 @@
       {
         "slug": "nownodes",
         "name": "NOWNodes",
-        "ageDays": 2334,
+        "ageDays": 2341,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -395,7 +425,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 377,
+        "ageDays": 384,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -478,6 +508,6 @@
       }
     ]
   },
-  "generatedAt": "2026-09-20T13:42:17Z",
+  "generatedAt": "2026-09-27T14:46:50Z",
   "evalKey": "engine-b-sweeps"
 }

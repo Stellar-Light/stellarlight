@@ -1,63 +1,13 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 61747,
-    "realHits": 8085,
-    "distinctQueries": 4338,
-    "replayed": 250
+    "loggedHits": 100000,
+    "realHits": 64185,
+    "distinctQueries": 7388,
+    "replayed": 190
   },
-  "okRate": 98,
-  "misses": [
-    {
-      "endpoint": "/api/research",
-      "query": "test",
-      "hits": 30,
-      "lastSeen": "2026-09-20T10:08:50.616Z",
-      "days": 15,
-      "buckets": [
-        "other"
-      ],
-      "class": "WEAK",
-      "evidence": "top confidence 0.4"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "contracterrorcodefromnumber",
-      "hits": 17,
-      "lastSeen": "2026-09-16T08:57:51.005Z",
-      "days": 3,
-      "buckets": [
-        "browser",
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 16,
-      "lastSeen": "2026-09-20T12:34:33.448Z",
-      "days": 14,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "defindex tvl exact product lineup",
-      "hits": 7,
-      "lastSeen": "2026-09-19T01:29:25.188Z",
-      "days": 2,
-      "buckets": [
-        "other"
-      ],
-      "class": "WEAK",
-      "evidence": "top confidence 0.27"
-    }
-  ],
-  "generatedAt": "2026-09-20T13:42:17Z",
+  "okRate": 100,
+  "misses": [],
+  "generatedAt": "2026-09-27T14:46:50Z",
   "evalKey": "engine-d-demand"
 }

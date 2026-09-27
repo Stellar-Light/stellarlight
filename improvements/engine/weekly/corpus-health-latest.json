@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 10679,
-    "docs": 2175
+    "chunks": 10788,
+    "docs": 2185
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,10 +13,38 @@
     "sample": []
   },
   "s7_coverage": {
+    "release": {
+      "chunks": 210,
+      "datedPct": 100,
+      "newestAgeDays": 1,
+      "undated": false,
+      "stalled": false
+    },
     "lumenloop-research": {
-      "chunks": 509,
+      "chunks": 521,
       "datedPct": 100,
       "newestAgeDays": 2,
+      "undated": false,
+      "stalled": false
+    },
+    "audit": {
+      "chunks": 1063,
+      "datedPct": 100,
+      "newestAgeDays": 57,
+      "undated": false,
+      "stalled": false
+    },
+    "sdf-blog": {
+      "chunks": 2441,
+      "datedPct": 100,
+      "newestAgeDays": 4,
+      "undated": false,
+      "stalled": false
+    },
+    "dev-docs": {
+      "chunks": 4071,
+      "datedPct": 75,
+      "newestAgeDays": 4,
       "undated": false,
       "stalled": false
     },
@@ -29,38 +57,10 @@
       "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
-    "release": {
-      "chunks": 205,
-      "datedPct": 100,
-      "newestAgeDays": 2,
-      "undated": false,
-      "stalled": false
-    },
-    "audit": {
-      "chunks": 980,
-      "datedPct": 100,
-      "newestAgeDays": 58,
-      "undated": false,
-      "stalled": false
-    },
-    "dev-docs": {
-      "chunks": 4065,
-      "datedPct": 75,
-      "newestAgeDays": 6,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-blog": {
-      "chunks": 2438,
-      "datedPct": 100,
-      "newestAgeDays": 7,
-      "undated": false,
-      "stalled": false
-    },
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1359,
+      "newestAgeDays": 1366,
       "undated": false,
       "stalled": false
     },
@@ -76,49 +76,49 @@
     "cap": {
       "chunks": 936,
       "datedPct": 98,
-      "newestAgeDays": 31,
+      "newestAgeDays": 38,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 182,
+      "newestAgeDays": 189,
       "undated": false,
       "stalled": false
     },
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 13,
+      "newestAgeDays": 20,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 137,
+      "newestAgeDays": 144,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 124,
+      "newestAgeDays": 131,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 99,
+      "newestAgeDays": 106,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3861,
+      "newestAgeDays": 3868,
       "undated": false,
       "stalled": false
     }
@@ -129,10 +129,10 @@
     "sample": [],
     "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
     "informational": {
-      "templateSiblings": 8,
+      "templateSiblings": 9,
       "boilerplateOverlap": 32
     }
   },
-  "generatedAt": "2026-09-20T13:42:17Z",
+  "generatedAt": "2026-09-27T14:46:50Z",
   "evalKey": "corpus-health"
 }
