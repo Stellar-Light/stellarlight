@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-09-26T12:22:12.053Z",
+ "generatedAt": "2026-09-27T13:14:55.756Z",
  "surfaces": [
-  {
-   "surface": "code",
-   "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 21,
-   "clearedFindings": 14,
-   "verifiedFindings": 0
-  },
   {
    "surface": "retrieval",
    "means": "search and ranking across projects, repos, research",
    "openFindings": 2,
    "clearedFindings": 340,
+   "verifiedFindings": 0
+  },
+  {
+   "surface": "code",
+   "means": "repo scanning, code depth, symbol extraction",
+   "openFindings": 1,
+   "clearedFindings": 35,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 721,
-  "open": 24,
-  "refreshQueue": 43,
+  "total": 723,
+  "open": 4,
+  "refreshQueue": 44,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 65,
+   "oldestDays": 66,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 630,
+  "cleared": 651,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 64,
-    "total": 248
+    "open": 45,
+    "total": 250
    },
    "instrument": {
     "open": 20,
@@ -158,10 +158,10 @@
    },
    {
     "mode": "repo-gone",
-    "open": 21,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 0,
+    "cleared": 21,
     "verified": 0,
     "surface": "code"
    },
@@ -186,7 +186,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 27,
+    "refresh": 28,
     "blocked": 0,
     "cleared": 9,
     "verified": 0,
@@ -268,11 +268,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 11
+    "count": 4
    },
    {
     "bucket": "8–30d",
-    "count": 13
+    "count": 0
    },
    {
     "bucket": "31–60d",
@@ -285,65 +285,65 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "battery:q-pc-doc-category-validator-search",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-26"
+    "probe": "ROHIT8759/KeyWe",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "battery:q-pc-fee-bump-channel-accounts-feepool",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-26"
+    "probe": "robertDurst/stellar-rust-sdk",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "battery:q-pc-l2-payment-channels-starlight",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-26"
+    "probe": "rawritude/public-directory",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "battery:q-pc-memos-reference",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-26"
+    "probe": "rawritude/stellarlight",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "battery:q-pc-multisig-setup-lifecycle",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-26"
+    "probe": "rajkumarsharma316/Habit-Tracker-Soroban",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "≥3 of top-10 carry types=Explorer (6 exist)",
-    "surface": "retrieval",
-    "failureMode": "recall-miss",
-    "clearedAt": "2026-09-21"
+    "probe": "Dione-b/lp-stellar-onchain-experience",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "https://clickpesadebtfund.com",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
+    "probe": "Klorenn/stellar-paylink",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    },
    {
-    "probe": "https://reflector.world",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-09-17"
+    "probe": "Nursca/backend",
+    "surface": "code",
+    "failureMode": "repo-gone",
+    "clearedAt": "2026-09-27"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 284,
-     "recurred": 109,
-     "ratePct": 38.4
+     "newFindings": 286,
+     "recurred": 110,
+     "ratePct": 38.5
     },
     "lifetime": {
-     "newFindings": 721,
-     "recurred": 188,
+     "newFindings": 723,
+     "recurred": 189,
      "ratePct": 26.1
     }
    },
@@ -356,13 +356,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 284,
-     "repeats": 283,
-     "ratePct": 99.6
+     "newFindings": 286,
+     "repeats": 285,
+     "ratePct": 99.7
     },
     "lifetime": {
-     "newFindings": 721,
-     "repeats": 714,
+     "newFindings": 723,
+     "repeats": 716,
      "ratePct": 99
     },
     "byClass": [
@@ -374,8 +374,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 163,
-      "open": 40,
+      "total": 164,
+      "open": 41,
       "firstSeen": "2026-07-22"
      },
      {
@@ -404,8 +404,8 @@
      },
      {
       "class": "unclassified",
-      "total": 24,
-      "open": 24,
+      "total": 25,
+      "open": 4,
       "firstSeen": "2026-09-17"
      }
     ]
@@ -9519,15 +9519,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1335
+     "count": 1336
     },
     {
      "label": "slowing",
-     "count": 976
+     "count": 979
     },
     {
      "label": "active",
-     "count": 864
+     "count": 860
     },
     {
      "label": "unknown",
@@ -10672,14 +10672,14 @@
     "value": 110
    },
    {
-    "id": "s:raven-routing",
-    "label": "raven-routing",
-    "column": 0,
-    "value": 36
-   },
-   {
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 37
+   },
+   {
+    "id": "s:raven-routing",
+    "label": "raven-routing",
     "column": 0,
     "value": 36
    },
@@ -10705,7 +10705,7 @@
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 21
+    "value": 22
    },
    {
     "id": "s:scf-crosscheck",
@@ -10771,7 +10771,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 35
+    "value": 36
    },
    {
     "id": "f:corpus",
@@ -10795,13 +10795,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 630
+    "value": 651
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 84
+    "value": 65
    },
    {
     "id": "o:verified",
@@ -10875,7 +10875,7 @@
     "value": 30
    },
    {
-    "source": 3,
+    "source": 4,
     "target": 21,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
@@ -10907,7 +10907,7 @@
     "target": 23,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 14
+    "value": 35
    },
    {
     "source": 2,
@@ -10966,18 +10966,18 @@
     "value": 4
    },
    {
-    "source": 4,
+    "source": 3,
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 36
+    "value": 37
    },
    {
     "source": 19,
     "target": 24,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 51
+    "value": 32
    },
    {
     "source": 1,
@@ -10998,7 +10998,7 @@
     "target": 19,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 21
+    "value": 22
    },
    {
     "source": 16,
