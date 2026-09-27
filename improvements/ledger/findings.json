@@ -4082,7 +4082,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T01:38:08.372Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -4110,7 +4110,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T02:37:05.018Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -4138,7 +4138,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T02:37:05.018Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -6315,7 +6315,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-08-28T15:54:52.406Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7046,7 +7046,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-08-31T19:51:18.114Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7528,9 +7528,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-02T17:42:51.016Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -7556,9 +7556,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-02T17:42:51.016Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-18T10:16:00.055Z"
  },
@@ -7584,7 +7584,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7598,7 +7598,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7612,7 +7612,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7626,7 +7626,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7640,7 +7640,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7654,7 +7654,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7668,7 +7668,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7682,7 +7682,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7696,7 +7696,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7710,7 +7710,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7724,7 +7724,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7738,7 +7738,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7948,9 +7948,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8269,9 +8269,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8408,9 +8408,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8449,9 +8449,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8812,9 +8812,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8853,9 +8853,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8880,9 +8880,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -8921,9 +8921,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -9200,9 +9200,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -9255,9 +9255,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -9296,9 +9296,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-07T10:58:33.072Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9352,9 +9352,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-09T10:20:31.289Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9380,9 +9380,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-10T10:15:50.109Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9394,9 +9394,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-10T10:15:50.109Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9506,9 +9506,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-15T10:42:08.103Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9520,9 +9520,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:robertdurst-stellar-rust-sdk",
@@ -9533,9 +9534,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:rawritude-public-directory",
@@ -9546,9 +9548,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:rawritude-stellarlight",
@@ -9559,9 +9562,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:rajkumarsharma316-habit-tracker-soroban",
@@ -9572,9 +9576,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:dione-b-lp-stellar-onchain-experience",
@@ -9585,9 +9590,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:klorenn-stellar-paylink",
@@ -9598,9 +9604,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:nursca-backend",
@@ -9611,9 +9618,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:nursca-surface",
@@ -9624,9 +9632,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:nursca-contracts",
@@ -9637,9 +9646,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:mackenzie-oo7-stellar-x-web3bridge",
@@ -9650,9 +9660,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:mackenzie-oo7-stellar-oss-issues",
@@ -9663,9 +9674,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:timi16-paylink-sdk",
@@ -9676,9 +9688,10 @@
   "severity": "high",
   "firstSeen": "2026-09-17T10:38:59.203Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "nightly-note-freshness:note-stale-soneso-stellar-php-sdk-packagist-sone",
@@ -9688,9 +9701,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9701,9 +9714,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9714,9 +9727,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9727,9 +9740,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9740,9 +9753,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -9753,9 +9766,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9766,9 +9779,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9779,9 +9792,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-19T09:56:27.692Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -9792,9 +9805,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-19T09:56:27.692Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9805,9 +9818,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-19T09:56:27.692Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9818,7 +9831,7 @@
   "failureMode": "demand-miss",
   "severity": "high",
   "firstSeen": "2026-09-21T11:21:31.129Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-20T13:42:17Z",
   "kind": "instrument"
@@ -9831,7 +9844,7 @@
   "failureMode": "demand-miss",
   "severity": "high",
   "firstSeen": "2026-09-21T11:21:31.129Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-20T13:42:17Z",
   "kind": "instrument"
@@ -9845,9 +9858,10 @@
   "severity": "high",
   "firstSeen": "2026-09-22T10:34:53.700Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "nightly-note-freshness:note-stale-blindpaylabs-blindpay-mcp-npm-blindpa",
@@ -9857,9 +9871,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-22T10:34:53.700Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9870,9 +9884,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-22T10:34:53.700Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -9884,9 +9898,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:zaber-dev-ovrl-sdk",
@@ -9897,9 +9912,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:yripper-utility-contracts",
@@ -9910,9 +9926,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:yripper-soroban-preview-docker",
@@ -9923,9 +9940,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:galmanus-procyon",
@@ -9936,9 +9954,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:carlos-israelj-link2pay-sdk",
@@ -9949,9 +9968,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "gone-repos:cbiux-zcore-landing",
@@ -9962,9 +9982,10 @@
   "severity": "high",
   "firstSeen": "2026-09-24T10:45:08.452Z",
   "lastSeen": "2026-09-26T10:29:24.546Z",
-  "status": "open",
-  "evidenceAt": "2026-09-25T22:18:40.784Z",
-  "kind": "world"
+  "status": "cleared",
+  "evidenceAt": "2026-09-27T10:59:51.525Z",
+  "kind": "world",
+  "clearedAt": "2026-09-27T10:59:51.525Z"
  },
  {
   "id": "supersession-freshness:idos-network-kwil-db-economy",
@@ -9974,7 +9995,7 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-22T12:50:21.068Z",
   "kind": "world"
@@ -9987,7 +10008,7 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-22T12:50:21.068Z",
   "kind": "world"
@@ -10000,7 +10021,7 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
   "evidenceAt": "2026-09-22T12:50:21.068Z",
   "kind": "world"
@@ -10013,9 +10034,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10026,9 +10047,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10039,9 +10060,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10052,9 +10073,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10065,9 +10086,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T07:52:58.446Z",
+  "evidenceAt": "2026-09-27T08:22:06.355Z",
   "kind": "world"
  },
  {
@@ -10078,9 +10099,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10091,9 +10112,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10104,9 +10125,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10117,9 +10138,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10200,9 +10221,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-26T10:29:24.546Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10213,9 +10234,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-26T10:29:24.546Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:56.532Z",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
   "kind": "world"
  },
  {
@@ -10226,9 +10247,35 @@
   "failureMode": "battery-coverage-weak",
   "severity": "low",
   "firstSeen": "2026-09-26T10:29:24.546Z",
-  "lastSeen": "2026-09-26T10:29:24.546Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
   "status": "open",
-  "evidenceAt": "2026-09-26T10:28:23.061Z",
+  "evidenceAt": "2026-09-27T10:58:46.052Z",
   "kind": "instrument"
+ },
+ {
+  "id": "gone-repos:noetherdex-noether",
+  "source": "gone-repos",
+  "surface": "code",
+  "probe": "NoetherDEX/noether",
+  "failureMode": "repo-gone",
+  "severity": "high",
+  "firstSeen": "2026-09-27T10:59:51.525Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
+  "status": "open",
+  "evidenceAt": "2026-09-26T11:43:49.780Z",
+  "kind": "world"
+ },
+ {
+  "id": "nightly-note-freshness:note-stale-stellar-stellar-cli-crates-stellar-cl",
+  "source": "nightly-note-freshness",
+  "surface": "code",
+  "probe": "note-stale:stellar/stellar-cli:crates:stellar-cli",
+  "failureMode": "note-stale",
+  "severity": "low",
+  "firstSeen": "2026-09-27T10:59:51.525Z",
+  "lastSeen": "2026-09-27T10:59:51.525Z",
+  "status": "open",
+  "evidenceAt": "2026-09-27T10:59:22.200Z",
+  "kind": "world"
  }
 ]

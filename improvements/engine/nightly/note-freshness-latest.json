@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-26T10:28:56.532Z",
+	"generatedAt": "2026-09-27T10:59:22.200Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -80,6 +80,11 @@
 		{
 			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
 			"note": "note (asOf 2026-09-07) cites 0.2.0; registry latest is 0.2.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-cli:crates:stellar-cli",
+			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 28.1.0 (published 2026-09-26)",
 			"surface": "code"
 		},
 		{

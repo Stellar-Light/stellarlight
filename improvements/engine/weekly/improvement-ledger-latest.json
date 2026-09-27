@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-09-26T10:29:24.550Z",
-	"total": 721,
-	"open": 24,
-	"refreshQueue": 43,
+	"generatedAt": "2026-09-27T10:59:51.529Z",
+	"total": 723,
+	"open": 4,
+	"refreshQueue": 44,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 65,
+		"oldestDays": 66,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 65
+				"days": 66
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 65
+				"days": 66
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 29
+				"days": 30
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 21
+				"days": 22
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 21
+				"days": 22
 			}
 		]
 	},
@@ -59,44 +59,44 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 637,
+	"closed": 658,
 	"verified": 7,
-	"cleared": 630,
+	"cleared": 651,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 414,
+	"clearedOnSilence": 435,
 	"closingRate": 0.31,
-	"silenceShare": 0.57,
+	"silenceShare": 0.6,
 	"recurrence": {
 		"reopened": 11,
 		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 284,
-				"recurred": 109,
-				"ratePct": 38.4
+				"newFindings": 286,
+				"recurred": 110,
+				"ratePct": 38.5
 			},
 			"lifetime": {
-				"newFindings": 721,
-				"recurred": 188,
+				"newFindings": 723,
+				"recurred": 189,
 				"ratePct": 26.1
 			}
 		}
 	},
-	"oldestOpenDays": 9,
+	"oldestOpenDays": 6,
 	"inWave": 0,
-	"highOpen": 23,
+	"highOpen": 3,
 	"staleHighOpen": 0,
 	"bySurface": [
-		{
-			"surface": "code",
-			"open": 21,
-			"total": 65
-		},
 		{
 			"surface": "retrieval",
 			"open": 2,
 			"total": 342
+		},
+		{
+			"surface": "code",
+			"open": 1,
+			"total": 67
 		},
 		{
 			"surface": "corpus",
@@ -129,65 +129,65 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 12
+			"days": 13
 		}
 	],
 	"topOpen": [
 		{
-			"id": "gone-repos:rohit8759-keywe",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "ROHIT8759/KeyWe",
+			"id": "engine-d-demand:contracterrorcodefromnumber",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "contracterrorcodefromnumber",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:robertdurst-stellar-rust-sdk",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "robertDurst/stellar-rust-sdk",
+			"id": "engine-d-demand:defindex-tvl-exact-product-lineup",
+			"surface": "retrieval",
+			"source": "engine-d-demand",
+			"probe": "defindex tvl exact product lineup",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:rawritude-public-directory",
+			"id": "gone-repos:noetherdex-noether",
 			"surface": "code",
 			"source": "gone-repos",
-			"probe": "rawritude/public-directory",
+			"probe": "NoetherDEX/noether",
 			"severity": "high"
 		},
 		{
-			"id": "gone-repos:rawritude-stellarlight",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "rawritude/stellarlight",
-			"severity": "high"
+			"id": "raven-routing:top-stellar-projects-by-github-activity",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "top Stellar projects by GitHub activity",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:rajkumarsharma316-habit-tracker-soroban",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "rajkumarsharma316/Habit-Tracker-Soroban",
-			"severity": "high"
+			"id": "raven-routing:reflector-oracle-on-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "reflector oracle on Stellar",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:dione-b-lp-stellar-onchain-experience",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "Dione-b/lp-stellar-onchain-experience",
-			"severity": "high"
+			"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "jobs bounties and freelance work for Stellar contributors",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:klorenn-stellar-paylink",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "Klorenn/stellar-paylink",
-			"severity": "high"
+			"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "how does the Blend lending pool calculate interest rates in the code",
+			"severity": "medium"
 		},
 		{
-			"id": "gone-repos:nursca-backend",
-			"surface": "code",
-			"source": "gone-repos",
-			"probe": "Nursca/backend",
-			"severity": "high"
+			"id": "raven-routing:freighter",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "freighter",
+			"severity": "medium"
 		}
 	]
 }
