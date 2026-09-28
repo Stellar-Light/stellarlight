@@ -342,16 +342,20 @@ async function run() {
 			},
 			limit: 2000,
 			depth: 0,
-			select: { slug: true, links: true, name: true },
+			select: { slug: true, links: true, name: true, canonicalSlug: true },
 		});
 		const rows = candidates.docs as unknown as Array<{
 			slug?: string;
 			name?: string;
+			canonicalSlug?: string | null;
 			links?: { website?: string | null } | null;
 		}>;
 		console.log(`  toml join: ${rows.length} anchor/stablecoin-class rows`);
 		for (const p of rows) {
 			if (!p.slug) continue;
+			// A hidden duplicate (Draft + canonicalSlug) shares its canonical's
+			// domain; keying it would fetch and write the same asset twice.
+			if (p.canonicalSlug) continue;
 			const existing = bySlug.get(p.slug);
 			if (existing?.asset) continue; // a stronger source already keyed it
 			const dom = p.links?.website ? domainOf(p.links.website) : null;
@@ -360,8 +364,20 @@ async function run() {
 			await sleep(150); // be polite across many small operators
 			if (!text) continue;
 			const toml = parseStellarToml(text);
-			if (!toml.currencies.length) continue;
-			const [primary, ...rest] = toml.currencies;
+			// SEP-1 status: an asset the operator marks dead, test or private is
+			// not the row's on-chain evidence, whatever its trustline count
+			// (normalfinance.io marks all ten of its currencies dead, 2026-09-28).
+			const usable = toml.currencies.filter(
+				(c) => !c.status || c.status === "live",
+			);
+			if (!usable.length) {
+				if (toml.currencies.length)
+					console.log(
+						`  toml ${dom} → ${p.slug}: ${toml.currencies.length} currencies, none live (${toml.currencies.map((c) => `${c.code}:${c.status}`).join(", ")}) — skip`,
+					);
+				continue;
+			}
+			const [primary, ...rest] = usable;
 			const entry = existing ?? { contracts: [] };
 			entry.asset = { code: primary.code, issuer: primary.issuer };
 			bySlug.set(p.slug, entry);

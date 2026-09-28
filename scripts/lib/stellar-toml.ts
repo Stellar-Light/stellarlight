@@ -21,7 +21,7 @@ export interface StellarToml {
 	 *  whose issuer is a well-formed Stellar account (G + 55 base32 chars)
 	 *  are collected; a currency block without an issuer contributes to
 	 *  currencyCodes but never here. */
-	currencies: Array<{ code: string; issuer: string }>;
+	currencies: Array<{ code: string; issuer: string; status?: string }>;
 }
 
 /** Parse just the shapes we need: top-level `KEY = "v"`, the [DOCUMENTATION]
@@ -30,14 +30,23 @@ export function parseStellarToml(text: string): StellarToml {
 	const topLevel: Record<string, string> = {};
 	const documentation: Record<string, string> = {};
 	const currencyCodes: string[] = [];
-	const currencies: Array<{ code: string; issuer: string }> = [];
+	const currencies: Array<{ code: string; issuer: string; status?: string }> =
+		[];
 	let section: "top" | "doc" | "currency" | "other" = "top";
 	// The current [[CURRENCIES]] block accumulates until its next block starts
 	// — key order inside a block is not guaranteed by SEP-1.
-	let cur: { code?: string; issuer?: string } = {};
+	let cur: { code?: string; issuer?: string; status?: string } = {};
 	const flushCurrency = () => {
-		const code = cur.code?.trim().toUpperCase();
+		// Asset codes are case-sensitive on Stellar (nBTC and NBTC are two
+		// assets), so the code keeps the case the operator wrote; only the
+		// issuer is a StrKey, which is uppercase by definition. Uppercasing the
+		// code sent the on-chain join to a 404 for normalfinance.io's nBTC
+		// (2026-09-28) while the real asset had 65 trustlines.
+		const code = cur.code?.trim();
 		const issuer = cur.issuer?.trim().toUpperCase();
+		// SEP-1 `status`: live | dead | test | private. Kept so a join can
+		// decline an asset the operator itself has retired.
+		const status = cur.status?.trim().toLowerCase() || undefined;
 		if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
 		if (
 			code &&
@@ -45,7 +54,7 @@ export function parseStellarToml(text: string): StellarToml {
 			/^G[A-Z2-7]{55}$/.test(issuer) &&
 			!currencies.some((c) => c.code === code && c.issuer === issuer)
 		)
-			currencies.push({ code, issuer });
+			currencies.push(status ? { code, issuer, status } : { code, issuer });
 		cur = {};
 	};
 
@@ -68,6 +77,7 @@ export function parseStellarToml(text: string): StellarToml {
 			const k = key.toLowerCase();
 			if (k === "code") cur.code = value;
 			else if (k === "issuer") cur.issuer = value;
+			else if (k === "status") cur.status = value;
 		}
 	}
 	if (section === "currency") flushCurrency();
@@ -109,7 +119,6 @@ export async function fetchText(url: string): Promise<string | null> {
 		return null;
 	}
 }
-
 
 export function domainOf(websiteUrl: string): string | null {
 	try {
