@@ -134,6 +134,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-allbridge-io-allbridge-core-js-sdk-np",
+   "date": "2026-09-28",
+   "run": "36455121700",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
