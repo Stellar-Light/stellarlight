@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-27T10:59:22.200Z",
+	"generatedAt": "2026-09-28T12:13:29.932Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -19,7 +19,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
-			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.14.0 (published 2026-09-15)",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.15.0 (published 2026-09-27)",
 			"surface": "code"
 		},
 		{
@@ -64,12 +64,12 @@
 		},
 		{
 			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
-			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.13.0 (published 2026-09-15)",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.14.0 (published 2026-09-28)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
-			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.7.0 (published 2026-09-15)",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.8.0 (published 2026-09-28)",
 			"surface": "code"
 		},
 		{
@@ -130,6 +130,11 @@
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
 			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.1.0 (published 2026-09-17)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
+			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.10.3 (published 2026-09-27)",
 			"surface": "code"
 		},
 		{

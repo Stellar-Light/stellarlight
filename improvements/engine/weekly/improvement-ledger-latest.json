@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-09-27T10:59:51.529Z",
-	"total": 723,
-	"open": 4,
-	"refreshQueue": 44,
+	"generatedAt": "2026-09-28T12:14:16.252Z",
+	"total": 725,
+	"open": 1,
+	"refreshQueue": 46,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 66,
+		"oldestDays": 67,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 66
+				"days": 67
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 66
+				"days": 67
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 30
+				"days": 31
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 22
+				"days": 23
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 22
+				"days": 23
 			}
 		]
 	},
@@ -59,11 +59,11 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 658,
+	"closed": 661,
 	"verified": 7,
-	"cleared": 651,
+	"cleared": 654,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 435,
+	"clearedOnSilence": 438,
 	"closingRate": 0.31,
 	"silenceShare": 0.6,
 	"recurrence": {
@@ -72,41 +72,36 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 286,
-				"recurred": 110,
-				"ratePct": 38.5
+				"newFindings": 265,
+				"recurred": 98,
+				"ratePct": 37
 			},
 			"lifetime": {
-				"newFindings": 723,
-				"recurred": 189,
-				"ratePct": 26.1
+				"newFindings": 725,
+				"recurred": 191,
+				"ratePct": 26.3
 			}
 		}
 	},
-	"oldestOpenDays": 6,
+	"oldestOpenDays": 1,
 	"inWave": 0,
-	"highOpen": 3,
+	"highOpen": 1,
 	"staleHighOpen": 0,
 	"bySurface": [
 		{
-			"surface": "retrieval",
-			"open": 2,
-			"total": 342
-		},
-		{
 			"surface": "code",
 			"open": 1,
-			"total": 67
+			"total": 68
 		},
 		{
-			"surface": "corpus",
-			"open": 1,
-			"total": 24
+			"surface": "retrieval",
+			"open": 0,
+			"total": 342
 		},
 		{
 			"surface": "directory",
 			"open": 0,
-			"total": 201
+			"total": 202
 		},
 		{
 			"surface": "scf",
@@ -122,6 +117,11 @@
 			"surface": "consumer",
 			"open": 0,
 			"total": 36
+		},
+		{
+			"surface": "corpus",
+			"open": 0,
+			"total": 24
 		}
 	],
 	"unverifiedOpen": 17,
@@ -129,24 +129,10 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 13
+			"days": 14
 		}
 	],
 	"topOpen": [
-		{
-			"id": "engine-d-demand:contracterrorcodefromnumber",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "contracterrorcodefromnumber",
-			"severity": "high"
-		},
-		{
-			"id": "engine-d-demand:defindex-tvl-exact-product-lineup",
-			"surface": "retrieval",
-			"source": "engine-d-demand",
-			"probe": "defindex tvl exact product lineup",
-			"severity": "high"
-		},
 		{
 			"id": "gone-repos:noetherdex-noether",
 			"surface": "code",
@@ -187,6 +173,20 @@
 			"surface": "consumer",
 			"source": "raven-routing",
 			"probe": "freighter",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:is-anyone-actually-building-on-stellar-or-is-it-",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "is anyone actually building on Stellar or is it dead?",
+			"severity": "medium"
+		},
+		{
+			"id": "raven-routing:what-can-you-actually-build-on-stellar",
+			"surface": "consumer",
+			"source": "raven-routing",
+			"probe": "what can you actually build on Stellar?",
 			"severity": "medium"
 		}
 	]

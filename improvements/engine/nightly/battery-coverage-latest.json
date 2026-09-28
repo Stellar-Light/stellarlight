@@ -1,11 +1,5 @@
 {
-	"generatedAt": "2026-09-27T10:58:46.052Z",
+	"generatedAt": "2026-09-28T12:12:45.508Z",
 	"detector": "battery-coverage",
-	"failures": [
-		{
-			"probe": "battery:q-pc-slp-0004-0006-status",
-			"note": "top 0.59 < 0.6 via research/confidence for \"What are Stellar Limits Proposals SLP-0004 and SLP-0006, and which one was final\" (protocol-core); best: https://lumenloop.com/news/practical-confidential-stablecoins-issuer-controlled-2",
-			"surface": "corpus"
-		}
-	]
+	"failures": []
 }
