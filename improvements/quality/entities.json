@@ -1,13 +1,6 @@
 {
- "generatedAt": "2026-09-27T13:14:55.756Z",
+ "generatedAt": "2026-09-28T15:48:58.832Z",
  "surfaces": [
-  {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 2,
-   "clearedFindings": 340,
-   "verifiedFindings": 0
-  },
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
@@ -16,10 +9,10 @@
    "verifiedFindings": 0
   },
   {
-   "surface": "corpus",
-   "means": "indexed research/audit documents and their chunking",
-   "openFindings": 1,
-   "clearedFindings": 23,
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 0,
+   "clearedFindings": 342,
    "verifiedFindings": 0
   },
   {
@@ -49,13 +42,20 @@
    "openFindings": 0,
    "clearedFindings": 188,
    "verifiedFindings": 0
+  },
+  {
+   "surface": "corpus",
+   "means": "indexed research/audit documents and their chunking",
+   "openFindings": 0,
+   "clearedFindings": 24,
+   "verifiedFindings": 0
   }
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 723,
-  "open": 4,
-  "refreshQueue": 44,
+  "total": 725,
+  "open": 1,
+  "refreshQueue": 46,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 66,
+   "oldestDays": 68,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,16 +79,16 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 651,
+  "cleared": 654,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 45,
-    "total": 250
+    "open": 47,
+    "total": 252
    },
    "instrument": {
-    "open": 20,
+    "open": 17,
     "total": 473
    }
   },
@@ -105,7 +105,7 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 13,
+    "refresh": 14,
     "blocked": 0,
     "cleared": 98,
     "verified": 0,
@@ -122,10 +122,10 @@
    },
    {
     "mode": "demand-miss",
-    "open": 2,
+    "open": 0,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 47,
+    "cleared": 49,
     "verified": 0,
     "surface": "retrieval"
    },
@@ -149,10 +149,10 @@
    },
    {
     "mode": "battery-coverage-weak",
-    "open": 1,
+    "open": 0,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 23,
+    "cleared": 24,
     "verified": 0,
     "surface": "corpus"
    },
@@ -186,7 +186,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 28,
+    "refresh": 29,
     "blocked": 0,
     "cleared": 9,
     "verified": 0,
@@ -268,7 +268,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 4
+    "count": 1
    },
    {
     "bucket": "8–30d",
@@ -284,6 +284,24 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "contracterrorcodefromnumber",
+    "surface": "retrieval",
+    "failureMode": "demand-miss",
+    "clearedAt": "2026-09-28"
+   },
+   {
+    "probe": "defindex tvl exact product lineup",
+    "surface": "retrieval",
+    "failureMode": "demand-miss",
+    "clearedAt": "2026-09-28"
+   },
+   {
+    "probe": "battery:q-pc-slp-0004-0006-status",
+    "surface": "corpus",
+    "failureMode": "battery-coverage-weak",
+    "clearedAt": "2026-09-28"
+   },
    {
     "probe": "ROHIT8759/KeyWe",
     "surface": "code",
@@ -313,38 +331,20 @@
     "surface": "code",
     "failureMode": "repo-gone",
     "clearedAt": "2026-09-27"
-   },
-   {
-    "probe": "Dione-b/lp-stellar-onchain-experience",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
-   },
-   {
-    "probe": "Klorenn/stellar-paylink",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
-   },
-   {
-    "probe": "Nursca/backend",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 286,
-     "recurred": 110,
-     "ratePct": 38.5
+     "newFindings": 265,
+     "recurred": 98,
+     "ratePct": 37
     },
     "lifetime": {
-     "newFindings": 723,
-     "recurred": 189,
-     "ratePct": 26.1
+     "newFindings": 725,
+     "recurred": 191,
+     "ratePct": 26.3
     }
    },
    "reopened": {
@@ -356,13 +356,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 286,
-     "repeats": 285,
-     "ratePct": 99.7
+     "newFindings": 265,
+     "repeats": 264,
+     "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 723,
-     "repeats": 716,
+     "newFindings": 725,
+     "repeats": 718,
      "ratePct": 99
     },
     "byClass": [
@@ -374,14 +374,14 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 164,
-      "open": 41,
+      "total": 166,
+      "open": 43,
       "firstSeen": "2026-07-22"
      },
      {
       "class": "taxonomy-coverage",
       "total": 110,
-      "open": 2,
+      "open": 0,
       "firstSeen": "2026-07-22"
      },
      {
@@ -399,7 +399,7 @@
      {
       "class": "meta-eval",
       "total": 25,
-      "open": 1,
+      "open": 0,
       "firstSeen": "2026-07-23"
      },
      {
@@ -1663,11 +1663,9 @@
    {
     "slug": "spectra-finance",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
-    "status": "Development"
+    "factsPresent": 5,
+    "missing": [],
+    "status": "Live"
    },
    {
     "slug": "wellspring",
@@ -8505,11 +8503,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 917
+    "count": 916
    },
    {
     "network": "mainnet",
-    "count": 85
+    "count": 86
    },
    {
     "network": "testnet",
@@ -8517,14 +8515,14 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 917,
-   "applicableUnknown": 202,
+   "unknown": 916,
+   "applicableUnknown": 201,
    "notApplicable": 715,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
    "human-verified": 281,
-   "onchain-activity": 49,
+   "onchain-activity": 50,
    "product-integration": 65,
    "repo-activity": 117,
    "package-release": 9
@@ -8532,18 +8530,18 @@
   "strongBasisSplit": {
    "population": 1004,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
-   "livePopulation": 845,
+   "livePopulation": 846,
    "weakLiveOnly": 465,
-   "weakLiveRows": 483,
+   "weakLiveRows": 482,
    "onchainEligible": 5,
-   "appOnly": 478,
+   "appOnly": 477,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 385
+    "count": 384
    },
    {
     "basis": "human-verified",
@@ -8563,7 +8561,7 @@
    },
    {
     "basis": "onchain-activity",
-    "count": 49
+    "count": 50
    },
    {
     "basis": "operator-announcement",
@@ -8579,7 +8577,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 512,
+  "weakestTotal": 511,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9412,7 +9410,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 483
+    "count": 482
    },
    {
     "field": "dated",
@@ -9523,11 +9521,11 @@
     },
     {
      "label": "slowing",
-     "count": 979
+     "count": 987
     },
     {
      "label": "active",
-     "count": 860
+     "count": 852
     },
     {
      "label": "unknown",
@@ -10634,7 +10632,7 @@
   {
    "area": "project status",
    "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "462 of 1004 rows (census)",
+   "measurement": "461 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10663,7 +10661,7 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 111
+    "value": 112
    },
    {
     "id": "s:engine-d-demand",
@@ -10675,7 +10673,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 37
+    "value": 38
    },
    {
     "id": "s:raven-routing",
@@ -10795,13 +10793,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 651
+    "value": 654
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 65
+    "value": 64
    },
    {
     "id": "o:verified",
@@ -10823,7 +10821,7 @@
     "target": 23,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
-    "value": 340
+    "value": 342
    },
    {
     "source": 2,
@@ -10942,7 +10940,7 @@
     "target": 23,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
-    "value": 23
+    "value": 24
    },
    {
     "source": 12,
@@ -10970,28 +10968,28 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 37
+    "value": 38
    },
    {
     "source": 19,
     "target": 24,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 32
+    "value": 33
    },
    {
     "source": 1,
     "target": 17,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 111
+    "value": 112
    },
    {
     "source": 17,
     "target": 24,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 13
+    "value": 14
    },
    {
     "source": 8,
@@ -11001,25 +10999,11 @@
     "value": 22
    },
    {
-    "source": 16,
-    "target": 24,
-    "sourceId": "f:retrieval",
-    "targetId": "o:open",
-    "value": 2
-   },
-   {
     "source": 14,
     "target": 19,
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
     "value": 3
-   },
-   {
-    "source": 20,
-    "target": 24,
-    "sourceId": "f:corpus",
-    "targetId": "o:open",
-    "value": 1
    }
   ]
  },
@@ -11083,10 +11067,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 917,
+    "missing": 916,
     "of": 1004,
-    "share": 91.3,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 917 unknown rows, 202 are on-chain product types where the question applies and an agent will ask it; the other 715 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "share": 91.2,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 916 unknown rows, 201 are on-chain product types where the question applies and an agent will ask it; the other 715 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11101,10 +11085,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 483,
+    "missing": 482,
     "of": 1004,
-    "share": 48.1,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 478 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 48,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 477 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
