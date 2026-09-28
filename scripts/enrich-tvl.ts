@@ -62,6 +62,10 @@ const LLAMA_MAP: Record<string, string[]> = {
 	"gami-labs": ["gami-labs"],
 	"defa-invoicemate": ["defa-by-invoicemate"],
 	sentora: ["sentora"],
+	// 2026-09-26: Spectra V2 lists Stellar among its chains (chainTvls.Stellar
+	// $750k on 2026-09-26, the seven Stellar PT markets); the Stellar slice
+	// is what lands, never the $18.9M multichain total.
+	"spectra-finance": ["spectra-v2"],
 };
 
 const LIVENESS_THRESHOLD_USD = 5_000;
