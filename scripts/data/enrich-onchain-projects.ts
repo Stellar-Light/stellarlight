@@ -28,13 +28,9 @@ import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
-import {
-	domainOf,
-	fetchText,
-	parseStellarToml,
-} from "../lib/stellar-toml";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
+import { domainOf, fetchText, parseStellarToml } from "../lib/stellar-toml";
 
 const execute = process.argv.includes("--execute");
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -42,19 +38,39 @@ const PAUSE_MS = 400; // be polite — unauthenticated, unpublished rate limits
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// 2026-09-28: every run since at least 09-08 ended with 22-26 HTTP 429s from
+// stellar.expert and the same number of silent "SKIP … fetch failure" lines
+// (the last seed and every stablecoin asset after it), while the lane
+// reported success. A 429 is "slow down", not "no data": back off and retry,
+// honouring Retry-After when the server sends one.
+const RETRY_DELAYS_MS = [5_000, 15_000, 45_000];
+
 async function fetchJson<T>(url: string): Promise<T | null> {
-	try {
-		const r = await fetch(url, {
-			headers: { "user-agent": "stellarlight-onchain-enrich" },
-		});
-		if (!r.ok) {
+	for (let attempt = 0; ; attempt++) {
+		try {
+			const r = await fetch(url, {
+				headers: { "user-agent": "stellarlight-onchain-enrich" },
+			});
+			if (r.ok) return (await r.json()) as T;
+			const retryable = r.status === 429 || r.status >= 500;
+			if (retryable && attempt < RETRY_DELAYS_MS.length) {
+				const header = Number(r.headers.get("retry-after"));
+				const wait =
+					Number.isFinite(header) && header > 0
+						? header * 1000
+						: RETRY_DELAYS_MS[attempt];
+				console.log(
+					`    … ${url} → HTTP ${r.status}, retry ${attempt + 1}/${RETRY_DELAYS_MS.length} in ${Math.round(wait / 1000)}s`,
+				);
+				await sleep(wait);
+				continue;
+			}
 			console.log(`    ✗ ${url} → HTTP ${r.status}`);
 			return null;
+		} catch (e) {
+			console.log(`    ✗ ${url} → ${(e as Error).message}`);
+			return null;
 		}
-		return (await r.json()) as T;
-	} catch (e) {
-		console.log(`    ✗ ${url} → ${(e as Error).message}`);
-		return null;
 	}
 }
 
@@ -259,7 +275,8 @@ async function run() {
 			// exact host, or the project site living on a subdomain of it
 			const slugs = new Set<string>();
 			for (const [h, ss] of byHost)
-				if (h === dom || h.endsWith(`.${dom}`)) for (const s of ss) slugs.add(s);
+				if (h === dom || h.endsWith(`.${dom}`))
+					for (const s of ss) slugs.add(s);
 			if (slugs.size === 0) {
 				console.log(`  registry ${a.code} (${dom}): no directory row — skip`);
 				continue;
@@ -361,6 +378,7 @@ async function run() {
 
 	let updated = 0;
 	let skipped = 0;
+	let fetchSkipped = 0; // projects left stale because stellar.expert did not answer
 	for (const [slug, keys] of bySlug) {
 		const proj = await payload.find({
 			collection: "projects",
@@ -450,6 +468,7 @@ async function run() {
 		if (failed) {
 			console.log(`SKIP ${slug}: fetch failure — existing data left untouched`);
 			skipped += 1;
+			fetchSkipped += 1;
 			continue;
 		}
 
@@ -648,8 +667,15 @@ async function run() {
 	if (repoFailed) process.exitCode = 1;
 
 	console.log(
-		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped}`,
+		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by fetch failure)`,
 	);
+	if (fetchSkipped) {
+		// A stale row is a silent failure; the run says so with its exit code.
+		console.error(
+			`RED: ${fetchSkipped} project(s) kept stale on-chain data because stellar.expert did not answer after retries.`,
+		);
+		process.exitCode = 1;
+	}
 	if (!execute) console.log("Dry run. --execute to write.");
 }
 
