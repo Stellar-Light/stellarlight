@@ -54,6 +54,13 @@ jobs:
       - name: Bank lint (structure + live rot)
         run: pnpm exec tsx scripts/eval/lint-eval-banks.ts --live
 
+      # The code-truth question set (interfaces, domains, dependencies, usage,
+      # depth, contracts, the composites) ran only by hand until 2026-09-30;
+      # a serve-path regression on scanned code had no lane to catch it. Exits
+      # 1 on any miss, so a red here reads as "code answers regressed".
+      - name: Code-truth probes (the defined code-level question set)
+        run: pnpm exec tsx scripts/eval/code-truth-probes.ts
+
       - name: Golden questions — direct vs through Raven
         env:
           RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
