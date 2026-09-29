@@ -172,6 +172,11 @@ export const AUDIT_PROJECT_ALIASES: Record<
 		basis: "unmatched",
 	},
 	untangled: { slug: "untangled", basis: "name-exact" },
+	// 2026-09-30, self-audit "audit coverage" red: portal report 83 "Peridot
+	// Finance Protocol" = directory row peridot-finance (peridot.finance,
+	// github.com/peridotfinance/peridot-soroban, the Soroban lending protocol
+	// whose contracts our on-chain seeds already carry).
+	"peridot finance protocol": { slug: "peridot-finance", basis: "alias" },
 	verseprop: { slug: "verseprop", basis: "name-exact" },
 	"volta circuit": { slug: "volta-circuit", basis: "name-exact" },
 	"wombat-exchange": { slug: "wombat", basis: "name-exact" },
