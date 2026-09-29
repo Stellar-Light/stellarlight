@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-09-29T14:16:25.351Z",
+ "generatedAt": "2026-09-29T21:51:52.642Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
-  "reported-upstream": 5,
+  "reported-upstream": 7,
   "declined-upstream": 1
  },
  "ourResponse": {
@@ -13,13 +13,13 @@
    "sls-029",
    "sls-033"
   ],
-  "fixApplicable": 5,
+  "fixApplicable": 7,
   "declined": 1,
   "distinctIssuesClosed": 3,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
- "total": 6,
+ "total": 8,
  "records": [
   {
    "id": "sls-024",
@@ -109,6 +109,36 @@
     "state": "open",
     "closedAt": null,
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1674"
+   }
+  },
+  {
+   "id": "sls-087",
+   "title": "Horizon current protocol-ceiling answers retain 28 after the scanned source defines 29",
+   "status": "reported-upstream",
+   "discovered": "2026-09-29",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-087-horizon-protocol-ceiling-note-stale.md",
+   "ourIssue": 1738,
+   "ourResponse": {
+    "issue": 1738,
+    "state": "open",
+    "closedAt": null,
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1738"
+   }
+  },
+  {
+   "id": "sls-088",
+   "title": "Horizon API repository is marked as a deployable Soroban contract product",
+   "status": "reported-upstream",
+   "discovered": "2026-09-29",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-088-horizon-product-contract-misclassification.md",
+   "ourIssue": 1739,
+   "ourResponse": {
+    "issue": 1739,
+    "state": "open",
+    "closedAt": null,
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1739"
    }
   }
  ]

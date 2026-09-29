@@ -1,16 +1,16 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-09-29T14:16:28.577Z",
+ "generatedAt": "2026-09-29T21:51:54.357Z",
  "stage": 1,
- "cleanWeeks": 1,
+ "cleanWeeks": 2,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 36369906315,
-  "at": "2026-09-28T02:27:44Z",
-  "event": "workflow_dispatch",
+  "id": 36580665476,
+  "at": "2026-09-29T14:10:30Z",
+  "event": "schedule",
   "conclusion": "success"
  },
- "lastCountedRunId": 34970767161,
+ "lastCountedRunId": 36580665476,
  "stamps": [
   {
    "slug": "agtrail",

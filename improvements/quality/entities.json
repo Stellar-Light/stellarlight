@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-29T14:16:20.160Z",
+ "generatedAt": "2026-09-29T21:51:43.591Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 68,
+   "oldestDays": 69,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -511,10 +511,8 @@
    {
     "slug": "humanitylink",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1209,10 +1207,8 @@
    {
     "slug": "jumpa",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8503,11 +8499,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 916
+    "count": 915
    },
    {
     "network": "mainnet",
-    "count": 86
+    "count": 87
    },
    {
     "network": "testnet",
@@ -8515,15 +8511,15 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 916,
+   "unknown": 915,
    "applicableUnknown": 201,
-   "notApplicable": 715,
+   "notApplicable": 714,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
    "human-verified": 281,
    "onchain-activity": 50,
-   "product-integration": 65,
+   "product-integration": 67,
    "repo-activity": 117,
    "package-release": 9
   },
@@ -8531,17 +8527,17 @@
    "population": 1004,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
    "livePopulation": 846,
-   "weakLiveOnly": 465,
-   "weakLiveRows": 482,
-   "onchainEligible": 5,
-   "appOnly": 477,
+   "weakLiveOnly": 463,
+   "weakLiveRows": 480,
+   "onchainEligible": 6,
+   "appOnly": 474,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 385
+    "count": 383
    },
    {
     "basis": "human-verified",
@@ -8557,7 +8553,7 @@
    },
    {
     "basis": "product-integration",
-    "count": 65
+    "count": 67
    },
    {
     "basis": "onchain-activity",
@@ -8577,7 +8573,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 511,
+  "weakestTotal": 509,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8895,9 +8891,9 @@
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
+    "deploymentNetwork": "mainnet",
+    "deploymentBasis": "mainnet-contract-join",
+    "hasOnchainFootprint": true,
     "deploymentApplies": false,
     "types": [],
     "score": 60,
@@ -9410,7 +9406,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 482
+    "count": 480
    },
    {
     "field": "dated",
@@ -9442,8 +9438,8 @@
    "curatedIndex": {
     "repos": 3419,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3155,
-    "depthPct": 92
+    "withCodeDepth": 3182,
+    "depthPct": 93
    },
    "tail": {
     "repos": 10018,
@@ -9462,7 +9458,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5738,
+    "pool": 5749,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 121
    }
@@ -9518,11 +9514,11 @@
     },
     {
      "label": "slowing",
-     "count": 990
+     "count": 994
     },
     {
      "label": "active",
-     "count": 893
+     "count": 889
     },
     {
      "label": "unknown",
@@ -9577,7 +9573,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11093,
+  "withCodeDepth": 11120,
   "withNotes": 1058,
   "withMainnet": 121,
   "top": [
@@ -10112,7 +10108,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 80,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10125,7 +10121,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 59,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10138,7 +10134,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10151,7 +10147,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10164,8 +10160,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 65,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10190,7 +10186,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10203,7 +10199,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10229,7 +10225,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10255,8 +10251,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 68,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10268,7 +10264,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10294,7 +10290,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 44,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10307,8 +10303,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 77,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10320,8 +10316,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 74,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10333,7 +10329,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10359,7 +10355,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 27,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10372,8 +10368,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 44,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10385,7 +10381,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10398,7 +10394,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10424,8 +10420,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 66,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10450,8 +10446,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 43,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10463,7 +10459,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 75,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10489,7 +10485,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 68,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10502,8 +10498,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 58,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10515,8 +10511,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 46,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10528,7 +10524,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 75,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10541,8 +10537,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 75,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10567,8 +10563,8 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 64,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10629,7 +10625,7 @@
   {
    "area": "project status",
    "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "462 of 1004 rows (census)",
+   "measurement": "460 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -11013,7 +11009,7 @@
     "missing": 359,
     "of": 378,
     "share": 95,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5360 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5371 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 359,
@@ -11064,10 +11060,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 916,
+    "missing": 915,
     "of": 1004,
-    "share": 91.2,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 916 unknown rows, 201 are on-chain product types where the question applies and an agent will ask it; the other 715 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "share": 91.1,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 915 unknown rows, 201 are on-chain product types where the question applies and an agent will ask it; the other 714 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11082,10 +11078,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 482,
+    "missing": 480,
     "of": 1004,
-    "share": 48,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 5 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 477 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 47.8,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 474 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -11101,28 +11097,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2344,
+    "missing": 2317,
     "of": 13437,
-    "share": 17.4,
+    "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2344,
+    "examplePoolSize": 2317,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "DiegoPoveda01/pozo",
-     "wmendes/spinbid",
-     "alex0tico/kuyfi-landing",
-     "alex0tico/stellar-raven-prompts",
-     "viniciorm/desafio-stellar",
      "Dione-b/stellar-start",
-     "Klorenn/ATLAS",
-     "Bran18/reflector-skill",
      "thiagocbalducci/neon-wallet-desktop",
-     "ThaisFReis/stellar-daily-viewer",
      "adletgamer/pakta",
-     "carlos-israelj/EcoBonus"
+     "FernandoMay/stellar-energy-assets",
+     "karagozemin/stellar-drips",
+     "ManuelJG1999/Thalos",
+     "geraldin21l/stellaryield-ai",
+     "AnoukRImola/biochainfinalrepo",
+     "Anuoluwapo25/fast-chow",
+     "drips-network/tx-relay",
+     "zkCaleb-dev/Stellar_workshop",
+     "zaber-dev/ovrl-sdk"
     ]
    },
    {
