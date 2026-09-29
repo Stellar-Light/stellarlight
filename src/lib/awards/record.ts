@@ -169,6 +169,8 @@ export async function reserveBallot(params: {
 	selections: BallotSelections;
 	/** The Pilot's signed authorization, kept as proof of authorship. */
 	authorization: string;
+	/** The nonce its memo commits to; without it the memo cannot be re-verified. */
+	nonce: string;
 }): Promise<{ ok: true; id: string | number } | { ok: false; reason: string }> {
 	try {
 		const payload = await getPayloadSafe();
@@ -210,6 +212,7 @@ export async function reserveBallot(params: {
 						at,
 						ballotId: params.ballotId,
 						authorization: params.authorization,
+						nonce: params.nonce,
 					},
 				],
 			},

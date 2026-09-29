@@ -66,7 +66,7 @@ function handMade(base: string, maxTime: number): string {
 	const tx = new TransactionBuilder(new Account(voter.publicKey(), base), {
 		fee: "10000",
 		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
-		memo: Memo.hash(authorizationDigest(round.slug, picks)),
+		memo: Memo.hash(authorizationDigest(round.slug, picks, nonce)),
 		timebounds: { minTime: 0, maxTime },
 	})
 		.addOperation(
@@ -78,12 +78,15 @@ function handMade(base: string, maxTime: number): string {
 }
 const nowSec = () => Math.floor(Date.now() / 1000);
 
+const nonce = "0123456789abcdef0123456789abcdef";
+
 describe("verifyAuthorization — the claims it makes are enforced", () => {
 	it("refuses an authorization that lasts longer than the ten minutes it is given", () => {
 		const v = verifyAuthorization(handMade("99", 4_102_444_800), {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: "100",
 		});
 		expect(v.ok).toBe(false);
@@ -96,12 +99,14 @@ describe("verifyAuthorization — the claims it makes are enforced", () => {
 			address: voter.publicKey(),
 			sequence: "100",
 			selections: picks,
+			nonce,
 		});
 		built.sign(voter);
 		const v = verifyAuthorization(built.toXDR(), {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: "100",
 			now: new Date((nowSec() + 599) * 1000),
 		});
@@ -115,6 +120,7 @@ describe("verifyAuthorization — the claims it makes are enforced", () => {
 			address: voter.publicKey(),
 			sequence: null,
 			selections: picks,
+			nonce,
 		});
 		built.sign(voter);
 		expect(built.sequence).toBe("1");
@@ -123,6 +129,7 @@ describe("verifyAuthorization — the claims it makes are enforced", () => {
 				round,
 				whitelist,
 				selections: picks,
+				nonce,
 				sequence: null,
 			}).ok,
 		).toBe(true);
@@ -131,6 +138,7 @@ describe("verifyAuthorization — the claims it makes are enforced", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: null,
 		});
 		expect(v.ok).toBe(false);
@@ -448,6 +456,7 @@ describe("record — the reserve is atomic and a reservation is not a ballot", (
 			roundSlug: round.slug,
 			address: voter.publicKey(),
 			authorization: "AAAAAgAAAAB-test-authorization",
+			nonce,
 			ballotId: "abcd1234",
 			selections: picks,
 		});

@@ -34,6 +34,8 @@ const sign = (kp: Keypair, tx: ReturnType<typeof buildStatusTx>) => {
 	return tx.toXDR();
 };
 
+const nonce = "0123456789abcdef0123456789abcdef";
+
 describe("signed status check", () => {
 	it("verifies the owner's signature for a funded and an unfunded account", () => {
 		for (const sequence of ["12345", null]) {
@@ -93,6 +95,7 @@ describe("signed status check", () => {
 				round,
 				whitelist,
 				selections,
+				nonce,
 				sequence: null,
 			}).ok,
 		).toBe(false);
@@ -103,6 +106,7 @@ describe("signed status check", () => {
 				address: voter.publicKey(),
 				sequence: null,
 				selections,
+				nonce,
 			}),
 		);
 		expect(
@@ -113,6 +117,7 @@ describe("signed status check", () => {
 				round,
 				whitelist,
 				selections,
+				nonce,
 				sequence: null,
 			}).ok,
 		).toBe(true);
