@@ -57,22 +57,6 @@ export default async function DirectoryPage({
 					<DirectoryFilters />
 				</div>
 
-				{/* Category links. The filter control writes ?type=, which is a
-				    poor ranking target and a URL nobody shares; these are the
-				    same slices as real pages, and they are how a crawler finds
-				    them at all. */}
-				<nav className="mb-10 flex flex-wrap gap-2" aria-label="Categories">
-					{DIRECTORY_CATEGORIES.map((c) => (
-						<Link
-							key={c.slug}
-							href={`/directory/${c.slug}`}
-							className="text-xs px-3 py-1.5 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-						>
-							{c.heading}
-						</Link>
-					))}
-				</nav>
-
 				{/* Projects Grid — key forces skeleton to show immediately on param change */}
 				<Suspense
 					key={`${searchQuery}-${typeFilter}-${scfFilter}-${sortOption}-${page}`}
@@ -87,6 +71,33 @@ export default async function DirectoryPage({
 						limit={limit}
 					/>
 				</Suspense>
+
+				{/* Category pages. The filter control above writes ?type=, a URL
+				    nobody shares and a poor ranking target; these are the same
+				    slices as real pages, and how a crawler finds them at all.
+				    They sit under the results, in the category pages' own
+				    "Browse by category" shape, so they read as places to go, not
+				    as a second filter, and on a phone they no longer push the
+				    results below the fold. */}
+				<nav
+					className="mt-16 pt-8 border-t border-border/40"
+					aria-label="Categories"
+				>
+					<h2 className="text-sm font-medium mb-4 text-muted-foreground">
+						Browse by category
+					</h2>
+					<div className="flex flex-wrap gap-2">
+						{DIRECTORY_CATEGORIES.map((c) => (
+							<Link
+								key={c.slug}
+								href={`/directory/${c.slug}`}
+								className="text-xs px-3 py-1.5 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+							>
+								{c.heading}
+							</Link>
+						))}
+					</div>
+				</nav>
 			</main>
 		</div>
 	);
