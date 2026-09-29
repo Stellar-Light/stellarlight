@@ -22,6 +22,10 @@
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import {
+	claimVerifiedByDomain,
+	isPlaceholderEmail,
+} from "@/lib/partner-invite";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { getAppUrl } from "@/lib/utils/app-url";
@@ -220,10 +224,19 @@ export async function POST(req: NextRequest) {
 		if (existing.docs.length > 0) {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 			const doc = existing.docs[0] as any;
+			// A claim from a mailbox at the listing's own domain is verified by
+			// construction: the account email becomes the claimant and the
+			// collection's invite hook does the rest. Anything else stays a
+			// request for the admin to verify.
+			const verified =
+				doc.status === "published" &&
+				isPlaceholderEmail(doc.email) &&
+				claimVerifiedByDomain(contactEmail, doc.websiteUrl);
 			await payload.update({
 				collection: "partner-accounts",
 				id: doc.id,
 				data: {
+					...(verified ? { email: contactEmail } : {}),
 					claimRequestedBy: contactEmail,
 					claimRequestedAt: new Date().toISOString(),
 				},
@@ -231,16 +244,25 @@ export async function POST(req: NextRequest) {
 			});
 			await notifyAdmin(
 				payload,
-				`Claim request: ${doc.name}`,
-				[
-					`${contactEmail} asked to claim the "${doc.name}" partner profile (${doc.status}).`,
-					"",
-					`Verify the email's domain against ${doc.websiteUrl ?? "their website"} before inviting.`,
-					`Review: ${base}/admin/collections/partner-accounts/${doc.id}`,
-				].join("\n"),
+				verified
+					? `Claim verified by domain: ${doc.name}`
+					: `Claim request: ${doc.name}`,
+				verified
+					? [
+							`${contactEmail} claimed the "${doc.name}" partner profile from the listing's own domain (${doc.websiteUrl}).`,
+							"",
+							"The account email is now that address and the invite went out automatically. Nothing to approve; reassign the email in the Payload sidebar if this is wrong.",
+							`Review: ${base}/admin/collections/partner-accounts/${doc.id}`,
+						].join("\n")
+					: [
+							`${contactEmail} asked to claim the "${doc.name}" partner profile (${doc.status}).`,
+							"",
+							`Verify the email's domain against ${doc.websiteUrl ?? "their website"} before inviting.`,
+							`Review: ${base}/admin/collections/partner-accounts/${doc.id}`,
+						].join("\n"),
 			);
 			return NextResponse.json(
-				{ ok: true, mode: "claim" },
+				{ ok: true, mode: "claim", verified },
 				{ headers: rateLimitHeaders(limit) },
 			);
 		}
