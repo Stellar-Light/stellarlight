@@ -1331,7 +1331,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					// the picks travel alongside; the signature's memo commits to them
-					body: JSON.stringify({ signedXdr, round: round.slug, selections }),
+					body: JSON.stringify({
+						signedXdr,
+						round: round.slug,
+						selections,
+						nonce: xdrBody.nonce,
+					}),
 				});
 				submitBody = await submitRes.json();
 				const busy =

@@ -17,6 +17,7 @@
 import { Memo, TransactionBuilder } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import {
+	AUTHORIZATION_NONCE_RE,
 	BALLOT_FEE_PER_OP,
 	ballotSourceOf,
 	newBallotId,
@@ -69,7 +70,12 @@ export async function POST(req: NextRequest) {
 		);
 	}
 
-	let body: { signedXdr?: unknown; round?: unknown; selections?: unknown };
+	let body: {
+		signedXdr?: unknown;
+		round?: unknown;
+		selections?: unknown;
+		nonce?: unknown;
+	};
 	try {
 		body = await req.json();
 	} catch {
@@ -82,6 +88,16 @@ export async function POST(req: NextRequest) {
 	if (!signedXdr || signedXdr.length > MAX_XDR_CHARS) {
 		return NextResponse.json(
 			{ error: "provide the signed authorization as `signedXdr`" },
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const nonce =
+		typeof body.nonce === "string" && AUTHORIZATION_NONCE_RE.test(body.nonce)
+			? body.nonce
+			: "";
+	if (!nonce) {
+		return NextResponse.json(
+			{ error: "provide the authorization nonce as `nonce`" },
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
@@ -152,6 +168,7 @@ export async function POST(req: NextRequest) {
 		round: loaded.round,
 		whitelist: loaded.whitelist,
 		selections: validated.selections,
+		nonce,
 		sequence: account?.funded === true ? account.account.sequence : null,
 		signers: account?.funded === true ? account.account.signers : undefined,
 	});
@@ -225,6 +242,7 @@ export async function POST(req: NextRequest) {
 		ballotId,
 		selections: validated.selections,
 		authorization: signedXdr,
+		nonce,
 	});
 	if (!reserved.ok) {
 		const dup = reserved.reason === "already_voted";

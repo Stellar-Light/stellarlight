@@ -621,15 +621,32 @@ const AUTHORIZATION_TTL_SECONDS = 600;
 /** Verify-side slack on the expiry bound, for the builder's clock vs ours. */
 const CLOCK_SKEW_SECONDS = 60;
 
+/** Server-issued per-authorization salt: 16 random bytes, lowercase hex. */
+export const AUTHORIZATION_NONCE_RE = /^[0-9a-f]{32}$/;
+
+export function newAuthorizationNonce(): string {
+	return randomBytes(16).toString("hex");
+}
+
 /**
- * What the voter's signature commits to: this round, these exact picks. It
- * rides in the authorization's memo as a hash, so the relay cannot write a
- * different ballot than the one that was signed.
+ * What the voter's signature commits to: this round, these exact picks, and
+ * a nonce the relay issued with the unsigned transaction. It rides in the
+ * authorization's memo as a hash, so the relay cannot write a different
+ * ballot than the one that was signed. The nonce is there because the pick
+ * space is small (a few dozen nominees, a handful of picks): without it,
+ * anyone holding a copy of the signed authorization could hash every
+ * combination and read the picks off the memo. With it, the memo reveals
+ * nothing to a holder who lacks the nonce, which only the relay's admin-only
+ * record keeps.
  */
 export function authorizationDigest(
 	roundSlug: string,
 	selections: BallotSelections,
+	nonce: string,
 ): Buffer {
+	if (!AUTHORIZATION_NONCE_RE.test(nonce)) {
+		throw new Error("authorization nonce must be 32 lowercase hex chars");
+	}
 	const cats = Object.entries(selections)
 		.filter(([, slugs]) => slugs.length > 0)
 		.map(([key, slugs]): [string, string] => [
@@ -640,7 +657,7 @@ export function authorizationDigest(
 		.map(([key, slugs]) => `${key}=${slugs}`)
 		.join(";");
 	return createHash("sha256")
-		.update(`i3-authorization-v1\n${roundSlug}\n${cats}`)
+		.update(`i3-authorization-v2\n${roundSlug}\n${nonce}\n${cats}`)
 		.digest();
 }
 
@@ -668,9 +685,11 @@ export function buildAuthorizationTx(params: {
 	/** The account's current sequence from Horizon, or null if unfunded. */
 	sequence: string | null;
 	selections: BallotSelections;
+	/** From newAuthorizationNonce(); returned to the voter beside the XDR. */
+	nonce: string;
 	now?: Date;
 }): Transaction {
-	const { round, address, sequence, selections } = params;
+	const { round, address, sequence, selections, nonce } = params;
 	if (!StrKey.isValidEd25519PublicKey(address)) {
 		throw new Error("invalid voter address");
 	}
@@ -680,7 +699,7 @@ export function buildAuthorizationTx(params: {
 	return new TransactionBuilder(new Account(address, base), {
 		fee: BALLOT_FEE_PER_OP,
 		networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
-		memo: Memo.hash(authorizationDigest(round.slug, selections)),
+		memo: Memo.hash(authorizationDigest(round.slug, selections, nonce)),
 		timebounds: { minTime: 0, maxTime: nowSec + AUTHORIZATION_TTL_SECONDS },
 	})
 		.addOperation(
@@ -760,16 +779,25 @@ export function verifyAuthorization(
 		round: BallotRound;
 		whitelist: Set<string>;
 		selections: BallotSelections;
+		/** The nonce the relay issued with the unsigned transaction. */
+		nonce: string;
 		/** The account's current sequence, or null if it does not exist. */
 		sequence: string | null;
 		signers?: string[];
 		now?: Date;
 	},
 ): AuthorizationVerdict {
+	if (!AUTHORIZATION_NONCE_RE.test(ctx.nonce)) {
+		return { ok: false, errors: ["authorization nonce is malformed"] };
+	}
 	return verifySignedIntent(signedXdr, {
 		...ctx,
 		opName: AUTHORIZATION_KEY,
-		expectedMemo: authorizationDigest(ctx.round.slug, ctx.selections),
+		expectedMemo: authorizationDigest(
+			ctx.round.slug,
+			ctx.selections,
+			ctx.nonce,
+		),
 		memoError: "authorization does not commit to these picks",
 	});
 }

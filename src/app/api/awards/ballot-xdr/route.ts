@@ -24,6 +24,7 @@ import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	buildAuthorizationTx,
+	newAuthorizationNonce,
 	roundOpenState,
 	validateSelections,
 } from "@/lib/awards/ballot";
@@ -150,16 +151,23 @@ export async function POST(req: NextRequest) {
 	// A returning voter spends one wallet signature to hear it; that is the
 	// documented cost of the anonymity.
 
+	// A fresh salt per authorization: the memo commits to the picks AND this
+	// nonce, so a copy of the signed transaction cannot be hashed back to the
+	// picks (the pick space is small enough to enumerate). The voter sends it
+	// back with the signature; the record keeps it for the auditor.
+	const nonce = newAuthorizationNonce();
 	const tx = buildAuthorizationTx({
 		round: loaded.round,
 		address,
 		sequence: account.funded ? account.account.sequence : null,
 		selections: validated.selections,
+		nonce,
 	});
 
 	return NextResponse.json(
 		{
 			xdr: tx.toXDR(),
+			nonce,
 			networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
 			round: loaded.round.slug,
 			selections: validated.selections,

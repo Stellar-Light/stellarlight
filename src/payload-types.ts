@@ -1553,6 +1553,7 @@ export interface AwardBallot {
 				at?: string | null;
 				ballotId?: string | null;
 				authorization?: string | null;
+				nonce?: string | null;
 				id?: string | null;
 		  }[]
 		| null;
@@ -3511,6 +3512,7 @@ export interface AwardBallotsSelect<T extends boolean = true> {
 				at?: T;
 				ballotId?: T;
 				authorization?: T;
+				nonce?: T;
 				id?: T;
 		  };
 	updatedAt?: T;

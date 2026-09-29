@@ -45,6 +45,8 @@ const picks = {
 };
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
 
+const nonce = "0123456789abcdef0123456789abcdef";
+
 describe("relay key scheme", () => {
 	it("fits the 64-byte manageData budget for the longest real key", () => {
 		const k = relayKey(
@@ -142,6 +144,7 @@ describe("voter authorization", () => {
 			address: voter.publicKey(),
 			sequence,
 			selections: sel,
+			nonce,
 		});
 		tx.sign(voter);
 		return tx.toXDR();
@@ -152,6 +155,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: seq,
 		});
 		expect(v.ok ? null : v.errors).toBeNull();
@@ -164,6 +168,7 @@ describe("voter authorization", () => {
 			address: voter.publicKey(),
 			sequence: seq,
 			selections: picks,
+			nonce,
 		});
 		// a valid tx needs current + 1; this one carries current
 		expect(tx.sequence).toBe(seq);
@@ -174,6 +179,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: null,
 		});
 		expect(v.ok).toBe(true);
@@ -184,6 +190,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: { ...picks, impact: ["beans", "decaf"] }, // same set, reordered
+			nonce,
 			sequence: seq,
 		});
 		expect(v.ok).toBe(true); // order is not a fact
@@ -191,6 +198,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: { ...picks, impact: ["decaf"] },
+			nonce,
 			sequence: seq,
 		});
 		expect(w.ok).toBe(false);
@@ -209,7 +217,7 @@ describe("voter authorization", () => {
 				fee: "10000",
 				networkPassphrase: AWARDS_NETWORK_PASSPHRASE,
 				memo: require("@stellar/stellar-sdk").Memo.hash(
-					authorizationDigest(round.slug, picks),
+					authorizationDigest(round.slug, picks, nonce),
 				),
 				timebounds: {
 					minTime: 0,
@@ -229,6 +237,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: seq,
 		});
 		expect(v.ok).toBe(false);
@@ -238,6 +247,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: seq,
 			now: new Date(Date.now() + 11 * 60_000),
 		});
@@ -252,6 +262,7 @@ describe("voter authorization", () => {
 			address: voter.publicKey(),
 			sequence: seq,
 			selections: picks,
+			nonce,
 		});
 		inner.sign(voter);
 		const payer = Keypair.random();
@@ -266,6 +277,7 @@ describe("voter authorization", () => {
 			round,
 			whitelist,
 			selections: picks,
+			nonce,
 			sequence: seq,
 		});
 		expect(v.ok ? null : v.errors).toBeNull();
@@ -276,6 +288,7 @@ describe("voter authorization", () => {
 			address: voter.publicKey(),
 			sequence: seq,
 			selections: picks,
+			nonce,
 		});
 		const wrapped = TransactionBuilder.buildFeeBumpTransaction(
 			payer,
@@ -289,6 +302,7 @@ describe("voter authorization", () => {
 				round,
 				whitelist,
 				selections: picks,
+				nonce,
 				sequence: seq,
 			}).ok,
 		).toBe(false);
@@ -301,6 +315,7 @@ describe("voter authorization", () => {
 			address: stranger.publicKey(),
 			sequence: seq,
 			selections: picks,
+			nonce,
 		});
 		tx.sign(stranger);
 		expect(
@@ -308,6 +323,7 @@ describe("voter authorization", () => {
 				round,
 				whitelist,
 				selections: picks,
+				nonce,
 				sequence: seq,
 			}).ok,
 		).toBe(false);
@@ -318,6 +334,7 @@ describe("voter authorization", () => {
 			address: voter.publicKey(),
 			sequence: seq,
 			selections: picks,
+			nonce,
 		});
 		d.sign(delegate);
 		expect(
@@ -325,6 +342,7 @@ describe("voter authorization", () => {
 				round,
 				whitelist,
 				selections: picks,
+				nonce,
 				sequence: seq,
 			}).ok,
 		).toBe(false);
@@ -333,9 +351,51 @@ describe("voter authorization", () => {
 				round,
 				whitelist,
 				selections: picks,
+				nonce,
 				sequence: seq,
 				signers: [delegate.publicKey()],
 			}).ok,
 		).toBe(true);
+	});
+});
+
+describe("authorization nonce", () => {
+	const voter = Keypair.random();
+	const whitelist = new Set([voter.publicKey()]);
+	const seq = "12345678901234567";
+	const other = "fedcba9876543210fedcba9876543210";
+
+	it("two authorizations for the same picks carry different memos", () => {
+		expect(authorizationDigest(round.slug, picks, nonce)).not.toEqual(
+			authorizationDigest(round.slug, picks, other),
+		);
+	});
+
+	it("a signed authorization is rejected under any other nonce", () => {
+		const tx = buildAuthorizationTx({
+			round,
+			address: voter.publicKey(),
+			sequence: seq,
+			selections: picks,
+			nonce,
+		});
+		tx.sign(voter);
+		const wrong = verifyAuthorization(tx.toXDR(), {
+			round,
+			whitelist,
+			selections: picks,
+			nonce: other,
+			sequence: seq,
+		});
+		expect(wrong.ok).toBe(false);
+		if (!wrong.ok) expect(wrong.errors.join()).toMatch(/does not commit/);
+		const malformed = verifyAuthorization(tx.toXDR(), {
+			round,
+			whitelist,
+			selections: picks,
+			nonce: "not-hex",
+			sequence: seq,
+		});
+		expect(malformed.ok).toBe(false);
 	});
 });

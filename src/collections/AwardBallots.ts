@@ -141,6 +141,10 @@ export const AwardBallots: CollectionConfig = {
 				// record can re-verify it (verifyAuthorization) without anything
 				// being published. Never public: this collection is admin-only.
 				{ name: "authorization", type: "textarea" },
+				// The server-issued nonce that authorization's memo commits to
+				// (authorizationDigest). Re-verifying the memo needs it; a copy of
+				// the signed transaction without it reveals nothing about the picks.
+				{ name: "nonce", type: "text" },
 			],
 		},
 	],
