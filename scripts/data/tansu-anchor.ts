@@ -374,7 +374,12 @@ async function commit(): Promise<number> {
 		);
 		return 0;
 	}
+	// The results anchor REPLACES the record, so the pre-vote manifest anchor
+	// written by --manifest must ride along: on the mock round the 2026-09-25
+	// publish dropped the 09-24 manifest record, and /api/awards/anchor then
+	// served manifest: null while the chain still held the manifest tx.
 	const record: AnchorRecord = {
+		...(prior?.manifest ? { manifest: prior.manifest } : {}),
 		project: NAME,
 		projectKey: key.toString("hex"),
 		commitSha: hash,
@@ -396,6 +401,15 @@ async function commit(): Promise<number> {
 	const got = (back.anchor ?? null) as AnchorRecord | null;
 	if (got?.commitSha !== hash) {
 		console.error("READ-BACK FAILED: round.anchor does not hold the hash");
+		return 1;
+	}
+	if (
+		prior?.manifest?.digest &&
+		got?.manifest?.digest !== prior.manifest.digest
+	) {
+		console.error(
+			"READ-BACK FAILED: the results anchor dropped the pre-vote manifest record",
+		);
 		return 1;
 	}
 	console.log(
