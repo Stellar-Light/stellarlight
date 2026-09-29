@@ -13,7 +13,62 @@
  */
 
 import type { Payload, PayloadRequest } from "payload";
+import { registrableDomain } from "@/lib/partner-project-identity";
 import { getAppUrl } from "@/lib/utils/app-url";
+
+/**
+ * Hosts many unrelated parties share. A listing whose website lives on one of
+ * these can never be claimed by domain: an address there proves nothing.
+ */
+const SHARED_HOSTS = new Set([
+	"gmail.com",
+	"googlemail.com",
+	"outlook.com",
+	"hotmail.com",
+	"yahoo.com",
+	"proton.me",
+	"protonmail.com",
+	"icloud.com",
+	"github.io",
+	"github.com",
+	"gitlab.com",
+	"notion.site",
+	"substack.com",
+	"medium.com",
+	"linktr.ee",
+	"vercel.app",
+	"netlify.app",
+	"webflow.io",
+	"wordpress.com",
+	"wixsite.com",
+	"x.com",
+	"twitter.com",
+	"t.me",
+	"discord.gg",
+]);
+
+/**
+ * Ownership verification for a listing claim, decided by construction rather
+ * than by an admin reading two domains: the claimant's mailbox must sit on the
+ * listing's own registrable domain (eTLD+1, so mail.partner.com claims
+ * partner.com and www never matters), and that domain must not be a shared
+ * host. A stranger cannot obtain a mailbox at the partner's domain; a partner
+ * cannot lose the claim to one.
+ */
+export function claimVerifiedByDomain(
+	claimantEmail: string,
+	partnerWebsiteUrl?: string | null,
+): boolean {
+	const mailbox = claimantEmail.trim().toLowerCase().split("@")[1] ?? "";
+	const emailDomain = registrableDomain(mailbox);
+	const siteDomain = registrableDomain(partnerWebsiteUrl);
+	return Boolean(
+		emailDomain &&
+			siteDomain &&
+			emailDomain === siteDomain &&
+			!SHARED_HOSTS.has(siteDomain),
+	);
+}
 
 /**
  * Seeded/curated partners carry a `curated+<slug>@stellarlight.xyz` placeholder

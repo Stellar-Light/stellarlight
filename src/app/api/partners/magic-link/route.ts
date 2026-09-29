@@ -17,22 +17,23 @@
  * Branches, all server-side:
  *   1. exact published, non-placeholder account email → mint 7d token + send
  *      the sign-in email (lands on /partners/reset-password?mode=signin).
- *   2. email DOMAIN matches a published partner whose account still has the
- *      curated+ placeholder → record a claim request + notify admin (approval
- *      = admin sets the real email, which fires the invite hook).
+ *   2. email's registrable DOMAIN matches a published partner whose account
+ *      still has the curated+ placeholder → the claim is verified by
+ *      construction (claimVerifiedByDomain): the account email becomes the
+ *      claimant, the invite hook fires, the admin is notified after the fact.
  *   3. anything else → nothing.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
+	claimVerifiedByDomain,
 	isPlaceholderEmail,
 	mintPartnerLoginToken,
 	sendPartnerSignInEmail,
 } from "@/lib/partner-invite";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
-import { normalizeUrl } from "@/lib/utils/normalize";
 
 export const dynamic = "force-dynamic";
 
@@ -126,8 +127,12 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json(NEUTRAL, { headers: rateLimitHeaders(limit) });
 		}
 
-		// 2. Domain matches an unclaimed (placeholder) partner → claim request.
-		//    Never auto-approves: the admin setting the real email IS the approval.
+		// 2. Domain matches a published partner that still carries the curated
+		//    placeholder login → the claim is verified by construction: only a
+		//    mailbox at the listing's own registrable domain can make it (shared
+		//    hosts never qualify). The account email becomes the claimant, which
+		//    fires the collection's invite hook, the same action an admin used to
+		//    take by hand. The admin is told, not asked.
 		const domain = email.split("@")[1];
 		if (domain) {
 			const published = await payload.find({
@@ -138,16 +143,17 @@ export async function POST(req: NextRequest) {
 				overrideAccess: true,
 			});
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-			const target = (published.docs as any[]).find((p) => {
-				if (!isPlaceholderEmail(p.email)) return false;
-				const host = normalizeUrl(p.websiteUrl);
-				return host === domain || domain.endsWith(`.${host}`);
-			});
+			const target = (published.docs as any[]).find(
+				(p) =>
+					isPlaceholderEmail(p.email) &&
+					claimVerifiedByDomain(email, p.websiteUrl),
+			);
 			if (target) {
 				await payload.update({
 					collection: "partner-accounts",
 					id: target.id,
 					data: {
+						email,
 						claimRequestedBy: email,
 						claimRequestedAt: new Date().toISOString(),
 					},
@@ -155,11 +161,11 @@ export async function POST(req: NextRequest) {
 				});
 				await notifyAdmin(
 					payload,
-					`Partner claim via sign-in: ${target.name}`,
+					`Partner claim verified by domain: ${target.name}`,
 					[
-						`${email} tried to sign in and their domain matches ${target.name} (${target.websiteUrl}).`,
+						`${email} claimed ${target.name} (${target.websiteUrl}) by signing in from the listing's own domain.`,
 						"",
-						"To approve: verify the domain, then set the account Email in the Payload sidebar to this address and Save — that sends them a set-your-password invite.",
+						"The account email is now that address and the invite went out automatically. Nothing to approve; reassign the email in the Payload sidebar if this is wrong.",
 					].join("\n"),
 				);
 			}
