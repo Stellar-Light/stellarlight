@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-29T21:57:38.274Z",
+ "generatedAt": "2026-09-30T14:07:07.491Z",
  "surfaces": [
   {
    "surface": "code",
@@ -337,9 +337,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 265,
-     "recurred": 98,
-     "ratePct": 37
+     "newFindings": 236,
+     "recurred": 97,
+     "ratePct": 41.1
     },
     "lifetime": {
      "newFindings": 725,
@@ -356,8 +356,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 265,
-     "repeats": 264,
+     "newFindings": 236,
+     "repeats": 235,
      "ratePct": 99.6
     },
     "lifetime": {
@@ -8537,7 +8537,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 383
+    "count": 382
    },
    {
     "basis": "human-verified",
@@ -8569,7 +8569,7 @@
    },
    {
     "basis": "unverified",
-    "count": 5
+    "count": 6
    }
   ],
   "weakestReturned": 40,
@@ -9458,7 +9458,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5749,
+    "pool": 5748,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 121
    }
@@ -9510,19 +9510,19 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1342
+     "count": 1348
     },
     {
      "label": "slowing",
-     "count": 994
+     "count": 1003
     },
     {
      "label": "active",
-     "count": 889
+     "count": 903
     },
     {
      "label": "unknown",
-     "count": 149
+     "count": 120
     },
     {
      "label": "archived",
@@ -9532,19 +9532,19 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1182
+     "count": 1200
     },
     {
      "label": "unknown",
-     "count": 545
+     "count": 521
     },
     {
      "label": "Rust",
-     "count": 493
+     "count": 495
     },
     {
      "label": "JavaScript",
-     "count": 378
+     "count": 381
     },
     {
      "label": "Python",
@@ -9567,8 +9567,8 @@
      "count": 40
     },
     {
-     "label": "CSS",
-     "count": 24
+     "label": "PHP",
+     "count": 25
     }
    ],
    "languageOther": 48
@@ -10104,8 +10104,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 80,
@@ -10117,8 +10117,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 59,
@@ -10130,8 +10130,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10143,7 +10143,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "active",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10156,8 +10156,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 65,
@@ -10182,8 +10182,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10195,7 +10195,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "active",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10221,8 +10221,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10247,8 +10247,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 68,
@@ -10260,8 +10260,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "PHP",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10286,8 +10286,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 44,
@@ -10299,8 +10299,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 77,
@@ -10312,8 +10312,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 74,
@@ -10325,8 +10325,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10338,7 +10338,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10351,8 +10351,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 27,
@@ -10364,8 +10364,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 44,
@@ -10377,8 +10377,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 0,
@@ -10390,7 +10390,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10403,7 +10403,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10416,8 +10416,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 66,
@@ -10442,8 +10442,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 43,
@@ -10455,8 +10455,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 75,
@@ -10481,8 +10481,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 68,
@@ -10494,8 +10494,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 58,
@@ -10507,8 +10507,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 46,
@@ -10520,8 +10520,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 75,
@@ -10533,8 +10533,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 75,
@@ -10559,8 +10559,8 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 64,
@@ -10625,7 +10625,7 @@
   {
    "area": "project status",
    "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "460 of 1004 rows (census)",
+   "measurement": "459 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -11009,7 +11009,7 @@
     "missing": 359,
     "of": 378,
     "share": 95,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5371 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5370 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 359,
