@@ -603,6 +603,19 @@
 			"pr": null,
 			"costUsd": 0,
 			"note": "agent run failed: "
+		},
+		{
+			"task": "claims",
+			"unit": "check-links",
+			"items": [
+				"check-links"
+			],
+			"date": "2026-09-30",
+			"run": "36740235037",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
