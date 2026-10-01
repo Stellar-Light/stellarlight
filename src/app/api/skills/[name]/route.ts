@@ -137,6 +137,15 @@ export async function GET(
 
 	// 3. Community submission?
 	const community = await loadApprovedCommunitySkill(slug);
+	if (community === undefined && !isSdf) {
+		return NextResponse.json(
+			{
+				error: `skill ${slug} could not be looked up: the community registry read failed`,
+				retryAfterSeconds: 2,
+			},
+			{ status: 503, headers: { "Retry-After": "2" } },
+		);
+	}
 	if (community) {
 		logHit();
 		return jsonResponse(
@@ -257,9 +266,10 @@ async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
 	}
 }
 
+/** null = not found; undefined = the read failed (an outage, not an absence). */
 async function loadApprovedCommunitySkill(slug: string) {
 	const payload = await getPayloadSafe();
-	if (!payload) return null;
+	if (!payload) return undefined;
 	try {
 		const result = await payload.find({
 			collection: "community-skills",
@@ -305,7 +315,7 @@ async function loadApprovedCommunitySkill(slug: string) {
 			content: null,
 		};
 	} catch {
-		return null;
+		return undefined;
 	}
 }
 

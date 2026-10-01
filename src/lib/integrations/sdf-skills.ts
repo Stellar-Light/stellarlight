@@ -58,6 +58,7 @@ async function fetchSdfSkillLinks(): Promise<Map<string, string>> {
 	try {
 		const res = await fetch(`${BASE}/llms.txt`, {
 			next: { revalidate: 86_400 }, // 24h, same cadence as the skills
+			signal: AbortSignal.timeout(5000),
 			headers: {
 				"User-Agent": "StellarLight/1.0 (https://stellarlight.xyz/scout)",
 			},
@@ -140,6 +141,7 @@ export async function fetchSdfSkill(
 	try {
 		const res = await fetch(rawUrl, {
 			next: { revalidate: 86_400 }, // 24h
+			signal: AbortSignal.timeout(5000),
 			headers: {
 				"User-Agent": "StellarLight/1.0 (https://stellarlight.xyz/scout)",
 			},

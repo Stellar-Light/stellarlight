@@ -106,6 +106,7 @@ async function fetchHubHackathons(
 		const response = await fetch(url, {
 			headers: DORA_BROWSER_HEADERS,
 			next: { revalidate: 3600 }, // Cache for 1 hour
+			signal: AbortSignal.timeout(5000),
 		});
 
 		if (!response.ok) {
@@ -248,7 +249,11 @@ async function fetchWinnerPrizeMap(
 	try {
 		const res = await fetch(
 			`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
-			{ headers: DORA_BROWSER_HEADERS, next: { revalidate: 3600 } },
+			{
+				headers: DORA_BROWSER_HEADERS,
+				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
+			},
 		);
 		if (!res.ok) return map;
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
@@ -303,6 +308,7 @@ export async function fetchHackathonSubmissions(
 			const res = await fetch(url, {
 				headers: DORA_BROWSER_HEADERS,
 				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
 			});
 			if (!res.ok) break;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape

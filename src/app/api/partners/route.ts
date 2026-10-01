@@ -225,6 +225,24 @@ function toPublic(
 	};
 }
 
+/** A failed directory read is an outage, never an empty directory: the
+ *  honest answer is 503 with Retry-After, not 200 with no rows. */
+function partnersUnavailable(
+	req: NextRequest,
+	startedAt: number,
+): NextResponse {
+	logApiHit({ req, startedAt, status: 503, endpoint: "/api/partners" });
+	return NextResponse.json(
+		{
+			error: "partner directory read failed",
+			advisory:
+				"The partner directory could not be read. This is an outage, NOT a claim that no partner matches. Retry after a moment.",
+			retryAfterSeconds: 2,
+		},
+		{ status: 503, headers: { "Retry-After": "2" } },
+	);
+}
+
 export async function GET(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
@@ -351,90 +369,89 @@ export async function GET(req: NextRequest) {
 	let bestPartnerScore: number | null = null;
 
 	const payload = await getPayloadSafe();
-	if (payload) {
-		try {
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = { status: { equals: "published" } };
-			if (type) where.partnerType = { equals: type };
-			if (sector) where.sectors = { contains: sector };
-			if (regionNorm) where.regions = { contains: regionNorm };
-			if (rampList.length)
-				where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
-			// engine-e ambiguous-contract (open since 07-22): with every published
-			// partner currently accepting clients, accepting=1 returned pages
-			// byte-identical to the bare call — live filter, single-value enum,
-			// undecidable from outside. accepting=0 now selects the complement
-			// (only NOT-accepting partners; today the honest empty set), so the
-			// two values return different pages and the parameter proves itself.
-			if (acceptingParsed === true) where.acceptingClients = { equals: true };
-			else if (acceptingParsed === false)
-				where.acceptingClients = { equals: false };
+	if (!payload) return partnersUnavailable(req, startedAt);
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
+		const where: any = { status: { equals: "published" } };
+		if (type) where.partnerType = { equals: type };
+		if (sector) where.sectors = { contains: sector };
+		if (regionNorm) where.regions = { contains: regionNorm };
+		if (rampList.length)
+			where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
+		// engine-e ambiguous-contract (open since 07-22): with every published
+		// partner currently accepting clients, accepting=1 returned pages
+		// byte-identical to the bare call — live filter, single-value enum,
+		// undecidable from outside. accepting=0 now selects the complement
+		// (only NOT-accepting partners; today the honest empty set), so the
+		// two values return different pages and the parameter proves itself.
+		if (acceptingParsed === true) where.acceptingClients = { equals: true };
+		else if (acceptingParsed === false)
+			where.acceptingClients = { equals: false };
 
-			const result = await payload.find({
-				collection: "partner-accounts",
-				where,
-				limit: 200,
-				depth: 0,
-			});
+		const result = await payload.find({
+			collection: "partner-accounts",
+			where,
+			limit: 200,
+			depth: 0,
+		});
 
-			// Directory quality gate (default ON; ?all=1 bypasses): only complete,
-			// non-archived profiles show by default — 28/47 seeds are placeholder
-			// rows without a tagline. In-memory on ≤200 docs; display-only (the
-			// concierge matcher keeps its own eligibility rule).
-			const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
-			// Emir-class fix (lessons class 23, 2026-07-09): rows hidden by the
-			// quality bar must be DISCLOSED — counts.total=0 with no filteredOut
-			// read as "no wallet partners exist" while 5 sat behind null taglines.
-			filteredOutCount = result.docs.length - eligible.length;
-			const bySlug = new Map(eligible.map((d) => [String(d.slug), d]));
+		// Directory quality gate (default ON; ?all=1 bypasses): only complete,
+		// non-archived profiles show by default — 28/47 seeds are placeholder
+		// rows without a tagline. In-memory on ≤200 docs; display-only (the
+		// concierge matcher keeps its own eligibility rule).
+		const eligible = all ? result.docs : result.docs.filter(passesQualityBar);
+		// Emir-class fix (lessons class 23, 2026-07-09): rows hidden by the
+		// quality bar must be DISCLOSED — counts.total=0 with no filteredOut
+		// read as "no wallet partners exist" while 5 sat behind null taglines.
+		filteredOutCount = result.docs.length - eligible.length;
+		const bySlug = new Map(eligible.map((d) => [String(d.slug), d]));
 
-			// Ranking:
-			//  - with q: relevance via the SHARED scorer (scorePartners) — the same
-			//    engine the concierge matchmaker uses: partial/OR match weighted by
-			//    the structured capability fields (assets, ramps, SEPs, country…)
-			//    and region-gated. Replaces the old strict all-token-AND text filter
-			//    that returned 1 partner for "USDC off-ramp" when 8 actually fit —
-			//    and perversely returned FEWER results the more keywords you added.
-			//  - without q: pilot cohort first, then freshness.
-			const freshRank = { fresh: 0, aging: 1, stale: 2, archived: 3 } as Record<
-				string,
-				number
-			>;
-			// Honest-absence (guard B): scorePartners deliberately falls back to
-			// "a few accepting/fresh partners" (score 0) when a query yields no
-			// usable signal. That is a reasonable ranking choice and a terrible
-			// ANSWER if we do not say so — measured through Raven, the nonsense
-			// query "zzqqxx nonexistent protocol 9999" came back with 5 partners
-			// and nothing marking them as filler. Capture the best score so the
-			// response can tell the caller which it got.
-			const scored = q ? scorePartners(q, eligible, eligible.length) : null;
-			bestPartnerScore = scored?.length
-				? Math.max(...scored.map((s) => s.score ?? 0))
-				: null;
-			const ordered = q
-				? (scored
-						?.map((s) => bySlug.get(s.partner.slug))
-						.filter(Boolean) as typeof eligible)
-				: [...eligible].sort(
-						(a, b) =>
-							Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
-							(freshRank[String(a.freshnessStatus ?? "fresh")] ?? 9) -
-								(freshRank[String(b.freshnessStatus ?? "fresh")] ?? 9),
-					);
+		// Ranking:
+		//  - with q: relevance via the SHARED scorer (scorePartners) — the same
+		//    engine the concierge matchmaker uses: partial/OR match weighted by
+		//    the structured capability fields (assets, ramps, SEPs, country…)
+		//    and region-gated. Replaces the old strict all-token-AND text filter
+		//    that returned 1 partner for "USDC off-ramp" when 8 actually fit —
+		//    and perversely returned FEWER results the more keywords you added.
+		//  - without q: pilot cohort first, then freshness.
+		const freshRank = { fresh: 0, aging: 1, stale: 2, archived: 3 } as Record<
+			string,
+			number
+		>;
+		// Honest-absence (guard B): scorePartners deliberately falls back to
+		// "a few accepting/fresh partners" (score 0) when a query yields no
+		// usable signal. That is a reasonable ranking choice and a terrible
+		// ANSWER if we do not say so — measured through Raven, the nonsense
+		// query "zzqqxx nonexistent protocol 9999" came back with 5 partners
+		// and nothing marking them as filler. Capture the best score so the
+		// response can tell the caller which it got.
+		const scored = q ? scorePartners(q, eligible, eligible.length) : null;
+		bestPartnerScore = scored?.length
+			? Math.max(...scored.map((s) => s.score ?? 0))
+			: null;
+		const ordered = q
+			? (scored
+					?.map((s) => bySlug.get(s.partner.slug))
+					.filter(Boolean) as typeof eligible)
+			: [...eligible].sort(
+					(a, b) =>
+						Number(Boolean(b.pilot)) - Number(Boolean(a.pilot)) ||
+						(freshRank[String(a.freshnessStatus ?? "fresh")] ?? 9) -
+							(freshRank[String(b.freshnessStatus ?? "fresh")] ?? 9),
+				);
 
-			// EXPERIMENTS (default off): include the gated blocks only when opted
-			// in via ?exp=<id> / X-Experiments header / env canary.
-			const withCompliance = isExperimentOn("partner-compliance-api", req);
-			const withOnchain = isExperimentOn("partner-onchain-live", req);
-			const mapped = ordered.map((p) =>
-				toPublic(p, { compliance: withCompliance, onchain: withOnchain }),
-			);
+		// EXPERIMENTS (default off): include the gated blocks only when opted
+		// in via ?exp=<id> / X-Experiments header / env canary.
+		const withCompliance = isExperimentOn("partner-compliance-api", req);
+		const withOnchain = isExperimentOn("partner-onchain-live", req);
+		const mapped = ordered.map((p) =>
+			toPublic(p, { compliance: withCompliance, onchain: withOnchain }),
+		);
 
-			totalMatching = mapped.length;
-			partners = mapped.slice(offset, offset + limit);
-		} catch {
-			// fall through with empty
-		}
+		totalMatching = mapped.length;
+		partners = mapped.slice(offset, offset + limit);
+	} catch {
+		return partnersUnavailable(req, startedAt);
 	}
 
 	logApiHit({

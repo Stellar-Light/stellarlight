@@ -771,7 +771,7 @@ export async function GET(req: NextRequest) {
 	const builderAdvisory =
 		totalMatching > 0
 			? undefined
-			: collectionTotal === 0
+			: collectionTotal === 0 && !isDegraded(warnings)
 				? {
 						summary:
 							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
