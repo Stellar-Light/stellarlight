@@ -439,6 +439,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/partners",
 		query: q,
 		filters: {

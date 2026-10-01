@@ -121,7 +121,13 @@ export async function GET(
 			);
 		}
 
-		logApiHit({ req, endpoint: "/api/partners/[slug]", query: slug });
+		logApiHit({
+			req,
+			startedAt,
+			status: 200,
+			endpoint: "/api/partners/[slug]",
+			query: slug,
+		});
 
 		return NextResponse.json(
 			{

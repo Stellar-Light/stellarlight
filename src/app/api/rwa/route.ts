@@ -130,6 +130,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/rwa",
 		filters: { state, level, kind, project, limit },
 		resultCount: rows.length,

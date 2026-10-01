@@ -203,6 +203,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/skills",
 		filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 	});

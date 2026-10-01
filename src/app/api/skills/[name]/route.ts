@@ -26,6 +26,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { logApiHit } from "@/lib/api-usage";
 import {
 	CURATED_SKILLS,
 	type CuratedSkill,
@@ -60,7 +61,7 @@ const INLINED_SKILL_CONTENT: Record<string, string> = {
 };
 
 export async function GET(
-	_req: NextRequest,
+	req: NextRequest,
 	{ params }: { params: Promise<{ name: string }> },
 ) {
 	const startedAt = Date.now();
@@ -70,6 +71,14 @@ export async function GET(
 	// idempotent on real slugs, so this is a no-op for correct slugs and a fix
 	// for display names that previously 404'd.
 	const slug = generateSlug(rawName);
+	const logHit = () =>
+		logApiHit({
+			req,
+			startedAt,
+			status: 200,
+			endpoint: "/api/skills/[name]",
+			query: slug,
+		});
 
 	// 1. SDF skill? Fetch full content live from skills.stellar.org.
 	// sls-053: gate against the LIVE llms.txt-derived list (24h cache), not a
@@ -79,6 +88,7 @@ export async function GET(
 	const isSdf = (await fetchSdfSkillNames()).includes(slug);
 	const skill = isSdf ? await fetchSdfSkill(slug) : null;
 	if (skill) {
+		logHit();
 		return jsonResponse(
 			{
 				meta: {
@@ -108,6 +118,7 @@ export async function GET(
 	// 2. Curated entry?
 	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
 	if (curated) {
+		logHit();
 		return jsonResponse(
 			{
 				meta: {
@@ -127,6 +138,7 @@ export async function GET(
 	// 3. Community submission?
 	const community = await loadApprovedCommunitySkill(slug);
 	if (community) {
+		logHit();
 		return jsonResponse(
 			{
 				meta: {

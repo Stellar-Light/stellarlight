@@ -98,6 +98,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/contracts",
 		query: q,
 		filters: { domain, limit: rowLimit, offset },

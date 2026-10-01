@@ -149,6 +149,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/stablecoins",
 		filters: { peg: pegFilter, sort, limit },
 		resultCount: rows.length,
