@@ -33,6 +33,11 @@ on:
         description: "Delete this address's ballot for the round so it can vote again (test wallets)."
         type: boolean
         default: false
+      open_to_all:
+        description: "Rehearsal only: let ANY wallet vote on the round (true) or restore the whitelist (false). Needs test_mode."
+        type: choice
+        options: ["", "true", "false"]
+        default: ""
       execute:
         description: "Write to the DB? Leave false for a dry run."
         type: boolean
@@ -65,6 +70,7 @@ jobs:
           IN_TEST_MODE: ${{ inputs.test_mode }}
           IN_FUND: ${{ inputs.fund }}
           IN_RESET: ${{ inputs.reset }}
+          IN_OPEN_TO_ALL: ${{ inputs.open_to_all }}
           IN_EXECUTE: ${{ inputs.execute }}
         run: |
           args=(--address="$IN_ADDRESS")
@@ -72,5 +78,6 @@ jobs:
           if [ "$IN_TEST_MODE" = "true" ]; then args+=(--test-mode); fi
           if [ "$IN_FUND" = "true" ]; then args+=(--fund); fi
           if [ "$IN_RESET" = "true" ]; then args+=(--reset); fi
+          if [ -n "$IN_OPEN_TO_ALL" ]; then args+=(--open-to-all="$IN_OPEN_TO_ALL"); fi
           if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
           pnpm exec tsx scripts/data/award-test-setup.ts "${args[@]}"

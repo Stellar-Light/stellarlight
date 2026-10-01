@@ -1407,6 +1407,10 @@ export interface AwardRound {
 	 */
 	testMode?: boolean | null;
 	/**
+	 * Rehearsal only: any valid Stellar address may vote on this round, no whitelist. Honoured ONLY while testMode is also on, so a real round can never be opened by this switch.
+	 */
+	openToAll?: boolean | null;
+	/**
 	 * How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters — every pick is one vote for that nominee.
 	 */
 	picksPerCategory: number;
@@ -3452,6 +3456,7 @@ export interface AwardRoundsSelect<T extends boolean = true> {
 	slug?: T;
 	status?: T;
 	testMode?: T;
+	openToAll?: T;
 	picksPerCategory?: T;
 	ballotMode?: T;
 	categories?:
