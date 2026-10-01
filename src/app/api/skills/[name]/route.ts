@@ -36,6 +36,7 @@ import {
 } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 import { generateSlug } from "@/lib/utils/normalize";
@@ -62,6 +63,7 @@ export async function GET(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ name: string }> },
 ) {
+	const startedAt = Date.now();
 	const { name: rawName } = await params;
 	// Accept either the slug ('stellar-scout') or the display name ('Stellar
 	// Scout') — agents naturally pass whatever the user said. generateSlug is
@@ -99,7 +101,7 @@ export async function GET(
 					content: skill.content, // raw SKILL.md, frontmatter included
 				},
 			},
-			{ sMaxAge: 86_400 },
+			{ sMaxAge: 86_400, startedAt },
 		);
 	}
 
@@ -118,7 +120,7 @@ export async function GET(
 					content: await resolveCuratedContent(curated),
 				},
 			},
-			{ sMaxAge: 3600 },
+			{ sMaxAge: 3600, startedAt },
 		);
 	}
 
@@ -134,7 +136,7 @@ export async function GET(
 				},
 				skill: community,
 			},
-			{ sMaxAge: 3600 },
+			{ sMaxAge: 3600, startedAt },
 		);
 	}
 
@@ -160,9 +162,13 @@ export async function GET(
 }
 
 /** JSON response with consistent cache headers. */
-function jsonResponse(body: unknown, { sMaxAge }: { sMaxAge: number }) {
+function jsonResponse(
+	body: unknown,
+	{ sMaxAge, startedAt }: { sMaxAge: number; startedAt: number },
+) {
 	return NextResponse.json(body, {
 		headers: {
+			...serverTiming(startedAt),
 			"Cache-Control": `public, s-maxage=${sMaxAge}, stale-while-revalidate=${sMaxAge}`,
 		},
 	});

@@ -30,6 +30,7 @@ import {
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -88,6 +89,7 @@ function doraToRow(h: DoraHacksHackathon): HackathonRow {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -326,6 +328,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				// a DoraHacks hiccup must not pin an empty hour into every consumer's cache
 				"Cache-Control":
 					hackathons.length === 0

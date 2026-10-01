@@ -29,6 +29,7 @@ import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600; // 1h on edge
@@ -80,6 +81,7 @@ interface UnifiedSkill {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -235,6 +237,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},

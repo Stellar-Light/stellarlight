@@ -28,6 +28,7 @@ import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,7 @@ interface AuditRow {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/audits",
 		limit: 60,
@@ -243,6 +245,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				...rateLimitHeaders(limit),
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},

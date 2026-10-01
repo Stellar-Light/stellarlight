@@ -13,6 +13,7 @@
  * `codeReferences`, so consumers that only call project search pick them up.
  * Shared implementation in src/lib/repo-search.ts.
  */
+
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
@@ -28,11 +29,13 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { REPO_ACTIVITY_STATES, type RepoActivityState } from "@/lib/repo-grade";
 import { searchRepos } from "@/lib/repo-search";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -220,6 +223,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				// empty pages are never pinned in the edge cache (see projects/search);
 				// neither is a page a failed read thinned — it would serve the
 				// degraded set to every caller for the whole s-maxage window

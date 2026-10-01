@@ -31,6 +31,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 import {
 	rankStablecoins,
 	STABLECOIN_SORTS,
@@ -50,6 +51,7 @@ const CORS = {
 };
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 
 	// Reject unknown params (an agent that sends country= must learn it's not
@@ -182,6 +184,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				...CORS,
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},
