@@ -95,6 +95,15 @@ async function main() {
 	console.log(`address: ${ADDRESS}`);
 	console.log("");
 
+	// Refuse up front, before any write: a round admits every wallet only while
+	// it is a test round, and the loader enforces the same pairing.
+	if (OPEN_TO_ALL === "true" && !(TEST_MODE || round.testMode)) {
+		console.error(
+			"openToAll needs testMode on this round (pass --test-mode); a real round never opens to every wallet",
+		);
+		process.exit(1);
+	}
+
 	// 1. Whitelist (idempotent).
 	const existing = await payload.find({
 		collection: "award-voters",
@@ -136,12 +145,7 @@ async function main() {
 	// honours it together with testMode, and so does this switch.
 	if (OPEN_TO_ALL === "true" || OPEN_TO_ALL === "false") {
 		const want = OPEN_TO_ALL === "true";
-		if (want && !(TEST_MODE || round.testMode)) {
-			console.error(
-				"• openToAll: REFUSED — needs testMode on this round (pass --test-mode); a real round never opens to every wallet",
-			);
-			process.exitCode = 1;
-		} else if (!!round.openToAll === want) {
+		if (!!round.openToAll === want) {
 			console.log(`• openToAll: already ${want} — skip`);
 		} else if (EXECUTE) {
 			await payload.update({
