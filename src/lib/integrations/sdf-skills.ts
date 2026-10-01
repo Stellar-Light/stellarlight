@@ -33,6 +33,28 @@ export type SdfSkillName = (typeof SDF_SKILL_NAMES)[number];
  *  index — the source of truth for what is maintained). Falls back to the
  *  static list above on any fetch/parse failure. */
 export async function fetchSdfSkillNames(): Promise<string[]> {
+	const links = await fetchSdfSkillLinks();
+	return links.size >= 3 ? [...links.keys()] : [...SDF_SKILL_NAMES];
+}
+
+/**
+ * The registry's llms.txt links each skill to the SKILL.md it is served
+ * from. Most live under skills.stellar.org, but the registry also lists
+ * skills hosted in their authors' repositories (raw.githubusercontent.com),
+ * so the name alone does not give the URL: a skill fetched from the derived
+ * skills.stellar.org path 404s when it lives elsewhere.
+ */
+export function parseLlmsSkillLinks(txt: string): Map<string, string> {
+	const links = new Map<string, string>();
+	for (const m of txt.matchAll(
+		/\((https?:\/\/[^)\s]+\/skills\/([a-z0-9-]+)\/SKILL\.md)\)/g,
+	)) {
+		if (!links.has(m[2])) links.set(m[2], m[1]);
+	}
+	return links;
+}
+
+async function fetchSdfSkillLinks(): Promise<Map<string, string>> {
 	try {
 		const res = await fetch(`${BASE}/llms.txt`, {
 			next: { revalidate: 86_400 }, // 24h, same cadence as the skills
@@ -40,16 +62,10 @@ export async function fetchSdfSkillNames(): Promise<string[]> {
 				"User-Agent": "StellarLight/1.0 (https://stellarlight.xyz/scout)",
 			},
 		});
-		if (!res.ok) return [...SDF_SKILL_NAMES];
-		const txt = await res.text();
-		const names = [
-			...new Set(
-				[...txt.matchAll(/skills\/([a-z0-9-]+)\/SKILL\.md/g)].map((m) => m[1]),
-			),
-		];
-		return names.length >= 3 ? names : [...SDF_SKILL_NAMES];
+		if (!res.ok) return new Map();
+		return parseLlmsSkillLinks(await res.text());
 	} catch {
-		return [...SDF_SKILL_NAMES];
+		return new Map();
 	}
 }
 
@@ -96,11 +112,20 @@ function parseFrontmatter(md: string): {
 	return { frontmatter: fm, body };
 }
 
-function urlForSkill(name: string): { rawUrl: string; url: string } {
-	return {
-		rawUrl: `${BASE}/skills/${name}/SKILL.md`,
-		url: `${BASE}/skills/${name}/`,
-	};
+function urlForSkill(
+	name: string,
+	registryRawUrl?: string,
+): { rawUrl: string; url: string } {
+	const rawUrl = registryRawUrl ?? `${BASE}/skills/${name}/SKILL.md`;
+	// A skill the registry hosts elsewhere gets its author's repository as
+	// the homepage; the registry has no page for it.
+	const gh = rawUrl.match(
+		/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)\/SKILL\.md$/,
+	);
+	const url = gh
+		? `https://github.com/${gh[1]}/${gh[2]}/tree/${gh[3]}/${gh[4]}`
+		: `${BASE}/skills/${name}/`;
+	return { rawUrl, url };
 }
 
 /** Fetch one skill's raw markdown with 24h Next.js cache. Returns null
@@ -108,7 +133,10 @@ function urlForSkill(name: string): { rawUrl: string; url: string } {
 export async function fetchSdfSkill(
 	name: string,
 ): Promise<SdfSkillFull | null> {
-	const { rawUrl, url } = urlForSkill(name);
+	const { rawUrl, url } = urlForSkill(
+		name,
+		(await fetchSdfSkillLinks()).get(name),
+	);
 	try {
 		const res = await fetch(rawUrl, {
 			next: { revalidate: 86_400 }, // 24h
