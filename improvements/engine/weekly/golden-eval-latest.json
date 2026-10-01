@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8498530983924866,
+      "topScore": 0.849909782409668,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -531,7 +531,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 57,
+      "topScore": 78,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -549,7 +549,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 78,
+      "topScore": 83,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -585,7 +585,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7969061136245728,
+      "topScore": 0.79648756980896,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-09-28T12:02:08Z"
+  "generatedAt": "2026-10-01T11:51:11Z"
 }
