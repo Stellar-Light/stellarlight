@@ -161,6 +161,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-dfns-dfns-sdk-python-pypi-dfns-sdk",
+   "date": "2026-10-01",
+   "run": "36886078595",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
