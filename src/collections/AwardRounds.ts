@@ -94,6 +94,16 @@ export const AwardRounds: CollectionConfig = {
 			},
 		},
 		{
+			name: "openToAll",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				position: "sidebar",
+				description:
+					"Rehearsal only: any valid Stellar address may vote on this round, no whitelist. Honoured ONLY while testMode is also on, so a real round can never be opened by this switch.",
+			},
+		},
+		{
 			name: "picksPerCategory",
 			type: "number",
 			required: true,

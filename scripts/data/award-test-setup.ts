@@ -6,6 +6,7 @@
  *   ... --execute --test-mode   # also flip the round to testMode (i3-test memo on ballots)
  *   ... --execute --fund        # also friendbot-fund the address on testnet
  *   ... --execute --reset       # delete this address's ballot so it can vote again
+ *   ... --execute --test-mode --open-to-all=true   # rehearsal: ANY wallet may vote (off: =false)
  *
  * Idempotent and repeatable — the test wallet is meant to be reset, so this
  * can be re-run to re-whitelist. It ONLY ever:
@@ -38,6 +39,7 @@ const EXECUTE = process.argv.includes("--execute");
 const TEST_MODE = process.argv.includes("--test-mode");
 const FUND = process.argv.includes("--fund");
 const RESET = process.argv.includes("--reset");
+const OPEN_TO_ALL = arg("open-to-all"); // "true" | "false" | undefined
 const ADDRESS = (arg("address") ?? "").trim().toUpperCase();
 const ROUND_SLUG = arg("round") ?? null; // null → the open round
 const LABEL = arg("label") ?? "Pilot — test wallet";
@@ -85,12 +87,22 @@ async function main() {
 		slug: string;
 		status: string;
 		testMode?: boolean;
+		openToAll?: boolean;
 	};
 	console.log(
 		`round: ${round.slug} (status=${round.status}, testMode=${!!round.testMode})`,
 	);
 	console.log(`address: ${ADDRESS}`);
 	console.log("");
+
+	// Refuse up front, before any write: a round admits every wallet only while
+	// it is a test round, and the loader enforces the same pairing.
+	if (OPEN_TO_ALL === "true" && !(TEST_MODE || round.testMode)) {
+		console.error(
+			"openToAll needs testMode on this round (pass --test-mode); a real round never opens to every wallet",
+		);
+		process.exit(1);
+	}
 
 	// 1. Whitelist (idempotent).
 	const existing = await payload.find({
@@ -126,6 +138,26 @@ async function main() {
 			console.log("• testMode: SET true (ballots now carry the i3-test memo)");
 		} else {
 			console.log("• testMode: WOULD set true");
+		}
+	}
+
+	// 2b. openToAll: a rehearsal round admits any valid wallet. The loader only
+	// honours it together with testMode, and so does this switch.
+	if (OPEN_TO_ALL === "true" || OPEN_TO_ALL === "false") {
+		const want = OPEN_TO_ALL === "true";
+		if (!!round.openToAll === want) {
+			console.log(`• openToAll: already ${want} — skip`);
+		} else if (EXECUTE) {
+			await payload.update({
+				collection: "award-rounds",
+				id: round.id,
+				data: { openToAll: want },
+			});
+			console.log(
+				`• openToAll: SET ${want}${want ? " (any valid address can vote on this round until it is switched off)" : ""}`,
+			);
+		} else {
+			console.log(`• openToAll: WOULD set ${want}`);
 		}
 	}
 

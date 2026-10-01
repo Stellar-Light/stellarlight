@@ -8,6 +8,7 @@
  * points; the directory speaks.
  */
 
+import { StrKey } from "@stellar/stellar-sdk";
 import { getPayloadSafe } from "@/lib/payload-client";
 import type { BallotNominee, BallotRound } from "./ballot";
 import { AWARD_LOGO_OVERRIDES } from "./logo-overrides";
@@ -48,7 +49,20 @@ function toBallotRound(doc: any): BallotRound & { title: string } {
 		opensAt: doc.opensAt ?? null,
 		closesAt: doc.closesAt ?? null,
 		testMode: !!doc.testMode,
+		openToAll: !!doc.openToAll,
 	};
+}
+
+/**
+ * A rehearsal whitelist: every valid account id is "on" it, so the ballot,
+ * status and submit routes admit any wallet without a code path of their own.
+ * Its members still iterate normally, so turnout and the manifest see the
+ * addresses that were actually whitelisted.
+ */
+class AnyWalletWhitelist extends Set<string> {
+	override has(address: string): boolean {
+		return StrKey.isValidEd25519PublicKey(address);
+	}
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -183,16 +197,20 @@ export async function loadRoundOrThrow(
 					a.name.localeCompare(b.name),
 			);
 
-	const whitelist = new Set<string>(
-		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
-		(voterDocs.docs as any[])
-			.map((v) =>
-				String(v.address ?? "")
-					.trim()
-					.toUpperCase(),
-			)
-			.filter(Boolean),
-	);
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	const members = (voterDocs.docs as any[])
+		.map((v) =>
+			String(v.address ?? "")
+				.trim()
+				.toUpperCase(),
+		)
+		.filter(Boolean);
+	// Both switches, never one: testMode marks the ballots as throwaway, and
+	// only then may the whitelist admit everyone.
+	const whitelist =
+		round.testMode && round.openToAll
+			? new AnyWalletWhitelist(members)
+			: new Set<string>(members);
 
 	return { round, nominees, whitelist };
 }

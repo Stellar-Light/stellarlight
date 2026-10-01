@@ -75,6 +75,12 @@ export interface BallotRound {
 	 * requires it. Defaults false; the real round carries no memo.
 	 */
 	testMode?: boolean;
+	/**
+	 * Rehearsal switch: every valid account id counts as whitelisted. The
+	 * loader honours it only together with testMode, so the real round can
+	 * never be opened to every wallet by one stray checkbox.
+	 */
+	openToAll?: boolean;
 }
 
 export interface BallotNominee {
