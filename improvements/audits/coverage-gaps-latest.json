@@ -1,29 +1,100 @@
 {
-  "asOf": "2026-09-15T15:31:39.049Z",
+  "asOf": "2026-10-01T14:54:03.019Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
-    "total": 514,
-    "absent": 1,
-    "served": 513,
-    "absentAwarded": 1,
-    "absentSubmittedOnly": 0,
+    "total": 531,
+    "absent": 10,
+    "served": 521,
+    "absentAwarded": 3,
+    "absentSubmittedOnly": 7,
     "sample": [
       {
-        "scfSlug": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+        "scfSlug": "open-rwa-vault-infrastructure-nis",
         "rounds": [
-          "42"
+          "45"
         ],
         "notAwardedRounds": [],
         "awarded": true,
-        "url": "https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu"
+        "url": "https://communityfund.stellar.org/project/open-rwa-vault-infrastructure-nis"
+      },
+      {
+        "scfSlug": "canary-protocol-y4l",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/canary-protocol-y4l"
+      },
+      {
+        "scfSlug": "pods-dxl",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/pods-dxl"
+      },
+      {
+        "scfSlug": "pollar-nqe",
+        "rounds": [],
+        "notAwardedRounds": [
+          "42"
+        ],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/pollar-nqe"
+      },
+      {
+        "scfSlug": "cara7-yyx",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/cara7-yyx"
+      },
+      {
+        "scfSlug": "astrolabe-bzg",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/astrolabe-bzg"
+      },
+      {
+        "scfSlug": "nila-fwc",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/nila-fwc"
+      },
+      {
+        "scfSlug": "fermah-pay-w3c",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/fermah-pay-w3c"
+      },
+      {
+        "scfSlug": "principal-vzt",
+        "rounds": [
+          "45"
+        ],
+        "notAwardedRounds": [
+          "44"
+        ],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/principal-vzt"
+      },
+      {
+        "scfSlug": "zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib",
+        "rounds": [
+          "45"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib"
       }
     ]
   },
   "defillama": {
-    "stellarListed": 44,
-    "matched": 33,
+    "stellarListed": 42,
+    "matched": 32,
     "missing": 1,
-    "belowFloor": 2
+    "belowFloor": 1
   },
   "corroboratedAbsent": [],
   "domainMatched": [
@@ -83,16 +154,6 @@
       "domain": "youtube.com/@robertosanzcriptomonedas"
     },
     {
-      "scf": "bwb-brazilian-real-estate-yields-on-stellar-zab",
-      "slug": "bwb",
-      "domain": "bwbi.com.br"
-    },
-    {
-      "scf": "agama-dtk",
-      "slug": "octarine",
-      "domain": "octarine.finance"
-    },
-    {
       "scf": "embedded-collective-investment-via-soroban-syi",
       "slug": "escala",
       "domain": "escalahq.com"
@@ -113,6 +174,16 @@
       "domain": "theaha.co"
     },
     {
+      "scf": "the-merchant-settlement-rail-for-africa-bzf",
+      "slug": "slimepay",
+      "domain": "slimepay.com"
+    },
+    {
+      "scf": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+      "slug": "lifi",
+      "domain": "li.fi"
+    },
+    {
       "scf": "post-quantum-secure-wallets-for-stellar-97o",
       "slug": "soundness",
       "domain": "soundness.xyz"
@@ -128,20 +199,14 @@
       "domain": "jsr.io/@creit-tech/stellar-router-sdk"
     }
   ],
-  "reviewedAbsent": [
-    {
-      "scfSlug": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
-      "verdict": "not absent \u2014 served TWICE, as pagcrypto and pagfinance",
-      "evidence": "one company seeded twice: both rows publish pag.finance and the same types. pagcrypto carries the #42 award and github.com/PagCrypto; pagfinance carries the brand name and scf.awarded:false, so an agent finding the brand-named row is told it has no SCF funding. Same operator confirmed from the asset's own anchor \u2014 brlp.money/.well-known/stellar.toml gives ORG_NAME \"PagFinance\" for BRLP issuer GDD3ZAU3\u2026NPRF, whose Horizon home_domain points back at brlp.money. No pass matched the SCF entry because the fund lists pagcrypto.finance while both rows carry pag.finance and the submission title is descriptive. Queued as a DUPE_MERGE in curate-projects.ts (pagcrypto -> pagfinance, copyScf)."
-    }
-  ],
-  "unreviewedAbsent": 0,
+  "reviewedAbsent": [],
+  "unreviewedAbsent": 10,
   "summary": {
     "missingDefillama": 1,
-    "missingScf": 1,
-    "missingScfAwarded": 1,
+    "missingScf": 10,
+    "missingScfAwarded": 3,
     "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 1,
+    "staleCollections": 0,
     "staleOrEmptyResearchSources": 1,
     "refreshUnmeasurableSources": 3
   }
