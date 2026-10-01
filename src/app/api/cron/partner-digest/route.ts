@@ -8,6 +8,9 @@ import configPromise from "@/payload.config";
  *
  *   GET /api/cron/partner-digest            (Vercel Cron, Bearer CRON_SECRET)
  *   GET /api/cron/partner-digest?dryRun=1   (compute + report, send/write nothing)
+ *   GET /api/cron/partner-digest?checkin=all (operator override: the check-in is
+ *                                            due for every published partner now,
+ *                                            whatever its clock says)
  *
  * Runs weekly and sends AT MOST one email per partner, bundling two things so
  * a partner is never pinged twice:
@@ -47,7 +50,9 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const dryRun = new URL(request.url).searchParams.get("dryRun") === "1";
+	const params = new URL(request.url).searchParams;
+	const dryRun = params.get("dryRun") === "1";
+	const forceCheckin = params.get("checkin") === "all";
 	const now = Date.now();
 
 	try {
@@ -91,6 +96,12 @@ export async function GET(request: Request) {
 		}> = [];
 		const noAddress: string[] = [];
 		const sendFailed: string[] = [];
+		// Clock summary so a dry run explains a quiet week.
+		const clocks = {
+			due: 0,
+			future: 0,
+			earliestFutureAt: null as string | null,
+		};
 
 		for (const p of partners.docs) {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -102,7 +113,17 @@ export async function GET(request: Request) {
 			const reminderDueAt = doc.nextReminderAt
 				? new Date(doc.nextReminderAt).getTime()
 				: 0;
-			const checkinDue = !doc.nextReminderAt || reminderDueAt <= now;
+			const clockDue = !doc.nextReminderAt || reminderDueAt <= now;
+			if (clockDue) clocks.due++;
+			else {
+				clocks.future++;
+				if (
+					!clocks.earliestFutureAt ||
+					doc.nextReminderAt < clocks.earliestFutureAt
+				)
+					clocks.earliestFutureAt = doc.nextReminderAt;
+			}
+			const checkinDue = forceCheckin || clockDue;
 
 			if (leadCount === 0 && !checkinDue) continue;
 
@@ -226,6 +247,8 @@ export async function GET(request: Request) {
 		return NextResponse.json({
 			success: true,
 			dryRun,
+			forceCheckin,
+			clocks,
 			partnersScanned: partners.docs.length,
 			emailsSent,
 			checkinsSent,
