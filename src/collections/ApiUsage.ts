@@ -106,6 +106,19 @@ export const ApiUsage: CollectionConfig = {
 			},
 		},
 		{
+			// HTTP status we answered with. A 5xx row is the server-side record
+			// of a failure the caller saw; without it a stall leaves no trace.
+			name: "status",
+			type: "number",
+			index: true,
+		},
+		{
+			// Our own wall time for the request in milliseconds, measured from
+			// the start of the handler to the moment the hit is logged.
+			name: "durationMs",
+			type: "number",
+		},
+		{
 			// Match tier served (projects: strict/loose-1/majority/semantic/all;
 			// research: vector/keyword). `semantic` on projects = pure fallback.
 			name: "matchMode",

@@ -2138,6 +2138,8 @@ export interface ApiUsage {
 	 * Rows returned on this response (0 = miss)
 	 */
 	resultCount?: number | null;
+	status?: number | null;
+	durationMs?: number | null;
 	/**
 	 * Match tier / retrieval mode served
 	 */
@@ -3801,6 +3803,8 @@ export interface ApiUsageSelect<T extends boolean = true> {
 	country?: T;
 	filtersJson?: T;
 	resultCount?: T;
+	status?: T;
+	durationMs?: T;
 	matchMode?: T;
 	updatedAt?: T;
 	createdAt?: T;

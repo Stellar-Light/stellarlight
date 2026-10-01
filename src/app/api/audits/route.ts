@@ -224,6 +224,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/audits",
 		query: q ?? project ?? auditor ?? null,
 		filters: { project, auditor, since, limit: limitParam, offset },

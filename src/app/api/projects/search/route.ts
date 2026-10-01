@@ -955,6 +955,8 @@ export async function GET(req: NextRequest) {
 	if (!q && !category && !scfAwardedOnly && !statusParam && !typeParam) {
 		logApiHit({
 			req,
+			startedAt,
+			status: 200,
 			endpoint: "/api/projects/search",
 			query: "",
 			filters: { category, scfAwarded: scfAwardedOnly, limit },
@@ -2544,6 +2546,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/projects/search",
 		query: q,
 		filters: {

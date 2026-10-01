@@ -262,6 +262,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/hackathons",
 		filters: { status: statusFilter, source: sourceFilter, limit },
 	});

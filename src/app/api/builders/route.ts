@@ -710,6 +710,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/builders",
 		query: q,
 		filters: { location, limit },
