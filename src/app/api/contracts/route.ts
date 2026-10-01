@@ -25,6 +25,7 @@ import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { serverTiming } from "@/lib/server-timing";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export const dynamic = "force-dynamic";
 const VALID_PARAMS = ["q", "domain", "limit", "offset"];
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/contracts",
 		limit: 60,
@@ -118,7 +120,7 @@ export async function GET(req: NextRequest) {
 			},
 			contracts,
 		},
-		{ headers: rateLimitHeaders(limit) },
+		{ headers: { ...rateLimitHeaders(limit), ...serverTiming(startedAt) } },
 	);
 }
 

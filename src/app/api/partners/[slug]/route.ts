@@ -13,6 +13,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -88,6 +89,7 @@ export async function GET(
 	req: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
+	const startedAt = Date.now();
 	const { slug } = await params;
 
 	const payload = await getPayloadSafe();
@@ -131,6 +133,7 @@ export async function GET(
 			},
 			{
 				headers: {
+					...serverTiming(startedAt),
 					"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 				},
 			},

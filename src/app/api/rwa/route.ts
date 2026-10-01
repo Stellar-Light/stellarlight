@@ -15,6 +15,7 @@ import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { mergeMeasured, type RwaMeasured } from "@/lib/rwa-measured";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -31,6 +32,7 @@ const CORS = {
 };
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Reject unknown params, as /api/stablecoins does: an agent that sends
 	// sort= or network= must learn the parameter does nothing, not receive a
@@ -163,6 +165,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				...CORS,
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},

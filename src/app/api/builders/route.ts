@@ -47,6 +47,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { NOT_GONE } from "@/lib/repo-grade";
 import { findPeopleByName } from "@/lib/sdf-people";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -167,6 +168,7 @@ const SUPPORTED_PARAMS = [
 ] as const;
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Strict unknown-param rejection (sls-040 / #521): `?scfTier=high` (and any
 	// other unsupported key) was silently ignored — the caller got the full
@@ -885,6 +887,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				// A page a failed read thinned is never pinned — an hour of a
 				// degraded roster served to every caller is the wrong trade.
 				"Cache-Control": isDegraded(warnings)

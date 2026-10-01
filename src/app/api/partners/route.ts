@@ -36,6 +36,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
 import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -225,6 +226,7 @@ function toPublic(
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -546,6 +548,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},
 		},

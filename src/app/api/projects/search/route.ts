@@ -61,6 +61,7 @@ import {
 	type ProductsCoverage,
 	productsCoverage,
 } from "@/lib/rwa-products";
+import { serverTiming } from "@/lib/server-timing";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -814,6 +815,7 @@ function tvlMethodUrlFor(slugs: string[] | null): string | null {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
 	// frequently send the search term under `query` — the field name many other
@@ -2730,6 +2732,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				// Never pin an EMPTY page in the edge cache. A transient find error or
 				// a cold index can produce zero rows for a query that normally has
 				// dozens; with s-maxage + stale-while-revalidate that zero was served
