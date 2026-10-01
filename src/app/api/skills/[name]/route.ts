@@ -74,14 +74,11 @@ export async function GET(
 	// 1. SDF skill? Fetch full content live from skills.stellar.org.
 	// sls-053: gate against the LIVE llms.txt-derived list (24h cache), not a
 	// static snapshot — so renamed/added SDF skills resolve without a deploy.
-	if ((await fetchSdfSkillNames()).includes(slug)) {
-		const skill = await fetchSdfSkill(slug);
-		if (!skill) {
-			return NextResponse.json(
-				{ error: `failed to fetch skill ${slug} from skills.stellar.org` },
-				{ status: 502 },
-			);
-		}
+	// An upstream miss falls through to the curated and community copies
+	// below; only when every source fails does the caller see a 503.
+	const isSdf = (await fetchSdfSkillNames()).includes(slug);
+	const skill = isSdf ? await fetchSdfSkill(slug) : null;
+	if (skill) {
 		return jsonResponse(
 			{
 				meta: {
@@ -140,6 +137,17 @@ export async function GET(
 				skill: community,
 			},
 			{ sMaxAge: 3600, startedAt },
+		);
+	}
+
+	// The registry lists it but every copy failed to fetch: temporary, retry.
+	if (isSdf) {
+		return NextResponse.json(
+			{
+				error: `skill ${slug} is listed by skills.stellar.org but could not be fetched from any source`,
+				retryAfterSeconds: 300,
+			},
+			{ status: 503, headers: { "Retry-After": "300" } },
 		);
 	}
 
