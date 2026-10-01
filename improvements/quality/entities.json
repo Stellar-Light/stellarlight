@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-01T13:08:02.596Z",
+ "generatedAt": "2026-10-01T14:44:54.751Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 70,
+   "oldestDays": 71,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -9460,7 +9460,7 @@
    "mainnetJoin": {
     "pool": 5758,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 121
+    "joined": 122
    }
   },
   "curatedShape": {
@@ -9514,11 +9514,11 @@
     },
     {
      "label": "slowing",
-     "count": 1010
+     "count": 1011
     },
     {
      "label": "active",
-     "count": 892
+     "count": 891
     },
     {
      "label": "unknown",
@@ -9575,7 +9575,7 @@
   },
   "withCodeDepth": 11134,
   "withNotes": 1059,
-  "withMainnet": 121,
+  "withMainnet": 122,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
