@@ -81,6 +81,21 @@ export const isPlaceholderEmail = (email: string | null | undefined): boolean =>
 	(email.startsWith("curated+") && email.endsWith("@stellarlight.xyz"));
 
 /**
+ * Where a partner's email goes: the real login address, else the listing's
+ * public contact. The curated+slug placeholder that curated accounts sign in
+ * through never receives mail.
+ */
+export function checkinRecipient(doc: {
+	email?: string | null;
+	contactEmail?: string | null;
+}): string | null {
+	const login = (doc.email ?? "").trim();
+	if (login && !isPlaceholderEmail(login)) return login;
+	const contact = (doc.contactEmail ?? "").trim();
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? contact : null;
+}
+
+/**
  * Mint a 7-day password-reset token for a partner account WITHOUT sending
  * Payload's default email (we compose our own copy).
  *

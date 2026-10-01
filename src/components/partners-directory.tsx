@@ -159,9 +159,6 @@ export function PartnersDirectory({
 						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
 							Stellar Partners
 						</h1>
-						<span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-muted-foreground border border-border">
-							Beta
-						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
 						Anchors, ramps, auditors, infrastructure and protocols builders can
