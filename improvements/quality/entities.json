@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-09-30T14:07:07.491Z",
+ "generatedAt": "2026-10-01T13:08:02.596Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 1,
-   "clearedFindings": 35,
+   "openFindings": 8,
+   "clearedFindings": 34,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 725,
-  "open": 1,
-  "refreshQueue": 46,
+  "total": 741,
+  "open": 8,
+  "refreshQueue": 56,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 69,
+   "oldestDays": 70,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 654,
+  "cleared": 653,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 47,
-    "total": 252
+    "open": 64,
+    "total": 268
    },
    "instrument": {
     "open": 17,
@@ -105,7 +105,7 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 14,
+    "refresh": 15,
     "blocked": 0,
     "cleared": 98,
     "verified": 0,
@@ -139,6 +139,15 @@
     "surface": "directory"
    },
    {
+    "mode": "repo-gone",
+    "open": 8,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 21,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
     "mode": "api-drift",
     "open": 0,
     "refresh": 0,
@@ -155,15 +164,6 @@
     "cleared": 24,
     "verified": 0,
     "surface": "corpus"
-   },
-   {
-    "mode": "repo-gone",
-    "open": 1,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 21,
-    "verified": 0,
-    "surface": "code"
    },
    {
     "mode": "scf-round-overclaim",
@@ -186,9 +186,9 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 29,
+    "refresh": 38,
     "blocked": 0,
-    "cleared": 9,
+    "cleared": 8,
     "verified": 0,
     "surface": "code"
    },
@@ -268,7 +268,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 1
+    "count": 8
    },
    {
     "bucket": "8–30d",
@@ -337,18 +337,18 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 236,
-     "recurred": 97,
-     "ratePct": 41.1
+     "newFindings": 222,
+     "recurred": 86,
+     "ratePct": 38.7
     },
     "lifetime": {
-     "newFindings": 725,
-     "recurred": 191,
-     "ratePct": 26.3
+     "newFindings": 741,
+     "recurred": 207,
+     "ratePct": 27.9
     }
    },
    "reopened": {
-    "count": 11,
+    "count": 12,
     "shareOfClosures": 0.02,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -356,14 +356,14 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 236,
-     "repeats": 235,
-     "ratePct": 99.6
+     "newFindings": 222,
+     "repeats": 221,
+     "ratePct": 99.5
     },
     "lifetime": {
-     "newFindings": 725,
-     "repeats": 718,
-     "ratePct": 99
+     "newFindings": 741,
+     "repeats": 734,
+     "ratePct": 99.1
     },
     "byClass": [
      {
@@ -374,8 +374,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 166,
-      "open": 43,
+      "total": 175,
+      "open": 53,
       "firstSeen": "2026-07-22"
      },
      {
@@ -391,6 +391,12 @@
       "firstSeen": "2026-07-22"
      },
      {
+      "class": "unclassified",
+      "total": 32,
+      "open": 11,
+      "firstSeen": "2026-09-17"
+     },
+     {
       "class": "contract-completeness",
       "total": 30,
       "open": 0,
@@ -401,12 +407,6 @@
       "total": 25,
       "open": 0,
       "firstSeen": "2026-07-23"
-     },
-     {
-      "class": "unclassified",
-      "total": 25,
-      "open": 4,
-      "firstSeen": "2026-09-17"
      }
     ]
    }
@@ -9438,13 +9438,13 @@
    "curatedIndex": {
     "repos": 3419,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3182,
+    "withCodeDepth": 3186,
     "depthPct": 93
    },
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7938
+    "withCodeDepth": 7948
    },
    "knowledgeNotes": {
     "pool": 373,
@@ -9458,7 +9458,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5748,
+    "pool": 5758,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 121
    }
@@ -9510,15 +9510,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1348
+     "count": 1352
     },
     {
      "label": "slowing",
-     "count": 1003
+     "count": 1010
     },
     {
      "label": "active",
-     "count": 903
+     "count": 892
     },
     {
      "label": "unknown",
@@ -9573,8 +9573,8 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11120,
-  "withNotes": 1058,
+  "withCodeDepth": 11134,
+  "withNotes": 1059,
   "withMainnet": 121,
   "top": [
    {
@@ -10654,7 +10654,7 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 112
+    "value": 113
    },
    {
     "id": "s:engine-d-demand",
@@ -10666,7 +10666,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 38
+    "value": 46
    },
    {
     "id": "s:raven-routing",
@@ -10681,6 +10681,12 @@
     "value": 29
    },
    {
+    "id": "s:gone-repos",
+    "label": "gone-repos",
+    "column": 0,
+    "value": 29
+   },
+   {
     "id": "s:nightly-drift",
     "label": "nightly-drift",
     "column": 0,
@@ -10691,12 +10697,6 @@
     "label": "nightly-battery",
     "column": 0,
     "value": 24
-   },
-   {
-    "id": "s:gone-repos",
-    "label": "gone-repos",
-    "column": 0,
-    "value": 22
    },
    {
     "id": "s:scf-crosscheck",
@@ -10753,16 +10753,16 @@
     "value": 188
    },
    {
+    "id": "f:code",
+    "label": "code",
+    "column": 1,
+    "value": 42
+   },
+   {
     "id": "f:contract",
     "label": "contract",
     "column": 1,
     "value": 37
-   },
-   {
-    "id": "f:code",
-    "label": "code",
-    "column": 1,
-    "value": 36
    },
    {
     "id": "f:corpus",
@@ -10786,13 +10786,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 654
+    "value": 653
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 64
+    "value": 81
    },
    {
     "id": "o:verified",
@@ -10846,20 +10846,20 @@
    },
    {
     "source": 10,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 18,
+    "source": 19,
     "target": 25,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 18,
+    "source": 19,
     "target": 23,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
@@ -10888,17 +10888,17 @@
    },
    {
     "source": 15,
-    "target": 19,
+    "target": 18,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 19,
+    "source": 18,
     "target": 23,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 35
+    "value": 34
    },
    {
     "source": 2,
@@ -10915,14 +10915,14 @@
     "value": 188
    },
    {
-    "source": 6,
-    "target": 18,
+    "source": 7,
+    "target": 19,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 25
    },
    {
-    "source": 7,
+    "source": 8,
     "target": 20,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
@@ -10937,7 +10937,7 @@
    },
    {
     "source": 12,
-    "target": 19,
+    "target": 18,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
@@ -10951,49 +10951,49 @@
    },
    {
     "source": 13,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
     "value": 4
    },
    {
     "source": 3,
-    "target": 19,
+    "target": 18,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 38
+    "value": 46
    },
    {
-    "source": 19,
+    "source": 18,
     "target": 24,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 33
+    "value": 49
    },
    {
     "source": 1,
     "target": 17,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 112
+    "value": 113
    },
    {
     "source": 17,
     "target": 24,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 14
+    "value": 15
    },
    {
-    "source": 8,
-    "target": 19,
+    "source": 6,
+    "target": 18,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 22
+    "value": 29
    },
    {
     "source": 14,
-    "target": 19,
+    "target": 18,
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
     "value": 3
@@ -11009,7 +11009,7 @@
     "missing": 359,
     "of": 378,
     "share": 95,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5370 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5380 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 359,
@@ -11033,7 +11033,7 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12379,
+    "missing": 12378,
     "of": 13437,
     "share": 92.1,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
@@ -11097,13 +11097,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2317,
+    "missing": 2303,
     "of": 13437,
-    "share": 17.2,
+    "share": 17.1,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2317,
+    "examplePoolSize": 2303,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
