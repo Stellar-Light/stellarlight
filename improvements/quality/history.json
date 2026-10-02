@@ -491,8 +491,8 @@
  },
  {
   "date": "2026-10-02",
-  "batteryPass": 62,
-  "batteryFail": 3,
+  "batteryPass": 91,
+  "batteryFail": 0,
   "batteryErrors": null,
   "parityPass": 51,
   "openMaps": 0,
