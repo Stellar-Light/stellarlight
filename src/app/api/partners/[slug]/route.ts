@@ -16,6 +16,9 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies
@@ -145,9 +148,21 @@ export async function GET(
 			},
 		);
 	} catch {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/partners/[slug]",
+			query: slug,
+		});
 		return NextResponse.json(
-			{ error: "directory lookup failed" },
-			{ status: 500 },
+			{
+				error: "directory lookup failed",
+				advisory:
+					"The partner record could not be read. This is an outage, NOT a claim that the partner does not exist. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{ status: 503, headers: { "Retry-After": "2" } },
 		);
 	}
 }

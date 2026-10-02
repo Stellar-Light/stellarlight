@@ -55,6 +55,7 @@ export async function fetchScfRounds(): Promise<ScfRoundState | null> {
 		const res = await fetch(AWARDS_URL, {
 			headers: { "user-agent": "stellarlight.xyz data layer (scf-round meta)" },
 			next: { revalidate: REVALIDATE_SECONDS },
+			signal: AbortSignal.timeout(5000),
 		});
 		if (!res.ok) return null;
 		const text = (await res.text()).replace(/\\"/g, '"');

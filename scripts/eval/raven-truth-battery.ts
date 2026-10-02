@@ -26,6 +26,7 @@ const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
 	"",
 );
+
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -108,7 +109,8 @@ async function raven(code: string): Promise<any> {
 		throw new Error(
 			`raven HTTP ${res.status} ${res.statusText} (${text.length} bytes)${text ? `: ${text.slice(0, 160)}` : " — empty body"}`,
 		);
-	if (!text.trim()) throw new Error(`raven returned an empty body (HTTP ${res.status})`);
+	if (!text.trim())
+		throw new Error(`raven returned an empty body (HTTP ${res.status})`);
 	// SSE or plain; find the result payload's first text content
 	const line = text
 		.split("\n")
@@ -134,17 +136,16 @@ async function raven(code: string): Promise<any> {
 	let depth = 0;
 	for (let i = start; i < content.length; i++) {
 		if (content[i] === "{") depth++;
-		else if (content[i] === "}" && --depth === 0)
-			{
-				const slice = content.slice(start, i + 1);
-				try {
-					return JSON.parse(slice);
-				} catch {
-					throw new Error(
-						`raven's JSON did not parse (${slice.length} bytes of ${content.length}): ${slice.slice(0, 160)}`,
-					);
-				}
+		else if (content[i] === "}" && --depth === 0) {
+			const slice = content.slice(start, i + 1);
+			try {
+				return JSON.parse(slice);
+			} catch {
+				throw new Error(
+					`raven's JSON did not parse (${slice.length} bytes of ${content.length}): ${slice.slice(0, 160)}`,
+				);
 			}
+		}
 	}
 	throw new Error("unterminated JSON in raven reply");
 }
@@ -420,21 +421,40 @@ async function sliceG() {
 			projects?: Array<{ slug?: string; name?: string }>;
 			meta?: { counts?: { total?: number } };
 		};
+	// The API caps a page at 100 rows, and a typed set can exceed that (RWA
+	// reached 101 on 2026-10-02 and tripped every G probe): the set is the
+	// WALK at the cap, not one page. Membership and totals are compared on
+	// the walked set; the page-vs-total check is kept for sets that fit.
+	const PAGE = 100;
+	const walkSet = async (url: string) => {
+		const slugs: string[] = [];
+		let total = -1;
+		let projects: Array<{ slug?: string; name?: string }> = [];
+		for (let off = 0; off < 1000; off += PAGE) {
+			const page = await fetchJson(`${url}&limit=${PAGE}&offset=${off}`);
+			if (off === 0) {
+				total = page.meta?.counts?.total ?? -1;
+				projects = page.projects ?? [];
+			}
+			const got = (page.projects ?? []).map((p) => String(p.slug));
+			slugs.push(...got);
+			if (got.length < PAGE) break;
+		}
+		return { slugs, total, projects };
+	};
 	try {
 		for (const gType of G_TYPES) {
 			const ql = gType.toLowerCase();
-			const noQ = await fetchJson(`${base}?type=${gType}&limit=200`);
-			const noQSlugs = (noQ.projects ?? []).map((p) => String(p.slug));
-			const total = noQ.meta?.counts?.total ?? -1;
+			const noQ = await walkSet(`${base}?type=${gType}`);
+			const noQSlugs = noQ.slugs;
+			const total = noQ.total;
 			verdict(
-				noQSlugs.length === total,
+				noQSlugs.length === total && new Set(noQSlugs).size === total,
 				"G:closed-set",
-				`type=${gType} no-q: returned=${noQSlugs.length} total=${total} (must be equal — one page IS the set)`,
+				`type=${gType} no-q: walked=${noQSlugs.length} distinct=${new Set(noQSlugs).size} total=${total} (the walk at the page cap IS the set)`,
 			);
-			const withQ = await fetchJson(`${base}?type=${gType}&q=${ql}&limit=200`);
-			const withQSlugs = new Set(
-				(withQ.projects ?? []).map((p) => String(p.slug)),
-			);
+			const withQ = await walkSet(`${base}?type=${gType}&q=${ql}`);
+			const withQSlugs = new Set(withQ.slugs);
 			const sameSet =
 				withQSlugs.size === noQSlugs.length &&
 				noQSlugs.every((x) => withQSlugs.has(x));
@@ -459,7 +479,7 @@ async function sliceG() {
 				`${gType} walk at limit=17: ${walked.length} rows, ${dupes.length} dupes ${dupes.length ? JSON.stringify([...new Set(dupes)]) : ""} (must equal the set, once each)`,
 			);
 			const norm = (n: string) => n.toLowerCase().replace(/[^a-z0-9]/g, "");
-			const names = (noQ.projects ?? []).map((p) => norm(String(p.name ?? "")));
+			const names = noQ.projects.map((p) => norm(String(p.name ?? "")));
 			const nameDupes = names.filter((x, i2) => x && names.indexOf(x) !== i2);
 			verdict(
 				nameDupes.length === 0,

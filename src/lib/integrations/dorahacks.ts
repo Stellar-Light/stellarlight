@@ -72,6 +72,14 @@ const STELLAR_RE = /stellar|soroban/i;
  * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
  * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
+/**
+ * A timed-out upstream read must not be mistaken for a complete one: the
+ * callers that cache an index rethrow it, so a stale complete index beats a
+ * fresh partial one.
+ */
+const isAbortError = (e: unknown): boolean =>
+	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
@@ -106,6 +114,7 @@ async function fetchHubHackathons(
 		const response = await fetch(url, {
 			headers: DORA_BROWSER_HEADERS,
 			next: { revalidate: 3600 }, // Cache for 1 hour
+			signal: AbortSignal.timeout(5000),
 		});
 
 		if (!response.ok) {
@@ -248,7 +257,11 @@ async function fetchWinnerPrizeMap(
 	try {
 		const res = await fetch(
 			`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
-			{ headers: DORA_BROWSER_HEADERS, next: { revalidate: 3600 } },
+			{
+				headers: DORA_BROWSER_HEADERS,
+				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
+			},
 		);
 		if (!res.ok) return map;
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
@@ -271,6 +284,7 @@ async function fetchWinnerPrizeMap(
 		}
 	} catch (err) {
 		console.error(`Error fetching DoraHacks winners for ${uname}:`, err);
+		if (isAbortError(err)) throw err;
 	}
 	return map;
 }
@@ -303,6 +317,7 @@ export async function fetchHackathonSubmissions(
 			const res = await fetch(url, {
 				headers: DORA_BROWSER_HEADERS,
 				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
 			});
 			if (!res.ok) break;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
@@ -363,6 +378,7 @@ export async function fetchHackathonSubmissions(
 			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
 			err,
 		);
+		if (isAbortError(err)) throw err;
 	}
 	return out;
 }

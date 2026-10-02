@@ -33,7 +33,8 @@ import {
 } from "@/lib/integrations/curated-skills";
 import {
 	fetchSdfSkill,
-	fetchSdfSkillNames,
+	fetchSdfSkillNamesLive,
+	SDF_SKILL_NAMES,
 } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -49,6 +50,9 @@ import { generateSlug } from "@/lib/utils/normalize";
 // method-handler COMBINATION is what caused the #276/#280 stable-500; the normal
 // dynamic-route + guards pattern used by the other 22 routes is safe).
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 /**
  * Map of slug → inlined SKILL.md text for our own skill files. Lets the
@@ -85,7 +89,11 @@ export async function GET(
 	// static snapshot — so renamed/added SDF skills resolve without a deploy.
 	// An upstream miss falls through to the curated and community copies
 	// below; only when every source fails does the caller see a 503.
-	const isSdf = (await fetchSdfSkillNames()).includes(slug);
+	const liveNames = await fetchSdfSkillNamesLive();
+	const registryDown = liveNames === null;
+	const isSdf = ([...(liveNames ?? SDF_SKILL_NAMES)] as string[]).includes(
+		slug,
+	);
 	const skill = isSdf ? await fetchSdfSkill(slug) : null;
 	if (skill) {
 		logHit();
@@ -137,6 +145,15 @@ export async function GET(
 
 	// 3. Community submission?
 	const community = await loadApprovedCommunitySkill(slug);
+	if (community === undefined && !isSdf) {
+		return NextResponse.json(
+			{
+				error: `skill ${slug} could not be looked up: the community registry read failed`,
+				retryAfterSeconds: 2,
+			},
+			{ status: 503, headers: { "Retry-After": "2" } },
+		);
+	}
 	if (community) {
 		logHit();
 		return jsonResponse(
@@ -160,6 +177,18 @@ export async function GET(
 				retryAfterSeconds: 300,
 			},
 			{ status: 503, headers: { "Retry-After": "300" } },
+		);
+	}
+
+	// With the registry unreadable, an unknown slug may well be a listed skill
+	// the static fallback does not know: that is "could not check", not 404.
+	if (registryDown) {
+		return NextResponse.json(
+			{
+				error: `skill ${slug} could not be looked up: the skills.stellar.org registry did not answer`,
+				retryAfterSeconds: 60,
+			},
+			{ status: 503, headers: { "Retry-After": "60" } },
 		);
 	}
 
@@ -257,9 +286,10 @@ async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
 	}
 }
 
+/** null = not found; undefined = the read failed (an outage, not an absence). */
 async function loadApprovedCommunitySkill(slug: string) {
 	const payload = await getPayloadSafe();
-	if (!payload) return null;
+	if (!payload) return undefined;
 	try {
 		const result = await payload.find({
 			collection: "community-skills",
@@ -305,7 +335,7 @@ async function loadApprovedCommunitySkill(slug: string) {
 			content: null,
 		};
 	} catch {
-		return null;
+		return undefined;
 	}
 }
 

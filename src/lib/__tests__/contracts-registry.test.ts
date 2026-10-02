@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { buildContractsRegistry } from "../contracts-registry";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+	buildContractsRegistry,
+	resetContractsRegistryCache,
+} from "../contracts-registry";
 
 // biome-ignore lint/suspicious/noExplicitAny: mock payload
 function mockPayload(repos: any[], audits: any[] = []): any {
@@ -30,6 +33,8 @@ const verified = {
 };
 
 describe("buildContractsRegistry", () => {
+	// The registry is memoized per instance; each case reads its own fixture.
+	beforeEach(() => resetContractsRegistryCache());
 	it("joins repo truth + audits into contract rows, most-evidenced first", async () => {
 		const idOnly = {
 			...verified,

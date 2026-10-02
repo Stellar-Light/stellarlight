@@ -31,6 +31,9 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 const VALID_PARAMS = ["project", "auditor", "q", "since", "limit", "offset"];
 
@@ -134,12 +137,35 @@ export async function GET(req: NextRequest) {
 	// The registry is small (tens of rows) — fetch once, filter in JS so
 	// matching is normalization-aware (never Payload `contains` on identity
 	// strings; see the substring-vs-membership trap).
-	const found = await payload.find({
-		collection: "audits",
-		limit: 500,
-		depth: 0,
-		sort: "-publishedAt",
-	});
+	const found = await payload
+		.find({
+			collection: "audits",
+			limit: 500,
+			depth: 0,
+			sort: "-publishedAt",
+		})
+		.catch(() => null);
+	if (!found) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/audits",
+			query: q,
+		});
+		return NextResponse.json(
+			{
+				error: "audit registry read failed",
+				advisory:
+					"The audit registry could not be read. This is an outage, NOT a claim that a project is unaudited. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
 
 	let rows = (found.docs as unknown as AuditRow[]).map((d) => ({
 		reportId: d.reportId,

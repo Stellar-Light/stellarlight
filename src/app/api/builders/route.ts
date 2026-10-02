@@ -50,6 +50,9 @@ import { findPeopleByName } from "@/lib/sdf-people";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 // BuilderRow / BuilderMatch / BuilderCodeEvidence / BuilderProject + SKILL_HINT
@@ -771,86 +774,92 @@ export async function GET(req: NextRequest) {
 	const builderAdvisory =
 		totalMatching > 0
 			? undefined
-			: collectionTotal === 0
+			: isDegraded(warnings) && totalMatching === 0
 				? {
 						summary:
-							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
+							"A builders read failed during this request (see meta.warnings). The empty result is an outage, NOT a filter miss and NOT an empty directory. Retry after a moment.",
 						channels: builderChannels,
 					}
-				: sdfMatches.length
+				: collectionTotal === 0 && !isDegraded(warnings)
 					? {
-							summary: `${sdfMatches
-								.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
-								.join(
-									"; ",
-								)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
-							scope:
-								"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
-							sdfPeople: sdfMatches,
-							tryInstead: [
-								{
-									endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
-									why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
-								},
-							],
+							summary:
+								"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
 							channels: builderChannels,
 						}
-					: personLookup
+					: sdfMatches.length
 						? {
-								summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+								summary: `${sdfMatches
+									.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
+									.join(
+										"; ",
+									)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
 								scope:
 									"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+								sdfPeople: sdfMatches,
 								tryInstead: [
 									{
-										endpoint: "/api/people",
-										why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
-									},
-									{
-										endpoint: "/api/research",
-										why: "doc/spec/blog authorship across the SDF corpus",
+										endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+										why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
 									},
 								],
 								channels: builderChannels,
 							}
-						: {
-								// The last-resort branch used to end the conversation: a flat
-								// "none match these filters" with nowhere to go. That reads as
-								// "we don't know this", when for the real queries that land
-								// here we usually DO hold the answer somewhere else — `rice`
-								// is Justin Rice in /api/people, `reflector` and `strupey` are
-								// projects, `tyler` is a curated builder under @kalepail. An
-								// index answering only for itself turns its own scope
-								// boundary into a claim about the ecosystem.
-								summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
-									nameSuggestions.length
-										? `. The directory does hold ${nameSuggestions
-												.map((c) => `${c.name} (@${c.handle})`)
-												.join(
-													", ",
-												)} — if that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
-										: ""
-								}`,
-								...(nameSuggestions.length
-									? { didYouMean: nameSuggestions }
-									: {}),
-								// Named surfaces, not a shrug: whatever this is, one of these
-								// indexes is the one that would hold it.
-								tryInstead: [
-									{
-										endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
-										why: "if the query is a person's name — the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
-									},
-									{
-										endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
-										why: "if the query is a PROJECT or product name rather than a person — single-word queries here are very often a project",
-									},
-									{
-										endpoint: `/api/repos/search?q=${encodeURIComponent(q ?? "")}`,
-										why: "if the query is a GitHub org/repo name — indexed code the builder directory doesn't mirror",
-									},
-								],
-								channels: builderChannels,
-							};
+						: personLookup
+							? {
+									summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+									scope:
+										"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+									tryInstead: [
+										{
+											endpoint: "/api/people",
+											why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
+										},
+										{
+											endpoint: "/api/research",
+											why: "doc/spec/blog authorship across the SDF corpus",
+										},
+									],
+									channels: builderChannels,
+								}
+							: {
+									// The last-resort branch used to end the conversation: a flat
+									// "none match these filters" with nowhere to go. That reads as
+									// "we don't know this", when for the real queries that land
+									// here we usually DO hold the answer somewhere else — `rice`
+									// is Justin Rice in /api/people, `reflector` and `strupey` are
+									// projects, `tyler` is a curated builder under @kalepail. An
+									// index answering only for itself turns its own scope
+									// boundary into a claim about the ecosystem.
+									summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
+										nameSuggestions.length
+											? `. The directory does hold ${nameSuggestions
+													.map((c) => `${c.name} (@${c.handle})`)
+													.join(
+														", ",
+													)} — if that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
+											: ""
+									}`,
+									...(nameSuggestions.length
+										? { didYouMean: nameSuggestions }
+										: {}),
+									// Named surfaces, not a shrug: whatever this is, one of these
+									// indexes is the one that would hold it.
+									tryInstead: [
+										{
+											endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a person's name — the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
+										},
+										{
+											endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a PROJECT or product name rather than a person — single-word queries here are very often a project",
+										},
+										{
+											endpoint: `/api/repos/search?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a GitHub org/repo name — indexed code the builder directory doesn't mirror",
+										},
+									],
+									channels: builderChannels,
+								};
 
 	return NextResponse.json(
 		{

@@ -41,6 +41,9 @@ import {
 } from "@/lib/stablecoins";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 const KNOWN_PARAMS = new Set(["peg", "sort", "limit"]);
@@ -92,11 +95,30 @@ export async function GET(req: NextRequest) {
 	}
 
 	// The registry is ~23 rows — fetch all and filter/rank in JS.
-	const found = await payload.find({
-		collection: "stablecoins",
-		limit: 200,
-		depth: 0,
-	});
+	const found = await payload
+		.find({
+			collection: "stablecoins",
+			limit: 200,
+			depth: 0,
+		})
+		.catch(() => null);
+	if (!found) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/stablecoins",
+		});
+		return NextResponse.json(
+			{
+				error: "stablecoin store read failed",
+				advisory:
+					"The datastore read failed. This is an outage, NOT a claim that Stellar has no stablecoins. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{ status: 503, headers: { ...CORS, "Retry-After": "2" } },
+		);
+	}
 
 	let rows = (found.docs as StoreRow[])
 		// A retired row is one we stopped tracking; it is not part of the
