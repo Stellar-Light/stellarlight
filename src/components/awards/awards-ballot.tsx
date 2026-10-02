@@ -161,6 +161,7 @@ type Phase =
 	| "requesting"
 	| "signing"
 	| "submitting"
+	| "confirmed"
 	| "submitted";
 
 // stellar-markets' signature ease.
@@ -724,21 +725,34 @@ function Hourglass() {
  * a busy button; now it holds a signature writing itself. Covers the three
  * in-flight phases with the copy that actually tells you what to do.
  */
-function SigningOverlay({ phase }: { phase: Phase }) {
+function SigningOverlay({
+	phase,
+	onContinue,
+}: {
+	phase: Phase;
+	onContinue?: () => void;
+}) {
 	const active =
-		phase === "requesting" || phase === "signing" || phase === "submitting";
+		phase === "requesting" ||
+		phase === "signing" ||
+		phase === "submitting" ||
+		phase === "confirmed";
 	const title =
 		phase === "requesting"
 			? "Preparing your ballot"
 			: phase === "signing"
 				? "Approve in your wallet"
-				: "Recording on Stellar";
+				: phase === "confirmed"
+					? "Vote confirmed"
+					: "Recording on Stellar";
 	const sub =
 		phase === "requesting"
 			? "Building the transaction from your picks."
 			: phase === "signing"
 				? "One signature covers every category. No real funds."
-				: "Sending your signed ballot to testnet.";
+				: phase === "confirmed"
+					? "Your nominations are in and on-chain. Taking you to your receipt."
+					: "Sending your signed ballot to testnet.";
 	return (
 		<AnimatePresence>
 			{active && (
@@ -758,7 +772,14 @@ function SigningOverlay({ phase }: { phase: Phase }) {
 						transition={{ duration: 0.28, ease: EASE }}
 						className="sm-signing-card"
 					>
-						{phase === "submitting" ? (
+						{phase === "confirmed" ? (
+							<div
+								className="mb-5 mt-1 inline-flex h-14 w-14 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10"
+								aria-hidden="true"
+							>
+								<Check className="h-7 w-7 text-emerald-400" />
+							</div>
+						) : phase === "submitting" ? (
 							// in flight: the sand drains and the glass turns over
 							<div className="mb-5 mt-1" aria-hidden="true">
 								<Hourglass />
@@ -778,6 +799,15 @@ function SigningOverlay({ phase }: { phase: Phase }) {
 							{title}
 						</h2>
 						<p className="text-sm leading-relaxed text-neutral-400">{sub}</p>
+						{phase === "confirmed" && onContinue && (
+							<button
+								type="button"
+								onClick={onContinue}
+								className="mt-5 inline-flex h-10 items-center justify-center rounded-full bg-neutral-100 px-5 text-sm font-semibold text-neutral-900"
+							>
+								See my receipt
+							</button>
+						)}
 					</motion.div>
 				</motion.div>
 			)}
@@ -1045,6 +1075,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	// window scroll was not reliably landing: pilots reported no success
 	// message and scrolled up to find it. Scroll the receipt itself into view
 	// once it has mounted, and move focus to it for screen readers.
+	// The confirmed step holds for a moment, then hands off to the receipt.
+	useEffect(() => {
+		if (phase !== "confirmed") return;
+		const t = window.setTimeout(() => setPhase("submitted"), 2200);
+		return () => window.clearTimeout(t);
+	}, [phase]);
 	useEffect(() => {
 		if (phase !== "submitted") return;
 		const t = window.setTimeout(() => {
@@ -1384,7 +1420,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			setEligibility((prev) =>
 				prev ? { ...prev, votes: { ...selections }, hasVoted: true } : prev,
 			);
-			setPhase("submitted");
+			setPhase("confirmed");
 		} catch (err) {
 			setError(walletErrorMessage(err));
 			setPhase("idle");
@@ -1507,7 +1543,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	return (
 		<>
 			<StageReveal />
-			<SigningOverlay phase={phase} />
+			<SigningOverlay phase={phase} onContinue={() => setPhase("submitted")} />
 			<TopBar
 				onHowItWorks={() => setHowOpen(true)}
 				wallet={{
@@ -1641,75 +1677,80 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			    resubmitted). Same card and same printed ballot as the moment
 			    they submitted: the receipt they were handed doesn't disappear
 			    because they came back later. ── */}
-			{votedBefore && phase !== "submitted" && address && (
-				<motion.div
-					initial={{ opacity: 0, y: 12 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.4, ease: EASE }}
-					className="max-w-2xl mx-auto px-4 sm:px-6 mb-8"
-				>
-					<div className="rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 text-center sm:p-7">
-						<VoteReceipt />
-						<h2 className="mb-2 text-xl font-semibold tracking-tight text-neutral-100 sm:text-2xl">
-							{picksPerCategory > 1
-								? "Your nominations are in"
-								: "You've already voted"}
-						</h2>
-						<p className="mb-4 text-sm leading-relaxed text-neutral-300">
-							{picksPerCategory > 1 ? (
-								<>
-									Your picks are marked on the ballot below. This ballot is
-									final; the first one cast is the one that counts.
-									{voting.open && closesLabel && (
-										<>
-											{" "}
-											Nominations close{" "}
-											<span className="text-neutral-100">{closesLabel}</span>.
-										</>
-									)}
-								</>
-							) : (
-								<>
-									Your picks are marked on the ballot below. This ballot is
-									final; the first one cast is the one that counts.
-									{voting.open && closesLabel && (
-										<>
-											{" "}
-											Voting closes{" "}
-											<span className="text-neutral-100">{closesLabel}</span>.
-										</>
-									)}{" "}
-									Results are published when voting closes.
-								</>
-							)}
-						</p>
-						{picksPerCategory > 1 && (
+			{votedBefore &&
+				phase !== "submitted" &&
+				phase !== "confirmed" &&
+				address && (
+					<motion.div
+						initial={{ opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.4, ease: EASE }}
+						className="max-w-2xl mx-auto px-4 sm:px-6 mb-8"
+					>
+						<div className="rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 text-center sm:p-7">
+							<VoteReceipt />
+							<h2 className="mb-2 text-xl font-semibold tracking-tight text-neutral-100 sm:text-2xl">
+								{picksPerCategory > 1
+									? "Your nominations are in"
+									: "You've already voted"}
+							</h2>
 							<p className="mb-4 text-sm leading-relaxed text-neutral-300">
-								<span className="text-neutral-100">What happens next:</span>{" "}
-								when nominations close, the four most nominated projects in each
-								category become the finalists. Phase 2 is the final vote, one
-								pick per category, and every Pilot votes again then.
-							</p>
-						)}
-						{/* The ballot lives on the relay under its id, not on the voter's
-						    account; only the receipt knows the transaction. */}
-						{txHash && (
-							<a
-								href={explorerTxUrl(txHash)}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
-							>
-								Verify your ballot on-chain
-								{ballotId && (
-									<span className="text-neutral-500">· ballot {ballotId}</span>
+								{picksPerCategory > 1 ? (
+									<>
+										Your picks are marked on the ballot below. This ballot is
+										final; the first one cast is the one that counts.
+										{voting.open && closesLabel && (
+											<>
+												{" "}
+												Nominations close{" "}
+												<span className="text-neutral-100">{closesLabel}</span>.
+											</>
+										)}
+									</>
+								) : (
+									<>
+										Your picks are marked on the ballot below. This ballot is
+										final; the first one cast is the one that counts.
+										{voting.open && closesLabel && (
+											<>
+												{" "}
+												Voting closes{" "}
+												<span className="text-neutral-100">{closesLabel}</span>.
+											</>
+										)}{" "}
+										Results are published when voting closes.
+									</>
 								)}
-								<ArrowUpRight className="h-4 w-4" />
-							</a>
-						)}
-					</div>
-				</motion.div>
-			)}
+							</p>
+							{picksPerCategory > 1 && (
+								<p className="mb-4 text-sm leading-relaxed text-neutral-300">
+									<span className="text-neutral-100">What happens next:</span>{" "}
+									when nominations close, the four most nominated projects in
+									each category become the finalists. Phase 2 is the final vote,
+									one pick per category, and every Pilot votes again then.
+								</p>
+							)}
+							{/* The ballot lives on the relay under its id, not on the voter's
+						    account; only the receipt knows the transaction. */}
+							{txHash && (
+								<a
+									href={explorerTxUrl(txHash)}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
+								>
+									Verify your ballot on-chain
+									{ballotId && (
+										<span className="text-neutral-500">
+											· ballot {ballotId}
+										</span>
+									)}
+									<ArrowUpRight className="h-4 w-4" />
+								</a>
+							)}
+						</div>
+					</motion.div>
+				)}
 
 			{/* ── Read-only notice ── */}
 			{!address && voting.open && (
