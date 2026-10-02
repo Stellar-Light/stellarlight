@@ -4632,7 +4632,7 @@ export interface operations {
                 q?: string;
                 /** @description Alias of `q` (agents commonly send the term under this name; both are accepted, `q` wins when both are present). */
                 query?: string;
-                /** @description Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags). */
+                /** @description Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags). Several sources in one call: see `sources` (a comma here is read the same way). */
                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
                 /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Using any audit-metadata filter scopes RETRIEVAL to source=audit (an explicit contradictory source= is rejected with 400). For report-level enumeration prefer listAudits. */
                 auditor?: string;
@@ -4642,6 +4642,10 @@ export interface operations {
                 severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;
+                /** @description Several declared sources in one call, comma-separated (e.g. cap,sep,dev-docs); a comma in `source` is read the same way. Each source is searched exactly as `source=<one>&limit=<perSource>` would search it and its rows come back together, in the order given. meta.bySource carries each source's status, returned count, matchMode, sourceDocCount and resultsHash (equal to that single-source call's meta.resultsHash). A source that cannot be read is named in meta.warnings and bySource while the others answer; no source readable is a 503. Counts as one request against the rate limit. No sourceAdvisory on this form. */
+                sources?: ("sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release")[];
+                /** @description Rows per source when several sources are requested (default 8, max 25; `limit` is read when absent). With one source it is the same as `limit`. */
+                perSource?: number;
                 /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
             };
@@ -4690,6 +4694,20 @@ export interface operations {
                             sourceDocCount?: number;
                             /** @description sha256 of the `results` array. `generatedAt` changes on every call, the evidence does not; compare this to tell two reads apart. */
                             resultsHash?: string;
+                            /** @description Present on a several-source call (`sources`): one entry per requested source, in the order given. resultsHash equals meta.resultsHash of the single-source call with the same q and limit=perSource; status other than 200 means that source could not be read and its rows are missing (also named in meta.warnings). */
+                            bySource?: {
+                                /** @enum {string} */
+                                source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
+                                /** @description HTTP status of this source's read (200 = answered). Not dated: it describes this response only. */
+                                status?: number;
+                                returned?: number;
+                                /** @enum {string} */
+                                matchMode?: "vector" | "keyword";
+                                sourceDocCount?: number;
+                                sourceEmpty?: boolean;
+                                resultsHash?: string;
+                                error?: string;
+                            }[];
                             /** @description Present when stronger matches exist outside the requested `source`: the in-source top is a weak neighbour of the question. Not emitted for an empty source. */
                             sourceAdvisory?: {
                                 note?: string;

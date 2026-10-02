@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
 		surfaces: ["api"],
+		version: "spec@1.9.60",
+		type: "added",
+		summary:
+			"searchResearch takes several sources in one call: sources=cap,sep,dev-docs (or a comma in source) with perSource rows from each (default 8, max 25). Each source is searched exactly as its single-source call would be, so its rows match; meta.bySource reports each source's status, returned, matchMode, sourceDocCount and resultsHash.",
+		detail:
+			"For a consumer that routes one question to a dozen sources and takes up to N rows from each, one call replaces the fan-out: one rate-limit token, one embedding of the query, one instance, four sources at a time. Parity is by construction (the single-source pipeline runs once per source) and checkable: bySource[i].resultsHash equals meta.resultsHash of source=<that>&limit=<perSource>. A source that cannot be read is named in meta.warnings and in bySource with its status while the rest answer (no source readable is a 503); a malformed request (no q, an unknown source, an audit filter with a non-audit source) is a 400. sourceAdvisory is single-source only. The source enum is now spread from the code's RESEARCH_SOURCES.",
+	},
+	{
+		date: "2026-10-02",
+		surfaces: ["api"],
 		version: "spec@1.9.59",
 		type: "fixed",
 		summary:

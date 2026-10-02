@@ -29,6 +29,7 @@ import {
 import { PROJECT_TYPES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
+import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
 import { TRUST_SIGNALS } from "./trust-report";
@@ -5827,28 +5828,8 @@ export const spec: OpenAPISpec = {
 						name: "source",
 						in: "query",
 						description:
-							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags).",
-						schema: {
-							type: "string",
-							enum: [
-								"sdf-blog",
-								"scf-handbook",
-								"sep",
-								"cap",
-								"dev-docs",
-								"paper",
-								"scf-proposal",
-								"lumenloop",
-								"lumenloop-research",
-								"repo-docs",
-								"audit",
-								"incident",
-								"security-program",
-								"sdf-org",
-								"ec-developer-report",
-								"release",
-							],
-						},
+							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags). Several sources in one call: see `sources` (a comma here is read the same way).",
+						schema: { type: "string", enum: [...RESEARCH_SOURCES] },
 					},
 					{
 						name: "auditor",
@@ -5885,6 +5866,25 @@ export const spec: OpenAPISpec = {
 						name: "limit",
 						in: "query",
 						description: "Max results (default 8, max 25)",
+						schema: { type: "integer", minimum: 1, maximum: 25, default: 8 },
+					},
+					{
+						name: "sources",
+						in: "query",
+						description:
+							"Several declared sources in one call, comma-separated (e.g. cap,sep,dev-docs); a comma in `source` is read the same way. Each source is searched exactly as `source=<one>&limit=<perSource>` would search it and its rows come back together, in the order given. meta.bySource carries each source's status, returned count, matchMode, sourceDocCount and resultsHash (equal to that single-source call's meta.resultsHash). A source that cannot be read is named in meta.warnings and bySource while the others answer; no source readable is a 503. Counts as one request against the rate limit. No sourceAdvisory on this form.",
+						style: "form",
+						explode: false,
+						schema: {
+							type: "array",
+							items: { type: "string", enum: [...RESEARCH_SOURCES] },
+						},
+					},
+					{
+						name: "perSource",
+						in: "query",
+						description:
+							"Rows per source when several sources are requested (default 8, max 25; `limit` is read when absent). With one source it is the same as `limit`.",
 						schema: { type: "integer", minimum: 1, maximum: 25, default: 8 },
 					},
 					{ $ref: "#/components/parameters/fields" },
@@ -5965,6 +5965,34 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															description:
 																"sha256 of the `results` array. `generatedAt` changes on every call, the evidence does not; compare this to tell two reads apart.",
+														},
+														bySource: {
+															type: "array",
+															description:
+																"Present on a several-source call (`sources`): one entry per requested source, in the order given. resultsHash equals meta.resultsHash of the single-source call with the same q and limit=perSource; status other than 200 means that source could not be read and its rows are missing (also named in meta.warnings).",
+															items: {
+																type: "object",
+																properties: {
+																	source: {
+																		type: "string",
+																		enum: [...RESEARCH_SOURCES],
+																	},
+																	status: {
+																		type: "integer",
+																		description:
+																			"HTTP status of this source's read (200 = answered). Not dated: it describes this response only.",
+																	},
+																	returned: { type: "integer" },
+																	matchMode: {
+																		type: "string",
+																		enum: [...RESEARCH_MODES],
+																	},
+																	sourceDocCount: { type: "integer" },
+																	sourceEmpty: { type: "boolean" },
+																	resultsHash: { type: "string" },
+																	error: { type: "string" },
+																},
+															},
 														},
 														sourceAdvisory: {
 															type: "object",

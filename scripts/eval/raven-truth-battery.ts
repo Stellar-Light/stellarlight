@@ -662,6 +662,40 @@ async function sliceK() {
 	);
 }
 
+// L: several sources in one call must return, per source, exactly the rows
+// the single-source call returns: the claim made to a partner replacing 13
+// scoped calls with one. A nonce keeps both reads off the edge cache so they
+// are computed within seconds of each other. Runs every day, no rotation.
+async function sliceL() {
+	console.log("\n── L: multi-source research parity ──");
+	const nonce = Date.now();
+	const q = encodeURIComponent("soroban authorization");
+	const sources = ["cap", "sep", "dev-docs"];
+	const multi = await http(
+		`/api/research?q=${q}&source=${sources.join(",")}&perSource=6&v=${nonce}`,
+	);
+	const by: any[] = multi?.meta?.bySource ?? [];
+	verdict(
+		by.length === sources.length,
+		"L:bySource",
+		`${by.length} of ${sources.length} sources reported`,
+	);
+	for (const s of sources) {
+		const single = await http(
+			`/api/research?q=${q}&source=${s}&limit=6&v=${nonce}`,
+		);
+		const row = by.find((b) => b.source === s);
+		verdict(
+			!!row &&
+				row.status === 200 &&
+				row.resultsHash === single?.meta?.resultsHash &&
+				row.returned === single?.meta?.counts?.returned,
+			"L:parity",
+			`source=${s}: multi ${String(row?.resultsHash ?? "?").slice(0, 12)} vs single ${String(single?.meta?.resultsHash ?? "?").slice(0, 12)} (${row?.returned ?? "?"}/${single?.meta?.counts?.returned ?? "?"} rows)`,
+		);
+	}
+}
+
 // A battery with no credential is not a battery. Sending the requests anyway
 // buys four opaque slice errors and a "0 fail" summary.
 if (!TOKEN) {
@@ -684,6 +718,7 @@ const slices = [
 	sliceI,
 	sliceJ,
 	sliceK,
+	sliceL,
 ];
 for (const s of slices) {
 	try {
