@@ -338,15 +338,6 @@ export default async function SkillDetailPage({
 /* ─── data loading ───────────────────────────────────────────────────── */
 
 async function loadSkill(slug: string): Promise<SkillData | null> {
-	// The skills.stellar.org registry (SDF authored and community-built)
-	const registryNames = (await fetchSdfSkillNamesLive()) ?? [
-		...SDF_SKILL_NAMES,
-	];
-	if (registryNames.includes(slug)) {
-		const s = await fetchSdfSkill(slug);
-		if (!s) return null;
-		return { ...registrySkillView(s), content: s.content };
-	}
 	// Curated
 	const c = findCuratedSkill(slug);
 	if (c) {
@@ -373,6 +364,15 @@ async function loadSkill(slug: string): Promise<SkillData | null> {
 						? STELLAR_DEVELOPER_ACTIVITY_SKILL.trim()
 						: null,
 		};
+	}
+	// The skills.stellar.org registry (SDF authored and community-built)
+	const registryNames = (await fetchSdfSkillNamesLive()) ?? [
+		...SDF_SKILL_NAMES,
+	];
+	if (registryNames.includes(slug)) {
+		const s = await fetchSdfSkill(slug);
+		if (!s) return null;
+		return { ...registrySkillView(s), content: s.content };
 	}
 	// Community
 	return loadApprovedCommunitySkill(slug);

@@ -664,6 +664,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "soroswap-sdk",
+		registryName: "soroswap-sdk",
 		name: "Soroswap SDK",
 		tagline: "TypeScript SDK for the Soroswap AMM (DEX on Soroban).",
 		description:
@@ -673,6 +674,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		install: "npm install @soroswap/sdk",
 		repository: "https://github.com/soroswap/core",
 		homepage: "https://soroswap.finance/",
+		// The agent-facing skill skills.stellar.org lists for this SDK.
+		docs: "https://raw.githubusercontent.com/soroswap/sdk/main/soroswap-sdk-skill.md",
 		compatibility: ["Node.js", "Browser", "TypeScript"],
 		targetUser: ["dev", "agent"],
 		tags: ["DEX", "AMM", "soroban", "typescript"],

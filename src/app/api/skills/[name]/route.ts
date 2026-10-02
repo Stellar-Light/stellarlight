@@ -91,6 +91,29 @@ export async function GET(
 	// static snapshot — so renamed/added SDF skills resolve without a deploy.
 	// An upstream miss falls through to the curated and community copies
 	// below; only when every source fails does the caller see a 503.
+	// Curated first, as the list merges: a curated entry stands for the registry
+	// copy it names (Stellar Scout, Lumen Loop's skills, the Soroswap SDK), so
+	// its slug must answer with the curated row here too.
+	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
+	if (curated) {
+		logHit();
+		return jsonResponse(
+			{
+				meta: {
+					source: curated.docs ?? curated.homepage ?? curated.repository,
+					operator: "stellarlight.xyz",
+					generatedAt: new Date().toISOString(),
+				},
+				skill: {
+					...toUnifiedShape(curated),
+					content: await resolveCuratedContent(curated),
+				},
+			},
+			{ sMaxAge: 3600, startedAt },
+		);
+	}
+
+	// 3. Community submission?
 	const registry = await fetchRegistryLive();
 	const registryDown = registry === null;
 	// A display name slugified ("MPP Discover" -> mpp-discover) may not be the
@@ -124,26 +147,6 @@ export async function GET(
 		);
 	}
 
-	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
-	if (curated) {
-		logHit();
-		return jsonResponse(
-			{
-				meta: {
-					source: curated.docs ?? curated.homepage ?? curated.repository,
-					operator: "stellarlight.xyz",
-					generatedAt: new Date().toISOString(),
-				},
-				skill: {
-					...toUnifiedShape(curated),
-					content: await resolveCuratedContent(curated),
-				},
-			},
-			{ sMaxAge: 3600, startedAt },
-		);
-	}
-
-	// 3. Community submission?
 	const community = await loadApprovedCommunitySkill(slug);
 	if (community === undefined && !isSdf) {
 		return NextResponse.json(
