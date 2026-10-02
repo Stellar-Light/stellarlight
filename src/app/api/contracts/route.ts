@@ -29,6 +29,9 @@ import { serverTiming } from "@/lib/server-timing";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 const VALID_PARAMS = ["q", "domain", "limit", "offset"];
 

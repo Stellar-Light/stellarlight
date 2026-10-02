@@ -30,7 +30,7 @@ const DIMS = 1024;
  * liked (a partner measured 24.7 s), while every other route answered in
  * under a second. Past it the route falls back to keyword ranking.
  */
-export const EMBED_TIMEOUT_MS = 8_000;
+export const EMBED_TIMEOUT_MS = 5_000;
 /** Per-instance memo of query embeddings: an agent asking one question
  *  across 16 sources sends the same text 16 times; and a retry of a
  *  question that just ran costs nothing. Bounded, oldest evicted. */

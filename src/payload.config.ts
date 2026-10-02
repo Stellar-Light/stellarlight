@@ -181,7 +181,13 @@ export default buildConfig({
 			serverSelectionTimeoutMS: 5_000,
 			connectTimeoutMS: 5_000,
 			// ...and a node that stops answering mid-query is abandoned too.
-			socketTimeoutMS: 20_000,
+			socketTimeoutMS: 10_000,
+			// A request that finds no free connection waits here. Unbounded, it
+			// waits as long as the socket timeout and every route on the instance
+			// stalls together behind one stuck node (the 30 s cross-endpoint stall
+			// a partner measured on 2026-09-29). Give up fast; the routes answer
+			// 503 with Retry-After and the client retries.
+			waitQueueTimeoutMS: 2_000,
 			// Serverless: every warm Vercel instance is its own client, and the
 			// driver's default pool (100) plus one monitor socket per replica-set
 			// node means a burst of cold starts can hold hundreds of Atlas

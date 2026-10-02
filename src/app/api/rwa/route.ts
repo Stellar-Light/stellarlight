@@ -18,6 +18,9 @@ import { mergeMeasured, type RwaMeasured } from "@/lib/rwa-measured";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 const KNOWN_PARAMS = new Set(["state", "level", "kind", "project", "limit"]);
@@ -92,6 +95,7 @@ export async function GET(req: NextRequest) {
 				where: { assetId: { in: rows.map((r) => r.id) } },
 				limit: rows.length || 1,
 				depth: 0,
+				pagination: false,
 			});
 			for (const d of docs.docs as unknown as Array<
 				Partial<RwaMeasured> & { assetId: string }

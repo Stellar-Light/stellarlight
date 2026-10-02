@@ -62,12 +62,57 @@ export interface ContractsQuery {
 	offset?: number;
 }
 
+const REGISTRY_TTL_MS = 300_000;
+let registryCache: { at: number; rows: Promise<ContractRow[]> } | null = null;
+
+/**
+ * The registry rows do not depend on the query: three reads over repos,
+ * projects and audits that every /api/contracts call used to repeat. Build
+ * them at most once per instance per five minutes, share the in-flight
+ * promise between concurrent callers, and filter, sort and page per request.
+ * ponytail: per-instance cache; a shared cache if instances multiply.
+ */
+function loadRegistryRows(payload: Payload): Promise<ContractRow[]> {
+	const now = Date.now();
+	if (!registryCache || now - registryCache.at > REGISTRY_TTL_MS) {
+		const rows = buildRegistryRows(payload);
+		registryCache = { at: now, rows };
+		rows.catch(() => {
+			registryCache = null;
+		});
+	}
+	return registryCache.rows;
+}
+
 export async function buildContractsRegistry(
 	payload: Payload,
 	opts: ContractsQuery = {},
 ): Promise<{ contracts: ContractRow[]; total: number }> {
 	const { q = "", domain = "", limit = 20, offset = 0 } = opts;
+	let rows = [...(await loadRegistryRows(payload))];
+	if (domain) rows = rows.filter((r) => r.codeDomains.includes(domain));
+	if (q) {
+		const needle = q.toLowerCase();
+		rows = rows.filter(
+			(r) =>
+				r.repo.fullName.toLowerCase().includes(needle) ||
+				(r.project?.slug ?? "").includes(needle) ||
+				(r.project?.name ?? "").toLowerCase().includes(needle) ||
+				(r.contractId ?? "").toLowerCase().includes(needle),
+		);
+	}
+	// Most-evidenced first: live usage, then verified id, then depth.
+	rows.sort(
+		(a, b) =>
+			(b.codeInUse ? 1 : 0) - (a.codeInUse ? 1 : 0) ||
+			(b.contractId ? 1 : 0) - (a.contractId ? 1 : 0) ||
+			(b.codeDepth ?? 0) - (a.codeDepth ?? 0),
+	);
 
+	return { contracts: rows.slice(offset, offset + limit), total: rows.length };
+}
+
+async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 	const res = await payload.find({
 		collection: "repos",
 		where: {
@@ -78,6 +123,7 @@ export async function buildContractsRegistry(
 		},
 		limit: 500,
 		depth: 0,
+		pagination: false,
 		select: { readmeExcerpt: false },
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
@@ -103,6 +149,8 @@ export async function buildContractsRegistry(
 			where: { slug: { in: slugs } },
 			limit: 500,
 			depth: 0,
+			pagination: false,
+			joins: false,
 			select: { slug: true, onchain: true },
 		});
 		for (const p of projects.docs as any[]) {
@@ -138,6 +186,7 @@ export async function buildContractsRegistry(
 			where: { projectSlug: { in: slugs } },
 			limit: 500,
 			depth: 0,
+			pagination: false,
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 		for (const a of audits.docs as any[]) {
@@ -158,7 +207,7 @@ export async function buildContractsRegistry(
 		}
 	}
 
-	let rows: ContractRow[] = docs.map((d) => {
+	const rows: ContractRow[] = docs.map((d) => {
 		const iface: string[] = Array.isArray(d.contractInterface)
 			? d.contractInterface.filter(
 					(s: unknown): s is string => typeof s === "string",
@@ -211,24 +260,5 @@ export async function buildContractsRegistry(
 		};
 	});
 
-	if (domain) rows = rows.filter((r) => r.codeDomains.includes(domain));
-	if (q) {
-		const needle = q.toLowerCase();
-		rows = rows.filter(
-			(r) =>
-				r.repo.fullName.toLowerCase().includes(needle) ||
-				(r.project?.slug ?? "").includes(needle) ||
-				(r.project?.name ?? "").toLowerCase().includes(needle) ||
-				(r.contractId ?? "").toLowerCase().includes(needle),
-		);
-	}
-	// Most-evidenced first: live usage, then verified id, then depth.
-	rows.sort(
-		(a, b) =>
-			(b.codeInUse ? 1 : 0) - (a.codeInUse ? 1 : 0) ||
-			(b.contractId ? 1 : 0) - (a.contractId ? 1 : 0) ||
-			(b.codeDepth ?? 0) - (a.codeDepth ?? 0),
-	);
-
-	return { contracts: rows.slice(offset, offset + limit), total: rows.length };
+	return rows;
 }

@@ -41,6 +41,9 @@ import {
 } from "@/lib/stablecoins";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 const KNOWN_PARAMS = new Set(["peg", "sort", "limit"]);

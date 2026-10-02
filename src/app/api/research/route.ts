@@ -451,6 +451,8 @@ export async function GET(req: NextRequest) {
 				where,
 				limit: 200,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 
 			const allDocs = result.docs as unknown as Array<{
@@ -569,6 +571,8 @@ export async function GET(req: NextRequest) {
 					},
 					limit: 25,
 					depth: 0,
+					pagination: false,
+					select: { embedding: false },
 				});
 				for (const d of direct.docs as unknown as Array<{
 					id: string;
@@ -658,6 +662,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 10,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as Array<
 				Record<string, unknown>
@@ -867,6 +873,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 10,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			const have = new Set(chunks.map((c) => c.id));
 			for (const d of direct.docs as unknown as RawResearchDoc[]) {
@@ -896,6 +904,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 24,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as RawResearchDoc[]) {
 				chunks.push(toRow(d));

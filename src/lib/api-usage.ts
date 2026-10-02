@@ -106,6 +106,10 @@ export function logApiHit({
 			if (!payload) return;
 			await payload.create({
 				collection: "api-usage",
+				// A fire-and-forget insert needs no transaction; on a replica set
+				// each one otherwise costs a start, a majority commit and a
+				// connection the request path is waiting for.
+				disableTransaction: true,
 				data: {
 					endpoint,
 					query: cleanQuery,
