@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-10-02T03:37:40.740Z",
+	"asOf": "2026-10-02T04:27:41.947Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 107,
 	"healthy": 104,
@@ -301,7 +301,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:28:06Z",
+			"lastSuccessAt": "2026-10-02T04:18:37Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 99,
@@ -323,7 +323,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:34:53Z",
+			"lastSuccessAt": "2026-10-02T04:25:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -390,10 +390,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-28T04:04:32Z",
-			"ageDays": 34,
+			"ageDays": 35,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 34d ago (manual tool — age not judged)"
+			"why": "last green 35d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "deepwiki-calibrate.yml",
@@ -401,10 +401,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-31T04:05:47Z",
-			"ageDays": 31,
+			"ageDays": 32,
 			"graceDays": 45,
 			"runs": 1,
-			"why": "last green 31d ago (manual tool — age not judged)"
+			"why": "last green 32d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "depth-eval.yml",
@@ -752,7 +752,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:24:27Z",
+			"lastSuccessAt": "2026-10-02T04:18:37Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -774,7 +774,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:28:06Z",
+			"lastSuccessAt": "2026-10-02T04:25:04Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -821,8 +821,8 @@
 			"lastSuccessAt": "2026-10-02T03:28:06Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 79,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"runs": 78,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -1104,7 +1104,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:34:53Z",
+			"lastSuccessAt": "2026-10-02T04:25:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1159,7 +1159,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T03:24:27Z",
+			"lastSuccessAt": "2026-10-02T04:18:37Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
