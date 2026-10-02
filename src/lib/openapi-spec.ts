@@ -18,6 +18,7 @@ import {
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
+import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
 import { DEPLOYMENT_NETWORKS } from "./project-deployment";
 import {
@@ -26,6 +27,7 @@ import {
 	STATUS_BASES,
 } from "./project-status";
 import { PROJECT_TYPES } from "./project-types";
+import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
@@ -295,7 +297,7 @@ export const spec: OpenAPISpec = {
 			"Every response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.",
 			"",
 			"## Rate limits",
-			"Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
+			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
 			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.",
@@ -5813,7 +5815,7 @@ export const spec: OpenAPISpec = {
 						name: "source",
 						in: "query",
 						description:
-							"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags).",
+							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags).",
 						schema: {
 							type: "string",
 							enum: [
@@ -5878,6 +5880,18 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Research results",
+						headers: {
+							"X-Scout-Match-Mode": {
+								description:
+									"The retrieval mode that produced this page, the same value as meta.matchMode: `vector` or `keyword`.",
+								schema: { type: "string", enum: [...RESEARCH_MODES] },
+							},
+							"Server-Timing": {
+								description:
+									"Our own wall time per phase in milliseconds (init, embed, vector, rank, total), so a consumer can split our time from transfer time.",
+								schema: { type: "string" },
+							},
+						},
 						content: {
 							"application/json": {
 								schema: {
@@ -5913,9 +5927,46 @@ export const spec: OpenAPISpec = {
 																"Embedding model used for vector retrieval (e.g. voyage-3); null in keyword mode.",
 														},
 														scoreModel: {
+															type: "object",
+															description:
+																"What `confidence.score` measures in this response; read it before comparing scores across sources.",
+															properties: {
+																version: { type: "string" },
+																fields: {
+																	type: "array",
+																	items: { type: "string" },
+																},
+																note: { type: "string" },
+															},
+														},
+														sourceEmpty: {
+															type: "boolean",
+															description:
+																"True when the `source` filter names a declared source that holds no documents yet. The page is an empty vector page (no keyword pass, no advisory): an empty source, not a miss. Drop the filter or pick another source.",
+														},
+														sourceDocCount: {
+															type: "integer",
+															description:
+																"How many documents the corpus holds for the `source` filter (present only on source-scoped calls). A consumer can skip a source below its per-source take before sending.",
+														},
+														resultsHash: {
 															type: "string",
 															description:
-																"What `score` measures in this response (e.g. cosine similarity 0-1) — read it before comparing scores across sources.",
+																"sha256 of the `results` array. `generatedAt` changes on every call, the evidence does not; compare this to tell two reads apart.",
+														},
+														sourceAdvisory: {
+															type: "object",
+															description:
+																"Present when stronger matches exist outside the requested `source`: the in-source top is a weak neighbour of the question. Not emitted for an empty source.",
+															properties: {
+																note: { type: "string" },
+																inSourceTopScore: { type: "number" },
+																corpusWideTopScore: { type: "number" },
+																corpusWideTopSource: {
+																	type: "string",
+																	nullable: true,
+																},
+															},
 														},
 													},
 												},
@@ -5927,6 +5978,59 @@ export const spec: OpenAPISpec = {
 										},
 									},
 								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"The call is wrong: missing q, an unknown source, or audit-only filters on a non-audit source. Fix the call; do not retry it as is.",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RequestError" },
+							},
+						},
+					},
+					"429": {
+						description:
+							"This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds until this instance's window resets.",
+								schema: { type: "integer" },
+							},
+							"X-RateLimit-Scope": {
+								description:
+									"Always `instance`: the counter is per serverless instance, not global.",
+								schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
+							},
+							"Server-Timing": {
+								description: "Our own wall time, as on a 200.",
+								schema: { type: "string" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
+					"503": {
+						description:
+							"A read failed: the database handle could not be opened, or both the vector and the keyword stage threw. An outage, NOT an empty result: retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description:
+									"Seconds to wait before resending (2 on database reads).",
+								schema: { type: "integer" },
+							},
+							"Server-Timing": {
+								description: "Our own wall time, as on a 200.",
+								schema: { type: "string" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
 							},
 						},
 					},
@@ -7814,6 +7918,35 @@ export const spec: OpenAPISpec = {
 			},
 		},
 		schemas: {
+			RetryableError: {
+				type: "object",
+				description:
+					"A failure the caller should retry: the read behind the answer failed (database, upstream, or this instance's rate window). Never a claim about the data; `advisory` says what the failure is NOT a claim about. Mirrors the Retry-After header in seconds.",
+				required: ["error", "retryAfterSeconds"],
+				properties: {
+					error: { type: "string", description: "What failed, in one line." },
+					advisory: {
+						type: "string",
+						description:
+							"What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look).",
+					},
+					retryAfterSeconds: {
+						type: "integer",
+						description:
+							"Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry.",
+					},
+				},
+			},
+			RequestError: {
+				type: "object",
+				description:
+					"The request itself was wrong (a 400): fix the call, do not retry it as is.",
+				required: ["error"],
+				properties: {
+					error: { type: "string" },
+					hint: { type: "string", description: "How to correct the call." },
+				},
+			},
 			Meta: {
 				type: "object",
 				description: "Standard meta block included on every list response",

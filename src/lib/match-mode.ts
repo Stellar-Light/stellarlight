@@ -9,6 +9,9 @@
  * an expansion, or a vector lookup. The label must state the MECHANISM
  * actually used — sls-076's lesson: the lie was the label, not the match.
  */
+/** The retrieval modes /api/research reports in X-Scout-Match-Mode and meta.matchMode. */
+export const RESEARCH_MODES = ["vector", "keyword"] as const;
+
 export type SimpleMatchMode =
 	| "all" // no text query — the full set (structured filters only)
 	| "filtered" // returned rows contain the query terms literally

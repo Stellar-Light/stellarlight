@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-02",
+		surfaces: ["api"],
+		version: "spec@1.9.55",
+		type: "changed",
+		summary:
+			"Failure contract on every route an agent reads: 429 and 503 bodies carry error, advisory and retryAfterSeconds with Retry-After and Server-Timing; a failed read behind an empty page is a 503, never a 200; research documents its 400, 429 and 503, carries sourceEmpty, sourceDocCount and resultsHash, and an empty declared source answers an empty vector page; rate-limit headers say X-RateLimit-Scope: instance.",
+		detail:
+			"From a consumer-side audit of the API as that consumer's detectors measure it, after their incident file for the 2026-09-29 stall. What changed: (1) every 429 and 503 on the routes an agent reads has one body shape, error plus advisory plus retryAfterSeconds, with Retry-After in seconds and Server-Timing on the failure too; Retry-After is 2 on database reads, 60 or 300 on the skills registry. (2) repos/search, projects/search and builders no longer answer a degraded EMPTY page as a warned 200; an empty page behind a failed read is a 503 with Retry-After 2, a partial page keeps the warned 200. hackathons and the skills list add a meta.warnings line and skip the cache when a listing read fails. (3) research documents its 400, 429 and 503; a declared source with no documents answers an empty vector page (X-Scout-Match-Mode vector, no keyword pass, no sourceAdvisory) with meta.sourceEmpty true; every source-scoped call carries meta.sourceDocCount; meta.resultsHash is the sha256 of results so two reads can be compared without generatedAt; a limit above 25 is reported in meta.warnings instead of silently clamped. (4) Rate-limit counters are per serverless instance: every limited response carries X-RateLimit-Scope: instance. (5) Server-Timing on listings carries cold;dur on the first request an instance serves. Timeouts behind the contract, since 2026-10-02: embedding 5 s, database socket 10 s, wait for a pooled connection 5 s, function cap 30 s on research and 20 s on the other routes an agent reads. Headers and fields are additive; no parameter or enum changed.",
+	},
+	{
 		date: "2026-09-25",
 		surfaces: ["api"],
 		version: "spec@1.9.54",
