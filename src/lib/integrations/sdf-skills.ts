@@ -403,11 +403,12 @@ export function mergeSkillLists<T extends { slug: string }>(
 	let merged = 0;
 	const aliased = new Set(aliases);
 	for (const r of registry) {
-		if (aliased.has(r.slug)) {
+		// Named as an alias, or the same slug as a curated row: either way a
+		// curated row stands for it, and the count says so.
+		if (aliased.has(r.slug) || seen.has(r.slug)) {
 			merged += 1;
 			continue;
 		}
-		if (seen.has(r.slug)) continue;
 		seen.add(r.slug);
 		all.push(r);
 	}
