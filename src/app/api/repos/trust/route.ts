@@ -18,7 +18,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -52,7 +51,6 @@ export async function GET(req: NextRequest) {
 	}
 
 	const sp = req.nextUrl.searchParams;
-	const paramWarning = unknownParamWarning(sp, ["repo"]);
 	const unknown = [...sp.keys()].filter((k) => !VALID_PARAMS.includes(k));
 	if (unknown.length) {
 		return NextResponse.json(
@@ -106,7 +104,6 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/repos/trust`,
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				note: "Every field is evidence-grounded (scanner, on-chain enrichment, audits registry); signals is a closed deterministic vocabulary — absence of a signal means the evidence doesn't hold, not that the opposite is proven. codeTruth.contractInterface carries the real scanned signatures: verify generated calls against it before shipping code that invokes this contract.",
 			},
 			report,

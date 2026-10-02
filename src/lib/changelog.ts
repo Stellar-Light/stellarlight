@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
 		surfaces: ["api"],
+		version: "spec@1.9.59",
+		type: "fixed",
+		summary:
+			"Correction to 1.9.58: six of the eight routes it called silent (getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) had rejected an unknown query parameter with 400 and a supported list all along; the unreachable warning code added to them is removed. The policy as it stands: search operations ignore and name an unknown parameter in meta.warnings; registry and lookup operations reject it with 400; both name the supported set.",
+		detail:
+			"The 1.9.58 survey classified routes by grepping for one phrasing of the rejection and missed three others ('Unsupported query parameter(s)', 'Unknown query param(s)', 'Unknown query param'), so it reported six strict routes as silent and documented a warning they can never send. A live probe after the deploy showed the 400s. Only getRfps and getChangelog were silent; they warn since 1.9.58 and keep doing so. The shared Meta.warnings description now names both groups by operationId; the warnings property added to listContracts, searchHackathonBuilds, resolveProject and getRepoTrust in 1.9.58 is withdrawn. The four registries' hint from 1.9.58 stays. No field, parameter or enum changed.",
+	},
+	{
+		date: "2026-10-02",
+		surfaces: ["api"],
 		version: "spec@1.9.58",
 		type: "changed",
 		summary:

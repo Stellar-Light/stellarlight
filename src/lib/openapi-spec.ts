@@ -70,22 +70,6 @@ const REPORT_META_SCHEMA = {
 	},
 };
 
-/** getRepoTrust's meta: the shared report meta plus the unknown-parameter
- * warning. The other report operations reject unknown parameters with 400,
- * so they never carry it. */
-const TRUST_META_SCHEMA = {
-	...REPORT_META_SCHEMA,
-	properties: {
-		...REPORT_META_SCHEMA.properties,
-		warnings: {
-			type: "array",
-			items: { type: "string" },
-			description:
-				"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
-		},
-	},
-};
-
 /** ScfPitchReport["round"] — live SCF round state; never asserts a negative
  * on fetch failure (source: "unavailable" = verify yourself). */
 const SCF_ROUND_SCHEMA = {
@@ -1551,12 +1535,6 @@ export const spec: OpenAPISpec = {
 											description:
 												"Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it.",
 											properties: {
-												warnings: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
-												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
 												searched: {
@@ -2950,12 +2928,6 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
-												warnings: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
-												},
 												matchMode: {
 													type: "string",
 													enum: ["all", "filtered"],
@@ -5111,7 +5083,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: TRUST_META_SCHEMA,
+										meta: REPORT_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
@@ -5316,12 +5288,6 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
-												warnings: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
-												},
 												matchMode: {
 													type: "string",
 													enum: ["all", "filtered"],
@@ -8031,7 +7997,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "string" },
 						description:
-							"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. This is the policy of every list and search operation except four registries, listAudits, getChanges, getRwaAssets and getStablecoins, which reject an unknown parameter with 400 and name the supported set in hint, because a registry list that looks filtered is worse than a 400.",
+							"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400.",
 					},
 					counts: {
 						type: "object",

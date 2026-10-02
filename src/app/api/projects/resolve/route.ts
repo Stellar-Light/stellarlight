@@ -22,7 +22,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { type ResolvableProject, resolveProject } from "@/lib/resolve-project";
@@ -39,7 +38,6 @@ const CORS = {
 export async function GET(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
-	const paramWarning = unknownParamWarning(sp, ["q"]);
 	const unknown = [...sp.keys()].find((k) => !KNOWN_PARAMS.has(k));
 	if (unknown) {
 		return NextResponse.json(
@@ -105,7 +103,6 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/api/projects/resolve",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				searched: found.totalDocs,
 				methodology:
 					"Matches the query against project slugs, then aliases, then normalized names, strongest first; `matchedOn` reports which, so an exact slug can be weighted differently from a name collision. A name matching two projects returns a MISS naming both rather than picking one. `found: false` means the name is NOT TRACKED in this directory: never that it never existed and never that it is defunct. When a record carries a successor, `current` is where to look now and `superseded` is true. `evidence.unsourced: true` means we assert that status with no citable source, so it is our unverified record rather than an established fact about a named company.",
