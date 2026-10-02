@@ -242,7 +242,10 @@ function partnersUnavailable(
 				"The partner directory could not be read. This is an outage, NOT a claim that no partner matches. Retry after a moment.",
 			retryAfterSeconds: 2,
 		},
-		{ status: 503, headers: { "Retry-After": "2" } },
+		{
+			status: 503,
+			headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+		},
 	);
 }
 

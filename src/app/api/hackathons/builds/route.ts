@@ -96,9 +96,12 @@ export async function GET(req: NextRequest) {
 				error: "hackathon builds index unavailable",
 				advisory:
 					"The prior-art index could not be built because the upstream roster read timed out. This is an outage, NOT a claim that nothing similar was built. Retry after a moment.",
-				retryAfterSeconds: 5,
+				retryAfterSeconds: 2,
 			},
-			{ status: 503, headers: { "Retry-After": "5" } },
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 	const indexedTotal = indexed.length;

@@ -15,9 +15,11 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
+import { isDegraded } from "@/lib/degraded-read";
 import {
 	clampLimit,
 	parseFields,
@@ -158,6 +160,26 @@ export async function GET(req: NextRequest) {
 	// unknown-param disclosure — the honesty channel the contract documents —
 	// instead of the quiet 200 + 0 rows it used to be (2026-09-14).
 	const warnings = [...(paramWarning ? [paramWarning] : []), ...readWarnings];
+
+	// An empty page behind a failed read is an outage, not a checked-empty: a
+	// consumer whose retry rule fires only on 503 would otherwise score it as
+	// lost evidence. A partial page keeps the warned 200.
+	if (isDegraded(warnings) && repos.length === 0) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/repos/search",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "repo search read failed",
+			advisory: `${warnings.join("; ")}. This is an outage, NOT a claim that no repository matches. Retry after a moment.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
+	}
 
 	logApiHit({
 		req,
