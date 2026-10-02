@@ -71,7 +71,13 @@ async function loadProjects(): Promise<Map<string, Row>> {
 	for (const status of STATUSES) {
 		for (let offset = 0; ; offset += 100) {
 			const u = `${BASE}/api/projects/search?status=${encodeURIComponent(status)}&limit=100&offset=${offset}&fields=slug,name,status,statusBasis,shortDescription,links`;
-			const res = await fetch(u);
+			// A 5xx under load is transient (the search route has an 8s read
+			// bound); retry twice before calling the whole run inconclusive.
+			let res = await fetch(u);
+			for (let t = 1; t <= 2 && res.status >= 500; t++) {
+				await new Promise((r) => setTimeout(r, 3000 * t));
+				res = await fetch(u);
+			}
 			if (!res.ok)
 				throw new Error(`projects ${status}@${offset}: HTTP ${res.status}`);
 			const rows = ((await res.json()) as { projects?: Row[] }).projects ?? [];
