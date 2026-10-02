@@ -33,8 +33,17 @@ export type SdfSkillName = (typeof SDF_SKILL_NAMES)[number];
  *  index — the source of truth for what is maintained). Falls back to the
  *  static list above on any fetch/parse failure. */
 export async function fetchSdfSkillNames(): Promise<string[]> {
+	return (await fetchSdfSkillNamesLive()) ?? [...SDF_SKILL_NAMES];
+}
+
+/**
+ * The live registry list, or null when the registry could not be read: a
+ * caller deciding between "unknown skill" and "could not check" needs the
+ * difference the static fallback hides.
+ */
+export async function fetchSdfSkillNamesLive(): Promise<string[] | null> {
 	const links = await fetchSdfSkillLinks();
-	return links.size >= 3 ? [...links.keys()] : [...SDF_SKILL_NAMES];
+	return links.size >= 3 ? [...links.keys()] : null;
 }
 
 /**

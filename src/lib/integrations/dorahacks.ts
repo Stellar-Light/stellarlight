@@ -72,6 +72,14 @@ const STELLAR_RE = /stellar|soroban/i;
  * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
  * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
+/**
+ * A timed-out upstream read must not be mistaken for a complete one: the
+ * callers that cache an index rethrow it, so a stale complete index beats a
+ * fresh partial one.
+ */
+const isAbortError = (e: unknown): boolean =>
+	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
@@ -276,6 +284,7 @@ async function fetchWinnerPrizeMap(
 		}
 	} catch (err) {
 		console.error(`Error fetching DoraHacks winners for ${uname}:`, err);
+		if (isAbortError(err)) throw err;
 	}
 	return map;
 }
@@ -369,6 +378,7 @@ export async function fetchHackathonSubmissions(
 			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
 			err,
 		);
+		if (isAbortError(err)) throw err;
 	}
 	return out;
 }
