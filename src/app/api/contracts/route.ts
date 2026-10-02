@@ -21,7 +21,7 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { buildContractsRegistry } from "@/lib/contracts-registry";
-import { clampLimit, unknownParamWarning } from "@/lib/http-params";
+import { clampLimit } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -59,12 +59,6 @@ export async function GET(req: NextRequest) {
 	}
 
 	const sp = req.nextUrl.searchParams;
-	const paramWarning = unknownParamWarning(sp, [
-		"q",
-		"domain",
-		"limit",
-		"offset",
-	]);
 	const unknown = [...sp.keys()].filter((k) => !VALID_PARAMS.includes(k));
 	if (unknown.length) {
 		return NextResponse.json(
@@ -155,7 +149,6 @@ export async function GET(req: NextRequest) {
 				...matchModeMeta(q ? "filtered" : "all"),
 				source: `${getAppUrl()}/api/contracts`,
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: {
 					q: q || null,
 					domain: domain || null,
