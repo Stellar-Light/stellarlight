@@ -30,6 +30,55 @@ import {
 
 export type TallySource = "chain" | "mirror" | "chain+mirror";
 
+/**
+ * Ballots left out of a round's count, named here so every reader (the
+ * results API, the admin tally, the published file) applies the same list,
+ * and the list itself is public in the repo with its reason. A ballot listed
+ * here is still on chain; the results name it as excluded and say why, so a
+ * count of the relay's entries reconciles with the published totals.
+ */
+export const EXCLUDED_BALLOTS: Readonly<
+	Record<string, ReadonlyArray<{ ballotId: string; reason: string }>>
+> = {
+	"i3-2026-nominations": [
+		{
+			ballotId: "322fee99",
+			reason:
+				"Organizer test ballot from a wallet labelled 'test', cast on 2026-10-02 before the round was announced, to check the live round end to end. Not a pilot's vote.",
+		},
+	],
+};
+
+export interface Exclusions {
+	entries: FirstBallotEntry[];
+	relay: Map<string, BallotSelections>;
+	/** Addresses whose ballot was excluded: they leave the turnout too. */
+	addresses: Set<string>;
+	/** Every listed ballot, and whether this round's record or relay held it. */
+	excluded: Array<{ ballotId: string; reason: string; found: boolean }>;
+}
+
+/** Pure. Drops the round's EXCLUDED_BALLOTS from the record and the relay. */
+export function applyExclusions(
+	round: string,
+	entries: FirstBallotEntry[],
+	relay: Map<string, BallotSelections>,
+	list = EXCLUDED_BALLOTS[round] ?? [],
+): Exclusions {
+	const ids = new Set(list.map((x) => x.ballotId));
+	const hit = (e: FirstBallotEntry) => !!e.ballotId && ids.has(e.ballotId);
+	return {
+		entries: entries.filter((e) => !hit(e)),
+		relay: new Map([...relay].filter(([id]) => !ids.has(id))),
+		addresses: new Set(entries.filter(hit).map((e) => e.address)),
+		excluded: list.map((x) => ({
+			...x,
+			found:
+				entries.some((e) => e.ballotId === x.ballotId) || relay.has(x.ballotId),
+		})),
+	};
+}
+
 /** One voter's first ballot, as the record holds it. Never published. */
 export interface FirstBallotEntry {
 	address: string;
@@ -151,6 +200,8 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	afterClose: number;
 	/** Relay ballots the record does not hold, counted, unattributed. */
 	relayOnly: number;
+	/** The round's EXCLUDED_BALLOTS, each with whether it was found. */
+	excluded: Exclusions["excluded"];
 }> {
 	const relayPub = relayKeypair()?.publicKey() ?? null;
 	const [probe, record] = await Promise.all([
@@ -170,7 +221,11 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	const byAddress = new Map<string, FirstBallotEntry>();
 	for (const e of record ?? [])
 		if (!byAddress.has(e.address)) byAddress.set(e.address, e);
-	const entries = [...byAddress.values()];
+	// Ballots named in EXCLUDED_BALLOTS leave every count: the record, the
+	// relay map, the turnout and the digest.
+	const ex = applyExclusions(loaded.round.slug, [...byAddress.values()], relay);
+	const entries = ex.entries;
+	const counted = ex.relay;
 
 	// A ballot the relay wrote was gated on the close time before it was
 	// written, so only record-less relay ballots need dating, and those are
@@ -178,7 +233,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	let afterClose = 0;
 	const known = new Set(entries.map((e) => e.ballotId).filter(Boolean));
 	if (loaded.round.closesAt && relayPub) {
-		const unknown = [...relay.keys()].filter((id) => !known.has(id));
+		const unknown = [...counted.keys()].filter((id) => !known.has(id));
 		const dated = await Promise.all(
 			unknown.map(async (id) => ({
 				id,
@@ -190,7 +245,7 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 		);
 		for (const { id, op } of dated) {
 			if (!ballotCountsAtTime(op?.at, loaded.round.closesAt)) {
-				relay.delete(id);
+				counted.delete(id);
 				afterClose++;
 			}
 		}
@@ -199,13 +254,14 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	const { accounts, recordVoters, relayOnly } = mergeBallots(
 		loaded.round,
 		entries,
-		relay,
+		counted,
 	);
 	const tally = tallyRound(
 		loaded.round,
 		loaded.nominees,
 		accounts,
-		loaded.whitelist.size,
+		loaded.whitelist.size -
+			[...ex.addresses].filter((a) => loaded.whitelist.has(a)).length,
 	);
 	const source: TallySource =
 		recordVoters && relayOnly.length
@@ -216,9 +272,12 @@ export async function liveTally(loaded: LoadedRound): Promise<{
 	return {
 		tally,
 		source,
-		digest: record ? ballotsDigest(record) : null,
+		digest: record
+			? ballotsDigest(record.filter((e) => !ex.addresses.has(e.address)))
+			: null,
 		afterClose,
 		relayOnly: relayOnly.length,
+		excluded: ex.excluded,
 	};
 }
 
@@ -325,6 +384,8 @@ export interface ResultsDocument {
 	/** Ballots counted from the relay that the record does not name (anonymous,
 	 *  not covered by ballotsDigest). Normally 0. */
 	relayOnly: number;
+	/** Ballots left out of every count above, each with the reason. */
+	excluded: Array<{ ballotId: string; reason: string }>;
 	categories: Array<{
 		key: string;
 		name: string;
@@ -343,6 +404,7 @@ export function resultsDocument(
 	digest: string | null,
 	now: Date = new Date(),
 	relayOnly = 0,
+	excluded: ReadonlyArray<{ ballotId: string; reason: string }> = [],
 ): ResultsDocument {
 	const { round } = loaded;
 	return {
@@ -356,6 +418,7 @@ export function resultsDocument(
 		ballotsDigest: digest,
 		turnout: { ...tally.turnout },
 		relayOnly,
+		excluded: excluded.map(({ ballotId, reason }) => ({ ballotId, reason })),
 		categories: tally.categories.map((c) => ({
 			key: c.key,
 			name: c.name,
@@ -368,7 +431,7 @@ export function resultsDocument(
 		})),
 		generatedAt: now.toISOString(),
 		note:
-			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror, not the chain, is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts), publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet), see /api/awards/anchor?round=" +
+			"Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror, not the chain, is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts), publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet). Ballots listed in excluded are left out of the counts, the turnout and ballotsDigest, each with its reason. See /api/awards/anchor?round=" +
 			round.slug,
 	};
 }

@@ -9,8 +9,10 @@ import {
 	tallyRound,
 } from "../awards/ballot";
 import {
+	applyExclusions,
 	ballotCountsAtTime,
 	ballotsDigest,
+	EXCLUDED_BALLOTS,
 	mergeBallots,
 	resultsDocument,
 } from "../awards/publish";
@@ -355,5 +357,53 @@ describe("ballotCountsAtTime", () => {
 	it("counts everything when the round has no close date", () => {
 		expect(ballotCountsAtTime("2030-01-01T00:00:00.000Z", null)).toBe(true);
 		expect(ballotCountsAtTime(null, null)).toBe(true);
+	});
+});
+
+describe("applyExclusions", () => {
+	const sel = { impact: ["a"] };
+	const entries = [
+		{
+			address: "GTEST",
+			selections: sel,
+			txHash: "t1",
+			at: null,
+			ballotId: "322fee99",
+		},
+		{
+			address: "GPILOT",
+			selections: sel,
+			txHash: "t2",
+			at: null,
+			ballotId: "aaaa1111",
+		},
+	];
+	const relay = new Map([
+		["322fee99", sel],
+		["aaaa1111", sel],
+		["bbbb2222", sel],
+	]);
+	it("drops the listed ballot from the record and the relay, and names its voter", () => {
+		const ex = applyExclusions("i3-2026-nominations", entries, relay);
+		expect(ex.entries.map((e) => e.ballotId)).toEqual(["aaaa1111"]);
+		expect([...ex.relay.keys()]).toEqual(["aaaa1111", "bbbb2222"]);
+		expect([...ex.addresses]).toEqual(["GTEST"]);
+		expect(ex.excluded).toEqual([
+			{ ...EXCLUDED_BALLOTS["i3-2026-nominations"][0], found: true },
+		]);
+	});
+	it("leaves a round with no list untouched", () => {
+		const ex = applyExclusions("some-other-round", entries, relay);
+		expect(ex.entries).toHaveLength(2);
+		expect(ex.relay.size).toBe(3);
+		expect(ex.excluded).toEqual([]);
+	});
+	it("reports a listed id it could not find", () => {
+		const ex = applyExclusions("r", [], new Map(), [
+			{ ballotId: "deadbeef", reason: "typo check" },
+		]);
+		expect(ex.excluded).toEqual([
+			{ ballotId: "deadbeef", reason: "typo check", found: false },
+		]);
 	});
 });
