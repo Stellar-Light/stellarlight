@@ -92,6 +92,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: `unknown parameter${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}`,
+				hint: `Supported: ${VALID_PARAMS.join(", ")}. Unknown parameters are rejected here, never ignored, so a feed that looks filtered is never returned.`,
 				validParams: VALID_PARAMS,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },

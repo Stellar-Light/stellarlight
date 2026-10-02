@@ -28,7 +28,7 @@ import {
 	rfpStatus,
 } from "@/data/ideas";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { fetchScfRounds } from "@/lib/scf-rounds";
@@ -73,6 +73,14 @@ export async function GET(req: NextRequest) {
 	// null on failure so the fallback below can obey the invariant.
 	const scfLive = await fetchScfRounds();
 	const sp = req.nextUrl.searchParams;
+	const paramWarning = unknownParamWarning(sp, [
+		"q",
+		"category",
+		"quarter",
+		"status",
+		"limit",
+		"offset",
+	]);
 	const q = sp.get("q")?.toLowerCase().trim();
 	const categoryFilter = sp.get("category") as Category | null;
 	const quarterFilter = sp.get("quarter") as Quarter | null;
@@ -190,6 +198,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/ideas",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: {
 					q: q ?? null,
 					category: categoryFilter,

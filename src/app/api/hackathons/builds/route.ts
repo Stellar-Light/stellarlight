@@ -27,6 +27,7 @@ import {
 	BOOL_TRUE_VALUES,
 	clampLimit,
 	strictBoolParam,
+	unknownParamWarning,
 } from "@/lib/http-params";
 import {
 	type DoraHacksSubmission,
@@ -52,6 +53,12 @@ async function getIndex(): Promise<IndexedBuild[]> {
 export async function GET(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
+	const paramWarning = unknownParamWarning(sp, [
+		"q",
+		"track",
+		"winnersOnly",
+		"limit",
+	]);
 	const unknown = [...new Set(sp.keys())].filter(
 		(k) => !(SUPPORTED_PARAMS as readonly string[]).includes(k),
 	);
@@ -156,6 +163,7 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: { q: q ?? null, winnersOnly, track: track ?? null, limit },
 				counts: {
 					indexedBuilds: indexedTotal,

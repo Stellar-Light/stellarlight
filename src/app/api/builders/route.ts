@@ -42,7 +42,12 @@ import {
 	isDegraded,
 	withReadTimeout,
 } from "@/lib/degraded-read";
-import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import {
+	clampLimit,
+	parseFields,
+	pickFields,
+	unknownParamWarning,
+} from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -213,6 +218,18 @@ export async function GET(req: NextRequest) {
 	// lookups under the 2026-09-14 eval load — which an agent reads as "no
 	// such builder" and the eval read as a miss.
 	const warnings: string[] = [];
+	// An unknown query parameter is named, never silently ignored (the shared
+	// policy of every list route; four registries reject it with 400 instead).
+	const paramWarning = unknownParamWarning(sp, [
+		"q",
+		"skill",
+		"tech",
+		"location",
+		"limit",
+		"offset",
+		"fields",
+	]);
+	if (paramWarning) warnings.push(paramWarning);
 	const rawByLogin = new Map<string, Record<string, unknown>>();
 
 	if (!payload)

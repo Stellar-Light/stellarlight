@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
 			{
 				error: `unknown parameter${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}`,
 				validParams: VALID_PARAMS,
-				hint: "severity-level filtering is not available yet: severityCounts is null until deterministic extraction lands (null = not extracted, NOT zero findings)",
+				hint: `Supported: ${VALID_PARAMS.join(", ")}. Unknown parameters are rejected here, never ignored, so a list that looks filtered is never returned. severity-level filtering is not available yet: severityCounts is null until deterministic extraction lands (null = not extracted, NOT zero findings)`,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);

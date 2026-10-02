@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: `Unknown query param '${unknown}'.`,
+				hint: `Supported: ${[...KNOWN_PARAMS].join(", ")}. Unknown parameters are rejected here, never ignored, so a registry list that looks filtered is never returned.`,
 				validParams: [...KNOWN_PARAMS],
 			},
 			{ status: 400, headers: CORS },
