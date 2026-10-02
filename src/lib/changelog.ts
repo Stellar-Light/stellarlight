@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
 		surfaces: ["api"],
+		version: "spec@1.9.56",
+		type: "added",
+		summary:
+			"searchResearch source=scf-proposal is filled: one document per SCF submission on communityfund.stellar.org (every status, not only awarded), carrying the proposal's own sections and the facts the page states (round, status, award type, requested budget); re-ingested weekly.",
+		detail:
+			"Until today the source was declared in the enum but held no documents, so every scoped call answered an empty vector page with sourceEmpty true. The corpus now holds the public submission pages (about 950 submissions across 531 projects) chunked per section, tagged by project slug, round, status and category, with the facts header on every document. Use it for what a project proposed and asked for; use source=scf-handbook for program rules and /api/projects/search?scfAwarded=true for the awarded roster with round numbers. The ingest lane runs every Monday and re-plans after each write, so a status change on a submission (for example Information Collection to Awarded) lands within a week. Description-only change to the source parameter; no field, parameter or enum changed.",
+	},
+	{
+		date: "2026-10-02",
+		surfaces: ["api"],
 		version: "spec@1.9.55",
 		type: "changed",
 		summary:

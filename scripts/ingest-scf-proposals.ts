@@ -36,6 +36,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,
+	type DuplicateChunkRef,
 	loadExistingChunks,
 	upsertChunks,
 } from "../src/lib/research-ingest";
@@ -66,9 +67,13 @@ interface SubmissionSummary {
 	roundName: string;
 	budget: number | string | null;
 	awardType: string | null;
+	/** Record id of the project that owns the submission (a string on the
+	 * pages seen; tolerated as a one-element array, the Airtable link shape). */
+	project?: string | string[] | null;
 }
 
 interface ProjectRecord {
+	id?: string;
 	slug: string;
 	title: string;
 	description?: string;
@@ -279,12 +284,28 @@ async function run() {
 
 	const payload =
 		execute || replan ? await getPayload({ config: configPromise }) : null;
+	const duplicates: DuplicateChunkRef[] = [];
 	const existing = payload
-		? await loadExistingChunks(payload, "scf-proposal")
+		? await loadExistingChunks(payload, "scf-proposal", { duplicates })
 		: new Map();
 	if (payload) {
 		const total = [...existing.values()].reduce((s, m) => s + m.size, 0);
-		console.log(`  ${total} existing chunks already in collection\n`);
+		console.log(`  ${total} existing chunks already in collection`);
+		// Two docs on one (parentDocId, chunkIndex) key: the plan can converge
+		// on one of them only, so the others go on execute and are named in a
+		// plan. The first execute pass left seven, one submission written under
+		// two projects.
+		if (duplicates.length) {
+			console.log(
+				`  ${duplicates.length} duplicate chunk doc(s) on a key already held${execute ? ": deleting" : " (deleted on execute)"}`,
+			);
+			if (execute) {
+				for (const d of duplicates) {
+					await payload.delete({ collection: "research-docs", id: d.id });
+				}
+			}
+		}
+		console.log("");
 	}
 
 	const listed = (await fetchText(`${BASE}/backend/projects`).then((t) =>
@@ -295,6 +316,14 @@ async function run() {
 		`Projects listed: ${listed.length}${Number.isFinite(projectLimit) ? ` (processing ${projects.length})` : ""}`,
 	);
 
+	// A project page lists its own submissions and, for a few projects, a
+	// sibling's (Upesa's page lists Liquid's "Issuance and liquidity hub").
+	// Each listed submission names its owner, so a submission is ingested once,
+	// under the owner, when the owner is itself a listed project; the first
+	// execute pass wrote that one twice, with two project headers, and the
+	// re-plan could never converge.
+	const listedIds = new Set(listed.map((p) => p.id).filter(Boolean));
+	let listedElsewhere = 0;
 	let pageErrors = 0;
 	let submissionsSeen = 0;
 	let submissionsEmpty = 0;
@@ -320,6 +349,11 @@ async function run() {
 		const subs = rec?.submissions ?? [];
 		for (const raw of subs) {
 			if (!raw?.id) continue;
+			const owner = Array.isArray(raw.project) ? raw.project[0] : raw.project;
+			if (owner && rec?.id && owner !== rec.id && listedIds.has(owner)) {
+				listedElsewhere += 1;
+				continue;
+			}
 			submissionsSeen += 1;
 			// Six of 946 submissions carried no round name (and some no title or
 			// status); the page still renders them, so the document does too,
@@ -377,7 +411,7 @@ async function run() {
 	}
 
 	console.log(
-		`\nSubmissions: ${submissionsSeen} seen, ${submissionsEmpty} without text`,
+		`\nSubmissions: ${submissionsSeen} seen, ${submissionsEmpty} without text, ${listedElsewhere} listed under a sibling project (ingested under the owner)`,
 	);
 	console.log(
 		`  by status: ${[...statusCounts.entries()].map(([k, v]) => `${k}=${v}`).join(", ")}`,

@@ -298,9 +298,16 @@ export interface ExistingChunkRef {
 	publishedAt?: string | null;
 }
 
+/** A second stored doc on a (parentDocId, chunkIndex) key the map already holds. */
+export type DuplicateChunkRef = ExistingChunkRef & {
+	parentDocId: string;
+	chunkIndex: number;
+};
+
 export async function loadExistingChunks(
 	payload: Payload,
 	source: ResearchSource,
+	opts: { duplicates?: DuplicateChunkRef[] } = {},
 ): Promise<Map<string, Map<number, ExistingChunkRef>>> {
 	const map = new Map<string, Map<number, ExistingChunkRef>>();
 	const existing = await payload.find({
@@ -309,16 +316,28 @@ export async function loadExistingChunks(
 		limit: 10_000,
 		depth: 0,
 	});
-	for (const d of existing.docs as unknown as Array<
-		ExistingChunkRef & { parentDocId: string; chunkIndex: number }
-	>) {
+	for (const d of existing.docs as unknown as Array<DuplicateChunkRef>) {
 		if (!map.has(d.parentDocId)) map.set(d.parentDocId, new Map());
-		map.get(d.parentDocId)?.set(d.chunkIndex, {
+		const perDoc = map.get(d.parentDocId);
+		const ref: ExistingChunkRef = {
 			id: d.id,
 			contentHash: d.contentHash,
 			title: d.title ?? null,
 			publishedAt: d.publishedAt ?? null,
-		});
+		};
+		if (perDoc?.has(d.chunkIndex)) {
+			// The map keeps the first doc returned per key and names the rest,
+			// so an ingester can delete them. Keeping the last one in silence
+			// hid a submission ingested twice under two projects: the plan
+			// matched one copy, re-embedded the other, and never converged.
+			opts.duplicates?.push({
+				...ref,
+				parentDocId: d.parentDocId,
+				chunkIndex: d.chunkIndex,
+			});
+			continue;
+		}
+		perDoc?.set(d.chunkIndex, ref);
 	}
 	return map;
 }

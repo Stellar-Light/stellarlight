@@ -4,14 +4,17 @@ name: Ingest SCF proposals (research corpus)
 # Fills the research source "scf-proposal": one document per SCF submission
 # (communityfund.stellar.org/submissions/<id>) with the proposal's own
 # sections and the facts the page states (project, round, status, award
-# type, requested budget). Dispatch-only until the first execute run has been
-# reviewed; the weekly schedule is added once the corpus is in.
+# type, requested budget). Runs weekly on the schedule (executes: SCF rounds
+# open, close and change status over weeks, not hours); a manual dispatch is
+# a dry run unless execute=true.
 #
-#   execute=false (default): fetch, chunk, plan, write nothing.
-#   execute=true: embed + write, then the Idempotence re-plan must print
-#                 `replan: writes=0` (QUALITY.md, the second condition).
+#   dispatch, execute=false (default): fetch, chunk, plan, write nothing.
+#   schedule, or execute=true: embed + write, then the Idempotence re-plan
+#                 must print `replan: writes=0` (QUALITY.md, second condition).
 
 on:
+  schedule:
+    - cron: "20 4 * * 1" # Mondays 04:20 UTC
   workflow_dispatch:
     inputs:
       execute:
@@ -54,13 +57,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Ensure Atlas Vector Search index exists
-        if: inputs.execute == true
+        if: github.event_name == 'schedule' || inputs.execute == true
         run: pnpm exec tsx scripts/create-vector-index.ts --execute
 
-      - name: Ingest SCF proposals (dry run unless execute=true)
+      - name: Ingest SCF proposals (dry run unless scheduled or execute=true)
         shell: bash
         env:
-          IN_EXECUTE: ${{ inputs.execute }}
+          IN_EXECUTE: ${{ github.event_name == 'schedule' || inputs.execute }}
           IN_LIMIT: ${{ inputs.limit }}
         run: |
           args=()
@@ -72,7 +75,7 @@ jobs:
       # pass the plan must be empty, or the ingester is not idempotent (a
       # chunk that re-counts as new on every run re-embeds forever).
       - name: Idempotence
-        if: inputs.execute == true
+        if: github.event_name == 'schedule' || inputs.execute == true
         shell: bash
         env:
           IN_LIMIT: ${{ inputs.limit }}
