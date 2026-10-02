@@ -5977,7 +5977,11 @@ export const spec: OpenAPISpec = {
 																		type: "string",
 																		enum: [...RESEARCH_SOURCES],
 																	},
-																	status: { type: "integer" },
+																	status: {
+																		type: "integer",
+																		description:
+																			"HTTP status of this source's read (200 = answered). Not dated: it describes this response only.",
+																	},
 																	returned: { type: "integer" },
 																	matchMode: {
 																		type: "string",

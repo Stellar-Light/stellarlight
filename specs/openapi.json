@@ -8066,7 +8066,8 @@
 																		]
 																	},
 																	"status": {
-																		"type": "integer"
+																		"type": "integer",
+																		"description": "HTTP status of this source's read (200 = answered). Not dated: it describes this response only."
 																	},
 																	"returned": {
 																		"type": "integer"

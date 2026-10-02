@@ -4698,6 +4698,7 @@ export interface operations {
                             bySource?: {
                                 /** @enum {string} */
                                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
+                                /** @description HTTP status of this source's read (200 = answered). Not dated: it describes this response only. */
                                 status?: number;
                                 returned?: number;
                                 /** @enum {string} */
