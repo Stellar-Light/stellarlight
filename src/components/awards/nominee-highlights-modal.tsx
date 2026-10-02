@@ -260,7 +260,10 @@ export function NomineeHighlightsModal({
 	}, [nominee, onClose]);
 
 	const open = nominee !== null;
-	const data = shown;
+	// The nominee being opened, from its first frame; `shown` only carries the
+	// last one through the exit animation (it updates after paint, so reading
+	// it on open drew the previous nominee's logo for a frame).
+	const data = nominee ?? shown;
 	// Lead every sheet with the growth moment so the big TVL number lands in the
 	// SAME place across nominees. highlights.ts authors moments per-project, so
 	// the growth moment (the one carrying the TVL odometer) sat 1st for some and
@@ -323,7 +326,7 @@ export function NomineeHighlightsModal({
 									transition={{ ...POP_SPRING, delay: 0.05 }}
 									className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#333] bg-[#111]"
 								>
-									<SheetLogo src={data.logoUrl} />
+									<SheetLogo key={data.slug} src={data.logoUrl} />
 								</motion.span>
 								<div className="min-w-0">
 									<motion.p
