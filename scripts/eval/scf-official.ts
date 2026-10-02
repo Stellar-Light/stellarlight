@@ -180,12 +180,20 @@ export function parseRoundVerdicts(html: string): {
 		number,
 		{ round: number; budgetUSD: number | null; awardType: string | null }
 	>();
-	// Field order within one submission object: status … roundName … awardType
-	// … budget (verified on fluxity-mez 2026-08-03). The [^{}] guards keep every
-	// capture inside a single object — a missing awardType/budget fails to null,
-	// never bleeds into the next card.
+	// One submission object: id … status … roundName, then the rest of the
+	// object up to the next brace. awardType and budget are read out of that
+	// rest independently, because SCF reorders them: awardType … budget on
+	// 2026-08-03 (fluxity-mez), budget … awardType by 2026-10-02. The ordered
+	// regex this replaces read the new order as "no budget" on every card, and
+	// a dry run planned to write null amounts over ~550 stored round awards.
+	// The [^{}] guard keeps every read inside one object, so a missing field
+	// fails to null and never bleeds into the next card.
 	const re =
-		/"id":"([^"]+)"[^{}]*?"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"(?:[^{}]*?"awardType":"([^"]*)")?(?:[^{}]*?"budget":(\d+(?:\.\d+)?))?/g;
+		/"id":"([^"]+)"[^{}]*?"status":"([^"]+)"[^{}]*?"roundName":"([^"]+)"([^{}]*)/g;
+	const fieldsOf = (rest: string) => ({
+		awardType: /"awardType":"([^"]*)"/.exec(rest)?.[1] || null,
+		budget: /"budget":(\d+(?:\.\d+)?)/.exec(rest)?.[1] ?? null,
+	});
 	// Per-CARD collection first: the page embeds each card twice (flight
 	// reference form + resolved props form) and the reference form can carry a
 	// TRUNCATED budget (bondhive #29: 100 vs the resolved 100000). Keep the MAX
@@ -229,13 +237,14 @@ export function parseRoundVerdicts(html: string): {
 		// read as "no award on the page". "Not Awarded" does not start with
 		// "Awarded", so the negative verdicts are untouched.
 		const isAward = /^Awarded\b/.test(status);
+		const f = fieldsOf(m[4]);
 		if (!isAward && !isNegativeVerdict(status)) {
 			const num = m[3].match(/SCF\s*#\s*(\d+)/i)?.[1];
 			const nc = {
 				id: m[1],
 				roundNum: num ? Number(num) : null,
-				budgetUSD: m[5] ? Number(m[5]) : null,
-				awardType: m[4] || null,
+				budgetUSD: f.budget ? Number(f.budget) : null,
+				awardType: f.awardType,
 			};
 			const prev = neutralByKey.get(nc.id);
 			if (!prev) neutralByKey.set(nc.id, nc);
@@ -254,8 +263,8 @@ export function parseRoundVerdicts(html: string): {
 			isAward,
 			roundNum: num ? Number(num) : null,
 			roundName: m[3] || null,
-			budgetUSD: isAward && m[5] ? Number(m[5]) : null,
-			awardType: isAward && m[4] ? m[4] : null,
+			budgetUSD: isAward && f.budget ? Number(f.budget) : null,
+			awardType: isAward ? f.awardType : null,
 		};
 		const key = `${card.isAward ? "A" : "N"}|${card.id}`;
 		const prev = cardByKey.get(key);
