@@ -87,6 +87,9 @@ export const Entities: CollectionConfig = {
 			type: "relationship",
 			relationTo: "projects",
 			hasMany: true,
+			// The projects.relatedEntities join filters on this field for every
+			// project row read with joins on.
+			index: true,
 		},
 	],
 	// Unique index on slug is handled by unique: true on the field

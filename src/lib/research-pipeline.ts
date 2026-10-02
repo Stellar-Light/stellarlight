@@ -83,15 +83,30 @@ export const VECTOR_INDEX_FIELDS = [
  * deploy. Unreadable (an Atlas blip, an older tier) reads as "none": the
  * pool path still works, only slower for small sources.
  */
-let filterPathsCache: { at: number; paths: Set<string> } | null = null;
+let filterPathsCache: { at: number; paths: Promise<Set<string>> } | null = null;
 const FILTER_PATHS_TTL_MS = 10 * 60 * 1000;
-export async function vectorIndexFilterPaths(collection: {
+export function vectorIndexFilterPaths(collection: {
 	listSearchIndexes: () => { toArray: () => Promise<unknown[]> };
 }): Promise<Set<string>> {
 	const now = Date.now();
-	if (filterPathsCache && now - filterPathsCache.at < FILTER_PATHS_TTL_MS) {
-		return filterPathsCache.paths;
+	if (!filterPathsCache || now - filterPathsCache.at >= FILTER_PATHS_TTL_MS) {
+		// One listSearchIndexes call per instance per ten minutes, shared by
+		// every request that arrives while it is in flight (a cold burst used
+		// to issue one per request). A read that fails is not kept: the next
+		// request asks again instead of running the widened pool pass for the
+		// whole window on the strength of one blip.
+		const paths = readVectorIndexFilterPaths(collection);
+		filterPathsCache = { at: now, paths };
+		paths.catch(() => {
+			filterPathsCache = null;
+		});
 	}
+	return filterPathsCache.paths.catch(() => new Set<string>());
+}
+
+async function readVectorIndexFilterPaths(collection: {
+	listSearchIndexes: () => { toArray: () => Promise<unknown[]> };
+}): Promise<Set<string>> {
 	const paths = new Set<string>();
 	try {
 		const all = (await collection.listSearchIndexes().toArray()) as Array<{
@@ -107,10 +122,10 @@ export async function vectorIndexFilterPaths(collection: {
 				if (f.type === "filter" && f.path) paths.add(f.path);
 			}
 		}
-	} catch {
-		// unreadable: the pool path
+	} catch (err) {
+		// unreadable: the caller takes the pool path for THIS request only
+		throw err;
 	}
-	filterPathsCache = { at: now, paths };
 	return paths;
 }
 

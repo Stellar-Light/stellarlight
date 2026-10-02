@@ -87,7 +87,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: { description: "owner/name — natural key" },
 		},
-		{ name: "owner", type: "text" },
+		{ name: "owner", type: "text", index: true },
 		{ name: "name", type: "text" },
 		{ name: "url", type: "text" },
 		{ name: "description", type: "textarea" },
@@ -196,6 +196,7 @@ export const Repos: CollectionConfig = {
 			name: "repoScore",
 			type: "number",
 			defaultValue: 0,
+			index: true,
 			admin: {
 				description:
 					"0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)",

@@ -36,6 +36,7 @@ import {
 } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
@@ -49,6 +50,7 @@ async function getIndex(): Promise<IndexedBuild[]> {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	const unknown = [...new Set(sp.keys())].filter(
 		(k) => !(SUPPORTED_PARAMS as readonly string[]).includes(k),
@@ -135,27 +137,36 @@ export async function GET(req: NextRequest) {
 	}));
 
 	try {
-		logApiHit({ endpoint: "/api/hackathons/builds", query: q, req });
+		logApiHit({
+			endpoint: "/api/hackathons/builds",
+			query: q,
+			req,
+			startedAt,
+			status: 200,
+		});
 	} catch {}
 
-	return NextResponse.json({
-		meta: {
-			...matchModeMeta(q ? "filtered" : "all"),
-			source: "https://stellarlight.xyz/api/hackathons/builds",
-			upstream: "dorahacks.io",
-			generatedAt: new Date().toISOString(),
-			filters: { q: q ?? null, winnersOnly, track: track ?? null, limit },
-			counts: {
-				indexedBuilds: indexedTotal,
-				matched: scored.length,
-				returned: builds.length,
+	return NextResponse.json(
+		{
+			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
+				source: "https://stellarlight.xyz/api/hackathons/builds",
+				upstream: "dorahacks.io",
+				generatedAt: new Date().toISOString(),
+				filters: { q: q ?? null, winnersOnly, track: track ?? null, limit },
+				counts: {
+					indexedBuilds: indexedTotal,
+					matched: scored.length,
+					returned: builds.length,
+				},
+				note: q
+					? "Prior-art over hackathon PROTOTYPES (DoraHacks buidls) — most never become directory projects. A hit means someone already built something similar at a Stellar hackathon; check `url`/`githubUrl` before rebuilding. Absence here is NOT proof it's never been tried (DoraHacks-sourced; non-winners can have thin descriptions)."
+					: "No q — returning winners + most-voted builds across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
 			},
-			note: q
-				? "Prior-art over hackathon PROTOTYPES (DoraHacks buidls) — most never become directory projects. A hit means someone already built something similar at a Stellar hackathon; check `url`/`githubUrl` before rebuilding. Absence here is NOT proof it's never been tried (DoraHacks-sourced; non-winners can have thin descriptions)."
-				: "No q — returning winners + most-voted builds across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
+			builds,
 		},
-		builds,
-	});
+		{ headers: serverTiming(startedAt) },
+	);
 }
 
 export const POST = methodNotAllowed(["GET"]);

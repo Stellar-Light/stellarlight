@@ -988,6 +988,8 @@ export const Projects: CollectionConfig = {
 			name: "hackathon",
 			type: "relationship",
 			relationTo: "hackathons",
+			// The hackathons.projects join filters on this field.
+			index: true,
 			admin: {
 				description: "Hackathon this project originated from (if applicable)",
 			},

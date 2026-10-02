@@ -25,6 +25,7 @@ import { embed } from "@/lib/embed";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
 import { findNameMatch } from "@/lib/fuzzy-name";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -247,6 +248,55 @@ async function semanticProjectRows(
 		};
 	});
 }
+
+// Query-independent reads every search repeated (and each with a parallel
+// count): built once per instance per five minutes, shared by concurrent
+// requests, bounded by the caller's read timeout as before.
+const REFERENCE_TTL_MS = 300_000;
+const auditRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "audits",
+		limit: 500,
+		depth: 0,
+		overrideAccess: true,
+		pagination: false,
+		select: { projectSlug: true, auditor: true, publishedAt: true },
+	});
+});
+const entityRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "entities",
+		limit: 300,
+		depth: 0,
+		pagination: false,
+		select: { name: true, slug: true, projects: true },
+	});
+});
+const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "partner-accounts",
+		where: { partnerType: { equals: "anchor" } },
+		limit: 100,
+		depth: 0,
+		pagination: false,
+		select: {
+			name: true,
+			slug: true,
+			country: true,
+			regions: true,
+			assets: true,
+			seps: true,
+			rampTypes: true,
+			lastPartnerUpdateAt: true,
+		},
+	});
+});
 
 export const dynamic = "force-dynamic";
 // The caller gives up at 10 s; a request still working past 20 s is a
@@ -1284,13 +1334,7 @@ export async function GET(req: NextRequest) {
 			// serves BOTH the hay injection below and the response attachment.
 			try {
 				const auditRows = await withReadTimeout(
-					payload.find({
-						collection: "audits",
-						limit: 500,
-						depth: 0,
-						overrideAccess: true,
-						select: { projectSlug: true, auditor: true, publishedAt: true },
-					}),
+					auditRowsMemo(),
 					DEFAULT_READ_TIMEOUT_MS,
 				);
 				// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
@@ -2349,12 +2393,7 @@ export async function GET(req: NextRequest) {
 	if (payload && projectsOut.length) {
 		try {
 			const entRes = await withReadTimeout(
-				payload.find({
-					collection: "entities",
-					limit: 300,
-					depth: 0,
-					select: { name: true, slug: true, projects: true },
-				}),
+				entityRowsMemo(),
 				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const m = new Map<string, { name: string; slug: string }>();
@@ -2415,22 +2454,7 @@ export async function GET(req: NextRequest) {
 	if (payload && hasAnchorRows) {
 		try {
 			const pRes = await withReadTimeout(
-				payload.find({
-					collection: "partner-accounts",
-					where: { partnerType: { equals: "anchor" } },
-					limit: 100,
-					depth: 0,
-					select: {
-						name: true,
-						slug: true,
-						country: true,
-						regions: true,
-						assets: true,
-						seps: true,
-						rampTypes: true,
-						lastPartnerUpdateAt: true,
-					},
-				}),
+				anchorRowsMemo(),
 				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const m = new Map<string, AnchorProfile>();

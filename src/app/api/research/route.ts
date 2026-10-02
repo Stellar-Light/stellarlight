@@ -1005,7 +1005,11 @@ export async function GET(req: NextRequest) {
 			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
 			const db = (payload.db as any)?.connection?.db;
 			const collection = db?.collection("research-docs");
-			if (collection) {
+			// The advisory fires only when the corpus-wide top beats the served
+			// in-source top by 0.1; a served top above 0.9 cannot be beaten, so
+			// the second vector search is skipped for it.
+			const inConf = results[0]?.confidence?.score ?? 0;
+			if (collection && inConf <= 0.9) {
 				const wide = await collection
 					.aggregate(
 						buildResearchVectorPipeline({
@@ -1027,7 +1031,6 @@ export async function GET(req: NextRequest) {
 					query: q,
 				});
 				const wideTop = wideRanked[0];
-				const inConf = results[0]?.confidence?.score ?? 0;
 				const wideConf = wideTop?.confidence?.score ?? 0;
 				if (wideTop && wideConf > inConf + 0.1) {
 					sourceAdvisory = {
