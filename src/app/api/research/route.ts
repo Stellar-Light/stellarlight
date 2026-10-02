@@ -28,6 +28,7 @@ import {
 	pickFields,
 	unknownParamWarning,
 } from "@/lib/http-params";
+import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints } from "@/lib/lane-hints";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -88,6 +89,29 @@ interface ResearchRow {
 	// CAP crosswalk (source === "cap"; #785 — every serving path must carry these)
 	capStatus?: string | null;
 	capProtocolVersion?: number | null;
+}
+
+// A scoped query that returns nothing must say whether the SOURCE is empty
+// (no documents at all) rather than a miss: a partner routed every funding
+// question to source=scf-proposal and read "vector search unavailable" for a
+// source that holds no documents. One count per source per instance per ten
+// minutes, shared by concurrent requests.
+const sourceCountMemos = new Map<string, () => Promise<number>>();
+function sourceDocCount(source: string): Promise<number> {
+	let get = sourceCountMemos.get(source);
+	if (!get) {
+		get = instanceMemo(600_000, async () => {
+			const payload = await getPayloadSafe();
+			if (!payload) throw new Error("no database handle");
+			const res = await payload.count({
+				collection: "research-docs",
+				where: { source: { equals: source } },
+			});
+			return res.totalDocs;
+		});
+		sourceCountMemos.set(source, get);
+	}
+	return get();
 }
 
 export async function GET(req: NextRequest) {
@@ -1087,6 +1111,15 @@ export async function GET(req: NextRequest) {
 				}
 			: null;
 
+	// Empty source or a miss: only an empty source gets the empty-source note.
+	let sourceEmptyNote: string | null = null;
+	if (effectiveSource && results.length === 0) {
+		const n = await sourceDocCount(effectiveSource).catch(() => -1);
+		if (n === 0) {
+			sourceEmptyNote = `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`;
+		}
+	}
+
 	return NextResponse.json(
 		{
 			meta: {
@@ -1096,9 +1129,14 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning || vectorNote
-					? { warnings: [paramWarning, vectorNote].filter(Boolean) }
+				...(paramWarning || vectorNote || sourceEmptyNote
+					? {
+							warnings: [paramWarning, vectorNote, sourceEmptyNote].filter(
+								Boolean,
+							),
+						}
 					: {}),
+				...(sourceEmptyNote ? { sourceEmpty: true } : {}),
 				...(sourceAdvisory ? { sourceAdvisory } : {}),
 				...(exactMiss ? { exactMiss } : {}),
 				query: q,
