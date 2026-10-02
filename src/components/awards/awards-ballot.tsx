@@ -1039,6 +1039,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const [howOpen, setHowOpen] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [txHash, setTxHash] = useState<string | null>(null);
+	const confirmRef = useRef<HTMLDivElement>(null);
+	// Bring the confirmation to the voter. The receipt renders at the top of
+	// the page while the submit control sits at the bottom, and a smooth
+	// window scroll was not reliably landing: pilots reported no success
+	// message and scrolled up to find it. Scroll the receipt itself into view
+	// once it has mounted, and move focus to it for screen readers.
+	useEffect(() => {
+		if (phase !== "submitted") return;
+		const t = window.setTimeout(() => {
+			confirmRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+			confirmRef.current?.focus({ preventScroll: true });
+		}, 120);
+		return () => window.clearTimeout(t);
+	}, [phase]);
 	const [ballotId, setBallotId] = useState<string | null>(null);
 	const prefilled = useRef(false);
 	const [ballotPage, setBallotPage] = useState(0);
@@ -1368,7 +1385,6 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				prev ? { ...prev, votes: { ...selections }, hasVoted: true } : prev,
 			);
 			setPhase("submitted");
-			window.scrollTo({ top: 0, behavior: "smooth" });
 		} catch (err) {
 			setError(walletErrorMessage(err));
 			setPhase("idle");
@@ -1449,6 +1465,45 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		);
 	}
 
+	/** The confirmation where the voter is looking: the submit control's slot. */
+	function SubmittedNotice({ compact = false }: { compact?: boolean }) {
+		if (!txHash) return null;
+		return (
+			<div
+				aria-live="polite"
+				className={`rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] text-left ${compact ? "px-4 py-3" : "p-4"}`}
+			>
+				<p className="flex items-center gap-2 text-sm font-semibold text-neutral-100">
+					<Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+					Thanks for voting! Your vote is on-chain.
+				</p>
+				<div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+					<a
+						href={explorerTxUrl(txHash)}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex items-center gap-1 text-neutral-300 underline-offset-4 hover:underline"
+					>
+						View transaction{" "}
+						<ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+					</a>
+					<button
+						type="button"
+						onClick={() =>
+							confirmRef.current?.scrollIntoView({
+								behavior: "smooth",
+								block: "start",
+							})
+						}
+						className="text-neutral-400 hover:text-neutral-200"
+					>
+						Show my receipt
+					</button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<>
 			<StageReveal />
@@ -1518,6 +1573,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<AnimatePresence>
 				{phase === "submitted" && txHash && (
 					<motion.div
+						ref={confirmRef}
+						tabIndex={-1}
+						aria-live="polite"
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0 }}
@@ -1822,7 +1880,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								);
 							})}
 						</ul>
-						{ballotOpen && <PrimaryButton full />}
+						{phase === "submitted" && txHash ? (
+							<SubmittedNotice />
+						) : (
+							ballotOpen && <PrimaryButton full />
+						)}
 						{closesShort && voting.open && (
 							<p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
 								One signature, and it's final. Voting closes{" "}
@@ -2003,7 +2065,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								);
 							})}
 						</div>
-						<PrimaryButton full />
+						{phase === "submitted" && txHash ? (
+							<SubmittedNotice compact />
+						) : (
+							<PrimaryButton full />
+						)}
 					</div>
 				</motion.div>
 			)}
