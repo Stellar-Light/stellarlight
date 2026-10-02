@@ -785,7 +785,7 @@ export interface components {
             };
             /** @description Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
             note?: string;
-            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure — the request still succeeds; endpoints that shipped strict from day one return 400 instead. */
+            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. This is the policy of every list and search operation except four registries, listAudits, getChanges, getRwaAssets and getStablecoins, which reject an unknown parameter with 400 and name the supported set in hint, because a registry list that looks filtered is worse than a 400. */
             warnings?: string[];
             counts?: {
                 /** @description Rows in this page (post limit/offset slice) */
@@ -2593,6 +2593,8 @@ export interface operations {
                     "application/json": {
                         /** @description Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it. */
                         meta?: {
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                             /** Format: uri */
                             source?: string;
                             /** Format: date-time */
@@ -2732,7 +2734,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Missing/invalid since, unknown param, or invalid surface — never silently ignored */
+            /** @description Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2768,6 +2770,8 @@ export interface operations {
                         /** Format: date-time */
                         generatedAt?: string;
                         meta?: {
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                             counts?: {
                                 returned?: number;
                                 total?: number;
@@ -3145,6 +3149,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                             /**
                              * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
                              * @enum {string}
@@ -3791,6 +3797,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                             activeQuarter?: string;
                             /** @description Human label for activeQuarter (e.g. 'Q3 2026'). */
                             activeQuarterLabel?: string;
@@ -4338,6 +4346,8 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                             note?: string;
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                         };
                         report?: {
                             repo?: {
@@ -4449,6 +4459,8 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                             /**
                              * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
                              * @enum {string}
@@ -4565,7 +4577,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Unknown parameter or invalid value (params are never silently ignored) */
+            /** @description Unknown parameter (named with the supported set in hint) or invalid value; parameters are never silently ignored. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5534,7 +5546,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Invalid sort or unknown query param */
+            /** @description Invalid sort, or an unknown query parameter (named with the supported set in hint); this registry rejects rather than ignores it. */
             400: {
                 headers: {
                     [name: string]: unknown;

@@ -14,6 +14,7 @@
 
 import { NextResponse } from "next/server";
 import { CHANGELOG } from "@/lib/changelog";
+import { unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
+	const paramWarning = unknownParamWarning(searchParams, ["since", "limit"]);
 
 	const since = searchParams.get("since");
 	if (since && !ISO_DATE.test(since)) {
@@ -64,6 +66,7 @@ export async function GET(req: Request) {
 				// artifacts. Do not remove the flat fields below: consumers read
 				// them today. They are deprecated, not gone.
 				counts: { returned: entries.length, total },
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				/** @deprecated read `meta.counts.returned` — kept for compatibility. */
 				returned: entries.length,
 				/** @deprecated read `meta.counts.total` — kept for compatibility. */

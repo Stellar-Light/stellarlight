@@ -18,7 +18,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
@@ -39,6 +39,12 @@ const MATCH_BASIS =
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	const paramWarning = unknownParamWarning(sp, [
+		"q",
+		"section",
+		"limit",
+		"offset",
+	]);
 
 	// Strict unknown-param rejection (mirrors /api/builders): a dropped param
 	// silently returns the full roster while the caller believes they filtered.
@@ -113,6 +119,7 @@ export async function GET(req: NextRequest) {
 				observedAt: PEOPLE_OBSERVED_AT,
 				generatedAt: new Date().toISOString(),
 				filters: { q, section, limit, offset },
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				counts: { returned: people.length, total },
 				sections: sectionsAvailable(),
 				matchBasis: MATCH_BASIS,

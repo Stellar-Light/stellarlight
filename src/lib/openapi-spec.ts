@@ -70,6 +70,22 @@ const REPORT_META_SCHEMA = {
 	},
 };
 
+/** getRepoTrust's meta: the shared report meta plus the unknown-parameter
+ * warning. The other report operations reject unknown parameters with 400,
+ * so they never carry it. */
+const TRUST_META_SCHEMA = {
+	...REPORT_META_SCHEMA,
+	properties: {
+		...REPORT_META_SCHEMA.properties,
+		warnings: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+		},
+	},
+};
+
 /** ScfPitchReport["round"] — live SCF round state; never asserts a negative
  * on fetch failure (source: "unavailable" = verify yourself). */
 const SCF_ROUND_SCHEMA = {
@@ -1535,6 +1551,12 @@ export const spec: OpenAPISpec = {
 											description:
 												"Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it.",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
 												searched: {
@@ -1816,7 +1838,7 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"Missing/invalid since, unknown param, or invalid surface \u2014 never silently ignored",
+							"Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored.",
 					},
 				},
 			},
@@ -1887,6 +1909,12 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												counts: {
 													type: "object",
 													properties: {
@@ -2922,6 +2950,12 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												matchMode: {
 													type: "string",
 													enum: ["all", "filtered"],
@@ -4340,6 +4374,12 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												activeQuarter: { type: "string" },
 												activeQuarterLabel: {
 													type: "string",
@@ -5071,7 +5111,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: REPORT_META_SCHEMA,
+										meta: TRUST_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
@@ -5276,6 +5316,12 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												matchMode: {
 													type: "string",
 													enum: ["all", "filtered"],
@@ -5531,7 +5577,7 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"Unknown parameter or invalid value (params are never silently ignored)",
+							"Unknown parameter (named with the supported set in hint) or invalid value; parameters are never silently ignored.",
 						content: {
 							"application/json": {
 								schema: {
@@ -7892,7 +7938,8 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": {
-						description: "Invalid sort or unknown query param",
+						description:
+							"Invalid sort, or an unknown query parameter (named with the supported set in hint); this registry rejects rather than ignores it.",
 						content: {
 							"application/json": {
 								schema: { $ref: "#/components/schemas/ErrorResponse" },
@@ -7984,7 +8031,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "string" },
 						description:
-							"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure — the request still succeeds; endpoints that shipped strict from day one return 400 instead.",
+							"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. This is the policy of every list and search operation except four registries, listAudits, getChanges, getRwaAssets and getStablecoins, which reject an unknown parameter with 400 and name the supported set in hint, because a registry list that looks filtered is worse than a 400.",
 					},
 					counts: {
 						type: "object",

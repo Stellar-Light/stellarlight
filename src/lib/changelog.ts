@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
+		surfaces: ["api"],
+		version: "spec@1.9.58",
+		type: "changed",
+		summary:
+			"One policy for an unknown query parameter: every list and search operation names it in meta.warnings and answers (now also getBuilders, listContracts, searchHackathonBuilds, getPeople, getRfps, getChangelog, resolveProject, getRepoTrust, which ignored it in silence); the four registries that reject it with 400 (listAudits, getChanges, getRwaAssets, getStablecoins) name the supported set in hint.",
+		detail:
+			"An agent reads a 400 as its own mistake and a warning as advice, and until today a third of the read routes gave neither: eight routes dropped an unknown parameter without a word, so a request with a misspelled filter returned the unfiltered set as if filtered. Those eight now carry the shared warning (the unknown names, the statement that results are NOT filtered by them, the supported list). The four registries keep their documented 400 (a registry list that looks filtered is worse than a 400) and the 400 body now names the supported set in hint, so both policies teach the same thing. The shared Meta.warnings description states the policy and names the four exceptions. No field, parameter or enum changed.",
+	},
+	{
+		date: "2026-10-02",
 		surfaces: ["api", "mcp"],
 		version: "spec@1.9.57",
 		type: "fixed",
