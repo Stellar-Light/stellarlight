@@ -21,6 +21,7 @@ import {
 import { PROJECT_TYPES } from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
+import { RESEARCH_SOURCES } from "../research-sources";
 import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
@@ -351,5 +352,25 @@ describe("research response headers spread the code's vocabularies (spec 1.9.55)
 			S.paths["/api/research"].get.responses["429"].headers["X-RateLimit-Scope"]
 				.schema.enum;
 		expect(e).toEqual([RATE_LIMIT_SCOPE]);
+	});
+});
+
+describe("research sources spread the code's list (spec 1.9.60)", () => {
+	it("source, sources and bySource[].source all enumerate RESEARCH_SOURCES", () => {
+		const params = S.paths["/api/research"].get.parameters as Array<{
+			name: string;
+			schema: { enum?: string[]; items?: { enum: string[] } };
+		}>;
+		const one = params.find((p) => p.name === "source");
+		const many = params.find((p) => p.name === "sources");
+		expect(sorted(one?.schema.enum ?? [])).toEqual(sorted(RESEARCH_SOURCES));
+		expect(sorted(many?.schema.items?.enum ?? [])).toEqual(
+			sorted(RESEARCH_SOURCES),
+		);
+		const meta =
+			S.paths["/api/research"].get.responses["200"].content["application/json"]
+				.schema.properties.meta;
+		const by = JSON.stringify(meta);
+		expect(by).toContain("bySource");
 	});
 });

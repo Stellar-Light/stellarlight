@@ -18,11 +18,12 @@
  */
 
 import { createHash } from "node:crypto";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
+import { degradedWarning } from "@/lib/degraded-read";
 import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
 import {
 	clampLimit,
@@ -35,7 +36,11 @@ import { laneHints } from "@/lib/lane-hints";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import {
+	type RateLimitResult,
+	rateLimit,
+	rateLimitHeaders,
+} from "@/lib/rate-limit";
 import {
 	buildResearchVectorPipeline,
 	cosineVectorScore,
@@ -57,6 +62,8 @@ import {
 	selectRecencySupplement,
 	versionTargets,
 } from "@/lib/research-rank";
+import { RESEARCH_SOURCES, requestedSources } from "@/lib/research-sources";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
 /** A source-scoped request runs the lexical refill scan only for queries this short. */
@@ -116,8 +123,14 @@ function sourceDocCount(source: string): Promise<number> {
 	return get();
 }
 
-export async function GET(req: NextRequest) {
+async function research(
+	req: NextRequest,
+	internal = false,
+): Promise<NextResponse> {
 	const startedAt = Date.now();
+	// internal = one source of a multi-source request: the outer call is rate
+	// limited and logged once, and the advisory's wide search is skipped.
+	const log: typeof logApiHit = internal ? () => {} : logApiHit;
 	// Phase timings for the Server-Timing header: where a request spends its
 	// time, so a slow answer can be read as cold start, embedding, vector
 	// search or ranking without a log dive. Durations in ms.
@@ -129,59 +142,25 @@ export async function GET(req: NextRequest) {
 		phaseStart = now;
 	};
 	// Rate-limit first so abusers don't even reach the embedding call.
-	const limit = rateLimit(req, {
-		endpoint: "/api/research",
-		limit: RATE_LIMIT_MAX,
-		windowMs: RATE_LIMIT_WINDOW_MS,
-	});
-	if (!limit.allowed) {
-		const retryAfterSeconds = Math.max(
-			1,
-			Math.ceil((limit.resetAt - Date.now()) / 1000),
-		);
-		logApiHit({ req, startedAt, status: 429, endpoint: "/api/research" });
-		return apiError({
-			status: 429,
-			error: "rate limit exceeded",
-			advisory:
-				"This instance's per-minute window is spent; the limit is counted per serverless instance (X-RateLimit-Scope). Wait Retry-After and resend.",
-			retryAfterSeconds,
-			startedAt,
-			headers: rateLimitHeaders(limit),
-		});
-	}
+	const limit: RateLimitResult = internal
+		? {
+				allowed: true,
+				limit: RATE_LIMIT_MAX,
+				remaining: RATE_LIMIT_MAX,
+				resetAt: Date.now() + RATE_LIMIT_WINDOW_MS,
+			}
+		: rateLimit(req, {
+				endpoint: "/api/research",
+				limit: RATE_LIMIT_MAX,
+				windowMs: RATE_LIMIT_WINDOW_MS,
+			});
+	if (!limit.allowed) return tooMany(req, startedAt, limit);
 
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
 	// reads as filtered. Warned, not 400'd — the contract is additive-only.
-	const paramWarning = unknownParamWarning(
-		sp,
-		[
-			"q",
-			"query",
-			"keyword",
-			"search",
-			"source",
-			"auditor",
-			"protocol",
-			"severity",
-			"limit",
-			"fields",
-		],
-		{
-			advertise: [
-				"q",
-				"source",
-				"auditor",
-				"protocol",
-				"severity",
-				"limit",
-				"fields",
-			],
-			hint: "Research is a semantic corpus: unmatched intents belong in q rather than in a filter.",
-		},
-	);
+	const paramWarning = researchParamWarning(sp);
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -199,7 +178,7 @@ export async function GET(req: NextRequest) {
 	const auditorFilter = sp.get("auditor");
 	const protocolFilter = sp.get("protocol");
 	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
-	const limitParam = clampLimit(sp.get("limit"), 8, 25);
+	const limitParam = clampLimit(sp.get("limit") ?? sp.get("perSource"), 8, 25);
 	const limitRaw = Math.floor(Number(sp.get("limit")));
 	const limitNote =
 		Number.isFinite(limitRaw) && limitRaw > 25
@@ -209,24 +188,7 @@ export async function GET(req: NextRequest) {
 
 	// Single source of truth for valid `source` values. Kept in sync with
 	// the ResearchSource type in src/lib/research-ingest.ts.
-	const VALID_SOURCES = [
-		"sdf-blog",
-		"scf-handbook",
-		"sep",
-		"cap",
-		"dev-docs",
-		"paper",
-		"scf-proposal",
-		"lumenloop",
-		"lumenloop-research",
-		"repo-docs",
-		"audit",
-		"incident",
-		"security-program",
-		"sdf-org",
-		"ec-developer-report",
-		"release",
-	] as const;
+	const VALID_SOURCES = RESEARCH_SOURCES;
 
 	if (!q) {
 		return NextResponse.json(
@@ -609,7 +571,7 @@ export async function GET(req: NextRequest) {
 	}
 
 	if (vectorStageFailed && keywordFailed) {
-		logApiHit({
+		log({
 			req,
 			startedAt,
 			status: 503,
@@ -1049,7 +1011,7 @@ export async function GET(req: NextRequest) {
 	// freshness floor most in-source tops above 0.6 confidence even when
 	// relevance is weak (the first calibration never fired). One extra
 	// aggregate per source-filtered vector query; embedding reused.
-	if (sourceFilter && queryEmbedding && !sourceKnownEmpty) {
+	if (sourceFilter && queryEmbedding && !sourceKnownEmpty && !internal) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
 			const db = (payload.db as any)?.connection?.db;
@@ -1095,7 +1057,7 @@ export async function GET(req: NextRequest) {
 		}
 	}
 
-	logApiHit({
+	log({
 		req,
 		startedAt,
 		status: 200,
@@ -1225,6 +1187,313 @@ export async function GET(req: NextRequest) {
 }
 
 // sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+// Say when a param was dropped (the projects/search treatment, 2026-07-11
+// audit): a filter we never read returns an unfiltered list the caller reads
+// as filtered. Warned, not 400'd: the contract is additive-only.
+function researchParamWarning(sp: URLSearchParams): string | null {
+	return unknownParamWarning(
+		sp,
+		[
+			"q",
+			"query",
+			"keyword",
+			"search",
+			"source",
+			"sources",
+			"auditor",
+			"protocol",
+			"severity",
+			"limit",
+			"perSource",
+			"fields",
+		],
+		{
+			advertise: [
+				"q",
+				"source",
+				"sources",
+				"auditor",
+				"protocol",
+				"severity",
+				"limit",
+				"perSource",
+				"fields",
+			],
+			hint: "Research is a semantic corpus: unmatched intents belong in q rather than in a filter.",
+		},
+	);
+}
+
+function tooMany(
+	req: NextRequest,
+	startedAt: number,
+	limit: RateLimitResult,
+): NextResponse {
+	logApiHit({ req, startedAt, status: 429, endpoint: "/api/research" });
+	return apiError({
+		status: 429,
+		error: "rate limit exceeded",
+		advisory:
+			"This instance's per-minute window is spent; the limit is counted per serverless instance (X-RateLimit-Scope). Wait Retry-After and resend.",
+		retryAfterSeconds: Math.max(
+			1,
+			Math.ceil((limit.resetAt - Date.now()) / 1000),
+		),
+		startedAt,
+		headers: rateLimitHeaders(limit),
+	});
+}
+
+export async function GET(req: NextRequest) {
+	const sp = req.nextUrl.searchParams;
+	const sources = requestedSources(sp);
+	if (!sources) return research(req);
+	if (sources.length > 1) return researchMany(req, sources);
+	// `sources=<one>` is the single-source call.
+	const url = new URL(req.nextUrl);
+	if (sp.has("sources")) url.searchParams.delete("sources");
+	if (sources.length) url.searchParams.set("source", sources[0]);
+	else url.searchParams.delete("source");
+	return research(new NextRequest(url, { headers: req.headers }));
+}
+
+// Several sources in one call, for a consumer that routes a question to a
+// dozen sources and takes up to N rows from each (a partner sent 13 scoped
+// calls per question). Each source runs the single-source pipeline as it is,
+// so its rows are exactly what `source=<one>&limit=<perSource>` returns
+// (meta.bySource carries each source's resultsHash to prove it). The query is
+// embedded once (embed() shares one in-flight call), and four sources run at
+// a time so the instance's five pooled connections are not all taken.
+// ponytail: one rate-limit token per call; weight it by source count if a
+// caller ever makes this the expensive path.
+const FANOUT_CONCURRENCY = 4;
+
+async function researchMany(
+	req: NextRequest,
+	sources: string[],
+): Promise<NextResponse> {
+	const startedAt = Date.now();
+	const limit = rateLimit(req, {
+		endpoint: "/api/research",
+		limit: RATE_LIMIT_MAX,
+		windowMs: RATE_LIMIT_WINDOW_MS,
+	});
+	if (!limit.allowed) return tooMany(req, startedAt, limit);
+	const sp = req.nextUrl.searchParams;
+	const unknown = sources.filter((s) => !RESEARCH_SOURCES.includes(s as never));
+	if (unknown.length) {
+		return NextResponse.json(
+			{
+				error: `unknown source${unknown.length > 1 ? "s" : ""}: ${unknown.map((s) => `'${s}'`).join(", ")}`,
+				hint: "see validSources for the full list",
+				validSources: RESEARCH_SOURCES,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const perRaw = sp.get("perSource") ?? sp.get("limit");
+	const perSource = clampLimit(perRaw, 8, 25);
+	const perN = Math.floor(Number(perRaw));
+	const perNote =
+		Number.isFinite(perN) && perN > 25
+			? `perSource ${perN} was clamped to 25, the maximum rows per source`
+			: null;
+	const q =
+		(
+			sp.get("q") ??
+			sp.get("query") ??
+			sp.get("keyword") ??
+			sp.get("search")
+		)?.trim() ?? "";
+	// Each source's request carries only the parameters research reads, so a
+	// stray parameter is reported once (below), not once per source.
+	const base = new URL(req.nextUrl.pathname, req.nextUrl.origin);
+	if (q) base.searchParams.set("q", q);
+	for (const k of ["auditor", "protocol", "severity", "fields"]) {
+		const v = sp.get(k);
+		if (v !== null) base.searchParams.set(k, v);
+	}
+	base.searchParams.set("limit", String(perSource));
+
+	const answers = await mapLimit(
+		sources,
+		FANOUT_CONCURRENCY,
+		async (source) => {
+			const url = new URL(base);
+			url.searchParams.set("source", source);
+			try {
+				const res = await research(
+					new NextRequest(url, { headers: req.headers }),
+					true,
+				);
+				// biome-ignore lint/suspicious/noExplicitAny: our own response body
+				const body: any = await res.json().catch(() => null);
+				return { source, status: res.status, body };
+			} catch (e) {
+				return { source, status: 503, body: { error: String(e) } };
+			}
+		},
+	);
+	// A malformed request (no q, a filter that contradicts a source) is the
+	// caller's to fix: answer the 400 itself, not a page missing sources.
+	const bad = answers.find((a) => a.status === 400);
+	if (bad) {
+		return NextResponse.json(bad.body, {
+			status: 400,
+			headers: rateLimitHeaders(limit),
+		});
+	}
+	const ok = answers.filter((a) => a.status === 200 && a.body?.meta);
+	const failed = answers.filter((a) => !(a.status === 200 && a.body?.meta));
+	if (ok.length === 0) {
+		logApiHit({ req, startedAt, status: 503, endpoint: "/api/research" });
+		return apiError({
+			status: 503,
+			error: "research store unavailable",
+			advisory:
+				"No requested source could be read. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
+	}
+	// biome-ignore lint/suspicious/noExplicitAny: rows are our own result rows
+	const results: any[] = ok.flatMap((a) => a.body.results ?? []);
+	const mode: "vector" | "keyword" = ok.every(
+		(a) => a.body.meta.mode === "vector",
+	)
+		? "vector"
+		: "keyword";
+	const paramWarning = researchParamWarning(sp);
+	const warnings = [
+		...(paramWarning ? [paramWarning] : []),
+		...(perNote ? [perNote] : []),
+		...ok.flatMap((a) =>
+			((a.body.meta.warnings ?? []) as string[]).map(
+				(w) => `source=${a.source}: ${w}`,
+			),
+		),
+		...failed.map((a) =>
+			degradedWarning(
+				`research source=${a.source}`,
+				`${a.status} ${a.body?.error ?? "read failed"}; its rows are missing from this page`,
+			),
+		),
+	];
+	// An identifier is missing from this page only when every source missed it.
+	const missLists = ok.map(
+		(a) => (a.body.meta.exactMiss?.identifiers ?? []) as string[],
+	);
+	const missed = missLists.reduce((acc, l) => acc.filter((x) => l.includes(x)));
+	const missNote = ok.find((a) => a.body.meta.exactMiss)?.body.meta.exactMiss;
+	const empty = results.length === 0;
+	logApiHit({
+		req,
+		startedAt,
+		status: 200,
+		endpoint: "/api/research",
+		query: q,
+		filters: {
+			source: sources.join(","),
+			perSource,
+			auditor: sp.get("auditor"),
+			protocol: sp.get("protocol"),
+			severity: sp.get("severity"),
+			mode,
+		},
+		resultCount: results.length,
+		matchMode: mode,
+	});
+	return NextResponse.json(
+		{
+			meta: {
+				...matchModeMeta(mode),
+				...(laneHints("research", { empty })
+					? { hints: laneHints("research", { empty }) }
+					: {}),
+				source: "https://stellarlight.xyz/api/research",
+				generatedAt: new Date().toISOString(),
+				...(warnings.length ? { warnings } : {}),
+				...(missed.length && missNote
+					? { exactMiss: { ...missNote, identifiers: missed } }
+					: {}),
+				query: q,
+				mode,
+				model: ok.some((a) => a.body.meta.mode === "vector")
+					? EMBEDDING_MODEL
+					: null,
+				resultsHash: createHash("sha256")
+					.update(JSON.stringify(results))
+					.digest("hex"),
+				filters: {
+					source: sources.join(","),
+					sources,
+					perSource,
+					auditor: sp.get("auditor"),
+					protocol: sp.get("protocol"),
+					severity: sp.get("severity")?.toLowerCase() ?? null,
+					limit: perSource,
+				},
+				counts: {
+					returned: results.length,
+					total: null,
+					totalBasis: "unbounded-similarity-ranking",
+				},
+				bySource: answers.map((a) =>
+					a.status === 200 && a.body?.meta
+						? {
+								source: a.source,
+								status: 200,
+								returned: a.body.meta.counts?.returned ?? 0,
+								matchMode: a.body.meta.mode,
+								...(a.body.meta.sourceDocCount !== undefined
+									? { sourceDocCount: a.body.meta.sourceDocCount }
+									: {}),
+								...(a.body.meta.sourceEmpty ? { sourceEmpty: true } : {}),
+								resultsHash: a.body.meta.resultsHash,
+							}
+						: {
+								source: a.source,
+								status: a.status,
+								returned: 0,
+								error: a.body?.error ?? "read failed",
+							},
+				),
+				scoreModel: ok[0].body.meta.scoreModel,
+			},
+			results,
+		},
+		{
+			headers: {
+				...rateLimitHeaders(limit),
+				"X-Scout-Match-Mode": mode,
+				...serverTiming(startedAt),
+				"Cache-Control": failed.length
+					? "no-store"
+					: "public, s-maxage=60, stale-while-revalidate=300",
+			},
+		},
+	);
+}
+
+async function mapLimit<T, R>(
+	items: T[],
+	n: number,
+	fn: (x: T) => Promise<R>,
+): Promise<R[]> {
+	const out: R[] = new Array(items.length);
+	let next = 0;
+	await Promise.all(
+		Array.from({ length: Math.min(n, items.length) }, async () => {
+			while (next < items.length) {
+				const i = next++;
+				out[i] = await fn(items[i]);
+			}
+		}),
+	);
+	return out;
+}
+
 export const POST = methodNotAllowed(["GET"]);
 export const PUT = methodNotAllowed(["GET"]);
 export const DELETE = methodNotAllowed(["GET"]);
