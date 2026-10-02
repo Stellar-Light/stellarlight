@@ -94,6 +94,8 @@ export async function GET(
 	// Curated first, as the list merges: a curated entry stands for the registry
 	// copy it names (Stellar Scout, Lumen Loop's skills, the Soroswap SDK), so
 	// its slug must answer with the curated row here too.
+	const registry = await fetchRegistryLive();
+	const registryDown = registry === null;
 	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
 	if (curated) {
 		logHit();
@@ -106,6 +108,11 @@ export async function GET(
 				},
 				skill: {
 					...toUnifiedShape(curated),
+					// The list marks a curated row the registry lists under its
+					// registryName; the detail answers the same shape.
+					...(curated.registryName && registry?.has(curated.registryName)
+						? { registry: SKILLS_REGISTRY }
+						: {}),
 					content: await resolveCuratedContent(curated),
 				},
 			},
@@ -114,8 +121,6 @@ export async function GET(
 	}
 
 	// 3. Community submission?
-	const registry = await fetchRegistryLive();
-	const registryDown = registry === null;
 	// A display name slugified ("MPP Discover" -> mpp-discover) may not be the
 	// catalog name (discover): resolve it through the registry's titles too.
 	const registryName = registry
