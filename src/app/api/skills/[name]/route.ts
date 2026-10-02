@@ -32,9 +32,11 @@ import {
 	type CuratedSkill,
 } from "@/lib/integrations/curated-skills";
 import {
+	fetchRegistryLive,
 	fetchSdfSkill,
-	fetchSdfSkillNamesLive,
+	registrySkillView,
 	SDF_SKILL_NAMES,
+	SKILLS_REGISTRY,
 } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -89,33 +91,32 @@ export async function GET(
 	// static snapshot — so renamed/added SDF skills resolve without a deploy.
 	// An upstream miss falls through to the curated and community copies
 	// below; only when every source fails does the caller see a 503.
-	const liveNames = await fetchSdfSkillNamesLive();
-	const registryDown = liveNames === null;
-	const isSdf = ([...(liveNames ?? SDF_SKILL_NAMES)] as string[]).includes(
-		slug,
-	);
-	const skill = isSdf ? await fetchSdfSkill(slug) : null;
+	const registry = await fetchRegistryLive();
+	const registryDown = registry === null;
+	// A display name slugified ("MPP Discover" -> mpp-discover) may not be the
+	// catalog name (discover): resolve it through the registry's titles too.
+	const registryName = registry
+		? registry.has(slug)
+			? slug
+			: [...registry.values()].find((e) => generateSlug(e.title) === slug)?.name
+		: (SDF_SKILL_NAMES as readonly string[]).includes(slug)
+			? slug
+			: undefined;
+	const isSdf = registryName !== undefined;
+	const skill = registryName ? await fetchSdfSkill(registryName) : null;
 	if (skill) {
 		logHit();
 		return jsonResponse(
 			{
 				meta: {
 					source: skill.rawUrl,
-					operator: "Stellar Development Foundation",
+					operator: skill.community
+						? `community-built, listed on ${SKILLS_REGISTRY} and maintained by its author (not reviewed by SDF)`
+						: "Stellar Development Foundation",
 					generatedAt: new Date().toISOString(),
 				},
 				skill: {
-					slug,
-					source: "sdf" as const,
-					kind: "skill-md" as const,
-					name: humanize(skill.name),
-					description: skill.description,
-					install: `npx skills add stellar/${skill.name}`,
-					homepage: skill.url,
-					rawUrl: skill.rawUrl,
-					compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-					targetUser: ["dev"],
-					tags: [skill.name, "SDF"],
+					...registrySkillView(skill),
 					content: skill.content, // raw SKILL.md, frontmatter included
 				},
 			},
@@ -123,7 +124,6 @@ export async function GET(
 		);
 	}
 
-	// 2. Curated entry?
 	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
 	if (curated) {
 		logHit();
@@ -346,19 +346,6 @@ async function loadApprovedCommunitySkill(slug: string) {
 	} catch {
 		return undefined;
 	}
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) =>
-			w === "zk"
-				? "ZK"
-				: w === "dapp"
-					? "dApp"
-					: w[0]?.toUpperCase() + w.slice(1),
-		)
-		.join(" ");
 }
 
 // JSON-405 method guards (sls-004): now that the route is force-dynamic (not

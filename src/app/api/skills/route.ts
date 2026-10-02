@@ -26,7 +26,12 @@ import {
 	type CuratedSkillKind,
 	type CuratedSkillSource,
 } from "@/lib/integrations/curated-skills";
-import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
+import {
+	fetchSdfSkillCatalog,
+	mergeSkillLists,
+	registrySkillView,
+	SKILLS_REGISTRY,
+} from "@/lib/integrations/sdf-skills";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -68,6 +73,9 @@ interface UnifiedSkill {
 	description: string;
 	source: Source;
 	kind: Kind;
+	/** "skills.stellar.org" when the entry is listed on SDF's registry (SDF
+	 * authored or community-built); absent for entries we curate or host. */
+	registry?: string;
 	install?: string;
 	installAlt?: { label: string; command: string }[];
 	repository?: string;
@@ -78,9 +86,9 @@ interface UnifiedSkill {
 	targetUser?: string[];
 	tags?: string[];
 	featured?: boolean;
-	/** SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. */
+	/** Registry entries only: whether the skill is user-invocable in skills.stellar.org's sense. */
 	userInvocable?: boolean;
-	/** SDF skills only — argument hint string. */
+	/** Registry entries only: argument hint string. */
 	argumentHint?: string;
 }
 
@@ -117,23 +125,12 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	// 1. SDF skills (proxy of skills.stellar.org)
-	const sdfSkills: UnifiedSkill[] = (await fetchSdfSkillCatalog()).map((s) => ({
-		slug: s.name,
-		name: humanize(s.name),
-		tagline: shorten(s.description, 160),
-		description: s.description,
-		source: "sdf",
-		kind: "skill-md",
-		install: `npx skills add stellar/${s.name}`,
-		homepage: s.url,
-		rawUrl: s.rawUrl,
-		userInvocable: s.userInvocable,
-		argumentHint: s.argumentHint,
-		compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-		targetUser: ["dev"],
-		tags: [s.name, "SDF"],
-	}));
+	// 1. The skills.stellar.org registry: SDF's own set and the community-built
+	// section, labelled by section. An entry's section is what the registry
+	// says about it: community-built entries are listed, not reviewed, by SDF.
+	const catalog = await fetchSdfSkillCatalog();
+	const registrySkills: UnifiedSkill[] = catalog.skills.map(registrySkillView);
+	const registryNames = new Set(catalog.skills.map((s) => s.name));
 
 	// 2. Curated entries (Stellarlight + Lumenloop + others we maintain)
 	const curatedSkills: UnifiedSkill[] = CURATED_SKILLS.map((s) => ({
@@ -143,6 +140,9 @@ export async function GET(req: NextRequest) {
 		description: s.description,
 		source: s.source as CuratedSkillSource as Source,
 		kind: s.kind,
+		...(s.registryName && registryNames.has(s.registryName)
+			? { registry: SKILLS_REGISTRY }
+			: {}),
 		install: s.install,
 		installAlt: s.installAlt,
 		repository: s.repository,
@@ -159,17 +159,12 @@ export async function GET(req: NextRequest) {
 	const communityFailed = communityRaw === null;
 	const communitySkills: UnifiedSkill[] = communityRaw ?? [];
 
-	// Merge with dedup by slug — curated wins over SDF wins over community
-	// (so we can't accidentally let a community submission shadow Scout).
-	const all: UnifiedSkill[] = [];
-	const seen = new Set<string>();
-	for (const list of [curatedSkills, sdfSkills, communitySkills]) {
-		for (const s of list) {
-			if (seen.has(s.slug)) continue;
-			seen.add(s.slug);
-			all.push(s);
-		}
-	}
+	const { all, merged } = mergeSkillLists(
+		curatedSkills,
+		registrySkills,
+		communitySkills,
+		CURATED_SKILLS.flatMap((s) => (s.registryName ? [s.registryName] : [])),
+	);
 
 	// Apply filters
 	let filtered = all;
@@ -221,10 +216,18 @@ export async function GET(req: NextRequest) {
 				...matchModeMeta(qFilter ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning || communityFailed
+				...(paramWarning || communityFailed || !catalog.live
 					? {
 							warnings: [
 								...(paramWarning ? [paramWarning] : []),
+								...(catalog.live
+									? []
+									: [
+											degradedWarning(
+												"skills.stellar.org registry",
+												"the registry did not answer; the SDF set is served from a fallback list and community-built entries are missing from this page",
+											),
+										]),
 								...(communityFailed
 									? [
 											degradedWarning(
@@ -254,15 +257,24 @@ export async function GET(req: NextRequest) {
 				},
 				validSources: VALID_SOURCES,
 				validKinds: VALID_KINDS,
+				registry: {
+					url: `https://${SKILLS_REGISTRY}/llms.txt`,
+					live: catalog.live,
+					listed: catalog.listed,
+					served: catalog.skills.length,
+					merged,
+					unreachable: catalog.unreachable,
+				},
 			},
 			skills: filtered,
 		},
 		{
 			headers: {
 				...serverTiming(startedAt),
-				"Cache-Control": communityFailed
-					? "no-store"
-					: "public, s-maxage=3600, stale-while-revalidate=7200",
+				"Cache-Control":
+					communityFailed || !catalog.live
+						? "no-store"
+						: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);
@@ -315,25 +327,6 @@ async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[] | null> {
 	} catch {
 		return null;
 	}
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) =>
-			w === "zk"
-				? "ZK"
-				: w === "dapp"
-					? "dApp"
-					: w[0]?.toUpperCase() + w.slice(1),
-		)
-		.join(" ");
-}
-
-function shorten(s: string, max: number): string {
-	const first = s.split(/[.!?]\s/)[0] ?? s;
-	if (first.length <= max) return first.endsWith(".") ? first : `${first}.`;
-	return `${first.slice(0, max - 1)}…`;
 }
 
 // sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).

@@ -140,10 +140,12 @@ export async function GET() {
 	const sdfSkillCatalog = await fetchSdfSkillCatalog().catch(() => null);
 	const sdfSkills: SourceStatus = {
 		name: "sdfSkills",
-		count: sdfSkillCatalog ? sdfSkillCatalog.length : null,
+		count: sdfSkillCatalog
+			? sdfSkillCatalog.skills.filter((s) => !s.community).length
+			: null,
 		lastUpdatedAt: null,
 		notes:
-			"Proxied from skills.stellar.org (server-cached 24h); count = the same catalog /api/skills?source=sdf serves. Live freshness shown on the upstream site.",
+			"Proxied from skills.stellar.org (server-cached 24h); count = the SDF-authored section, the same rows /api/skills?source=sdf serves. The registry's Community Built section is served as source=community. Live freshness shown on the upstream site.",
 	};
 
 	const usage = await getUsageStats();

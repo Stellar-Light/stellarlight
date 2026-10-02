@@ -6043,7 +6043,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "List AI skills for Stellar builders",
 				description:
-					"Catalog of installable Stellar AI skills/tools — SDF's official skills.stellar.org set merged with curated and community entries. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links; filter by `source`/`kind`. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
+					"Catalog of installable Stellar AI skills/tools: both sections of SDF's skills.stellar.org registry (source=sdf for the SDF-authored set, source=community for Community Built entries, listed but not reviewed by SDF) merged with curated entries and approved submissions. Each entry carries `install`, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool) and repo/docs links; filter by `source`/`kind`. meta.registry says what the registry listed, resolved and could not fetch. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
 				"x-routing": {
 					purpose:
 						"Browse installable Stellar AI skills, MCP servers, SDKs, CLIs, and agent kits.",
@@ -6154,6 +6154,22 @@ export const spec: OpenAPISpec = {
 															description:
 																"Every value the source filter accepts (unknown values 400 with this list).",
 														},
+														registry: {
+															type: "object",
+															description:
+																"What the skills.stellar.org registry contributed to this page: listed = names in its llms.txt (both sections), served = those whose SKILL.md resolved, merged = registry copies replaced by a curated entry of the same skill, unreachable = listed names whose SKILL.md could not be fetched (named, never hidden). live=false means the registry did not answer and the SDF set came from a fallback list, so community-built entries are missing.",
+															properties: {
+																url: { type: "string" },
+																live: { type: "boolean" },
+																listed: { type: "integer" },
+																served: { type: "integer" },
+																merged: { type: "integer" },
+																unreachable: {
+																	type: "array",
+																	items: { type: "string" },
+																},
+															},
+														},
 													},
 												},
 											],
@@ -6176,7 +6192,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "Get one skill's full content",
 				description:
-					"Full detail for ONE skill by slug or display name — metadata plus, for SDF official skills, the complete raw SKILL.md text (`.skill.content`, fetched live from skills.stellar.org). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
+					"Full detail for ONE skill by slug or display name — metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
 				"x-routing": {
 					purpose:
 						"One skill's full SKILL.md content, metadata, and install command.",
@@ -9979,15 +9995,22 @@ export const spec: OpenAPISpec = {
 					source: {
 						type: "string",
 						enum: ["sdf", "stellarlight", "lumenloop", "external", "community"],
+						description:
+							"Who stands behind the entry. sdf = SDF authored (the registry's Included Stellar Skills section). community = community-built: listed on skills.stellar.org under its author's maintenance and not reviewed by SDF (registry present), or an approved submission to this directory (registry absent). stellarlight and lumenloop = curated by those teams; external = an SDK, CLI or tool we list.",
 					},
 					kind: {
 						type: "string",
 						enum: ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"],
 					},
+					registry: {
+						type: "string",
+						description:
+							"'skills.stellar.org' when the entry is listed on SDF's registry (either section), including a curated entry the registry lists under another name. Absent for entries we curate or host that the registry does not list.",
+					},
 					install: {
 						type: "string",
 						description:
-							"Primary install command (e.g. 'npx skills add stellar/{slug}'). Absent when the entry has no one-line install.",
+							"Primary install command, e.g. 'npx skills add https://github.com/stellar/stellar-dev-skill' for the SDF set (the registry's own command) or 'npx skills add <that repository>' for a community-built entry. Absent when the entry has no one-line install.",
 					},
 					installAlt: {
 						type: "array",
@@ -10013,7 +10036,7 @@ export const spec: OpenAPISpec = {
 					rawUrl: {
 						type: "string",
 						description:
-							"Direct raw SKILL.md URL (SDF skills). Absent elsewhere.",
+							"Direct raw SKILL.md URL for entries listed on skills.stellar.org (SDF authored and community-built). Absent elsewhere.",
 					},
 					compatibility: {
 						type: "array",
@@ -10035,12 +10058,12 @@ export const spec: OpenAPISpec = {
 					userInvocable: {
 						type: "boolean",
 						description:
-							"SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere.",
+							"Registry entries only (SDF authored and community-built): whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere.",
 					},
 					argumentHint: {
 						type: "string",
 						description:
-							"SDF skills only — argument hint (e.g. '[payment task]'). Absent elsewhere.",
+							"Registry entries only: argument hint (e.g. '[payment task]'). Absent elsewhere.",
 					},
 				},
 			},
