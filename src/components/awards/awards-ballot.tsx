@@ -2646,6 +2646,7 @@ const WINNERS_2025 = [
 	{
 		category: "Impact",
 		name: "Decaf",
+		slug: "decaf",
 		logo: "/awards/winners-2025/decaf.jpg",
 		line: "Stablecoins you can actually use.",
 		blurb:
@@ -2655,6 +2656,7 @@ const WINNERS_2025 = [
 	{
 		category: "Innovation",
 		name: "Etherfuse",
+		slug: "etherfuse",
 		logo: "/awards/winners-2025/etherfuse.jpg",
 		line: "RWAs as usable rails.",
 		blurb:
@@ -2664,6 +2666,7 @@ const WINNERS_2025 = [
 	{
 		category: "Interoperability",
 		name: "DeFindex",
+		slug: "defindex",
 		logo: "/awards/winners-2025/defindex.png",
 		line: "One integration, many protocols.",
 		blurb:
@@ -2720,7 +2723,15 @@ function WinnerCard({
 				/>
 			</div>
 			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
-				{winner.name}
+				{/* a new tab, so a pilot mid-ballot keeps their picks */}
+				<a
+					href={`/project/${winner.slug}`}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="rounded-sm underline-offset-4 hover:underline focus-visible:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
+				>
+					{winner.name}
+				</a>
 				{/* the burst goes up behind the name, as the curtain clears it */}
 				{open && (
 					<span className="sm-confetti" aria-hidden="true">
