@@ -1,5 +1,5 @@
 /**
- * Stellar stablecoin registry — ranked by USD market cap.
+ * Stellar stablecoin registry: ranked by USD market cap.
  *
  *   GET /api/stablecoins                     → all issuers, biggest USD mcap first
  *   GET /api/stablecoins?peg=USD             → only USD-pegged
@@ -17,7 +17,7 @@
  *
  * WHY it ranks by USD market cap, not raw supply (boxy review 2026-07-21):
  * circulating supply is denominated in each asset's OWN peg, so it is NOT
- * comparable across rows — GYEN's 100.87M is YEN (~$676K), ARST's 243M is
+ * comparable across rows: GYEN's 100.87M is YEN (~$676K), ARST's 243M is
  * Argentine pesos (~$243K). Only marketCapUSD (supply × USD price) is
  * comparable; that is the default order, and every row carries its `peg` so
  * denomination is never ambiguous. `supply` is served too but is meaningful
@@ -27,6 +27,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -80,24 +81,22 @@ export async function GET(req: NextRequest) {
 	const pegFilter = sp.get("peg");
 	const limit = clampLimit(sp.get("limit"), 50, 100);
 
-	// A store outage must NEVER render as an empty 200 — that is precisely the
+	// A store outage must NEVER render as an empty 200: that is precisely the
 	// shape an agent reads as "Stellar has no stablecoins". Fail loudly.
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{
-				error: "stablecoin store unavailable",
-				advisory:
-					"The datastore was unreachable. This is an outage, NOT a claim that Stellar has no stablecoins, and NOT a claim that any asset was delisted. Retry shortly.",
-			},
-			{
-				status: 503,
-				headers: { ...serverTiming(startedAt), ...CORS, "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: "stablecoin store unavailable",
+			advisory:
+				"The datastore was unreachable. This is an outage, NOT a claim that Stellar has no stablecoins, and NOT a claim that any asset was delisted. Retry shortly.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: CORS,
+		});
 	}
 
-	// The registry is ~23 rows — fetch all and filter/rank in JS.
+	// The registry is ~23 rows: fetch all and filter/rank in JS.
 	const found = await payload
 		.find({
 			collection: "stablecoins",
@@ -134,12 +133,12 @@ export async function GET(req: NextRequest) {
 		.filter((r) => r.ticker);
 
 	// sls-066: `total` used to be taken BEFORE the peg filter, so peg=USD
-	// returned 7 rows under counts.total 22 — while every other endpoint's
+	// returned 7 rows under counts.total 22: while every other endpoint's
 	// contract defines counts.total as the filtered count before slicing.
 	// `tracked` keeps the whole-inventory number, `total` means what the
 	// contract says.
 	const tracked = rows.length;
-	// Computed over the WHOLE inventory before peg-filter and limit — a limit
+	// Computed over the WHOLE inventory before peg-filter and limit: a limit
 	// boundary splitting an EURC pair must not make the disambiguation vanish.
 	const multiIssuerTickers = (() => {
 		const byTicker = new Map<string, Set<string>>();
@@ -154,7 +153,7 @@ export async function GET(req: NextRequest) {
 			.map(([t, cs]) => ({
 				ticker: t,
 				companies: [...cs].sort(),
-				note: `${t} is issued on Stellar by ${cs.size} distinct companies — attribute by issuer account, never by ticker alone.`,
+				note: `${t} is issued on Stellar by ${cs.size} distinct companies: attribute by issuer account, never by ticker alone.`,
 			}));
 	})();
 	if (pegFilter) {
@@ -194,21 +193,21 @@ export async function GET(req: NextRequest) {
 				// motivated it attributed MyKobo's EURC to Circle because a prose
 				// source said "Circle issues USDC and EURC"): when one ticker is
 				// issued by MULTIPLE distinct companies, ticker alone is not an
-				// identity — say so where the numbers are, so a caller projecting
+				// identity: say so where the numbers are, so a caller projecting
 				// {ticker, marketCap} can't silently drop the issuer axis.
 				multiIssuerTickers,
 				filters: { peg: pegFilter ?? null, sort, limit },
 				counts: { tracked, total, returned: rows.length, byBasis },
 				// sls-066: say what this inventory IS. It is a curated registry of
-				// hand-verified issuers — not a census of every Stellar stablecoin.
+				// hand-verified issuers: not a census of every Stellar stablecoin.
 				// A ticker absent here is "not in our registry", never "does not
 				// exist on Stellar".
 				coverage: {
 					basis: "curated-registry",
-					note: "Rows are a hand-curated registry of verified (code, issuer) pairs, measured every 6h. Absence from this list means the asset is not tracked here — NOT proof it is not issued on Stellar; verify against Horizon before asserting non-existence. Asset identity is (code, issuer): two assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on ticker alone.",
+					note: "Rows are a hand-curated registry of verified (code, issuer) pairs, measured every 6h. Absence from this list means the asset is not tracked here: NOT proof it is not issued on Stellar; verify against Horizon before asserting non-existence. Asset identity is (code, issuer): two assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on ticker alone.",
 				},
 				methodology:
-					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`) — cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par).",
+					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par).",
 			},
 			stablecoins: rows,
 		},

@@ -14,12 +14,13 @@
  *     near-match would attribute one company's history to another.
  *   - an inactive status with no source says so. We hold ~80 inactive rows
  *     and 10 carry a source URL, so most of what this returns is our own
- *     unverified record — and it is labelled that way rather than laundered
+ *     unverified record: and it is labelled that way rather than laundered
  *     into a fact about a named company.
  *   - "no successor recorded" is never "nothing succeeded it".
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -35,6 +36,7 @@ const CORS = {
 };
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	const unknown = [...sp.keys()].find((k) => !KNOWN_PARAMS.has(k));
 	if (unknown) {
@@ -49,7 +51,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error:
-					"`q` is required — the name, slug, or project URL an agent encountered.",
+					"`q` is required: the name, slug, or project URL an agent encountered.",
 			},
 			{ status: 400, headers: CORS },
 		);
@@ -57,14 +59,15 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{
-				error: "project store unavailable",
-				advisory:
-					"The datastore was unreachable. This is an outage — NOT a resolution miss, and NOT a claim the name is untracked. Retry before concluding anything about it.",
-			},
-			{ status: 503, headers: { ...CORS, "Retry-After": "2" } },
-		);
+		return apiError({
+			status: 503,
+			error: "project store unavailable",
+			advisory:
+				"The datastore was unreachable. This is an outage: NOT a resolution miss, and NOT a claim the name is untracked. Retry before concluding anything about it.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: CORS,
+		});
 	}
 
 	// The whole set, matched in JS: resolution is normalization-aware
@@ -102,7 +105,7 @@ export async function GET(req: NextRequest) {
 				generatedAt: new Date().toISOString(),
 				searched: found.totalDocs,
 				methodology:
-					"Matches the query against project slugs, then aliases, then normalized names, strongest first; `matchedOn` reports which, so an exact slug can be weighted differently from a name collision. A name matching two projects returns a MISS naming both rather than picking one. `found: false` means the name is NOT TRACKED in this directory — never that it never existed and never that it is defunct. When a record carries a successor, `current` is where to look now and `superseded` is true. `evidence.unsourced: true` means we assert that status with no citable source, so it is our unverified record rather than an established fact about a named company.",
+					"Matches the query against project slugs, then aliases, then normalized names, strongest first; `matchedOn` reports which, so an exact slug can be weighted differently from a name collision. A name matching two projects returns a MISS naming both rather than picking one. `found: false` means the name is NOT TRACKED in this directory: never that it never existed and never that it is defunct. When a record carries a successor, `current` is where to look now and `superseded` is true. `evidence.unsourced: true` means we assert that status with no citable source, so it is our unverified record rather than an established fact about a named company.",
 			},
 			...resolution,
 		},

@@ -26,6 +26,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	CURATED_SKILLS,
@@ -154,16 +155,14 @@ export async function GET(
 
 	const community = await loadApprovedCommunitySkill(slug);
 	if (community === undefined && !isSdf) {
-		return NextResponse.json(
-			{
-				error: `skill ${slug} could not be looked up: the community registry read failed`,
-				retryAfterSeconds: 2,
-			},
-			{
-				status: 503,
-				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: `skill ${slug} could not be looked up: the community registry read failed`,
+			advisory:
+				"The community registry read failed; the skill may exist. This is an outage, not a 404. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 	if (community) {
 		logHit();
@@ -182,31 +181,27 @@ export async function GET(
 
 	// The registry lists it but every copy failed to fetch: temporary, retry.
 	if (isSdf) {
-		return NextResponse.json(
-			{
-				error: `skill ${slug} is listed by skills.stellar.org but could not be fetched from any source`,
-				retryAfterSeconds: 300,
-			},
-			{
-				status: 503,
-				headers: { ...serverTiming(startedAt), "Retry-After": "300" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: `skill ${slug} is listed by skills.stellar.org but could not be fetched from any source`,
+			advisory:
+				"skills.stellar.org lists this skill but its SKILL.md could not be fetched from where the registry links it. Report it; a retry inside 300 s returns the same answer.",
+			retryAfterSeconds: 300,
+			startedAt,
+		});
 	}
 
 	// With the registry unreadable, an unknown slug may well be a listed skill
 	// the static fallback does not know: that is "could not check", not 404.
 	if (registryDown) {
-		return NextResponse.json(
-			{
-				error: `skill ${slug} could not be looked up: the skills.stellar.org registry did not answer`,
-				retryAfterSeconds: 60,
-			},
-			{
-				status: 503,
-				headers: { ...serverTiming(startedAt), "Retry-After": "60" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: `skill ${slug} could not be looked up: the skills.stellar.org registry did not answer`,
+			advisory:
+				"skills.stellar.org did not answer, so its entries cannot be resolved. Report it; a retry inside 60 s returns the same answer.",
+			retryAfterSeconds: 60,
+			startedAt,
+		});
 	}
 
 	// Not found anywhere.

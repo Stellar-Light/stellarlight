@@ -16,6 +16,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -28,25 +29,25 @@ export const dynamic = "force-dynamic";
 const VALID_PARAMS = ["repo"];
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/repos/trust",
 		limit: 60,
 		windowMs: 60_000,
 	});
 	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
+		return apiError({
+			status: 429,
+			error: "rate limit exceeded",
+			advisory:
+				"This instance's per-minute window is spent (counters are per serverless instance: X-RateLimit-Scope: instance). Wait Retry-After and resend; this says nothing about the data.",
+			retryAfterSeconds: Math.max(
+				1,
+				Math.ceil((limit.resetAt - Date.now()) / 1000),
+			),
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const sp = req.nextUrl.searchParams;
@@ -74,13 +75,15 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "index unavailable" },
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: "index unavailable",
+			advisory:
+				"The repository index did not answer. This is an outage, not a trust verdict about the repository. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const report = await buildTrustReport(payload, repo);

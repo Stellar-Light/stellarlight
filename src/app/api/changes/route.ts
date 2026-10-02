@@ -34,6 +34,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -64,25 +65,25 @@ const afterSince = (v: unknown, since: number): boolean => {
 };
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/changes",
 		limit: 60,
 		windowMs: 60_000,
 	});
 	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
+		return apiError({
+			status: 429,
+			error: "rate limit exceeded",
+			advisory:
+				"This instance's per-minute window is spent (counters are per serverless instance: X-RateLimit-Scope: instance). Wait Retry-After and resend; this says nothing about the data.",
+			retryAfterSeconds: Math.max(
+				1,
+				Math.ceil((limit.resetAt - Date.now()) / 1000),
+			),
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const sp = req.nextUrl.searchParams;
@@ -149,13 +150,15 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "backing store unavailable" },
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: "backing store unavailable",
+			advisory:
+				"The backing store did not answer. This is an outage, not a statement that nothing changed. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const changes: ChangeRow[] = [];
