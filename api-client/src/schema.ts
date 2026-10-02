@@ -3896,8 +3896,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
-                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
-                            warnings?: string[];
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
@@ -4016,8 +4014,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
-                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
-                            warnings?: string[];
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
@@ -4253,8 +4249,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
-                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
-                            warnings?: string[];
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
@@ -4348,12 +4342,12 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: {
-                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
-                            warnings?: string[];
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
                             note?: string;
+                            /** @description Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them. */
+                            warnings?: string[];
                         };
                         report?: {
                             repo?: {

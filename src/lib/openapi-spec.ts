@@ -64,15 +64,25 @@ const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
 const REPORT_META_SCHEMA = {
 	type: "object",
 	properties: {
+		source: { type: "string" },
+		generatedAt: { type: "string", format: "date-time" },
+		note: { type: "string" },
+	},
+};
+
+/** getRepoTrust's meta: the shared report meta plus the unknown-parameter
+ * warning. The other report operations reject unknown parameters with 400,
+ * so they never carry it. */
+const TRUST_META_SCHEMA = {
+	...REPORT_META_SCHEMA,
+	properties: {
+		...REPORT_META_SCHEMA.properties,
 		warnings: {
 			type: "array",
 			items: { type: "string" },
 			description:
 				"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
 		},
-		source: { type: "string" },
-		generatedAt: { type: "string", format: "date-time" },
-		note: { type: "string" },
 	},
 };
 
@@ -5101,7 +5111,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: REPORT_META_SCHEMA,
+										meta: TRUST_META_SCHEMA,
 										report: {
 											type: "object",
 											properties: {
