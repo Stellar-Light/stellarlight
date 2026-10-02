@@ -6043,7 +6043,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "List AI skills for Stellar builders",
 				description:
-					"Catalog of installable Stellar AI skills/tools: both sections of SDF's skills.stellar.org registry (source=sdf for the SDF-authored set, source=community for Community Built entries, which the registry lists but does not review) merged with curated entries and approved submissions. meta.registry reports what the registry listed, what resolved, and what could not be fetched. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links; filter by `source`/`kind`. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
+					"Catalog of installable Stellar AI skills/tools: both sections of SDF's skills.stellar.org registry (source=sdf for the SDF-authored set, source=community for Community Built entries, listed but not reviewed by SDF) merged with curated entries and approved submissions. Each entry carries `install`, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool) and repo/docs links; filter by `source`/`kind`. meta.registry says what the registry listed, resolved and could not fetch. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
 				"x-routing": {
 					purpose:
 						"Browse installable Stellar AI skills, MCP servers, SDKs, CLIs, and agent kits.",
