@@ -577,6 +577,38 @@ async function sliceI() {
 	);
 }
 
+// ── Slice J: every declared research source holds documents ──
+// The source enum is the contract an agent routes on; a value with nothing
+// behind it (scf-proposal held zero documents for a quarter while a partner
+// sent every funding question to it) is a declared capability that answers
+// empty every time, labelled as a retrieval fallback. The API's own
+// count-backed verdict (meta.sourceEmpty, #1761) is what this reads, so the
+// probe cannot pass on a query that merely missed. Runs every day, no rotation.
+async function sliceJ() {
+	console.log("\n── J: declared research sources hold documents ──");
+	const spec = await http("/api/openapi.json");
+	const params = spec?.paths?.["/api/research"]?.get?.parameters ?? [];
+	const sourceParam = params.find((p: any) => p?.name === "source");
+	const sources: string[] = sourceParam?.schema?.enum ?? [];
+	verdict(
+		sources.length >= 10,
+		"J:enum",
+		`${sources.length} declared sources in the spec`,
+	);
+	for (const s of sources) {
+		const r = await http(
+			`/api/research?q=stellar&source=${encodeURIComponent(s)}&limit=3`,
+		);
+		const returned = r?.meta?.counts?.returned ?? 0;
+		const empty = r?.meta?.sourceEmpty === true;
+		verdict(
+			!empty && returned > 0,
+			"J:source-has-docs",
+			`source=${s}: returned=${returned} mode=${r?.meta?.matchMode ?? "?"}${empty ? " sourceEmpty=true" : ""}`,
+		);
+	}
+}
+
 // A battery with no credential is not a battery. Sending the requests anyway
 // buys four opaque slice errors and a "0 fail" summary.
 if (!TOKEN) {
@@ -597,6 +629,7 @@ const slices = [
 	sliceG,
 	sliceH,
 	sliceI,
+	sliceJ,
 ];
 for (const s of slices) {
 	try {
