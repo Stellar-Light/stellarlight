@@ -137,5 +137,8 @@ export function rateLimitHeaders(r: RateLimitResult): Record<string, string> {
 		"X-RateLimit-Limit": String(r.limit),
 		"X-RateLimit-Remaining": String(r.remaining),
 		"X-RateLimit-Reset": String(Math.ceil(r.resetAt / 1000)),
+		// Buckets live per serverless instance; a consumer accounting a host-wide
+		// window from these numbers would be wrong by construction.
+		"X-RateLimit-Scope": "instance",
 	};
 }

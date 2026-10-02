@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
 			{
 				status: 429,
 				headers: {
+					...serverTiming(startedAt),
 					...rateLimitHeaders(limit),
 					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
 				},
@@ -126,10 +127,19 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
-			{ error: "payload unavailable" },
+			{
+				error: "store unavailable",
+				advisory:
+					"The database handle could not be opened. This is an outage, NOT a claim about the data. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
 			{
 				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				headers: {
+					...serverTiming(startedAt),
+					...rateLimitHeaders(limit),
+					"Retry-After": "2",
+				},
 			},
 		);
 	}
@@ -162,7 +172,11 @@ export async function GET(req: NextRequest) {
 			},
 			{
 				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				headers: {
+					...serverTiming(startedAt),
+					...rateLimitHeaders(limit),
+					"Retry-After": "2",
+				},
 			},
 		);
 	}

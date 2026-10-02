@@ -151,7 +151,10 @@ export async function GET(
 				error: `skill ${slug} could not be looked up: the community registry read failed`,
 				retryAfterSeconds: 2,
 			},
-			{ status: 503, headers: { "Retry-After": "2" } },
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 	if (community) {
@@ -176,7 +179,10 @@ export async function GET(
 				error: `skill ${slug} is listed by skills.stellar.org but could not be fetched from any source`,
 				retryAfterSeconds: 300,
 			},
-			{ status: 503, headers: { "Retry-After": "300" } },
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "300" },
+			},
 		);
 	}
 
@@ -188,7 +194,10 @@ export async function GET(
 				error: `skill ${slug} could not be looked up: the skills.stellar.org registry did not answer`,
 				retryAfterSeconds: 60,
 			},
-			{ status: 503, headers: { "Retry-After": "60" } },
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "60" },
+			},
 		);
 	}
 

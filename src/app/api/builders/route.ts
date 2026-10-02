@@ -17,6 +17,7 @@ import {
 	handleForName,
 	nameCandidatesFor,
 } from "@/data/builder-name-overrides";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { type BuilderLike, builderCodeActivity } from "@/lib/builder-code";
 import {
@@ -709,6 +710,24 @@ export async function GET(req: NextRequest) {
 				warnings.push(degradedWarning("builders on-Stellar activity", e));
 			}
 		}
+	}
+
+	// An empty page behind a failed read is an outage, not a checked-empty.
+	if (isDegraded(warnings) && builders.length === 0) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/builders",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "builders read failed",
+			advisory: `${warnings.join("; ")}. This is an outage, NOT a claim that no builder matches. Retry after a moment.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	logApiHit({

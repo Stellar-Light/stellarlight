@@ -21,6 +21,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { degradedWarning } from "@/lib/degraded-read";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import {
 	type DoraHacksHackathon,
@@ -97,6 +98,9 @@ export async function GET(req: NextRequest) {
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
 	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	// One line per listing read that failed; a thinned page says so and is
+	// not cached for an hour.
+	const readWarnings: string[] = [];
 	const paramWarning = unknownParamWarning(
 		sp,
 		["status", "organizer", "source", "limit", "q"],
@@ -199,16 +203,16 @@ export async function GET(req: NextRequest) {
 						source: "curated",
 					};
 				});
-			} catch {
-				// fall through
+			} catch (err) {
+				readWarnings.push(degradedWarning("curated hackathons", err));
 			}
 		}
 	}
 	try {
 		const doraHackathons = await fetchAllDoraHacksHackathons();
 		dora = doraHackathons.map(doraToRow);
-	} catch {
-		// fall through
+	} catch (err) {
+		readWarnings.push(degradedWarning("DoraHacks listing", err));
 	}
 
 	// 3. Merge. De-duplicate by externalUrl — if a curated entry already
@@ -310,7 +314,14 @@ export async function GET(req: NextRequest) {
 				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(paramWarning || readWarnings.length
+					? {
+							warnings: [
+								...(paramWarning ? [paramWarning] : []),
+								...readWarnings,
+							],
+						}
+					: {}),
 				filters: {
 					status: statusFilter,
 					organizer: organizerFilter,
@@ -337,7 +348,7 @@ export async function GET(req: NextRequest) {
 				...serverTiming(startedAt),
 				// a DoraHacks hiccup must not pin an empty hour into every consumer's cache
 				"Cache-Control":
-					hackathons.length === 0
+					hackathons.length === 0 || readWarnings.length > 0
 						? "no-store"
 						: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},

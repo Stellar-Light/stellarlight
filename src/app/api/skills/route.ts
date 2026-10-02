@@ -19,6 +19,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { degradedWarning } from "@/lib/degraded-read";
 import { unknownParamWarning } from "@/lib/http-params";
 import {
 	CURATED_SKILLS,
@@ -154,7 +155,9 @@ export async function GET(req: NextRequest) {
 	}));
 
 	// 3. Community submissions (approved only)
-	const communitySkills: UnifiedSkill[] = await loadApprovedCommunitySkills();
+	const communityRaw = await loadApprovedCommunitySkills();
+	const communityFailed = communityRaw === null;
+	const communitySkills: UnifiedSkill[] = communityRaw ?? [];
 
 	// Merge with dedup by slug — curated wins over SDF wins over community
 	// (so we can't accidentally let a community submission shadow Scout).
@@ -218,7 +221,21 @@ export async function GET(req: NextRequest) {
 				...matchModeMeta(qFilter ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(paramWarning || communityFailed
+					? {
+							warnings: [
+								...(paramWarning ? [paramWarning] : []),
+								...(communityFailed
+									? [
+											degradedWarning(
+												"community skills",
+												"the registry read failed; community entries are missing from this page",
+											),
+										]
+									: []),
+							],
+						}
+					: {}),
 				filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 				counts: {
 					returned: filtered.length,
@@ -243,16 +260,19 @@ export async function GET(req: NextRequest) {
 		{
 			headers: {
 				...serverTiming(startedAt),
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				"Cache-Control": communityFailed
+					? "no-store"
+					: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);
 }
 
 /** Load approved community submissions from Payload, mapped to the unified shape. */
-async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[]> {
+/** null = the read failed (an outage), never an empty list. */
+async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[] | null> {
 	const payload = await getPayloadSafe();
-	if (!payload) return [];
+	if (!payload) return null;
 	try {
 		const result = await payload.find({
 			collection: "community-skills",
@@ -293,7 +313,7 @@ async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[]> {
 			tags: (d.tags ?? []).map((t) => t.tag).filter((x): x is string => !!x),
 		}));
 	} catch {
-		return [];
+		return null;
 	}
 }
 

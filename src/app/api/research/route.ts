@@ -17,7 +17,9 @@
  * Rate limited: 60 req/min per IP (these queries cost Voyage credits).
  */
 
+import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
@@ -133,19 +135,20 @@ export async function GET(req: NextRequest) {
 		windowMs: RATE_LIMIT_WINDOW_MS,
 	});
 	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
+		const retryAfterSeconds = Math.max(
+			1,
+			Math.ceil((limit.resetAt - Date.now()) / 1000),
 		);
+		logApiHit({ req, startedAt, status: 429, endpoint: "/api/research" });
+		return apiError({
+			status: 429,
+			error: "rate limit exceeded",
+			advisory:
+				"This instance's per-minute window is spent; the limit is counted per serverless instance (X-RateLimit-Scope). Wait Retry-After and resend.",
+			retryAfterSeconds,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const sp = req.nextUrl.searchParams;
@@ -197,6 +200,11 @@ export async function GET(req: NextRequest) {
 	const protocolFilter = sp.get("protocol");
 	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
 	const limitParam = clampLimit(sp.get("limit"), 8, 25);
+	const limitRaw = Math.floor(Number(sp.get("limit")));
+	const limitNote =
+		Number.isFinite(limitRaw) && limitRaw > 25
+			? `limit ${limitRaw} was clamped to 25, the maximum rows per call; scope by source or page with offset for more`
+			: null;
 	const fieldsWanted = parseFields(sp.get("fields"));
 
 	// Single source of truth for valid `source` values. Kept in sync with
@@ -289,13 +297,15 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	mark("init");
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "payload unavailable" },
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: "research store unavailable",
+			advisory:
+				"The database handle could not be opened. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	let mode: "vector" | "keyword" = "vector";
@@ -311,6 +321,15 @@ export async function GET(req: NextRequest) {
 	// an empty answer; the deliberate 0-row fall-through is not a failure.
 	let vectorStageFailed = false;
 	let keywordFailed = false;
+	// A declared source with no documents answers as an EMPTY VECTOR page: no
+	// keyword pass (there is nothing to rank), no corpus-wide advisory, no
+	// "vector unavailable" label. A consumer's fallback detector reads the
+	// mode; keyword here said the vector stage failed when the source was
+	// simply empty. sourceDocCount is memoized per source for ten minutes.
+	const sourceDocs = effectiveSource
+		? await sourceDocCount(effectiveSource).catch(() => null)
+		: null;
+	const sourceKnownEmpty = sourceDocs === 0;
 
 	// Shared doc→row mapper: the sourceAdvisory ranks the corpus-wide pool
 	// through the EXACT same shape+regime as the served results.
@@ -354,229 +373,238 @@ export async function GET(req: NextRequest) {
 
 	// Try vector search first. If Atlas vector search isn't configured
 	// or the corpus is empty, fall back to keyword.
-	try {
-		queryEmbedding = await embed(q);
+	if (sourceKnownEmpty) {
 		mark("embed");
-
-		// We use the underlying mongoose connection to run the $vectorSearch
-		// aggregation since Payload's `find()` doesn't expose vector ops.
-		// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
-		const db = (payload.db as any)?.connection?.db;
-		const collection = db?.collection("research-docs");
-		if (!collection) throw new Error("research-docs collection unavailable");
-
-		// NOTE: source filter is applied as a post-pipeline $match rather
-		// than $vectorSearch.filter. The latter requires `source` to be
-		// declared as a filter field in the vector index definition, which
-		// our minimal index doesn't have. The builder over-fetches and
-		// post-filters instead so callers can use ?source= without an index
-		// rebuild — and widens the vector stage for filtered queries so the
-		// pool keeps enough DISTINCT in-source documents for the per-doc
-		// collapse (sls-019: a starved cap pool made the refill serve
-		// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
-		const indexFilter = effectiveSource
-			? (await vectorIndexFilterPaths(collection)).has("source")
-			: false;
-		const pipeline = buildResearchVectorPipeline({
-			queryEmbedding,
-			limit: limitParam,
-			sourceFilter: effectiveSource,
-			indexFilter,
-		});
-
-		let docs = await collection.aggregate(pipeline).toArray();
-		if (docs.length === 0 && effectiveSource && !indexFilter) {
-			// A small source can be absent from the generic top pool entirely;
-			// survey a deeper pool once before calling it a miss.
-			docs = await collection
-				.aggregate(
-					buildResearchVectorPipeline({
-						queryEmbedding,
-						limit: limitParam,
-						sourceFilter: effectiveSource,
-						deep: true,
-					}),
-				)
-				.toArray();
-		}
-		// If Atlas Vector Search index isn't created yet, $vectorSearch
-		// silently returns []. Force-fall-through to keyword in that case so
-		// the endpoint stays useful before the index is set up.
 		mark("vector");
-		if (docs.length === 0) {
-			vectorNote = effectiveSource
-				? `vector: the query was embedded, but no chunk of source "${effectiveSource}" is in the vector index; keyword ranking was used`
-				: "vector: the query was embedded, but the vector index returned nothing; keyword ranking was used";
-			throw new Error("vector search returned 0 results — falling back");
-		}
-		chunks = docs.map(rowOfDoc);
-	} catch (err) {
-		if (!vectorNote) {
-			vectorStageFailed = true;
-			const why =
-				err instanceof Error && /abort|timeout/i.test(err.message)
-					? `the embedding service did not answer within ${EMBED_TIMEOUT_MS / 1000} s`
-					: "the embedding or vector stage failed";
-			vectorNote = `vector: ${why}; keyword ranking was used`;
-		}
-		// Fall back to keyword search using Payload's standard find.
-		// Ranking is BM25-lite: term frequency × field-position weight,
-		// with length normalization and a phrase-proximity bonus.
-		//
-		// The previous scoring just counted unique tokens appearing AT
-		// LEAST ONCE in title+content — so a chunk mentioning "oracle"
-		// 50 times got the same score as one mentioning it incidentally.
-		// That made vector-fallback retrieval near-random, which is
-		// exactly what production exhibits when VOYAGE_API_KEY is unset.
-		mode = "keyword";
+	} else {
 		try {
-			const rawTokens = q
-				.toLowerCase()
-				.split(/\s+/)
-				.filter((t) => t.length > 1);
+			queryEmbedding = await embed(q);
+			mark("embed");
 
-			// Money is written with separators in the source documents
-			// ("$300,000") while a person or agent asking about it usually types
-			// the bare digits ("300000"). Tokens are matched with `contains`, a
-			// substring test, so those two never meet: a query for 300000 misses
-			// the handbook page that states the $300,000 lifetime cap, and the
-			// empty result reads as "there is no such rule" — the omission-as-
-			// negation failure this corpus exists to avoid. Emit both spellings
-			// for any numeric token so either phrasing finds the same passage.
-			// Verified 2026-07-23: `300,000` found the rule, `300000` did not.
-			const tokenSet = new Set<string>();
-			for (const t of rawTokens) {
-				tokenSet.add(t);
-				if (/^\$?[\d,]+$/.test(t)) {
-					const bare = t.replace(/[$,]/g, "");
-					// Years are 4-digit numbers too, and grouping one produces a
-					// nonsense token ("2026" → "2,026"). Money at that width is
-					// real ($5,000), so exclude by value rather than by length.
-					const isYear =
-						bare.length === 4 && Number(bare) >= 1900 && Number(bare) <= 2099;
-					if (bare.length > 3 && !isYear) {
-						tokenSet.add(bare);
-						// 300000 → 300,000
-						tokenSet.add(bare.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-					}
-				}
-			}
-			const tokens = [...tokenSet];
+			// We use the underlying mongoose connection to run the $vectorSearch
+			// aggregation since Payload's `find()` doesn't expose vector ops.
+			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+			const db = (payload.db as any)?.connection?.db;
+			const collection = db?.collection("research-docs");
+			if (!collection) throw new Error("research-docs collection unavailable");
 
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
-			const where: any = {};
-			if (effectiveSource) where.source = { equals: effectiveSource };
-			if (tokens.length) {
-				where.or = tokens.map((t) => ({
-					or: [{ title: { contains: t } }, { content: { contains: t } }],
-				}));
-			}
-
-			// Pull a wider candidate pool (200) so ranking has room to
-			// surface high-relevance chunks past position 50 — Mongo
-			// returns matches in storage order, not relevance order.
-			const result = await payload.find({
-				collection: "research-docs",
-				where,
-				limit: 200,
-				depth: 0,
-				pagination: false,
-				select: { embedding: false },
+			// NOTE: source filter is applied as a post-pipeline $match rather
+			// than $vectorSearch.filter. The latter requires `source` to be
+			// declared as a filter field in the vector index definition, which
+			// our minimal index doesn't have. The builder over-fetches and
+			// post-filters instead so callers can use ?source= without an index
+			// rebuild — and widens the vector stage for filtered queries so the
+			// pool keeps enough DISTINCT in-source documents for the per-doc
+			// collapse (sls-019: a starved cap pool made the refill serve
+			// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
+			const indexFilter = effectiveSource
+				? (await vectorIndexFilterPaths(collection)).has("source")
+				: false;
+			const pipeline = buildResearchVectorPipeline({
+				queryEmbedding,
+				limit: limitParam,
+				sourceFilter: effectiveSource,
+				indexFilter,
 			});
 
-			const allDocs = result.docs as unknown as Array<{
-				id: string;
-				source: string;
-				title: string;
-				section?: string;
-				url: string;
-				content: string;
-				chunkIndex: number;
-				publishedAt?: string;
-				observedAt?: string;
-				docKind?: string;
-				docVersionStatus?: string;
-				auditor?: string;
-				protocol?: string;
-				severity?: string;
-				capStatus?: string;
-				capProtocolVersion?: number;
-			}>;
-
-			// Compute mean content length for length-normalization
-			const meanLen = allDocs.length
-				? allDocs.reduce((s, d) => s + d.content.length, 0) / allDocs.length
-				: 1;
-
-			function escapeRe(s: string) {
-				return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			let docs = await collection.aggregate(pipeline).toArray();
+			if (docs.length === 0 && effectiveSource && !indexFilter) {
+				// A small source can be absent from the generic top pool entirely;
+				// survey a deeper pool once before calling it a miss.
+				docs = await collection
+					.aggregate(
+						buildResearchVectorPipeline({
+							queryEmbedding,
+							limit: limitParam,
+							sourceFilter: effectiveSource,
+							deep: true,
+						}),
+					)
+					.toArray();
 			}
-
-			function score(d: { title: string; section?: string; content: string }) {
-				if (!tokens.length) return 1;
-				const title = d.title.toLowerCase();
-				const section = (d.section ?? "").toLowerCase();
-				const body = d.content.toLowerCase();
-
-				let s = 0;
-				let matchedTokens = 0;
-				for (const t of tokens) {
-					const re = new RegExp(`\\b${escapeRe(t)}\\b`, "g");
-					const tfTitle = (title.match(re) || []).length;
-					const tfSection = (section.match(re) || []).length;
-					const tfBody = (body.match(re) || []).length;
-					const tfTotal = tfTitle + tfSection + tfBody;
-					if (tfTotal === 0) continue;
-					matchedTokens += 1;
-					// log(1+tf) avoids one mega-frequent token swamping
-					// everything; field weights: title 3×, section 2×, body 1×.
-					s +=
-						Math.log(1 + tfBody) +
-						2 * Math.log(1 + tfSection) +
-						3 * Math.log(1 + tfTitle);
-				}
-				if (matchedTokens === 0) return 0;
-				// All-tokens-matched bonus (favors strict over partial)
-				if (matchedTokens === tokens.length) s *= 1.5;
-				// Phrase-proximity bonus: full query as a substring is a
-				// strong signal — bump 1.8× when present in body
-				if (tokens.length >= 2) {
-					const phrase = tokens.join(" ");
-					if (body.includes(phrase)) s *= 1.8;
-				}
-				// Length normalization: penalize chunks much longer than
-				// the mean so a 6000-char chunk doesn't dominate over a
-				// 1500-char chunk just by surface area.
-				const lenPenalty = 1 / Math.sqrt(d.content.length / meanLen);
-				return s * lenPenalty;
+			// If Atlas Vector Search index isn't created yet, $vectorSearch
+			// silently returns []. Force-fall-through to keyword in that case so
+			// the endpoint stays useful before the index is set up.
+			mark("vector");
+			if (docs.length === 0) {
+				vectorNote = effectiveSource
+					? `vector: the query was embedded, but no chunk of source "${effectiveSource}" is in the vector index; keyword ranking was used`
+					: "vector: the query was embedded, but the vector index returned nothing; keyword ranking was used";
+				throw new Error("vector search returned 0 results — falling back");
 			}
+			chunks = docs.map(rowOfDoc);
+		} catch (err) {
+			if (!vectorNote) {
+				vectorStageFailed = true;
+				const why =
+					err instanceof Error && /abort|timeout/i.test(err.message)
+						? `the embedding service did not answer within ${EMBED_TIMEOUT_MS / 1000} s`
+						: "the embedding or vector stage failed";
+				vectorNote = `vector: ${why}; keyword ranking was used`;
+			}
+			// Fall back to keyword search using Payload's standard find.
+			// Ranking is BM25-lite: term frequency × field-position weight,
+			// with length normalization and a phrase-proximity bonus.
+			//
+			// The previous scoring just counted unique tokens appearing AT
+			// LEAST ONCE in title+content — so a chunk mentioning "oracle"
+			// 50 times got the same score as one mentioning it incidentally.
+			// That made vector-fallback retrieval near-random, which is
+			// exactly what production exhibits when VOYAGE_API_KEY is unset.
+			mode = "keyword";
+			try {
+				const rawTokens = q
+					.toLowerCase()
+					.split(/\s+/)
+					.filter((t) => t.length > 1);
 
-			chunks = allDocs
-				.map((d) => ({
-					id: String(d.id),
-					source: d.source,
-					title: d.title,
-					section: d.section ?? null,
-					url: d.url,
-					content: d.content,
-					chunkIndex: d.chunkIndex,
-					publishedAt: d.publishedAt ?? null,
-					observedAt: d.observedAt ?? null,
-					docKind: d.docKind ?? null,
-					docVersionStatus: d.docVersionStatus ?? null,
-					auditor: d.auditor ?? null,
-					protocol: d.protocol ?? null,
-					severity: d.severity ?? null,
-					capStatus: d.capStatus ?? null,
-					capProtocolVersion: d.capProtocolVersion ?? null,
-					score: score(d),
-				}))
-				.filter((d) => (d.score ?? 0) > 0)
-				.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-				.slice(0, Math.max(limitParam * 8, 48));
-		} catch {
-			chunks = [];
-			keywordFailed = true;
+				// Money is written with separators in the source documents
+				// ("$300,000") while a person or agent asking about it usually types
+				// the bare digits ("300000"). Tokens are matched with `contains`, a
+				// substring test, so those two never meet: a query for 300000 misses
+				// the handbook page that states the $300,000 lifetime cap, and the
+				// empty result reads as "there is no such rule" — the omission-as-
+				// negation failure this corpus exists to avoid. Emit both spellings
+				// for any numeric token so either phrasing finds the same passage.
+				// Verified 2026-07-23: `300,000` found the rule, `300000` did not.
+				const tokenSet = new Set<string>();
+				for (const t of rawTokens) {
+					tokenSet.add(t);
+					if (/^\$?[\d,]+$/.test(t)) {
+						const bare = t.replace(/[$,]/g, "");
+						// Years are 4-digit numbers too, and grouping one produces a
+						// nonsense token ("2026" → "2,026"). Money at that width is
+						// real ($5,000), so exclude by value rather than by length.
+						const isYear =
+							bare.length === 4 && Number(bare) >= 1900 && Number(bare) <= 2099;
+						if (bare.length > 3 && !isYear) {
+							tokenSet.add(bare);
+							// 300000 → 300,000
+							tokenSet.add(bare.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+						}
+					}
+				}
+				const tokens = [...tokenSet];
+
+				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
+				const where: any = {};
+				if (effectiveSource) where.source = { equals: effectiveSource };
+				if (tokens.length) {
+					where.or = tokens.map((t) => ({
+						or: [{ title: { contains: t } }, { content: { contains: t } }],
+					}));
+				}
+
+				// Pull a wider candidate pool (200) so ranking has room to
+				// surface high-relevance chunks past position 50 — Mongo
+				// returns matches in storage order, not relevance order.
+				const result = await payload.find({
+					collection: "research-docs",
+					where,
+					limit: 200,
+					depth: 0,
+					pagination: false,
+					select: { embedding: false },
+				});
+
+				const allDocs = result.docs as unknown as Array<{
+					id: string;
+					source: string;
+					title: string;
+					section?: string;
+					url: string;
+					content: string;
+					chunkIndex: number;
+					publishedAt?: string;
+					observedAt?: string;
+					docKind?: string;
+					docVersionStatus?: string;
+					auditor?: string;
+					protocol?: string;
+					severity?: string;
+					capStatus?: string;
+					capProtocolVersion?: number;
+				}>;
+
+				// Compute mean content length for length-normalization
+				const meanLen = allDocs.length
+					? allDocs.reduce((s, d) => s + d.content.length, 0) / allDocs.length
+					: 1;
+
+				function escapeRe(s: string) {
+					return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+				}
+
+				function score(d: {
+					title: string;
+					section?: string;
+					content: string;
+				}) {
+					if (!tokens.length) return 1;
+					const title = d.title.toLowerCase();
+					const section = (d.section ?? "").toLowerCase();
+					const body = d.content.toLowerCase();
+
+					let s = 0;
+					let matchedTokens = 0;
+					for (const t of tokens) {
+						const re = new RegExp(`\\b${escapeRe(t)}\\b`, "g");
+						const tfTitle = (title.match(re) || []).length;
+						const tfSection = (section.match(re) || []).length;
+						const tfBody = (body.match(re) || []).length;
+						const tfTotal = tfTitle + tfSection + tfBody;
+						if (tfTotal === 0) continue;
+						matchedTokens += 1;
+						// log(1+tf) avoids one mega-frequent token swamping
+						// everything; field weights: title 3×, section 2×, body 1×.
+						s +=
+							Math.log(1 + tfBody) +
+							2 * Math.log(1 + tfSection) +
+							3 * Math.log(1 + tfTitle);
+					}
+					if (matchedTokens === 0) return 0;
+					// All-tokens-matched bonus (favors strict over partial)
+					if (matchedTokens === tokens.length) s *= 1.5;
+					// Phrase-proximity bonus: full query as a substring is a
+					// strong signal — bump 1.8× when present in body
+					if (tokens.length >= 2) {
+						const phrase = tokens.join(" ");
+						if (body.includes(phrase)) s *= 1.8;
+					}
+					// Length normalization: penalize chunks much longer than
+					// the mean so a 6000-char chunk doesn't dominate over a
+					// 1500-char chunk just by surface area.
+					const lenPenalty = 1 / Math.sqrt(d.content.length / meanLen);
+					return s * lenPenalty;
+				}
+
+				chunks = allDocs
+					.map((d) => ({
+						id: String(d.id),
+						source: d.source,
+						title: d.title,
+						section: d.section ?? null,
+						url: d.url,
+						content: d.content,
+						chunkIndex: d.chunkIndex,
+						publishedAt: d.publishedAt ?? null,
+						observedAt: d.observedAt ?? null,
+						docKind: d.docKind ?? null,
+						docVersionStatus: d.docVersionStatus ?? null,
+						auditor: d.auditor ?? null,
+						protocol: d.protocol ?? null,
+						severity: d.severity ?? null,
+						capStatus: d.capStatus ?? null,
+						capProtocolVersion: d.capProtocolVersion ?? null,
+						score: score(d),
+					}))
+					.filter((d) => (d.score ?? 0) > 0)
+					.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+					.slice(0, Math.max(limitParam * 8, 48));
+			} catch {
+				chunks = [];
+				keywordFailed = true;
+			}
 		}
 	}
 
@@ -588,18 +616,15 @@ export async function GET(req: NextRequest) {
 			endpoint: "/api/research",
 			query: q,
 		});
-		return NextResponse.json(
-			{
-				error: "research read failed",
-				advisory:
-					"Both the vector and the keyword stage failed to read the corpus. This is an outage, NOT an empty result. Retry after a moment.",
-				retryAfterSeconds: 2,
-			},
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
+		return apiError({
+			status: 503,
+			error: "research read failed",
+			advisory:
+				"Both the vector and the keyword stage failed to read the corpus. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	// Exact-identifier retrieval guarantee (sls-019): when the query names a
@@ -1024,7 +1049,7 @@ export async function GET(req: NextRequest) {
 	// freshness floor most in-source tops above 0.6 confidence even when
 	// relevance is weak (the first calibration never fired). One extra
 	// aggregate per source-filtered vector query; embedding reused.
-	if (sourceFilter && queryEmbedding) {
+	if (sourceFilter && queryEmbedding && !sourceKnownEmpty) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
 			const db = (payload.db as any)?.connection?.db;
@@ -1112,13 +1137,9 @@ export async function GET(req: NextRequest) {
 			: null;
 
 	// Empty source or a miss: only an empty source gets the empty-source note.
-	let sourceEmptyNote: string | null = null;
-	if (effectiveSource && results.length === 0) {
-		const n = await sourceDocCount(effectiveSource).catch(() => -1);
-		if (n === 0) {
-			sourceEmptyNote = `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`;
-		}
-	}
+	const sourceEmptyNote = sourceKnownEmpty
+		? `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`
+		: null;
 
 	return NextResponse.json(
 		{
@@ -1129,19 +1150,32 @@ export async function GET(req: NextRequest) {
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning || vectorNote || sourceEmptyNote
+				...(paramWarning || limitNote || vectorNote || sourceEmptyNote
 					? {
-							warnings: [paramWarning, vectorNote, sourceEmptyNote].filter(
-								Boolean,
-							),
+							warnings: [
+								paramWarning,
+								limitNote,
+								vectorNote,
+								sourceEmptyNote,
+							].filter(Boolean),
 						}
 					: {}),
 				...(sourceEmptyNote ? { sourceEmpty: true } : {}),
+				// How many documents the scoped source holds, so a consumer can
+				// skip a source below its per-source take before sending.
+				...(effectiveSource && sourceDocs !== null
+					? { sourceDocCount: sourceDocs }
+					: {}),
 				...(sourceAdvisory ? { sourceAdvisory } : {}),
 				...(exactMiss ? { exactMiss } : {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
+				// Hash of `results` alone: generatedAt changes every call, the
+				// evidence does not; a consumer comparing two reads hashes this.
+				resultsHash: createHash("sha256")
+					.update(JSON.stringify(results))
+					.digest("hex"),
 				filters: {
 					source: sourceFilter,
 					auditor: auditorFilter,

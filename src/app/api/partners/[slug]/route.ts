@@ -98,8 +98,16 @@ export async function GET(
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
-			{ error: "directory temporarily unavailable" },
-			{ status: 503, headers: { "Retry-After": "2" } },
+			{
+				error: "directory temporarily unavailable",
+				advisory:
+					"The database handle could not be opened. This is an outage, NOT a claim that the partner does not exist. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 
@@ -162,7 +170,10 @@ export async function GET(
 					"The partner record could not be read. This is an outage, NOT a claim that the partner does not exist. Retry after a moment.",
 				retryAfterSeconds: 2,
 			},
-			{ status: 503, headers: { "Retry-After": "2" } },
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 }
