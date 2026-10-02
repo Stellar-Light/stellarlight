@@ -11,6 +11,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	fetchAllDoraHacksHackathons,
@@ -204,13 +205,18 @@ export async function GET(
 	req: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
+	const startedAt = Date.now();
 	const { slug } = await params;
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "payload unavailable" },
-			{ status: 503, headers: { "Retry-After": "2" } },
-		);
+		return apiError({
+			status: 503,
+			error: "hackathon store unavailable",
+			advisory:
+				"The hackathon store did not answer. This is an outage, not a statement that the hackathon is unknown. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	try {
