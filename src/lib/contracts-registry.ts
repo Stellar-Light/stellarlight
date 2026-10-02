@@ -72,6 +72,11 @@ let registryCache: { at: number; rows: Promise<ContractRow[]> } | null = null;
  * promise between concurrent callers, and filter, sort and page per request.
  * ponytail: per-instance cache; a shared cache if instances multiply.
  */
+/** Tests: drop the per-instance snapshot between cases. */
+export function resetContractsRegistryCache(): void {
+	registryCache = null;
+}
+
 function loadRegistryRows(payload: Payload): Promise<ContractRow[]> {
 	const now = Date.now();
 	if (!registryCache || now - registryCache.at > REGISTRY_TTL_MS) {
