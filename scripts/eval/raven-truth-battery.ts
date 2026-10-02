@@ -609,6 +609,59 @@ async function sliceJ() {
 	}
 }
 
+// K: the skills catalog's registry health, direct. A mirrored registry is
+// measured by what it listed against what resolved, and by its own sections:
+// the catalog once served 15 community-built entries as SDF-authored, never
+// saw 13 of the registry's 38 lines, and 404'd the page of every entry
+// outside a static list while the API served it. Runs every day, no rotation.
+async function sliceK() {
+	console.log("\n── K: skills registry listed, resolved, labelled ──");
+	const r = await http("/api/skills");
+	const reg = r?.meta?.registry;
+	verdict(
+		reg?.live === true,
+		"K:registry-live",
+		`live=${reg?.live ?? "absent"} listed=${reg?.listed ?? "?"} served=${reg?.served ?? "?"}`,
+	);
+	const listed = reg?.listed ?? 0;
+	const served = reg?.served ?? 0;
+	verdict(
+		listed >= 30 && served >= listed - 3,
+		"K:registry-resolves",
+		`listed=${listed} served=${served} unreachable=${JSON.stringify(reg?.unreachable ?? [])}`,
+	);
+	const by = r?.meta?.counts?.bySource ?? {};
+	verdict(
+		(by.sdf ?? 0) >= 6 && (by.sdf ?? 0) <= 15 && (by.community ?? 0) >= 15,
+		"K:sections-labelled",
+		`sdf=${by.sdf ?? 0} community=${by.community ?? 0} (SDF authored is a section of about 8; community built about 29)`,
+	);
+	const skills: any[] = r?.skills ?? [];
+	const segmentNamed = skills
+		.filter((s) => /^(Mcp|Sdk|Main|Src|Discover Mpprouter)$/.test(s.name))
+		.map((s) => s.slug);
+	verdict(
+		segmentNamed.length === 0,
+		"K:names-are-titles",
+		segmentNamed.length
+			? `path-segment names: ${segmentNamed.join(", ")}`
+			: `${skills.length} rows named by title`,
+	);
+	const community = skills.find(
+		(s) => s.source === "community" && s.registry === "skills.stellar.org",
+	);
+	const detail = community ? await http(`/api/skills/${community.slug}`) : null;
+	verdict(
+		!!community &&
+			detail?.skill?.source === "community" &&
+			typeof detail?.skill?.content === "string",
+		"K:community-detail-resolves",
+		community
+			? `/api/skills/${community.slug}: source=${detail?.skill?.source ?? "?"} content=${typeof detail?.skill?.content}`
+			: "no community-built registry entry in the catalog",
+	);
+}
+
 // A battery with no credential is not a battery. Sending the requests anyway
 // buys four opaque slice errors and a "0 fail" summary.
 if (!TOKEN) {
@@ -630,6 +683,7 @@ const slices = [
 	sliceH,
 	sliceI,
 	sliceJ,
+	sliceK,
 ];
 for (const s of slices) {
 	try {

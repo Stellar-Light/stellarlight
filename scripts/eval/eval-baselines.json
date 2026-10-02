@@ -1,9 +1,9 @@
 {
 	"$comment": "sha256 fingerprints of every eval input (banks, guards, goldens, linter). The vitest gate (eval-fingerprints.test.ts) fails when reality drifts from this file, so ANY eval change carries its re-baseline in the same diff — reviewers see 'the meter moved' explicitly. Regenerate: pnpm exec tsx scripts/eval/update-eval-baselines.ts",
-	"baselinedAt": "2026-10-02T03:08:16.893Z",
+	"baselinedAt": "2026-10-02T05:27:22.873Z",
 	"files": {
 		"scripts/eval/battery-banks.ts": "2ab3fbf72605a912174cd9f281acbdaab6ec738763b6f0f278e83a0be6f1967b",
-		"scripts/eval/raven-truth-battery.ts": "52608eac4e68ad9f724fcb9421c1b24f2232e197771a18a09cd26f0924e988ee",
+		"scripts/eval/raven-truth-battery.ts": "8596fc8fb98e2632109c71ba6ba6a9af619b44e7c0a0e7daad7842de27af6ce7",
 		"scripts/eval/raven-golden-parity.ts": "b4488e0b1eba90809867ec872e89fb787ca41f96ef4ffc5d36be7ab669f0059d",
 		"scripts/eval/raven-surface-consistency.ts": "581b3862b12b3245033742a05ae024882f0edd36d83db1f49820c557cca110c4",
 		"scripts/eval/raven-honest-absence.ts": "8cdaab553f2030af6367412ea75f38270888455ca67cda5cdd345aa1a91ba8dd",
