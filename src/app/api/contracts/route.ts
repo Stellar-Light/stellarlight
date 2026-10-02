@@ -92,12 +92,34 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const { contracts, total } = await buildContractsRegistry(payload, {
+	const registry = await buildContractsRegistry(payload, {
 		q,
 		domain,
 		limit: rowLimit,
 		offset,
-	});
+	}).catch(() => null);
+	if (!registry) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/contracts",
+			query: q,
+		});
+		return NextResponse.json(
+			{
+				error: "index read failed",
+				advisory:
+					"The contracts index could not be read. This is an outage, NOT a claim that no contracts exist. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
+	const { contracts, total } = registry;
 
 	logApiHit({
 		req,

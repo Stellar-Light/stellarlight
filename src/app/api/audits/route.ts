@@ -137,12 +137,35 @@ export async function GET(req: NextRequest) {
 	// The registry is small (tens of rows) — fetch once, filter in JS so
 	// matching is normalization-aware (never Payload `contains` on identity
 	// strings; see the substring-vs-membership trap).
-	const found = await payload.find({
-		collection: "audits",
-		limit: 500,
-		depth: 0,
-		sort: "-publishedAt",
-	});
+	const found = await payload
+		.find({
+			collection: "audits",
+			limit: 500,
+			depth: 0,
+			sort: "-publishedAt",
+		})
+		.catch(() => null);
+	if (!found) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/audits",
+			query: q,
+		});
+		return NextResponse.json(
+			{
+				error: "audit registry read failed",
+				advisory:
+					"The audit registry could not be read. This is an outage, NOT a claim that a project is unaudited. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
 
 	let rows = (found.docs as unknown as AuditRow[]).map((d) => ({
 		reportId: d.reportId,
