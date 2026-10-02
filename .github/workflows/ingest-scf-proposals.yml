@@ -58,6 +58,7 @@ jobs:
         run: pnpm exec tsx scripts/create-vector-index.ts --execute
 
       - name: Ingest SCF proposals (dry run unless execute=true)
+        shell: bash
         env:
           IN_EXECUTE: ${{ inputs.execute }}
           IN_LIMIT: ${{ inputs.limit }}
@@ -72,6 +73,7 @@ jobs:
       # chunk that re-counts as new on every run re-embeds forever).
       - name: Idempotence
         if: inputs.execute == true
+        shell: bash
         env:
           IN_LIMIT: ${{ inputs.limit }}
         run: |
