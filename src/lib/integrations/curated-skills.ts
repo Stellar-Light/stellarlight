@@ -70,6 +70,7 @@ export interface CuratedSkill {
 export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "stellar-scout",
+		registryName: "stellar-scout",
 		name: "Stellar Scout",
 		tagline:
 			"Vet ideas, match SCF RFPs, scan audits, map competitors, connect with builders — your AI analyst for building on Stellar.",

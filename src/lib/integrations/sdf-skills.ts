@@ -77,15 +77,25 @@ const GENERIC_SEGMENTS = new Set([
  */
 export function parseLlmsRegistry(txt: string): Map<string, RegistryEntry> {
 	const entries = new Map<string, RegistryEntry>();
-	let section: RegistrySection = "official";
+	// Links count only under a skills section: "Included Stellar Skills"
+	// (official) and "Community Built"; the Installing and Example Prompts
+	// sections are skipped, so a changelog link there never becomes a skill.
+	let section: RegistrySection | null = "official";
 	for (const line of txt.split("\n")) {
 		const heading = line.match(/^##\s+(.+)$/);
 		if (heading) {
-			section = /community/i.test(heading[1]) ? "community" : "official";
+			section = /community/i.test(heading[1])
+				? "community"
+				: /skills/i.test(heading[1])
+					? "official"
+					: null;
 			continue;
 		}
+		if (!section) continue;
+		// Three listed skills are a bare .md (defindex-sdk-skill.md), not a
+		// SKILL.md: the registry lists them, so the catalog does.
 		const m = line.match(
-			/\[([^\]]+)\]\((https?:\/\/[^)\s]+\/SKILL\.md)\)(?::\s*(.*))?/,
+			/\[([^\]]+)\]\((https?:\/\/[^)\s]+\.md)\)(?::\s*(.*))?/,
 		);
 		if (!m) continue;
 		// The directory the SKILL.md sits in is the skill's own id (what its
@@ -93,13 +103,13 @@ export function parseLlmsRegistry(txt: string): Map<string, RegistryEntry> {
 		// keeps SKILL.md at its root and has no such directory, and a generic
 		// directory (mcp, sdk, src) names nothing, so those take the title.
 		const rootLevel =
-			/^https?:\/\/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/SKILL\.md$/.test(
+			/^https?:\/\/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/[^/]+\.md$/.test(
 				m[2],
 			);
 		const seg = rootLevel
 			? undefined
 			: m[2]
-					.match(/\/([A-Za-z0-9_.-]+)\/SKILL\.md$/)?.[1]
+					.match(/\/([A-Za-z0-9_.-]+)\/[^/]+\.md$/)?.[1]
 					.toLowerCase()
 					.replace(/[^a-z0-9-]+/g, "-");
 		const name = seg && !GENERIC_SEGMENTS.has(seg) ? seg : slugifyTitle(m[1]);
@@ -220,7 +230,7 @@ function urlForSkill(
 	// A repository skill lives at <branch>/<path>/SKILL.md or, for a repo
 	// that is one skill, at <branch>/SKILL.md.
 	const gh = rawUrl.match(
-		/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(?:(.+)\/)?SKILL\.md$/,
+		/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(?:(.+)\/)?[^/]+\.md$/,
 	);
 	const url = gh
 		? `https://github.com/${gh[1]}/${gh[2]}/tree/${gh[3]}${gh[4] ? `/${gh[4]}` : ""}`
@@ -324,6 +334,10 @@ export function registrySkillView(s: SdfSkillSummary) {
 			? `https://github.com/${gh[1]}/${gh[2]}`
 			: undefined
 		: OFFICIAL_REPO;
+	// The skills CLI installs a SKILL.md; a skill the registry serves as a
+	// bare .md is fetched from rawUrl instead, so no install command is
+	// claimed for it.
+	const installable = /\/SKILL\.md$/.test(s.rawUrl);
 	return {
 		slug: s.name,
 		name: s.title,
@@ -332,7 +346,8 @@ export function registrySkillView(s: SdfSkillSummary) {
 		source: s.community ? ("community" as const) : ("sdf" as const),
 		kind: "skill-md" as const,
 		registry: SKILLS_REGISTRY,
-		...(repo ? { install: `npx skills add ${repo}`, repository: repo } : {}),
+		...(repo ? { repository: repo } : {}),
+		...(repo && installable ? { install: `npx skills add ${repo}` } : {}),
 		...(s.community
 			? {}
 			: {

@@ -14,6 +14,9 @@ import {
 const txt = [
 	"# Stellar Skills",
 	"",
+	"## Installing",
+	"- [Changelog](https://example.org/CHANGELOG.md): a link outside the skill sections is not a skill",
+	"",
 	"## Included Stellar Skills",
 	"- [Stellar Smart Contracts](https://skills.stellar.org/skills/smart-contracts/SKILL.md): Soroban contracts in Rust. Testing and security too.",
 	"",
@@ -23,13 +26,13 @@ const txt = [
 	"- [Stellar Agent Search](https://raw.githubusercontent.com/example/stellar-agent-search/main/skills/mcp/SKILL.md): a generic path segment",
 	"- [PMLL](https://raw.githubusercontent.com/example/pmll/main/SKILL.md): a root-level SKILL.md",
 	"- [Trustless Work Escrow](https://raw.githubusercontent.com/example/trustlesswork-skill/main/trustless-work-dev/SKILL.md): a directory outside skills/",
+	"- [DeFindex SDK](https://raw.githubusercontent.com/example/defindex-sdk/main/defindex-sdk-skill.md): a bare .md the registry lists",
 	"- [Setup again](https://example.org/skills/setup-stellar-contracts/SKILL.md): duplicate name keeps the first link",
-	"- [Not a skill](https://example.org/README.md): no SKILL.md, skipped",
 ].join("\n");
 
 describe("parseLlmsRegistry", () => {
 	const reg = parseLlmsRegistry(txt);
-	it("keeps the section, title and summary of every SKILL.md entry", () => {
+	it("keeps the section, title and summary of every .md entry under a skills section", () => {
 		expect([...reg.keys()]).toEqual([
 			"smart-contracts",
 			"setup-stellar-contracts",
@@ -37,6 +40,7 @@ describe("parseLlmsRegistry", () => {
 			"stellar-agent-search",
 			"pmll",
 			"trustless-work-dev",
+			"defindex-sdk",
 		]);
 		expect(reg.get("smart-contracts")).toMatchObject({
 			section: "official",
@@ -119,6 +123,24 @@ describe("registrySkillView", () => {
 		});
 		expect(v).not.toHaveProperty("compatibility");
 		expect(v).not.toHaveProperty("installAlt");
+	});
+	it("claims no install command for a bare .md the skills CLI cannot install", () => {
+		const v = registrySkillView({
+			...base,
+			name: "defindex-sdk",
+			title: "DeFindex SDK",
+			summary: "Vaults.",
+			community: true,
+			url: "https://github.com/example/defindex-sdk/tree/main",
+			rawUrl:
+				"https://raw.githubusercontent.com/example/defindex-sdk/main/defindex-sdk-skill.md",
+		});
+		expect(v).toMatchObject({
+			repository: "https://github.com/example/defindex-sdk",
+			rawUrl:
+				"https://raw.githubusercontent.com/example/defindex-sdk/main/defindex-sdk-skill.md",
+		});
+		expect(v).not.toHaveProperty("install");
 	});
 });
 
