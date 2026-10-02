@@ -132,6 +132,9 @@ export function rateLimit(
 }
 
 /** Convert a RateLimitResult into the standard X-RateLimit headers. */
+/** Rate-limit counters live per serverless instance; every limited response says so. */
+export const RATE_LIMIT_SCOPE = "instance" as const;
+
 export function rateLimitHeaders(r: RateLimitResult): Record<string, string> {
 	return {
 		"X-RateLimit-Limit": String(r.limit),
@@ -139,6 +142,6 @@ export function rateLimitHeaders(r: RateLimitResult): Record<string, string> {
 		"X-RateLimit-Reset": String(Math.ceil(r.resetAt / 1000)),
 		// Buckets live per serverless instance; a consumer accounting a host-wide
 		// window from these numbers would be wrong by construction.
-		"X-RateLimit-Scope": "instance",
+		"X-RateLimit-Scope": RATE_LIMIT_SCOPE,
 	};
 }

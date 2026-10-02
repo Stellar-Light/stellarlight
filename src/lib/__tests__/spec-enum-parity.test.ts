@@ -9,6 +9,7 @@ import {
 } from "@/data/rwa-registry";
 import { CODE_DOMAINS } from "../code-domains";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
+import { RESEARCH_MODES } from "../match-mode";
 import { spec } from "../openapi-spec";
 import { PARTNER_TYPES } from "../partner-match";
 import { DEPLOYMENT_NETWORKS } from "../project-deployment";
@@ -18,6 +19,7 @@ import {
 	STATUS_BASES,
 } from "../project-status";
 import { PROJECT_TYPES } from "../project-types";
+import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
@@ -333,5 +335,21 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		expect(sorted(b.schema.enum)).toEqual(
 			sorted([...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES]),
 		);
+	});
+});
+
+describe("research response headers spread the code's vocabularies (spec 1.9.55)", () => {
+	it("X-Scout-Match-Mode on the 200 equals RESEARCH_MODES", () => {
+		const e: string[] =
+			S.paths["/api/research"].get.responses["200"].headers[
+				"X-Scout-Match-Mode"
+			].schema.enum;
+		expect(sorted(e)).toEqual(sorted(RESEARCH_MODES));
+	});
+	it("X-RateLimit-Scope on the 429 is the one scope the limiter reports", () => {
+		const e: string[] =
+			S.paths["/api/research"].get.responses["429"].headers["X-RateLimit-Scope"]
+				.schema.enum;
+		expect(e).toEqual([RATE_LIMIT_SCOPE]);
 	});
 });

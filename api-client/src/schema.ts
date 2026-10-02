@@ -758,6 +758,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description A failure the caller should retry: the read behind the answer failed (database, upstream, or this instance's rate window). Never a claim about the data; `advisory` says what the failure is NOT a claim about. Mirrors the Retry-After header in seconds. */
+        RetryableError: {
+            /** @description What failed, in one line. */
+            error: string;
+            /** @description What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look). */
+            advisory?: string;
+            /** @description Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry. */
+            retryAfterSeconds: number;
+        };
+        /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
+        RequestError: {
+            error: string;
+            /** @description How to correct the call. */
+            hint?: string;
+        };
         /** @description Standard meta block included on every list response */
         Meta: {
             /** Format: uri */
@@ -4608,7 +4623,7 @@ export interface operations {
                 q?: string;
                 /** @description Alias of `q` (agents commonly send the term under this name; both are accepted, `q` wins when both are present). */
                 query?: string;
-                /** @description Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags). */
+                /** @description Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags). */
                 source?: "sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release";
                 /** @description Audit-metadata filter: exact auditor firm (case/homoglyph-insensitive, e.g. OtterSec, Certora). Using any audit-metadata filter scopes RETRIEVAL to source=audit (an explicit contradictory source= is rejected with 400). For report-level enumeration prefer listAudits. */
                 auditor?: string;
@@ -4630,6 +4645,10 @@ export interface operations {
             /** @description Research results */
             200: {
                 headers: {
+                    /** @description The retrieval mode that produced this page, the same value as meta.matchMode: `vector` or `keyword`. */
+                    "X-Scout-Match-Mode"?: "vector" | "keyword";
+                    /** @description Our own wall time per phase in milliseconds (init, embed, vector, rank, total), so a consumer can split our time from transfer time. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -4650,11 +4669,65 @@ export interface operations {
                             mode?: "vector" | "keyword";
                             /** @description Embedding model used for vector retrieval (e.g. voyage-3); null in keyword mode. */
                             model?: string | null;
-                            /** @description What `score` measures in this response (e.g. cosine similarity 0-1) — read it before comparing scores across sources. */
-                            scoreModel?: string;
+                            /** @description What `confidence.score` measures in this response; read it before comparing scores across sources. */
+                            scoreModel?: {
+                                version?: string;
+                                fields?: string[];
+                                note?: string;
+                            };
+                            /** @description True when the `source` filter names a declared source that holds no documents yet. The page is an empty vector page (no keyword pass, no advisory): an empty source, not a miss. Drop the filter or pick another source. */
+                            sourceEmpty?: boolean;
+                            /** @description How many documents the corpus holds for the `source` filter (present only on source-scoped calls). A consumer can skip a source below its per-source take before sending. */
+                            sourceDocCount?: number;
+                            /** @description sha256 of the `results` array. `generatedAt` changes on every call, the evidence does not; compare this to tell two reads apart. */
+                            resultsHash?: string;
+                            /** @description Present when stronger matches exist outside the requested `source`: the in-source top is a weak neighbour of the question. Not emitted for an empty source. */
+                            sourceAdvisory?: {
+                                note?: string;
+                                inSourceTopScore?: number;
+                                corpusWideTopScore?: number;
+                                corpusWideTopSource?: string | null;
+                            };
                         };
                         results?: components["schemas"]["ResearchResult"][];
                     };
+                };
+            };
+            /** @description The call is wrong: missing q, an unknown source, or audit-only filters on a non-audit source. Fix the call; do not retry it as is. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"];
+                };
+            };
+            /** @description This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend. */
+            429: {
+                headers: {
+                    /** @description Seconds until this instance's window resets. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description A read failed: the database handle could not be opened, or both the vector and the keyword stage threw. An outage, NOT an empty result: retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2 on database reads). */
+                    "Retry-After"?: number;
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
