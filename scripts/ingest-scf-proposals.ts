@@ -238,7 +238,7 @@ function buildMarkdown(
 	const facts = [
 		`Project: ${rec?.title ?? project.title} (${BASE}/project/${project.slug})`,
 		`Award round: ${sub.roundName}`,
-		`Status: ${sub.status.trim()}`,
+		`Status: ${sub.status}`,
 		sub.awardType ? `Award type: ${sub.awardType}` : null,
 		cleanBudget(sub.budget)
 			? `Requested budget: ${cleanBudget(sub.budget)}`
@@ -318,10 +318,19 @@ async function run() {
 			return;
 		}
 		const subs = rec?.submissions ?? [];
-		for (const sub of subs) {
-			if (!sub?.id) continue;
+		for (const raw of subs) {
+			if (!raw?.id) continue;
 			submissionsSeen += 1;
-			const status = (sub.status ?? "unknown").trim();
+			// Six of 946 submissions carried no round name (and some no title or
+			// status); the page still renders them, so the document does too,
+			// with the gap stated rather than a crash per row.
+			const sub: SubmissionSummary = {
+				...raw,
+				title: (raw.title ?? "").trim() || project.title,
+				status: (raw.status ?? "unknown").trim() || "unknown",
+				roundName: (raw.roundName ?? "").trim() || "round not stated",
+			};
+			const status = sub.status;
 			statusCounts.set(status, (statusCounts.get(status) ?? 0) + 1);
 			try {
 				const html = await fetchText(`${BASE}/submissions/${sub.id}`);
