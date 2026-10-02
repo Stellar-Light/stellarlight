@@ -48,8 +48,15 @@ async function main() {
 		);
 		return 1;
 	}
-	const { tally, source, digest, afterClose, relayOnly } =
+	const { tally, source, digest, afterClose, relayOnly, excluded } =
 		await liveTally(loaded);
+	const missing = excluded.filter((x) => !x.found);
+	if (EXECUTE && missing.length) {
+		console.error(
+			`REFUSED: excluded ballot(s) ${missing.map((x) => x.ballotId).join(", ")} are not in ${ROUND}'s record or on the relay. Check the ids in EXCLUDED_BALLOTS before publishing.`,
+		);
+		return 1;
+	}
 	if (loaded.round.status === "open") {
 		// This log is public (the repo is): a per-nominee tally of an OPEN round
 		// would publish the live standings to anyone. Counts only, then stop.
@@ -110,11 +117,17 @@ async function main() {
 		digest,
 		new Date(),
 		relayOnly,
+		excluded,
 	);
 	const json = `${JSON.stringify(doc, null, "\t")}\n`;
 	console.log(
 		`\n${ROUND} (${loaded.round.status}) · source ${source} · turnout ${tally.turnout.voted}/${tally.turnout.whitelisted} · relay-only ${relayOnly}`,
 	);
+	for (const x of excluded) {
+		console.log(
+			`  excluded ballot ${x.ballotId}${x.found ? "" : " (NOT FOUND)"}: ${x.reason}`,
+		);
+	}
 	if (afterClose > 0) {
 		console.log(
 			`  ${afterClose} out-of-band ballot(s) NOT counted — written to Horizon after the round closed`,
