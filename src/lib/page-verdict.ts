@@ -18,6 +18,7 @@
  * a non-product verdict, because this feeds a basis DOWNGRADE (never a
  * status change) and a false "parked" costs a live project its evidence.
  */
+import { choiceConfidence, type JevAnswer, type JevQuestion } from "./jev";
 import { registrableDomain } from "./partner-project-identity";
 
 export type PageVerdict =
@@ -107,3 +108,157 @@ export const NON_PRODUCT_VERDICTS: ReadonlySet<PageVerdict> = new Set([
 	"scaffold",
 	"offsite-redirect",
 ]);
+
+// Moved from scripts/check-links.ts (2026-10-03) so every reader of a page
+// (the weekly link check, the typed-decision eval) judges the same bytes.
+export const NO_PAGE_READ =
+	/(^|\.)(github\.com|x\.com|twitter\.com|linkedin\.com|discord\.(gg|com)|t\.me|medium\.com|youtube\.com|apps\.apple\.com|play\.google\.com|npmjs\.com|crates\.io|jsr\.io)$/i;
+
+/** Bounded GET of the first 64 KB so the verdict can see the title/meta.
+ * Skipped for hosts where a page title says nothing about a product. */
+export async function readPage(
+	url: string,
+	signal: AbortSignal,
+	userAgent: string,
+): Promise<{
+	title: string | null;
+	meta: string | null;
+	body: string | null;
+	finalUrl: string | null;
+}> {
+	const host = new URL(url).hostname;
+	if (NO_PAGE_READ.test(host))
+		return { title: null, meta: null, body: null, finalUrl: null };
+	const res = await fetch(url, {
+		method: "GET",
+		redirect: "follow",
+		headers: { "User-Agent": userAgent, Accept: "text/html,*/*;q=0.5" },
+		signal,
+	});
+	const reader = res.body?.getReader();
+	let html = "";
+	if (reader) {
+		const dec = new TextDecoder();
+		while (html.length < 65_536) {
+			const { value, done } = await reader.read();
+			if (done) break;
+			html += dec.decode(value, { stream: true });
+		}
+		try {
+			await reader.cancel();
+		} catch {}
+	}
+	const t = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+	const m = /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)/i.exec(
+		html,
+	);
+	const body = html
+		.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/\s+/g, " ")
+		.slice(0, 1500);
+	const clean = (x: string | undefined) =>
+		x ? x.replace(/\s+/g, " ").trim().slice(0, 200) : null;
+	return {
+		title: clean(t?.[1]),
+		meta: clean(m?.[1]),
+		body,
+		finalUrl: res.url || null,
+	};
+}
+
+// ── Jev: the pages classifyPage leaves open ─────────────────────────────────
+// classifyPage settles only near-unambiguous pages and calls the rest
+// "product" or "unknown". A shutdown notice written in prose, a domain now
+// serving somebody else's business, a pivot: no regex catches those. Jev reads
+// the page against the project record and answers with a probability, and a
+// reading below the bar is "unknown", the same honest default as above.
+
+/** The questions Jev answers about one page. */
+export const PAGE_QUESTIONS: Record<"kind" | "same_project", JevQuestion> = {
+	kind: {
+		type: "choice",
+		instructions:
+			"What does this web page show, judged against the project record?",
+		criteria: {
+			product:
+				"A working site for this project's product or the company that makes it: a marketing site, app, docs or dashboard.",
+			shut_down:
+				"The project says it has shut down, been discontinued or sunset, or is no longer operating or taking users.",
+			parked: "A parked, for-sale, expired or registrar placeholder domain.",
+			unrelated:
+				"A different business, a taken-over domain, spam, gambling, or content unrelated to the project.",
+			placeholder:
+				"A coming-soon, waitlist-only, under-construction, empty, error or default server page.",
+		},
+	},
+	same_project: {
+		type: "boolean",
+		instructions:
+			"Is this page about the same project as the record, by name or by what it does?",
+	},
+};
+
+export type JevPageKind =
+	| "product"
+	| "shut_down"
+	| "parked"
+	| "unrelated"
+	| "placeholder";
+
+export const JEV_NON_PRODUCT: ReadonlySet<string> = new Set([
+	"shut_down",
+	"parked",
+	"unrelated",
+	"placeholder",
+]);
+
+/** The state Jev reads: the record, then what the page served. */
+export function pageJevState(
+	project: { name: string; description?: string | null; website: string },
+	page: {
+		title: string | null;
+		meta: string | null;
+		body: string | null;
+		finalUrl: string | null;
+	},
+): Record<string, unknown> {
+	return {
+		project: {
+			name: project.name,
+			description: project.description ?? null,
+			website: project.website,
+		},
+		page: {
+			finalUrl: page.finalUrl,
+			title: page.title,
+			metaDescription: page.meta,
+			text: page.body,
+		},
+	};
+}
+
+/** Jev's reading of a page, kept only when it clears the bar. A confident
+ * non-product kind wins; a confident "not this project" reads as unrelated
+ * (a working site for somebody else is not evidence for this row). */
+export function jevPageReading(
+	a: Record<"kind" | "same_project", JevAnswer>,
+	bar = 0.9,
+): {
+	kind: JevPageKind | "unknown";
+	p: number | null;
+	sameProject: number | null;
+} {
+	const p = choiceConfidence(a.kind);
+	const choice = a.kind.type === "choice" ? a.kind.choice : null;
+	const sameProject =
+		a.same_project.type === "boolean" ? a.same_project.probability : null;
+	const confident = choice !== null && p !== null && p >= bar;
+	if (confident && JEV_NON_PRODUCT.has(choice))
+		return { kind: choice as JevPageKind, p, sameProject };
+	if (sameProject !== null && sameProject <= 1 - bar)
+		return { kind: "unrelated", p: 1 - sameProject, sameProject };
+	if (confident && choice === "product")
+		return { kind: "product", p, sameProject };
+	return { kind: "unknown", p, sameProject };
+}

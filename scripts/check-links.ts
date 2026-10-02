@@ -44,20 +44,24 @@ import "./load-env";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getPayloadOrInconclusive } from "./lib/payload-connect";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
 import {
 	type LinkStatus,
 	nextLinkHistory,
 	UNVERIFIABLE_RUNS_TO_ESCALATE,
 } from "../src/lib/link-history";
-import { classifyPage, type PageVerdict } from "../src/lib/page-verdict";
+import {
+	classifyPage,
+	type PageVerdict,
+	readPage,
+} from "../src/lib/page-verdict";
 import {
 	classifyExternalError,
 	classifyExternalStatus,
 	isBotWall,
 } from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
+import { getPayloadOrInconclusive } from "./lib/payload-connect";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -319,63 +323,6 @@ function cleanUrl(raw: string | undefined | null): string | null {
 
 /* ─── HTTP check ─────────────────────────────────────────────────────── */
 
-/* ─── Page read (what a 2xx actually served) ─────────────────────────── */
-
-const NO_PAGE_READ =
-	/(^|\.)(github\.com|x\.com|twitter\.com|linkedin\.com|discord\.(gg|com)|t\.me|medium\.com|youtube\.com|apps\.apple\.com|play\.google\.com|npmjs\.com|crates\.io|jsr\.io)$/i;
-
-/** Bounded GET of the first 64 KB so the verdict can see the title/meta.
- * Skipped for hosts where a page title says nothing about a product. */
-async function readPage(
-	url: string,
-	signal: AbortSignal,
-): Promise<{
-	title: string | null;
-	meta: string | null;
-	body: string | null;
-	finalUrl: string | null;
-}> {
-	const host = new URL(url).hostname;
-	if (NO_PAGE_READ.test(host))
-		return { title: null, meta: null, body: null, finalUrl: null };
-	const res = await fetch(url, {
-		method: "GET",
-		redirect: "follow",
-		headers: { "User-Agent": USER_AGENT, Accept: "text/html,*/*;q=0.5" },
-		signal,
-	});
-	const reader = res.body?.getReader();
-	let html = "";
-	if (reader) {
-		const dec = new TextDecoder();
-		while (html.length < 65_536) {
-			const { value, done } = await reader.read();
-			if (done) break;
-			html += dec.decode(value, { stream: true });
-		}
-		try {
-			await reader.cancel();
-		} catch {}
-	}
-	const t = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
-	const m = /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)/i.exec(
-		html,
-	);
-	const body = html
-		.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
-		.replace(/<[^>]+>/g, " ")
-		.replace(/\s+/g, " ")
-		.slice(0, 1500);
-	const clean = (x: string | undefined) =>
-		x ? x.replace(/\s+/g, " ").trim().slice(0, 200) : null;
-	return {
-		title: clean(t?.[1]),
-		meta: clean(m?.[1]),
-		body,
-		finalUrl: res.url || null,
-	};
-}
-
 async function checkUrl(url: string): Promise<CheckResult> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -443,7 +390,7 @@ async function checkUrl(url: string): Promise<CheckResult> {
 			// a business). Read what it served; any failure here leaves the
 			// verdict unknown, never downgrades.
 			try {
-				const page = await readPage(url, controller.signal);
+				const page = await readPage(url, controller.signal, USER_AGENT);
 				const finalHost = page.finalUrl
 					? new URL(page.finalUrl).hostname
 					: null;
