@@ -92,13 +92,16 @@ export function vectorIndexFilterPaths(collection: {
 	if (!filterPathsCache || now - filterPathsCache.at >= FILTER_PATHS_TTL_MS) {
 		// One listSearchIndexes call per instance per ten minutes, shared by
 		// every request that arrives while it is in flight (a cold burst used
-		// to issue one per request).
-		filterPathsCache = {
-			at: now,
-			paths: readVectorIndexFilterPaths(collection),
-		};
+		// to issue one per request). A read that fails is not kept: the next
+		// request asks again instead of running the widened pool pass for the
+		// whole window on the strength of one blip.
+		const paths = readVectorIndexFilterPaths(collection);
+		filterPathsCache = { at: now, paths };
+		paths.catch(() => {
+			filterPathsCache = null;
+		});
 	}
-	return filterPathsCache.paths;
+	return filterPathsCache.paths.catch(() => new Set<string>());
 }
 
 async function readVectorIndexFilterPaths(collection: {
@@ -119,8 +122,9 @@ async function readVectorIndexFilterPaths(collection: {
 				if (f.type === "filter" && f.path) paths.add(f.path);
 			}
 		}
-	} catch {
-		// unreadable: the pool path
+	} catch (err) {
+		// unreadable: the caller takes the pool path for THIS request only
+		throw err;
 	}
 	return paths;
 }
