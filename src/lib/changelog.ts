@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.57",
+		type: "fixed",
+		summary:
+			"listSkills labels the skills.stellar.org registry by section: SDF-authored entries stay source=sdf, Community Built entries are source=community (listed, not reviewed, by SDF); every registry entry carries registry: 'skills.stellar.org'; ten more registry entries resolve; the install command is the registry's own; duplicate Lumen Loop listings are merged; meta.registry reports listed, served, merged and unreachable.",
+		detail:
+			"Before: the catalog served 15 community-built skills as source=sdf (SDF authorship they do not have), parsed only entries whose URL had a /skills/<name>/SKILL.md shape (root-level and nested SKILL.md repositories were invisible, ten of the registry's 35 lines), printed 'npx skills add stellar/<name>' as the install command (a repository that does not exist; the registry's command is 'npx skills add https://github.com/stellar/stellar-dev-skill'), listed seven Lumen Loop skills twice under two slugs and two sources, and named entries after a generic path segment ('Mcp', 'Discover'). After: the section decides the label, the registry's title and one-line summary are the entry's name and tagline, a root-level SKILL.md resolves to its repository, a curated entry that names its registry copy replaces it (registry: 'skills.stellar.org' on the curated row), community-built entries carry no claimed compatibility list, and meta.registry names what could not be fetched instead of dropping it. getSkill resolves community-built registry entries too (their /skills/<slug> pages 404'd), and accepts the registry's display title. /api/status sdfSkills counts the SDF-authored section only.",
+	},
+	{
+		date: "2026-10-02",
 		surfaces: ["api"],
 		version: "spec@1.9.56",
 		type: "added",

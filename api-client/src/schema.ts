@@ -599,7 +599,7 @@ export interface paths {
         };
         /**
          * List AI skills for Stellar builders
-         * @description Catalog of installable Stellar AI skills/tools — SDF's official skills.stellar.org set merged with curated and community entries. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links; filter by `source`/`kind`. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.
+         * @description Catalog of installable Stellar AI skills/tools: both sections of SDF's skills.stellar.org registry (source=sdf for the SDF-authored set, source=community for Community Built entries, which the registry lists but does not review) merged with curated entries and approved submissions. meta.registry reports what the registry listed, what resolved, and what could not be fetched. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links; filter by `source`/`kind`. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.
          */
         get: operations["listSkills"];
         put?: never;
@@ -619,7 +619,7 @@ export interface paths {
         };
         /**
          * Get one skill's full content
-         * @description Full detail for ONE skill by slug or display name — metadata plus, for SDF official skills, the complete raw SKILL.md text (`.skill.content`, fetched live from skills.stellar.org). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.
+         * @description Full detail for ONE skill by slug or display name — metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.
          */
         get: operations["getSkill"];
         put?: never;
@@ -1798,11 +1798,16 @@ export interface components {
             /** @description One-line summary. Absent on some rows. */
             tagline?: string;
             description?: string;
-            /** @enum {string} */
+            /**
+             * @description Who stands behind the entry. sdf = SDF authored (the registry's Included Stellar Skills section). community = community-built: listed on skills.stellar.org under its author's maintenance and not reviewed by SDF (registry present), or an approved submission to this directory (registry absent). stellarlight and lumenloop = curated by those teams; external = an SDK, CLI or tool we list.
+             * @enum {string}
+             */
             source?: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
             /** @enum {string} */
             kind?: "skill-md" | "mcp-server" | "sdk" | "cli" | "agent-kit" | "tool";
-            /** @description Primary install command (e.g. 'npx skills add stellar/{slug}'). Absent when the entry has no one-line install. */
+            /** @description 'skills.stellar.org' when the entry is listed on SDF's registry (either section), including a curated entry the registry lists under another name. Absent for entries we curate or host that the registry does not list. */
+            registry?: string;
+            /** @description Primary install command, e.g. 'npx skills add https://github.com/stellar/stellar-dev-skill' for the SDF set (the registry's own command) or 'npx skills add <that repository>' for a community-built entry. Absent when the entry has no one-line install. */
             install?: string;
             /** @description Alternate install commands for other agent runtimes — an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies. */
             installAlt?: {
@@ -1814,7 +1819,7 @@ export interface components {
             homepage?: string;
             /** @description Docs URL. Absent on most rows. */
             docs?: string;
-            /** @description Direct raw SKILL.md URL (SDF skills). Absent elsewhere. */
+            /** @description Direct raw SKILL.md URL for entries listed on skills.stellar.org (SDF authored and community-built). Absent elsewhere. */
             rawUrl?: string;
             /** @description Agent runtimes the skill is known to work in (e.g. 'Claude Code', 'Codex', 'Cursor'). */
             compatibility?: string[];
@@ -1823,9 +1828,9 @@ export interface components {
             tags?: string[];
             /** @description Editorially featured. Absent (not false) on most rows. */
             featured?: boolean;
-            /** @description SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere. */
+            /** @description Registry entries only (SDF authored and community-built): whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere. */
             userInvocable?: boolean;
-            /** @description SDF skills only — argument hint (e.g. '[payment task]'). Absent elsewhere. */
+            /** @description Registry entries only: argument hint (e.g. '[payment task]'). Absent elsewhere. */
             argumentHint?: string;
         };
         /** @description One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues. */
@@ -4766,6 +4771,15 @@ export interface operations {
                             validKinds?: string[];
                             /** @description Every value the source filter accepts (unknown values 400 with this list). */
                             validSources?: string[];
+                            /** @description What the skills.stellar.org registry contributed to this page: listed = names in its llms.txt (both sections), served = those whose SKILL.md resolved, merged = registry copies replaced by a curated entry of the same skill, unreachable = listed names whose SKILL.md could not be fetched (named, never hidden). live=false means the registry did not answer and the SDF set came from a fallback list, so community-built entries are missing. */
+                            registry?: {
+                                url?: string;
+                                live?: boolean;
+                                listed?: number;
+                                served?: number;
+                                merged?: number;
+                                unreachable?: string[];
+                            };
                         };
                         skills?: components["schemas"]["Skill"][];
                     };
