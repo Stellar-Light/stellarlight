@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-01T12:02:01.098Z",
+	"generatedAt": "2026-10-02T11:33:44.445Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -133,6 +133,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.7.0 (published 2026-10-02)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:DcentWallet/dcent-web-connector:npm:dcent-web-connector",
 			"note": "note (asOf 2026-09-14) cites 2.0.0; registry latest is 2.1.0 (published 2026-09-30)",
 			"surface": "code"
@@ -149,7 +154,7 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.11 (published 2026-09-24)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.12 (published 2026-10-01)",
 			"surface": "code"
 		},
 		{
@@ -195,6 +200,11 @@
 		{
 			"probe": "note-repo-gone:Kali-Decoder/stellar-crates-tinder",
 			"note": "public note asOf 2026-09-14; github.com/Kali-Decoder/stellar-crates-tinder is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:axis-markets/stellarexpert-data-source",
+			"note": "public note asOf 2026-09-14; github.com/axis-markets/stellarexpert-data-source is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		}
 	]

@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7614928483963013,
+      "topScore": 0.7598240375518799,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7825485467910767,
+      "topScore": 0.8238687515258789,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -143,7 +143,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "From Colombia to El Salvador and Beyond: How a Proven Model "
+      "sample": "Stellar USDC to GCash off-ramp (SCF submission, SCF #17)"
     },
     {
       "id": "dossier-blend-safety",
@@ -657,7 +657,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7234534621238708,
+      "topScore": 0.709642144693438,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "rs-soroban-sdk v27.0.6 — 27.0.6"
+      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-01T11:51:11Z"
+  "generatedAt": "2026-10-02T11:23:13Z"
 }
