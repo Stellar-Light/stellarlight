@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-02",
 		surfaces: ["api"],
+		version: "spec@1.9.61",
+		type: "fixed",
+		summary:
+			"Correction to 1.9.60: a multi-source call returns each source's single-source rows, but its bySource resultsHash matches the single call's only when both reuse one query embedding. Scores can differ in the fourth decimal between calls that embed the query separately (two single-source calls on different instances do too), which can swap near-tied rows; compare row ids.",
+		detail:
+			"Measured live: per source, multi vs scoped call, same row set 26 of 26 and same order 25 of 26; two scoped calls on different instances matched resultsHash 22 of 26 and the row set 25 of 26. Description-only change.",
+	},
+	{
+		date: "2026-10-02",
+		surfaces: ["api"],
 		version: "spec@1.9.60",
 		type: "added",
 		summary:

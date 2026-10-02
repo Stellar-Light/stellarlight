@@ -5872,7 +5872,7 @@ export const spec: OpenAPISpec = {
 						name: "sources",
 						in: "query",
 						description:
-							"Several declared sources in one call, comma-separated (e.g. cap,sep,dev-docs); a comma in `source` is read the same way. Each source is searched exactly as `source=<one>&limit=<perSource>` would search it and its rows come back together, in the order given. meta.bySource carries each source's status, returned count, matchMode, sourceDocCount and resultsHash (equal to that single-source call's meta.resultsHash). A source that cannot be read is named in meta.warnings and bySource while the others answer; no source readable is a 503. Counts as one request against the rate limit. No sourceAdvisory on this form.",
+							"Several declared sources in one call, comma-separated (e.g. cap,sep,dev-docs); a comma in `source` is read the same way. Each source is searched exactly as `source=<one>&limit=<perSource>` would search it and its rows come back together, in the order given. meta.bySource carries each source's status, returned count, matchMode, sourceDocCount and resultsHash. The rows are the single-source call's rows; scores can differ in the fourth decimal between any two calls that embed the query separately (two single-source calls on different instances do too), which can swap near-tied rows, so compare row ids across separate calls. A source that cannot be read is named in meta.warnings and bySource while the others answer; no source readable is a 503. Counts as one request against the rate limit. No sourceAdvisory on this form.",
 						style: "form",
 						explode: false,
 						schema: {
@@ -5969,7 +5969,7 @@ export const spec: OpenAPISpec = {
 														bySource: {
 															type: "array",
 															description:
-																"Present on a several-source call (`sources`): one entry per requested source, in the order given. resultsHash equals meta.resultsHash of the single-source call with the same q and limit=perSource; status other than 200 means that source could not be read and its rows are missing (also named in meta.warnings).",
+																"Present on a several-source call (`sources`): one entry per requested source, in the order given. resultsHash hashes this source's rows, the rows its single-source call (same q, limit=perSource) returns; across separate calls compare row ids, since scores can differ in the fourth decimal; status other than 200 means that source could not be read and its rows are missing (also named in meta.warnings).",
 															items: {
 																type: "object",
 																properties: {

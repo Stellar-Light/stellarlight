@@ -685,13 +685,22 @@ async function sliceL() {
 			`/api/research?q=${q}&source=${s}&limit=6&v=${nonce}`,
 		);
 		const row = by.find((b) => b.source === s);
+		// Row ids, not resultsHash: each call embeds the query on its own
+		// instance and scores differ in the fourth decimal, which can swap
+		// near-ties; two single-source calls differ the same way.
+		const ids = (rows: any[] | undefined) =>
+			(rows ?? [])
+				.map((r) => r.id)
+				.sort()
+				.join(",");
+		const multiIds = ids(
+			(multi?.results ?? []).filter((r: any) => r.source === s),
+		);
+		const singleIds = ids(single?.results);
 		verdict(
-			!!row &&
-				row.status === 200 &&
-				row.resultsHash === single?.meta?.resultsHash &&
-				row.returned === single?.meta?.counts?.returned,
+			!!row && row.status === 200 && multiIds !== "" && multiIds === singleIds,
 			"L:parity",
-			`source=${s}: multi ${String(row?.resultsHash ?? "?").slice(0, 12)} vs single ${String(single?.meta?.resultsHash ?? "?").slice(0, 12)} (${row?.returned ?? "?"}/${single?.meta?.counts?.returned ?? "?"} rows)`,
+			`source=${s}: ${row?.returned ?? "?"}/${single?.meta?.counts?.returned ?? "?"} rows, same row set ${multiIds === singleIds}`,
 		);
 	}
 }
