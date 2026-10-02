@@ -56,6 +56,6 @@ describe("embed", () => {
 		});
 		await embed("a query the cache has not seen");
 		expect(seen).toBeInstanceOf(AbortSignal);
-		expect(EMBED_TIMEOUT_MS).toBe(8_000);
+		expect(EMBED_TIMEOUT_MS).toBe(5_000);
 	});
 });

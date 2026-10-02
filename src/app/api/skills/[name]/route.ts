@@ -50,6 +50,9 @@ import { generateSlug } from "@/lib/utils/normalize";
 // method-handler COMBINATION is what caused the #276/#280 stable-500; the normal
 // dynamic-route + guards pattern used by the other 22 routes is safe).
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 /**
  * Map of slug → inlined SKILL.md text for our own skill files. Lets the

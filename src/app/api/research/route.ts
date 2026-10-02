@@ -21,7 +21,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
-import { EMBEDDING_MODEL, embed } from "@/lib/embed";
+import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
 import {
 	clampLimit,
 	parseFields,
@@ -283,6 +283,10 @@ export async function GET(req: NextRequest) {
 	// Kept in scope past the try so the recency pool supplement can score
 	// direct-fetched chunks with the same cosine scale as the vector pool.
 	let queryEmbedding: number[] | null = null;
+	// Both retrieval stages failing is an outage the caller must retry, not
+	// an empty answer; the deliberate 0-row fall-through is not a failure.
+	let vectorStageFailed = false;
+	let keywordFailed = false;
 
 	// Shared doc→row mapper: the sourceAdvisory ranks the corpus-wide pool
 	// through the EXACT same shape+regime as the served results.
@@ -384,9 +388,10 @@ export async function GET(req: NextRequest) {
 		chunks = docs.map(rowOfDoc);
 	} catch (err) {
 		if (!vectorNote) {
+			vectorStageFailed = true;
 			const why =
 				err instanceof Error && /abort|timeout/i.test(err.message)
-					? "the embedding service did not answer within 8 s"
+					? `the embedding service did not answer within ${EMBED_TIMEOUT_MS / 1000} s`
 					: "the embedding or vector stage failed";
 			vectorNote = `vector: ${why}; keyword ranking was used`;
 		}
@@ -451,6 +456,8 @@ export async function GET(req: NextRequest) {
 				where,
 				limit: 200,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 
 			const allDocs = result.docs as unknown as Array<{
@@ -545,7 +552,30 @@ export async function GET(req: NextRequest) {
 				.slice(0, Math.max(limitParam * 8, 48));
 		} catch {
 			chunks = [];
+			keywordFailed = true;
 		}
+	}
+
+	if (vectorStageFailed && keywordFailed) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/research",
+			query: q,
+		});
+		return NextResponse.json(
+			{
+				error: "research read failed",
+				advisory:
+					"Both the vector and the keyword stage failed to read the corpus. This is an outage, NOT an empty result. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
 	}
 
 	// Exact-identifier retrieval guarantee (sls-019): when the query names a
@@ -569,6 +599,8 @@ export async function GET(req: NextRequest) {
 					},
 					limit: 25,
 					depth: 0,
+					pagination: false,
+					select: { embedding: false },
 				});
 				for (const d of direct.docs as unknown as Array<{
 					id: string;
@@ -658,6 +690,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 10,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as Array<
 				Record<string, unknown>
@@ -774,6 +808,7 @@ export async function GET(req: NextRequest) {
 				sort: "-publishedAt",
 				limit: 40,
 				depth: 0,
+				pagination: false,
 			});
 			const have = new Set(chunks.map((c) => c.id));
 			const candidates = (recent.docs as unknown as RawResearchDoc[]).filter(
@@ -832,6 +867,7 @@ export async function GET(req: NextRequest) {
 					where: lexWhere,
 					limit: 30,
 					depth: 0,
+					pagination: false,
 				});
 				const have = new Set(chunks.map((c) => c.id));
 				for (const d of lex.docs as unknown as RawResearchDoc[]) {
@@ -867,6 +903,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 10,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			const have = new Set(chunks.map((c) => c.id));
 			for (const d of direct.docs as unknown as RawResearchDoc[]) {
@@ -896,6 +934,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 24,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as RawResearchDoc[]) {
 				chunks.push(toRow(d));

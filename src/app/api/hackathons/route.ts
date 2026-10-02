@@ -33,6 +33,9 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 interface HackathonRow {
@@ -157,6 +160,7 @@ export async function GET(req: NextRequest) {
 					where,
 					limit: 300,
 					depth: 1,
+					joins: false,
 					sort: "-startDate",
 				});
 
