@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-03",
 		surfaces: ["api"],
+		version: "spec@1.9.64",
+		type: "added",
+		summary:
+			"The research corpus gains stellar.org's evergreen explainers: the learn family (lumens, Stellar Consensus Protocol, stablecoins, DeFi, smart contracts, tokenization and more), the use-case pages (payments, ramps, exchanges, tokenization, DeFi, aid disbursement) and the ambassador program, as source=sdf-org. None was in the corpus before.",
+		detail:
+			"31 pages: 33 in the site's sitemap less three that serve identical text under a second slug. Each is registered with a verbatim signature phrase the weekly corpus-coverage check asserts. Found by scoring the corpus against a public agent's golden research cards, whose gold sources for lumen supply, consensus, remittance and aid questions were these pages.",
+	},
+	{
+		date: "2026-10-03",
+		surfaces: ["api"],
 		version: "spec@1.9.63",
 		type: "changed",
 		summary:
