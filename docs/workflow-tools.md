@@ -102,10 +102,14 @@ makes too slowly.
   type for each of the 25 types, scored against 129 rows a human typed (50
   exact type sets, 79 added types). Review mode lists published rows where
   Jev confidently disagrees with the stored types.
+- **Does a repo build on Stellar.** Wired in as `--task repos`: Jev reads a
+  repo's README, description and topics. It is scored against the code scan's
+  proof and compared with the keyword gate that admits repos from multi-chain
+  orgs. The gate's baseline on 2026-10-03, 205 repos: 43 of 105 code-proven
+  Stellar repos found (41% recall), 17 false alarms (72% precision).
 - **Next uses, same pattern.** Whether two records are one product (duplicate
-  rows inflate the listed and launched counts), whether a linked GitHub org is
-  this project's code, and whether a repo in a multi-chain org integrates
-  Stellar (the keyword gate drops those today).
+  rows inflate the listed and launched counts) and whether a linked GitHub org
+  is this project's code.
 
 Rules. A Jev answer is a triage signal: it routes a row to review or decides
 between two readings we already have. It never writes over curated data and

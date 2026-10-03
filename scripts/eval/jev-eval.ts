@@ -11,18 +11,27 @@
  *   --task types  Which of the 25 project types fit? One yes/no per type.
  *                 Labels: TYPES_SET (a human's exact type set for the row) and
  *                 TYPES_ADD (types a human added).
+ *   --task repos  Does a repo build on Stellar, judged from its README,
+ *                 description and topics? Labels: the code scan's stellarProof
+ *                 (an SDK, contract macros or a stellar.toml found in the code,
+ *                 against scanned repos with none). Baseline: the keyword gate
+ *                 that admits repos from multi-chain orgs (STELLAR_SIGNAL).
  *
  *   --eval    (default) score against the labels and list every disagreement
  *             for a human look (a label is dated; the row may have changed).
  *   --review  page: weak-basis Live rows either reader calls not the product.
  *             types: published rows where Jev confidently disagrees with the
- *             stored types. Nothing is written in either mode.
+ *             stored types. repos: scanned repos with no Stellar proof that
+ *             Jev reads as Stellar (possible scan misses) and the share it
+ *             reads as unrelated. Nothing is written in any mode.
  *
  * Read-only: the public API, the public pages and the gateway. No database.
  * Without AI_GATEWAY_API_KEY the Jev column reads could-not-check: the page
- * task still measures the regex baseline, the types task has none.
+ * task still measures the regex baseline, the types task has none, the repos
+ * task measures the keyword gate. The repos task reads READMEs from GitHub
+ * (GITHUB_TOKEN if set).
  *
- *   pnpm exec tsx scripts/eval/jev-eval.ts [--task page|types] [--review] [--limit N] [--bar 0.9] [--out file.json]
+ *   pnpm exec tsx scripts/eval/jev-eval.ts [--task page|types|repos] [--review] [--limit N] [--bar 0.9] [--out file.json]
  */
 import { appendFileSync, writeFileSync } from "node:fs";
 import {
@@ -41,6 +50,7 @@ import {
 	readPage,
 } from "../../src/lib/page-verdict";
 import { PROJECT_TYPES, TYPE_DEFINITIONS } from "../../src/lib/project-types";
+import { STELLAR_SIGNAL } from "../../src/lib/repo-org-attribution";
 import {
 	STATUS_FIX,
 	TYPES_ADD,
@@ -54,8 +64,8 @@ const arg = (name: string) => {
 	return i >= 0 ? args[i + 1] : undefined;
 };
 const TASK = arg("--task") ?? "page";
-if (TASK !== "page" && TASK !== "types")
-	throw new Error(`--task must be page or types, got ${TASK}`);
+if (TASK !== "page" && TASK !== "types" && TASK !== "repos")
+	throw new Error(`--task must be page, types or repos, got ${TASK}`);
 const REVIEW = args.includes("--review");
 const LIMIT = Number(arg("--limit") ?? 0);
 const BAR = Number(arg("--bar") ?? 0.9);
@@ -495,8 +505,246 @@ async function typesTask(projects: Map<string, Row>, key: string | null) {
 		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
 }
 
+// ── Task: repos ─────────────────────────────────────────────────────────────
+
+/** Code proof that a repo uses Stellar (the Repos collection's stellarProof). */
+const PROVEN = [
+	"cargo-sdk",
+	"js-sdk",
+	"lang-sdk",
+	"stellar-toml",
+	"contract-macros",
+];
+/** How many of each class the eval samples, spread across the class. */
+const REPO_SAMPLE: Record<string, number> = {
+	"cargo-sdk": 40,
+	"js-sdk": 40,
+	"lang-sdk": 15,
+	"stellar-toml": 5,
+	"contract-macros": 5,
+	none: 100,
+};
+
+const REPO_QUESTIONS: Record<string, JevQuestion> = {
+	stellar: {
+		type: "boolean",
+		instructions:
+			"Does the code in this repository use Stellar or Soroban: a Stellar SDK, Soroban smart contracts, a stellar.toml, or an implementation of a Stellar protocol? Judge the repository itself. A passing mention, or a multi-chain project whose code here does not touch Stellar, is not enough.",
+	},
+};
+
+interface RepoItem {
+	fullName: string;
+	proof: string;
+}
+
+async function getJson(u: string, headers: Record<string, string> = {}) {
+	const res = await fetch(u, { headers, signal: AbortSignal.timeout(20_000) });
+	if (!res.ok) throw new Error(`${u.split("?")[0]}: HTTP ${res.status}`);
+	return res.json();
+}
+
+/** `n` repos with this proof value, from two spread-out pages. For "none"
+ * only scanned repos count, so it means the scan looked and found nothing. */
+async function repoClass(proof: string, n: number): Promise<RepoItem[]> {
+	const scanned =
+		proof === "none" ? "&where%5BcodeScanState%5D%5Bequals%5D=scanned" : "";
+	const where = `where%5BstellarProof%5D%5Bequals%5D=${proof}${scanned}`;
+	const per = Math.ceil(n / 2);
+	const head = await getJson(`${BASE}/api/repos?${where}&limit=1&depth=0`);
+	const pages = Math.max(1, Math.ceil((head.totalDocs ?? 0) / per));
+	const picks = [
+		...new Set([Math.ceil(pages / 4), Math.ceil((3 * pages) / 4)]),
+	];
+	const out: RepoItem[] = [];
+	for (const page of picks) {
+		const d = await getJson(
+			`${BASE}/api/repos?${where}&limit=${per}&page=${page}&depth=0&sort=fullName`,
+		);
+		for (const doc of d.docs ?? [])
+			if (doc.fullName) out.push({ fullName: doc.fullName, proof });
+	}
+	return out.slice(0, n);
+}
+
+/** Description, topics and the first 1.5 KB of README text, from GitHub. */
+async function repoFacts(fullName: string) {
+	const token = process.env.GITHUB_TOKEN?.trim();
+	const auth: Record<string, string> = token
+		? { authorization: `Bearer ${token}` }
+		: {};
+	const meta = await getJson(`https://api.github.com/repos/${fullName}`, {
+		accept: "application/vnd.github+json",
+		...auth,
+	});
+	let readme = "";
+	try {
+		const res = await fetch(`https://api.github.com/repos/${fullName}/readme`, {
+			headers: { accept: "application/vnd.github.raw", ...auth },
+			signal: AbortSignal.timeout(20_000),
+		});
+		if (res.ok)
+			readme = (await res.text())
+				.replace(/<[^>]+>|!\[[^\]]*\]\([^)]*\)/g, " ")
+				.replace(/\s+/g, " ")
+				.slice(0, 1500);
+	} catch {
+		readme = ""; // judged on description and topics alone
+	}
+	return {
+		name: String(meta.name ?? fullName.split("/")[1] ?? ""),
+		description: (meta.description as string | null) ?? null,
+		topics: (meta.topics as string[] | undefined) ?? [],
+		language: (meta.language as string | null) ?? null,
+		readme,
+	};
+}
+
+type RepoResult = RepoItem & {
+	keyword?: boolean;
+	jev?: { p: number } | { error: string } | null;
+	error?: string;
+	inputTokens?: number | null;
+};
+
+async function judgeRepo(
+	item: RepoItem,
+	key: string | null,
+): Promise<RepoResult> {
+	let facts: Awaited<ReturnType<typeof repoFacts>>;
+	try {
+		facts = await repoFacts(item.fullName);
+	} catch (e) {
+		return { ...item, error: String(e).slice(0, 120) };
+	}
+	const keyword = STELLAR_SIGNAL.test(
+		`${facts.name} ${facts.description ?? ""} ${facts.topics.join(" ")}`,
+	);
+	if (!key) return { ...item, keyword, jev: null };
+	try {
+		const r = await jevEvaluate(
+			{
+				repo: {
+					fullName: item.fullName,
+					description: facts.description,
+					topics: facts.topics,
+					language: facts.language,
+				},
+				readme: facts.readme || null,
+			},
+			REPO_QUESTIONS,
+			{ apiKey: key, signal: AbortSignal.timeout(20_000) },
+		);
+		const a = r.answers.stellar;
+		return {
+			...item,
+			keyword,
+			jev:
+				a.type === "boolean"
+					? { p: a.probability }
+					: { error: "not a boolean answer" },
+			inputTokens: r.inputTokens,
+		};
+	} catch (e) {
+		return { ...item, keyword, jev: { error: String(e).slice(0, 160) } };
+	}
+}
+
+const jevP = (r: RepoResult) => (r.jev && "p" in r.jev ? r.jev.p : null);
+
+async function reposTask(key: string | null) {
+	const lines: string[] = [];
+	const say = (x = "") => {
+		lines.push(x);
+		console.log(x);
+	};
+	const classes = REVIEW ? { none: LIMIT > 0 ? LIMIT : 200 } : REPO_SAMPLE;
+	let items: RepoItem[] = [];
+	for (const [proof, n] of Object.entries(classes))
+		items.push(...(await repoClass(proof, n)));
+	if (LIMIT > 0 && !REVIEW) items = items.slice(0, LIMIT);
+	const results = await mapLimit(items, 6, (it) => judgeRepo(it, key));
+	const read = results.filter((r) => !r.error);
+	const tokens = read.reduce((n, r) => n + (r.inputTokens ?? 0), 0);
+	say(`## Jev repo relevance (${REVIEW ? "review" : "eval"})`);
+	say();
+	say(
+		`${items.length} repos; ${read.length} read from GitHub, ${results.length - read.length} could not be read.`,
+	);
+	say(
+		key
+			? `Jev: bar ${BAR}; ${tokens} input tokens, about $${((tokens / 1e6) * USD_PER_M_INPUT).toFixed(4)}.`
+			: "Jev: could not check (AI_GATEWAY_API_KEY is not set). Keyword gate only.",
+	);
+	const jevYes = (r: RepoResult) => (jevP(r) ?? 0) >= BAR;
+	const jevNo = (r: RepoResult) => {
+		const p = jevP(r);
+		return p !== null && p <= 1 - BAR;
+	};
+	say();
+	if (!REVIEW) {
+		const pos = (r: RepoResult) => PROVEN.includes(r.proof);
+		const pct = (a: number, b: number) =>
+			b ? `${Math.round((100 * a) / b)}%` : "n/a";
+		const row = (
+			name: string,
+			yes: (r: RepoResult) => boolean,
+			no: (r: RepoResult) => boolean,
+		) => {
+			let tp = 0;
+			let fp = 0;
+			let fn = 0;
+			let undecided = 0;
+			for (const r of read) {
+				if (yes(r)) {
+					if (pos(r)) tp++;
+					else fp++;
+				} else if (no(r)) {
+					if (pos(r)) fn++;
+				} else undecided++;
+			}
+			say(
+				`| ${name} | ${tp} | ${fn} | ${fp} | ${undecided} | ${pct(tp, tp + fn)} | ${pct(tp, tp + fp)} |`,
+			);
+		};
+		const proven = read.filter(pos).length;
+		say(
+			`Read: ${proven} with code proof of Stellar use, ${read.length - proven} scanned with none.`,
+		);
+		say();
+		say(
+			"| Reader | Found | Missed | False alarms | Undecided | Recall | Precision |",
+		);
+		say("| --- | --- | --- | --- | --- | --- | --- |");
+		row(
+			"Keyword gate (name, description, topics)",
+			(r) => !!r.keyword,
+			(r) => !r.keyword,
+		);
+		if (key) row("Jev (adds the README)", jevYes, jevNo);
+	} else {
+		const yes = read
+			.filter(jevYes)
+			.sort((a, b) => (jevP(b) ?? 0) - (jevP(a) ?? 0));
+		const no = read.filter(jevNo).length;
+		say(
+			key
+				? `Scanned repos with no Stellar proof: Jev reads ${yes.length} of ${read.length} as Stellar (possible scan misses) and ${no} as unrelated.`
+				: `Scanned repos with no Stellar proof: the keyword gate matches ${read.filter((r) => r.keyword).length} of ${read.length}.`,
+		);
+		for (const r of yes.slice(0, 60))
+			say(
+				`- ${r.fullName}: Jev ${(jevP(r) ?? 0).toFixed(2)}${r.keyword ? ", keyword gate agrees" : ""}`,
+			);
+	}
+	if (OUT) writeFileSync(OUT, JSON.stringify(results, null, 1));
+	if (process.env.GITHUB_STEP_SUMMARY)
+		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+}
+
 async function main() {
 	const key = jevKey();
+	if (TASK === "repos") return reposTask(key);
 	const projects = await loadProjects();
 	if (TASK === "types") return typesTask(projects, key);
 	let items = REVIEW ? reviewItems(projects) : evalItems(projects);

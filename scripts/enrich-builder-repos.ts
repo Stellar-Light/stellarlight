@@ -40,6 +40,8 @@ import "./load-env";
 import { getPayload } from "payload";
 import { listOwnerRepos, type OwnerRepo } from "../src/lib/github";
 import { isDenied } from "../src/lib/repo-allowlist";
+// Same gate the org pass uses for multi-chain orgs (one shared copy).
+import { STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { deriveTriageTags } from "../src/lib/repo-triage";
 import configPromise from "../src/payload.config";
 
@@ -67,10 +69,6 @@ const SWEEP_CAP = Number(process.env.BUILDER_SWEEP_CAP || "400") || 400;
  * appear, and only 1,508 of them have two or more. The curated roster bypasses this entirely.
  */
 const MIN_INDEXED_REPOS = Number(process.env.BUILDER_MIN_REPOS || "2") || 2;
-
-/** Same gate the org pass uses for multi-chain orgs. */
-const STELLAR_SIGNAL =
-	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 
 /**
  * For the anonymous code-derived tail, the signal has to come from the

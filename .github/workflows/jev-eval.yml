@@ -1,13 +1,13 @@
 name: Jev evals (manual)
 # Read-only: measures Jev (TypeSafe AI's typed-decision model, through Vercel
 # AI Gateway) against human labels. task=page: what a project's website shows;
-# task=types: which project types fit. mode=review lists rows Jev confidently
-# disagrees with. Public API + public pages + the gateway; no database secrets
+# task=types: which project types fit; task=repos: does a repo build on Stellar.
+# mode=review lists rows Jev confidently disagrees with. Public API + public pages + the gateway; no database secrets
 # and no writes. Needs AI_GATEWAY_API_KEY; without it the run says so.
 on:
   workflow_dispatch:
     inputs:
-      task: { description: "page (what a website shows) or types (which project types fit)", type: choice, options: [page, types], default: page }
+      task: { description: "page (what a website shows), types (which project types fit) or repos (does a repo build on Stellar)", type: choice, options: [page, types, repos], default: page }
       mode: { description: "eval (score against human labels) or review (list confident disagreements)", type: choice, options: [eval, review], default: eval }
       bar: { description: "Confidence a Jev answer must clear to count", type: string, default: "0.9" }
 permissions: { contents: read }
@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 20
     env:
       AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+      # repos task: README reads from the GitHub API
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
