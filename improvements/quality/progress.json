@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-02T14:03:33.935Z",
+ "generatedAt": "2026-10-03T12:42:54.029Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -68,7 +68,7 @@
    "current": 54.7,
    "target": 50,
    "unit": "% of Live rows on a weak basis",
-   "pct": 0.8686629892303652,
+   "pct": 0.8704578250032794,
    "note": "Origin is the share when the phase opened (842/979). The ratchet may only fall."
   },
   "P5": {
@@ -239,6 +239,19 @@
     "fetchedAt": "2026-09-06",
     "markers": [
      "zkCrossDEX served as the main proving ground for this phase"
+    ]
+   },
+   {
+    "file": "improvements/receipts/zenex-2026-10-03.json",
+    "slug": "zenex",
+    "url": "https://docs.zenex.trade/deployments/contract-addresses",
+    "fetchedAt": "2026-10-03",
+    "markers": [
+     "live Zenex deployment on Stellar mainnet",
+     "ledger 64,737,253",
+     "CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ",
+     "CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB",
+     "NOT TBD"
     ]
    },
    {
