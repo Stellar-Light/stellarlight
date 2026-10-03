@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-10-03T08:31:19.404Z",
+	"asOf": "2026-10-03T10:04:00.953Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 109,
 	"healthy": 106,
@@ -26,10 +26,10 @@
 			"name": "Aggregate feedback votes (nightly)",
 			"cron": "40 3 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T10:02:49Z",
+			"lastSuccessAt": "2026-10-03T09:25:26Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 52,
+			"runs": 53,
 			"why": "last green 0d ago"
 		},
 		{
@@ -158,10 +158,10 @@
 			"name": "Backfill knowledge notes",
 			"cron": "23 3 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T09:51:40Z",
+			"lastSuccessAt": "2026-10-03T09:14:30Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 38,
+			"runs": 39,
 			"why": "last green 0d ago"
 		},
 		{
@@ -202,10 +202,10 @@
 			"name": "Backfill triage tags",
 			"cron": "0 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T10:19:57Z",
+			"lastSuccessAt": "2026-10-03T09:42:01Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 52,
+			"runs": 53,
 			"why": "last green 0d ago"
 		},
 		{
@@ -301,10 +301,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T08:25:35Z",
+			"lastSuccessAt": "2026-10-03T10:01:07Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -323,7 +323,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T08:29:08Z",
+			"lastSuccessAt": "2026-10-03T10:01:07Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -697,7 +697,7 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T02:19:14Z",
+			"lastSuccessAt": "2026-10-03T08:33:23Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -763,7 +763,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T08:25:35Z",
+			"lastSuccessAt": "2026-10-03T09:24:24Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 95,
@@ -785,7 +785,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T07:29:22Z",
+			"lastSuccessAt": "2026-10-03T10:01:07Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -832,8 +832,8 @@
 			"lastSuccessAt": "2026-10-03T07:52:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 85,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"runs": 84,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -1126,7 +1126,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T08:29:08Z",
+			"lastSuccessAt": "2026-10-03T10:01:08Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1148,10 +1148,10 @@
 			"name": "Upgrade status basis from link health",
 			"cron": "23 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T08:23:27Z",
+			"lastSuccessAt": "2026-10-03T09:56:17Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 35,
+			"runs": 36,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1181,7 +1181,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T06:19:40Z",
+			"lastSuccessAt": "2026-10-03T09:24:24Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
