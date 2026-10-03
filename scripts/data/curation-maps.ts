@@ -1832,12 +1832,19 @@ export const STATUS_FIX: Record<
 			"https://github.com/laina-defi/laina/blob/main/src/lib/horizon.ts",
 		basis: "human-verified",
 	},
-	// receipt: improvements/receipts/zenex-2026-08-28.json
+	// receipt: improvements/receipts/zenex-2026-08-28.json (pre-launch, every
+	// address TBD). Launched since: owner report 2026-10-03 "zenex is live on
+	// mainnet", verified the same day. The deployments page now lists "the
+	// live Zenex deployment on Stellar mainnet", written from the chain at
+	// ledger 64,737,253 (2026-10-02): factory CDFEZPO7…, an active XLM-USD
+	// market CAOZCITW…. On the public network the market contract was created
+	// 2026-09-29 and shows 317 invocations (stellar.expert). receipt:
+	// improvements/receipts/zenex-2026-10-03.json
 	zenex: {
 		from: "Pre-Release",
-		to: "Pre-Release",
-		note: "Perpetual (leveraged) trading exchange on Stellar/Soroban, formerly Hermes; pre-launch — its deployments page still lists every contract address as TBD.",
-		asOf: "2026-08-25",
+		to: "Live",
+		note: "Perpetual (leveraged) trading exchange on Stellar/Soroban, formerly Hermes. Live on Stellar mainnet since 2026-09-29: its deployments page lists the mainnet factory and an active XLM-USD market, and the market contract shows 317 invocations on the public network.",
+		asOf: "2026-10-03",
 		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
 		basis: "human-verified",
 	},
@@ -5486,6 +5493,13 @@ export const DEPLOYMENT_VERIFIED: Record<
 		network: "mainnet",
 		sourceUrl: "https://developers.stellar.org/launch/usdt0",
 		note: "SDF developer launch page 2026-09-02: USDT0 issued by GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q; SAC CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF; OFT CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6 (LayerZero OFT standard, operated by Everdawn Labs). Announcement: https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+	},
+	// 2026-10-03: launched on mainnet 2026-09-29 (see the STATUS_FIX entry and
+	// improvements/receipts/zenex-2026-10-03.json).
+	zenex: {
+		network: "mainnet",
+		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
+		note: "operator page written from the chain lists mainnet factory CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ and XLM-USD market CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB; market created on public 2026-09-29, 317 invocations (stellar.expert)",
 	},
 };
 
