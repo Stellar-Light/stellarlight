@@ -1,0 +1,102 @@
+{
+	"generatedAt": "2026-10-02T17:26:21.848Z",
+	"source": "data/snapshots/projects/*.json.gz",
+	"latestSnapshot": "2026-10-02",
+	"historyStart": "2026-10-02",
+	"snapshots": 1,
+	"definitions": {
+		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
+		"markedLive": "Status Live, on any evidence.",
+		"liveOnStrongEvidence": "Status Live where the status rests on the product itself (repo activity, on-chain activity, a product integration, a package release, an operator announcement or a human check), not only on its website answering.",
+		"observedActive": "A commit in a linked repo within 180 days of the snapshot, or a mainnet deployment observed through on-chain activity.",
+		"noActivityData": "Launched, with no linked repo commit and no on-chain deployment record: alive or not, we cannot observe it."
+	},
+	"groups": {
+		"all": {
+			"listed": 1004,
+			"launched": 940,
+			"markedLive": 846,
+			"liveOnStrongEvidence": 396,
+			"observedActive": 308,
+			"noActivityData": 412
+		},
+		"scf": {
+			"listed": 597,
+			"launched": 571,
+			"markedLive": 544,
+			"liveOnStrongEvidence": 235,
+			"observedActive": 195,
+			"noActivityData": 208
+		},
+		"nonScf": {
+			"listed": 407,
+			"launched": 369,
+			"markedLive": 302,
+			"liveOnStrongEvidence": 161,
+			"observedActive": 113,
+			"noActivityData": 204
+		}
+	},
+	"cohorts": {
+		"scfByFirstRound": [
+			{
+				"cohort": "rounds 1-15",
+				"listed": 83,
+				"launched": 81,
+				"markedLive": 73,
+				"liveOnStrongEvidence": 32,
+				"observedActive": 19,
+				"noActivityData": 34
+			},
+			{
+				"cohort": "rounds 16-30",
+				"listed": 240,
+				"launched": 232,
+				"markedLive": 217,
+				"liveOnStrongEvidence": 92,
+				"observedActive": 69,
+				"noActivityData": 69
+			},
+			{
+				"cohort": "rounds 31-45",
+				"listed": 266,
+				"launched": 250,
+				"markedLive": 246,
+				"liveOnStrongEvidence": 104,
+				"observedActive": 101,
+				"noActivityData": 104
+			},
+			{
+				"cohort": "round unknown",
+				"listed": 8,
+				"launched": 8,
+				"markedLive": 8,
+				"liveOnStrongEvidence": 7,
+				"observedActive": 6,
+				"noActivityData": 1
+			}
+		],
+		"nonScfByListedYear": [
+			{
+				"cohort": "listed date unknown",
+				"listed": 407,
+				"launched": 369,
+				"markedLive": 302,
+				"liveOnStrongEvidence": 161,
+				"observedActive": 113,
+				"noActivityData": 204
+			}
+		]
+	},
+	"changes": {
+		"since": "2026-10-02",
+		"newlyLaunched": [],
+		"newlyInactive": [],
+		"revived": []
+	},
+	"survival": {
+		"windowDays": 180,
+		"availableFrom": "2027-03-31",
+		"readings": []
+	}
+}

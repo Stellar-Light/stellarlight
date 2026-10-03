@@ -1,0 +1,69 @@
+name: Project status snapshot (daily)
+
+# One dated snapshot a day of every published project as the directory serves
+# it (status, the evidence it rests on, last code activity, SCF rounds,
+# on-chain deployment, first-listed date), plus the lifecycle report computed
+# from every snapshot so far: data/snapshots/projects/. The directory keeps
+# current state only; this is the history that makes "launched, and still
+# alive N days later" measurable from the first snapshot on.
+# Scheduled runs write and commit; a manual dispatch is a dry run unless
+# execute=true. Reads the public API plus first-listed dates from the
+# database; writes nothing to the database.
+
+on:
+  schedule:
+    - cron: "17 5 * * *" # daily 05:17 UTC
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write and commit today's snapshot and report. Unchecked = dry run."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot-project-status
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Snapshot (dry run unless scheduled or execute=true)
+        run: pnpm exec tsx scripts/data/snapshot-project-status.ts --with-listed-dates ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+
+      - name: Commit the snapshot and report if they changed
+        if: github.event_name == 'schedule' || inputs.execute
+        run: |
+          set -euo pipefail
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add data/snapshots/projects/ || exit 0
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "data(lifecycle): project status snapshot [skip ci]"
+          # Push races with other artifact lanes: push first, and on rejection
+          # rebase keeping this run's files (-X theirs replays this commit).
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push
