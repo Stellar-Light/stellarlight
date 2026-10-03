@@ -19,7 +19,12 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
-import { isDegraded } from "@/lib/degraded-read";
+import {
+	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
+} from "@/lib/degraded-read";
 import {
 	clampLimit,
 	parseFields,
@@ -39,7 +44,14 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 20;
 export const revalidate = 60;
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
@@ -199,7 +211,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...(laneHints("repos", { empty: repos.length === 0 })
 					? { hints: laneHints("repos", { empty: repos.length === 0 }) }
 					: {}),
@@ -245,7 +257,7 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 				counts: { returned: repos.length, total },
-			},
+			}),
 			repos: repos.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{

@@ -23,7 +23,7 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
-import { degradedWarning } from "@/lib/degraded-read";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
 import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
 import {
 	clampLimit,
@@ -1105,7 +1105,7 @@ async function research(
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...matchModeMeta(mode),
 				...(laneHints("research", { empty: results.length === 0 })
 					? { hints: laneHints("research", { empty: results.length === 0 }) }
@@ -1165,7 +1165,7 @@ async function research(
 					fields: ["relevance", "freshness", "authority"],
 					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it — applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key).",
 				},
-			},
+			}),
 			results: results.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
@@ -1406,7 +1406,7 @@ async function researchMany(
 	});
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...matchModeMeta(mode),
 				...(laneHints("research", { empty })
 					? { hints: laneHints("research", { empty }) }
@@ -1460,7 +1460,7 @@ async function researchMany(
 							},
 				),
 				scoreModel: ok[0].body.meta.scoreModel,
-			},
+			}),
 			results,
 		},
 		{

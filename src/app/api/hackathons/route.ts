@@ -21,7 +21,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { degradedWarning } from "@/lib/degraded-read";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import {
 	type DoraHacksHackathon,
@@ -310,7 +310,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
@@ -340,7 +340,7 @@ export async function GET(req: NextRequest) {
 					total: matchedBeforeLimit,
 				},
 				...(fallbackChannels ? { fallbackChannels } : {}),
-			},
+			}),
 			hackathons,
 		},
 		{

@@ -8,6 +8,8 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	withPartial,
+	withReadDeadline,
 	withReadTimeout,
 } from "../degraded-read";
 
@@ -132,5 +134,64 @@ describe("degradedWarning / isDegraded", () => {
 				degradedWarning("x", new Error("y")),
 			]),
 		).toBe(true);
+	});
+});
+
+describe("withReadDeadline (2026-10-03: fail early enough to retry)", () => {
+	afterEach(() => vi.useRealTimers());
+
+	it("caps a read at what the request budget has left", async () => {
+		vi.useFakeTimers();
+		const p = withReadDeadline(1_000, () =>
+			degradedRead("repos search", () => new Promise(() => {}), null, 4_000),
+		);
+		await vi.advanceTimersByTimeAsync(1_000);
+		expect((await p).warning).toContain("(timeout after 1000ms)");
+	});
+
+	it("sequential reads share the budget, with a floor once it is spent", async () => {
+		vi.useFakeTimers();
+		const never = () => new Promise(() => {});
+		const p = withReadDeadline(1_000, async () => {
+			const a = await degradedRead("first", never, null, 4_000);
+			const b = await degradedRead("second", never, null, 4_000);
+			return [a.warning, b.warning];
+		});
+		await vi.advanceTimersByTimeAsync(1_200);
+		const [a, b] = await p;
+		expect(a).toContain("(timeout after 1000ms)");
+		expect(b).toContain("(timeout after 200ms)");
+	});
+});
+
+describe("withPartial", () => {
+	it("a complete page says so outright, even beside other warnings", () => {
+		expect(withPartial({})).toMatchObject({ partial: false, failedReads: [] });
+		expect(
+			withPartial({ warnings: ["Unknown query parameter(s) ignored: foo"] }),
+		).toMatchObject({ partial: false, failedReads: [] });
+	});
+
+	it("names every failed read with its class, in order", () => {
+		const e = new Error("connection 4 to cluster0.example.net closed");
+		e.name = "MongoServerSelectionError";
+		const m = withPartial({
+			warnings: [
+				"Unknown query parameter(s) ignored: foo",
+				degradedWarning("repos search", e),
+				degradedWarning(
+					"research source=sep",
+					"503 index read failed; its rows are missing from this page",
+				),
+			],
+		});
+		expect(m.partial).toBe(true);
+		expect(m.failedReads).toEqual([
+			{ read: "repos search", cause: "MongoServerSelectionError" },
+			{
+				read: "research source=sep",
+				cause: "503 index read failed; its rows are missing from this page",
+			},
+		]);
 	});
 });

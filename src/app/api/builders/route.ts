@@ -40,6 +40,9 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
 	withReadTimeout,
 } from "@/lib/degraded-read";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
@@ -171,7 +174,14 @@ const SUPPORTED_PARAMS = [
 	"fields",
 ] as const;
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Strict unknown-param rejection (sls-040 / #521): `?scfTier=high` (and any
@@ -882,7 +892,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...matchModeMeta(q ? "expanded" : "all"),
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
@@ -912,7 +922,7 @@ export async function GET(req: NextRequest) {
 							},
 						}
 					: {}),
-			},
+			}),
 			builders: builders.map((b) => pickFields(b, fieldsWanted)),
 		},
 		{
