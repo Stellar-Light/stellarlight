@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-10-03T07:55:25.415Z",
+	"asOf": "2026-10-03T08:31:19.404Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 108,
-	"healthy": 105,
+	"checked": 109,
+	"healthy": 106,
 	"broken": [
 		{
 			"file": "gone-repos.yml",
@@ -279,10 +279,10 @@
 			"name": "Curator Agent — Link health check",
 			"cron": "23 2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T08:36:40Z",
+			"lastSuccessAt": "2026-10-03T08:12:49Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 19,
+			"runs": 20,
 			"why": "last green 0d ago"
 		},
 		{
@@ -301,10 +301,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T07:52:38Z",
+			"lastSuccessAt": "2026-10-03T08:25:35Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -323,7 +323,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T07:52:39Z",
+			"lastSuccessAt": "2026-10-03T08:29:08Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -356,11 +356,11 @@
 			"name": "Curate projects (manual)",
 			"cron": "30 7 * * 2",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-29T14:10:30Z",
-			"ageDays": 3,
+			"lastSuccessAt": "2026-10-03T08:17:28Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 14,
-			"why": "last green 3d ago"
+			"runs": 17,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "curator-wallet-availability.yml",
@@ -763,7 +763,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T06:31:40Z",
+			"lastSuccessAt": "2026-10-03T08:25:35Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 95,
@@ -829,11 +829,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T07:29:22Z",
+			"lastSuccessAt": "2026-10-03T07:52:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 84,
-			"why": "last green 0d ago"
+			"runs": 85,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -1034,6 +1034,17 @@
 			"why": "last green 110d ago (manual tool — age not judged)"
 		},
 		{
+			"file": "snapshot-project-status.yml",
+			"name": "Project status snapshot (daily)",
+			"cron": "17 5 * * *",
+			"state": "ok",
+			"lastSuccessAt": "2026-10-03T07:57:32Z",
+			"ageDays": 0,
+			"graceDays": 4,
+			"runs": 1,
+			"why": "last green 0d ago"
+		},
+		{
 			"file": "status-recency.yml",
 			"name": "Status recency queue",
 			"cron": "30 7 * * 2",
@@ -1060,10 +1071,10 @@
 			"name": "Sync Lumenloop ecosystem projects",
 			"cron": "0 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T13:16:52Z",
+			"lastSuccessAt": "2026-10-03T08:29:29Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 71,
+			"runs": 1,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1115,7 +1126,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-03T07:52:38Z",
+			"lastSuccessAt": "2026-10-03T08:29:08Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1137,10 +1148,10 @@
 			"name": "Upgrade status basis from link health",
 			"cron": "23 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T10:36:00Z",
+			"lastSuccessAt": "2026-10-03T08:23:27Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 32,
+			"runs": 35,
 			"why": "last green 0d ago"
 		},
 		{
