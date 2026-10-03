@@ -67,3 +67,13 @@ export function repoNameOwner(
 	}
 	return best?.sib ?? null;
 }
+
+/**
+ * The keyword gate for multi-chain orgs: a repo whose name, description or
+ * topics match is treated as Stellar-related at index admission. One copy,
+ * read by the org pass (scripts/enrich-repos.ts), the builder pass
+ * (scripts/enrich-builder-repos.ts) and the Jev repo eval, which measures it
+ * against code-scan proof.
+ */
+export const STELLAR_SIGNAL =
+	/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;

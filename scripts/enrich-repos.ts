@@ -30,7 +30,7 @@ import {
 	type AuditRecord,
 	buildKnowledgeNotes,
 } from "../src/lib/repo-knowledge";
-import { repoNameOwner } from "../src/lib/repo-org-attribution";
+import { repoNameOwner, STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import { deriveTriageTags } from "../src/lib/repo-triage";
@@ -335,8 +335,6 @@ async function main() {
 	// into the code-reference index. A DEDICATED Stellar org (most repos signal)
 	// keeps all its repos; a multi-chain/unrelated org keeps ONLY the repos that
 	// actually mention Stellar/Soroban in name/description/topics.
-	const STELLAR_SIGNAL =
-		/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 	const isStellarRepo = (r: OwnerRepo) =>
 		STELLAR_SIGNAL.test(
 			`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`,
