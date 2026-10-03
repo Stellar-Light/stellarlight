@@ -1,29 +1,36 @@
 /**
- * Jev page verdicts, measured before they are trusted.
+ * Jev (TypeSafe AI's typed-decision model) measured against human labels
+ * before anything relies on it. Two tasks, one harness:
  *
- * classifyPage (src/lib/page-verdict.ts) is a deliberately conservative regex
- * pass: it settles the unambiguous pages (parked, spam, scaffold, off-site
- * redirect) and calls everything else "product" or "unknown". Jev reads the
- * same page against the project record and answers the question the regex
- * leaves open: is this the product, or something else wearing its domain?
+ *   --task page   (default) What does a project's website actually show?
+ *                 classifyPage (src/lib/page-verdict.ts) settles the
+ *                 unambiguous pages and calls the rest "product" or "unknown";
+ *                 Jev answers the question it leaves open. Labels: websites
+ *                 removed as taken over or parked, rows retired for a
+ *                 site-level reason, rows confirmed Live.
+ *   --task types  Which of the 25 project types fit? One yes/no per type.
+ *                 Labels: TYPES_SET (a human's exact type set for the row) and
+ *                 TYPES_ADD (types a human added).
  *
- *   --eval    (default) pages a human already judged: websites removed from a
- *             row as taken over or parked, rows retired for a site-level
- *             reason, and rows a human confirmed Live. Prints recall and
- *             precision for the regex alone, Jev alone and both together,
- *             and lists every disagreement with the label for a human look
- *             (a label is dated; the site may have changed since).
- *   --review  Live rows whose status rests on a weak basis. Lists the ones
- *             either reader calls not the product. Nothing is written.
+ *   --eval    (default) score against the labels and list every disagreement
+ *             for a human look (a label is dated; the row may have changed).
+ *   --review  page: weak-basis Live rows either reader calls not the product.
+ *             types: published rows where Jev confidently disagrees with the
+ *             stored types. Nothing is written in either mode.
  *
  * Read-only: the public API, the public pages and the gateway. No database.
- * Without AI_GATEWAY_API_KEY the Jev column reads could-not-check and only
- * the regex baseline is measured.
+ * Without AI_GATEWAY_API_KEY the Jev column reads could-not-check: the page
+ * task still measures the regex baseline, the types task has none.
  *
- *   pnpm exec tsx scripts/eval/jev-page-verdict.ts [--review] [--limit N] [--bar 0.9] [--out file.json]
+ *   pnpm exec tsx scripts/eval/jev-eval.ts [--task page|types] [--review] [--limit N] [--bar 0.9] [--out file.json]
  */
 import { appendFileSync, writeFileSync } from "node:fs";
-import { jevEvaluate, jevKey } from "../../src/lib/jev";
+import {
+	type JevAnswer,
+	type JevQuestion,
+	jevEvaluate,
+	jevKey,
+} from "../../src/lib/jev";
 import {
 	classifyPage,
 	JEV_NON_PRODUCT,
@@ -33,13 +40,22 @@ import {
 	pageJevState,
 	readPage,
 } from "../../src/lib/page-verdict";
-import { STATUS_FIX, WEBSITE_REMOVE } from "../data/curation-maps";
+import { PROJECT_TYPES, TYPE_DEFINITIONS } from "../../src/lib/project-types";
+import {
+	STATUS_FIX,
+	TYPES_ADD,
+	TYPES_SET,
+	WEBSITE_REMOVE,
+} from "../data/curation-maps";
 
 const args = process.argv.slice(2);
 const arg = (name: string) => {
 	const i = args.indexOf(name);
 	return i >= 0 ? args[i + 1] : undefined;
 };
+const TASK = arg("--task") ?? "page";
+if (TASK !== "page" && TASK !== "types")
+	throw new Error(`--task must be page or types, got ${TASK}`);
 const REVIEW = args.includes("--review");
 const LIMIT = Number(arg("--limit") ?? 0);
 const BAR = Number(arg("--bar") ?? 0.9);
@@ -64,13 +80,14 @@ interface Row {
 	statusBasis?: string | null;
 	shortDescription?: string | null;
 	links?: { website?: string | null } | null;
+	types?: string[] | null;
 }
 
 async function loadProjects(): Promise<Map<string, Row>> {
 	const out = new Map<string, Row>();
 	for (const status of STATUSES) {
 		for (let offset = 0; ; offset += 100) {
-			const u = `${BASE}/api/projects/search?status=${encodeURIComponent(status)}&limit=100&offset=${offset}&fields=slug,name,status,statusBasis,shortDescription,links`;
+			const u = `${BASE}/api/projects/search?status=${encodeURIComponent(status)}&limit=100&offset=${offset}&fields=slug,name,status,statusBasis,shortDescription,links,types`;
 			// A 5xx under load is transient (the search route has an 8s read
 			// bound); retry twice before calling the whole run inconclusive.
 			let res = await fetch(u);
@@ -270,9 +287,218 @@ function score(rows: Result[], says: (r: Result) => boolean) {
 	};
 }
 
+// ── Task: types ─────────────────────────────────────────────────────────────
+
+const typeKey = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+const TYPE_QUESTIONS: Record<string, JevQuestion> = Object.fromEntries(
+	PROJECT_TYPES.map((t) => [
+		typeKey(t),
+		{
+			type: "boolean",
+			instructions: `Does this project fit the type "${t}"? ${TYPE_DEFINITIONS[t]}`,
+		},
+	]),
+);
+
+interface TypeItem {
+	slug: string;
+	name: string;
+	description: string | null;
+	url: string | null;
+	stored: string[];
+	/** The human's types: the whole set when `exact`, additions otherwise. */
+	truth?: string[];
+	exact?: boolean;
+}
+
+function typeItems(projects: Map<string, Row>): TypeItem[] {
+	const item = (r: Row): TypeItem => ({
+		slug: r.slug,
+		name: r.name ?? r.slug,
+		description: r.shortDescription ?? null,
+		url: r.links?.website ?? null,
+		stored: r.types ?? [],
+	});
+	if (REVIEW) return [...projects.values()].map(item);
+	const out: TypeItem[] = [];
+	for (const [slug, truth] of Object.entries(TYPES_SET)) {
+		const r = projects.get(slug);
+		if (r) out.push({ ...item(r), truth, exact: true });
+	}
+	for (const [slug, truth] of Object.entries(TYPES_ADD)) {
+		const r = projects.get(slug);
+		if (r && !(slug in TYPES_SET))
+			out.push({ ...item(r), truth, exact: false });
+	}
+	return out;
+}
+
+/** Jev's confident answers: yes at or above the bar, no at or below 1 - bar. */
+function typeReading(answers: Record<string, JevAnswer>) {
+	const yes = new Map<string, number>();
+	const no = new Map<string, number>();
+	for (const t of PROJECT_TYPES) {
+		const a = answers[typeKey(t)];
+		if (a?.type !== "boolean") continue;
+		if (a.probability >= BAR) yes.set(t, a.probability);
+		else if (a.probability <= 1 - BAR) no.set(t, a.probability);
+	}
+	return { yes, no };
+}
+
+type TypeAnswered = TypeItem & {
+	reading: ReturnType<typeof typeReading>;
+	inputTokens: number | null;
+};
+type TypeResult = TypeAnswered | (TypeItem & { error: string });
+
+async function judgeTypes(item: TypeItem, key: string): Promise<TypeResult> {
+	let page: Awaited<ReturnType<typeof readPage>> | null = null;
+	if (item.url) {
+		try {
+			page = await readPage(item.url, AbortSignal.timeout(15_000), UA);
+		} catch {
+			page = null; // the record alone still carries a description
+		}
+	}
+	const state = {
+		project: {
+			name: item.name,
+			description: item.description,
+			website: item.url,
+		},
+		...(page && (page.title || page.meta || page.body)
+			? {
+					page: {
+						title: page.title,
+						metaDescription: page.meta,
+						text: page.body,
+					},
+				}
+			: {}),
+	};
+	try {
+		const r = await jevEvaluate(state, TYPE_QUESTIONS, {
+			apiKey: key,
+			signal: AbortSignal.timeout(20_000),
+		});
+		return {
+			...item,
+			reading: typeReading(r.answers),
+			inputTokens: r.inputTokens,
+		};
+	} catch (e) {
+		return { ...item, error: String(e).slice(0, 160) };
+	}
+}
+
+async function typesTask(projects: Map<string, Row>, key: string | null) {
+	const lines: string[] = [];
+	const say = (x = "") => {
+		lines.push(x);
+		console.log(x);
+	};
+	let items = typeItems(projects);
+	if (LIMIT > 0) items = items.slice(0, LIMIT);
+	say(`## Jev type tags (${REVIEW ? "review" : "eval"})`);
+	say();
+	if (!key) {
+		say(
+			`${items.length} rows ready. Jev: could not check (AI_GATEWAY_API_KEY is not set). This task has no non-Jev baseline, so nothing was measured.`,
+		);
+	} else {
+		const results = await mapLimit(items, 8, (it) => judgeTypes(it, key));
+		const ok = results.filter((r): r is TypeAnswered => "reading" in r);
+		const tokens = ok.reduce((n, r) => n + (r.inputTokens ?? 0), 0);
+		say(
+			`${items.length} rows; Jev answered ${ok.length}, failed ${results.length - ok.length}; bar ${BAR}; ${tokens} input tokens, about $${((tokens / 1e6) * USD_PER_M_INPUT).toFixed(4)}.`,
+		);
+		const failed = results.find((r) => "error" in r && r.error);
+		if (failed && "error" in failed) say(`First Jev error: ${failed.error}`);
+		say();
+		if (!REVIEW) {
+			// Exact rows: every type is labeled (in the set or not).
+			let tp = 0;
+			let fp = 0;
+			let fn = 0;
+			let tn = 0;
+			let abstain = 0;
+			const misses: string[] = [];
+			for (const r of ok.filter((x) => x.exact)) {
+				const truth = new Set(r.truth);
+				for (const t of PROJECT_TYPES) {
+					const yes = r.reading.yes.has(t);
+					const no = r.reading.no.has(t);
+					if (!yes && !no) abstain++;
+					else if (yes && truth.has(t)) tp++;
+					else if (yes) {
+						fp++;
+						misses.push(`- ${r.slug}: Jev says ${t}, the human set does not`);
+					} else if (truth.has(t)) {
+						fn++;
+						misses.push(`- ${r.slug}: Jev says not ${t}, the human set does`);
+					} else tn++;
+				}
+			}
+			// Added rows: only the added types are labeled, all positive.
+			let addHit = 0;
+			let addMiss = 0;
+			let addAbstain = 0;
+			for (const r of ok.filter((x) => !x.exact)) {
+				for (const t of r.truth ?? []) {
+					if (r.reading.yes.has(t)) addHit++;
+					else if (r.reading.no.has(t)) {
+						addMiss++;
+						misses.push(`- ${r.slug}: Jev says not ${t}, a human added it`);
+					} else addAbstain++;
+				}
+			}
+			const pct = (a: number, b: number) =>
+				b ? `${Math.round((100 * a) / b)}%` : "n/a";
+			say("| Labels | Right | Wrong | Undecided | Precision | Recall |");
+			say("| --- | --- | --- | --- | --- | --- |");
+			say(
+				`| Exact type sets | ${tp + tn} | ${fp + fn} | ${abstain} | ${pct(tp, tp + fp)} | ${pct(tp, tp + fn)} |`,
+			);
+			say(
+				`| Added types | ${addHit} | ${addMiss} | ${addAbstain} | n/a | ${pct(addHit, addHit + addMiss)} |`,
+			);
+			say();
+			say(
+				"Disagreements with a label (check the row before calling either one wrong):",
+			);
+			for (const m of misses) say(m);
+		} else {
+			const flags: Array<{ line: string; p: number }> = [];
+			for (const r of ok) {
+				const stored = new Set(r.stored);
+				for (const [t, p] of r.reading.yes)
+					if (!stored.has(t))
+						flags.push({
+							p,
+							line: `- ${r.slug}: likely ${t} (${p.toFixed(2)}), not tagged`,
+						});
+				for (const [t, p] of r.reading.no)
+					if (stored.has(t))
+						flags.push({
+							p: 1 - p,
+							line: `- ${r.slug}: tagged ${t}, Jev says not (${p.toFixed(2)})`,
+						});
+			}
+			flags.sort((a, b) => b.p - a.p);
+			say(`Confident disagreements with stored types: ${flags.length}.`);
+			for (const f of flags.slice(0, 80)) say(f.line);
+		}
+		if (OUT) writeFileSync(OUT, JSON.stringify(results, null, 1));
+	}
+	if (process.env.GITHUB_STEP_SUMMARY)
+		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+}
+
 async function main() {
 	const key = jevKey();
 	const projects = await loadProjects();
+	if (TASK === "types") return typesTask(projects, key);
 	let items = REVIEW ? reviewItems(projects) : evalItems(projects);
 	if (LIMIT > 0) items = items.slice(0, LIMIT);
 	const results = await mapLimit(items, 8, (it) => judge(it, key));

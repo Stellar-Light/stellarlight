@@ -88,7 +88,7 @@ It fits the decisions in our pipeline that a regex gets wrong and a human
 makes too slowly.
 
 - **What a project's website actually shows.** Wired in as
-  `scripts/eval/jev-page-verdict.ts` (client: `src/lib/jev.ts`).
+  `scripts/eval/jev-eval.ts --task page` (client: `src/lib/jev.ts`).
   `classifyPage` settles parked, spam and scaffold pages and calls the rest
   "product" or "unknown". Jev reads the page against the record and answers
   product, shut down, parked, unrelated or placeholder, plus whether the page
@@ -98,6 +98,10 @@ makes too slowly.
   Its misses are what Jev is for: a betting site in Chinese, a "Page not
   found" page, company sites whose Stellar product is gone. Most of its false
   alarms are rebrands to a new domain, which the same-project answer settles.
+- **Which project types fit.** Wired in as `--task types`: one yes or no per
+  type for each of the 25 types, scored against 129 rows a human typed (50
+  exact type sets, 79 added types). Review mode lists published rows where
+  Jev confidently disagrees with the stored types.
 - **Next uses, same pattern.** Whether two records are one product (duplicate
   rows inflate the listed and launched counts), whether a linked GitHub org is
   this project's code, and whether a repo in a multi-chain org integrates
@@ -111,7 +115,7 @@ goes live.
 
 Setup (owner). Create an AI Gateway key in the Vercel team (AI Gateway, API
 keys), store it with `gh secret set AI_GATEWAY_API_KEY -R
-Stellar-Light/stellarlight`, then dispatch "Jev page verdicts (manual)" in
-eval mode. What leaves our infrastructure: a project's name, short description
+Stellar-Light/stellarlight`, then dispatch "Jev evals (manual)" in eval
+mode, once per task. What leaves our infrastructure: a project's name, short description
 and website, and the first 1.5 KB of that public page's text. No database
 content and no user data.
