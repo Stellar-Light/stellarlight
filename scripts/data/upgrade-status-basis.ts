@@ -37,6 +37,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import { NON_PRODUCT_VERDICTS } from "../../src/lib/page-verdict";
+import { curatedFieldsFor } from "./curation-maps";
 
 const { default: configPromise } = await import("../../src/payload.config");
 
@@ -173,6 +174,8 @@ async function main() {
 	let noCheck = 0;
 	let staleEvidence = 0;
 	let strongerBasis = 0;
+	/** Rows whose status a curation registry owns; never moved here. */
+	const curatedOwned = new Set<string>();
 
 	const noCheckRows: Array<{
 		slug: string;
@@ -245,6 +248,13 @@ async function main() {
 			});
 			continue;
 		}
+		// A curation registry that owns a row's status owns its basis and date
+		// too (STATUS_FIX writes all three). This lane must not move them, or
+		// curate writes them back each week (2026-10-03).
+		if (curatedFieldsFor(p.slug).has("status")) {
+			curatedOwned.add(p.slug);
+			continue;
+		}
 		upgrade.push({
 			id: p.id,
 			slug: p.slug,
@@ -308,6 +318,12 @@ async function main() {
 			!NON_PRODUCT_VERDICTS.has(check.pageVerdict as never)
 		)
 			continue;
+		// zilt: a human recorded that its "Create Next App" title sits on a page
+		// that does sell the product. The scaffold verdict must not undo that.
+		if (curatedFieldsFor(p.slug).has("status")) {
+			curatedOwned.add(p.slug);
+			continue;
+		}
 		downgrade.push({
 			id: p.id,
 			slug: p.slug,
@@ -325,6 +341,9 @@ async function main() {
 				`   ${n.slug.padEnd(24)} ${n.verdict.padEnd(16)} ${n.title.slice(0, 50)}`,
 			);
 	}
+	console.log(
+		`\n${curatedOwned.size} row(s) this pass would have moved, left alone because a curation registry owns their status, basis and date${curatedOwned.size ? `: ${[...curatedOwned].join(", ")}` : ""}`,
+	);
 	console.log(
 		`\n→ ${downgrade.length} site-liveness row(s) DOWNGRADED to unverified (page is not a product)`,
 	);

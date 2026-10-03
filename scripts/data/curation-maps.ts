@@ -2622,6 +2622,51 @@ export const STATUS_FIX: Record<
  * PRODUCT is verifiably alive but the recorded URL is dead (lapsed apex,
  * rebrand, or move). Overwrites links.website; equality no-ops keep reruns
  * clean. Status stays Live — these were false positives on the death list. */
+// ── Moved from scripts/data/curate-projects.ts (2026-10-03) ─────────────
+// As local maps these OWNED nothing: curatedFieldsFor could not see them,
+// so the daily feed sync wrote tricorn's old name and stellar-registry's old
+// GitHub link back the morning after every weekly curate run.
+
+/** links.github corrections — equality-guarded overwrites for records whose
+ * repo link points at the WRONG place (org renames, project splits). */
+export const GITHUB_LINK_FIX: Record<string, string> = {
+	// org renamed AquaToken→AquariusDeFi (old page is an empty shell)
+	aquarius: "https://github.com/AquariusDeFi",
+	// registry split out of scaffold-stellar into its own org 2026-05-19;
+	// the old link now literally shows a different product's code
+	"stellar-registry": "https://github.com/stellar-registry/contracts",
+	// Row-facts 2026-09-05: SCF-seeded row (SCF #44 Build) with no links. The
+	// SCF project page links the author (github.com/NibrasD); the author's
+	// Stellar-VRF repo (BLS12-381 VRF + drand for Soroban, pushed 2026-08-21)
+	// is the row's own subject ("ECVRF plus Drand verifiable randomness for
+	// Soroban contracts"). The SCF-linked frontend
+	// (soroban-vrf-frontend.onrender.com) answers 503 "Service Suspended".
+	"vrf-soroban": "https://github.com/NibrasD/Stellar-VRF",
+	// check-links 2026-09-07: normalfinance/normal-v1 404s. Of seven fuzzy
+	// name matches across the dead-link queue this was the only one with
+	// corroborating evidence — the successor repo's homepage IS the project's
+	// own site (normalfinance.io). The other six were rejected: a docs repo, an
+	// org placeholder, a widget, all name-similar and evidence-free.
+	normal: "https://github.com/normalfinance/normal-index-v1",
+};
+
+/** Rebrands — name, website, and description move together so both the old
+ * and new brand stay searchable. Equality no-ops keep reruns clean. */
+export const REBRANDS: Record<
+	string,
+	{ name: string; website: string; description: string }
+> = {
+	// boxy 2026-07-09: "tricorn is live (as) utexo" — human-confirmed live.
+	// tricorn.network 301s → bridge.utexo.com → mint.utexo.com. Coinspect
+	// audited the Stellar/Soroban integration (stellarsecurityportal.com/report/31).
+	tricorn: {
+		name: "Utexo",
+		website: "https://mint.utexo.com",
+		description:
+			"Utexo (formerly Tricorn) is a live cross-chain bridge supporting EVM and non-EVM chains, moving assets to and from Stellar. Its Stellar/Soroban bridge integration was audited by Coinspect. Rebranded from tricorn.network to utexo.com.",
+	},
+};
+
 /** Name corrections. The lumenloop mapper writes `name`, so a rename that is
  * not registered here is reverted by the next nightly sync — the class that
  * silently undid curation for weeks (#730). Equality no-ops keep reruns clean.
@@ -5371,6 +5416,14 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	if (slug in GITHUB_LINK_REMOVE) owned.add("links.github");
 	if (slug in DOCS_LINKS) owned.add("links.docs");
 	if (slug in GITHUB_REPOS_ADD) owned.add("github");
+	// Curate's own correction lists (moved here 2026-10-03). A rebrand moves
+	// the name, the description and the website together.
+	if (slug in GITHUB_LINK_FIX) owned.add("links.github");
+	if (slug in REBRANDS) {
+		owned.add("name");
+		owned.add("shortDescription");
+		owned.add("links.website");
+	}
 	return owned;
 }
 
@@ -5390,6 +5443,8 @@ export function curatedSlugs(): string[] {
 			...Object.keys(WEBSITE_REMOVE),
 			...Object.keys(WEBSITE_REMOVE_DEAD),
 			...Object.keys(GITHUB_LINK_REMOVE),
+			...Object.keys(GITHUB_LINK_FIX),
+			...Object.keys(REBRANDS),
 		]),
 	].sort();
 }
@@ -5977,4 +6032,8 @@ export const OWNERSHIP_COVERAGE: Array<{
 	},
 	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
 	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
+	{ map: GITHUB_LINK_FIX, name: "GITHUB_LINK_FIX", field: "links.github" },
+	{ map: REBRANDS, name: "REBRANDS", field: "name" },
+	{ map: REBRANDS, name: "REBRANDS", field: "shortDescription" },
+	{ map: REBRANDS, name: "REBRANDS", field: "links.website" },
 ];

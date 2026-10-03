@@ -13,7 +13,10 @@ import { join } from "node:path";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
 import { STRONG_STATUS_BASES } from "../src/lib/project-status";
-import { withoutCuratedFields } from "../src/lib/utils/curated-fields";
+import {
+	changedFields,
+	withoutCuratedFields,
+} from "../src/lib/utils/curated-fields";
 import {
 	extractEntryId,
 	type LumenloopEntry,
@@ -36,6 +39,9 @@ const stats = {
 		skipped: 0,
 		errors: 0,
 		curatedFieldsKept: 0,
+		/** Dry run only: rows whose stored fields the patch would change. */
+		rowsWouldChange: 0,
+		fieldChanges: {} as Record<string, number>,
 	},
 	entities: { created: 0, linked: 0, skipped: 0, errors: 0 },
 	total_files: 0,
@@ -217,8 +223,22 @@ async function main() {
 					);
 
 					if (dryRun) {
+						// Name the fields, not just the row: a dry run that cannot
+						// say what it would change cannot show a lane fight.
+						const changes = changedFields(
+							patch as Record<string, unknown>,
+							doc as unknown as Record<string, unknown>,
+						);
+						for (const f of changes)
+							stats.projects.fieldChanges[f] =
+								(stats.projects.fieldChanges[f] ?? 0) + 1;
+						if (changes.length) stats.projects.rowsWouldChange++;
 						console.log(
 							`  UPDATE: ${mapped.name} (${slug})${
+								changes.length
+									? ` would change [${changes.join(", ")}]`
+									: " no field changes"
+							}${
 								protectedFields.length
 									? ` [curated, not overwritten: ${protectedFields.join(", ")}]`
 									: ""

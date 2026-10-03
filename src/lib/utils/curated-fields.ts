@@ -46,3 +46,33 @@ export function withoutCuratedFields<T extends Record<string, unknown>>(
 	}
 	return { data: data as T, protectedFields: protectedFields.sort() };
 }
+
+/** The fields a feed patch would actually change on the stored record, as
+ * dotted paths one level deep (links.github, github.orgLogin), so a dry run
+ * names what an execute would write instead of only that it would write.
+ * Payload array-row `id`s are ignored and `provenance` (the sync's own
+ * bookkeeping, stamped on every write) is left out. */
+export function changedFields(
+	patch: Record<string, unknown>,
+	doc: Record<string, unknown>,
+	skip: ReadonlySet<string> = new Set(["provenance"]),
+): string[] {
+	const norm = (x: unknown) =>
+		JSON.stringify(x ?? null, (key, val) => (key === "id" ? undefined : val));
+	const out: string[] = [];
+	for (const [key, value] of Object.entries(patch)) {
+		if (skip.has(key) || value === undefined) continue;
+		const current = doc[key];
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			const cur =
+				current && typeof current === "object"
+					? (current as Record<string, unknown>)
+					: {};
+			for (const [sub, v] of Object.entries(value as Record<string, unknown>)) {
+				if (v !== undefined && norm(v) !== norm(cur[sub]))
+					out.push(`${key}.${sub}`);
+			}
+		} else if (norm(value) !== norm(current)) out.push(key);
+	}
+	return out.sort();
+}

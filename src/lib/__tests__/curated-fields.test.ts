@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withoutCuratedFields } from "../utils/curated-fields";
+import { changedFields, withoutCuratedFields } from "../utils/curated-fields";
 
 /** Lessons class 32 — the daily lumenloop sync spread the whole upstream feed
  * record over curated projects, so every curated field was reverted within 24h
@@ -109,5 +109,49 @@ describe("withoutCuratedFields", () => {
 		);
 		expect("name" in data).toBe(false);
 		expect(protectedFields).toEqual(["name"]);
+	});
+});
+
+describe("changedFields: what a feed patch would actually write", () => {
+	it("names nested paths that differ and ignores equal ones", () => {
+		expect(
+			changedFields(
+				{
+					name: "Tricorn",
+					links: {
+						website: "https://tricorn.network",
+						github: "https://github.com/a/b",
+					},
+				},
+				{
+					name: "Utexo",
+					links: {
+						website: "https://mint.utexo.com",
+						github: "https://github.com/a/b",
+					},
+				},
+			),
+		).toEqual(["links.website", "name"]);
+	});
+
+	it("ignores Payload array-row ids and the provenance stamp", () => {
+		expect(
+			changedFields(
+				{
+					github: { repos: [{ owner: "a", name: "b" }] },
+					provenance: { source: "LumenloopSeed" },
+				},
+				{
+					github: { repos: [{ owner: "a", name: "b", id: "66f0" }] },
+					provenance: { source: "Curated" },
+				},
+			),
+		).toEqual([]);
+	});
+
+	it("reports a value the record does not hold yet", () => {
+		expect(changedFields({ github: { orgLogin: "gitlab.com" } }, {})).toEqual([
+			"github.orgLogin",
+		]);
 	});
 });
