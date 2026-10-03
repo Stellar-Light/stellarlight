@@ -50,6 +50,10 @@ import {
 	jevKey,
 } from "../../src/lib/jev";
 import {
+	QUALITY_QUESTIONS,
+	RELEVANCE_QUESTIONS,
+} from "../../src/lib/jev-research";
+import {
 	classifyPage,
 	JEV_NON_PRODUCT,
 	jevPageReading,
@@ -792,43 +796,6 @@ interface Passage {
 	jevError?: string;
 	inputTokens?: number;
 }
-
-/** Pass 1, relevance: the question and the passage, nothing else. */
-const RELEVANCE_QUESTIONS: Record<string, JevQuestion> = {
-	answers: {
-		type: "score",
-		instructions: "How much does this passage help answer the question?",
-		criteria: [
-			"Unrelated to the question.",
-			"Same topic, but it does not help answer the question.",
-			"Partly answers the question.",
-			"Directly answers the question.",
-		],
-	},
-};
-
-/** Pass 2, quality: the passage with its date, no question. Separate passes
- * so one framing cannot colour the other. */
-const QUALITY_QUESTIONS: Record<string, JevQuestion> = {
-	substance: {
-		type: "boolean",
-		instructions:
-			"Is this passage substantive content a developer could learn from, rather than navigation, a list of links or other posts, a cookie or subscription banner, a table of contents, or a fragment with no information?",
-	},
-	currency: {
-		type: "choice",
-		instructions:
-			"As of the date given as today, does this passage describe how Stellar works today?",
-		criteria: {
-			current: "It describes current behaviour, or history that is still true.",
-			possibly_outdated:
-				"It may describe a superseded API, tool, process, version or rule.",
-			outdated:
-				"It clearly describes something that has been replaced or is no longer true.",
-			unclear: "The passage gives no basis to tell.",
-		},
-	},
-};
 
 async function researchRows(q: GoldenQuestion): Promise<Passage[]> {
 	const u = `${BASE}/api/research?q=${encodeURIComponent(q.question)}&source=${RESEARCH_SOURCES.join(",")}&perSource=${PER_SOURCE}`;
