@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-10-02T17:26:21.848Z",
+	"generatedAt": "2026-10-03T07:58:18.292Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-10-02",
+	"latestSnapshot": "2026-10-03",
 	"historyStart": "2026-10-02",
-	"snapshots": 1,
+	"snapshots": 2,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -21,19 +21,19 @@
 			"noActivityData": 412
 		},
 		"scf": {
-			"listed": 597,
-			"launched": 571,
-			"markedLive": 544,
-			"liveOnStrongEvidence": 235,
-			"observedActive": 195,
+			"listed": 613,
+			"launched": 579,
+			"markedLive": 552,
+			"liveOnStrongEvidence": 236,
+			"observedActive": 203,
 			"noActivityData": 208
 		},
 		"nonScf": {
-			"listed": 407,
-			"launched": 369,
-			"markedLive": 302,
-			"liveOnStrongEvidence": 161,
-			"observedActive": 113,
+			"listed": 391,
+			"launched": 361,
+			"markedLive": 294,
+			"liveOnStrongEvidence": 160,
+			"observedActive": 105,
 			"noActivityData": 204
 		}
 	},
@@ -50,21 +50,21 @@
 			},
 			{
 				"cohort": "rounds 16-30",
-				"listed": 240,
-				"launched": 232,
-				"markedLive": 217,
+				"listed": 239,
+				"launched": 231,
+				"markedLive": 216,
 				"liveOnStrongEvidence": 92,
 				"observedActive": 69,
-				"noActivityData": 69
+				"noActivityData": 68
 			},
 			{
 				"cohort": "rounds 31-45",
-				"listed": 266,
-				"launched": 250,
-				"markedLive": 246,
-				"liveOnStrongEvidence": 104,
-				"observedActive": 101,
-				"noActivityData": 104
+				"listed": 283,
+				"launched": 259,
+				"markedLive": 255,
+				"liveOnStrongEvidence": 105,
+				"observedActive": 109,
+				"noActivityData": 105
 			},
 			{
 				"cohort": "round unknown",
@@ -78,13 +78,22 @@
 		],
 		"nonScfByListedYear": [
 			{
-				"cohort": "listed date unknown",
-				"listed": 407,
-				"launched": 369,
-				"markedLive": 302,
-				"liveOnStrongEvidence": 161,
-				"observedActive": 113,
-				"noActivityData": 204
+				"cohort": "2025",
+				"listed": 99,
+				"launched": 99,
+				"markedLive": 93,
+				"liveOnStrongEvidence": 44,
+				"observedActive": 33,
+				"noActivityData": 55
+			},
+			{
+				"cohort": "2026",
+				"listed": 292,
+				"launched": 262,
+				"markedLive": 201,
+				"liveOnStrongEvidence": 116,
+				"observedActive": 72,
+				"noActivityData": 149
 			}
 		]
 	},
