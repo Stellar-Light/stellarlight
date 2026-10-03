@@ -27,6 +27,11 @@ on:
     # 07:00 UTC daily — just after the EC snapshot + research-corpus refreshes
     - cron: "0 7 * * *"
   workflow_dispatch:
+    inputs:
+      # A manual run used to execute unconditionally after its dry run, so no
+      # one could look at the plan without writing it (2026-10-03). Scheduled
+      # runs still execute.
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
 
 permissions:
   contents: read
@@ -59,4 +64,5 @@ jobs:
         run: pnpm exec tsx scripts/sync-lumenloop.ts
 
       - name: Execute sync — upsert projects + entities
+        if: github.event_name == 'schedule' || inputs.execute
         run: pnpm exec tsx scripts/sync-lumenloop.ts --execute

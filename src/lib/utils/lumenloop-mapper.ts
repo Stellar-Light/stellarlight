@@ -148,18 +148,19 @@ function mapTwitterHandle(handles: string[] | undefined): string | undefined {
 function extractGithubRepos(
 	urls: string[],
 ): Array<{ owner: string; name: string }> {
+	// GitHub URLs only, and trimmed. This used to strip a leading "github.com/"
+	// and split whatever was left, so a GitLab or Google Docs link became owner
+	// "gitlab.com" or "docs.google.com", which then landed in github.orgLogin;
+	// a trailing space in the feed stayed in the repo name. The daily sync
+	// wrote both back after every weekly curate run cleaned them (2026-10-03).
 	const repos: Array<{ owner: string; name: string }> = [];
 	for (const url of urls) {
-		const cleaned = url
-			.replace(/^https?:\/\//, "")
-			.replace(/^github\.com\//, "")
-			.replace(/\/$/, "");
-		const parts = cleaned.split("/").filter(Boolean);
-		if (parts.length >= 2) {
-			// Has specific repo: owner/repo
-			repos.push({ owner: parts[0], name: parts[1] });
-		}
-		// If only org (e.g., "github.com/stellar"), we set orgLogin but no specific repo
+		const m =
+			/^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#\s]+)\/([^/?#\s]+)/i.exec(
+				url.trim(),
+			);
+		// Org-only links (github.com/stellar) carry no repo and are skipped.
+		if (m) repos.push({ owner: m[1], name: m[2].replace(/\.git$/, "") });
 	}
 	return repos;
 }
