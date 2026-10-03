@@ -107,6 +107,16 @@ makes too slowly.
   proof and compared with the keyword gate that admits repos from multi-chain
   orgs. The gate's baseline on 2026-10-03, 205 repos: 43 of 105 code-proven
   Stellar repos found (41% recall), 17 false alarms (72% precision).
+- **How good our research passages are.** Wired in as `--task sources`: the
+  golden research questions are asked of all 16 sources the way Raven asks,
+  and Jev scores every served passage in two separate passes, relevance to
+  the question (0 to 3), then substance and currency against today's date.
+  Several passes under different criteria is the recommended way to use it
+  for source scoring. Baseline on 2026-10-03, 2,375 passages: the golden junk
+  rule flags 90% of release-note passages because it strips bullet lines
+  before measuring length, and a multi-source call returns four passages from
+  every source whether relevant or not (4% of developer-report passages hit
+  an answer pattern).
 - **Next uses, same pattern.** Whether two records are one product (duplicate
   rows inflate the listed and launched counts) and whether a linked GitHub org
   is this project's code.
