@@ -20,6 +20,7 @@ import {
 	titlePrefixMatch,
 } from "../src/lib/identity";
 import configPromise from "../src/payload.config";
+import { curatedFieldsFor } from "./data/curation-maps";
 import { parseRoundVerdicts } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
@@ -53,6 +54,39 @@ function toSlug(name: string): string {
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "");
 }
+
+/** The page's own `"siteUrls":{...}` object, brace-matched off the rebuilt
+ * flight stream. One per page (checked on 531 pages, 2026-10-03). */
+function siteUrlsOf(txt: string): Record<string, unknown> | null {
+	const at = txt.indexOf('"siteUrls":{');
+	if (at < 0) return null;
+	const start = txt.indexOf("{", at);
+	let depth = 0;
+	for (let i = start; i < txt.length; i++) {
+		if (txt[i] === "{") depth++;
+		else if (txt[i] === "}" && --depth === 0) {
+			try {
+				return JSON.parse(txt.slice(start, i + 1));
+			} catch {
+				return null;
+			}
+		}
+	}
+	return null;
+}
+
+/** An owner or owner/repo GitHub URL, nothing else: the field also carries
+ * GitLab links, Google Docs and comma-joined pairs on real pages. */
+const GITHUB_URL =
+	/^https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)?\/?$/;
+const githubUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && GITHUB_URL.test(v.trim()) ? v.trim() : undefined;
+/** A single absolute http(s) URL. Bare handles ("@telluscoop") and
+ * scheme-less hosts are dropped rather than guessed at. */
+const httpUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && /^https?:\/\/[^\s,]+$/.test(v.trim())
+		? v.trim()
+		: undefined;
 
 /** Download image buffer */
 async function downloadImage(
@@ -198,6 +232,17 @@ async function scrapeDetailPage(slug: string): Promise<{
 		}
 		const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
 		if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
+
+		// Links (2026-10-03). The page is App Router, so the __NEXT_DATA__ read
+		// above never matches and no link had been read since the site moved:
+		// the last run added 0 links across 472 matched projects. The project's
+		// own submission carries them as siteUrls on the flight stream.
+		const urls = siteUrlsOf(txt);
+		if (urls) {
+			result.website ??= httpUrl(urls.website);
+			result.twitter ??= httpUrl(urls.x ?? urls.twitter);
+			result.github ??= githubUrl(urls.github);
+		}
 
 		// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
 		// The old "grab every SCF #N on the page" scrape read the badge/
@@ -1033,12 +1078,19 @@ async function main() {
 				console.log(`    DESC: "${detail.description.slice(0, 60)}..."`);
 			}
 
-			// Add links we're missing
+			// Add links we're missing. A field a curation registry owns (a
+			// removed dead or hijacked link) is never refilled from the page, or
+			// this lane and curate would flip it on alternate runs.
 			const currentLinks = ours.links || {};
 			const newLinks: any = { ...currentLinks };
 			let linksChanged = false;
+			const owned = curatedFieldsFor(String(ours.slug ?? ""));
 
-			if (detail.website && !currentLinks.website) {
+			if (
+				detail.website &&
+				!currentLinks.website &&
+				!owned.has("links.website")
+			) {
 				newLinks.website = detail.website;
 				linksChanged = true;
 			}
@@ -1046,7 +1098,7 @@ async function main() {
 				newLinks.twitter = detail.twitter;
 				linksChanged = true;
 			}
-			if (detail.github && !currentLinks.github) {
+			if (detail.github && !currentLinks.github && !owned.has("links.github")) {
 				newLinks.github = detail.github;
 				linksChanged = true;
 			}

@@ -92,3 +92,28 @@ describe("award status of an absent SCF project", () => {
 		expect([...v.notAwarded]).toEqual(["44"]);
 	});
 });
+
+describe("award fields in either order (2026-10-03)", () => {
+	// SCF moved budget ahead of awardType. An ordered regex read every card in
+	// the new order as "no budget", and a dry run planned null amounts over
+	// ~550 stored round awards. Both orders must read the same.
+	const newOrder =
+		'{"id":"rec-new","status":"Awarded","roundName":"SCF #35","budget":93700,"awardType":"Build","isCvvc":false}';
+	const oldOrder =
+		'{"id":"rec-old","status":"Awarded","roundName":"SCF #32","awardType":"Build","budget":56120}';
+	it("reads budget and award type whichever comes first", () => {
+		const v = parseRoundVerdicts([newOrder, oldOrder].join("\n"));
+		const byRound = Object.fromEntries(v.awards.map((a) => [a.round, a]));
+		expect(byRound[35]).toMatchObject({ budgetUSD: 93700, awardType: "Build" });
+		expect(byRound[32]).toMatchObject({ budgetUSD: 56120, awardType: "Build" });
+	});
+	it("never takes a budget from the next card", () => {
+		const v = parseRoundVerdicts(
+			[
+				'{"id":"rec-a","status":"Awarded","roundName":"SCF #40","awardType":"Build"}',
+				'{"id":"rec-b","status":"Not Awarded","roundName":"SCF #41","budget":99999,"awardType":"Build"}',
+			].join("\n"),
+		);
+		expect(v.awards.find((a) => a.round === 40)?.budgetUSD).toBeNull();
+	});
+});
