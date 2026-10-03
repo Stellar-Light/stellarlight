@@ -21,6 +21,7 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { buildContractsRegistry } from "@/lib/contracts-registry";
+import { DEFAULT_READ_TIMEOUT_MS, degradedRead } from "@/lib/degraded-read";
 import { clampLimit } from "@/lib/http-params";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -101,12 +102,22 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const registry = await buildContractsRegistry(payload, {
-		q,
-		domain,
-		limit: rowLimit,
-		offset,
-	}).catch(() => null);
+	// Bounded like the other listing reads (2026-10-03). Unbounded, a stalled
+	// read held the request to the function cap and a partner's 10 s deadline
+	// passed with no answer at all; now it is the 503 below, early enough to
+	// retry.
+	const { value: registry } = await degradedRead(
+		"contracts registry",
+		() =>
+			buildContractsRegistry(payload, {
+				q,
+				domain,
+				limit: rowLimit,
+				offset,
+			}),
+		null,
+		DEFAULT_READ_TIMEOUT_MS,
+	);
 	if (!registry) {
 		logApiHit({
 			req,

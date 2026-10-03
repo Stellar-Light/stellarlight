@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-03",
+		surfaces: ["api"],
+		version: "spec@1.9.62",
+		type: "changed",
+		summary:
+			"Failed reads fail early and say so as fields. Every response that can come back incomplete (searchProjects, searchRepos, getBuilders, searchResearch, listSkills, getHackathons) now carries meta.partial and meta.failedReads. A read that stalls is cut at 4 s instead of 8 s, the reads in one request share a 6 s budget, and the contracts registry read is bounded too, so a stalled database answers as a partial page or a 503 early enough to retry inside a 10 s client deadline.",
+		detail:
+			"Measured by a partner at six questions a minute: a 503 arrived 8.0 s into a 10 s deadline, a builders page took 9.6 s, and a contracts read never answered. partial is true only when a backend read failed; a limit or filter never sets it. failedReads names each failed read and its failure class, never the raw error.",
+	},
+	{
 		date: "2026-10-02",
 		surfaces: ["api"],
 		version: "spec@1.9.61",

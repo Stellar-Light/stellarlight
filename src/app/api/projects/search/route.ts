@@ -20,6 +20,9 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
 	withReadTimeout,
 } from "@/lib/degraded-read";
 import { embed } from "@/lib/embed";
@@ -868,7 +871,14 @@ function tvlMethodUrlFor(slugs: string[] | null): string | null {
 	return slugs?.length ? `https://defillama.com/protocol/${slugs[0]}` : null;
 }
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
@@ -1017,7 +1027,7 @@ export async function GET(req: NextRequest) {
 		});
 		return NextResponse.json(
 			{
-				meta: {
+				meta: withPartial({
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
 					...(warnings.length ? { warnings } : {}),
@@ -1037,7 +1047,7 @@ export async function GET(req: NextRequest) {
 							},
 						],
 					},
-				},
+				}),
 				projects: [],
 				codeReferences: [],
 			},
@@ -2607,7 +2617,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				...(warnings.length ? { warnings } : {}),
@@ -2771,7 +2781,7 @@ export async function GET(req: NextRequest) {
 							},
 						}
 					: {}),
-			},
+			}),
 			// ?fields= projection runs LAST so every enrichment (builtBy,
 			// anchorProfile, repos, onchain) is present before filtering.
 			projects: projectsWithOrg.map((p) => pickFields(p, fieldsWanted)),

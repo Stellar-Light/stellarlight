@@ -19,7 +19,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { degradedWarning } from "@/lib/degraded-read";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
 import { unknownParamWarning } from "@/lib/http-params";
 import {
 	CURATED_SKILLS,
@@ -212,7 +212,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...matchModeMeta(qFilter ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
@@ -265,7 +265,7 @@ export async function GET(req: NextRequest) {
 					merged,
 					unreachable: catalog.unreachable,
 				},
-			},
+			}),
 			skills: filtered,
 		},
 		{
