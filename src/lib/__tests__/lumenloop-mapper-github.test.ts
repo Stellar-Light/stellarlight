@@ -13,6 +13,20 @@ const map = (github: string[]) =>
 		.github;
 
 describe("lumenloop mapper: GitHub identity", () => {
+	it("rejects an owner no GitHub login can be (the feed's own shape)", () => {
+		// Verbatim from the upstream feed on 2026-10-03.
+		expect(map(["github.com/gitlab.com/tales"])).toBeUndefined();
+		expect(
+			map(["github.com/gitlab.com/rivool-finance/stellar-contracts"]),
+		).toBeUndefined();
+		expect(map(["github.com/dev-api-new.skopadev.com/api/#"])).toBeUndefined();
+		expect(
+			map([
+				"github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
+			]),
+		).toBeUndefined();
+	});
+
 	it("ignores GitLab and other non-GitHub hosts", () => {
 		expect(map(["https://gitlab.com/dolphinze/disbursements"])).toBeUndefined();
 		expect(

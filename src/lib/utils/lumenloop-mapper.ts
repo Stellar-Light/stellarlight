@@ -145,6 +145,9 @@ function mapTwitterHandle(handles: string[] | undefined): string | undefined {
 /**
  * Extract owner/name pairs from GitHub URLs like "github.com/org/repo"
  */
+/** GitHub's login rule: 1-39 letters, digits or single inner hyphens. */
+const GITHUB_LOGIN = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+
 function extractGithubRepos(
 	urls: string[],
 ): Array<{ owner: string; name: string }> {
@@ -159,8 +162,12 @@ function extractGithubRepos(
 			/^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#\s]+)\/([^/?#\s]+)/i.exec(
 				url.trim(),
 			);
-		// Org-only links (github.com/stellar) carry no repo and are skipped.
-		if (m) repos.push({ owner: m[1], name: m[2].replace(/\.git$/, "") });
+		// Org-only links (github.com/stellar) carry no repo and are skipped. The
+		// owner must be a possible GitHub login (letters, digits, single
+		// hyphens; never a dot): the feed itself stores a GitLab project as
+		// "github.com/gitlab.com/tales", which passes the host test.
+		if (m && GITHUB_LOGIN.test(m[1]))
+			repos.push({ owner: m[1], name: m[2].replace(/\.git$/, "") });
 	}
 	return repos;
 }
