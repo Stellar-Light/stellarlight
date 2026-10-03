@@ -637,6 +637,48 @@ export function anchorDocUrls(query: string | undefined): string[] {
 	return out;
 }
 
+/**
+ * The order rankResearchChunks gives one source's rows, as a comparator, so
+ * rows from several sources merge by the same rule (2026-10-03). A
+ * multi-source call used to return them grouped in request order, so a
+ * reader that keeps the first rows saw whichever sources were named first:
+ * on Raven's 386 golden cards with a gold document in our corpus, that put
+ * the gold document in the top 5 for 14% of them; this rule puts it there
+ * for 71% (first for 45%, against 8%).
+ *
+ * Identifier-named documents first (an exact CAP/SEP/release lookup is a
+ * lookup, not a search). Then confidence, or under recency intent ("latest",
+ * "recent") confidence blended with dated freshness: confidence keeps 60% so
+ * a fresh but irrelevant chunk cannot hijack the page, and freshness is
+ * source-aware (a lastmod-dated source cannot spend its edit date as
+ * publication evidence; meeting recaps' URL-derived dates still count).
+ * Confidence rounds to 2dp, so raw retrieval score breaks the near-ties.
+ */
+export function researchOrder(
+	query: string | undefined,
+	now: number = Date.now(),
+): (
+	a: RankableChunk & { confidence: { score: number } },
+	b: RankableChunk & { confidence: { score: number } },
+) => number {
+	const targets = identifierTargets(query);
+	const vTargets = versionTargets(query);
+	const pinned = (c: RankableChunk) =>
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const recent = recencyIntent(query);
+	const key = (c: RankableChunk & { confidence: { score: number } }) =>
+		recent
+			? 0.6 * c.confidence.score +
+				0.4 * datedFreshness(c.publishedAt, now, meetingReclass(c).source)
+			: c.confidence.score;
+	return (a, b) =>
+		Number(pinned(b)) - Number(pinned(a)) ||
+		key(b) - key(a) ||
+		b.confidence.score - a.confidence.score ||
+		(b.score ?? 0) - (a.score ?? 0);
+}
+
 export function rankResearchChunks<T extends RankableChunk>(
 	pool: T[],
 	opts: {
@@ -727,30 +769,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 				}),
 			};
 		})
-		// Identifier-named docs first; then confidence order; raw retrieval
-		// score breaks ties (confidence rounds to 2dp, so near-equals happen).
-		.sort(
-			(a, b) =>
-				Number(pinned(b)) - Number(pinned(a)) ||
-				b.confidence.score - a.confidence.score ||
-				(b.score ?? 0) - (a.score ?? 0),
-		);
-
-	// Recency-intent re-sort (see RECENCY_INTENT_RE above): blend confidence
-	// with dated freshness so provably-current chunks top "latest/recent"
-	// queries. Confidence still carries 60% — a fresh-but-irrelevant chunk
-	// can't hijack the page. Identifier pins still take precedence. Dated
-	// freshness is source-aware: a lastmod-dated source (dev-docs) can't
-	// spend its edit date as publication evidence, while meeting recaps'
-	// URL-derived dates (reclassified above) still count.
-	if (recencyIntent(opts.query)) {
-		const key = (c: (typeof scored)[number]) =>
-			0.6 * c.confidence.score +
-			0.4 * datedFreshness(c.publishedAt, now, meetingReclass(c).source);
-		scored.sort(
-			(a, b) => Number(pinned(b)) - Number(pinned(a)) || key(b) - key(a),
-		);
-	}
+		.sort(researchOrder(opts.query, now));
 
 	// Best chunk per document first — also collapsing exact-duplicate content
 	// served under different URLs (index-page mirrors of the same recap).

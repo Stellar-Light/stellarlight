@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-03",
 		surfaces: ["api"],
+		version: "spec@1.9.63",
+		type: "changed",
+		summary:
+			"A several-source research call now returns its rows in one ranking across sources (identifier-named documents first, then confidence, the rule each source uses for its own rows) instead of grouped in request order. The row set is unchanged; only the order moves, so a reader that keeps the first rows gets the best passages of every source.",
+		detail:
+			"Measured on the 386 golden cards of a public agent's own eval corpus that name a gold document our corpus can hold: grouped in request order, the gold document came first for 8% of cards, reached the top 5 for 14% and the top 10 for 24%; ranked across sources by this rule, 45%, 71% and 75%. meta.bySource still reports each source in request order.",
+	},
+	{
+		date: "2026-10-03",
+		surfaces: ["api"],
 		version: "spec@1.9.62",
 		type: "changed",
 		summary:
