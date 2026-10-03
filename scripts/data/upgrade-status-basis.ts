@@ -191,13 +191,6 @@ async function main() {
 		statusBasis?: string | null;
 		links?: { website?: string | null } | null;
 	}>) {
-		// A curation registry that owns a row's status owns its basis and date
-		// too (STATUS_FIX writes all three). This lane must not move them, or
-		// curate writes them back each week (zilt, 2026-10-03).
-		if (curatedFieldsFor(p.slug).has("status")) {
-			curatedOwned.add(p.slug);
-			continue;
-		}
 		const basis = p.statusBasis ?? null;
 		if (basis && !WEAK.has(basis)) {
 			strongerBasis++;
@@ -255,6 +248,13 @@ async function main() {
 			});
 			continue;
 		}
+		// A curation registry that owns a row's status owns its basis and date
+		// too (STATUS_FIX writes all three). This lane must not move them, or
+		// curate writes them back each week (2026-10-03).
+		if (curatedFieldsFor(p.slug).has("status")) {
+			curatedOwned.add(p.slug);
+			continue;
+		}
 		upgrade.push({
 			id: p.id,
 			slug: p.slug,
@@ -305,12 +305,6 @@ async function main() {
 		links?: { website?: string | null } | null;
 	}>) {
 		if (p.statusBasis !== "site-liveness") continue;
-		// zilt: a human recorded that its "Create Next App" title sits on a page
-		// that does sell the product. The scaffold verdict must not undo that.
-		if (curatedFieldsFor(p.slug).has("status")) {
-			curatedOwned.add(p.slug);
-			continue;
-		}
 		const site = p.links?.website?.trim();
 		if (!site) continue;
 		const key = site
@@ -324,6 +318,12 @@ async function main() {
 			!NON_PRODUCT_VERDICTS.has(check.pageVerdict as never)
 		)
 			continue;
+		// zilt: a human recorded that its "Create Next App" title sits on a page
+		// that does sell the product. The scaffold verdict must not undo that.
+		if (curatedFieldsFor(p.slug).has("status")) {
+			curatedOwned.add(p.slug);
+			continue;
+		}
 		downgrade.push({
 			id: p.id,
 			slug: p.slug,
@@ -342,7 +342,7 @@ async function main() {
 			);
 	}
 	console.log(
-		`\n${curatedOwned.size} row(s) left alone: a curation registry owns their status, basis and date`,
+		`\n${curatedOwned.size} row(s) this pass would have moved, left alone because a curation registry owns their status, basis and date${curatedOwned.size ? `: ${[...curatedOwned].join(", ")}` : ""}`,
 	);
 	console.log(
 		`\n→ ${downgrade.length} site-liveness row(s) DOWNGRADED to unverified (page is not a product)`,
