@@ -7,6 +7,7 @@ import {
 	rankResearchChunks,
 	recencyContentTokens,
 	recencyIntent,
+	researchOrder,
 	selectRecencySupplement,
 } from "../research-rank";
 
@@ -1020,5 +1021,53 @@ describe("recency intent is a news signal, not a present-state qualifier", () =>
 		expect(
 			recencyIntent("What is the current base reserve on Stellar mainnet?"),
 		).toBe(false);
+	});
+});
+
+describe("researchOrder: one ranking across sources (2026-10-03)", () => {
+	const row = (source: string, url: string, conf: number, score = 0.7) => ({
+		source,
+		url,
+		title: url,
+		content: "x",
+		publishedAt: null,
+		score,
+		confidence: { score: conf },
+	});
+
+	it("merges rows from several sources by confidence, not request order", () => {
+		const rows = [
+			row("sdf-blog", "https://stellar.org/blog/a", 0.6),
+			row("sdf-blog", "https://stellar.org/blog/b", 0.55),
+			row("dev-docs", "https://developers.stellar.org/docs/x", 0.9),
+		];
+		expect(rows.sort(researchOrder("trustlines")).map((r) => r.source)).toEqual(
+			["dev-docs", "sdf-blog", "sdf-blog"],
+		);
+	});
+
+	it("keeps an identifier-named document first even at lower confidence", () => {
+		const rows = [
+			row("dev-docs", "https://developers.stellar.org/docs/anchors", 0.95),
+			row(
+				"sep",
+				"https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md",
+				0.5,
+			),
+		];
+		expect(rows.sort(researchOrder("SEP-24"))[0].source).toBe("sep");
+	});
+
+	it("breaks a confidence tie on raw retrieval score", () => {
+		const rows = [
+			row(
+				"cap",
+				"https://github.com/stellar/stellar-protocol/blob/master/core/cap-0046.md",
+				0.8,
+				0.71,
+			),
+			row("dev-docs", "https://developers.stellar.org/docs/y", 0.8, 0.79),
+		];
+		expect(rows.sort(researchOrder("soroban host"))[0].source).toBe("dev-docs");
 	});
 });

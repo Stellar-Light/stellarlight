@@ -59,6 +59,7 @@ import {
 	rankResearchChunks,
 	recencyContentTokens,
 	recencyIntent,
+	researchOrder,
 	selectRecencySupplement,
 	versionTargets,
 } from "@/lib/research-rank";
@@ -1357,8 +1358,16 @@ async function researchMany(
 			headers: rateLimitHeaders(limit),
 		});
 	}
+	// One ranking across sources, by the rule each source already uses for
+	// its own rows (researchOrder). Grouped in request order, a reader that
+	// keeps the first rows saw whichever sources were named first: on Raven's
+	// golden cards the gold document reached the top 5 for 14% of them, 71%
+	// ranked (scripts/eval/raven-source-recall.ts, 2026-10-03). Each row
+	// still names its source; meta.bySource keeps the per-source view.
 	// biome-ignore lint/suspicious/noExplicitAny: rows are our own result rows
-	const results: any[] = ok.flatMap((a) => a.body.results ?? []);
+	const results: any[] = ok
+		.flatMap((a) => a.body.results ?? [])
+		.sort(researchOrder(q));
 	const mode: "vector" | "keyword" = ok.every(
 		(a) => a.body.meta.mode === "vector",
 	)
