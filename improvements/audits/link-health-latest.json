@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-10-03T08:19:36.692Z",
- "asOf": "2026-10-03T08:19:36.692Z",
+ "generatedAt": "2026-10-04T08:37:37.354Z",
+ "asOf": "2026-10-04T08:37:37.354Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2570,
+ "checked": 2603,
  "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
   {
@@ -189,6 +189,17 @@
    ]
   },
   {
+   "url": "https://useoinc.com.br",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/oinc.links.website"
+   ],
+   "citedByStatus": [
+    "oinc: Live"
+   ]
+  },
+  {
    "url": "https://www.grupoamonet.com.br",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -197,6 +208,151 @@
    ],
    "citedByStatus": [
     "69d19a821a0f3c3e3c2706e2: n/a"
+   ]
+  },
+  {
+   "url": "https://x.com/boundless_xyz",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/boundless.links.twitter"
+   ],
+   "citedByStatus": [
+    "boundless: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/catalyst_bm",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/catalyst.links.twitter",
+    "entities/intellecteu.links.twitter"
+   ],
+   "citedByStatus": [
+    "catalyst: Live",
+    "intellecteu: n/a"
+   ]
+  },
+  {
+   "url": "https://x.com/contentdaoapp",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/content-dao.links.twitter"
+   ],
+   "citedByStatus": [
+    "content-dao: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/copperxhq",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/copperx.links.twitter"
+   ],
+   "citedByStatus": [
+    "copperx: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/createplayearn",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/katagames.links.twitter"
+   ],
+   "citedByStatus": [
+    "katagames: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/decentriolabs",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/decentrio.links.twitter"
+   ],
+   "citedByStatus": [
+    "decentrio: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/janusfreight",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/janus.links.twitter"
+   ],
+   "citedByStatus": [
+    "janus: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/myshopcatlog",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/catlog.links.twitter"
+   ],
+   "citedByStatus": [
+    "catlog: Development"
+   ]
+  },
+  {
+   "url": "https://x.com/nectar_xlm",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/nectar-network.links.twitter"
+   ],
+   "citedByStatus": [
+    "nectar-network: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/ondofinance",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/ondo.links.twitter"
+   ],
+   "citedByStatus": [
+    "ondo: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/spaceandtimedb",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/space-and-time.links.twitter"
+   ],
+   "citedByStatus": [
+    "space-and-time: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/stridesocials",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/stride.links.twitter"
+   ],
+   "citedByStatus": [
+    "stride: Live"
+   ]
+  },
+  {
+   "url": "https://x.com/usepaykit",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/paykit.links.twitter"
+   ],
+   "citedByStatus": [
+    "paykit: Live"
    ]
   }
  ],
@@ -269,6 +425,50 @@
    ],
    "citedByStatus": [
     "stellartpad: Draft"
+   ]
+  },
+  {
+   "url": "https://x.com/multiclique_org",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/multiclique.links.twitter"
+   ],
+   "citedByStatus": [
+    "multiclique: Draft"
+   ]
+  },
+  {
+   "url": "https://x.com/sorobanlearning",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/soroban-learn.links.twitter"
+   ],
+   "citedByStatus": [
+    "soroban-learn: Inactive"
+   ]
+  },
+  {
+   "url": "https://x.com/thehub_dao",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/the-hub.links.twitter"
+   ],
+   "citedByStatus": [
+    "the-hub: Draft"
+   ]
+  },
+  {
+   "url": "https://x.com/venture23xyz",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/localcoin.links.twitter"
+   ],
+   "citedByStatus": [
+    "localcoin: Inactive"
    ]
   }
  ]
