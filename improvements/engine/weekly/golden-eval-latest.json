@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8108398914337158,
+      "topScore": 0.8109575510025024,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -261,7 +261,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8468309640884399,
+      "topScore": 0.8468425273895264,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296414017677307,
+      "topScore": 0.8296040892601013,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -657,7 +657,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.709642144693438,
+      "topScore": 0.7102424041479865,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -680,7 +680,7 @@
       "scoreOk": true,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
       "sample": "Stellar Weekly Roundup: Week of Sep 11, 2026"
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038456797599792,
+      "topScore": 0.7052388191223145,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-02T11:23:13Z"
+  "generatedAt": "2026-10-04T11:20:37Z"
 }

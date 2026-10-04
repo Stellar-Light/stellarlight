@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-02T11:33:44.445Z",
+	"generatedAt": "2026-10-04T11:30:46.315Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -89,7 +89,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-09-30 (published 2026-09-30)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-02 (published 2026-10-02)",
 			"surface": "code"
 		},
 		{
@@ -158,6 +158,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:winsznx/routedock:npm:@routedock/routedock",
+			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.2.0 (published 2026-10-02)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
 			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.6 (published 2026-09-30)",
 			"surface": "code"
@@ -184,7 +189,7 @@
 		},
 		{
 			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
-			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.10.3 (published 2026-09-27)",
+			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.12.0 (published 2026-10-03)",
 			"surface": "code"
 		},
 		{
