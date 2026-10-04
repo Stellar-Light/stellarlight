@@ -2,12 +2,12 @@
   "windowDays": 14,
   "frame": {
     "loggedHits": 100000,
-    "realHits": 64185,
-    "distinctQueries": 7388,
-    "replayed": 190
+    "realHits": 54326,
+    "distinctQueries": 6958,
+    "replayed": 250
   },
   "okRate": 100,
   "misses": [],
-  "generatedAt": "2026-09-27T14:46:50Z",
+  "generatedAt": "2026-10-04T14:50:58Z",
   "evalKey": "engine-d-demand"
 }

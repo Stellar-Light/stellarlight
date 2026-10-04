@@ -1,16 +1,39 @@
 {
-  "generatedAt": "2026-09-27T14:46:50Z",
+  "generatedAt": "2026-10-04T14:50:58Z",
   "frame": {
     "scf": 531,
     "directory": 1004,
     "matched": 340,
-    "roundsChecked": 328
+    "roundsChecked": 338
   },
   "overstated": [],
   "understated": [],
   "roundsBackfill": [],
   "roundsOverstated": [],
   "roundsUnverifiable": [
+    {
+      "slug": "swiftex",
+      "name": "SwiftEx",
+      "ourRounds": [
+        "35",
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/swiftex-0ll",
+      "officialAwardedRounds": [
+        "35"
+      ],
+      "reason": "no submission verdict found for round(s) #45"
+    },
+    {
+      "slug": "stride",
+      "name": "Stride",
+      "ourRounds": [
+        "33"
+      ],
+      "url": "https://communityfund.stellar.org/project/stride-4uu",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
     {
       "slug": "palremit",
       "name": "Palremit",
@@ -62,52 +85,45 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
+      "slug": "micro-be",
+      "name": "Micro Be",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/micro-be-k9o",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "minisend",
+      "name": "Minisend",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/minisend-7tt",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
       "slug": "swiftex",
       "name": "SwiftEx",
       "ourRounds": [
-        "35"
+        "35",
+        "45"
       ],
       "url": "https://communityfund.stellar.org/project/swiftex-qxc",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
+      "officialAwardedRounds": [
+        "45"
+      ],
+      "reason": "no submission verdict found for round(s) #35"
     },
     {
-      "slug": "janus",
-      "name": "Janus",
+      "slug": "neko",
+      "name": "Neko",
       "ourRounds": [
         "45"
       ],
-      "url": "https://communityfund.stellar.org/project/janus-m2t",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
-      "slug": "sorted",
-      "name": "Sorted",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/sorted-jqh",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
-      "slug": "nouns-builder-protocol",
-      "name": "Nouns Builder Protocol",
-      "ourRounds": [
-        "44"
-      ],
-      "url": "https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
-      "slug": "yolat",
-      "name": "Yolat",
-      "ourRounds": [
-        "44"
-      ],
-      "url": "https://communityfund.stellar.org/project/yolat-bl5",
+      "url": "https://communityfund.stellar.org/project/neko-j49",
       "officialAwardedRounds": [],
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },

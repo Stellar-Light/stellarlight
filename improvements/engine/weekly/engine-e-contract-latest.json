@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-09-27T14:46:50Z",
-  "specVersion": "1.9.54",
+  "generatedAt": "2026-10-04T14:50:58Z",
+  "specVersion": "1.9.63",
   "frame": {
     "ops": 38,
     "paramsProbed": 28,
-    "fieldsChecked": 934,
+    "fieldsChecked": 925,
     "postChecked": 5,
     "skipped": [
       "GET /api/verify ?type (baseline 400)",
@@ -69,6 +69,11 @@
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/quality) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
+      "op": "GET /api/changelog",
+      "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/changelog?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
       "op": "GET /api/projects/search",
       "field": "meta.note",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
@@ -92,16 +97,6 @@
       "op": "GET /api/projects/search",
       "field": "projects[].placementRank",
       "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].ciPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].testsPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/search",
@@ -170,6 +165,16 @@
     },
     {
       "op": "GET /api/hackathons/{slug}",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/{slug}",
+      "field": "meta.failedReads",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/{slug}",
       "field": "meta.counts",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
@@ -200,6 +205,16 @@
     },
     {
       "op": "GET /api/people",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/people?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/people",
+      "field": "meta.failedReads",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/people?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/people",
       "field": "meta.docKind",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/people?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
@@ -211,6 +226,16 @@
     {
       "op": "GET /api/partners",
       "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/partners",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/partners",
+      "field": "meta.failedReads",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -229,8 +254,23 @@
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/partners?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
+      "op": "GET /api/rfps",
+      "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/rfps?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
       "op": "GET /api/audits",
       "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/audits?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/audits",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/audits?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/audits",
+      "field": "meta.failedReads",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/audits?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -240,7 +280,22 @@
     },
     {
       "op": "GET /api/research",
-      "field": "meta.warnings",
+      "field": "meta.sourceEmpty",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/research",
+      "field": "meta.sourceDocCount",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/research",
+      "field": "meta.bySource",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/research",
+      "field": "meta.sourceAdvisory",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -261,6 +316,16 @@
     {
       "op": "GET /api/clusters",
       "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/clusters) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/clusters",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/clusters) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/clusters",
+      "field": "meta.failedReads",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/clusters) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -271,6 +336,16 @@
     {
       "op": "GET /api/stablecoins",
       "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/stablecoins?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/stablecoins",
+      "field": "meta.partial",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/stablecoins?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/stablecoins",
+      "field": "meta.failedReads",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/stablecoins?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     }
   ],
@@ -289,6 +364,11 @@
       "op": "GET /api/hackathons/builds",
       "field": "builds[].prizeUsd",
       "evidence": "served on live rows (https://stellarlight.xyz/api/hackathons/builds?limit=200), missing from the spec's item schema"
+    },
+    {
+      "op": "GET /api/skills/{name}",
+      "field": "skill.registry",
+      "evidence": "served live (https://stellarlight.xyz/api/skills/stellar-scout), missing from the spec"
     },
     {
       "op": "GET /api/analyze",

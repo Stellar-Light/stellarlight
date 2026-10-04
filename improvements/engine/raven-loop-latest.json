@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-09-27T14:46:50.528Z",
+	"generatedAt": "2026-10-04T14:50:58.491Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 47,
@@ -9,8 +9,8 @@
 	"okRate": 1,
 	"misses": [],
 	"demand": {
-		"checked": 1,
-		"parityHeld": 1,
+		"checked": 0,
+		"parityHeld": 0,
 		"deadends": 0,
 		"goneNow": 0
 	},

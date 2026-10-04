@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 38,
+    "count": 42,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -123,34 +123,34 @@
         "missing": "evm"
       },
       {
-        "slug": "neon-wallet",
+        "slug": "lendwise",
         "field": "supportedNetworks",
         "prose": "ethereum",
         "missing": "evm"
       },
       {
-        "slug": "linq",
+        "slug": "lendwise",
+        "field": "supportedNetworks",
+        "prose": "evm",
+        "missing": "evm"
+      },
+      {
+        "slug": "lendwise",
+        "field": "supportedNetworks",
+        "prose": "arbitrum",
+        "missing": "evm"
+      },
+      {
+        "slug": "lendwise",
         "field": "supportedNetworks",
         "prose": "base",
         "missing": "evm"
       },
       {
-        "slug": "linq",
+        "slug": "neon-wallet",
         "field": "supportedNetworks",
-        "prose": "solana",
-        "missing": "solana"
-      },
-      {
-        "slug": "linq",
-        "field": "supportedNetworks",
-        "prose": "sui",
-        "missing": "sui"
-      },
-      {
-        "slug": "linq",
-        "field": "supportedNetworks",
-        "prose": "aptos",
-        "missing": "aptos"
+        "prose": "ethereum",
+        "missing": "evm"
       }
     ]
   },
@@ -159,18 +159,18 @@
       "shortDescription": "99% (202/204)",
       "types": "100% (204/204)",
       "supportedNetworks": "55% (113/204)",
-      "logoUrl": "75% (154/204)"
+      "logoUrl": "77% (157/204)"
     },
     "Tooling": {
-      "shortDescription": "96% (176/183)",
-      "types": "99% (181/183)",
-      "logoUrl": "81% (149/183)"
+      "shortDescription": "97% (178/184)",
+      "types": "99% (182/184)",
+      "logoUrl": "82% (151/184)"
     },
     "User-Facing App": {
-      "shortDescription": "97% (397/408)",
-      "types": "99% (405/408)",
-      "supportedNetworks": "73% (297/408)",
-      "logoUrl": "83% (340/408)"
+      "shortDescription": "99% (401/407)",
+      "types": "99% (404/407)",
+      "supportedNetworks": "74% (301/407)",
+      "logoUrl": "85% (346/407)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -179,11 +179,11 @@
       "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
-      "shortDescription": "99% (155/157)",
+      "shortDescription": "99% (156/157)",
       "types": "99% (156/157)",
-      "supportedNetworks": "76% (120/157)",
-      "logoUrl": "80% (125/157)",
-      "tvlUSD": "9% (14/157)"
+      "supportedNetworks": "77% (121/157)",
+      "logoUrl": "80% (126/157)",
+      "tvlUSD": "10% (15/157)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -363,20 +363,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 397,
+    "liveNoDatedSignal": 383,
     "liveStale365": 130,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 573,
+        "ageDays": 580,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 941,
+        "ageDays": 948,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -392,13 +392,6 @@
         "name": "Hubble",
         "ageDays": null,
         "hasDated": false,
-        "tvlUSD": null
-      },
-      {
-        "slug": "nownodes",
-        "name": "NOWNodes",
-        "ageDays": 2341,
-        "hasDated": true,
         "tvlUSD": null
       },
       {
@@ -425,7 +418,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 384,
+        "ageDays": 391,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -505,9 +498,16 @@
         "ageDays": null,
         "hasDated": false,
         "tvlUSD": null
+      },
+      {
+        "slug": "fordefi",
+        "name": "Fordefi",
+        "ageDays": null,
+        "hasDated": false,
+        "tvlUSD": null
       }
     ]
   },
-  "generatedAt": "2026-09-27T14:46:50Z",
+  "generatedAt": "2026-10-04T14:50:58Z",
   "evalKey": "engine-b-sweeps"
 }
