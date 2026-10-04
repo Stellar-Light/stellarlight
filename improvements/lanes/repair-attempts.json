@@ -188,6 +188,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-passkey-kit-npm-passkey-kit",
+   "date": "2026-10-04",
+   "run": "37209004404",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
