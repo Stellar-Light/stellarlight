@@ -40,7 +40,12 @@ export async function semanticBuildScores(
 								index: "hackathon_build_vector_index",
 								path: "embedding",
 								queryVector,
-								numCandidates: 300,
+								// Candidates well above the limit, for recall at the
+								// larger limits counting asks for.
+								numCandidates: Math.min(
+									2_000,
+									Math.max(300, (opts.limit ?? 50) * 4),
+								),
 								limit: opts.limit ?? 50,
 								filter: {
 									hiddenUpstream: { $ne: true },

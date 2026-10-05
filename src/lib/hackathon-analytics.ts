@@ -73,6 +73,19 @@ const LIBRARY_SCOPES: Array<[string, string]> = [
 ];
 
 /** The library a declared package belongs to. */
+/** Each assigned type's measured precision and recall, as the lane stamped
+ * them on the builds that carry it. */
+export function categoryMeasures(
+	builds: IndexedBuild[],
+): Map<string, { precision: number; recall: number }> {
+	const out = new Map<string, { precision: number; recall: number }>();
+	for (const b of builds)
+		for (const c of b.categories ?? [])
+			if (!out.has(c.type) && c.precision != null && c.recall != null)
+				out.set(c.type, { precision: c.precision, recall: c.recall });
+	return out;
+}
+
 export function libraryOf(pkg: string): string {
 	return (
 		LIBRARY_EXACT[pkg] ??
@@ -84,7 +97,7 @@ export function libraryOf(pkg: string): string {
 export const FACETS = {
 	category: {
 		label:
-			"the directory project type the submission was sorted into (up to three per build). A submission whose types are all uncertain carries none and still counts in `known`, so a share estimates the share of all submissions. Security includes zero-knowledge and privacy projects, as the directory types them.",
+			"the directory project type the submission was sorted into (up to three per build). Counts are confident assignments: each value carries its type's measured precision and recall on the hand-typed directory, so a type with low recall undercounts and one with balanced precision and recall tracks its true share. A submission whose types are all uncertain carries none and still counts in `known`. Security includes zero-knowledge and privacy projects, as the directory types them.",
 		unknown: "not categorized yet",
 		values: (b) => b.categories?.map((c) => c.type) ?? null,
 	},

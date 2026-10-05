@@ -15,6 +15,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
+	categoryMeasures,
 	distribution,
 	distributionBy,
 	FACET_IDS,
@@ -26,6 +27,7 @@ import {
 } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
+	MEANING_NEIGHBOURS,
 	parseBuildFilters,
 	queryBuilds,
 } from "@/lib/hackathon-build-query";
@@ -101,6 +103,10 @@ export async function GET(req: NextRequest) {
 	}
 
 	const { scored, field, served, warnings } = await queryBuilds(indexed, f);
+	if (f.q && served !== "keyword")
+		warnings.push(
+			`Counted by meaning: at most the ${MEANING_NEIGHBOURS} submissions nearest the query that clear the similarity floor, and a neighbour in meaning is not proof a build is about the topic. For a share of a topic, keyword mode counts every build that names it.`,
+		);
 	// A type the method never assigns would read as a share of zero: say it
 	// cannot be measured instead.
 	if (
@@ -120,6 +126,24 @@ export async function GET(req: NextRequest) {
 		? distributionBy(matched, field, facet, by, opts)
 		: undefined;
 	const lift = winnersVsOthers(matched, facet, opts);
+	// How far each reported type's count can be trusted, from the lane's own
+	// measurement on the hand-typed directory.
+	let measured:
+		| Array<{ type: string; precision: number; recall: number }>
+		| undefined;
+	if (facet === "category") {
+		const m = categoryMeasures(indexed);
+		const reported = new Set([
+			...total.values.map((v) => v.value),
+			...(groups ?? []).flatMap((g) => g.values.map((v) => v.value)),
+		]);
+		measured = [...reported]
+			.filter((t) => m.has(t))
+			.map((t) => ({
+				type: t,
+				...(m.get(t) as { precision: number; recall: number }),
+			}));
+	}
 
 	try {
 		logApiHit({
@@ -161,6 +185,7 @@ export async function GET(req: NextRequest) {
 					id: facet,
 					counts: FACETS[facet].label,
 					unknownMeans: FACETS[facet].unknown || null,
+					...(measured ? { measured } : {}),
 				},
 				by: by ?? null,
 				value: value ?? null,

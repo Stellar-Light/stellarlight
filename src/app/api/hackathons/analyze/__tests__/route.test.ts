@@ -4,6 +4,7 @@ import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 vi.mock("@/lib/hackathon-build-semantic", () => ({
+	BUILD_SEMANTIC_FLOOR: 0.68,
 	semanticBuildScores: vi.fn(async () => null),
 }));
 const index: IndexedBuild[] = [];
@@ -59,7 +60,9 @@ const build = (
 	haystack: `${id} builds payments`.toLowerCase(),
 	...over,
 });
-const cat = (type: string) => [{ type, score: 0.8 }];
+const cat = (type: string) => [
+	{ type, score: 0.8, precision: 0.82, recall: 0.83 },
+];
 
 beforeEach(() => {
 	index.length = 0;
@@ -174,5 +177,38 @@ describe("a type the method never assigns", () => {
 		const { body } = await get("analyze", "facet=category&value=Oracle");
 		expect(body.total.values[0]).toMatchObject({ value: "Oracle", builds: 0 });
 		expect(body.meta.warnings?.[0]).toMatch(/unknown, not zero/);
+	});
+});
+
+describe("counting by meaning", () => {
+	it("says the count is bounded and a neighbour is not proof of the topic", async () => {
+		const sem = await import("@/lib/hackathon-build-semantic");
+		vi.mocked(sem.semanticBuildScores).mockResolvedValueOnce(
+			new Map([["a1", 0.8]]),
+		);
+		const { body } = await get(
+			"analyze",
+			"q=agent%20payments&mode=meaning&facet=event",
+		);
+		expect(body.meta.mode.served).toBe("meaning");
+		expect(
+			body.meta.warnings.some((w: string) => /at most the 300/.test(w)),
+		).toBe(true);
+		expect(
+			vi.mocked(sem.semanticBuildScores).mock.calls.at(-1)?.[1],
+		).toMatchObject({
+			limit: 300,
+		});
+	});
+});
+
+describe("category counts carry their measurement", () => {
+	it("lists precision and recall for each reported type", async () => {
+		const { body } = await get("analyze", "facet=category");
+		expect(body.meta.facet.measured).toEqual(
+			expect.arrayContaining([
+				{ type: "Payments", precision: 0.82, recall: 0.83 },
+			]),
+		);
 	});
 });

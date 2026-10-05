@@ -28,6 +28,10 @@ export const BUILD_FILTER_PARAMS = [
 ] as const;
 
 const MAX_EVENTS = 10;
+/** Nearest submissions search by meaning reads. Counting needs the whole
+ * neighbourhood, not a page: at 50, analyze counted 50 matches against a
+ * field of 1,343 and called it a share. */
+export const MEANING_NEIGHBOURS = 300;
 
 export interface BuildFilters {
 	/** Lowercased topic; "" = none. */
@@ -134,7 +138,10 @@ export async function queryBuilds(
 	let served = f.mode;
 	let semantic: Map<string, number> | undefined;
 	if (f.mode !== "keyword") {
-		const sem = await semanticBuildScores(f.q, { winnersOnly: f.winnersOnly });
+		const sem = await semanticBuildScores(f.q, {
+			winnersOnly: f.winnersOnly,
+			limit: MEANING_NEIGHBOURS,
+		});
 		if (sem) semantic = sem;
 		else {
 			served = "keyword";

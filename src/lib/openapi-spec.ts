@@ -3456,6 +3456,16 @@ export const spec: OpenAPISpec = {
 																description:
 																	"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
 															},
+															precision: {
+																type: "number",
+																description:
+																	"The type's leave-one-out precision on the hand-typed directory at its cut. Not dated per item: categoriesAt dates the whole list.",
+															},
+															recall: {
+																type: "number",
+																description:
+																	"The type's leave-one-out recall there: a low recall means counts of this type undercount. Not dated per item: categoriesAt dates the whole list.",
+															},
 														},
 													},
 												},
@@ -3669,6 +3679,19 @@ export const spec: OpenAPISpec = {
 															nullable: true,
 															description:
 																"Why a build's value can be unknown; null when it never is.",
+														},
+														measured: {
+															type: "array",
+															description:
+																"facet=category only: each reported type's precision and recall, measured leave-one-out on the hand-typed directory at its cut. A type with low recall undercounts; balanced precision and recall track its true share.",
+															items: {
+																type: "object",
+																properties: {
+																	type: { type: "string" },
+																	precision: { type: "number" },
+																	recall: { type: "number" },
+																},
+															},
 														},
 													},
 												},

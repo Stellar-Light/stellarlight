@@ -530,8 +530,9 @@ async function main() {
 			labeled.push({ id: p.slug, vec, types: p.types });
 		}
 		// Calibrated on the directory's own hand-set types: every type gets the
-		// lowest cut at which it is right MIN_PRECISION of the time, and the k
-		// with the best F1 among calibrations that clear the floor is used.
+		// cut with the best F1 among those where it is right MIN_PRECISION of
+		// the time, and the k with the best overall F1 that clears the floor is
+		// used.
 		const { best, all } = bestCalibration(labeled);
 		console.log(
 			`\ncategories: ${labeled.length} hand-typed directory projects to learn from; each type gets its own cut (precision ${MIN_PRECISION}+, ${MIN_SUPPORT}+ examples), leave-one-out:`,
@@ -555,6 +556,7 @@ async function main() {
 			);
 		} else {
 			const method = `nearest directory projects, k=${best.k}, a cut per type set at precision ${MIN_PRECISION}+ (${best.cuts.size} types assignable); leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
+			const measured = new Map(best.types.map((t) => [t.type, t]));
 			let sorted = 0;
 			let agree = 0;
 			let linkedChecked = 0;
@@ -566,7 +568,10 @@ async function main() {
 				const cats = assignTypes(
 					typeScores(neighbours(vec, labeled, best.k), best.k),
 					best.cuts,
-				);
+				).map((c) => {
+					const m = measured.get(c.type);
+					return m ? { ...c, precision: m.precision, recall: m.recall } : c;
+				});
 				r.categories = cats;
 				r.categoriesAt = now;
 				r.categoriesMethod = method;
