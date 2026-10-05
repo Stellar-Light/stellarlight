@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 export const RSSFeeds: CollectionConfig = {
 	slug: "rss-feeds",
@@ -15,10 +16,10 @@ export const RSSFeeds: CollectionConfig = {
 			"Manage RSS feeds that automatically import blog posts. Visit the RSS Management page to sync feeds.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: adminOnly,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

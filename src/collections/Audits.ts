@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * Security-audit registry: one row per audit REPORT (not per finding),
@@ -21,7 +22,12 @@ export const Audits: CollectionConfig = {
 		useAsTitle: "title",
 		defaultColumns: ["title", "auditor", "projectSlug", "publishedAt"],
 	},
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
 	fields: [
 		{
 			name: "reportId",

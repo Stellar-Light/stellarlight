@@ -1,3 +1,5 @@
+import type { Access } from "payload";
+
 /**
  * Who counts as an admin.
  *
@@ -13,3 +15,11 @@
 export const isAdmin = (
 	user: { collection?: string } | null | undefined,
 ): boolean => user?.collection === "users";
+
+/**
+ * The rule for anything only an admin may do. Payload's own default for an
+ * operation a collection leaves out is "any logged-in user", which includes
+ * every partner, so every collection states each operation explicitly
+ * (src/collections/__tests__/access.test.ts fails if one does not).
+ */
+export const adminOnly: Access = ({ req }) => isAdmin(req.user);

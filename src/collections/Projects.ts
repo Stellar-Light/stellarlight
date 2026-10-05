@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { PROJECT_TYPES } from "@/lib/project-types";
-
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
+import { adminOnly, isAdmin } from "./access";
 
 export const Projects: CollectionConfig = {
 	slug: "projects",
@@ -14,8 +14,7 @@ export const Projects: CollectionConfig = {
 	access: {
 		read: () => true,
 		create: ({ data, req }) => {
-			// Allow admin creation from backend
-			if (req.user) {
+			if (isAdmin(req.user)) {
 				return true;
 			}
 			// Allow public creation for intake (unverified projects)
@@ -27,10 +26,10 @@ export const Projects: CollectionConfig = {
 			}
 			return false;
 		},
-		update: ({ req }) => {
-			// Only admins can update
-			return !!req.user;
-		},
+		update: adminOnly,
+		delete: adminOnly,
+		// Version history holds earlier, unpublished states of a record.
+		readVersions: adminOnly,
 	},
 	fields: [
 		{

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 export const IdeaSubmissions: CollectionConfig = {
 	slug: "idea-submissions",
@@ -13,9 +14,9 @@ export const IdeaSubmissions: CollectionConfig = {
 		// (rate-limited, overrideAccess). See ScoutFeedback for the same pattern.
 		create: () => false,
 		// Only admins can read/update/delete
-		read: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

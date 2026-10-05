@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { PRICE_BASES } from "@/lib/stablecoins";
+import { adminOnly } from "./access";
 
 /**
  * Stellar stablecoin inventory — one row per (asset code, issuer), written by
@@ -31,7 +32,12 @@ export const Stablecoins: CollectionConfig = {
 		useAsTitle: "assetId",
 		defaultColumns: ["assetId", "company", "peg", "marketCapUSD", "measuredAt"],
 	},
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
 	fields: [
 		{
 			name: "assetId",

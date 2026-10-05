@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * Measured state of the verified RWA registry (P3: the second bounded lane).
@@ -14,7 +15,12 @@ import type { CollectionConfig } from "payload";
 export const RwaAssets: CollectionConfig = {
 	slug: "rwa-assets",
 	admin: { useAsTitle: "assetId", group: "Ecosystem" },
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
 	fields: [
 		{
 			name: "assetId",

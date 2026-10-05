@@ -175,6 +175,7 @@ export const Partners: CollectionConfig = {
 		delete: ({ req }) => isAdmin(req.user),
 		// Partners must not see each other in the admin list UI.
 		admin: ({ req }) => isAdmin(req.user),
+		unlock: ({ req }) => isAdmin(req.user),
 	},
 	hooks: {
 		beforeValidate: [

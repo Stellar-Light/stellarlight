@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * One dated row per stablecoin per UTC day — the history the charts and the
@@ -23,7 +24,12 @@ export const StablecoinSnapshots: CollectionConfig = {
 		useAsTitle: "key",
 		defaultColumns: ["assetId", "day", "supply", "marketCapUSD", "holders"],
 	},
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
 	fields: [
 		{
 			name: "key",
