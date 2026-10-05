@@ -50,10 +50,15 @@ export interface IndexedBuild extends DoraHacksSubmission {
 }
 
 /** One project type a build was sorted into; score 0 to 1 (the share of its
- * nearest directory projects that carry the type, similarity-weighted). */
+ * nearest directory projects that carry the type, similarity-weighted).
+ * precision and recall are the type's own leave-one-out numbers on the
+ * hand-typed directory at its cut: how far a count of this type can be
+ * trusted (a high-precision, low-recall type undercounts). */
 export interface BuildCategory {
 	type: string;
 	score: number;
+	precision?: number;
+	recall?: number;
 }
 
 const isLinkBasis = (v: unknown): v is LinkBasis =>

@@ -255,3 +255,19 @@ describe("what the linked project is today", () => {
 		expect(distribution(rows, "project", { now: NOW }).known).toBe(4);
 	});
 });
+
+describe("measured categories", () => {
+	it("takes each type's precision and recall from the builds that carry it", async () => {
+		const { categoryMeasures } = await import("@/lib/hackathon-analytics");
+		const m = categoryMeasures([
+			build("a", {
+				categories: [
+					{ type: "Payments", score: 0.9, precision: 0.82, recall: 0.83 },
+				],
+			}),
+			build("b", { categories: [{ type: "Anchor", score: 0.6 }] }), // stored before the lane stamped them
+		]);
+		expect(m.get("Payments")).toEqual({ precision: 0.82, recall: 0.83 });
+		expect(m.has("Anchor")).toBe(false);
+	});
+});
