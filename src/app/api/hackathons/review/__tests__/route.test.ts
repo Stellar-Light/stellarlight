@@ -48,7 +48,13 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 	getHackathonBuildsIndex: vi.fn(async () => index),
 }));
 vi.mock("@/lib/hackathon-build-semantic", () => ({
-	similarToBuild: vi.fn(async () => new Map([["dorahacks-buidl-7", 0.83]])),
+	similarToBuild: vi.fn(
+		async () =>
+			new Map([
+				["dorahacks-buidl-9", 0.9], // the same repo, entered in another event
+				["dorahacks-buidl-7", 0.83],
+			]),
+	),
 	semanticBuildScores: vi.fn(async () => null),
 }));
 vi.mock("@/lib/scf-pitch", () => ({
@@ -92,6 +98,11 @@ index.push(
 		categories: [{ type: "Payments", score: 0.8 }],
 	}),
 	build("dorahacks-buidl-8", { categories: [{ type: "DEX", score: 0.7 }] }),
+	build("dorahacks-buidl-9", {
+		name: "TollPay again",
+		githubUrl: "https://github.com/rajkaria/toll",
+		hackathon: { title: "Older", slug: "older", endedAt: "2025-01-01" },
+	}),
 );
 
 const get = async (qs: string) => {

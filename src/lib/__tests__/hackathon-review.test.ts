@@ -158,3 +158,21 @@ describe("checks", () => {
 		expect(c.activity).toBeNull();
 	});
 });
+
+describe("the idea the pitch view runs on", () => {
+	it("uses the summary, falls back to the write-up's opening, and stays within 200 characters", async () => {
+		const { reviewIdea } = await import("@/lib/hackathon-review");
+		expect(reviewIdea(detail())).toBe("TollPay. Stripe for MCP servers.");
+		const noSummary = reviewIdea(
+			detail({
+				summary: null,
+				writeUp:
+					"## Toll\n\n**Toll** lets MCP servers charge per call in USDC.",
+			}),
+		);
+		expect(noSummary).toBe(
+			"TollPay. Toll Toll lets MCP servers charge per call in USDC.",
+		);
+		expect(reviewIdea(detail({ summary: "x".repeat(400) })).length).toBe(200);
+	});
+});

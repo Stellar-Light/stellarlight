@@ -29,6 +29,18 @@ import {
 import { buildScfPitch, type ScfPitchReport } from "@/lib/scf-pitch";
 import type { HackathonBuild } from "@/payload-types";
 
+/** The idea the SCF pitch view runs on: the name and DoraHacks' summary, or
+ * the opening of the write-up when there is no summary (a name alone vets
+ * nothing), capped at the pitch's 200 characters. */
+export function reviewIdea(d: BuildDetail): string {
+	const opening = (d.writeUp ?? "")
+		.replace(/[#*_>`[\]()]/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+	const about = d.summary?.trim() || opening;
+	return [d.name, about].filter(Boolean).join(". ").slice(0, 200).trim();
+}
+
 /** A write-up shorter than this gives a reviewer little to go on. */
 const SHORT_WRITE_UP = 600;
 const DAY = 86_400_000;
@@ -275,7 +287,7 @@ export async function buildHackathonReview(
 		? (await readProjectFacts(payload, [doc.projectSlug]))?.get(doc.projectSlug)
 		: undefined;
 	const submission = buildDetailFromStored(doc, facts);
-	const idea = [submission.name, submission.summary].filter(Boolean).join(". ");
+	const idea = reviewIdea(submission);
 	const [similar, pitch] = await Promise.all([
 		similarToBuild(subject.buildId, { limit: 10 }),
 		buildScfPitch(payload, idea),
@@ -291,9 +303,18 @@ export async function buildHackathonReview(
 		checks: reviewChecks(submission),
 		similar: {
 			checked: similar !== null,
+			// The team's own entries of the same repo are not prior work; they
+			// are counted in otherSubmissionsOfRepo.
 			builds: [...(similar ?? new Map<string, number>())]
 				.map(([id, s]) => ({ b: byId.get(id), s }))
-				.filter((x): x is { b: IndexedBuild; s: number } => !!x.b)
+				.filter(
+					(x): x is { b: IndexedBuild; s: number } =>
+						!!x.b &&
+						!(
+							submission.repo &&
+							repoFullNameOf(x.b.githubUrl) === submission.repo
+						),
+				)
 				.slice(0, 5)
 				.map(({ b, s }) => ({
 					id: b.id,
