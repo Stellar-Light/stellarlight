@@ -3159,6 +3159,8 @@ export interface operations {
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
+                /** @description keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
+                mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
             };
@@ -3177,22 +3179,33 @@ export interface operations {
                     "application/json": {
                         meta?: {
                             /**
-                             * @description How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).
+                             * @description How rows matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both blended; all = no text query (structured filters only).
                              * @enum {string}
                              */
-                            matchMode?: "all" | "filtered";
+                            matchMode?: "all" | "filtered" | "vector" | "hybrid";
                             matchModeLabel?: string;
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
                             /** @description Where the raw builds came from (DoraHacks). */
                             upstream?: string;
+                            /** @description The search mode asked for and the one that served. They differ only when search by meaning could not run. */
+                            mode?: {
+                                /** @enum {string} */
+                                requested?: "keyword" | "meaning" | "hybrid";
+                                /** @enum {string} */
+                                served?: "keyword" | "meaning" | "hybrid";
+                            };
+                            /** @description Present only when something limited this answer, e.g. search by meaning could not run. */
+                            warnings?: string[];
                             /** @description The filters as applied — an echo, so a caller can see what was honoured. */
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
                                 track?: string | null;
                                 limit?: number;
+                                /** @enum {string} */
+                                mode?: "keyword" | "meaning" | "hybrid";
                             };
                             /** @description returned vs total — how much the filters narrowed. */
                             counts?: {
@@ -3232,6 +3245,8 @@ export interface operations {
                             } | null;
                             /** @description Which query terms this build matched — the evidence behind its inclusion. */
                             matchedTerms?: string[];
+                            /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
+                            similarity?: number;
                         }[];
                     };
                 };

@@ -77,3 +77,8 @@ export function parseBuildId(raw: string): string | null {
 		/dorahacks\.io\/buidl\/(\d+)/i.exec(s);
 	return m ? `dorahacks-buidl-${m[1]}` : null;
 }
+
+/** keyword: words and their stems/synonyms. meaning: vector similarity only.
+ * hybrid: both, blended. The spec spreads this list (enum ratchet). */
+export const BUILD_SEARCH_MODES = ["keyword", "meaning", "hybrid"] as const;
+export type BuildSearchMode = (typeof BUILD_SEARCH_MODES)[number];

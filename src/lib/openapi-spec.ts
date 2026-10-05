@@ -17,6 +17,7 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
+import { BUILD_SEARCH_MODES } from "./hackathon-build-links";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
@@ -2888,6 +2889,8 @@ export const spec: OpenAPISpec = {
 						"hackathon winners by topic",
 						"won prizes",
 						"x402 builds",
+						"search by meaning",
+						"similar hackathon projects",
 					],
 					useWhen: [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -2935,6 +2938,18 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
+						name: "mode",
+						in: "query",
+						required: false,
+						description:
+							"keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						schema: {
+							type: "string",
+							enum: [...BUILD_SEARCH_MODES],
+							default: "keyword",
+						},
+					},
+					{
 						name: "limit",
 						in: "query",
 						required: false,
@@ -2957,9 +2972,9 @@ export const spec: OpenAPISpec = {
 											properties: {
 												matchMode: {
 													type: "string",
-													enum: ["all", "filtered"],
+													enum: ["all", "filtered", "vector", "hybrid"],
 													description:
-														"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														"How rows matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both blended; all = no text query (structured filters only).",
 												},
 												matchModeLabel: { type: "string" },
 												source: { type: "string" },
@@ -2968,6 +2983,27 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													description:
 														"Where the raw builds came from (DoraHacks).",
+												},
+												mode: {
+													type: "object",
+													description:
+														"The search mode asked for and the one that served. They differ only when search by meaning could not run.",
+													properties: {
+														requested: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+														served: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+													},
+												},
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when something limited this answer, e.g. search by meaning could not run.",
 												},
 												filters: {
 													type: "object",
@@ -2978,6 +3014,10 @@ export const spec: OpenAPISpec = {
 														winnersOnly: { type: "boolean" },
 														track: { type: "string", nullable: true },
 														limit: { type: "integer" },
+														mode: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
 													},
 												},
 												counts: {
@@ -3049,6 +3089,11 @@ export const spec: OpenAPISpec = {
 														items: { type: "string" },
 														description:
 															"Which query terms this build matched — the evidence behind its inclusion.",
+													},
+													similarity: {
+														type: "number",
+														description:
+															"Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it.",
 													},
 												},
 											},
