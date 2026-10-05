@@ -1,5 +1,10 @@
 {
-	"generatedAt": "2026-10-04T11:20:06.343Z",
+	"generatedAt": "2026-10-05T12:41:53.984Z",
 	"detector": "api-drift",
-	"failures": []
+	"failures": [
+		{
+			"probe": "status.endpoints lists /api/hackathons/builds/{id}",
+			"note": "OpenAPI documents /api/hackathons/builds/{id} but /api/status.endpoints[] omits it"
+		}
+	]
 }

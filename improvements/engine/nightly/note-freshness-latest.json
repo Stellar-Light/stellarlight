@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-04T11:30:46.315Z",
+	"generatedAt": "2026-10-05T12:53:49.416Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -198,6 +198,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:soomtochukwu/tradeflow",
+			"note": "public note asOf 2026-05-15; github.com/soomtochukwu/tradeflow is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-predates-archival:stellar/mcp-stellar-xdr",
 			"note": "public note asOf 2026-09-14; repo archived 2026-09-24 — the note describes a live repo",
 			"surface": "code"
@@ -205,6 +210,11 @@
 		{
 			"probe": "note-repo-gone:Kali-Decoder/stellar-crates-tinder",
 			"note": "public note asOf 2026-09-14; github.com/Kali-Decoder/stellar-crates-tinder is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:0xasuna/zkshotroul",
+			"note": "public note asOf 2026-09-14; github.com/0xasuna/zkshotroul is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
