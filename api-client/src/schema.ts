@@ -3369,6 +3369,11 @@ export interface operations {
                                 status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
                                 /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
                                 scfAwarded?: boolean;
+                                /**
+                                 * Format: date-time
+                                 * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                                 */
+                                factsReadAt?: string;
                             } | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
@@ -3453,6 +3458,11 @@ export interface operations {
                                 status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
                                 /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
                                 scfAwarded?: boolean;
+                                /**
+                                 * Format: date-time
+                                 * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                                 */
+                                factsReadAt?: string;
                             } | null;
                             /** @description Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none. */
                             stack?: string[];
@@ -3464,7 +3474,7 @@ export interface operations {
                             categories?: {
                                 /** @enum {string} */
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
-                                /** @description 0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. */
+                                /** @description 0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list. */
                                 score?: number;
                             }[];
                             /** @description When it was categorized; null = not yet. */
@@ -4574,6 +4584,11 @@ export interface operations {
                                     status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
                                     /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
                                     scfAwarded?: boolean;
+                                    /**
+                                     * Format: date-time
+                                     * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                                     */
+                                    factsReadAt?: string;
                                 } | null;
                             }[];
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */

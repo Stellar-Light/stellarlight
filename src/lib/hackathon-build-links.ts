@@ -41,6 +41,8 @@ export interface LinkedProject {
 	status?: string | null;
 	/** Whether SCF funded the project, read with the index. Absent = unknown. */
 	scfAwarded?: boolean;
+	/** When status and scfAwarded were read; absent with them. */
+	factsReadAt?: string;
 }
 
 export const LINK_BASES = ["repo", "website"] as const;

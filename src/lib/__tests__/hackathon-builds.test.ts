@@ -550,13 +550,18 @@ describe("project facts on a link", () => {
 			createdAt: "2026-10-05T00:00:00.000Z",
 		};
 		expect(
-			indexedFromStored(row, { status: "Live", scfAwarded: false }).project,
+			indexedFromStored(row, {
+				status: "Live",
+				scfAwarded: false,
+				factsReadAt: "2026-10-05T17:00:00.000Z",
+			}).project,
 		).toEqual({
 			slug: "tollpay",
 			name: "TollPay",
 			basis: "repo",
 			status: "Live",
 			scfAwarded: false,
+			factsReadAt: "2026-10-05T17:00:00.000Z",
 		});
 		expect(indexedFromStored(row).project).toEqual({
 			slug: "tollpay",

@@ -116,6 +116,7 @@ async function buildLiveIndex(): Promise<IndexedBuild[]> {
 export interface ProjectFacts {
 	status: string | null;
 	scfAwarded: boolean;
+	factsReadAt: string;
 }
 
 /** The facts of the projects these builds link to, read fresh, or null when
@@ -136,6 +137,7 @@ export async function readProjectFacts(
 			}),
 			8_000,
 		);
+		const factsReadAt = new Date().toISOString();
 		return new Map(
 			(
 				res.docs as Array<{
@@ -145,7 +147,7 @@ export async function readProjectFacts(
 				}>
 			).map((p) => [
 				p.slug,
-				{ status: p.status ?? null, scfAwarded: !!p.scf?.awarded },
+				{ status: p.status ?? null, scfAwarded: !!p.scf?.awarded, factsReadAt },
 			]),
 		);
 	} catch {

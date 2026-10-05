@@ -195,6 +195,12 @@ const BUILD_PROJECT_SCHEMA = {
 			description:
 				"Whether SCF funded the project. Absent when it could not be read (unknown).",
 		},
+		factsReadAt: {
+			type: "string",
+			format: "date-time",
+			description:
+				"When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.",
+		},
 	},
 	required: ["slug", "name"],
 };
@@ -3448,7 +3454,7 @@ export const spec: OpenAPISpec = {
 															score: {
 																type: "number",
 																description:
-																	"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type.",
+																	"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
 															},
 														},
 													},
