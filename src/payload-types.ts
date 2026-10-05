@@ -76,6 +76,7 @@ export interface Config {
 		stablecoins: Stablecoin;
 		"stablecoin-snapshots": StablecoinSnapshot;
 		"rwa-assets": RwaAsset;
+		"hackathon-builds": HackathonBuild;
 		"award-rounds": AwardRound;
 		"award-nominees": AwardNominee;
 		"award-voters": AwardVoter;
@@ -122,6 +123,9 @@ export interface Config {
 			| StablecoinSnapshotsSelect<false>
 			| StablecoinSnapshotsSelect<true>;
 		"rwa-assets": RwaAssetsSelect<false> | RwaAssetsSelect<true>;
+		"hackathon-builds":
+			| HackathonBuildsSelect<false>
+			| HackathonBuildsSelect<true>;
 		"award-rounds": AwardRoundsSelect<false> | AwardRoundsSelect<true>;
 		"award-nominees": AwardNomineesSelect<false> | AwardNomineesSelect<true>;
 		"award-voters": AwardVotersSelect<false> | AwardVotersSelect<true>;
@@ -1379,6 +1383,81 @@ export interface RwaAsset {
 	 * Set when the row could not be measured; names why
 	 */
 	note?: string | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathon-builds".
+ */
+export interface HackathonBuild {
+	id: string;
+	/**
+	 * dorahacks-buidl-<id>, the id the builds API has always served
+	 */
+	buildId: string;
+	name: string;
+	/**
+	 * DoraHacks' one-line summary (about 256 characters at most upstream). Served as `description`.
+	 */
+	vision?: string | null;
+	/**
+	 * The team's full write-up from the submission page, markdown as published. Empty until the lane has read the page.
+	 */
+	description?: string | null;
+	/**
+	 * What the team tagged itself with on DoraHacks ("layer1:Stellar", "category:..."). Self-reported.
+	 */
+	selfTags?: string[] | null;
+	/**
+	 * The event's DoraHacks uname: the slug /api/hackathons lists and /api/hackathons/{slug} opens
+	 */
+	hackathonSlug: string;
+	hackathonTitle: string;
+	/**
+	 * Event end date, YYYY-MM-DD
+	 */
+	endedAt?: string | null;
+	track?: string | null;
+	/**
+	 * This build's own placement as DoraHacks published it ('1st Place'); empty when not a winner
+	 */
+	placement?: string | null;
+	/**
+	 * Award category title, shared by every placement inside it; not this build's payout
+	 */
+	award?: string | null;
+	isWinner?: boolean | null;
+	url: string;
+	githubUrl?: string | null;
+	demoUrl?: string | null;
+	videoUrl?: string | null;
+	/**
+	 * owner/name parsed from githubUrl, lowercased. Empty for an account or org link.
+	 */
+	repoFullName?: string | null;
+	/**
+	 * The directory project that lists this exact repo as its own. Empty after a check = no project lists it. A shared GitHub owner never counts.
+	 */
+	projectSlug?: string | null;
+	projectName?: string | null;
+	/**
+	 * When projectSlug was last derived, ISO. Empty = never checked.
+	 */
+	linkCheckedAt?: string | null;
+	/**
+	 * When the lane last read the submission page, ISO
+	 */
+	detailReadAt?: string | null;
+	/**
+	 * Deleted or made private on DoraHacks: kept here, not served
+	 */
+	hiddenUpstream?: boolean | null;
+	firstSeenAt: string;
+	/**
+	 * Last time the event's DoraHacks roster listed this build, ISO
+	 */
+	lastSeenAt: string;
 	updatedAt: string;
 	createdAt: string;
 }
@@ -2868,6 +2947,10 @@ export interface PayloadLockedDocument {
 				value: string | RwaAsset;
 		  } | null)
 		| ({
+				relationTo: "hackathon-builds";
+				value: string | HackathonBuild;
+		  } | null)
+		| ({
 				relationTo: "award-rounds";
 				value: string | AwardRound;
 		  } | null)
@@ -3446,6 +3529,38 @@ export interface RwaAssetsSelect<T extends boolean = true> {
 	measureBasis?: T;
 	measuredAt?: T;
 	note?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathon-builds_select".
+ */
+export interface HackathonBuildsSelect<T extends boolean = true> {
+	buildId?: T;
+	name?: T;
+	vision?: T;
+	description?: T;
+	selfTags?: T;
+	hackathonSlug?: T;
+	hackathonTitle?: T;
+	endedAt?: T;
+	track?: T;
+	placement?: T;
+	award?: T;
+	isWinner?: T;
+	url?: T;
+	githubUrl?: T;
+	demoUrl?: T;
+	videoUrl?: T;
+	repoFullName?: T;
+	projectSlug?: T;
+	projectName?: T;
+	linkCheckedAt?: T;
+	detailReadAt?: T;
+	hiddenUpstream?: T;
+	firstSeenAt?: T;
+	lastSeenAt?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

@@ -259,7 +259,7 @@ export interface paths {
         };
         /**
          * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
-         * @description Topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly=1` = prize winners; `track` filters by track. Absence is a real whitespace signal, not proof it was never tried. For SHIPPED products in the directory → use searchProjects.
+         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's event (hackathonSlug opens it in getHackathon), placement, repo/demo links and `project`, the directory project listing its exact repo. Ordered by concepts covered, then prize winners first. `winnersOnly=1` = winners; `track` filters by track. Absence is a whitespace signal, not proof it was never tried. For SHIPPED products → use searchProjects.
          */
         get: operations["searchHackathonBuilds"];
         put?: never;
@@ -3190,6 +3190,7 @@ export interface operations {
                             demoUrl?: string | null;
                             githubUrl?: string | null;
                             hackathon?: string;
+                            /** @description The event's slug, the one getHackathons lists and getHackathon opens. */
                             hackathonSlug?: string;
                             track?: string | null;
                             /** @description This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner. */
@@ -3198,8 +3199,15 @@ export interface operations {
                             award?: string | null;
                             /** @description Placed in the event; absence of a win is not a quality judgement. */
                             isWinner?: boolean;
+                            /** @description What this build itself won in USD, parsed from its own placement string; null = not stated there (DoraHacks often names the amount only on the award category). */
+                            prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
+                            /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            project?: {
+                                slug: string;
+                                name: string;
+                            } | null;
                             /** @description Which query terms this build matched — the evidence behind its inclusion. */
                             matchedTerms?: string[];
                         }[];
@@ -4087,6 +4095,11 @@ export interface operations {
                                 placement?: string | null;
                                 githubUrl?: string | null;
                                 url?: string | null;
+                                /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                project?: {
+                                    slug: string;
+                                    name: string;
+                                } | null;
                             }[];
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
                             startFrom?: {

@@ -128,6 +128,13 @@ async function fetchHubHackathons(
 		const data: any = await response.json();
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 		const rows: any[] = Array.isArray(data?.results) ? data.results : [];
+		// Only page 1 is read. Every Stellar listing fits on it today (the
+		// largest, the "stellar" search, lists 19 events), so a second page
+		// means events are being missed: say so instead of serving a short list.
+		if (data?.next)
+			console.warn(
+				`DoraHacks ${label}: more than ${rows.length} events listed and only page 1 was read; the rest are missing.`,
+			);
 		const now = Date.now() / 1000;
 		return rows
 			.filter((r) => typeof r?.id === "number")
@@ -200,6 +207,39 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 		}
 		return b.end_time - a.end_time; // Most recent first
 	});
+}
+
+/**
+ * DoraHacks events with a final roster: ended, or winners announced, newest
+ * first. Curated rows are skipped: they have no DoraHacks roster to read.
+ */
+export function endedDoraHacksEvents(
+	hacks: DoraHacksHackathon[],
+): DoraHacksHackathon[] {
+	return hacks
+		.filter(
+			(h) => h.source !== "curated" && (h.status === 2 || h.winner_announced),
+		)
+		.sort((a, b) => (b.end_time ?? 0) - (a.end_time ?? 0));
+}
+
+/**
+ * How a DoraHacks event is named on everything we serve. The slug is the
+ * event's own `uname`, the one /api/hackathons lists and
+ * /api/hackathons/{slug} opens. Submissions used to carry a slug made from
+ * the title instead, so 10 of the 12 events with recorded winners could not
+ * be opened from one of their submissions.
+ */
+export function doraEventRef(
+	h: Pick<DoraHacksHackathon, "title" | "uname" | "end_time">,
+): { title: string; slug: string; endedAt: string | null } {
+	return {
+		title: h.title,
+		slug: h.uname,
+		endedAt: h.end_time
+			? new Date(h.end_time * 1000).toISOString().slice(0, 10)
+			: null,
+	};
 }
 
 // Browser-like headers — the whole /api/v1/hub surface rejects short bot-style
@@ -381,6 +421,49 @@ export async function fetchHackathonSubmissions(
 		if (isAbortError(err)) throw err;
 	}
 	return out;
+}
+
+/** One submission's own page, beyond what the event roster lists. */
+export interface DoraHacksBuidlDetail {
+	/** The team's full write-up, markdown as published. null = none written. */
+	description: string | null;
+	/** What the team tagged itself with ("layer1:Stellar", "category:..."). Self-reported. */
+	selfTags: string[];
+	/** Deleted or made private on DoraHacks. */
+	hidden: boolean;
+}
+
+/**
+ * Read one submission's page record. null = DoraHacks answered that it has
+ * no such submission (404). Any other failure throws, so a caller can tell
+ * "gone" from "could not check".
+ */
+export async function fetchBuidlDetail(
+	buidlId: number,
+): Promise<DoraHacksBuidlDetail | null> {
+	const res = await fetch(`${DORAHACKS_API_BASE}/buidls/${buidlId}`, {
+		headers: DORA_BROWSER_HEADERS,
+		signal: AbortSignal.timeout(10_000),
+	});
+	if (res.status === 404) return null;
+	if (!res.ok)
+		throw new Error(`DoraHacks buidl ${buidlId}: HTTP ${res.status}`);
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const d: any = await res.json();
+	const tags: unknown[] = Array.isArray(d?.other_infrastructures)
+		? d.other_infrastructures
+		: [];
+	return {
+		description:
+			typeof d?.description === "string" && d.description.trim()
+				? d.description.trim()
+				: null,
+		selfTags: tags
+			.filter((t): t is string => typeof t === "string" && !!t.trim())
+			.map((t) => t.trim())
+			.slice(0, 30),
+		hidden: !!d?.is_deleted || !!d?.is_private,
+	};
 }
 
 /** Parse a DoraHacks placement label ("1st Place - $5,000 in XLM") into a
