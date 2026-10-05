@@ -1466,6 +1466,18 @@ export interface HackathonBuild {
 	 * sha1 of the embedded text; the lane re-embeds a row only when it changes
 	 */
 	embeddingTextHash?: string | null;
+	/**
+	 * Stellar packages the repo's package.json and Cargo.toml files declare (the src/lib/stellar-deps.ts allowlist). Meaningful only when stackReadAt is set: empty after a read = declares none.
+	 */
+	stack?: string[] | null;
+	/**
+	 * When the lane last read the repo's manifests, ISO. Empty = never read: no repo link, not public, or not read yet.
+	 */
+	stackReadAt?: string | null;
+	/**
+	 * When the repo last answered not found (deleted, renamed away or private), ISO. Cleared by the next successful read.
+	 */
+	repoMissingAt?: string | null;
 	firstSeenAt: string;
 	/**
 	 * Last time the event's DoraHacks roster listed this build, ISO
@@ -3574,6 +3586,9 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	hiddenUpstream?: T;
 	embedding?: T;
 	embeddingTextHash?: T;
+	stack?: T;
+	stackReadAt?: T;
+	repoMissingAt?: T;
 	firstSeenAt?: T;
 	lastSeenAt?: T;
 	updatedAt?: T;

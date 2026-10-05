@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
 		surfaces: ["api"],
+		version: "spec@1.9.68",
+		type: "added",
+		summary:
+			"Hackathon submissions carry `stack`: the Stellar packages their repo declares in its package.json and Cargo.toml files. searchHackathonBuilds adds meta.stack, package counts over every matched build (winnersOnly=1 with no q = which SDKs winners use), and a `package` filter (builds whose repo declares it); getHackathonSubmission adds stackReadAt and repoMissingAt.",
+		detail:
+			"Read by the daily sync lane, once a month per repo, winners and the newest events first, at most 400 repos a run, so the backfill completes over a few days. Absent `stack` means unknown (no repo link, a repo that is not public, or not read yet), never 'uses none'; meta.stack counts only builds whose repo was read and says how many that is.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["api"],
 		version: "spec@1.9.67",
 		type: "added",
 		summary:

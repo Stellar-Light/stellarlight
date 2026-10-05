@@ -259,7 +259,7 @@ export interface paths {
         };
         /**
          * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
-         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's event (hackathonSlug opens it in getHackathon), placement, repo/demo links and `project`, the directory project listing its exact repo. Ordered by concepts covered, then prize winners first. `winnersOnly=1` = winners; `track` filters by track. Absence is a whitespace signal, not proof it was never tried. For SHIPPED products → use searchProjects.
+         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
          */
         get: operations["searchHackathonBuilds"];
         put?: never;
@@ -279,7 +279,7 @@ export interface paths {
         };
         /**
          * One Stellar hackathon submission in full
-         * @description One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens it in getHackathon), placement and prize, repo/demo/video links, `project` (the directory project that lists its exact repo; absent = not checked, null = none) and when we read it. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use searchHackathonBuilds.
+         * @description One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.
          */
         get: operations["getHackathonSubmission"];
         put?: never;
@@ -3159,6 +3159,8 @@ export interface operations {
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
+                /** @description Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the list is a floor, not everyone who used it; meta.stack then shows what else those builds use. */
+                package?: string;
                 /** @description keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Max builds (default 20, max 100). */
@@ -3203,6 +3205,7 @@ export interface operations {
                                 q?: string | null;
                                 winnersOnly?: boolean;
                                 track?: string | null;
+                                package?: string | null;
                                 limit?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
@@ -3213,6 +3216,19 @@ export interface operations {
                                 indexedBuilds?: number;
                                 matched?: number;
                                 returned?: number;
+                            };
+                            /** @description Which Stellar packages the matched builds' repos declare, over every matched build (not just this page). winnersOnly=1 with no q = what winners build on; add q for a topic. */
+                            stack?: {
+                                buildsMatched?: number;
+                                /** @description Matched builds whose repo was read; packages are counted over these. */
+                                buildsRead?: number;
+                                /** @description Most-declared first, at most 15. */
+                                packages?: {
+                                    name?: string;
+                                    builds?: number;
+                                    winners?: number;
+                                }[];
+                                note?: string;
                             };
                             note?: string;
                         };
@@ -3243,6 +3259,8 @@ export interface operations {
                                 slug: string;
                                 name: string;
                             } | null;
+                            /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
+                            stack?: string[];
                             /** @description Which query terms this build matched — the evidence behind its inclusion. */
                             matchedTerms?: string[];
                             /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
@@ -3311,6 +3329,12 @@ export interface operations {
                                 slug: string;
                                 name: string;
                             } | null;
+                            /** @description Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none. */
+                            stack?: string[];
+                            /** @description When we last read the repo's manifests; null = never read. */
+                            stackReadAt?: string | null;
+                            /** @description When the repo last answered not found (deleted, renamed away or private); null = it has not. */
+                            repoMissingAt?: string | null;
                             /** Format: date-time */
                             firstSeenAt?: string;
                             /**

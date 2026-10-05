@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.67",
+		"version": "1.9.68",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -3459,7 +3459,7 @@
 					"Hackathons"
 				],
 				"summary": "Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
-				"description": "Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's event (hackathonSlug opens it in getHackathon), placement, repo/demo links and `project`, the directory project listing its exact repo. Ordered by concepts covered, then prize winners first. `winnersOnly=1` = winners; `track` filters by track. Absence is a whitespace signal, not proof it was never tried. For SHIPPED products → use searchProjects.",
+				"description": "Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					"purpose": "Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
 					"keywords": [
@@ -3478,7 +3478,10 @@
 						"won prizes",
 						"x402 builds",
 						"search by meaning",
-						"similar hackathon projects"
+						"similar hackathon projects",
+						"tech stack",
+						"sdk usage",
+						"libraries used"
 					],
 					"useWhen": [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -3495,7 +3498,9 @@
 						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
-						"Which x402 projects won prizes at Stellar hackathons?"
+						"Which x402 projects won prizes at Stellar hackathons?",
+						"Which SDKs and libraries do Stellar hackathon winners use most?",
+						"Which Stellar hackathon projects were built with passkey-kit?"
 					]
 				},
 				"parameters": [
@@ -3532,6 +3537,15 @@
 						"in": "query",
 						"required": false,
 						"description": "Filter by hackathon track (substring match).",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "package",
+						"in": "query",
+						"required": false,
+						"description": "Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the list is a floor, not everyone who used it; meta.stack then shows what else those builds use.",
 						"schema": {
 							"type": "string"
 						}
@@ -3643,6 +3657,10 @@
 															"type": "string",
 															"nullable": true
 														},
+														"package": {
+															"type": "string",
+															"nullable": true
+														},
 														"limit": {
 															"type": "integer"
 														},
@@ -3669,6 +3687,40 @@
 														},
 														"returned": {
 															"type": "integer"
+														}
+													}
+												},
+												"stack": {
+													"type": "object",
+													"description": "Which Stellar packages the matched builds' repos declare, over every matched build (not just this page). winnersOnly=1 with no q = what winners build on; add q for a topic.",
+													"properties": {
+														"buildsMatched": {
+															"type": "integer"
+														},
+														"buildsRead": {
+															"type": "integer",
+															"description": "Matched builds whose repo was read; packages are counted over these."
+														},
+														"packages": {
+															"type": "array",
+															"description": "Most-declared first, at most 15.",
+															"items": {
+																"type": "object",
+																"properties": {
+																	"name": {
+																		"type": "string"
+																	},
+																	"builds": {
+																		"type": "integer"
+																	},
+																	"winners": {
+																		"type": "integer"
+																	}
+																}
+															}
+														},
+														"note": {
+															"type": "string"
 														}
 													}
 												},
@@ -3760,6 +3812,13 @@
 															"name"
 														]
 													},
+													"stack": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none."
+													},
 													"matchedTerms": {
 														"type": "array",
 														"items": {
@@ -3789,7 +3848,7 @@
 					"Hackathons"
 				],
 				"summary": "One Stellar hackathon submission in full",
-				"description": "One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens it in getHackathon), placement and prize, repo/demo/video links, `project` (the directory project that lists its exact repo; absent = not checked, null = none) and when we read it. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use searchHackathonBuilds.",
+				"description": "One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.",
 				"x-routing": {
 					"purpose": "Read one hackathon submission in full: what the team wrote, its links and placement, and what it became.",
 					"keywords": [
@@ -3950,6 +4009,23 @@
 														"slug",
 														"name"
 													]
+												},
+												"stack": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													},
+													"description": "Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none."
+												},
+												"stackReadAt": {
+													"type": "string",
+													"nullable": true,
+													"description": "When we last read the repo's manifests; null = never read."
+												},
+												"repoMissingAt": {
+													"type": "string",
+													"nullable": true,
+													"description": "When the repo last answered not found (deleted, renamed away or private); null = it has not."
 												},
 												"firstSeenAt": {
 													"type": "string",

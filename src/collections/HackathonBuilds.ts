@@ -163,6 +163,31 @@ export const HackathonBuilds: CollectionConfig = {
 					"sha1 of the embedded text; the lane re-embeds a row only when it changes",
 			},
 		},
+		{
+			name: "stack",
+			type: "text",
+			hasMany: true,
+			admin: {
+				description:
+					"Stellar packages the repo's package.json and Cargo.toml files declare (the src/lib/stellar-deps.ts allowlist). Meaningful only when stackReadAt is set: empty after a read = declares none.",
+			},
+		},
+		{
+			name: "stackReadAt",
+			type: "text",
+			admin: {
+				description:
+					"When the lane last read the repo's manifests, ISO. Empty = never read: no repo link, not public, or not read yet.",
+			},
+		},
+		{
+			name: "repoMissingAt",
+			type: "text",
+			admin: {
+				description:
+					"When the repo last answered not found (deleted, renamed away or private), ISO. Cleared by the next successful read.",
+			},
+		},
 		{ name: "firstSeenAt", type: "text", required: true },
 		{
 			name: "lastSeenAt",
