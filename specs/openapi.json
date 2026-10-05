@@ -4411,7 +4411,7 @@
 					"Hackathons"
 				],
 				"summary": "Trends, counts and winner comparisons across Stellar hackathon submissions",
-				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					"purpose": "Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
 					"keywords": [
@@ -4460,12 +4460,13 @@
 						"name": "facet",
 						"in": "query",
 						"required": false,
-						"description": "What to count (default category). category: directory project types. package: Stellar packages a repo declares. activity: commits 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year.",
+						"description": "What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year.",
 						"schema": {
 							"type": "string",
 							"enum": [
 								"category",
 								"package",
+								"library",
 								"activity",
 								"project",
 								"placement",
@@ -4730,6 +4731,7 @@
 															"enum": [
 																"category",
 																"package",
+																"library",
 																"activity",
 																"project",
 																"placement",

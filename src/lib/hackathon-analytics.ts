@@ -45,6 +45,42 @@ function activityAfter(b: IndexedBuild, now: number): string[] | null {
 	return [`no commits ${KEPT_BUILDING_DAYS}+ days after`];
 }
 
+/** Package names that are one library: renamed scopes, legacy names and a
+ * project's several packages. A package not listed is its own library. */
+const LIBRARY_EXACT: Record<string, string> = {
+	"@stellar/stellar-sdk": "Stellar JS SDK",
+	"stellar-sdk": "Stellar JS SDK",
+	"soroban-client": "Stellar JS SDK",
+	"@stellar/stellar-base": "Stellar JS SDK",
+	"stellar-base": "Stellar JS SDK",
+	"@creit.tech/stellar-wallets-kit": "Stellar Wallets Kit",
+	"@creit-tech/stellar-wallets-kit": "Stellar Wallets Kit",
+	"stellar-wallets-kit": "Stellar Wallets Kit",
+	"@stellar/freighter-api": "Freighter API",
+	"passkey-kit": "Passkey Kit",
+	"passkey-kit-sdk": "Passkey Kit",
+	"soroban-sdk": "Soroban Rust SDK",
+	"soroban-token-sdk": "Soroban Rust SDK",
+};
+const LIBRARY_SCOPES: Array<[string, string]> = [
+	["@x402/", "x402"],
+	["@blend-capital/", "Blend SDK"],
+	["@defindex/", "DeFindex SDK"],
+	["@soroswap/", "Soroswap SDK"],
+	["@reflector-network/", "Reflector"],
+	["soroban-env-", "Soroban Rust SDK"],
+	["soroban-spec", "Soroban Rust SDK"],
+];
+
+/** The library a declared package belongs to. */
+export function libraryOf(pkg: string): string {
+	return (
+		LIBRARY_EXACT[pkg] ??
+		LIBRARY_SCOPES.find(([p]) => pkg.startsWith(p))?.[1] ??
+		pkg
+	);
+}
+
 export const FACETS = {
 	category: {
 		label:
@@ -56,6 +92,12 @@ export const FACETS = {
 		label: "a Stellar package its repo declares in package.json or Cargo.toml",
 		unknown: "no repo link, a repo that is not public, or not read yet",
 		values: (b) => b.stack ?? null,
+	},
+	library: {
+		label:
+			"a Stellar library its repo builds on: declared packages folded into the library they belong to (both Stellar Wallets Kit scopes, the legacy and current JS SDK names, every @x402 package)",
+		unknown: "no repo link, a repo that is not public, or not read yet",
+		values: (b) => (b.stack ? [...new Set(b.stack.map(libraryOf))] : null),
 	},
 	activity: {
 		label: `whether the submitted repo saw commits on its default branch ${KEPT_BUILDING_DAYS}+ days after the event ended (work that moved to another repo counts as none here)`,

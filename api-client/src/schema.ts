@@ -299,7 +299,7 @@ export interface paths {
         };
         /**
          * Trends, counts and winner comparisons across Stellar hackathon submissions
-         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
+         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
          */
         get: operations["analyzeHackathonSubmissions"];
         put?: never;
@@ -3502,8 +3502,8 @@ export interface operations {
     analyzeHackathonSubmissions: {
         parameters: {
             query?: {
-                /** @description What to count (default category). category: directory project types. package: Stellar packages a repo declares. activity: commits 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year. */
-                facet?: "category" | "package" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                /** @description What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year. */
+                facet?: "category" | "package" | "library" | "activity" | "project" | "placement" | "track" | "event" | "year";
                 /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. */
                 by?: "event" | "year" | "placement" | "track";
                 /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. */
@@ -3570,7 +3570,7 @@ export interface operations {
                             };
                             facet?: {
                                 /** @enum {string} */
-                                id?: "category" | "package" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                                id?: "category" | "package" | "library" | "activity" | "project" | "placement" | "track" | "event" | "year";
                                 /** @description What one value counts. */
                                 counts?: string;
                                 /** @description Why a build's value can be unknown; null when it never is. */

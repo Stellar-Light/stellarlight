@@ -200,3 +200,29 @@ describe("shifts between events", () => {
 		expect(dex?.spread).toBe(0.5);
 	});
 });
+
+describe("libraries", () => {
+	it("folds renamed scopes and sibling packages into one library, counted once per build", () => {
+		const d = distribution(
+			[
+				build("a", {
+					stack: [
+						"@creit.tech/stellar-wallets-kit",
+						"@x402/core",
+						"@x402/stellar",
+					],
+				}),
+				build("b", {
+					stack: ["@creit-tech/stellar-wallets-kit", "stellar-sdk"],
+				}),
+			],
+			"library",
+			{ now: NOW },
+		);
+		expect(
+			d.values.find((v) => v.value === "Stellar Wallets Kit")?.builds,
+		).toBe(2);
+		expect(d.values.find((v) => v.value === "x402")?.builds).toBe(1);
+		expect(d.values.find((v) => v.value === "Stellar JS SDK")?.builds).toBe(1);
+	});
+});

@@ -9,10 +9,13 @@
  * that carry it. The directory's types are set by hand, so the method is
  * calibrated and measured on them before anything is written: each typed
  * project is scored from its neighbours without itself (leave-one-out), and
- * every type gets its own cut, the lowest at which it is right at least
- * MIN_PRECISION of the time. A shared cut over-assigned the common types
- * (Payments is 29% of the directory) and never reached the rare ones; a type
- * that cannot reach the bar at any cut is never assigned.
+ * every type gets its own cut: of the cuts where it is right at least
+ * MIN_PRECISION of the time, the one with the best balance of precision and
+ * recall (F1). A shared cut over-assigned the common types (Payments is 29%
+ * of the directory) and never reached the rare ones; the lowest passing cut
+ * maximised recall and overcounted them by a third. Balanced cuts keep a
+ * type's count near its true count, which is what shares need. A type that
+ * cannot reach the bar at any cut is never assigned.
  *
  * ponytail: nearest neighbours only. Rare types with few directory examples
  * (Faucet, RPC) are the weak spot; type-definition prototypes or a model pass
@@ -140,8 +143,9 @@ export interface Calibration {
 	covered: number;
 }
 
-/** Each type's lowest cut at which it is right at least MIN_PRECISION of the
- * time (leave-one-out), then the whole assignment measured with those cuts. */
+/** Each type's cut: the best F1 among the cuts where it is right at least
+ * MIN_PRECISION of the time (leave-one-out); then the whole assignment
+ * measured with those cuts. */
 export function calibrate(
 	labeled: Labeled[],
 	near: Neighbour[][],
@@ -161,6 +165,7 @@ export function calibrate(
 			precision: 0,
 			recall: 0,
 		};
+		let bestF1 = -1;
 		if (n >= MIN_SUPPORT)
 			for (const cut of CUTS) {
 				let tp = 0;
@@ -170,15 +175,20 @@ export function calibrate(
 					l.types.includes(type) ? tp++ : fp++;
 				});
 				const precision = tp + fp ? tp / (tp + fp) : 0;
-				if (tp >= MIN_HITS && precision >= MIN_PRECISION) {
+				const recall = tp / n;
+				const f1 =
+					precision + recall
+						? (2 * precision * recall) / (precision + recall)
+						: 0;
+				if (tp >= MIN_HITS && precision >= MIN_PRECISION && f1 > bestF1) {
+					bestF1 = f1;
 					chosen = {
 						type,
 						support: n,
 						cut,
 						precision: r3(precision),
-						recall: r3(tp / n),
+						recall: r3(recall),
 					};
-					break;
 				}
 			}
 		if (chosen.cut != null) cuts.set(type, chosen.cut);

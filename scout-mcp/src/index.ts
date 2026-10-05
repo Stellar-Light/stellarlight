@@ -375,11 +375,12 @@ server.registerTool(
 	{
 		title: "Trends and counts across Stellar hackathon submissions",
 		description:
-			"Counts any facet of every stored Stellar hackathon submission: category (directory project types), package (Stellar SDKs a repo declares), activity (commits on the submitted repo 90+ days after the event), project (became a directory project), placement, track, event or year. `by: event` or `year` makes it a trend (oldest first); every answer adds winners against everyone else, with lift. Takes the same filters as search_hackathon_builds. Shares are over known values; unknown builds are counted apart. Examples: payments share event by event = facet category, value Payments, by event; which SDKs winners use = facet package, winnersOnly.",
+			"Counts any facet of every stored Stellar hackathon submission: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits on the submitted repo 90+ days after the event), project (became a directory project), placement, track, event or year. `by: event` or `year` makes it a trend (oldest first); every answer adds winners against everyone else, with lift. Takes the same filters as search_hackathon_builds. Shares are over known values; unknown builds are counted apart. Examples: payments share event by event = facet category, value Payments, by event; which SDKs winners use = facet library, winnersOnly.",
 		inputSchema: {
 			facet: z
 				.enum([
 					"category",
+					"library",
 					"package",
 					"activity",
 					"project",
