@@ -426,7 +426,7 @@ server.registerTool(
 	},
 );
 
-// 2d. review_submission — feedback on one hackathon submission from a link
+// 2d. review_submission: feedback on one hackathon submission from a link
 server.registerTool(
 	"review_submission",
 	{
