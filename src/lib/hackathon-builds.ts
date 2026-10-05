@@ -16,6 +16,7 @@ import {
 	endedDoraHacksEvents,
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
+	parsePlacement,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { contentTokens } from "@/lib/repo-search";
@@ -106,6 +107,72 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 						: null,
 				}
 			: {}),
+	};
+}
+
+/** One stored submission in full, as getHackathonBuild serves it. */
+export interface BuildDetail {
+	id: string;
+	name: string;
+	/** DoraHacks' one-line summary. */
+	summary: string | null;
+	/** The team's own write-up, markdown as published. A claim, not proof. */
+	writeUp: string | null;
+	selfTags: string[];
+	hackathon: { title: string; slug: string; endedAt: string | null };
+	track: string | null;
+	placement: string | null;
+	award: string | null;
+	prizeUsd: number | null;
+	isWinner: boolean;
+	links: {
+		dorahacks: string;
+		github: string | null;
+		demo: string | null;
+		video: string | null;
+	};
+	repo: string | null;
+	/** Absent = link not checked; null = checked, no project lists the repo. */
+	project?: LinkedProject | null;
+	firstSeenAt: string;
+	lastSeenAt: string;
+	writeUpReadAt: string | null;
+}
+
+export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
+	return {
+		id: d.buildId,
+		name: d.name,
+		summary: d.vision ?? null,
+		writeUp: d.description ?? null,
+		selfTags: d.selfTags ?? [],
+		hackathon: {
+			title: d.hackathonTitle,
+			slug: d.hackathonSlug,
+			endedAt: d.endedAt ?? null,
+		},
+		track: d.track ?? null,
+		placement: d.placement ?? null,
+		award: d.award ?? null,
+		prizeUsd: parsePlacement(d.placement ?? null).prizeUsd || null,
+		isWinner: !!d.isWinner,
+		links: {
+			dorahacks: d.url,
+			github: d.githubUrl ?? null,
+			demo: d.demoUrl ?? null,
+			video: d.videoUrl ?? null,
+		},
+		repo: d.repoFullName ?? null,
+		...(d.linkCheckedAt
+			? {
+					project: d.projectSlug
+						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
+						: null,
+				}
+			: {}),
+		firstSeenAt: d.firstSeenAt,
+		lastSeenAt: d.lastSeenAt,
+		writeUpReadAt: d.detailReadAt ?? null,
 	};
 }
 

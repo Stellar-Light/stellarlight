@@ -270,6 +270,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hackathons/builds/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One Stellar hackathon submission in full
+         * @description One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens it in getHackathon), placement and prize, repo/demo/video links, `project` (the directory project that lists its exact repo; absent = not checked, null = none) and when we read it. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use searchHackathonBuilds.
+         */
+        get: operations["getHackathonSubmission"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/builders": {
         parameters: {
             query?: never;
@@ -3184,6 +3204,8 @@ export interface operations {
                             note?: string;
                         };
                         builds?: {
+                            /** @description Opens the full submission in getHackathonSubmission. */
+                            id?: string;
                             name?: string;
                             description?: string | null;
                             url?: string | null;
@@ -3213,6 +3235,100 @@ export interface operations {
                         }[];
                     };
                 };
+            };
+        };
+    };
+    getHackathonSubmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The stored submission. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            upstream?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            note?: string;
+                        };
+                        build?: {
+                            id?: string;
+                            name?: string;
+                            /** @description DoraHacks' one-line summary. */
+                            summary?: string | null;
+                            /** @description The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none. */
+                            writeUp?: string | null;
+                            /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
+                            selfTags?: string[];
+                            hackathon?: {
+                                title?: string;
+                                slug?: string;
+                                endedAt?: string | null;
+                            };
+                            track?: string | null;
+                            placement?: string | null;
+                            award?: string | null;
+                            prizeUsd?: number | null;
+                            isWinner?: boolean;
+                            links?: {
+                                dorahacks?: string;
+                                github?: string | null;
+                                demo?: string | null;
+                                video?: string | null;
+                            };
+                            /** @description owner/name from the GitHub link; null for an account or org link. */
+                            repo?: string | null;
+                            /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            project?: {
+                                slug: string;
+                                name: string;
+                            } | null;
+                            /** Format: date-time */
+                            firstSeenAt?: string;
+                            /**
+                             * Format: date-time
+                             * @description Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.
+                             */
+                            lastSeenAt?: string;
+                            /** @description When we last read the submission page. */
+                            writeUpReadAt?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Not a submission id, or a query parameter (this operation takes none). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not in Scout's store (absence of a record, not proof the submission never existed). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The store did not answer; retry after Retry-After. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -4090,6 +4206,8 @@ export interface operations {
                             };
                             /** @description Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all. */
                             builds?: {
+                                /** @description Opens the full submission in getHackathonSubmission. */
+                                id?: string;
                                 name?: string;
                                 hackathon?: string;
                                 endedAt?: string | null;

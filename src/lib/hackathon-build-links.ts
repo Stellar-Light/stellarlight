@@ -65,3 +65,15 @@ export function indexProjectRepos(
 	}
 	return out;
 }
+
+/** A submission's stored id from what an agent is likely to hold: the `id`
+ * searchHackathonBuilds returns (dorahacks-buidl-<n>), the bare number, or
+ * the dorahacks.io/buidl/<n> link. null when it is none of those. */
+export function parseBuildId(raw: string): string | null {
+	const s = raw.trim();
+	const m =
+		/^dorahacks-buidl-(\d+)$/.exec(s) ??
+		/^(\d+)$/.exec(s) ??
+		/dorahacks\.io\/buidl\/(\d+)/i.exec(s);
+	return m ? `dorahacks-buidl-${m[1]}` : null;
+}

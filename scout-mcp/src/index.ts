@@ -929,6 +929,28 @@ server.registerTool(
 		asToolResult(await callScout(`/api/scf-pitch?q=${encodeURIComponent(q)}`)),
 );
 
+// 20. get_hackathon_submission — one stored submission in full
+server.registerTool(
+	"get_hackathon_submission",
+	{
+		title: "Read one Stellar hackathon submission",
+		description:
+			"One stored hackathon submission in full: the team's own write-up (a claim, not proof), DoraHacks summary, self-reported tags, event, placement and prize, links, and `project`, the directory project that lists its exact repo. Pass the `id` from search_hackathon_builds or hackathon_brief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use search_hackathon_builds.",
+		inputSchema: {
+			id: z
+				.string()
+				.min(1)
+				.describe(
+					"dorahacks-buidl-<n> from search_hackathon_builds, or the bare <n>.",
+				),
+		},
+	},
+	async ({ id }) =>
+		asToolResult(
+			await callScout(`/api/hackathons/builds/${encodeURIComponent(id)}`),
+		),
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Boot
 // ─────────────────────────────────────────────────────────────────────────────

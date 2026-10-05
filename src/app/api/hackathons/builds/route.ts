@@ -116,6 +116,8 @@ export async function GET(req: NextRequest) {
 	});
 
 	const builds = scored.slice(0, limit).map(({ b, matched }) => ({
+		// Opens the full submission in getHackathonBuild.
+		id: b.id,
 		name: b.name,
 		description: b.description,
 		hackathon: b.hackathon.title,
