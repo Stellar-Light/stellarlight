@@ -117,8 +117,16 @@ const SCF_FUNDED_PEER_SCHEMA = {
 const SCF_FUNDING_BAR_SCHEMA = {
 	type: "object",
 	properties: {
-		fundedProjects: { type: "integer" },
-		totalAwardedUSD: { type: "number" },
+		fundedProjects: {
+			type: "integer",
+			description:
+				"Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count.",
+		},
+		totalAwardedUSD: {
+			type: "number",
+			description:
+				"Recorded award USD across all fundedProjects, not just the listed peers.",
+		},
 		basis: { type: "string" },
 	},
 };
@@ -2878,6 +2886,8 @@ export const spec: OpenAPISpec = {
 						"winning projects",
 						"winning builds",
 						"hackathon winners by topic",
+						"won prizes",
+						"x402 builds",
 					],
 					useWhen: [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -2894,6 +2904,7 @@ export const spec: OpenAPISpec = {
 						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
+						"Which x402 projects won prizes at Stellar hackathons?",
 					],
 				},
 				parameters: [
@@ -4335,6 +4346,7 @@ export const spec: OpenAPISpec = {
 						// 2026-09-05 routing battery (T1): a newcomer asks who "gives
 						// out" grants — neither word was in any field.
 						"Who gives out grants for building on Stellar?",
+						"Which SCF RFPs are open right now?",
 					],
 				},
 				parameters: [
@@ -4557,7 +4569,12 @@ export const spec: OpenAPISpec = {
 					],
 					notFor: [
 						"general idea vetting without the funding lens (vetIdea)",
-						"RFP browsing (listRfps) or award history research (searchResearch)",
+						"RFP browsing (getRfps) or award history research (searchResearch)",
+					],
+					exampleQuestions: [
+						"Help me prepare my Stellar Community Fund application.",
+						"Is an SCF round open now, and who in my vertical already got funded?",
+						"What angles should my SCF pitch take for a payments idea?",
 					],
 				},
 				parameters: [
@@ -4642,6 +4659,11 @@ export const spec: OpenAPISpec = {
 						"rails — stablecoins and partners are separate calls; open RFPs → getRfps",
 						"non-Stellar ideas — vertical will not resolve; say so",
 					],
+					exampleQuestions: [
+						"We have 48 hours at a hackathon to build an x402 paywall. Where do we start?",
+						"Give my hackathon team a build brief for a passkey wallet.",
+						"Is this hackathon idea taken, and which repo is safe to fork?",
+					],
 				},
 				parameters: [
 					{
@@ -4676,7 +4698,7 @@ export const spec: OpenAPISpec = {
 												builds: {
 													type: "array",
 													description:
-														"Prototype-layer prior art — DoraHacks submissions matching the idea, winners ranked first, ≤5.",
+														"Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all.",
 													items: {
 														type: "object",
 														properties: {
@@ -4925,6 +4947,12 @@ export const spec: OpenAPISpec = {
 						"single-repo assessment (getRepoTrust) or plain discovery (searchRepos/searchProjects)",
 						"demand claims — gap is SUPPLY-side coverage only",
 					],
+					exampleQuestions: [
+						"I want to build a lending protocol on Stellar. What already exists?",
+						"Vet this idea: a payroll app that pays contractors in USDC.",
+						"Is the wallet space on Stellar crowded, and is anyone funded in it?",
+						"Should I build this on Stellar or has it been done?",
+					],
 				},
 				parameters: [
 					{
@@ -5064,7 +5092,8 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "getRepoTrust",
 				tags: ["Code"],
-				summary: "Trust report — the code-truth composite for one repo",
+				summary:
+					"Trust report for one Stellar GitHub repo: maintained, audited, used on mainnet",
 				description:
 					"One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.",
 				"x-routing": {
@@ -5091,6 +5120,11 @@ export const spec: OpenAPISpec = {
 					notFor: [
 						"discovering which repos exist (searchRepos) or contract enumeration (listContracts)",
 						"repos we have not indexed — 404 is absence of evidence, not a verdict",
+					],
+					exampleQuestions: [
+						"Is stellar/passkey-kit maintained and audited?",
+						"Is this Stellar repo safe to depend on?",
+						"Has this contract's code changed since its last audit?",
 					],
 				},
 				parameters: [
@@ -5253,7 +5287,7 @@ export const spec: OpenAPISpec = {
 						"contract address",
 					],
 					useWhen: [
-						"'which verified contracts are live on mainnet' / 'show deployed DeFi contracts' (domain=defi-lending etc.)",
+						"'which verified contracts are live on mainnet' / 'show deployed DeFi contracts' (filter with domain=)",
 						"'what contract does project X run' — q=<project>",
 						"joining a contract to its code, usage, and audit evidence in one call",
 					],
@@ -5274,6 +5308,11 @@ export const spec: OpenAPISpec = {
 						"how do I write / deploy / test a contract -> searchResearch (docs, SEPs, guides) or searchRepos (working examples)",
 						"how does X work in the code / where is X implemented -> explainRepo",
 						"who should audit my contract / which firms audit -> getPartners (type=audit-firm)",
+					],
+					exampleQuestions: [
+						"Which verified Soroban contracts are live on mainnet?",
+						"What mainnet contract does Blend run?",
+						"Show deployed DeFi contracts with audit and usage evidence.",
 					],
 				},
 				parameters: [
@@ -6130,6 +6169,10 @@ export const spec: OpenAPISpec = {
 						"skills.stellar.org",
 						"marketplace",
 						"catalog",
+						"x402",
+						"agent payments",
+						"accept payments",
+						"which skill should I install",
 					],
 					useWhen: [
 						"what Stellar AI skills / MCP servers / SDKs can I install",
@@ -6145,6 +6188,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"What MCP servers exist for Stellar?",
 						"Is there a skill for anchors?",
+						"Which skill should my agent install to accept x402 payments?",
 					],
 				},
 				parameters: [
@@ -6428,6 +6472,7 @@ export const spec: OpenAPISpec = {
 						// 2026-09-05 routing battery (T4): "verticals" and "least" were
 						// absent from every field, so the question gated out entirely.
 						"Which verticals on Stellar have the least competition?",
+						"How crowded is lending on Stellar?",
 					],
 				},
 				parameters: [

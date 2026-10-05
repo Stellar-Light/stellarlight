@@ -208,7 +208,16 @@ export interface ScoredBuild {
 	b: IndexedBuild;
 	score: number;
 	matched: string[];
+	/** How much of the query the build covers, each word weighted by rarity. */
+	coverage: number;
+	/** Share of the query's concepts the build covers, 0 to 1. */
+	share: number;
 }
+
+/** A winner's edge over a build about as relevant as it: enough to put
+ * winners first among near-equals, not enough to lift a winner past a build
+ * that covers the idea clearly better. */
+const WINNER_EDGE = 1.25;
 
 /** Comparison filler the shared stopword list keeps: "an app like X" is a
  * question about X, so "like" must not count as a concept a build covers. */
@@ -230,12 +239,13 @@ function termMatcher(v: string): (hay: string) => boolean {
  * ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
  * which every submission says, are not concepts.
  *
- * Order: how many of the query's concepts a build covers, then prize winners
- * before the rest, then score. Winners first among similarly relevant builds
- * is the useful order for prior art; score alone let a title stuffed with the
- * query's words outrank the winner that built the idea ("Stripe for AI
- * agents": five unplaced builds above TollPay, which won with "Stripe for
- * MCP servers"). With no query: browse mode, winners first, then most-voted.
+ * Order: how much of the query a build covers, each word weighted by how
+ * rare it is across the pool, with a modest edge for prize winners (winners
+ * first among similarly relevant builds, the useful order for prior art),
+ * then score. Score alone let a title stuffed with the query's words outrank
+ * the winner that built the idea ("Stripe for AI agents": five unplaced
+ * builds above TollPay, which won with "Stripe for MCP servers"). With no
+ * query: browse mode, winners first, then most-voted.
  */
 export function searchHackathonBuilds(
 	indexed: IndexedBuild[],
@@ -255,20 +265,43 @@ export function searchHackathonBuilds(
 				b,
 				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount ?? 0, 100),
 				matched: [] as string[],
+				coverage: 0,
+				share: 0,
 			}))
 			.sort((a, b) => b.score - a.score);
 	}
-	const tokens = [
+	const raw = [
 		...new Set(
 			contentTokens(query).filter(
 				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
 			),
 		),
 	];
+	// A hyphenated phrase is one concept: "pay-per-call" also matches
+	// "pay per call" and "paypercall", and its parts stop counting on their
+	// own (they made one phrase weigh three times).
+	const parts = new Set(
+		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
+	);
+	const tokens = raw.filter((t) => !parts.has(t));
 	const terms = tokens.map((t) => ({
 		t,
-		variants: expandBuildTerm(t).map(termMatcher),
+		variants: [
+			...expandBuildTerm(t),
+			...(t.includes("-") ? [t.replace(/-/g, " "), t.replace(/-/g, "")] : []),
+		].map(termMatcher),
 	}));
+	// Rarer words say more. In an agents hackathon "agents" is everywhere and
+	// "x402" is not, so a build is weighed by WHICH words it covers, not how
+	// many: counting words let descriptions padded with common ones ("per",
+	// "api", "agents") outrank the winners that built the idea.
+	const weight = new Map<string, number>();
+	for (const { t, variants } of terms) {
+		const df = pool.filter((b) =>
+			variants.some((hit) => hit(b.haystack)),
+		).length;
+		weight.set(t, Math.log((pool.length + 1) / (df + 1)));
+	}
 	const scored: ScoredBuild[] = [];
 	for (const b of pool) {
 		let score = 0;
@@ -293,14 +326,21 @@ export function searchHackathonBuilds(
 		) {
 			score += b.isWinner ? 2 : 0;
 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;
-			scored.push({ b, score, matched: [...matched] });
+			const coverage = [...matched].reduce(
+				(n, t) => n + (weight.get(t) ?? 0),
+				0,
+			);
+			scored.push({
+				b,
+				score,
+				matched: [...matched],
+				coverage,
+				share: matched.size / (tokens.length || 1),
+			});
 		}
 	}
-	scored.sort(
-		(a, b) =>
-			b.matched.length - a.matched.length ||
-			Number(b.b.isWinner) - Number(a.b.isWinner) ||
-			b.score - a.score,
-	);
+	const rank = (s: ScoredBuild) =>
+		s.coverage * (s.b.isWinner ? WINNER_EDGE : 1);
+	scored.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
 	return scored;
 }

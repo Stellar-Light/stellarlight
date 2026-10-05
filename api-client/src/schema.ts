@@ -518,7 +518,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Trust report — the code-truth composite for one repo
+         * Trust report for one Stellar GitHub repo: maintained, audited, used on mainnet
          * @description One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.
          */
         get: operations["getRepoTrust"];
@@ -3938,7 +3938,9 @@ export interface operations {
                                 lastAwardedRound?: number | null;
                             }[];
                             fundingBar?: {
+                                /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
                                 fundedProjects?: number;
+                                /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
                                 totalAwardedUSD?: number;
                                 basis?: string;
                             };
@@ -4086,7 +4088,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art — DoraHacks submissions matching the idea, winners ranked first, ≤5. */
+                            /** @description Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all. */
                             builds?: {
                                 name?: string;
                                 hackathon?: string;
@@ -4213,7 +4215,9 @@ export interface operations {
                                     lastAwardedRound?: number | null;
                                 }[];
                                 fundingBar?: {
+                                    /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
                                     fundedProjects?: number;
+                                    /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
                                     totalAwardedUSD?: number;
                                     basis?: string;
                                 };

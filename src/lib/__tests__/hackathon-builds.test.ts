@@ -270,3 +270,56 @@ describe("repo to project links", () => {
 		expect(idx.has("o/h")).toBe(false);
 	});
 });
+
+describe("rarity and phrases", () => {
+	// An agents hackathon: "agents" and "api" are everywhere, "x402" is not.
+	const filler = Array.from({ length: 30 }, (_, i) =>
+		build(`Agent tool ${i}`, "An API for AI agents.", false, `f${i}`),
+	);
+
+	it("weighs a rare word above common ones", () => {
+		const out = searchHackathonBuilds(
+			[
+				...filler,
+				build("Padded", "An agents API API agents for agents."),
+				build("Paywall", "x402 paywall for agents."),
+			],
+			"x402 api for agents",
+		);
+		expect(out[0].b.name).toBe("Paywall");
+	});
+
+	it("counts a hyphenated phrase once and matches it spaced", () => {
+		const out = searchHackathonBuilds(
+			[
+				build("Spaced", "Pay per call access to data."),
+				build("Parts", "Pay once, then call anything."),
+			],
+			"pay-per-call",
+		);
+		expect(out[0].b.name).toBe("Spaced");
+		expect(out[0].matched).toEqual(["pay-per-call"]);
+		expect(out.map((s) => s.b.name)).not.toContain("Parts");
+	});
+});
+
+describe("brief picks winners first, then broadens", () => {
+	it("puts covering winners first and leaves out a one-word winner", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const picks = pickBriefBuilds(
+			[
+				build("Exact phrase", "x402 pay-per-call API for AI agents."),
+				build(
+					"RenderGate",
+					"Pay-per-render browser API for agents with x402.",
+					true,
+				),
+				build("Wallet winner", "A wallet.", true),
+			],
+			"x402 pay-per-call API for AI agents",
+		).map((s) => s.b.name);
+		expect(picks[0]).toBe("RenderGate");
+		expect(picks).toContain("Exact phrase");
+		expect(picks.indexOf("Wallet winner")).not.toBe(0);
+	});
+});

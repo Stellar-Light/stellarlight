@@ -19,6 +19,7 @@ import type { Payload } from "payload";
 import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
 import {
 	getHackathonBuildsIndex,
+	type IndexedBuild,
 	searchHackathonBuilds,
 } from "./hackathon-builds";
 import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
@@ -157,6 +158,24 @@ export interface HackathonBrief {
 	whatNotToClaim: string[];
 }
 
+/**
+ * Prior-art builds for a brief: winners first, then broaden, the order
+ * prior-art research should take. Up to two prize winners covering at least
+ * half of the idea's concepts, then the closest other builds, five in all.
+ * Ranking alone can bury a winner under builds whose text repeats the query's
+ * exact phrase; a winner matching one word of three is not prior art.
+ */
+export function pickBriefBuilds(index: IndexedBuild[], q: string) {
+	const winners = searchHackathonBuilds(index, q, { winnersOnly: true })
+		.filter((s) => s.share >= 0.5)
+		.slice(0, 2);
+	const seen = new Set(winners.map((s) => s.b.id));
+	return [
+		...winners,
+		...searchHackathonBuilds(index, q).filter((s) => !seen.has(s.b.id)),
+	].slice(0, 5);
+}
+
 /** Pure: which claims THIS brief would tempt, from its own facts. */
 export function deriveWhatNotToClaim(
 	b: Omit<HackathonBrief, "whatNotToClaim">,
@@ -228,18 +247,16 @@ export async function buildHackathonBrief(
 		.filter((t): t is TrustReport => !!t)
 		.map(summarizeTrust);
 
-	const builds = searchHackathonBuilds(index, q)
-		.slice(0, 5)
-		.map(({ b }) => ({
-			name: b.name,
-			hackathon: b.hackathon.title,
-			endedAt: b.hackathon.endedAt ?? null,
-			isWinner: b.isWinner,
-			placement: b.hackathonPlacement ?? null,
-			githubUrl: b.githubUrl ?? null,
-			url: b.url ?? null,
-			...(b.project !== undefined ? { project: b.project } : {}),
-		}));
+	const builds = pickBriefBuilds(index, q).map(({ b }) => ({
+		name: b.name,
+		hackathon: b.hackathon.title,
+		endedAt: b.hackathon.endedAt ?? null,
+		isWinner: b.isWinner,
+		placement: b.hackathonPlacement ?? null,
+		githubUrl: b.githubUrl ?? null,
+		url: b.url ?? null,
+		...(b.project !== undefined ? { project: b.project } : {}),
+	}));
 
 	const partial: Omit<HackathonBrief, "whatNotToClaim"> = {
 		idea: q,
