@@ -60,6 +60,7 @@ const WRITERS: Record<string, "read-back" | string> = {
 		"clears); every execute is live-verified in the run log",
 	"scripts/refresh-stablecoins.ts": "read-back",
 	"scripts/check-gone-repos.ts": "read-back",
+	"scripts/sync-hackathon-builds.ts": "read-back",
 };
 for (const [file, expectation] of Object.entries(WRITERS)) {
 	let src = "";

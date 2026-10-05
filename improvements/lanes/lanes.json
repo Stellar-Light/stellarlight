@@ -423,6 +423,14 @@
 			"since": null
 		},
 		{
+			"id": "sync-hackathon-builds",
+			"workflow": "sync-hackathon-builds.yml",
+			"cadence": "cron 43 4 * * *",
+			"executeInput": "execute",
+			"writeSet": "hackathon-builds upserts: every Stellar submission on DoraHacks (roster fields, the team's full write-up, self-reported tags) and the exact-repo link to a directory project; never deletes",
+			"since": null
+		},
+		{
 			"id": "refresh-stablecoins",
 			"workflow": "refresh-stablecoins.yml",
 			"cadence": "cron 25 */6 * * *",

@@ -269,9 +269,12 @@ server.registerTool(
 				.describe("Max results (default 20)."),
 		},
 	},
-	async ({ status, organizer, source, limit }) => {
+	async ({ status, q, organizer, source, limit }) => {
 		const params = new URLSearchParams();
 		if (status) params.set("status", status);
+		// Declared above since the API learned ?q=, but never forwarded: a named
+		// event lookup silently returned the whole catalog.
+		if (q) params.set("q", q);
 		if (organizer) params.set("organizer", organizer);
 		if (source) params.set("source", source);
 		if (limit !== undefined) params.set("limit", String(limit));

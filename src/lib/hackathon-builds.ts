@@ -1,21 +1,34 @@
 /**
- * Flattened cross-hackathon buidl index (DoraHacks submissions for the most
- * recent ended events), shared by /api/hackathons/builds and the builder
- * profile pages. Cached with unstable_cache for an hour so a profile render
- * never pays the cold fan-out.
+ * Flattened cross-hackathon buidl index (DoraHacks submissions), shared by
+ * /api/hackathons/builds, the hackathon brief and the builder profile pages.
+ * Served from our own store (the hackathon-builds collection, filled by
+ * scripts/sync-hackathon-builds.ts), falling back to a live DoraHacks read of
+ * the most recent ended events when the store is empty or unreachable.
+ * Cached with unstable_cache for an hour so a profile render never pays the
+ * cold fan-out.
  */
 import { unstable_cache } from "next/cache";
+import { withReadTimeout } from "@/lib/degraded-read";
+import type { LinkedProject } from "@/lib/hackathon-build-links";
 import {
 	type DoraHacksSubmission,
+	doraEventRef,
+	endedDoraHacksEvents,
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 } from "@/lib/integrations/dorahacks";
+import { getPayloadSafe } from "@/lib/payload-client";
+import { contentTokens } from "@/lib/repo-search";
 import { CORE_SYNONYMS, GENERIC_QUERY_TOKENS } from "@/lib/search-vocabulary";
-import { generateSlug } from "@/lib/utils/normalize";
+import type { HackathonBuild } from "@/payload-types";
 
 export interface IndexedBuild extends DoraHacksSubmission {
 	hackathon: { title: string; slug: string; endedAt: string | null };
 	haystack: string; // lowercased name + description + track + award, for matching
+	/** Only on rows served from the store, where the link was checked: the
+	 * directory project that lists this build's exact repo, or null when none
+	 * does. Absent on a live-read row: not checked, which is not "none". */
+	project?: LinkedProject | null;
 }
 
 async function pool<T, R>(
@@ -35,47 +48,120 @@ async function pool<T, R>(
 	return out;
 }
 
-export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
-	const hacks = await fetchAllDoraHacksHackathons();
-	// Only ENDED events have a meaningful build roster; cap to the most recent
-	// to bound cold-rebuild cost.
-	const ended = hacks
-		.filter((h) => h.status === 2 || h.winner_announced)
-		.sort((a, b) => (b.end_time ?? 0) - (a.end_time ?? 0))
-		.slice(0, 40);
+const haystackOf = (
+	name: string,
+	description: string | null,
+	track: string | null,
+	award: string | null,
+) => `${name} ${description ?? ""} ${track ?? ""} ${award ?? ""}`.toLowerCase();
+
+/** Live read of the most recent ended DoraHacks events: the fallback when the
+ * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
+ * no cap. */
+async function buildLiveIndex(): Promise<IndexedBuild[]> {
+	const ended = endedDoraHacksEvents(await fetchAllDoraHacksHackathons()).slice(
+		0,
+		40,
+	);
 	const perHack = await pool(ended, 6, async (h) => {
 		const subs = await fetchHackathonSubmissions(h);
-		const endedAt = h.end_time
-			? new Date(h.end_time * 1000).toISOString().slice(0, 10)
-			: null;
-		const hackathon = { title: h.title, slug: generateSlug(h.title), endedAt };
+		const hackathon = doraEventRef(h);
 		return subs.map((s) => ({
 			...s,
 			hackathon,
-			haystack:
-				`${s.name} ${s.description ?? ""} ${s.track ?? ""} ${s.award ?? ""}`.toLowerCase(),
+			haystack: haystackOf(s.name, s.description, s.track, s.award),
 		}));
 	});
-	// Dedupe by buidl id AND by event+name (DoraHacks repeats submissions across
-	// pages; a resubmission gets a new id with the same name in the same event).
+	return perHack.flat();
+}
+
+/** A stored row in the shape the index serves. `vision` (DoraHacks' one-line
+ * summary) stays `description`, as the live read has always served it. */
+export function indexedFromStored(d: HackathonBuild): IndexedBuild {
+	const description = d.vision ?? null;
+	return {
+		id: d.buildId,
+		name: d.name,
+		description,
+		githubUrl: d.githubUrl ?? null,
+		demoUrl: d.demoUrl ?? null,
+		videoUrl: d.videoUrl ?? null,
+		track: d.track ?? null,
+		hackathonPlacement: d.placement ?? null,
+		award: d.award ?? null,
+		isWinner: !!d.isWinner,
+		voteCount: null,
+		url: d.url,
+		source: "dorahacks",
+		hackathon: {
+			title: d.hackathonTitle,
+			slug: d.hackathonSlug,
+			endedAt: d.endedAt ?? null,
+		},
+		haystack: haystackOf(d.name, description, d.track ?? null, d.award ?? null),
+		...(d.linkCheckedAt
+			? {
+					project: d.projectSlug
+						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
+						: null,
+				}
+			: {}),
+	};
+}
+
+/** Every stored build, or null when the store could not be read. A build
+ * DoraHacks stopped listing is still served (that is the point of storing
+ * it); one the team deleted or made private stays stored, not served. */
+async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
+	const payload = await getPayloadSafe();
+	if (!payload) return null;
+	try {
+		const res = await withReadTimeout(
+			payload.find({
+				collection: "hackathon-builds",
+				where: { hiddenUpstream: { not_equals: true } },
+				pagination: false,
+				depth: 0,
+				// The full write-ups run to several KB each and the index never
+				// reads them; leaving them out keeps this read small.
+				select: { description: false, selfTags: false },
+			}),
+			8_000,
+		);
+		return (res.docs as HackathonBuild[]).map(indexedFromStored);
+	} catch (e) {
+		console.error(
+			"hackathon-builds store read failed; serving the live DoraHacks read",
+			e,
+		);
+		return null;
+	}
+}
+
+/** Dedupe by buidl id AND by event+name (DoraHacks repeats submissions across
+ * pages; a resubmission gets a new id with the same name in the same event). */
+function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 	const seenId = new Set<string>();
 	const seenKey = new Set<string>();
 	const flat: IndexedBuild[] = [];
-	for (const arr of perHack) {
-		for (const b of arr) {
-			const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
-			if (seenId.has(b.id) || seenKey.has(key)) continue;
-			seenId.add(b.id);
-			seenKey.add(key);
-			flat.push(b);
-		}
+	for (const b of rows) {
+		const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
+		if (seenId.has(b.id) || seenKey.has(key)) continue;
+		seenId.add(b.id);
+		seenKey.add(key);
+		flat.push(b);
 	}
 	return flat;
 }
 
+export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
+	const stored = await readStoredBuilds();
+	return dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
+}
+
 export const getHackathonBuildsIndex = unstable_cache(
 	buildHackathonBuildsIndex,
-	["hackathon-builds-index:v1"],
+	["hackathon-builds-index:v2"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],
@@ -124,12 +210,32 @@ export interface ScoredBuild {
 	matched: string[];
 }
 
+/** Comparison filler the shared stopword list keeps: "an app like X" is a
+ * question about X, so "like" must not count as a concept a build covers. */
+const QUERY_FILLER = new Set(["like", "similar"]);
+
+/** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
+ * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
+function termMatcher(v: string): (hay: string) => boolean {
+	if (v.length > 3) return (hay) => hay.includes(v);
+	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const re = new RegExp(`\\b${escaped}\\b`);
+	return (hay) => re.test(hay);
+}
+
 /**
  * Score + rank builds for a topic query. Prior-art favors RECALL (a missed
  * existing build is the costly error): a NAME match always surfaces;
  * otherwise at least half the concepts must hit so a common token alone
- * ("payments") doesn't flood. Ranking handles precision from there. With no
- * query: browse mode — winners first, then most-voted.
+ * ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
+ * which every submission says, are not concepts.
+ *
+ * Order: how many of the query's concepts a build covers, then prize winners
+ * before the rest, then score. Winners first among similarly relevant builds
+ * is the useful order for prior art; score alone let a title stuffed with the
+ * query's words outrank the winner that built the idea ("Stripe for AI
+ * agents": five unplaced builds above TollPay, which won with "Stripe for
+ * MCP servers"). With no query: browse mode, winners first, then most-voted.
  */
 export function searchHackathonBuilds(
 	indexed: IndexedBuild[],
@@ -152,21 +258,30 @@ export function searchHackathonBuilds(
 			}))
 			.sort((a, b) => b.score - a.score);
 	}
-	const tokens = query
-		.split(/\s+/)
-		.filter((t) => t && !GENERIC_QUERY_TOKENS.has(t));
+	const tokens = [
+		...new Set(
+			contentTokens(query).filter(
+				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
+			),
+		),
+	];
+	const terms = tokens.map((t) => ({
+		t,
+		variants: expandBuildTerm(t).map(termMatcher),
+	}));
 	const scored: ScoredBuild[] = [];
 	for (const b of pool) {
 		let score = 0;
 		let nameMatched = false;
 		const matched = new Set<string>();
-		for (const t of tokens) {
-			for (const v of expandBuildTerm(t)) {
-				if (b.name.toLowerCase().includes(v)) {
+		const name = b.name.toLowerCase();
+		for (const { t, variants } of terms) {
+			for (const hit of variants) {
+				if (hit(name)) {
 					score += 3;
 					matched.add(t);
 					nameMatched = true;
-				} else if (b.haystack.includes(v)) {
+				} else if (hit(b.haystack)) {
 					score += 1;
 					matched.add(t);
 				}
@@ -181,6 +296,11 @@ export function searchHackathonBuilds(
 			scored.push({ b, score, matched: [...matched] });
 		}
 	}
-	scored.sort((a, b) => b.score - a.score);
+	scored.sort(
+		(a, b) =>
+			b.matched.length - a.matched.length ||
+			Number(b.b.isWinner) - Number(a.b.isWinner) ||
+			b.score - a.score,
+	);
 	return scored;
 }

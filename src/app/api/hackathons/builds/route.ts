@@ -12,8 +12,9 @@
  * topic-searchable index so "has anyone built X at a hackathon?" is answerable in
  * one call, with the event, placement/award, and links for each hit.
  *
- * Read-through + module-cached (buidl rosters are DoraHacks-fetch-cached 1h, and
- * the flattened index is held in-memory per instance) so search is cheap.
+ * Served from our own store (the hackathon-builds collection, filled daily by
+ * scripts/sync-hackathon-builds.ts), with a live DoraHacks read as the
+ * fallback; the flattened index is cached for an hour, so search is cheap.
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
@@ -136,6 +137,9 @@ export async function GET(req: NextRequest) {
 		url: b.url,
 		githubUrl: b.githubUrl,
 		demoUrl: b.demoUrl,
+		// Present only when the link was checked: the directory project that
+		// lists this build's exact repo, or null when none does.
+		...(b.project !== undefined ? { project: b.project } : {}),
 		...(matched.length ? { matchedTerms: matched } : {}),
 	}));
 
@@ -163,8 +167,8 @@ export async function GET(req: NextRequest) {
 					returned: builds.length,
 				},
 				note: q
-					? "Prior-art over hackathon PROTOTYPES (DoraHacks buidls) — most never become directory projects. A hit means someone already built something similar at a Stellar hackathon; check `url`/`githubUrl` before rebuilding. Absence here is NOT proof it's never been tried (DoraHacks-sourced; non-winners can have thin descriptions)."
-					: "No q — returning winners + most-voted builds across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
+					? "Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first. A hit means someone already built something similar at a Stellar hackathon: check `url` or `githubUrl` before rebuilding, and `project` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions)."
+					: "No q: prize winners first across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
 			},
 			builds,
 		},

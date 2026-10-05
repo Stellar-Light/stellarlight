@@ -31,6 +31,24 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-05",
+		surfaces: ["api"],
+		version: "spec@1.9.64",
+		type: "changed",
+		summary:
+			"searchHackathonBuilds serves our own stored copy of every Stellar submission on DoraHacks and adds `project`: the directory project that lists a build's exact repo (absent = not checked, null = none). Results are ordered by how many of the query's concepts a build covers, then prize winners first, and hackathonSlug now opens the event in getHackathon. hackathonBrief's builds carry `project` too.",
+		detail:
+			"Before, the index was read live from DoraHacks and named each event with a slug made from its title, so 10 of the 12 events with recorded winners answered 404 in getHackathon when followed from a submission. Ranking by score alone let titles stuffed with the query's words outrank the winner that built the idea: on an agent-payments query, five unplaced builds came before the prize winner that pitched the same thing. Query filler and 'stellar' no longer count as concepts, and terms of three letters or fewer ('ai', 'zk') match whole words only. prizeUsd, always returned, is now in the schema. A shared GitHub owner never links a build to a project.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.2.2",
+		type: "fixed",
+		summary:
+			"get_hackathons forwards q. The tool declared it but dropped it, so a named event lookup returned the whole catalog.",
+	},
+	{
 		date: "2026-10-03",
 		surfaces: ["api"],
 		version: "spec@1.9.63",

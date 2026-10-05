@@ -152,6 +152,21 @@ const TYPE_COVERAGE_PROPS = {
 	hackathonWinners: { type: "integer" },
 };
 
+/** What a hackathon build became: shared by searchHackathonBuilds and
+ * hackathonBrief. Optional on purpose: absent means the link was not checked
+ * (the build was read live from DoraHacks), which is not "no project". */
+const BUILD_PROJECT_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+	properties: {
+		slug: { type: "string" },
+		name: { type: "string" },
+	},
+	required: ["slug", "name"],
+};
+
 /** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
  * computation /api/vet-idea serves, embedded by scf-pitch + hackathon-brief. */
 const VET_BLOCK_SCHEMA = {
@@ -2565,7 +2580,7 @@ export const spec: OpenAPISpec = {
 					"Browse/LIST Stellar hackathon events — a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.",
 				"x-routing": {
 					purpose:
-						"List/browse Stellar hackathon events (curated + DoraHacks SDF orgs 3096/3853) and resolve event slugs.",
+						"List/browse Stellar hackathon events (curated + every Stellar organizer on DoraHacks) and resolve event slugs.",
 					keywords: [
 						"hackathon",
 						"hackathons",
@@ -2846,7 +2861,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
 				description:
-					"Topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly=1` = prize winners; `track` filters by track. Absence is a real whitespace signal, not proof it was never tried. For SHIPPED products in the directory → use searchProjects.",
+					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's event (hackathonSlug opens it in getHackathon), placement, repo/demo links and `project`, the directory project listing its exact repo. Ordered by concepts covered, then prize winners first. `winnersOnly=1` = winners; `track` filters by track. Absence is a whitespace signal, not proof it was never tried. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
@@ -2981,7 +2996,11 @@ export const spec: OpenAPISpec = {
 													demoUrl: { type: "string", nullable: true },
 													githubUrl: { type: "string", nullable: true },
 													hackathon: { type: "string" },
-													hackathonSlug: { type: "string" },
+													hackathonSlug: {
+														type: "string",
+														description:
+															"The event's slug, the one getHackathons lists and getHackathon opens.",
+													},
 													track: { type: "string", nullable: true },
 													placement: {
 														type: "string",
@@ -3000,8 +3019,15 @@ export const spec: OpenAPISpec = {
 														description:
 															"Placed in the event; absence of a win is not a quality judgement.",
 													},
+													prizeUsd: {
+														type: "number",
+														nullable: true,
+														description:
+															"What this build itself won in USD, parsed from its own placement string; null = not stated there (DoraHacks often names the amount only on the award category).",
+													},
 													votes: { type: "integer", nullable: true },
 													endedAt: { type: "string", nullable: true },
+													project: BUILD_PROJECT_SCHEMA,
 													matchedTerms: {
 														type: "array",
 														items: { type: "string" },
@@ -4661,6 +4687,7 @@ export const spec: OpenAPISpec = {
 															placement: { type: "string", nullable: true },
 															githubUrl: { type: "string", nullable: true },
 															url: { type: "string", nullable: true },
+															project: BUILD_PROJECT_SCHEMA,
 														},
 													},
 												},

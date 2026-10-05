@@ -123,6 +123,8 @@ export interface HackathonBrief {
 		placement: string | null;
 		githubUrl: string | null;
 		url: string | null;
+		/** Present only when checked: the directory project listing this build's exact repo, or null. */
+		project?: { slug: string; name: string } | null;
 	}>;
 	/** Candidate repos to fork/study — the top competitor repos that are not
 	 * archived, with a trust summary each. A competitor is a starting point to
@@ -236,6 +238,7 @@ export async function buildHackathonBrief(
 			placement: b.hackathonPlacement ?? null,
 			githubUrl: b.githubUrl ?? null,
 			url: b.url ?? null,
+			...(b.project !== undefined ? { project: b.project } : {}),
 		}));
 
 	const partial: Omit<HackathonBrief, "whatNotToClaim"> = {
