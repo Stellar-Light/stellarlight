@@ -879,6 +879,56 @@ server.registerTool(
 	},
 );
 
+// 17-19. The one-call idea composites. Raven reaches them through the API
+// spec; until 1.3.0 an MCP client could not call them at all.
+const ideaInput = {
+	q: z
+		.string()
+		.min(3)
+		.max(200)
+		.describe(
+			"Short idea description, 3 to 200 characters (e.g. 'lending protocol for RWAs').",
+		),
+};
+
+server.registerTool(
+	"vet_idea",
+	{
+		title: "Vet a Stellar build idea",
+		description:
+			"The 'I want to build X on Stellar' check in one call: competitor repos and active directory projects in the idea's vertical, their maturity from verified evidence (audits, live on-chain usage), hackathon prior art, the vertical's supply-side gap and SCF funding presence. Every block carries its basis. A gap is supply, not demand. Not for one named project → use search_projects.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(await callScout(`/api/vet-idea?q=${encodeURIComponent(q)}`)),
+);
+
+server.registerTool(
+	"hackathon_brief",
+	{
+		title: "Hackathon brief for an idea",
+		description:
+			"A hackathon team's first hour in one call: the vet-idea view, prize winners and other builds that already tried the idea, starter repos with a trust summary, verified mainnet contracts for its code domain, and SCF funding after the event, plus what not to claim. No verdicts. Not for listing events → use get_hackathons.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(
+			await callScout(`/api/hackathon-brief?q=${encodeURIComponent(q)}`),
+		),
+);
+
+server.registerTool(
+	"scf_pitch",
+	{
+		title: "Prepare a Stellar Community Fund pitch",
+		description:
+			"SCF application prep in one call: the live round state and deadline (never asserted on a failed fetch), funded projects in the idea's vertical with recorded award totals, the vet-idea view, and pitch angles that each name the fact they stand on. Writes no prose for you. Not for browsing sponsor briefs → use get_rfps.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(await callScout(`/api/scf-pitch?q=${encodeURIComponent(q)}`)),
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Boot
 // ─────────────────────────────────────────────────────────────────────────────
