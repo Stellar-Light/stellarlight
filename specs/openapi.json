@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.70",
+		"version": "1.9.71",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -3225,7 +3225,7 @@
 					"Hackathons"
 				],
 				"summary": "Get one hackathon's full detail",
-				"description": "Full detail for ONE hackathon by slug — every submission with placement, prize, track, and post-hack status; derives `winners`, per-track aggregates, and a `stats` outcome funnel. DoraHacks-only events read live, degrading to a winner roster + `meta.note`. Needs an exact slug — resolve via getHackathons first. Not for listing/browsing events → use getHackathons.",
+				"description": "Full detail for ONE hackathon by slug: every submission with placement, prize and track; `winners`, per-track aggregates and a `stats` funnel. DoraHacks events serve the stored copy: the event page, `rules` (submission requirements, and judging criteria where the organizer published them) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). Needs an exact slug; resolve via getHackathons first. Not for listing events → use getHackathons.",
 				"x-routing": {
 					"purpose": "One hackathon's winners, submissions, tracks, and outcome stats.",
 					"keywords": [
@@ -3242,14 +3242,18 @@
 						"in progress",
 						"abandoned",
 						"outcome funnel",
-						"scfAwarded"
+						"scfAwarded",
+						"judging criteria",
+						"submission requirements",
+						"rules"
 					],
 					"useWhen": [
 						"who won [event] / who won its soroban track",
 						"who won the most recent or latest Stellar hackathon",
 						"what projects were submitted to [event]",
 						"what tracks did [event] have and what did they pay",
-						"how many [event] submissions are still being built"
+						"how many [event] submissions are still being built",
+						"how is [event] judged / what does a submission to [event] need"
 					],
 					"notFor": [
 						"listing/browsing many events -> getHackathons",
@@ -3259,7 +3263,8 @@
 					],
 					"exampleQuestions": [
 						"Who won the Stellar x402 hackathon?",
-						"What tracks did the event have and what did they pay?"
+						"What tracks did the event have and what did they pay?",
+						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?"
 					]
 				},
 				"parameters": [
@@ -3465,7 +3470,7 @@
 													},
 													"profile": {
 														"type": "object",
-														"description": "What the event's stored submissions were about and built with. Absent when none are stored. Shares are over known values, as in analyzeHackathonSubmissions.",
+														"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions.",
 														"properties": {
 															"submissions": {
 																"type": "integer"
@@ -3474,6 +3479,46 @@
 																"type": "integer"
 															},
 															"category": {
+																"type": "object",
+																"properties": {
+																	"builds": {
+																		"type": "integer",
+																		"description": "Builds in the set."
+																	},
+																	"known": {
+																		"type": "integer",
+																		"description": "Builds whose value is known: every share's denominator."
+																	},
+																	"unknown": {
+																		"type": "integer",
+																		"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+																	},
+																	"values": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"value": {
+																					"type": "string"
+																				},
+																				"builds": {
+																					"type": "integer"
+																				},
+																				"winners": {
+																					"type": "integer",
+																					"description": "Of `builds`, how many placed."
+																				},
+																				"share": {
+																					"type": "number",
+																					"nullable": true,
+																					"description": "builds / known (0 to 1); null when no build's value is known."
+																				}
+																			}
+																		}
+																	}
+																}
+															},
+															"library": {
 																"type": "object",
 																"properties": {
 																	"builds": {
@@ -3554,6 +3599,127 @@
 																}
 															},
 															"activity": {
+																"type": "object",
+																"properties": {
+																	"builds": {
+																		"type": "integer",
+																		"description": "Builds in the set."
+																	},
+																	"known": {
+																		"type": "integer",
+																		"description": "Builds whose value is known: every share's denominator."
+																	},
+																	"unknown": {
+																		"type": "integer",
+																		"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+																	},
+																	"values": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"value": {
+																					"type": "string"
+																				},
+																				"builds": {
+																					"type": "integer"
+																				},
+																				"winners": {
+																					"type": "integer",
+																					"description": "Of `builds`, how many placed."
+																				},
+																				"share": {
+																					"type": "number",
+																					"nullable": true,
+																					"description": "builds / known (0 to 1); null when no build's value is known."
+																				}
+																			}
+																		}
+																	}
+																}
+															},
+															"project": {
+																"type": "object",
+																"description": "Became a directory project (a floor).",
+																"properties": {
+																	"builds": {
+																		"type": "integer",
+																		"description": "Builds in the set."
+																	},
+																	"known": {
+																		"type": "integer",
+																		"description": "Builds whose value is known: every share's denominator."
+																	},
+																	"unknown": {
+																		"type": "integer",
+																		"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+																	},
+																	"values": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"value": {
+																					"type": "string"
+																				},
+																				"builds": {
+																					"type": "integer"
+																				},
+																				"winners": {
+																					"type": "integer",
+																					"description": "Of `builds`, how many placed."
+																				},
+																				"share": {
+																					"type": "number",
+																					"nullable": true,
+																					"description": "builds / known (0 to 1); null when no build's value is known."
+																				}
+																			}
+																		}
+																	}
+																}
+															},
+															"projectStatus": {
+																"type": "object",
+																"properties": {
+																	"builds": {
+																		"type": "integer",
+																		"description": "Builds in the set."
+																	},
+																	"known": {
+																		"type": "integer",
+																		"description": "Builds whose value is known: every share's denominator."
+																	},
+																	"unknown": {
+																		"type": "integer",
+																		"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+																	},
+																	"values": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"properties": {
+																				"value": {
+																					"type": "string"
+																				},
+																				"builds": {
+																					"type": "integer"
+																				},
+																				"winners": {
+																					"type": "integer",
+																					"description": "Of `builds`, how many placed."
+																				},
+																				"share": {
+																					"type": "number",
+																					"nullable": true,
+																					"description": "builds / known (0 to 1); null when no build's value is known."
+																				}
+																			}
+																		}
+																	}
+																}
+															},
+															"scf": {
 																"type": "object",
 																"properties": {
 																	"builds": {
@@ -14537,7 +14703,337 @@
 					},
 					"hackathon": {
 						"type": "object",
-						"additionalProperties": true
+						"additionalProperties": true,
+						"properties": {
+							"description": {
+								"type": "string",
+								"nullable": true,
+								"description": "The event page, markdown as the organizer published it (stored daily for DoraHacks events)."
+							},
+							"rules": {
+								"type": "object",
+								"description": "What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none: most Stellar events publish submission requirements and no judging criteria.",
+								"properties": {
+									"repoRequired": {
+										"type": "boolean"
+									},
+									"videoRequired": {
+										"type": "boolean"
+									},
+									"submissionQuestions": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"requirements": {
+										"type": "string",
+										"nullable": true
+									},
+									"judgingCriteria": {
+										"type": "string",
+										"nullable": true
+									},
+									"readAt": {
+										"type": "string",
+										"format": "date-time"
+									}
+								}
+							},
+							"profile": {
+								"type": "object",
+								"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions.",
+								"properties": {
+									"submissions": {
+										"type": "integer"
+									},
+									"winners": {
+										"type": "integer"
+									},
+									"category": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"library": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"package": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"activity": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"project": {
+										"type": "object",
+										"description": "Became a directory project (a floor).",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"projectStatus": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									},
+									"scf": {
+										"type": "object",
+										"properties": {
+											"builds": {
+												"type": "integer",
+												"description": "Builds in the set."
+											},
+											"known": {
+												"type": "integer",
+												"description": "Builds whose value is known: every share's denominator."
+											},
+											"unknown": {
+												"type": "integer",
+												"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+											},
+											"values": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"value": {
+															"type": "string"
+														},
+														"builds": {
+															"type": "integer"
+														},
+														"winners": {
+															"type": "integer",
+															"description": "Of `builds`, how many placed."
+														},
+														"share": {
+															"type": "number",
+															"nullable": true,
+															"description": "builds / known (0 to 1); null when no build's value is known."
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					},
 					"winners": {
 						"type": "array",

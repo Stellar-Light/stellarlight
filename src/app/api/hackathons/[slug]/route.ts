@@ -13,13 +13,20 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
+import { eventProfile } from "@/lib/hackathon-analytics";
 import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
+import {
+	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import type { HackathonEvent } from "@/payload-types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -272,10 +279,44 @@ export async function GET(
 				(s, w) => s + (w.hackathonPrize ?? 0),
 				0,
 			);
-			// Pull the live submission roster from DoraHacks (read-through; degrades
-			// to [] if the feed is unavailable). Populates submissions/winners/tracks
-			// for events that aren't curated in our DB.
-			const liveSubmissions = await fetchHackathonSubmissions(dora);
+			// The stored copy first: the same submissions search and analyze read,
+			// refreshed daily, and the event's own stored page. A live DoraHacks
+			// read only when the store holds none of this event's submissions
+			// (degrades to [] if the feed is unavailable).
+			const [index, storedEvent] = await Promise.all([
+				getHackathonBuildsIndex().catch(() => [] as IndexedBuild[]),
+				payload
+					.find({
+						collection: "hackathon-events",
+						where: { slug: { equals: slug } },
+						limit: 1,
+						depth: 0,
+					})
+					.then((r) => r.docs[0] as HackathonEvent | undefined)
+					.catch(() => undefined),
+			]);
+			const stored = index.filter((b) => b.hackathon.slug === slug);
+			const fromStore = stored.length > 0;
+			// Served in the submission shape this endpoint has always served:
+			// the stored row's other facts live on search, detail and analyze.
+			const liveSubmissions: DoraHacksSubmission[] = fromStore
+				? stored.map((b) => ({
+						id: b.id,
+						name: b.name,
+						description: b.description,
+						githubUrl: b.githubUrl,
+						demoUrl: b.demoUrl,
+						videoUrl: b.videoUrl,
+						track: b.track,
+						hackathonPlacement: b.hackathonPlacement,
+						award: b.award,
+						isWinner: b.isWinner,
+						voteCount: b.voteCount,
+						url: b.url,
+						source: "dorahacks" as const,
+					}))
+				: await fetchHackathonSubmissions(dora);
+			const page = storedEvent?.description ?? dora.description ?? null;
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 			const winners = liveWinners.length
 				? rankAndSort(liveWinners)
@@ -303,17 +344,19 @@ export async function GET(
 					meta: {
 						source: getHackathonUrl(dora),
 						generatedAt: new Date().toISOString(),
-						note: liveSubmissions.length
-							? "DoraHacks-sourced — submissions, winners, and tracks below are pulled live from DoraHacks."
-							: curatedWinners.length
-								? "DoraHacks-sourced — live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
-								: "DoraHacks-sourced — live submission feed unavailable; visit externalUrl for full detail.",
+						note: fromStore
+							? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
+							: liveSubmissions.length
+								? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
+								: curatedWinners.length
+									? "DoraHacks-sourced: live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
+									: "DoraHacks-sourced: live submission feed unavailable; visit externalUrl for full detail.",
 					},
 					hackathon: {
 						id: `dorahacks-${dora.id}`,
 						name: dora.title,
 						slug: dora.uname,
-						description: dora.description ?? null,
+						description: page,
 						startDate: new Date(dora.start_time * 1000)
 							.toISOString()
 							.slice(0, 10),
@@ -332,7 +375,26 @@ export async function GET(
 						prizePoolUSD: dora.bonus_price || null,
 						// sls-016: structured per-place split parsed from the description
 						// prose (rank → amountUSD → asset); [] when not itemized.
-						prizeTiers: parsePrizeTiers(dora.description),
+						prizeTiers: parsePrizeTiers(page),
+						// What the organizer published about submitting and judging.
+						// Absent = the event page was not read; a null section = the
+						// page has none (most Stellar events publish no judging
+						// criteria).
+						...(storedEvent?.detailReadAt
+							? {
+									rules: {
+										repoRequired: !!storedEvent.repoRequired,
+										videoRequired: !!storedEvent.videoRequired,
+										submissionQuestions: storedEvent.submissionQuestions ?? [],
+										requirements: storedEvent.requirementsSection ?? null,
+										judgingCriteria: storedEvent.judgingSection ?? null,
+										readAt: storedEvent.detailReadAt,
+									},
+								}
+							: {}),
+						// The engine's profile of the stored submissions: categories,
+						// libraries, activity after the event, and what they became.
+						...(fromStore ? { profile: eventProfile(stored) } : {}),
 						hackersCount: dora.hackers_count || null,
 						source: dora.source === "curated" ? "curated" : "dorahacks",
 						stats: {

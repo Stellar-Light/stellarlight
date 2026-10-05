@@ -73,6 +73,24 @@ const LIBRARY_SCOPES: Array<[string, string]> = [
 ];
 
 /** The library a declared package belongs to. */
+/** One event's submissions profiled by the engine: what they were about,
+ * what they built with, and what became of them. compareHackathons and
+ * getHackathon serve this same shape. */
+export function eventProfile(builds: IndexedBuild[]) {
+	return {
+		submissions: builds.length,
+		winners: builds.filter((b) => b.isWinner).length,
+		category: distribution(builds, "category", { top: 5 }),
+		library: distribution(builds, "library", { top: 5 }),
+		package: distribution(builds, "package", { top: 5 }),
+		activity: distribution(builds, "activity", { top: 4 }),
+		project: distribution(builds, "project"),
+		projectStatus: distribution(builds, "projectStatus", { top: 4 }),
+		scf: distribution(builds, "scf"),
+	};
+}
+export type EventProfile = ReturnType<typeof eventProfile>;
+
 /** Each assigned type's measured precision and recall, as the lane stamped
  * them on the builds that carry it. */
 export function categoryMeasures(

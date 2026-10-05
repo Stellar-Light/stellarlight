@@ -328,6 +328,29 @@ const FACET_COUNT_PROPS = {
 	values: { type: "array", items: FACET_VALUE_SCHEMA },
 };
 
+/** One event's stored submissions profiled by the analytics engine:
+ * compareHackathons' and getHackathon's `profile`. */
+const EVENT_PROFILE_SCHEMA = {
+	type: "object",
+	description:
+		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions.",
+	properties: {
+		submissions: { type: "integer" },
+		winners: { type: "integer" },
+		category: { type: "object", properties: FACET_COUNT_PROPS },
+		library: { type: "object", properties: FACET_COUNT_PROPS },
+		package: { type: "object", properties: FACET_COUNT_PROPS },
+		activity: { type: "object", properties: FACET_COUNT_PROPS },
+		project: {
+			type: "object",
+			description: "Became a directory project (a floor).",
+			properties: FACET_COUNT_PROPS,
+		},
+		projectStatus: { type: "object", properties: FACET_COUNT_PROPS },
+		scf: { type: "object", properties: FACET_COUNT_PROPS },
+	},
+};
+
 /** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
  * computation /api/vet-idea serves, embedded by scf-pitch + hackathon-brief. */
 const VET_BLOCK_SCHEMA = {
@@ -2997,7 +3020,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Get one hackathon's full detail",
 				description:
-					"Full detail for ONE hackathon by slug — every submission with placement, prize, track, and post-hack status; derives `winners`, per-track aggregates, and a `stats` outcome funnel. DoraHacks-only events read live, degrading to a winner roster + `meta.note`. Needs an exact slug — resolve via getHackathons first. Not for listing/browsing events → use getHackathons.",
+					"Full detail for ONE hackathon by slug: every submission with placement, prize and track; `winners`, per-track aggregates and a `stats` funnel. DoraHacks events serve the stored copy: the event page, `rules` (submission requirements, and judging criteria where the organizer published them) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). Needs an exact slug; resolve via getHackathons first. Not for listing events → use getHackathons.",
 				"x-routing": {
 					purpose:
 						"One hackathon's winners, submissions, tracks, and outcome stats.",
@@ -3016,6 +3039,9 @@ export const spec: OpenAPISpec = {
 						"abandoned",
 						"outcome funnel",
 						"scfAwarded",
+						"judging criteria",
+						"submission requirements",
+						"rules",
 					],
 					useWhen: [
 						"who won [event] / who won its soroban track",
@@ -3023,6 +3049,7 @@ export const spec: OpenAPISpec = {
 						"what projects were submitted to [event]",
 						"what tracks did [event] have and what did they pay",
 						"how many [event] submissions are still being built",
+						"how is [event] judged / what does a submission to [event] need",
 					],
 					notFor: [
 						"listing/browsing many events -> getHackathons",
@@ -3033,6 +3060,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who won the Stellar x402 hackathon?",
 						"What tracks did the event have and what did they pay?",
+						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?",
 					],
 				},
 				parameters: [
@@ -3194,27 +3222,7 @@ export const spec: OpenAPISpec = {
 													},
 													liveCount: { type: "integer", nullable: true },
 													activeRatePct: { type: "number", nullable: true },
-													profile: {
-														type: "object",
-														description:
-															"What the event's stored submissions were about and built with. Absent when none are stored. Shares are over known values, as in analyzeHackathonSubmissions.",
-														properties: {
-															submissions: { type: "integer" },
-															winners: { type: "integer" },
-															category: {
-																type: "object",
-																properties: FACET_COUNT_PROPS,
-															},
-															package: {
-																type: "object",
-																properties: FACET_COUNT_PROPS,
-															},
-															activity: {
-																type: "object",
-																properties: FACET_COUNT_PROPS,
-															},
-														},
-													},
+													profile: EVENT_PROFILE_SCHEMA,
 												},
 											},
 										},
@@ -10245,7 +10253,35 @@ export const spec: OpenAPISpec = {
 				type: "object",
 				properties: {
 					meta: { $ref: "#/components/schemas/Meta" },
-					hackathon: { type: "object", additionalProperties: true },
+					hackathon: {
+						type: "object",
+						additionalProperties: true,
+						properties: {
+							description: {
+								type: "string",
+								nullable: true,
+								description:
+									"The event page, markdown as the organizer published it (stored daily for DoraHacks events).",
+							},
+							rules: {
+								type: "object",
+								description:
+									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none: most Stellar events publish submission requirements and no judging criteria.",
+								properties: {
+									repoRequired: { type: "boolean" },
+									videoRequired: { type: "boolean" },
+									submissionQuestions: {
+										type: "array",
+										items: { type: "string" },
+									},
+									requirements: { type: "string", nullable: true },
+									judgingCriteria: { type: "string", nullable: true },
+									readAt: { type: "string", format: "date-time" },
+								},
+							},
+							profile: EVENT_PROFILE_SCHEMA,
+						},
+					},
 					winners: {
 						type: "array",
 						description:

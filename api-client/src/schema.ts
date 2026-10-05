@@ -219,7 +219,7 @@ export interface paths {
         };
         /**
          * Get one hackathon's full detail
-         * @description Full detail for ONE hackathon by slug — every submission with placement, prize, track, and post-hack status; derives `winners`, per-track aggregates, and a `stats` outcome funnel. DoraHacks-only events read live, degrading to a winner roster + `meta.note`. Needs an exact slug — resolve via getHackathons first. Not for listing/browsing events → use getHackathons.
+         * @description Full detail for ONE hackathon by slug: every submission with placement, prize and track; `winners`, per-track aggregates and a `stats` funnel. DoraHacks events serve the stored copy: the event page, `rules` (submission requirements, and judging criteria where the organizer published them) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). Needs an exact slug; resolve via getHackathons first. Not for listing events → use getHackathons.
          */
         get: operations["getHackathon"];
         put?: never;
@@ -1453,6 +1453,137 @@ export interface components {
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
             hackathon?: {
+                /** @description The event page, markdown as the organizer published it (stored daily for DoraHacks events). */
+                description?: string | null;
+                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none: most Stellar events publish submission requirements and no judging criteria. */
+                rules?: {
+                    repoRequired?: boolean;
+                    videoRequired?: boolean;
+                    submissionQuestions?: string[];
+                    requirements?: string | null;
+                    judgingCriteria?: string | null;
+                    /** Format: date-time */
+                    readAt?: string;
+                };
+                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. */
+                profile?: {
+                    submissions?: number;
+                    winners?: number;
+                    category?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    library?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    package?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    activity?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    /** @description Became a directory project (a floor). */
+                    project?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    projectStatus?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                    scf?: {
+                        /** @description Builds in the set. */
+                        builds?: number;
+                        /** @description Builds whose value is known: every share's denominator. */
+                        known?: number;
+                        /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                        unknown?: number;
+                        values?: {
+                            value?: string;
+                            builds?: number;
+                            /** @description Of `builds`, how many placed. */
+                            winners?: number;
+                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            share?: number | null;
+                        }[];
+                    };
+                };
+            } & {
                 [key: string]: unknown;
             };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
@@ -3189,11 +3320,27 @@ export interface operations {
                             stillActiveCount?: number | null;
                             liveCount?: number | null;
                             activeRatePct?: number | null;
-                            /** @description What the event's stored submissions were about and built with. Absent when none are stored. Shares are over known values, as in analyzeHackathonSubmissions. */
+                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. */
                             profile?: {
                                 submissions?: number;
                                 winners?: number;
                                 category?: {
+                                    /** @description Builds in the set. */
+                                    builds?: number;
+                                    /** @description Builds whose value is known: every share's denominator. */
+                                    known?: number;
+                                    /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                                    unknown?: number;
+                                    values?: {
+                                        value?: string;
+                                        builds?: number;
+                                        /** @description Of `builds`, how many placed. */
+                                        winners?: number;
+                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        share?: number | null;
+                                    }[];
+                                };
+                                library?: {
                                     /** @description Builds in the set. */
                                     builds?: number;
                                     /** @description Builds whose value is known: every share's denominator. */
@@ -3226,6 +3373,55 @@ export interface operations {
                                     }[];
                                 };
                                 activity?: {
+                                    /** @description Builds in the set. */
+                                    builds?: number;
+                                    /** @description Builds whose value is known: every share's denominator. */
+                                    known?: number;
+                                    /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                                    unknown?: number;
+                                    values?: {
+                                        value?: string;
+                                        builds?: number;
+                                        /** @description Of `builds`, how many placed. */
+                                        winners?: number;
+                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        share?: number | null;
+                                    }[];
+                                };
+                                /** @description Became a directory project (a floor). */
+                                project?: {
+                                    /** @description Builds in the set. */
+                                    builds?: number;
+                                    /** @description Builds whose value is known: every share's denominator. */
+                                    known?: number;
+                                    /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                                    unknown?: number;
+                                    values?: {
+                                        value?: string;
+                                        builds?: number;
+                                        /** @description Of `builds`, how many placed. */
+                                        winners?: number;
+                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        share?: number | null;
+                                    }[];
+                                };
+                                projectStatus?: {
+                                    /** @description Builds in the set. */
+                                    builds?: number;
+                                    /** @description Builds whose value is known: every share's denominator. */
+                                    known?: number;
+                                    /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                                    unknown?: number;
+                                    values?: {
+                                        value?: string;
+                                        builds?: number;
+                                        /** @description Of `builds`, how many placed. */
+                                        winners?: number;
+                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        share?: number | null;
+                                    }[];
+                                };
+                                scf?: {
                                     /** @description Builds in the set. */
                                     builds?: number;
                                     /** @description Builds whose value is known: every share's denominator. */

@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
+		surfaces: ["api"],
+		version: "spec@1.9.71",
+		type: "changed",
+		summary:
+			"getHackathon serves DoraHacks events from the stored copy: the event page as the organizer published it, `rules` (whether a repo and a video are required, the submission form's questions, and the page's own requirements and judging sections) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). compareHackathons' profile gains library, project, projectStatus and scf.",
+		detail:
+			"Before, the event description was always null for DoraHacks events (the event list carries none) and every request re-read the roster live. A stored submission roster is now served in the same submission shape; a live read remains the fallback. A null judgingCriteria means the organizer published none: on 2026-10-05, 1 of 12 Stellar events did.",
+	},
+	{
+		date: "2026-10-05",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.6.0",
 		type: "added",
