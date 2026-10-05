@@ -46,6 +46,19 @@ export interface LinkedProject {
 }
 
 export const LINK_BASES = ["repo", "website"] as const;
+/** reviewSubmission: how the link was resolved, and its check ids.
+ * Here (pure) so the spec can spread them. */
+export const REVIEW_RESOLVED_BY = ["submission", "repo"] as const;
+export const REVIEW_CHECK_IDS = [
+	"repo",
+	"activity",
+	"stack",
+	"directory",
+	"status",
+	"scf",
+	"writeUp",
+	"demo",
+] as const;
 export type LinkBasis = (typeof LINK_BASES)[number];
 
 /** The project fields the rule reads. */

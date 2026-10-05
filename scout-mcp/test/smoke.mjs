@@ -195,6 +195,7 @@ async function main() {
 			"scf_pitch",
 			"get_hackathon_submission",
 			"analyze_hackathon_submissions",
+			"review_submission",
 		];
 		const got = tools.map((t) => t.name).sort();
 		const missing = expected.filter((n) => !got.includes(n));

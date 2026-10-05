@@ -22,6 +22,8 @@ import {
 	BUILD_MATCH_MODES,
 	BUILD_SEARCH_MODES,
 	LINK_BASES,
+	REVIEW_CHECK_IDS,
+	REVIEW_RESOLVED_BY,
 } from "./hackathon-build-links";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
@@ -338,9 +340,9 @@ const VET_BLOCK_SCHEMA = {
 			properties: {
 				matchMode: {
 					type: "string",
-					enum: ["vertical", "scored", "weak"],
+					enum: ["vertical", "vertical+scored", "scored", "weak"],
 					description:
-						"How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
+						"How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
 				},
 				matchModeLabel: { type: "string" },
 				repos: {
@@ -349,7 +351,12 @@ const VET_BLOCK_SCHEMA = {
 						type: "object",
 						properties: {
 							fullName: { type: "string" },
-							tier: { type: "string", nullable: true },
+							tier: {
+								type: "string",
+								nullable: true,
+								description:
+									"The repo's grade tier, read live from the index with this response; not dated per row.",
+							},
 							activityState: { type: "string" },
 							stars: { type: "integer", nullable: true },
 							codeDomains: { type: "array", items: { type: "string" } },
@@ -363,7 +370,12 @@ const VET_BLOCK_SCHEMA = {
 						properties: {
 							slug: { type: "string" },
 							name: { type: "string", nullable: true },
-							status: { type: "string", nullable: true },
+							status: {
+								type: "string",
+								nullable: true,
+								description:
+									"The project's directory status, read live with this response; not dated per row.",
+							},
 							types: { type: "array", items: { type: "string" } },
 						},
 					},
@@ -448,6 +460,162 @@ const AUDIT_REPORT_ROW_SCHEMA = {
 		auditor: { type: "string", nullable: true },
 		publishedAt: { type: "string", format: "date-time", nullable: true },
 		title: { type: "string", nullable: true },
+	},
+};
+
+/** One stored submission in full: getHackathonSubmission's `build` and
+ * reviewSubmission's `review.submission`. */
+const BUILD_DETAIL_SCHEMA = {
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+		summary: {
+			type: "string",
+			nullable: true,
+			description: "DoraHacks' one-line summary.",
+		},
+		writeUp: {
+			type: "string",
+			nullable: true,
+			description:
+				"The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none.",
+		},
+		selfTags: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported.",
+		},
+		hackathon: {
+			type: "object",
+			properties: {
+				title: { type: "string" },
+				slug: { type: "string" },
+				endedAt: { type: "string", nullable: true },
+			},
+		},
+		track: { type: "string", nullable: true },
+		placement: { type: "string", nullable: true },
+		award: { type: "string", nullable: true },
+		prizeUsd: { type: "number", nullable: true },
+		isWinner: { type: "boolean" },
+		links: {
+			type: "object",
+			properties: {
+				dorahacks: { type: "string" },
+				github: { type: "string", nullable: true },
+				demo: { type: "string", nullable: true },
+				video: { type: "string", nullable: true },
+			},
+		},
+		repo: {
+			type: "string",
+			nullable: true,
+			description:
+				"owner/name from the GitHub link; null for an account or org link.",
+		},
+		project: BUILD_PROJECT_SCHEMA,
+		stack: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none.",
+		},
+		stackReadAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the repo's manifests; null = never read.",
+		},
+		repoMissingAt: {
+			type: "string",
+			nullable: true,
+			description:
+				"When the repo last answered not found (deleted, renamed away or private); null = it has not.",
+		},
+		categories: {
+			type: "array",
+			description:
+				"Directory project types this submission was sorted into, best first. Absent = not categorized yet.",
+			items: {
+				type: "object",
+				properties: {
+					type: {
+						type: "string",
+						enum: [...PROJECT_TYPES],
+					},
+					score: {
+						type: "number",
+						description:
+							"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
+					},
+				},
+			},
+		},
+		categoriesAt: {
+			type: "string",
+			nullable: true,
+			description: "When it was categorized; null = not yet.",
+		},
+		categoriesMethod: {
+			type: "string",
+			nullable: true,
+			description:
+				"How the categories were assigned, with the method's measured precision and recall on the hand-typed directory.",
+		},
+		activity: {
+			type: "object",
+			description:
+				"The repo's activity. Absent = not read (no repo link, or not read yet).",
+			properties: {
+				lastCommitAt: {
+					type: "string",
+					nullable: true,
+					description: "Last commit on the default branch.",
+				},
+				archived: { type: "boolean" },
+			},
+		},
+		activityCheckedAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the repo's activity; null = never.",
+		},
+		firstSeenAt: { type: "string", format: "date-time" },
+		lastSeenAt: {
+			type: "string",
+			format: "date-time",
+			description:
+				"Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.",
+		},
+		writeUpReadAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the submission page.",
+		},
+	},
+};
+
+/** The SCF pitch report: scfPitch's `report` and
+ * reviewSubmission's `review.pitch`. */
+const SCF_PITCH_REPORT_SCHEMA = {
+	type: "object",
+	properties: {
+		idea: { type: "string" },
+		vertical: { type: "string", nullable: true },
+		round: SCF_ROUND_SCHEMA,
+		fundedPeers: {
+			type: "array",
+			items: SCF_FUNDED_PEER_SCHEMA,
+		},
+		fundingBar: SCF_FUNDING_BAR_SCHEMA,
+		vet: VET_BLOCK_SCHEMA,
+		angles: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Deterministic derivations from served facts — each names its evidence; not judgments.",
+		},
 	},
 };
 
@@ -3371,139 +3539,7 @@ export const spec: OpenAPISpec = {
 												note: { type: "string" },
 											},
 										},
-										build: {
-											type: "object",
-											properties: {
-												id: { type: "string" },
-												name: { type: "string" },
-												summary: {
-													type: "string",
-													nullable: true,
-													description: "DoraHacks' one-line summary.",
-												},
-												writeUp: {
-													type: "string",
-													nullable: true,
-													description:
-														"The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none.",
-												},
-												selfTags: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported.",
-												},
-												hackathon: {
-													type: "object",
-													properties: {
-														title: { type: "string" },
-														slug: { type: "string" },
-														endedAt: { type: "string", nullable: true },
-													},
-												},
-												track: { type: "string", nullable: true },
-												placement: { type: "string", nullable: true },
-												award: { type: "string", nullable: true },
-												prizeUsd: { type: "number", nullable: true },
-												isWinner: { type: "boolean" },
-												links: {
-													type: "object",
-													properties: {
-														dorahacks: { type: "string" },
-														github: { type: "string", nullable: true },
-														demo: { type: "string", nullable: true },
-														video: { type: "string", nullable: true },
-													},
-												},
-												repo: {
-													type: "string",
-													nullable: true,
-													description:
-														"owner/name from the GitHub link; null for an account or org link.",
-												},
-												project: BUILD_PROJECT_SCHEMA,
-												stack: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none.",
-												},
-												stackReadAt: {
-													type: "string",
-													nullable: true,
-													description:
-														"When we last read the repo's manifests; null = never read.",
-												},
-												repoMissingAt: {
-													type: "string",
-													nullable: true,
-													description:
-														"When the repo last answered not found (deleted, renamed away or private); null = it has not.",
-												},
-												categories: {
-													type: "array",
-													description:
-														"Directory project types this submission was sorted into, best first. Absent = not categorized yet.",
-													items: {
-														type: "object",
-														properties: {
-															type: {
-																type: "string",
-																enum: [...PROJECT_TYPES],
-															},
-															score: {
-																type: "number",
-																description:
-																	"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
-															},
-														},
-													},
-												},
-												categoriesAt: {
-													type: "string",
-													nullable: true,
-													description:
-														"When it was categorized; null = not yet.",
-												},
-												categoriesMethod: {
-													type: "string",
-													nullable: true,
-													description:
-														"How the categories were assigned, with the method's measured precision and recall on the hand-typed directory.",
-												},
-												activity: {
-													type: "object",
-													description:
-														"The repo's activity. Absent = not read (no repo link, or not read yet).",
-													properties: {
-														lastCommitAt: {
-															type: "string",
-															nullable: true,
-															description: "Last commit on the default branch.",
-														},
-														archived: { type: "boolean" },
-													},
-												},
-												activityCheckedAt: {
-													type: "string",
-													nullable: true,
-													description:
-														"When we last read the repo's activity; null = never.",
-												},
-												firstSeenAt: { type: "string", format: "date-time" },
-												lastSeenAt: {
-													type: "string",
-													format: "date-time",
-													description:
-														"Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.",
-												},
-												writeUpReadAt: {
-													type: "string",
-													nullable: true,
-													description: "When we last read the submission page.",
-												},
-											},
-										},
+										build: BUILD_DETAIL_SCHEMA,
 									},
 								},
 							},
@@ -3762,6 +3798,164 @@ export const spec: OpenAPISpec = {
 						description:
 							"The index could not be built; retry after Retry-After.",
 					},
+				},
+			},
+		},
+		"/api/hackathons/review": {
+			get: {
+				operationId: "reviewSubmission",
+				tags: ["Hackathons"],
+				summary: "Review a hackathon project from its GitHub or DoraHacks link",
+				description:
+					"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.",
+				"x-routing": {
+					purpose:
+						"Get feedback on your own hackathon project before you apply to SCF: what the evidence shows, what is missing, who built close to it, and who is funded.",
+					keywords: [
+						"review my project",
+						"feedback on my project",
+						"my hackathon project",
+						"my submission",
+						"what's weak",
+						"what is missing",
+						"before I apply",
+						"apply to SCF",
+						"github link",
+						"dorahacks link",
+						"is my project ready",
+					],
+					useWhen: [
+						"here is my hackathon project (a GitHub or DoraHacks link): what is weak about it",
+						"what is missing before I apply to SCF with this project",
+						"who built something close to my submission, and did they win",
+					],
+					notFor: [
+						"an idea with no link -> vetIdea / scfPitch",
+						"a repo's own trust signals outside hackathons -> getRepoTrust",
+						"one submission's full write-up only -> getHackathonSubmission",
+					],
+					exampleQuestions: [
+						"Here is my hackathon project: github.com/rajkaria/toll. What's weak about it before I apply to SCF?",
+						"Review my Stellar hackathon submission: dorahacks.io/buidl/42585.",
+					],
+				},
+				parameters: [
+					{
+						name: "link",
+						in: "query",
+						required: true,
+						description:
+							"The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The review.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												note: { type: "string" },
+											},
+										},
+										review: {
+											type: "object",
+											properties: {
+												link: { type: "string" },
+												resolvedBy: {
+													type: "string",
+													enum: [...REVIEW_RESOLVED_BY],
+												},
+												otherSubmissionsOfRepo: {
+													type: "integer",
+													description:
+														"Other stored submissions of the same repo, not reviewed here.",
+												},
+												submission: BUILD_DETAIL_SCHEMA,
+												checks: {
+													type: "array",
+													description:
+														"Mechanical checks over the submission's own facts, each a finding with its evidence. Not dated per item: the submission's own read dates (stackReadAt, activityCheckedAt, writeUpReadAt, project.factsReadAt) date them.",
+													items: {
+														type: "object",
+														properties: {
+															id: {
+																type: "string",
+																enum: [...REVIEW_CHECK_IDS],
+															},
+															ok: {
+																type: "boolean",
+																nullable: true,
+																description:
+																	"true = in place; false = missing or a warning sign; null = could not be checked, never a no.",
+															},
+															finding: { type: "string" },
+														},
+													},
+												},
+												similar: {
+													type: "object",
+													description:
+														"The stored submissions closest in meaning to this one, by its own embedding.",
+													properties: {
+														checked: {
+															type: "boolean",
+															description:
+																"false = search by meaning could not run: unknown, not 'nothing similar'.",
+														},
+														builds: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	name: { type: "string" },
+																	hackathon: { type: "string" },
+																	isWinner: { type: "boolean" },
+																	placement: { type: "string", nullable: true },
+																	similarity: { type: "number" },
+																	project: BUILD_PROJECT_SCHEMA,
+																},
+															},
+														},
+													},
+												},
+												categoryContext: {
+													type: "object",
+													nullable: true,
+													description:
+														"How crowded the submission's top category is across every stored submission. null when it is not categorized.",
+													properties: {
+														type: { type: "string", enum: [...PROJECT_TYPES] },
+														submissions: { type: "integer" },
+														winners: { type: "integer" },
+														shareOfSubmissions: {
+															type: "number",
+															nullable: true,
+														},
+													},
+												},
+												pitch: SCF_PITCH_REPORT_SCHEMA,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "No link, or a parameter other than link." },
+					"404": {
+						description:
+							"No stored submission matches the link (not proof it was never submitted).",
+					},
+					"503": { description: "The store did not answer; retry." },
 				},
 			},
 		},
@@ -5304,26 +5498,7 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: REPORT_META_SCHEMA,
-										report: {
-											type: "object",
-											properties: {
-												idea: { type: "string" },
-												vertical: { type: "string", nullable: true },
-												round: SCF_ROUND_SCHEMA,
-												fundedPeers: {
-													type: "array",
-													items: SCF_FUNDED_PEER_SCHEMA,
-												},
-												fundingBar: SCF_FUNDING_BAR_SCHEMA,
-												vet: VET_BLOCK_SCHEMA,
-												angles: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Deterministic derivations from served facts — each names its evidence; not judgments.",
-												},
-											},
-										},
+										report: SCF_PITCH_REPORT_SCHEMA,
 									},
 								},
 							},

@@ -426,6 +426,30 @@ server.registerTool(
 	},
 );
 
+// 2d. review_submission — feedback on one hackathon submission from a link
+server.registerTool(
+	"review_submission",
+	{
+		title: "Review a Stellar hackathon project from its link",
+		description:
+			"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, how crowded its category is, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vet_idea or scf_pitch.",
+		inputSchema: {
+			link: z
+				.string()
+				.min(3)
+				.describe(
+					"The submission's GitHub repo (owner/name or URL) or its DoraHacks link or id.",
+				),
+		},
+	},
+	async ({ link }) =>
+		asToolResult(
+			await callScout(
+				`/api/hackathons/review?link=${encodeURIComponent(link)}`,
+			),
+		),
+);
+
 // 3. get_hackathon — detail for one hackathon
 server.registerTool(
 	"get_hackathon",
