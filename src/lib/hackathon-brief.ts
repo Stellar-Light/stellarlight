@@ -126,6 +126,8 @@ export interface HackathonBrief {
 		url: string | null;
 		/** Present only when checked: the directory project listing this build's exact repo, or null. */
 		project?: { slug: string; name: string } | null;
+		/** Opens the full submission in getHackathonBuild. */
+		id: string;
 	}>;
 	/** Candidate repos to fork/study — the top competitor repos that are not
 	 * archived, with a trust summary each. A competitor is a starting point to
@@ -248,6 +250,7 @@ export async function buildHackathonBrief(
 		.map(summarizeTrust);
 
 	const builds = pickBriefBuilds(index, q).map(({ b }) => ({
+		id: b.id,
 		name: b.name,
 		hackathon: b.hackathon.title,
 		endedAt: b.hackathon.endedAt ?? null,

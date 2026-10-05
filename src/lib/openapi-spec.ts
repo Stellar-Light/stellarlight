@@ -3001,6 +3001,11 @@ export const spec: OpenAPISpec = {
 											items: {
 												type: "object",
 												properties: {
+													id: {
+														type: "string",
+														description:
+															"Opens the full submission in getHackathonSubmission.",
+													},
 													name: { type: "string" },
 													description: { type: "string", nullable: true },
 													url: { type: "string", nullable: true },
@@ -3052,6 +3057,147 @@ export const spec: OpenAPISpec = {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		"/api/hackathons/builds/{id}": {
+			get: {
+				operationId: "getHackathonSubmission",
+				tags: ["Hackathons"],
+				summary: "One Stellar hackathon submission in full",
+				description:
+					"One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens it in getHackathon), placement and prize, repo/demo/video links, `project` (the directory project that lists its exact repo; absent = not checked, null = none) and when we read it. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use searchHackathonBuilds.",
+				"x-routing": {
+					purpose:
+						"Read one hackathon submission in full: what the team wrote, its links and placement, and what it became.",
+					keywords: [
+						"hackathon submission",
+						"submission details",
+						"full write-up",
+						"dorahacks link",
+						"what did this team submit",
+					],
+					useWhen: [
+						"you hold a submission id or a dorahacks.io/buidl link and need the full write-up",
+						"what exactly did <winner> submit, and did it become a project",
+					],
+					notFor: [
+						"finding submissions on a topic -> searchHackathonBuilds",
+						"one event's winners and roster -> getHackathon",
+					],
+					exampleQuestions: [
+						"Show me everything TollPay submitted to Stellar Hacks: Agents.",
+						"What does this DoraHacks submission do: dorahacks.io/buidl/42585?",
+					],
+				},
+				parameters: [
+					{
+						name: "id",
+						in: "path",
+						required: true,
+						description:
+							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The stored submission.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												upstream: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												note: { type: "string" },
+											},
+										},
+										build: {
+											type: "object",
+											properties: {
+												id: { type: "string" },
+												name: { type: "string" },
+												summary: {
+													type: "string",
+													nullable: true,
+													description: "DoraHacks' one-line summary.",
+												},
+												writeUp: {
+													type: "string",
+													nullable: true,
+													description:
+														"The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none.",
+												},
+												selfTags: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported.",
+												},
+												hackathon: {
+													type: "object",
+													properties: {
+														title: { type: "string" },
+														slug: { type: "string" },
+														endedAt: { type: "string", nullable: true },
+													},
+												},
+												track: { type: "string", nullable: true },
+												placement: { type: "string", nullable: true },
+												award: { type: "string", nullable: true },
+												prizeUsd: { type: "number", nullable: true },
+												isWinner: { type: "boolean" },
+												links: {
+													type: "object",
+													properties: {
+														dorahacks: { type: "string" },
+														github: { type: "string", nullable: true },
+														demo: { type: "string", nullable: true },
+														video: { type: "string", nullable: true },
+													},
+												},
+												repo: {
+													type: "string",
+													nullable: true,
+													description:
+														"owner/name from the GitHub link; null for an account or org link.",
+												},
+												project: BUILD_PROJECT_SCHEMA,
+												firstSeenAt: { type: "string", format: "date-time" },
+												lastSeenAt: {
+													type: "string",
+													format: "date-time",
+													description:
+														"Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.",
+												},
+												writeUpReadAt: {
+													type: "string",
+													nullable: true,
+													description: "When we last read the submission page.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Not a submission id, or a query parameter (this operation takes none).",
+					},
+					"404": {
+						description:
+							"Not in Scout's store (absence of a record, not proof the submission never existed).",
+					},
+					"503": {
+						description: "The store did not answer; retry after Retry-After.",
 					},
 				},
 			},
@@ -4702,6 +4848,11 @@ export const spec: OpenAPISpec = {
 													items: {
 														type: "object",
 														properties: {
+															id: {
+																type: "string",
+																description:
+																	"Opens the full submission in getHackathonSubmission.",
+															},
 															name: { type: "string" },
 															hackathon: { type: "string" },
 															endedAt: { type: "string", nullable: true },

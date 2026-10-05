@@ -323,3 +323,45 @@ describe("brief picks winners first, then broadens", () => {
 		expect(picks.indexOf("Wallet winner")).not.toBe(0);
 	});
 });
+
+describe("one submission in full", () => {
+	it("opens from the id, the bare number or the DoraHacks link", async () => {
+		const { parseBuildId } = await import("@/lib/hackathon-build-links");
+		expect(parseBuildId("dorahacks-buidl-42585")).toBe("dorahacks-buidl-42585");
+		expect(parseBuildId(" 42585 ")).toBe("dorahacks-buidl-42585");
+		expect(parseBuildId("https://dorahacks.io/buidl/42585")).toBe(
+			"dorahacks-buidl-42585",
+		);
+		expect(parseBuildId("tollpay")).toBeNull();
+		expect(parseBuildId("42585; drop")).toBeNull();
+	});
+
+	it("serves the write-up, the parsed prize and an unchecked link as absent", async () => {
+		const { buildDetailFromStored } = await import("@/lib/hackathon-builds");
+		const d = buildDetailFromStored({
+			id: "x",
+			buildId: "dorahacks-buidl-27438",
+			name: "Blend Pool Creator",
+			vision: "Launch custom lending pools.",
+			description: "## Blend Pool Creator\nFull write-up.",
+			selfTags: ["layer1:Stellar"],
+			hackathonSlug: "stellar-hacks-blend",
+			hackathonTitle: "Stellar Hacks: Blend",
+			endedAt: "2025-07-07",
+			placement: "1st Place - $3,000 in XLM",
+			isWinner: true,
+			url: "https://dorahacks.io/buidl/27438",
+			githubUrl: "https://github.com/ELDEVODE/blend-pool-creator",
+			repoFullName: "eldevode/blend-pool-creator",
+			firstSeenAt: "2026-10-05T10:20:00.000Z",
+			lastSeenAt: "2026-10-05T10:20:00.000Z",
+			detailReadAt: "2026-10-05T10:20:00.000Z",
+			updatedAt: "2026-10-05T10:20:00.000Z",
+			createdAt: "2026-10-05T10:20:00.000Z",
+		});
+		expect(d.writeUp).toBe("## Blend Pool Creator\nFull write-up.");
+		expect(d.prizeUsd).toBe(3000);
+		expect(d.hackathon.slug).toBe("stellar-hacks-blend");
+		expect("project" in d).toBe(false);
+	});
+});

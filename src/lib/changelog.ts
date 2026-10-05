@@ -32,6 +32,24 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
+		surfaces: ["api"],
+		version: "spec@1.9.66",
+		type: "added",
+		summary:
+			"getHackathonSubmission (GET /api/hackathons/builds/{id}) serves one stored Stellar hackathon submission in full: the team's write-up, self-reported tags, event, placement and prize, links, `project` and when we read it. searchHackathonBuilds and hackathonBrief rows carry the `id` that opens it.",
+		detail:
+			"Search rows carry DoraHacks' one-line summary; the team's full write-up (often 1 to 8 KB) was only on the submission page. The id accepts dorahacks-buidl-<n>, the bare number or a dorahacks.io/buidl link. 404 means not in Scout's store, never that the submission does not exist; submissions their teams deleted or made private are not served.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.4.0",
+		type: "added",
+		summary:
+			"scout-mcp adds get_hackathon_submission, one stored hackathon submission in full (25 tools).",
+	},
+	{
+		date: "2026-10-05",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.3.0",
 		type: "added",
