@@ -598,6 +598,13 @@ export const REPO_SUCCESSIONS: Record<string, string> = Object.fromEntries(
 		.map(([k, v]) => [k, v.supersededBy as string]),
 );
 
+/** Where a repo lives now: its successor when the supersession map records
+ * a move, else itself. Curated pick lists resolve through this so they
+ * follow a move instead of going stale. */
+export function currentRepo(fullName: string): string {
+	return repoSupersession(fullName)?.supersededBy ?? fullName;
+}
+
 /** The supersession fields a repo row serves, or null when the repo has none. */
 export function repoSupersession(fullName: string): {
 	supersededBy: string | null;
