@@ -67,6 +67,8 @@ export async function GET(
 				},
 				limit: 1,
 				depth: 0,
+				// The 1,024-number vector is never served; do not read it.
+				select: { embedding: false, embeddingTextHash: false },
 			}),
 			DEFAULT_READ_TIMEOUT_MS,
 		);

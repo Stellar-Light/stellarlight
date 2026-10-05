@@ -365,3 +365,59 @@ describe("one submission in full", () => {
 		expect("project" in d).toBe(false);
 	});
 });
+
+describe("search by meaning", () => {
+	const idx = [
+		build(
+			"Position Watch",
+			"Telegram alerts when a position nears closing.",
+			false,
+			"a",
+		),
+		build("Lending Dashboard", "Lending pool analytics and alerts.", true, "b"),
+		build("NFT Gallery", "Show your collectibles.", false, "c"),
+	];
+	// "warn borrowers before liquidation" shares no word with build a; its
+	// meaning is close.
+	const sem = new Map([
+		["a", 0.82],
+		["b", 0.74],
+	]);
+
+	it("meaning finds a build that shares no words with the query", () => {
+		const out = searchHackathonBuilds(
+			idx,
+			"warn borrowers before liquidation",
+			{
+				mode: "meaning",
+				semantic: sem,
+			},
+		);
+		expect(out.map((s) => s.b.id)).toEqual(["a", "b"]);
+		expect(out[0].similarity).toBe(0.82);
+		expect(out[0].matched).toEqual([]);
+	});
+
+	it("hybrid keeps keyword matches and adds close-in-meaning builds", () => {
+		const out = searchHackathonBuilds(idx, "lending alerts", {
+			mode: "hybrid",
+			semantic: sem,
+		});
+		const ids = out.map((s) => s.b.id);
+		expect(ids[0]).toBe("b"); // both signals, and a winner
+		expect(ids).toContain("a"); // joined on meaning
+		expect(ids).not.toContain("c");
+	});
+
+	it("keyword mode ignores similarity entirely", () => {
+		const out = searchHackathonBuilds(
+			idx,
+			"warn borrowers before liquidation",
+			{
+				mode: "keyword",
+				semantic: sem,
+			},
+		);
+		expect(out.every((s) => s.similarity === undefined)).toBe(true);
+	});
+});

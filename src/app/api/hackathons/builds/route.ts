@@ -18,7 +18,10 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
 import {
+	BUILD_SEARCH_MODES,
+	type BuildSearchMode,
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 	searchHackathonBuilds,
@@ -42,7 +45,13 @@ import { serverTiming } from "@/lib/server-timing";
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
-const SUPPORTED_PARAMS = ["q", "limit", "winnersOnly", "track"] as const;
+const SUPPORTED_PARAMS = [
+	"q",
+	"limit",
+	"winnersOnly",
+	"track",
+	"mode",
+] as const;
 
 // Index shape + builder live in src/lib/hackathon-builds.ts (shared with the
 // builder profile pages); the hour-long cache is unstable_cache, not per instance.
@@ -84,6 +93,17 @@ export async function GET(req: NextRequest) {
 	}
 	const winnersOnly = winnersOnlyRaw;
 	const track = sp.get("track")?.toLowerCase().trim();
+	const modeRaw = sp.get("mode") ?? "keyword";
+	if (!(BUILD_SEARCH_MODES as readonly string[]).includes(modeRaw)) {
+		return NextResponse.json(
+			{
+				error: `Invalid mode '${modeRaw}'.`,
+				validValues: BUILD_SEARCH_MODES,
+			},
+			{ status: 400 },
+		);
+	}
+	const requestedMode = modeRaw as BuildSearchMode;
 
 	let indexed: IndexedBuild[];
 	try {
@@ -110,12 +130,29 @@ export async function GET(req: NextRequest) {
 	// Scoring lives in src/lib/hackathon-builds.ts (searchHackathonBuilds) so
 	// the hackathon-brief composite can call it in-process — this route and
 	// the composite share one implementation and cannot drift.
+	// Search by meaning: null = could not check, which serves keyword results
+	// and says so; it is never read as "nothing close".
+	const warnings: string[] = [];
+	let mode: BuildSearchMode = requestedMode;
+	let semantic: Map<string, number> | undefined;
+	if (q && mode !== "keyword") {
+		const sem = await semanticBuildScores(q, { winnersOnly });
+		if (sem) semantic = sem;
+		else {
+			mode = "keyword";
+			warnings.push(
+				"search by meaning could not run this request (embedding or vector index unavailable); these are keyword matches, not a statement that nothing close exists",
+			);
+		}
+	}
 	const scored = searchHackathonBuilds(indexed, q ?? "", {
 		winnersOnly,
 		track,
+		mode,
+		semantic,
 	});
 
-	const builds = scored.slice(0, limit).map(({ b, matched }) => ({
+	const builds = scored.slice(0, limit).map(({ b, matched, similarity }) => ({
 		// Opens the full submission in getHackathonBuild.
 		id: b.id,
 		name: b.name,
@@ -143,6 +180,9 @@ export async function GET(req: NextRequest) {
 		// lists this build's exact repo, or null when none does.
 		...(b.project !== undefined ? { project: b.project } : {}),
 		...(matched.length ? { matchedTerms: matched } : {}),
+		...(similarity !== undefined
+			? { similarity: Math.round(similarity * 1000) / 1000 }
+			: {}),
 	}));
 
 	try {
@@ -158,11 +198,27 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
-				...matchModeMeta(q ? "filtered" : "all"),
+				...matchModeMeta(
+					!q
+						? "all"
+						: mode === "meaning"
+							? "vector"
+							: mode === "hybrid"
+								? "hybrid"
+								: "filtered",
+				),
+				mode: { requested: requestedMode, served: mode },
+				...(warnings.length ? { warnings } : {}),
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
 				generatedAt: new Date().toISOString(),
-				filters: { q: q ?? null, winnersOnly, track: track ?? null, limit },
+				filters: {
+					q: q ?? null,
+					winnersOnly,
+					track: track ?? null,
+					limit,
+					mode: requestedMode,
+				},
 				counts: {
 					indexedBuilds: indexedTotal,
 					matched: scored.length,

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
 		surfaces: ["api"],
+		version: "spec@1.9.67",
+		type: "added",
+		summary:
+			"searchHackathonBuilds takes `mode`: keyword (the default, unchanged), meaning (vector similarity over each submission's name, summary and write-up) or hybrid (both, blended, winners keep their edge). Rows found or ranked by meaning carry `similarity`; meta.mode says which mode served, and meta.matchMode adds vector and hybrid.",
+		detail:
+			"Embeddings are voyage-3 over all 1,400 stored submissions, refreshed by the sync lane when a row's text changes. If search by meaning cannot run (no key, index or store unavailable, timeout), keyword results are served with meta.mode.served = keyword and a warning, never an empty answer that reads as 'nothing close'. The default stays keyword until the modes are measured against each other on a fixed question set.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["api"],
 		version: "spec@1.9.66",
 		type: "added",
 		summary:

@@ -9,7 +9,12 @@
  */
 import { unstable_cache } from "next/cache";
 import { withReadTimeout } from "@/lib/degraded-read";
-import type { LinkedProject } from "@/lib/hackathon-build-links";
+import {
+	BUILD_SEARCH_MODES,
+	type BuildSearchMode,
+	type LinkedProject,
+} from "@/lib/hackathon-build-links";
+import { BUILD_SEMANTIC_FLOOR } from "@/lib/hackathon-build-semantic";
 import {
 	type DoraHacksSubmission,
 	doraEventRef,
@@ -284,7 +289,11 @@ export interface ScoredBuild {
 	coverage: number;
 	/** Share of the query's concepts the build covers, 0 to 1. */
 	share: number;
+	/** Vector similarity to the query, when search by meaning ran. */
+	similarity?: number;
 }
+
+export { BUILD_SEARCH_MODES, type BuildSearchMode };
 
 /** A winner's edge over a build about as relevant as it: enough to put
  * winners first among near-equals, not enough to lift a winner past a build
@@ -322,7 +331,14 @@ function termMatcher(v: string): (hay: string) => boolean {
 export function searchHackathonBuilds(
 	indexed: IndexedBuild[],
 	q: string,
-	opts: { winnersOnly?: boolean; track?: string } = {},
+	opts: {
+		winnersOnly?: boolean;
+		track?: string;
+		mode?: BuildSearchMode;
+		/** buildId -> similarity from semanticBuildScores; required for
+		 * meaning and hybrid, ignored for keyword. */
+		semantic?: Map<string, number>;
+	} = {},
 ): ScoredBuild[] {
 	let pool = indexed;
 	if (opts.winnersOnly) pool = pool.filter((b) => b.isWinner);
@@ -411,8 +427,41 @@ export function searchHackathonBuilds(
 			});
 		}
 	}
-	const rank = (s: ScoredBuild) =>
-		s.coverage * (s.b.isWinner ? WINNER_EDGE : 1);
-	scored.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
-	return scored;
+	const mode = opts.mode ?? "keyword";
+	const sem = opts.semantic;
+	if (mode === "keyword" || !sem) {
+		const rank = (s: ScoredBuild) =>
+			s.coverage * (s.b.isWinner ? WINNER_EDGE : 1);
+		scored.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
+		return scored;
+	}
+	// Meaning and hybrid: builds close in meaning join the keyword matches,
+	// within the same winners/track filters. Similarity is scaled 0 to 1
+	// between the floor and this query's best match; keyword coverage 0 to 1
+	// by its share of the query's total weight.
+	const byId = new Set(scored.map((s) => s.b.id));
+	for (const b of pool)
+		if (sem.has(b.id) && !byId.has(b.id))
+			scored.push({ b, score: 0, matched: [], coverage: 0, share: 0 });
+	const top = Math.max(BUILD_SEMANTIC_FLOOR + 0.01, ...sem.values());
+	const rel = (id: string) => {
+		const s = sem.get(id);
+		return s == null
+			? 0
+			: (s - BUILD_SEMANTIC_FLOOR) / (top - BUILD_SEMANTIC_FLOOR);
+	};
+	const totalWeight = [...weight.values()].reduce((n, w) => n + w, 0) || 1;
+	for (const s of scored) {
+		const sim = sem.get(s.b.id);
+		if (sim != null) s.similarity = sim;
+	}
+	const blend = (s: ScoredBuild) =>
+		(mode === "meaning"
+			? rel(s.b.id)
+			: 0.5 * (s.coverage / totalWeight) + 0.5 * rel(s.b.id)) *
+		(s.b.isWinner ? WINNER_EDGE : 1);
+	const out =
+		mode === "meaning" ? scored.filter((s) => sem.has(s.b.id)) : scored;
+	out.sort((a, b) => blend(b) - blend(a) || b.score - a.score);
+	return out;
 }

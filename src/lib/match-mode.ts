@@ -17,7 +17,8 @@ export type SimpleMatchMode =
 	| "filtered" // returned rows contain the query terms literally
 	| "expanded" // matched via synonym/stem expansion of the query terms
 	| "keyword" // coarse keyword fallback (vector search unavailable)
-	| "vector"; // vector-similarity ranking — conceptual, not literal
+	| "vector" // vector-similarity ranking — conceptual, not literal
+	| "hybrid"; // keyword matches and vector similarity blended
 
 export const SIMPLE_MATCH_LABEL: Record<SimpleMatchMode, string> = {
 	all: "no text query — full set (structured filters only)",
@@ -28,6 +29,8 @@ export const SIMPLE_MATCH_LABEL: Record<SimpleMatchMode, string> = {
 		"vector search unavailable — coarse keyword match over title and content",
 	vector:
 		"vector-similarity ranking — conceptually related, not literal keyword truth (verify before relying)",
+	hybrid:
+		"keyword matches and vector similarity blended; each row's matchedTerms and similarity show which (verify meaning-only rows before relying)",
 };
 
 /** Spread into a response's meta: `...matchModeMeta(q ? "filtered" : "all")` */
