@@ -44,9 +44,14 @@ import {
 	K_GRID,
 	type Labeled,
 	leaveOneOut,
+	looNeighbours,
 	MIN_PRECISION,
+	MIN_TYPE_PRECISION,
+	MIN_TYPE_SUPPORT,
 	neighbours,
+	perType,
 	pickSetting,
+	trustedTypes,
 	typeScores,
 	assign as typesAbove,
 	unit,
@@ -520,21 +525,37 @@ async function main() {
 			if (p.status === "Draft" || !p.types?.length || !vec) continue;
 			labeled.push({ id: p.slug, vec, types: p.types });
 		}
-		const grid = leaveOneOut(labeled);
+		// Two passes over the same neighbour lists: measure every type at the
+		// best overall setting, keep the types that are precise on their own,
+		// then pick the setting again with only those types assignable.
+		const near = looNeighbours(labeled, Math.max(...K_GRID));
+		const all = leaveOneOut(labeled, near);
+		const base = [...all].sort((a, b) => b.f1 - a.f1)[0];
+		const trusted = trustedTypes(perType(labeled, near, base.k, base.cut));
+		const grid = leaveOneOut(labeled, near, K_GRID, CUT_GRID, trusted);
 		const best = pickSetting(grid);
 		console.log(
-			`\ncategories: ${labeled.length} typed directory projects to learn from; leave-one-out over k ${K_GRID.join("/")} and cut ${CUT_GRID.join("/")}:`,
+			`\ncategories: ${labeled.length} hand-typed directory projects to learn from. Types assigned only when precise on their own (precision ${MIN_TYPE_PRECISION}+, ${MIN_TYPE_SUPPORT}+ examples): ${trusted.size} of ${new Set(labeled.flatMap((l) => l.types)).size}. Leave-one-out with those types, k ${K_GRID.join("/")} by cut ${CUT_GRID.join("/")}:`,
 		);
 		for (const m of grid)
 			console.log(
 				`  k=${String(m.k).padStart(2)} cut=${m.cut}  precision ${m.precision.toFixed(3)}  recall ${m.recall.toFixed(3)}  f1 ${m.f1.toFixed(3)}  covered ${m.covered.toFixed(3)}${m === best ? "  <- used" : ""}`,
 			);
+		if (best) {
+			console.log(
+				"  per type at the used setting (support, assigned, precision, recall):",
+			);
+			for (const t of perType(labeled, near, best.k, best.cut))
+				console.log(
+					`    ${t.type.padEnd(16)} ${String(t.support).padStart(4)} ${String(t.assigned).padStart(4)}  ${t.precision.toFixed(2)}  ${t.recall.toFixed(2)}${trusted.has(t.type) ? "" : "  (not assigned)"}`,
+				);
+		}
 		if (!best) {
 			console.error(
 				`  ✗ no setting reaches precision ${MIN_PRECISION}: categories not written`,
 			);
 		} else {
-			const method = `nearest directory projects, k=${best.k}, cut ${best.cut}; leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
+			const method = `nearest directory projects, k=${best.k}, cut ${best.cut}, ${trusted.size} types measured precise enough to assign; leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
 			let sorted = 0;
 			let agree = 0;
 			let linkedChecked = 0;
@@ -546,6 +567,7 @@ async function main() {
 				const cats = typesAbove(
 					typeScores(neighbours(vec, labeled, best.k), best.k),
 					best.cut,
+					trusted,
 				);
 				r.categories = cats;
 				r.categoriesAt = now;

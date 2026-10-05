@@ -172,3 +172,31 @@ describe("shared filters", () => {
 		expect("error" in parse("mode=fuzzy")).toBe(true);
 	});
 });
+
+describe("shifts between events", () => {
+	it("counts a value against each event's full set, not its top list", async () => {
+		const { facetShifts } = await import("@/lib/hackathon-analytics");
+		const kale = [
+			build("k1", { event: "kale", categories: cat("DEX") }),
+			build("k2", { event: "kale", categories: cat("Payments") }),
+		];
+		const agents = [
+			build("a1", { categories: cat("Payments") }),
+			build("a2", { categories: cat("Payments") }),
+			build("a3", { categories: cat("AI") }),
+			build("a4", { categories: cat("AI") }),
+		];
+		const shifts = facetShifts(
+			new Map([
+				["kale", kale],
+				["agents", agents],
+			]),
+		);
+		const dex = shifts.find((s) => s.value === "DEX");
+		expect(dex?.shares).toEqual([
+			{ slug: "kale", share: 0.5 },
+			{ slug: "agents", share: 0 },
+		]);
+		expect(dex?.spread).toBe(0.5);
+	});
+});

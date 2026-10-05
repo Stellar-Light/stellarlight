@@ -102,6 +102,11 @@ export const GROUP_FACETS = [
 	"track",
 ] as const satisfies readonly FacetId[];
 export type GroupFacetId = (typeof GROUP_FACETS)[number];
+/** Facets compareHackathons reports shifts for between events. */
+export const SHIFT_FACETS = [
+	"category",
+	"package",
+] as const satisfies readonly FacetId[];
 
 export interface ValueCount {
 	value: string;
@@ -276,4 +281,52 @@ export function winnersVsOthers(
 		})
 		.slice(0, opts.value ? 1 : (opts.top ?? 10));
 	return { winnersKnown: dw.known, othersKnown: oKnown, values };
+}
+
+/** One value's share in each compared event, for the shifts between them. */
+export interface FacetShift {
+	facet: (typeof SHIFT_FACETS)[number];
+	value: string;
+	/** Per event: the value's share of the submissions whose facet is known;
+	 * null when none is. */
+	shares: { slug: string; share: number | null }[];
+	/** Highest share minus lowest, over the events where it is known. */
+	spread: number;
+}
+
+/** The values whose share moved most between the events: the "what changed"
+ * line. Candidates are the values in any event's top list; each is then
+ * counted against every event's full set, so a value outside one event's top
+ * list still gets its real share there. */
+export function facetShifts(
+	byEvent: Map<string, IndexedBuild[]>,
+): FacetShift[] {
+	const events = [...byEvent].filter(([, builds]) => builds.length);
+	if (events.length < 2) return [];
+	const out: FacetShift[] = [];
+	for (const facet of SHIFT_FACETS) {
+		const candidates = new Set(
+			events.flatMap(([, builds]) =>
+				distribution(builds, facet, { top: 5 }).values.map((v) => v.value),
+			),
+		);
+		for (const value of candidates) {
+			const shares = events.map(([slug, builds]) => ({
+				slug,
+				share: distribution(builds, facet, { value }).values[0]?.share ?? null,
+			}));
+			const known = shares
+				.map((x) => x.share)
+				.filter((x): x is number => x != null);
+			if (known.length < 2) continue;
+			out.push({
+				facet,
+				value,
+				shares,
+				spread:
+					Math.round((Math.max(...known) - Math.min(...known)) * 1000) / 1000,
+			});
+		}
+	}
+	return out.sort((a, b) => b.spread - a.spread).slice(0, 6);
 }

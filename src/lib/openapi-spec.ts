@@ -17,7 +17,7 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
-import { FACET_IDS, GROUP_FACETS } from "./hackathon-analytics";
+import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
 import { BUILD_MATCH_MODES, BUILD_SEARCH_MODES } from "./hackathon-build-links";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
@@ -2865,7 +2865,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Compare 2–5 hackathons side-by-side",
 				description:
-					"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, prize-per-winner, and cohort DURABILITY — stillActiveCount/liveCount/activeRatePct, how many of the event's projects are still alive today; curated events only) plus a `deltas` block flagging the spreads incl. the most durable cohort. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via getHackathons. Not for ecosystem-wide totals across ALL events → use analyzeEcosystem.",
+					"Side-by-side comparison of 2–5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.",
 				"x-routing": {
 					purpose:
 						"Compare 2–5 named hackathons on prizes, turnout, and outcomes.",
@@ -2886,6 +2886,8 @@ export const spec: OpenAPISpec = {
 						"survival rate",
 						"which projects survived",
 						"most durable cohort",
+						"what changed between",
+						"category shift",
 					],
 					useWhen: [
 						"which Stellar hackathon should I enter",
@@ -2902,6 +2904,7 @@ export const spec: OpenAPISpec = {
 						"Was event A bigger than event B?",
 						"Compare the last two SDF hackathons on prize money",
 						"Which hackathon's projects are still active today?",
+						"How did AI agent projects change from Stellar Hacks: KALE x Reflector to Stellar Hacks: Agents?",
 					],
 				},
 				parameters: [
@@ -2967,6 +2970,44 @@ export const spec: OpenAPISpec = {
 															"null when the source publishes none: unknown, never zero.",
 													},
 													source: { type: "string" },
+													hackersCount: { type: "integer", nullable: true },
+													submissionCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions.",
+													},
+													winnerCount: { type: "integer", nullable: true },
+													prizePerWinnerUSD: { type: "number", nullable: true },
+													stillActiveCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events only: the event's directory projects still active today.",
+													},
+													liveCount: { type: "integer", nullable: true },
+													activeRatePct: { type: "number", nullable: true },
+													profile: {
+														type: "object",
+														description:
+															"What the event's stored submissions were about and built with. Absent when none are stored. Shares are over known values, as in analyzeHackathonSubmissions.",
+														properties: {
+															submissions: { type: "integer" },
+															winners: { type: "integer" },
+															category: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+															package: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+															activity: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+														},
+													},
 												},
 											},
 										},
@@ -2975,6 +3016,32 @@ export const spec: OpenAPISpec = {
 											description: "What differs across the compared events.",
 											properties: {
 												notes: { type: "array", items: { type: "string" } },
+												facetShifts: {
+													type: "array",
+													description:
+														"Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set.",
+													items: {
+														type: "object",
+														properties: {
+															facet: {
+																type: "string",
+																enum: [...SHIFT_FACETS],
+															},
+															value: { type: "string" },
+															shares: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		slug: { type: "string" },
+																		share: { type: "number", nullable: true },
+																	},
+																},
+															},
+															spread: { type: "number" },
+														},
+													},
+												},
 											},
 										},
 									},

@@ -32,13 +32,21 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.5.0",
+		type: "added",
+		summary:
+			"scout-mcp adds analyze_hackathon_submissions (counts, trends and winner comparisons over hackathon submissions; 26 tools), and search_hackathon_builds takes mode, hackathon, category and package.",
+	},
+	{
+		date: "2026-10-05",
 		surfaces: ["api"],
 		version: "spec@1.9.69",
 		type: "added",
 		summary:
-			"analyzeHackathonSubmissions (GET /api/hackathons/analyze) counts any facet of the stored hackathon submissions: category, package, activity, project, placement, track, event or year. `by=event` or `by=year` makes it a trend, and every answer adds winnersVsOthers with lift. searchHackathonBuilds takes the same filters plus `hackathon` and `category`, and its rows carry `categories`.",
+			"analyzeHackathonSubmissions (GET /api/hackathons/analyze) counts any facet of the stored hackathon submissions: category, package, activity, project, placement, track, event or year. `by=event` or `by=year` makes it a trend, and every answer adds winnersVsOthers with lift. searchHackathonBuilds takes the same filters plus `hackathon` and `category`, and its rows carry `categories`. compareHackathons gives every event with stored submissions its submission and winner counts and a `profile`, and `deltas.facetShifts` names the category and package shares that moved most.",
 		detail:
-			"One engine now backs search's meta.stack and analyze, so a new question is a facet, not new arithmetic. Shares are over builds whose value is known; unknown builds are counted apart, never as none. Categories are the directory's own project types, taken from each submission's nearest directory projects and written only when the method's leave-one-out precision on the hand-typed directory clears 0.7. Activity is the last commit on the submitted repo's default branch, so work that moved to another repo counts as none. getHackathonSubmission adds categories (with scores), categoriesAt, activity and activityCheckedAt.",
+			"One engine now backs search's meta.stack and analyze, so a new question is a facet, not new arithmetic. Shares are over builds whose value is known; unknown builds are counted apart, never as none. Categories are the directory's own project types, taken from each submission's nearest directory projects. The method is measured leave-one-out on the hand-typed directory: only types precise on their own (0.7+, with 10+ examples) are assigned, and nothing is written unless the overall precision clears 0.7. Activity is the last commit on the submitted repo's default branch, so work that moved to another repo counts as none. getHackathonSubmission adds categories (with scores), categoriesAt, activity and activityCheckedAt.",
 	},
 	{
 		date: "2026-10-05",

@@ -3,6 +3,7 @@ import {
 	assign,
 	type Labeled,
 	leaveOneOut,
+	looNeighbours,
 	neighbours,
 	pickSetting,
 	typeScores,
@@ -46,9 +47,39 @@ describe("nearest directory projects", () => {
 	});
 
 	it("measures itself on the labeled rows and picks a setting that clears the floor", () => {
-		const m = leaveOneOut(LABELED, [2], [0.5]);
+		const m = leaveOneOut(LABELED, looNeighbours(LABELED, 2), [2], [0.5]);
 		expect(m[0]).toMatchObject({ k: 2, cut: 0.5, precision: 1, covered: 1 });
 		expect(pickSetting(m)?.k).toBe(2);
 		expect(pickSetting([{ ...m[0], precision: 0.5 }])).toBeNull();
+	});
+});
+
+describe("types measured one by one", () => {
+	it("trusts a type only with enough examples and precision, and assigns only trusted types", async () => {
+		const { perType, trustedTypes, MIN_TYPE_SUPPORT } = await import(
+			"@/lib/hackathon-build-categories"
+		);
+		// Twelve clean payments rows and twelve clean DEX rows, plus one AI row
+		// sitting among the payments rows: too few AI examples to trust.
+		const rows: Labeled[] = [];
+		for (let i = 0; i < 12; i++) {
+			rows.push(row(`p${i}`, ["Payments"], 1, 0.01 * i, 0));
+			rows.push(row(`d${i}`, ["DEX"], 0.01 * i, 1, 0));
+		}
+		rows.push(row("ai", ["AI"], 1, 0.05, 0.02));
+		const near = looNeighbours(rows, 3);
+		const m = perType(rows, near, 3, 0.3);
+		const trusted = trustedTypes(m);
+		expect(trusted.has("Payments")).toBe(true);
+		expect(trusted.has("DEX")).toBe(true);
+		expect(trusted.has("AI")).toBe(false);
+		expect(m.find((x) => x.type === "AI")?.support).toBeLessThan(
+			MIN_TYPE_SUPPORT,
+		);
+		// The AI row's neighbours are payments rows, so it is sorted Payments:
+		// 24 right of 25 assignments.
+		expect(leaveOneOut(rows, near, [3], [0.3], trusted)[0].precision).toBe(
+			0.96,
+		);
 	});
 });

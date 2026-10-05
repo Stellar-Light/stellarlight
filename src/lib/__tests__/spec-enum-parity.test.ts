@@ -377,7 +377,14 @@ describe("research sources spread the code's list (spec 1.9.60)", () => {
 
 describe("hackathon submission vocabularies are their constants (spec 1.9.69)", () => {
 	it("facets, groupings, match modes and categories spread from code", async () => {
-		const { FACET_IDS, GROUP_FACETS } = await import("../hackathon-analytics");
+		const { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } = await import(
+			"../hackathon-analytics"
+		);
+		const shift =
+			S.paths["/api/hackathons/compare"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.deltas.properties.facetShifts.items.properties.facet;
+		expect(sorted(shift.enum)).toEqual(sorted(SHIFT_FACETS));
 		const { BUILD_MATCH_MODES } = await import("../hackathon-build-links");
 		const op = S.paths["/api/hackathons/analyze"].get;
 		const param = (name: string) =>
