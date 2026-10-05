@@ -18,6 +18,7 @@ import {
 	type StellarProof,
 } from "../../src/lib/code-signals";
 import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
+import { type DepBlob, extractStellarDeps } from "../../src/lib/stellar-deps";
 
 export interface TreeEntry {
 	path: string;
@@ -163,6 +164,67 @@ export function orderManifests<T extends { path: string }>(cargos: T[]): T[] {
 			a.path.split("/").length - b.path.split("/").length ||
 			(a.path < b.path ? -1 : a.path > b.path ? 1 : 0),
 	);
+}
+
+/** What one repo's manifests say it builds on.
+ *  read     the tree and every chosen manifest were read; `stack` may be [].
+ *  missing  the repo answered 404: deleted, renamed away, or private.
+ *  error    anything else; nothing may be concluded, retry later. */
+export type RepoStack =
+	| { state: "read"; stack: string[] }
+	| { state: "missing" }
+	| { state: "error"; note: string };
+
+/** Vendored or built code: its manifests are someone else's dependencies. */
+const VENDORED_DIR = /(^|\/)(node_modules|vendor|target)\//;
+const STACK_MAX_MANIFESTS = 16;
+
+/**
+ * The Stellar packages a repo's package.json and Cargo.toml files declare
+ * (extractStellarDeps' allowlist), for a repo that is not in the scan pool:
+ * hackathon submissions. One REST call (the tree at HEAD); the manifests come
+ * from raw.githubusercontent.com, off the REST pool. A RateLimitError from
+ * `gh` propagates so the caller can stop its run cleanly.
+ */
+export async function fetchRepoStack(gh: Gh, full: string): Promise<RepoStack> {
+	const [owner, name] = full.split("/");
+	if (!owner || !name) return { state: "error", note: "not owner/name" };
+	const res = await gh(`/repos/${owner}/${name}/git/trees/HEAD?recursive=1`);
+	if (res.status === 404) return { state: "missing" };
+	// 409 = the repository is empty: read, and it declares nothing.
+	if (res.status === 409) return { state: "read", stack: [] };
+	if (!res.ok) return { state: "error", note: `tree ${res.status}` };
+	const body = (await res.json()) as {
+		tree?: TreeEntry[];
+		truncated?: boolean;
+	};
+	const manifests = orderManifests(
+		(body.tree ?? []).filter(
+			(t) =>
+				t.type === "blob" &&
+				/(^|\/)(package\.json|cargo\.toml)$/i.test(t.path) &&
+				!VENDORED_DIR.test(t.path),
+		),
+	).slice(0, STACK_MAX_MANIFESTS);
+	const blobs: DepBlob[] = [];
+	for (const m of manifests) {
+		try {
+			const r = await fetch(rawUrl(owner, name, "HEAD", m.path), {
+				headers: { "user-agent": "sl-code-scan" },
+				signal: AbortSignal.timeout(20_000),
+			});
+			if (!r.ok) return { state: "error", note: `${m.path}: ${r.status}` };
+			blobs.push({ path: m.path, text: await r.text() });
+		} catch (e) {
+			return { state: "error", note: `${m.path}: ${(e as Error).message}` };
+		}
+	}
+	const stack = extractStellarDeps(blobs);
+	// A truncated tree can hide manifests: what was found is evidence, an
+	// empty result is not.
+	if (body.truncated && !stack.length)
+		return { state: "error", note: "tree truncated" };
+	return { state: "read", stack };
 }
 
 /** THE shared, guarded path selection. Identical for probe/scanner/eval. */

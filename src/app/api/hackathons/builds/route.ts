@@ -25,6 +25,7 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 	searchHackathonBuilds,
+	stackCounts,
 } from "@/lib/hackathon-builds";
 import {
 	BOOL_FALSE_VALUES,
@@ -50,6 +51,7 @@ const SUPPORTED_PARAMS = [
 	"limit",
 	"winnersOnly",
 	"track",
+	"package",
 	"mode",
 ] as const;
 
@@ -93,6 +95,7 @@ export async function GET(req: NextRequest) {
 	}
 	const winnersOnly = winnersOnlyRaw;
 	const track = sp.get("track")?.toLowerCase().trim();
+	const pkg = sp.get("package")?.toLowerCase().trim() || undefined;
 	const modeRaw = sp.get("mode") ?? "keyword";
 	if (!(BUILD_SEARCH_MODES as readonly string[]).includes(modeRaw)) {
 		return NextResponse.json(
@@ -148,6 +151,7 @@ export async function GET(req: NextRequest) {
 	const scored = searchHackathonBuilds(indexed, q ?? "", {
 		winnersOnly,
 		track,
+		package: pkg,
 		mode,
 		semantic,
 	});
@@ -179,6 +183,8 @@ export async function GET(req: NextRequest) {
 		// Present only when the link was checked: the directory project that
 		// lists this build's exact repo, or null when none does.
 		...(b.project !== undefined ? { project: b.project } : {}),
+		// Present only when the repo was read: absent is unknown.
+		...(b.stack ? { stack: b.stack } : {}),
 		...(matched.length ? { matchedTerms: matched } : {}),
 		...(similarity !== undefined
 			? { similarity: Math.round(similarity * 1000) / 1000 }
@@ -216,6 +222,7 @@ export async function GET(req: NextRequest) {
 					q: q ?? null,
 					winnersOnly,
 					track: track ?? null,
+					package: pkg ?? null,
 					limit,
 					mode: requestedMode,
 				},
@@ -223,6 +230,12 @@ export async function GET(req: NextRequest) {
 					indexedBuilds: indexedTotal,
 					matched: scored.length,
 					returned: builds.length,
+				},
+				// Over every matched build, not just this page: "which SDKs do
+				// winners use" is winnersOnly=1 with no q.
+				stack: {
+					...stackCounts(scored.map((s) => s.b)),
+					note: "Stellar packages declared in each matched build's repo manifests (package.json, Cargo.toml). Counted over buildsRead; the other matched builds have no repo link, a repo that is not public, or were not read yet: unknown, not 'uses none'.",
 				},
 				note: q
 					? "Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first. A hit means someone already built something similar at a Stellar hackathon: check `url` or `githubUrl` before rebuilding, and `project` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions)."

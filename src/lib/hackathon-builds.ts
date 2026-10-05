@@ -35,6 +35,9 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	 * directory project that lists this build's exact repo, or null when none
 	 * does. Absent on a live-read row: not checked, which is not "none". */
 	project?: LinkedProject | null;
+	/** Stellar packages the build's repo declares, present only when the repo
+	 * was read: absent is unknown, [] is "declares none". */
+	stack?: string[];
 }
 
 async function pool<T, R>(
@@ -112,6 +115,7 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 						: null,
 				}
 			: {}),
+		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 	};
 }
 
@@ -139,6 +143,10 @@ export interface BuildDetail {
 	repo: string | null;
 	/** Absent = link not checked; null = checked, no project lists the repo. */
 	project?: LinkedProject | null;
+	/** Absent = repo not read; [] = read, declares no Stellar package. */
+	stack?: string[];
+	stackReadAt: string | null;
+	repoMissingAt: string | null;
 	firstSeenAt: string;
 	lastSeenAt: string;
 	writeUpReadAt: string | null;
@@ -175,6 +183,9 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 						: null,
 				}
 			: {}),
+		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
+		stackReadAt: d.stackReadAt ?? null,
+		repoMissingAt: d.repoMissingAt ?? null,
 		firstSeenAt: d.firstSeenAt,
 		lastSeenAt: d.lastSeenAt,
 		writeUpReadAt: d.detailReadAt ?? null,
@@ -244,6 +255,37 @@ export const getHackathonBuildsIndex = unstable_cache(
 		tags: ["hackathons"],
 	},
 );
+
+/** Which Stellar packages a set of builds declares, counted over the builds
+ * whose repo was read. The rest (no repo link, a repo that is not public, or
+ * one not read yet) are unknown, not "uses none", so they are not counted. */
+export function stackCounts(builds: IndexedBuild[], top = 15) {
+	const tally = new Map<string, { builds: number; winners: number }>();
+	let read = 0;
+	for (const b of builds) {
+		if (!b.stack) continue;
+		read++;
+		for (const name of b.stack) {
+			const t = tally.get(name) ?? { builds: 0, winners: 0 };
+			t.builds++;
+			if (b.isWinner) t.winners++;
+			tally.set(name, t);
+		}
+	}
+	return {
+		buildsMatched: builds.length,
+		buildsRead: read,
+		packages: [...tally]
+			.map(([name, t]) => ({ name, ...t }))
+			.sort(
+				(a, b) =>
+					b.builds - a.builds ||
+					b.winners - a.winners ||
+					a.name.localeCompare(b.name),
+			)
+			.slice(0, top),
+	};
+}
 
 /** Builds whose GitHub link points at one of these repos (owner/name, any case) or at the owner's account. */
 export function buildsForRepos(
@@ -334,6 +376,8 @@ export function searchHackathonBuilds(
 	opts: {
 		winnersOnly?: boolean;
 		track?: string;
+		/** Only builds whose repo declares this Stellar package. */
+		package?: string;
 		mode?: BuildSearchMode;
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
@@ -345,6 +389,10 @@ export function searchHackathonBuilds(
 	if (opts.track) {
 		const t = opts.track.toLowerCase();
 		pool = pool.filter((b) => (b.track ?? "").toLowerCase().includes(t));
+	}
+	if (opts.package) {
+		const p = opts.package.toLowerCase();
+		pool = pool.filter((b) => b.stack?.includes(p));
 	}
 	const query = q.trim().toLowerCase();
 	if (!query) {

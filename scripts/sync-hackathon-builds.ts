@@ -18,6 +18,9 @@
  *      (src/lib/hackathon-build-links.ts; a shared GitHub owner never counts)
  *   4. embeddings for search by meaning, only for rows whose text changed
  *      (voyage-3 via src/lib/embed.ts), and the vector index they need
+ *   5. the stack: the Stellar packages each submission's repo declares in its
+ *      package.json and Cargo.toml files, read once a month per repo, winners
+ *      and the newest events first, at most STACK_MAX_REPOS repos a run
  *
  * The rules the stablecoin and RWA lanes earned:
  *   - a row is never deleted;
@@ -51,9 +54,19 @@ import {
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 import type { HackathonBuild } from "../src/payload-types";
+import {
+	createGh,
+	fetchRepoStack,
+	RateLimitError,
+} from "./scan/fetch-repo-code";
 
 const EXECUTE = process.argv.includes("--execute");
 const DETAIL_MAX_AGE_MS = 30 * 86_400_000;
+const STACK_MAX_AGE_MS = 30 * 86_400_000;
+/** One REST call per repo, so the first backfill (about a thousand repos)
+ * spreads over a few days and never drains the Actions token. A dry run reads
+ * a sample to check the pipeline. */
+const STACK_MAX_REPOS = EXECUTE ? 400 : 25;
 const req = createRequire(import.meta.url);
 // biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
 const { MongoClient } = req("mongodb") as any;
@@ -147,6 +160,7 @@ const FIELDS = [
 	"projectSlug",
 	"projectName",
 	"hiddenUpstream",
+	"stack",
 ] as const;
 
 async function pool<T>(items: T[], n: number, fn: (t: T) => Promise<void>) {
@@ -357,6 +371,76 @@ async function main() {
 		);
 	}
 
+	// ── 5. what each repo builds on ──────────────────────────────────────
+	// Read once per repo and shared by every build that links it. A repo that
+	// answered not found waits a month too; a failed read keeps what is
+	// stored and is retried next run.
+	const fresh = (at?: string | null) =>
+		!!at && Date.now() - Date.parse(at) < STACK_MAX_AGE_MS;
+	const stackDue = new Map<string, Row[]>();
+	const byPriority = [...rows.values()].sort(
+		(a, b) =>
+			Number(!!b.isWinner) - Number(!!a.isWinner) ||
+			(b.endedAt ?? "").localeCompare(a.endedAt ?? ""),
+	);
+	for (const r of byPriority) {
+		const old = stored.get(r.buildId);
+		if (!r.repoFullName || fresh(old?.stackReadAt) || fresh(old?.repoMissingAt))
+			continue;
+		stackDue.set(r.repoFullName, [...(stackDue.get(r.repoFullName) ?? []), r]);
+	}
+	const stackRun = { read: 0, missing: 0, failed: 0, rateLimited: false };
+	const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+	const stackBatch = [...stackDue.keys()].slice(0, STACK_MAX_REPOS);
+	if (!stackDue.size) {
+		console.log("\nrepo stacks: none due");
+	} else if (!ghToken) {
+		console.log(
+			`\nrepo stacks: ${stackDue.size} repos due, not read (GITHUB_TOKEN is not set)`,
+		);
+	} else {
+		const gh = createGh(ghToken);
+		await pool(stackBatch, 4, async (repo) => {
+			if (stackRun.rateLimited) return;
+			try {
+				const s = await fetchRepoStack(gh, repo);
+				for (const r of stackDue.get(repo) ?? []) {
+					if (s.state === "read") {
+						r.stack = s.stack;
+						r.stackReadAt = now;
+						r.repoMissingAt = null;
+					} else if (s.state === "missing") r.repoMissingAt = now;
+				}
+				if (s.state === "error") {
+					stackRun.failed++;
+					console.error(`  ✗ ${repo}: ${s.note}`);
+				} else stackRun[s.state]++;
+			} catch (e) {
+				if (e instanceof RateLimitError) stackRun.rateLimited = true;
+				else {
+					stackRun.failed++;
+					console.error(`  ✗ ${repo}: ${(e as Error).message}`);
+				}
+			}
+		});
+		console.log(
+			`\nrepo stacks: ${stackDue.size} repos due, ${stackBatch.length} this run: ${stackRun.read} read, ${stackRun.missing} not found (deleted, renamed or private), ${stackRun.failed} could not be read (stored values kept)${stackRun.rateLimited ? "; GitHub rate limit reached, the rest wait for the next run" : ""}`,
+		);
+		const tally = new Map<string, number>();
+		for (const repo of stackBatch)
+			for (const p of stackDue.get(repo)?.[0]?.stack ?? [])
+				tally.set(p, (tally.get(p) ?? 0) + 1);
+		console.log(
+			`  repos per package this run: ${
+				[...tally]
+					.sort((a, b) => b[1] - a[1])
+					.slice(0, 12)
+					.map(([p, n]) => `${p} ${n}`)
+					.join(", ") || "none"
+			}`,
+		);
+	}
+
 	// ── diff ─────────────────────────────────────────────────────────────
 	const creates: Row[] = [];
 	const updates: { id: string; data: Row; changed: string[] }[] = [];
@@ -474,6 +558,16 @@ async function main() {
 	if ((!indexOk || emb.failed > toEmbed.length / 2) && !process.exitCode) {
 		console.error(
 			"✗ embeddings or the vector index did not complete. Rows were written; search by meaning needs a re-run.",
+		);
+		process.exitCode = 2;
+	}
+	if (
+		stackBatch.length >= 20 &&
+		stackRun.failed > stackBatch.length / 2 &&
+		!process.exitCode
+	) {
+		console.error(
+			`✗ ${stackRun.failed} of ${stackBatch.length} repos could not be read. Rows were written; the stacks need a re-run.`,
 		);
 		process.exitCode = 2;
 	}
