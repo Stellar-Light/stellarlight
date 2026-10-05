@@ -82,3 +82,10 @@ export function parseBuildId(raw: string): string | null {
  * hybrid: both, blended. The spec spreads this list (enum ratchet). */
 export const BUILD_SEARCH_MODES = ["keyword", "meaning", "hybrid"] as const;
 export type BuildSearchMode = (typeof BUILD_SEARCH_MODES)[number];
+/** meta.matchMode values the submission operations report. */
+export const BUILD_MATCH_MODES = [
+	"all",
+	"filtered",
+	"vector",
+	"hybrid",
+] as const;

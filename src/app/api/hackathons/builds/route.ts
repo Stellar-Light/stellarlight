@@ -18,27 +18,18 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
+import { distribution } from "@/lib/hackathon-analytics";
 import {
-	BUILD_SEARCH_MODES,
-	type BuildSearchMode,
+	BUILD_FILTER_PARAMS,
+	parseBuildFilters,
+	queryBuilds,
+} from "@/lib/hackathon-build-query";
+import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
-	searchHackathonBuilds,
-	stackCounts,
 } from "@/lib/hackathon-builds";
-import {
-	BOOL_FALSE_VALUES,
-	BOOL_TRUE_VALUES,
-	clampLimit,
-	strictBoolParam,
-} from "@/lib/http-params";
-import {
-	type DoraHacksSubmission,
-	fetchAllDoraHacksHackathons,
-	fetchHackathonSubmissions,
-	parsePlacement,
-} from "@/lib/integrations/dorahacks";
+import { clampLimit } from "@/lib/http-params";
+import { parsePlacement } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { serverTiming } from "@/lib/server-timing";
@@ -46,14 +37,7 @@ import { serverTiming } from "@/lib/server-timing";
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
-const SUPPORTED_PARAMS = [
-	"q",
-	"limit",
-	"winnersOnly",
-	"track",
-	"package",
-	"mode",
-] as const;
+const SUPPORTED_PARAMS = [...BUILD_FILTER_PARAMS, "limit"] as const;
 
 // Index shape + builder live in src/lib/hackathon-builds.ts (shared with the
 // builder profile pages); the hour-long cache is unstable_cache, not per instance.
@@ -77,36 +61,12 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const q = sp.get("q")?.toLowerCase().trim();
+	const parsed = parseBuildFilters(sp);
+	if ("error" in parsed)
+		return NextResponse.json(parsed.error, { status: 400 });
+	const f = parsed.filters;
+	const q = f.q || undefined;
 	const limit = clampLimit(sp.get("limit"), 20, 100);
-	// Engine E invalid-accepted class: a garbage value silently coerced to
-	// false returned the UNFILTERED list while the caller believed the filter
-	// applied. 400 with the accepted forms, same treatment as partners'
-	// accepting param.
-	const winnersOnlyRaw = strictBoolParam(sp.get("winnersOnly"));
-	if (winnersOnlyRaw === "invalid") {
-		return NextResponse.json(
-			{
-				error: `Invalid winnersOnly value '${sp.get("winnersOnly")}'.`,
-				validValues: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
-			},
-			{ status: 400 },
-		);
-	}
-	const winnersOnly = winnersOnlyRaw;
-	const track = sp.get("track")?.toLowerCase().trim();
-	const pkg = sp.get("package")?.toLowerCase().trim() || undefined;
-	const modeRaw = sp.get("mode") ?? "keyword";
-	if (!(BUILD_SEARCH_MODES as readonly string[]).includes(modeRaw)) {
-		return NextResponse.json(
-			{
-				error: `Invalid mode '${modeRaw}'.`,
-				validValues: BUILD_SEARCH_MODES,
-			},
-			{ status: 400 },
-		);
-	}
-	const requestedMode = modeRaw as BuildSearchMode;
 
 	let indexed: IndexedBuild[];
 	try {
@@ -130,31 +90,10 @@ export async function GET(req: NextRequest) {
 	}
 	const indexedTotal = indexed.length;
 
-	// Scoring lives in src/lib/hackathon-builds.ts (searchHackathonBuilds) so
-	// the hackathon-brief composite can call it in-process — this route and
-	// the composite share one implementation and cannot drift.
-	// Search by meaning: null = could not check, which serves keyword results
-	// and says so; it is never read as "nothing close".
-	const warnings: string[] = [];
-	let mode: BuildSearchMode = requestedMode;
-	let semantic: Map<string, number> | undefined;
-	if (q && mode !== "keyword") {
-		const sem = await semanticBuildScores(q, { winnersOnly });
-		if (sem) semantic = sem;
-		else {
-			mode = "keyword";
-			warnings.push(
-				"search by meaning could not run this request (embedding or vector index unavailable); these are keyword matches, not a statement that nothing close exists",
-			);
-		}
-	}
-	const scored = searchHackathonBuilds(indexed, q ?? "", {
-		winnersOnly,
-		track,
-		package: pkg,
-		mode,
-		semantic,
-	});
+	// Filters, scoring and the meaning fallback live in
+	// src/lib/hackathon-build-query.ts, shared with analyze, so the operations
+	// read the same set the same way.
+	const { scored, served: mode, warnings } = await queryBuilds(indexed, f);
 
 	const builds = scored.slice(0, limit).map(({ b, matched, similarity }) => ({
 		// Opens the full submission in getHackathonBuild.
@@ -185,6 +124,8 @@ export async function GET(req: NextRequest) {
 		...(b.project !== undefined ? { project: b.project } : {}),
 		// Present only when the repo was read: absent is unknown.
 		...(b.stack ? { stack: b.stack } : {}),
+		// Present only when categorized: best first.
+		...(b.categories ? { categories: b.categories.map((c) => c.type) } : {}),
 		...(matched.length ? { matchedTerms: matched } : {}),
 		...(similarity !== undefined
 			? { similarity: Math.round(similarity * 1000) / 1000 }
@@ -213,18 +154,20 @@ export async function GET(req: NextRequest) {
 								? "hybrid"
 								: "filtered",
 				),
-				mode: { requested: requestedMode, served: mode },
+				mode: { requested: f.mode, served: mode },
 				...(warnings.length ? { warnings } : {}),
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
 				generatedAt: new Date().toISOString(),
 				filters: {
 					q: q ?? null,
-					winnersOnly,
-					track: track ?? null,
-					package: pkg ?? null,
+					winnersOnly: f.winnersOnly,
+					hackathon: f.hackathons.length ? f.hackathons : null,
+					track: f.track ?? null,
+					category: f.category ?? null,
+					package: f.package ?? null,
 					limit,
-					mode: requestedMode,
+					mode: f.mode,
 				},
 				counts: {
 					indexedBuilds: indexedTotal,
@@ -234,7 +177,7 @@ export async function GET(req: NextRequest) {
 				// Over every matched build, not just this page: "which SDKs do
 				// winners use" is winnersOnly=1 with no q.
 				stack: {
-					...stackCounts(scored.map((s) => s.b)),
+					...stackMeta(scored.map((s) => s.b)),
 					note: "Stellar packages declared in each matched build's repo manifests (package.json, Cargo.toml). Counted over buildsRead; the other matched builds have no repo link, a repo that is not public, or were not read yet: unknown, not 'uses none'.",
 				},
 				note: q
@@ -245,6 +188,20 @@ export async function GET(req: NextRequest) {
 		},
 		{ headers: serverTiming(startedAt) },
 	);
+}
+
+/** meta.stack, the package facet in the shape it shipped with (spec 1.9.68). */
+function stackMeta(builds: IndexedBuild[]) {
+	const d = distribution(builds, "package", { top: 15 });
+	return {
+		buildsMatched: d.builds,
+		buildsRead: d.known,
+		packages: d.values.map((v) => ({
+			name: v.value,
+			builds: v.builds,
+			winners: v.winners,
+		})),
+	};
 }
 
 export const POST = methodNotAllowed(["GET"]);

@@ -452,24 +452,6 @@ describe("what a build's repo declares", () => {
 		expect(d.stackReadAt).toBeNull();
 		expect(d.repoMissingAt).toBe("2026-10-05T00:00:00.000Z");
 	});
-
-	it("counts packages over the builds whose repo was read", async () => {
-		const { stackCounts } = await import("@/lib/hackathon-builds");
-		const withStack = (b: IndexedBuild, stack?: string[]) =>
-			stack ? { ...b, stack } : b;
-		const c = stackCounts([
-			withStack(build("A", "", true), ["soroban-sdk", "@stellar/stellar-sdk"]),
-			withStack(build("B", "", false), ["@stellar/stellar-sdk"]),
-			withStack(build("C", "", true), []),
-			build("D", "", true), // repo not read: unknown, not counted
-		]);
-		expect(c.buildsMatched).toBe(4);
-		expect(c.buildsRead).toBe(3);
-		expect(c.packages).toEqual([
-			{ name: "@stellar/stellar-sdk", builds: 2, winners: 1 },
-			{ name: "soroban-sdk", builds: 1, winners: 1 },
-		]);
-	});
 });
 
 describe("package filter", () => {

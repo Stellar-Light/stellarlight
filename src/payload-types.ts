@@ -1478,6 +1478,38 @@ export interface HackathonBuild {
 	 * When the repo last answered not found (deleted, renamed away or private), ISO. Cleared by the next successful read.
 	 */
 	repoMissingAt?: string | null;
+	/**
+	 * Directory project types this submission was sorted into, best first, each with a 0 to 1 score. Read only when categoriesAt is set.
+	 */
+	categories?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * When the lane last categorized this submission, ISO. Empty = not categorized.
+	 */
+	categoriesAt?: string | null;
+	/**
+	 * How the categories were assigned, with the version and its measured precision.
+	 */
+	categoriesMethod?: string | null;
+	/**
+	 * Date of the last commit on the repo's default branch, ISO. Read only when activityCheckedAt is set.
+	 */
+	repoLastCommitAt?: string | null;
+	/**
+	 * The repo is archived on GitHub.
+	 */
+	repoArchived?: boolean | null;
+	/**
+	 * When the lane last read the repo's activity, ISO. Empty = never read.
+	 */
+	activityCheckedAt?: string | null;
 	firstSeenAt: string;
 	/**
 	 * Last time the event's DoraHacks roster listed this build, ISO
@@ -3589,6 +3621,12 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	stack?: T;
 	stackReadAt?: T;
 	repoMissingAt?: T;
+	categories?: T;
+	categoriesAt?: T;
+	categoriesMethod?: T;
+	repoLastCommitAt?: T;
+	repoArchived?: T;
+	activityCheckedAt?: T;
 	firstSeenAt?: T;
 	lastSeenAt?: T;
 	updatedAt?: T;

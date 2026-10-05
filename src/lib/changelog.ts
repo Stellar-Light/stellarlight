@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
 		surfaces: ["api"],
+		version: "spec@1.9.69",
+		type: "added",
+		summary:
+			"analyzeHackathonSubmissions (GET /api/hackathons/analyze) counts any facet of the stored hackathon submissions: category, package, activity, project, placement, track, event or year. `by=event` or `by=year` makes it a trend, and every answer adds winnersVsOthers with lift. searchHackathonBuilds takes the same filters plus `hackathon` and `category`, and its rows carry `categories`.",
+		detail:
+			"One engine now backs search's meta.stack and analyze, so a new question is a facet, not new arithmetic. Shares are over builds whose value is known; unknown builds are counted apart, never as none. Categories are the directory's own project types, taken from each submission's nearest directory projects and written only when the method's leave-one-out precision on the hand-typed directory clears 0.7. Activity is the last commit on the submitted repo's default branch, so work that moved to another repo counts as none. getHackathonSubmission adds categories (with scores), categoriesAt, activity and activityCheckedAt.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["api"],
 		version: "spec@1.9.68",
 		type: "added",
 		summary:

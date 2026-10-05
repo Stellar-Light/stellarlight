@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.68",
+		"version": "1.9.69",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -3478,10 +3478,7 @@
 						"won prizes",
 						"x402 builds",
 						"search by meaning",
-						"similar hackathon projects",
-						"tech stack",
-						"sdk usage",
-						"libraries used"
+						"similar hackathon projects"
 					],
 					"useWhen": [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -3499,7 +3496,6 @@
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
 						"Which x402 projects won prizes at Stellar hackathons?",
-						"Which SDKs and libraries do Stellar hackathon winners use most?",
 						"Which Stellar hackathon projects were built with passkey-kit?"
 					]
 				},
@@ -3514,10 +3510,25 @@
 						}
 					},
 					{
+						"name": "mode",
+						"in": "query",
+						"required": false,
+						"description": "How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"keyword",
+								"meaning",
+								"hybrid"
+							],
+							"default": "keyword"
+						}
+					},
+					{
 						"name": "winnersOnly",
 						"in": "query",
 						"required": false,
-						"description": "Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored.",
+						"description": "Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
 						"schema": {
 							"type": "string",
 							"enum": [
@@ -3533,6 +3544,15 @@
 						}
 					},
 					{
+						"name": "hackathon",
+						"in": "query",
+						"required": false,
+						"description": "Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"name": "track",
 						"in": "query",
 						"required": false,
@@ -3542,27 +3562,48 @@
 						}
 					},
 					{
-						"name": "package",
+						"name": "category",
 						"in": "query",
 						"required": false,
-						"description": "Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the list is a floor, not everyone who used it; meta.stack then shows what else those builds use.",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"name": "mode",
-						"in": "query",
-						"required": false,
-						"description": "keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						"description": "Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor.",
 						"schema": {
 							"type": "string",
 							"enum": [
-								"keyword",
-								"meaning",
-								"hybrid"
-							],
-							"default": "keyword"
+								"Wallet",
+								"DEX",
+								"Lending",
+								"Bridge",
+								"Infrastructure",
+								"Payments",
+								"Anchor",
+								"SDK",
+								"Indexer",
+								"Explorer",
+								"Analytics",
+								"AI",
+								"Gaming",
+								"Education",
+								"Security",
+								"NFT",
+								"RWA",
+								"Stablecoin",
+								"Social Impact",
+								"RPC",
+								"Faucet",
+								"Card Issuing",
+								"Exchange",
+								"Oracle",
+								"Yield"
+							]
+						}
+					},
+					{
+						"name": "package",
+						"in": "query",
+						"required": false,
+						"description": "Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it.",
+						"schema": {
+							"type": "string"
 						}
 					},
 					{
@@ -3644,7 +3685,7 @@
 												},
 												"filters": {
 													"type": "object",
-													"description": "The filters as applied — an echo, so a caller can see what was honoured.",
+													"description": "The filters as applied: an echo, so a caller can see what was honoured.",
 													"properties": {
 														"q": {
 															"type": "string",
@@ -3653,7 +3694,18 @@
 														"winnersOnly": {
 															"type": "boolean"
 														},
+														"hackathon": {
+															"type": "array",
+															"nullable": true,
+															"items": {
+																"type": "string"
+															}
+														},
 														"track": {
+															"type": "string",
+															"nullable": true
+														},
+														"category": {
 															"type": "string",
 															"nullable": true
 														},
@@ -3818,6 +3870,13 @@
 															"type": "string"
 														},
 														"description": "Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none."
+													},
+													"categories": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission."
 													},
 													"matchedTerms": {
 														"type": "array",
@@ -4027,6 +4086,73 @@
 													"nullable": true,
 													"description": "When the repo last answered not found (deleted, renamed away or private); null = it has not."
 												},
+												"categories": {
+													"type": "array",
+													"description": "Directory project types this submission was sorted into, best first. Absent = not categorized yet.",
+													"items": {
+														"type": "object",
+														"properties": {
+															"type": {
+																"type": "string",
+																"enum": [
+																	"Wallet",
+																	"DEX",
+																	"Lending",
+																	"Bridge",
+																	"Infrastructure",
+																	"Payments",
+																	"Anchor",
+																	"SDK",
+																	"Indexer",
+																	"Explorer",
+																	"Analytics",
+																	"AI",
+																	"Gaming",
+																	"Education",
+																	"Security",
+																	"NFT",
+																	"RWA",
+																	"Stablecoin",
+																	"Social Impact",
+																	"RPC",
+																	"Faucet",
+																	"Card Issuing",
+																	"Exchange",
+																	"Oracle",
+																	"Yield"
+																]
+															},
+															"score": {
+																"type": "number",
+																"description": "0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type."
+															}
+														}
+													}
+												},
+												"categoriesAt": {
+													"type": "string",
+													"nullable": true,
+													"description": "When it was categorized; null = not yet."
+												},
+												"activity": {
+													"type": "object",
+													"description": "The repo's activity. Absent = not read (no repo link, or not read yet).",
+													"properties": {
+														"lastCommitAt": {
+															"type": "string",
+															"nullable": true,
+															"description": "Last commit on the default branch."
+														},
+														"archived": {
+															"type": "boolean"
+														}
+													}
+												},
+												"activityCheckedAt": {
+													"type": "string",
+													"nullable": true,
+													"description": "When we last read the repo's activity; null = never."
+												},
 												"firstSeenAt": {
 													"type": "string",
 													"format": "date-time"
@@ -4056,6 +4182,538 @@
 					},
 					"503": {
 						"description": "The store did not answer; retry after Retry-After."
+					}
+				}
+			}
+		},
+		"/api/hackathons/analyze": {
+			"get": {
+				"operationId": "analyzeHackathonSubmissions",
+				"tags": [
+					"Hackathons"
+				],
+				"summary": "Trends, counts and winner comparisons across Stellar hackathon submissions",
+				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+				"x-routing": {
+					"purpose": "Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
+					"keywords": [
+						"hackathon trends",
+						"trend",
+						"across hackathons",
+						"event by event",
+						"share of submissions",
+						"percentage",
+						"breakdown",
+						"distribution",
+						"categories",
+						"category share",
+						"which sdks",
+						"tech stack",
+						"libraries used",
+						"winners vs",
+						"what winners did differently",
+						"lift",
+						"kept building",
+						"after the hackathon",
+						"cohort"
+					],
+					"useWhen": [
+						"what share of hackathon submissions are <category>, event by event",
+						"how did <topic> change across Stellar hackathons",
+						"which SDKs or packages do hackathon winners use",
+						"what did the winners do differently",
+						"how many hackathon projects kept building after the event"
+					],
+					"notFor": [
+						"finding the builds themselves -> searchHackathonBuilds",
+						"one submission in full -> getHackathonSubmission",
+						"event dates, prize pools and registrations -> getHackathons / compareHackathons"
+					],
+					"exampleQuestions": [
+						"What share of Stellar hackathon submissions are payments projects, event by event?",
+						"How did AI agent projects change across Stellar hackathons?",
+						"Which SDKs and libraries do Stellar hackathon winners use most?",
+						"What did winning Stellar hackathon projects do differently from the rest?",
+						"How many Stellar hackathon projects kept building after the event?"
+					]
+				},
+				"parameters": [
+					{
+						"name": "facet",
+						"in": "query",
+						"required": false,
+						"description": "What to count (default category). category: directory project types. package: Stellar packages a repo declares. activity: commits 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"category",
+								"package",
+								"activity",
+								"project",
+								"placement",
+								"track",
+								"event",
+								"year"
+							],
+							"default": "category"
+						}
+					},
+					{
+						"name": "by",
+						"in": "query",
+						"required": false,
+						"description": "Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"event",
+								"year",
+								"placement",
+								"track"
+							]
+						}
+					},
+					{
+						"name": "value",
+						"in": "query",
+						"required": false,
+						"description": "Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value.",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "top",
+						"in": "query",
+						"required": false,
+						"description": "Most values to report per set (default 10, or 5 with by; max 30).",
+						"schema": {
+							"type": "integer",
+							"default": 10,
+							"maximum": 30
+						}
+					},
+					{
+						"name": "q",
+						"in": "query",
+						"required": false,
+						"description": "Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "mode",
+						"in": "query",
+						"required": false,
+						"description": "How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"keyword",
+								"meaning",
+								"hybrid"
+							],
+							"default": "keyword"
+						}
+					},
+					{
+						"name": "winnersOnly",
+						"in": "query",
+						"required": false,
+						"description": "Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"1",
+								"true",
+								"yes",
+								"on",
+								"0",
+								"false",
+								"no",
+								"off"
+							]
+						}
+					},
+					{
+						"name": "hackathon",
+						"in": "query",
+						"required": false,
+						"description": "Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "track",
+						"in": "query",
+						"required": false,
+						"description": "Filter by hackathon track (substring match).",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "category",
+						"in": "query",
+						"required": false,
+						"description": "Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"Wallet",
+								"DEX",
+								"Lending",
+								"Bridge",
+								"Infrastructure",
+								"Payments",
+								"Anchor",
+								"SDK",
+								"Indexer",
+								"Explorer",
+								"Analytics",
+								"AI",
+								"Gaming",
+								"Education",
+								"Security",
+								"NFT",
+								"RWA",
+								"Stablecoin",
+								"Social Impact",
+								"RPC",
+								"Faucet",
+								"Card Issuing",
+								"Exchange",
+								"Oracle",
+								"Yield"
+							]
+						}
+					},
+					{
+						"name": "package",
+						"in": "query",
+						"required": false,
+						"description": "Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it.",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The facet counted over the filtered submissions.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"meta": {
+											"type": "object",
+											"properties": {
+												"matchMode": {
+													"type": "string",
+													"enum": [
+														"all",
+														"filtered",
+														"vector",
+														"hybrid"
+													],
+													"description": "How submissions matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both; all = no q."
+												},
+												"matchModeLabel": {
+													"type": "string"
+												},
+												"mode": {
+													"type": "object",
+													"properties": {
+														"requested": {
+															"type": "string",
+															"enum": [
+																"keyword",
+																"meaning",
+																"hybrid"
+															]
+														},
+														"served": {
+															"type": "string",
+															"enum": [
+																"keyword",
+																"meaning",
+																"hybrid"
+															]
+														}
+													}
+												},
+												"warnings": {
+													"type": "array",
+													"items": {
+														"type": "string"
+													}
+												},
+												"source": {
+													"type": "string"
+												},
+												"upstream": {
+													"type": "string"
+												},
+												"generatedAt": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"filters": {
+													"type": "object",
+													"description": "The filters as applied: an echo, so a caller can see what was honoured.",
+													"properties": {
+														"q": {
+															"type": "string",
+															"nullable": true
+														},
+														"winnersOnly": {
+															"type": "boolean"
+														},
+														"hackathon": {
+															"type": "array",
+															"nullable": true,
+															"items": {
+																"type": "string"
+															}
+														},
+														"track": {
+															"type": "string",
+															"nullable": true
+														},
+														"category": {
+															"type": "string",
+															"nullable": true
+														},
+														"package": {
+															"type": "string",
+															"nullable": true
+														},
+														"limit": {
+															"type": "integer"
+														},
+														"mode": {
+															"type": "string",
+															"enum": [
+																"keyword",
+																"meaning",
+																"hybrid"
+															]
+														}
+													}
+												},
+												"facet": {
+													"type": "object",
+													"properties": {
+														"id": {
+															"type": "string",
+															"enum": [
+																"category",
+																"package",
+																"activity",
+																"project",
+																"placement",
+																"track",
+																"event",
+																"year"
+															]
+														},
+														"counts": {
+															"type": "string",
+															"description": "What one value counts."
+														},
+														"unknownMeans": {
+															"type": "string",
+															"nullable": true,
+															"description": "Why a build's value can be unknown; null when it never is."
+														}
+													}
+												},
+												"by": {
+													"type": "string",
+													"nullable": true,
+													"enum": [
+														"event",
+														"year",
+														"placement",
+														"track"
+													]
+												},
+												"value": {
+													"type": "string",
+													"nullable": true
+												},
+												"counts": {
+													"type": "object",
+													"properties": {
+														"indexedBuilds": {
+															"type": "integer"
+														}
+													}
+												},
+												"note": {
+													"type": "string"
+												}
+											}
+										},
+										"total": {
+											"type": "object",
+											"description": "The facet over every matched submission.",
+											"properties": {
+												"field": {
+													"type": "integer",
+													"description": "Builds passing every filter except q; builds / field is the share that matched q."
+												},
+												"builds": {
+													"type": "integer",
+													"description": "Builds in the set."
+												},
+												"known": {
+													"type": "integer",
+													"description": "Builds whose value is known: every share's denominator."
+												},
+												"unknown": {
+													"type": "integer",
+													"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+												},
+												"values": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"value": {
+																"type": "string"
+															},
+															"builds": {
+																"type": "integer"
+															},
+															"winners": {
+																"type": "integer",
+																"description": "Of `builds`, how many placed."
+															},
+															"share": {
+																"type": "number",
+																"nullable": true,
+																"description": "builds / known (0 to 1); null when no build's value is known."
+															}
+														}
+													}
+												}
+											}
+										},
+										"groups": {
+											"type": "array",
+											"description": "Present with `by`: the facet within each group. Events and years run oldest first; a group where nothing matched reports zero.",
+											"items": {
+												"type": "object",
+												"properties": {
+													"value": {
+														"type": "string"
+													},
+													"title": {
+														"type": "string",
+														"description": "by=event: the event's title."
+													},
+													"endedAt": {
+														"type": "string",
+														"nullable": true
+													},
+													"field": {
+														"type": "integer",
+														"description": "Builds in this group before q: the group's whole field."
+													},
+													"builds": {
+														"type": "integer",
+														"description": "Builds in the set."
+													},
+													"known": {
+														"type": "integer",
+														"description": "Builds whose value is known: every share's denominator."
+													},
+													"unknown": {
+														"type": "integer",
+														"description": "Builds whose value is unknown (meta.facet.unknownMeans): never counted as none."
+													},
+													"values": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"value": {
+																	"type": "string"
+																},
+																"builds": {
+																	"type": "integer"
+																},
+																"winners": {
+																	"type": "integer",
+																	"description": "Of `builds`, how many placed."
+																},
+																"share": {
+																	"type": "number",
+																	"nullable": true,
+																	"description": "builds / known (0 to 1); null when no build's value is known."
+																}
+															}
+														}
+													}
+												}
+											}
+										},
+										"winnersVsOthers": {
+											"type": "object",
+											"description": "Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement.",
+											"properties": {
+												"winnersKnown": {
+													"type": "integer"
+												},
+												"othersKnown": {
+													"type": "integer"
+												},
+												"values": {
+													"type": "array",
+													"items": {
+														"type": "object",
+														"properties": {
+															"value": {
+																"type": "string"
+															},
+															"winners": {
+																"type": "integer"
+															},
+															"others": {
+																"type": "integer"
+															},
+															"winnersShare": {
+																"type": "number",
+																"nullable": true
+															},
+															"othersShare": {
+																"type": "number",
+																"nullable": true
+															},
+															"lift": {
+																"type": "number",
+																"nullable": true,
+																"description": "winnersShare / othersShare: above 1 = more common among winners. null when either share is unknown or zero. Small counts are noise."
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones."
+					},
+					"503": {
+						"description": "The index could not be built; retry after Retry-After."
 					}
 				}
 			}

@@ -290,6 +290,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hackathons/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Trends, counts and winner comparisons across Stellar hackathon submissions
+         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
+         */
+        get: operations["analyzeHackathonSubmissions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/builders": {
         parameters: {
             query?: never;
@@ -3155,14 +3175,18 @@ export interface operations {
             query?: {
                 /** @description Topic to search build names + descriptions (prior-art lookup). */
                 q?: string;
-                /** @description Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored. */
+                /** @description How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
+                mode?: "keyword" | "meaning" | "hybrid";
+                /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
-                /** @description Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the list is a floor, not everyone who used it; meta.stack then shows what else those builds use. */
+                /** @description Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor. */
+                category?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
+                /** @description Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it. */
                 package?: string;
-                /** @description keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
-                mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
             };
@@ -3200,11 +3224,13 @@ export interface operations {
                             };
                             /** @description Present only when something limited this answer, e.g. search by meaning could not run. */
                             warnings?: string[];
-                            /** @description The filters as applied — an echo, so a caller can see what was honoured. */
+                            /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
+                                hackathon?: string[] | null;
                                 track?: string | null;
+                                category?: string | null;
                                 package?: string | null;
                                 limit?: number;
                                 /** @enum {string} */
@@ -3261,6 +3287,8 @@ export interface operations {
                             } | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
+                            /** @description Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission. */
+                            categories?: string[];
                             /** @description Which query terms this build matched — the evidence behind its inclusion. */
                             matchedTerms?: string[];
                             /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
@@ -3335,6 +3363,23 @@ export interface operations {
                             stackReadAt?: string | null;
                             /** @description When the repo last answered not found (deleted, renamed away or private); null = it has not. */
                             repoMissingAt?: string | null;
+                            /** @description Directory project types this submission was sorted into, best first. Absent = not categorized yet. */
+                            categories?: {
+                                /** @enum {string} */
+                                type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
+                                /** @description 0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. */
+                                score?: number;
+                            }[];
+                            /** @description When it was categorized; null = not yet. */
+                            categoriesAt?: string | null;
+                            /** @description The repo's activity. Absent = not read (no repo link, or not read yet). */
+                            activity?: {
+                                /** @description Last commit on the default branch. */
+                                lastCommitAt?: string | null;
+                                archived?: boolean;
+                            };
+                            /** @description When we last read the repo's activity; null = never. */
+                            activityCheckedAt?: string | null;
                             /** Format: date-time */
                             firstSeenAt?: string;
                             /**
@@ -3363,6 +3408,166 @@ export interface operations {
                 content?: never;
             };
             /** @description The store did not answer; retry after Retry-After. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    analyzeHackathonSubmissions: {
+        parameters: {
+            query?: {
+                /** @description What to count (default category). category: directory project types. package: Stellar packages a repo declares. activity: commits 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year. */
+                facet?: "category" | "package" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. */
+                by?: "event" | "year" | "placement" | "track";
+                /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. */
+                value?: string;
+                /** @description Most values to report per set (default 10, or 5 with by; max 30). */
+                top?: number;
+                /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission. */
+                q?: string;
+                /** @description How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
+                mode?: "keyword" | "meaning" | "hybrid";
+                /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
+                winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                hackathon?: string;
+                /** @description Filter by hackathon track (substring match). */
+                track?: string;
+                /** @description Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor. */
+                category?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
+                /** @description Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it. */
+                package?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The facet counted over the filtered submissions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            /**
+                             * @description How submissions matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both; all = no q.
+                             * @enum {string}
+                             */
+                            matchMode?: "all" | "filtered" | "vector" | "hybrid";
+                            matchModeLabel?: string;
+                            mode?: {
+                                /** @enum {string} */
+                                requested?: "keyword" | "meaning" | "hybrid";
+                                /** @enum {string} */
+                                served?: "keyword" | "meaning" | "hybrid";
+                            };
+                            warnings?: string[];
+                            source?: string;
+                            upstream?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description The filters as applied: an echo, so a caller can see what was honoured. */
+                            filters?: {
+                                q?: string | null;
+                                winnersOnly?: boolean;
+                                hackathon?: string[] | null;
+                                track?: string | null;
+                                category?: string | null;
+                                package?: string | null;
+                                limit?: number;
+                                /** @enum {string} */
+                                mode?: "keyword" | "meaning" | "hybrid";
+                            };
+                            facet?: {
+                                /** @enum {string} */
+                                id?: "category" | "package" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                                /** @description What one value counts. */
+                                counts?: string;
+                                /** @description Why a build's value can be unknown; null when it never is. */
+                                unknownMeans?: string | null;
+                            };
+                            /** @enum {string|null} */
+                            by?: "event" | "year" | "placement" | "track" | null;
+                            value?: string | null;
+                            counts?: {
+                                indexedBuilds?: number;
+                            };
+                            note?: string;
+                        };
+                        /** @description The facet over every matched submission. */
+                        total?: {
+                            /** @description Builds passing every filter except q; builds / field is the share that matched q. */
+                            field?: number;
+                            /** @description Builds in the set. */
+                            builds?: number;
+                            /** @description Builds whose value is known: every share's denominator. */
+                            known?: number;
+                            /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                            unknown?: number;
+                            values?: {
+                                value?: string;
+                                builds?: number;
+                                /** @description Of `builds`, how many placed. */
+                                winners?: number;
+                                /** @description builds / known (0 to 1); null when no build's value is known. */
+                                share?: number | null;
+                            }[];
+                        };
+                        /** @description Present with `by`: the facet within each group. Events and years run oldest first; a group where nothing matched reports zero. */
+                        groups?: {
+                            value?: string;
+                            /** @description by=event: the event's title. */
+                            title?: string;
+                            endedAt?: string | null;
+                            /** @description Builds in this group before q: the group's whole field. */
+                            field?: number;
+                            /** @description Builds in the set. */
+                            builds?: number;
+                            /** @description Builds whose value is known: every share's denominator. */
+                            known?: number;
+                            /** @description Builds whose value is unknown (meta.facet.unknownMeans): never counted as none. */
+                            unknown?: number;
+                            values?: {
+                                value?: string;
+                                builds?: number;
+                                /** @description Of `builds`, how many placed. */
+                                winners?: number;
+                                /** @description builds / known (0 to 1); null when no build's value is known. */
+                                share?: number | null;
+                            }[];
+                        }[];
+                        /** @description Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement. */
+                        winnersVsOthers?: {
+                            winnersKnown?: number;
+                            othersKnown?: number;
+                            values?: {
+                                value?: string;
+                                winners?: number;
+                                others?: number;
+                                winnersShare?: number | null;
+                                othersShare?: number | null;
+                                /** @description winnersShare / othersShare: above 1 = more common among winners. null when either share is unknown or zero. Small counts are noise. */
+                                lift?: number | null;
+                            }[];
+                        };
+                    };
+                };
+            };
+            /** @description An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The index could not be built; retry after Retry-After. */
             503: {
                 headers: {
                     [name: string]: unknown;

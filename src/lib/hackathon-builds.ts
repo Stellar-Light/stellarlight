@@ -38,7 +38,29 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	/** Stellar packages the build's repo declares, present only when the repo
 	 * was read: absent is unknown, [] is "declares none". */
 	stack?: string[];
+	/** Directory project types the build was sorted into, best first, present
+	 * only when categorized. */
+	categories?: BuildCategory[];
+	/** The repo's last commit on its default branch, present only when read. */
+	activity?: { lastCommitAt: string | null; archived: boolean };
+	/** The repo answered not found the last time it was read. */
+	repoMissing?: boolean;
 }
+
+/** One project type a build was sorted into; score 0 to 1 (the share of its
+ * nearest directory projects that carry the type, similarity-weighted). */
+export interface BuildCategory {
+	type: string;
+	score: number;
+}
+
+const isCategoryList = (v: unknown): v is BuildCategory[] =>
+	Array.isArray(v) &&
+	v.every(
+		(c) =>
+			typeof c?.type === "string" &&
+			typeof (c as BuildCategory).score === "number",
+	);
 
 async function pool<T, R>(
 	items: T[],
@@ -116,6 +138,20 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 				}
 			: {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
+		...(d.categoriesAt && isCategoryList(d.categories)
+			? { categories: d.categories }
+			: {}),
+		...(d.activityCheckedAt
+			? {
+					activity: {
+						lastCommitAt: d.repoLastCommitAt ?? null,
+						archived: !!d.repoArchived,
+					},
+				}
+			: {}),
+		...(d.repoMissingAt && (!d.stackReadAt || d.repoMissingAt > d.stackReadAt)
+			? { repoMissing: true }
+			: {}),
 	};
 }
 
@@ -147,6 +183,12 @@ export interface BuildDetail {
 	stack?: string[];
 	stackReadAt: string | null;
 	repoMissingAt: string | null;
+	/** Absent = not categorized. */
+	categories?: BuildCategory[];
+	categoriesAt: string | null;
+	/** Absent = activity not read. */
+	activity?: { lastCommitAt: string | null; archived: boolean };
+	activityCheckedAt: string | null;
 	firstSeenAt: string;
 	lastSeenAt: string;
 	writeUpReadAt: string | null;
@@ -186,6 +228,19 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		stackReadAt: d.stackReadAt ?? null,
 		repoMissingAt: d.repoMissingAt ?? null,
+		...(d.categoriesAt && isCategoryList(d.categories)
+			? { categories: d.categories }
+			: {}),
+		categoriesAt: d.categoriesAt ?? null,
+		...(d.activityCheckedAt
+			? {
+					activity: {
+						lastCommitAt: d.repoLastCommitAt ?? null,
+						archived: !!d.repoArchived,
+					},
+				}
+			: {}),
+		activityCheckedAt: d.activityCheckedAt ?? null,
 		firstSeenAt: d.firstSeenAt,
 		lastSeenAt: d.lastSeenAt,
 		writeUpReadAt: d.detailReadAt ?? null,
@@ -249,43 +304,14 @@ export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 
 export const getHackathonBuildsIndex = unstable_cache(
 	buildHackathonBuildsIndex,
-	["hackathon-builds-index:v2"],
+	// Bump when IndexedBuild's shape changes: the cache outlives deploys, and
+	// an old-shape index serves every new field as unknown for up to an hour.
+	["hackathon-builds-index:v3"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],
 	},
 );
-
-/** Which Stellar packages a set of builds declares, counted over the builds
- * whose repo was read. The rest (no repo link, a repo that is not public, or
- * one not read yet) are unknown, not "uses none", so they are not counted. */
-export function stackCounts(builds: IndexedBuild[], top = 15) {
-	const tally = new Map<string, { builds: number; winners: number }>();
-	let read = 0;
-	for (const b of builds) {
-		if (!b.stack) continue;
-		read++;
-		for (const name of b.stack) {
-			const t = tally.get(name) ?? { builds: 0, winners: 0 };
-			t.builds++;
-			if (b.isWinner) t.winners++;
-			tally.set(name, t);
-		}
-	}
-	return {
-		buildsMatched: builds.length,
-		buildsRead: read,
-		packages: [...tally]
-			.map(([name, t]) => ({ name, ...t }))
-			.sort(
-				(a, b) =>
-					b.builds - a.builds ||
-					b.winners - a.winners ||
-					a.name.localeCompare(b.name),
-			)
-			.slice(0, top),
-	};
-}
 
 /** Builds whose GitHub link points at one of these repos (owner/name, any case) or at the owner's account. */
 export function buildsForRepos(
@@ -378,6 +404,10 @@ export function searchHackathonBuilds(
 		track?: string;
 		/** Only builds whose repo declares this Stellar package. */
 		package?: string;
+		/** Only builds from these events (slugs). */
+		hackathons?: string[];
+		/** Only builds sorted into this project type. */
+		category?: string;
 		mode?: BuildSearchMode;
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
@@ -393,6 +423,16 @@ export function searchHackathonBuilds(
 	if (opts.package) {
 		const p = opts.package.toLowerCase();
 		pool = pool.filter((b) => b.stack?.includes(p));
+	}
+	if (opts.hackathons?.length) {
+		const hs = new Set(opts.hackathons.map((h) => h.toLowerCase()));
+		pool = pool.filter((b) => hs.has(b.hackathon.slug.toLowerCase()));
+	}
+	if (opts.category) {
+		const c = opts.category.toLowerCase();
+		pool = pool.filter((b) =>
+			b.categories?.some((x) => x.type.toLowerCase() === c),
+		);
 	}
 	const query = q.trim().toLowerCase();
 	if (!query) {
