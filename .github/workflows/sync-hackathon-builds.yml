@@ -1,8 +1,9 @@
 name: Sync hackathon builds
 
 # Stores every Stellar hackathon submission DoraHacks lists in the
-# hackathon-builds collection, reads each submission's own page, and links each
-# one to the directory project that lists its exact repo. /api/hackathons/builds
+# hackathon-builds collection, reads each submission's own page, links each
+# one to the directory project that lists its exact repo, embeds rows whose
+# text changed, and keeps hackathon_build_vector_index in place. /api/hackathons/builds
 # serves this store first and falls back to a live DoraHacks read.
 #
 # A row is never deleted; a failed read never blanks a stored value; an
@@ -31,6 +32,8 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Embeddings for search by meaning (voyage-3, same key as embed-projects).
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

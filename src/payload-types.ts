@@ -1453,6 +1453,19 @@ export interface HackathonBuild {
 	 * Deleted or made private on DoraHacks: kept here, not served
 	 */
 	hiddenUpstream?: boolean | null;
+	embedding?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * sha1 of the embedded text; the lane re-embeds a row only when it changes
+	 */
+	embeddingTextHash?: string | null;
 	firstSeenAt: string;
 	/**
 	 * Last time the event's DoraHacks roster listed this build, ISO
@@ -3559,6 +3572,8 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	linkCheckedAt?: T;
 	detailReadAt?: T;
 	hiddenUpstream?: T;
+	embedding?: T;
+	embeddingTextHash?: T;
 	firstSeenAt?: T;
 	lastSeenAt?: T;
 	updatedAt?: T;

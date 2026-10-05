@@ -144,6 +144,25 @@ export const HackathonBuilds: CollectionConfig = {
 					"Deleted or made private on DoraHacks: kept here, not served",
 			},
 		},
+		{
+			// voyage-3, 1024 dims, over buildEmbeddingText (name, summary, track,
+			// start of the write-up). Written by the sync lane, read raw by
+			// $vectorSearch on hackathon_build_vector_index. Never served: the
+			// field is admin-read and the index read leaves it out.
+			name: "embedding",
+			type: "json",
+			access: { read: ({ req }) => isAdmin(req.user) },
+			admin: { hidden: true },
+		},
+		{
+			name: "embeddingTextHash",
+			type: "text",
+			admin: {
+				hidden: true,
+				description:
+					"sha1 of the embedded text; the lane re-embeds a row only when it changes",
+			},
+		},
 		{ name: "firstSeenAt", type: "text", required: true },
 		{
 			name: "lastSeenAt",
