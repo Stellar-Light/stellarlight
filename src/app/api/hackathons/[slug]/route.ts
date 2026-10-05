@@ -378,8 +378,8 @@ export async function GET(
 						prizeTiers: parsePrizeTiers(page),
 						// What the organizer published about submitting and judging.
 						// Absent = the event page was not read; a null section = the
-						// page has none (most Stellar events publish no judging
-						// criteria).
+						// page has none (most Stellar event pages have no judging
+						// section: 14 of 20 on 2026-10-05).
 						...(storedEvent?.detailReadAt
 							? {
 									rules: {

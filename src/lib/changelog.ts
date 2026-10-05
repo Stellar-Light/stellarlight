@@ -38,7 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"getHackathon serves DoraHacks events from the stored copy: the event page as the organizer published it, `rules` (whether a repo and a video are required, the submission form's questions, and the page's own requirements and judging sections) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). compareHackathons' profile gains library, project, projectStatus and scf.",
 		detail:
-			"Before, the event description was always null for DoraHacks events (the event list carries none) and every request re-read the roster live. A stored submission roster is now served in the same submission shape; a live read remains the fallback. A null judgingCriteria means the organizer published none: on 2026-10-05, 1 of 12 Stellar events did.",
+			"Before, the event description was always null for DoraHacks events (the event list carries none) and every request re-read the roster live. A stored submission roster is now served in the same submission shape; a live read remains the fallback. A null judgingCriteria means the organizer published none: on 2026-10-05, 6 of 20 Stellar event pages had a judging section and 5 a requirements section.",
 	},
 	{
 		date: "2026-10-05",

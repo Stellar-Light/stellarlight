@@ -10266,7 +10266,7 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none: most Stellar events publish submission requirements and no judging criteria.",
+									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section).",
 								properties: {
 									repoRequired: { type: "boolean" },
 									videoRequired: { type: "boolean" },

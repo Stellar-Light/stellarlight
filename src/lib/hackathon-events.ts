@@ -2,10 +2,10 @@
  * What an organizer published about a hackathon, read off the event page's
  * markdown. Pure, so the sync lane and the tests share one reading.
  *
- * Only sections the organizer wrote are served, under their own heading:
- * most Stellar events publish submission requirements and no judging
- * criteria (1 of 12 on 2026-10-05), and a missing section is reported as
- * not published, never filled in.
+ * Only sections the organizer wrote are served, under their own heading. On
+ * 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6
+ * a judging section; a missing section is reported as not published, never
+ * filled in.
  */
 
 /** The text under the first heading matching `heading`, up to the next

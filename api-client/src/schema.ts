@@ -1455,7 +1455,7 @@ export interface components {
             hackathon?: {
                 /** @description The event page, markdown as the organizer published it (stored daily for DoraHacks events). */
                 description?: string | null;
-                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none: most Stellar events publish submission requirements and no judging criteria. */
+                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). */
                 rules?: {
                     repoRequired?: boolean;
                     videoRequired?: boolean;
