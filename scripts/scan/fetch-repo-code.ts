@@ -559,6 +559,11 @@ export async function verifyMainnetContract(
 export async function fetchRepoCode(
 	gh: Gh,
 	full: string,
+	/** Read the code at this commit instead of the default branch's head. The
+	 * eval pins a fixture whose upstream repo moved on (its label describes
+	 * code that is gone from HEAD); production scans never pass it. The repo's
+	 * own metadata (fork, tags, topics) is still read as it is today. */
+	opts: { ref?: string } = {},
 ): Promise<RepoCodeResult | null> {
 	const [owner, name] = full.split("/");
 	if (!owner || !name) return null;
@@ -566,16 +571,18 @@ export async function fetchRepoCode(
 	if (!meta?.default_branch) return null;
 	const branch = meta.default_branch;
 	const treeRes = await (
-		await gh(`/repos/${owner}/${name}/git/trees/${branch}?recursive=1`)
+		await gh(
+			`/repos/${owner}/${name}/git/trees/${opts.ref ?? branch}?recursive=1`,
+		)
 	).json();
 	// Commit SHA (not the tree sha — GitHub URLs resolve commits): one light
 	// branches call so every fact this scan writes is citable at a commit.
-	const scannedRef: string | null = await gh(
-		`/repos/${owner}/${name}/branches/${encodeURIComponent(branch)}`,
-	)
-		.then((r) => r.json())
-		.then((b) => (typeof b?.commit?.sha === "string" ? b.commit.sha : null))
-		.catch(() => null);
+	const scannedRef: string | null = opts.ref
+		? opts.ref
+		: await gh(`/repos/${owner}/${name}/branches/${encodeURIComponent(branch)}`)
+				.then((r) => r.json())
+				.then((b) => (typeof b?.commit?.sha === "string" ? b.commit.sha : null))
+				.catch(() => null);
 	const tree: TreeEntry[] = (treeRes.tree ?? []).map(
 		(t: { path: string; type: string; size?: number; sha: string }) => ({
 			path: t.path,

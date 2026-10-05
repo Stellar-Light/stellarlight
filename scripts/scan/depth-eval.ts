@@ -32,6 +32,7 @@ import {
 	JS_SHALLOW,
 	LANG_DEEP,
 	LANG_SHALLOW,
+	type LabeledRepo,
 	SHALLOW,
 	SHALLOW_FRONTIER,
 } from "./depth-labels";
@@ -107,13 +108,13 @@ interface Row {
 
 async function scoreBand(
 	band: "DEEP" | "SHALLOW",
-	list: { fullName: string; why: string }[],
+	list: LabeledRepo[],
 ): Promise<{ rows: Row[]; failed: string[] }> {
 	const rows: Row[] = [];
 	const failed: string[] = [];
-	for (const { fullName, why } of list) {
+	for (const { fullName, why, ref } of list) {
 		try {
-			const r = await fetchRepoCode(gh, fullName);
+			const r = await fetchRepoCode(gh, fullName, { ref });
 			if (!r) {
 				failed.push(fullName);
 				continue;
@@ -239,15 +240,12 @@ async function main() {
 		console.log(
 			`\n── JS gate: DEEP ≥ ${JS_GATE.deepMin} · SHALLOW ≤ ${JS_GATE.shallowMax} · margin ≥ ${JS_GATE.marginMin} ──`,
 		);
-		const scoreJs = async (
-			band: "DEEP" | "SHALLOW",
-			list: { fullName: string; why: string }[],
-		) => {
+		const scoreJs = async (band: "DEEP" | "SHALLOW", list: LabeledRepo[]) => {
 			const rows: Row[] = [];
 			const failed: string[] = [];
-			for (const { fullName, why } of list) {
+			for (const { fullName, why, ref } of list) {
 				try {
-					const r = await fetchRepoCode(gh, fullName);
+					const r = await fetchRepoCode(gh, fullName, { ref });
 					if (!r) {
 						failed.push(fullName);
 						continue;
@@ -310,9 +308,9 @@ async function main() {
 				why: string;
 			}> = [];
 			const failed: string[] = [];
-			for (const { fullName, why } of list) {
+			for (const { fullName, why, ref } of list) {
 				try {
-					const r = await fetchRepoCode(gh, fullName);
+					const r = await fetchRepoCode(gh, fullName, { ref });
 					if (!r) {
 						failed.push(fullName);
 						continue;
