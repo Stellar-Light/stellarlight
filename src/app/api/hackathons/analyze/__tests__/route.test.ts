@@ -168,3 +168,11 @@ describe("GET /api/hackathons/compare", () => {
 		]);
 	});
 });
+
+describe("a type the method never assigns", () => {
+	it("is reported as unknown, not as a share of zero", async () => {
+		const { body } = await get("analyze", "facet=category&value=Oracle");
+		expect(body.total.values[0]).toMatchObject({ value: "Oracle", builds: 0 });
+		expect(body.meta.warnings?.[0]).toMatch(/unknown, not zero/);
+	});
+});

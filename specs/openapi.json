@@ -3246,6 +3246,7 @@
 					],
 					"useWhen": [
 						"who won [event] / who won its soroban track",
+						"who won the most recent or latest Stellar hackathon",
 						"what projects were submitted to [event]",
 						"what tracks did [event] have and what did they pay",
 						"how many [event] submissions are still being built"
@@ -3341,7 +3342,7 @@
 						"Was event A bigger than event B?",
 						"Compare the last two SDF hackathons on prize money",
 						"Which hackathon's projects are still active today?",
-						"How did AI agent projects change from Stellar Hacks: KALE x Reflector to Stellar Hacks: Agents?"
+						"How did the projects change from one Stellar hackathon to the next, and what did the winners build?"
 					]
 				},
 				"parameters": [
@@ -4352,6 +4353,11 @@
 													"nullable": true,
 													"description": "When it was categorized; null = not yet."
 												},
+												"categoriesMethod": {
+													"type": "string",
+													"nullable": true,
+													"description": "How the categories were assigned, with the method's measured precision and recall on the hand-typed directory."
+												},
 												"activity": {
 													"type": "object",
 													"description": "The repo's activity. Absent = not read (no repo link, or not read yet).",
@@ -4410,8 +4416,8 @@
 				"tags": [
 					"Hackathons"
 				],
-				"summary": "Trends, counts and winner comparisons across Stellar hackathon submissions",
-				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+				"summary": "Trends and counts across Stellar hackathon submissions, with lift",
+				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					"purpose": "Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
 					"keywords": [
@@ -4440,7 +4446,8 @@
 						"how did <topic> change across Stellar hackathons",
 						"which SDKs or packages do hackathon winners use",
 						"what did the winners do differently",
-						"how many hackathon projects kept building after the event"
+						"how many hackathon projects kept building after the event",
+						"what happened to <topic> hackathon projects afterwards: kept building, went quiet, became a directory project"
 					],
 					"notFor": [
 						"finding the builds themselves -> searchHackathonBuilds",

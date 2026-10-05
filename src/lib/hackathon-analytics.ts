@@ -84,7 +84,7 @@ export function libraryOf(pkg: string): string {
 export const FACETS = {
 	category: {
 		label:
-			"the directory project type the submission was sorted into (one build can carry up to three)",
+			"the directory project type the submission was sorted into (up to three per build). A submission whose types are all uncertain carries none and still counts in `known`, so a share estimates the share of all submissions. Security includes zero-knowledge and privacy projects, as the directory types them.",
 		unknown: "not categorized yet",
 		values: (b) => b.categories?.map((c) => c.type) ?? null,
 	},

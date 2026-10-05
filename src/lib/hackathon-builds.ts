@@ -197,6 +197,8 @@ export interface BuildDetail {
 	/** Absent = not categorized. */
 	categories?: BuildCategory[];
 	categoriesAt: string | null;
+	/** How the categories were assigned, with its measured precision. */
+	categoriesMethod: string | null;
 	/** Absent = activity not read. */
 	activity?: { lastCommitAt: string | null; archived: boolean };
 	activityCheckedAt: string | null;
@@ -249,6 +251,7 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 			? { categories: d.categories }
 			: {}),
 		categoriesAt: d.categoriesAt ?? null,
+		categoriesMethod: d.categoriesMethod ?? null,
 		...(d.activityCheckedAt
 			? {
 					activity: {

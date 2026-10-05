@@ -101,6 +101,18 @@ export async function GET(req: NextRequest) {
 	}
 
 	const { scored, field, served, warnings } = await queryBuilds(indexed, f);
+	// A type the method never assigns would read as a share of zero: say it
+	// cannot be measured instead.
+	if (
+		facet === "category" &&
+		value &&
+		!indexed.some((b) =>
+			b.categories?.some((c) => c.type.toLowerCase() === value.toLowerCase()),
+		)
+	)
+		warnings.push(
+			`No submission is sorted into '${value}': the method assigns a type only where it is right 70% of the time on the hand-typed directory, and this one never gets there. Its share is unknown, not zero; count the topic with q instead (q=${value.toLowerCase()}, facet=event).`,
+		);
 	const matched = scored.map((s) => s.b);
 	const opts = { top, value };
 	const total = { field: field.length, ...distribution(matched, facet, opts) };

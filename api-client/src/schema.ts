@@ -298,8 +298,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Trends, counts and winner comparisons across Stellar hackathon submissions
-         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer adds winners against everyone else, with lift. Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
+         * Trends and counts across Stellar hackathon submissions, with lift
+         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
          */
         get: operations["analyzeHackathonSubmissions"];
         put?: never;
@@ -3455,6 +3455,8 @@ export interface operations {
                             }[];
                             /** @description When it was categorized; null = not yet. */
                             categoriesAt?: string | null;
+                            /** @description How the categories were assigned, with the method's measured precision and recall on the hand-typed directory. */
+                            categoriesMethod?: string | null;
                             /** @description The repo's activity. Absent = not read (no repo link, or not read yet). */
                             activity?: {
                                 /** @description Last commit on the default branch. */

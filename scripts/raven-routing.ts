@@ -540,8 +540,13 @@ const BANK: BankItem[] = [
 	},
 	{
 		q: "what percentage of hackathon winners are still building?",
-		expect: ["analyzeEcosystem", "compareHackathons", "getHackathon"],
-		note: "T4: post-hackathon status funnel / cohort durability / per-event outcome stats — searchHackathonBuilds (the 09-03 top hit) carries no still-building state",
+		expect: [
+			"analyzeHackathonSubmissions",
+			"analyzeEcosystem",
+			"compareHackathons",
+			"getHackathon",
+		],
+		note: "T4: post-hackathon status funnel / cohort durability / per-event outcome stats; analyzeHackathonSubmissions answers it directly (facet=activity, winnersOnly=1). searchHackathonBuilds (the 09-03 top hit) carries no still-building state",
 		persona: "T4",
 	},
 	{
