@@ -16,6 +16,8 @@
  *      tags) when it has not been read in the last 30 days
  *   3. the project link: the one directory project that lists the exact repo
  *      (src/lib/hackathon-build-links.ts; a shared GitHub owner never counts)
+ *   4. embeddings for search by meaning, only for rows whose text changed
+ *      (voyage-3 via src/lib/embed.ts), and the vector index they need
  *
  * The rules the stablecoin and RWA lanes earned:
  *   - a row is never deleted;
@@ -25,7 +27,13 @@
  *   - every write is read back (payload.update drops unknown keys silently).
  */
 import "./load-env";
+import { createRequire } from "node:module";
 import { getPayload } from "payload";
+import { embedBatch } from "../src/lib/embed";
+import {
+	buildEmbeddingText,
+	embeddingTextHash,
+} from "../src/lib/hackathon-build-embedding";
 import {
 	indexProjectRepos,
 	type LinkedProject,
@@ -46,6 +54,73 @@ import type { HackathonBuild } from "../src/payload-types";
 
 const EXECUTE = process.argv.includes("--execute");
 const DETAIL_MAX_AGE_MS = 30 * 86_400_000;
+const req = createRequire(import.meta.url);
+// biome-ignore lint/suspicious/noExplicitAny: dynamic require, no types
+const { MongoClient } = req("mongodb") as any;
+
+/** The index search by meaning reads: cosine over the 1024-dim embedding,
+ * with the fields a query filters on. */
+const VECTOR_INDEX = {
+	name: "hackathon_build_vector_index",
+	type: "vectorSearch" as const,
+	definition: {
+		fields: [
+			{
+				type: "vector",
+				path: "embedding",
+				numDimensions: 1024,
+				similarity: "cosine",
+			},
+			{ type: "filter", path: "isWinner" },
+			{ type: "filter", path: "hiddenUpstream" },
+			{ type: "filter", path: "hackathonSlug" },
+		],
+	},
+};
+
+/** List the collection's search indexes; on --execute, create ours if it is
+ * missing. Returns false when the check itself failed. */
+async function ensureVectorIndex(): Promise<boolean> {
+	const uri = process.env.DATABASE_URI || process.env.MONGODB_URI;
+	if (!uri) {
+		console.error("\n✗ no DATABASE_URI: vector index not checked");
+		return false;
+	}
+	const client = new MongoClient(uri);
+	try {
+		await client.connect();
+		const coll = client.db().collection("hackathon-builds");
+		const existing = (await coll.listSearchIndexes().toArray()) as Array<{
+			name: string;
+			status?: string;
+		}>;
+		const found = existing.find((i) => i.name === VECTOR_INDEX.name);
+		if (found) {
+			console.log(
+				`\nvector index: ${VECTOR_INDEX.name} exists (${found.status ?? "status unknown"})`,
+			);
+			return true;
+		}
+		if (!EXECUTE) {
+			console.log(
+				`\nvector index: ${VECTOR_INDEX.name} is missing; --execute creates it`,
+			);
+			return true;
+		}
+		await coll.createSearchIndex(VECTOR_INDEX);
+		console.log(
+			`\nvector index: created ${VECTOR_INDEX.name}; Atlas builds it in the background`,
+		);
+		return true;
+	} catch (e) {
+		console.error(
+			`\n✗ vector index check failed: ${(e as Error).message}\nAtlas UI fallback, collection hackathon-builds, index ${VECTOR_INDEX.name}:\n${JSON.stringify(VECTOR_INDEX.definition)}`,
+		);
+		return false;
+	} finally {
+		await client.close();
+	}
+}
 
 type Row = Partial<Omit<HackathonBuild, "id" | "updatedAt" | "createdAt">> & {
 	buildId: string;
@@ -224,6 +299,64 @@ async function main() {
 		}
 	}
 
+	// ── 4. embeddings ────────────────────────────────────────────────────
+	// Re-embed only rows whose text changed or that have none, so a run with
+	// no new submissions or edits costs nothing. A failed batch keeps what is
+	// stored.
+	const toEmbed: Array<{ r: Row; text: string; hash: string }> = [];
+	for (const r of rows.values()) {
+		const old = stored.get(r.buildId);
+		const text = buildEmbeddingText({
+			name: r.name ?? "",
+			vision: r.vision,
+			track: r.track,
+			description: r.description ?? old?.description,
+		});
+		const hash = embeddingTextHash(text);
+		if (old?.embeddingTextHash === hash && Array.isArray(old?.embedding))
+			continue;
+		toEmbed.push({ r, text, hash });
+	}
+	const emb = { done: 0, failed: 0 };
+	if (!toEmbed.length) {
+		console.log("\nembeddings: none due");
+	} else if (!process.env.VOYAGE_API_KEY) {
+		console.log(
+			`\nembeddings: ${toEmbed.length} due, not run (VOYAGE_API_KEY is not set)`,
+		);
+	} else if (!EXECUTE) {
+		try {
+			const [probe] = await embedBatch([toEmbed[0].text]);
+			console.log(
+				`\nembeddings: ${toEmbed.length} due; pipeline check returned ${probe.length} dimensions`,
+			);
+		} catch (e) {
+			console.error(
+				`\n✗ embeddings: ${toEmbed.length} due; pipeline check failed: ${(e as Error).message}`,
+			);
+		}
+	} else {
+		for (let i = 0; i < toEmbed.length; i += 100) {
+			const batch = toEmbed.slice(i, i + 100);
+			try {
+				const vecs = await embedBatch(batch.map((x) => x.text));
+				batch.forEach((x, j) => {
+					x.r.embedding = vecs[j];
+					x.r.embeddingTextHash = x.hash;
+				});
+				emb.done += batch.length;
+			} catch (e) {
+				emb.failed += batch.length;
+				console.error(
+					`  ✗ embedding batch ${i / 100 + 1} failed: ${(e as Error).message}`,
+				);
+			}
+		}
+		console.log(
+			`\nembeddings: ${toEmbed.length} due, ${emb.done} embedded, ${emb.failed} failed (stored vectors kept)`,
+		);
+	}
+
 	// ── diff ─────────────────────────────────────────────────────────────
 	const creates: Row[] = [];
 	const updates: { id: string; data: Row; changed: string[] }[] = [];
@@ -259,6 +392,7 @@ async function main() {
 		);
 
 	if (!EXECUTE) {
+		await ensureVectorIndex();
 		console.log("\ndry run: nothing written. Re-run with --execute to upsert.");
 		return;
 	}
@@ -336,6 +470,13 @@ async function main() {
 		);
 	}
 	if (failed) process.exitCode = 1;
+	const indexOk = await ensureVectorIndex();
+	if ((!indexOk || emb.failed > toEmbed.length / 2) && !process.exitCode) {
+		console.error(
+			"✗ embeddings or the vector index did not complete. Rows were written; search by meaning needs a re-run.",
+		);
+		process.exitCode = 2;
+	}
 	if (due.length >= 20 && detail.failed > due.length / 2 && !process.exitCode) {
 		console.error(
 			`✗ ${detail.failed} of ${due.length} submission pages could not be read. Rosters were written; the pages need a re-run.`,

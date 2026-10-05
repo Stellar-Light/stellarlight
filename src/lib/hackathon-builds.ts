@@ -124,7 +124,12 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 				depth: 0,
 				// The full write-ups run to several KB each and the index never
 				// reads them; leaving them out keeps this read small.
-				select: { description: false, selfTags: false },
+				select: {
+					description: false,
+					selfTags: false,
+					embedding: false,
+					embeddingTextHash: false,
+				},
 			}),
 			8_000,
 		);

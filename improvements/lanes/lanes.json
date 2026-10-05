@@ -427,7 +427,7 @@
 			"workflow": "sync-hackathon-builds.yml",
 			"cadence": "cron 43 4 * * *",
 			"executeInput": "execute",
-			"writeSet": "hackathon-builds upserts: every Stellar submission on DoraHacks (roster fields, the team's full write-up, self-reported tags) and the exact-repo link to a directory project; never deletes",
+			"writeSet": "hackathon-builds upserts: every Stellar submission on DoraHacks (roster fields, the team's full write-up, self-reported tags), the exact-repo link to a directory project, and voyage-3 embeddings for rows whose text changed; ensures hackathon_build_vector_index; never deletes",
 			"since": null
 		},
 		{
