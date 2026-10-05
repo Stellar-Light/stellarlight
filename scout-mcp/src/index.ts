@@ -369,7 +369,7 @@ server.registerTool(
 	},
 );
 
-// 2c. analyze_hackathon_submissions — counts, trends and winner comparisons
+// 2c. analyze_hackathon_submissions: counts, trends and winner comparisons
 server.registerTool(
 	"analyze_hackathon_submissions",
 	{
