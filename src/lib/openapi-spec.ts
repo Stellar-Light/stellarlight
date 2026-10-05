@@ -183,6 +183,18 @@ const BUILD_PROJECT_SCHEMA = {
 			description:
 				"repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).",
 		},
+		status: {
+			type: "string",
+			nullable: true,
+			enum: [...PROJECT_STATUSES],
+			description:
+				"The project's directory status today. Absent when it could not be read (unknown).",
+		},
+		scfAwarded: {
+			type: "boolean",
+			description:
+				"Whether SCF funded the project. Absent when it could not be read (unknown).",
+		},
 	},
 	required: ["slug", "name"],
 };
@@ -3564,7 +3576,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year.",
+							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year.",
 						schema: {
 							type: "string",
 							enum: [...FACET_IDS],

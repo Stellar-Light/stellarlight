@@ -106,10 +106,28 @@ export const FACETS = {
 	},
 	project: {
 		label:
-			"became a directory project (a project lists the submission's exact repo)",
+			"became a directory project: a project lists the submission's exact repo, or the submission's demo site is the project's own website. A submission we could not link counts as none here, so this is a floor.",
 		unknown: "link not checked",
 		values: (b) =>
 			b.project === undefined ? null : b.project ? ["directory project"] : [],
+	},
+	projectStatus: {
+		label:
+			"the directory status today of the project the submission became (Live, Pre-Release, Development, Inactive)",
+		unknown:
+			"not linked to a directory project, or the project's status could not be read",
+		values: (b) => (b.project?.status ? [b.project.status] : null),
+	},
+	scf: {
+		label: "whether the project the submission became has SCF funding",
+		unknown:
+			"not linked to a directory project, or its funding could not be read",
+		values: (b) =>
+			b.project && b.project.scfAwarded !== undefined
+				? b.project.scfAwarded
+					? ["SCF funded"]
+					: []
+				: null,
 	},
 	placement: {
 		label: "placed in its event or not",

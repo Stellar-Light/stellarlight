@@ -36,6 +36,11 @@ export interface LinkedProject {
 	 * the submission's demo site is the project's website. Absent on links
 	 * stored before the basis was recorded (all by repo). */
 	basis?: LinkBasis;
+	/** The project's directory status today, read with the index. Absent
+	 * when that read failed: unknown, not "no status". */
+	status?: string | null;
+	/** Whether SCF funded the project, read with the index. Absent = unknown. */
+	scfAwarded?: boolean;
 }
 
 export const LINK_BASES = ["repo", "website"] as const;

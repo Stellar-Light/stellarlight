@@ -111,9 +111,66 @@ async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	return perHack.flat();
 }
 
+/** What a linked project is today: its directory status and whether SCF
+ * funded it. */
+export interface ProjectFacts {
+	status: string | null;
+	scfAwarded: boolean;
+}
+
+/** The facts of the projects these builds link to, read fresh, or null when
+ * the read failed (then the facts are unknown, never "unfunded"). */
+export async function readProjectFacts(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	slugs: string[],
+): Promise<Map<string, ProjectFacts> | null> {
+	if (!slugs.length) return new Map();
+	try {
+		const res = await withReadTimeout(
+			payload.find({
+				collection: "projects",
+				where: { slug: { in: slugs } },
+				pagination: false,
+				depth: 0,
+				select: { slug: true, status: true, scf: { awarded: true } },
+			}),
+			8_000,
+		);
+		return new Map(
+			(
+				res.docs as Array<{
+					slug: string;
+					status?: string | null;
+					scf?: { awarded?: boolean | null } | null;
+				}>
+			).map((p) => [
+				p.slug,
+				{ status: p.status ?? null, scfAwarded: !!p.scf?.awarded },
+			]),
+		);
+	} catch {
+		return null;
+	}
+}
+
+const linkedProject = (d: HackathonBuild, facts?: ProjectFacts) =>
+	d.projectSlug
+		? {
+				slug: d.projectSlug,
+				name: d.projectName ?? d.projectSlug,
+				...(isLinkBasis(d.projectLinkBasis)
+					? { basis: d.projectLinkBasis }
+					: {}),
+				...(facts ? facts : {}),
+			}
+		: null;
+
 /** A stored row in the shape the index serves. `vision` (DoraHacks' one-line
  * summary) stays `description`, as the live read has always served it. */
-export function indexedFromStored(d: HackathonBuild): IndexedBuild {
+export function indexedFromStored(
+	d: HackathonBuild,
+	facts?: ProjectFacts,
+): IndexedBuild {
 	const description = d.vision ?? null;
 	return {
 		id: d.buildId,
@@ -135,19 +192,7 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 			endedAt: d.endedAt ?? null,
 		},
 		haystack: haystackOf(d.name, description, d.track ?? null, d.award ?? null),
-		...(d.linkCheckedAt
-			? {
-					project: d.projectSlug
-						? {
-								slug: d.projectSlug,
-								name: d.projectName ?? d.projectSlug,
-								...(isLinkBasis(d.projectLinkBasis)
-									? { basis: d.projectLinkBasis }
-									: {}),
-							}
-						: null,
-				}
-			: {}),
+		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		...(d.categoriesAt && isCategoryList(d.categories)
 			? { categories: d.categories }
@@ -207,7 +252,10 @@ export interface BuildDetail {
 	writeUpReadAt: string | null;
 }
 
-export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
+export function buildDetailFromStored(
+	d: HackathonBuild,
+	facts?: ProjectFacts,
+): BuildDetail {
 	return {
 		id: d.buildId,
 		name: d.name,
@@ -231,19 +279,7 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 			video: d.videoUrl ?? null,
 		},
 		repo: d.repoFullName ?? null,
-		...(d.linkCheckedAt
-			? {
-					project: d.projectSlug
-						? {
-								slug: d.projectSlug,
-								name: d.projectName ?? d.projectSlug,
-								...(isLinkBasis(d.projectLinkBasis)
-									? { basis: d.projectLinkBasis }
-									: {}),
-							}
-						: null,
-				}
-			: {}),
+		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		stackReadAt: d.stackReadAt ?? null,
 		repoMissingAt: d.repoMissingAt ?? null,
@@ -291,7 +327,18 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 			}),
 			8_000,
 		);
-		return (res.docs as HackathonBuild[]).map(indexedFromStored);
+		const docs = res.docs as HackathonBuild[];
+		const facts = await readProjectFacts(payload, [
+			...new Set(
+				docs.map((d) => d.projectSlug).filter((s): s is string => !!s),
+			),
+		]);
+		return docs.map((d) =>
+			indexedFromStored(
+				d,
+				d.projectSlug ? facts?.get(d.projectSlug) : undefined,
+			),
+		);
 	} catch (e) {
 		console.error(
 			"hackathon-builds store read failed; serving the live DoraHacks read",

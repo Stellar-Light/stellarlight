@@ -226,3 +226,32 @@ describe("libraries", () => {
 		expect(d.values.find((v) => v.value === "Stellar JS SDK")?.builds).toBe(1);
 	});
 });
+
+describe("what the linked project is today", () => {
+	it("counts status and SCF only over linked builds whose facts were read", () => {
+		const rows = [
+			build("a", {
+				project: { slug: "a", name: "A", status: "Live", scfAwarded: true },
+			}),
+			build("b", {
+				project: {
+					slug: "b",
+					name: "B",
+					status: "Inactive",
+					scfAwarded: false,
+				},
+			}),
+			build("c", { project: { slug: "c", name: "C" } }), // facts unread
+			build("d", { project: null }), // not linked
+		];
+		const status = distribution(rows, "projectStatus", { now: NOW });
+		expect(status).toMatchObject({ known: 2, unknown: 2 });
+		const scf = distribution(rows, "scf", { now: NOW });
+		expect(scf).toMatchObject({ known: 2, unknown: 2 });
+		expect(scf.values).toEqual([
+			{ value: "SCF funded", builds: 1, winners: 0, share: 0.5 },
+		]);
+		// The link itself is known for the unlinked build: a floor, counted.
+		expect(distribution(rows, "project", { now: NOW }).known).toBe(4);
+	});
+});

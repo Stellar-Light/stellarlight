@@ -3362,6 +3362,13 @@ export interface operations {
                                  * @enum {string}
                                  */
                                 basis?: "repo" | "website";
+                                /**
+                                 * @description The project's directory status today. Absent when it could not be read (unknown).
+                                 * @enum {string|null}
+                                 */
+                                status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                                /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                                scfAwarded?: boolean;
                             } | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
@@ -3439,6 +3446,13 @@ export interface operations {
                                  * @enum {string}
                                  */
                                 basis?: "repo" | "website";
+                                /**
+                                 * @description The project's directory status today. Absent when it could not be read (unknown).
+                                 * @enum {string|null}
+                                 */
+                                status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                                /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                                scfAwarded?: boolean;
                             } | null;
                             /** @description Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none. */
                             stack?: string[];
@@ -3504,8 +3518,8 @@ export interface operations {
     analyzeHackathonSubmissions: {
         parameters: {
             query?: {
-                /** @description What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project. placement: winner or not. track, event, year. */
-                facet?: "category" | "package" | "library" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                /** @description What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year. */
+                facet?: "category" | "package" | "library" | "activity" | "project" | "projectStatus" | "scf" | "placement" | "track" | "event" | "year";
                 /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. */
                 by?: "event" | "year" | "placement" | "track";
                 /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. */
@@ -3572,7 +3586,7 @@ export interface operations {
                             };
                             facet?: {
                                 /** @enum {string} */
-                                id?: "category" | "package" | "library" | "activity" | "project" | "placement" | "track" | "event" | "year";
+                                id?: "category" | "package" | "library" | "activity" | "project" | "projectStatus" | "scf" | "placement" | "track" | "event" | "year";
                                 /** @description What one value counts. */
                                 counts?: string;
                                 /** @description Why a build's value can be unknown; null when it never is. */
@@ -4553,6 +4567,13 @@ export interface operations {
                                      * @enum {string}
                                      */
                                     basis?: "repo" | "website";
+                                    /**
+                                     * @description The project's directory status today. Absent when it could not be read (unknown).
+                                     * @enum {string|null}
+                                     */
+                                    status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                                    /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                                    scfAwarded?: boolean;
                                 } | null;
                             }[];
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */

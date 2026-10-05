@@ -530,3 +530,38 @@ describe("links by website", () => {
 		});
 	});
 });
+
+describe("project facts on a link", () => {
+	it("carries the project's status and funding when read, and leaves them out when not", () => {
+		const row = {
+			id: "x",
+			buildId: "dorahacks-buidl-42585",
+			name: "TollPay",
+			hackathonSlug: "e",
+			hackathonTitle: "E",
+			url: "https://dorahacks.io/buidl/42585",
+			linkCheckedAt: "2026-10-05T00:00:00.000Z",
+			projectSlug: "tollpay",
+			projectName: "TollPay",
+			projectLinkBasis: "repo",
+			firstSeenAt: "2026-10-05T00:00:00.000Z",
+			lastSeenAt: "2026-10-05T00:00:00.000Z",
+			updatedAt: "2026-10-05T00:00:00.000Z",
+			createdAt: "2026-10-05T00:00:00.000Z",
+		};
+		expect(
+			indexedFromStored(row, { status: "Live", scfAwarded: false }).project,
+		).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+			basis: "repo",
+			status: "Live",
+			scfAwarded: false,
+		});
+		expect(indexedFromStored(row).project).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+			basis: "repo",
+		});
+	});
+});
