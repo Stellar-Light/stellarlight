@@ -12,6 +12,8 @@ import { withReadTimeout } from "@/lib/degraded-read";
 import {
 	BUILD_SEARCH_MODES,
 	type BuildSearchMode,
+	LINK_BASES,
+	type LinkBasis,
 	type LinkedProject,
 } from "@/lib/hackathon-build-links";
 import { BUILD_SEMANTIC_FLOOR } from "@/lib/hackathon-build-semantic";
@@ -53,6 +55,9 @@ export interface BuildCategory {
 	type: string;
 	score: number;
 }
+
+const isLinkBasis = (v: unknown): v is LinkBasis =>
+	(LINK_BASES as readonly unknown[]).includes(v);
 
 const isCategoryList = (v: unknown): v is BuildCategory[] =>
 	Array.isArray(v) &&
@@ -133,7 +138,13 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 		...(d.linkCheckedAt
 			? {
 					project: d.projectSlug
-						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
+						? {
+								slug: d.projectSlug,
+								name: d.projectName ?? d.projectSlug,
+								...(isLinkBasis(d.projectLinkBasis)
+									? { basis: d.projectLinkBasis }
+									: {}),
+							}
 						: null,
 				}
 			: {}),
@@ -221,7 +232,13 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 		...(d.linkCheckedAt
 			? {
 					project: d.projectSlug
-						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
+						? {
+								slug: d.projectSlug,
+								name: d.projectName ?? d.projectSlug,
+								...(isLinkBasis(d.projectLinkBasis)
+									? { basis: d.projectLinkBasis }
+									: {}),
+							}
 						: null,
 				}
 			: {}),

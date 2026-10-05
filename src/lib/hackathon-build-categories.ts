@@ -7,10 +7,12 @@
  * write-up, a directory project of its name, description and category. A
  * type's score is the similarity-weighted share of the k nearest projects
  * that carry it. The directory's types are set by hand, so the method is
- * measured on them before anything is written: each typed project is sorted
- * from its neighbours without itself (leave-one-out) across a small grid of
- * k and score cuts, and the lane writes only with a setting whose precision
- * clears MIN_PRECISION.
+ * calibrated and measured on them before anything is written: each typed
+ * project is scored from its neighbours without itself (leave-one-out), and
+ * every type gets its own cut, the lowest at which it is right at least
+ * MIN_PRECISION of the time. A shared cut over-assigned the common types
+ * (Payments is 29% of the directory) and never reached the rare ones; a type
+ * that cannot reach the bar at any cut is never assigned.
  *
  * ponytail: nearest neighbours only. Rare types with few directory examples
  * (Faucet, RPC) are the weak spot; type-definition prototypes or a model pass
@@ -18,15 +20,16 @@
  */
 import type { BuildCategory } from "@/lib/hackathon-builds";
 
-/** Below this measured precision, categories are not written at all. */
+/** A type is assigned only at a cut where its leave-one-out precision on the
+ * directory clears this. */
 export const MIN_PRECISION = 0.7;
-/** A type is assigned only when, on its own, its leave-one-out precision
- * clears this and the directory has enough examples of it to say so. */
-export const MIN_TYPE_PRECISION = 0.7;
-export const MIN_TYPE_SUPPORT = 10;
+/** Directory examples a type needs before its precision means anything. */
+export const MIN_SUPPORT = 15;
+/** Correct assignments a type needs at its cut. */
+const MIN_HITS = 5;
 export const MAX_TYPES = 3;
 export const K_GRID = [5, 10, 15, 25];
-export const CUT_GRID = [0.3, 0.4, 0.5, 0.6];
+const CUTS = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
 
 export interface Labeled {
 	id: string;
@@ -80,6 +83,12 @@ export function neighbours(
 	return best;
 }
 
+/** Each labeled row's nearest other rows, computed once and shared by every
+ * measurement. */
+export function looNeighbours(labeled: Labeled[], kMax: number): Neighbour[][] {
+	return labeled.map((l) => neighbours(l.vec, labeled, kMax, l.id));
+}
+
 /** Each type's similarity-weighted share among the first k neighbours. */
 export function typeScores(near: Neighbour[], k: number): Map<string, number> {
 	const scores = new Map<string, number>();
@@ -93,23 +102,37 @@ export function typeScores(near: Neighbour[], k: number): Map<string, number> {
 	return scores;
 }
 
-/** The types at or above the cut, best first, at most MAX_TYPES; only
- * `allowed` types when given. */
+/** The types whose score reaches their own cut, best first, at most
+ * MAX_TYPES. A type with no cut is never assigned. */
 export function assign(
 	scores: Map<string, number>,
-	cut: number,
-	allowed?: Set<string>,
+	cuts: Map<string, number>,
 ): BuildCategory[] {
 	return [...scores]
-		.filter(([t, s]) => s >= cut && (!allowed || allowed.has(t)))
+		.filter(([t, s]) => cuts.has(t) && s >= (cuts.get(t) ?? 1))
 		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
 		.slice(0, MAX_TYPES)
 		.map(([type, s]) => ({ type, score: Math.round(s * 100) / 100 }));
 }
 
-export interface Measured {
+const r3 = (n: number) => Math.round(n * 1000) / 1000;
+
+export interface TypeMeasure {
+	type: string;
+	/** Directory projects that carry the type. */
+	support: number;
+	/** The type's own cut; null = never assigned. */
+	cut: number | null;
+	precision: number;
+	recall: number;
+}
+
+export interface Calibration {
 	k: number;
-	cut: number;
+	/** type -> its cut, for the types that may be assigned. */
+	cuts: Map<string, number>;
+	types: TypeMeasure[];
+	/** Over every row and every assignable type, with the MAX_TYPES cap. */
 	precision: number;
 	recall: number;
 	f1: number;
@@ -117,125 +140,87 @@ export interface Measured {
 	covered: number;
 }
 
-const r3 = (n: number) => Math.round(n * 1000) / 1000;
-
-/** Each labeled row's nearest other rows, computed once and shared by every
- * measurement below. */
-export function looNeighbours(labeled: Labeled[], kMax: number): Neighbour[][] {
-	return labeled.map((l) => neighbours(l.vec, labeled, kMax, l.id));
-}
-
-/** Precision and recall of every (k, cut) on the labeled rows themselves,
- * each sorted from its neighbours without itself; only `allowed` types are
- * assigned when given. */
-export function leaveOneOut(
-	labeled: Labeled[],
-	near: Neighbour[][],
-	ks = K_GRID,
-	cuts = CUT_GRID,
-	allowed?: Set<string>,
-): Measured[] {
-	const out: Measured[] = [];
-	for (const k of ks) {
-		const scores = near.map((n) => typeScores(n, k));
-		for (const cut of cuts) {
-			let tp = 0;
-			let fp = 0;
-			let fn = 0;
-			let covered = 0;
-			labeled.forEach((l, i) => {
-				const got = assign(scores[i], cut, allowed).map((c) => c.type);
-				if (got.length) covered++;
-				for (const t of got) l.types.includes(t) ? tp++ : fp++;
-				for (const t of l.types) if (!got.includes(t)) fn++;
-			});
-			const precision = tp + fp ? tp / (tp + fp) : 0;
-			const recall = tp + fn ? tp / (tp + fn) : 0;
-			out.push({
-				k,
-				cut,
-				precision: r3(precision),
-				recall: r3(recall),
-				f1: r3(
-					precision + recall
-						? (2 * precision * recall) / (precision + recall)
-						: 0,
-				),
-				covered: r3(labeled.length ? covered / labeled.length : 0),
-			});
-		}
-	}
-	return out;
-}
-
-export interface TypeMeasure {
-	type: string;
-	/** Directory projects that carry the type. */
-	support: number;
-	/** Times the method assigned it. */
-	assigned: number;
-	precision: number;
-	recall: number;
-}
-
-/** Leave-one-out precision and recall of each type on its own, at one
- * setting. */
-export function perType(
+/** Each type's lowest cut at which it is right at least MIN_PRECISION of the
+ * time (leave-one-out), then the whole assignment measured with those cuts. */
+export function calibrate(
 	labeled: Labeled[],
 	near: Neighbour[][],
 	k: number,
-	cut: number,
-	allowed?: Set<string>,
-): TypeMeasure[] {
-	const stats = new Map<string, { support: number; tp: number; fp: number }>();
-	const at = (t: string) => {
-		let s = stats.get(t);
-		if (!s) {
-			s = { support: 0, tp: 0, fp: 0 };
-			stats.set(t, s);
-		}
-		return s;
-	};
-	labeled.forEach((l, i) => {
-		for (const t of l.types) at(t).support++;
-		const got = assign(typeScores(near[i], k), cut, allowed).map((c) => c.type);
-		for (const t of got) l.types.includes(t) ? at(t).tp++ : at(t).fp++;
-	});
-	return [...stats]
-		.map(([type, s]) => ({
+): Calibration {
+	const scores = near.map((n) => typeScores(n, k));
+	const support = new Map<string, number>();
+	for (const l of labeled)
+		for (const t of l.types) support.set(t, (support.get(t) ?? 0) + 1);
+	const cuts = new Map<string, number>();
+	const types: TypeMeasure[] = [];
+	for (const [type, n] of support) {
+		let chosen: TypeMeasure = {
 			type,
-			support: s.support,
-			assigned: s.tp + s.fp,
-			precision: r3(s.tp + s.fp ? s.tp / (s.tp + s.fp) : 0),
-			recall: r3(s.support ? s.tp / s.support : 0),
-		}))
-		.sort((a, b) => b.support - a.support || a.type.localeCompare(b.type));
+			support: n,
+			cut: null,
+			precision: 0,
+			recall: 0,
+		};
+		if (n >= MIN_SUPPORT)
+			for (const cut of CUTS) {
+				let tp = 0;
+				let fp = 0;
+				labeled.forEach((l, i) => {
+					if ((scores[i].get(type) ?? 0) < cut) return;
+					l.types.includes(type) ? tp++ : fp++;
+				});
+				const precision = tp + fp ? tp / (tp + fp) : 0;
+				if (tp >= MIN_HITS && precision >= MIN_PRECISION) {
+					chosen = {
+						type,
+						support: n,
+						cut,
+						precision: r3(precision),
+						recall: r3(tp / n),
+					};
+					break;
+				}
+			}
+		if (chosen.cut != null) cuts.set(type, chosen.cut);
+		types.push(chosen);
+	}
+	types.sort((a, b) => b.support - a.support || a.type.localeCompare(b.type));
+	let tp = 0;
+	let fp = 0;
+	let fn = 0;
+	let covered = 0;
+	labeled.forEach((l, i) => {
+		const got = assign(scores[i], cuts).map((c) => c.type);
+		if (got.length) covered++;
+		for (const t of got) l.types.includes(t) ? tp++ : fp++;
+		for (const t of l.types) if (!got.includes(t)) fn++;
+	});
+	const precision = tp + fp ? tp / (tp + fp) : 0;
+	const recall = tp + fn ? tp / (tp + fn) : 0;
+	return {
+		k,
+		cuts,
+		types,
+		precision: r3(precision),
+		recall: r3(recall),
+		f1: r3(
+			precision + recall ? (2 * precision * recall) / (precision + recall) : 0,
+		),
+		covered: r3(labeled.length ? covered / labeled.length : 0),
+	};
 }
 
-/** The types the method may assign: measured precise enough, with enough
- * directory examples behind the measurement. */
-export function trustedTypes(measures: TypeMeasure[]): Set<string> {
-	return new Set(
-		measures
-			.filter(
-				(m) =>
-					m.support >= MIN_TYPE_SUPPORT &&
-					m.assigned > 0 &&
-					m.precision >= MIN_TYPE_PRECISION,
-			)
-			.map((m) => m.type),
-	);
-}
-
-/** Best F1 among the settings whose precision clears the floor; null when
- * none does, and then nothing is written. */
-export function pickSetting(
-	measured: Measured[],
-	floor = MIN_PRECISION,
-): Measured | null {
-	return (
-		measured
-			.filter((m) => m.precision >= floor)
-			.sort((a, b) => b.f1 - a.f1 || b.precision - a.precision)[0] ?? null
-	);
+/** The k with the best F1 among calibrations whose overall precision clears
+ * MIN_PRECISION; null when none does, and then nothing is written. */
+export function bestCalibration(
+	labeled: Labeled[],
+	ks = K_GRID,
+): { best: Calibration | null; all: Calibration[] } {
+	const near = looNeighbours(labeled, Math.max(...ks));
+	const all = ks.map((k) => calibrate(labeled, near, k));
+	const best =
+		all
+			.filter((c) => c.precision >= MIN_PRECISION && c.cuts.size > 0)
+			.sort((a, b) => b.f1 - a.f1)[0] ?? null;
+	return { best, all };
 }

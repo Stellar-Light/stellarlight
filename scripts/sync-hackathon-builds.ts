@@ -40,20 +40,13 @@ import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
 import {
-	CUT_GRID,
-	K_GRID,
+	assign as assignTypes,
+	bestCalibration,
 	type Labeled,
-	leaveOneOut,
-	looNeighbours,
 	MIN_PRECISION,
-	MIN_TYPE_PRECISION,
-	MIN_TYPE_SUPPORT,
+	MIN_SUPPORT,
 	neighbours,
-	perType,
-	pickSetting,
-	trustedTypes,
 	typeScores,
-	assign as typesAbove,
 	unit,
 } from "../src/lib/hackathon-build-categories";
 import {
@@ -62,9 +55,11 @@ import {
 } from "../src/lib/hackathon-build-embedding";
 import {
 	indexProjectRepos,
+	indexProjectSites,
 	type LinkedProject,
 	type ProjectRepoRow,
 	repoFullNameOf,
+	siteKeyOf,
 } from "../src/lib/hackathon-build-links";
 import {
 	type DoraHacksSubmission,
@@ -183,6 +178,7 @@ const FIELDS = [
 	"repoFullName",
 	"projectSlug",
 	"projectName",
+	"projectLinkBasis",
 	"hiddenUpstream",
 	"stack",
 	"categories",
@@ -305,6 +301,7 @@ async function main() {
 
 	// ── 3. project links ─────────────────────────────────────────────────
 	let links: Map<string, LinkedProject | null> | null = null;
+	let sites: Map<string, LinkedProject | null> | null = null;
 	try {
 		const projects = await payload.find({
 			collection: "projects",
@@ -320,6 +317,7 @@ async function main() {
 			},
 		});
 		links = indexProjectRepos(projects.docs as unknown as ProjectRepoRow[]);
+		sites = indexProjectSites(projects.docs as unknown as ProjectRepoRow[]);
 		console.log(
 			`\n${projects.docs.length} directory projects read; ${links.size} repos listed by a project`,
 		);
@@ -333,8 +331,14 @@ async function main() {
 		for (const r of rows.values()) {
 			const p = r.repoFullName ? links.get(r.repoFullName) : undefined;
 			if (p === null) ambiguous++;
-			r.projectSlug = p?.slug ?? null;
-			r.projectName = p?.name ?? null;
+			// No project lists the repo: the demo site may still be a project's
+			// own website. An ambiguous repo stays unlinked either way.
+			const key = siteKeyOf(r.demoUrl);
+			const s = p === undefined && key ? sites?.get(key) : undefined;
+			const linked = p ?? s ?? null;
+			r.projectSlug = linked?.slug ?? null;
+			r.projectName = linked?.name ?? null;
+			r.projectLinkBasis = p ? "repo" : s ? "website" : null;
 			r.linkCheckedAt = now;
 		}
 	}
@@ -525,37 +529,32 @@ async function main() {
 			if (p.status === "Draft" || !p.types?.length || !vec) continue;
 			labeled.push({ id: p.slug, vec, types: p.types });
 		}
-		// Two passes over the same neighbour lists: measure every type at the
-		// best overall setting, keep the types that are precise on their own,
-		// then pick the setting again with only those types assignable.
-		const near = looNeighbours(labeled, Math.max(...K_GRID));
-		const all = leaveOneOut(labeled, near);
-		const base = [...all].sort((a, b) => b.f1 - a.f1)[0];
-		const trusted = trustedTypes(perType(labeled, near, base.k, base.cut));
-		const grid = leaveOneOut(labeled, near, K_GRID, CUT_GRID, trusted);
-		const best = pickSetting(grid);
+		// Calibrated on the directory's own hand-set types: every type gets the
+		// lowest cut at which it is right MIN_PRECISION of the time, and the k
+		// with the best F1 among calibrations that clear the floor is used.
+		const { best, all } = bestCalibration(labeled);
 		console.log(
-			`\ncategories: ${labeled.length} hand-typed directory projects to learn from. Types assigned only when precise on their own (precision ${MIN_TYPE_PRECISION}+, ${MIN_TYPE_SUPPORT}+ examples): ${trusted.size} of ${new Set(labeled.flatMap((l) => l.types)).size}. Leave-one-out with those types, k ${K_GRID.join("/")} by cut ${CUT_GRID.join("/")}:`,
+			`\ncategories: ${labeled.length} hand-typed directory projects to learn from; each type gets its own cut (precision ${MIN_PRECISION}+, ${MIN_SUPPORT}+ examples), leave-one-out:`,
 		);
-		for (const m of grid)
+		for (const c of all)
 			console.log(
-				`  k=${String(m.k).padStart(2)} cut=${m.cut}  precision ${m.precision.toFixed(3)}  recall ${m.recall.toFixed(3)}  f1 ${m.f1.toFixed(3)}  covered ${m.covered.toFixed(3)}${m === best ? "  <- used" : ""}`,
+				`  k=${String(c.k).padStart(2)}  precision ${c.precision.toFixed(3)}  recall ${c.recall.toFixed(3)}  f1 ${c.f1.toFixed(3)}  covered ${c.covered.toFixed(3)}  types assignable ${c.cuts.size}${c === best ? "  <- used" : ""}`,
 			);
 		if (best) {
 			console.log(
-				"  per type at the used setting (support, assigned, precision, recall):",
+				"  per type at the used k (support, cut, precision, recall):",
 			);
-			for (const t of perType(labeled, near, best.k, best.cut))
+			for (const t of best.types)
 				console.log(
-					`    ${t.type.padEnd(16)} ${String(t.support).padStart(4)} ${String(t.assigned).padStart(4)}  ${t.precision.toFixed(2)}  ${t.recall.toFixed(2)}${trusted.has(t.type) ? "" : "  (not assigned)"}`,
+					`    ${t.type.padEnd(16)} ${String(t.support).padStart(4)}  ${t.cut == null ? "  -" : t.cut.toFixed(1)}  ${t.cut == null ? "never assigned" : `${t.precision.toFixed(2)}  ${t.recall.toFixed(2)}`}`,
 				);
 		}
 		if (!best) {
 			console.error(
-				`  ✗ no setting reaches precision ${MIN_PRECISION}: categories not written`,
+				`  ✗ no k reaches precision ${MIN_PRECISION}: categories not written`,
 			);
 		} else {
-			const method = `nearest directory projects, k=${best.k}, cut ${best.cut}, ${trusted.size} types measured precise enough to assign; leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
+			const method = `nearest directory projects, k=${best.k}, a cut per type set at precision ${MIN_PRECISION}+ (${best.cuts.size} types assignable); leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
 			let sorted = 0;
 			let agree = 0;
 			let linkedChecked = 0;
@@ -564,10 +563,9 @@ async function main() {
 				const old = stored.get(r.buildId);
 				const vec = unit(r.embedding ?? old?.embedding);
 				if (!vec) continue;
-				const cats = typesAbove(
+				const cats = assignTypes(
 					typeScores(neighbours(vec, labeled, best.k), best.k),
-					best.cut,
-					trusted,
+					best.cuts,
 				);
 				r.categories = cats;
 				r.categoriesAt = now;
@@ -639,11 +637,11 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
 	);
-	for (const r of linked.slice(0, 60))
+	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {

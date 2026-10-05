@@ -18,7 +18,11 @@ import {
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
 import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
-import { BUILD_MATCH_MODES, BUILD_SEARCH_MODES } from "./hackathon-build-links";
+import {
+	BUILD_MATCH_MODES,
+	BUILD_SEARCH_MODES,
+	LINK_BASES,
+} from "./hackathon-build-links";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
@@ -169,10 +173,16 @@ const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 	properties: {
 		slug: { type: "string" },
 		name: { type: "string" },
+		basis: {
+			type: "string",
+			enum: [...LINK_BASES],
+			description:
+				"repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).",
+		},
 	},
 	required: ["slug", "name"],
 };

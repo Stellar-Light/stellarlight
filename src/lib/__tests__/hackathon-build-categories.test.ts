@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
 	assign,
+	bestCalibration,
+	calibrate,
 	type Labeled,
-	leaveOneOut,
 	looNeighbours,
+	MIN_SUPPORT,
 	neighbours,
-	pickSetting,
 	typeScores,
 	unit,
 } from "@/lib/hackathon-build-categories";
@@ -17,16 +18,6 @@ const row = (id: string, types: string[], ...xs: number[]): Labeled => ({
 	vec: v(...xs),
 });
 
-// Two clean clusters: payments along x, DEXes along y.
-const LABELED = [
-	row("p1", ["Payments"], 1, 0.1, 0),
-	row("p2", ["Payments"], 1, 0.2, 0),
-	row("p3", ["Payments", "AI"], 1, 0.05, 0.1),
-	row("d1", ["DEX"], 0.1, 1, 0),
-	row("d2", ["DEX"], 0.2, 1, 0),
-	row("d3", ["DEX"], 0.05, 1, 0.1),
-];
-
 describe("nearest directory projects", () => {
 	it("rejects anything that is not a usable vector", () => {
 		expect(unit([1, 2], 3)).toBeNull();
@@ -34,52 +25,49 @@ describe("nearest directory projects", () => {
 		expect(unit("x", 3)).toBeNull();
 	});
 
-	it("scores a type by its weighted share of the neighbours, and leaves the row itself out", () => {
-		const near = neighbours(v(1, 0.1, 0), LABELED, 3, "p1");
-		expect(near.map((n) => n.types[0])).toEqual([
-			"Payments",
-			"Payments",
-			"DEX",
+	it("scores a type by its weighted share of the neighbours, leaving the row itself out", () => {
+		const rows = [
+			row("p1", ["Payments"], 1, 0.1, 0),
+			row("p2", ["Payments"], 1, 0.2, 0),
+			row("d1", ["DEX"], 0.1, 1, 0),
+		];
+		const near = neighbours(v(1, 0.1, 0), rows, 2, "p1");
+		expect(near.map((n) => n.types[0])).toEqual(["Payments", "DEX"]);
+		expect(typeScores(near, 1).get("Payments")).toBe(1);
+		expect(assign(typeScores(near, 1), new Map([["Payments", 0.5]]))).toEqual([
+			{ type: "Payments", score: 1 },
 		]);
-		const s = typeScores(near, 2);
-		expect(s.get("Payments")).toBe(1);
-		expect(assign(s, 0.5)).toEqual([{ type: "Payments", score: 1 }]);
-	});
-
-	it("measures itself on the labeled rows and picks a setting that clears the floor", () => {
-		const m = leaveOneOut(LABELED, looNeighbours(LABELED, 2), [2], [0.5]);
-		expect(m[0]).toMatchObject({ k: 2, cut: 0.5, precision: 1, covered: 1 });
-		expect(pickSetting(m)?.k).toBe(2);
-		expect(pickSetting([{ ...m[0], precision: 0.5 }])).toBeNull();
+		// A type without a cut is never assigned, whatever its score.
+		expect(assign(typeScores(near, 1), new Map())).toEqual([]);
 	});
 });
 
-describe("types measured one by one", () => {
-	it("trusts a type only with enough examples and precision, and assigns only trusted types", async () => {
-		const { perType, trustedTypes, MIN_TYPE_SUPPORT } = await import(
-			"@/lib/hackathon-build-categories"
+describe("a cut per type", () => {
+	// Twenty payments rows and twenty DEX rows in two clean clusters, plus a
+	// few AI rows inside the payments cluster: AI has too few examples, and
+	// its neighbours are payments rows, so it never gets a cut.
+	const rows: Labeled[] = [];
+	for (let i = 0; i < 20; i++) {
+		rows.push(row(`p${i}`, ["Payments"], 1, 0.01 * i, 0));
+		rows.push(row(`d${i}`, ["DEX"], 0.01 * i, 1, 0));
+	}
+	for (let i = 0; i < 3; i++)
+		rows.push(row(`ai${i}`, ["AI"], 1, 0.005 * i, 0.01));
+
+	it("gives the clean types a cut and the thin one none", () => {
+		const c = calibrate(rows, looNeighbours(rows, 5), 5);
+		expect(c.cuts.has("Payments")).toBe(true);
+		expect(c.cuts.has("DEX")).toBe(true);
+		expect(c.cuts.has("AI")).toBe(false);
+		expect(c.types.find((t) => t.type === "AI")?.support).toBeLessThan(
+			MIN_SUPPORT,
 		);
-		// Twelve clean payments rows and twelve clean DEX rows, plus one AI row
-		// sitting among the payments rows: too few AI examples to trust.
-		const rows: Labeled[] = [];
-		for (let i = 0; i < 12; i++) {
-			rows.push(row(`p${i}`, ["Payments"], 1, 0.01 * i, 0));
-			rows.push(row(`d${i}`, ["DEX"], 0.01 * i, 1, 0));
-		}
-		rows.push(row("ai", ["AI"], 1, 0.05, 0.02));
-		const near = looNeighbours(rows, 3);
-		const m = perType(rows, near, 3, 0.3);
-		const trusted = trustedTypes(m);
-		expect(trusted.has("Payments")).toBe(true);
-		expect(trusted.has("DEX")).toBe(true);
-		expect(trusted.has("AI")).toBe(false);
-		expect(m.find((x) => x.type === "AI")?.support).toBeLessThan(
-			MIN_TYPE_SUPPORT,
-		);
-		// The AI row's neighbours are payments rows, so it is sorted Payments:
-		// 24 right of 25 assignments.
-		expect(leaveOneOut(rows, near, [3], [0.3], trusted)[0].precision).toBe(
-			0.96,
-		);
+		expect(c.precision).toBeGreaterThanOrEqual(0.9);
+	});
+
+	it("picks a k whose overall precision clears the floor", () => {
+		const { best, all } = bestCalibration(rows, [3, 5]);
+		expect(all.map((c) => c.k)).toEqual([3, 5]);
+		expect(best?.precision).toBeGreaterThanOrEqual(0.7);
 	});
 });

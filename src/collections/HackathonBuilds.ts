@@ -121,6 +121,14 @@ export const HackathonBuilds: CollectionConfig = {
 		},
 		{ name: "projectName", type: "text" },
 		{
+			name: "projectLinkBasis",
+			type: "text",
+			admin: {
+				description:
+					"Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).",
+			},
+		},
+		{
 			name: "linkCheckedAt",
 			type: "text",
 			admin: {

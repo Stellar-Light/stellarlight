@@ -1442,6 +1442,10 @@ export interface HackathonBuild {
 	projectSlug?: string | null;
 	projectName?: string | null;
 	/**
+	 * Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).
+	 */
+	projectLinkBasis?: string | null;
+	/**
 	 * When projectSlug was last derived, ISO. Empty = never checked.
 	 */
 	linkCheckedAt?: string | null;
@@ -3613,6 +3617,7 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	repoFullName?: T;
 	projectSlug?: T;
 	projectName?: T;
+	projectLinkBasis?: T;
 	linkCheckedAt?: T;
 	detailReadAt?: T;
 	hiddenUpstream?: T;

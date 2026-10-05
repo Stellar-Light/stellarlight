@@ -3353,10 +3353,15 @@ export interface operations {
                             prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
-                            /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
+                                /**
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                 * @enum {string}
+                                 */
+                                basis?: "repo" | "website";
                             } | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
@@ -3425,10 +3430,15 @@ export interface operations {
                             };
                             /** @description owner/name from the GitHub link; null for an account or org link. */
                             repo?: string | null;
-                            /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
+                                /**
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                 * @enum {string}
+                                 */
+                                basis?: "repo" | "website";
                             } | null;
                             /** @description Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none. */
                             stack?: string[];
@@ -4532,10 +4542,15 @@ export interface operations {
                                 placement?: string | null;
                                 githubUrl?: string | null;
                                 url?: string | null;
-                                /** @description The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
+                                    /**
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                     * @enum {string}
+                                     */
+                                    basis?: "repo" | "website";
                                 } | null;
                             }[];
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
