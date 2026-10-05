@@ -18,6 +18,7 @@
 import type { Payload } from "payload";
 import {
 	computeEcosystemGaps,
+	GAP_PROJECT_SELECT,
 	GAP_VERTICALS,
 	type TypeCoverage,
 } from "./ecosystem-gaps";
@@ -386,10 +387,8 @@ export async function buildVetIdea(
 			select: {
 				slug: true,
 				name: true,
-				types: true,
-				status: true,
 				scfAwarded: true,
-				scf: true,
+				...GAP_PROJECT_SELECT,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape

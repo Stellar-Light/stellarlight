@@ -79,6 +79,7 @@ export async function buildScfPitch(
 
 	// Funded peers: vertical-wide over ACTIVE projects, structured scf truth.
 	let fundedPeers: ScfPitchReport["fundedPeers"] = [];
+	let fundedCount = 0;
 	let totalAwardedUSD = 0;
 	if (vet.vertical) {
 		const res = await payload.find({
@@ -95,30 +96,10 @@ export async function buildScfPitch(
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-		const docs = res.docs as any[];
-		fundedPeers = docs
-			.filter(
-				(p) =>
-					Array.isArray(p.types) &&
-					p.types.includes(vet.vertical) &&
-					(p.scf?.awarded ?? p.scfAwarded),
-			)
-			.map((p) => ({
-				slug: String(p.slug),
-				name: p.name ? String(p.name) : null,
-				totalAwardedUSD:
-					typeof p.scf?.totalAwarded === "number" ? p.scf.totalAwarded : null,
-				lastAwardedRound:
-					typeof p.scf?.lastAwardedRound === "number"
-						? p.scf.lastAwardedRound
-						: null,
-			}))
-			.sort((a, b) => (b.totalAwardedUSD ?? 0) - (a.totalAwardedUSD ?? 0))
-			.slice(0, 8);
-		totalAwardedUSD = fundedPeers.reduce(
-			(n, p) => n + (p.totalAwardedUSD ?? 0),
-			0,
-		);
+		const funded = fundedInVertical(res.docs as any[], vet.vertical);
+		fundedPeers = funded.peers.slice(0, 8);
+		fundedCount = funded.count;
+		totalAwardedUSD = funded.totalAwardedUSD;
 	}
 
 	const angles: string[] = [];
@@ -130,23 +111,21 @@ export async function buildScfPitch(
 		angles.push(
 			`Coverage argument: only ${vet.gap.total} active ${vet.vertical} project(s) in the directory — supply-side gap (not a demand claim).`,
 		);
-	if (vet.gap && vet.gap.total > 3 && fundedPeers.length)
+	if (vet.gap && vet.gap.total > 3 && fundedCount)
 		angles.push(
-			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedPeers.length} of them (${fundedPeers
+			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedCount} of them (largest awards: ${fundedPeers
 				.slice(0, 3)
 				.map((p) => p.slug)
-				.join(", ")}) — the pitch must say what they don't do.`,
+				.join(", ")}). The pitch must say what they don't do.`,
 		);
-	if (fundedPeers.length === 0 && vet.vertical)
+	if (fundedCount === 0 && vet.vertical)
 		angles.push(
 			`No ACTIVE ${vet.vertical} project carries an SCF award on record — first-mover framing available (absence of a record, not proof none exists).`,
 		);
-	const deadPrior = vet.priorArt.repos.filter(
-		(r) => r.activityState !== "active",
-	).length;
+	const deadPrior = countWentQuiet(vet.priorArt.repos);
 	if (deadPrior > 0)
 		angles.push(
-			`${deadPrior} judged-hackathon prior attempt(s) in this space went inactive — address why this one survives (reviewers will ask).`,
+			`${deadPrior} judged-hackathon prior attempt(s) in this space went quiet (no commit in 180 days) or were archived. Address why this one survives (reviewers will ask).`,
 		);
 	if (vet.maturity.liveOnMainnetRepos > 0)
 		angles.push(
@@ -159,10 +138,10 @@ export async function buildScfPitch(
 		round,
 		fundedPeers,
 		fundingBar: {
-			fundedProjects: fundedPeers.length,
+			fundedProjects: fundedCount,
 			totalAwardedUSD,
 			basis:
-				"ACTIVE directory projects in the vertical with structured SCF award records (scf.awarded); totals are recorded award USD, top-8 peers.",
+				"Every ACTIVE directory project in the vertical with a structured SCF award record (scf.awarded); totalAwardedUSD is the recorded award USD across all of them. fundedPeers lists the 8 largest.",
 		},
 		vet: {
 			competitors: vet.competitors,
@@ -172,4 +151,53 @@ export async function buildScfPitch(
 		},
 		angles,
 	};
+}
+
+/** Every ACTIVE project in the vertical with an SCF award on record, largest
+ * award first, with the count and total over ALL of them. The report shows the
+ * top 8 as peers; the angle once called that display cap the funded count
+ * ("SCF already funded 8" for a vertical with 192 funded projects). */
+export function fundedInVertical(
+	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+	docs: any[],
+	vertical: string,
+): {
+	peers: ScfPitchReport["fundedPeers"];
+	count: number;
+	totalAwardedUSD: number;
+} {
+	const peers = docs
+		.filter(
+			(p) =>
+				Array.isArray(p.types) &&
+				p.types.includes(vertical) &&
+				(p.scf?.awarded ?? p.scfAwarded),
+		)
+		.map((p) => ({
+			slug: String(p.slug),
+			name: p.name ? String(p.name) : null,
+			totalAwardedUSD:
+				typeof p.scf?.totalAwarded === "number" ? p.scf.totalAwarded : null,
+			lastAwardedRound:
+				typeof p.scf?.lastAwardedRound === "number"
+					? p.scf.lastAwardedRound
+					: null,
+		}))
+		.sort((a, b) => (b.totalAwardedUSD ?? 0) - (a.totalAwardedUSD ?? 0));
+	return {
+		peers,
+		count: peers.length,
+		totalAwardedUSD: peers.reduce((n, p) => n + (p.totalAwardedUSD ?? 0), 0),
+	};
+}
+
+/** Prior attempts that went quiet: dormant (no commit in 180 days) or
+ * archived. A maintained repo (a commit within 180 days) did not go inactive,
+ * though the angle used to count it. */
+export function countWentQuiet(
+	repos: Array<{ activityState?: string | null }>,
+): number {
+	return repos.filter(
+		(r) => r.activityState === "dormant" || r.activityState === "archived",
+	).length;
 }

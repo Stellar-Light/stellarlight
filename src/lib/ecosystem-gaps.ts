@@ -23,6 +23,17 @@ export interface GapProject {
 	hackathonPlacement?: string | null;
 }
 
+/** The project fields computeEcosystemGaps reads, for a Payload `select`. A
+ * caller that selects fewer gets zeros, not an error: vet-idea left out
+ * hackathonPlacement and reported 0 hackathon winners in every vertical
+ * while analyze?dimension=gaps counted them. */
+export const GAP_PROJECT_SELECT = {
+	types: true,
+	status: true,
+	scf: true,
+	hackathonPlacement: true,
+} as const;
+
 export interface TypeCoverage {
 	type: string;
 	total: number;

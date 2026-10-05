@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
 		surfaces: ["api"],
+		version: "spec@1.9.65",
+		type: "fixed",
+		summary:
+			"The idea composites state their counts honestly and show winners first. scfPitch's fundingBar.fundedProjects and totalAwardedUSD now cover every funded project in the vertical (they covered the 8 listed peers, and an angle reported that display cap as the funded count). vetIdea's gap.hackathonWinners counts winners (it read 0 in every vertical). hackathonBrief's builds start with up to two prize winners that cover the idea. vetIdea, hackathonBrief, scfPitch, getRepoTrust and listContracts gain example questions.",
+		detail:
+			"Measured on 2026-10-05: on a payments idea the pitch said SCF had funded 8 projects in a vertical where its own vet block counted 192; an angle counted a maintained repo as a prior attempt that went inactive (only dormant or archived count now). Build search weighs each query word by how rare it is across all submissions and treats a hyphenated phrase as one concept, so common words no longer outrank the specific ones. On an x402 pay-per-call idea the brief now opens with the 3rd- and 2nd-place winners that built close variants. Routing measured with the local scorer replica on this spec: the right operation ranks first for 18 of 23 intent prompts (14 on 1.9.64), and the 65-probe bank holds at 45 with none lost.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["api"],
 		version: "spec@1.9.64",
 		type: "changed",
 		summary:
