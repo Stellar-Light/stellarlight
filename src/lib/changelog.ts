@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.3.0",
+		type: "added",
+		summary:
+			"scout-mcp adds vet_idea, hackathon_brief and scf_pitch, the one-call idea composites Raven already reaches through the API spec. 24 tools; the README's counts (19 and 20) and its stale project, repo and skill numbers are corrected.",
+	},
+	{
+		date: "2026-10-05",
 		surfaces: ["api"],
 		version: "spec@1.9.65",
 		type: "fixed",

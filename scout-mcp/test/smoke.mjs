@@ -189,6 +189,10 @@ async function main() {
 			"explain_repo",
 			"get_people",
 			"get_audits",
+			"search_hackathon_builds",
+			"vet_idea",
+			"hackathon_brief",
+			"scf_pitch",
 		];
 		const got = tools.map((t) => t.name).sort();
 		const missing = expected.filter((n) => !got.includes(n));
