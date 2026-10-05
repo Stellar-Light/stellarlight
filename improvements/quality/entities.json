@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-04T13:25:40.792Z",
+ "generatedAt": "2026-10-05T16:21:03.845Z",
  "surfaces": [
   {
    "surface": "code",
@@ -9,10 +9,17 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "contract",
+   "means": "the OpenAPI contract and its generated artifacts",
+   "openFindings": 1,
+   "clearedFindings": 30,
+   "verifiedFindings": 7
+  },
+  {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 1,
-   "clearedFindings": 189,
+   "clearedFindings": 201,
    "verifiedFindings": 0
   },
   {
@@ -28,13 +35,6 @@
    "openFindings": 0,
    "clearedFindings": 16,
    "verifiedFindings": 0
-  },
-  {
-   "surface": "contract",
-   "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 0,
-   "clearedFindings": 30,
-   "verifiedFindings": 7
   },
   {
    "surface": "consumer",
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 762,
-  "open": 9,
-  "refreshQueue": 75,
+  "total": 765,
+  "open": 10,
+  "refreshQueue": 65,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 73,
+   "oldestDays": 75,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,17 +79,17 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 654,
+  "cleared": 666,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 84,
-    "total": 289
+    "open": 74,
+    "total": 291
    },
    "instrument": {
-    "open": 17,
-    "total": 473
+    "open": 18,
+    "total": 474
    }
   },
   "byFailureMode": [
@@ -105,9 +105,9 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 31,
+    "refresh": 19,
     "blocked": 0,
-    "cleared": 99,
+    "cleared": 111,
     "verified": 0,
     "surface": "directory"
    },
@@ -149,7 +149,7 @@
    },
    {
     "mode": "api-drift",
-    "open": 0,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
     "cleared": 25,
@@ -186,7 +186,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 41,
+    "refresh": 43,
     "blocked": 0,
     "cleared": 8,
     "verified": 0,
@@ -277,7 +277,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 8
+    "count": 9
    },
    {
     "bucket": "8–30d",
@@ -294,70 +294,70 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "https://interstellar.exchange",
+    "probe": "https://x.com/boundless_xyz",
     "surface": "directory",
     "failureMode": "broken-link",
-    "clearedAt": "2026-10-04"
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "contracterrorcodefromnumber",
-    "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-09-28"
+    "probe": "https://x.com/catalyst_bm",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "defindex tvl exact product lineup",
-    "surface": "retrieval",
-    "failureMode": "demand-miss",
-    "clearedAt": "2026-09-28"
+    "probe": "https://x.com/contentdaoapp",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "battery:q-pc-slp-0004-0006-status",
-    "surface": "corpus",
-    "failureMode": "battery-coverage-weak",
-    "clearedAt": "2026-09-28"
+    "probe": "https://x.com/copperxhq",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "ROHIT8759/KeyWe",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
+    "probe": "https://x.com/createplayearn",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "robertDurst/stellar-rust-sdk",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
+    "probe": "https://x.com/decentriolabs",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "rawritude/public-directory",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
+    "probe": "https://x.com/janusfreight",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    },
    {
-    "probe": "rawritude/stellarlight",
-    "surface": "code",
-    "failureMode": "repo-gone",
-    "clearedAt": "2026-09-27"
+    "probe": "https://x.com/myshopcatlog",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-05"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 235,
-     "recurred": 103,
-     "ratePct": 43.8
+     "newFindings": 223,
+     "recurred": 91,
+     "ratePct": 40.8
     },
     "lifetime": {
-     "newFindings": 762,
-     "recurred": 227,
-     "ratePct": 29.8
+     "newFindings": 765,
+     "recurred": 230,
+     "ratePct": 30.1
     }
    },
    "reopened": {
-    "count": 12,
+    "count": 13,
     "shareOfClosures": 0.02,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -365,13 +365,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 235,
-     "repeats": 234,
+     "newFindings": 223,
+     "repeats": 222,
      "ratePct": 99.6
     },
     "lifetime": {
-     "newFindings": 762,
-     "repeats": 755,
+     "newFindings": 765,
+     "repeats": 758,
      "ratePct": 99.1
     },
     "byClass": [
@@ -383,8 +383,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 195,
-      "open": 72,
+      "total": 197,
+      "open": 62,
       "firstSeen": "2026-07-22"
      },
      {
@@ -407,8 +407,8 @@
      },
      {
       "class": "contract-completeness",
-      "total": 30,
-      "open": 0,
+      "total": 31,
+      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9451,7 +9451,7 @@
    "tail": {
     "repos": 10018,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7948
+    "withCodeDepth": 7949
    },
    "knowledgeNotes": {
     "pool": 373,
@@ -9465,7 +9465,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5758,
+    "pool": 5757,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 124
    }
@@ -9517,15 +9517,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1354
+     "count": 1355
     },
     {
      "label": "slowing",
-     "count": 1023
+     "count": 1026
     },
     {
      "label": "active",
-     "count": 877
+     "count": 873
     },
     {
      "label": "unknown",
@@ -9580,7 +9580,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11134,
+  "withCodeDepth": 11135,
   "withNotes": 1059,
   "withMainnet": 124,
   "top": [
@@ -10673,7 +10673,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 49
+    "value": 51
    },
    {
     "id": "s:raven-routing",
@@ -10697,7 +10697,7 @@
     "id": "s:nightly-drift",
     "label": "nightly-drift",
     "column": 0,
-    "value": 25
+    "value": 26
    },
    {
     "id": "s:nightly-battery",
@@ -10763,7 +10763,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 190
+    "value": 202
    },
    {
     "id": "f:code",
@@ -10775,7 +10775,7 @@
     "id": "f:contract",
     "label": "contract",
     "column": 1,
-    "value": 37
+    "value": 38
    },
    {
     "id": "f:corpus",
@@ -10799,13 +10799,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 654
+    "value": 666
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 101
+    "value": 92
    },
    {
     "id": "o:verified",
@@ -10925,14 +10925,14 @@
     "target": 24,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 189
+    "value": 201
    },
    {
     "source": 7,
     "target": 20,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
-    "value": 25
+    "value": 26
    },
    {
     "source": 8,
@@ -10974,14 +10974,14 @@
     "target": 19,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 49
+    "value": 51
    },
    {
     "source": 19,
     "target": 25,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 52
+    "value": 54
    },
    {
     "source": 1,
@@ -10995,7 +10995,7 @@
     "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 32
+    "value": 20
    },
    {
     "source": 6,
@@ -11017,6 +11017,13 @@
     "sourceId": "s:weak-basis-liveness",
     "targetId": "f:directory",
     "value": 1
+   },
+   {
+    "source": 20,
+    "target": 25,
+    "sourceId": "f:contract",
+    "targetId": "o:open",
+    "value": 1
    }
   ]
  },
@@ -11029,7 +11036,7 @@
     "missing": 358,
     "of": 377,
     "share": 95,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5381 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5380 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 358,
@@ -11117,13 +11124,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2303,
+    "missing": 2302,
     "of": 13437,
     "share": 17.1,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2303,
+    "examplePoolSize": 2302,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
