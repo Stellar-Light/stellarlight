@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * ScoutFeedback — write-only public ingestion of feedback from agents
@@ -43,9 +44,9 @@ export const ScoutFeedback: CollectionConfig = {
 		// overrideAccess. Leaving this open let anyone POST /api/scout-feedback
 		// straight past the limiter (unbounded on the M0).
 		create: () => false,
-		read: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

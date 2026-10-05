@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * ResearchDocs — chunked, embedded primary-source content for the
@@ -56,10 +57,10 @@ export const ResearchDocs: CollectionConfig = {
 			"Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
+		read: adminOnly,
 		create: () => false,
 		update: () => false,
-		delete: ({ req }) => !!req.user,
+		delete: adminOnly,
 	},
 	fields: [
 		{

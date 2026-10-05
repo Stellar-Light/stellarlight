@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * ApiUsage — append-only log of public-API hits for the Stellar Scout
@@ -32,10 +33,10 @@ export const ApiUsage: CollectionConfig = {
 			"Public-API hit log. Append-only, used to measure Scout skill adoption.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
+		read: adminOnly,
 		create: () => false, // local API only — REST/GraphQL clients cannot create
 		update: () => false,
-		delete: ({ req }) => !!req.user,
+		delete: adminOnly,
 	},
 	fields: [
 		{

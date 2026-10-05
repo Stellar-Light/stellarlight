@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
-
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
+import { adminOnly } from "./access";
 
 export const Hackathons: CollectionConfig = {
 	slug: "hackathons",
@@ -11,9 +11,9 @@ export const Hackathons: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

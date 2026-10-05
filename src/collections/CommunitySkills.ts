@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * CommunitySkills — third-party-submitted entries in the Stellar AI skills
@@ -28,9 +29,9 @@ export const CommunitySkills: CollectionConfig = {
 		// Anyone can submit via POST /api/community-skills (which uses the
 		// Local API and is gated by validation + rate limits there).
 		create: () => false, // disallow create via REST/GraphQL; route handler uses Local API
-		read: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { activityStateOf, CODE_SCAN_STATES } from "../lib/repo-grade";
 import { repoSupersession } from "../lib/repo-relations";
+import { adminOnly, isAdmin } from "./access";
 
 /**
  * Code references: GitHub repos in the Stellar ecosystem as flat, searchable,
@@ -22,13 +23,19 @@ export const Repos: CollectionConfig = {
 			"lastCommitAt",
 		],
 	},
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
 	hooks: {
 		// Internal knowledge notes are triage memory (why a long-tail repo
 		// isn't worth surfacing/deep-indexing) and must never leave the DB
 		// through ANY read path — including Payload's auto-exposed
 		// /api/repos REST (public read). Filtered here at the collection
-		// layer for unauthenticated reads; admin sessions still see them.
+		// layer for every reader but an admin. A partner session is logged in
+		// too, so "no user" was the wrong test.
 		// Serve-side filters in repo-search are a second, redundant layer.
 		afterRead: [
 			({ doc, req }) => {
@@ -36,7 +43,7 @@ export const Repos: CollectionConfig = {
 				// req.user; they pass context.internal so their read-backs can see
 				// the fields they just wrote. No external path can set local-API
 				// context, so the privacy boundary holds.
-				if (!req?.user && req?.context?.internal !== true) {
+				if (!isAdmin(req?.user) && req?.context?.internal !== true) {
 					if (Array.isArray(doc?.knowledgeNotes)) {
 						doc.knowledgeNotes = doc.knowledgeNotes.filter(
 							(n: { visibility?: string | null }) =>

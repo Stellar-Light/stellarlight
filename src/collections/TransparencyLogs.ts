@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 export const TransparencyLogs: CollectionConfig = {
 	slug: "transparency-logs",
@@ -8,6 +9,9 @@ export const TransparencyLogs: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

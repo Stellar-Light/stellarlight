@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * Curator Agent — Phase 1: link health.
@@ -60,10 +61,10 @@ export const LinkChecks: CollectionConfig = {
 	access: {
 		// Same shape as other ops collections — admin reads/writes, no
 		// public exposure
-		read: ({ req }) => Boolean(req.user),
-		create: ({ req }) => Boolean(req.user),
-		update: ({ req }) => Boolean(req.user),
-		delete: ({ req }) => Boolean(req.user),
+		read: adminOnly,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

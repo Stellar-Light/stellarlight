@@ -2,6 +2,7 @@ import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import type { CollectionConfig } from "payload";
 import { HtmlSnippetBlock } from "../blocks/HtmlSnippet";
 import { SocialEmbedBlock } from "../blocks/SocialEmbed";
+import { adminOnly, isAdmin } from "./access";
 
 export const Blog: CollectionConfig = {
 	slug: "blog",
@@ -20,10 +21,15 @@ export const Blog: CollectionConfig = {
 		drafts: true,
 	},
 	access: {
-		read: () => true,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		// Drafts are on: without the published filter, anyone could read an
+		// unpublished post with ?draft=true. Site pages read through the local
+		// API, so they are unaffected.
+		read: ({ req }) =>
+			isAdmin(req.user) ? true : { _status: { equals: "published" } },
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+		readVersions: adminOnly,
 	},
 	fields: [
 		{
