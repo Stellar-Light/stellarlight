@@ -15,7 +15,7 @@ import {
 	degradedWarning,
 } from "@/lib/degraded-read";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
-import { repoSupersession } from "@/lib/repo-relations";
+import { currentRepo, repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
@@ -884,7 +884,8 @@ export function canonicalFor(q: string): string[] {
 	const out: string[] = [];
 	for (const c of CANONICAL) {
 		if (c.test.test(hay))
-			for (const r of c.repos) if (!out.includes(r)) out.push(r);
+			for (const r of c.repos.map(currentRepo))
+				if (!out.includes(r)) out.push(r);
 	}
 	return out;
 }
@@ -999,7 +1000,11 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// "wallet" token in name/topics/desc (freighter's don't), so SDK/demo repos
 	// swept the page. All three verified in-index 2026-07-19: stellar/freighter
 	// (the canonical extension wallet, alive), creit-tech/xbull-wallet, and
-	// kalepail/passkey-kit (the actively-maintained smart-wallet kit).
+	// kalepail/passkey-kit (the actively-maintained smart-wallet kit), since
+	// moved to stellar/passkey-kit and archived. The stale pick floated the
+	// archived repo first for "passkey smart wallet" and left the live one
+	// sixth; picks now also resolve through the supersession map (currentRepo),
+	// so the next move cannot strand a float the same way.
 	// 2026-08-14: + creit-tech/stellar-wallets-kit — THE canonical multi-wallet
 	// connect kit (the library dapps embed to support every wallet at once) was
 	// missing from its own family's float, so it ranked 7th for "wallet kit".
@@ -1009,7 +1014,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		repos: [
 			"stellar/freighter",
 			"Creit-Tech/xBull-Wallet",
-			"kalepail/passkey-kit",
+			"stellar/passkey-kit",
 			"Creit-Tech/Stellar-Wallets-Kit",
 		],
 	},
@@ -1103,7 +1108,8 @@ export function flagshipsFor(q: string): string[] {
 	for (const v of VERTICAL_FLAGSHIPS) {
 		if (v.test.test(hay)) {
 			firedTests.push(v.test);
-			for (const r of v.repos) if (!out.includes(r)) out.push(r);
+			for (const r of v.repos.map(currentRepo))
+				if (!out.includes(r)) out.push(r);
 		}
 	}
 	if (out.length < 2) return out;

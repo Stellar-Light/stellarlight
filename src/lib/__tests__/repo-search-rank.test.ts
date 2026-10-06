@@ -432,12 +432,17 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 		const f = flagshipsFor("wallet");
 		expect(f).toContain("stellar/freighter");
 		expect(f).toContain("Creit-Tech/xBull-Wallet");
-		expect(f).toContain("kalepail/passkey-kit");
+		expect(f).toContain("stellar/passkey-kit");
 	});
-	it("smart wallet queries hit the wallet vertical too", () => {
-		expect(flagshipsFor("smart wallet passkeys")).toContain(
-			"kalepail/passkey-kit",
-		);
+	it("smart wallet queries hit the wallet vertical too, with the live passkey kit", () => {
+		const f = flagshipsFor("passkey smart wallet");
+		expect(f[0]).toBe("stellar/passkey-kit");
+		expect(f).not.toContain("kalepail/passkey-kit");
+	});
+	it("a curated pick that moved resolves to where it lives now", async () => {
+		const { currentRepo } = await import("@/lib/repo-relations");
+		expect(currentRepo("kalepail/passkey-kit")).toBe("stellar/passkey-kit");
+		expect(currentRepo("stellar/freighter")).toBe("stellar/freighter");
 	});
 	it("q=anchor floats the open anchor tooling (operators are closed-source)", () => {
 		const f = flagshipsFor("anchor integration");
@@ -456,7 +461,7 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 	});
 	it("a query naming a flagship's identity floats that flagship first", () => {
 		expect(flagshipsFor("passkey smart wallet kit")[0]).toBe(
-			"kalepail/passkey-kit",
+			"stellar/passkey-kit",
 		);
 		expect(flagshipsFor("xbull wallet")[0]).toBe("Creit-Tech/xBull-Wallet");
 	});
