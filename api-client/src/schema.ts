@@ -310,6 +310,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hackathons/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Review a hackathon project from its GitHub or DoraHacks link
+         * @description Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.
+         */
+        get: operations["reviewSubmission"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/builders": {
         parameters: {
             query?: never;
@@ -3695,6 +3715,288 @@ export interface operations {
             };
         };
     };
+    reviewSubmission: {
+        parameters: {
+            query: {
+                /** @description The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest. */
+                link: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The review. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta?: {
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            note?: string;
+                        };
+                        review?: {
+                            link?: string;
+                            /** @enum {string} */
+                            resolvedBy?: "submission" | "repo";
+                            /** @description Other stored submissions of the same repo, not reviewed here. */
+                            otherSubmissionsOfRepo?: number;
+                            submission?: {
+                                id?: string;
+                                name?: string;
+                                /** @description DoraHacks' one-line summary. */
+                                summary?: string | null;
+                                /** @description The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none. */
+                                writeUp?: string | null;
+                                /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
+                                selfTags?: string[];
+                                hackathon?: {
+                                    title?: string;
+                                    slug?: string;
+                                    endedAt?: string | null;
+                                };
+                                track?: string | null;
+                                placement?: string | null;
+                                award?: string | null;
+                                prizeUsd?: number | null;
+                                isWinner?: boolean;
+                                links?: {
+                                    dorahacks?: string;
+                                    github?: string | null;
+                                    demo?: string | null;
+                                    video?: string | null;
+                                };
+                                /** @description owner/name from the GitHub link; null for an account or org link. */
+                                repo?: string | null;
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                project?: {
+                                    slug: string;
+                                    name: string;
+                                    /**
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                     * @enum {string}
+                                     */
+                                    basis?: "repo" | "website";
+                                    /**
+                                     * @description The project's directory status today. Absent when it could not be read (unknown).
+                                     * @enum {string|null}
+                                     */
+                                    status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                                    /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                                    scfAwarded?: boolean;
+                                    /**
+                                     * Format: date-time
+                                     * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                                     */
+                                    factsReadAt?: string;
+                                } | null;
+                                /** @description Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none. */
+                                stack?: string[];
+                                /** @description When we last read the repo's manifests; null = never read. */
+                                stackReadAt?: string | null;
+                                /** @description When the repo last answered not found (deleted, renamed away or private); null = it has not. */
+                                repoMissingAt?: string | null;
+                                /** @description Directory project types this submission was sorted into, best first. Absent = not categorized yet. */
+                                categories?: {
+                                    /** @enum {string} */
+                                    type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
+                                    /** @description 0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list. */
+                                    score?: number;
+                                    /** @description The type's leave-one-out precision on the hand-typed directory at its cut. Not dated per item: categoriesAt dates the whole list. */
+                                    precision?: number;
+                                    /** @description The type's leave-one-out recall there: a low recall means counts of this type undercount. Not dated per item: categoriesAt dates the whole list. */
+                                    recall?: number;
+                                }[];
+                                /** @description When it was categorized; null = not yet. */
+                                categoriesAt?: string | null;
+                                /** @description How the categories were assigned, with the method's measured precision and recall on the hand-typed directory. */
+                                categoriesMethod?: string | null;
+                                /** @description The repo's activity. Absent = not read (no repo link, or not read yet). */
+                                activity?: {
+                                    /** @description Last commit on the default branch. */
+                                    lastCommitAt?: string | null;
+                                    archived?: boolean;
+                                };
+                                /** @description When we last read the repo's activity; null = never. */
+                                activityCheckedAt?: string | null;
+                                /** Format: date-time */
+                                firstSeenAt?: string;
+                                /**
+                                 * Format: date-time
+                                 * @description Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.
+                                 */
+                                lastSeenAt?: string;
+                                /** @description When we last read the submission page. */
+                                writeUpReadAt?: string | null;
+                            };
+                            /** @description Mechanical checks over the submission's own facts, each a finding with its evidence. Not dated per item: the submission's own read dates (stackReadAt, activityCheckedAt, writeUpReadAt, project.factsReadAt) date them. */
+                            checks?: {
+                                /** @enum {string} */
+                                id?: "repo" | "activity" | "stack" | "directory" | "status" | "scf" | "writeUp" | "demo";
+                                /** @description true = in place; false = missing or a warning sign; null = could not be checked, never a no. */
+                                ok?: boolean | null;
+                                finding?: string;
+                            }[];
+                            /** @description The stored submissions closest in meaning to this one, by its own embedding. */
+                            similar?: {
+                                /** @description false = search by meaning could not run: unknown, not 'nothing similar'. */
+                                checked?: boolean;
+                                builds?: {
+                                    id?: string;
+                                    name?: string;
+                                    hackathon?: string;
+                                    isWinner?: boolean;
+                                    placement?: string | null;
+                                    similarity?: number;
+                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                    project?: {
+                                        slug: string;
+                                        name: string;
+                                        /**
+                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                         * @enum {string}
+                                         */
+                                        basis?: "repo" | "website";
+                                        /**
+                                         * @description The project's directory status today. Absent when it could not be read (unknown).
+                                         * @enum {string|null}
+                                         */
+                                        status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                                        /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                                        scfAwarded?: boolean;
+                                        /**
+                                         * Format: date-time
+                                         * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                                         */
+                                        factsReadAt?: string;
+                                    } | null;
+                                }[];
+                            };
+                            /** @description How crowded the submission's top category is across every stored submission. null when it is not categorized. */
+                            categoryContext?: {
+                                /** @enum {string} */
+                                type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
+                                submissions?: number;
+                                winners?: number;
+                                shareOfSubmissions?: number | null;
+                            } | null;
+                            pitch?: {
+                                idea?: string;
+                                vertical?: string | null;
+                                round?: {
+                                    /**
+                                     * @description unavailable = the live round check failed; open is [] but says nothing about actual round state.
+                                     * @enum {string}
+                                     */
+                                    source?: "live" | "unavailable";
+                                    open?: {
+                                        round?: number;
+                                        phase?: string | null;
+                                        /** @description ISO date (YYYY-MM-DD) when known. */
+                                        submissionDeadline?: string | null;
+                                    }[];
+                                    note?: string;
+                                };
+                                fundedPeers?: {
+                                    slug?: string;
+                                    name?: string | null;
+                                    totalAwardedUSD?: number | null;
+                                    lastAwardedRound?: number | null;
+                                }[];
+                                fundingBar?: {
+                                    /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
+                                    fundedProjects?: number;
+                                    /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
+                                    totalAwardedUSD?: number;
+                                    basis?: string;
+                                };
+                                /** @description Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row. */
+                                vet?: {
+                                    competitors?: {
+                                        /**
+                                         * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                         * @enum {string}
+                                         */
+                                        matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
+                                        matchModeLabel?: string;
+                                        repos?: {
+                                            fullName?: string;
+                                            /** @description The repo's grade tier, read live from the index with this response; not dated per row. */
+                                            tier?: string | null;
+                                            activityState?: string;
+                                            stars?: number | null;
+                                            codeDomains?: string[];
+                                        }[];
+                                        projects?: {
+                                            slug?: string;
+                                            name?: string | null;
+                                            /** @description The project's directory status, read live with this response; not dated per row. */
+                                            status?: string | null;
+                                            types?: string[];
+                                        }[];
+                                    };
+                                    maturity?: {
+                                        auditedProjects?: number;
+                                        liveOnMainnetRepos?: number;
+                                        basis?: string;
+                                    };
+                                    priorArt?: {
+                                        repos?: {
+                                            fullName?: string;
+                                            hackathonWinner?: boolean;
+                                            activityState?: string;
+                                            /** Format: date-time */
+                                            lastCommitAt?: string | null;
+                                        }[];
+                                        note?: string;
+                                    };
+                                    /** @description SUPPLY-side coverage of the idea's vertical: a gap is not demand. Null when no vertical mapped. */
+                                    gap?: {
+                                        type?: string;
+                                        total?: number;
+                                        live?: number;
+                                        /** @description Active-but-not-yet-Live (Development / Pre-Release). */
+                                        inProgress?: number;
+                                        scfFunded?: number;
+                                        hackathonWinners?: number;
+                                        basis?: string;
+                                    } | null;
+                                };
+                                /** @description Deterministic derivations from served facts: each names its evidence; not judgments. */
+                                angles?: string[];
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description No link, or a parameter other than link. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No stored submission matches the link (not proof it was never submitted). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The store did not answer; retry. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getBuilders: {
         parameters: {
             query?: {
@@ -4427,13 +4729,14 @@ export interface operations {
                             vet?: {
                                 competitors?: {
                                     /**
-                                     * @description How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                     * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
                                      * @enum {string}
                                      */
-                                    matchMode?: "vertical" | "scored" | "weak";
+                                    matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
                                     matchModeLabel?: string;
                                     repos?: {
                                         fullName?: string;
+                                        /** @description The repo's grade tier, read live from the index with this response; not dated per row. */
                                         tier?: string | null;
                                         activityState?: string;
                                         stars?: number | null;
@@ -4442,6 +4745,7 @@ export interface operations {
                                     projects?: {
                                         slug?: string;
                                         name?: string | null;
+                                        /** @description The project's directory status, read live with this response; not dated per row. */
                                         status?: string | null;
                                         types?: string[];
                                     }[];
@@ -4461,7 +4765,7 @@ export interface operations {
                                     }[];
                                     note?: string;
                                 };
-                                /** @description SUPPLY-side coverage of the idea's vertical — a gap is not demand. Null when no vertical mapped. */
+                                /** @description SUPPLY-side coverage of the idea's vertical: a gap is not demand. Null when no vertical mapped. */
                                 gap?: {
                                     type?: string;
                                     total?: number;
@@ -4473,7 +4777,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Deterministic derivations from served facts — each names its evidence; not judgments. */
+                            /** @description Deterministic derivations from served facts: each names its evidence; not judgments. */
                             angles?: string[];
                         };
                     };
@@ -4521,13 +4825,14 @@ export interface operations {
                             vet?: {
                                 competitors?: {
                                     /**
-                                     * @description How relevance was established: vertical = typed membership; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                     * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
                                      * @enum {string}
                                      */
-                                    matchMode?: "vertical" | "scored" | "weak";
+                                    matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
                                     matchModeLabel?: string;
                                     repos?: {
                                         fullName?: string;
+                                        /** @description The repo's grade tier, read live from the index with this response; not dated per row. */
                                         tier?: string | null;
                                         activityState?: string;
                                         stars?: number | null;
@@ -4536,6 +4841,7 @@ export interface operations {
                                     projects?: {
                                         slug?: string;
                                         name?: string | null;
+                                        /** @description The project's directory status, read live with this response; not dated per row. */
                                         status?: string | null;
                                         types?: string[];
                                     }[];
@@ -4555,7 +4861,7 @@ export interface operations {
                                     }[];
                                     note?: string;
                                 };
-                                /** @description SUPPLY-side coverage of the idea's vertical — a gap is not demand. Null when no vertical mapped. */
+                                /** @description SUPPLY-side coverage of the idea's vertical: a gap is not demand. Null when no vertical mapped. */
                                 gap?: {
                                     type?: string;
                                     total?: number;

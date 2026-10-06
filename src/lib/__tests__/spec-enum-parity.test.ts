@@ -385,8 +385,19 @@ describe("hackathon submission vocabularies are their constants (spec 1.9.69)", 
 				"application/json"
 			].schema.properties.deltas.properties.facetShifts.items.properties.facet;
 		expect(sorted(shift.enum)).toEqual(sorted(SHIFT_FACETS));
-		const { BUILD_MATCH_MODES, LINK_BASES } = await import(
-			"../hackathon-build-links"
+		const {
+			BUILD_MATCH_MODES,
+			LINK_BASES,
+			REVIEW_CHECK_IDS,
+			REVIEW_RESOLVED_BY,
+		} = await import("../hackathon-build-links");
+		const review =
+			S.paths["/api/hackathons/review"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.review.properties;
+		expect(sorted(review.resolvedBy.enum)).toEqual(sorted(REVIEW_RESOLVED_BY));
+		expect(sorted(review.checks.items.properties.id.enum)).toEqual(
+			sorted(REVIEW_CHECK_IDS),
 		);
 		const row =
 			S.paths["/api/hackathons/builds"].get.responses["200"].content[
