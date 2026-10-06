@@ -121,6 +121,14 @@ export const HackathonBuilds: CollectionConfig = {
 		},
 		{ name: "projectName", type: "text" },
 		{
+			name: "projectLinkBasis",
+			type: "text",
+			admin: {
+				description:
+					"Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).",
+			},
+		},
+		{
 			name: "linkCheckedAt",
 			type: "text",
 			admin: {
@@ -186,6 +194,55 @@ export const HackathonBuilds: CollectionConfig = {
 			admin: {
 				description:
 					"When the repo last answered not found (deleted, renamed away or private), ISO. Cleared by the next successful read.",
+			},
+		},
+		{
+			// [{ type, score }], best first: directory project types (the
+			// PROJECT_TYPES vocabulary) from the build's nearest directory
+			// projects. Written by the sync lane only after the method passes its
+			// leave-one-out check on the directory's own hand-set types.
+			name: "categories",
+			type: "json",
+			admin: {
+				description:
+					"Directory project types this submission was sorted into, best first, each with a 0 to 1 score. Read only when categoriesAt is set.",
+			},
+		},
+		{
+			name: "categoriesAt",
+			type: "text",
+			admin: {
+				description:
+					"When the lane last categorized this submission, ISO. Empty = not categorized.",
+			},
+		},
+		{
+			name: "categoriesMethod",
+			type: "text",
+			admin: {
+				description:
+					"How the categories were assigned, with the version and its measured precision.",
+			},
+		},
+		{
+			name: "repoLastCommitAt",
+			type: "text",
+			admin: {
+				description:
+					"Date of the last commit on the repo's default branch, ISO. Read only when activityCheckedAt is set.",
+			},
+		},
+		{
+			name: "repoArchived",
+			type: "checkbox",
+			admin: { description: "The repo is archived on GitHub." },
+		},
+		{
+			name: "activityCheckedAt",
+			type: "text",
+			admin: {
+				description:
+					"When the lane last read the repo's activity, ISO. Empty = never read.",
 			},
 		},
 		{ name: "firstSeenAt", type: "text", required: true },

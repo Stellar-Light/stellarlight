@@ -284,28 +284,71 @@ server.registerTool(
 	},
 );
 
+// The filters search_hackathon_builds and analyze_hackathon_submissions share,
+// the same list the API parses once (src/lib/hackathon-build-query.ts).
+const BUILD_FILTER_INPUTS = {
+	q: z
+		.string()
+		.optional()
+		.describe("Topic: matches build names, summaries and write-ups."),
+	mode: z
+		.enum(["keyword", "meaning", "hybrid"])
+		.optional()
+		.describe(
+			"How q matches: keyword (default), meaning (vector similarity) or hybrid.",
+		),
+	winnersOnly: z.boolean().optional().describe("Only prize-winning builds."),
+	hackathon: z
+		.string()
+		.optional()
+		.describe("Only these events: one slug or up to 10, comma-separated."),
+	track: z
+		.string()
+		.optional()
+		.describe("Filter by hackathon track (substring match)."),
+	category: z
+		.string()
+		.optional()
+		.describe(
+			"Only builds sorted into this directory project type (Payments, DEX, AI...).",
+		),
+	package: z
+		.string()
+		.optional()
+		.describe(
+			"Only builds whose repo declares this Stellar package (passkey-kit, soroban-sdk).",
+		),
+};
+
+function buildFilterParams(f: {
+	q?: string;
+	mode?: string;
+	winnersOnly?: boolean;
+	hackathon?: string;
+	track?: string;
+	category?: string;
+	package?: string;
+}): URLSearchParams {
+	const params = new URLSearchParams();
+	if (f.q) params.set("q", f.q);
+	if (f.mode) params.set("mode", f.mode);
+	if (f.winnersOnly) params.set("winnersOnly", "1");
+	if (f.hackathon) params.set("hackathon", f.hackathon);
+	if (f.track) params.set("track", f.track);
+	if (f.category) params.set("category", f.category);
+	if (f.package) params.set("package", f.package);
+	return params;
+}
+
 // 2b. search_hackathon_builds — prior-art over hackathon prototypes
 server.registerTool(
 	"search_hackathon_builds",
 	{
 		title: "Search what was built at Stellar hackathons",
 		description:
-			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — most never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly` restricts to prize winners; `track` filters by track. An empty result is a real whitespace signal. For SHIPPED products in the directory → use search_projects.",
+			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
 		inputSchema: {
-			q: z
-				.string()
-				.optional()
-				.describe(
-					"Topic to search build names + descriptions (prior-art lookup).",
-				),
-			winnersOnly: z
-				.boolean()
-				.optional()
-				.describe("Only prize-winning builds."),
-			track: z
-				.string()
-				.optional()
-				.describe("Filter by hackathon track (substring match)."),
+			...BUILD_FILTER_INPUTS,
 			limit: z
 				.number()
 				.int()
@@ -315,17 +358,71 @@ server.registerTool(
 				.describe("Max builds (default 20)."),
 		},
 	},
-	async ({ q, winnersOnly, track, limit }) => {
-		const params = new URLSearchParams();
-		if (q) params.set("q", q);
-		if (winnersOnly) params.set("winnersOnly", "1");
-		if (track) params.set("track", track);
+	async ({ limit, ...filters }) => {
+		const params = buildFilterParams(filters);
 		if (limit !== undefined) params.set("limit", String(limit));
 		const qs = params.toString();
 		const result = await callScout(
 			`/api/hackathons/builds${qs ? `?${qs}` : ""}`,
 		);
 		return asToolResult(result);
+	},
+);
+
+// 2c. analyze_hackathon_submissions: counts, trends and winner comparisons
+server.registerTool(
+	"analyze_hackathon_submissions",
+	{
+		title: "Trends and counts across Stellar hackathon submissions",
+		description:
+			"Counts any facet of every stored Stellar hackathon submission: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits on the submitted repo 90+ days after the event), project (became a directory project), placement, track, event or year. `by: event` or `year` makes it a trend (oldest first); every answer adds winners against everyone else, with lift. Takes the same filters as search_hackathon_builds. Shares are over known values; unknown builds are counted apart. Examples: payments share event by event = facet category, value Payments, by event; which SDKs winners use = facet library, winnersOnly.",
+		inputSchema: {
+			facet: z
+				.enum([
+					"category",
+					"library",
+					"package",
+					"activity",
+					"project",
+					"placement",
+					"track",
+					"event",
+					"year",
+				])
+				.optional()
+				.describe("What to count (default category)."),
+			by: z
+				.enum(["event", "year", "placement", "track"])
+				.optional()
+				.describe(
+					"Split the counts per event or year (a trend), placement or track.",
+				),
+			value: z
+				.string()
+				.optional()
+				.describe(
+					"Report only this value (e.g. Payments, soroban-sdk), as a row even at zero; with by=event, the trend of one value.",
+				),
+			top: z
+				.number()
+				.int()
+				.min(1)
+				.max(30)
+				.optional()
+				.describe("Most values per set (default 10, or 5 with by)."),
+			...BUILD_FILTER_INPUTS,
+		},
+	},
+	async ({ facet, by, value, top, ...filters }) => {
+		const params = buildFilterParams(filters);
+		if (facet) params.set("facet", facet);
+		if (by) params.set("by", by);
+		if (value) params.set("value", value);
+		if (top !== undefined) params.set("top", String(top));
+		const qs = params.toString();
+		return asToolResult(
+			await callScout(`/api/hackathons/analyze${qs ? `?${qs}` : ""}`),
+		);
 	},
 );
 

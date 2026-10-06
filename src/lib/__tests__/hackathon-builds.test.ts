@@ -452,24 +452,6 @@ describe("what a build's repo declares", () => {
 		expect(d.stackReadAt).toBeNull();
 		expect(d.repoMissingAt).toBe("2026-10-05T00:00:00.000Z");
 	});
-
-	it("counts packages over the builds whose repo was read", async () => {
-		const { stackCounts } = await import("@/lib/hackathon-builds");
-		const withStack = (b: IndexedBuild, stack?: string[]) =>
-			stack ? { ...b, stack } : b;
-		const c = stackCounts([
-			withStack(build("A", "", true), ["soroban-sdk", "@stellar/stellar-sdk"]),
-			withStack(build("B", "", false), ["@stellar/stellar-sdk"]),
-			withStack(build("C", "", true), []),
-			build("D", "", true), // repo not read: unknown, not counted
-		]);
-		expect(c.buildsMatched).toBe(4);
-		expect(c.buildsRead).toBe(3);
-		expect(c.packages).toEqual([
-			{ name: "@stellar/stellar-sdk", builds: 2, winners: 1 },
-			{ name: "soroban-sdk", builds: 1, winners: 1 },
-		]);
-	});
 });
 
 describe("package filter", () => {
@@ -481,5 +463,110 @@ describe("package filter", () => {
 		];
 		const hit = searchHackathonBuilds(rows, "", { package: "Passkey-Kit" });
 		expect(hit.map((s) => s.b.name)).toEqual(["Passkey Wallet"]);
+	});
+});
+
+describe("links by website", () => {
+	it("compares hosts without www. or app., and never a shared platform", async () => {
+		const { siteKeyOf } = await import("@/lib/hackathon-build-links");
+		expect(siteKeyOf("https://www.tollpay.xyz/pricing")).toBe("tollpay.xyz");
+		expect(siteKeyOf("https://app.tollpay.xyz")).toBe("tollpay.xyz");
+		expect(siteKeyOf("https://rendergate.vercel.app/")).toBe(
+			"rendergate.vercel.app",
+		);
+		expect(siteKeyOf("https://github.com/rajkaria/toll")).toBeNull();
+		expect(siteKeyOf("https://someone.github.io/demo")).toBeNull();
+		expect(siteKeyOf("https://youtu.be/abc")).toBeNull();
+		expect(siteKeyOf("not a url")).toBeNull();
+		expect(siteKeyOf("ftp://tollpay.xyz")).toBeNull();
+	});
+
+	it("links a site one project claims, and none that two projects share", async () => {
+		const { indexProjectSites } = await import("@/lib/hackathon-build-links");
+		const sites = indexProjectSites([
+			{
+				slug: "tollpay",
+				name: "TollPay",
+				links: { website: "https://tollpay.xyz" },
+			},
+			{ slug: "a", name: "A", links: { website: "https://shared.io" } },
+			{ slug: "b", name: "B", links: { website: "https://www.shared.io" } },
+			{
+				slug: "draft",
+				name: "Draft",
+				status: "Draft",
+				links: { website: "https://draft.dev" },
+			},
+		]);
+		expect(sites.get("tollpay.xyz")).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+		});
+		expect(sites.get("shared.io")).toBeNull();
+		expect(sites.has("draft.dev")).toBe(false);
+	});
+
+	it("serves the basis a link was made by", () => {
+		const b = indexedFromStored({
+			id: "x",
+			buildId: "dorahacks-buidl-1",
+			name: "X",
+			hackathonSlug: "e",
+			hackathonTitle: "E",
+			url: "https://dorahacks.io/buidl/1",
+			linkCheckedAt: "2026-10-05T00:00:00.000Z",
+			projectSlug: "tollpay",
+			projectName: "TollPay",
+			projectLinkBasis: "website",
+			firstSeenAt: "2026-10-05T00:00:00.000Z",
+			lastSeenAt: "2026-10-05T00:00:00.000Z",
+			updatedAt: "2026-10-05T00:00:00.000Z",
+			createdAt: "2026-10-05T00:00:00.000Z",
+		});
+		expect(b.project).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+			basis: "website",
+		});
+	});
+});
+
+describe("project facts on a link", () => {
+	it("carries the project's status and funding when read, and leaves them out when not", () => {
+		const row = {
+			id: "x",
+			buildId: "dorahacks-buidl-42585",
+			name: "TollPay",
+			hackathonSlug: "e",
+			hackathonTitle: "E",
+			url: "https://dorahacks.io/buidl/42585",
+			linkCheckedAt: "2026-10-05T00:00:00.000Z",
+			projectSlug: "tollpay",
+			projectName: "TollPay",
+			projectLinkBasis: "repo",
+			firstSeenAt: "2026-10-05T00:00:00.000Z",
+			lastSeenAt: "2026-10-05T00:00:00.000Z",
+			updatedAt: "2026-10-05T00:00:00.000Z",
+			createdAt: "2026-10-05T00:00:00.000Z",
+		};
+		expect(
+			indexedFromStored(row, {
+				status: "Live",
+				scfAwarded: false,
+				factsReadAt: "2026-10-05T17:00:00.000Z",
+			}).project,
+		).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+			basis: "repo",
+			status: "Live",
+			scfAwarded: false,
+			factsReadAt: "2026-10-05T17:00:00.000Z",
+		});
+		expect(indexedFromStored(row).project).toEqual({
+			slug: "tollpay",
+			name: "TollPay",
+			basis: "repo",
+		});
 	});
 });

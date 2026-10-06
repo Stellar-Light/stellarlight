@@ -17,7 +17,12 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
-import { BUILD_SEARCH_MODES } from "./hackathon-build-links";
+import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
+import {
+	BUILD_MATCH_MODES,
+	BUILD_SEARCH_MODES,
+	LINK_BASES,
+} from "./hackathon-build-links";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
@@ -168,12 +173,157 @@ const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"The directory project that lists this build's exact GitHub repo as its own, or null when none does. A shared GitHub owner never counts: the team behind a build can run other products. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 	properties: {
 		slug: { type: "string" },
 		name: { type: "string" },
+		basis: {
+			type: "string",
+			enum: [...LINK_BASES],
+			description:
+				"repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).",
+		},
+		status: {
+			type: "string",
+			nullable: true,
+			enum: [...PROJECT_STATUSES],
+			description:
+				"The project's directory status today. Absent when it could not be read (unknown).",
+		},
+		scfAwarded: {
+			type: "boolean",
+			description:
+				"Whether SCF funded the project. Absent when it could not be read (unknown).",
+		},
+		factsReadAt: {
+			type: "string",
+			format: "date-time",
+			description:
+				"When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.",
+		},
 	},
 	required: ["slug", "name"],
+};
+
+/** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
+ * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
+const buildFilterParams = (qDescription: string) => [
+	{
+		name: "q",
+		in: "query",
+		required: false,
+		description: qDescription,
+		schema: { type: "string" },
+	},
+	{
+		name: "mode",
+		in: "query",
+		required: false,
+		description:
+			"How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+		schema: {
+			type: "string",
+			enum: [...BUILD_SEARCH_MODES],
+			default: "keyword",
+		},
+	},
+	{
+		name: "winnersOnly",
+		in: "query",
+		required: false,
+		description:
+			"Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
+		schema: {
+			type: "string",
+			enum: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
+		},
+	},
+	{
+		name: "hackathon",
+		in: "query",
+		required: false,
+		description:
+			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+		schema: { type: "string" },
+	},
+	{
+		name: "track",
+		in: "query",
+		required: false,
+		description: "Filter by hackathon track (substring match).",
+		schema: { type: "string" },
+	},
+	{
+		name: "category",
+		in: "query",
+		required: false,
+		description:
+			"Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor.",
+		schema: { type: "string", enum: [...PROJECT_TYPES] },
+	},
+	{
+		name: "package",
+		in: "query",
+		required: false,
+		description:
+			"Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it.",
+		schema: { type: "string" },
+	},
+];
+
+/** The filters as applied, echoed in meta. */
+const BUILD_FILTERS_ECHO_SCHEMA = {
+	type: "object",
+	description:
+		"The filters as applied: an echo, so a caller can see what was honoured.",
+	properties: {
+		q: { type: "string", nullable: true },
+		winnersOnly: { type: "boolean" },
+		hackathon: {
+			type: "array",
+			nullable: true,
+			items: { type: "string" },
+		},
+		track: { type: "string", nullable: true },
+		category: { type: "string", nullable: true },
+		package: { type: "string", nullable: true },
+		limit: { type: "integer" },
+		mode: { type: "string", enum: [...BUILD_SEARCH_MODES] },
+	},
+};
+
+/** One facet value's count, for analyzeHackathonSubmissions. */
+const FACET_VALUE_SCHEMA = {
+	type: "object",
+	properties: {
+		value: { type: "string" },
+		builds: { type: "integer" },
+		winners: {
+			type: "integer",
+			description: "Of `builds`, how many placed.",
+		},
+		share: {
+			type: "number",
+			nullable: true,
+			description:
+				"builds / known (0 to 1); null when no build's value is known.",
+		},
+	},
+};
+
+/** builds / known / unknown and the values: a facet counted over one set. */
+const FACET_COUNT_PROPS = {
+	builds: { type: "integer", description: "Builds in the set." },
+	known: {
+		type: "integer",
+		description: "Builds whose value is known: every share's denominator.",
+	},
+	unknown: {
+		type: "integer",
+		description:
+			"Builds whose value is unknown (meta.facet.unknownMeans): never counted as none.",
+	},
+	values: { type: "array", items: FACET_VALUE_SCHEMA },
 };
 
 /** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
@@ -2691,6 +2841,7 @@ export const spec: OpenAPISpec = {
 					],
 					useWhen: [
 						"who won [event] / who won its soroban track",
+						"who won the most recent or latest Stellar hackathon",
 						"what projects were submitted to [event]",
 						"what tracks did [event] have and what did they pay",
 						"how many [event] submissions are still being built",
@@ -2743,7 +2894,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Compare 2–5 hackathons side-by-side",
 				description:
-					"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, prize-per-winner, and cohort DURABILITY — stillActiveCount/liveCount/activeRatePct, how many of the event's projects are still alive today; curated events only) plus a `deltas` block flagging the spreads incl. the most durable cohort. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via getHackathons. Not for ecosystem-wide totals across ALL events → use analyzeEcosystem.",
+					"Side-by-side comparison of 2–5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.",
 				"x-routing": {
 					purpose:
 						"Compare 2–5 named hackathons on prizes, turnout, and outcomes.",
@@ -2764,6 +2915,8 @@ export const spec: OpenAPISpec = {
 						"survival rate",
 						"which projects survived",
 						"most durable cohort",
+						"what changed between",
+						"category shift",
 					],
 					useWhen: [
 						"which Stellar hackathon should I enter",
@@ -2780,6 +2933,7 @@ export const spec: OpenAPISpec = {
 						"Was event A bigger than event B?",
 						"Compare the last two SDF hackathons on prize money",
 						"Which hackathon's projects are still active today?",
+						"How did the projects change from one Stellar hackathon to the next, and what did the winners build?",
 					],
 				},
 				parameters: [
@@ -2845,6 +2999,44 @@ export const spec: OpenAPISpec = {
 															"null when the source publishes none: unknown, never zero.",
 													},
 													source: { type: "string" },
+													hackersCount: { type: "integer", nullable: true },
+													submissionCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions.",
+													},
+													winnerCount: { type: "integer", nullable: true },
+													prizePerWinnerUSD: { type: "number", nullable: true },
+													stillActiveCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events only: the event's directory projects still active today.",
+													},
+													liveCount: { type: "integer", nullable: true },
+													activeRatePct: { type: "number", nullable: true },
+													profile: {
+														type: "object",
+														description:
+															"What the event's stored submissions were about and built with. Absent when none are stored. Shares are over known values, as in analyzeHackathonSubmissions.",
+														properties: {
+															submissions: { type: "integer" },
+															winners: { type: "integer" },
+															category: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+															package: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+															activity: {
+																type: "object",
+																properties: FACET_COUNT_PROPS,
+															},
+														},
+													},
 												},
 											},
 										},
@@ -2853,6 +3045,32 @@ export const spec: OpenAPISpec = {
 											description: "What differs across the compared events.",
 											properties: {
 												notes: { type: "array", items: { type: "string" } },
+												facetShifts: {
+													type: "array",
+													description:
+														"Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set.",
+													items: {
+														type: "object",
+														properties: {
+															facet: {
+																type: "string",
+																enum: [...SHIFT_FACETS],
+															},
+															value: { type: "string" },
+															shares: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		slug: { type: "string" },
+																		share: { type: "number", nullable: true },
+																	},
+																},
+															},
+															spread: { type: "number" },
+														},
+													},
+												},
 											},
 										},
 									},
@@ -2891,9 +3109,6 @@ export const spec: OpenAPISpec = {
 						"x402 builds",
 						"search by meaning",
 						"similar hackathon projects",
-						"tech stack",
-						"sdk usage",
-						"libraries used",
 					],
 					useWhen: [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -2911,57 +3126,13 @@ export const spec: OpenAPISpec = {
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
 						"Which x402 projects won prizes at Stellar hackathons?",
-						"Which SDKs and libraries do Stellar hackathon winners use most?",
 						"Which Stellar hackathon projects were built with passkey-kit?",
 					],
 				},
 				parameters: [
-					{
-						name: "q",
-						in: "query",
-						required: false,
-						description:
-							"Topic to search build names + descriptions (prior-art lookup).",
-						schema: { type: "string" },
-					},
-					{
-						name: "winnersOnly",
-						in: "query",
-						required: false,
-						description:
-							"Set to 1 to return only prize-winning builds. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms — never silently ignored.",
-						schema: {
-							type: "string",
-							enum: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
-						},
-					},
-					{
-						name: "track",
-						in: "query",
-						required: false,
-						description: "Filter by hackathon track (substring match).",
-						schema: { type: "string" },
-					},
-					{
-						name: "package",
-						in: "query",
-						required: false,
-						description:
-							"Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the list is a floor, not everyone who used it; meta.stack then shows what else those builds use.",
-						schema: { type: "string" },
-					},
-					{
-						name: "mode",
-						in: "query",
-						required: false,
-						description:
-							"keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
-						schema: {
-							type: "string",
-							enum: [...BUILD_SEARCH_MODES],
-							default: "keyword",
-						},
-					},
+					...buildFilterParams(
+						"Topic to search build names + descriptions (prior-art lookup).",
+					),
 					{
 						name: "limit",
 						in: "query",
@@ -2985,7 +3156,7 @@ export const spec: OpenAPISpec = {
 											properties: {
 												matchMode: {
 													type: "string",
-													enum: ["all", "filtered", "vector", "hybrid"],
+													enum: [...BUILD_MATCH_MODES],
 													description:
 														"How rows matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both blended; all = no text query (structured filters only).",
 												},
@@ -3018,22 +3189,7 @@ export const spec: OpenAPISpec = {
 													description:
 														"Present only when something limited this answer, e.g. search by meaning could not run.",
 												},
-												filters: {
-													type: "object",
-													description:
-														"The filters as applied — an echo, so a caller can see what was honoured.",
-													properties: {
-														q: { type: "string", nullable: true },
-														winnersOnly: { type: "boolean" },
-														track: { type: "string", nullable: true },
-														package: { type: "string", nullable: true },
-														limit: { type: "integer" },
-														mode: {
-															type: "string",
-															enum: [...BUILD_SEARCH_MODES],
-														},
-													},
-												},
+												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {
 													type: "object",
 													description:
@@ -3129,6 +3285,12 @@ export const spec: OpenAPISpec = {
 														items: { type: "string" },
 														description:
 															"Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none.",
+													},
+													categories: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission.",
 													},
 													matchedTerms: {
 														type: "array",
@@ -3278,6 +3440,66 @@ export const spec: OpenAPISpec = {
 													description:
 														"When the repo last answered not found (deleted, renamed away or private); null = it has not.",
 												},
+												categories: {
+													type: "array",
+													description:
+														"Directory project types this submission was sorted into, best first. Absent = not categorized yet.",
+													items: {
+														type: "object",
+														properties: {
+															type: {
+																type: "string",
+																enum: [...PROJECT_TYPES],
+															},
+															score: {
+																type: "number",
+																description:
+																	"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
+															},
+															precision: {
+																type: "number",
+																description:
+																	"The type's leave-one-out precision on the hand-typed directory at its cut. Not dated per item: categoriesAt dates the whole list.",
+															},
+															recall: {
+																type: "number",
+																description:
+																	"The type's leave-one-out recall there: a low recall means counts of this type undercount. Not dated per item: categoriesAt dates the whole list.",
+															},
+														},
+													},
+												},
+												categoriesAt: {
+													type: "string",
+													nullable: true,
+													description:
+														"When it was categorized; null = not yet.",
+												},
+												categoriesMethod: {
+													type: "string",
+													nullable: true,
+													description:
+														"How the categories were assigned, with the method's measured precision and recall on the hand-typed directory.",
+												},
+												activity: {
+													type: "object",
+													description:
+														"The repo's activity. Absent = not read (no repo link, or not read yet).",
+													properties: {
+														lastCommitAt: {
+															type: "string",
+															nullable: true,
+															description: "Last commit on the default branch.",
+														},
+														archived: { type: "boolean" },
+													},
+												},
+												activityCheckedAt: {
+													type: "string",
+													nullable: true,
+													description:
+														"When we last read the repo's activity; null = never.",
+												},
 												firstSeenAt: { type: "string", format: "date-time" },
 												lastSeenAt: {
 													type: "string",
@@ -3307,6 +3529,261 @@ export const spec: OpenAPISpec = {
 					},
 					"503": {
 						description: "The store did not answer; retry after Retry-After.",
+					},
+				},
+			},
+		},
+		"/api/hackathons/analyze": {
+			get: {
+				operationId: "analyzeHackathonSubmissions",
+				tags: ["Hackathons"],
+				summary:
+					"Trends and counts across Stellar hackathon submissions, with lift",
+				description:
+					"Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+				"x-routing": {
+					purpose:
+						"Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
+					keywords: [
+						"hackathon trends",
+						"trend",
+						"across hackathons",
+						"event by event",
+						"share of submissions",
+						"percentage",
+						"breakdown",
+						"distribution",
+						"categories",
+						"category share",
+						"which sdks",
+						"tech stack",
+						"libraries used",
+						"winners vs",
+						"what winners did differently",
+						"lift",
+						"kept building",
+						"after the hackathon",
+						"cohort",
+					],
+					useWhen: [
+						"what share of hackathon submissions are <category>, event by event",
+						"how did <topic> change across Stellar hackathons",
+						"which SDKs or packages do hackathon winners use",
+						"what did the winners do differently",
+						"how many hackathon projects kept building after the event",
+						"what happened to <topic> hackathon projects afterwards: kept building, went quiet, became a directory project",
+					],
+					notFor: [
+						"finding the builds themselves -> searchHackathonBuilds",
+						"one submission in full -> getHackathonSubmission",
+						"event dates, prize pools and registrations -> getHackathons / compareHackathons",
+					],
+					exampleQuestions: [
+						"What share of Stellar hackathon submissions are payments projects, event by event?",
+						"How did AI agent projects change across Stellar hackathons?",
+						"Which SDKs and libraries do Stellar hackathon winners use most?",
+						"What did winning Stellar hackathon projects do differently from the rest?",
+						"How many Stellar hackathon projects kept building after the event?",
+					],
+				},
+				parameters: [
+					{
+						name: "facet",
+						in: "query",
+						required: false,
+						description:
+							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year.",
+						schema: {
+							type: "string",
+							enum: [...FACET_IDS],
+							default: "category",
+						},
+					},
+					{
+						name: "by",
+						in: "query",
+						required: false,
+						description:
+							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q.",
+						schema: { type: "string", enum: [...GROUP_FACETS] },
+					},
+					{
+						name: "value",
+						in: "query",
+						required: false,
+						description:
+							"Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value.",
+						schema: { type: "string" },
+					},
+					{
+						name: "top",
+						in: "query",
+						required: false,
+						description:
+							"Most values to report per set (default 10, or 5 with by; max 30).",
+						schema: { type: "integer", default: 10, maximum: 30 },
+					},
+					...buildFilterParams(
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+					),
+				],
+				responses: {
+					"200": {
+						description: "The facet counted over the filtered submissions.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: [...BUILD_MATCH_MODES],
+													description:
+														"How submissions matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both; all = no q.",
+												},
+												matchModeLabel: { type: "string" },
+												mode: {
+													type: "object",
+													properties: {
+														requested: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+														served: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+													},
+												},
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+												},
+												source: { type: "string" },
+												upstream: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: BUILD_FILTERS_ECHO_SCHEMA,
+												facet: {
+													type: "object",
+													properties: {
+														id: { type: "string", enum: [...FACET_IDS] },
+														counts: {
+															type: "string",
+															description: "What one value counts.",
+														},
+														unknownMeans: {
+															type: "string",
+															nullable: true,
+															description:
+																"Why a build's value can be unknown; null when it never is.",
+														},
+														measured: {
+															type: "array",
+															description:
+																"facet=category only: each reported type's precision and recall, measured leave-one-out on the hand-typed directory at its cut. A type with low recall undercounts; balanced precision and recall track its true share.",
+															items: {
+																type: "object",
+																properties: {
+																	type: { type: "string" },
+																	precision: { type: "number" },
+																	recall: { type: "number" },
+																},
+															},
+														},
+													},
+												},
+												by: {
+													type: "string",
+													nullable: true,
+													enum: [...GROUP_FACETS],
+												},
+												value: { type: "string", nullable: true },
+												counts: {
+													type: "object",
+													properties: {
+														indexedBuilds: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										total: {
+											type: "object",
+											description: "The facet over every matched submission.",
+											properties: {
+												field: {
+													type: "integer",
+													description:
+														"Builds passing every filter except q; builds / field is the share that matched q.",
+												},
+												...FACET_COUNT_PROPS,
+											},
+										},
+										groups: {
+											type: "array",
+											description:
+												"Present with `by`: the facet within each group. Events and years run oldest first; a group where nothing matched reports zero.",
+											items: {
+												type: "object",
+												properties: {
+													value: { type: "string" },
+													title: {
+														type: "string",
+														description: "by=event: the event's title.",
+													},
+													endedAt: { type: "string", nullable: true },
+													field: {
+														type: "integer",
+														description:
+															"Builds in this group before q: the group's whole field.",
+													},
+													...FACET_COUNT_PROPS,
+												},
+											},
+										},
+										winnersVsOthers: {
+											type: "object",
+											description:
+												"Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement.",
+											properties: {
+												winnersKnown: { type: "integer" },
+												othersKnown: { type: "integer" },
+												values: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															winners: { type: "integer" },
+															others: { type: "integer" },
+															winnersShare: { type: "number", nullable: true },
+															othersShare: { type: "number", nullable: true },
+															lift: {
+																type: "number",
+																nullable: true,
+																description:
+																	"winnersShare / othersShare: above 1 = more common among winners. null when either share is unknown or zero. Small counts are noise.",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones.",
+					},
+					"503": {
+						description:
+							"The index could not be built; retry after Retry-After.",
 					},
 				},
 			},

@@ -374,3 +374,48 @@ describe("research sources spread the code's list (spec 1.9.60)", () => {
 		expect(by).toContain("bySource");
 	});
 });
+
+describe("hackathon submission vocabularies are their constants (spec 1.9.69)", () => {
+	it("facets, groupings, match modes and categories spread from code", async () => {
+		const { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } = await import(
+			"../hackathon-analytics"
+		);
+		const shift =
+			S.paths["/api/hackathons/compare"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.deltas.properties.facetShifts.items.properties.facet;
+		expect(sorted(shift.enum)).toEqual(sorted(SHIFT_FACETS));
+		const { BUILD_MATCH_MODES, LINK_BASES } = await import(
+			"../hackathon-build-links"
+		);
+		const row =
+			S.paths["/api/hackathons/builds"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.builds.items.properties;
+		expect(sorted(row.project.properties.basis.enum)).toEqual(
+			sorted(LINK_BASES),
+		);
+		const op = S.paths["/api/hackathons/analyze"].get;
+		const param = (name: string) =>
+			(op.parameters as Param[]).find(
+				(x) => (x as { name?: string }).name === name,
+			);
+		expect(sorted(param("facet")?.schema.enum ?? [])).toEqual(
+			sorted(FACET_IDS),
+		);
+		expect(sorted(param("by")?.schema.enum ?? [])).toEqual(
+			sorted(GROUP_FACETS),
+		);
+		expect(sorted(param("category")?.schema.enum ?? [])).toEqual(
+			sorted(PROJECT_TYPES),
+		);
+		for (const path of ["/api/hackathons/analyze", "/api/hackathons/builds"]) {
+			const meta =
+				S.paths[path].get.responses["200"].content["application/json"].schema
+					.properties.meta;
+			expect(sorted(meta.properties.matchMode.enum)).toEqual(
+				sorted(BUILD_MATCH_MODES),
+			);
+		}
+	});
+});

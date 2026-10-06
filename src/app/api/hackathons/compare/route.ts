@@ -19,6 +19,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
+	type Distribution,
+	distribution,
+	type FacetId,
+	type FacetShift,
+	facetShifts,
+} from "@/lib/hackathon-analytics";
+import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
+import {
 	fetchAllDoraHacksHackathons,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
@@ -51,6 +62,48 @@ interface HackathonSnapshot {
 	/** stillActiveCount / submissionCount as a percent — the survival rate that
 	 *  makes "2× the submissions but half as durable" answerable. */
 	activeRatePct?: number;
+	/** What the event's stored submissions were about and built with, counted
+	 * by the same engine as analyzeHackathonSubmissions. Absent when the store
+	 * holds none of the event's submissions. */
+	profile?: EventProfile;
+}
+
+/** Facets compared across events. */
+const PROFILE_FACETS = [
+	"category",
+	"package",
+	"activity",
+] as const satisfies readonly FacetId[];
+
+type EventProfile = { submissions: number; winners: number } & Record<
+	(typeof PROFILE_FACETS)[number],
+	Distribution
+>;
+
+function profileOf(builds: IndexedBuild[]): EventProfile {
+	return {
+		submissions: builds.length,
+		winners: builds.filter((b) => b.isWinner).length,
+		category: distribution(builds, "category", { top: 5 }),
+		package: distribution(builds, "package", { top: 5 }),
+		activity: distribution(builds, "activity", { top: 4 }),
+	};
+}
+
+/** Fill submissions, winners and the profile from the stored index; curated
+ * counts are kept where the event already has them. */
+function withStored(
+	s: HackathonSnapshot,
+	builds: IndexedBuild[],
+): HackathonSnapshot {
+	if (!builds.length) return s;
+	const profile = profileOf(builds);
+	return {
+		...s,
+		submissionCount: s.submissionCount ?? profile.submissions,
+		winnerCount: s.winnerCount ?? profile.winners,
+		profile,
+	};
 }
 
 async function loadOne(slug: string): Promise<HackathonSnapshot> {
@@ -174,6 +227,8 @@ interface ComparisonDeltas {
 	/** Cohort durability spread — which event's projects survived best (highest
 	 *  still-active rate). Curated hackathons only. */
 	activeRatePct?: { highest: string; lowest: string };
+	/** Category and package shares that moved most between the events. */
+	facetShifts?: FacetShift[];
 	notes: string[];
 }
 
@@ -274,8 +329,43 @@ async function compare(slugs: string[], req: NextRequest) {
 		);
 	}
 
-	const snapshots = await Promise.all(slugs.map(loadOne));
+	// The stored submissions give every event, DoraHacks ones included, its
+	// submission and winner counts and a profile; a failed index read keeps
+	// the comparison and says so.
+	const [loaded, index] = await Promise.all([
+		Promise.all(slugs.map(loadOne)),
+		getHackathonBuildsIndex().catch(() => null),
+	]);
+	const byEvent = new Map(
+		slugs.map((slug) => [
+			slug,
+			index?.filter((b) => b.hackathon.slug === slug) ?? [],
+		]),
+	);
+	const snapshots = loaded.map((s) => withStored(s, byEvent.get(s.slug) ?? []));
 	const deltas = computeDeltas(snapshots);
+	const shifts = facetShifts(byEvent);
+	if (shifts.length) {
+		deltas.facetShifts = shifts;
+		const pct = (n: number | null) =>
+			n == null ? "?" : `${Math.round(n * 100)}%`;
+		for (const s of shifts.slice(0, 3)) {
+			const known = s.shares.filter((x) => x.share != null);
+			const hi = known.reduce((a, b) =>
+				(b.share ?? 0) > (a.share ?? 0) ? b : a,
+			);
+			const lo = known.reduce((a, b) =>
+				(b.share ?? 0) < (a.share ?? 0) ? b : a,
+			);
+			deltas.notes.push(
+				`${s.value} (${s.facet}): ${hi.slug} ${pct(hi.share)} vs ${lo.slug} ${pct(lo.share)} of submissions where known`,
+			);
+		}
+	}
+	if (!index)
+		deltas.notes.push(
+			"submission profiles unavailable: the stored submissions could not be read; counts above come from the event listings only",
+		);
 
 	logApiHit({
 		req,

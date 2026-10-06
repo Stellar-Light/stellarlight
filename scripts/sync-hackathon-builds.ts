@@ -21,6 +21,12 @@
  *   5. the stack: the Stellar packages each submission's repo declares in its
  *      package.json and Cargo.toml files, read once a month per repo, winners
  *      and the newest events first, at most STACK_MAX_REPOS repos a run
+ *   6. repo activity: the last commit on each repo's default branch and
+ *      whether it is archived, every run (GraphQL, 50 repos a call)
+ *   7. categories: the directory project types of each submission's nearest
+ *      directory projects (src/lib/hackathon-build-categories.ts), written
+ *      only when the method's leave-one-out precision on the directory's own
+ *      hand-set types clears the floor
  *
  * The rules the stablecoin and RWA lanes earned:
  *   - a row is never deleted;
@@ -34,14 +40,26 @@ import { createRequire } from "node:module";
 import { getPayload } from "payload";
 import { embedBatch } from "../src/lib/embed";
 import {
+	assign as assignTypes,
+	bestCalibration,
+	type Labeled,
+	MIN_PRECISION,
+	MIN_SUPPORT,
+	neighbours,
+	typeScores,
+	unit,
+} from "../src/lib/hackathon-build-categories";
+import {
 	buildEmbeddingText,
 	embeddingTextHash,
 } from "../src/lib/hackathon-build-embedding";
 import {
 	indexProjectRepos,
+	indexProjectSites,
 	type LinkedProject,
 	type ProjectRepoRow,
 	repoFullNameOf,
+	siteKeyOf,
 } from "../src/lib/hackathon-build-links";
 import {
 	type DoraHacksSubmission,
@@ -56,6 +74,7 @@ import configPromise from "../src/payload.config";
 import type { HackathonBuild } from "../src/payload-types";
 import {
 	createGh,
+	fetchRepoActivity,
 	fetchRepoStack,
 	RateLimitError,
 } from "./scan/fetch-repo-code";
@@ -159,8 +178,11 @@ const FIELDS = [
 	"repoFullName",
 	"projectSlug",
 	"projectName",
+	"projectLinkBasis",
 	"hiddenUpstream",
 	"stack",
+	"categories",
+	"repoArchived",
 ] as const;
 
 async function pool<T>(items: T[], n: number, fn: (t: T) => Promise<void>) {
@@ -279,6 +301,7 @@ async function main() {
 
 	// ── 3. project links ─────────────────────────────────────────────────
 	let links: Map<string, LinkedProject | null> | null = null;
+	let sites: Map<string, LinkedProject | null> | null = null;
 	try {
 		const projects = await payload.find({
 			collection: "projects",
@@ -294,6 +317,7 @@ async function main() {
 			},
 		});
 		links = indexProjectRepos(projects.docs as unknown as ProjectRepoRow[]);
+		sites = indexProjectSites(projects.docs as unknown as ProjectRepoRow[]);
 		console.log(
 			`\n${projects.docs.length} directory projects read; ${links.size} repos listed by a project`,
 		);
@@ -307,8 +331,14 @@ async function main() {
 		for (const r of rows.values()) {
 			const p = r.repoFullName ? links.get(r.repoFullName) : undefined;
 			if (p === null) ambiguous++;
-			r.projectSlug = p?.slug ?? null;
-			r.projectName = p?.name ?? null;
+			// No project lists the repo: the demo site may still be a project's
+			// own website. An ambiguous repo stays unlinked either way.
+			const key = siteKeyOf(r.demoUrl);
+			const s = p === undefined && key ? sites?.get(key) : undefined;
+			const linked = p ?? s ?? null;
+			r.projectSlug = linked?.slug ?? null;
+			r.projectName = linked?.name ?? null;
+			r.projectLinkBasis = p ? "repo" : s ? "website" : null;
 			r.linkCheckedAt = now;
 		}
 	}
@@ -441,6 +471,150 @@ async function main() {
 		);
 	}
 
+	// ── 6. repo activity ─────────────────────────────────────────────────
+	// Cheap enough to refresh every run. A repo GitHub reports missing is left
+	// to the stack step, the one writer of repoMissingAt.
+	const activityRepos = [
+		...new Set(
+			[...rows.values()]
+				.map((r) => r.repoFullName)
+				.filter((x): x is string => !!x),
+		),
+	];
+	let activityRead = 0;
+	if (!ghToken) {
+		console.log(
+			`\nrepo activity: ${activityRepos.length} repos, not read (GITHUB_TOKEN is not set)`,
+		);
+	} else {
+		const activity = await fetchRepoActivity(ghToken, activityRepos);
+		for (const r of rows.values()) {
+			const a = r.repoFullName ? activity.get(r.repoFullName) : undefined;
+			if (a?.state !== "read") continue;
+			r.repoLastCommitAt = a.lastCommitAt;
+			r.repoArchived = a.archived;
+			r.activityCheckedAt = now;
+		}
+		activityRead = [...activity.values()].filter(
+			(a) => a.state === "read",
+		).length;
+		const missing = activity.size - activityRead;
+		console.log(
+			`\nrepo activity: ${activityRepos.length} repos, ${activityRead} read, ${missing} not found, ${activityRepos.length - activity.size} could not be read (stored values kept)`,
+		);
+	}
+
+	// ── 7. categories ────────────────────────────────────────────────────
+	// Measured before it is trusted: every typed directory project is sorted
+	// from its neighbours without itself, over the k/cut grid, and categories
+	// are written only with a setting that clears MIN_PRECISION.
+	let categoriesOk = false;
+	try {
+		const projects = await payload.find({
+			collection: "projects",
+			pagination: false,
+			depth: 0,
+			select: { slug: true, status: true, types: true, embedding: true },
+		});
+		const labeled: Labeled[] = [];
+		const typesBySlug = new Map<string, string[]>();
+		for (const p of projects.docs as Array<{
+			slug: string;
+			status?: string;
+			types?: string[] | null;
+			embedding?: unknown;
+		}>) {
+			typesBySlug.set(p.slug, p.types ?? []);
+			const vec = unit(p.embedding);
+			if (p.status === "Draft" || !p.types?.length || !vec) continue;
+			labeled.push({ id: p.slug, vec, types: p.types });
+		}
+		// Calibrated on the directory's own hand-set types: every type gets the
+		// cut with the best F1 among those where it is right MIN_PRECISION of
+		// the time, and the k with the best overall F1 that clears the floor is
+		// used.
+		const { best, all } = bestCalibration(labeled);
+		console.log(
+			`\ncategories: ${labeled.length} hand-typed directory projects to learn from; each type gets its own cut (precision ${MIN_PRECISION}+, ${MIN_SUPPORT}+ examples), leave-one-out:`,
+		);
+		for (const c of all)
+			console.log(
+				`  k=${String(c.k).padStart(2)}  precision ${c.precision.toFixed(3)}  recall ${c.recall.toFixed(3)}  f1 ${c.f1.toFixed(3)}  covered ${c.covered.toFixed(3)}  types assignable ${c.cuts.size}${c === best ? "  <- used" : ""}`,
+			);
+		if (best) {
+			console.log(
+				"  per type at the used k (support, cut, precision, recall):",
+			);
+			for (const t of best.types)
+				console.log(
+					`    ${t.type.padEnd(16)} ${String(t.support).padStart(4)}  ${t.cut == null ? "  -" : t.cut.toFixed(1)}  ${t.cut == null ? "never assigned" : `${t.precision.toFixed(2)}  ${t.recall.toFixed(2)}`}`,
+				);
+		}
+		if (!best) {
+			console.error(
+				`  ✗ no k reaches precision ${MIN_PRECISION}: categories not written`,
+			);
+		} else {
+			const method = `nearest directory projects, k=${best.k}, a cut per type set at precision ${MIN_PRECISION}+ (${best.cuts.size} types assignable); leave-one-out on ${labeled.length} hand-typed directory projects: precision ${best.precision}, recall ${best.recall}`;
+			const measured = new Map(best.types.map((t) => [t.type, t]));
+			let sorted = 0;
+			let agree = 0;
+			let linkedChecked = 0;
+			const sample: string[] = [];
+			for (const r of byPriority) {
+				const old = stored.get(r.buildId);
+				const vec = unit(r.embedding ?? old?.embedding);
+				if (!vec) continue;
+				const cats = assignTypes(
+					typeScores(neighbours(vec, labeled, best.k), best.k),
+					best.cuts,
+				).map((c) => {
+					const m = measured.get(c.type);
+					return m ? { ...c, precision: m.precision, recall: m.recall } : c;
+				});
+				r.categories = cats;
+				r.categoriesAt = now;
+				r.categoriesMethod = method;
+				sorted++;
+				// The few builds linked to a directory project are a check on the
+				// submission side: does the top type match the project's own?
+				const own = r.projectSlug ? typesBySlug.get(r.projectSlug) : undefined;
+				if (own?.length && cats.length) {
+					linkedChecked++;
+					if (own.includes(cats[0].type)) agree++;
+				}
+				if (r.isWinner && sample.length < 30)
+					sample.push(
+						`  ${(r.name ?? "").slice(0, 34).padEnd(34)} ${cats.map((c) => `${c.type} ${c.score}`).join(", ") || "(none above the cut)"}`,
+					);
+			}
+			const tally = new Map<string, number>();
+			for (const r of rows.values())
+				for (const c of (r.categories as Array<{ type: string }> | undefined) ??
+					[])
+					tally.set(c.type, (tally.get(c.type) ?? 0) + 1);
+			const none = [...rows.values()].filter(
+				(r) => Array.isArray(r.categories) && !r.categories.length,
+			).length;
+			console.log(
+				`  sorted ${sorted} submissions (${none} with no type above the cut); linked builds whose top type is their project's own: ${agree} of ${linkedChecked}`,
+			);
+			console.log(
+				`  submissions per type: ${[...tally]
+					.sort((a, b) => b[1] - a[1])
+					.map(([t, n]) => `${t} ${n}`)
+					.join(", ")}`,
+			);
+			console.log("  winners, first 30:");
+			for (const line of sample) console.log(line);
+			categoriesOk = sorted > 0;
+		}
+	} catch (e) {
+		console.error(
+			`\n✗ categories: could not run (${(e as Error).message}); stored categories kept`,
+		);
+	}
+
 	// ── diff ─────────────────────────────────────────────────────────────
 	const creates: Row[] = [];
 	const updates: { id: string; data: Row; changed: string[] }[] = [];
@@ -468,11 +642,11 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
 	);
-	for (const r of linked.slice(0, 60))
+	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {
@@ -558,6 +732,23 @@ async function main() {
 	if ((!indexOk || emb.failed > toEmbed.length / 2) && !process.exitCode) {
 		console.error(
 			"✗ embeddings or the vector index did not complete. Rows were written; search by meaning needs a re-run.",
+		);
+		process.exitCode = 2;
+	}
+	if (!categoriesOk && !process.exitCode) {
+		console.error(
+			"✗ categories were not written this run (see the categories section). Rows were written; the analyze category facet keeps the stored values.",
+		);
+		process.exitCode = 2;
+	}
+	if (
+		activityRepos.length >= 20 &&
+		activityRead === 0 &&
+		ghToken &&
+		!process.exitCode
+	) {
+		console.error(
+			"✗ no repo activity could be read. Rows were written; activity needs a re-run.",
 		);
 		process.exitCode = 2;
 	}

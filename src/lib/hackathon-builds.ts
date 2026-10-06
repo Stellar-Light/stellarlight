@@ -12,6 +12,8 @@ import { withReadTimeout } from "@/lib/degraded-read";
 import {
 	BUILD_SEARCH_MODES,
 	type BuildSearchMode,
+	LINK_BASES,
+	type LinkBasis,
 	type LinkedProject,
 } from "@/lib/hackathon-build-links";
 import { BUILD_SEMANTIC_FLOOR } from "@/lib/hackathon-build-semantic";
@@ -38,7 +40,37 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	/** Stellar packages the build's repo declares, present only when the repo
 	 * was read: absent is unknown, [] is "declares none". */
 	stack?: string[];
+	/** Directory project types the build was sorted into, best first, present
+	 * only when categorized. */
+	categories?: BuildCategory[];
+	/** The repo's last commit on its default branch, present only when read. */
+	activity?: { lastCommitAt: string | null; archived: boolean };
+	/** The repo answered not found the last time it was read. */
+	repoMissing?: boolean;
 }
+
+/** One project type a build was sorted into; score 0 to 1 (the share of its
+ * nearest directory projects that carry the type, similarity-weighted).
+ * precision and recall are the type's own leave-one-out numbers on the
+ * hand-typed directory at its cut: how far a count of this type can be
+ * trusted (a high-precision, low-recall type undercounts). */
+export interface BuildCategory {
+	type: string;
+	score: number;
+	precision?: number;
+	recall?: number;
+}
+
+const isLinkBasis = (v: unknown): v is LinkBasis =>
+	(LINK_BASES as readonly unknown[]).includes(v);
+
+const isCategoryList = (v: unknown): v is BuildCategory[] =>
+	Array.isArray(v) &&
+	v.every(
+		(c) =>
+			typeof c?.type === "string" &&
+			typeof (c as BuildCategory).score === "number",
+	);
 
 async function pool<T, R>(
 	items: T[],
@@ -84,9 +116,68 @@ async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	return perHack.flat();
 }
 
+/** What a linked project is today: its directory status and whether SCF
+ * funded it. */
+export interface ProjectFacts {
+	status: string | null;
+	scfAwarded: boolean;
+	factsReadAt: string;
+}
+
+/** The facts of the projects these builds link to, read fresh, or null when
+ * the read failed (then the facts are unknown, never "unfunded"). */
+export async function readProjectFacts(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	slugs: string[],
+): Promise<Map<string, ProjectFacts> | null> {
+	if (!slugs.length) return new Map();
+	try {
+		const res = await withReadTimeout(
+			payload.find({
+				collection: "projects",
+				where: { slug: { in: slugs } },
+				pagination: false,
+				depth: 0,
+				select: { slug: true, status: true, scf: { awarded: true } },
+			}),
+			8_000,
+		);
+		const factsReadAt = new Date().toISOString();
+		return new Map(
+			(
+				res.docs as Array<{
+					slug: string;
+					status?: string | null;
+					scf?: { awarded?: boolean | null } | null;
+				}>
+			).map((p) => [
+				p.slug,
+				{ status: p.status ?? null, scfAwarded: !!p.scf?.awarded, factsReadAt },
+			]),
+		);
+	} catch {
+		return null;
+	}
+}
+
+const linkedProject = (d: HackathonBuild, facts?: ProjectFacts) =>
+	d.projectSlug
+		? {
+				slug: d.projectSlug,
+				name: d.projectName ?? d.projectSlug,
+				...(isLinkBasis(d.projectLinkBasis)
+					? { basis: d.projectLinkBasis }
+					: {}),
+				...(facts ? facts : {}),
+			}
+		: null;
+
 /** A stored row in the shape the index serves. `vision` (DoraHacks' one-line
  * summary) stays `description`, as the live read has always served it. */
-export function indexedFromStored(d: HackathonBuild): IndexedBuild {
+export function indexedFromStored(
+	d: HackathonBuild,
+	facts?: ProjectFacts,
+): IndexedBuild {
 	const description = d.vision ?? null;
 	return {
 		id: d.buildId,
@@ -108,14 +199,22 @@ export function indexedFromStored(d: HackathonBuild): IndexedBuild {
 			endedAt: d.endedAt ?? null,
 		},
 		haystack: haystackOf(d.name, description, d.track ?? null, d.award ?? null),
-		...(d.linkCheckedAt
+		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
+		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
+		...(d.categoriesAt && isCategoryList(d.categories)
+			? { categories: d.categories }
+			: {}),
+		...(d.activityCheckedAt
 			? {
-					project: d.projectSlug
-						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
-						: null,
+					activity: {
+						lastCommitAt: d.repoLastCommitAt ?? null,
+						archived: !!d.repoArchived,
+					},
 				}
 			: {}),
-		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
+		...(d.repoMissingAt && (!d.stackReadAt || d.repoMissingAt > d.stackReadAt)
+			? { repoMissing: true }
+			: {}),
 	};
 }
 
@@ -147,12 +246,23 @@ export interface BuildDetail {
 	stack?: string[];
 	stackReadAt: string | null;
 	repoMissingAt: string | null;
+	/** Absent = not categorized. */
+	categories?: BuildCategory[];
+	categoriesAt: string | null;
+	/** How the categories were assigned, with its measured precision. */
+	categoriesMethod: string | null;
+	/** Absent = activity not read. */
+	activity?: { lastCommitAt: string | null; archived: boolean };
+	activityCheckedAt: string | null;
 	firstSeenAt: string;
 	lastSeenAt: string;
 	writeUpReadAt: string | null;
 }
 
-export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
+export function buildDetailFromStored(
+	d: HackathonBuild,
+	facts?: ProjectFacts,
+): BuildDetail {
 	return {
 		id: d.buildId,
 		name: d.name,
@@ -176,16 +286,24 @@ export function buildDetailFromStored(d: HackathonBuild): BuildDetail {
 			video: d.videoUrl ?? null,
 		},
 		repo: d.repoFullName ?? null,
-		...(d.linkCheckedAt
-			? {
-					project: d.projectSlug
-						? { slug: d.projectSlug, name: d.projectName ?? d.projectSlug }
-						: null,
-				}
-			: {}),
+		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		stackReadAt: d.stackReadAt ?? null,
 		repoMissingAt: d.repoMissingAt ?? null,
+		...(d.categoriesAt && isCategoryList(d.categories)
+			? { categories: d.categories }
+			: {}),
+		categoriesAt: d.categoriesAt ?? null,
+		categoriesMethod: d.categoriesMethod ?? null,
+		...(d.activityCheckedAt
+			? {
+					activity: {
+						lastCommitAt: d.repoLastCommitAt ?? null,
+						archived: !!d.repoArchived,
+					},
+				}
+			: {}),
+		activityCheckedAt: d.activityCheckedAt ?? null,
 		firstSeenAt: d.firstSeenAt,
 		lastSeenAt: d.lastSeenAt,
 		writeUpReadAt: d.detailReadAt ?? null,
@@ -216,7 +334,18 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 			}),
 			8_000,
 		);
-		return (res.docs as HackathonBuild[]).map(indexedFromStored);
+		const docs = res.docs as HackathonBuild[];
+		const facts = await readProjectFacts(payload, [
+			...new Set(
+				docs.map((d) => d.projectSlug).filter((s): s is string => !!s),
+			),
+		]);
+		return docs.map((d) =>
+			indexedFromStored(
+				d,
+				d.projectSlug ? facts?.get(d.projectSlug) : undefined,
+			),
+		);
 	} catch (e) {
 		console.error(
 			"hackathon-builds store read failed; serving the live DoraHacks read",
@@ -249,43 +378,14 @@ export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 
 export const getHackathonBuildsIndex = unstable_cache(
 	buildHackathonBuildsIndex,
-	["hackathon-builds-index:v2"],
+	// Bump when IndexedBuild's shape changes: the cache outlives deploys, and
+	// an old-shape index serves every new field as unknown for up to an hour.
+	["hackathon-builds-index:v3"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],
 	},
 );
-
-/** Which Stellar packages a set of builds declares, counted over the builds
- * whose repo was read. The rest (no repo link, a repo that is not public, or
- * one not read yet) are unknown, not "uses none", so they are not counted. */
-export function stackCounts(builds: IndexedBuild[], top = 15) {
-	const tally = new Map<string, { builds: number; winners: number }>();
-	let read = 0;
-	for (const b of builds) {
-		if (!b.stack) continue;
-		read++;
-		for (const name of b.stack) {
-			const t = tally.get(name) ?? { builds: 0, winners: 0 };
-			t.builds++;
-			if (b.isWinner) t.winners++;
-			tally.set(name, t);
-		}
-	}
-	return {
-		buildsMatched: builds.length,
-		buildsRead: read,
-		packages: [...tally]
-			.map(([name, t]) => ({ name, ...t }))
-			.sort(
-				(a, b) =>
-					b.builds - a.builds ||
-					b.winners - a.winners ||
-					a.name.localeCompare(b.name),
-			)
-			.slice(0, top),
-	};
-}
 
 /** Builds whose GitHub link points at one of these repos (owner/name, any case) or at the owner's account. */
 export function buildsForRepos(
@@ -378,6 +478,10 @@ export function searchHackathonBuilds(
 		track?: string;
 		/** Only builds whose repo declares this Stellar package. */
 		package?: string;
+		/** Only builds from these events (slugs). */
+		hackathons?: string[];
+		/** Only builds sorted into this project type. */
+		category?: string;
 		mode?: BuildSearchMode;
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
@@ -393,6 +497,16 @@ export function searchHackathonBuilds(
 	if (opts.package) {
 		const p = opts.package.toLowerCase();
 		pool = pool.filter((b) => b.stack?.includes(p));
+	}
+	if (opts.hackathons?.length) {
+		const hs = new Set(opts.hackathons.map((h) => h.toLowerCase()));
+		pool = pool.filter((b) => hs.has(b.hackathon.slug.toLowerCase()));
+	}
+	if (opts.category) {
+		const c = opts.category.toLowerCase();
+		pool = pool.filter((b) =>
+			b.categories?.some((x) => x.type.toLowerCase() === c),
+		);
 	}
 	const query = q.trim().toLowerCase();
 	if (!query) {

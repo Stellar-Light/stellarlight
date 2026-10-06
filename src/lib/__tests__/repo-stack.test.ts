@@ -75,3 +75,46 @@ describe("fetchRepoStack", () => {
 		).toBe("error");
 	});
 });
+
+describe("fetchRepoActivity", () => {
+	it("reads commits and archived flags, says missing only on NOT_FOUND, and skips a failed batch", async () => {
+		const { fetchRepoActivity } = await import(
+			"../../../scripts/scan/fetch-repo-code"
+		);
+		const post = vi.fn(async (_url: string, init: { body: string }) => {
+			const q = JSON.parse(init.body).query as string;
+			if (q.includes('"broken"')) return new Response("", { status: 502 });
+			return new Response(
+				JSON.stringify({
+					data: {
+						r0: {
+							isArchived: false,
+							defaultBranchRef: {
+								target: { committedDate: "2026-08-01T00:00:00Z" },
+							},
+						},
+						r1: null,
+					},
+					errors: [{ type: "NOT_FOUND", path: ["r1"] }],
+				}),
+			);
+		});
+		const got = await fetchRepoActivity(
+			"t",
+			["a/live", "a/gone"],
+			post as unknown as typeof fetch,
+		);
+		expect(got.get("a/live")).toEqual({
+			state: "read",
+			lastCommitAt: "2026-08-01T00:00:00Z",
+			archived: false,
+		});
+		expect(got.get("a/gone")).toEqual({ state: "missing" });
+		const failed = await fetchRepoActivity(
+			"t",
+			["a/broken"],
+			post as unknown as typeof fetch,
+		);
+		expect(failed.size).toBe(0);
+	});
+});

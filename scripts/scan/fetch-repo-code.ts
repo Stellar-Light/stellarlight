@@ -175,6 +175,79 @@ export type RepoStack =
 	| { state: "missing" }
 	| { state: "error"; note: string };
 
+/** A repo's activity: the last commit on its default branch, and whether it
+ * is archived. Absent from the result map = could not be read this time. */
+export type RepoActivity =
+	| { state: "read"; lastCommitAt: string | null; archived: boolean }
+	| { state: "missing" };
+
+const ACTIVITY_BATCH = 50;
+
+/**
+ * Activity for many repos at once over GraphQL: one query per 50 repos, so a
+ * daily read of every submission repo costs a couple of dozen calls. A repo
+ * GitHub reports NOT_FOUND is `missing`; a batch that fails any other way
+ * leaves its repos out of the map (unknown, retried next run), never missing.
+ */
+export async function fetchRepoActivity(
+	token: string,
+	repos: string[],
+	post: typeof fetch = fetch,
+): Promise<Map<string, RepoActivity>> {
+	const out = new Map<string, RepoActivity>();
+	for (let i = 0; i < repos.length; i += ACTIVITY_BATCH) {
+		const batch = repos.slice(i, i + ACTIVITY_BATCH);
+		const fields = batch.map((full, j) => {
+			const [owner, name] = full.split("/");
+			return `r${j}: repository(owner: ${JSON.stringify(owner ?? "")}, name: ${JSON.stringify(name ?? "")}) { isArchived defaultBranchRef { target { ... on Commit { committedDate } } } }`;
+		});
+		let body: {
+			data?: Record<
+				string,
+				{
+					isArchived: boolean;
+					defaultBranchRef: {
+						target: { committedDate?: string } | null;
+					} | null;
+				} | null
+			>;
+			errors?: Array<{ type?: string; path?: string[] }>;
+		};
+		try {
+			const res = await post("https://api.github.com/graphql", {
+				method: "POST",
+				headers: {
+					authorization: `Bearer ${token}`,
+					"content-type": "application/json",
+					"user-agent": "sl-code-scan",
+				},
+				body: JSON.stringify({ query: `query { ${fields.join(" ")} }` }),
+				signal: AbortSignal.timeout(30_000),
+			});
+			if (!res.ok) continue;
+			body = await res.json();
+		} catch {
+			continue;
+		}
+		const notFound = new Set(
+			(body.errors ?? [])
+				.filter((e) => e.type === "NOT_FOUND")
+				.map((e) => e.path?.[0]),
+		);
+		batch.forEach((full, j) => {
+			const r = body.data?.[`r${j}`];
+			if (r)
+				out.set(full, {
+					state: "read",
+					lastCommitAt: r.defaultBranchRef?.target?.committedDate ?? null,
+					archived: !!r.isArchived,
+				});
+			else if (notFound.has(`r${j}`)) out.set(full, { state: "missing" });
+		});
+	}
+	return out;
+}
+
 /** Vendored or built code: its manifests are someone else's dependencies. */
 const VENDORED_DIR = /(^|\/)(node_modules|vendor|target)\//;
 const STACK_MAX_MANIFESTS = 16;

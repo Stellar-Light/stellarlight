@@ -11,7 +11,10 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
 import { parseBuildId } from "@/lib/hackathon-build-links";
-import { buildDetailFromStored } from "@/lib/hackathon-builds";
+import {
+	buildDetailFromStored,
+	readProjectFacts,
+} from "@/lib/hackathon-builds";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
@@ -91,6 +94,11 @@ export async function GET(
 			startedAt,
 		});
 
+	// What the linked project is today; a failed read leaves it unknown.
+	const facts = doc.projectSlug
+		? (await readProjectFacts(payload, [doc.projectSlug]))?.get(doc.projectSlug)
+		: undefined;
+
 	try {
 		logApiHit({
 			endpoint: "/api/hackathons/builds/[id]",
@@ -107,7 +115,7 @@ export async function GET(
 				generatedAt: new Date().toISOString(),
 				note: "One stored submission in full. writeUp is the team's own text as published (markdown): a claim about what they built, not evidence that it shipped. Check the repo, the demo and `project`.",
 			},
-			build: buildDetailFromStored(doc),
+			build: buildDetailFromStored(doc, facts),
 		},
 		{ headers: serverTiming(startedAt) },
 	);
