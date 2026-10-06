@@ -20,6 +20,7 @@ import { CommunitySkills } from "./collections/CommunitySkills";
 import { Entities } from "./collections/Entities";
 import { FundingSnapshots } from "./collections/FundingSnapshots";
 import { HackathonBuilds } from "./collections/HackathonBuilds";
+import { HackathonEvents } from "./collections/HackathonEvents";
 import { Hackathons } from "./collections/Hackathons";
 import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { LinkChecks } from "./collections/LinkChecks";
@@ -92,6 +93,7 @@ export default buildConfig({
 		StablecoinSnapshots,
 		RwaAssets,
 		HackathonBuilds,
+		HackathonEvents,
 		AwardRounds,
 		AwardNominees,
 		AwardVoters,

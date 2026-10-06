@@ -466,6 +466,67 @@ export async function fetchBuidlDetail(
 	};
 }
 
+/** One DoraHacks event's own page: what the organizer published. */
+export interface DoraHacksEventDetail {
+	/** The event page, markdown as published (brief, resources, prizes, rules). */
+	description: string | null;
+	summary: string | null;
+	tracks: string[];
+	/** The submission form requires a public repo / a demo video. */
+	repoRequired: boolean;
+	videoRequired: boolean;
+	/** The submission form's own questions, as asked. */
+	submissionQuestions: string[];
+}
+
+/** An event's page from /hackathons/{uname}. null = not found (404); throws
+ * on any other failure, so a failed read never passes for "nothing
+ * published". Only public fields are read. */
+export async function fetchHackathonDetail(
+	uname: string,
+): Promise<DoraHacksEventDetail | null> {
+	const res = await fetch(
+		`${DORAHACKS_API_BASE}/hackathons/${encodeURIComponent(uname)}`,
+		{ headers: DORA_BROWSER_HEADERS, signal: AbortSignal.timeout(10_000) },
+	);
+	if (res.status === 404) return null;
+	if (!res.ok) throw new Error(`DoraHacks event ${uname}: HTTP ${res.status}`);
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const d: any = await res.json();
+	const text = (v: unknown) =>
+		typeof v === "string" && v.trim() ? v.trim() : null;
+	let form: unknown = [];
+	try {
+		form =
+			typeof d?.submission_form === "string"
+				? JSON.parse(d.submission_form)
+				: (d?.submission_form ?? []);
+	} catch {
+		form = [];
+	}
+	return {
+		description: text(d?.description),
+		summary: text(d?.summary),
+		tracks: (Array.isArray(d?.tracks) ? d.tracks : [])
+			.map((t: { name?: unknown; title?: unknown }) =>
+				text(t?.name ?? t?.title),
+			)
+			.filter(
+				(t: string | null): t is string => !!t && t !== "[DEFAULT_TRACK]",
+			),
+		repoRequired: !!d?.mandatory_git_repo_link,
+		videoRequired: !!d?.mandatory_video_link,
+		// "Did you make sure...?$mode:single$option:Yes": the question is the
+		// text before the form's own markup.
+		submissionQuestions: (Array.isArray(form) ? form : [])
+			.map((q: { question?: unknown }) =>
+				typeof q?.question === "string" ? q.question.split("$")[0].trim() : "",
+			)
+			.filter(Boolean)
+			.slice(0, 20),
+	};
+}
+
 /** Parse a DoraHacks placement label ("1st Place - $5,000 in XLM") into a
  * sortable rank, a clean label, and the prize in USD. Non-ordinal placements
  * ("Track Winner", "Winner") sort after the numbered ones. */

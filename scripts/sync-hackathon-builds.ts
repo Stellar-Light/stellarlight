@@ -23,6 +23,10 @@
  *      and the newest events first, at most STACK_MAX_REPOS repos a run
  *   6. repo activity: the last commit on each repo's default branch and
  *      whether it is archived, every run (GraphQL, 50 repos a call)
+ *   0. the events themselves: every Stellar DoraHacks event's own page
+ *      (dates, prize, tracks, the page, the submission form's requirements,
+ *      the requirements and judging sections when the organizer wrote them),
+ *      into hackathon-events
  *   7. categories: the directory project types of each submission's nearest
  *      directory projects (src/lib/hackathon-build-categories.ts), written
  *      only when the method's leave-one-out precision on the directory's own
@@ -62,16 +66,23 @@ import {
 	siteKeyOf,
 } from "../src/lib/hackathon-build-links";
 import {
+	JUDGING_HEADING,
+	markdownSection,
+	REQUIREMENTS_HEADING,
+} from "../src/lib/hackathon-events";
+import {
+	type DoraHacksHackathon,
 	type DoraHacksSubmission,
 	doraEventRef,
 	endedDoraHacksEvents,
 	fetchAllDoraHacksHackathons,
 	fetchBuidlDetail,
+	fetchHackathonDetail,
 	fetchHackathonSubmissions,
 } from "../src/lib/integrations/dorahacks";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
-import type { HackathonBuild } from "../src/payload-types";
+import type { HackathonBuild, HackathonEvent } from "../src/payload-types";
 import {
 	createGh,
 	fetchRepoActivity,
@@ -197,6 +208,135 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const same = (a: unknown, b: unknown) =>
 	JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
+const isoDay = (unix?: number | null) =>
+	unix ? new Date(unix * 1000).toISOString().slice(0, 10) : null;
+
+/** Step 0: every Stellar DoraHacks event's own page into hackathon-events.
+ * The listing fields are refreshed every run; the page fields only when the
+ * page was read, so a failed read keeps what is stored. Returns how many
+ * pages failed, for the instrument check. */
+async function syncEvents(
+	payload: Awaited<ReturnType<typeof getPayload>>,
+	all: DoraHacksHackathon[],
+	now: string,
+): Promise<{ read: number; failed: number; written: number }> {
+	const dora = all.filter((h) => h.source !== "curated" && h.uname);
+	const prev = await payload.find({
+		collection: "hackathon-events",
+		pagination: false,
+		depth: 0,
+	});
+	const stored = new Map(
+		(prev.docs as HackathonEvent[]).map((d) => [d.slug, d]),
+	);
+	const rows: Array<Record<string, unknown> & { slug: string }> = [];
+	let read = 0;
+	let failed = 0;
+	for (const h of dora) {
+		const row: Record<string, unknown> & { slug: string } = {
+			slug: h.uname,
+			title: h.title,
+			startDate: isoDay(h.start_time),
+			endDate: isoDay(h.end_time),
+			prizePoolUsd: h.bonus_price || null,
+			hackersCount: h.hackers_count || null,
+			lastSeenAt: now,
+		};
+		try {
+			const d = await fetchHackathonDetail(h.uname);
+			if (d) {
+				Object.assign(row, {
+					summary: d.summary,
+					description: d.description,
+					tracks: d.tracks,
+					repoRequired: d.repoRequired,
+					videoRequired: d.videoRequired,
+					submissionQuestions: d.submissionQuestions,
+					requirementsSection: markdownSection(
+						d.description,
+						REQUIREMENTS_HEADING,
+					),
+					judgingSection: markdownSection(d.description, JUDGING_HEADING),
+					detailReadAt: now,
+				});
+				read++;
+			}
+		} catch {
+			failed++;
+		}
+		rows.push(row);
+		await sleep(250);
+	}
+	const judged = rows.filter((r) => r.judgingSection).map((r) => r.slug);
+	console.log(
+		`
+events: ${dora.length} Stellar events on DoraHacks, ${read} pages read, ${failed} could not be read (stored values kept); ${rows.filter((r) => r.requirementsSection).length} publish requirements, ${judged.length} publish judging criteria${judged.length ? ` (${judged.join(", ")})` : ""}`,
+	);
+	if (!EXECUTE) return { read, failed, written: 0 };
+	const sent = new Map<string, Record<string, unknown>>();
+	for (const row of rows) {
+		const old = stored.get(row.slug);
+		try {
+			if (old)
+				await payload.update({
+					collection: "hackathon-events",
+					id: old.id,
+					data: row,
+					context: { internal: true },
+				});
+			else
+				await payload.create({
+					collection: "hackathon-events",
+					data: { ...row, firstSeenAt: now } as Omit<
+						HackathonEvent,
+						"id" | "updatedAt" | "createdAt"
+					>,
+					context: { internal: true },
+				});
+			sent.set(row.slug, row);
+		} catch (e) {
+			failed++;
+			console.error(
+				`  ✗ event ${row.slug}: write failed: ${(e as Error).message}`,
+			);
+		}
+	}
+	const docs = (r: { docs: unknown[] }) => r.docs as Record<string, unknown>[];
+	const mismatches = await verifyWrites(
+		sent,
+		async (keys) =>
+			new Map(
+				docs(
+					await payload.find({
+						collection: "hackathon-events",
+						where: { slug: { in: keys } },
+						limit: keys.length,
+						depth: 0,
+					}),
+				).map((d) => [String(d.slug), d]),
+			),
+		[...new Set([...sent.values()].flatMap(Object.keys))],
+		200,
+		async (key) =>
+			docs(
+				await payload.find({
+					collection: "hackathon-events",
+					where: { slug: { equals: key } },
+					limit: 1,
+					depth: 0,
+				}),
+			)[0] ?? null,
+	);
+	if (mismatches.length) {
+		console.error(
+			`  ✗ ${mismatches.length} event field(s) did NOT persist as sent:\n${formatMismatches(mismatches)}`,
+		);
+		process.exitCode = 1;
+	} else
+		console.log(`  ✓ all ${sent.size} event row(s) hold the values written`);
+	return { read, failed, written: sent.size };
+}
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	const now = new Date().toISOString();
@@ -214,13 +354,24 @@ async function main() {
 	console.log(`${stored.size} builds already stored`);
 
 	// ── 1. events and their rosters ──────────────────────────────────────
-	const events = endedDoraHacksEvents(await fetchAllDoraHacksHackathons());
+	const allEvents = await fetchAllDoraHacksHackathons();
+	const events = endedDoraHacksEvents(allEvents);
 	if (!events.length) {
 		console.error(
 			"✗ DoraHacks listed no ended Stellar events. Instrument failure: nothing written.",
 		);
 		process.exitCode = 2;
 		return;
+	}
+	// ── 0. the events' own pages ─────────────────────────────────────────
+	let eventSync = { read: 0, failed: 0, written: 0 };
+	try {
+		eventSync = await syncEvents(payload, allEvents, now);
+	} catch (e) {
+		eventSync.failed = Number.POSITIVE_INFINITY;
+		console.error(
+			`\n✗ events: could not run (${(e as Error).message}); stored events kept`,
+		);
 	}
 	const rows = new Map<string, Row>();
 	let emptyRosters = 0;
@@ -732,6 +883,12 @@ async function main() {
 	if ((!indexOk || emb.failed > toEmbed.length / 2) && !process.exitCode) {
 		console.error(
 			"✗ embeddings or the vector index did not complete. Rows were written; search by meaning needs a re-run.",
+		);
+		process.exitCode = 2;
+	}
+	if (eventSync.failed > eventSync.read && !process.exitCode) {
+		console.error(
+			"✗ most event pages could not be read. Submissions were written; the events need a re-run.",
 		);
 		process.exitCode = 2;
 	}
