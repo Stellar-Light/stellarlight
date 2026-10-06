@@ -33,6 +33,24 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-05",
 		surfaces: ["mcp"],
+		version: "scout-mcp@1.6.0",
+		type: "added",
+		summary:
+			"scout-mcp adds review_submission: feedback on one hackathon submission from its GitHub or DoraHacks link (27 tools).",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["api"],
+		version: "spec@1.9.70",
+		type: "added",
+		summary:
+			"reviewSubmission (GET /api/hackathons/review?link=) reviews one Stellar hackathon submission from its GitHub repo or DoraHacks link, with no sign-in: its stored facts, `checks` that each state a fact (ok null = could not be checked), the submissions closest in meaning, how crowded its category is, and the SCF pitch view over its summary.",
+		detail:
+			"A composite over what already exists: the submission store, the analytics engine, search by meaning over the submission's own embedding, and scfPitch. A repo submitted more than once resolves to its placed entry, then the newest. Also fixed: the vet block's competitors.matchMode enum now lists vertical+scored, a value vet-idea already served; and competitor tier and status say they are read live with the response.",
+	},
+	{
+		date: "2026-10-05",
+		surfaces: ["mcp"],
 		version: "scout-mcp@1.5.0",
 		type: "added",
 		summary:
