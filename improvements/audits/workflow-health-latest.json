@@ -1,23 +1,33 @@
 {
-	"asOf": "2026-10-05T11:20:47.159Z",
+	"asOf": "2026-10-05T16:15:45.208Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 110,
-	"healthy": 107,
+	"healthy": 105,
 	"broken": [
+		{
+			"file": "consumption-guard.yml",
+			"state": "failing",
+			"why": "4 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
+		},
+		{
+			"file": "depth-eval.yml",
+			"state": "failing",
+			"why": "2 failed run(s) since its last green 7d ago — it is trying and losing, not idle; dies at \"Run codeDepth separation gate\""
+		},
 		{
 			"file": "gone-repos.yml",
 			"state": "standing-signal",
-			"why": "22 run(s) red at its declared signal step since its last green 20d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
+			"why": "23 run(s) red at its declared signal step since its last green 20d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
 		},
 		{
 			"file": "task-lane.yml",
 			"state": "standing-signal",
-			"why": "8 run(s) red at its declared signal step since its last green 16d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
+			"why": "8 run(s) red at its declared signal step since its last green 17d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
 		},
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "32 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "34 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Write the /quality artifact\""
 		}
 	],
 	"rows": [
@@ -82,10 +92,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T14:43:20Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 17,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-publish.yml",
@@ -93,21 +103,21 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T14:59:15Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-reconcile.yml",
 			"name": "award reconcile mirror",
 			"cron": "30 5 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T11:10:25Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-05T12:24:20Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 30,
-			"why": "last green 1d ago"
+			"runs": 31,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "award-round.yml",
@@ -115,10 +125,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T13:58:32Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 18,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "award-test-setup.yml",
@@ -126,10 +136,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T13:56:54Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -225,10 +235,10 @@
 			"cron": "30 8 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T15:01:34Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "basis-from-onchain.yml",
@@ -236,10 +246,10 @@
 			"cron": "0 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T15:15:23Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "basis-from-product.yml",
@@ -258,10 +268,10 @@
 			"cron": "30 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T16:02:58Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "calibrate-semantic.yml",
@@ -291,31 +301,31 @@
 			"cron": "20 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-01T14:30:29Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 75,
 			"runs": 1,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "consumption-guard.yml",
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
-			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:07:12Z",
+			"state": "failing",
+			"lastSuccessAt": "2026-10-05T11:28:13Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 99,
-			"why": "last green 0d ago"
+			"runs": 100,
+			"why": "4 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Cross-artifact quantities agree\""
 		},
 		{
 			"file": "content-freshness.yml",
 			"name": "Content freshness guard",
 			"cron": "23 13 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:07:12Z",
+			"lastSuccessAt": "2026-10-05T11:19:05Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 53,
+			"runs": 54,
 			"why": "last green 0d ago"
 		},
 		{
@@ -323,7 +333,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:17:52Z",
+			"lastSuccessAt": "2026-10-05T16:12:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -335,10 +345,10 @@
 			"cron": "0 8 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-01T14:52:52Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 75,
 			"runs": 1,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "curate-partners.yml",
@@ -410,12 +420,12 @@
 			"file": "depth-eval.yml",
 			"name": "codeDepth eval gate",
 			"cron": "41 5 * * 1",
-			"state": "ok",
+			"state": "failing",
 			"lastSuccessAt": "2026-09-28T11:56:49Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 21,
-			"runs": 100,
-			"why": "last green 6d ago"
+			"runs": 99,
+			"why": "2 failed run(s) since its last green 7d ago — it is trying and losing, not idle; dies at \"Run codeDepth separation gate\""
 		},
 		{
 			"file": "embed-projects.yml",
@@ -434,10 +444,10 @@
 			"cron": "0 9 * * 0",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-04T14:37:14Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "enrich-builder-repos.yml",
@@ -455,10 +465,10 @@
 			"name": "Enrich builder profiles (GitHub)",
 			"cron": "30 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T12:39:33Z",
+			"lastSuccessAt": "2026-10-05T15:04:07Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 51,
+			"runs": 52,
 			"why": "last green 0d ago"
 		},
 		{
@@ -478,10 +488,10 @@
 			"cron": "0 6 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T12:34:24Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 40,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "enrich-partner-onchain.yml",
@@ -510,11 +520,11 @@
 			"name": "Enrich repo activity (unenriched lane)",
 			"cron": "20 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T10:36:16Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-05T11:33:23Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 22,
-			"why": "last green 1d ago"
+			"runs": 23,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "enrich-repos.yml",
@@ -522,10 +532,10 @@
 			"cron": "0 8 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-28T16:12:51Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 6d ago"
+			"why": "last green 7d ago"
 		},
 		{
 			"file": "enrich-scf.yml",
@@ -543,11 +553,11 @@
 			"name": "enrich-tvl",
 			"cron": "0 5 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-09-28T11:35:54Z",
-			"ageDays": 6,
+			"lastSuccessAt": "2026-10-05T12:10:26Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 8,
-			"why": "last green 6d ago"
+			"runs": 9,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "fix-dev-docs-titles.yml",
@@ -599,10 +609,10 @@
 			"cron": "0 7 * * 0",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-04T13:03:43Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "gone-repos.yml",
@@ -612,8 +622,8 @@
 			"lastSuccessAt": "2026-09-15T02:16:41Z",
 			"ageDays": 20,
 			"graceDays": 4,
-			"runs": 23,
-			"why": "22 run(s) red at its declared signal step since its last green 20d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
+			"runs": 24,
+			"why": "23 run(s) red at its declared signal step since its last green 20d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
 		},
 		{
 			"file": "import-replit-stablecoin-history.yml",
@@ -632,10 +642,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-06-19T16:02:36Z",
-			"ageDays": 107,
+			"ageDays": 108,
 			"graceDays": 45,
 			"runs": 3,
-			"why": "last green 107d ago (manual tool — age not judged)"
+			"why": "last green 108d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "ingest-ec-taxonomy.yml",
@@ -653,11 +663,11 @@
 			"name": "Ingest SCF proposals (research corpus)",
 			"cron": "20 4 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-02T04:25:50Z",
-			"ageDays": 3,
+			"lastSuccessAt": "2026-10-05T11:31:04Z",
+			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 1,
-			"why": "last green 3d ago"
+			"runs": 2,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "lane-autonomy.yml",
@@ -665,10 +675,10 @@
 			"cron": "41 7 * * 1",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-28T15:55:43Z",
-			"ageDays": 6,
+			"ageDays": 7,
 			"graceDays": 21,
 			"runs": 8,
-			"why": "last green 6d ago"
+			"why": "last green 7d ago"
 		},
 		{
 			"file": "link-canonical-slug.yml",
@@ -708,10 +718,10 @@
 			"name": "live-index-guards",
 			"cron": "0 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T11:31:03Z",
+			"lastSuccessAt": "2026-10-05T13:01:48Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 20,
+			"runs": 21,
 			"why": "last green 0d ago"
 		},
 		{
@@ -720,10 +730,10 @@
 			"cron": "0 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-01T14:22:07Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 75,
 			"runs": 2,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "mark-defunct.yml",
@@ -763,7 +773,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:07:13Z",
+			"lastSuccessAt": "2026-10-05T15:50:14Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -774,18 +784,18 @@
 			"name": "Nightly health (detectors → issue)",
 			"cron": "45 5 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T11:18:20Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-05T12:40:31Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 22,
-			"why": "last green 1d ago"
+			"runs": 23,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "openapi-lint.yml",
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:19:05Z",
+			"lastSuccessAt": "2026-10-05T16:12:55Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -797,10 +807,10 @@
 			"cron": "43 7 * * 3",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-30T14:14:16Z",
-			"ageDays": 4,
+			"ageDays": 5,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 4d ago"
+			"why": "last green 5d ago"
 		},
 		{
 			"file": "partner-freshness-report.yml",
@@ -829,11 +839,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T10:14:03Z",
+			"lastSuccessAt": "2026-10-05T11:19:05Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 84,
-			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -863,10 +873,10 @@
 			"cron": "0 6 * * 3",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-30T11:36:50Z",
-			"ageDays": 4,
+			"ageDays": 5,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 4d ago"
+			"why": "last green 5d ago"
 		},
 		{
 			"file": "raven-eval-parity.yml",
@@ -874,10 +884,10 @@
 			"cron": "30 7 * * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-04T13:22:33Z",
-			"ageDays": 0,
+			"ageDays": 1,
 			"graceDays": 4,
 			"runs": 9,
-			"why": "last green 0d ago"
+			"why": "last green 1d ago"
 		},
 		{
 			"file": "raven-source-recall.yml",
@@ -920,7 +930,7 @@
 			"lastSuccessAt": "2026-10-03T10:58:10Z",
 			"ageDays": 2,
 			"graceDays": 4,
-			"runs": 10,
+			"runs": 11,
 			"why": "last green 2d ago"
 		},
 		{
@@ -928,7 +938,7 @@
 			"name": "Refresh RWA measurements",
 			"cron": "37 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T06:09:08Z",
+			"lastSuccessAt": "2026-10-05T15:12:45Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -939,10 +949,10 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T05:52:16Z",
+			"lastSuccessAt": "2026-10-05T14:55:51Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 77,
+			"runs": 78,
 			"why": "last green 0d ago"
 		},
 		{
@@ -961,7 +971,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T05:51:14Z",
+			"lastSuccessAt": "2026-10-05T14:53:48Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -1049,11 +1059,11 @@
 			"name": "Project status snapshot (daily)",
 			"cron": "17 5 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T11:07:10Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-05T12:16:56Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 2,
-			"why": "last green 1d ago"
+			"runs": 3,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "status-recency.yml",
@@ -1061,10 +1071,10 @@
 			"cron": "30 7 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T14:12:22Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 7,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "supersession-freshness.yml",
@@ -1072,20 +1082,20 @@
 			"cron": "47 7 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-15T12:53:59Z",
-			"ageDays": 19,
+			"ageDays": 20,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 19d ago"
+			"why": "last green 20d ago"
 		},
 		{
 			"file": "sync-lumenloop.yml",
 			"name": "Sync Lumenloop ecosystem projects",
 			"cron": "0 7 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T12:54:32Z",
+			"lastSuccessAt": "2026-10-05T15:21:28Z",
 			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 3,
+			"runs": 4,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1105,10 +1115,10 @@
 			"cron": "30 7 1 * *",
 			"state": "ok",
 			"lastSuccessAt": "2026-10-01T14:39:10Z",
-			"ageDays": 3,
+			"ageDays": 4,
 			"graceDays": 75,
 			"runs": 2,
-			"why": "last green 3d ago"
+			"why": "last green 4d ago"
 		},
 		{
 			"file": "tansu-anchor.yml",
@@ -1116,10 +1126,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T14:46:38Z",
-			"ageDays": 2,
+			"ageDays": 3,
 			"graceDays": 45,
 			"runs": 9,
-			"why": "last green 2d ago (manual tool — age not judged)"
+			"why": "last green 3d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "task-lane.yml",
@@ -1127,17 +1137,17 @@
 			"cron": "17 9 * * 2",
 			"state": "standing-signal",
 			"lastSuccessAt": "2026-09-18T13:36:58Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 21,
 			"runs": 13,
-			"why": "8 run(s) red at its declared signal step since its last green 16d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
+			"why": "8 run(s) red at its declared signal step since its last green 17d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
 		},
 		{
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:19:05Z",
+			"lastSuccessAt": "2026-10-05T16:12:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1149,21 +1159,21 @@
 			"cron": "0 9 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T15:15:04Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 2,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "upgrade-status-basis.yml",
 			"name": "Upgrade status basis from link health",
 			"cron": "23 4 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-04T10:39:38Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-05T11:40:16Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 37,
-			"why": "last green 1d ago"
+			"runs": 38,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "vector-index.yml",
@@ -1192,7 +1202,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-05T11:07:13Z",
+			"lastSuccessAt": "2026-10-05T15:50:14Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1204,10 +1214,10 @@
 			"cron": "40 5 * * 2",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-29T11:32:27Z",
-			"ageDays": 5,
+			"ageDays": 6,
 			"graceDays": 21,
 			"runs": 6,
-			"why": "last green 5d ago"
+			"why": "last green 6d ago"
 		},
 		{
 			"file": "weak-basis-liveness.yml",
@@ -1215,10 +1225,10 @@
 			"cron": "17 8 * * 4",
 			"state": "ok",
 			"lastSuccessAt": "2026-09-24T13:32:33Z",
-			"ageDays": 10,
+			"ageDays": 11,
 			"graceDays": 21,
 			"runs": 3,
-			"why": "last green 10d ago"
+			"why": "last green 11d ago"
 		},
 		{
 			"file": "workflow-health.yml",
@@ -1229,7 +1239,7 @@
 			"ageDays": 19,
 			"graceDays": 21,
 			"runs": 91,
-			"why": "32 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "34 failed run(s) since its last green 19d ago — it is trying and losing, not idle; dies at \"Write the /quality artifact\""
 		}
 	]
 }

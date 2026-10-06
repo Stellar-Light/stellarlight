@@ -27,6 +27,12 @@ const gh = createGh(GH);
 
 const DEEP = DEEP_LABELS.map((l) => l.fullName);
 const SHALLOW = SHALLOW_LABELS.map((l) => l.fullName);
+/** A label's pinned commit, so the probe scores what the eval scores. */
+const REF = new Map(
+	[...DEEP_LABELS, ...SHALLOW_LABELS]
+		.filter((l) => l.ref)
+		.map((l) => [l.fullName, l.ref as string]),
+);
 
 async function main() {
 	const argv = process.argv.slice(2);
@@ -49,7 +55,7 @@ async function main() {
 	] as const) {
 		for (const full of list) {
 			try {
-				const r = await fetchRepoCode(gh, full);
+				const r = await fetchRepoCode(gh, full, { ref: REF.get(full) });
 				if (!r) {
 					console.error(`  ! ${full}: no tree`);
 					continue;

@@ -10,9 +10,9 @@ async function main() {
 		["FRONTIER", JS_DEEP_FRONTIER],
 		["SHALLOW", JS_SHALLOW],
 	] as const) {
-		for (const { fullName } of list) {
+		for (const { fullName, ref } of list) {
 			try {
-				const r = await fetchRepoCode(gh, fullName);
+				const r = await fetchRepoCode(gh, fullName, { ref });
 				if (!r) {
 					console.log(`${band} ?????  ${fullName} unfetchable`);
 					continue;

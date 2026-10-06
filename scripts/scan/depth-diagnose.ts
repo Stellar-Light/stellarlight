@@ -22,9 +22,12 @@ async function main() {
 		? args.map((fullName) => ({ fullName, why: "(cli)" }))
 		: [...DEEP_FRONTIER, ...SHALLOW_FRONTIER];
 
-	for (const { fullName } of targets) {
+	for (const { fullName, ref } of targets as Array<{
+		fullName: string;
+		ref?: string;
+	}>) {
 		try {
-			const r = await fetchRepoCode(gh, fullName);
+			const r = await fetchRepoCode(gh, fullName, { ref });
 			if (!r) {
 				console.log(`\n═══ ${fullName}: unfetchable`);
 				continue;
