@@ -19,9 +19,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
-	type Distribution,
-	distribution,
-	type FacetId,
+	type EventProfile,
+	eventProfile,
 	type FacetShift,
 	facetShifts,
 } from "@/lib/hackathon-analytics";
@@ -68,28 +67,6 @@ interface HackathonSnapshot {
 	profile?: EventProfile;
 }
 
-/** Facets compared across events. */
-const PROFILE_FACETS = [
-	"category",
-	"package",
-	"activity",
-] as const satisfies readonly FacetId[];
-
-type EventProfile = { submissions: number; winners: number } & Record<
-	(typeof PROFILE_FACETS)[number],
-	Distribution
->;
-
-function profileOf(builds: IndexedBuild[]): EventProfile {
-	return {
-		submissions: builds.length,
-		winners: builds.filter((b) => b.isWinner).length,
-		category: distribution(builds, "category", { top: 5 }),
-		package: distribution(builds, "package", { top: 5 }),
-		activity: distribution(builds, "activity", { top: 4 }),
-	};
-}
-
 /** Fill submissions, winners and the profile from the stored index; curated
  * counts are kept where the event already has them. */
 function withStored(
@@ -97,7 +74,7 @@ function withStored(
 	builds: IndexedBuild[],
 ): HackathonSnapshot {
 	if (!builds.length) return s;
-	const profile = profileOf(builds);
+	const profile = eventProfile(builds);
 	return {
 		...s,
 		submissionCount: s.submissionCount ?? profile.submissions,

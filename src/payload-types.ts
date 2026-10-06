@@ -77,6 +77,7 @@ export interface Config {
 		"stablecoin-snapshots": StablecoinSnapshot;
 		"rwa-assets": RwaAsset;
 		"hackathon-builds": HackathonBuild;
+		"hackathon-events": HackathonEvent;
 		"award-rounds": AwardRound;
 		"award-nominees": AwardNominee;
 		"award-voters": AwardVoter;
@@ -126,6 +127,9 @@ export interface Config {
 		"hackathon-builds":
 			| HackathonBuildsSelect<false>
 			| HackathonBuildsSelect<true>;
+		"hackathon-events":
+			| HackathonEventsSelect<false>
+			| HackathonEventsSelect<true>;
 		"award-rounds": AwardRoundsSelect<false> | AwardRoundsSelect<true>;
 		"award-nominees": AwardNomineesSelect<false> | AwardNomineesSelect<true>;
 		"award-voters": AwardVotersSelect<false> | AwardVotersSelect<true>;
@@ -1518,6 +1522,61 @@ export interface HackathonBuild {
 	/**
 	 * Last time the event's DoraHacks roster listed this build, ISO
 	 */
+	lastSeenAt: string;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * Every Stellar hackathon event on DoraHacks, as its organizer published it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathon-events".
+ */
+export interface HackathonEvent {
+	id: string;
+	/**
+	 * The event's DoraHacks uname: the slug /api/hackathons lists and /api/hackathons/{slug} opens
+	 */
+	slug: string;
+	title: string;
+	/**
+	 * YYYY-MM-DD
+	 */
+	startDate?: string | null;
+	/**
+	 * YYYY-MM-DD
+	 */
+	endDate?: string | null;
+	prizePoolUsd?: number | null;
+	hackersCount?: number | null;
+	summary?: string | null;
+	/**
+	 * The event page, markdown as the organizer published it (brief, resources, prizes, rules).
+	 */
+	description?: string | null;
+	tracks?: string[] | null;
+	/**
+	 * The submission form requires a public repo.
+	 */
+	repoRequired?: boolean | null;
+	/**
+	 * The submission form requires a demo video.
+	 */
+	videoRequired?: boolean | null;
+	submissionQuestions?: string[] | null;
+	/**
+	 * The page's own requirements or rules section, verbatim. Empty = the page has none.
+	 */
+	requirementsSection?: string | null;
+	/**
+	 * The page's own judging criteria section, verbatim. Empty = the organizer published none.
+	 */
+	judgingSection?: string | null;
+	/**
+	 * When the lane last read the event page, ISO
+	 */
+	detailReadAt?: string | null;
+	firstSeenAt: string;
 	lastSeenAt: string;
 	updatedAt: string;
 	createdAt: string;
@@ -3012,6 +3071,10 @@ export interface PayloadLockedDocument {
 				value: string | HackathonBuild;
 		  } | null)
 		| ({
+				relationTo: "hackathon-events";
+				value: string | HackathonEvent;
+		  } | null)
+		| ({
 				relationTo: "award-rounds";
 				value: string | AwardRound;
 		  } | null)
@@ -3632,6 +3695,31 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	repoLastCommitAt?: T;
 	repoArchived?: T;
 	activityCheckedAt?: T;
+	firstSeenAt?: T;
+	lastSeenAt?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hackathon-events_select".
+ */
+export interface HackathonEventsSelect<T extends boolean = true> {
+	slug?: T;
+	title?: T;
+	startDate?: T;
+	endDate?: T;
+	prizePoolUsd?: T;
+	hackersCount?: T;
+	summary?: T;
+	description?: T;
+	tracks?: T;
+	repoRequired?: T;
+	videoRequired?: T;
+	submissionQuestions?: T;
+	requirementsSection?: T;
+	judgingSection?: T;
+	detailReadAt?: T;
 	firstSeenAt?: T;
 	lastSeenAt?: T;
 	updatedAt?: T;
