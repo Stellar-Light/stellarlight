@@ -20,6 +20,10 @@
 export interface LabeledRepo {
 	fullName: string;
 	why: string;
+	/** The commit the label was verified at, when the repo has since moved
+	 * on: the eval scores the code at this commit instead of HEAD, so upstream
+	 * drift cannot turn a true label false. Unset = HEAD. */
+	ref?: string;
 }
 
 export const DEEP: LabeledRepo[] = [
@@ -369,9 +373,16 @@ export const JS_DEEP: LabeledRepo[] = [
 		fullName: "chatch/stellarexplorer",
 		why: "Live steexp.com explorer (2017-2026, 507 stars) with real @stellar/stellar-sdk@16 integration in its own app/lib/stellar/ — Soroban rpc.Server subclass, Horizon query builders, Federation/MuxedAcco...",
 	},
+	// Pinned 2026-10-05: on 2026-10-02 the repo became the standalone
+	// @lobstrco/signer-extension-api package (53 files, no stellar-sdk
+	// dependency) and was renamed from lobstrco/lobstr-browser-extension. The
+	// extension app this label describes left the public repo, so at HEAD it
+	// scored 0.414 (signing + wallet-provider only) and failed the JS DEEP
+	// band. At the pinned commit, the last before the move, it scores 0.559.
 	{
-		fullName: "lobstrco/lobstr-browser-extension",
-		why: "Official LOBSTR wallet extension (active, pushed 2026-07): Home.tsx uses @stellar/stellar-sdk Horizon.Server for live balance handling and background/messageListener/external/sign.ts + @lobstrco/si...",
+		fullName: "Lobstrco/signer-extension-api",
+		ref: "849662d17063c0c0ddf51a7eeddef6bd734fad03",
+		why: "Official LOBSTR wallet extension at 849662d (2026-08-13, before the repo became the standalone signer API): extension/src/popup/views/Home/Home.tsx uses @stellar/stellar-sdk Horizon.Server for live balances; extension/src/background/messageListener/{external,internal}/sign.ts + @lobstrco/si...",
 	},
 	{
 		fullName: "allbridge-io/allbridge-core-js-sdk",
