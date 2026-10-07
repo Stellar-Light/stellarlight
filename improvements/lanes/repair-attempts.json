@@ -215,6 +215,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-ledger-data-indexer-d",
+   "date": "2026-10-07",
+   "run": "37646654085",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
