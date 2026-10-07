@@ -13,6 +13,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
 import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
 import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
@@ -64,6 +65,29 @@ async function collectionStatus(
 	}
 }
 
+/** The events /api/hackathons serves, counted from what we store: the
+ * DoraHacks event pages the daily hackathon lane keeps (hackathon-events
+ * holds DoraHacks rows only) plus the code-curated events that never touch
+ * DoraHacks. The `hackathons` collection this used to count is empty, so the
+ * source read 0 while 26 events were served. */
+async function hackathonStatus(
+	// biome-ignore lint/suspicious/noExplicitAny: Payload's type is awkward
+	payload: any,
+): Promise<SourceStatus> {
+	const stored = await collectionStatus(
+		payload,
+		"hackathon-events",
+		"hackathons",
+		"Stellar hackathon events: DoraHacks event pages stored by the daily hackathon lane, plus the code-curated events that never touch DoraHacks. /api/hackathons merges the live DoraHacks listing with the same curated events; its meta.counts is the served total.",
+	);
+	if (stored.count === null) return stored;
+	return {
+		...stored,
+		count: stored.count + CURATED_HACKATHONS.length,
+		populationId: "hackathon-events+curated|status:all",
+	};
+}
+
 export async function GET() {
 	const payload = await getPayloadSafe();
 	const generatedAt = new Date().toISOString();
@@ -79,12 +103,7 @@ export async function GET() {
 	] = payload
 		? await Promise.all([
 				collectionStatus(payload, "projects", "projects"),
-				collectionStatus(
-					payload,
-					"hackathons",
-					"hackathons",
-					"Curated DB collection only (may be 0). /api/hackathons additionally merges live DoraHacks-sourced events — see its meta.counts for the served total.",
-				),
+				hackathonStatus(payload),
 				collectionStatus(
 					payload,
 					"builders",
