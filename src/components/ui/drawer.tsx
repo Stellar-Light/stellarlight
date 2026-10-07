@@ -43,7 +43,10 @@ const DrawerContent = React.forwardRef<
 		<DrawerPrimitive.Content
 			ref={ref}
 			className={cn(
-				"fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-2xl border border-[#2F2F2F] bg-[#1a1a1a] p-6",
+				// outline-none: vaul focuses the content on open and the browser's default
+				// focus ring drew a blue line along the drawer's top edge on mobile
+				// (owner, 2026-09-05); the handle bar is the affordance, not a ring.
+				"fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-2xl border border-[#2F2F2F] bg-[#1a1a1a] p-6 outline-none focus:outline-none focus-visible:outline-none",
 				className,
 			)}
 			{...props}

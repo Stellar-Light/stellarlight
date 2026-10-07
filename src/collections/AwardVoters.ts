@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { isAdmin } from "./access";
 
 /**
  * i³ Awards — voter whitelist (one row per eligible Stellar address per round).
@@ -28,10 +29,10 @@ export const AwardVoters: CollectionConfig = {
 			"Whitelisted voter addresses per round. A ballot is only relayed if its source account is listed here.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: ({ req }) => isAdmin(req.user),
+		create: ({ req }) => isAdmin(req.user),
+		update: ({ req }) => isAdmin(req.user),
+		delete: ({ req }) => isAdmin(req.user),
 	},
 	fields: [
 		{

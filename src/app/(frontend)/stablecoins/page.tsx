@@ -1,0 +1,225 @@
+import type { Metadata } from "next";
+import {
+	type CoinView,
+	StablecoinExplorer,
+} from "@/components/stablecoin-explorer";
+import { ReconciliationNote } from "@/components/stablecoin-reconciliation-note";
+import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	docToEntry,
+	fetchFeedEntries,
+	mergeNews,
+	NEWS_SOURCES,
+	type NewsItem,
+} from "@/lib/stablecoin-news";
+import { reconcileWithDefiLlama } from "@/lib/stablecoin-reconciliation";
+import {
+	issuerLeaderboard,
+	pivotByToken,
+	type TokenSnapshot,
+} from "@/lib/stablecoin-series";
+import { aggregateDaily, type SnapshotPoint } from "@/lib/stablecoin-view";
+import { type StoreRow, storeRowToApi } from "@/lib/stablecoins";
+import { graph, itemListNode } from "@/lib/structured-data";
+import { getAppUrl } from "@/lib/utils/app-url";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Stellar Stablecoins & Issued Assets",
+	description:
+		"Every stablecoin issued on Stellar with its issuer, peg, supply, holders and on-chain activity, read from Horizon rather than a press release.",
+	alternates: { canonical: "/stablecoins" },
+};
+
+export default async function StablecoinsPage() {
+	const payload = await getPayloadSafe();
+	let coins: CoinView[] = [];
+	let rawSnapshots: unknown[] = [];
+	let news: NewsItem[] = [];
+	let series = {
+		points: [] as ReturnType<typeof aggregateDaily>["points"],
+		droppedLowCoverage: 0,
+	};
+
+	if (payload) {
+		const [current, snaps] = await Promise.all([
+			payload.find({ collection: "stablecoins", limit: 200, depth: 0 }),
+			payload.find({
+				collection: "stablecoin-snapshots",
+				// The whole series, newest first so a cap can never drop the
+				// current days (2026-08-22: the imported Replit history made the
+				// table 3,700 rows; at 20 assets/day a flat 5,000 ran out in
+				// two months). 20,000 ≈ 2.7 years at today's roster.
+				limit: 20000,
+				depth: 0,
+				sort: "-day",
+				select: {
+					day: true,
+					assetId: true,
+					code: true,
+					marketCapUSD: true,
+					holders: true,
+					supply: true,
+				},
+			}),
+		]);
+
+		coins = (current.docs as StoreRow[])
+			.filter((d) => !d.retiredAt)
+			.map((d) => {
+				const r = storeRowToApi(d);
+				return {
+					id: r.assetId ?? `${r.ticker}-${r.issuer?.slice(0, 8) ?? ""}`,
+					ticker: r.ticker,
+					name: r.name || r.ticker,
+					company: r.company ?? "",
+					issuerCode: r.issuer ?? "",
+					issuerDomain: r.issuerDomain ?? "",
+					country: r.country,
+					peg: r.peg,
+					assetType: r.assetType,
+					logoUrl: d.logoUrl ?? null,
+					// The explorer drew a peg flag for assets whose issuer serves no
+					// usable logo (BRLT, ARST, PEN, MXNe, mZAR) — same rule here.
+					useFlagIcon: !d.logoUrl,
+					basis: r.basis,
+					note: r.note,
+					measuredAt: r.updatedAt,
+					supplyRaw: r.supply,
+					holdersRaw: r.holders,
+					marketCapRaw: r.marketCapUSD,
+					volumeRaw: r.volume24hUSD,
+					priceRaw: r.priceUSD,
+				} satisfies CoinView;
+			})
+			.filter((c) => c.ticker);
+
+		// Stablecoin coverage for the dock: the live RSS window for freshness,
+		// the ingested corpus for depth. Filtered by whether the piece is ABOUT
+		// stablecoins — never by vector similarity, which returns the
+		// consensus-protocol paper for the query "stablecoin".
+		try {
+			const [feed, found] = await Promise.all([
+				fetchFeedEntries(),
+				payload.find({
+					collection: "research-docs",
+					where: { source: { in: NEWS_SOURCES } },
+					limit: 400,
+					depth: 0,
+					sort: "-publishedAt",
+					select: {
+						title: true,
+						url: true,
+						content: true,
+						publishedAt: true,
+						source: true,
+					},
+				}),
+			]);
+			const corpus = (found.docs as Parameters<typeof docToEntry>[0][])
+				.map(docToEntry)
+				.filter((e): e is NonNullable<typeof e> => e !== null);
+			news = mergeNews(feed, corpus);
+		} catch {
+			// The dock is supplementary — never take the page down for it.
+		}
+
+		// Oldest first for everything downstream.
+		const ordered = [...snaps.docs].sort((a, b) =>
+			String((a as SnapshotPoint).day).localeCompare(
+				String((b as SnapshotPoint).day),
+			),
+		);
+		rawSnapshots = ordered;
+		series = aggregateDaily(ordered as SnapshotPoint[]);
+	}
+
+	const totalMarketCap = coins.reduce((s, c) => s + (c.marketCapRaw ?? 0), 0);
+	const totalHolders = coins.reduce((s, c) => s + (c.holdersRaw ?? 0), 0);
+	const totalVolume24h = coins.reduce((s, c) => s + (c.volumeRaw ?? 0), 0);
+
+	// The FULL daily series, oldest first. The explorer picks the window
+	// (30D / 90D / All) client-side — the imported history reaches back to
+	// 2025-11-28 and a fixed 30-day slice here hid all of it.
+	const allDays = series.points;
+
+	// Per-token series for the four analytics panels, plus the leaderboard.
+	// The leaderboard needs no history, so it is useful from the first run.
+	const snapDocs = (rawSnapshots ?? []) as TokenSnapshot[];
+	const marketCapByToken = pivotByToken(snapDocs, "marketCapUSD");
+	const holdersByToken = pivotByToken(snapDocs, "holders");
+	// Total market cap over time. Built from `series.points` rather than
+	// totalPerDay() because those rows carry `assetsCounted` — the number of
+	// assets measured that day. A total that steps up because WE started
+	// tracking more assets is not the market growing, and the reader has to be
+	// able to tell the difference, so the count travels with the value.
+	const totalMarketCapSeries = allDays.map((p) => ({
+		_date: p.date,
+		total: p.marketCapUSD,
+		assets: p.assetsCounted,
+	}));
+	// Per-token supply — the issuer drawer's 30-day supply-change chart.
+	const supplyByToken = pivotByToken(snapDocs, "supply");
+	const issuers = issuerLeaderboard(coins);
+	// Our headline is larger than every other Stellar tracker's. Rather than
+	// leave a reader to assume that means we are wrong, show where the
+	// difference comes from — computed live, and null when their endpoint is
+	// unreachable so the page never carries a stale comparison.
+	const reconciliation = await reconcileWithDefiLlama(
+		coins.map((c) => ({ ticker: c.ticker, supply: c.supplyRaw })),
+	);
+
+	return (
+		<div className="min-h-screen bg-background pt-16">
+			{/* ItemList for the coins this page lists. "stellar stablecoins" is a
+			    query someone types, and each ticker already has its own page at
+			    /stablecoins/[assetId] — this is what tells a crawler the list
+			    and the detail pages belong together. numberOfItems follows the
+			    array, so it cannot drift from what is rendered. */}
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify output, no user-controlled string in the JSON-LD body
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(
+						graph([
+							itemListNode(getAppUrl(), {
+								path: "/stablecoins",
+								name: "Stellar Stablecoins",
+								items: coins.map((c) => ({
+									name: `${c.ticker}${c.name && c.name !== c.ticker ? ` — ${c.name}` : ""}`,
+									url: `/stablecoins/${c.id}`,
+								})),
+							}),
+						]),
+					),
+				}}
+			/>
+			<StablecoinExplorer
+				coins={coins}
+				marketCapSeries={allDays.map((p) => ({
+					date: p.date,
+					value: p.marketCapUSD,
+				}))}
+				holdersSeries={allDays.map((p) => ({
+					date: p.date,
+					value: p.holders,
+				}))}
+				totalMarketCap={totalMarketCap}
+				totalVolume24h={totalVolume24h}
+				totalHolders={totalHolders}
+				marketCapByToken={marketCapByToken}
+				holdersByToken={holdersByToken}
+				totalMarketCapSeries={totalMarketCapSeries}
+				supplyByToken={supplyByToken}
+				issuers={issuers}
+				news={news}
+			/>
+			{reconciliation && (
+				<div className="container mx-auto max-w-7xl px-6 pb-12">
+					<ReconciliationNote data={reconciliation} />
+				</div>
+			)}
+		</div>
+	);
+}

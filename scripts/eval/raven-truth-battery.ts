@@ -1,0 +1,749 @@
+/**
+ * Raven truth battery — daily, rotating, graded against curated truth.
+ *
+ * Born from the 2026-08-27 hand-run battery (44 probes, 29 ops) that found
+ * the split-identity hole and the liveness-float regression. This is that
+ * battery productionized, with the two things a hand-run lacks:
+ *
+ *  1. ROTATION — the same questions every day go stale; probes rotate by
+ *     day-of-year across banks, so a week of runs covers the whole bank.
+ *  2. A SELF-UPDATING ANSWER KEY — hand-written expectations rot. Slices D-F
+ *     derive their expectations from our own curated truth: prominence>=80
+ *     rows must be findable by their own name, human-verified statuses must
+ *     serve exactly what a human verified, and project links/descriptions
+ *     must meet the data bar. Curation IS the answer key, so new curated
+ *     rows are guarded automatically.
+ *
+ * Guard-B lesson applies: every probe error is counted and the run exits
+ * non-zero on errors — a quiet detector and a clean run must never look the
+ * same. Raven is the path agents take; query slices go through the gateway
+ * (RAVEN_TOKEN), row-QA slices hit HTTP directly.
+ */
+
+import { ABSENT_BANKS, CATEGORY_BANKS, KNOWN_BANKS } from "./battery-banks";
+
+const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
+	/\/$/,
+	"",
+);
+
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
+const RAVEN = process.env.RAVEN_URL || "https://agents.stellar.buzz/mcp";
+/**
+ * The token lives durably at ~/.config/stellarlight/raven.token; CI supplies
+ * RAVEN_TOKEN. Falling back to the file matters because the alternative is
+ * worse than an error: on 2026-09-06 four slices sent UNAUTHENTICATED
+ * requests, took an empty-bodied 401, and the run still printed "0 fail" —
+ * a third of the battery silently not running.
+ */
+const TOKEN =
+	process.env.RAVEN_TOKEN ||
+	(() => {
+		try {
+			return readFileSync(
+				join(homedir(), ".config/stellarlight/raven.token"),
+				"utf8",
+			).trim();
+		} catch {
+			return "";
+		}
+	})();
+const GATE = process.argv.includes("--gate");
+const ALL = process.argv.includes("--all"); // ignore rotation, run every bank
+
+// deterministic rotation — no Date.now() in the selection itself would break
+// nothing here (this is a CLI, not a workflow script), but keep it stable per
+// calendar day so a red can be reproduced locally all day.
+const dayOfYear = Math.floor(
+	(Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 0)) / 86400000,
+);
+
+let pass = 0;
+let fail = 0;
+let errors = 0;
+const failures: string[] = [];
+
+function verdict(ok: boolean, name: string, detail: string) {
+	if (ok) pass++;
+	else {
+		fail++;
+		failures.push(`${name}: ${detail}`);
+	}
+	console.log(`  ${ok ? "ok  " : "FAIL"}  ${name}  ${detail}`);
+}
+
+async function http(path: string): Promise<any> {
+	const r = await fetch(`${BASE}${path}`, {
+		headers: { "User-Agent": "raven-truth-battery" },
+	});
+	if (!r.ok) throw new Error(`${r.status} ${path}`);
+	return r.json();
+}
+
+let rpcId = 0;
+async function raven(code: string): Promise<any> {
+	rpcId++;
+	const res = await fetch(RAVEN, {
+		method: "POST",
+		headers: {
+			"content-type": "application/json",
+			accept: "application/json, text/event-stream",
+			authorization: `Bearer ${TOKEN}`,
+		},
+		body: JSON.stringify({
+			jsonrpc: "2.0",
+			id: rpcId,
+			method: "tools/call",
+			params: { name: "execute", arguments: { code } },
+		}),
+	});
+	const text = await res.text();
+	// A refusal is not a parse error. Without this, a 429 or a 5xx with an
+	// empty body surfaced as "SyntaxError: Unexpected end of JSON input" and
+	// read like OUR bug — four slices reported that on 2026-09-06 and the
+	// message named neither the status nor the endpoint.
+	if (!res.ok)
+		throw new Error(
+			`raven HTTP ${res.status} ${res.statusText} (${text.length} bytes)${text ? `: ${text.slice(0, 160)}` : " — empty body"}`,
+		);
+	if (!text.trim())
+		throw new Error(`raven returned an empty body (HTTP ${res.status})`);
+	// SSE or plain; find the result payload's first text content
+	const line = text
+		.split("\n")
+		.filter((l) => l.startsWith("data:"))
+		.map((l) => l.slice(5).trim())
+		.find((l) => l.startsWith("{"));
+	let body: any;
+	try {
+		body = JSON.parse(line ?? text);
+	} catch (e) {
+		throw new Error(
+			`raven reply was not JSON (HTTP ${res.status}, ${text.length} bytes): ${text.slice(0, 160)}`,
+		);
+	}
+	const content =
+		body?.result?.content?.find((c: any) => c.type === "text")?.text ?? "";
+	// Raven appends coaching after the JSON — parse the leading object only.
+	const start = content.indexOf("{");
+	if (start < 0)
+		throw new Error(
+			`no JSON in raven reply — it answered in prose: ${content.slice(0, 200)}`,
+		);
+	let depth = 0;
+	for (let i = start; i < content.length; i++) {
+		if (content[i] === "{") depth++;
+		else if (content[i] === "}" && --depth === 0) {
+			const slice = content.slice(start, i + 1);
+			try {
+				return JSON.parse(slice);
+			} catch {
+				throw new Error(
+					`raven's JSON did not parse (${slice.length} bytes of ${content.length}): ${slice.slice(0, 160)}`,
+				);
+			}
+		}
+	}
+	throw new Error("unterminated JSON in raven reply");
+}
+
+// ── Slice A: known-item recall through phrasings (rotates) ─────────────────
+// Each bank pairs real projects with a NATURAL phrasing family. The named
+// project must lead. Banks deliberately span verticals the last battery
+// didn't touch.
+const PHRASINGS = [
+	(n: string) => `is ${n} live`,
+	(n: string) => `tell me about ${n}`,
+	(n: string) => `what is ${n}`,
+	(n: string) => `${n} on stellar`,
+];
+
+async function sliceA() {
+	console.log("\n── A: known-item recall (rotating phrasings) ──");
+	const bank = KNOWN_BANKS[dayOfYear % KNOWN_BANKS.length];
+	const banks = ALL ? KNOWN_BANKS.flat() : bank;
+	const phrase = PHRASINGS[dayOfYear % PHRASINGS.length];
+	const cases = banks
+		.map(([name, slug], i) => ({
+			q: (ALL ? PHRASINGS[i % PHRASINGS.length] : phrase)(name),
+			slug,
+		}))
+		.map(
+			(c) => `{ q: ${JSON.stringify(c.q)}, slug: ${JSON.stringify(c.slug)} }`,
+		)
+		.join(",");
+	const out = await raven(`
+		const cases = [${cases}];
+		const out = [];
+		for (const c of cases) {
+			const r = await scout.searchProjects({ q: c.q, limit: 5 });
+			const rows = r.data?.projects ?? [];
+			out.push({ q: c.q, want: c.slug, top: rows[0]?.slug ?? null,
+				status: rows.find((p) => p.slug === c.slug)?.status ?? null,
+				mode: r.data?.meta?.matchMode ?? null });
+		}
+		return { out };
+	`);
+	for (const r of out.out ?? []) {
+		verdict(
+			r.top === r.want,
+			`A:${r.want}`,
+			`"${r.q}" -> top=${r.top} mode=${r.mode}${r.status ? ` status=${r.status}` : ""}`,
+		);
+	}
+}
+
+// ── Slice B: absent-entity honesty (rotates, includes camelCase traps) ─────
+// sls-076 regression control (their filed requirement): q=Strupey must NEVER
+// come back as a keyword tier — the row it finds (Stroopy.AI) matches only
+// through our curated spelling correction, and two agent runs treated the old
+// strict label as identity evidence for an unverified name. "corrected" (the
+// honest mode) and "semantic" both pass; any keyword tier is the regression.
+async function sliceB2() {
+	console.log("\n── B2: spelling-corrected honesty (sls-076) ──");
+	const out = await raven(`
+		const r = await scout.searchProjects({ q: "Strupey", limit: 3 });
+		return { mode: r.data?.meta?.matchMode ?? null,
+			label: r.data?.meta?.matchModeLabel ?? null,
+			slugs: (r.data?.projects ?? []).map((p) => p.slug) };
+	`);
+	verdict(
+		out.mode === "corrected" || out.mode === "semantic",
+		"B2:corrected",
+		`q=Strupey -> mode=${out.mode} slugs=${JSON.stringify(out.slugs)}`,
+	);
+}
+
+async function sliceB() {
+	console.log("\n── B: absent-entity honesty ──");
+	const qs = ALL
+		? ABSENT_BANKS.flat()
+		: ABSENT_BANKS[dayOfYear % ABSENT_BANKS.length];
+	const out = await raven(`
+		const qs = ${JSON.stringify(qs)};
+		const out = [];
+		for (const q of qs) {
+			const r = await scout.searchProjects({ q, limit: 4 });
+			out.push({ q, mode: r.data?.meta?.matchMode ?? null,
+				rows: (r.data?.projects ?? []).length });
+		}
+		return { out };
+	`);
+	for (const r of out.out ?? []) {
+		// honest = semantic (guards fire) or an empty keyword result. A keyword
+		// tier WITH rows is a confident answer about something we do not hold.
+		verdict(
+			r.mode === "semantic" || r.rows === 0,
+			"B:absent",
+			`"${r.q}" -> mode=${r.mode} rows=${r.rows}`,
+		);
+	}
+}
+
+// ── Slice C: category truth (rotates verticals; expected members curated) ──
+async function sliceC() {
+	console.log("\n── C: category truth ──");
+	const picks = ALL
+		? CATEGORY_BANKS
+		: [
+				CATEGORY_BANKS[dayOfYear % CATEGORY_BANKS.length],
+				CATEGORY_BANKS[(dayOfYear + 3) % CATEGORY_BANKS.length],
+			];
+	for (const c of picks) {
+		const op = c.op ?? "searchProjects";
+		const key = c.key ?? "projects";
+		const out = await raven(`
+			const r = await scout.${op}({ q: ${JSON.stringify(c.q)}, limit: 8 });
+			return { slugs: (r.data?.${key} ?? []).map((p) => p.slug) };
+		`);
+		const hit = (out.slugs ?? []).filter((s: string) => c.anyOf.includes(s));
+		verdict(
+			hit.length >= (c.min ?? 2),
+			"C:category",
+			`"${c.q}" -> ${hit.length}/${c.anyOf.length} expected members in top-8 (${(out.slugs ?? []).slice(0, 4).join(",")})`,
+		);
+	}
+}
+
+// ── Slice D: curated truth as the answer key — prominence rows ─────────────
+// Every prominence>=80 row is a canonical pick a human made. Each must be
+// findable by ITS OWN NAME. No hand-written list: curation drives coverage.
+async function sliceD() {
+	console.log(
+		"\n── D: prominence rows findable by name (curation = answer key) ──",
+	);
+	const d = await http("/api/projects/search?q=stellar&limit=200");
+	const prominent = (d.projects ?? [])
+		.filter((p: any) => Number(p.prominence ?? 0) >= 80)
+		.slice(0, 24);
+	if (prominent.length < 3) {
+		// the sample query may not surface enough prominent rows — that is a
+		// sampling limitation, not proof of absence; note and move on.
+		console.log(
+			`  note: only ${prominent.length} prominent rows in sample; skipping`,
+		);
+		return;
+	}
+	const picks = ALL
+		? prominent
+		: prominent.filter((_: any, i: number) => i % 3 === dayOfYear % 3);
+	for (const p of picks) {
+		const r = await http(
+			`/api/projects/search?q=${encodeURIComponent(p.name)}&limit=3`,
+		);
+		const top = (r.projects ?? [])[0]?.slug;
+		verdict(
+			top === p.slug,
+			"D:prominent",
+			`"${p.name}" -> ${top} (want ${p.slug})`,
+		);
+	}
+}
+
+// ── Slice E: human-verified statuses serve exactly what a human verified ───
+async function sliceE() {
+	// Caveat: search responses are cached per query key (SWR). Right after a
+	// curation lands, one path can briefly serve the pre-curation snapshot —
+	// a red here that self-heals next run is cache staleness, not data loss.
+	// A red that PERSISTS is a real serving defect — gate-io's persistent red
+	// turned out to be the slug missing from the search haystack entirely, not
+	// a cache or a revert. Chase it to root, never wave it off.
+	console.log("\n── E: human-verified statuses hold ──");
+	const d = await http("/api/projects/search?q=stellar&limit=200");
+	const hv = (d.projects ?? []).filter(
+		(p: any) => p.statusBasis === "human-verified",
+	);
+	const picks = ALL
+		? hv
+		: hv.filter((_: any, i: number) => i % 2 === dayOfYear % 2);
+	for (const p of picks.slice(0, 12)) {
+		const r = await http(
+			`/api/projects/search?q=${encodeURIComponent(p.slug)}&limit=1`,
+		);
+		const row = (r.projects ?? [])[0];
+		verdict(
+			row?.slug === p.slug &&
+				row?.status === p.status &&
+				row?.statusBasis === "human-verified",
+			"E:hv-status",
+			`${p.slug} status=${row?.status} basis=${row?.statusBasis}`,
+		);
+	}
+	if (!picks.length) console.log("  note: no human-verified rows in sample");
+}
+
+// ── Slice F: project data quality — links, descriptions, provenance ────────
+async function sliceF() {
+	console.log("\n── F: row data quality (top + random sample) ──");
+	const d = await http("/api/projects/search?q=stellar&limit=200");
+	const rows = d.projects ?? [];
+	const top = rows.slice(0, 10);
+	const rand = rows
+		.filter((_: any, i: number) => i % 17 === dayOfYear % 17)
+		.slice(0, 8);
+	for (const p of [...top, ...rand]) {
+		const problems: string[] = [];
+		const desc = p.shortDescription || p.description || "";
+		if (!desc || desc.length < 25) problems.push("thin description");
+		if (!Array.isArray(p.types) || p.types.length === 0)
+			problems.push("no types");
+		if (
+			p.status === "Live" &&
+			!p.statusSourceUrl &&
+			p.statusBasis !== "human-verified"
+		)
+			problems.push("Live without source");
+		const site = p.links?.website;
+		if (site) {
+			try {
+				const h = await fetch(site, {
+					method: "HEAD",
+					redirect: "follow",
+					signal: AbortSignal.timeout(10000),
+				});
+				// 403/405/429 on a bare HEAD is bot-blocking (gate-io's Cloudflare),
+				// not a dead site — only genuine not-there codes count.
+				// class 32 (link-check lesson, applied to the battery's own probe):
+				// a 5xx is the ORIGIN failing — one observation proves nothing
+				// about the row (stellar-passport 530'd for a day and the row was
+				// fine). Bot walls (403/405/429) likewise. Only proven-dead
+				// client statuses fail the row; the weekly link-check's streak
+				// escalation owns chronic origin sickness.
+				if (
+					h.status >= 400 &&
+					h.status < 500 &&
+					![403, 405, 429].includes(h.status)
+				)
+					problems.push(`website ${h.status}`);
+			} catch {
+				problems.push("website unreachable");
+			}
+		}
+		verdict(
+			problems.length === 0,
+			"F:row",
+			`${p.slug}${problems.length ? ` — ${problems.join("; ")}` : ""}`,
+		);
+	}
+}
+
+const t0 = Date.now();
+console.log(
+	`Raven truth battery → ${BASE} (day ${dayOfYear}, ${ALL ? "ALL banks" : "rotating"})`,
+);
+// ── Slice G: enumeration integrity (sls-033's count-instability, closed) ──
+// An exact-type enumeration is a SET: membership must not depend on q, limit,
+// or offset. Two roots closed 2026-08-28: (1) tier admission + a limit-gated
+// bypass made membership depend on page size; (2) Payload `contains` on the
+// hasMany types field is CASE-INSENSITIVE SUBSTRING per element — type=DEX
+// counted every Indexer ("In-DEX-er"), inflating total to 61 for a 46-row
+// set. Wallet is pinned (the original subject); DEX is pinned (the collision
+// witness); a third type rotates daily.
+async function sliceG() {
+	const G_TYPES = ALL
+		? ["Wallet", "DEX", "Oracle", "Exchange", "Lending"]
+		: [
+				"Wallet",
+				"DEX",
+				["Oracle", "Exchange", "Lending", "Bridge", "Anchor", "RWA"][
+					dayOfYear % 6
+				],
+			];
+	console.log(`\n── G: enumeration integrity (${G_TYPES.join(", ")}) ──`);
+	const base = "https://stellarlight.xyz/api/projects/search";
+	const fetchJson = async (u: string) =>
+		(await (
+			await fetch(u, { headers: { "User-Agent": "stellarlight-battery" } })
+		).json()) as {
+			projects?: Array<{ slug?: string; name?: string }>;
+			meta?: { counts?: { total?: number } };
+		};
+	// The API caps a page at 100 rows, and a typed set can exceed that (RWA
+	// reached 101 on 2026-10-02 and tripped every G probe): the set is the
+	// WALK at the cap, not one page. Membership and totals are compared on
+	// the walked set; the page-vs-total check is kept for sets that fit.
+	const PAGE = 100;
+	const walkSet = async (url: string) => {
+		const slugs: string[] = [];
+		let total = -1;
+		let projects: Array<{ slug?: string; name?: string }> = [];
+		for (let off = 0; off < 1000; off += PAGE) {
+			const page = await fetchJson(`${url}&limit=${PAGE}&offset=${off}`);
+			if (off === 0) {
+				total = page.meta?.counts?.total ?? -1;
+				projects = page.projects ?? [];
+			}
+			const got = (page.projects ?? []).map((p) => String(p.slug));
+			slugs.push(...got);
+			if (got.length < PAGE) break;
+		}
+		return { slugs, total, projects };
+	};
+	try {
+		for (const gType of G_TYPES) {
+			const ql = gType.toLowerCase();
+			const noQ = await walkSet(`${base}?type=${gType}`);
+			const noQSlugs = noQ.slugs;
+			const total = noQ.total;
+			verdict(
+				noQSlugs.length === total && new Set(noQSlugs).size === total,
+				"G:closed-set",
+				`type=${gType} no-q: walked=${noQSlugs.length} distinct=${new Set(noQSlugs).size} total=${total} (the walk at the page cap IS the set)`,
+			);
+			const withQ = await walkSet(`${base}?type=${gType}&q=${ql}`);
+			const withQSlugs = new Set(withQ.slugs);
+			const sameSet =
+				withQSlugs.size === noQSlugs.length &&
+				noQSlugs.every((x) => withQSlugs.has(x));
+			verdict(
+				sameSet,
+				"G:q-ranks-only",
+				`${gType}: q membership ${withQSlugs.size} vs typed set ${noQSlugs.length} — q must rank, never gate`,
+			);
+			const walked: string[] = [];
+			for (let off = 0; off < 300; off += 17) {
+				const page = await fetchJson(
+					`${base}?type=${gType}&q=${ql}&limit=17&offset=${off}`,
+				);
+				const slugs = (page.projects ?? []).map((p) => String(p.slug));
+				walked.push(...slugs);
+				if (slugs.length < 17) break;
+			}
+			const dupes = walked.filter((x, i2) => walked.indexOf(x) !== i2);
+			verdict(
+				dupes.length === 0 && walked.length === noQSlugs.length,
+				"G:pagination",
+				`${gType} walk at limit=17: ${walked.length} rows, ${dupes.length} dupes ${dupes.length ? JSON.stringify([...new Set(dupes)]) : ""} (must equal the set, once each)`,
+			);
+			const norm = (n: string) => n.toLowerCase().replace(/[^a-z0-9]/g, "");
+			const names = noQ.projects.map((p) => norm(String(p.name ?? "")));
+			const nameDupes = names.filter((x, i2) => x && names.indexOf(x) !== i2);
+			verdict(
+				nameDupes.length === 0,
+				"G:no-duplicate-names",
+				`${gType}: duplicate normalized names: ${nameDupes.length ? JSON.stringify([...new Set(nameDupes)]) : "none"}`,
+			);
+		}
+	} catch (e) {
+		errors++;
+		console.log(`  ERROR in sliceG: ${String(e).slice(0, 120)}`);
+	}
+}
+
+// ── Slice H: verify-surface truths (the claim engine grades itself) ──
+// Standing claims pinned to curated truth: a status contradiction (laina,
+// human-verified testnet-only), a multi-issuer attribution (EURC — supported
+// WITH the never-by-ticker-alone warning), a wrong-attribution contradiction
+// (USDC/Tether), and an audit support (blend). Drift = the data moved
+// (update the probe WITH evidence) or verify broke — both worth a red.
+async function sliceH() {
+	console.log("\n── H: verify-surface truths ──");
+	const check = async (claim: string, want: string, mustContain?: string) => {
+		try {
+			const r = (await (
+				await fetch(
+					`https://stellarlight.xyz/api/verify?claim=${encodeURIComponent(claim)}`,
+					{ headers: { "User-Agent": "stellarlight-battery" } },
+				)
+			).json()) as { verdict?: string; statement?: string };
+			const okV = r.verdict === want;
+			const okS = !mustContain || (r.statement ?? "").includes(mustContain);
+			verdict(
+				okV && okS,
+				"H:verify",
+				`"${claim}" -> ${r.verdict}${mustContain && !okS ? ` (statement missing "${mustContain}")` : ""} (want ${want})`,
+			);
+		} catch (e) {
+			errors++;
+			console.log(`  ERROR in sliceH: ${String(e).slice(0, 100)}`);
+		}
+	};
+	await check("is laina live", "contradicted", "Pre-Release");
+	await check("is EURC issued by Circle", "supported", "also issued by MyKobo");
+	await check("is USDC issued by Tether", "contradicted", "Circle");
+	await check("is blend audited", "supported");
+}
+
+/** Slice I — sls-079: deployment is a separate, evidence-backed fact.
+ * The answer key is SELF-UPDATING like D-F: whatever DEPLOYMENT_VERIFIED
+ * curation and the evidence backfill wrote must serve exactly that, every
+ * unevidenced row must say "unknown" (never a guess), and an unknown must
+ * never carry stray provenance. */
+async function sliceI() {
+	console.log("\n── I: deployment fact (evidence-only, unknown is honest) ──");
+	// curated case: the operator bundle proved testnet-only (sls-079 receipt)
+	const sf = await http("/api/projects/search?q=stellars%20finance&limit=1");
+	const sfRow = (sf.projects ?? [])[0] ?? {};
+	verdict(
+		sfRow.deployment?.network === "testnet" &&
+			sfRow.deployment?.basis === "human-verified",
+		"I:curated",
+		`stellars-finance -> ${JSON.stringify(sfRow.deployment)}`,
+	);
+	// evidence case: onchain-activity rows must serve mainnet
+	const rf = await http("/api/projects/search?q=reflector&limit=1");
+	const rfDep = ((rf.projects ?? [])[0] ?? {}).deployment;
+	verdict(
+		rfDep?.network === "mainnet",
+		"I:evidenced",
+		`reflector -> ${JSON.stringify(rfDep)}`,
+	);
+	// honesty case: rows without evidence carry an explicit unknown with NO
+	// provenance attached, on every row of a broad page
+	const page = await http("/api/projects/search?q=wallet&limit=25");
+	let missing = 0;
+	let strayProvenance = 0;
+	for (const p of page.projects ?? []) {
+		const dep = p.deployment;
+		if (!dep || typeof dep.network !== "string") missing++;
+		else if (
+			dep.network === "unknown" &&
+			(dep.basis !== null || dep.sourceUrl !== null)
+		)
+			strayProvenance++;
+	}
+	verdict(
+		missing === 0,
+		"I:present",
+		`${missing} of ${(page.projects ?? []).length} rows missing the deployment field`,
+	);
+	verdict(
+		strayProvenance === 0,
+		"I:unknown-clean",
+		`${strayProvenance} unknown row(s) carrying stray provenance`,
+	);
+}
+
+// ── Slice J: every declared research source holds documents ──
+// The source enum is the contract an agent routes on; a value with nothing
+// behind it (scf-proposal held zero documents for a quarter while a partner
+// sent every funding question to it) is a declared capability that answers
+// empty every time, labelled as a retrieval fallback. The API's own
+// count-backed verdict (meta.sourceEmpty, #1761) is what this reads, so the
+// probe cannot pass on a query that merely missed. Runs every day, no rotation.
+async function sliceJ() {
+	console.log("\n── J: declared research sources hold documents ──");
+	const spec = await http("/api/openapi.json");
+	const params = spec?.paths?.["/api/research"]?.get?.parameters ?? [];
+	const sourceParam = params.find((p: any) => p?.name === "source");
+	const sources: string[] = sourceParam?.schema?.enum ?? [];
+	verdict(
+		sources.length >= 10,
+		"J:enum",
+		`${sources.length} declared sources in the spec`,
+	);
+	for (const s of sources) {
+		const r = await http(
+			`/api/research?q=stellar&source=${encodeURIComponent(s)}&limit=3`,
+		);
+		const returned = r?.meta?.counts?.returned ?? 0;
+		const empty = r?.meta?.sourceEmpty === true;
+		verdict(
+			!empty && returned > 0,
+			"J:source-has-docs",
+			`source=${s}: returned=${returned} mode=${r?.meta?.matchMode ?? "?"}${empty ? " sourceEmpty=true" : ""}`,
+		);
+	}
+}
+
+// K: the skills catalog's registry health, direct. A mirrored registry is
+// measured by what it listed against what resolved, and by its own sections:
+// the catalog once served 15 community-built entries as SDF-authored, never
+// saw 13 of the registry's 38 lines, and 404'd the page of every entry
+// outside a static list while the API served it. Runs every day, no rotation.
+async function sliceK() {
+	console.log("\n── K: skills registry listed, resolved, labelled ──");
+	const r = await http("/api/skills");
+	const reg = r?.meta?.registry;
+	verdict(
+		reg?.live === true,
+		"K:registry-live",
+		`live=${reg?.live ?? "absent"} listed=${reg?.listed ?? "?"} served=${reg?.served ?? "?"}`,
+	);
+	const listed = reg?.listed ?? 0;
+	const served = reg?.served ?? 0;
+	verdict(
+		listed >= 30 && served >= listed - 3,
+		"K:registry-resolves",
+		`listed=${listed} served=${served} unreachable=${JSON.stringify(reg?.unreachable ?? [])}`,
+	);
+	const by = r?.meta?.counts?.bySource ?? {};
+	verdict(
+		(by.sdf ?? 0) >= 6 && (by.sdf ?? 0) <= 15 && (by.community ?? 0) >= 15,
+		"K:sections-labelled",
+		`sdf=${by.sdf ?? 0} community=${by.community ?? 0} (SDF authored is a section of about 8; community built about 29)`,
+	);
+	const skills: any[] = r?.skills ?? [];
+	const segmentNamed = skills
+		.filter((s) => /^(Mcp|Sdk|Main|Src|Discover Mpprouter)$/.test(s.name))
+		.map((s) => s.slug);
+	verdict(
+		segmentNamed.length === 0,
+		"K:names-are-titles",
+		segmentNamed.length
+			? `path-segment names: ${segmentNamed.join(", ")}`
+			: `${skills.length} rows named by title`,
+	);
+	const community = skills.find(
+		(s) => s.source === "community" && s.registry === "skills.stellar.org",
+	);
+	const detail = community ? await http(`/api/skills/${community.slug}`) : null;
+	verdict(
+		!!community &&
+			detail?.skill?.source === "community" &&
+			typeof detail?.skill?.content === "string",
+		"K:community-detail-resolves",
+		community
+			? `/api/skills/${community.slug}: source=${detail?.skill?.source ?? "?"} content=${typeof detail?.skill?.content}`
+			: "no community-built registry entry in the catalog",
+	);
+}
+
+// L: several sources in one call must return, per source, exactly the rows
+// the single-source call returns: the claim made to a partner replacing 13
+// scoped calls with one. A nonce keeps both reads off the edge cache so they
+// are computed within seconds of each other. Runs every day, no rotation.
+async function sliceL() {
+	console.log("\n── L: multi-source research parity ──");
+	const nonce = Date.now();
+	const q = encodeURIComponent("soroban authorization");
+	const sources = ["cap", "sep", "dev-docs"];
+	const multi = await http(
+		`/api/research?q=${q}&source=${sources.join(",")}&perSource=6&v=${nonce}`,
+	);
+	const by: any[] = multi?.meta?.bySource ?? [];
+	verdict(
+		by.length === sources.length,
+		"L:bySource",
+		`${by.length} of ${sources.length} sources reported`,
+	);
+	for (const s of sources) {
+		const single = await http(
+			`/api/research?q=${q}&source=${s}&limit=6&v=${nonce}`,
+		);
+		const row = by.find((b) => b.source === s);
+		// Row ids, not resultsHash: each call embeds the query on its own
+		// instance and scores differ in the fourth decimal, which can swap
+		// near-ties; two single-source calls differ the same way.
+		const ids = (rows: any[] | undefined) =>
+			(rows ?? [])
+				.map((r) => r.id)
+				.sort()
+				.join(",");
+		const multiIds = ids(
+			(multi?.results ?? []).filter((r: any) => r.source === s),
+		);
+		const singleIds = ids(single?.results);
+		verdict(
+			!!row && row.status === 200 && multiIds !== "" && multiIds === singleIds,
+			"L:parity",
+			`source=${s}: ${row?.returned ?? "?"}/${single?.meta?.counts?.returned ?? "?"} rows, same row set ${multiIds === singleIds}`,
+		);
+	}
+}
+
+// A battery with no credential is not a battery. Sending the requests anyway
+// buys four opaque slice errors and a "0 fail" summary.
+if (!TOKEN) {
+	console.error(
+		"INCONCLUSIVE: no Raven token (RAVEN_TOKEN, or ~/.config/stellarlight/raven.token). The through-Raven slices cannot run, and an unauthenticated 401 is not a test result.",
+	);
+	process.exit(2);
+}
+
+const slices = [
+	sliceA,
+	sliceB,
+	sliceB2,
+	sliceC,
+	sliceD,
+	sliceE,
+	sliceF,
+	sliceG,
+	sliceH,
+	sliceI,
+	sliceJ,
+	sliceK,
+	sliceL,
+];
+for (const s of slices) {
+	try {
+		await s();
+	} catch (e) {
+		errors++;
+		console.log(`  ERROR in ${s.name}: ${String(e).slice(0, 140)}`);
+	}
+}
+console.log(`\n${"=".repeat(74)}`);
+console.log(
+	`  ${pass} pass · ${fail} fail · ${errors} slice errors · ${((Date.now() - t0) / 1000).toFixed(0)}s`,
+);
+if (failures.length) {
+	console.log("\n  failures:");
+	for (const f of failures.slice(0, 30)) console.log(`   · ${f}`);
+}
+// Errors always gate — a battery that could not probe must never look green.
+if (GATE && (fail > 0 || errors > 0)) process.exit(1);

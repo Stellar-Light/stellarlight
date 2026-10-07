@@ -1,4 +1,7 @@
 import type { CollectionConfig } from "payload";
+import { activityStateOf, CODE_SCAN_STATES } from "../lib/repo-grade";
+import { repoSupersession } from "../lib/repo-relations";
+import { adminOnly, isAdmin } from "./access";
 
 /**
  * Code references: GitHub repos in the Stellar ecosystem as flat, searchable,
@@ -20,7 +23,69 @@ export const Repos: CollectionConfig = {
 			"lastCommitAt",
 		],
 	},
-	access: { read: () => true },
+	access: {
+		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
+	},
+	hooks: {
+		// Internal knowledge notes are triage memory (why a long-tail repo
+		// isn't worth surfacing/deep-indexing) and must never leave the DB
+		// through ANY read path — including Payload's auto-exposed
+		// /api/repos REST (public read). Filtered here at the collection
+		// layer for every reader but an admin. A partner session is logged in
+		// too, so "no user" was the wrong test.
+		// Serve-side filters in repo-search are a second, redundant layer.
+		afterRead: [
+			({ doc, req }) => {
+				// Internal maintenance scripts read through the local API with no
+				// req.user; they pass context.internal so their read-backs can see
+				// the fields they just wrote. No external path can set local-API
+				// context, so the privacy boundary holds.
+				if (!isAdmin(req?.user) && req?.context?.internal !== true) {
+					if (Array.isArray(doc?.knowledgeNotes)) {
+						doc.knowledgeNotes = doc.knowledgeNotes.filter(
+							(n: { visibility?: string | null }) =>
+								n?.visibility !== "internal",
+						);
+					}
+					// Triage tags are internal verdicts (see repo-triage.ts) —
+					// public surfaces express the same reality via tier +
+					// activityState in neutral language.
+					if (doc && "triageTags" in doc) doc.triageTags = undefined;
+				}
+				// A repo that was replaced must say so on EVERY read path.
+				// Until 2026-09-07 this was attached in repo-search only, so
+				// /api/repos/search?q=defindex reported paltalabs/defindex
+				// superseded by defindex-io/stellar-contracts (archived,
+				// 2026-07-01) while /api/repos returned the same row with
+				// isArchived: true and supersededBy absent. An agent that hits
+				// the collection learns the repo is dead and nothing about what
+				// replaced it — exactly the case this data exists for.
+				//
+				// Derived at read time from the dated map, never stored, so the
+				// map stays the single truth and no backfill can go stale.
+				if (doc?.fullName) {
+					const sup = repoSupersession(String(doc.fullName));
+					if (sup) Object.assign(doc, sup);
+				}
+				// activityState alongside it, for the same reason. The endpoint
+				// sweep (2026-09-07) found search serving a derived verdict —
+				// active / maintained / dormant / archived / unknown — that the
+				// collection omitted, so the two paths answered "is this alive?"
+				// differently. Derived here from fields the row already carries,
+				// never stored, so it cannot go stale.
+				if (doc && ("lastCommitAt" in doc || "isArchived" in doc)) {
+					doc.activityState = activityStateOf(
+						doc.lastCommitAt as string | null,
+						doc.isArchived as boolean | null,
+					);
+				}
+				return doc;
+			},
+		],
+	},
 	fields: [
 		{
 			name: "fullName",
@@ -29,7 +94,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: { description: "owner/name — natural key" },
 		},
-		{ name: "owner", type: "text" },
+		{ name: "owner", type: "text", index: true },
 		{ name: "name", type: "text" },
 		{ name: "url", type: "text" },
 		{ name: "description", type: "textarea" },
@@ -45,6 +110,50 @@ export const Repos: CollectionConfig = {
 		{ name: "stars", type: "number", defaultValue: 0 },
 		{ name: "openIssues", type: "number", defaultValue: 0 },
 		{ name: "lastCommitAt", type: "date" },
+		{
+			// Repo-intel slice 2: velocity + release signals from the same enrich
+			// GraphQL call. asOf dates the snapshot; null fields = unavailable at
+			// fetch time, never zero.
+			name: "activitySignals",
+			type: "group",
+			fields: [
+				{ name: "commits90d", type: "number" },
+				{ name: "lastReleaseAt", type: "date" },
+				{ name: "releaseTag", type: "text" },
+				{ name: "openPRs", type: "number" },
+				{ name: "asOf", type: "date" },
+			],
+		},
+		{
+			// sls-064 analog: this repo is a SUPERSEDED generation; the named
+			// repo is its successor. Curated via REPO_SUCCESSIONS
+			// (src/lib/repo-relations.ts) — verified against the repos' own
+			// statements, never inferred from names. Null = not superseded
+			// (or not yet classified). Stamped wholesale by enrich each pass.
+			name: "successorRepo",
+			type: "text",
+			index: true,
+		},
+		{
+			// Repo-intel slice 3: dated facts with sources (curated map +
+			// derived audit crosslink), rebuilt wholesale by enrich each pass —
+			// see src/lib/repo-knowledge.ts for the discipline.
+			name: "knowledgeNotes",
+			type: "array",
+			fields: [
+				{ name: "note", type: "textarea", required: true },
+				{ name: "source", type: "text", required: true },
+				{ name: "asOf", type: "text" },
+				{
+					// public (default) serves everywhere; internal is triage
+					// memory that never leaves the DB (serve-side filtered).
+					name: "visibility",
+					type: "select",
+					options: ["public", "internal"],
+					defaultValue: "public",
+				},
+			],
+		},
 		{ name: "homepageUrl", type: "text" },
 		{ name: "isFork", type: "checkbox", defaultValue: false },
 		{ name: "isArchived", type: "checkbox", defaultValue: false },
@@ -94,14 +203,72 @@ export const Repos: CollectionConfig = {
 			name: "repoScore",
 			type: "number",
 			defaultValue: 0,
+			index: true,
 			admin: {
-				description: "0-100 quality grade (freshness + traction + authority)",
+				description:
+					"0-100 quality grade: own merit from the scanned code + independent corroboration (see src/lib/repo-grade.ts)",
 				position: "sidebar",
 			},
 		},
 		{ name: "repoScoreLabel", type: "text", admin: { position: "sidebar" } },
 		{ name: "lastEnrichedAt", type: "date", admin: { position: "sidebar" } },
 		{ name: "enrichError", type: "text", admin: { position: "sidebar" } },
+		{
+			// INTERNAL structured triage labels (src/lib/repo-triage.ts) —
+			// derived from stored signals each enrich pass, stripped for
+			// unauthenticated reads by the afterRead hook. Drives scan-wave
+			// skip decisions; never drives public copy.
+			name: "triageTags",
+			type: "select",
+			hasMany: true,
+			options: [
+				"dead-hackathon-project",
+				"farm-signals",
+				"inert-fork",
+				"archived-upstream",
+				"dead-long-tail",
+				"tutorial-or-template",
+			],
+			index: true,
+			admin: {
+				position: "sidebar",
+				description: "Internal triage labels — never served",
+			},
+		},
+		{
+			// Discovery provenance: how this repo entered the index. Project-linked
+			// repos come from the curated directory's github links (enrich-repos);
+			// ec-taxonomy repos come from Electric Capital's public crypto-ecosystems
+			// list (ingest-ec-taxonomy). Forever distinguishable for trust/filtering.
+			name: "source",
+			type: "select",
+			// builder-owned: indexed because a tracked PERSON owns it, not
+			// because a directory project links it. Individual contributors
+			// were invisible to a project-driven index until this existed.
+			options: ["project-link", "ec-taxonomy", "builder-owned"],
+			defaultValue: "project-link",
+			index: true,
+			admin: {
+				position: "sidebar",
+				description: "How this repo entered the index",
+			},
+		},
+		{
+			// Quality tier (tag-and-demote, never delete — the Inactive-projects
+			// pattern): archive = archived/dead-and-unstarred (name-searchable but
+			// sinks in ranking, excluded from inline codeReferences); community =
+			// alive but unproven; quality = repoScoreLabel high. Computed at
+			// ingest/enrich time.
+			name: "tier",
+			type: "select",
+			options: ["quality", "community", "archive"],
+			defaultValue: "community",
+			index: true,
+			admin: {
+				position: "sidebar",
+				description: "Quality tier — archive is demoted, never deleted",
+			},
+		},
 
 		// ── Code-Truth Ledger (CTL) — code-signal + audit fields.
 		// DECLARED here so the scanner (scripts/scan/*) can write them and
@@ -153,6 +320,14 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			// Engineering-practice presence facts from the code scan (tree-level):
+			// "has a CI config" / "has test files" — presence only, never a claim
+			// CI passes or coverage is good. Written by scan-repo-code.
+			name: "ciPresent",
+			type: "checkbox",
+		},
+		{ name: "testsPresent", type: "checkbox" },
+		{
 			name: "contractMacroCount",
 			type: "number",
 			admin: { position: "sidebar" },
@@ -185,6 +360,48 @@ export const Repos: CollectionConfig = {
 				description: "Matched @stellar/* JS dependency",
 			},
 		},
+		{
+			// Packages this repo PUBLISHES, verified against the registry.
+			//
+			// A package.json `name` is worthless as evidence — 18 of 25 sampled
+			// hackathon repos have one. The evidence is the registry serving that
+			// package AND naming this repo as its source: jsr.io returns
+			// `githubRepository: {owner, name}`, npm returns `repository.url`.
+			// Neither can be produced without controlling both the repo and the
+			// namespace, which is what makes it hard to fake — unlike a test file
+			// or a CI badge.
+			//
+			// In the same 25-repo hackathon sample: 0 verified-published.
+			// WHEN the registry check last ran. Absent = never checked.
+			//
+			// `publishedPackages: []` cannot carry that meaning: Payload serves an
+			// unset array field as [], so on 2026-09-08 all 13,169 rows read as
+			// either packages-or-empty and NONE as absent — including the 2,578
+			// the lane had explicitly declined to check. The lane's trinary write
+			// rule (verified / checked-none / could-not-check → not written) was
+			// correct and invisible, because the read side collapsed two of the
+			// three into the same value.
+			name: "packagesCheckedAt",
+			type: "text",
+			admin: {
+				description:
+					"When the registry check last ran. Absent = never checked (an empty publishedPackages cannot say that).",
+			},
+		},
+		{
+			name: "publishedPackages",
+			type: "array",
+			admin: {
+				description:
+					"Registry-verified packages this repo publishes (the registry names this repo as the source).",
+			},
+			fields: [
+				{ name: "registry", type: "text" }, // "npm" | "jsr"
+				{ name: "name", type: "text" },
+				{ name: "version", type: "text" },
+				{ name: "verifiedAt", type: "text" },
+			],
+		},
 		// Anti-farm (additive; real code caps to 0).
 		{
 			name: "farmScore",
@@ -215,12 +432,77 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "contractInterface",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Soroban contract ABI (array of strings): pub fn signatures per #[contractimpl] block, Contract.fn(args) -> ret",
+			},
+		},
+		{
+			name: "stellarDeps",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal",
+			},
+		},
+		{
+			name: "sdkCapabilities",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, \u2026) detected in actual sources \u2014 computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)",
+			},
+		},
+		{
+			// Evidence-only domain labels (src/lib/code-domains.ts): what the
+			// CODE proves the repo does (defi-lending, defi-amm, oracle,
+			// payments-x402, wallet-infra, anchor-ramp, indexer, \u2026) \u2014 derived
+			// from deps + capability tags + interface traits at scan time,
+			// never from topics/README self-description.
+			name: "codeDomains",
+			type: "json",
+			index: true,
+			admin: {
+				position: "sidebar",
+				description: "Code-evidence domain labels (scanner-derived)",
+			},
+		},
+		{
+			name: "scannedRef",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"Commit SHA of the default branch the code facts were computed at — provenance pin (github.com/<fullName>/tree/<scannedRef>)",
+			},
+		},
+		{
 			name: "mainnetContractId",
 			type: "text",
 			admin: {
 				position: "sidebar",
 				description:
-					"README contract id VERIFIED live on Stellar mainnet via stellar.expert (scanner)",
+					"README contract id resolved live on Stellar mainnet via stellar.expert, with shared token contracts and other projects' contracts excluded (scanner)",
+			},
+		},
+		{
+			// WHOSE contract it is — the thing mainnetContractId alone never said.
+			// "published" means we ruled out the two provable ways it isn't this
+			// repo's, not that we proved it is; only "self-validated" earns the
+			// verified-contract-id trust signal.
+			name: "mainnetContractBasis",
+			type: "select",
+			options: ["self-validated", "published"],
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Ownership evidence for mainnetContractId (self-validated = stellar.expert names this repo)",
 			},
 		},
 		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from
@@ -235,16 +517,18 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		// Scan lifecycle. pending = never successfully scanned (never demoted).
+		// `gone` = GitHub answered 404 for the repo itself; the row stays (its
+		// history is still true) but serving surfaces stop recommending it.
 		{
 			name: "codeScanState",
 			type: "select",
-			options: ["pending", "scanned", "error", "incomplete"],
+			options: [...CODE_SCAN_STATES],
 			defaultValue: "pending",
 			index: true,
 			admin: {
 				position: "sidebar",
 				description:
-					"CTL scan state — pending/error/incomplete are never demoted",
+					"CTL scan state — pending/error/incomplete are never demoted; gone = GitHub 404s the repo",
 			},
 		},
 		{ name: "codeScanError", type: "text", admin: { position: "sidebar" } },
@@ -258,6 +542,27 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{ name: "codeScannedAt", type: "date", admin: { position: "sidebar" } },
+		{
+			// Code-in-use (code-truth track): rollup of LIVE mainnet activity for
+			// contracts attributed to this repo (scanner-verified contract ids +
+			// stellar.expert wasm validation). Written ONLY by
+			// scripts/data/enrich-onchain-projects.ts (weekly). Deltas null until
+			// a second snapshot exists — never zero.
+			name: "codeInUse",
+			type: "group",
+			admin: {
+				description:
+					"Mainnet usage rollup for contracts attributed to this repo. Populated by enrich-onchain-projects only; absent = no verified contract joined, NOT 'unused'.",
+			},
+			fields: [
+				{ name: "contracts", type: "number" },
+				{ name: "events", type: "number" },
+				{ name: "eventsDelta", type: "number" },
+				{ name: "subinvocations", type: "number" },
+				{ name: "subinvocationsDelta", type: "number" },
+				{ name: "asOf", type: "text" },
+			],
+		},
 		// ── Audit trail — every code-signal change is explainable + rollbackable.
 		{
 			name: "priorTier",

@@ -26,16 +26,22 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
+import { logApiHit } from "@/lib/api-usage";
 import {
 	CURATED_SKILLS,
 	type CuratedSkill,
 } from "@/lib/integrations/curated-skills";
 import {
+	fetchRegistryLive,
 	fetchSdfSkill,
-	fetchSdfSkillNames,
+	registrySkillView,
+	SDF_SKILL_NAMES,
+	SKILLS_REGISTRY,
 } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 import { generateSlug } from "@/lib/utils/normalize";
@@ -47,6 +53,9 @@ import { generateSlug } from "@/lib/utils/normalize";
 // method-handler COMBINATION is what caused the #276/#280 stable-500; the normal
 // dynamic-route + guards pattern used by the other 22 routes is safe).
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 /**
  * Map of slug → inlined SKILL.md text for our own skill files. Lets the
@@ -59,56 +68,38 @@ const INLINED_SKILL_CONTENT: Record<string, string> = {
 };
 
 export async function GET(
-	_req: NextRequest,
+	req: NextRequest,
 	{ params }: { params: Promise<{ name: string }> },
 ) {
+	const startedAt = Date.now();
 	const { name: rawName } = await params;
 	// Accept either the slug ('stellar-scout') or the display name ('Stellar
 	// Scout') — agents naturally pass whatever the user said. generateSlug is
 	// idempotent on real slugs, so this is a no-op for correct slugs and a fix
 	// for display names that previously 404'd.
 	const slug = generateSlug(rawName);
+	const logHit = () =>
+		logApiHit({
+			req,
+			startedAt,
+			status: 200,
+			endpoint: "/api/skills/[name]",
+			query: slug,
+		});
 
 	// 1. SDF skill? Fetch full content live from skills.stellar.org.
 	// sls-053: gate against the LIVE llms.txt-derived list (24h cache), not a
 	// static snapshot — so renamed/added SDF skills resolve without a deploy.
-	if ((await fetchSdfSkillNames()).includes(slug)) {
-		const skill = await fetchSdfSkill(slug);
-		if (!skill) {
-			return NextResponse.json(
-				{ error: `failed to fetch skill ${slug} from skills.stellar.org` },
-				{ status: 502 },
-			);
-		}
-		return jsonResponse(
-			{
-				meta: {
-					source: skill.rawUrl,
-					operator: "Stellar Development Foundation",
-					generatedAt: new Date().toISOString(),
-				},
-				skill: {
-					slug,
-					source: "sdf" as const,
-					kind: "skill-md" as const,
-					name: humanize(skill.name),
-					description: skill.description,
-					install: `npx skills add stellar/${skill.name}`,
-					homepage: skill.url,
-					rawUrl: skill.rawUrl,
-					compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-					targetUser: ["dev"],
-					tags: [skill.name, "SDF"],
-					content: skill.content, // raw SKILL.md, frontmatter included
-				},
-			},
-			{ sMaxAge: 86_400 },
-		);
-	}
-
-	// 2. Curated entry?
+	// An upstream miss falls through to the curated and community copies
+	// below; only when every source fails does the caller see a 503.
+	// Curated first, as the list merges: a curated entry stands for the registry
+	// copy it names (Stellar Scout, Lumen Loop's skills, the Soroswap SDK), so
+	// its slug must answer with the curated row here too.
+	const registry = await fetchRegistryLive();
+	const registryDown = registry === null;
 	const curated = CURATED_SKILLS.find((s) => s.slug === slug);
 	if (curated) {
+		logHit();
 		return jsonResponse(
 			{
 				meta: {
@@ -118,16 +109,63 @@ export async function GET(
 				},
 				skill: {
 					...toUnifiedShape(curated),
+					// The list marks a curated row the registry lists under its
+					// registryName; the detail answers the same shape.
+					...(curated.registryName && registry?.has(curated.registryName)
+						? { registry: SKILLS_REGISTRY }
+						: {}),
 					content: await resolveCuratedContent(curated),
 				},
 			},
-			{ sMaxAge: 3600 },
+			{ sMaxAge: 3600, startedAt },
 		);
 	}
 
 	// 3. Community submission?
+	// A display name slugified ("MPP Discover" -> mpp-discover) may not be the
+	// catalog name (discover): resolve it through the registry's titles too.
+	const registryName = registry
+		? registry.has(slug)
+			? slug
+			: [...registry.values()].find((e) => generateSlug(e.title) === slug)?.name
+		: (SDF_SKILL_NAMES as readonly string[]).includes(slug)
+			? slug
+			: undefined;
+	const isSdf = registryName !== undefined;
+	const skill = registryName ? await fetchSdfSkill(registryName) : null;
+	if (skill) {
+		logHit();
+		return jsonResponse(
+			{
+				meta: {
+					source: skill.rawUrl,
+					operator: skill.community
+						? `community-built, listed on ${SKILLS_REGISTRY} and maintained by its author (not reviewed by SDF)`
+						: "Stellar Development Foundation",
+					generatedAt: new Date().toISOString(),
+				},
+				skill: {
+					...registrySkillView(skill),
+					content: skill.content, // raw SKILL.md, frontmatter included
+				},
+			},
+			{ sMaxAge: 86_400, startedAt },
+		);
+	}
+
 	const community = await loadApprovedCommunitySkill(slug);
+	if (community === undefined && !isSdf) {
+		return apiError({
+			status: 503,
+			error: `skill ${slug} could not be looked up: the community registry read failed`,
+			advisory:
+				"The community registry read failed; the skill may exist. This is an outage, not a 404. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
+	}
 	if (community) {
+		logHit();
 		return jsonResponse(
 			{
 				meta: {
@@ -137,8 +175,33 @@ export async function GET(
 				},
 				skill: community,
 			},
-			{ sMaxAge: 3600 },
+			{ sMaxAge: 3600, startedAt },
 		);
+	}
+
+	// The registry lists it but every copy failed to fetch: temporary, retry.
+	if (isSdf) {
+		return apiError({
+			status: 503,
+			error: `skill ${slug} is listed by skills.stellar.org but could not be fetched from any source`,
+			advisory:
+				"skills.stellar.org lists this skill but its SKILL.md could not be fetched from where the registry links it. Report it; a retry inside 300 s returns the same answer.",
+			retryAfterSeconds: 300,
+			startedAt,
+		});
+	}
+
+	// With the registry unreadable, an unknown slug may well be a listed skill
+	// the static fallback does not know: that is "could not check", not 404.
+	if (registryDown) {
+		return apiError({
+			status: 503,
+			error: `skill ${slug} could not be looked up: the skills.stellar.org registry did not answer`,
+			advisory:
+				"skills.stellar.org did not answer, so its entries cannot be resolved. Report it; a retry inside 60 s returns the same answer.",
+			retryAfterSeconds: 60,
+			startedAt,
+		});
 	}
 
 	// Not found anywhere.
@@ -152,9 +215,13 @@ export async function GET(
 }
 
 /** JSON response with consistent cache headers. */
-function jsonResponse(body: unknown, { sMaxAge }: { sMaxAge: number }) {
+function jsonResponse(
+	body: unknown,
+	{ sMaxAge, startedAt }: { sMaxAge: number; startedAt: number },
+) {
 	return NextResponse.json(body, {
 		headers: {
+			...serverTiming(startedAt),
 			"Cache-Control": `public, s-maxage=${sMaxAge}, stale-while-revalidate=${sMaxAge}`,
 		},
 	});
@@ -231,9 +298,10 @@ async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
 	}
 }
 
+/** null = not found; undefined = the read failed (an outage, not an absence). */
 async function loadApprovedCommunitySkill(slug: string) {
 	const payload = await getPayloadSafe();
-	if (!payload) return null;
+	if (!payload) return undefined;
 	try {
 		const result = await payload.find({
 			collection: "community-skills",
@@ -279,21 +347,8 @@ async function loadApprovedCommunitySkill(slug: string) {
 			content: null,
 		};
 	} catch {
-		return null;
+		return undefined;
 	}
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) =>
-			w === "zk"
-				? "ZK"
-				: w === "dapp"
-					? "dApp"
-					: w[0]?.toUpperCase() + w.slice(1),
-		)
-		.join(" ");
 }
 
 // JSON-405 method guards (sls-004): now that the route is force-dynamic (not

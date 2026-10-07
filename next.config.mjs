@@ -23,6 +23,20 @@ const nextConfig = {
 				protocol: "https",
 				hostname: "demo.stellarpassport.xyz",
 			},
+			// Cover art for hand-tracked events, each served by its own
+			// organizer: Meridian (Stellar's Sanity CDN), Rise In, Luma.
+			{
+				protocol: "https",
+				hostname: "cdn.sanity.io",
+			},
+			{
+				protocol: "https",
+				hostname: "files.risein.com",
+			},
+			{
+				protocol: "https",
+				hostname: "images.lumacdn.com",
+			},
 		],
 	},
 	// Exclude problematic packages from server-side bundling
@@ -77,6 +91,7 @@ const nextConfig = {
 			"/api/openapi.json",
 			"/api/status",
 			"/api/changelog",
+			"/api/changes",
 			"/api/audits",
 			"/api/projects/search",
 			"/api/repos/search",
@@ -87,6 +102,7 @@ const nextConfig = {
 			"/api/builders",
 			"/api/people",
 			"/api/partners",
+			"/api/stablecoins",
 			"/api/partners/:slug",
 			"/api/rfps",
 			"/api/research",
@@ -97,6 +113,20 @@ const nextConfig = {
 			"/api/analyze",
 			"/api/leaderboard",
 			"/api/feedback",
+			// Drift guard 2026-08-21: an endpoint missing here silently ships
+			// without CORS or X-API-Version (browser agents can't call it).
+			"/api/projects/resolve",
+			"/api/vet-idea",
+			"/api/scf-pitch",
+			"/api/hackathon-brief",
+			"/api/repos/trust",
+			"/api/contracts",
+			// Drift guard 2026-08-28: the two Verification ops shipped without
+			// CORS or a version header — invisible to browser agents.
+			"/api/quality",
+			"/api/verify",
+			// Drift guard 2026-09-05: /api/rwa shipped 09-04 without the header.
+			"/api/rwa",
 		];
 		const corsHeaders = [
 			{ key: "Access-Control-Allow-Origin", value: "*" },

@@ -18,11 +18,14 @@
 // "dex" → "amm"/"swap", "pool" → "liquidity", "on-ramp" → "anchor". Each query
 // token expands to a term set; a record matches the token if ANY term hits its
 // text. Keeps recall high on single-word category queries without a vector pass.
+import { RESOLVABLE_PROJECT_STATUSES } from "./project-status";
 import { contentTokens, isContentStopword } from "./repo-search";
 import {
 	anchorTokens,
 	CORE_SYNONYMS,
+	GENERIC_QUERY_TOKENS,
 	mergeVocabulary,
+	SPELLING_CORRECTIONS,
 } from "./search-vocabulary";
 
 // Project-surface overlay. Core chain/vertical/region vocabulary lives in
@@ -151,6 +154,27 @@ export const SYNONYMS: Record<string, string[]> = mergeVocabulary(
 	PROJECT_SYNONYM_OVERLAY,
 );
 
+/** sls-076: does this row's admission DEPEND on a spelling correction?
+ * True when at least one query token is a known misspelling whose literal
+ * form (and ordinary stemming) misses the haystack while its corrected
+ * expansion hits — i.e. remove the correction and the row no longer earns
+ * that token. The caller downgrades matchMode to "corrected" so an agent
+ * never reads a spelling neighbor as "all keywords matched". */
+export function correctionMediated(hay: string, tokens: string[]): boolean {
+	for (const t of tokens) {
+		const corrected = SPELLING_CORRECTIONS[t];
+		if (!corrected) continue;
+		const withCorrection = termsForToken(t);
+		const literalOnly = withCorrection.filter(
+			(v) => !v.includes(corrected) && !corrected.includes(v),
+		);
+		const hitLiteral = literalOnly.some((v) => hasPositiveHit(hay, v));
+		const hitCorrected = withCorrection.some((v) => hasPositiveHit(hay, v));
+		if (!hitLiteral && hitCorrected) return true;
+	}
+	return false;
+}
+
 export function termsForToken(t: string): string[] {
 	const out = new Set<string>([t]);
 	// F2 (2026-07-09 audit root #2): light ITERATIVE stemming. Variants are
@@ -235,6 +259,33 @@ export function tokenize(q: string): string[] {
 			tokens.push(...kept, joined);
 		}
 	}
+	// Multi-word queries wrapping a camelCase NAME (2026-08-18 recall audit):
+	// natural phrasing dead-ends because contentTokens splits the name into
+	// fragments — "is idOS live" → [id, os, live]; the 2-char fragments flood
+	// strict-AND while the joined identity is never rebuilt (that rebuild above
+	// is single-word only). So idOS's own record can't match all tokens and the
+	// page fills with prominence defaults (dia/band). Live proof: q="is idOS
+	// live" → dia/band/alchemy, but q="is idos live" → idos #1. Rebuild the
+	// joined form per camelCase word and drop the sub-3-char/stopword split
+	// noise, exactly like the single-word path. Only fires when the query both
+	// has spaces AND contains an internal-caps word, so all-lowercase and
+	// no-name multi-word queries (e.g. "release escrow") are untouched.
+	if (/\s/.test(q.trim())) {
+		const joinedForms = q
+			.trim()
+			.split(/\s+/)
+			.filter((w) => /[a-z][A-Z]/.test(w))
+			.map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ""))
+			.filter((j) => j.length > 2);
+		if (joinedForms.length) {
+			const kept = tokens.filter(
+				(t) =>
+					t.length >= 3 && !isContentStopword(t) && !joinedForms.includes(t),
+			);
+			tokens.length = 0;
+			tokens.push(...kept, ...joinedForms);
+		}
+	}
 	return tokens;
 }
 
@@ -275,6 +326,38 @@ export const INTENT_TYPE: Record<string, string> = {
 	x402: "Payments",
 	mpp: "Payments",
 	micropayment: "Payments",
+	// Raven #39: "what card services can I integrate" is a category question.
+	// Without a type behind it the word "card" matched Yellow Card (a name
+	// homonym), CyberBrawl (a card GAME) and gift-card shops, while Bridge —
+	// on the playbook's own debit-cards page — never entered the pool because
+	// its prose did not say "card". Structured truth drives inclusion.
+	card: "Card Issuing",
+	cards: "Card Issuing",
+	debit: "Card Issuing",
+	// Playbook battery: "which centralized exchanges list XLM" is a category.
+	cex: "Exchange",
+	centralized: "Exchange",
+	// Truth battery 2026-08-27: the oracle vertical existed only as prose.
+	oracle: "Oracle",
+	oracles: "Oracle",
+	// Guard-D 2026-09-01: "smart contract audit firms for Soroban" ranked
+	// redstone-finance (an Oracle) #2 — its lifecycle note says "audited by
+	// Veridise", and a passive audited-by mention ranked as if the project
+	// WERE an auditor. Auditor questions are category questions; the category
+	// is Security. NOTE: the F2 stemmer folds "audited" → "audit" upstream,
+	// so property-questions ("is X audited?") also carry the category — fine,
+	// because intent admission is additive recall and identity matches
+	// dominate the ranking of the named X.
+	audit: "Security",
+	audits: "Security",
+	auditor: "Security",
+	auditors: "Security",
+	// P4 untyped census 2026-08-31: the yield/asset-management vertical had no
+	// enum member — "yield vaults on Stellar" browsed nothing while defindex,
+	// cushion and the vault cohort sat untyped or approximated as Lending.
+	yield: "Yield",
+	vault: "Yield",
+	vaults: "Yield",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",
@@ -306,12 +389,70 @@ export const INTENT_TYPE: Record<string, string> = {
 	infrastructure: "Infrastructure",
 };
 
+/**
+ * Identity groups for camelCase/hyphenated words the tokenizer split.
+ *
+ * "is FlurboSwap live" tokenizes to [flurbo, swap, live, flurboswap] — and the
+ * F2 anchor gate ("a relaxed-tier row must hit at least one anchor") was
+ * satisfiable by the FRAGMENT "swap" alone, so a fabricated name containing a
+ * real word returned that word's whole category at a keyword tier: soroswap,
+ * sushi, alchemy for a project that does not exist, confidently, with every
+ * semantic-mode honesty guard bypassed (2026-08-27 through-Raven battery).
+ *
+ * A split word is ONE identity, not a bag of independent anchors: a row
+ * matches the identity only by carrying the joined form ("soroswap") or ALL
+ * its fragments — never a single fragment. Queries with no split words return
+ * [] and behave exactly as before.
+ */
+/**
+ * Word-boundary hit for identity FRAGMENTS. hitsAnyToken is substring-based
+ * (right for prose recall), but a split identity's fragments are evidence of
+ * a NAME: "block" substring-hitting "blockchain" made every crypto row
+ * satisfy the GetBlockCard group, so the gate excluded nothing. A fragment
+ * counts only as a standalone word.
+ */
+export function hitsWordToken(hay: string, token: string): boolean {
+	const esc = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`(?:^|[^a-z0-9])${esc}(?:[^a-z0-9]|$)`, "i").test(hay);
+}
+
+export function splitIdentityGroups(
+	q: string,
+): Array<{ joined: string; fragments: string[] }> {
+	const groups: Array<{ joined: string; fragments: string[] }> = [];
+	for (const raw of q.split(/\s+/)) {
+		// Only camelCase words are identity-shaped. Hyphenated VOCABULARY
+		// ("non-custodial", "cross-border", "on-ramp") also splits, but those
+		// are topic words — grouping them would demand every fragment and cost
+		// recall on ordinary queries.
+		if (!/[a-z][A-Z]/.test(raw)) continue;
+		const joined = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (!joined) continue;
+		const parts = tokenize(raw).filter((t) => t !== joined);
+		if (parts.length >= 2) groups.push({ joined, fragments: parts });
+	}
+	return groups;
+}
+
 export function intentTypesFor(tokens: string[]): Set<string> {
 	const s = new Set<string>();
-	for (const t of tokens) {
-		if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
-		for (const syn of SYNONYMS[t] ?? [])
-			if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+	for (const raw of tokens) {
+		// Raven #39 battery (2026-08-21): category questions come plural —
+		// "which DEXes / AMMs / bridges / oracles / wallets / indexers can I
+		// integrate" — and every plural missed the singular intent key, so the
+		// question lost its category and degraded to word-matching (DEXes →
+		// only 10 candidates corpus-wide). Try the singular forms too.
+		const forms = new Set<string>([raw]);
+		if (raw.length > 3) {
+			if (raw.endsWith("ies")) forms.add(`${raw.slice(0, -3)}y`);
+			if (raw.endsWith("es")) forms.add(raw.slice(0, -2));
+			if (raw.endsWith("s")) forms.add(raw.slice(0, -1));
+		}
+		for (const t of forms) {
+			if (INTENT_TYPE[t]) s.add(INTENT_TYPE[t]);
+			for (const syn of SYNONYMS[t] ?? [])
+				if (INTENT_TYPE[syn]) s.add(INTENT_TYPE[syn]);
+		}
 	}
 	return s;
 }
@@ -328,15 +469,65 @@ export function intentTypesFor(tokens: string[]): Set<string> {
  */
 export function structuredSelectClauses(
 	tokens: string[],
-): Array<Record<string, { contains: string }>> {
-	const out: Array<Record<string, { contains: string }>> = [];
-	for (const tv of intentTypesFor(tokens))
-		out.push({ types: { contains: tv } });
+): Array<Record<string, { contains: string } | { in: string[] }>> {
+	const out: Array<Record<string, { contains: string } | { in: string[] }>> =
+		[];
+	// `in`, never `contains`: on a hasMany select, contains is case-
+	// insensitive SUBSTRING per element — an intent type of "DEX" would
+	// admit every Indexer as a candidate (2026-08-28 audit).
+	for (const tv of intentTypesFor(tokens)) out.push({ types: { in: [tv] } });
 	for (const t of tokens) {
 		const m = t.match(/^sep-?(\d{1,3})$/);
 		if (m) out.push({ "coverage.seps": { contains: `sep-${m[1]}` } });
 	}
 	return out;
+}
+
+/**
+ * Status + lineage half of the candidate where-clause — "which rows may this
+ * search even look at". The default pool is the shared RESOLVABLE tier
+ * (src/lib/project-status.ts): everything with a public page, Inactive
+ * included (a name lookup must still find a project we record as dead) and
+ * Draft — hidden pending approval — excluded.
+ *
+ * ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05). Two lanes hide a
+ * duplicate and they used to disagree: the dedup lane parks the lower-ranked
+ * twin as Draft, curate's DUPE_MERGES re-marked the same row Inactive 30
+ * minutes later, and Inactive is a DEATH VERDICT a consumer reads as "this
+ * project shut down". The reason curate chose Inactive was here: a lineage
+ * shadow must stay a FOLD CANDIDATE so a lookup of the old name still resolves
+ * to the canonical, and the default pool below excludes Draft — so a Draft
+ * shadow would have gone dark and broken name continuity.
+ *
+ * So a shadow (canonicalSlug set) is admitted in query mode REGARDLESS of its
+ * status, Draft included. It is never SERVED as itself: the shadow-fold swaps
+ * it for its canonical, and the route drops any Draft row that survives the
+ * fold. An explicit ?status= stays a hard contract (it already excluded
+ * off-status shadows), and browse mode still excludes shadows outright so
+ * counts.total and page sizes stay exact.
+ */
+export function statusAdmissionWhere(
+	hasQuery: boolean,
+	statusParam: string | null,
+): Record<string, unknown> {
+	const status = statusParam
+		? { equals: statusParam }
+		: { in: [...RESOLVABLE_PROJECT_STATUSES] };
+	// Browse mode (no query): shadows are merged-away dupes, not real records
+	// — excluded in the DB so counts.total and page sizes are exact
+	// (re-measure 2026-07-11: ?status=Inactive said total=82 while only 42
+	// real rows survived the fold).
+	if (!hasQuery) return { status, canonicalSlug: { equals: null } };
+	// Explicit ?status= overrides the pool — including for shadows, so a status
+	// browse can never be widened by a fold candidate of another status.
+	if (statusParam) return { status };
+	// Query mode, default pool: status OR shadow. `and` (not a second `or`) —
+	// the caller owns top-level `or` for the token clauses, and Payload ANDs
+	// every top-level key. `exists` on a text field means set, non-null and
+	// non-empty, which is exactly "is a shadow".
+	return {
+		and: [{ or: [{ status }, { canonicalSlug: { exists: true } }] }],
+	};
 }
 
 // Ramp/anchor/corridor intent vocabulary. A query carrying any of these (direct
@@ -378,6 +569,7 @@ export function isRampIntent(tokens: string[]): boolean {
 // pass raw Payload docs or mapped rows.
 export interface MatchableProject {
 	name?: string | null;
+	slug?: string | null;
 	shortDescription?: string | null;
 	category?: string | null;
 	types?: string[] | null;
@@ -429,7 +621,30 @@ export function buildHaystack(p: MatchableProject): string {
 	const pg = p.publicGoods?.awardRounds?.length
 		? "scf public goods award maintenance pilots"
 		: "";
-	return `${p.name ?? ""} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
+	// The slug IS identity vocabulary. Without it, a row whose slug differs
+	// from its display name is unfindable by its own slug: q="gate-io" scored
+	// 1 of 3 tokens against name "Gate" and fell through to semantic
+	// neighbours (posted-app, steexp) — while q="gate" found it fine. Both the
+	// hyphenated form and its space-split words are included so "gate-io" and
+	// "gate io" phrasings match.
+	const slug = p.slug ? `${p.slug} ${p.slug.replace(/-/g, " ")}` : "";
+	// Dotted/punctuated names are the joined-form's blind side (engine-A
+	// P-KNOWN + P-PHRASE, crediolabs-ai): the query rebuild appends
+	// "crediolabsai" for q="CredioLabs.AI", but no haystack field carried that
+	// form — the name word-splits at the dot — so the record missed its OWN
+	// name and both probes fell to semantic neighbours, while every fragment
+	// query hit. Carry the canon-joined name and slug as identity vocabulary,
+	// the same move the slug line above makes for hyphens. Same class covers
+	// coins.ph, arka.fund, stellars.finance and every future dotted seed.
+	const joinedName = (p.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+	const joinedSlug = (p.slug ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+	// Only forms the hay doesn't already carry verbatim — a plain name's
+	// joined form IS the name, and re-adding it would just pad occurrences.
+	const baseForms = new Set([(p.name ?? "").toLowerCase(), p.slug ?? ""]);
+	const joinedForms = [...new Set([joinedName, joinedSlug])]
+		.filter((j) => j.length > 2 && !baseForms.has(j))
+		.join(" ");
+	return `${p.name ?? ""} ${slug} ${joinedForms} ${p.shortDescription ?? ""} ${p.category ?? ""} ${types} ${nets} ${covText} ${pg}`.toLowerCase();
 }
 
 // Negation guard (2026-07-11 audit): substring matching means "custodial"
@@ -552,7 +767,17 @@ const CHAIN_PROOF: Record<string, string[]> = {
 	optimism: ["optimism", "evm"],
 	avalanche: ["avalanche", "evm"],
 	bnb: ["bnb", "bsc", "evm"],
-	evm: ["evm", "ethereum", "polygon", "arbitrum", "optimism", "avalanche", "bnb", "bsc", "base"],
+	evm: [
+		"evm",
+		"ethereum",
+		"polygon",
+		"arbitrum",
+		"optimism",
+		"avalanche",
+		"bnb",
+		"bsc",
+		"base",
+	],
 	polkadot: ["polkadot"],
 	kusama: ["kusama"],
 	tron: ["tron"],
@@ -668,4 +893,265 @@ export function structuredHit(
 		return typeMatch(p, intentTypes) || corridorMatch(p, tokens);
 	}
 	return typeMatch(p, intentTypes);
+}
+
+// Name-lookup rank (sls-009): the standard directory-search contract — a
+// query that IS a project's name must return that project first, regardless
+// of how much authority (prominence/SCF/stars) other keyword matches carry.
+export function nameMatchScore(
+	name: string,
+	slug: string,
+	q: string,
+	aliases?: string[] | null,
+	tokens?: string[],
+): number {
+	const qq = q.trim().toLowerCase();
+	if (!qq) return 0;
+	const n = name.trim().toLowerCase();
+	const sl = slug.toLowerCase();
+	const alias = (v: string) =>
+		(aliases ?? []).some((a) => a.trim().toLowerCase() === v);
+	if (n === qq || sl === qq || alias(qq)) return 3;
+	// The exact-name signal is the FIRST key in the result sort, but it was
+	// computed against the RAW query, so ordinary phrasing destroyed it:
+	// q="tell me about Bridge" never equals "bridge", so the project literally
+	// named Bridge scored 0 here and lost to allbridge/axelar, which merely
+	// MENTION bridging. Asking a natural question should not cost a record its
+	// own identity. The stopword-stripped tokens are the query's real subject,
+	// so an exact hit on those is an exact identity hit too — compared both as
+	// written and slug-shaped, since our slugs hyphenate ("blue orion" ->
+	// "blue-orion"). Deliberately only promotes to 3 (exact); it never
+	// manufactures a weaker prefix/word-boundary match, which is what made
+	// nameRank 2/1 a late tiebreaker rather than a primary key.
+	// The query's SUBJECT is its anchors, not all its tokens: "is Bridge live"
+	// tokenizes to ["bridge","live"], and "bridge live" matches nothing. Generic
+	// words were already demoted out of anchor status (#1041), so reusing that
+	// same vocabulary here keeps one definition of "what this query is about".
+	// Shared mention vetoes for BOTH identity-promotion branches below. The
+	// second audit round proved these must sit here, not only on containment:
+	// "best hot wallet for stellar" reduces through anchors to exactly "hot
+	// wallet", so the equality branch handed the category question to the
+	// project named like the category — same defect, older door.
+	//
+	// AN ARTICLE NEVER PRECEDES A NAME: "what is a hot wallet" asks about the
+	// category; a/an in front of the matched span means the words, not the
+	// project ("the" stays legal — The Signal). SHOPPING WORDS MEAN THE
+	// CATEGORY: a superlative/comparison query wants the category ranked, and
+	// rank-1 identity for the like-named project answers a different question.
+	const SHOPPING =
+		/\b(best|top|cheapest|fastest|safest|easiest|good|better|recommended?|recommendations?|compare|comparison|alternatives?|options?|vs)\b/i;
+	const mentionVeto = (needle: string): boolean => {
+		if (SHOPPING.test(qq)) return true;
+		const esc = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
+		return new RegExp(`\\ban?\\s+${flexible}([^a-z0-9]|$)`, "i").test(qq);
+	};
+	// A camelCase split leaves its FRAGMENTS beside the joined form ("0xAuth"
+	// → ["auth","0xauth"]), and the joined anchors "auth 0xauth" can never
+	// equal the name. The tokenizer already treats fragments as subordinate to
+	// the joined word; do the same here for the equality test only: drop an
+	// anchor that is a substring of another anchor. Names that start with a
+	// digit cannot reach the proper-noun rescue below (it requires a capital),
+	// so this was the only door left for them — "what is 0xAuth" scored 0 for
+	// the record named 0xAuth and ranked it #4 behind three "auth" mentions
+	// (engine-a recall miss, 2026-09-13). Mention vetoes still see every token.
+	const anchorsAll = anchorTokens(tokens ?? []);
+	const anchorsNoFragments = anchorsAll.filter(
+		(a) => !anchorsAll.some((b) => b !== a && b.includes(a)),
+	);
+	let joined = anchorsNoFragments.join(" ").trim();
+	// A single content token IS the query's subject even when anchor vocabulary
+	// drops it for length: "what is DD" tokenizes to ["dd"], and anchorTokens'
+	// sub-3-char guard (right for fragment noise in multi-token queries) left
+	// the subject empty, so the record literally named DD could never win its
+	// own phrase while prominent rows filled the page (engine-a P-PHRASE miss,
+	// open since 07-22). Equality-only promotion preserves the guard's purpose:
+	// a 2-char token still has to EQUAL a name/slug/alias to score anything.
+	// Cross-vendor audit (2026-08-31): anchorTokens also drops tokens for
+	// GENERICITY, and this rescue was re-promoting those — "what is sol"
+	// scored 3 against a row named Sol, bypassing the vocabulary's own
+	// design note that sol is never a lone anchor (Solana ambiguity). Only a
+	// LENGTH-dropped token is rescued; a generic word stays a category
+	// mention, exactly what its demotion decided.
+	if (
+		!joined &&
+		(tokens ?? []).length === 1 &&
+		!GENERIC_QUERY_TOKENS.has(tokens?.[0] ?? "")
+	)
+		joined = tokens?.[0] ?? "";
+	if (joined && joined !== qq && !mentionVeto(joined)) {
+		const hyphen = joined.replace(/\s+/g, "-");
+		if (n === joined || sl === joined || sl === hyphen || alias(joined))
+			return 3;
+	}
+	// THE NAME APPEARS VERBATIM IN THE QUERY (the 2026-08-30 recall-miss class).
+	//
+	// The path above reduces the QUERY through anchorTokens and then compares it
+	// to the UNREDUCED name — so any name containing a word that reduction
+	// strips can never match itself. "is Stellar Tools live" reduces to "tools",
+	// which is not "stellar tools"; the project literally named Stellar Tools
+	// scored 0 for its own name. Reproduced live before the fix, top-3 for each:
+	//   "is Stellar Tools live"       -> beamable, trustswap, trustline
+	//   "is Stellar Wallets Kit live" -> hot-wallet, hana, albedo
+	//   "tell me about Rise In"       -> scorechain, alchemy, xoxno
+	//   "is Block by Block live"      -> exaion, fastbuka, nethermind
+	// This score is the FIRST sort key, so the record lost on its own identity
+	// and unrelated rows won. 26 of the 56 open ledger findings are this.
+	//
+	// The fix compares against the RAW query instead, which needs no reduction
+	// to stay honest: if the full name occurs in the question as WHOLE WORDS,
+	// the question is about that record. Word boundaries are load-bearing — a
+	// bare substring test would match "dd" inside "sudden" and promote a
+	// two-letter name onto half the corpus.
+	// MULTI-WORD ONLY, and that restriction is the whole safety argument.
+	//
+	// A single word appearing in a question is a MENTION, not an identity
+	// claim: the project named "Bridge" must not own "cross-chain bridge to
+	// stellar", and slug "stellar" must not own "payments on Stellar today".
+	// Single-word identity already has a path — the proper-noun promotion
+	// below, which requires capitalisation MID-SENTENCE, so sentence case
+	// cannot fake it. This containment test deliberately does not duplicate
+	// that judgement; it only handles what that path structurally cannot see:
+	// a multi-word name, whose co-occurrence in order is not a coincidence.
+	// "Stellar Wallets Kit" appearing intact in a question is about that
+	// record; "bridge" appearing in one is not.
+	const distinctive = (needle: string): boolean =>
+		needle.split(/[\s-]+/).filter(Boolean).length > 1;
+	// THE QUERY MUST BE ABOUT NOTHING BUT THE NAME. Containment alone turned
+	// out to promote ordinary English: an adversarial audit ran the exported
+	// scorer against the live directory and found "what is the rise in TVL on
+	// Stellar" handing rank-1 identity to the project named Rise In, "give
+	// credit to the auditors" to Give Credit, "walk through the transaction
+	// block by block" to Block by Block — confirmed live before this fix
+	// ("best protocol for yield on stellar" returned for-yield at #1). A
+	// multi-word name appearing in order is not a coincidence, but it IS how
+	// English works; the difference between naming a project and using its
+	// words is whether the query carries any OTHER subject.
+	//
+	// So: strip the query to content tokens, remove the name's own tokens, and
+	// require everything left to be generic question-scaffolding ("live",
+	// "maintained", "tools"). "is Stellar Wallets Kit live" leaves {live} —
+	// generic, promote. "what is the rise in TVL" leaves {tvl} — a real
+	// subject, reject. This also stops a SHORTER name shadowing a longer one:
+	// a project named "Stellar Wallets" leaves {kit, live} for the Kit query,
+	// and kit is not generic.
+	//
+	// Known residual, deliberate: a query that IS the name plus scaffolding
+	// ("best dex tools on stellar" for a project named DEX Tools) still
+	// promotes — after stripping, nothing distinguishes it from asking about
+	// the project, and refusing it would reopen the recall class this branch
+	// exists to fix.
+	const queryIsOnlyAbout = (needle: string): boolean => {
+		const nameToks = new Set(needle.split(/[\s-]+/).filter(Boolean));
+		// contentTokens keeps a hyphenated compound whole ("stellar-wallets-kit")
+		// and splits camelCase into fragments ("DeFi" -> de, fi; "iOS" -> os), so
+		// a token also counts as the name's own when every hyphen part is — or
+		// when it is a fragment of the name's compact form. Without the fragment
+		// check, "what is Stellar DeFi Hub" left {de, fi} uncovered and the rule
+		// rejected the exact recall probe this branch exists to serve.
+		const compact = needle.replace(/[^a-z0-9]/g, "");
+		const covered = (t: string): boolean =>
+			nameToks.has(t) ||
+			GENERIC_QUERY_TOKENS.has(t) ||
+			(t.length >= 2 && compact.includes(t)) ||
+			t
+				.split("-")
+				.every((p) => !p || nameToks.has(p) || GENERIC_QUERY_TOKENS.has(p));
+		return contentTokens(q).every(covered);
+	};
+	const bounded = (needle: string): boolean => {
+		if (needle.length < 2) return false;
+		if (!distinctive(needle)) return false;
+		const esc = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		// slugs hyphenate what the query spaces: match either separator
+		const flexible = esc.replace(/[\s-]+/g, "[\\s-]+");
+		if (!new RegExp(`(^|[^a-z0-9])${flexible}([^a-z0-9]|$)`, "i").test(qq))
+			return false;
+		if (mentionVeto(needle)) return false;
+		return queryIsOnlyAbout(needle);
+	};
+	if (
+		bounded(n) ||
+		bounded(sl) ||
+		(aliases ?? []).some((a) => bounded(a.trim().toLowerCase()))
+	)
+		return 3;
+	// Proper-noun promotion (wave-5, the Hermes case): "what happened to
+	// Hermes exchange on Stellar" carries ONE capitalized proper noun
+	// mid-sentence, and that word exactly equalling a record's name or
+	// alias is an identity signal the joined-anchors path cannot see (the
+	// join is "happened hermes exchange"). Promote ONLY a word the user
+	// CAPITALIZED mid-query (never the first word — sentence case is not a
+	// signal — and never network names, which appear capitalized in nearly
+	// every query). Lowercase category words ("bridge to stellar") never
+	// fire this, so category queries keep their ranking.
+	const NETWORK_WORDS = new Set(["stellar", "soroban", "lumens", "xlm"]);
+	const capitalized = qq.length
+		? (q.trim().match(/(?<=\s)[A-Z][A-Za-z0-9-]{2,}/g) ?? [])
+		: [];
+	// A capital INSIDE a word is a casing nobody produces by accident. That
+	// makes it a stronger identity signal than the rule above, and it needs
+	// neither of that rule's two conditions: sentence case cannot capitalise a
+	// letter mid-word, so the first-word exclusion is unnecessary, and the
+	// capital need not come first. "is zkCross live" matched nothing precisely
+	// because the regex above wants the capital in position 0 and zkCross's is
+	// in position 2.
+	//
+	// A lowercase letter must PRECEDE the capital, which is what separates
+	// "zkCross" from "DEX". Acronyms are how people write categories — a
+	// question about "NFT tooling" is not a claim about a project named NFT —
+	// and GENERIC_QUERY_TOKENS holds 44 words, none of them acronyms, so there
+	// is nothing here to gate them on. They stay out.
+	const intercaps = (q.trim().match(/[A-Za-z][A-Za-z0-9-]*/g) ?? []).filter(
+		(w) => {
+			const upper = w.slice(1).search(/[A-Z]/);
+			return upper >= 0 && /[a-z]/.test(w.slice(0, upper + 1));
+		},
+	);
+	// Both branches promote only on EXACT equality to a name, slug or alias —
+	// this is not the containment test above, so a false positive requires the
+	// user to have typed the whole name.
+	for (const w of [...capitalized, ...intercaps]) {
+		const lw = w.toLowerCase();
+		if (NETWORK_WORDS.has(lw)) continue;
+		if (n === lw || sl === lw || alias(lw)) return 3;
+	}
+	// A camelCase word is its own subject: "tell me about GetBlockCard" -> the
+	// group's joined form "getblockcard" IS the identity being asked about,
+	// but the flat anchor join above ("block card getblockcard") matches
+	// nothing. Try each group's joined form directly — again promoting only
+	// to exact.
+	for (const g of splitIdentityGroups(q)) {
+		const nj = n.replace(/[^a-z0-9]/g, "");
+		if (nj === g.joined || sl.replace(/-/g, "") === g.joined || alias(g.joined))
+			return 3;
+	}
+	if (n.startsWith(qq)) return 2;
+	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
+}
+
+/**
+ * Query mode keeps a lineage shadow (canonicalSlug set) as a NAME proxy only:
+ * the old name must still resolve to the canonical (statusAdmissionWhere), so
+ * a shadow lends the canonical its rank when the query matched its name /
+ * slug / aliases — never when it matched stale types or prose the canonical
+ * may not carry. q=education served stellar-passport #1 above 32 typed rows
+ * (2026-09-13): its Draft shadow `passport` still said types [Wallet,
+ * Education] plus the SDF/SCF boosts, ranked first, and the fold swapped in a
+ * canonical that is neither. Non-shadows always keep their rank.
+ */
+export function shadowEarnedRank(
+	p: MatchableProject & {
+		canonicalSlug?: string | null;
+		identity?: { aliases?: string[] | null } | null;
+	},
+	q: string,
+	tokens: string[],
+): boolean {
+	if (!p.canonicalSlug || p.canonicalSlug === p.slug) return true;
+	return (
+		nameMatchScore(p.name ?? "", p.slug ?? "", q, p.identity?.aliases, tokens) >
+		0
+	);
 }

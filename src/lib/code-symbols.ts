@@ -18,6 +18,8 @@
  *    sources biggest-first, so the cap keeps symbols from the real logic).
  */
 
+import { stripCommentsAndStrings } from "./code-depth";
+
 export interface SymbolBlob {
 	path: string;
 	text: string | null;
@@ -116,6 +118,79 @@ export function symbolsHaystack(symbols: unknown): string {
 	return `${split} ${raw}`;
 }
 
+// ── Contract interface truth (repo-intel slice 4) ──────────────────────────
+// Symbols say WHAT a contract implements; the interface says HOW TO CALL IT.
+// For each `#[contractimpl]` impl block we capture the full pub fn SIGNATURES
+// (name, args, return type) — the deployed contract's actual ABI, prefixed
+// with the impl's contract name so multi-contract repos (soroban-examples)
+// stay legible. The leading host-injected `env: Env` param is stripped, same
+// as the SDK's own contractspec — what remains is what a CALLER passes.
+
+const MAX_IFACE_FNS = 48;
+const MAX_SIG_LEN = 200;
+
+// Group 1 = trait name when the impl is `impl Trait for Struct` (FxDAO
+// idiom), group 2 = the contract type. Trait-impl methods CANNOT be `pub`
+// in Rust — the macro exports all of them; inherent impls export only
+// `pub fn`. The signature matcher mirrors exactly that rule.
+const IMPL_RE =
+	/#\s*\[\s*contractimpl\s*\]\s*(?:pub\s+)?impl(?:\s*<[^>\n]{0,80}>)?\s+(?:([A-Za-z_][A-Za-z0-9_]*)\s+for\s+)?([A-Za-z_][A-Za-z0-9_]*)/g;
+const SIG_RE =
+	/\b(pub\s+)?fn\s+([a-z_][a-z0-9_]*)\s*(?:<[^>\n]{0,80}>)?\s*(\([^)]{0,600}\))\s*(->\s*[^;{]{1,160})?\{/g;
+
+/** Signature surface of every #[contractimpl] block across a repo's fetched
+ * Rust sources. Entries look like `Swap.swap(a: Address, amount: i128) -> i128`.
+ * Fns whose args the bounded regex can't capture (nested-paren tuple args) are
+ * SKIPPED, never truncated mid-type — missing beats lying. */
+export function extractContractInterface(blobs: SymbolBlob[]): string[] {
+	const out: string[] = [];
+	const seen = new Set<string>();
+	for (const b of blobs) {
+		if (out.length >= MAX_IFACE_FNS) break;
+		if (!b.text || !b.path.toLowerCase().endsWith(".rs") || isTestPath(b.path))
+			continue;
+		if (!/#\s*\[\s*contractimpl\s*\]/.test(b.text)) continue;
+		const clean = stripCommentsAndStrings(b.text);
+		for (const im of clean.matchAll(IMPL_RE)) {
+			const isTraitImpl = !!im[1];
+			const contract = im[2];
+			// Brace-match the impl block so signatures never leak in from a
+			// neighbouring non-contract impl in the same file.
+			const open = clean.indexOf("{", im.index + im[0].length);
+			if (open < 0) continue;
+			let depth = 1;
+			let i = open + 1;
+			while (i < clean.length && depth > 0) {
+				if (clean[i] === "{") depth++;
+				else if (clean[i] === "}") depth--;
+				i++;
+			}
+			const block = clean.slice(open + 1, i - 1);
+			for (const m of block.matchAll(SIG_RE)) {
+				// bare fn is the exported surface ONLY in trait impls; in
+				// inherent impls the macro exports pub fns alone — a bare fn
+				// there is a private helper and must not enter the ABI.
+				if (!m[1] && !isTraitImpl) continue;
+				const name = m[2];
+				const key = `${contract}.${name}`.toLowerCase();
+				if (seen.has(key)) continue;
+				seen.add(key);
+				const args = m[3]
+					.replace(/\s+/g, " ")
+					.replace(/^\(\s*_?e(?:nv)?\s*:\s*&?\s*Env\s*(?:,\s*|(?=\)))/, "(")
+					.replace(/,?\s*\)$/, ")");
+				const ret = m[4] ? ` ${m[4].replace(/\s+/g, " ").trim()}` : "";
+				let sig = `${contract}.${name}${args}${ret === " -> ()" ? "" : ret}`;
+				if (sig.length > MAX_SIG_LEN) sig = `${sig.slice(0, MAX_SIG_LEN)}…`;
+				out.push(sig);
+				if (out.length >= MAX_IFACE_FNS) break;
+			}
+			if (out.length >= MAX_IFACE_FNS) break;
+		}
+	}
+	return out;
+}
+
 // ── JS/TS (gist gap 1, phase 1: facts, not scores) ─────────────────────────
 // The ~1,900 non-Rust repos carry no code-content signal at all. Phase 1
 // extracts (a) the exported symbol surface and (b) WHICH Stellar SDK
@@ -194,17 +269,104 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 		/\bexport\s+(?:const|async\s+function|function)\s+(?:getPublicKey|signTransaction|signMessage|signAuthEntry|requestAccess)\b/,
 	],
 	["passkey", /passkey-kit|\bPasskeyKit\b|webauthn/i],
+	// Agent-payments era (2026-08-11, from real idioms: rozo-mpprouter's x402
+	// resource-server + the @stellar/mpp charge client). Import paths and
+	// concrete identifiers only — a prose mention of "x402" in a comment is
+	// not an implementation.
+	["x402", /@x402\/|\bX-PAYMENT\b|X402[A-Z][a-z]|[a-z]X402\b|x402[-_][a-z]/],
+	[
+		"mpp",
+		/@stellar\/mpp|\bmpp\/(?:charge|session)\b|\bMpp(?:Charge|Session|Client)\b/,
+	],
 	["fee-bump", /\bfeeBump\b|\bTransactionBuilder\.buildFeeBumpTransaction\b/i],
+];
+
+/** The closed capability tag set, for filter validation + spec enums. */
+export const SDK_CAPABILITY_TAGS: readonly string[] =
+	SDK_CAPABILITY_PATTERNS.map(([tag]) => tag).sort();
+
+/**
+ * Language-frontier capability idioms (2026-08-13 Raven-lens gap: official
+ * Python/Go SDKs and the Kotlin anchor-platform served zero capabilities —
+ * the detector was JS-only). Same CLOSED tag set; per-language patterns
+ * fire only in files that pass a stellar-context gate, so a generic
+ * `TransactionBuilder` in some other chain's Java SDK can never cross-fire.
+ */
+const PY_EXT = /\.py$/i;
+const PY_CONTEXT = /stellar_sdk|from stellar_sdk|import stellar_sdk/;
+const PY_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\bTransactionBuilder\b|\.append_[a-z_]*op\(/],
+	["signing", /\bKeypair\.from_secret\b|\.sign\(/],
+	[
+		"soroban-rpc",
+		/\bSorobanServer\b|\bsimulate_transaction\b|\bsend_transaction\b/,
+	],
+	["horizon", /\bServer\(|\bsubmit_transaction\b|horizon\.stellar\.org/],
+	[
+		"contract-invoke",
+		/\binvoke_contract_function\b|\bContractClient\b|\bscval\b|\bInvokeHostFunction\b/,
+	],
+	[
+		"sep10-auth",
+		/\bbuild_challenge_transaction\b|\bread_challenge_transaction\b|sep-?10|\bWebAuth\b/i,
+	],
+	["sep24-ramp", /sep-?24|\binteractive\s*deposit|TransferServer/i],
+	["fee-bump", /fee_bump|FeeBumpTransaction/i],
+];
+const GO_EXT = /\.go$/i;
+const GO_CONTEXT =
+	/github\.com\/stellar\/go|stellar\/go\/(txnbuild|clients|keypair)/;
+const GO_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\btxnbuild\./],
+	["signing", /\bkeypair\.(Parse|MustParse|Random)\b|\.Sign\(/],
+	["horizon", /\bhorizonclient\.|\bSubmitTransaction\b/],
+	["soroban-rpc", /soroban[a-z]*rpc|\bSimulateTransaction\b/i],
+	["contract-invoke", /\bInvokeHostFunction\b/],
+	[
+		"sep10-auth",
+		/sep-?10|\bChallengeTransaction\b|\bReadChallengeTx\b|\bwebauth\b/i,
+	],
+	["sep24-ramp", /sep-?24|interactive\s*deposit/i],
+	["fee-bump", /\bFeeBumpTransaction\b/],
+];
+const JVM_EXT = /\.(kt|java)$/i;
+const JVM_CONTEXT = /org\.stellar\.(sdk|anchor)|stellar\.sdk/;
+const JVM_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
+	["tx-building", /\bTransactionBuilder\b/],
+	["signing", /\bKeyPair\.fromSecretSeed\b|\.sign\(/],
+	["soroban-rpc", /\bSorobanServer\b|\bsimulateTransaction\b/],
+	["horizon", /\bServer\(|horizon\.stellar\.org|\bsubmitTransaction\b/],
+	["contract-invoke", /\bInvokeHostFunctionOperation\b|\bContractClient\b/],
+	["sep10-auth", /\bSep10Challenge\b|\bSep10\b|sep-?10/i],
+	["sep24-ramp", /\bSep24\b|sep-?24|interactive\s*(deposit|withdraw)/i],
+	["fee-bump", /\bFeeBumpTransaction\b/],
+];
+const LANG_FAMILIES: Array<
+	[ext: RegExp, context: RegExp, patterns: Array<[string, RegExp]>]
+> = [
+	[PY_EXT, PY_CONTEXT, PY_CAPABILITY_PATTERNS],
+	[GO_EXT, GO_CONTEXT, GO_CAPABILITY_PATTERNS],
+	[JVM_EXT, JVM_CONTEXT, JVM_CAPABILITY_PATTERNS],
 ];
 
 export function detectSdkCapabilities(blobs: SymbolBlob[]): string[] {
 	const tags = new Set<string>();
 	for (const b of blobs) {
-		if (!b.text || !JS_EXT.test(b.path)) continue;
-		for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
-			if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+		if (!b.text) continue;
+		if (JS_EXT.test(b.path)) {
+			for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
+				if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+			}
+			continue;
 		}
-		if (tags.size === SDK_CAPABILITY_PATTERNS.length) break;
+		for (const [ext, context, patterns] of LANG_FAMILIES) {
+			if (!ext.test(b.path)) continue;
+			if (!context.test(b.text)) break; // right language, no stellar context
+			for (const [tag, re] of patterns) {
+				if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
+			}
+			break;
+		}
 	}
 	return [...tags].sort();
 }

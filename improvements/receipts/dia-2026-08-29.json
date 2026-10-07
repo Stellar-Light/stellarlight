@@ -1,0 +1,28 @@
+{
+ "slug": "dia",
+ "url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+ "finalUrl": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+ "fetchedAt": "2026-08-29T04:12:21.004Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 04:12:20 GMT",
+  "etag": null,
+  "lastModified": "Thu, 27 Aug 2026 17:55:28 GMT",
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "a302ed10e2e91c94d83ad6e2689369f3415da1efb8cec8c57b6bffef50ca4773",
+ "bodyTextChars": 7696,
+ "markers": [
+  {
+   "marker": "DIA",
+   "found": true,
+   "excerpt": "UASBVEJNE5C2MCFWVIXL4Z7DMD7PJJMF Testnet To learn more about this oracle, please see their docs or visit their GitHub . DIA Oracles ​ DIA is a cross-chain, trustless oracle network that delivers verifiable price feeds. dApps on Stellar can consume these feeds from DIA&#x27;s deployed contracts. DIA "
+  },
+  {
+   "marker": "testnet",
+   "found": true,
+   "excerpt": "5BMHYH4DXMCJZC Fiat exchange rates Mainnet CAVLP5DH2GJPZMVO7IJY4CVOD5MWEFTJFVPD2YY2FQXOQHRGHK4D6HLP Stellar Mainnet DEX Testnet CCYOZJCOPG34LLQQ7N24YXBM7LL62R7ONMZ3G6WZAAYPB5OYKOMJRN63 External CEXs &amp; DEXs Testnet CCSSOHTBL3LEWUCBBEB5NJFC2OKFRC74OWEIJIZLRJBGAAU4VMU5NV4W Fiat exchange rates Testn"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

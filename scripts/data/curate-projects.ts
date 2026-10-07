@@ -12,146 +12,63 @@
  * Every value is grounded in the provider's own current site copy — no
  * fabrication.
  */
+import "../load-env";
 import { getPayload } from "payload";
+import {
+	parseGithubIdentity,
+	parseGithubRepoRef,
+} from "../../src/lib/github-identity";
+import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
+import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import configPromise from "../../src/payload.config";
-import { SEEDS, STATUS_FIX, WEBSITE_FIXES } from "./curation-maps";
+import {
+	ALIAS_ADD,
+	CANONICAL_SET,
+	DESCRIPTION_FIXES,
+	DOCS_LINKS,
+	GITHUB_LINK_FIX,
+	GITHUB_LINK_REMOVE,
+	GITHUB_REPOS_ADD,
+	LOGO_SET,
+	NAME_FIXES,
+	PROMINENCE_SET,
+	REBRANDS,
+	SEEDS,
+	STATUS_FIX,
+	STATUS_SOURCE_BACKFILL,
+	STATUS_SOURCE_RETRACT,
+	TYPE_ADD,
+	TYPES_ADD,
+	TYPES_SET,
+	WEBSITE_FIXES,
+	WEBSITE_REMOVE,
+	WEBSITE_REMOVE_DEAD,
+} from "./curation-maps";
+
+/** Stored repo entries, normalised and deduped. An entry that names no GitHub
+ *  repository (another forge's host as the owner) is dropped rather than
+ *  repaired — see parseGithubRepoRef. */
+function normalizedRepos(
+	raw: Array<{ owner: string; name: string }> | undefined,
+): Array<{ owner: string; name: string }> {
+	const out: Array<{ owner: string; name: string }> = [];
+	for (const r of raw ?? []) {
+		const ref = parseGithubRepoRef(r?.owner, r?.name);
+		if (!ref) continue;
+		if (
+			out.some(
+				(o) =>
+					o.owner.toLowerCase() === ref.owner.toLowerCase() &&
+					o.name.toLowerCase() === ref.name.toLowerCase(),
+			)
+		)
+			continue;
+		out.push(ref);
+	}
+	return out;
+}
 
 const EXECUTE = process.argv.includes("--execute");
-
-const DESCRIPTION_FIXES: Record<string, string> = {
-	// gyen had NO description. The issuer's own stellar.toml
-	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
-	// issuance is wound down with a 1:1 redemption window through Nov 11
-	// 2026 — material lifecycle truth an agent must see on the row.
-	gyen: "GYEN is a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. Per the issuer's own stellar.toml (July 2026), new issuance is wound down; 1:1 redemption remains open through November 11, 2026.",
-	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
-	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
-	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-
-	// network-by-joining-as-tier-1-validators. The fact is recorded on each
-	// record (dated) since /press pages are not in the research corpus.
-	moneygram:
-		"MoneyGram Access (MoneyGram Ramps) is a fiat on- and off-ramp anchor on Stellar. Via the SEP-24 standard, users deposit and withdraw cash to and from USDC at ~500K retail locations across 170+ cash-out countries, with no bank account required. In June 2026 MoneyGram launched MGUSD, a self-custodial USD stablecoin issued by Bridge on Stellar. In July 2026 MoneyGram joined Stellar's Tier 1 validator set — the core organizations whose quorum secures network consensus.",
-	figure:
-		"Figure is America's #1 non-bank HELOC lender, building the future of capital markets on blockchain. Built on Provenance Blockchain, Figure also issues YLDS — a yield-bearing stablecoin deployed on Stellar — enabling compliance-first real-world asset access for a global audience. In July 2026 Figure (Figure Markets) joined Stellar's Tier 1 validator set, bringing a regulated capital-markets operator into network consensus.",
-	// range's old description was raw SCF-proposal prose ("This proposal seeks
-	// to build a Steller Bridge Explorer…", typo included) — rewritten to
-	// describe the product.
-	range:
-		"Range is a cross-chain security and intelligence platform: real-time transaction monitoring, forensic tracing (Range Trail), and a cross-chain explorer covering Stellar among other ecosystems, including Stellar bridge-explorer integration. In July 2026 Range joined Stellar's Tier 1 validator set as a blockchain-security validator organization.",
-	// sls-030: represent the funded-historical + embedded-implementation truth.
-	comet:
-		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",
-	// S1 prose⇄structure divergence (2026-07-11 engine run): these two
-	// descriptions asserted chains the records' CURATED supportedNetworks
-	// (verified from primary sources 2026-07-09) do not carry. The prose was
-	// the overclaiming side — fixed here rather than adding unverified
-	// networks (precision over recall).
-	helix:
-		"Institutional staking infrastructure by Helix Labs. The protocol is currently live only on Canton — Stellar integration is on the roadmap, not launched. Helix Labs separately operates validator infrastructure across major L1 ecosystems.",
-	"templar-protocol":
-		"Templar is a decentralized 'cypher lending' protocol that lets Stellar users borrow USDC against XLM collateral directly from their Stellar wallets, without bridges or wrapped tokens. It uses NEAR's multi-party-computation (MPC) network and Chain Signatures to custody deposits and settle cross-chain. On Stellar the collateral asset is XLM; Bitcoin-collateral and Ethereum/NEAR markets exist on its other deployments. The Stellar integration was announced November 2025.",
-	// boxy 2026-07-09: CCTP entry read like a bridge product; it's the RAIL.
-	// An agent answering "how do I bridge USDC to Stellar" should name CCTP
-	// as the mechanism and a bridge built on it as the actionable route.
-	"circle-cctp-cross-chain-transfer-protocol":
-		"Circle's Cross-Chain Transfer Protocol (CCTP), live on Stellar since May 2026. Moves native USDC between Stellar and 23+ chains (Ethereum, Solana, Base, Arbitrum, Optimism) via a 1:1 burn-and-mint model rather than wrapped or locked assets, settling in seconds. CCTP is bridging INFRASTRUCTURE, not a user-facing bridge: there is no Circle-hosted bridge app — builders integrate it (and pass execution metadata via Hooks), and end-users move USDC through bridges built on it, e.g. Rozo's Intent Bridge on Stellar.",
-	// sls-017: lobstr.co self-describes as a "Stellar & XRPL Wallet" (by Ultra
-	// Stellar); the record previously said "Stellar wallet" only.
-	lobstr:
-		"LOBSTR is a widely used non-custodial wallet for the Stellar and XRP Ledger (XRPL) networks, by Ultra Stellar, on iOS, Android, web and a browser extension. Users hold, send, receive, buy and swap XLM, USDC, XRP and network assets, make peer-to-peer payments, trade on the DEX/SDEX, use fiat on/off-ramps, and claim a federation address (username*lobstr.co). LOBSTR Vault adds multisig.",
-	// raven#8 / sls-018 (data half): the record described only the flagship
-	// Stablebonds product; Etherfuse FX — their Mexico USDC↔MXN on/off-ramp
-	// API (etherfuse/ramp-api-example; wholesale bps-level pricing per their
-	// public docs) — was invisible prose-wise. Multi-product companies get
-	// BOTH products named so neither is hidden behind the dominant one.
-	etherfuse:
-		"Etherfuse is a multi-product company on Stellar: it issues Stablebonds — tokenized government treasury bonds (Mexican CETES, US Treasuries and others) that give yield-bearing onchain exposure to sovereign debt and underpin treasury-management apps such as Bando — and operates Etherfuse FX, a Mexico fiat on/off-ramp API for programmatic USDC↔MXN conversion at wholesale bps-level pricing, built for wallets and apps to integrate.",
-	// raven#18 (mmazco, 2026-07-09): Alchemy's Stellar Data API is now LIVE
-	// but the record predated it (RPC-only prose). Grounded in Alchemy's own
-	// docs (alchemy.com/docs/reference/stellar-api-quickstart + stellar-data-
-	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
-	// Tier-1 validator: boxy-confirmed 2026-07-10 + Alchemy's own blog
-	// ("Alchemy expands support on Stellar with Data APIs and Tier-1
-	// validation … Alchemy is now a tier-1 validator on Stellar", announced
-	// x.com/Alchemy/status/2074907730129883195, 2026-07-08) + listed on the
-	// official tier-1-orgs docs page and the node explorer (boxy-verified —
-	// an earlier note here claimed the docs page lacked them; that was a
-	// false negative from a text-strip curl of a data-rendered page).
-	alchemy:
-		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
-	// sls-024 recurrence (#533 batch): the record claimed "iOS and Android
-	// mobile apps" while neither store lists the app — the Play listing for
-	// app.xbull.mobile (the applicationId in Creit-Tech/xBull-Wallet's own
-	// capacitor.config.ts / android build.gradle) returns 404 and an App
-	// Store bundleId lookup returns 0 results (both checked 2026-07-13).
-	// The product IS live: xbull.app (web wallet, HTTP 200) and the Chrome
-	// Web Store extension (HTTP 200), both verified 2026-07-13 — so the
-	// stale platform claim is removed instead of the status.
-	xbull:
-		"xBull is an open-source, non-custodial Stellar wallet by Creit Tech, available as a browser extension and web app. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps. Its formerly listed iOS and Android store apps are no longer available on either app store (store listings checked 2026-07-13).",
-};
-
-// Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
-// "should the data layer ingest partner docs?": NO — provider reference
-// docs are agent-readable at SOURCE (Alchemy ships llms.txt) and a corpus
-// copy would go stale (the class-19 hazard) while duplicating what the
-// provider already serves agents. Our differentiated role is the STRUCTURED
-// record (who provides what, freshness, confidence) + a first-class pointer
-// so consumers hop straight to the living source.
-const DOCS_LINKS: Record<string, string> = {
-	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
-};
-
-// sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
-// links.github points at a BIG org — enrich-repos keyword-gates large orgs
-// (only repo names matching "stellar" survive), so a Stellar-relevant repo
-// with a non-stellar name is invisible to discovery even though its org is
-// linked. Merges missing pairs, never removes; enrich-repos indexes them on
-// its next sweep. Each row is hand-verified against the repo's own README.
-const GITHUB_REPOS_ADD: Record<
-	string,
-	Array<{ owner: string; name: string }>
-> = {
-	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
-	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
-	// implemented as a Relayer plugin (Stellar support today)", networks
-	// stellar:testnet, type "stellar" (current support). The openzeppelin
-	// record links github.com/openzeppelin (org, >>20 repos → keyword gate),
-	// and the repo name lacks "stellar" — hence the recall zero.
-	openzeppelin: [
-		{ owner: "OpenZeppelin", name: "relayer-plugin-x402-facilitator" },
-	],
-	// Q2 cold-agent run (2026-07-20): aquarius had NO repo commit data, so it
-	// never entered activity leaderboards. Cause: the org renamed
-	// AquaToken→AquariusDeFi (old link is an empty shell; repo API 301s).
-	// These four are Aquarius-owned and active this month (dao web app,
-	// voting tracker, governance, bribes). The audited AMM contracts repo
-	// (AquaToken/soroban-amm) went private/deleted — cannot be linked.
-	aquarius: [
-		{ owner: "AquariusDeFi", name: "dao-aquarius-soroban" },
-		{ owner: "AquariusDeFi", name: "aqua-voting-tracker" },
-		{ owner: "AquariusDeFi", name: "aqua-governance" },
-		{ owner: "AquariusDeFi", name: "aqua-bribes" },
-	],
-	// PG recon 2026-07-20: the registry split out of theahaco/scaffold-stellar
-	// into its own org ~2026-05-19 (proof chain: proposal PR #65 →
-	// scaffold-stellar docs → cargo install --git stellar-registry/cli;
-	// oz-combined-wasms homepage = rgstry.xyz closes the loop).
-	"stellar-registry": [
-		{ owner: "stellar-registry", name: "contracts" },
-		{ owner: "stellar-registry", name: "cli" },
-	],
-};
-
-/** links.github corrections — equality-guarded overwrites for records whose
- * repo link points at the WRONG place (org renames, project splits). */
-const GITHUB_LINK_FIX: Record<string, string> = {
-	// org renamed AquaToken→AquariusDeFi (old page is an empty shell)
-	aquarius: "https://github.com/AquariusDeFi",
-	// registry split out of scaffold-stellar into its own org 2026-05-19;
-	// the old link now literally shows a different product's code
-	"stellar-registry": "https://github.com/stellar-registry/contracts",
-};
 
 // raven#8 / sls-018 (data half): multi-product projects are indexable under
 // EVERY capability they demonstrably have, not a single dominant category.
@@ -166,6 +83,252 @@ const GITHUB_LINK_FIX: Record<string, string> = {
  * (the Soneso Flutter base SDK has no directory record; Hardware Wallet
  * Support is a multi-repo workstream with no dedicated record).
  */
+/**
+ * SCF award-linkage repairs (raven sls-058 / our #744) — legacy-era awards the
+ * automated pipeline structurally cannot see.
+ *
+ * Both projects are marked scfAwarded:false while their OFFICIAL submission
+ * records say Awarded. Root cause isn't a scrape bug: neither project appears
+ * on communityfund.stellar.org/projects AT ALL (verified 2026-07-28 — zero
+ * hits for either name in the listing HTML), and that listing is the entire
+ * comparison population for both the ingest and the scf-crosscheck detector.
+ * A legacy award attached to a project absent from the listing is invisible
+ * to every listing-derived check — the UNDERSTATED class exists and simply
+ * never gets to run on these rows.
+ *
+ * So these are asserted here, each backed by its official submission record
+ * (fetched and read 2026-07-28, award name + amount + round confirmed on the
+ * page). scf-crosscheck carries the same entries as CURATED_LEGACY_AWARDS and
+ * re-verifies BOTH sides on every run — the official page still says Awarded,
+ * and our API actually serves it — so a silent revert or a source change
+ * pages us instead of waiting for Raven's next eval round.
+ *
+ * DISCIPLINE for adding entries: only from a communityfund.stellar.org
+ * submission record you have OPENED and READ (award name, amount, round).
+ * Never from a project's own site, a tweet, or memory — this is money data,
+ * the single most-cited SCF fact.
+ */
+const SCF_LEGACY_AWARDS: Record<
+	string,
+	{ round: number; usd: number; award: string; evidence: string }
+> = {
+	sstream: {
+		round: 16,
+		usd: 36_000,
+		award: "Legacy v4.0 Award",
+		evidence: "https://communityfund.stellar.org/submissions/recnfJhEt3t2QogUI",
+	},
+	wagelink: {
+		round: 24,
+		usd: 50_000,
+		award: "Legacy v5.0 Activation Award",
+		evidence:
+			"https://communityfund.stellar.org/project/wagelink-sdp-integration-i2b",
+	},
+};
+
+/** SCF submission linkage from the 2026-08-31 absence review
+ * (docs/SCF-SEED-REVIEW-2026-08-31.md). Promote-only, rounds WITHOUT
+ * amounts: every entry's evidence is its SCF project page, opened and read
+ * during the review — the page proves the submission and its rounds, but
+ * per-round dollar figures are the crosscheck lanes' job and are never
+ * invented here. Merges awarded:true + rounds; never removes, never touches
+ * totals. Rows listed with "?" rounds in the review are deliberately absent. */
+const SCF_SUBMISSION_LINKS: Record<
+	string,
+	{ rounds: number[]; evidence: string }
+> = {
+	// the 19 approved creates (seeded this run — SEEDS runs first)
+	loop: {
+		rounds: [40],
+		evidence:
+			"https://communityfund.stellar.org/project/loop-cashback-everywhere-with-stellar-zom",
+	},
+	"crediolabs-ai": {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/crediolabsai-ut9",
+	},
+	// policywright / account-demolisher (2026-09-06): the cited page shows ONE
+	// awarded submission (#44); the earlier rounds were badge-inherited, no
+	// page carries them (Wayback CDX: no other page). Enrich exact-syncs the
+	// page and this map put the rounds back — the row flipped every execute.
+	policywright: {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/policywright-j8x",
+	},
+	"vrf-soroban": {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/vrf-soroban-8yl",
+	},
+	komet: {
+		rounds: [28, 30],
+		evidence:
+			"https://communityfund.stellar.org/project/komet-formal-verification-o0s",
+	},
+	"roberto-sanz-criptomonedas": {
+		rounds: [22, 24],
+		evidence: "https://communityfund.stellar.org/project/social-podcast-ini",
+	},
+	janus: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/janus-m2t",
+	},
+	// kutana/sendana rounds corrected 2026-09-01 (crosscheck roundsOverstated,
+	// verified by hand against the pages' per-submission verdicts): the review
+	// read the top badge list, which includes NOT-awarded submission rounds —
+	// the documented buildAwardRounds trap, entered through the manual lane.
+	// kutana: #38/#39/#43/#44 submissions read "Not Awarded"/"Panel Review
+	// Failed"; the #45 submission ($97k budget = the page's totalAwarded,
+	// totalPaid $9.7k) is the award. Same shape for sendana ($100k/#45).
+	kutana: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/kutana-9ti",
+	},
+	// sorted/crebit corrected 2026-09-01 (post-enrich sweep of the same
+	// badge-inheritance class): crebit #44 is affirmatively "Not Awarded";
+	// sorted #44 is neutral Pre-Screen but the page's own arithmetic proves
+	// it contributed nothing (totalAwarded $150k equals the #45 budget
+	// alone). Both awards are #45; enrich already wrote the rows — these
+	// entries just stop the union-merge from resurrecting the dead rounds.
+	sorted: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/sorted-jqh",
+	},
+	sendana: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/sendana-axa",
+	},
+	"account-demolisher": {
+		rounds: [44],
+		evidence:
+			"https://communityfund.stellar.org/project/account-demolisher-bfe",
+	},
+	etesia: {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/etesia-rgj",
+	},
+	"nouns-builder-protocol": {
+		rounds: [44],
+		evidence:
+			"https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+	},
+	yolat: {
+		rounds: [44],
+		evidence: "https://communityfund.stellar.org/project/yolat-bl5",
+	},
+	crebit: {
+		rounds: [45],
+		evidence: "https://communityfund.stellar.org/project/crebit-rate-locks-ril",
+	},
+	pagcrypto: {
+		rounds: [42],
+		evidence:
+			"https://communityfund.stellar.org/project/regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+	},
+	// upesa/verseprop rounds corrected 2026-09-01 (same badge-inheritance
+	// class as kutana/sendana, caught at slug-override verification): the
+	// pages affirmatively verdict upesa #41 and verseprop #31/#32 "Not
+	// Awarded"; the awards are #42 and #33 ("Awarded" cards, $86k / $112,020).
+	upesa: {
+		rounds: [42],
+		evidence: "https://communityfund.stellar.org/project/liquid-by-upesa-dvq",
+	},
+	fxdao: {
+		rounds: [13],
+		evidence: "https://communityfund.stellar.org/project/fxdao-xov",
+	},
+	// the duplicates whose rounds the review read off their SCF pages
+	verseprop: {
+		rounds: [33],
+		evidence:
+			"https://communityfund.stellar.org/project/a-real-estate-tokenization-platform-ss1",
+	},
+	ctx: {
+		rounds: [19, 41],
+		evidence:
+			"https://communityfund.stellar.org/project/prices-api-rfp-ctx-1vo",
+	},
+	inferera: {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/soroban-disassembler-working-title-ply",
+	},
+	simbolik: {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/advanced-debugging-for-soroban-contracts-5sr",
+	},
+	fairblock: {
+		rounds: [40],
+		evidence:
+			"https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt",
+	},
+	tucambio: {
+		rounds: [37, 43],
+		evidence:
+			"https://communityfund.stellar.org/project/seasonal-workers-payroll-lru",
+	},
+	womenbiz: {
+		rounds: [29],
+		evidence:
+			"https://communityfund.stellar.org/project/stellar-women-bootcamp-r5v",
+	},
+	// #35 dropped 2026-09-06: the cited page marks it "Not Awarded" (badge-
+	// inherited); #38 $70k + #44 $80k are its awarded cards. The page is now
+	// slug-joined to the row (enrich SCF_SLUG_OVERRIDES), so this is satisfied.
+	fastbuka: {
+		rounds: [38, 44],
+		evidence: "https://communityfund.stellar.org/project/choppaddi-vmf",
+	},
+	untangled: {
+		rounds: [41],
+		evidence: "https://communityfund.stellar.org/project/octopos-g6i",
+	},
+	// coala-pay is MULTI-PAGE (2026-09-01 verification): r22 ($50k) verified
+	// on anticipatory-aid-on-soroban-f7j, r35 ($60k) verified on
+	// coala-pay-billy-wallet-9mi, r31 unverdicted on both pages (kept —
+	// never accuse on silence). Deliberately NOT slug-joined; the union
+	// merge below is what records the verified rounds.
+	// r31 is on neither page (unverdicted) — dropped 2026-09-06; the enrich
+	// fold now carries both pages' awards, so this entry is satisfied.
+	"coala-pay": {
+		rounds: [22, 35],
+		evidence:
+			"https://communityfund.stellar.org/project/anticipatory-aid-on-soroban-f7j",
+	},
+	// escala corrected 2026-09-01 (badge-inheritance class, caught at
+	// linkage verification): the page marks #42/#43 "Not Awarded"; the award
+	// is #44 ($70k Build).
+	escala: {
+		rounds: [44],
+		evidence:
+			"https://communityfund.stellar.org/project/embedded-collective-investment-via-soroban-syi",
+	},
+	lobster: {
+		rounds: [42],
+		evidence:
+			"https://communityfund.stellar.org/project/institutional-liquidity-infrastructure-for-stellar-k5c",
+	},
+	"dfs-labs": {
+		rounds: [24],
+		evidence: "https://communityfund.stellar.org/project/stellar-surge-1gh",
+	},
+	ichi: {
+		rounds: [26],
+		evidence: "https://communityfund.stellar.org/project/solo-labs-iy1",
+	},
+	"the-aha-company": {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/smart-account-onboarding-8yr",
+	},
+	"soroban-decompiler": {
+		rounds: [41],
+		evidence:
+			"https://communityfund.stellar.org/project/rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
+	},
+};
+
 const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 	"stellar-php-sdk": {
 		rounds: ["2025Q4", "2026Q1"],
@@ -227,47 +390,6 @@ const PG_AWARDS: Record<string, { rounds: string[]; evidence: string }> = {
 	},
 };
 
-const TYPES_ADD: Record<string, string[]> = {
-	// Stablecoin appended per boxy triage 2026-07-20 (issued-asset + sectors
-	// axes both fired — domain-matched stellar.expert issuance).
-	etherfuse: ["Anchor", "Stablecoin"],
-	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
-	// USDT across Base, Stellar, Solana, Ethereum, BNB" — rozo.ai homepage,
-	// linked not coming-soon; Hacken audit of ROZO Intents in our corpus).
-	// Typed Payments-only, so every bridge/EVM query missed it — the same
-	// multi-product secondary-capability class as etherfuse (sls-018).
-	rozo: ["Bridge"],
-	// boxy 2026-07-09: CCTP is bridging INFRA (burn-and-mint rail bridge
-	// builders integrate), not a user-facing bridge app. Keep Bridge so
-	// corridor queries still learn it exists; add the taxonomy truth.
-	"circle-cctp-cross-chain-transfer-protocol": ["Infrastructure"],
-	// raven#18: the Stellar Data API is a portfolio/indexer product (SDF's own
-	// indexers page classifies it there) — RPC-only typing hid it from every
-	// indexer/portfolio-API query. Same multi-product class as etherfuse.
-	alchemy: ["Indexer"],
-	// boxy triage 2026-07-20 of the capability-mismatch sweep's first report
-	// (25 candidates): the anchor axis batch, approved "all except benji"
-	// (FT's benji is a tokenized fund; the anchor is FT-the-company — held).
-	// Each partner here is an operating anchor in the anchors directory whose
-	// project row never carried the type — the exact Etherfuse class.
-	gyen: ["Anchor"],
-	brl: ["Anchor"],
-	audd: ["Anchor"],
-	blox: ["Anchor"],
-	coca: ["Anchor"],
-	elroy: ["Anchor"],
-	ripe: ["Anchor"],
-	alfred: ["Anchor"],
-	trace: ["Anchor"],
-	// boxy triage 2026-07-20, issued-asset axis: domain-matched on-chain
-	// issuance (stellar.expert, issuer domain == partner domain). etherfuse
-	// fired on TWO independent axes (sectors + issuance); anclap issues
-	// ARS/PEN anchored tokens. Payments-on-wallets (hana/xbull/lobstr) was
-	// explicitly DECLINED — wallets stay wallets; the sweep keeps reporting.
-	// (etherfuse Anchor already added above; this appends Stablecoin.)
-	anclap: ["Stablecoin"],
-};
-
 /** EXACT-SYNC types for curated slugs — the corrective sibling of TYPES_ADD.
  * Use when a record carries a WRONG type (self-audit #414: 12 records typed
  * Bridge with empty supportedNetworks — most were mis-typed oracles/wallets/
@@ -278,12 +400,49 @@ const TYPES_ADD: Record<string, string[]> = {
  * group for listed slugs — the official page is the source of truth. */
 const SCF_FIX: Record<
 	string,
-	{ awarded: boolean; totalAwarded: number; awardedRounds: number[] }
+	{
+		awarded: boolean;
+		/** null = the project's SCF-page total is undisclosed — preserve, never derive from round sums. */
+		totalAwarded: number | null;
+		awardedRounds: number[];
+		/** sls-061: per-round official amounts for projects the SCF API cannot
+		 * match (no API entry → the enricher can never populate roundAwards).
+		 * Only with hand-verified per-round sources; amountUSD null = award
+		 * confirmed, amount not verifiable — never guessed. */
+		roundAwards?: Array<{
+			round: number;
+			amountUSD: number | null;
+			awardType: string | null;
+		}>;
+		/** true = the stored join is a fossil of the pre-2026-08-12 substring
+		 * matcher (another project's page written onto this row): drop the page
+		 * linkage (slug / sourceUrl / lastAwardedRound) too, not just the facts. */
+		unlink?: boolean;
+	}
 > = {
 	// sls-027: official page shows 7 submissions, 4 AWARDED (#16 $150K, #20
 	// $100K, #25 $94.5K + Q1-2024 Liquidity $50K); #18/#24 explicitly NOT
 	// awarded. Total was right, membership wasn't.
 	phoenix: { awarded: true, totalAwarded: 394500, awardedRounds: [16, 20, 25] },
+	// 2026-09-06: fossil of the pre-2026-08-12 substring matcher — OpenGrants
+	// ("opengrants" ⊃ "pen") was written onto PEN, Anclap's asset row. No SCF
+	// page is titled PEN (listing + Wayback CDX checked); anclap-r4u is the
+	// COMPANY page (r7/r17/r26) and no Anclap row exists — left unjoined, a
+	// company award does not belong on an asset row. opengrants-fdb joins our
+	// `opengrants` row via SCF_PAGES_BEYOND_CAP (enrich-from-scf.ts).
+	pen: { awarded: false, totalAwarded: null, awardedRounds: [], unlink: true },
+	// 2026-09-06: the same wrong-row class, caught by link intersection. SCF's
+	// only Hermes page (hermes-isy, "Stellar's Own Perpetual Exchange") links
+	// github.com/zenith-protocols = our ZENEX row; the name matcher wrote its
+	// $150,000 SCF #32 award onto this row, OrbitCDP's separate Hermes
+	// (github.com/orbit-cdp/hermes). Unlinked here; the page is bound to zenex
+	// in SCF_SLUG_OVERRIDES (enrich-from-scf.ts).
+	hermes: {
+		awarded: false,
+		totalAwarded: null,
+		awardedRounds: [],
+		unlink: true,
+	},
 	// sls-026: live said $391K + rounds [17,23,27,30]; official = $291K PAID,
 	// round 30 marked Ineligible. Paid awards only.
 	aquarius: {
@@ -292,7 +451,81 @@ const SCF_FIX: Record<
 		awardedRounds: [17, 23, 27],
 	},
 	// sls-030: official pages show $150K (r13) + $141K (r18); record said false.
-	comet: { awarded: true, totalAwarded: 291000, awardedRounds: [13, 18] },
+	// sls-061: comet has NO entry in the SCF projects API (only the unrelated
+	// "Komet"), so the enricher can never populate roundAwards — curated here
+	// from the same sls-030 hand-verified official pages. awardType wasn't
+	// captured in that verification → null, never guessed.
+	// sls-063 (2026-08-11): 7 rows whose official pages are either absent from
+	// the SCF listing (sstream/wagelink/unalivio/tucambio) or don't parse the
+	// award under any candidate slug (stride/palremit/autoaction — stride-4uu
+	// etc. exist but carry no parseable award verdict). Round + budget from the
+	// finding's official-submission recheck, spot-verified; totals preserved
+	// verbatim (null = undisclosed, never derived). awardType null — never
+	// guessed. Digibank r44 deliberately NOT inferred, per the finding.
+	sstream: {
+		awarded: true,
+		totalAwarded: 36000,
+		awardedRounds: [16],
+		roundAwards: [{ round: 16, amountUSD: 36000, awardType: null }],
+	},
+	wagelink: {
+		awarded: true,
+		totalAwarded: 50000,
+		awardedRounds: [24],
+		roundAwards: [{ round: 24, amountUSD: 50000, awardType: null }],
+	},
+	unalivio: {
+		awarded: true,
+		totalAwarded: null,
+		awardedRounds: [32],
+		roundAwards: [{ round: 32, amountUSD: 18475, awardType: null }],
+	},
+	// tucambio re-verified 2026-09-06 on seasonal-workers-payroll-lru (the
+	// project's only live page; tucambio-wallets-lru renders no payload):
+	// #37 $75,000 + #43 $100,000, page total $175,000. The old [37] entry
+	// fought SCF_SUBMISSION_LINKS' [37, 43] on every execute.
+	tucambio: {
+		awarded: true,
+		totalAwarded: 175000,
+		awardedRounds: [37, 43],
+		roundAwards: [
+			{ round: 37, amountUSD: 75000, awardType: "Build" },
+			{ round: 43, amountUSD: 100000, awardType: "Build" },
+		],
+	},
+	stride: {
+		awarded: true,
+		totalAwarded: 120000,
+		awardedRounds: [33],
+		roundAwards: [{ round: 33, amountUSD: 120000, awardType: "Build" }], // type read off the page 2026-09-06 (it parses now)
+	},
+	palremit: {
+		awarded: true,
+		totalAwarded: 60000,
+		awardedRounds: [32],
+		roundAwards: [{ round: 32, amountUSD: 60000, awardType: "Build" }], // type read off the page 2026-09-06
+	},
+	autoaction: {
+		awarded: true,
+		totalAwarded: 50000,
+		awardedRounds: [29],
+		roundAwards: [
+			{
+				round: 29,
+				amountUSD: 50000,
+				awardType: "Legacy v5.0 Activation Award",
+			},
+		], // type read off the page 2026-09-06
+	},
+	comet: {
+		awarded: true,
+		totalAwarded: 291000,
+		awardedRounds: [13, 18],
+		roundAwards: [
+			{ round: 13, amountUSD: 150000, awardType: null },
+			{ round: 18, amountUSD: 141000, awardType: null },
+		],
+	},
 	// sls-043: the canonical band row claimed SCF #41 / $100K while the alias
 	// row (band-protocol, merged 2026-07-10 S3b wave) carried the OFFICIAL
 	// facts. communityfund.stellar.org/project/band-protocol-2ob (read
@@ -385,6 +618,15 @@ const IDENTITY_FIX: Record<
 	string,
 	{ aliases: string[]; renamedAt?: string; renameSourceUrl?: string }
 > = {
+	// Raven #39: row renamed Wirex Pay → Wirex (NAME_FIXES); the product
+	// name stays searchable. Source: Wirex & Stellar dual-stablecoin Visa
+	// settlement announcement (PR Newswire, 2025-11-18).
+	"wirex-pay": {
+		aliases: ["Wirex Pay"],
+		renamedAt: "2025-11-18",
+		renameSourceUrl:
+			"https://lumenloop.com/news/wirex-stellar-go-live-dual-stablecoin-visa-settlement-usdc",
+	},
 	// Vesseo is SDF-subsidiary Sunship's consumer USDC wallet, formerly
 	// Vibrant (the record's own description + vesseoapp.com; Tyler's P4 H3
 	// primary-source extraction cites current material as "the Vesseo app").
@@ -398,89 +640,6 @@ const IDENTITY_FIX: Record<
 		renameSourceUrl:
 			"https://vesseoapp.com/blog-ar/adi%C3%B3s-vibrant-hola-vesseo",
 	},
-};
-
-const TYPES_SET: Record<string, string[]> = {
-	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
-	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
-	// evidence per row). Bridge removed; remaining types verified.
-	orally: ["Infrastructure", "AI", "SDK", "Security"], // orally.network: oracle service (data feeds/automation), not an asset bridge
-	tezoro: ["Lending"], // tezoro.io: yield aggregator over Ethereum lending protocols
-	"soroban-optimistic-oracle": ["Infrastructure"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one
-	"unstoppable-wallet": ["Wallet"], // unstoppable.money: multichain wallet; swaps via DEXes, no own bridge
-	sorobanhooks: ["Infrastructure", "Analytics", "SDK"], // sorobanhooks.xyz: webhook/notification tooling; moves no assets
-	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
-	perun: ["Infrastructure", "SDK"], // polycry.pt: state-channel framework (go-perun + perun-stellar-backend)
-	"peridot-finance": ["Lending"], // peridot.finance: cross-chain lending platform — product is lending
-	// batch 2 (self-audit re-run surfaced 8 more, mostly 07-10 seeds):
-	"volta-circuit": ["Security", "Wallet"], // voltacircuit.com: multi-sig wallet security/controls product
-	upwealth: ["AI", "Analytics"], // upwealth.io: AI investment/advisory platform for wealth managers
-	swiftex: ["Wallet", "DEX"], // SwiftExWallet README: multichain wallet; bridging via third-party Allbridge
-	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
-	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
-	cobo: ["Infrastructure", "Wallet"], // cobo.com: institutional omni-custody / wallet-as-a-service platform — custody, not a bridge
-	// sls-035 DEX-taxonomy wave (2026-07-11): the types=DEX cluster mixed real
-	// trading venues with aggregators/routers/analytics platforms that run no
-	// venue of their own — polluting DEX browses and venue ground-truth checks
-	// (the amm→rango class). Each row below is re-typed from the project's OWN
-	// primary source (quoted); actual venues and SDEX trading clients were left
-	// untouched. Cross-chain swap aggregators keep/carry Bridge — the
-	// user-meaningful corridor capability (the rubic #414 precedent) —
-	// Stellar-only routers/services go Infrastructure.
-	stellarbroker: ["Infrastructure", "SDK"], // stellar.broker: Stellar-only multi-source liquidity swap ROUTER/aggregator — best routing across AMMs + Stellar DEX, runs no venue (so NOT a DEX venue; the verifier's DEX call was wrong), and it's integrable by other apps/wallets (boxy 2026-07-15) → +SDK.
-	wowmax: ["Bridge"], // wowmax.exchange: "combines a powerful DEX aggregator with an on-chain copy-trading protocol… trade crypto at the best possible prices across multiple decentralized exchanges" — aggregator, not a venue
-	rango: ["Bridge"], // rango.exchange: "a new layer on top of all Bridges and DEXs, working as a Bridge Aggregator and DEX Aggregator at the same time" — router, not a venue
-	houdiniswap: ["Bridge"], // houdiniswap.com: "non-custodial liquidity aggregator… sources swap routes from vetted, compliant exchange partners"; explicitly does not pool assets
-	rubic: ["Bridge"], // rubic.exchange: "an aggregator of Bridges, Dexs, Intent Protocols, & Private Solutions" (340+ integrations) — routing layer, no own pools
-	"dex-tools": ["Analytics"], // dextools.io + info.dextools.io: DeFi charting/pair-explorer/portfolio "data hub"; connects existing wallets, holds no liquidity
-	"mobula-labs": ["Analytics", "AI", "SDK"], // mobula.io: "Stream-based, modular & blazing fast APIs powering the best onchain products" — data/API provider, not a venue
-	spinach: ["Infrastructure"], // spinach.fi: "Liquidity Competitions — projects earn daily rewards for integrating and growing liquidity" — incentive-campaign platform, not a venue
-	// sls-033 (#519) wallet product-kind wave (2026-07-13): the record's own
-	// description already says WalletConnect "is not a wallet itself" but an
-	// "open connection protocol … a natively supported Stellar Wallets Kit
-	// module" — yet types was EMPTY, so the connectivity-protocol-vs-wallet
-	// distinction #519 demands existed only in prose (the prose-only-facts bug
-	// class) and the record was invisible to every type filter. Typed to the
-	// taxonomy truth we have today; the richer per-record productKind enum is
-	// a batch-D field.
-	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
-	// Bridge-cluster mistags (boxy 2026-07-15: "templar is a lending protocol, why
-	// is it a bridge"). #414 wave left non-bridge records Bridge-typed. Re-typed
-	// from each record's OWN primary source; deliberate aggregators (rubic/rango/
-	// houdiniswap/wowmax — routing layers whose corridor capability IS the point)
-	// stay Bridge. Frontend /directory reads the same projects.types as the API,
-	// so this fixes both surfaces at once.
-	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
-	pyth: [], // pyth.network: decentralized price-feed ORACLE. Matches the oracle convention (band/reflector/lightecho/dia all carry types=[] + category=Infrastructure); "Bridge" was plain wrong.
-	nethermind: ["Infrastructure", "Security"], // nethermind.io: research/engineering firm + Nethermind Security (audits, formal verification, ZK); Stellar work = RISC Zero zkVM verifier + private-payments. Verifier-confirmed 2026-07-15.
-	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
-	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
-	// Directory-quality engine — verifier-confirmed re-tags (2026-07-15). Each
-	// agent-verified from the product's own live site (evidence in the
-	// directory-quality-verify run). Auto-apply tier (high confidence).
-	"cactus-link": ["Wallet"], // mycactus.com + Chrome Web Store: institutional browser-extension wallet (Cactus Custody). A wallet's security is a property, not its category.
-	"hito-wallet": ["Wallet"], // hito.xyz: NFC thin hardware crypto wallet (for sale). Hardware wallet = Wallet, not Security.
-	keystone: ["Wallet"], // keyst.one: hardware wallet.
-	mxlet: ["Wallet"], // xlet.io: open Stellar hardware wallet.
-	decaf: ["Wallet", "Payments"], // decaf.so: non-custodial wallet for cross-border money movement — Wallet + Payments, not Payments alone.
-	reclaim: ["Security", "SDK"], // reclaimprotocol.org: zkTLS credential/proof-of-personhood protocol + zkFetch SDK (Soroban example). Security + the developer SDK.
-	trustline: ["Security", "SDK", "Infrastructure"], // trustline.id: security SDK + smart-contract insurance. Adds the SDK it ships.
-	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
-	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
-	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
-	defindex: ["Infrastructure", "SDK"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks. Yield infra, not a lending venue.
-	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
-	nebula: ["SDK"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK. NOT an oracle; drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
-	// Held-queue resolutions after a closer look (boxy 2026-07-15).
-	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
-	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.
-	indentura: ["Lending", "RWA"], // thawdigital.com: "on-chain CREDIT infrastructure — trade credit and receivables financing" — credit/lending against RWA receivables.
-	// sls-033 (2026-07-15): mis-typed as Wallet — web-verified NOT wallets, so an
-	// exact type=Wallet enumeration wrongly returned them (the StellarTerm-in-the-
-	// wallet-list class the finding names). Drop Wallet; keep their real types.
-	pakananet: ["Payments", "AI", "RWA", "Security"], // pakana.net: private ZK payments/compliance infrastructure, not a wallet (multisig-escrow is one feature)
-	stellarfolio: ["Analytics"], // stellarfolio.app: read-only portfolio viewer — enter ANY public address to view its assets; holds no keys
-	equilibre: ["Analytics"], // equilibre.io: portfolio rebalancer / DEX trading tool, wallet-independent (also already defunct — see STATUS_FIX)
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
@@ -567,6 +726,12 @@ const PRODUCT_KIND: Record<string, string> = {
 	"hito-wallet": "hardware-wallet", // Hito HOLD — physical $150 NFC hardware wallet device
 	arculus: "hardware-wallet", // Arculus Key Card — physical signing device + companion app
 	keystone: "hardware-wallet", // Keystone 3 Pro — air-gapped cold hardware wallet
+	// sls-033 recheck (2026-08-13): the agent-stack seed row — a library that
+	// CREATES and operates Stellar wallets programmatically for AI agents
+	// (signing, tx-building, x402/mpp caps verified by code scan). A wallet
+	// built BY software from a library = wallet-sdk; mxlet stays null by the
+	// documented dead-domain precision decision (cannot evidence-classify).
+	"stellar-agent-wallet-skill": "wallet-sdk",
 };
 
 /** sls-033 (#519): per-platform app availability — DATED, store-checked facts,
@@ -588,6 +753,138 @@ interface AvailabilityRow {
 	note?: string;
 }
 const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
+	// ── Store evidence 2026-09-07. Every listing below was found on the
+	// PROJECT'S OWN SITE, never by searching a store for the project's name:
+	// the operator publishing their own store link IS the intersection, and a
+	// name search is the collision trap that cost 26 of 31 matches on the
+	// package-registry pass. Release dates come from Apple's lookup API by id
+	// and Play's "Updated on"; all 13 shipped a build within 90 days.
+	// Three ship under a product name that differs from the row (fastbuka →
+	// "Choppaddi", providencia-onchain → "VIIO", utoken → "Upesa") — kept,
+	// because the link came from their own site, and named here so the
+	// mismatch is visible rather than silently resolved.
+	akuna: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Akuna Wallet — release 2026-08-31, found via the project's own site",
+		},
+	],
+	bousol: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Bousol Wallet - Paon Bleu Inc. — release 2026-08-26, found via the project's own site",
+		},
+	],
+	dollarize: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Dollarize: USD Account — release 2026-08-10, found via the project's own site",
+		},
+	],
+	ebioro: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
+			checkedAt: "2026-09-07",
+			note: "ebioro — release 2026-09-06, found via the project's own site",
+		},
+	],
+	fastbuka: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Choppaddi — release 2026-08-03, found via the project's own site",
+		},
+	],
+	fewticket: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Fewticket — release 2026-09-02, found via the project's own site",
+		},
+	],
+	"freedom-pay-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Freedom Pay Wallet — release 2026-07-16, found via the project's own site",
+		},
+	],
+	meru: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Meru | Cuenta en dólares — release 2026-09-06, found via the project's own site",
+		},
+	],
+	"providencia-onchain": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
+			checkedAt: "2026-09-07",
+			note: "VIIO — release 2026-08-31, found via the project's own site",
+		},
+	],
+	scopex: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Scopex — release 2026-08-28, found via the project's own site",
+		},
+	],
+	seevcash: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Seevcash: Send Money Anywhere — release 2026-09-06, found via the project's own site",
+		},
+	],
+	utoken: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Upesa — release 2026-08-19, found via the project's own site",
+		},
+	],
+	yolat: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Yolat — release 2026-09-04, found via the project's own site",
+		},
+	],
 	xbull: [
 		{
 			platform: "web",
@@ -778,29 +1075,55 @@ const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
 	],
 };
 
-/** Rebrands — name, website, and description move together so both the old
- * and new brand stay searchable. Equality no-ops keep reruns clean. */
-const REBRANDS: Record<
-	string,
-	{ name: string; website: string; description: string }
-> = {
-	// boxy 2026-07-09: "tricorn is live (as) utexo" — human-confirmed live.
-	// tricorn.network 301s → bridge.utexo.com → mint.utexo.com. Coinspect
-	// audited the Stellar/Soroban integration (stellarsecurityportal.com/report/31).
-	tricorn: {
-		name: "Utexo",
-		website: "https://mint.utexo.com",
-		description:
-			"Utexo (formerly Tricorn) is a live cross-chain bridge supporting EVM and non-EVM chains, moving assets to and from Stellar. Its Stellar/Soroban bridge integration was audited by Coinspect. Rebranded from tricorn.network to utexo.com.",
-	},
-};
-
 /** Review finding 27 one-shot corrections — OVERWRITES coverage.countries for
  * rows the 2026-07-07 sync mis-wrote with the partner's incorporation country.
  * Grounding per row: [] = the corridor is regional/global (the partner record's
  * `regions` carries it; a wrong single country is worse than honest absence).
  * bitso's corridors are proven by its own CNBV/GFSC compliance currencies
  * (MXN/BRL/ARS/COP). Rows retire (no-op) once applied — equality-checked. */
+/** #742 products model (sls-023/029 root): per-product deployment records.
+ * EVERY row cites its evidence — a product without a verifiable evidenceUrl
+ * does not ship (Band/RedStone/DIA/WisdomTree/Figure rows await verified
+ * mappings; deferred is honest, fabricated is not). Exact-sync on the value
+ * tuple; asOf = the date the evidence was last verified. */
+const PRODUCTS_FIX: Record<
+	string,
+	Array<{
+		name: string;
+		kind: string;
+		network: string;
+		status: string;
+		contractId?: string | null;
+		evidenceUrl: string;
+		asOf: string;
+		note?: string;
+	}>
+> = {
+	dtcc: [
+		{
+			name: "DTCC tokenized-collateral platform (Stellar availability)",
+			kind: "rwa-asset",
+			network: "mainnet",
+			status: "announced",
+			evidenceUrl: "https://stellar.org/case-studies/dtcc",
+			asOf: "2026-08-13",
+			note: "operator states Stellar availability expected H1 2027; provider row status Development covers the org, this row covers the product claim",
+		},
+	],
+	lightecho: [
+		{
+			name: "Lightecho Stellar Oracle",
+			kind: "oracle-feed",
+			network: "mainnet",
+			status: "live",
+			contractId: null,
+			evidenceUrl: "https://github.com/bp-ventures/lightecho-stellar-oracle",
+			asOf: "2026-08-13",
+			note: "contract IDs published in the operator repo; per-network ID labels pending verification, so none is asserted here. Consumer caution: price state observed stale in upstream checks",
+		},
+	],
+};
+
 const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
 	"boss-pay": [], // HQ=US; corridors = Africa/LatAm remittance (regions field)
 	"ripe-money": [], // HQ=Singapore; "off-ramp for Asia"
@@ -1013,17 +1336,70 @@ const VENUE_ROLE: Record<string, string> = {
  *
  * Per merge: the CANONICAL record absorbs the dupe's complementary facts
  * (fill-if-empty only — desc/github verbatim from the dupe's own record);
- * the DUPE gets canonicalSlug → canonical + status Inactive (the documented
- * suppress-from-active-listings mechanism) + a lifecycle note. Nothing is
- * deleted. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
- * the award sits on the stale-named record: awarded/rounds copy to the
- * canonical only when the canonical carries no award of its own. */
+ * the DUPE gets canonicalSlug → canonical + status Draft (hidden, the same
+ * end state the dedup lane writes — a duplicate is hidden, NEVER dead, and
+ * Inactive is a death verdict) + a lifecycle note. Nothing is deleted, and a
+ * shadow that already carries a human death verdict keeps it. `copyScf` is for the rename case (ultra-swap → usdc-swap) where
+ * the award sits on the stale-named record: the shadow's WHOLE SCF record
+ * moves into the canonical's empty award fields (fill-if-empty, citation
+ * atomic — see src/lib/scf-merge.ts). It copied three of nine fields until
+ * 2026-09-14, which left lulpay serving $58,000 with no round records and no
+ * source after the lul→lulpay merge. */
 const DUPE_MERGES: Array<{
 	dupe: string;
 	canonical: string;
 	fill?: { shortDescription?: string; github?: string };
 	copyScf?: boolean;
 }> = [
+	// ── Same-entity sweep 2026-09-08 ────────────────────────────────────────
+	// Found by grouping active rows on website-host + github-OWNER and keeping
+	// groups whose shortDescription is byte-identical: 21 groups shared both
+	// links, 4 had identical descriptions, 2 survived verification.
+	//
+	// ambergroup.io serves "Amber Group: Building the Future of Digital Assets"
+	// and the string ZET appears ZERO times on it. The rows are otherwise
+	// indistinguishable — same website, same github org, same types ['RWA'],
+	// same category, byte-identical description, neither carrying an SCF award.
+	// Nothing separates them: one entity, seeded twice.
+	{ dupe: "zet", canonical: "amber" },
+	// lulpay.com serves "LulPay - Send Money to Uganda Instantly", so the
+	// canonical is the row whose name the product actually uses. The award
+	// rides across: `lul` holds SCF slug lul-serving-the-unbanked-ckz, rounds 29
+	// and 38, $58,000 — ONE submission across two rounds, not two products —
+	// and lulpay carries none, so copyScf moves it instead of stranding it.
+	{ dupe: "lul", canonical: "lulpay", copyScf: true },
+	//
+	// NOT FOLDED, and the reason is the point: inference + inferera share
+	// inferara.com and github.com/inferara with byte-identical descriptions,
+	// which is exactly what put them on this list. They are not one product.
+	// Their SCF records are two different submissions from one research group:
+	//   inference  → inference-xfj                           round 39  $149,730
+	//   inferera   → soroban-disassembler-working-title-ply   round 41  $100,000
+	// Folding them would have destroyed a $100,000 award record. The identical
+	// description is a seed artifact — both rows inherited the GROUP's blurb —
+	// so on this list "same description" is a reason to LOOK, never a verdict.
+	// Same shape as lightsail/xlm.sh and ultra-stellar/lobstr: one org, several
+	// products, correctly separate rows.
+	// ── Weakest-queue triage 2026-08-28: the dashboard's 40%-score rows were
+	// mostly no-basis DUPLICATES of already-triaged rows. Folding removes them
+	// from every serving surface and from the queue.
+	// same thebluemarble.io; canonical already Inactive human-verified (the
+	// lapsed domain now serves a Vietnamese gambling site - noted 2026-08-28)
+	{ dupe: "blue-marble", canonical: "the-blue-marble" },
+	// the OLD domain-move row (sorobansecurity.com) of the project that now
+	// lives at stellarsecurityportal.com (see WEBSITE_FIXES)
+	{ dupe: "soroban-security-portal", canonical: "stellar-security-portal" },
+	// same ortege.ai, with CONFLICTING statuses across the pair (Live vs
+	// Inactive) - the canonical keeps Live pending a deeper look (site
+	// currently TLS-broken, 2026-08-28)
+	{ dupe: "ortege-ai", canonical: "ortege" },
+	// lumosdao.io 308s to lumoscore.com - same project, rebranded. Both rows
+	// Draft; owner assessment 2026-08-28: "not a good project at all" - keep
+	// Draft, do NOT promote in future passes.
+	{ dupe: "lumos-dao", canonical: "lumosdao" },
+	// Raven #39 sweep: coca-wallet is an empty Inactive shadow of coca
+	// (same coca.xyz site, no description, no basis).
+	{ dupe: "coca-wallet", canonical: "coca" },
 	{ dupe: "stellarexpert", canonical: "stellar-expert" },
 	{
 		dupe: "sorobanpulse",
@@ -1107,6 +1483,14 @@ const DUPE_MERGES: Array<{
 	{ dupe: "pakana", canonical: "pakananet" }, // pakananet carries the $45.2k SCF award
 	{ dupe: "meria", canonical: "meria-defi" },
 	{ dupe: "coca-wallet", canonical: "coca" },
+	// Owner, 2026-09-06: "orbitcdp was built by zenith but orbit died; hermes
+	// was a product of zenith but renamed to zenex". So this row is not a
+	// second perpetual exchange — it is the same product under its Orbit-era
+	// home (github.com/orbit-cdp/hermes), and the live one is zenex
+	// (zenex.trade, github.com/zenith-protocols). SCF's only Hermes page is
+	// already bound to zenex in SCF_SLUG_OVERRIDES; this folds the row so the
+	// old name stops standing as a separate project.
+	{ dupe: "hermes", canonical: "zenex" },
 	{ dupe: "alfred-pay", canonical: "alfred" },
 	{ dupe: "blue-marble", canonical: "the-blue-marble" },
 	{ dupe: "mica-rent", canonical: "mica" },
@@ -1161,6 +1545,11 @@ async function main() {
 		slug: string;
 		data: Record<string, unknown>;
 	}> = [];
+
+	// builtBy is NOT curated here: it isn't a Projects field — a lane that
+	// wrote it (2026-08-14) was a silent-drop no-op (payload drops unknown
+	// keys, reports success). Served builtBy derives from the ENTITIES
+	// collection; fix the entity record/links instead. S0 guards the serve.
 
 	console.log("── Description fixes (overwrite shortDescription) ──");
 	for (const [slug, desc] of Object.entries(DESCRIPTION_FIXES)) {
@@ -1243,6 +1632,74 @@ async function main() {
 			slug: proj.slug,
 			data: { coverage: { countries, currencies, seps, asOf: ASOF } },
 		});
+	}
+
+	// ── statusSourceUrl retract: null EXACTLY the mangled/contradicted value ──
+	console.log("\n── Status source retract (audit C2) ──");
+	for (const [slug, badUrl] of Object.entries(STATUS_SOURCE_RETRACT)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) continue;
+		if (d.statusSourceUrl !== badUrl) {
+			console.log(`  ${slug}: current source is not the retracted value, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: statusSourceUrl NULLED (was ${badUrl})`);
+		if (EXECUTE) {
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: { statusSourceUrl: null },
+				context: { internal: true },
+				overrideAccess: true,
+			});
+		}
+	}
+
+	// ── statusSourceUrl backfill: fill-only-if-empty, verdict untouched ──
+	console.log("\n── Status source backfill (fill-only-if-empty) ──");
+	for (const [slug, srcUrl] of Object.entries(STATUS_SOURCE_BACKFILL)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.statusSourceUrl) {
+			console.log(`  ${slug}: already sourced, skip`);
+			continue;
+		}
+		// Audit C5: the map is FOR human-verified Inactive rows — a row that has
+		// since flipped to Live must never get a dead-site URL stamped as its
+		// status receipt.
+		if (d.status !== "Inactive") {
+			console.log(`  ${slug}: status is ${d.status}, not Inactive — skip`);
+			continue;
+		}
+		console.log(`  ${slug}: statusSourceUrl ← ${srcUrl}`);
+		if (EXECUTE) {
+			await payload.update({
+				collection: "projects",
+				id: d.id,
+				data: { statusSourceUrl: srcUrl },
+				context: { internal: true },
+				overrideAccess: true,
+			});
+		}
 	}
 
 	// ── raven#8 / sls-018: additive types for multi-product projects ──
@@ -1459,6 +1916,94 @@ async function main() {
 			console.log("  (none — every capability axis agrees with its project)");
 	}
 
+	// ── github.orgLogin normalization (derived, not a map) ──
+	// The field is a GitHub login. The public intake form takes free text, so
+	// rows arrived holding submission URLs, owner/repo pairs, other forges'
+	// hostnames and comma-joined junk. Every reader rejects those shapes, so
+	// those projects were never fanned out to their repos and the API served a
+	// hostname where a login belongs. parseGithubIdentity is the same function
+	// the intake route now applies at the boundary, so this pass converges: a
+	// normalised value re-normalises to itself and plans nothing.
+	//
+	// Rows whose value names another forge lose the field entirely — an absent
+	// GitHub owner, not a repaired one. The forge URL belongs in links.
+	console.log("\n── github.orgLogin normalization ──");
+	{
+		const all = await payload.find({
+			collection: "projects",
+			limit: 5000,
+			depth: 0,
+			overrideAccess: true,
+		});
+		let planned = 0;
+		for (const doc of all.docs) {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			const d = doc as any;
+			const cur = d.github?.orgLogin;
+			if (typeof cur !== "string" || !cur) continue;
+			const { orgLogin, repo } = parseGithubIdentity(cur);
+			if (orgLogin === cur && !repo) continue;
+			const repos = normalizedRepos(d.github?.repos);
+			// A submission URL that names a repository is the only record we have
+			// of it; keep it so enrich-repos can verify and score it. Never
+			// duplicate one the row already carries.
+			const addRepo =
+				repo &&
+				!repos.some((r) => r.owner === repo.owner && r.name === repo.name)
+					? repo
+					: null;
+			if (orgLogin === cur && !addRepo) continue;
+			planned++;
+			console.log(
+				`  ${d.slug}: orgLogin "${cur}" → ${orgLogin ? `"${orgLogin}"` : "(none — not a GitHub owner)"}${addRepo ? ` + repo ${addRepo.owner}/${addRepo.name}` : ""}`,
+			);
+			writes.push({
+				id: d.id,
+				slug: d.slug,
+				data: {
+					github: {
+						...(d.github ?? {}),
+						orgLogin: orgLogin ?? null,
+						repos: addRepo ? [...repos, addRepo] : repos,
+					},
+				},
+			});
+		}
+		if (!planned)
+			console.log("  (none — every stored orgLogin is already a GitHub login)");
+
+		// Same free text, one level down: github.repos[] entries holding another
+		// forge's host as the owner, a person's display name, or a second URL
+		// glued to the repo name. Runs over every row, including those whose
+		// orgLogin was already clean.
+		let repoPlanned = 0;
+		for (const doc of all.docs) {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			const d = doc as any;
+			if (writes.some((w) => w.id === d.id)) continue; // already rewritten above
+			const cur: Array<{ owner: string; name: string }> = d.github?.repos ?? [];
+			if (!cur.length) continue;
+			const want = normalizedRepos(cur);
+			const same =
+				want.length === cur.length &&
+				want.every(
+					(r, i) => r.owner === cur[i]?.owner && r.name === cur[i]?.name,
+				);
+			if (same) continue;
+			repoPlanned++;
+			console.log(
+				`  ${d.slug}: repos [${cur.map((r) => `${r.owner}/${r.name}`).join(", ")}] → [${want.map((r) => `${r.owner}/${r.name}`).join(", ")}]`,
+			);
+			writes.push({
+				id: d.id,
+				slug: d.slug,
+				data: { github: { ...(d.github ?? {}), repos: want } },
+			});
+		}
+		if (!repoPlanned)
+			console.log("  (none — every stored repo entry names a GitHub repo)");
+	}
+
 	// ── finding 27: corridor-country corrections (OVERWRITE, equality-guarded) ──
 	console.log("\n── Coverage country corrections (finding 27) ──");
 	for (const [slug, fix] of Object.entries(COVERAGE_COUNTRY_FIX)) {
@@ -1502,7 +2047,16 @@ async function main() {
 			overrideAccess: true,
 		});
 		if (r.docs[0]) {
-			console.log(`  ${seed.slug}: exists, skip`);
+			// Diagnostic (2026-08-31): fxdao and enerdao "existed" while the
+			// public API served neither — a bare skip hides WHAT exists. Print
+			// the blocking row's status and name, so a hidden Draft (the dedup
+			// lane's hiding mechanism) is visible in the log instead of reading
+			// as an already-served project.
+			// biome-ignore lint/suspicious/noExplicitAny: diagnostic read
+			const blocking = r.docs[0] as any;
+			console.log(
+				`  ${seed.slug}: exists, skip (status=${blocking?.status}, name=${blocking?.name})`,
+			);
 			continue;
 		}
 		console.log(
@@ -1512,7 +2066,12 @@ async function main() {
 			try {
 				await payload.create({
 					collection: "projects",
-					data: seed,
+					// biome-ignore lint/suspicious/noExplicitAny: the seed literals'
+					// inferred union produced a types-ratchet signature that CHURNED
+					// on every map edit (the baselined message is length-truncated,
+					// so upstream string-length changes moved its tail) — closed with
+					// the site cast the sibling prod writers already use.
+					data: seed as any,
 					overrideAccess: true,
 				});
 				console.log(`  created: ${seed.slug}`);
@@ -1593,8 +2152,13 @@ async function main() {
 		});
 	}
 
-	console.log("\n── Status fixes (from-guarded) ──");
-	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
+	// PROMOTE-ONLY: this section can mark a project awarded and merge rounds in;
+	// it can never un-award, remove a round, or overwrite a nonzero total. An
+	// existing nonzero totalAwarded that disagrees with our figure is a
+	// reconciliation question for a human, not something a script should settle
+	// by overwriting — so it logs and leaves it.
+	console.log("\n── SCF legacy award linkage (promote-only, #744) ──");
+	for (const [slug, a] of Object.entries(SCF_LEGACY_AWARDS)) {
 		const r = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: slug } },
@@ -1608,10 +2172,237 @@ async function main() {
 			console.log(`  WARN: no project "${slug}" — skipped`);
 			continue;
 		}
+		const scf = d.scf ?? {};
+		const rounds: number[] = Array.isArray(scf.awardedRounds)
+			? scf.awardedRounds.map(Number)
+			: [];
+		const hasRound = rounds.includes(a.round);
+		if (scf.awarded && hasRound) {
+			console.log(`  ${slug}: already awarded w/ round ${a.round}, skip`);
+			continue;
+		}
+		const nextRounds = hasRound
+			? rounds
+			: [...rounds, a.round].sort((x, y) => x - y);
+		const existingTotal = Number(scf.totalAwarded) || 0;
+		if (existingTotal > 0 && existingTotal !== a.usd) {
+			console.log(
+				`  ${slug}: totalAwarded already ${existingTotal} ≠ ${a.usd} — merging round only, total left for human reconciliation`,
+			);
+		}
+		console.log(
+			`  ${slug}: scfAwarded ${!!scf.awarded} → true, rounds [${rounds.join(", ")}] → [${nextRounds.join(", ")}]${existingTotal === 0 ? `, totalAwarded → ${a.usd}` : ""} (${a.award}, ${a.evidence})`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					awarded: true,
+					awardedRounds: nextRounds,
+					lastAwardedRound: Math.max(
+						Number(scf.lastAwardedRound) || 0,
+						a.round,
+					),
+					...(existingTotal === 0 ? { totalAwarded: a.usd } : {}),
+				},
+			},
+		});
+	}
+
+	console.log("\n── Status fixes (from-guarded) ──");
+	// ── The curator gate (2026-08-29, the hoops confession) ────────────────
+	// The automated path already enforces "a 200 is not a business": the
+	// weekly link-check reads what a 2xx SERVED and the basis upgrader
+	// refuses non-product pages. Manual curation BYPASSED that whole layer —
+	// a hand-written site-liveness Live stamp shipped off a 200 whose page
+	// literally said TESTNET and "JOIN THE WAITLIST". Per the closure rule,
+	// the fix is not "read more carefully": it is making this path unable to
+	// repeat it. Any STATUS_FIX asserting Live on a machine basis
+	// (site-liveness) has its sourceUrl FETCHED and scanned for pre-launch
+	// markers at apply time; a hit refuses the entry loudly, in dry-run and
+	// execute alike. human-verified entries still pass — that basis is a
+	// person taking responsibility for having actually read the page — but
+	// the marker scan warns on them too, so the diff shows the contradiction.
+	const PRELAUNCH_MARKERS =
+		/\b(testnet[- ]?only|available on testnet|on testnet|TESTNET|join the waitlist|joins? our waitlist|coming soon|mainnet (opens|soon|launch)|funds are not real|not yet (live|launched)|pre-?launch)\b/i;
+	// SCOPE: a PRODUCT page. The markers above are claims when a landing page
+	// makes them ("join the waitlist", "coming soon"); they are ordinary
+	// vocabulary in a package registry document, where TESTNET is a network
+	// constant every Stellar SDK documents beside MAINNET.
+	//
+	// Measured 2026-09-08 across the 59 Live rows that publish a verified
+	// package: this scan fired on 21 of them — soroswap (@soroswap/sdk lists
+	// `SupportedNetworks.MAINNET | SupportedNetworks.TESTNET`, mainnet first),
+	// reflector ("Beam oracle client for Testnet" next to "oracle on Pubnet"),
+	// OpenZeppelin, SDF's own passkey-kit, and stellar-pay, which is ours. All
+	// unambiguously live. A 36% false-positive rate is not a gate, it is noise
+	// that trains people to ignore a REFUSED line.
+	//
+	// So the scan is skipped for registry documents. It is not a weakening: for
+	// basis `package-release` the evidence is that a versioned artifact exists
+	// with a registry-served backlink to this repo, and the README prose was
+	// never the claim being made.
+	const REGISTRY_HOSTS =
+		/^https?:\/\/(registry\.npmjs\.org|jsr\.io\/api|crates\.io\/api|pypi\.org\/pypi)\//i;
+	const prelaunchScan = async (
+		url: string,
+	): Promise<{ hit: string | null; ok: boolean }> => {
+		if (REGISTRY_HOSTS.test(url)) return { hit: null, ok: true };
+		try {
+			const res = await fetch(url, {
+				headers: { "User-Agent": "stellarlight-curator-gate" },
+				redirect: "follow",
+			});
+			if (!res.ok) return { hit: null, ok: false };
+			const text = (await res.text())
+				.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ")
+				.replace(/<[^>]+>/g, " ")
+				.replace(/\s+/g, " ");
+			const m = PRELAUNCH_MARKERS.exec(text);
+			return { hit: m ? m[0] : null, ok: true };
+		} catch {
+			return { hit: null, ok: false };
+		}
+	};
+
+	for (const [slug, fix] of Object.entries(STATUS_FIX)) {
+		if (fix.to === "Live" && fix.sourceUrl && fix.basis !== "human-verified") {
+			const scan = await prelaunchScan(fix.sourceUrl);
+			if (scan.hit) {
+				console.error(
+					`  REFUSED ${slug}: Live stamp on ${fix.basis}, but ${fix.sourceUrl} carries pre-launch marker "${scan.hit}" — a 200 is not a business. Read the page; if Live is still right, use basis human-verified and own it.`,
+				);
+				process.exitCode = 1;
+				continue;
+			}
+			if (!scan.ok)
+				console.log(
+					`  WARN ${slug}: could not verify ${fix.sourceUrl} for the Live stamp (fetch failed) — entry proceeds, but the evidence is unconfirmed`,
+				);
+		} else if (fix.to === "Live" && fix.sourceUrl) {
+			const scan = await prelaunchScan(fix.sourceUrl);
+			if (scan.hit)
+				console.log(
+					`  WARN ${slug}: human-verified Live, but the page carries "${scan.hit}" — the human owns this contradiction`,
+				);
+		}
+
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// A lineage shadow is owned by the fold (Draft + canonicalSlug). A
+		// status entry naming one would overwrite that — the third writer the
+		// 2026-09-05 audit warned about. Fix the canonical row instead.
+		if (d.canonicalSlug) {
+			console.log(
+				`  ${slug}: is a shadow of ${d.canonicalSlug} — skip (fix the canonical row)`,
+			);
+			continue;
+		}
+		// A lineage shadow is not a record: its status is the fold's (Draft +
+		// canonicalSlug, #1337) and no curated entry may write onto it — a
+		// STATUS_FIX keyed by a shadow slug would silently re-open a hidden
+		// duplicate (audit 2026-09-05, "one field, one writer").
+		if (d.canonicalSlug) {
+			console.log(
+				`  ${slug}: shadow of ${d.canonicalSlug} — curated status entry skipped; re-key it to the canonical row`,
+			);
+			continue;
+		}
 		if (d.status !== fix.from) {
+			// An entry that already moved the row keeps owning its lifecycle note:
+			// when the stored note lags the verdict (fill-if-empty left the earlier
+			// Live packet note on five rows retired or downgraded on 2026-09-06),
+			// refresh the note alone. Status, basis and dates are not touched.
+			// The entry itself proves the row was once Live: `from: "Live"` is a
+			// statement that we observed it Live before retiring it. That is the
+			// wasLive flag, and it was set on 1 of 99 Inactive rows while 90 were
+			// provably Live — so a consumer asking "was this ever real?" got
+			// silence about a product that shipped and died.
+			const provesWasLive = fix.from === "Live" && fix.to !== "Live";
+			const needsWasLive = provesWasLive && !d.lifecycle?.wasLive;
+			const needsNote =
+				fix.from !== fix.to &&
+				d.status === fix.to &&
+				fix.note &&
+				d.lifecycle?.note !== fix.note;
+			if (needsNote || needsWasLive) {
+				const parts = [
+					needsNote ? "lifecycle note refreshed to the verdict" : null,
+					needsWasLive ? "wasLive set (the entry retired it FROM Live)" : null,
+				].filter(Boolean);
+				console.log(`  ${slug}: already ${fix.to} — ${parts.join("; ")}`);
+				writes.push({
+					id: d.id,
+					slug,
+					data: {
+						lifecycle: {
+							...(d.lifecycle ?? {}),
+							...(needsNote ? { note: fix.note } : {}),
+							...(needsWasLive ? { wasLive: true } : {}),
+						},
+					},
+				});
+				continue;
+			}
 			console.log(
 				`  ${slug}: status '${d.status}' ≠ '${fix.from}', skip (retired or manually set)`,
 			);
+			continue;
+		}
+		// A weak curated basis never overwrites a strong one a lane earned. The
+		// July entry for blend (from Live, to Live, basis site-liveness) re-stamped
+		// site-liveness on every execute, erasing the onchain-activity the basis
+		// lane keeps awarding (1,682 subinvocations in the window, 2026-09-05) —
+		// 16 STATUS_FIX entries carry a weak basis and could do the same. When
+		// the status is unchanged, the stored strong provenance IS the better
+		// evidence; there is nothing to write. A status MOVE is a verdict and
+		// still writes as the entry says.
+		// The FIFTH copy of this list, found 2026-09-08 while wiring
+		// package-release. It is a local const inside a loop, so the sweep that
+		// replaced the four exported copies did not see it. Left stale it is a
+		// live bug: a row that had EARNED package-release would not be
+		// recognised as strong, and a weak curated entry could overwrite it —
+		// precisely what this guard exists to prevent, which it learned from
+		// blend having site-liveness re-stamped over onchain-activity on every
+		// execute.
+		const STRONG = new Set<string>(STRONG_STATUS_BASES);
+		if (
+			fix.from === fix.to &&
+			fix.basis &&
+			!fix.withdraw &&
+			!STRONG.has(fix.basis) &&
+			STRONG.has(String(d.statusBasis ?? ""))
+		) {
+			console.log(
+				`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
+			);
+			continue;
+		}
+		// Idempotence (2026-09-06): a stamp whose every field already matches
+		// the row is not a write. 141 from===to entries were re-written on every
+		// execute — "143 applied" meant nothing, and the noise hid that tucambio
+		// flipped between two curate maps each run. A stamp only fills an empty
+		// note, so a row with any note is in sync on the note.
+		if (
+			fix.from === fix.to &&
+			(!fix.asOf || String(d.statusAsOf ?? "").slice(0, 10) === fix.asOf) &&
+			(!fix.sourceUrl || d.statusSourceUrl === fix.sourceUrl) &&
+			(!fix.basis || d.statusBasis === fix.basis) &&
+			(!fix.note || !!d.lifecycle?.note)
+		) {
+			console.log(`  ${slug}: stamp already in sync, skip`);
 			continue;
 		}
 		console.log(`  ${slug}: status ${fix.from} → ${fix.to}`);
@@ -1619,8 +2410,19 @@ async function main() {
 		const data: any = { status: fix.to };
 		// Inactive flips carry their evidence as ecosystem memory (fill-if-
 		// empty): "X WAS a live Y that shut down" beats silence for consumers.
-		if (fix.note && !d.lifecycle?.note)
+		// A status MOVE is a verdict: its note replaces whatever was there. A
+		// stamp (from === to) only fills an empty note, as before.
+		if (fix.note && (fix.from !== fix.to || !d.lifecycle?.note))
 			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
+		// Retiring a row FROM Live is itself the proof it was once Live — the
+		// flag a consumer needs to hear "this used to be a real product" rather
+		// than silence. Rides the same write, never guessed.
+		if (fix.from === "Live" && fix.to !== "Live")
+			data.lifecycle = {
+				...(d.lifecycle ?? {}),
+				...data.lifecycle,
+				wasLive: true,
+			};
 		// sls-024: date + source + kind-of-evidence ride the same write, so the
 		// served label stops being an unprovenanced bare string.
 		if (fix.asOf) data.statusAsOf = fix.asOf;
@@ -1630,6 +2432,335 @@ async function main() {
 	}
 
 	console.log("\n── Website fixes (dead recorded URL → verified live URL) ──");
+	// ── PROMINENCE_SET: editorial rank boost, exact-sync ──
+	for (const [slug, prominence] of Object.entries(PROMINENCE_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if ((d.prominence ?? 0) === prominence) {
+			console.log(`  ${slug}: prominence already ${prominence}, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: prominence ${d.prominence ?? 0} → ${prominence}`);
+		writes.push({ id: d.id, slug, data: { prominence } });
+	}
+
+	// ── SCF submission linkage (2026-08-31 review) — promote-only, no amounts ──
+	console.log("\n── SCF submission linkage (absence review, promote-only) ──");
+	for (const [slug, a] of Object.entries(SCF_SUBMISSION_LINKS)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped (seed missing?)`);
+			continue;
+		}
+		const scf = d.scf ?? {};
+		const rounds: number[] = Array.isArray(scf.awardedRounds)
+			? scf.awardedRounds.map(Number)
+			: [];
+		const nextRounds = [...new Set([...rounds, ...a.rounds])].sort(
+			(x, y) => x - y,
+		);
+		if (scf.awarded && nextRounds.length === rounds.length) {
+			console.log(`  ${slug}: already awarded w/ all rounds, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: scfAwarded ${!!scf.awarded} → true, rounds [${rounds.join(", ")}] → [${nextRounds.join(", ")}] (${a.evidence})`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					awarded: true,
+					awardedRounds: nextRounds,
+					lastAwardedRound: Math.max(
+						Number(scf.lastAwardedRound) || 0,
+						...a.rounds,
+					),
+				},
+			},
+		});
+	}
+
+	// ── ALIAS_ADD: rename-continuity aliases (sls-050 as data) ──
+	for (const [slug, addAliases] of Object.entries(ALIAS_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// aliases is hasMany TEXT — an array of plain strings (write the same
+		// shape back; an object shape would be silently dropped, the
+		// payload-silent-drop trap).
+		const current: string[] = Array.isArray(d.aliases)
+			? d.aliases.filter((a: unknown): a is string => typeof a === "string")
+			: [];
+		const missing = addAliases.filter((a) => !current.includes(a));
+		if (!missing.length) {
+			console.log(
+				`  ${slug}: aliases already carry ${addAliases.join(",")}, skip`,
+			);
+			continue;
+		}
+		console.log(
+			`  ${slug}: aliases [${current.join(",")}] +${missing.join(",")}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { aliases: [...current, ...missing] },
+		});
+	}
+
+	// ── TYPE_ADD: additive type tags (Oracle vertical, guard D 2026-08-27) ──
+	for (const [slug, addTypes] of Object.entries(TYPE_ADD)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const current: string[] = Array.isArray(d.types) ? d.types : [];
+		const missing = addTypes.filter((t) => !current.includes(t));
+		if (!missing.length) {
+			console.log(`  ${slug}: types already carry ${addTypes.join(",")}, skip`);
+			continue;
+		}
+		// ADD-only merge — write the full array (hasMany), never a partial.
+		console.log(
+			`  ${slug}: types [${current.join(",")}] +${missing.join(",")}`,
+		);
+		writes.push({ id: d.id, slug, data: { types: [...current, ...missing] } });
+	}
+
+	// ── NAME_FIXES: registered renames (sync-protected via curatedFieldsFor) ──
+	for (const [slug, name] of Object.entries(NAME_FIXES)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.name === name) {
+			console.log(`  ${slug}: name already "${name}", skip`);
+			continue;
+		}
+		console.log(`  ${slug}: name "${d.name}" → "${name}"`);
+		writes.push({ id: d.id, slug, data: { name } });
+	}
+
+	const r2Ready = !!(
+		process.env.R2_ACCESS_KEY_ID &&
+		process.env.R2_SECRET_ACCESS_KEY &&
+		process.env.R2_BUCKET &&
+		process.env.R2_ENDPOINT
+	);
+	if (Object.keys(LOGO_SET).length && EXECUTE && !r2Ready) {
+		// 2026-09-23: two logos were "set" this way and 404ed — the files went
+		// to the runner's disk and vanished with the job.
+		console.error(
+			"  LOGO_SET: REFUSED — R2 is not configured here (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_ENDPOINT). An upload would land on the runner's disk and vanish. Add the secrets (enrich-scf.yml names them) and re-run.",
+		);
+		process.exitCode = 1;
+	}
+	for (const [slug, spec] of Object.entries(LOGO_SET)) {
+		if (EXECUTE && !r2Ready) break;
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const logoId =
+			d.logo && typeof d.logo === "object" ? d.logo.id : (d.logo ?? null);
+		const current = logoId
+			? await payload
+					.findByID({
+						collection: "media",
+						id: logoId,
+						depth: 0,
+						overrideAccess: true,
+					})
+					.catch(() => null)
+			: null;
+		const source = spec.url ?? (spec.file ? `file:${spec.file}` : "");
+		if (!source) {
+			console.error(`  ${slug}: LOGO_SET entry has neither url nor file`);
+			process.exitCode = 1;
+			continue;
+		}
+		// biome-ignore lint/suspicious/noExplicitAny: media doc shape
+		const cur = current as any;
+		if (String(cur?.alt ?? "").includes(source)) {
+			// the record says so; make sure the file actually serves before
+			// trusting it — an upload that missed R2 leaves a doc and no bytes
+			const served = cur?.filename
+				? await fetch(
+						`https://stellarlight.xyz/api/media/file/${encodeURIComponent(String(cur.filename))}`,
+					)
+						.then((res) => res.ok)
+						.catch(() => false)
+				: false;
+			if (served) {
+				console.log(`  ${slug}: logo already from ${source}, skip`);
+				continue;
+			}
+			console.log(
+				`  ${slug}: logo record points at ${source} but the file does not serve — re-uploading`,
+			);
+		}
+		console.log(`  ${slug}: logo ← ${source} (${spec.note})`);
+		if (!EXECUTE) continue;
+		let buffer: Buffer;
+		let type: string;
+		if (spec.file) {
+			const { readFileSync } = await import("node:fs");
+			buffer = readFileSync(spec.file);
+			type = spec.file.endsWith(".png")
+				? "image/png"
+				: spec.file.endsWith(".svg")
+					? "image/svg+xml"
+					: "image/jpeg";
+		} else {
+			const res = await fetch(spec.url as string, {
+				headers: { "User-Agent": "Mozilla/5.0 (stellarlight curate)" },
+			});
+			if (!res.ok) {
+				console.error(`  ${slug}: logo download failed — HTTP ${res.status}`);
+				process.exitCode = 1;
+				continue;
+			}
+			type = (res.headers.get("content-type") ?? "").split(";")[0].trim();
+			buffer = Buffer.from(await res.arrayBuffer());
+		}
+		let mimetype = type;
+		let ext =
+			type === "image/png"
+				? ".png"
+				: type === "image/jpeg"
+					? ".jpg"
+					: type === "image/webp"
+						? ".webp"
+						: "";
+		if (type === "image/svg+xml" || source.endsWith(".svg")) {
+			// next/image serves no SVG: rasterise to a padded 512px PNG
+			const sharp = (await import("sharp")).default;
+			const inner = await sharp(buffer, { density: 600 })
+				.resize(400, 400, { fit: "inside" })
+				.png()
+				.toBuffer();
+			buffer = await sharp({
+				create: {
+					width: 512,
+					height: 512,
+					channels: 4,
+					background: { r: 0, g: 0, b: 0, alpha: 0 },
+				},
+			})
+				.composite([{ input: inner, gravity: "center" }])
+				.png()
+				.toBuffer();
+			mimetype = "image/png";
+			ext = ".png";
+		} else if (!ext) {
+			console.error(`  ${slug}: unsupported logo type "${type}"`);
+			process.exitCode = 1;
+			continue;
+		}
+		const media = await payload.create({
+			collection: "media",
+			data: { alt: `${d.name} logo (${source})` },
+			file: {
+				data: buffer,
+				name: `${slug}-logo${ext}`,
+				mimetype,
+				size: buffer.length,
+			},
+			overrideAccess: true,
+		});
+		await payload.update({
+			collection: "projects",
+			id: d.id,
+			data: { logo: media.id },
+			overrideAccess: true,
+		});
+		console.log(
+			`  ${slug}: logo set (media ${media.id}, ${buffer.length} bytes)`,
+		);
+	}
+
+	for (const [slug, canonical] of Object.entries(CANONICAL_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		if (d.canonicalSlug === canonical) {
+			console.log(`  ${slug}: already a shadow of ${canonical}, skip`);
+			continue;
+		}
+		console.log(
+			`  ${slug}: canonicalSlug "${d.canonicalSlug ?? ""}" → "${canonical}"`,
+		);
+		writes.push({ id: d.id, slug, data: { canonicalSlug: canonical } });
+	}
+
 	for (const [slug, website] of Object.entries(WEBSITE_FIXES)) {
 		const r = await payload.find({
 			collection: "projects",
@@ -1660,6 +2791,83 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { links: { ...(d.links ?? {}), website } },
+		});
+	}
+
+	console.log("\n── Website removals (hijacked + dead, value-keyed) ──");
+	for (const [slug, hijacked] of Object.entries({
+		...WEBSITE_REMOVE,
+		...WEBSITE_REMOVE_DEAD,
+	})) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const norm = (u: string) =>
+			(u ?? "").replace(/^(https?:\/\/)www\./, "$1").replace(/\/+$/, "");
+		if (!d.links?.website) {
+			console.log(`  ${slug}: website already empty, skip`);
+			continue;
+		}
+		if (norm(d.links.website) !== norm(hijacked)) {
+			console.log(
+				`  ${slug}: website is ${d.links.website}, not the recorded value — skip (relinked since)`,
+			);
+			continue;
+		}
+		// Not "hijacked": this map holds BOTH hijacked domains and merely dead
+		// ones (its own section header says so), and most entries are an NXDOMAIN
+		// or a 404. The log is what a reviewer reads before approving a prod
+		// write, so it should not assert a cause the entry does not carry — the
+		// reason lives in the comment beside each entry.
+		console.log(`  ${slug}: website REMOVED (was ${d.links.website})`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), website: null } },
+		});
+	}
+
+	console.log("\n── GitHub link removals (dead citations, value-keyed) ──");
+	for (const [slug, dead] of Object.entries(GITHUB_LINK_REMOVE)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		const norm = (u: string) => (u ?? "").replace(/\/+$/, "");
+		if (!d.links?.github) {
+			console.log(`  ${slug}: github link already empty, skip`);
+			continue;
+		}
+		if (norm(d.links.github) !== norm(dead)) {
+			console.log(
+				`  ${slug}: github is ${d.links.github}, not the recorded dead value — skip (relinked since)`,
+			);
+			continue;
+		}
+		console.log(`  ${slug}: github REMOVED (was ${d.links.github} — 404)`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), github: null } },
 		});
 	}
 
@@ -1709,7 +2917,9 @@ async function main() {
 		if (
 			cur.join(",") === fix.aliases.join(",") &&
 			(d.renameSourceUrl ?? undefined) === fix.renameSourceUrl &&
-			(d.renamedAt ?? undefined) === fix.renamedAt
+			// renamedAt is a date field: compare the day, not the stored timestamp
+			// (wirex-pay and vesseo re-wrote identical aliases on every execute)
+			String(d.renamedAt ?? "").slice(0, 10) === (fix.renamedAt ?? "")
 		) {
 			console.log(`  ${slug}: identity already in sync, skip`);
 			continue;
@@ -1745,10 +2955,28 @@ async function main() {
 			continue;
 		}
 		const cur = d.scf ?? {};
+		const wantRA = fix.roundAwards ?? null;
+		const raInSync =
+			!wantRA ||
+			JSON.stringify(
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+				(cur.roundAwards ?? []).map((r: any) => [
+					r.round,
+					r.amountUSD ?? null,
+					r.awardType ?? null,
+				]),
+			) ===
+				JSON.stringify(wantRA.map((r) => [r.round, r.amountUSD, r.awardType]));
 		if (
 			cur.awarded === fix.awarded &&
 			cur.totalAwarded === fix.totalAwarded &&
-			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",")
+			(cur.awardedRounds ?? []).join(",") === fix.awardedRounds.join(",") &&
+			raInSync &&
+			(!fix.unlink || cur.slug == null) &&
+			// provenance first-stamp (same gap enrich had, #828): a curated row
+			// whose values are in sync but whose basis is missing still needs
+			// the human-verified stamp — in-sync is not stamped.
+			cur.basis === "human-verified"
 		) {
 			console.log(`  ${slug}: scf already in sync, skip`);
 			continue;
@@ -1756,7 +2984,61 @@ async function main() {
 		console.log(
 			`  ${slug}: scf awarded=${cur.awarded}→${fix.awarded} total=${cur.totalAwarded}→${fix.totalAwarded} rounds=[${(cur.awardedRounds ?? []).join(",")}]→[${fix.awardedRounds.join(",")}]`,
 		);
-		writes.push({ id: d.id, slug, data: { scf: { ...cur, ...fix } } });
+		const { unlink, ...scfFix } = fix;
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				scf: {
+					...cur,
+					...scfFix,
+					...(unlink
+						? { slug: null, sourceUrl: null, lastAwardedRound: null }
+						: {}),
+					// curated corrections are page-verified by a human where the
+					// official record is ambiguous — the strongest basis we serve
+					basis: "human-verified",
+					asOf: new Date().toISOString().slice(0, 10),
+				},
+			},
+		});
+	}
+
+	for (const [slug, want] of Object.entries(PRODUCTS_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}" — skipped`);
+			continue;
+		}
+		// exact-sync on the value tuple (ignore Payload array-row ids)
+		const tup = (rows: unknown) =>
+			JSON.stringify(
+				// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+				((rows as any[]) ?? []).map((x) => [
+					x.name,
+					x.kind,
+					x.network,
+					x.status,
+					x.contractId ?? null,
+					x.evidenceUrl,
+					x.asOf,
+					x.note ?? null,
+				]),
+			);
+		if (tup(d.products) === tup(want)) {
+			console.log(`  ${slug}: products already in sync, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: products → ${want.length} record(s)`);
+		writes.push({ id: d.id, slug, data: { products: want } });
 	}
 
 	for (const [slug, want] of Object.entries(TYPES_SET)) {
@@ -1974,13 +3256,14 @@ async function main() {
 			cData.shortDescription = m.fill.shortDescription;
 		if (m.fill?.github && !canon.links?.github)
 			cData.links = { ...(canon.links ?? {}), github: m.fill.github };
-		if (m.copyScf && !canon.scf?.awarded && dupe.scf?.awarded) {
-			cData.scf = {
-				...(canon.scf ?? {}),
-				awarded: true,
-				totalAwarded: dupe.scf.totalAwarded ?? null,
-				awardedRounds: dupe.scf.awardedRounds ?? [],
-			};
+		if (m.copyScf) {
+			const moved = fillScfFromDupe(canon.scf, dupe.scf);
+			if (moved) {
+				cData.scf = moved.scf;
+				console.log(
+					`  ${m.canonical}: SCF record ← ${m.dupe} (${moved.filled.join(", ")})`,
+				);
+			}
 		}
 		if (Object.keys(cData).length) {
 			console.log(
@@ -1999,19 +3282,49 @@ async function main() {
 			);
 			continue;
 		}
-		if (dupe.status !== "Inactive") dData.status = "Inactive";
+		// ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05). This wrote
+		// Inactive — a DEATH VERDICT ("defunct/abandoned") on a row that is
+		// merely a duplicate — and it fought the dedup lane, which parks the
+		// lower-ranked twin at Draft: on 2026-09-05 detect-duplicate-projects
+		// hid 11 rows as Draft and this step re-marked them Inactive 30 minutes
+		// later, leaving 29+ duplicates served through the raw API as dead
+		// projects. A duplicate is HIDDEN, never dead: park it at Draft, the
+		// same end state the dedup lane writes. Name continuity survives —
+		// statusAdmissionWhere() admits a shadow as a fold candidate at ANY
+		// status, so a lookup of the old name still folds to the canonical.
+		//
+		// EXCEPT a human death verdict: a genuinely dead project that also
+		// happens to be a duplicate keeps the status a human gave it. No lane
+		// overwrites that.
+		const humanDeathVerdict =
+			dupe.status === "Inactive" &&
+			dupe.statusBasis === "human-verified" &&
+			!!dupe.statusSourceUrl;
+		if (humanDeathVerdict) {
+			console.log(
+				`  ${m.dupe}: human death verdict kept, not re-parked (Inactive, human-verified, ${dupe.statusSourceUrl})`,
+			);
+		} else if (dupe.status !== "Draft") {
+			dData.status = "Draft";
+		}
 		if (!dupe.lifecycle?.note)
 			dData.lifecycle = {
 				...(dupe.lifecycle ?? {}),
 				note: `Duplicate record of '${m.canonical}' (same project, split entry) — funding, status and repos live on the canonical record. Merged ${ASOF}.`,
 			};
 		if (Object.keys(dData).length) {
+			// Name the status TRANSITION, not just the key: this line is the dry
+			// run's only evidence of what the pass would do to a duplicate, and
+			// "status was 'Inactive'" reads identically whether the pass parks the
+			// row at Draft or re-marks it dead.
 			console.log(
-				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status was '${dupe.status}')`,
+				`  ${m.dupe}: → shadow of ${m.canonical} (${Object.keys(dData).join(", ")}; status '${dupe.status}' ${dData.status ? `→ '${dData.status}'` : "kept"})`,
 			);
 			writes.push({ id: dupe.id, slug: m.dupe, data: dData });
 		} else {
-			console.log(`  ${m.dupe}: already linked + Inactive, skip`);
+			console.log(
+				`  ${m.dupe}: already linked + parked (${dupe.status}), skip`,
+			);
 		}
 	}
 
@@ -2053,7 +3366,74 @@ async function main() {
 	// enum value missing from the Types options — aborted the whole batch,
 	// losing 12 valid writes). A bad row fails loudly; the rest still land.
 	let failed = 0;
+	// Two sections can plan a write for the same row, and each builds its patch
+	// by spreading the group as it was READ — `{ ...d.links, website: null }`.
+	// Applied in sequence the second patch's stale spread RESURRECTS what the
+	// first cleared, and merging the patches does not help: the later one still
+	// carries the stale sibling. On 2026-09-07 mimoto and sorosorcerer were
+	// named by both GITHUB_LINK_REMOVE and WEBSITE_REMOVE_DEAD, both writes
+	// reported success, and each row ended with one link cleared and the other
+	// restored. 42 of 44 removals stuck; the two that did not were exactly the
+	// two with a second write in the same run.
+	//
+	// So the patches are reduced to their INTENT. Every patch for a row was
+	// built from the same stored group, so the keys where a patch DIFFERS from
+	// what is stored are precisely what that section meant to change. Union the
+	// differences and one write carries them all.
+	const byRow = new Map<string, Array<(typeof writes)[number]>>();
 	for (const w of writes) {
+		const k = String(w.id);
+		byRow.set(k, [...(byRow.get(k) ?? []), w]);
+	}
+	const merged: typeof writes = [];
+	for (const [, group] of byRow) {
+		if (group.length === 1) {
+			merged.push(group[0]);
+			continue;
+		}
+		const stored = (await payload.findByID({
+			collection: "projects",
+			id: group[0].id,
+			depth: 0,
+			overrideAccess: true,
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		})) as any;
+		const data: Record<string, unknown> = {};
+		for (const w of group) {
+			for (const [key, val] of Object.entries(
+				w.data as Record<string, unknown>,
+			)) {
+				const cur = stored?.[key];
+				if (
+					val &&
+					cur &&
+					typeof val === "object" &&
+					typeof cur === "object" &&
+					!Array.isArray(val) &&
+					!Array.isArray(cur)
+				) {
+					// Group patch: keep only the keys this section actually changed.
+					const base = (data[key] ?? { ...(cur as object) }) as Record<
+						string,
+						unknown
+					>;
+					for (const [k2, v2] of Object.entries(
+						val as Record<string, unknown>,
+					)) {
+						if ((cur as Record<string, unknown>)[k2] !== v2) base[k2] = v2;
+					}
+					data[key] = base;
+				} else {
+					data[key] = val;
+				}
+			}
+		}
+		merged.push({ ...group[0], data });
+		console.log(
+			`  (${group.length} patches for ${group[0].slug} reduced to their intent — a stale spread would have resurrected one)`,
+		);
+	}
+	for (const w of merged) {
 		try {
 			await payload.update({
 				collection: "projects",
@@ -2071,8 +3451,12 @@ async function main() {
 		console.error(`\n${failed} write(s) FAILED — fix and re-run.`);
 		process.exitCode = 1;
 	}
-	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(0);
+	console.log(
+		`\nDONE: ${merged.length} write(s) applied (${writes.length} planned).`,
+	);
+	// exit(0) STOMPED the exitCode set above (same bug enrich-repos fixed):
+	// failed writes exited green. Honor the failure code.
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

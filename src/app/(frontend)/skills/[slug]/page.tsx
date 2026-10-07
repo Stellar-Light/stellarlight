@@ -34,7 +34,12 @@ import {
 	CURATED_SKILLS,
 	findCuratedSkill,
 } from "@/lib/integrations/curated-skills";
-import { fetchSdfSkill, SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import {
+	fetchSdfSkill,
+	fetchSdfSkillNamesLive,
+	registrySkillView,
+	SDF_SKILL_NAMES,
+} from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
@@ -53,6 +58,9 @@ interface SkillData {
 	description: string;
 	source: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
 	kind: string;
+	registry?: string;
+	userInvocable?: boolean;
+	argumentHint?: string;
 	install?: string;
 	installAlt?: { label: string; command: string }[];
 	repository?: string;
@@ -84,9 +92,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { slug } = await params;
 	const skill = await loadSkill(slug);
-	if (!skill) return { title: "Skill not found | Stellar Light" };
+	if (!skill) return { title: "Skill not found" };
 
-	const title = `${skill.name} | Stellar Light Skills`;
+	const title = `${skill.name} — Stellar Skill`;
 	const description = skill.tagline ?? truncate(skill.description, 160);
 	const canonical = `${SITE_URL}/skills/${skill.slug}`;
 	const ogUrl = `${SITE_URL}/api/skills/${skill.slug}/og`;
@@ -330,26 +338,6 @@ export default async function SkillDetailPage({
 /* ─── data loading ───────────────────────────────────────────────────── */
 
 async function loadSkill(slug: string): Promise<SkillData | null> {
-	// SDF
-	if ((SDF_SKILL_NAMES as readonly string[]).includes(slug)) {
-		const s = await fetchSdfSkill(slug);
-		if (!s) return null;
-		return {
-			slug,
-			name: humanize(slug),
-			tagline: truncate(s.description, 160),
-			description: s.description,
-			source: "sdf",
-			kind: "skill-md",
-			install: `npx skills add stellar/${slug}`,
-			homepage: s.url,
-			rawUrl: s.rawUrl,
-			compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-			targetUser: ["dev"],
-			tags: [slug, "SDF"],
-			content: s.content,
-		};
-	}
 	// Curated
 	const c = findCuratedSkill(slug);
 	if (c) {
@@ -376,6 +364,15 @@ async function loadSkill(slug: string): Promise<SkillData | null> {
 						? STELLAR_DEVELOPER_ACTIVITY_SKILL.trim()
 						: null,
 		};
+	}
+	// The skills.stellar.org registry (SDF authored and community-built)
+	const registryNames = (await fetchSdfSkillNamesLive()) ?? [
+		...SDF_SKILL_NAMES,
+	];
+	if (registryNames.includes(slug)) {
+		const s = await fetchSdfSkill(slug);
+		if (!s) return null;
+		return { ...registrySkillView(s), content: s.content };
 	}
 	// Community
 	return loadApprovedCommunitySkill(slug);
@@ -477,19 +474,6 @@ function stripFrontmatter(md: string): string {
 function truncate(s: string, max: number): string {
 	if (s.length <= max) return s;
 	return `${s.slice(0, max - 1).trimEnd()}…`;
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) =>
-			w === "zk"
-				? "ZK"
-				: w === "dapp"
-					? "dApp"
-					: w[0]?.toUpperCase() + w.slice(1),
-		)
-		.join(" ");
 }
 
 function buildJsonLd(skill: SkillData) {
@@ -648,7 +632,7 @@ function SourceBadge({ source }: { source: SkillData["source"] }) {
 		stellarlight: "Stellarlight",
 		lumenloop: "LumenLoop",
 		external: "Ecosystem",
-		community: "Community",
+		community: "Community built",
 	}[source];
 	return (
 		<span className="inline-flex items-center px-2 py-0.5 rounded border border-border/60 bg-white/[0.04] text-[10px] uppercase tracking-wider text-muted-foreground">

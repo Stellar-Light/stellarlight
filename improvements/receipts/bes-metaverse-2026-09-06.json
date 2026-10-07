@@ -1,0 +1,30 @@
+{
+ "slug": "bes-metaverse",
+ "url": "https://besmetaverse.com/",
+ "finalUrl": "https://www.hugedomains.com/domain_profile.cfm?d=besmetaverse.com",
+ "fetchedAt": "2026-09-06T04:19:24.924Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:19:24 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "7feace9a5cc19fe458a427546453c4069afa4d3c2a150e82a3871b38bc61e4f5",
+ "bodyTextChars": 5270,
+ "markers": [
+  {
+   "marker": "is for sale",
+   "found": true,
+   "where": "text",
+   "excerpt": "BesMetaverse.com is for sale | HugeDomains Skip to main content Search for domains --> Search +1-303-893-0552 Home FAQs About us Contact us My account My favorites Shopping cart BesMetaverse.com Bu"
+  },
+  {
+   "marker": "This domain is for sale",
+   "found": true,
+   "where": "text",
+   "excerpt": "or 24 months See details 30-day money back guarantee Take immediate ownership Safe and secure shopping BesMetaverse.com This domain is for sale: $595 Buy now for $595 or pay $24.79 per month for 24 months &#9656; Buy now Processing or &#9656; Start payment plan Processing Make 24 monthly payments Pa"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

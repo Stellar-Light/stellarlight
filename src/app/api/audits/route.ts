@@ -21,14 +21,20 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { clampLimit } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 
 const VALID_PARAMS = ["project", "auditor", "q", "since", "limit", "offset"];
 
@@ -46,29 +52,35 @@ interface AuditRow {
 	observedAt: string | null;
 	findingsTotal: number | null;
 	severityCounts: Record<string, number> | null;
+	engagementId: string | null;
+	reportVersion: string | null;
+	supersededByReportId: number | null;
+	engagementStart: string | null;
+	engagementEnd: string | null;
+	findingsExtraction: string | null;
 	chunksIndexed: number;
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/audits",
 		limit: 60,
 		windowMs: 60_000,
 	});
 	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
+		return apiError({
+			status: 429,
+			error: "rate limit exceeded",
+			advisory:
+				"This instance's per-minute window is spent (counters are per serverless instance: X-RateLimit-Scope: instance). Wait Retry-After and resend; this says nothing about the data.",
+			retryAfterSeconds: Math.max(
+				1,
+				Math.ceil((limit.resetAt - Date.now()) / 1000),
+			),
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const sp = req.nextUrl.searchParams;
@@ -80,7 +92,7 @@ export async function GET(req: NextRequest) {
 			{
 				error: `unknown parameter${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}`,
 				validParams: VALID_PARAMS,
-				hint: "severity-level filtering is not available yet: severityCounts is null until deterministic extraction lands (null = not extracted, NOT zero findings)",
+				hint: `Supported: ${VALID_PARAMS.join(", ")}. Unknown parameters are rejected here, never ignored, so a list that looks filtered is never returned. severity-level filtering is not available yet: severityCounts is null until deterministic extraction lands (null = not extracted, NOT zero findings)`,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -114,20 +126,59 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
-			{ error: "payload unavailable" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				error: "store unavailable",
+				advisory:
+					"The database handle could not be opened. This is an outage, NOT a claim about the data. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: {
+					...serverTiming(startedAt),
+					...rateLimitHeaders(limit),
+					"Retry-After": "2",
+				},
+			},
 		);
 	}
 
 	// The registry is small (tens of rows) — fetch once, filter in JS so
 	// matching is normalization-aware (never Payload `contains` on identity
 	// strings; see the substring-vs-membership trap).
-	const found = await payload.find({
-		collection: "audits",
-		limit: 500,
-		depth: 0,
-		sort: "-publishedAt",
-	});
+	const found = await payload
+		.find({
+			collection: "audits",
+			limit: 500,
+			depth: 0,
+			sort: "-publishedAt",
+		})
+		.catch(() => null);
+	if (!found) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/audits",
+			query: q,
+		});
+		return NextResponse.json(
+			{
+				error: "audit registry read failed",
+				advisory:
+					"The audit registry could not be read. This is an outage, NOT a claim that a project is unaudited. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: {
+					...serverTiming(startedAt),
+					...rateLimitHeaders(limit),
+					"Retry-After": "2",
+				},
+			},
+		);
+	}
 
 	let rows = (found.docs as unknown as AuditRow[]).map((d) => ({
 		reportId: d.reportId,
@@ -143,6 +194,12 @@ export async function GET(req: NextRequest) {
 		observedAt: d.observedAt ?? null,
 		findingsTotal: d.findingsTotal ?? null,
 		severityCounts: d.severityCounts ?? null,
+		engagementId: d.engagementId ?? null,
+		reportVersion: d.reportVersion ?? null,
+		supersededByReportId: d.supersededByReportId ?? null,
+		engagementStart: d.engagementStart ?? null,
+		engagementEnd: d.engagementEnd ?? null,
+		findingsExtraction: d.findingsExtraction ?? null,
 		chunksIndexed: d.chunksIndexed ?? 0,
 	}));
 	const total = rows.length;
@@ -206,6 +263,8 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/audits",
 		query: q ?? project ?? auditor ?? null,
 		filters: { project, auditor, since, limit: limitParam, offset },
@@ -215,6 +274,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/api/audits",
 				generatedAt: new Date().toISOString(),
 				filters: { project, auditor, q, since, limit: limitParam, offset },
@@ -226,6 +286,7 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
+				...serverTiming(startedAt),
 				...rateLimitHeaders(limit),
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},

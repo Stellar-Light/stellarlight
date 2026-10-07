@@ -21,10 +21,19 @@ name: Curator Agent — Link health check
 
 on:
   schedule:
-    # Weekly (Mon 02:00 UTC) — was daily, but at ~18 min/run this single job
-    # burned ~540 Actions-min/month (a quarter of the private-repo free tier)
-    # for a signal that moves on a weeks cadence (link rot). 2026-07-16.
-    - cron: "0 2 * * 1"
+    # Daily again (2026-09-01). It went weekly on 2026-07-16 because ~18
+    # min/run burned ~540 Actions-min/month of the PRIVATE-repo free tier.
+    # The repo is public now (Actions minutes are free on public repos) and a
+    # full run took 7 min today. Weekly also starved the status-basis lane:
+    # a relink or a checker fix only earns a row its evidence when this
+    # runs, and consecutiveFailures is only meaningful when it ticks daily
+    # (the header's original reasoning). The checker is HEAD-first and reads
+    # at most 64 KB per URL.
+    # :23, not :00 (2026-09-02): the first daily slot at 02:00Z never fired —
+    # top-of-hour is GitHub's most congested schedule minute (the scan cron
+    # lost its 00:00Z and 02:00Z slots the same night). Off-peak minutes are
+    # the only lever we hold.
+    - cron: "23 2 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -33,7 +42,7 @@ on:
         default: "false"
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   DATABASE_URI: ${{ secrets.DATABASE_URI }}
@@ -75,3 +84,31 @@ jobs:
           else
             pnpm exec tsx scripts/check-links.ts --execute
           fi
+
+      # The proven-broken list is a work queue, so it lands where the
+      # improvement ledger reads it. Runs even if the check step failed — a
+      # partial list is still true about what it did probe.
+      - name: Commit the artifact if it changed
+        if: always()
+        run: |
+          set -euo pipefail
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/audits/link-health-latest.json || exit 0
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "data(quality): link health [skip ci]"
+          # Push races and dirty trees both hit this step (2026-09-15): the
+          # gone-repos lane's dry run lost its artifact to `cannot lock ref
+          # 'refs/heads/main'` while another lane pushed, and its execute run to
+          # `cannot pull with rebase: You have unstaged changes` — so the probe's
+          # own record never persisted and every later run would have re-reported
+          # the same 147 findings as new. This is the retry shape lane-autonomy
+          # and packet-stamps already use: push first, and on rejection rebase
+          # keeping THIS run's measurement (`-X theirs` — in a rebase the sides
+          # are swapped, so `theirs` is the commit being replayed). --autostash
+          # covers a working tree the script dirtied after `git add`.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push

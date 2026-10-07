@@ -13,8 +13,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies
@@ -41,7 +45,13 @@ function toPublic(p: any) {
 			.map((a: { code: string }) => a.code)
 			.filter(Boolean),
 		seps: p.seps ?? [],
-		rampTypes: p.rampTypes ?? [],
+		tomlSourceUrl: p.tomlSourceUrl ?? null,
+		tomlFetchedAt: p.tomlFetchedAt ?? null,
+		// null, never []: the list route already serves an unconfirmed ramp set
+		// as null, and the detail served [] for the same row (MYKOBO, 2026-09-05
+		// through-Raven battery) — an empty array asserts "no ramps" where the
+		// transfer server's /info was simply not readable.
+		rampTypes: p.rampTypes?.length ? p.rampTypes : null,
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		typicalEngagement: p.typicalEngagement ?? null,
@@ -82,13 +92,22 @@ export async function GET(
 	req: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
+	const startedAt = Date.now();
 	const { slug } = await params;
 
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
-			{ error: "directory temporarily unavailable" },
-			{ status: 503 },
+			{
+				error: "directory temporarily unavailable",
+				advisory:
+					"The database handle could not be opened. This is an outage, NOT a claim that the partner does not exist. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 
@@ -113,7 +132,13 @@ export async function GET(
 			);
 		}
 
-		logApiHit({ req, endpoint: "/api/partners/[slug]", query: slug });
+		logApiHit({
+			req,
+			startedAt,
+			status: 200,
+			endpoint: "/api/partners/[slug]",
+			query: slug,
+		});
 
 		return NextResponse.json(
 			{
@@ -125,14 +150,30 @@ export async function GET(
 			},
 			{
 				headers: {
+					...serverTiming(startedAt),
 					"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 				},
 			},
 		);
 	} catch {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/partners/[slug]",
+			query: slug,
+		});
 		return NextResponse.json(
-			{ error: "directory lookup failed" },
-			{ status: 500 },
+			{
+				error: "directory lookup failed",
+				advisory:
+					"The partner record could not be read. This is an outage, NOT a claim that the partner does not exist. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), "Retry-After": "2" },
+			},
 		);
 	}
 }

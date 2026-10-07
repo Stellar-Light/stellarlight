@@ -22,14 +22,16 @@
  *      (the recap-served-3× class; rank-time collapse hides it, this
  *      finds it at the source).
  */
+import "../load-env";
 import { writeFileSync } from "node:fs";
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 import { getPayload } from "payload";
+import {
+	classifyMirrorComponent,
+	mirrorComponents,
+} from "../../src/lib/corpus-mirrors";
 import { JUNK_URL_RE } from "../../src/lib/research-rank";
+import { titleIssue } from "../../src/lib/title-quality";
 import configPromise from "../../src/payload.config";
 
 const JSON_OUT = process.argv.includes("--json");
@@ -49,31 +51,24 @@ const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 	"lumenloop-research": 30,
 };
 
-const BARE_DATE_RE = /^(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\w+ \d{1,2}, \d{4})$/;
-
 /**
- * Evidence-calibrated (first live run): 'starts-lowercase' false-positived
- * on CLI/RPC reference pages whose titles ARE lowercase identifiers
- * ('tx sign and tx send', 'request_trust'). Meeting recaps USED to be
- * excused as "inherently date-titled" — no longer: the ingester now
- * synthesizes "Stellar Protocol Meeting YYYY-MM-DD" titles, so a bare-date
- * meeting title is a regression this sweep must catch (same bar as
- * run-golden's BAD-TITLE).
+ * Sources whose upstream format states NO publication date anywhere — there
+ * is nothing to extract, so "0% dated" is the correct reading, not a defect.
+ * Declared with a reason so the artifact SAYS why instead of silently
+ * exempting; the /quality reader (src/lib/quality-artifacts.ts) skips these
+ * in its defect count but reports them in the detail line. A source belongs
+ * here only after checking the real upstream pages — dated sources with a
+ * broken extractor (the sep/cap/paper class) get fixed, never declared.
  */
-function titleIssue(title: string, _url: string): string | null {
-	const t = (title ?? "").trim();
-	if (!t) return "empty";
-	if (BARE_DATE_RE.test(t)) return "bare-date";
-	if (t.length > 110) return "overlong (sentence, not a title)";
-	// Run-3 evidence: word-count flagged 296 legit SEO-style docs titles
-	// ('Issue an Asset on Stellar: Set Trustlines…'). A body fragment ENDS
-	// like a sentence; length alone doesn't make one.
-	if (/[.!?]$/.test(t)) return "sentence-like (body fragment?)";
-	// Run-3 samples surfaced this class: '&amp;' served raw in titles —
-	// the ingester never decodes entities from <title>.
-	if (/&(amp|lt|gt|quot|#\d+|#x[0-9a-f]+);/i.test(t)) return "html-entities";
-	return null;
-}
+const UNDATEABLE_SOURCES: Record<string, string> = {
+	"repo-docs": "GitHub READMEs state no publication date",
+	"scf-handbook": "handbook site pages state no publication date",
+};
+
+// titleIssue (and its calibration history) moved to src/lib/title-quality.ts
+// so this sweep, the ingest choke point (chunkMarkdown → deriveCleanTitle) and
+// the back-fill repair (scripts/fix-corpus-titles.ts) share ONE classifier —
+// the rule and the fix can't drift apart.
 
 async function main() {
 	console.error("Engine B (corpus) — research-docs sweeps");
@@ -149,6 +144,8 @@ async function main() {
 			newestAgeDays: number | null;
 			stalled: boolean;
 			undated: boolean;
+			undateable?: true;
+			reason?: string;
 		}
 	> = {};
 	for (const [source, list] of bySource) {
@@ -163,32 +160,55 @@ async function main() {
 		const expect = FRESHNESS_EXPECTATIONS_DAYS[source];
 		// undated ≠ stalled: lumenloop's chunks carry NO publishedAt at all
 		// (an extraction gap of the R2 class) — freshness is UNMEASURABLE
-		// there, which is its own finding, not a stall verdict.
-		const undated = dated.length === 0;
+		// there, which is its own finding, not a stall verdict. And undated ≠
+		// undateable: a DECLARED undateable source (upstream states no date)
+		// reads 0% dated by construction — reported with its reason, never
+		// counted as the extraction-gap defect.
+		const undateableReason = UNDATEABLE_SOURCES[source];
+		const undated = dated.length === 0 && !undateableReason;
 		coverage[source] = {
 			chunks: list.length,
 			datedPct: Math.round((dated.length / list.length) * 100),
 			newestAgeDays,
 			undated,
+			...(undateableReason
+				? { undateable: true as const, reason: undateableReason }
+				: {}),
 			stalled:
 				expect !== undefined &&
-				!undated &&
+				dated.length > 0 &&
 				newestAgeDays !== null &&
 				newestAgeDays > expect,
 		};
 	}
 
-	// ── S8 mirrored content (same hash, >1 distinct URL) ──
-	const byHash = new Map<string, Set<string>>();
+	// ── S8 mirrored content — grouping AND classification shared with the
+	// repair script via src/lib/corpus-mirrors.ts. Raw hash-groups conflated
+	// three different phenomena and only one of them is dirt:
+	//   republication / ambiguous  -> ACTIONABLE (the count below)
+	//   template-siblings          -> distinct docs by construction (sep6 vs
+	//                                 sep24 guides, versioned release notes)
+	//   boilerplate-overlap        -> docs sharing template text, not mirrors
+	// Counting template READMEs as corpus dirt kept this sweep permanently
+	// red over rows nobody should ever delete.
+	const byUrlS8 = new Map<string, { source: string; hashes: Set<string> }>();
 	for (const r of rows) {
-		if (!r.contentHash) continue;
-		const set = byHash.get(r.contentHash) ?? new Set<string>();
-		set.add(r.url);
-		byHash.set(r.contentHash, set);
+		const d = byUrlS8.get(r.url) ?? { source: r.source, hashes: new Set() };
+		if (r.contentHash) d.hashes.add(r.contentHash);
+		byUrlS8.set(r.url, d);
 	}
-	const mirrors = [...byHash.entries()]
-		.filter(([, urls]) => urls.size > 1)
-		.map(([hash, urls]) => ({ hash: hash.slice(0, 12), urls: [...urls] }));
+	const s8Kinds = new Map<string, string[][]>();
+	for (const urls of mirrorComponents(rows)) {
+		// offline classification: no probes, so a provable republication shows
+		// up as "ambiguous" here and the repair script's probing settles it
+		const kind = classifyMirrorComponent(urls, byUrlS8).kind;
+		s8Kinds.set(kind, [...(s8Kinds.get(kind) ?? []), urls]);
+	}
+	const s8Actionable = [
+		...(s8Kinds.get("republication") ?? []),
+		...(s8Kinds.get("ambiguous") ?? []),
+	];
+	const mirrors = s8Actionable.map((urls) => ({ urls }));
 
 	const report = {
 		frame: { chunks: rows.length, docs: byDoc.size },
@@ -205,7 +225,16 @@ async function main() {
 		s7_stalled: Object.entries(coverage)
 			.filter(([, c]) => c.stalled)
 			.map(([s]) => s),
-		s8_mirrors: { count: mirrors.length, sample: mirrors.slice(0, 10) },
+		s8_mirrors: {
+			count: mirrors.length,
+			sample: mirrors.slice(0, 10),
+			meaning:
+				"actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
+			informational: {
+				templateSiblings: (s8Kinds.get("template-siblings") ?? []).length,
+				boilerplateOverlap: (s8Kinds.get("boilerplate-overlap") ?? []).length,
+			},
+		},
 	};
 
 	if (OUT_FILE) {
@@ -228,7 +257,7 @@ async function main() {
 	console.log("S7 publishedAt coverage / freshness:");
 	for (const [s, c] of Object.entries(coverage))
 		console.log(
-			`   ${s.padEnd(22)} ${String(c.chunks).padStart(5)} chunks | dated ${c.datedPct}% | newest ${c.newestAgeDays ?? "—"}d${c.stalled ? "  ⚠ STALLED" : ""}`,
+			`   ${s.padEnd(22)} ${String(c.chunks).padStart(5)} chunks | dated ${c.datedPct}% | newest ${c.newestAgeDays ?? "—"}d${c.stalled ? "  ⚠ STALLED" : ""}${c.undateable ? `  (undateable: ${c.reason})` : ""}`,
 		);
 	console.log(`S8 mirrored content: ${mirrors.length} hash groups across URLs`);
 	for (const m of mirrors.slice(0, 8)) console.log(`   ${m.urls.join(" ↔ ")}`);

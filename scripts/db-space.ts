@@ -13,11 +13,9 @@
  * touched — those are all read by live surfaces.
  */
 
+import "./load-env";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const PRUNE_LOGS = process.argv.includes("--prune-logs");
 const PRUNE_DAYS = Number(process.env.PRUNE_DAYS ?? "30");

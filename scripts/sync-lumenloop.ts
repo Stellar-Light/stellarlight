@@ -6,12 +6,17 @@
  *   npx tsx scripts/sync-lumenloop.ts --execute        # Actually write to DB
  *   npx tsx scripts/sync-lumenloop.ts --execute --skip-entities  # Skip entity creation
  */
-import "dotenv/config";
+import "./load-env";
 import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
+import { STRONG_STATUS_BASES } from "../src/lib/project-status";
+import {
+	changedFields,
+	withoutCuratedFields,
+} from "../src/lib/utils/curated-fields";
 import {
 	extractEntryId,
 	type LumenloopEntry,
@@ -19,6 +24,7 @@ import {
 } from "../src/lib/utils/lumenloop-mapper";
 import { generateSlug } from "../src/lib/utils/normalize";
 import configPromise from "../src/payload.config";
+import { curatedFieldsFor } from "./data/curation-maps";
 
 // --- CLI args ---
 const args = process.argv.slice(2);
@@ -27,7 +33,16 @@ const skipEntities = args.includes("--skip-entities");
 
 // --- Stats ---
 const stats = {
-	projects: { inserted: 0, updated: 0, skipped: 0, errors: 0 },
+	projects: {
+		inserted: 0,
+		updated: 0,
+		skipped: 0,
+		errors: 0,
+		curatedFieldsKept: 0,
+		/** Dry run only: rows whose stored fields the patch would change. */
+		rowsWouldChange: 0,
+		fieldChanges: {} as Record<string, number>,
+	},
 	entities: { created: 0, linked: 0, skipped: 0, errors: 0 },
 	total_files: 0,
 };
@@ -156,20 +171,114 @@ async function main() {
 
 			if (existing.docs.length > 0) {
 				const doc = existing.docs[0];
+				// A lineage shadow (canonicalSlug set) is not a record: its facts live on
+				// the canonical row and its status is the fold's (Draft, hidden). The
+				// feed must not write onto it — on 2026-09-05 the sync restored "Live"
+				// onto 13 shadows the dedup lane had hidden hours earlier, the third
+				// writer on one field in one day.
+				const shadowOf = (doc as { canonicalSlug?: string | null })
+					.canonicalSlug;
+				if (shadowOf) {
+					console.log(
+						`  SKIP: ${mapped.name} (${slug}) is a shadow of ${shadowOf} — the feed does not write onto shadows`,
+					);
+					continue;
+				}
 
 				// Only update LumenloopSeed or Unverified projects
 				if (
 					doc.provenance?.source === "LumenloopSeed" ||
 					doc.verificationLevel === "Unverified"
 				) {
+					// A curation registry OWNS the fields it names for this slug —
+					// the feed must not write them back (lessons class 32). Curating
+					// a record never made it ineligible for this branch, so every
+					// curated field was reverted within 24h of any curate run.
+					const owned = curatedFieldsFor(slug);
+					// A status a LANE earned outranks a feed label, whether or not a
+					// curation map happens to name the row. The map protected 161 of
+					// 309 touched rows; the other 148 carried repo-activity (84),
+					// product-integration (52), onchain-activity (11) or
+					// human-verified (1) and the feed's label would have overwritten
+					// the evidence. It had not bitten yet only because the two mostly
+					// agree — the damage lands exactly when we know better, which is
+					// the whole point of holding the row.
+					//
+					// The same weak-basis test already decides whether the sync may
+					// stamp its own provenance; it now decides whether it may write
+					// the status at all.
+					// An explicit list of tiers WE produced, not "anything but weak".
+					// site-liveness is deliberately absent: it means a page answered,
+					// which a parked domain also does, and it is often months stale.
+					// Protecting it would mean the feed could never tell us a project
+					// died — losing the one thing an upstream curator is well placed
+					// to notice. The feed keeps refreshing those; it may not touch a
+					// status our own lanes or a human established.
+					const EARNED_STATUS_BASES = new Set<string>(STRONG_STATUS_BASES);
+					if (EARNED_STATUS_BASES.has(String(doc.statusBasis)))
+						owned.add("status");
+					const { data: patch, protectedFields } = withoutCuratedFields(
+						mapped,
+						owned,
+					);
+
 					if (dryRun) {
-						console.log(`  UPDATE: ${mapped.name} (${slug})`);
+						// Name the fields, not just the row: a dry run that cannot
+						// say what it would change cannot show a lane fight.
+						const changes = changedFields(
+							patch as Record<string, unknown>,
+							doc as unknown as Record<string, unknown>,
+						);
+						for (const f of changes)
+							stats.projects.fieldChanges[f] =
+								(stats.projects.fieldChanges[f] ?? 0) + 1;
+						if (changes.length) stats.projects.rowsWouldChange++;
+						console.log(
+							`  UPDATE: ${mapped.name} (${slug})${
+								changes.length
+									? ` would change [${changes.join(", ")}]`
+									: " no field changes"
+							}${
+								protectedFields.length
+									? ` [curated, not overwritten: ${protectedFields.join(", ")}]`
+									: ""
+							}`,
+						);
 					} else {
+						// sls-024: the inherited label's citable source IS the lumenloop
+						// file this row syncs from. Stamp it (plus a dated basis) when
+						// the row has no stronger basis — never stomp human-verified/
+						// site-liveness/onchain evidence.
+						const weakBasis =
+							!doc.statusBasis ||
+							doc.statusBasis === "source-inherited" ||
+							doc.statusBasis === "unverified";
+						// statusAsOf DATES THE OBSERVATION, not the sync. It moved to
+						// `now` on every run for every weak-basis row, so 850 projects
+						// nobody had re-checked since import reported "Live, as of
+						// today" each morning — a freshness claim the sync had not
+						// earned, and worse than leaving it null. It advances only when
+						// the incoming status actually differs from what we hold; an
+						// unchanged label keeps the date we first observed it.
+						const incomingStatus = (patch as { status?: string }).status;
+						const statusChanged =
+							typeof incomingStatus === "string" &&
+							incomingStatus !== doc.status;
+						const provenanceStamp = weakBasis
+							? {
+									statusBasis: "source-inherited",
+									...(statusChanged || !doc.statusAsOf
+										? { statusAsOf: new Date() }
+										: {}),
+									statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
+								}
+							: {};
 						await payload.update({
 							collection: "projects",
 							id: doc.id,
 							data: {
-								...mapped,
+								...patch,
+								...provenanceStamp,
 								slug,
 								provenance: {
 									...mapped.provenance,
@@ -179,8 +288,15 @@ async function main() {
 								},
 							},
 						});
-						console.log(`  UPDATED: ${mapped.name} → ${doc.id}`);
+						console.log(
+							`  UPDATED: ${mapped.name} → ${doc.id}${
+								protectedFields.length
+									? ` [curated, not overwritten: ${protectedFields.join(", ")}]`
+									: ""
+							}`,
+						);
 					}
+					if (protectedFields.length) stats.projects.curatedFieldsKept++;
 					stats.projects.updated++;
 
 					// Link entity
@@ -202,7 +318,14 @@ async function main() {
 				} else {
 					const created = await payload.create({
 						collection: "projects",
-						data: { ...mapped, slug } as any,
+						data: {
+							...mapped,
+							statusBasis: "source-inherited",
+							statusAsOf: new Date(),
+							statusSourceUrl: `https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/${file}`,
+							slug,
+							// biome-ignore lint/suspicious/noExplicitAny: payload create shape
+						} as any,
 					});
 					console.log(`  CREATED: ${mapped.name} → ${created.id}`);
 					stats.projects.inserted++;
@@ -237,6 +360,9 @@ async function main() {
 	console.log(`  Updated: ${stats.projects.updated}`);
 	console.log(`  Skipped: ${stats.projects.skipped}`);
 	console.log(`  Errors:  ${stats.projects.errors}`);
+	console.log(
+		`  Curated records whose owned fields were left alone: ${stats.projects.curatedFieldsKept}`,
+	);
 	console.log("");
 	console.log("Entities:");
 	console.log(`  Created: ${stats.entities.created}`);
@@ -256,6 +382,21 @@ async function main() {
 		console.log("*** Run with --execute to apply changes. ***");
 	}
 
+	// Zero-work/failed-work runs are FAILURES (2026-08-08 sweep, the
+	// green-run-that-did-nothing class): an empty upstream sweep or swallowed
+	// per-item errors must not exit green on the nightly cron.
+	if (stats.total_files === 0) {
+		console.error(
+			"\n✗ zero files scanned — upstream empty or unreachable; exiting 1.",
+		);
+		process.exit(1);
+	}
+	if (stats.projects.errors > 0 || stats.entities.errors > 0) {
+		console.error(
+			`\n✗ ${stats.projects.errors + stats.entities.errors} item error(s) — exiting 1 so the run shows red.`,
+		);
+		process.exit(1);
+	}
 	process.exit(0);
 }
 

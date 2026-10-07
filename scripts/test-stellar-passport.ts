@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
-import path from "path";
-
-dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
+import "./load-env";
 
 async function testStellarPassportAPI() {
 	const apiKey = process.env.STELLAR_PASSPORT;

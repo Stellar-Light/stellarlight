@@ -1,14 +1,14 @@
 /**
- * i³ Awards — thin client-side wrapper around @creit.tech/stellar-wallets-kit.
+ * i³ Awards, thin client-side wrapper around @creit.tech/stellar-wallets-kit.
  *
  * The kit is browser-only (preact web components, wallet extensions), so it
- * is ONLY ever loaded through dynamic import() from user gestures — never
- * at module scope — keeping /awards SSR-safe and the kit out of the page's
+ * is ONLY ever loaded through dynamic import() from user gestures, never
+ * at module scope, keeping /awards SSR-safe and the kit out of the page's
  * initial JS. We use our own on-brand wallet picker UI instead of the
  * kit's built-in modal, so only the SDK core + the three wallet modules
  * (Freighter, xBull, Albedo) are pulled in.
  *
- * Network is pinned to TESTNET here as well — the wallet prompt itself
+ * Network is pinned to TESTNET here as well, the wallet prompt itself
  * tells the voter they're signing a testnet transaction.
  */
 
@@ -19,7 +19,7 @@ export const AWARDS_WALLETS: Array<{
 	name: string;
 	hint: string;
 	/** Self-hosted brand logo (public/wallets/*.png, from the wallet kit's
-	 *  official icons) — kept local so the picker doesn't depend on an
+	 *  official icons), kept local so the picker doesn't depend on an
 	 *  external host at connect time. */
 	icon: string;
 }> = [
@@ -38,7 +38,7 @@ export const AWARDS_WALLETS: Array<{
 	{
 		id: "albedo",
 		name: "Albedo",
-		hint: "Web — no install needed",
+		hint: "Web, no install needed",
 		icon: "/wallets/albedo.png",
 	},
 ];

@@ -48,7 +48,9 @@ export type CanonicalFamily =
 	| "enterprise-fund"
 	| "terms"
 	| "quarterly-reports"
-	| "security-program";
+	| "security-program"
+	| "research-grants"
+	| "asset-launches";
 
 export interface CanonicalPage {
 	/** Stable registry key. sdf-org rows chunk under parentDocId `sdf-org-<id>`. */
@@ -59,12 +61,16 @@ export interface CanonicalPage {
 	/** Parent-doc title for the ingested chunks (citation surface). */
 	title: string;
 	/** Research source whose ingester writes this page's chunks. */
-	source: Extract<ResearchSource, "sdf-org" | "security-program" | "sdf-blog">;
+	source: Extract<
+		ResearchSource,
+		"sdf-org" | "security-program" | "sdf-blog" | "dev-docs"
+	>;
 	/** Which script produces the chunks (documentation + skip accounting). */
 	ingestedBy:
 		| "ingest-sdf-org.ts"
 		| "ingest-security-program.ts"
-		| "ingest-sdf-blog.ts";
+		| "ingest-sdf-blog.ts"
+		| "ingest-developers-docs.ts";
 	/**
 	 * Verbatim phrases from the live page. The coverage guard requires EACH
 	 * to appear (case-insensitive) in ≥1 corpus chunk whose url matches; the
@@ -200,6 +206,27 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		tags: ["enterprise-fund", "investments"],
 	},
 	{
+		id: "research-grants",
+		url: "https://research.stellar.org/research-grants",
+		family: "research-grants",
+		title:
+			"Stellar Academic Research Grants — eligibility, deadlines, budget cap (research.stellar.org)",
+		source: "sdf-org",
+		ingestedBy: "ingest-sdf-org.ts",
+		// sls-055 recurrence (2026-08-04 evals): q-scf-academic-research-grant
+		// searched exact research-grant vocabulary and retrieved nothing — the
+		// research.stellar.org family was never ingested. Signatures verbatim
+		// from the live page 2026-08-14.
+		signatures: [
+			"Budget not to exceed $150,000",
+			"We review grant proposals quarterly",
+			"paid to academic institutions only",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["research-grants", "academic", "funding"],
+	},
+	{
 		id: "terms-of-service",
 		url: "https://stellar.org/terms-of-service",
 		family: "terms",
@@ -278,6 +305,44 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		quotable: true,
 		dateStrategy: "undated",
 		tags: ["bug-bounty", "supersession"],
+	},
+
+	// ── asset-launches: a live asset's official launch pages. USDT0
+	// (2026-09-02): the developer launch page is NOT in the dev-docs sitemap
+	// (ingest-developers-docs.ts EXTRA_PAGES carries it); the announcement
+	// arrives through the sitemap-driven blog ingest. Both guarded so a
+	// "is USDT on Stellar / what is the USDT0 contract" answer can never
+	// silently lose its source.
+	{
+		id: "usdt0-launch-page",
+		url: "https://developers.stellar.org/launch/usdt0",
+		family: "asset-launches",
+		title:
+			"USDT0 on Stellar — developer launch page (asset, SAC + OFT contracts)",
+		source: "dev-docs",
+		ingestedBy: "ingest-developers-docs.ts",
+		signatures: [
+			"GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+			"CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["asset-launches", "stablecoins", "usdt0"],
+	},
+	{
+		id: "usdt0-launch-announcement",
+		url: "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		family: "asset-launches",
+		title: "USDT0 is now live on Stellar (SDF announcement, 2026-09-02)",
+		source: "sdf-blog",
+		ingestedBy: "ingest-sdf-blog.ts",
+		signatures: [
+			"unified supply backed 1:1 by USDT",
+			"OFT interoperability standard",
+		],
+		quotable: true,
+		dateStrategy: "undated",
+		tags: ["asset-launches", "stablecoins", "usdt0"],
 	},
 ];
 

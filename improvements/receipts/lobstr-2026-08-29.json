@@ -1,0 +1,28 @@
+{
+ "slug": "lobstr",
+ "url": "https://lobstr.co/",
+ "finalUrl": "https://lobstr.co/",
+ "fetchedAt": "2026-08-29T04:15:33.000Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 04:15:32 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "316585751357faebab3f8536e908e1dc4fbc1f2264519cd6cb2df85779818022",
+ "bodyTextChars": 3392,
+ "markers": [
+  {
+   "marker": "LOBSTR for iOS",
+   "found": true,
+   "excerpt": "LOBSTR – Simple and Secure Stellar &amp; XRP Ledger Wallet. Sign In Get Started Apps LOBSTR for iOS LOBSTR for Android Vault for iOS Vault for Android Trade Buy & Sell Crypto Buy Stellar Lumens Buy USD Coin (Stellar) Buy Bitcoin Buy Ethereum Buy Litecoin Buy other "
+  },
+  {
+   "marker": "Stellar",
+   "found": true,
+   "excerpt": "LOBSTR – Simple and Secure Stellar &amp; XRP Ledger Wallet. Sign In Get Started Apps LOBSTR for iOS LOBSTR for Android Vault for iOS Vault for Android Trade Buy & Sell Crypto Buy Stellar Lumens Buy USD Coin "
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

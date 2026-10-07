@@ -1,0 +1,49 @@
+name: Award onchain-activity basis (manual)
+
+# The quality board tells readers that weak-basis rows with an on-chain
+# footprint "can earn onchain-activity from dated evidence" — and nothing in
+# the repo ever wrote that value, so the 41 eligible rows had no lane to
+# travel. This is that lane. It reads the enrich-onchain snapshot we already
+# store (a dated prevAsOf -> asOf window with per-window deltas) and upgrades
+# only rows that MOVED inside it.
+#
+# Never downgrades, never overwrites human-verified, and leaves a quiet window
+# alone — no movement is not proof of death. Dry-run by default.
+
+on:
+  # Its EVIDENCE refreshes on a schedule and this pass did not, so a row
+  # waited on somebody pressing a button — on-chain payments and
+  # subinvocations are re-read continuously; this turns them into a status
+  # basis and, just as importantly, re-dates the ones already carrying it.
+  # Dry run on 2026-09-15, after 10 days idle: 11 rows due a refresh,
+  # including blend, aquarius, reflector and defindex.
+  schedule:
+    - cron: "0 9 * * 2"
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: basis-from-onchain
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  award:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Award (dry-run unless execute=true)
+        run: pnpm exec tsx scripts/basis-from-onchain.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

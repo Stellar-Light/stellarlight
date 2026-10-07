@@ -1,4 +1,5 @@
 name: Refresh Scout research corpus
+# workflow-health: signal-steps: ^(Idempotence|Verify the corpus still holds every canonical page)$
 
 # Daily run hits all 9 ingest scripts. Each script is idempotent via
 # per-chunk SHA-256 contentHash — only NEW or CHANGED chunks get
@@ -44,7 +45,10 @@ env:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 45, not 30 (2026-09-13): the Idempotence re-plan re-runs every ingester
+    # dry, so the job needs roughly double the single-pass 4–10 min. A guard
+    # that cannot finish gives no verdict (curate-projects learned this at 8).
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -66,7 +70,7 @@ jobs:
         # Without this index, /api/research's $vectorSearch silently
         # returns 0 docs and falls back to keyword mode.
         continue-on-error: true
-        run: pnpm exec tsx scripts/create-vector-index.ts
+        run: pnpm exec tsx scripts/create-vector-index.ts --execute
 
       - name: Ingest SEPs (stellar/stellar-protocol)
         if: inputs.source == '' || inputs.source == 'sep'
@@ -84,6 +88,8 @@ jobs:
           # the unauthenticated core/ listing intermittently 4xx'd.
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-caps.ts --execute
+      - name: Ingest in-repo docs (canonical repos)
+        run: pnpm exec tsx scripts/ingest-repo-docs.ts --execute
 
       - name: Ingest lumenloop (awesome-stellar-community-fund)
         if: inputs.source == '' || inputs.source == 'lumenloop'
@@ -156,3 +162,85 @@ jobs:
         if: inputs.source == '' || inputs.source == 'ec-developer-report'
         continue-on-error: true
         run: pnpm exec tsx scripts/ingest-ec-developer-report.ts --execute
+
+      # Idempotence gate (2026-09-13, the rule curate-projects and enrich-scf
+      # already live by): an execute must leave nothing planned. Every
+      # ingester is re-run with --replan — the same fetch and the same DB diff,
+      # no embed, no write — and must print `replan: writes=0`. A write still
+      # planned right after it was applied is a step that died mid-run under
+      # continue-on-error, a writer whose read-back disagrees with what it
+      # wrote (the normalizeDate class), or two writers on one row. The writes
+      # above already landed; this step only reports, loudly. An ingester that
+      # cannot re-plan (crash, source unreachable) is could-not-check for that
+      # source — named, never counted as clean, never counted as a finding.
+      - name: Idempotence
+        if: inputs.source == ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          planned=0; clean=0; unchecked=""
+          for s in seps caps repo-docs lumenloop lumenloop-research scf-handbook sdf-blog developers-docs papers protocol-releases soroban-security incidents security-program sdf-org ec-developer-report; do
+            pnpm exec tsx "scripts/ingest-$s.ts" --replan > "replan-$s.log" 2>&1
+            line=$(grep -E '^replan: writes=' "replan-$s.log" | tr '\n' ' ')
+            if [ -z "$line" ]; then
+              echo "  ? $s — no plan line (could not re-plan):"
+              tail -n 3 "replan-$s.log" | sed 's/^/      /'
+              unchecked="$unchecked $s"
+              continue
+            fi
+            n=$(grep -oE '^replan: writes=[0-9]+' "replan-$s.log" | cut -d= -f2 | awk '{ t += $1 } END { print t + 0 }')
+            if [ "$n" = "0" ]; then
+              echo "  ✓ $s — $line"; clean=$((clean + 1))
+            else
+              echo "  ✗ $s — $line"
+            fi
+            planned=$((planned + n))
+          done
+          if [ "$planned" != "0" ]; then
+            echo "::error::$planned write(s) still planned after execute — a step that died mid-run, a non-idempotent writer, or two writers on one row; see the ✗ rows"
+            exit 1
+          fi
+          if [ -n "$unchecked" ]; then
+            echo "::warning::could not re-plan:$unchecked — the claim covers the other $clean source(s) only"
+          fi
+          echo "0 writes planned after execute across $clean re-planned source(s)"
+
+      # Every ingest above is continue-on-error, so ONE source failing cannot
+      # block the rest. The cost of that isolation is that a step which died
+      # mid-run still reports success: on 2026-09-02 the developers.stellar.org
+      # ingest hit a transient Atlas TLS error, printed FATAL, and the run went
+      # green with the day's new pages missing from the corpus. Nothing noticed
+      # until a consumer asked for one of them.
+      #
+      # So the run now asserts its own END STATE rather than trusting its steps:
+      # every page in CANONICAL_PAGES must be present with its signature text
+      # intact. This step does NOT continue on error — a corpus that lost a
+      # guarded page reds the run.
+      - name: Verify the corpus still holds every canonical page
+        if: inputs.source == ''
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        # Exit 1 = a guarded page is genuinely missing → red. Exit 2 = we could
+        # not look (no DATABASE_URI, or the connection died); retry once, and
+        # if it still cannot look, say so and pass — "could not check" must not
+        # be published as "data lost".
+        run: |
+          set +e
+          for attempt in 1 2; do
+            pnpm exec tsx scripts/eval/corpus-coverage-check.ts
+            code=$?
+            [ "$code" = "2" ] || break
+            echo "::warning::coverage check could not read the corpus (attempt $attempt)"
+            sleep 30
+          done
+          if [ "$code" = "1" ]; then
+            echo "::error::the corpus is missing a canonical page — see the rows above"
+            exit 1
+          fi
+          if [ "$code" = "2" ]; then
+            echo "::warning::coverage could not be verified this run (corpus unreachable)"
+          fi
+          exit 0

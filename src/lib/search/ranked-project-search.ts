@@ -49,6 +49,40 @@ function applyScfFilter(baseWhere: any, scfFilter?: string) {
  *
  * Ranking: name startsWith > name contains > org-only match
  */
+/** Option values of the projects.types / projects.category selects (see src/collections/Projects.ts). */
+const PROJECT_TYPES = [
+	"Wallet",
+	"DEX",
+	"Lending",
+	"Bridge",
+	"Infrastructure",
+	"Payments",
+	"Anchor",
+	"SDK",
+	"Indexer",
+	"Explorer",
+	"Analytics",
+	"AI",
+	"Gaming",
+	"Education",
+	"Security",
+	"NFT",
+	"RWA",
+	"Stablecoin",
+	"Social Impact",
+	"RPC",
+	"Faucet",
+];
+const PROJECT_CATEGORIES = [
+	"Infrastructure",
+	"Tooling",
+	"Partner Integration",
+	"User-Facing App",
+	"Asset",
+	"Protocol/Contract",
+	"Anchor",
+];
+
 export async function rankedProjectSearch(
 	payload: Payload,
 	options: RankedSearchOptions,
@@ -64,11 +98,30 @@ export async function rankedProjectSearch(
 	applyTypeFilter(baseWhere, typeFilter);
 	applyScfFilter(baseWhere, scfFilter);
 
+	// Match on what a visitor means, not only the name: "wallet" must find
+	// Lobstr and Freighter (type Wallet, description "wallet") ahead of
+	// "walletban" and "wallet-guru" (name substrings). Before this the box
+	// searched name + GitHub org only and hid every flagship wallet.
+	// `types` and `category` are select fields: Payload rejects `contains` on
+	// them (the whole find threw and the box said "No projects found" for every
+	// query for ~40 minutes on 2026-08-17). Match them by option value instead.
+	const q = query.trim().toLowerCase();
+	const typeHits = PROJECT_TYPES.filter(
+		(t) => t.toLowerCase().includes(q) || q.includes(t.toLowerCase()),
+	);
+	const categoryHits = PROJECT_CATEGORIES.filter(
+		(c) => c.toLowerCase().includes(q) || q.includes(c.toLowerCase()),
+	);
 	const where = {
 		...baseWhere,
 		or: [
 			{ name: { contains: query } },
 			{ "github.orgLogin": { contains: query } },
+			// `description` is rich text and cannot be queried ("The following path
+			// cannot be queried: description"); shortDescription is the plain one
+			{ shortDescription: { contains: query } },
+			...(typeHits.length ? [{ types: { in: typeHits } }] : []),
+			...(categoryHits.length ? [{ category: { in: categoryHits } }] : []),
 		],
 	};
 
@@ -78,26 +131,38 @@ export async function rankedProjectSearch(
 		limit: 0,
 		depth: 1,
 		sort,
+		// limit: 0 means EVERY matching row is loaded to rank in memory, so the
+		// 1024-dim embedding is the most expensive field here, not the least.
+		// Ranking never reads it; nothing downstream renders it.
+		select: { embedding: false } as never,
 	});
 
-	// Rank: name startsWith > name contains > org-only
+	// Rank: exact/leading name > name contains > type or category match >
+	// description mention; within a tier, curated prominence (the same boost
+	// /api/projects/search uses) so canonical projects lead incidental ones.
 	const lowerQuery = query.toLowerCase();
-	const sorted = [...results.docs].sort((a, b) => {
-		const aName = a.name?.toLowerCase() || "";
-		const bName = b.name?.toLowerCase() || "";
-
-		const aScore = aName.startsWith(lowerQuery)
-			? 2
-			: aName.includes(lowerQuery)
-				? 1
-				: 0;
-		const bScore = bName.startsWith(lowerQuery)
-			? 2
-			: bName.includes(lowerQuery)
-				? 1
-				: 0;
-
-		return bScore - aScore;
+	const tier = (p: any) => {
+		const name = String(p.name ?? "").toLowerCase();
+		const types = Array.isArray(p.types)
+			? p.types.map((t: unknown) => String(t).toLowerCase())
+			: [];
+		const category = String(p.category ?? "").toLowerCase();
+		if (name === lowerQuery) return 6;
+		// "wallet" means the type before it means "WalletConnect"
+		if (types.includes(lowerQuery) || category === lowerQuery) return 5;
+		if (name.startsWith(lowerQuery)) return 4;
+		if (name.includes(lowerQuery)) return 3;
+		if (
+			types.some((t: string) => t.includes(lowerQuery)) ||
+			category.includes(lowerQuery)
+		)
+			return 2;
+		return 1;
+	};
+	const sorted = [...results.docs].sort((a: any, b: any) => {
+		const dt = tier(b) - tier(a);
+		if (dt !== 0) return dt;
+		return Number(b.prominence ?? 0) - Number(a.prominence ?? 0);
 	});
 
 	const totalDocs = sorted.length;

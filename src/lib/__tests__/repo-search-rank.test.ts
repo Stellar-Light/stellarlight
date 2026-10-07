@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { flagshipsFor, searchRepos } from "../repo-search";
+import {
+	canonicalFor,
+	explicitRepoName,
+	flagshipsFor,
+	searchRepos,
+} from "../repo-search";
 
 /** F4 (audit root #4): stellarness ranks above raw keyword score. */
 
@@ -69,6 +74,58 @@ describe("searchRepos F4 ranking", () => {
 			{ limit: 5 },
 		);
 		expect(repos[0].fullName).toBe("team/chain-indexer");
+	});
+
+	// Golden repos-soroswap: the org's OWN repos must lead a plain org-name
+	// query, above higher-authority repos that merely mention/tag the term.
+	it("a plain org-name query floats the org's own repos (q=soroswap)", async () => {
+		const own = doc({
+			fullName: "soroswap/core",
+			description: "Core AMM contracts",
+			repoScore: 61,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const mentioner = doc({
+			fullName: "stellarcarbon/hackmeridian",
+			description:
+				"Hackathon project integrating soroswap for swaps on Soroban",
+			topics: ["soroswap", "stellar"],
+			repoScore: 70,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([mentioner, own]),
+			"soroswap",
+			{
+				limit: 5,
+			},
+		);
+		expect(repos[0]?.fullName).toBe("soroswap/core");
+	});
+
+	it("a generic word does NOT ride owner identity past Stellar evidence", async () => {
+		// Org literally named "wallet" would exact-match q=wallet — but a repo
+		// NAMED wallet under a normal org must not gain alias (owner-only rule),
+		// and evidence ordering still leads.
+		const namedWallet = doc({
+			fullName: "evmcorp/wallet",
+			description: "an EVM wallet",
+			repoScore: 90,
+		});
+		const proven = doc({
+			fullName: "stellarteam/keys",
+			description: "wallet toolkit for Stellar",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([namedWallet, proven]),
+			"wallet",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("stellarteam/keys");
 	});
 
 	it("owner is searchable (q=allbridge reaches allbridge-io/*)", async () => {
@@ -366,17 +423,26 @@ describe("staleness vs org authority (2026-07-19 answer-key eval)", () => {
 	});
 });
 
+// Casing is LOAD-BEARING: the corpus stores GitHub's canonical casing and
+// Mongo `equals` is case-sensitive, so the lowercase spellings these tests used
+// to assert matched ZERO rows in production for months while the tests passed.
+// The tests encoded the bug. Assert what GitHub actually serves.
 describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", () => {
 	it("q=wallet floats the verified flagship wallets", () => {
 		const f = flagshipsFor("wallet");
 		expect(f).toContain("stellar/freighter");
-		expect(f).toContain("creit-tech/xbull-wallet");
-		expect(f).toContain("kalepail/passkey-kit");
+		expect(f).toContain("Creit-Tech/xBull-Wallet");
+		expect(f).toContain("stellar/passkey-kit");
 	});
-	it("smart wallet queries hit the wallet vertical too", () => {
-		expect(flagshipsFor("smart wallet passkeys")).toContain(
-			"kalepail/passkey-kit",
-		);
+	it("smart wallet queries hit the wallet vertical too, with the live passkey kit", () => {
+		const f = flagshipsFor("passkey smart wallet");
+		expect(f[0]).toBe("stellar/passkey-kit");
+		expect(f).not.toContain("kalepail/passkey-kit");
+	});
+	it("a curated pick that moved resolves to where it lives now", async () => {
+		const { currentRepo } = await import("@/lib/repo-relations");
+		expect(currentRepo("kalepail/passkey-kit")).toBe("stellar/passkey-kit");
+		expect(currentRepo("stellar/freighter")).toBe("stellar/freighter");
 	});
 	it("q=anchor floats the open anchor tooling (operators are closed-source)", () => {
 		const f = flagshipsFor("anchor integration");
@@ -395,9 +461,9 @@ describe("vertical flagships — wallet + anchor (2026-07-19 answer-key eval)", 
 	});
 	it("a query naming a flagship's identity floats that flagship first", () => {
 		expect(flagshipsFor("passkey smart wallet kit")[0]).toBe(
-			"kalepail/passkey-kit",
+			"stellar/passkey-kit",
 		);
-		expect(flagshipsFor("xbull wallet")[0]).toBe("creit-tech/xbull-wallet");
+		expect(flagshipsFor("xbull wallet")[0]).toBe("Creit-Tech/xBull-Wallet");
 	});
 	it("identity tokens absent → curated order holds on the tie", () => {
 		expect(flagshipsFor("anchor integration")[0]).toBe(
@@ -559,5 +625,500 @@ describe("contentTokens hyphen split (real-demand 2026-07-21: zk-snark 22 asks)"
 			limit: 5,
 		});
 		expect(repos.map((r) => r.fullName)).toContain("zkorg/zk-proofs");
+	});
+});
+
+describe("usage-aware ranking (code-truth 5)", () => {
+	it("a mainnet-used repo outranks a keyword-luckier repo without usage (the oracle case)", async () => {
+		const feeders = doc({
+			fullName: "datacorp/oracle-price-feeders",
+			description: "oracle price feed feeders",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 23,
+		});
+		const used = doc({
+			fullName: "reflector/contract",
+			description: "decentralized oracle for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 62,
+			codeInUse: {
+				contracts: 1,
+				events: 44447,
+				eventsDelta: 743,
+				asOf: "2026-08-13",
+			},
+		});
+		const { repos } = await searchRepos(
+			mockPayload([feeders, used]),
+			"oracle price feed",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("reflector/contract");
+	});
+	it("exact identity still beats usage — searching the unused repo by name finds it first", async () => {
+		const named = doc({
+			fullName: "datacorp/oracle-price-feeders",
+			description: "oracle price feed feeders",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+		});
+		const used = doc({
+			fullName: "reflector/contract",
+			description: "decentralized oracle for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			codeInUse: {
+				contracts: 1,
+				events: 44447,
+				eventsDelta: 743,
+				asOf: "2026-08-13",
+			},
+		});
+		const { repos } = await searchRepos(
+			mockPayload([named, used]),
+			"datacorp/oracle-price-feeders",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("datacorp/oracle-price-feeders");
+	});
+	it("usage never lets a no-evidence repo beat a code-verified one (F4 contract holds)", async () => {
+		const usedNoEvidence = doc({
+			fullName: "evmcorp/amm",
+			description: "amm contracts",
+			codeInUse: { contracts: 1, events: 999, asOf: "2026-08-13" },
+		});
+		const verified = doc({
+			fullName: "stellarteam/amm",
+			description: "amm on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([usedNoEvidence, verified]),
+			"amm",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellarteam/amm");
+	});
+});
+
+describe("superseded-generation demotion (sls-064 analog A)", () => {
+	it("a superseded repo ranks below its live peer at equal relevance", async () => {
+		const v1 = doc({
+			fullName: "proto/contracts",
+			description: "lending protocol contracts on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 70,
+			successorRepo: "proto/contracts-v2",
+		});
+		const v2 = doc({
+			fullName: "proto/contracts-v2",
+			description: "lending protocol contracts on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 55,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([v1, v2]),
+			"lending protocol contracts",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("proto/contracts-v2");
+		expect(repos[1].successorRepo).toBe("proto/contracts-v2");
+	});
+});
+
+describe("spaced product-name identity (Stellar-Wallets-Kit class)", () => {
+	// The real corpus shape: the wallet vertical float fires for these queries
+	// and would otherwise pin its other seeds above the exact-name repo.
+	const kit = () =>
+		doc({
+			fullName: "Creit-Tech/Stellar-Wallets-Kit",
+			description: "A kit to handle all Stellar Wallets at once",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 55,
+		});
+	const floats = () => [
+		doc({
+			fullName: "stellar/freighter",
+			description: "browser extension",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 70,
+			stars: 900,
+		}),
+		doc({
+			fullName: "Creit-Tech/xBull-Wallet",
+			description: "wallet app",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 65,
+		}),
+		doc({
+			fullName: "kalepail/passkey-kit",
+			description: "smart wallet kit",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 68,
+			stars: 400,
+		}),
+	];
+
+	it("a 3-word spaced form of a hyphenated repo name is exact identity (beats the family float)", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([...floats(), kit()]),
+			"stellar wallets kit",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Creit-Tech/Stellar-Wallets-Kit");
+	});
+
+	it("the exact hyphenated identifier beats the family float too", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([...floats(), kit()]),
+			"stellar-wallets-kit",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Creit-Tech/Stellar-Wallets-Kit");
+	});
+
+	it("two-word vocabulary can never ride spaced-name identity over F4 evidence", async () => {
+		// Mirror of the F4 fixture with the sharpest possible setup: the alien's
+		// repo name EXACTLY equals the two-word query — identity must stay off.
+		const alien = doc({
+			fullName: "evmcorp/nft-marketplace",
+			description: "NFT marketplace contracts for EVM chains",
+			repoScore: 85,
+			stars: 4000,
+		});
+		const stellar = doc({
+			fullName: "smallteam/market",
+			description: "An nft marketplace on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([alien, stellar]),
+			"nft marketplace",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("smallteam/market");
+	});
+});
+
+describe("knowledgeNotes visibility", () => {
+	it("internal notes never serve; public notes do", async () => {
+		const repo = doc({
+			fullName: "team/thing",
+			description: "a soroban tool",
+			knowledgeNotes: [
+				{ note: "Published on JSR.", source: "curated", asOf: "2026-08-14" },
+				{
+					note: "Triage: fork-farm cluster, do not surface.",
+					source: "curated",
+					asOf: "2026-08-14",
+					visibility: "internal",
+				},
+				{
+					note: "Docs live in /docs.",
+					source: "curated",
+					asOf: "2026-08-14",
+					visibility: "public",
+				},
+			],
+		});
+		const { repos } = await searchRepos(mockPayload([repo]), "soroban tool", {
+			limit: 5,
+		});
+		const notes = repos[0].knowledgeNotes.map((n) => n.note);
+		expect(notes).toContain("Published on JSR.");
+		expect(notes).toContain("Docs live in /docs.");
+		expect(notes.join(" ")).not.toContain("fork-farm");
+	});
+});
+
+describe("camelCase exact-name identity (round-9 TiwalaPay class)", () => {
+	it("a camelCase query IS identifier-form — exact name beats F4-evidenced pay-neighbors", async () => {
+		const evidenced = doc({
+			fullName: "davidmaronio/StellarPay402",
+			description: "payment rails on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 85,
+			stars: 200,
+		});
+		const exact = doc({
+			// Unscanned EC long-tail row whose NAME is exactly the query.
+			fullName: "Zooeyymama/TiwalaPay",
+			description: "remittance app for the Philippines",
+			repoScore: 40,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([evidenced, exact]),
+			"TiwalaPay",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("Zooeyymama/TiwalaPay");
+	});
+
+	it("a merely-capitalized vocabulary word is NOT identifier-form (F4 stands)", async () => {
+		const evidenced = doc({
+			fullName: "smallteam/market",
+			description: "An nft marketplace on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const nameHit = doc({
+			fullName: "evmcorp/Marketplace",
+			description: "NFT marketplace for EVM chains",
+			repoScore: 85,
+			stars: 4000,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([evidenced, nameHit]),
+			"Marketplace",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("smallteam/market");
+	});
+});
+
+describe("dependsOn filter (dependency-graph reverse read)", () => {
+	it("filters to repos whose stellarDeps include the package, case-insensitive", async () => {
+		const dependent = doc({
+			fullName: "team/dapp",
+			description: "a wallet dapp",
+			stellarDeps: ["passkey-kit", "@stellar/stellar-sdk"],
+		});
+		const bystander = doc({
+			fullName: "team/other",
+			description: "a wallet dapp",
+			stellarDeps: ["@stellar/stellar-sdk"],
+		});
+		const { repos, total } = await searchRepos(
+			mockPayload([dependent, bystander]),
+			"wallet dapp",
+			{ limit: 5, dependsOn: "Passkey-Kit" },
+		);
+		expect(total).toBe(1);
+		expect(repos[0].fullName).toBe("team/dapp");
+	});
+});
+
+// R-SYM class (acta, 2026-08-31): a single-word camelCase/snake identifier is
+// the symbol lookup the symbols feature advertises — the repo DEFINING it must
+// win, and concept/flagship floats must not fire off its wordy fragments
+// (did-stellar scored 32.3 and ranked 7th under score-0 canonicals).
+describe("identifier queries reach the defining repo", () => {
+	it("the repo whose codeSymbols carry the identifier outranks fragment matchers", async () => {
+		const famous = doc({
+			fullName: "bigorg/core-node",
+			description: "error code handling and result codes for the network core",
+			repoScore: 95,
+			stars: 5000,
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const definer = doc({
+			fullName: "acta-team/did-stellar",
+			description: "DID method for Stellar",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+			codeSymbols: ["contract_error_code_from_number", "resolve_did"],
+			stars: 3,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([famous, definer]),
+			"contractErrorCodeFromNumber",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("acta-team/did-stellar");
+	});
+
+	it("canonicalFor and flagshipsFor map identifiers to nothing", async () => {
+		const { canonicalFor } = await import("../repo-search");
+		expect(canonicalFor("contractErrorCodeFromNumber")).toEqual([]);
+		expect(canonicalFor("release_escrow")).toEqual([]);
+		expect(flagshipsFor("contractErrorCodeFromNumber")).toEqual([]);
+	});
+});
+
+// Ecosystem words confer no identity when a more specific anchor exists
+// (battery q-tool-indexer case: a `soroban` topic tag gave a score-5 oracle
+// the same identity credit as the score-20.8 indexer it then outranked via
+// the inUse tier).
+describe("ecosystem words are not identity when specific anchors exist", () => {
+	it("soroban-only zone hit loses identity; the specific hit keeps it", async () => {
+		const { repoAnchorIdentity } = await import("../repo-search");
+		const tokens = ["soroban", "event", "indexer"];
+		expect(
+			repoAnchorIdentity(tokens, ["reflector oracle soroban contract"]),
+		).toBe(false);
+		expect(
+			repoAnchorIdentity(tokens, ["contract event indexer for stellar"]),
+		).toBe(true);
+		// a query that is ONLY ecosystem words keeps them as anchors
+		expect(repoAnchorIdentity(["soroban"], ["soroban examples"])).toBe(true);
+	});
+});
+
+// Curated dated facts are searchable at description strength: an advisory
+// note must let the SDK repo match a security question its README never
+// mentions (battery q-soroban-sdk-cve).
+describe("knowledgeNotes are description-strength match evidence", () => {
+	it("a repo matches a query only its knowledge note answers", async () => {
+		const sdk = doc({
+			fullName: "stellar/rs-soroban-sdk",
+			description: "Rust SDK for Soroban contracts",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+			knowledgeNotes: [
+				{
+					note: "Security advisories: CVE-2026-24889 (GHSA-96xm-fv9w-pf3f) fixed in 25.0.2/23.5.1/22.0.9",
+					source: "https://github.com/advisories/GHSA-96xm-fv9w-pf3f",
+					asOf: "2026-08-31",
+				},
+			],
+		});
+		const bystander = doc({
+			fullName: "someone/defi-tool",
+			description: "a defi tool for soroban",
+			codeScanState: "scanned",
+			stellarProof: "soroban-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([sdk, bystander]),
+			"security advisories",
+			{ limit: 5 },
+		);
+		expect(repos[0]?.fullName).toBe("stellar/rs-soroban-sdk");
+	});
+});
+
+// battery q-tool-indexer (issue #1184, standing red since 2026-08-16): the
+// referee's 16-token natural question ranked an ORACLE #1. Three compounding
+// causes, each pinned here: surface-meta filler (github/repos/building) fed
+// the coverage multiplier on junk rows; "indexing" never folded to "indexer";
+// and "contract" granted reflector-CONTRACT identity credit via its name, so
+// the inUse tier floated it over every actual indexer.
+describe("battery q-tool-indexer — long natural indexer-discovery question", () => {
+	const BATTERY_Q =
+		"Find me open-source GitHub repos for indexing Soroban contract events or building a Stellar indexer.";
+	const oracle = doc({
+		fullName: "reflector-network/reflector-contract",
+		description:
+			"Reflector oracle smart contracts for Soroban — price feeds published on-chain",
+		topics: ["oracle", "soroban"],
+		codeScanState: "scanned",
+		stellarProof: "soroban-sdk",
+		repoScore: 90,
+		stars: 60,
+	});
+	const junk = doc({
+		fullName: "LabsCrypt/flowfi",
+		description:
+			"Open source GitHub repo for building payment flows on Stellar with events",
+		repoScore: 55,
+		stars: 5,
+	});
+	const golden = doc({
+		fullName: "stellar/stellar-ledger-data-indexer",
+		description:
+			"Indexer for Stellar ledger data — extracts and indexes contract events",
+		topics: ["indexer"],
+		codeScanState: "scanned",
+		stellarProof: "soroban-sdk",
+		repoScore: 80,
+		stars: 40,
+	});
+
+	it("the indexer repo leads; the oracle does not ride its name's 'contract' to #1", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([oracle, junk, golden]),
+			BATTERY_Q,
+			{ limit: 3 },
+		);
+		// The battery contract is the LEAD: the row whose name is the answer
+		// outranks the oracle that used to ride its "-contract" name token.
+		// No opinion on #2/#3 — in this 3-doc fixture the scanned oracle
+		// legitimately beats the junk row (the #1053 canonicality lesson).
+		expect(repos[0].fullName).toBe("stellar/stellar-ledger-data-indexer");
+	});
+
+	it("the canonical injection carries the official indexer role-set for the exact battery sentence", async () => {
+		const { canonicalFor } = await import("../repo-search");
+		const canon = canonicalFor(BATTERY_Q);
+		expect(canon[0]).toBe("stellar/stellar-ledger-data-indexer");
+		expect(canon).toContain("stellar/stellar-etl");
+		// The concept must not fire without the concept: a wallet question
+		// carries no indexer canon.
+		expect(canonicalFor("best passkey wallet for soroban")).not.toContain(
+			"stellar/stellar-ledger-data-indexer",
+		);
+	});
+
+	it("'indexing' reaches rows that only say 'indexer'", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([junk, golden]),
+			"indexing soroban events",
+			{ limit: 2 },
+		);
+		expect(repos[0].fullName).toBe("stellar/stellar-ledger-data-indexer");
+	});
+
+	it("identity preserved: 'reflector contract' still leads with the oracle", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([oracle, junk, golden]),
+			"reflector contract",
+			{ limit: 2 },
+		);
+		expect(repos[0].fullName).toBe("reflector-network/reflector-contract");
+	});
+});
+
+describe("explicitRepoName", () => {
+	it("a bare owner/name is explicit routing; a sentence is not", () => {
+		expect(explicitRepoName("stellar/stellar-etl")).toBe("stellar/stellar-etl");
+		expect(explicitRepoName("  Creit-Tech/Stellar-Wallets-Kit ")).toBe(
+			"Creit-Tech/Stellar-Wallets-Kit",
+		);
+		expect(explicitRepoName("how does stellar/stellar-etl ingest")).toBeNull();
+		expect(explicitRepoName("etl pipeline for ledger data")).toBeNull();
+	});
+
+	it("the concept map maps a bare owner/name to nothing", () => {
+		expect(canonicalFor("stellar/stellar-etl")).toEqual([]);
+		expect(canonicalFor("etl pipeline").length).toBeGreaterThan(0);
+	});
+});
+describe("language filter survives every candidate source (2026-09-05)", () => {
+	it("q + language serves only repos whose primaryLanguage matches", async () => {
+		const docs = [
+			doc({
+				fullName: "acme/sep10-py",
+				description: "SEP-10 authentication server",
+				primaryLanguage: "Python",
+			}),
+			doc({
+				fullName: "acme/sep10-ts",
+				description: "SEP-10 authentication client",
+				primaryLanguage: "TypeScript",
+			}),
+			doc({
+				fullName: "stellar/stellar-protocol",
+				description: "SEP-10 authentication spec",
+				primaryLanguage: "RPC",
+			}),
+		];
+		const { repos } = await searchRepos(
+			mockPayload(docs),
+			"SEP-10 authentication",
+			{ language: "python", limit: 10 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual(["acme/sep10-py"]);
 	});
 });

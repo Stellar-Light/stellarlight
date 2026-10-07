@@ -1,5 +1,8 @@
 # 2026-07-08 — Structured truth must drive INCLUSION, not just ranking
 
+Guard: src/lib/__tests__/project-search-match.test.ts — structured fields (types, coverage corridors) ADMIT a record, not just rank it
+Guard: scripts/self-audit.ts — known-item recall answer key (§5): natural query → the entity that MUST appear, daily
+
 **Classes:** 6 (structured truth not driving inclusion), 5 (literal matching), 14 (multi-product single-identity)
 
 ## What happened

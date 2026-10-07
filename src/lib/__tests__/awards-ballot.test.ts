@@ -11,27 +11,24 @@
  * exact shapes POST /api/awards/submit will and will not relay.
  */
 
-import {
-	Account,
-	Asset,
-	Keypair,
-	Networks,
-	Operation,
-	TransactionBuilder,
-} from "@stellar/stellar-sdk";
+import { Keypair } from "@stellar/stellar-sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	type BallotNominee,
 	type BallotRound,
-	buildBallotTx,
+	type BallotSelections,
 	dataKey,
 	decodeAccountVotes,
 	roundOpenState,
+	TEST_BALLOT_MEMO,
 	tallyRound,
 	validateSelections,
-	validateSignedBallot,
 } from "../awards/ballot";
-import { fetchTestnetAccount, submitToTestnetHorizon } from "../awards/stellar";
+import {
+	fetchTestnetAccount,
+	fundViaFriendbot,
+	submitToTestnetHorizon,
+} from "../awards/stellar";
 
 const voter = Keypair.random();
 const stranger = Keypair.random();
@@ -61,115 +58,51 @@ const nominees: BallotNominee[] = [
 const whitelist = new Set([voter.publicKey()]);
 
 /** Build + sign a well-formed ballot (the happy-path artifact). */
-function signedBallot(
-	selections: Record<string, string>,
-	opts: { passphrase?: string; signer?: Keypair } = {},
-) {
-	const tx = buildBallotTx({
-		round,
-		address: voter.publicKey(),
-		sequence: "1234567890",
-		selections,
-	});
-	if (opts.passphrase && opts.passphrase !== Networks.TESTNET) {
-		// Re-build under another network to simulate a mainnet-signed payload.
-		const account = new Account(voter.publicKey(), "1234567890");
-		const builder = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: opts.passphrase,
-		});
-		for (const [category, slug] of Object.entries(selections)) {
-			builder.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, category),
-					value: slug,
-				}),
-			);
-		}
-		const other = builder.setTimeout(300).build();
-		other.sign(opts.signer ?? voter);
-		return other.toXDR();
-	}
-	tx.sign(opts.signer ?? voter);
-	return tx.toXDR();
-}
 
 // ── buildBallotTx ────────────────────────────────────────────────────────────
-
-describe("buildBallotTx", () => {
-	it("emits one manageData op per selected category with the i3.<round>.<category> key", () => {
-		const tx = buildBallotTx({
-			round,
-			address: voter.publicKey(),
-			sequence: "7",
-			selections: { impact: "decaf", innovation: "blend" },
-		});
-		expect(tx.operations).toHaveLength(2);
-		const ops = tx.operations as Array<{
-			type: string;
-			name: string;
-			value?: Buffer;
-		}>;
-		expect(ops.every((o) => o.type === "manageData")).toBe(true);
-		expect(ops.map((o) => o.name).sort()).toEqual([
-			"i3.i3-2026-test.impact",
-			"i3.i3-2026-test.innovation",
-		]);
-		const impactOp = ops.find((o) => o.name.endsWith(".impact"));
-		expect(impactOp?.value?.toString("utf8")).toBe("decaf");
-	});
-
-	it("uses the voter as source with the next sequence", () => {
-		const tx = buildBallotTx({
-			round,
-			address: voter.publicKey(),
-			sequence: "41",
-			selections: { impact: "decaf" },
-		});
-		expect(tx.source).toBe(voter.publicKey());
-		expect(tx.sequence).toBe("42");
-	});
-
-	it("is a plain (fee-bump-friendly) transaction with a bounded timeout", () => {
-		const tx = buildBallotTx({
-			round,
-			address: voter.publicKey(),
-			sequence: "1",
-			selections: { impact: "decaf" },
-		});
-		expect("innerTransaction" in tx).toBe(false);
-		const max = Number(tx.timeBounds?.maxTime ?? 0);
-		expect(max).toBeGreaterThan(Date.now() / 1000);
-		expect(max).toBeLessThanOrEqual(Date.now() / 1000 + 301);
-	});
-
-	it("refuses a malformed address", () => {
-		expect(() =>
-			buildBallotTx({
-				round,
-				address: "not-an-address",
-				sequence: "1",
-				selections: { impact: "decaf" },
-			}),
-		).toThrow(/invalid voter address/);
-	});
-});
 
 // ── validateSelections ──────────────────────────────────────────────────────
 
 describe("validateSelections", () => {
 	it("accepts one valid nominee per category", () => {
 		const res = validateSelections(round, nominees, {
-			impact: "decaf",
-			interoperability: "rubic",
+			impact: ["decaf"],
+			innovation: ["blend"],
+			interoperability: ["rubic"],
 		});
 		expect(res.ok).toBe(true);
 		if (res.ok) {
 			expect(res.selections).toEqual({
-				impact: "decaf",
-				interoperability: "rubic",
+				impact: ["decaf"],
+				innovation: ["blend"],
+				interoperability: ["rubic"],
 			});
 		}
+	});
+
+	// This used to pass. Under one-ballot-per-voter it must not: the first
+	// ballot is the only one that counts, so an incomplete ballot is permanent
+	// and the voter can never fill in the categories they left blank.
+	it("refuses a ballot that leaves a category blank", () => {
+		const res = validateSelections(round, nominees, {
+			impact: ["decaf"],
+			interoperability: ["rubic"],
+		});
+		expect(res.ok).toBe(false);
+		if (!res.ok) {
+			expect(res.errors.join(" ")).toMatch(/"innovation" needs 1 pick, got 0/);
+		}
+	});
+
+	it("still requires nothing of a category that has no nominees", () => {
+		// a category whose nominees never imported is unvotable; demanding a
+		// pick there would refuse every ballot in the round, not just that one
+		const res = validateSelections(
+			round,
+			nominees.filter((n) => n.category !== "innovation"),
+			{ impact: ["decaf"], interoperability: ["rubic"] },
+		);
+		expect(res.ok).toBe(true);
 	});
 
 	it("rejects an empty ballot", () => {
@@ -186,7 +119,7 @@ describe("validateSelections", () => {
 
 		// blend is an innovation nominee — voting it under impact must fail.
 		const crossCategory = validateSelections(round, nominees, {
-			impact: "blend",
+			impact: ["blend"],
 		});
 		expect(crossCategory.ok).toBe(false);
 		if (!crossCategory.ok) {
@@ -225,189 +158,6 @@ describe("roundOpenState", () => {
 
 // ── validateSignedBallot (the relay gate) ───────────────────────────────────
 
-describe("validateSignedBallot", () => {
-	const ctx = { round, nominees, whitelist };
-
-	it("accepts a well-formed testnet ballot signed by a whitelisted voter", () => {
-		const verdict = validateSignedBallot(
-			signedBallot({ impact: "decaf", innovation: "blend" }),
-			ctx,
-		);
-		expect(verdict.ok).toBe(true);
-		if (verdict.ok) {
-			expect(verdict.source).toBe(voter.publicKey());
-			expect(verdict.selections).toEqual({
-				impact: "decaf",
-				innovation: "blend",
-			});
-		}
-	});
-
-	it("rejects a non-whitelisted source", () => {
-		const account = new Account(stranger.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, "impact"),
-					value: "decaf",
-				}),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(stranger);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/whitelist/);
-	});
-
-	it("rejects when the round is closed", () => {
-		const verdict = validateSignedBallot(signedBallot({ impact: "decaf" }), {
-			...ctx,
-			round: { ...round, status: "closed" },
-		});
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/not open/);
-	});
-
-	it("rejects payment operations (never an open relay)", () => {
-		const account = new Account(voter.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.payment({
-					destination: stranger.publicKey(),
-					asset: Asset.native(),
-					amount: "1",
-				}),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(voter);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) {
-			expect(verdict.errors.join()).toMatch(/manageData only/);
-		}
-	});
-
-	it("rejects manageData keys outside this round's namespace", () => {
-		const account = new Account(voter.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.manageData({ name: "config.webhook_url", value: "evil" }),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(voter);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/namespace/);
-	});
-
-	it("rejects duplicate votes for one category", () => {
-		const account = new Account(voter.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "20000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, "impact"),
-					value: "decaf",
-				}),
-			)
-			.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, "impact"),
-					value: "beans",
-				}),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(voter);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/duplicate/);
-	});
-
-	it("rejects a vote for a non-nominee", () => {
-		const account = new Account(voter.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, "impact"),
-					value: "totally-fake-project",
-				}),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(voter);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/not a nominee/);
-	});
-
-	it("rejects a transaction signed for MAINNET (structural testnet-only)", () => {
-		const xdr = signedBallot(
-			{ impact: "decaf" },
-			{ passphrase: Networks.PUBLIC },
-		);
-		const verdict = validateSignedBallot(xdr, ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) {
-			expect(verdict.errors.join()).toMatch(/TESTNET|signed/);
-		}
-	});
-
-	it("rejects a ballot signed by someone other than the source", () => {
-		const xdr = signedBallot({ impact: "decaf" }, { signer: stranger });
-		const verdict = validateSignedBallot(xdr, ctx);
-		expect(verdict.ok).toBe(false);
-	});
-
-	it("rejects unsigned ballots and garbage XDR", () => {
-		const tx = buildBallotTx({
-			round,
-			address: voter.publicKey(),
-			sequence: "1",
-			selections: { impact: "decaf" },
-		});
-		expect(validateSignedBallot(tx.toXDR(), ctx).ok).toBe(false);
-		expect(validateSignedBallot("not-xdr-at-all", ctx).ok).toBe(false);
-	});
-
-	it("rejects entry deletions (manageData with null value)", () => {
-		const account = new Account(voter.publicKey(), "9");
-		const tx = new TransactionBuilder(account, {
-			fee: "10000",
-			networkPassphrase: Networks.TESTNET,
-		})
-			.addOperation(
-				Operation.manageData({
-					name: dataKey(round.slug, "impact"),
-					value: null,
-				}),
-			)
-			.setTimeout(300)
-			.build();
-		tx.sign(voter);
-		const verdict = validateSignedBallot(tx.toXDR(), ctx);
-		expect(verdict.ok).toBe(false);
-		if (!verdict.ok) expect(verdict.errors.join()).toMatch(/deletes/);
-	});
-});
-
 // ── tallying ────────────────────────────────────────────────────────────────
 
 const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
@@ -420,7 +170,7 @@ describe("decodeAccountVotes / tallyRound", () => {
 			"i3.other-round.impact": b64("beans"),
 			unrelated_key: b64("noise"),
 		});
-		expect(votes).toEqual({ impact: "decaf" });
+		expect(votes).toEqual({ impact: ["decaf"] });
 	});
 
 	it("aggregates votes per category with turnout, no address mapping", () => {
@@ -481,8 +231,42 @@ describe("Horizon helpers", () => {
 		const res = await fetchTestnetAccount(voter.publicKey());
 		expect(res).toEqual({
 			funded: true,
-			account: { sequence: "99", data: { k: b64("v") } },
+			account: {
+				sequence: "99",
+				data: { k: b64("v") },
+				signers: [],
+				subentryCount: 0,
+			},
 		});
+	});
+
+	it("fetchTestnetAccount: keeps only ed25519 signers with weight", async () => {
+		// the signer set is what lets a delegated or multisig Pilot vote, so a
+		// weight-0 key (revoked master) or a non-ed25519 signer must not be in it
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(
+				async () =>
+					new Response(
+						JSON.stringify({
+							sequence: "99",
+							data: {},
+							signers: [
+								{
+									key: voter.publicKey(),
+									type: "ed25519_public_key",
+									weight: 0,
+								},
+								{ key: "GDELEGATE", type: "ed25519_public_key", weight: 1 },
+								{ key: "XHASH", type: "sha256_hash", weight: 5 },
+							],
+						}),
+						{ status: 200 },
+					),
+			),
+		);
+		const res = await fetchTestnetAccount(voter.publicKey());
+		expect(res.funded === true && res.account.signers).toEqual(["GDELEGATE"]);
 	});
 
 	it("fetchTestnetAccount: 404 means unfunded (friendbot case)", async () => {
@@ -531,5 +315,141 @@ describe("Horizon helpers", () => {
 			expect(res.resultCodes).toContain("tx_bad_seq");
 			expect(res.status).toBe(400);
 		}
+	});
+});
+
+// ── test-round memo marker ──────────────────────────────────────────────────
+
+// ── Shortlist round: pick N per category ───────────────────────────────────
+// Emir's phase 1: "vote for their four favorite projects in each category.
+// The order won't matter. The top four projects will then move forward."
+
+// ── friendbot, server-side ───────────────────────────────────────────────────
+
+describe("fundViaFriendbot", () => {
+	afterEach(() => vi.unstubAllGlobals());
+
+	it("200 = funded", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => new Response("{}", { status: 200 })),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: true,
+			already: false,
+		});
+	});
+
+	it("400 op_already_exists = someone funded it first, still success", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(
+				async () =>
+					new Response(
+						JSON.stringify({
+							extras: { result_codes: { operations: ["op_already_exists"] } },
+						}),
+						{ status: 400 },
+					),
+			),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: true,
+			already: true,
+		});
+	});
+
+	it("rate-limited or down = not funded, with the reason", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => new Response("slow down", { status: 429 })),
+		);
+		expect(await fundViaFriendbot(voter.publicKey())).toEqual({
+			ok: false,
+			error: "friendbot responded 429",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => {
+				throw new Error("ECONNRESET");
+			}),
+		);
+		const res = await fundViaFriendbot(voter.publicKey());
+		expect(res.ok).toBe(false);
+		if (!res.ok) expect(res.error).toMatch(/unreachable/);
+	});
+});
+
+describe("roundOpenState fails closed on a bad date", () => {
+	it("an unparseable closesAt does not mean the round never closes", () => {
+		// `now >= new Date("garbage")` is false, which used to read as OPEN
+		const r = roundOpenState({ ...round, closesAt: "not-a-date" });
+		expect(r.open).toBe(false);
+		expect(r.reason).toMatch(/closesAt/);
+	});
+	it("an unparseable opensAt does not mean the round is already open", () => {
+		const r = roundOpenState({ ...round, opensAt: "soon" });
+		expect(r.open).toBe(false);
+	});
+	it("valid dates still behave", () => {
+		const past = new Date(Date.now() - 60_000).toISOString();
+		const future = new Date(Date.now() + 60_000).toISOString();
+		expect(
+			roundOpenState({ ...round, opensAt: past, closesAt: future }).open,
+		).toBe(true);
+		expect(roundOpenState({ ...round, closesAt: past }).open).toBe(false);
+	});
+});
+
+describe("multi-pick (shortlist) rounds — validateSelections", () => {
+	const shortlist: BallotRound = { ...round, picksPerCategory: 4 };
+	const pool: BallotNominee[] = [
+		{ category: "impact", slug: "decaf", name: "Decaf" },
+		{ category: "impact", slug: "beans", name: "Beans" },
+		{ category: "impact", slug: "blend", name: "Blend" },
+		{ category: "impact", slug: "rubic", name: "Rubic" },
+		{ category: "impact", slug: "allbridge", name: "Allbridge" },
+	];
+
+	it("accepts exactly the slate", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "beans", "blend", "rubic"],
+		});
+		expect(r.ok).toBe(true);
+		if (r.ok) expect(r.selections.impact).toHaveLength(4);
+	});
+
+	it("refuses a fifth pick rather than silently truncating it", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "beans", "blend", "rubic", "allbridge"],
+		});
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/at most 4 picks/);
+	});
+
+	it("refuses the same nominee twice — one voter, one voice", () => {
+		const r = validateSelections(shortlist, pool, {
+			impact: ["decaf", "decaf"],
+		});
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/picked twice/);
+	});
+
+	it("refuses fewer than the slate — the phase asks for a full one", () => {
+		// nominations: "a minimum of 4 per category, so 4 can be shortlisted";
+		// under one-ballot-per-voter a short slate would be permanent
+		const r = validateSelections(shortlist, pool, { impact: ["decaf"] });
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.errors.join(" ")).toMatch(/needs 4 picks, got 1/);
+	});
+
+	it("requires only as many as a thin category has", () => {
+		const thin = pool.slice(0, 2);
+		expect(
+			validateSelections(shortlist, thin, { impact: ["decaf", "beans"] }).ok,
+		).toBe(true);
+		const short = validateSelections(shortlist, thin, { impact: ["decaf"] });
+		expect(short.ok).toBe(false);
+		if (!short.ok) expect(short.errors.join(" ")).toMatch(/needs 2 picks/);
 	});
 });

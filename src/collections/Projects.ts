@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
-
+import { PROJECT_TYPES } from "@/lib/project-types";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
+import { adminOnly, isAdmin } from "./access";
 
 export const Projects: CollectionConfig = {
 	slug: "projects",
@@ -13,8 +14,7 @@ export const Projects: CollectionConfig = {
 	access: {
 		read: () => true,
 		create: ({ data, req }) => {
-			// Allow admin creation from backend
-			if (req.user) {
+			if (isAdmin(req.user)) {
 				return true;
 			}
 			// Allow public creation for intake (unverified projects)
@@ -26,10 +26,10 @@ export const Projects: CollectionConfig = {
 			}
 			return false;
 		},
-		update: ({ req }) => {
-			// Only admins can update
-			return !!req.user;
-		},
+		update: adminOnly,
+		delete: adminOnly,
+		// Version history holds earlier, unpublished states of a record.
+		readVersions: adminOnly,
 	},
 	fields: [
 		{
@@ -77,29 +77,10 @@ export const Projects: CollectionConfig = {
 			name: "types",
 			type: "select",
 			hasMany: true,
-			options: [
-				"Wallet",
-				"DEX",
-				"Lending",
-				"Bridge",
-				"Infrastructure",
-				"Payments",
-				"Anchor",
-				"SDK",
-				"Indexer",
-				"Explorer",
-				"Analytics",
-				"AI",
-				"Gaming",
-				"Education",
-				"Security",
-				"NFT",
-				"RWA",
-				"Stablecoin",
-				"Social Impact",
-				"RPC",
-				"Faucet",
-			],
+			// One list (src/lib/project-types.ts) — the two validators and the two
+			// OpenAPI enums spread the same array, and a unit test pins all of them
+			// to it. The per-value provenance notes moved there with the values.
+			options: [...PROJECT_TYPES],
 		},
 		{
 			name: "status",
@@ -144,13 +125,17 @@ export const Projects: CollectionConfig = {
 			options: [
 				"operator-announcement",
 				"site-liveness",
+				"repo-activity",
+				"package-release",
+				"product-integration",
 				"onchain-activity",
 				"human-verified",
 				"source-inherited",
+				"unverified",
 			],
 			admin: {
 				description:
-					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (product surface checked), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
+					"What kind of evidence backs the current status: operator-announcement (the team/operator said so), site-liveness (a page answered - a parked domain and a dead product's marketing site both pass this), repo-activity (the project's OWN indexed repository committed inside a dated window - for a library or SDK the source moving IS liveness; for a deployed product it would only show the team is working, so it is not awarded there), package-release (a versioned artifact shipped to a package registry that names this project's OWN repo as its source - npm's repository.url or jsr.io's githubRepository, a backlink nobody can produce without controlling both the repo and the namespace; awarded only when the last publish is inside a dated window, because a 2021 artifact is not evidence a product is live now), product-integration (the LIVE product itself references Stellar infrastructure - a SEP-1 toml, a Horizon/RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle; an integration OBSERVED, never a claim the product works), onchain-activity (contract/network probe), human-verified (owner/boxy-confirmed), source-inherited (label carried from a seed source, unverified).",
 			},
 		},
 		{
@@ -198,7 +183,7 @@ export const Projects: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Inactive to suppress a duplicate.",
+					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Draft to suppress a duplicate (a duplicate is hidden, never dead; Inactive is a death verdict and is reserved for projects that actually shut down). Search still admits the row as a fold candidate so a lookup of the old name resolves to the canonical.",
 			},
 		},
 		{
@@ -287,6 +272,35 @@ export const Projects: CollectionConfig = {
 						{ name: "name", type: "text", required: true },
 					],
 				},
+			],
+		},
+		{
+			// sls-079: `status: Live` conflates "operating for users" with
+			// "deployed on mainnet" — one label, two facts. This group carries the
+			// SECOND fact separately, and only ever from evidence: a verified
+			// mainnet contract join, an on-chain activity reading, or a curated
+			// receipt (e.g. an operator bundle whose mainnet config is empty).
+			// "unknown" is the honest default — absence of evidence is never proof
+			// of disuse. Written by scripts/data/backfill-deployment.ts and the
+			// curation pass; never inferred from a page answering.
+			name: "deployment",
+			type: "group",
+			fields: [
+				{
+					name: "network",
+					type: "select",
+					options: ["mainnet", "testnet", "unknown"],
+				},
+				{
+					name: "basis",
+					type: "text",
+					admin: {
+						description:
+							"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified",
+					},
+				},
+				{ name: "sourceUrl", type: "text" },
+				{ name: "asOf", type: "date" },
 			],
 		},
 		{
@@ -547,6 +561,47 @@ export const Projects: CollectionConfig = {
 			// scripts/data/curate-projects.ts), each assignment grounded in the
 			// operator's own product description. Follows the venueRole precedent
 			// (#517).
+			name: "products",
+			type: "array",
+			admin: {
+				description:
+					"#742 (sls-023/029): per-PRODUCT deployment records — provider Live and product-live-on-network are DIFFERENT statements. Curated only (PRODUCTS_FIX); evidenceUrl + asOf are REQUIRED so every product claim is citable by construction. Empty = no product-level records yet (never 'no products').",
+			},
+			fields: [
+				{ name: "name", type: "text", required: true },
+				{
+					name: "kind",
+					type: "select",
+					options: [
+						"oracle-feed",
+						"rwa-asset",
+						"stablecoin",
+						"wallet-app",
+						"bridge",
+						"ramp",
+						"other",
+					],
+					required: true,
+				},
+				{
+					name: "network",
+					type: "select",
+					options: ["mainnet", "testnet", "futurenet"],
+					required: true,
+				},
+				{
+					name: "status",
+					type: "select",
+					options: ["live", "development", "announced", "retired"],
+					required: true,
+				},
+				{ name: "contractId", type: "text" },
+				{ name: "evidenceUrl", type: "text", required: true },
+				{ name: "asOf", type: "text", required: true },
+				{ name: "note", type: "text" },
+			],
+		},
+		{
 			name: "productKind",
 			type: "select",
 			options: [
@@ -698,6 +753,98 @@ export const Projects: CollectionConfig = {
 							"Round numbers this project was funded in, e.g. 2, 17, 22",
 					},
 				},
+				{
+					// sls-058 defect 2: the official submission record per awarded
+					// round — the reconciling basis for totalAwarded (SCF's own page
+					// total, which can exceed the sum of round budgets via top-ups /
+					// undisclosed components). Written by enrich-from-scf from the
+					// same submission cards the round verdicts come from.
+					name: "roundAwards",
+					type: "array",
+					admin: {
+						description:
+							"Per-award official record: round number (null for awards SCF does not number, e.g. a Liquidity Award), the award's own name, published submission budget (USD), award type",
+					},
+					fields: [
+						{
+							// Was required, which made a real award unstorable: SCF
+							// grants Liquidity Awards outside the numbered rounds
+							// ("Liquidity Award - '24 Q1"), so Blend's $50,000 —
+							// status Awarded on SCF's own page — had nowhere to live
+							// and surfaced as money with scfAwardedRounds: [].
+							name: "round",
+							type: "number",
+							admin: {
+								description:
+									"SCF round number, or empty for an award SCF does not number — read awardName for those",
+							},
+						},
+						{
+							name: "awardName",
+							type: "text",
+							admin: {
+								description:
+									"The award's own name as SCF publishes it (e.g. \"Liquidity Award - '24 Q1\"); the only identity a non-numbered award has",
+							},
+						},
+						{
+							name: "amountUSD",
+							type: "number",
+							admin: {
+								description:
+									"Published submission budget for the round; empty = award confirmed, budget not published",
+							},
+						},
+						{ name: "awardType", type: "text" },
+					],
+				},
+				// Citation-grade provenance trio (SYNTHESIS-2026-08-12): every award
+				// claim carries how we know, when it was last true, and where to
+				// re-verify — the sls-024 pattern extended to SCF facts.
+				{
+					name: "basis",
+					type: "select",
+					options: ["official-record", "human-verified"],
+					admin: {
+						description:
+							"Evidence class behind the award facts: official-record = parsed from the communityfund.stellar.org submission cards; human-verified = curated correction where the page is ambiguous",
+					},
+				},
+				{
+					name: "asOf",
+					type: "text",
+					admin: {
+						description:
+							"ISO date the award facts were last verified against the source",
+					},
+				},
+				{
+					name: "sourceUrl",
+					type: "text",
+					admin: {
+						description:
+							"Official SCF project page the award facts were read from",
+					},
+				},
+			],
+		},
+		{
+			// Feedback→quality loop: nightly aggregate of consumer votes
+			// (scout-feedback kinds worked/did-not-work) for THIS project.
+			// Written ONLY by scripts/aggregate-feedback.ts; score stays null
+			// until the target passes the distinct-voter floor — sub-floor
+			// counts are visible but carry no ranking influence.
+			name: "feedbackSignal",
+			type: "group",
+			admin: {
+				description:
+					"Aggregated consumer votes (distinct voters). Populated by scripts/aggregate-feedback.ts only.",
+			},
+			fields: [
+				{ name: "votes", type: "number" },
+				{ name: "worked", type: "number" },
+				{ name: "score", type: "number" },
+				{ name: "asOf", type: "text" },
 			],
 		},
 		{
@@ -840,6 +987,8 @@ export const Projects: CollectionConfig = {
 			name: "hackathon",
 			type: "relationship",
 			relationTo: "hackathons",
+			// The hackathons.projects join filters on this field.
+			index: true,
 			admin: {
 				description: "Hackathon this project originated from (if applicable)",
 			},
@@ -935,6 +1084,39 @@ export const Projects: CollectionConfig = {
 					}
 				}
 
+				return data;
+			},
+		],
+		beforeChange: [
+			// An awards ballot names nominees by slug; renaming a nominated
+			// project under an open or closed round silently zeroes its votes.
+			async ({ data, originalDoc, operation, req }) => {
+				if (
+					operation !== "update" ||
+					!originalDoc ||
+					!data?.slug ||
+					data.slug === originalDoc.slug
+				) {
+					return data;
+				}
+				const noms = await req.payload.find({
+					collection: "award-nominees",
+					where: { project: { equals: originalDoc.id } },
+					limit: 20,
+					depth: 1,
+					overrideAccess: true,
+				});
+				const live = noms.docs
+					// biome-ignore lint/suspicious/noExplicitAny: relationship shape
+					.map((n: any) =>
+						n.round && typeof n.round === "object" ? n.round : null,
+					)
+					.filter((r) => r && r.status !== "draft");
+				if (live.length) {
+					throw new Error(
+						`Cannot rename slug "${originalDoc.slug}": it is a nominee on ${live.map((r) => r.slug).join(", ")} and ballots name nominees by slug. Draft the round first.`,
+					);
+				}
 				return data;
 			},
 		],

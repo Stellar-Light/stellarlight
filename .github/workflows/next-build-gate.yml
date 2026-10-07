@@ -47,4 +47,10 @@ jobs:
       # `pnpm build` = typecheck (payload importmap + tsc --noEmit) then
       # `next build --webpack` — the exact Vercel command, so a build-only
       # failure reds this check instead of a deployment.
-      - run: pnpm build
+      # Retry once: Atlas intermittently drops the build-time TLS handshake
+      # ("SSL alert number 80") while pages statically render. It killed three
+      # green PRs on 2026-08-26/27 alone, and every single retry passed. A real
+      # build error fails identically twice, so nothing flaky can hide here —
+      # only the transient class gets absorbed. Same guard on the Vercel side
+      # via vercel.json buildCommand.
+      - run: pnpm build || pnpm build

@@ -133,6 +133,7 @@ server.registerTool(
 					"scf-proposal",
 					"lumenloop",
 					"lumenloop-research",
+					"repo-docs",
 					"audit",
 					"incident",
 					"security-program",
@@ -243,6 +244,12 @@ server.registerTool(
 				.enum(["upcoming", "active", "completed"])
 				.optional()
 				.describe("Optional status filter."),
+			q: z
+				.string()
+				.optional()
+				.describe(
+					"Free-text event lookup — matches event name + organizer, so a NAMED event ('agents', 'kale') resolves directly without paging the catalog.",
+				),
 			organizer: z
 				.string()
 				.optional()
@@ -262,9 +269,12 @@ server.registerTool(
 				.describe("Max results (default 20)."),
 		},
 	},
-	async ({ status, organizer, source, limit }) => {
+	async ({ status, q, organizer, source, limit }) => {
 		const params = new URLSearchParams();
 		if (status) params.set("status", status);
+		// Declared above since the API learned ?q=, but never forwarded: a named
+		// event lookup silently returned the whole catalog.
+		if (q) params.set("q", q);
 		if (organizer) params.set("organizer", organizer);
 		if (source) params.set("source", source);
 		if (limit !== undefined) params.set("limit", String(limit));
@@ -274,28 +284,71 @@ server.registerTool(
 	},
 );
 
+// The filters search_hackathon_builds and analyze_hackathon_submissions share,
+// the same list the API parses once (src/lib/hackathon-build-query.ts).
+const BUILD_FILTER_INPUTS = {
+	q: z
+		.string()
+		.optional()
+		.describe("Topic: matches build names, summaries and write-ups."),
+	mode: z
+		.enum(["keyword", "meaning", "hybrid"])
+		.optional()
+		.describe(
+			"How q matches: keyword (default), meaning (vector similarity) or hybrid.",
+		),
+	winnersOnly: z.boolean().optional().describe("Only prize-winning builds."),
+	hackathon: z
+		.string()
+		.optional()
+		.describe("Only these events: one slug or up to 10, comma-separated."),
+	track: z
+		.string()
+		.optional()
+		.describe("Filter by hackathon track (substring match)."),
+	category: z
+		.string()
+		.optional()
+		.describe(
+			"Only builds sorted into this directory project type (Payments, DEX, AI...).",
+		),
+	package: z
+		.string()
+		.optional()
+		.describe(
+			"Only builds whose repo declares this Stellar package (passkey-kit, soroban-sdk).",
+		),
+};
+
+function buildFilterParams(f: {
+	q?: string;
+	mode?: string;
+	winnersOnly?: boolean;
+	hackathon?: string;
+	track?: string;
+	category?: string;
+	package?: string;
+}): URLSearchParams {
+	const params = new URLSearchParams();
+	if (f.q) params.set("q", f.q);
+	if (f.mode) params.set("mode", f.mode);
+	if (f.winnersOnly) params.set("winnersOnly", "1");
+	if (f.hackathon) params.set("hackathon", f.hackathon);
+	if (f.track) params.set("track", f.track);
+	if (f.category) params.set("category", f.category);
+	if (f.package) params.set("package", f.package);
+	return params;
+}
+
 // 2b. search_hackathon_builds — prior-art over hackathon prototypes
 server.registerTool(
 	"search_hackathon_builds",
 	{
 		title: "Search what was built at Stellar hackathons",
 		description:
-			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — most never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly` restricts to prize winners; `track` filters by track. An empty result is a real whitespace signal. For SHIPPED products in the directory → use search_projects.",
+			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
 		inputSchema: {
-			q: z
-				.string()
-				.optional()
-				.describe(
-					"Topic to search build names + descriptions (prior-art lookup).",
-				),
-			winnersOnly: z
-				.boolean()
-				.optional()
-				.describe("Only prize-winning builds."),
-			track: z
-				.string()
-				.optional()
-				.describe("Filter by hackathon track (substring match)."),
+			...BUILD_FILTER_INPUTS,
 			limit: z
 				.number()
 				.int()
@@ -305,11 +358,8 @@ server.registerTool(
 				.describe("Max builds (default 20)."),
 		},
 	},
-	async ({ q, winnersOnly, track, limit }) => {
-		const params = new URLSearchParams();
-		if (q) params.set("q", q);
-		if (winnersOnly) params.set("winnersOnly", "1");
-		if (track) params.set("track", track);
+	async ({ limit, ...filters }) => {
+		const params = buildFilterParams(filters);
 		if (limit !== undefined) params.set("limit", String(limit));
 		const qs = params.toString();
 		const result = await callScout(
@@ -317,6 +367,87 @@ server.registerTool(
 		);
 		return asToolResult(result);
 	},
+);
+
+// 2c. analyze_hackathon_submissions: counts, trends and winner comparisons
+server.registerTool(
+	"analyze_hackathon_submissions",
+	{
+		title: "Trends and counts across Stellar hackathon submissions",
+		description:
+			"Counts any facet of every stored Stellar hackathon submission: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits on the submitted repo 90+ days after the event), project (became a directory project), placement, track, event or year. `by: event` or `year` makes it a trend (oldest first); every answer adds winners against everyone else, with lift. Takes the same filters as search_hackathon_builds. Shares are over known values; unknown builds are counted apart. Examples: payments share event by event = facet category, value Payments, by event; which SDKs winners use = facet library, winnersOnly.",
+		inputSchema: {
+			facet: z
+				.enum([
+					"category",
+					"library",
+					"package",
+					"activity",
+					"project",
+					"placement",
+					"track",
+					"event",
+					"year",
+				])
+				.optional()
+				.describe("What to count (default category)."),
+			by: z
+				.enum(["event", "year", "placement", "track"])
+				.optional()
+				.describe(
+					"Split the counts per event or year (a trend), placement or track.",
+				),
+			value: z
+				.string()
+				.optional()
+				.describe(
+					"Report only this value (e.g. Payments, soroban-sdk), as a row even at zero; with by=event, the trend of one value.",
+				),
+			top: z
+				.number()
+				.int()
+				.min(1)
+				.max(30)
+				.optional()
+				.describe("Most values per set (default 10, or 5 with by)."),
+			...BUILD_FILTER_INPUTS,
+		},
+	},
+	async ({ facet, by, value, top, ...filters }) => {
+		const params = buildFilterParams(filters);
+		if (facet) params.set("facet", facet);
+		if (by) params.set("by", by);
+		if (value) params.set("value", value);
+		if (top !== undefined) params.set("top", String(top));
+		const qs = params.toString();
+		return asToolResult(
+			await callScout(`/api/hackathons/analyze${qs ? `?${qs}` : ""}`),
+		);
+	},
+);
+
+// 2d. review_submission: feedback on one hackathon submission from a link
+server.registerTool(
+	"review_submission",
+	{
+		title: "Review a Stellar hackathon project from its link",
+		description:
+			"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, how crowded its category is, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vet_idea or scf_pitch.",
+		inputSchema: {
+			link: z
+				.string()
+				.min(3)
+				.describe(
+					"The submission's GitHub repo (owner/name or URL) or its DoraHacks link or id.",
+				),
+		},
+	},
+	async ({ link }) =>
+		asToolResult(
+			await callScout(
+				`/api/hackathons/review?link=${encodeURIComponent(link)}`,
+			),
+		),
 );
 
 // 3. get_hackathon — detail for one hackathon
@@ -496,7 +627,7 @@ server.registerTool(
 	{
 		title: "Search the Stellar GitHub repo / code-reference index",
 		description:
-			"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: code-depth + freshness + traction + ecosystem authority), each with a `codeVerified` block once scanned (prefer a real deployable contract on a current soroban-sdk). Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X'. Not for products/companies and their funding/status → use search_projects.",
+			"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: code-depth + freshness + traction + ecosystem authority), each with a `codeVerified` block once scanned: `contractInterface[]` (the Soroban ABI as full pub-fn signatures), `targetProtocol`+`protocolCaps[]` (which protocol the SDK pin targets and the CAPs defining it — advisory), `stellarDeps[]` (ecosystem dependencies from manifests — querying a package name like 'passkey-kit' surfaces its DEPENDENTS), `sdkCapabilities[]` (incl. `x402`/`mpp` agent-payment tags), symbols, version status. Rows also carry `activityState` (derived liveness), `activitySignals` (commits90d/releases; null = not captured), `knowledgeNotes[]` (dated curated facts), and `kind` + `kindBasis` (what the repo IS — archived | fork | template-or-tutorial | contract | application | hackathon | code — derived at read time; weigh a hackathon demo, a fork and a shipped product differently). Use for 'show me the code/repos for X', 'find a Soroban implementation of X', or 'which repos use package Y'. Not for products/companies and their funding/status → use search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -508,6 +639,12 @@ server.registerTool(
 				.string()
 				.optional()
 				.describe("Filter by primary language (e.g. 'Rust', 'TypeScript')."),
+			activity: z
+				.enum(["active", "dormant", "archived", "unknown"])
+				.optional()
+				.describe(
+					"Derived liveness filter. dormant/unknown are observations (stale/no commit date), never death verdicts.",
+				),
 			minScore: z
 				.number()
 				.int()
@@ -551,7 +688,7 @@ server.registerTool(
 	{
 		title: "Explain a Stellar repo's internals (deep code answer)",
 		description:
-			"Source-grounded ANSWER to a deep code question about a Stellar internal — routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls), then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. Not for discovering which repos/projects exist → use search_repos / search_projects.",
+			"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Pass `repo` to pin one, or omit to auto-route. The answer carries `knowledgeNotes` (dated curated facts, present even when a DeepWiki walkthrough leads) and `repoMeta.kind` (what the repo IS). Not for discovering which repos/projects exist → use search_repos / search_projects.",
 		inputSchema: {
 			q: z
 				.string()
@@ -581,13 +718,13 @@ server.registerTool(
 	{
 		title: "List Stellar RFPs (SCF-funded sponsor briefs)",
 		description:
-			"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use search_research.",
+			"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use search_research.",
 		inputSchema: {
 			status: z
 				.enum(["open", "closed"])
 				.optional()
 				.describe(
-					"Open RFPs are fundable for the current SCF quarter; closed are prior rounds.",
+					"open = the sponsor brief is still soliciting (NOT proof the SCF submission window is open today — check meta.scfRound); closed = prior rounds.",
 				),
 			quarter: z
 				.string()
@@ -656,8 +793,14 @@ server.registerTool(
 	{
 		title: "Get Stellar ecosystem developer activity",
 		description:
-			"Ranked list of active Stellar projects with per-project GitHub rollups (stars, open-issue backlog, last activity), plus an Electric Capital dev-count macro block ('how many active Stellar devs'). Metrics are recency/backlog signals, not commit volume. Ranks PROJECTS, not people → use get_builders for individual developers.",
+			"Ranked list of active Stellar projects with per-project GitHub rollups (stars, open-issue backlog, last activity), plus an Electric Capital dev-count macro block ('how many active Stellar devs'). Metrics are recency/backlog signals, not commit volume — cite `meta.dataAsOf` when quoting numbers; `meta.metricDefinitions` explains each metric. Ranks PROJECTS, not people → use get_builders for individual developers.",
 		inputSchema: {
+			type: z
+				.string()
+				.optional()
+				.describe(
+					"Exact project-type filter, repeatable via comma ('DEX,Lending'). Resolved filter echoed in meta.filters.type.",
+				),
 			include: z
 				.string()
 				.optional()
@@ -797,7 +940,7 @@ server.registerTool(
 	{
 		title: "Search Stellar ecosystem partners (audit firms, anchors, infra)",
 		description:
-			"The curated ecosystem partner directory — vetted service providers a builder hires or integrates: audit firms, anchors & on/off-ramps, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor in <region>'. Not for a built product/project → use search_projects.",
+			"The curated Stellar ecosystem partner directory — vetted service providers a builder hires or integrates: audit firms, anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor or ramp in <region>'. Not for a built product/project → use search_projects.",
 		inputSchema: {
 			type: z
 				.string()
@@ -855,6 +998,78 @@ server.registerTool(
 		const result = await callScout(`/api/changelog${qs}`);
 		return asToolResult(result);
 	},
+);
+
+// 17-19. The one-call idea composites. Raven reaches them through the API
+// spec; until 1.3.0 an MCP client could not call them at all.
+const ideaInput = {
+	q: z
+		.string()
+		.min(3)
+		.max(200)
+		.describe(
+			"Short idea description, 3 to 200 characters (e.g. 'lending protocol for RWAs').",
+		),
+};
+
+server.registerTool(
+	"vet_idea",
+	{
+		title: "Vet a Stellar build idea",
+		description:
+			"The 'I want to build X on Stellar' check in one call: competitor repos and active directory projects in the idea's vertical, their maturity from verified evidence (audits, live on-chain usage), hackathon prior art, the vertical's supply-side gap and SCF funding presence. Every block carries its basis. A gap is supply, not demand. Not for one named project → use search_projects.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(await callScout(`/api/vet-idea?q=${encodeURIComponent(q)}`)),
+);
+
+server.registerTool(
+	"hackathon_brief",
+	{
+		title: "Hackathon brief for an idea",
+		description:
+			"A hackathon team's first hour in one call: the vet-idea view, prize winners and other builds that already tried the idea, starter repos with a trust summary, verified mainnet contracts for its code domain, and SCF funding after the event, plus what not to claim. No verdicts. Not for listing events → use get_hackathons.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(
+			await callScout(`/api/hackathon-brief?q=${encodeURIComponent(q)}`),
+		),
+);
+
+server.registerTool(
+	"scf_pitch",
+	{
+		title: "Prepare a Stellar Community Fund pitch",
+		description:
+			"SCF application prep in one call: the live round state and deadline (never asserted on a failed fetch), funded projects in the idea's vertical with recorded award totals, the vet-idea view, and pitch angles that each name the fact they stand on. Writes no prose for you. Not for browsing sponsor briefs → use get_rfps.",
+		inputSchema: ideaInput,
+	},
+	async ({ q }) =>
+		asToolResult(await callScout(`/api/scf-pitch?q=${encodeURIComponent(q)}`)),
+);
+
+// 20. get_hackathon_submission — one stored submission in full
+server.registerTool(
+	"get_hackathon_submission",
+	{
+		title: "Read one Stellar hackathon submission",
+		description:
+			"One stored hackathon submission in full: the team's own write-up (a claim, not proof), DoraHacks summary, self-reported tags, event, placement and prize, links, and `project`, the directory project that lists its exact repo. Pass the `id` from search_hackathon_builds or hackathon_brief, or the number in a dorahacks.io/buidl link. For finding submissions on a topic → use search_hackathon_builds.",
+		inputSchema: {
+			id: z
+				.string()
+				.min(1)
+				.describe(
+					"dorahacks-buidl-<n> from search_hackathon_builds, or the bare <n>.",
+				),
+		},
+	},
+	async ({ id }) =>
+		asToolResult(
+			await callScout(`/api/hackathons/builds/${encodeURIComponent(id)}`),
+		),
 );
 
 // ─────────────────────────────────────────────────────────────────────────────

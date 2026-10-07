@@ -1,51 +1,42 @@
 /**
- * GET /api/awards/results[?round=<slug>] — aggregate tally, read from chain.
+ * GET /api/awards/results[?round=<slug>], aggregate tally.
  *
- * For every whitelisted address, reads its testnet account data entries
- * from Horizon, decodes the `i3.<round>.<category>` votes, and aggregates.
- * The chain is the source of truth — this endpoint holds no state of its
- * own and anyone could recompute the same numbers from public Horizon.
+ * Ballots are anonymous: written by the relay to its own account under random
+ * ids. The tally reads that one account (one Horizon call) and the record
+ * (address → first ballot), preferring the record wherever it holds an id, * it alone knows a voter's FIRST ballot, and it alone survives a testnet
+ * reset. A relay ballot the record does not name is counted anonymously and
+ * reported. `source` says which side carried the round.
  *
- * PRIVACY: the payload is AGGREGATE ONLY — per-category counts and a
- * turnout figure. No address→choice mapping is ever serialized here.
+ * PRIVACY: the payload is AGGREGATE ONLY, per-category counts and a turnout
+ * figure. No address→choice mapping is ever serialized here, and nothing is
+ * served while voting is open. `ballotsDigest` is a sha256 of the first-ballot
+ * record: it pins that record without disclosing any of it. null means the
+ * record could not be read, see liveTally.
  *
- * Cached ~30s per round in-memory (Horizon is hit up to ~98 times per
- * recompute; the cache keeps a refreshing results view cheap).
+ * Cached ~30s per round in-memory.
  */
-
 import { type NextRequest, NextResponse } from "next/server";
-import { type RoundTally, tallyRound } from "@/lib/awards/ballot";
-import { loadRound } from "@/lib/awards/round";
-import { fetchTestnetAccount } from "@/lib/awards/stellar";
+import { type RoundTally, roundOpenState } from "@/lib/awards/ballot";
+import { liveTally, type TallySource } from "@/lib/awards/publish";
+import { loadRoundResult } from "@/lib/awards/round";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const CACHE_TTL_MS = 30_000;
-const HORIZON_CONCURRENCY = 10;
 
-const cache = new Map<string, { at: number; tally: RoundTally }>();
-
-async function mapLimit<T, R>(
-	items: T[],
-	limit: number,
-	fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-	const results: R[] = new Array(items.length);
-	let next = 0;
-	const workers = Array.from(
-		{ length: Math.min(limit, items.length) },
-		async () => {
-			while (next < items.length) {
-				const i = next++;
-				results[i] = await fn(items[i]);
-			}
-		},
-	);
-	await Promise.all(workers);
-	return results;
-}
+const cache = new Map<
+	string,
+	{
+		at: number;
+		tally: RoundTally;
+		source: TallySource;
+		digest: string | null;
+		afterClose: number;
+		excluded: Array<{ ballotId: string; reason: string }>;
+	}
+>();
 
 export async function GET(req: NextRequest) {
 	const limit = rateLimit(req, {
@@ -60,11 +51,40 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const loaded = await loadRound(req.nextUrl.searchParams.get("round"));
+	const read = await loadRoundResult(req.nextUrl.searchParams.get("round"));
+	if (!read.ok) {
+		return NextResponse.json(
+			{
+				error: "round_unavailable",
+				message:
+					"The round could not be read right now. Nothing was changed. Try again in a moment.",
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
+	const loaded = read.loaded;
 	if (!loaded) {
 		return NextResponse.json(
 			{ error: "no award round exists" },
 			{ status: 404, headers: rateLimitHeaders(limit) },
+		);
+	}
+
+	// No running totals while voting is open. The page only renders results
+	// on a closed round, so nobody would notice this endpoint answering, but
+	// polled every 30s against Horizon it made each incoming ballot attributable
+	// in near-real-time, and a live count changes how the undecided vote.
+	if (roundOpenState(loaded.round).open) {
+		return NextResponse.json(
+			{
+				error: "voting_open",
+				message: "Results are published when voting closes.",
+				closesAt: loaded.round.closesAt ?? null,
+			},
+			{ status: 403, headers: rateLimitHeaders(limit) },
 		);
 	}
 
@@ -75,6 +95,10 @@ export async function GET(req: NextRequest) {
 				round: loaded.round.slug,
 				status: loaded.round.status,
 				closesAt: loaded.round.closesAt ?? null,
+				source: cached.source,
+				ballotsDigest: cached.digest,
+				afterClose: cached.afterClose,
+				excluded: cached.excluded,
 				...cached.tally,
 				cachedAt: new Date(cached.at).toISOString(),
 			},
@@ -82,28 +106,55 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const addresses = [...loaded.whitelist];
-	const accounts = await mapLimit(
-		addresses,
-		HORIZON_CONCURRENCY,
-		async (address) => {
-			const res = await fetchTestnetAccount(address);
-			return {
-				address,
-				data: res.funded === true ? res.account.data : null,
-			};
-		},
-	);
+	const {
+		tally,
+		source,
+		digest,
+		afterClose,
+		excluded: ex,
+	} = await liveTally(loaded);
+	const excluded = ex.map(({ ballotId, reason }) => ({ ballotId, reason }));
 
-	const tally = tallyRound(loaded.round, loaded.nominees, accounts);
+	// A null digest means the first-ballot record could not be READ. Under
+	// one-ballot-per-voter that is not a cosmetic gap: the mirror is the only
+	// thing that knows a voter's first ballot, so without it every revoter is
+	// counted on their LATEST pick, and after a testnet reset the answer is a
+	// confident turnout of zero. Both render as an ordinary `source: "chain"`
+	// tally. The publish lane already refuses to commit in this state; serving
+	// it here as though it were the result is the same mistake, in public.
+	if (!digest) {
+		return NextResponse.json(
+			{
+				error: "tally_unavailable",
+				message:
+					"The ballot record could not be read, so the tally cannot be computed correctly right now. This is temporary. Please retry.",
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
+
 	const at = Date.now();
-	cache.set(loaded.round.slug, { at, tally });
+	cache.set(loaded.round.slug, {
+		at,
+		tally,
+		source,
+		digest,
+		afterClose,
+		excluded,
+	});
 
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,
 			status: loaded.round.status,
 			closesAt: loaded.round.closesAt ?? null,
+			source,
+			ballotsDigest: digest,
+			afterClose,
+			excluded,
 			...tally,
 			cachedAt: new Date(at).toISOString(),
 		},

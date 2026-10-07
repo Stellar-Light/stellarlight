@@ -27,8 +27,17 @@ export interface SignalsInput {
 	farmFlags: string[];
 	/** Extracted pub fn/type names (src/lib/code-symbols.ts). */
 	codeSymbols: string[];
+	contractInterface: string[];
+	stellarDeps: string[];
+	/** JS/TS SDK capability tags (src/lib/code-symbols.ts detectSdkCapabilities). */
+	sdkCapabilities: string[];
+	/** Evidence-only domain labels (src/lib/code-domains.ts deriveCodeDomains). */
+	codeDomains: string[];
 	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
 	mainnetContractId: string | null;
+	mainnetContractBasis?: "self-validated" | "published" | null;
+	/** Commit SHA the facts were computed at (provenance pin). */
+	scannedRef: string | null;
 }
 
 /** Fields the scanner is FORBIDDEN to write — demotion/authority surfaces. */
@@ -70,10 +79,18 @@ export function signalsToWrite(
 		hasEvents: s.facts.hasEvents,
 		usesNoStd: s.facts.usesNoStd,
 		stellarJsDep: s.facts.stellarJsDep,
+		ciPresent: s.facts.ciPresent,
+		testsPresent: s.facts.testsPresent,
 		farmScore: s.farmScore,
 		farmFlags: s.farmFlags,
 		codeSymbols: s.codeSymbols,
+		contractInterface: s.contractInterface,
+		stellarDeps: s.stellarDeps,
+		sdkCapabilities: s.sdkCapabilities,
+		codeDomains: s.codeDomains,
+		scannedRef: s.scannedRef,
 		mainnetContractId: s.mainnetContractId,
+		mainnetContractBasis: s.mainnetContractBasis ?? null,
 		codeScanState: "scanned",
 		codeScanNote: s.scanNote,
 		codeScannedAt: nowIso,

@@ -19,16 +19,28 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
+import { unknownParamWarning } from "@/lib/http-params";
 import {
 	CURATED_SKILLS,
 	type CuratedSkillKind,
 	type CuratedSkillSource,
 } from "@/lib/integrations/curated-skills";
-import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
+import {
+	fetchSdfSkillCatalog,
+	mergeSkillLists,
+	registrySkillView,
+	SKILLS_REGISTRY,
+} from "@/lib/integrations/sdf-skills";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 3600; // 1h on edge
 
 type Source = "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
@@ -61,6 +73,9 @@ interface UnifiedSkill {
 	description: string;
 	source: Source;
 	kind: Kind;
+	/** "skills.stellar.org" when the entry is listed on SDF's registry (SDF
+	 * authored or community-built); absent for entries we curate or host. */
+	registry?: string;
 	install?: string;
 	installAlt?: { label: string; command: string }[];
 	repository?: string;
@@ -71,16 +86,28 @@ interface UnifiedSkill {
 	targetUser?: string[];
 	tags?: string[];
 	featured?: boolean;
-	/** SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. */
+	/** Registry entries only: whether the skill is user-invocable in skills.stellar.org's sense. */
 	userInvocable?: boolean;
-	/** SDF skills only — argument hint string. */
+	/** Registry entries only: argument hint string. */
 	argumentHint?: string;
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(sp, ["kind", "source", "q"], {
+		advertise: ["kind", "source", "q"],
+		hint: "Skill detail lives on /api/skills/{name}.",
+	});
 	const sourceFilter = sp.get("source");
 	const kindFilter = sp.get("kind");
+	// q was accepted by Raven's tool signature but NEVER applied: `?q=oracle`
+	// returned all 43 skills, so an agent read an unfiltered list as filtered.
+	// Match it over name/tagline/description/tags, the fields a skill is found by.
+	const qFilter = (sp.get("q") ?? "").trim().toLowerCase();
 
 	if (sourceFilter && !VALID_SOURCES.includes(sourceFilter as Source)) {
 		return NextResponse.json(
@@ -98,23 +125,12 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	// 1. SDF skills (proxy of skills.stellar.org)
-	const sdfSkills: UnifiedSkill[] = (await fetchSdfSkillCatalog()).map((s) => ({
-		slug: s.name,
-		name: humanize(s.name),
-		tagline: shorten(s.description, 160),
-		description: s.description,
-		source: "sdf",
-		kind: "skill-md",
-		install: `npx skills add stellar/${s.name}`,
-		homepage: s.url,
-		rawUrl: s.rawUrl,
-		userInvocable: s.userInvocable,
-		argumentHint: s.argumentHint,
-		compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-		targetUser: ["dev"],
-		tags: [s.name, "SDF"],
-	}));
+	// 1. The skills.stellar.org registry: SDF's own set and the community-built
+	// section, labelled by section. An entry's section is what the registry
+	// says about it: community-built entries are listed, not reviewed, by SDF.
+	const catalog = await fetchSdfSkillCatalog();
+	const registrySkills: UnifiedSkill[] = catalog.skills.map(registrySkillView);
+	const registryNames = new Set(catalog.skills.map((s) => s.name));
 
 	// 2. Curated entries (Stellarlight + Lumenloop + others we maintain)
 	const curatedSkills: UnifiedSkill[] = CURATED_SKILLS.map((s) => ({
@@ -124,6 +140,9 @@ export async function GET(req: NextRequest) {
 		description: s.description,
 		source: s.source as CuratedSkillSource as Source,
 		kind: s.kind,
+		...(s.registryName && registryNames.has(s.registryName)
+			? { registry: SKILLS_REGISTRY }
+			: {}),
 		install: s.install,
 		installAlt: s.installAlt,
 		repository: s.repository,
@@ -136,25 +155,30 @@ export async function GET(req: NextRequest) {
 	}));
 
 	// 3. Community submissions (approved only)
-	const communitySkills: UnifiedSkill[] = await loadApprovedCommunitySkills();
+	const communityRaw = await loadApprovedCommunitySkills();
+	const communityFailed = communityRaw === null;
+	const communitySkills: UnifiedSkill[] = communityRaw ?? [];
 
-	// Merge with dedup by slug — curated wins over SDF wins over community
-	// (so we can't accidentally let a community submission shadow Scout).
-	const all: UnifiedSkill[] = [];
-	const seen = new Set<string>();
-	for (const list of [curatedSkills, sdfSkills, communitySkills]) {
-		for (const s of list) {
-			if (seen.has(s.slug)) continue;
-			seen.add(s.slug);
-			all.push(s);
-		}
-	}
+	const { all, merged } = mergeSkillLists(
+		curatedSkills,
+		registrySkills,
+		communitySkills,
+		CURATED_SKILLS.flatMap((s) => (s.registryName ? [s.registryName] : [])),
+	);
 
 	// Apply filters
 	let filtered = all;
 	if (sourceFilter)
 		filtered = filtered.filter((s) => s.source === sourceFilter);
 	if (kindFilter) filtered = filtered.filter((s) => s.kind === kindFilter);
+	if (qFilter) {
+		const toks = qFilter.split(/\s+/).filter(Boolean);
+		filtered = filtered.filter((s) => {
+			const hay =
+				`${s.name} ${s.tagline ?? ""} ${s.description ?? ""} ${(s.tags ?? []).join(" ")}`.toLowerCase();
+			return toks.every((t) => hay.includes(t));
+		});
+	}
 
 	// Sort: featured first, then by source priority, then alphabetical.
 	// Source priority puts Stellarlight's own products first, then SDF's
@@ -180,18 +204,49 @@ export async function GET(req: NextRequest) {
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/skills",
-		filters: { source: sourceFilter, kind: kindFilter },
+		filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 	});
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
+				...matchModeMeta(qFilter ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/skills",
 				generatedAt: new Date().toISOString(),
-				filters: { source: sourceFilter, kind: kindFilter },
+				...(paramWarning || communityFailed || !catalog.live
+					? {
+							warnings: [
+								...(paramWarning ? [paramWarning] : []),
+								...(catalog.live
+									? []
+									: [
+											degradedWarning(
+												"skills.stellar.org registry",
+												"the registry did not answer; the SDF set is served from a fallback list and community-built entries are missing from this page",
+											),
+										]),
+								...(communityFailed
+									? [
+											degradedWarning(
+												"community skills",
+												"the registry read failed; community entries are missing from this page",
+											),
+										]
+									: []),
+							],
+						}
+					: {}),
+				filters: { source: sourceFilter, kind: kindFilter, q: qFilter || null },
 				counts: {
 					returned: filtered.length,
+					// No `limit` param: filtering is the only narrowing, so every
+					// matching skill is on this page and total == returned. `bySource`
+					// below counts the WHOLE catalog, pre-filter — a different
+					// denominator, which is exactly why total is stated explicitly.
+					total: filtered.length,
 					bySource: {
 						sdf: all.filter((s) => s.source === "sdf").length,
 						stellarlight: all.filter((s) => s.source === "stellarlight").length,
@@ -202,21 +257,34 @@ export async function GET(req: NextRequest) {
 				},
 				validSources: VALID_SOURCES,
 				validKinds: VALID_KINDS,
-			},
+				registry: {
+					url: `https://${SKILLS_REGISTRY}/llms.txt`,
+					live: catalog.live,
+					listed: catalog.listed,
+					served: catalog.skills.length,
+					merged,
+					unreachable: catalog.unreachable,
+				},
+			}),
 			skills: filtered,
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				...serverTiming(startedAt),
+				"Cache-Control":
+					communityFailed || !catalog.live
+						? "no-store"
+						: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);
 }
 
 /** Load approved community submissions from Payload, mapped to the unified shape. */
-async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[]> {
+/** null = the read failed (an outage), never an empty list. */
+async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[] | null> {
 	const payload = await getPayloadSafe();
-	if (!payload) return [];
+	if (!payload) return null;
 	try {
 		const result = await payload.find({
 			collection: "community-skills",
@@ -257,27 +325,8 @@ async function loadApprovedCommunitySkills(): Promise<UnifiedSkill[]> {
 			tags: (d.tags ?? []).map((t) => t.tag).filter((x): x is string => !!x),
 		}));
 	} catch {
-		return [];
+		return null;
 	}
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) =>
-			w === "zk"
-				? "ZK"
-				: w === "dapp"
-					? "dApp"
-					: w[0]?.toUpperCase() + w.slice(1),
-		)
-		.join(" ");
-}
-
-function shorten(s: string, max: number): string {
-	const first = s.split(/[.!?]\s/)[0] ?? s;
-	if (first.length <= max) return first.endsWith(".") ? first : `${first}.`;
-	return `${first.slice(0, max - 1)}…`;
 }
 
 // sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).

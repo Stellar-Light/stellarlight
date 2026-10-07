@@ -4,6 +4,7 @@
  * verificationLevel off "Unverified" (these are vetted flagships) and stamps
  * provenance=AdminEdit so the lumenloop sync won't clobber the curation.
  * --execute writes; dry-run prints the plan. */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

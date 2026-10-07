@@ -1,0 +1,75 @@
+name: i³ Awards — export ballots (CSV)
+# Exports a round's ballots as CSV for a spreadsheet or Airtable.
+#
+# Every row is an address→choice mapping, which the public surfaces
+# deliberately never serve. THIS REPO IS PUBLIC, and an Actions artifact on a
+# public repo can be downloaded by any GitHub account — so the file is
+# encrypted before upload (AES-256, passphrase from the AWARD_EXPORT_PASSPHRASE
+# repo secret) and the job REFUSES to run without that secret. Decrypt with:
+#   gpg --decrypt ballots-<round>.csv.gpg > ballots-<round>.csv
+# The job log prints counts only, never a row. Nothing is committed.
+#
+# The picks exported are each voter's FIRST ballot — the one the round counts.
+# The chain only holds the most recent, so exporting that would disagree with
+# the published result for anyone who changed their mind.
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round slug (e.g. i3-2026)"
+        required: true
+      retention_days:
+        description: "How long to keep the artifact (1–90)."
+        required: false
+        default: "7"
+concurrency:
+  group: award-export
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      AWARD_EXPORT_PASSPHRASE: ${{ secrets.AWARD_EXPORT_PASSPHRASE }}
+    steps:
+      - name: Refuse without an encryption passphrase
+        run: |
+          if [ -z "$AWARD_EXPORT_PASSPHRASE" ]; then
+            echo "::error::AWARD_EXPORT_PASSPHRASE is not set. This repo is public; an unencrypted artifact of address→choice rows is readable by anyone. Set the secret, then re-run."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # The round reaches the shell through the environment, never by
+      # interpolation into the command: this job holds secrets.
+      - name: Export ${{ inputs.round }}
+        env:
+          IN_ROUND: ${{ inputs.round }}
+        run: |
+          pnpm exec tsx scripts/data/award-export.ts \
+            --round="$IN_ROUND" \
+            --out="ballots-$IN_ROUND.csv"
+      - name: Encrypt, then remove the plaintext
+        env:
+          IN_ROUND: ${{ inputs.round }}
+        run: |
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --passphrase "$AWARD_EXPORT_PASSPHRASE" \
+            --output "ballots-$IN_ROUND.csv.gpg" \
+            "ballots-$IN_ROUND.csv"
+          shred -u "ballots-$IN_ROUND.csv"
+          ls -l "ballots-$IN_ROUND.csv.gpg"
+      - name: Upload (encrypted — the artifact itself is public)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ballots-${{ inputs.round }}
+          path: ballots-${{ inputs.round }}.csv.gpg
+          retention-days: ${{ inputs.retention_days }}
+          if-no-files-found: error

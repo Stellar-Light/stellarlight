@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { DirectoryFilters } from "@/components/directory-filters";
 import DirectoryProjectsGrid, {
 	DirectoryProjectsGridSkeleton,
 } from "@/components/directory-projects-grid";
+import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
+
+export const metadata: Metadata = {
+	title: "Stellar Projects Directory",
+	description:
+		"Browse every project building on Stellar: DeFi protocols, wallets, anchors, payments, RWAs and developer tools, each with its GitHub activity, on-chain footprint, SCF funding and a live or inactive status you can check.",
+	alternates: { canonical: "/directory" },
+};
 
 type SearchParams = Promise<{
 	q?: string;
@@ -34,9 +44,12 @@ export default async function DirectoryPage({
 			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 pt-24">
 				{/* Header */}
 				<div className="mb-8">
-					<h2 className="text-3xl font-medium tracking-tight mb-6">
-						Projects Directory
-					</h2>
+					{/* h1, not h2: this page had no h1 at all, so its strongest
+					    heading was invisible to a crawler ranking it for
+					    "stellar projects directory". */}
+					<h1 className="text-3xl font-medium tracking-tight mb-6">
+						Every project building on Stellar
+					</h1>
 				</div>
 
 				{/* Search and Filter */}
@@ -58,6 +71,33 @@ export default async function DirectoryPage({
 						limit={limit}
 					/>
 				</Suspense>
+
+				{/* Category pages. The filter control above writes ?type=, a URL
+				    nobody shares and a poor ranking target; these are the same
+				    slices as real pages, and how a crawler finds them at all.
+				    They sit under the results, in the category pages' own
+				    "Browse by category" shape, so they read as places to go, not
+				    as a second filter, and on a phone they no longer push the
+				    results below the fold. */}
+				<nav
+					className="mt-16 pt-8 border-t border-border/40"
+					aria-label="Categories"
+				>
+					<h2 className="text-sm font-medium mb-4 text-muted-foreground">
+						Browse by category
+					</h2>
+					<div className="flex flex-wrap gap-2">
+						{DIRECTORY_CATEGORIES.map((c) => (
+							<Link
+								key={c.slug}
+								href={`/directory/${c.slug}`}
+								className="text-xs px-3 py-1.5 rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+							>
+								{c.heading}
+							</Link>
+						))}
+					</div>
+				</nav>
 			</main>
 		</div>
 	);

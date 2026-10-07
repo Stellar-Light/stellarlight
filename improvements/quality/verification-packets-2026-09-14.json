@@ -1,0 +1,4347 @@
+{
+	"generatedAt": "2026-09-14T17:35:49.076561Z",
+	"population": 436,
+	"candidates": 425,
+	"excluded": {
+		"packeted": 6,
+		"statusFix": 5
+	},
+	"offset": 0,
+	"limit": 60,
+	"counts": {
+		"verify": 13,
+		"inactive": 2,
+		"leave": 45
+	},
+	"packets": [
+		{
+			"slug": "cactus-link",
+			"name": "Cactus Link",
+			"prominence": 55,
+			"types": ["Wallet"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://mycactus.com/"
+			},
+			"site": {
+				"url": "https://mycactus.com/",
+				"finalUrl": "https://www.mycactus.com/",
+				"status": 200,
+				"title": "Cactus Custody",
+				"description": null,
+				"namesProduct": "cactus",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 14
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site is a client-rendered Nuxt shell (14 chars of text) whose title \"Cactus Custody\" names the product; /blog and /news return the same shell; no dated artifact reachable without rendering [hand-read; rule said leave]"
+		},
+		{
+			"slug": "exaion",
+			"name": "Exaion",
+			"prominence": 55,
+			"types": ["RPC"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-07-20T05:43:16.639Z",
+				"sourceUrl": "https://crypto.exaion.com/products/node"
+			},
+			"site": {
+				"url": "https://crypto.exaion.com/products/node",
+				"finalUrl": "https://crypto.exaion.com/products/node",
+				"status": 200,
+				"title": "Exaion Node-as-a-Service | Exaion Crypto",
+				"description": "Institutional-grade RPC & archive infrastructure.",
+				"namesProduct": "exaion",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 6758
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2026-09-08T00:00:00.000Z",
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"title": "Providers"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"exaion\" (Node-as-a-Service page lists Stellar among its protocols); developers.stellar.org RPC providers page, last updated 2026-09-08, lists Exaion as a current provider (6d ago) [hand-read; rule said leave]"
+		},
+		{
+			"slug": "vaquita",
+			"name": "Vaquita",
+			"prominence": 4,
+			"types": ["Lending"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://vaquita.fi/"
+			},
+			"site": {
+				"url": "https://vaquita.fi/",
+				"finalUrl": "https://www.vaquita.fi/",
+				"status": 200,
+				"title": "Vaquita Saving money, but make it fun",
+				"description": "Set a goal, put a little aside, and watch your world grow while your money quietly earns for you. The fun way to save.",
+				"namesProduct": "vaquita",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 2558
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/vaquita-fi",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "vaquita-fi",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "vaquita-fi/vaquita-lemon",
+							"pushedAt": "2026-03-11",
+							"archived": false
+						},
+						{
+							"fullName": "vaquita-fi/vaquita-avax-ui",
+							"pushedAt": "2025-12-12",
+							"archived": false
+						},
+						{
+							"fullName": "vaquita-fi/vaquita-eth-global",
+							"pushedAt": "2025-11-23",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [42],
+				"sourceUrl": "https://communityfund.stellar.org/project/vaquita-gamified-savings-pqq"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"vaquita\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2026-03-11"
+		},
+		{
+			"slug": "5x-crypto",
+			"name": "5x Crypto",
+			"prominence": 0,
+			"types": ["Education"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://youtube.com/@5x.crypto"
+			},
+			"site": {
+				"url": "https://youtube.com/@5x.crypto",
+				"finalUrl": "https://www.youtube.com/@5x.crypto",
+				"status": 200,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 190170
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "YouTube channel; the page head names \"5x Crypto\" (og:title); the channel's own feed shows the newest upload 2026-09-13 (1d ago) — the channel is the product [hand-read; rule said leave]"
+		},
+		{
+			"slug": "accelar",
+			"name": "Accelar",
+			"prominence": 0,
+			"types": ["AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://accelar.io/"
+			},
+			"site": {
+				"url": "https://accelar.io/",
+				"finalUrl": "https://www.accelar.io/",
+				"status": 200,
+				"title": "Accelar | Enterprise Software Infrastructure & AI Solutions",
+				"description": "Accelar builds enterprise-grade blockchain infrastructure and AI-driven software solutions for the next generation of intelligent assets.",
+				"namesProduct": "accelar",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [
+					"https://apps.apple.com/app/id6503436498",
+					"https://apps.apple.com/app/id6738810897",
+					"https://apps.apple.com/app/id6740043929"
+				],
+				"postLinks": ["https://www.accelar.io/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 2348
+			},
+			"artifacts": [
+				{
+					"kind": "app-store",
+					"url": "https://apps.apple.com/app/id6503436498",
+					"date": null,
+					"note": "itunes lookup returned no result (listing gone?)"
+				},
+				{
+					"kind": "app-store",
+					"url": "https://apps.apple.com/app/id6738810897",
+					"date": null,
+					"note": "itunes lookup returned no result (listing gone?)"
+				},
+				{
+					"kind": "app-store",
+					"url": "https://apps.apple.com/app/id6740043929",
+					"date": null,
+					"note": "itunes lookup returned no result (listing gone?)"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://www.accelar.io/blog",
+					"finalUrl": "https://www.accelar.io/blog",
+					"status": 200,
+					"date": "2026-02-26",
+					"how": "time",
+					"title": "Accelar | Enterprise Software Infrastructure & AI Solutions"
+				}
+			],
+			"github": {
+				"link": "https://github.com/accelar-labs",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "accelar-labs",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Accelar-labs/sprixen-mcp",
+							"pushedAt": "2026-09-06",
+							"archived": false
+						},
+						{
+							"fullName": "Accelar-labs/accelar-plataform-frontend",
+							"pushedAt": "2026-02-17",
+							"archived": false
+						},
+						{
+							"fullName": "Accelar-labs/educhain-accelar-frontend",
+							"pushedAt": "2026-02-16",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [26],
+				"sourceUrl": "https://communityfund.stellar.org/project/accelar-2td"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"accelar\"; accelar.io/blog posts carry <time> dates 2026-02-22…2026-02-26 (200d ago); the three App Store links on the page return nothing from iTunes lookup in 7 storefronts (listings gone?); org push 2026-09-06 (Accelar-labs/sprixen-mcp) [hand-read; rule said verify]"
+		},
+		{
+			"slug": "ai-transparency-token",
+			"name": "AI Transparency Token",
+			"prominence": 0,
+			"types": ["AI", "NFT"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://ethixia.com/"
+			},
+			"site": {
+				"url": "https://ethixia.com/",
+				"finalUrl": "https://ethixia.com/",
+				"status": 200,
+				"title": "Ethix IA ᴬˡ – Trusted AI Implementation",
+				"description": "Ethix IA ᴬˡ – Ethical, Compliant AI built for Transparency and Responsibility.",
+				"namesProduct": "transparency",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 39
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [
+					{
+						"fullName": "falparis/aitt",
+						"from": "row.github.repos",
+						"error": "gh: Not Found (HTTP 404)"
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [36],
+				"sourceUrl": "https://communityfund.stellar.org/project/ai-transparency-token-aitt-be7"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 is \"Ethix IA – Trusted AI Implementation\" (39 chars of text); the name match is the word \"transparency\" in unrelated copy, not the product; linked repo falparis/aitt returns 404 (deleted or private) [hand-read; rule said leave]"
+		},
+		{
+			"slug": "aida",
+			"name": "AIDA",
+			"prominence": 0,
+			"types": ["AI", "DEX"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://aidapp.com/"
+			},
+			"site": {
+				"url": "https://aidapp.com/",
+				"finalUrl": "https://aidapp.com/",
+				"status": 200,
+				"title": "AIDA",
+				"description": "AI-powered trading terminal that connects multiple DEXs & LaunchPads for the best trading experience.",
+				"namesProduct": "aida",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1119
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [39],
+				"sourceUrl": "https://communityfund.stellar.org/project/aida-mz0"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"aida\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "airswift",
+			"name": "Airswift",
+			"prominence": 0,
+			"types": ["Payments", "Lending"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-09-08T07:22:13.996Z",
+				"sourceUrl": "https://pelagotech.com/"
+			},
+			"site": {
+				"url": "https://pelagotech.com/",
+				"finalUrl": "https://pelagotech.com/",
+				"status": 200,
+				"title": "Pelago - Where Payments meet Innovation",
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1715
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/airswiftio",
+				"repos": [
+					{
+						"fullName": "Airswiftio/SCF",
+						"from": "row.github.repos",
+						"pushedAt": "2025-02-27",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": {
+					"owner": "airswiftio",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Airswiftio/pelagopay-woocommerce-plugin",
+							"pushedAt": "2026-02-03",
+							"archived": false
+						},
+						{
+							"fullName": "Airswiftio/pelagopay-plugin-center",
+							"pushedAt": "2025-07-23",
+							"archived": false
+						},
+						{
+							"fullName": "Airswiftio/SCF",
+							"pushedAt": "2025-02-27",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [16],
+				"sourceUrl": "https://communityfund.stellar.org/project/pelago-airswift-nkm"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site is Pelago (pelagotech.com, the row's own link) and the visible page never says Airswift (the name sits only in markup); org repos are pelagopay-* (newest push 2026-02-03) — reads as a rename to PelagoPay, not a death; relink candidate [hand-read; rule said leave]"
+		},
+		{
+			"slug": "airtm",
+			"name": "Airtm",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:00.241Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/airtm.yaml"
+			},
+			"site": {
+				"url": "https://airtm.com/",
+				"finalUrl": "https://www.airtm.com/",
+				"status": 403,
+				"title": "Just a moment...",
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 16
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2025-12-05T00:00:00.000Z",
+				"url": "https://stellar.org/blog/ecosystem/cutting-cross-border-payroll-costs-by-20-25-with-airtm",
+				"title": "Cutting Cross-Border Payroll Costs by 20–25% with Airtm"
+			},
+			"proposal": "leave",
+			"reason": "HTTP 403 Cloudflare challenge (\"Just a moment...\") — could not check; stellar.org blog names Airtm 2025-12-05 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "alfred",
+			"name": "Alfred",
+			"prominence": 0,
+			"types": ["Payments", "Anchor"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://alfredpay.io/"
+			},
+			"site": {
+				"url": "https://alfredpay.io/",
+				"finalUrl": "https://alfredpay.io/",
+				"status": 200,
+				"title": "alfred | Stablecoin Payment Infrastructure for Latin America",
+				"description": "Fast, compliant cross-border payments for LATAM. Virtual accounts, instant settlement, and regulatory infrastructure built for fintechs and enterprises.",
+				"namesProduct": "alfred",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://alfredpay.io/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 3410
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://alfredpay.io/blog",
+					"finalUrl": "https://alfredpay.io/blog",
+					"status": 200,
+					"date": "2026-08-27",
+					"how": "text",
+					"title": "alfred Blog | LatAm Payments & Fintech Insights"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [9, 19],
+				"sourceUrl": "https://communityfund.stellar.org/project/alfred-xij"
+			},
+			"corpus": {
+				"date": "2022-05-09T00:00:00.000Z",
+				"url": "https://stellar.org/blog/ecosystem/how-winning-the-stellar-community-fund-opened-new-doors-for-alfred-pay",
+				"title": "How Winning the Stellar Community Fund Opened New Doors for Alfred Pay"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"alfred\"; dated post at alfredpay.io/blog — 2026-08-27 (text) (18d ago)"
+		},
+		{
+			"slug": "almanax",
+			"name": "Almanax",
+			"prominence": 0,
+			"types": ["Security", "AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://almanax.ai/"
+			},
+			"site": {
+				"url": "https://almanax.ai/",
+				"finalUrl": "https://almanax.ai/",
+				"status": 200,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 0
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/almanax-ai",
+				"repos": [
+					{
+						"fullName": "almanax-ai/w3sa",
+						"from": "row.github.repos",
+						"error": "gh: Not Found (HTTP 404)"
+					}
+				],
+				"ownerNewest": {
+					"owner": "almanax-ai",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "almanax-ai/almanax-security-plugin",
+							"pushedAt": "2026-03-27",
+							"archived": false
+						},
+						{
+							"fullName": "almanax-ai/Almanax-marketing-site-copy-MIT",
+							"pushedAt": "2026-02-25",
+							"archived": false
+						},
+						{
+							"fullName": "almanax-ai/lido-oracle",
+							"pushedAt": "2025-11-21",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [26, 32],
+				"sourceUrl": "https://communityfund.stellar.org/project/almanax-ryo"
+			},
+			"corpus": {
+				"date": "2026-07-21T00:00:00.000Z",
+				"url": "https://developers.stellar.org/docs/tools/developer-tools/security-tools",
+				"title": "Security Tools"
+			},
+			"proposal": "leave",
+			"reason": "client-rendered shell (0 chars, no title); org repos pushed 2026-03-27; linked repo almanax-ai/w3sa returns 404; developers.stellar.org security-tools page (updated 2026-07-21) lists Almanax — human read [hand-read; rule said leave]"
+		},
+		{
+			"slug": "alula",
+			"name": "Alula",
+			"prominence": 0,
+			"types": ["Lending"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://alula.finance/"
+			},
+			"site": {
+				"url": "https://alula.finance/",
+				"finalUrl": "https://alula.finance/",
+				"status": 200,
+				"title": "Alula — Institutional RWA Lending Infrastructure on Stellar",
+				"description": "Alula is configurable lending infrastructure on Stellar for institutional capital, with curated RWA and crypto markets, isolated risk, and policy-aligned rails.",
+				"namesProduct": "alula",
+				"prelaunch": "Testnet",
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://alula.finance/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4633
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://alula.finance/blog",
+					"finalUrl": "https://alula.finance/blog",
+					"status": 200,
+					"date": "2026-07-10",
+					"how": "jsonld",
+					"title": "Alula Insights — Research & News on RWA Lending"
+				}
+			],
+			"github": {
+				"link": "https://github.com/mfactory-lab",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "mfactory-lab",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "mfactory-lab/reference-pool",
+							"pushedAt": "2025-06-18",
+							"archived": false
+						},
+						{
+							"fullName": "mfactory-lab/solana-wallet-adapter-vue",
+							"pushedAt": "2024-11-29",
+							"archived": false
+						},
+						{
+							"fullName": "mfactory-lab/genai-code-review",
+							"pushedAt": "2024-11-20",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [34],
+				"sourceUrl": "https://communityfund.stellar.org/project/alula-quk"
+			},
+			"corpus": {
+				"date": "2026-04-06T03:00:38.218Z",
+				"url": "https://stellarsecurityportal.com/report/70",
+				"title": "Alula — Halborn (Smart Contracts - Alula Finance)"
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"alula\" but the how-it-works says \"Testnet tokens available via faucet\"; alula.finance/blog posts dated 2026-07-10 (JSON-LD); Halborn audit in the corpus 2026-04-06 — a testnet-stage product holding Live is the owner's read [hand-read; rule said leave]"
+		},
+		{
+			"slug": "amber",
+			"name": "Amber",
+			"prominence": 0,
+			"types": ["RWA"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://ambergroup.io/"
+			},
+			"site": {
+				"url": "https://ambergroup.io/",
+				"finalUrl": "https://ambergroup.io/",
+				"status": 200,
+				"title": "Amber Group: Building the Future of Digital Assets",
+				"description": "We are a global digital finance leader, empowering clients with innovative solutions like wealth management, asset management and liquidity provision. Through pioneering tech and regulatory expertise, we help organisations and individuals shape the future of digital assets.",
+				"namesProduct": "amber",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://ambergroup.io/news"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4628
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://ambergroup.io/news",
+					"finalUrl": "https://ambergroup.io/news",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Amber Group: News & Insights"
+				}
+			],
+			"github": {
+				"link": "https://github.com/ambergroup-io",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "ambergroup-io",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "ambergroup-io/cc-connect",
+							"pushedAt": "2026-05-13",
+							"archived": false
+						},
+						{
+							"fullName": "ambergroup-io/claude-code",
+							"pushedAt": "2026-03-31",
+							"archived": false
+						},
+						{
+							"fullName": "ambergroup-io/Documents",
+							"pushedAt": "2021-06-17",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"amber\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2026-05-13"
+		},
+		{
+			"slug": "amero",
+			"name": "Amero",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://amero.exchange/"
+			},
+			"site": {
+				"url": "https://amero.exchange/",
+				"finalUrl": "https://www.amero.exchange/",
+				"status": 200,
+				"title": "Amero Exchange | Conecta, Recarga y Retira Dinero Fácilmente con Soluciones Financieras Innovadoras en América Latina.",
+				"description": "Somos una plataforma de intercambio regulada, que permite crear \n  tu portafolio Conecta, Recarga y Retira Dinero Fácilmente con Soluciones Financieras Innovadoras en América Latina,  Permitiendo enviar a MoneyGram y sacar dinero en Depósito",
+				"namesProduct": "amero",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 118
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/amerogithub",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "amerogithub",
+					"from": "links.github",
+					"repos": [],
+					"note": "account has no public repos"
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [28, 31],
+				"sourceUrl": "https://communityfund.stellar.org/project/amero-exchange-d28"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"amero\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "amulets",
+			"name": "Amulets",
+			"prominence": 0,
+			"types": ["Wallet", "Card Issuing", "Stablecoin"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://amulets.io/"
+			},
+			"site": {
+				"url": "https://amulets.io/",
+				"finalUrl": "https://amulets.io/",
+				"status": 200,
+				"title": "Amulets | Bring your crypto to life",
+				"description": "Amulets Labs, LLC (Delaware). Payment card accepted anywhere Visa is accepted. Solana, USDC & USDT first. Compatible with Apple Pay and Google Pay.",
+				"namesProduct": "amulets",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [
+					"https://apps.apple.com/br/app/amulets-easy-solana-pay/id6752910730?l=en-GB",
+					"https://play.google.com/store/apps/details?id=io.amulets.wallet"
+				],
+				"postLinks": ["https://amulets.io/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 697
+			},
+			"artifacts": [
+				{
+					"kind": "app-store",
+					"url": "https://apps.apple.com/br/app/amulets-easy-solana-pay/id6752910730?l=en-GB",
+					"date": null,
+					"note": "itunes lookup returned no result (listing gone?)"
+				},
+				{
+					"kind": "play-store",
+					"url": "https://play.google.com/store/apps/details?id=io.amulets.wallet",
+					"status": 200,
+					"date": "2026-09-13",
+					"note": null
+				},
+				{
+					"kind": "post-page",
+					"url": "https://amulets.io/blog",
+					"finalUrl": "https://amulets.io/blog",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Amulets | Bring your crypto to life"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/amulets-oyl"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"amulets\"; Play listing updated 2026-09-13 (1d ago)"
+		},
+		{
+			"slug": "anchainai",
+			"name": "AnChain.AI",
+			"prominence": 0,
+			"types": ["Security", "AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://anchain.ai/"
+			},
+			"site": {
+				"url": "https://anchain.ai/",
+				"finalUrl": "https://www.anchain.ai/",
+				"status": 200,
+				"title": "AnChainAI - Crypto Investigations, AML, Payment risk screening API, Agentic AI advisory",
+				"description": "AnChain.AI is a leader in AML compliance, cryptocurrency and DeFi investigations, and agentic AI / LLM advisory services. Trusted by global regulators, financial institutions, VASPs, and stablecoin payment providers to combat crypto fraud and strengthen regulatory compliance.",
+				"namesProduct": "anchain.ai",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [
+					"https://www.anchain.ai/blog",
+					"https://www.anchain.ai/blog/sec-rca",
+					"https://www.anchain.ai/blog/forensics",
+					"https://www.anchain.ai/blog/clarity"
+				],
+				"headDates": {
+					"structured": [],
+					"text": ["2026-08-20", "2026-08-07", "2026-07-25"]
+				},
+				"textChars": 17357
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://www.anchain.ai/blog",
+					"finalUrl": "https://www.anchain.ai/blog",
+					"status": 200,
+					"date": "2026-08-20",
+					"how": "text",
+					"title": "Blogs and Case Studies"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://www.anchain.ai/blog/sec-rca",
+					"finalUrl": "https://www.anchain.ai/blog/sec-rca",
+					"status": 200,
+					"date": "2026-08-20",
+					"how": "text",
+					"title": "SEC Regulation Crypto Assets: From Legal Clarity to Verifiable On-Chain Compliance"
+				}
+			],
+			"github": {
+				"link": "https://github.com/anchainai",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "anchainai",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "AnChainAI/anchain-data-mcp",
+							"pushedAt": "2026-02-18",
+							"archived": false
+						},
+						{
+							"fullName": "AnChainAI/aml-mcp",
+							"pushedAt": "2025-09-04",
+							"archived": false
+						},
+						{
+							"fullName": "AnChainAI/anchain-axelar-dapper-flowbridge",
+							"pushedAt": "2024-09-25",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [11, 15, 20, 23],
+				"sourceUrl": "https://communityfund.stellar.org/project/anchainai-zpi"
+			},
+			"corpus": {
+				"date": "2023-06-29T00:00:00.000Z",
+				"url": "https://stellar.org/blog/ecosystem/stellar-community-fund-recap-soroban-infrastructure",
+				"title": "Stellar Community Fund Recap: Soroban Infrastructure"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"anchain.ai\"; dated post at anchain.ai/blog/sec-rca — 2026-08-20 (text) (25d ago)"
+		},
+		{
+			"slug": "apicharge",
+			"name": "ApiCharge",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://apicharge.com/"
+			},
+			"site": {
+				"url": "https://apicharge.com/",
+				"finalUrl": "https://apicharge.com/",
+				"status": 200,
+				"title": "ApiCharge for Machine Learning — Public Preview",
+				"description": "Productionise and monetise your ML models on your own terms. Self-sovereign endpoints, scale-to-zero GPU clusters, direct stablecoin settlement. No payment gateway. No business registration. No middleman.",
+				"namesProduct": "apicharge",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 6333
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://apicharge.com/news",
+					"finalUrl": "https://apicharge.com/news",
+					"status": 200,
+					"date": "2026-02-11",
+					"how": "guessed path; text",
+					"title": "News | ApiCharge",
+					"guessed": true
+				}
+			],
+			"github": {
+				"link": "https://github.com/streamcharge/apicharge",
+				"repos": [
+					{
+						"fullName": "StreamCharge/ApiCharge",
+						"from": "links.github",
+						"pushedAt": "2026-05-19",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 1,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [40],
+				"sourceUrl": "https://communityfund.stellar.org/project/apicharge-djv"
+			},
+			"corpus": {
+				"date": "2026-02-06T00:00:00.000Z",
+				"url": "https://lumenloop.com/news/mainnet-stablecoin-native-account-creation-transaction",
+				"title": "Mainnet Stablecoin-Native Account Creation and Transaction Processing Released"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"apicharge\"; apicharge.com/news post \"ApiCharge and x402: Converging on the Future of API Payments\" dated 2026-02-11 (215d ago); repo StreamCharge/ApiCharge pushed 2026-05-19. The title says \"Public Preview\" for the ML edition [hand-read; rule said verify]"
+		},
+		{
+			"slug": "archax",
+			"name": "Archax",
+			"prominence": 0,
+			"types": ["RWA"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://archax.com/"
+			},
+			"site": {
+				"url": "https://archax.com/",
+				"finalUrl": "https://archax.com/",
+				"status": 200,
+				"title": "Archax | Regulated Digital Asset Infrastructure",
+				"description": "Archax builds regulated infrastructure for tokenising, trading, and safekeeping real-world assets. Authorised across the UK and EU.",
+				"namesProduct": "archax",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 47
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"archax\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "arculus",
+			"name": "Arculus",
+			"prominence": 0,
+			"types": ["Wallet"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:01.541Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/arculus.yaml"
+			},
+			"site": {
+				"url": "https://getarculus.com/",
+				"finalUrl": "https://www.getarculus.com/",
+				"status": 403,
+				"title": "Just a moment...",
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 16
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2025-10-01T00:00:00.000Z",
+				"url": "https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+				"title": "The Blueprint Comes to Life: Building the Future of Finance at Meridian 2025"
+			},
+			"proposal": "leave",
+			"reason": "HTTP 403 Cloudflare challenge (\"Just a moment...\") — could not check; stellar.org Meridian 2025 post names Arculus 2025-10-01 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "arf",
+			"name": "Arf",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://arf.one/"
+			},
+			"site": {
+				"url": "https://arf.one/",
+				"finalUrl": "https://arf.one/",
+				"status": 200,
+				"title": "Homepage - arf | Borderless Finance Unlocked",
+				"description": null,
+				"namesProduct": "arf",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://arf.one/blog", "https://arf.one/index.php/blog"],
+				"headDates": {
+					"structured": [
+						["2024-08-09", "meta"],
+						["2024-08-09", "meta"],
+						["2024-08-09", "jsonld"]
+					],
+					"text": ["2023-08-17", "2023-08-01", "2023-06-15"]
+				},
+				"textChars": 4543
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://arf.one/blog",
+					"finalUrl": "https://arf.one/blog/",
+					"status": 200,
+					"date": "2026-06-05",
+					"how": "text",
+					"title": "Blog - arf | Borderless Finance Unlocked"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://arf.one/index.php/blog",
+					"finalUrl": "https://arf.one/blog/",
+					"status": 200,
+					"date": "2026-06-05",
+					"how": "text",
+					"title": "Blog - arf | Borderless Finance Unlocked"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2025-07-11T20:05:30.902Z",
+				"url": "https://lumenloop.com/news/global-liquidity-real-time-payments-arf-usdc-circle",
+				"title": "Global liquidity for real-time payments with Arf and USDC | Circle"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"arf\"; dated post at arf.one/blog — 2026-06-05 (text) (101d ago)"
+		},
+		{
+			"slug": "arkafund",
+			"name": "Arka.fund",
+			"prominence": 0,
+			"types": ["Yield"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://arka.fund/"
+			},
+			"site": {
+				"url": "https://arka.fund/",
+				"finalUrl": "https://arka.fund/",
+				"status": 200,
+				"title": "Arka.fund - On-Chain Asset Management Protocol",
+				"description": null,
+				"namesProduct": "arka.fund",
+				"prelaunch": "Coming soon",
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 3074
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/dogstarapps/arka.fund",
+				"repos": [
+					{
+						"fullName": "dogstarapps/arka.fund",
+						"from": "links.github",
+						"pushedAt": "2026-08-07",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [37],
+				"sourceUrl": "https://communityfund.stellar.org/project/arkafund-irx"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"arka.fund\"; \"Coming soon\" refers to governance features, not the product; repo dogstarapps/arka.fund pushed 2026-08-07 (a push is not product state for a Yield row); no dated operator artifact [hand-read; rule said leave]"
+		},
+		{
+			"slug": "arrel",
+			"name": "Arrel",
+			"prominence": 0,
+			"types": ["SDK"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://arreltech.com/"
+			},
+			"site": {
+				"url": "https://arreltech.com/",
+				"finalUrl": "https://arreltech.com/",
+				"status": 200,
+				"title": "Institutional Digital Asset Infrastructure | Arrel",
+				"description": "A unified stack to custody, trade, manage, and move crypto assets with confidence.",
+				"namesProduct": "arrel",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 3396
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2020-10-15T18:23:00.000Z",
+				"url": "https://lumenloop.com/news/stellar-blockchain-support-usdc-stablecoin-starting-next",
+				"title": "Stellar blockchain will support USDC stablecoin starting next year"
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"arrel\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "arst",
+			"name": "ARST",
+			"prominence": 0,
+			"types": ["Stablecoin"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-07-10T00:00:00.000Z",
+				"sourceUrl": "https://www.arst.finance/en"
+			},
+			"site": {
+				"url": "https://arst.finance/en",
+				"finalUrl": "https://www.arst.finance/en",
+				"status": 200,
+				"title": "ARST — The Argentine Peso Stablecoin · 1:1 with the Peso",
+				"description": "Transfer, save, and pay digitally using a peso-pegged currency designed to simplify your operations in Argentina — without banks or intermediaries.",
+				"namesProduct": "arst",
+				"prelaunch": "Coming Soon",
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 6505
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"arst\"; the \"Coming Soon\" hit is \"3 Active Networks · More Coming Soon\" (additional chains, not the product); no dated artifact on the page [hand-read; rule said leave]"
+		},
+		{
+			"slug": "art-club",
+			"name": "ART Club",
+			"prominence": 0,
+			"types": ["RWA", "Payments", "NFT"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:01.857Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/art-club.yaml"
+			},
+			"site": {
+				"url": null,
+				"finalUrl": null,
+				"status": 0,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": null,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": null
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/grmarkkes/artcc",
+				"repos": [
+					{
+						"fullName": "GRMarkkes/ArtCC",
+						"from": "links.github",
+						"pushedAt": "2024-06-03",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [26],
+				"sourceUrl": "https://communityfund.stellar.org/project/art-club-ia2"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "no website on the row; only a repo to read; linked repo push 2024-06-03"
+		},
+		{
+			"slug": "assemblyscript-soroban-sdk",
+			"name": "AssemblyScript Soroban SDK",
+			"prominence": 0,
+			"types": ["SDK"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://github.com/soneso/as-soroban-sdk"
+			},
+			"site": {
+				"url": "https://github.com/soneso/as-soroban-sdk",
+				"finalUrl": "https://github.com/soneso/as-soroban-sdk",
+				"status": 200,
+				"title": "GitHub - Soneso/as-soroban-sdk: Soroban SDK for AssemblyScript · GitHub",
+				"description": "Soroban SDK for AssemblyScript. Contribute to Soneso/as-soroban-sdk development by creating an account on GitHub.",
+				"namesProduct": "assemblyscript",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 23459
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/soneso/as-soroban-sdk",
+				"repos": [
+					{
+						"fullName": "Soneso/as-soroban-sdk",
+						"from": "links.github",
+						"pushedAt": "2025-08-11",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 19,
+						"release": {
+							"tag": "1.2.0",
+							"date": "2025-07-20"
+						},
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [10, 14, 18, 28],
+				"sourceUrl": "https://communityfund.stellar.org/project/assemblyscript-soroban-sdk-kn4"
+			},
+			"corpus": {
+				"date": "2026-07-27T00:00:00.000Z",
+				"url": "https://developers.stellar.org/docs/tools/sdks/contract-sdks",
+				"title": "Build smart contracts that will be deployed to the Stellar network"
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"assemblyscript\" but nothing dated within 365d; newest dated artifact 2025-08-11 (repo push 2025-08-11); linked repo push 2025-08-11"
+		},
+		{
+			"slug": "astrocore",
+			"name": "Astrocore",
+			"prominence": 0,
+			"types": ["SDK"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://github.com/astroband/astrocore"
+			},
+			"site": {
+				"url": "https://github.com/astroband/astrocore",
+				"finalUrl": "https://github.com/astroband/astrocore",
+				"status": 200,
+				"title": "GitHub - astroband/astrocore: Stellar-core implementation in Rust (WIP) · GitHub",
+				"description": "Stellar-core implementation in Rust (WIP). Contribute to astroband/astrocore development by creating an account on GitHub.",
+				"namesProduct": "astrocore",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 20879
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/astroband/astrocore",
+				"repos": [
+					{
+						"fullName": "astroband/astrocore",
+						"from": "links.github",
+						"pushedAt": "2023-08-14",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 31,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [2],
+				"sourceUrl": "https://communityfund.stellar.org/project/astrocore-4xe"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"astrocore\" but nothing dated within 365d; newest dated artifact 2023-08-14 (repo push 2023-08-14); linked repo push 2023-08-14"
+		},
+		{
+			"slug": "autify",
+			"name": "Autify",
+			"prominence": 0,
+			"types": ["AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://autifynetwork.com/"
+			},
+			"site": {
+				"url": "https://autifynetwork.com/",
+				"finalUrl": "https://autifynetwork.com/",
+				"status": 200,
+				"title": "Autify Compliance — Battery & E-Waste EPR Compliance Software for India",
+				"description": "Track EPR obligations, verify recycler certificates, and never miss a CPCB filing deadline — battery and e-waste EPR compliance software for Indian producers and importers.",
+				"namesProduct": "autify",
+				"prelaunch": "waitlist",
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4305
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://autifynetwork.com/blog",
+					"finalUrl": "https://autifynetwork.com/guides",
+					"status": 200,
+					"date": "2026-07-17",
+					"how": "guessed path; text",
+					"title": "EPR compliance guides — Autify Compliance",
+					"guessed": true
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [14],
+				"sourceUrl": "https://communityfund.stellar.org/project/autify-network-nxv"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "the domain now serves \"Autify Compliance\", an EPR compliance product for India behind a waitlist (guides dated 2026-07-17); the SCF 14 Autify Network product is not what the page sells — a pivot, not a Live stamp [hand-read; rule said leave]"
+		},
+		{
+			"slug": "autoaction",
+			"name": "AutoAction",
+			"prominence": 0,
+			"types": ["SDK"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-09-01T21:47:52.662Z",
+				"sourceUrl": "https://57blocks.com/"
+			},
+			"site": {
+				"url": "https://57blocks.com/",
+				"finalUrl": "https://57blocks.com/",
+				"status": 200,
+				"title": "Home · 57Blocks",
+				"description": "Bringing ideas to life. Partner with us to build and launch awesome products!",
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": "n engagement ends it is because the product was acquired or wound down, not because anyone left over quality. ✸ The engine One del",
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://57blocks.com/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 137141
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://57blocks.com/blog",
+					"finalUrl": "https://57blocks.com/blog",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Blog · Thinking · 57Blocks"
+				}
+			],
+			"github": {
+				"link": "https://github.com/57blocks/stellar-autoaction",
+				"repos": [
+					{
+						"fullName": "57blocks/Stellar-AutoAction",
+						"from": "links.github",
+						"pushedAt": "2024-10-23",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": {
+							"tag": "v0.0.1",
+							"date": "2024-10-18"
+						},
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [29],
+				"sourceUrl": "https://communityfund.stellar.org/project/autoaction-ybl"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site is the vendor's agency page (57blocks.com) and never names AutoAction; the \"wound down\" phrase is agency copy about client engagements, not this product; repo 57blocks/Stellar-AutoAction pushed 2024-10-23, release v0.0.1 2024-10-18 — stale, not gone [hand-read; rule said leave]"
+		},
+		{
+			"slug": "automated-finance",
+			"name": "Automated Finance",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://automated.finance/"
+			},
+			"site": {
+				"url": "https://automated.finance/",
+				"finalUrl": "https://automated.finance/",
+				"status": 200,
+				"title": "Automated Finance — Automação financeira on-chain",
+				"description": "Plataforma de automação financeira on-chain. DeFi, pagamentos, tesouraria — tudo em um único workflow visual.",
+				"namesProduct": "automated finance",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 10229
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [41],
+				"sourceUrl": "https://communityfund.stellar.org/project/automated-finance-urx"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"automated finance\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "autowhale",
+			"name": "Autowhale",
+			"prominence": 0,
+			"types": ["SDK"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-09-05T07:05:06.849Z",
+				"sourceUrl": "https://renesis.fi/"
+			},
+			"site": {
+				"url": "https://renesis.fi/",
+				"finalUrl": "https://renesis.fi/",
+				"status": 200,
+				"title": "Crypto Portfolio Management & Execution System | Renesis",
+				"description": "Renesis gives crypto funds one platform to track CeFi and DeFi positions, attribute P&L, generate LP reports, and execute across venues.",
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://renesis.fi/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 182086
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://renesis.fi/blog",
+					"finalUrl": "https://renesis.fi/blog",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Renesis | The Renesis Newsroom"
+				}
+			],
+			"github": {
+				"link": "https://github.com/autowhale",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "autowhale",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "autowhale/ccxt",
+							"pushedAt": "2023-01-06",
+							"archived": false
+						},
+						{
+							"fullName": "autowhale/ReinforcementLearningCourse",
+							"pushedAt": "2022-01-22",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [34],
+				"sourceUrl": "https://communityfund.stellar.org/project/autowhale-ys0"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site is Renesis (renesis.fi, the row's own link); the visible page never says Autowhale (markup only); autowhale org repos last pushed 2023-01-06 — a rebrand, not a death; relink candidate [hand-read; rule said leave]"
+		},
+		{
+			"slug": "azza",
+			"name": "Azza",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://useazza.com/"
+			},
+			"site": {
+				"url": "https://useazza.com/",
+				"finalUrl": "https://useazza.com/",
+				"status": 200,
+				"title": "AZZA — your money should work anywhere",
+				"description": "Send, receive, and spend money across borders, instantly on WhatsApp. Crypto or local currency, without the usual stress.",
+				"namesProduct": "azza",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://useazza.com/blog"],
+				"headDates": {
+					"structured": [],
+					"text": ["2025-09-10", "2025-08-31", "2025-08-28"]
+				},
+				"textChars": 5163
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://useazza.com/blog",
+					"finalUrl": "https://useazza.com/blog",
+					"status": 200,
+					"date": "2025-05-12",
+					"how": "time",
+					"title": "The Azza Blog · AZZA"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/azza-ziq"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"azza\"; useazza.com/blog newest post 2025-05-12; the 2025-09-10 on the home page is an embedded tweet — nothing within 365d [hand-read; rule said leave]"
+		},
+		{
+			"slug": "backyard",
+			"name": "Backyard",
+			"prominence": 0,
+			"types": ["Stablecoin", "Lending", "Yield"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://backyard.finance/"
+			},
+			"site": {
+				"url": "https://backyard.finance/",
+				"finalUrl": "https://backyard.finance/",
+				"status": 200,
+				"title": "Backyard",
+				"description": "Backyard Finance is a DeFi protocol that lets you merge stablecoin yield vaults from different protocols into one diversified strategy and mint our liquid stablecoin (BYD) against these Strategy LP tokens, managing it all in a single, user-friendly interface.",
+				"namesProduct": "backyard",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 8
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [42],
+				"sourceUrl": "https://communityfund.stellar.org/project/backyard-finance-rew"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"backyard\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "baf",
+			"name": "BAF",
+			"prominence": 0,
+			"types": ["Education"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://blockchainacceleration.org/"
+			},
+			"site": {
+				"url": "https://blockchainacceleration.org/",
+				"finalUrl": "https://www.blockchainacceleration.org/",
+				"status": 200,
+				"title": "Home",
+				"description": null,
+				"namesProduct": "baf",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1611
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [28],
+				"sourceUrl": "https://communityfund.stellar.org/project/baf-summer-of-stellar-hjc"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"baf\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "balanced-network",
+			"name": "Balanced",
+			"prominence": 0,
+			"types": ["DEX"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://balanced.network/"
+			},
+			"site": {
+				"url": "https://balanced.network/",
+				"finalUrl": "https://balanced.network/",
+				"status": 200,
+				"title": "Cross-chain DeFi that’s actually usable | Balanced",
+				"description": "Swap, earn, and borrow crypto across chains without wasting hours on tutorials.",
+				"namesProduct": "balanced",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4491
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/balancednetwork",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "balancednetwork",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "balancednetwork/balanced-network-interface",
+							"pushedAt": "2026-09-01",
+							"archived": false
+						},
+						{
+							"fullName": "balancednetwork/balanced-java-contracts",
+							"pushedAt": "2026-07-13",
+							"archived": false
+						},
+						{
+							"fullName": "balancednetwork/balanced-solidity-contracts",
+							"pushedAt": "2026-02-04",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [25, 29],
+				"sourceUrl": "https://communityfund.stellar.org/project/balanced-pae"
+			},
+			"corpus": {
+				"date": "2024-09-30T15:00:00.000Z",
+				"url": "https://stellarsecurityportal.com/report/11",
+				"title": "ICON xCall — Coinspect (Smart Contract Audit xCall Soroban Implementation)"
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"balanced\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2026-09-01"
+		},
+		{
+			"slug": "ballast-re",
+			"name": "Ballast Re",
+			"prominence": 0,
+			"types": ["RWA"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-21T22:44:43.374Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/ballast-re.yaml"
+			},
+			"site": {
+				"url": "https://ballastre.xyz/",
+				"finalUrl": "https://ballastre.xyz/",
+				"status": 200,
+				"title": "ballastre.xyz",
+				"description": "Website launching soon - Stay tuned for updates from ballastre! Contact us for more information.",
+				"namesProduct": "ballast",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 712
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/ballast-re-qkr"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 but it is a \"Launching Soon\" placeholder titled with the bare hostname (712 chars, a contact form); SCF 44 awardee; never launched as far as the page shows [hand-read; rule said leave]"
+		},
+		{
+			"slug": "bando",
+			"name": "Bando",
+			"prominence": 0,
+			"types": ["RWA"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://bando.cool/"
+			},
+			"site": {
+				"url": "https://bando.cool/",
+				"finalUrl": "https://bando.cool/",
+				"status": 200,
+				"title": "Bando - The way to get CETES for your business",
+				"description": "Access CETES in the easiest way for your company, the simplest path to MXN yield with immediate liquidity.",
+				"namesProduct": "bando",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 46
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [42],
+				"sourceUrl": "https://communityfund.stellar.org/project/bando-lbi"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bando\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "basilic",
+			"name": "Basilic",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://getbasilic.com/"
+			},
+			"site": {
+				"url": "https://getbasilic.com/",
+				"finalUrl": "https://getbasilic.com/",
+				"status": 200,
+				"title": "Basilic | Infraestructura de pagos para LATAM",
+				"description": "Un solo sistema para operar entre bancos, stablecoins y pagos regionales. Cobros, pagos cross-border, conciliación automática y más. Sin fricción ni vueltas.",
+				"namesProduct": "basilic",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 409
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/basilic-stablecoin-rails-for-latam-yvb"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"basilic\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "bebop",
+			"name": "Bebop",
+			"prominence": 0,
+			"types": ["Wallet", "Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:03.433Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/bebop.yaml"
+			},
+			"site": {
+				"url": null,
+				"finalUrl": null,
+				"status": 0,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": null,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": null
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/christopherkarani/escrowcotract",
+				"repos": [
+					{
+						"fullName": "christopherkarani/escrowcotract",
+						"from": "links.github",
+						"pushedAt": "2024-11-14",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [28, 31],
+				"sourceUrl": "https://communityfund.stellar.org/project/bebop-flo"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "no website on the row; only a repo to read; linked repo push 2024-11-14"
+		},
+		{
+			"slug": "ben-wallet",
+			"name": "Ben Wallet",
+			"prominence": 0,
+			"types": ["Wallet"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://ben-wallet.gitbook.io/ben-wallet"
+			},
+			"site": {
+				"url": "https://ben-wallet.gitbook.io/ben-wallet",
+				"finalUrl": "https://ben-wallet.gitbook.io/ben-wallet",
+				"status": 200,
+				"title": "Ben Wallet",
+				"description": "High-Level overview of Ben, a KALE-focused smart wallet built on Stellar.",
+				"namesProduct": "ben wallet",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://ben-wallet.gitbook.io/ben-wallet/releases"],
+				"headDates": {
+					"structured": [["2026-02-22", "time"]],
+					"text": []
+				},
+				"textChars": 3748
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://ben-wallet.gitbook.io/ben-wallet/releases",
+					"finalUrl": "https://ben-wallet.gitbook.io/ben-wallet/releases",
+					"status": 200,
+					"date": "2025-07-01",
+					"how": "time",
+					"title": "Releases | Ben Wallet"
+				}
+			],
+			"github": {
+				"link": "https://github.com/ben-platform",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "ben-platform",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Ben-Platform/kmp-stellar-sdk",
+							"pushedAt": "2026-09-13",
+							"archived": false
+						},
+						{
+							"fullName": "Ben-Platform/compose-multiplatform",
+							"pushedAt": "2026-08-17",
+							"archived": false
+						},
+						{
+							"fullName": "Ben-Platform/arrow",
+							"pushedAt": "2026-08-12",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [37],
+				"sourceUrl": "https://communityfund.stellar.org/project/ben-wallet-a-kale-wallet-zn8"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "GitBook docs last edited 2026-02-22; the Releases page lists network items (Protocol 25, SLP limit increases), not wallet releases, newest dated 2025-07-01; the org's 2026-09-13 push is a kmp-stellar-sdk fork [hand-read; rule said leave]"
+		},
+		{
+			"slug": "bes-metaverse",
+			"name": "BES Metaverse",
+			"prominence": 0,
+			"types": ["NFT", "AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://azores.group/"
+			},
+			"site": {
+				"url": "https://azores.group/",
+				"finalUrl": "https://www.azores.group/",
+				"status": 200,
+				"title": "Travel Packages, Tours, Rentals & Real Estate | Azores Group",
+				"description": "Plan your dream Azores vacation with Azores Group. Discover personalized travel packages, tours, rentals, and real estate, all crafted by local experts for an unforgettable experience.",
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 15143
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/besmetaverse",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "besmetaverse",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "BESMetaverse/metaverse",
+							"pushedAt": "2023-05-25",
+							"archived": false
+						},
+						{
+							"fullName": "BESMetaverse/besmetaverse-indexer",
+							"pushedAt": "2023-04-19",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "inactive",
+			"reason": "the row's own website (azores.group) serves an unrelated travel business, \"Travel Packages, Tours, Rentals & Real Estate | Azores Group\", with no mention of BES or a metaverse; BESMetaverse repos last pushed 2023-05-25 (not archived) [hand-read; rule said leave]"
+		},
+		{
+			"slug": "bevor",
+			"name": "Bevor",
+			"prominence": 0,
+			"types": ["Security", "AI"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bevor.io/"
+			},
+			"site": {
+				"url": "https://bevor.io/",
+				"finalUrl": "https://www.bevor.io/",
+				"status": 200,
+				"title": "Bevor | Harness your smart contract security",
+				"description": "Review smart contract findings beside the code and trace the impact of a change. Bevor gives your tools and reviewers a shared workspace.",
+				"namesProduct": "bevor",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1757
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/bevor-protocol",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "bevor-protocol",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Bevor-Protocol/WEWE-solana-programs",
+							"pushedAt": "2026-09-04",
+							"archived": false
+						},
+						{
+							"fullName": "Bevor-Protocol/Bevor-Skills",
+							"pushedAt": "2026-09-03",
+							"archived": false
+						},
+						{
+							"fullName": "Bevor-Protocol/bevorai-docs",
+							"pushedAt": "2026-08-26",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [40],
+				"sourceUrl": "https://communityfund.stellar.org/project/bevor-3ju"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bevor\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2026-09-04"
+		},
+		{
+			"slug": "bexo",
+			"name": "Bexo",
+			"prominence": 0,
+			"types": ["Wallet"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bexo.app/"
+			},
+			"site": {
+				"url": "https://bexo.app/",
+				"finalUrl": "https://www.bexo.app/",
+				"status": 200,
+				"title": "Bexo | Wallet Crypto - Autocustodia, Pagos QR y Mejor Tasa Crypto",
+				"description": "Bexo es la wallet de autocustodia #1. Compra Bitcoin, USDT y +30 criptos con la mejor tasa crypto. Paga en cualquier QR. Tus llaves, tu crypto. Sin comisiones ocultas. Descargala gratis.",
+				"namesProduct": "bexo",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [
+					"https://apps.apple.com/ar/app/beexo-wallet/id1533311061",
+					"https://play.google.com/store/apps/details?id=com.beexo&hl=en_US"
+				],
+				"postLinks": ["https://www.bexo.app/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 7123
+			},
+			"artifacts": [
+				{
+					"kind": "app-store",
+					"url": "https://apps.apple.com/ar/app/beexo-wallet/id1533311061",
+					"name": "Bexo Wallet",
+					"version": "18.3.5",
+					"date": "2026-05-22",
+					"seller": "Beexo Technologies, Inc."
+				},
+				{
+					"kind": "play-store",
+					"url": "https://play.google.com/store/apps/details?id=com.beexo&hl=en_US",
+					"status": 200,
+					"date": "2026-05-19",
+					"note": null
+				},
+				{
+					"kind": "post-page",
+					"url": "https://www.bexo.app/blog",
+					"finalUrl": "https://www.bexo.app/blog",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Blog | Bexo - Eventos, Sponsors y Novedades | Bexo - Wallet Crypto"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/bexo-wallet-usdc-payments-cross-border-transfers-qr-merchant-payments-for-latin-america-uyu"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"bexo\"; App Store release 18.3.5 2026-05-22 (115d ago)"
+		},
+		{
+			"slug": "bidali",
+			"name": "Bidali",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bidali.com/"
+			},
+			"site": {
+				"url": "https://bidali.com/",
+				"finalUrl": "https://www.bidali.com/",
+				"status": 200,
+				"title": "Bidali | Discover a new way to pay and save",
+				"description": "Earn up to 10% cash back instantly on purchases. Send and receive money for free.",
+				"namesProduct": "bidali",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [
+					"https://www.bidali.com/blog",
+					"https://www.bidali.com/press"
+				],
+				"headDates": {
+					"structured": [["2025-03-23", "meta"]],
+					"text": []
+				},
+				"textChars": 5150
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://www.bidali.com/blog",
+					"finalUrl": "https://www.bidali.com/blog",
+					"status": 200,
+					"date": "2025-03-23",
+					"how": "meta",
+					"title": "Bidali | The Bidali Blog"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://www.bidali.com/press",
+					"finalUrl": "https://www.bidali.com/press",
+					"status": 200,
+					"date": "2025-03-23",
+					"how": "meta",
+					"title": "Bidali | Bidali Press Kit"
+				}
+			],
+			"github": {
+				"link": "https://github.com/bidalihq",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "bidalihq",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "bidalihq/react-native-hyperlink",
+							"pushedAt": "2024-10-15",
+							"archived": false
+						},
+						{
+							"fullName": "bidalihq/stellar-hd-wallet",
+							"pushedAt": "2022-09-16",
+							"archived": false
+						},
+						{
+							"fullName": "bidalihq/trustwallet-assets",
+							"pushedAt": "2022-02-17",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bidali\" but nothing dated within 365d; newest dated artifact 2025-03-23 (dated post at bidali.com/press — 2025-03-23 (meta)); linked repo push 2024-10-15"
+		},
+		{
+			"slug": "bigger",
+			"name": "Bigger",
+			"prominence": 0,
+			"types": ["Education"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:03.952Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/bigger.yaml"
+			},
+			"site": {
+				"url": null,
+				"finalUrl": null,
+				"status": 0,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": null,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": null
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/bigger-tech",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "bigger-tech",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "bigger-tech/stellar-faucet",
+							"pushedAt": "2026-03-30",
+							"archived": false
+						},
+						{
+							"fullName": "bigger-tech/template-stellar-smart-contract",
+							"pushedAt": "2025-06-02",
+							"archived": false
+						},
+						{
+							"fullName": "bigger-tech/poc-authelia",
+							"pushedAt": "2025-03-21",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [23, 28],
+				"sourceUrl": "https://communityfund.stellar.org/project/bigger-startup-camp-20-rvx"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "no website on the row; only a repo to read; linked repo push 2026-03-30"
+		},
+		{
+			"slug": "bim-exchange",
+			"name": "BIM Exchange",
+			"prominence": 0,
+			"types": ["Bridge"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://exchange.bim.finance/"
+			},
+			"site": {
+				"url": "https://exchange.bim.finance/",
+				"finalUrl": "https://exchange.bim.finance/buy",
+				"status": 200,
+				"title": "Buy Crypto with Fiat | BIM Exchange",
+				"description": "Buy cryptocurrencies with fiat currency on BIM Exchange. Purchase Bitcoin, Ethereum and 100+ tokens easily on the best decentralized crypto exchange.",
+				"namesProduct": "bim exchange",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1048
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [42],
+				"sourceUrl": "https://communityfund.stellar.org/project/bim-exchange-llt"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bim exchange\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "bingtellar",
+			"name": "Bingtellar",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://bingtellar.com/"
+			},
+			"site": {
+				"url": "https://bingtellar.com/",
+				"finalUrl": "https://bingtellar.com/",
+				"status": 200,
+				"title": "Bingtellar: Experience global payments, designed for you to be borderless",
+				"description": "Bingtellar is the easiest way to Send and receive money globally, Exchange digital currencies, Create virtual Visa cards that work anywhere online. It",
+				"namesProduct": "bingtellar",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": ["2023-11-29", "2023-10-25", "2023-10-24"]
+				},
+				"textChars": 3936
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [
+					{
+						"fullName": "bingtellar/bingtellar-serverside",
+						"from": "row.github.repos",
+						"error": "gh: Not Found (HTTP 404)"
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [26, 42],
+				"sourceUrl": "https://communityfund.stellar.org/project/bingtellar-mkr"
+			},
+			"corpus": {
+				"date": "2024-11-01T09:22:50.911Z",
+				"url": "https://lumenloop.com/news/seamless-guide-instantly-withdraw-stablecoins-usdc-usdt",
+				"title": "A Seamless Guide"
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bingtellar\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "bitgifty",
+			"name": "BitGifty",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://bitgifty.com/"
+			},
+			"site": {
+				"url": "https://bitgifty.com/",
+				"finalUrl": "https://bitgifty.com/",
+				"status": 200,
+				"title": "BitGifty - Gift Crypto to Anyone, Anywhere",
+				"description": null,
+				"namesProduct": "bitgifty",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4436
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/damzylance/bigiftyxsoroban",
+				"repos": [
+					{
+						"fullName": "damzylance/bigiftyxsoroban",
+						"from": "links.github",
+						"pushedAt": "2024-10-26",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 0,
+						"release": null,
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [27],
+				"sourceUrl": "https://communityfund.stellar.org/project/bitgifty-iem"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bitgifty\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2024-10-26"
+		},
+		{
+			"slug": "bitt",
+			"name": "Bitt",
+			"prominence": 0,
+			"types": ["Payments", "Anchor"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:04.341Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/bitt.yaml"
+			},
+			"site": {
+				"url": "https://bitt.com/",
+				"finalUrl": "https://www.bitt.com/",
+				"status": 522,
+				"title": "bitt.com | 522: Connection timed out",
+				"description": null,
+				"namesProduct": "bitt",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": ["2026-09-14"]
+				},
+				"textChars": 928
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2022-01-25T00:00:00.000Z",
+				"url": "https://stellar.org/blog/foundation-news/stellar-development-foundation-q4-2021-in-review",
+				"title": "Stellar Development Foundation Q4 2021 in Review"
+			},
+			"proposal": "leave",
+			"reason": "HTTP 522 (Cloudflare origin timeout) — a 5xx is no verdict; corpus last names Bitt 2022-01-25 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "bitwage",
+			"name": "Bitwage",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bitwage.com/"
+			},
+			"site": {
+				"url": "https://bitwage.com/",
+				"finalUrl": "https://bitwage.com/en-ca",
+				"status": 200,
+				"title": "Simplify Global Payroll & Workforce Payments | Bitwage",
+				"description": "Easily manage global payroll with Bitwage. Send same-day payments, integrate with payroll systems, and offer crypto or stablecoin options. Trusted by businesses and freelancers worldwide.",
+				"namesProduct": "bitwage",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [
+					"https://bitwage.com/en-ca/blog",
+					"https://bitwage.com/en-us/blog"
+				],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 17297
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://bitwage.com/en-ca/blog",
+					"finalUrl": "https://bitwage.com/en-ca/blog",
+					"status": 200,
+					"date": "2026-04-21",
+					"how": "text",
+					"title": "Bitwage Blog | Insights on Global Payments and Crypto Payroll"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://bitwage.com/en-us/blog",
+					"finalUrl": "https://bitwage.com/en-us/blog",
+					"status": 200,
+					"date": "2026-04-21",
+					"how": "text",
+					"title": "Bitwage Blog | Insights on Global Payments and Crypto Payroll"
+				}
+			],
+			"github": {
+				"link": "https://github.com/bitwage",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "bitwage",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Bitwage/bitwage-blog-ar",
+							"pushedAt": "2023-01-11",
+							"archived": false
+						},
+						{
+							"fullName": "Bitwage/configure-aws-credentials",
+							"pushedAt": "2022-06-28",
+							"archived": false
+						},
+						{
+							"fullName": "Bitwage/ssh-action",
+							"pushedAt": "2022-06-16",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2022-08-11T00:00:00.000Z",
+				"url": "https://stellar.org/blog/ecosystem/bitwage-helps-remote-workers-get-paid-with-usdc-on-stellar",
+				"title": "Bitwage Helps Remote Workers Get Paid with USDC on Stellar"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"bitwage\"; dated post at bitwage.com/en-us/blog — 2026-04-21 (text) (146d ago)"
+		},
+		{
+			"slug": "bitwave",
+			"name": "Bitwave",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bitwave.io/"
+			},
+			"site": {
+				"url": "https://bitwave.io/",
+				"finalUrl": "https://www.bitwave.io/",
+				"status": 200,
+				"title": "The Enterprise Crypto Accounting, Payments, and Reporting Platform | Bitwave",
+				"description": "Bitwave simplifies operational and compliance workflows for enterprise and institutional finance teams. Track, manage, and move crypto – with confidence and security.",
+				"namesProduct": "bitwave",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [
+					"https://www.bitwave.io/blog/b2b-payments-are-broken-heres-how-blockchain-fixes-them",
+					"https://www.bitwave.io/blog",
+					"https://www.bitwave.io/blog/mcp-accounting-market-map",
+					"https://www.bitwave.io/blog/agentic-finance-guide",
+					"https://www.bitwave.io/blog/openclaw-accounting-done-right"
+				],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 10428
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://www.bitwave.io/blog/b2b-payments-are-broken-heres-how-blockchain-fixes-them",
+					"finalUrl": "https://www.bitwave.io/blog/b2b-payments-are-broken-heres-how-blockchain-fixes-them",
+					"status": 200,
+					"date": "2026-08-12",
+					"how": "jsonld",
+					"title": "B2B Payments Are Broken. Here’s How Blockchain Fixes Them."
+				},
+				{
+					"kind": "post-page",
+					"url": "https://www.bitwave.io/blog",
+					"finalUrl": "https://www.bitwave.io/blog",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "Blog | Bitwave - Digital Asset Accounting Software"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [24, 29],
+				"sourceUrl": "https://communityfund.stellar.org/project/bitwave-dyc"
+			},
+			"corpus": {
+				"date": "2026-06-14T00:00:00.000Z",
+				"url": "https://github.com/lumenloop/awesome-stellar-community-fund/blob/main/docs/scf-history.md",
+				"title": "SCF History: Versions, Award Types, and Program Evolution"
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"bitwave\"; dated post at bitwave.io/blog/b2b-payments-are-broken-heres-how-blockchain-fixes-them — 2026-08-12 (jsonld) (33d ago)"
+		},
+		{
+			"slug": "blade",
+			"name": "Blade",
+			"prominence": 0,
+			"types": ["RWA"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-07-20T05:43:16.639Z",
+				"sourceUrl": "https://bladelabs.io/"
+			},
+			"site": {
+				"url": "https://bladelabs.io/",
+				"finalUrl": "https://bladelabs.io/",
+				"status": 200,
+				"title": "Blade Labs — An AI staff that really does your work",
+				"description": "AI employees for individuals, not enterprises. It asks before money moves, every action leaves a receipt, and its memory is a folder you own.",
+				"namesProduct": "blade",
+				"prelaunch": "waitlist",
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": ["2026-08-25"]
+				},
+				"textChars": 2203
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/blade-labs",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "blade-labs",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Blade-Labs/react-native-blade-sdk",
+							"pushedAt": "2026-04-09",
+							"archived": false
+						},
+						{
+							"fullName": "Blade-Labs/blade-sdk-web-demo",
+							"pushedAt": "2026-02-11",
+							"archived": false
+						},
+						{
+							"fullName": "Blade-Labs/wallet-demo",
+							"pushedAt": "2026-02-11",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [25],
+				"sourceUrl": "https://communityfund.stellar.org/project/blade-tradfi-to-defi-bridge-zgq"
+			},
+			"corpus": {
+				"date": "2026-06-14T00:00:00.000Z",
+				"url": "https://github.com/lumenloop/awesome-stellar-community-fund/blob/main/docs/scf-history.md",
+				"title": "SCF History: Versions, Award Types, and Program Evolution"
+			},
+			"proposal": "leave",
+			"reason": "bladelabs.io now sells \"Blade Labs — An AI staff\" behind a waitlist; the wallet SDK is not on the page; org repos react-native-blade-sdk pushed 2026-04-09 — a pivot; human read [hand-read; rule said leave]"
+		},
+		{
+			"slug": "blink",
+			"name": "Blink",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://ourblink.cash/"
+			},
+			"site": {
+				"url": "https://ourblink.cash/",
+				"finalUrl": "https://ourblink.cash/",
+				"status": 0,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": "curl exit 35: curl: (35) LibreSSL/3.3.6: error:1404B438:SSL routines:ST_CONNECT:tlsv1 alert internal error",
+				"sameDomain": null,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": null
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/bingtellar",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "bingtellar",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "bingtellar/blink-build",
+							"pushedAt": "2026-08-25",
+							"archived": false
+						},
+						{
+							"fullName": "bingtellar/bingtellar-minipay",
+							"pushedAt": "2023-12-17",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/blink-4xa"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "could not check: curl exit 35: curl: (35) LibreSSL/3.3.6: error:1404B438:SSL routines:ST_CONNECT:tlsv1 alert internal error; linked repo push 2026-08-25"
+		},
+		{
+			"slug": "bloccpay",
+			"name": "Bloccpay",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bloccpay.com/"
+			},
+			"site": {
+				"url": "https://bloccpay.com/",
+				"finalUrl": "https://www.bloccpay.com/",
+				"status": 200,
+				"title": "Bloccpay",
+				"description": "Powering the future of global work. Pay businesses and talents worldwide in minutes with payroll, instant payments, and lifestyle perks in one platform.",
+				"namesProduct": "bloccpay",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://www.bloccpay.com/blog"],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 1463
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://www.bloccpay.com/blog",
+					"finalUrl": "https://www.bloccpay.com/blog",
+					"status": 200,
+					"date": "2026-01-04",
+					"how": "text",
+					"title": "Blog - Bloccpay"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [43],
+				"sourceUrl": "https://communityfund.stellar.org/project/bloccpay-vgn"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"bloccpay\"; dated post at bloccpay.com/blog — 2026-01-04 (text) (253d ago)"
+		},
+		{
+			"slug": "block-by-block",
+			"name": "Block by Block",
+			"prominence": 0,
+			"types": ["Education"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://open.spotify.com/show/3zL71U99SSNbfdhuLH4nZV"
+			},
+			"site": {
+				"url": "https://open.spotify.com/show/3zL71U99SSNbfdhuLH4nZV",
+				"finalUrl": "https://open.spotify.com/show/3zL71U99SSNbfdhuLH4nZV",
+				"status": 200,
+				"title": "Spotify – Web Player",
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 20
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": "2023-12-06T00:00:00.000Z",
+				"url": "https://stellar.org/blog/foundation-news/block-by-block-with-denelle-dixon-trust-disruption-and-navigating-the-decentralized-frontier-ft-konstantin-richter-ceo-of-blockdaemon",
+				"title": "block by block | Trust, Disruption & Navigating the Decentralized Frontier with Konstantin Richter"
+			},
+			"proposal": "leave",
+			"reason": "Spotify show page is client-rendered (\"Spotify – Web Player\", 20 chars); no episode date readable; corpus names the podcast 2023-12-06 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "block-time-financial",
+			"name": "Block Time Financial",
+			"prominence": 0,
+			"types": ["Payments"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://blocktimefinancial.com/"
+			},
+			"site": {
+				"url": "https://blocktimefinancial.com/",
+				"finalUrl": "https://blocktimefinancial.com/",
+				"status": 200,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 0
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/blocktimefinancial/option",
+				"repos": [
+					{
+						"fullName": "blocktimefinancial/option",
+						"from": "links.github",
+						"pushedAt": "2023-10-06",
+						"archived": false,
+						"disabled": false,
+						"fork": false,
+						"stars": 1,
+						"release": {
+							"tag": "v0.10.0",
+							"date": "2023-09-18"
+						},
+						"redirectedTo": null
+					}
+				],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "client-rendered shell (0 chars, no title); repo blocktimefinancial/option pushed 2023-10-06, release v0.10.0 2023-09-18 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "blockedenxyz",
+			"name": "BlockEden.xyz",
+			"prominence": 0,
+			"types": ["Indexer"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-17T03:02:29.060Z",
+				"sourceUrl": "https://blockeden.xyz/"
+			},
+			"site": {
+				"url": "https://blockeden.xyz/",
+				"finalUrl": "https://blockeden.xyz/",
+				"status": 200,
+				"title": "BlockEden.xyz | Web3 Infrastructure & Crypto Payments for Merchants",
+				"description": "Build and scale with fast blockchain RPC, APIs, and Eden Pay — the easiest way for merchants to accept crypto payments securely across multiple chains.",
+				"namesProduct": "blockeden.xyz",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [
+					"https://blockeden.xyz/blog/rss.xml",
+					"https://blockeden.xyz/blog/atom.xml",
+					"https://blockeden.xyz/blog"
+				],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 2705
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://blockeden.xyz/blog/rss.xml",
+					"finalUrl": "https://blockeden.xyz/blog/rss.xml",
+					"status": 200,
+					"date": "2026-07-18",
+					"how": "text",
+					"title": "BlockEden.xyz Blog"
+				},
+				{
+					"kind": "post-page",
+					"url": "https://blockeden.xyz/blog/atom.xml",
+					"finalUrl": "https://blockeden.xyz/blog/atom.xml",
+					"status": 200,
+					"date": "2026-07-18",
+					"how": "text",
+					"title": "BlockEden.xyz Blog"
+				}
+			],
+			"github": {
+				"link": "https://github.com/blockedenhq",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "blockedenhq",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "BlockEdenHQ/web-blockeden-home",
+							"pushedAt": "2025-03-25",
+							"archived": true
+						},
+						{
+							"fullName": "BlockEdenHQ/render-prometheus",
+							"pushedAt": "2025-01-03",
+							"archived": false
+						},
+						{
+							"fullName": "BlockEdenHQ/blockroma-frontend",
+							"pushedAt": "2024-03-26",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [18],
+				"sourceUrl": "https://communityfund.stellar.org/project/blockedenxyz-6du"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "verify",
+			"reason": "site 200 names \"blockeden.xyz\"; blog RSS newest item pubDate 2026-05-08 (129d ago); org repo web-blockeden-home is archived but render-prometheus pushed 2025-01-03 — the feed is the artifact, not the code [hand-read; rule said verify]"
+		},
+		{
+			"slug": "blocknify",
+			"name": "Blocknify",
+			"prominence": 0,
+			"types": ["Security"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "source-inherited",
+				"asOf": "2026-08-19T07:29:05.223Z",
+				"sourceUrl": "https://github.com/lumenloop/stellar-ecosystem-db/blob/main/projects/blocknify.yaml"
+			},
+			"site": {
+				"url": null,
+				"finalUrl": null,
+				"status": 0,
+				"title": null,
+				"description": null,
+				"namesProduct": null,
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": null,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": null
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/blocknify",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "blocknify",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Blocknify/signature-validation",
+							"pushedAt": "2021-06-07",
+							"archived": false
+						},
+						{
+							"fullName": "Blocknify/pdf.js",
+							"pushedAt": "2020-05-05",
+							"archived": false
+						},
+						{
+							"fullName": "Blocknify/react-phone-number-input",
+							"pushedAt": "2018-06-27",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [6, 7],
+				"sourceUrl": "https://communityfund.stellar.org/project/blocknify-5bv"
+			},
+			"corpus": {
+				"date": "2021-04-23T00:00:00.000Z",
+				"url": "https://stellar.org/blog/ecosystem/stellar-community-seed-fund-finalists-mojoflower-and-blocknify",
+				"title": "Stellar Community Seed Fund Finalists: Mojoflower and Blocknify"
+			},
+			"proposal": "inactive",
+			"reason": "no website on the row; Blocknify org newest push 2021-06-07; blocknify.com (a guess, NOT on the row) redirects to an unrelated gambling site (rans303-lite.com), i.e. the domain lapsed; corpus last names Blocknify 2021-04-23 [hand-read; rule said leave]"
+		},
+		{
+			"slug": "blockroll",
+			"name": "Blockroll",
+			"prominence": 0,
+			"types": ["Payments", "Stablecoin", "Card Issuing"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://blockroll.app/"
+			},
+			"site": {
+				"url": "https://blockroll.app/",
+				"finalUrl": "https://www.blockroll.app/",
+				"status": 200,
+				"title": "Blockroll — Banking for African Freelancers, Remote Workers & Creators",
+				"description": "Get paid globally in stablecoins or USD. Open EUR/USD accounts, create invoices, and manage your money from anywhere with Blockroll.",
+				"namesProduct": "blockroll",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4896
+			},
+			"artifacts": [],
+			"github": {
+				"link": "https://github.com/blockroll-tech",
+				"repos": [],
+				"ownerNewest": {
+					"owner": "blockroll-tech",
+					"from": "links.github",
+					"repos": [
+						{
+							"fullName": "Blockroll-Tech/open-assets",
+							"pushedAt": "2026-06-26",
+							"archived": false
+						},
+						{
+							"fullName": "Blockroll-Tech/nuban-bank-prediction",
+							"pushedAt": "2026-06-17",
+							"archived": false
+						}
+					]
+				},
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [43],
+				"sourceUrl": "https://communityfund.stellar.org/project/blockroll-cal"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"blockroll\" but nothing dated within 365d; no dated operator artifact found from the site head; linked repo push 2026-06-26"
+		},
+		{
+			"slug": "blox",
+			"name": "Blox",
+			"prominence": 0,
+			"types": ["Anchor"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://blox.global/"
+			},
+			"site": {
+				"url": "https://blox.global/",
+				"finalUrl": "https://blox.global/en",
+				"status": 200,
+				"title": "Blox — The Financial Operating System for Digital Assets",
+				"description": "Blox provides mass payments infrastructure, institutional digital treasury, and autonomous AI agent payments — all on one platform. $3B+ processed across 40 countries.",
+				"namesProduct": "blox",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": null,
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": [],
+				"headDates": {
+					"structured": [],
+					"text": []
+				},
+				"textChars": 4432
+			},
+			"artifacts": [],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": false,
+				"rounds": [],
+				"sourceUrl": null
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"blox\" but nothing dated within 365d; no dated operator artifact found from the site head"
+		},
+		{
+			"slug": "bluechip",
+			"name": "Bluechip",
+			"prominence": 0,
+			"types": ["Analytics"],
+			"statusNow": {
+				"status": "Live",
+				"basis": "site-liveness",
+				"asOf": "2026-08-27T17:11:33.588Z",
+				"sourceUrl": "https://bluechip.org/"
+			},
+			"site": {
+				"url": "https://bluechip.org/",
+				"finalUrl": "https://bluechip.org/en",
+				"status": 200,
+				"title": "Home | Bluechip",
+				"description": "Bluechip is an independent stablecoin rating agency. We evaluate stablecoins, cryptocurrencies designed to hold their value over time, and we tell the public which stablecoins look safer.",
+				"namesProduct": "bluechip",
+				"prelaunch": null,
+				"parked": null,
+				"deadPhrase": "SD PayPal A- $0.9999 $2.77B $56M USD USDM Mountain Protocol Wound down Wound down A- $0.9939 $1M $2 USD USDP Paxos A- $0.9975 $28M",
+				"transport": null,
+				"sameDomain": true,
+				"storeLinks": [],
+				"postLinks": ["https://bluechip.org/en/news"],
+				"headDates": {
+					"structured": [],
+					"text": ["2026-09-14", "2026-09-09", "2026-09-08"]
+				},
+				"textChars": 51418
+			},
+			"artifacts": [
+				{
+					"kind": "post-page",
+					"url": "https://bluechip.org/en/news",
+					"finalUrl": "https://bluechip.org/en/news",
+					"status": 200,
+					"date": null,
+					"how": null,
+					"title": "News | Bluechip"
+				}
+			],
+			"github": {
+				"link": null,
+				"repos": [],
+				"ownerNewest": null,
+				"error": null
+			},
+			"code": {
+				"repos": 0,
+				"newestCommit": null,
+				"newestRelease": null,
+				"archived": 0,
+				"names": []
+			},
+			"scf": {
+				"awarded": true,
+				"rounds": [44],
+				"sourceUrl": "https://communityfund.stellar.org/project/bluechip-xm4"
+			},
+			"corpus": {
+				"date": null,
+				"url": null,
+				"title": null
+			},
+			"proposal": "leave",
+			"reason": "site 200 names \"bluechip\" and serves a live stablecoin ratings table; the \"wound down\" phrase is USDM's rating row, not Bluechip; /news carries no parsed date; page data carries a CMS date_updated 2026-09-09 — no citable dated post [hand-read; rule said leave]"
+		}
+	]
+}

@@ -1,0 +1,24 @@
+{
+ "slug": "triiyo",
+ "url": "https://triiyo.com/",
+ "finalUrl": "https://www.hugedomains.com/domain_profile.cfm?d=triiyo.com",
+ "fetchedAt": "2026-09-07T02:06:24.946Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Mon, 07 Sep 2026 02:06:24 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "cfe3248b2a06159209c7959683d97fa4485762788ce42a691b1f4e48fd20145f",
+ "bodyTextChars": 5738,
+ "markers": [
+  {
+   "marker": "for sale",
+   "found": true,
+   "where": "text",
+   "excerpt": "Triiyo.com is for sale | HugeDomains Skip to main content Search for domains --> Search +1-303-893-0552 Home FAQs About us Contact us My account My favorites Shopping cart Triiyo.com Buy now: $1"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

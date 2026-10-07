@@ -23,6 +23,12 @@ export type CuratedSkillKind =
 export interface CuratedSkill {
 	/** Stable kebab-case slug used in URLs and as the dedup key. */
 	slug: string;
+	/**
+	 * The name skills.stellar.org lists this same skill under, when it differs
+	 * from our slug. The registry copy is dropped from the catalog in favour
+	 * of this entry, and this entry is marked as listed on the registry.
+	 */
+	registryName?: string;
 	/** Display name shown on the card. */
 	name: string;
 	/** Short one-line tagline (≤ 120 chars). */
@@ -64,6 +70,7 @@ export interface CuratedSkill {
 export const CURATED_SKILLS: CuratedSkill[] = [
 	{
 		slug: "stellar-scout",
+		registryName: "stellar-scout",
 		name: "Stellar Scout",
 		tagline:
 			"Vet ideas, match SCF RFPs, scan audits, map competitors, connect with builders — your AI analyst for building on Stellar.",
@@ -153,6 +160,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 
 	{
 		slug: "lumenloop-mcp-connect",
+		registryName: "lumenloop-mcp-connect",
 		name: "LumenLoop: MCP Connect",
 		tagline:
 			"Wire the LumenLoop MCP into your agent and learn what each tool does.",
@@ -176,6 +184,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-ecosystem-scout",
+		registryName: "stellar-ecosystem-scout",
 		name: "LumenLoop: Stellar Ecosystem Scout",
 		tagline:
 			"Map a sector or topic into a landscape of Stellar projects + content.",
@@ -199,6 +208,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-project-dossier",
+		registryName: "stellar-project-dossier",
 		name: "LumenLoop: Project Dossier",
 		tagline: "Build a due-diligence profile of a single Stellar project.",
 		description:
@@ -221,6 +231,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-scf-radar",
+		registryName: "scf-submission-radar",
 		name: "LumenLoop: SCF Submission Radar",
 		tagline: "Position an SCF idea against prior submissions before you apply.",
 		description:
@@ -243,6 +254,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-integration-finder",
+		registryName: "stellar-integration-finder",
 		name: "LumenLoop: Integration Finder",
 		tagline:
 			"Find the right wallet / oracle / anchor / RWA / DEX to integrate.",
@@ -266,6 +278,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-ecosystem-digest",
+		registryName: "stellar-ecosystem-digest",
 		name: "LumenLoop: Ecosystem Digest",
 		tagline: "Dated digest of recent activity on a theme or entity.",
 		description:
@@ -288,6 +301,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-builder-quickstart",
+		registryName: "stellar-builder-quickstart",
 		name: "LumenLoop: Builder Quickstart",
 		tagline: "Idea → Stellar primitives → prior art → a build path.",
 		description:
@@ -310,6 +324,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "lumenloop-content-auditor",
+		registryName: "stellar-content-auditor",
 		name: "LumenLoop: Content Auditor",
 		tagline:
 			"Audit a draft against the ecosystem — fix handles, add citations, flag bad claims.",
@@ -649,6 +664,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "soroswap-sdk",
+		registryName: "soroswap-sdk",
 		name: "Soroswap SDK",
 		tagline: "TypeScript SDK for the Soroswap AMM (DEX on Soroban).",
 		description:
@@ -658,6 +674,8 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		install: "npm install @soroswap/sdk",
 		repository: "https://github.com/soroswap/core",
 		homepage: "https://soroswap.finance/",
+		// The agent-facing skill skills.stellar.org lists for this SDK.
+		docs: "https://raw.githubusercontent.com/soroswap/sdk/main/soroswap-sdk-skill.md",
 		compatibility: ["Node.js", "Browser", "TypeScript"],
 		targetUser: ["dev", "agent"],
 		tags: ["DEX", "AMM", "soroban", "typescript"],

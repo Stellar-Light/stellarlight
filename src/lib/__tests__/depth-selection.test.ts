@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	orderManifests,
 	selectDepthPaths,
 	type TreeEntry,
 } from "../../../scripts/scan/fetch-repo-code";
@@ -79,5 +80,90 @@ describe("selectDepthPaths — tiered JS selection budget rollover", () => {
 		);
 		const sel = selectDepthPaths(tree, new Map());
 		expect(sel.jsSources).toHaveLength(10);
+	});
+});
+
+describe("orderManifests — the 40-manifest budget reads product crates first", () => {
+	it("packages/ come before examples/ even though the tree lists examples/ first", () => {
+		// OpenZeppelin/stellar-contracts: 61 manifests, 53 under examples/. In
+		// tree order the budget was spent before packages/ — the library — was
+		// read, so its sources were never sampled.
+		const tree: TreeEntry[] = [blob("Cargo.toml", 100)];
+		for (let i = 0; i < 53; i++)
+			tree.push(
+				blob(`examples/ex${String(i).padStart(2, "0")}/Cargo.toml`, 100),
+			);
+		for (const p of ["access", "accounts", "governance", "macros", "tokens"])
+			tree.push(blob(`packages/${p}/Cargo.toml`, 100));
+		tree.push(blob("packages/tokens/tests/fixtures/Cargo.toml", 100));
+		const first40 = orderManifests(tree)
+			.slice(0, 40)
+			.map((e) => e.path);
+		expect(first40[0]).toBe("Cargo.toml");
+		for (const p of ["access", "accounts", "governance", "macros", "tokens"])
+			expect(first40).toContain(`packages/${p}/Cargo.toml`);
+		expect(first40).not.toContain("packages/tokens/tests/fixtures/Cargo.toml");
+		expect(first40.filter((p) => p.startsWith("examples/"))).toHaveLength(34);
+	});
+
+	it("is a pure reorder — every manifest survives, and a small tree is untouched in content", () => {
+		const tree: TreeEntry[] = [
+			blob("contracts/token/Cargo.toml", 1),
+			blob("Cargo.toml", 1),
+			blob("tests/fixtures/Cargo.toml", 1),
+		];
+		expect(orderManifests(tree).map((e) => e.path)).toEqual([
+			"Cargo.toml",
+			"contracts/token/Cargo.toml",
+			"tests/fixtures/Cargo.toml",
+		]);
+		expect(tree.map((e) => e.path)).toEqual([
+			"contracts/token/Cargo.toml",
+			"Cargo.toml",
+			"tests/fixtures/Cargo.toml",
+		]); // input not mutated
+	});
+});
+
+describe("selectDepthPaths — a repo with no soroban crate still gets its sources", () => {
+	// stellar/rs-stellar-xdr, rs-stellar-strkey, rs-stellar-archivist,
+	// rs-stellar-rpc-client, OpenZeppelin/openzeppelin-monitor: Stellar Rust that
+	// depends on stellar-xdr / soroban-client, never soroban-sdk. With
+	// `sorobanCrateDirs` empty the source gate excluded EVERY .rs, so the only
+	// Rust that reached the scorer was whatever the test budget happened to pick
+	// — 4,830 lines of rs-stellar-archivist, 6,635 of openzeppelin-monitor, all
+	// test code, zero source. They are libraries; #1572 taught depth to grade
+	// libraries; it had nothing to grade.
+	const INFRA: TreeEntry[] = [
+		blob("Cargo.toml", 400),
+		blob("src/lib.rs", 9_000),
+		blob("src/curr.rs", 40_000),
+		blob("tests/str.rs", 12_000),
+	];
+	const NO_SOROBAN = new Map<string, boolean>([["Cargo.toml", false]]);
+
+	it("samples every crate's src/ when nothing declares soroban-sdk", () => {
+		const sel = selectDepthPaths(INFRA, NO_SOROBAN);
+		expect(sel.sources).toContain("src/curr.rs");
+		expect(sel.sources).toContain("src/lib.rs");
+		expect(sel.sources).not.toContain("tests/str.rs"); // still the test budget
+		expect(sel.tests).toContain("tests/str.rs");
+	});
+
+	it("a repo WITH a soroban crate keeps the narrow gate (vendored code stays out)", () => {
+		const tree: TreeEntry[] = [
+			blob("Cargo.toml", 100),
+			blob("contracts/token/Cargo.toml", 100),
+			blob("contracts/token/src/lib.rs", 8_000),
+			blob("vendor/other/src/huge.rs", 90_000), // not a soroban crate
+		];
+		const sel = selectDepthPaths(
+			tree,
+			new Map([
+				["Cargo.toml", false],
+				["contracts/token/Cargo.toml", true],
+			]),
+		);
+		expect(sel.sources).toEqual(["contracts/token/src/lib.rs"]);
 	});
 });

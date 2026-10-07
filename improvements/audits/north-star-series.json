@@ -35,6 +35,54 @@
 			"ok": 163,
 			"probes": 198,
 			"evidence": "improvements/engine/engine-analysis-2026-07-11.md"
+		},
+		{
+			"date": "2026-08-28",
+			"label": "Engine A full matrix (mechanized successor of the audit probes)",
+			"okRate": 99,
+			"ok": 2133,
+			"probes": 2164,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-09-06",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2234,
+			"probes": 2235,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-09-13",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2227,
+			"probes": 2229,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-09-14",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2228,
+			"probes": 2229,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-09-20",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2247,
+			"probes": 2247,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
+		},
+		{
+			"date": "2026-09-27",
+			"label": "Engine A full matrix (8 buckets)",
+			"okRate": 100,
+			"ok": 2275,
+			"probes": 2275,
+			"evidence": "improvements/engine/weekly/engine-a-recall-latest.json"
 		}
 	]
 }

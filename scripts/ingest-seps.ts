@@ -16,19 +16,19 @@
  *
  * Env required: PAYLOAD_SECRET, MONGODB_URI/DATABASE_URI, VOYAGE_API_KEY.
  */
-import { config as loadEnv } from "dotenv";
 
-// .env.local first (Next.js convention), then .env as fallback
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
+import { preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const GITHUB_API = "https://api.github.com/repos/stellar/stellar-protocol";
 const RAW_BASE =
@@ -48,6 +48,8 @@ interface SepChunk {
 	content: string; // chunk markdown
 	contentHash: string;
 	tags: string[]; // ["sep", "sep-24", ...]
+	/** Doc-level date from the SEP preamble (Updated over Created), on EVERY chunk. */
+	publishedAt: string | null;
 }
 
 const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
@@ -201,12 +203,21 @@ async function run() {
 	console.log(`  ${files.length} SEP files found`);
 	stats.sepsFetched = files.length;
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 
-	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
+	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title, publishedAt}>
 	const existingBySep = new Map<
 		string,
-		Map<number, { id: string; contentHash: string; title: string | null }>
+		Map<
+			number,
+			{
+				id: string;
+				contentHash: string;
+				title: string | null;
+				publishedAt: string | null;
+			}
+		>
 	>();
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
@@ -222,6 +233,7 @@ async function run() {
 			chunkIndex: number;
 			contentHash: string;
 			title?: string | null;
+			publishedAt?: string | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
@@ -229,6 +241,7 @@ async function run() {
 				id: d.id,
 				contentHash: d.contentHash,
 				title: d.title ?? null,
+				publishedAt: d.publishedAt ?? null,
 			});
 		}
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
@@ -243,7 +256,14 @@ async function run() {
 		try {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
-			const chunks = chunkMarkdown(md, parentDocId, title, url);
+			// S7: the SEP's preamble states its dates (Updated over Created) —
+			// ONE date per doc, stamped on EVERY chunk. The old per-chunk regex
+			// only ever dated the chunk that happened to contain the preamble.
+			const docDate = preambleDate(md);
+			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
+				...c,
+				publishedAt: docDate,
+			}));
 			stats.chunksTotal += chunks.length;
 
 			const existing = existingBySep.get(parentDocId);
@@ -255,16 +275,27 @@ async function run() {
 					// rows through the embed path. Content-identical + drifted
 					// title → update in place, no re-embed. (This script has its
 					// own upsert loop — the shared upsertChunks fix doesn't apply.)
-					if (payload && (prev.title ?? "") !== chunk.title) {
+					// Same for publishedAt: an Updated: bump only changes the
+					// preamble chunk's hash, so sibling chunks date via this path.
+					const dateDrift =
+						chunk.publishedAt !== null &&
+						(prev.publishedAt ?? "").slice(0, 10) !== chunk.publishedAt;
+					if (payload && ((prev.title ?? "") !== chunk.title || dateDrift)) {
 						stats.chunksUpdated++;
+						if (!execute) continue; // --replan counts it, never writes it
 						try {
 							await payload.update({
 								collection: "research-docs",
 								id: prev.id,
-								data: { title: chunk.title },
+								data: {
+									title: chunk.title,
+									...(dateDrift
+										? { publishedAt: toPublishedAt(chunk.publishedAt!) }
+										: {}),
+								},
 							});
 							console.log(
-								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
+								`  metadata fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'${dateDrift ? ` publishedAt→${chunk.publishedAt}` : ""}`,
 							);
 						} catch (err) {
 							console.error(
@@ -295,6 +326,10 @@ async function run() {
 	console.log(`  to embed: ${toEmbed.length}`);
 
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${stats.chunksNew + stats.chunksUpdated} new=${stats.chunksNew} updated=${stats.chunksUpdated} unchanged=${stats.chunksUnchanged} errors=${stats.errors}`,
+			);
 		console.log("");
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		return;
@@ -326,8 +361,16 @@ async function run() {
 		const existing = existingBySep
 			.get(chunk.parentDocId)
 			?.get(chunk.chunkIndex);
+		// sls-064 analog C: SEP rows served publishedAt/observedAt null — the
+		// provenance-trio gap. observedAt = this crawl; publishedAt = the date
+		// the SEP's own preamble states (Updated preferred over Created),
+		// derived once per doc via preambleDate() and carried on every chunk.
 		const data = {
 			source: "sep" as const,
+			observedAt: new Date().toISOString(),
+			...(chunk.publishedAt
+				? { publishedAt: toPublishedAt(chunk.publishedAt) }
+				: {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,

@@ -16,7 +16,20 @@
  *
  * Run:
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/detect-duplicate-projects.ts
+ *
+ * Flags:
+ *   --execute            actually hide: status=Draft + canonicalSlug=keeper.
+ *                        Default is a dry run.
+ *   --skip=slug,slug     operator veto: a cluster containing any of these slugs
+ *                        is reported but never hidden (needs a human call).
+ *                        Slugs are trimmed, so "a, b" == "a,b" — but the
+ *                        workflow must still QUOTE the value or the shell
+ *                        splits it into two argv entries and drops the second.
+ *
+ * With --execute every write is READ BACK by id before it is counted, and the
+ * run exits non-zero if any update reported success without landing.
  */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 
@@ -64,6 +77,12 @@ class UF {
 }
 
 const EXECUTE = process.argv.includes("--execute");
+const SKIP = new Set(
+	(process.argv.find((a) => a.startsWith("--skip="))?.slice(7) ?? "")
+		.split(",")
+		.map((s) => s.trim())
+		.filter(Boolean),
+);
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -74,7 +93,7 @@ async function main() {
 	});
 	const docs = res.docs as Doc[];
 	console.log(
-		`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft)" : "DRY RUN (read-only)"}`,
+		`Mode: ${EXECUTE ? "EXECUTE (will set dupes → Draft + canonicalSlug)" : "DRY RUN (read-only)"}`,
 	);
 	console.log(`Loaded ${docs.length} projects (totalDocs=${res.totalDocs}).\n`);
 	if (docs.length < res.totalDocs) {
@@ -112,8 +131,18 @@ async function main() {
 	const clusters = [...comp.values()].filter((ids) => ids.length > 1);
 	clusters.sort((a, b) => b.length - a.length);
 
-	let toHide = 0;
+	// Three EXCLUSIVE buckets over the non-keepers of every cluster, so the
+	// summary line sums to the non-keeper total: a row is already hidden, or
+	// frozen by an operator veto, or proposed. `hidden` is separate and counts
+	// only writes that were READ BACK as Draft.
+	let proposed = 0;
+	let vetoed = 0;
+	let alreadyHidden = 0;
+	let nonKeepers = 0;
+	let hidden = 0;
+	let mismatched = 0;
 	console.log(`HIGH-CONFIDENCE duplicate clusters: ${clusters.length}\n`);
+	if (SKIP.size) console.log(`Operator skip list: ${[...SKIP].join(", ")}\n`);
 	for (const ids of clusters) {
 		const ranked = ids
 			.map((i) => byId.get(i)!)
@@ -122,18 +151,75 @@ async function main() {
 		console.log(
 			`■ keep: ${keeper.name} [${keeper.status}/${keeper.verificationLevel ?? "?"}${keeper.scf?.awarded ? "/SCF" : ""}] (${keeper.slug})`,
 		);
+		// A vetoed slug anywhere in the cluster freezes the WHOLE cluster: the
+		// operator's call is "leave these records alone", and which one ranks as
+		// keeper can shift as data changes.
+		const veto = ranked.filter((d) => SKIP.has(d.slug));
+		for (const d of veto) console.log(`   SKIPPED by operator: ${d.slug}`);
 		for (const d of ranked.slice(1)) {
-			toHide++;
+			nonKeepers++;
+			// Already-Draft FIRST: a row that is already hidden was never a
+			// candidate, so counting it as "vetoed" would inflate what the
+			// operator's call actually froze. "Hidden" means the FULL end state
+			// — Draft AND owned by a canonical: a Draft row with no canonicalSlug
+			// is invisible everywhere INCLUDING name lookups, so it still needs
+			// its owner stamped (see the write below). An owner pointing somewhere
+			// else is a curated call (curate's DUPE_MERGES) and outranks this
+			// lane's ranked keeper.
+			if (d.status === "Draft" && d.canonicalSlug) {
+				alreadyHidden++;
+				console.log(
+					`   already hidden (Draft → ${d.canonicalSlug}): ${d.name} (${d.slug}) id=${d.id}`,
+				);
+				continue;
+			}
+			if (veto.length) {
+				vetoed++;
+				console.log(
+					`   not hidden (cluster vetoed): ${d.name} (${d.slug}) id=${d.id}`,
+				);
+				continue;
+			}
+			proposed++;
+			// ONE OWNER, ONE STATUS FOR A DUPLICATE (2026-09-05): the hide stamps
+			// the keeper as this row's canonical too, so this lane and curate's
+			// DUPE_MERGES converge on the SAME end state (Draft + canonicalSlug).
+			// Without the owner a hidden row is not a lineage shadow: search
+			// cannot fold its name to the keeper, so the old name goes dark.
+			// Never repointed — a row already naming a different canonical took
+			// the `already hidden` branch above.
+			const data = { status: "Draft" as const, canonicalSlug: keeper.slug };
 			if (EXECUTE) {
 				await payload.update({
 					collection: "projects",
 					id: d.id,
-					data: { status: "Draft" }, // reversible hide — record preserved
+					data, // reversible hide — record preserved
 				});
-				console.log(`   HIDDEN→Draft: ${d.name} (${d.slug}) id=${d.id}`);
+				// READ-BACK: payload.update() reports success while silently
+				// dropping a key it does not recognise, so the only proof a
+				// write landed is reading it again. `hidden` increments here
+				// and nowhere else — and it checks BOTH fields, since a
+				// half-landed write leaves exactly the ownerless Draft row
+				// this change exists to prevent.
+				const back = await payload.findByID({
+					collection: "projects",
+					id: d.id,
+					depth: 0,
+				});
+				if (back?.status === "Draft" && back?.canonicalSlug === keeper.slug) {
+					hidden++;
+					console.log(
+						`   HIDDEN→Draft (canonical ${keeper.slug}): ${d.name} (${d.slug}) id=${d.id}`,
+					);
+				} else {
+					mismatched++;
+					console.error(
+						`   read-back MISMATCH: ${d.name} (${d.slug}) id=${d.id} status=${back?.status} canonicalSlug=${back?.canonicalSlug ?? "null"} — the update reported success and did not land`,
+					);
+				}
 			} else {
 				console.log(
-					`   hide: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id}`,
+					`   ${d.status === "Draft" ? "adopt canonical" : "hide"}: ${d.name} [${d.status}/${d.verificationLevel ?? "?"}${d.scf?.awarded ? "/SCF" : ""}] (${d.slug}) id=${d.id} → canonical ${keeper.slug}`,
 				);
 			}
 		}
@@ -170,11 +256,17 @@ async function main() {
 	for (const f of fuzzy.slice(0, 40)) console.log(f);
 	if (fuzzy.length > 40) console.log(`   …and ${fuzzy.length - 40} more`);
 
+	// The three buckets are exclusive and cover every non-keeper, so this line
+	// is checkable by addition rather than by trust.
 	console.log(
-		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${toHide} records proposed to hide · ${docs.length - toHide} kept of ${docs.length}.`,
+		`\nSUMMARY: ${clusters.length} high-confidence clusters · ${nonKeepers} non-keepers = ${proposed} proposed to hide + ${vetoed} frozen by operator veto + ${alreadyHidden} already hidden (Draft) · ${docs.length - proposed} kept of ${docs.length}.`,
 	);
-	console.log("READ-ONLY — nothing was changed.");
-	process.exit(0);
+	console.log(
+		EXECUTE
+			? `EXECUTED — ${hidden} of ${proposed} record(s) READ BACK as Draft (reversible)${mismatched ? `, ${mismatched} did NOT land` : ""}.`
+			: "READ-ONLY — nothing was changed.",
+	);
+	process.exit(mismatched > 0 ? 1 : 0);
 }
 
 main().catch((e) => {

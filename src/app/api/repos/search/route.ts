@@ -3,7 +3,8 @@
  * Answers the "has anyone built X / show me zk repos" question project search
  * can't: it indexes GitHub topics + description + language + README, expands
  * synonyms (zk→zero-knowledge/snark...), and ranks by a quality grade
- * (repoScore = freshness + traction + hackathon/SCF/builder authority).
+ * (repoScore = own merit from the code we read + independent corroboration;
+ * see src/lib/repo-grade.ts).
  *
  *   GET /api/repos/search?q=zk
  *   GET /api/repos/search?q=oracle&language=Rust&minScore=40
@@ -12,19 +13,83 @@
  * `codeReferences`, so consumers that only call project search pick them up.
  * Shared implementation in src/lib/repo-search.ts.
  */
+
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { CODE_DOMAINS } from "@/lib/code-domains";
+import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
+import {
+	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
+} from "@/lib/degraded-read";
+import {
+	clampLimit,
+	parseFields,
+	pickFields,
+	unknownParamWarning,
+} from "@/lib/http-params";
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { REPO_ACTIVITY_STATES, type RepoActivityState } from "@/lib/repo-grade";
 import { searchRepos } from "@/lib/repo-search";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 60;
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		[
+			"q",
+			"query",
+			"keyword",
+			"search",
+			"language",
+			"minScore",
+			"activity",
+			"capability",
+			"domain",
+			"dependsOn",
+			"limit",
+			"offset",
+			"fields",
+		],
+		{
+			advertise: [
+				"q",
+				"language",
+				"minScore",
+				"activity",
+				"capability",
+				"domain",
+				"dependsOn",
+				"limit",
+				"offset",
+				"fields",
+			],
+			hint: "Repo search matches name/description/topics/symbols from q — put language or framework terms in q if the dedicated filter doesn't cover them.",
+		},
+	);
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -36,36 +101,136 @@ export async function GET(req: NextRequest) {
 		)?.trim() ?? "";
 	const language = sp.get("language")?.trim().toLowerCase() ?? "";
 	const minScore = Number(sp.get("minScore") || "0") || 0;
+	// Observable activity filter (slice 1 of the repo-intel work). Strict:
+	// an unknown state 400s with the valid values, never silently ignores.
+	const activityRaw = sp.get("activity")?.trim().toLowerCase() ?? "";
+	if (
+		activityRaw &&
+		!(REPO_ACTIVITY_STATES as readonly string[]).includes(activityRaw)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid activity value '${activityRaw}'.`,
+				validValues: REPO_ACTIVITY_STATES,
+			},
+			{ status: 400 },
+		);
+	}
+	const activity = activityRaw as RepoActivityState | "";
+	// Capability filter (closed scan-derived tag set). Strict like activity:
+	// unknown tags 400 with the valid values. Scan-derived semantics — an
+	// unscanned repo can never match; absence ≠ lacks-the-capability.
+	const capability = sp.get("capability")?.trim().toLowerCase() ?? "";
+	if (capability && !SDK_CAPABILITY_TAGS.includes(capability)) {
+		return NextResponse.json(
+			{
+				error: `Invalid capability value '${capability}'.`,
+				validValues: SDK_CAPABILITY_TAGS,
+			},
+			{ status: 400 },
+		);
+	}
+	// Code-domain filter (closed scan-derived label set) — same strictness
+	// and scan-derived semantics as capability.
+	const domain = sp.get("domain")?.trim().toLowerCase() ?? "";
+	if (domain && !(CODE_DOMAINS as readonly string[]).includes(domain)) {
+		return NextResponse.json(
+			{
+				error: `Invalid domain value '${domain}'.`,
+				validValues: CODE_DOMAINS,
+			},
+			{ status: 400 },
+		);
+	}
+	// Dependency-graph reverse read — open set (any ecosystem package name),
+	// so no enum validation; unknown packages honestly return 0 rows.
+	const dependsOn = (sp.get("dependsOn")?.trim() ?? "").slice(0, 80);
 	const limit = clampLimit(sp.get("limit"), 20, 100);
 	const fieldsWanted = parseFields(sp.get("fields"));
 	const offset = Math.max(Number(sp.get("offset") || "0") || 0, 0);
 
 	const payload = await getPayloadSafe();
-	const { repos, total, canonical, searched } = await searchRepos(payload, q, {
+	const {
+		repos,
+		total,
+		canonical,
+		searched,
+		matchMode,
+		matchModeLabel,
+		warnings: readWarnings,
+	} = await searchRepos(payload, q, {
 		limit,
 		offset,
 		language,
 		minScore,
+		activity,
+		capability,
+		domain,
+		dependsOn,
 	});
+	// A backend read that failed or timed out rides meta.warnings next to the
+	// unknown-param disclosure — the honesty channel the contract documents —
+	// instead of the quiet 200 + 0 rows it used to be (2026-09-14).
+	const warnings = [...(paramWarning ? [paramWarning] : []), ...readWarnings];
+
+	// An empty page behind a failed read is an outage, not a checked-empty: a
+	// consumer whose retry rule fires only on 503 would otherwise score it as
+	// lost evidence. A partial page keeps the warned 200.
+	if (isDegraded(warnings) && repos.length === 0) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/repos/search",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "repo search read failed",
+			advisory: `${warnings.join("; ")}. This is an outage, NOT a claim that no repository matches. Retry after a moment.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
+	}
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/repos/search",
 		query: q,
-		filters: { language, minScore, limit },
+		filters: {
+			language,
+			minScore,
+			activity: activity || null,
+			capability: capability || null,
+			limit,
+		},
 		resultCount: repos.length,
 	});
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				...(laneHints("repos", { empty: repos.length === 0 })
 					? { hints: laneHints("repos", { empty: repos.length === 0 }) }
 					: {}),
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				filters: { q, language: language || null, minScore, limit, offset },
-				note: "Code references graded by repoScore (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
+				...(warnings.length ? { warnings } : {}),
+				filters: {
+					q,
+					language: language || null,
+					minScore,
+					activity: activity || null,
+					limit,
+					offset,
+				},
+				// Honest-absence (guard B): say how well this page actually
+				// matched, so ranked neighbours are never read as hits.
+				matchMode,
+				matchModeLabel,
+				note: "Code references graded by repoScore (0-100) = the repo's own merit (code we read: tests, CI, releases, live SDK pin; plus adoption and freshness) lifted by independent corroboration (first-party publication, registry-verified packages, curation, notes, funding), with archived / fork / template / deprecated-SDK demotions. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0
 						? {
@@ -92,12 +257,19 @@ export async function GET(req: NextRequest) {
 						}
 					: {}),
 				counts: { returned: repos.length, total },
-			},
+			}),
 			repos: repos.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				...serverTiming(startedAt),
+				// empty pages are never pinned in the edge cache (see projects/search);
+				// neither is a page a failed read thinned — it would serve the
+				// degraded set to every caller for the whole s-maxage window
+				"Cache-Control":
+					repos.length === 0 || readWarnings.length
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);

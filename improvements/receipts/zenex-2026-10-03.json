@@ -1,0 +1,48 @@
+{
+	"slug": "zenex",
+	"url": "https://docs.zenex.trade/deployments/contract-addresses",
+	"finalUrl": "https://docs.zenex.trade/deployments",
+	"fetchedAt": "2026-10-03T07:55:39.822Z",
+	"httpStatus": 200,
+	"headers": {
+		"date": "Sat, 03 Oct 2026 07:55:39 GMT",
+		"etag": null,
+		"lastModified": null,
+		"server": "cloudflare"
+	},
+	"bodyTextSha256": "025bd5b27bd13de4c0047e73a681856972e1b8e04e4298503b0d079c497f4616",
+	"bodyTextChars": 8820,
+	"markers": [
+		{
+			"marker": "live Zenex deployment on Stellar mainnet",
+			"found": true,
+			"where": "text",
+			"excerpt": "Keepers Governance Risks Deployments Referrals FAQ Audits Deployments Deployments This page lists every contract of the live Zenex deployment on Stellar mainnet and the values those contracts run with. Check an address here before you approve a transaction that names it. Anyone can deploy a market t"
+		},
+		{
+			"marker": "ledger 64,737,253",
+			"found": true,
+			"where": "text",
+			"excerpt": ". The addresses below are the ones the Zenex app uses. A script writes this page from the chain. It read every value at ledger 64,737,253 on 2 October 2026, and it checked that the contracts report the same addresses about each other. An owner can change a value at any moment, so the contracts hold "
+		},
+		{
+			"marker": "CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ",
+			"found": true,
+			"where": "text",
+			"excerpt": "s CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75 . Protocol contracts ​ Contract Address What it does Factory CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ Deployed every market and its vault. It answers whether it deployed a given market. Oracle CBQP3O5NW6S4ZRE4SZAUO3VDOR32OMO2"
+		},
+		{
+			"marker": "CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB",
+			"found": true,
+			"where": "text",
+			"excerpt": "a value at any moment, so the contracts hold the value in force. Markets ​ Market XLM-USD Status Active Market contract CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB Vault CB2MX4WXJHOHCTDTN5DCFC7G3TLFLOYLCRCINPK7G2A3EUVW2AYVA56N Price stream Chainlink Data Streams, 0x000358cb12b1f5bbeca8b"
+		},
+		{
+			"marker": "TBD",
+			"found": false,
+			"where": null,
+			"excerpt": null
+		}
+	],
+	"note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

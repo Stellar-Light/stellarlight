@@ -1,5 +1,8 @@
 # 2026-07-08 — Schema drift: the spec lied about the live API
 
+Guard: .github/workflows/contract-gate.yml — the committed spec snapshot and generated client types must be fresh, and a spec change needs a changelog entry, on every PR
+Guard: scripts/check-api-drift.ts — live rows ⊆ spec (field coverage), daily; the deploy-race half: push/PR checks grade committed artifacts, only the schedule grades the live URL
+
 **Classes:** 11 (contract under-documentation), 3 (null-in-enum), 13 (deploy-race CI)
 
 ## What happened

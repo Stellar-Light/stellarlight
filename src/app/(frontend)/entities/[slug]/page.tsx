@@ -20,7 +20,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { aggregateEntity, formatUSD } from "@/lib/entity-stats";
+import { aggregateEntity, entitySummary, formatUSD } from "@/lib/entity-stats";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{
@@ -60,6 +60,48 @@ export default async function EntityDetailPage({ params }: { params: Params }) {
 
 	const entity = result.docs[0];
 	const stats = aggregateEntity(entity);
+	// enrich-entities.ts inherits website/github/twitter from the org's most
+	// prominent project when the org has none of its own, so Stellar Expert
+	// shows reflector.world. Say so next to the link instead of implying the
+	// org's homepage is a product's.
+	const host = (u: unknown) => {
+		try {
+			return new URL(String(u)).host.replace(/^www\./, "").toLowerCase();
+		} catch {
+			return "";
+		}
+	};
+	const projectDocs: any[] = (entity.projects || []).filter(
+		(p: any) => p && typeof p === "object",
+	);
+	const viaProject = (link: unknown): string | null => {
+		const h = host(link);
+		if (!h) return null;
+		const owner = projectDocs.find((p) =>
+			[
+				p.website,
+				p.links?.website,
+				p.links?.github,
+				p.links?.twitter,
+				p.github?.url,
+			].some(
+				(u) =>
+					host(u) === h ||
+					(h && host(u) && host(u).endsWith("." + h)) ||
+					(h && host(u) && h.endsWith("." + host(u))),
+			),
+		);
+		if (!owner) return null;
+		if (
+			host(link).includes(
+				String(entity.name ?? "")
+					.toLowerCase()
+					.replace(/[^a-z0-9]/g, ""),
+			)
+		)
+			return null;
+		return String(owner.name);
+	};
 
 	// Get associated projects - filter to only show live/active projects
 	const associatedProjects = (entity.projects || [])
@@ -168,9 +210,13 @@ export default async function EntityDetailPage({ params }: { params: Params }) {
 									<p className="text-base text-muted-foreground leading-relaxed">
 										{entity.description}
 									</p>
+								) : entitySummary(entity.name, stats) ? (
+									<p className="text-base text-muted-foreground leading-relaxed">
+										{entitySummary(entity.name, stats)}
+									</p>
 								) : (
 									<p className="text-base text-muted-foreground italic">
-										No description available.
+										This organization has not written a description yet.
 									</p>
 								)}
 								{entity.links?.website && (
@@ -219,6 +265,9 @@ export default async function EntityDetailPage({ params }: { params: Params }) {
 												{entity.links.website
 													.replace(/^https?:\/\//, "")
 													.replace(/\/$/, "")}
+												{viaProject(entity.links.website)
+													? ` (via ${viaProject(entity.links.website)})`
+													: ""}
 											</span>
 										</div>
 										<ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />

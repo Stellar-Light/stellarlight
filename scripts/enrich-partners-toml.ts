@@ -27,66 +27,18 @@
  *   - No deletes. A missing/unreachable toml = "skipped", never a wipe.
  */
 
+import "./load-env";
+import {
+	domainOf,
+	fetchText,
+	parseStellarToml,
+	type StellarToml,
+} from "./lib/stellar-toml";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const EXECUTE = process.argv.includes("--execute");
 const FETCH_TIMEOUT_MS = 10_000;
-
-/* ── minimal stellar.toml parsing (no TOML dep) ─────────────────────────── */
-
-interface StellarToml {
-	topLevel: Record<string, string>;
-	documentation: Record<string, string>;
-	currencyCodes: string[];
-}
-
-/** Parse just the shapes we need: top-level `KEY = "v"`, the [DOCUMENTATION]
- *  table, and `code = "X"` inside [[CURRENCIES]] blocks. */
-function parseStellarToml(text: string): StellarToml {
-	const topLevel: Record<string, string> = {};
-	const documentation: Record<string, string> = {};
-	const currencyCodes: string[] = [];
-	let section: "top" | "doc" | "currency" | "other" = "top";
-
-	for (const raw of text.split(/\r?\n/)) {
-		const line = raw.trim();
-		if (!line || line.startsWith("#")) continue;
-		if (line.startsWith("[")) {
-			if (/^\[\[\s*CURRENCIES\s*\]\]/i.test(line)) section = "currency";
-			else if (/^\[\s*DOCUMENTATION\s*\]/i.test(line)) section = "doc";
-			else section = "other";
-			continue;
-		}
-		const m = line.match(/^([A-Za-z0-9_]+)\s*=\s*"([^"]*)"/);
-		if (!m) continue;
-		const [, key, value] = m;
-		if (section === "top") topLevel[key.toUpperCase()] = value;
-		else if (section === "doc") documentation[key.toUpperCase()] = value;
-		else if (section === "currency" && key.toLowerCase() === "code") {
-			const code = value.trim().toUpperCase();
-			if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
-		}
-	}
-	return { topLevel, documentation, currencyCodes };
-}
-
-async function fetchText(url: string): Promise<string | null> {
-	try {
-		const res = await fetch(url, {
-			signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-			headers: { "User-Agent": "stellarlight-enrich/1.0" },
-			redirect: "follow",
-		});
-		if (!res.ok) return null;
-		return await res.text();
-	} catch {
-		return null;
-	}
-}
 
 async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
 	try {
@@ -104,13 +56,6 @@ async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
 	}
 }
 
-function domainOf(websiteUrl: string): string | null {
-	try {
-		return new URL(websiteUrl).hostname.replace(/^www\./, "");
-	} catch {
-		return null;
-	}
-}
 
 /**
  * Anchors whose stellar.toml lives on a different host than their marketing
@@ -612,6 +557,12 @@ async function main() {
 			} else {
 				// SEPs from declared endpoints
 				const seps: string[] = [];
+				// Provenance trio (SYNTHESIS-2026-08-12 slice 3): which toml, when.
+				// Stamped on EVERY successful parse — not gated on data deltas (the
+				// converged-corpus trap: a delta-gated stamp never reaches rows whose
+				// data stopped changing). Admin edits may postdate the snapshot.
+				update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
+				update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
 				if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
 				if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
 				if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");

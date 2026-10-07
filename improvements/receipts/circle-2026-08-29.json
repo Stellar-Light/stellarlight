@@ -1,0 +1,28 @@
+{
+ "slug": "circle",
+ "url": "https://developers.circle.com/cctp/references/stellar-contracts",
+ "finalUrl": "https://developers.circle.com/cctp/references/stellar-contracts",
+ "fetchedAt": "2026-08-29T04:15:33.526Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 29 Aug 2026 04:15:33 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "7eb2e2bb0743604f9f9e34c80a85f1776c90cd9630af68485f5239b301ce11df",
+ "bodyTextChars": 6351,
+ "markers": [
+  {
+   "marker": "Stellar",
+   "found": true,
+   "excerpt": "CCTP Stellar contracts and interfaces - Circle Docs Documentation Index Fetch the complete documentation index at: /llms.txt Use this file to discover all available pages before explori"
+  },
+  {
+   "marker": "Mainnet",
+   "found": true,
+   "excerpt": "way Gateway Overview Get started Transfer from a unified balance Webhooks Nanopayments Learn more On this page Overview Mainnet contract addresses Testnet contract addresses CCTP interface TokenMessengerMinter interface MessageTransmitter interface CctpForwarder interface CCTP Blockchain integration"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

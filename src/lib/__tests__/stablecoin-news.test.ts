@@ -1,0 +1,261 @@
+import { describe, expect, it } from "vitest";
+import {
+	docToEntry,
+	type FeedEntry,
+	mergeNews,
+	parseFeed,
+	relativeTime,
+	selectStablecoinNews,
+	sourceLabel,
+} from "../stablecoin-news";
+
+const day = (d: string) => `2026-08-${d}T12:00:00.000Z`;
+const entry = (o: Partial<FeedEntry>): FeedEntry => ({
+	title: "",
+	url: "https://lumenloop.com/news/x",
+	publishedAt: day("10"),
+	description: "",
+	...o,
+});
+
+describe("parseFeed", () => {
+	it("reads title, link, date and description out of RSS", () => {
+		const out = parseFeed(`<rss><channel>
+      <item>
+        <title>Stellar Is Now A Native Gateway For USDC</title>
+        <link>https://lumenloop.com/news/usdc-gateway</link>
+        <pubDate>Tue, 18 Aug 2026 11:00:00 GMT</pubDate>
+        <description><![CDATA[Circle's <b>USDC</b> lands natively.]]></description>
+      </item>
+    </channel></rss>`);
+		expect(out).toHaveLength(1);
+		expect(out[0].title).toBe("Stellar Is Now A Native Gateway For USDC");
+		expect(out[0].url).toBe("https://lumenloop.com/news/usdc-gateway");
+		expect(out[0].publishedAt).toBe("2026-08-18T11:00:00.000Z");
+		// CDATA unwrapped and inline tags stripped.
+		expect(out[0].description).toBe("Circle's USDC lands natively.");
+	});
+
+	it("skips items with no link or no title rather than emitting blanks", () => {
+		expect(
+			parseFeed("<rss><item><title>Orphan</title></item></rss>"),
+		).toHaveLength(0);
+	});
+});
+
+describe("selectStablecoinNews", () => {
+	it("takes a piece whose TITLE names the subject", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "Stellar Is Now A Native Gateway For USDC" }),
+		]);
+		expect(out).toHaveLength(1);
+	});
+
+	it("rejects a roundup even when its body is thick with the terms", () => {
+		// This is the case that broke the first two attempts: a digest body
+		// mentions stablecoin, USDC, Circle and mint, so any body-weighted
+		// rule ranks it above the actual coverage.
+		const out = selectStablecoinNews([
+			entry({
+				title: "Stellar Weekly Roundup: week of Aug 7, 2026",
+				description:
+					"USDC supply grew, Circle expanded reserves, a new stablecoin mint went live, plus grants and validator news.",
+			}),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("rejects a digest even when the title names a coin", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "Weekly Roundup: USDC, grants and validators" }),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("ignores a body that names the subject the title does not", () => {
+		// A headline is what an editor decided the piece is about.
+		const out = selectStablecoinNews([
+			entry({
+				title: "A new dollar lands",
+				description: "The USDC issuer, Circle, expands its reserve reporting.",
+			}),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("rejects the consensus paper — the vector-search false positive", () => {
+		const out = selectStablecoinNews([
+			entry({
+				title: "The Stellar Consensus Protocol",
+				description: "A federated model for internet-level consensus.",
+			}),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("decodes entities in a corpus title, which never sees the RSS parser", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "RedStone Brings Ondo&#x27;s USDY to Stellar DeFi" }),
+		]);
+		expect(out[0].title).toBe("RedStone Brings Ondo's USDY to Stellar DeFi");
+	});
+
+	it("keeps the real coverage the roundups were crowding out", () => {
+		const out = selectStablecoinNews([
+			entry({
+				title: "PYUSD deposits and withdrawals now available on Stellar!",
+			}),
+			entry({
+				title: "RedStone Brings Ondo's USDY to Stellar DeFi with SEP-40",
+				url: "https://lumenloop.com/news/redstone",
+			}),
+			entry({
+				title: "Sentora Expands Vaults on Stellar with Stablecoin Vaults",
+				url: "https://lumenloop.com/news/sentora",
+			}),
+		]);
+		expect(out).toHaveLength(3);
+	});
+
+	it("drops undated entries — a feed must not imply recency it cannot show", () => {
+		const out = selectStablecoinNews([
+			entry({ title: "A stablecoin explainer", publishedAt: null }),
+		]);
+		expect(out).toEqual([]);
+	});
+
+	it("orders newest first and respects the limit", () => {
+		const mk = (n: string, d: string) =>
+			entry({
+				title: `stablecoin ${n}`,
+				url: `https://lumenloop.com/news/${n}`,
+				publishedAt: day(d),
+			});
+		const out = selectStablecoinNews(
+			[mk("a", "01"), mk("c", "09"), mk("b", "05")],
+			2,
+		);
+		expect(out.map((n) => n.title)).toEqual(["stablecoin c", "stablecoin b"]);
+	});
+});
+
+describe("mergeNews", () => {
+	it("prefers the RSS copy of an article the corpus also holds", () => {
+		const url = "https://lumenloop.com/news/usdc";
+		const out = mergeNews(
+			[entry({ url, title: "Stellar Is Now A Native Gateway For USDC" })],
+			[entry({ url, title: "Stellar Is Now A Native Gateway For" })],
+		);
+		expect(out).toHaveLength(1);
+		expect(out[0].title).toBe("Stellar Is Now A Native Gateway For USDC");
+	});
+
+	it("keeps corpus items the feed window has scrolled past", () => {
+		const out = mergeNews(
+			[entry({ url: "https://lumenloop.com/news/new", title: "USDC today" })],
+			[
+				entry({
+					url: "https://lumenloop.com/research/old",
+					title: "USDC last year",
+					publishedAt: day("01"),
+				}),
+			],
+		);
+		expect(out.map((n) => n.title)).toEqual(["USDC today", "USDC last year"]);
+	});
+});
+
+describe("relativeTime", () => {
+	const now = new Date("2026-08-19T12:00:00.000Z").getTime();
+	it("scales the unit to the age", () => {
+		expect(relativeTime("2026-08-19T11:58:00.000Z", now)).toBe("2m ago");
+		expect(relativeTime("2026-08-19T07:00:00.000Z", now)).toBe("5h ago");
+		expect(relativeTime("2026-08-16T12:00:00.000Z", now)).toBe("3d ago");
+		expect(relativeTime("2026-06-19T12:00:00.000Z", now)).toBe("2mo ago");
+	});
+	it("is empty for a missing date rather than guessing", () => {
+		expect(relativeTime(null, now)).toBe("");
+		expect(relativeTime("not-a-date", now)).toBe("");
+	});
+});
+
+describe("multi-publisher dock (2026-09-02)", () => {
+	const sdf = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T09:00:00.000Z",
+		content: "Built on LayerZero's OFT interoperability standard…",
+		source: "sdf-blog",
+	};
+
+	it("carries an SDF stablecoin launch and credits SDF, not Lumen Loop", () => {
+		const entry = docToEntry(sdf);
+		expect(entry).not.toBeNull();
+		const [item] = selectStablecoinNews([entry as FeedEntry]);
+		expect(item.title).toBe("USDT0 is now live on Stellar");
+		expect(item.source).toBe("sdf-blog");
+		expect(sourceLabel(item.source)).toBe("Stellar Development Foundation");
+		expect(item.matched).toContain("usdt0");
+	});
+
+	it("still keeps SDF's non-stablecoin output off the dock", () => {
+		const entry = docToEntry({
+			...sdf,
+			title: "Protocol 27 upgrade guide",
+			url: "https://stellar.org/blog/foundation-news/protocol-27",
+		});
+		expect(selectStablecoinNews([entry as FeedEntry])).toEqual([]);
+	});
+
+	it("defaults an entry with no source to the RSS feed", () => {
+		const [item] = selectStablecoinNews([
+			{
+				title: "USDC on Stellar",
+				url: "https://lumenloop.com/x",
+				publishedAt: "2026-09-01T00:00:00.000Z",
+				description: "",
+			},
+		]);
+		expect(item.source).toBe("lumenloop");
+		expect(sourceLabel(item.source)).toBe("Lumen Loop");
+	});
+});
+
+describe("same headline from two publishers (2026-09-02)", () => {
+	const aggregator: FeedEntry = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://lumenloop.com/news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T10:00:00.000Z",
+		description: "",
+	};
+	const publisher: FeedEntry = {
+		title: "USDT0 is now live on Stellar",
+		url: "https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		publishedAt: "2026-09-02T09:00:00.000Z",
+		description: "",
+		source: "sdf-blog",
+	};
+
+	it("keeps one row and credits the publisher who announced it", () => {
+		const out = selectStablecoinNews([aggregator, publisher]);
+		expect(out).toHaveLength(1);
+		expect(out[0].source).toBe("sdf-blog");
+	});
+
+	it("is order-independent", () => {
+		const out = selectStablecoinNews([publisher, aggregator]);
+		expect(out).toHaveLength(1);
+		expect(out[0].source).toBe("sdf-blog");
+	});
+
+	it("keeps genuinely different headlines about the same launch", () => {
+		const out = selectStablecoinNews([
+			publisher,
+			{
+				...aggregator,
+				title: "USDT0 Goes Live on Stellar, Connecting Dollar Liquidity",
+			},
+		]);
+		expect(out).toHaveLength(2);
+	});
+});

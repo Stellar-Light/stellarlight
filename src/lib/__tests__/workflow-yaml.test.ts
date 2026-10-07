@@ -29,4 +29,31 @@ describe("GitHub Actions workflow files", () => {
 		// Default schema: duplicate mapping keys throw, matching Actions' parser.
 		expect(() => yaml.load(src, { filename: file })).not.toThrow();
 	});
+
+	// Second instance of the same class, 2026-08-30. consumption-guard.yml — the
+	// lane whose whole job is to fail a build when machinery goes unconsumed —
+	// installed pnpm with `npm i -g pnpm`, which resolves to LATEST. It was
+	// correct the day it was written; upstream shipped pnpm 11, engines.pnpm is
+	// "^9 || ^10", and the guard died at the install step before running once.
+	//
+	// The failure needs no edit of ours to arrive, which is what makes it worth a
+	// test rather than a review note: the repo's other 50+ workflows all pin the
+	// major through pnpm/action-setup, so the correct pattern was already here to
+	// copy and the broken one was a local invention.
+	it.each(FILES)("%s — pins pnpm rather than taking latest", (file) => {
+		// Comment lines are dropped first. check-consumption.ts shipped with this
+		// exact bug — it searched raw source and found the field name in its OWN
+		// comment, so it reported a consumer that did not exist. A checker that
+		// reads prose as code is a checker that passes for the wrong reason, and
+		// here it would fail for one: the fixed workflow explains what it stopped
+		// doing, and naming the broken command is how the note earns its place.
+		const src = readFileSync(join(DIR, file), "utf8")
+			.split("\n")
+			.filter((l) => !/^\s*#/.test(l))
+			.join("\n");
+		if (!/\bpnpm\b/.test(src)) return;
+		expect(src, `${file} installs whatever pnpm is newest today`).not.toMatch(
+			/npm\s+(i|install)\s+-g\s+pnpm/,
+		);
+	});
 });

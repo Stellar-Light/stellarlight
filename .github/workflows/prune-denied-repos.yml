@@ -1,0 +1,35 @@
+name: Prune denied repos (manual)
+
+# Removes indexed repos named in DENIED_REPOS (src/lib/repo-allowlist.ts).
+# Dry run by default; dispatch with execute to delete. Exact matches only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually delete. Unchecked = dry run."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prune
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        run: pnpm exec tsx scripts/data/prune-denied-repos.ts ${{ inputs.execute && '--execute' || '' }}

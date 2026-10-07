@@ -19,7 +19,8 @@ concurrency:
   cancel-in-progress: false
 permissions:
   issues: write
-  contents: read
+  # write: the job now COMMITS the /quality artifact (see below)
+  contents: write
 jobs:
   watch:
     runs-on: ubuntu-latest
@@ -45,6 +46,9 @@ jobs:
             gh run download "$PREV" --repo "$GITHUB_REPOSITORY" -n coverage-gap-evidence -D /tmp/prev || true
           fi
       - name: Build delta report
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           python3 - <<'EOF' > /tmp/watch.md
           import json, os
@@ -92,12 +96,24 @@ jobs:
           miss = lanes.get('defillama', {}).get('missing', [])
           if miss:
               print()
-              print("### DefiLlama missing (by TVL)")
+              print("### DefiLlama missing (by Stellar TVL)")
               print()
-              print("| protocol | category | TVL | site |")
-              print("|---|---|---|---|")
+              print("| protocol | category | Stellar TVL | total TVL | site |")
+              print("|---|---|---|---|---|")
               for m in miss:
-                  print(f"| {m['name']} | {m['category']} | ${m['tvlUSD']:,} | {m.get('url') or '—'} |")
+                  # stellarTvlUSD since #1133 (2026-08-30): the report ranks and
+                  # floors on the STELLAR slice, because a multichain protocol's
+                  # headline TVL says nothing about its Stellar footprint. The
+                  # old `tvlUSD` key crashed this step with a KeyError — but only
+                  # when `miss` was non-empty, so the lane passed on 2026-09-01
+                  # with nothing above the floor and failed on the first run that
+                  # actually had something to report. .get() keeps a future
+                  # rename a blank cell instead of a dead lane.
+                  st = m.get('stellarTvlUSD')
+                  tot = m.get('totalTvlUSD')
+                  stx = f"${st:,}" if isinstance(st, int) else "—"
+                  totx = f"${tot:,}" if isinstance(tot, int) else "—"
+                  print(f"| {m.get('name','?')} | {m.get('category','?')} | {stx} | {totx} | {m.get('url') or '—'} |")
           pd = [p for p in lanes.get('partnerDocs', []) if p.get('verdict') != 'own']
           if pd:
               print()
@@ -119,6 +135,59 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file /tmp/watch.md
           fi
+      # Commit the artifact /quality actually reads. The uploaded evidence
+      # below expires in 45 days and lives behind the Actions UI, so the
+      # scoreboard row would freeze at whatever date it was first written —
+      # a stale number that still renders. Same discipline as every other
+      # /quality row: the page reads a COMMITTED artifact, and the run that
+      # produced it is the only thing that can change it.
+      - name: Commit the /quality artifact
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p improvements/audits
+          python3 - <<'PY'
+          import json
+          g = json.load(open('/tmp/coverage.json'))
+          scf, dl = g['lanes']['scf'], g['lanes']['defillama']
+          json.dump({
+            "asOf": g['generatedAt'],
+            "source": "scripts/report-coverage-gaps.ts",
+            "scf": {"total": scf['frame']['scf'], "absent": scf['absent'],
+                    "served": scf['frame']['scf'] - scf['absent'],
+                    "absentAwarded": scf.get('absentAwarded'),
+                    "absentSubmittedOnly": scf.get('absentSubmittedOnly'),
+                    "sample": scf.get('sample', [])[:10]},
+            "defillama": {"stellarListed": dl['stellarListed'], "matched": dl['matched'],
+                          "missing": len(dl.get('missing', [])), "belowFloor": dl.get('belowFloor')},
+            # Protocols BOTH external rosters list and we do not hold. Carried
+            # through explicitly: this transform selects fields by name, so a new
+            # finding that is not named here reaches no consumer, which is the
+            # exact class this repo keeps re-learning.
+            "corroboratedAbsent": g.get('corroboratedAbsent', []),
+            "domainMatched": g['lanes']['scf'].get('domainMatched', []),
+            "reviewedAbsent": g['lanes']['scf'].get('reviewedAbsent', []),
+            "unreviewedAbsent": g['lanes']['scf'].get('unreviewedAbsent'),
+            "summary": g.get('summary'),
+          }, open('improvements/audits/coverage-gaps-latest.json', 'w'), indent=2)
+          PY
+          if ! git diff --quiet improvements/audits/coverage-gaps-latest.json; then
+            git config user.name "stellarlight bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add improvements/audits/coverage-gaps-latest.json
+            git commit -m "data: refresh coverage-gap artifact (SCF coverage row on /quality)"
+            # Push-first retry (#1596). A bare push dies non-fast-forward
+            # the moment main moves during the run, which on a repo this busy
+            # is routine; -X theirs keeps OUR freshly measured artifact, since
+            # the file is a snapshot of this run rather than something to merge.
+            for i in 1 2 3; do
+              git push && exit 0
+              git pull --rebase --autostash -X theirs origin main || git rebase --abort
+            done
+            git push
+          else
+            echo "coverage artifact unchanged — nothing to commit"
+          fi
+
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4

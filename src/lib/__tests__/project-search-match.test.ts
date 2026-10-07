@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	anchorIdentityHit,
@@ -11,12 +13,18 @@ import {
 	isRampIntent,
 	namedChains,
 	scoreTokens,
+	shadowEarnedRank,
+	statusAdmissionWhere,
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
 	tokenize,
 	typeMatch,
 } from "../project-search-match";
+import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "../project-status";
 
 // Real record shapes (fields that drive retrieval), captured live 2026-07-08.
 const ETHERFUSE = {
@@ -149,6 +157,26 @@ describe("Beacon Q3 class — chain vocabulary + filler tokens", () => {
 	});
 });
 
+describe("guard-D 2026-09-01 — auditor questions are Security-category questions", () => {
+	it("'audit firms' carries Security intent; passive audited-by rows are not the vertical", () => {
+		const intent = intentTypesFor(
+			tokenize("smart contract audit firms for Soroban"),
+		);
+		expect(intent.has("Security")).toBe(true);
+		// The F2 stemmer folds "audited" → "audit" before intent runs, so even
+		// property-questions carry the category — additive recall only; the
+		// named subject's identity match still dominates its ranking.
+		expect(
+			intentTypesFor(tokenize("is redstone finance audited")).has("Security"),
+		).toBe(true);
+	});
+	it("singular 'auditor' folds to the same category", () => {
+		expect(intentTypesFor(tokenize("soroban auditor")).has("Security")).toBe(
+			true,
+		);
+	});
+});
+
 describe("review finding 1 — corridor-discriminating admission", () => {
 	const mexTokens = tokenize("mexico on-ramp");
 	const intent = intentTypesFor(mexTokens);
@@ -236,17 +264,36 @@ describe("review finding 2 — identifier-form queries", () => {
 		// A bare ecosystem query is degenerate but unchanged (joined === token).
 		expect(tokenize("Stellar")).toEqual(["stellar"]);
 	});
+	it("multi-word queries wrapping a camelCase NAME rebuild the joined identity (recall audit 2026-08-18)", () => {
+		// Live bug: q="is idOS live" → dia/band/alchemy (idOS gone) because
+		// contentTokens split idOS → [id, os] and the 2-char fragments flood
+		// strict while the joined "idos" was never rebuilt. The camelCase phrase
+		// must now resolve to the SAME tokens as the working lowercase phrase.
+		expect(tokenize("is idOS live")).toEqual(["live", "idos"]);
+		expect(tokenize("is idos live")).toEqual(["idos", "live"]); // already worked; both now carry "idos"
+		expect(tokenize("what is NearX")).toContain("nearx");
+		// A compound name keeps its discriminating ≥3-char fragments AND the join.
+		expect(tokenize("what is WalletConnect")).toEqual([
+			"wallet",
+			"connect",
+			"walletconnect",
+		]);
+		// Ecosystem-stopword fragment is dropped, mirroring the single-word path.
+		expect(tokenize("tell me about StellarX")).toEqual(["stellarx"]);
+		// No camelCase, no name → untouched (the release-escrow guardrail).
+		expect(tokenize("release escrow")).toEqual(["release", "escrow"]);
+	});
 	it("hyphenated vocabulary stays intact", () => {
 		expect(tokenize("on-ramp mexico")).toContain("on-ramp");
 	});
 
-	it("F1: type-browse tokens become types-contains candidate clauses", () => {
+	it("F1: type-browse tokens become exact-membership types clauses (in, never contains — contains is substring per element and matched In-DEX-er, 2026-08-28)", () => {
 		const cl = structuredSelectClauses(["decentralized", "exchange"]);
-		expect(cl).toContainEqual({ types: { contains: "DEX" } });
+		expect(cl).toContainEqual({ types: { in: ["DEX"] } });
 		const edu = structuredSelectClauses(["education", "projects"]);
-		expect(edu).toContainEqual({ types: { contains: "Education" } });
+		expect(edu).toContainEqual({ types: { in: ["Education"] } });
 		const si = structuredSelectClauses(["social", "impact"]);
-		expect(si).toContainEqual({ types: { contains: "Social Impact" } });
+		expect(si).toContainEqual({ types: { in: ["Social Impact"] } });
 	});
 
 	it("F1: sep tokens become coverage.seps clauses (hyphen-normalized)", () => {
@@ -436,7 +483,9 @@ describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
 
 	it("EVM-family queries are proven by the generic evm tag", () => {
 		expect(chainCorridorHit(ALLBRIDGE, tokenize("ethereum bridge"))).toBe(true);
-		expect(chainCorridorHit(SPACEWALK, tokenize("ethereum bridge"))).toBe(false);
+		expect(chainCorridorHit(SPACEWALK, tokenize("ethereum bridge"))).toBe(
+			false,
+		);
 	});
 
 	it("unenriched bridges fall back to a prose mention", () => {
@@ -462,5 +511,227 @@ describe("chain-corridor discriminator (2026-07-21 persona battery)", () => {
 		expect(chainCorridorHit(SOLANA_WALLET, tokenize("solana wallet"))).toBe(
 			true,
 		);
+	});
+});
+
+// Raven #39 (2026-08-21): a card-issuance question is a CATEGORY question.
+const BRIDGE_XYZ = {
+	name: "Bridge",
+	shortDescription:
+		"Bridge is a stablecoin infrastructure company. On Stellar, Bridge issues MGUSD, MoneyGram's U.S.-dollar-backed stablecoin.",
+	category: "Infrastructure",
+	types: ["Payments", "Card Issuing"],
+	supportedNetworks: ["stellar"],
+	coverage: null,
+};
+const YELLOW_CARD = {
+	name: "Yellow Card",
+	shortDescription:
+		"Yellow Card is Africa's largest licensed stablecoin fiat on-ramp and off-ramp, operating across 20 countries.",
+	category: "Anchor",
+	types: ["Anchor", "Payments"],
+	supportedNetworks: ["stellar"],
+	coverage: null,
+};
+describe("card issuance is a category, not a word (stellar-raven #39)", () => {
+	it("card / cards / debit resolve to the Card Issuing type", () => {
+		for (const q of ["card", "cards", "debit"])
+			expect(intentTypesFor([q]).has("Card Issuing")).toBe(true);
+	});
+	it("a typed issuer whose prose never says 'card' is a structured hit", () => {
+		const tokens = ["card", "services"];
+		const it = intentTypesFor(tokens);
+		expect(typeMatch(BRIDGE_XYZ, it)).toBe(true);
+		expect(structuredHit(BRIDGE_XYZ, it, tokens, false)).toBe(true);
+	});
+	it("a name homonym is not a type match", () => {
+		expect(typeMatch(YELLOW_CARD, intentTypesFor(["card"]))).toBe(false);
+	});
+});
+
+describe("plural category words keep their intent (Raven #39 battery)", () => {
+	it("maps plural forms to the singular intent key", () => {
+		expect(intentTypesFor(["dexes"]).has("DEX")).toBe(true);
+		expect(intentTypesFor(["amms"]).has("DEX")).toBe(true);
+		expect(intentTypesFor(["bridges"]).has("Bridge")).toBe(true);
+		expect(intentTypesFor(["wallets"]).has("Wallet")).toBe(true);
+		expect(intentTypesFor(["cards"]).has("Card Issuing")).toBe(true);
+	});
+	it("does not invent an intent for unrelated short words", () => {
+		expect(intentTypesFor(["gas", "fees"]).size).toBe(0);
+	});
+});
+
+describe("centralized exchanges are a category (Playbook battery)", () => {
+	it("cex / centralized resolve to Exchange", () => {
+		expect(intentTypesFor(["centralized", "exchanges"]).has("Exchange")).toBe(
+			true,
+		);
+		expect(intentTypesFor(["cex"]).has("Exchange")).toBe(true);
+	});
+});
+
+// engine-A P-KNOWN/P-PHRASE (crediolabs-ai): a dotted name must find itself.
+// The query rebuild appends the joined form; the haystack must carry it.
+describe("dotted/punctuated names carry their joined identity in the haystack", () => {
+	const row = {
+		name: "CredioLabs.AI",
+		slug: "crediolabs-ai",
+		shortDescription: "policy builder",
+	} as Parameters<typeof buildHaystack>[0];
+
+	it("haystack contains the canon-joined name and slug", () => {
+		const hay = buildHaystack(row);
+		expect(hay).toContain("crediolabsai");
+	});
+
+	it("the joined query token hits the row (both probe shapes' discriminator)", () => {
+		const hay = buildHaystack(row);
+		expect(hitsAnyToken(hay, ["crediolabsai"])).toBe(true);
+	});
+
+	it("plain names gain no duplicate noise", () => {
+		const hay = buildHaystack({
+			name: "Beans",
+			slug: "beans",
+			shortDescription: "payments",
+		} as Parameters<typeof buildHaystack>[0]);
+		expect(hay.split("beans").length - 1).toBeLessThanOrEqual(3);
+	});
+});
+
+// ── One owner, one status for a duplicate (2026-09-05) ──────────────────
+//
+// The dedup lane parks a duplicate at Draft; curate's DUPE_MERGES used to
+// re-mark the same row Inactive half an hour later, so 29+ duplicates were
+// served as DEAD projects. Both lanes now write Draft — which only works if a
+// Draft shadow is still admitted as a FOLD CANDIDATE, or the old name goes
+// dark. These lock the three properties that make that safe.
+describe("duplicate admission: a shadow is hidden, never dead", () => {
+	const clause = (w: Record<string, unknown>) => JSON.stringify(w);
+
+	it("the pool is the shared RESOLVABLE tier — Draft is hidden", () => {
+		// Why the fold and the belt below must exist at all.
+		expect([...RESOLVABLE_PROJECT_STATUSES]).not.toContain("Draft");
+		expect([...HIDDEN_PROJECT_STATUSES]).toEqual(["Draft"]);
+	});
+
+	it("query mode admits a shadow at ANY status — Draft included", () => {
+		const w = statusAdmissionWhere(true, null);
+		// status-pool OR is-a-shadow: a Draft shadow satisfies the second arm,
+		// so a lookup of the old name still reaches the fold.
+		expect(w).toEqual({
+			and: [
+				{
+					or: [
+						{ status: { in: [...RESOLVABLE_PROJECT_STATUSES] } },
+						{ canonicalSlug: { exists: true } },
+					],
+				},
+			],
+		});
+		// `and`, never a second `or`: the route owns top-level `or` for the
+		// token clauses and Payload ANDs every top-level key.
+		expect(w.or).toBeUndefined();
+	});
+
+	it("browse mode (no q) excludes shadows outright", () => {
+		expect(statusAdmissionWhere(false, null)).toEqual({
+			status: { in: [...RESOLVABLE_PROJECT_STATUSES] },
+			canonicalSlug: { equals: null },
+		});
+		// no shadow escape hatch in a browse — counts.total stays exact
+		expect(clause(statusAdmissionWhere(false, null))).not.toContain("exists");
+	});
+
+	it("an explicit ?status= stays a hard contract, shadows included", () => {
+		expect(statusAdmissionWhere(true, "Inactive")).toEqual({
+			status: { equals: "Inactive" },
+		});
+		expect(statusAdmissionWhere(false, "Live")).toEqual({
+			status: { equals: "Live" },
+			canonicalSlug: { equals: null },
+		});
+	});
+});
+
+describe("a shadow lends its canonical a rank only through its NAME", () => {
+	// Live shape 2026-09-13: the Draft shadow of stellar-passport still carried
+	// the types of the record it was merged away from — and q=education served
+	// the canonical #1 above 32 typed-Education rows through it.
+	const shadow = {
+		name: "Stellar Passport",
+		slug: "passport",
+		canonicalSlug: "stellar-passport",
+		types: ["Wallet", "Education"],
+		shortDescription:
+			"Stellar Passport is a Web3 identity and participation layer",
+		identity: null,
+	};
+	const q = (s: string) => [s, tokenize(s)] as const;
+
+	it("a topic query that hit the shadow's stale types does not transfer", () => {
+		expect(shadowEarnedRank(shadow, ...q("education"))).toBe(false);
+	});
+
+	it("the old name still resolves — that is why shadows are indexed", () => {
+		expect(shadowEarnedRank(shadow, ...q("passport"))).toBe(true);
+		expect(shadowEarnedRank(shadow, ...q("stellar passport"))).toBe(true);
+	});
+
+	it("an alias on the shadow counts as its name", () => {
+		const renamed = {
+			...shadow,
+			name: "New Name",
+			slug: "new-name",
+			identity: { aliases: ["Passport"] },
+		};
+		expect(shadowEarnedRank(renamed, ...q("passport"))).toBe(true);
+		expect(shadowEarnedRank(renamed, ...q("education"))).toBe(false);
+	});
+
+	it("a non-shadow always keeps its rank", () => {
+		expect(
+			shadowEarnedRank({ ...shadow, canonicalSlug: null }, ...q("education")),
+		).toBe(true);
+		expect(
+			shadowEarnedRank(
+				{ ...shadow, canonicalSlug: "passport" },
+				...q("education"),
+			),
+		).toBe(true);
+	});
+});
+
+// The route itself needs a live Payload, so these two wiring facts — the only
+// places the admission above can be defeated — are asserted against its source.
+describe("/api/projects/search wires the admission + the Draft belt", () => {
+	const src = readFileSync(
+		join(process.cwd(), "src/app/api/projects/search/route.ts"),
+		"utf-8",
+	);
+
+	it("reads the route (guard is not vacuously passing)", () => {
+		expect(src.length).toBeGreaterThan(10_000);
+	});
+
+	it("builds the candidate where-clause from statusAdmissionWhere", () => {
+		expect(src).toContain("statusAdmissionWhere(!!q, statusParam)");
+		// the old hardcoded pool must not come back alongside it
+		expect(src).not.toContain('status: { in: ["Development"');
+	});
+
+	it("drops any hidden row that survives the fold (never served as itself)", () => {
+		const fold = src.indexOf("Shadow-fold");
+		const belt = src.indexOf("HIDDEN_PROJECT_STATUSES as readonly string[]");
+		expect(fold).toBeGreaterThan(0);
+		expect(belt).toBeGreaterThan(fold); // after the fold, or it eats the candidates
+	});
+
+	it("filters non-name shadow hits over the FULL set, before the count", () => {
+		const filt = src.indexOf("shadowEarnedRank(p, nameQ, nameTokens)");
+		const total = src.indexOf("totalMatching = projects.length");
+		expect(filt).toBeGreaterThan(0);
+		expect(total).toBeGreaterThan(filt); // page slicing + total come after
 	});
 });

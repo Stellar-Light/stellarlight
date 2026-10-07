@@ -27,8 +27,35 @@
  */
 
 const SCOUT_BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
-const MCP_URL = process.env.RAVEN_MCP_URL || "";
-const MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || "";
+const MCP_URL = process.env.RAVEN_MCP_URL || "https://agents.stellar.buzz/mcp";
+/**
+ * The token is durable at ~/.config/stellarlight/raven.token. Reading only the
+ * env meant every local run skipped the catalog half — and then printed "ok".
+ * Resolved lazily with a dynamic import: this file deliberately has no
+ * top-level import, so that it stays in global scope (see the collision guard
+ * at the bottom).
+ */
+// RAVEN_TOKEN is the name the repo's secret actually carries (see
+// raven-category-battery.yml, raven-eval-parity.yml). Reading only
+// RAVEN_MCP_TOKEN is why this guard could not be wired to CI at all: in a
+// runner the ~/.config file does not exist either, so it would have skipped
+// the catalog half and printed "ok" — the exact failure the comment above
+// warns about, one env-var name away.
+let MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || process.env.RAVEN_TOKEN || "";
+async function resolveToken(): Promise<void> {
+	if (MCP_TOKEN) return;
+	try {
+		const { readFileSync } = await import("node:fs");
+		const { homedir } = await import("node:os");
+		const { join } = await import("node:path");
+		MCP_TOKEN = readFileSync(
+			join(homedir(), ".config/stellarlight/raven.token"),
+			"utf8",
+		).trim();
+	} catch {
+		MCP_TOKEN = "";
+	}
+}
 // How long a newly-shipped op may stay un-cataloged before lag becomes drift.
 const GRACE_DAYS = Number(process.env.RAVEN_DRIFT_GRACE_DAYS || 10);
 // Cloudflare 1010-blocks some non-browser signatures (python-urllib); a curl
@@ -52,6 +79,14 @@ interface DriftReport {
 	catalogOps: string[] | null;
 	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
+	/** In the CATALOG (an exact-name query id-matches it) but not surfaced by
+	 *  the discovery sweep — our routing words are the gap, ours to fix. */
+	undiscoverable: string[];
+	/** Callable in the sandbox but with NO catalog entry: an exact-name query
+	 *  returns only neighbours. No wording of ours can surface an op the index
+	 *  does not hold, so an agent that does not already know the name cannot
+	 *  find it. Theirs to index, once past the re-baseline grace window. */
+	uncataloged: string[];
 	/** Absent but recently shipped — expected re-baseline lag, warn only. */
 	laggingInCatalog: { op: string; addedAt: string; ageDays: number }[];
 	extraInCatalog: string[];
@@ -165,7 +200,17 @@ async function expectedFromSpec(): Promise<{
 				op && typeof op === "object"
 					? (op as { operationId?: string }).operationId
 					: undefined;
-			if (id && !CATALOG_EXCLUDED.has(id)) {
+			// Side-effecting ops (the get-listed flow: partnerOnboard,
+			// submit-listing) are deliberately NOT part of the agent research
+			// surface, so a discovery sweep must not expect to find them.
+			// partnerOnboard was reported as a routing gap on 2026-09-06 purely
+			// because this list included it.
+			const sideEffecting =
+				op && typeof op === "object"
+					? (op as { "x-side-effecting"?: boolean })["x-side-effecting"] ===
+						true
+					: false;
+			if (id && !CATALOG_EXCLUDED.has(id) && !sideEffecting) {
 				ops.push(id);
 				pathByOp.set(id, path);
 			}
@@ -178,8 +223,13 @@ async function expectedFromSpec(): Promise<{
 	};
 }
 
-async function catalogOps(): Promise<{
+async function catalogOps(specOps: string[]): Promise<{
 	ops: string[];
+	/** Ops the vocabulary sweep missed that the sandbox still exposes — our
+	 *  discoverability gap, never their absence. */
+	callableButUndiscovered: string[];
+	/** Of the suspects, the ones the catalog actually holds an entry for. */
+	cataloguedSuspects: string[];
 	claimed: number | null;
 	auditRouted: boolean | null;
 }> {
@@ -203,7 +253,12 @@ async function catalogOps(): Promise<{
 
 	// Vocabulary sweep — the catalog search caps hits per query, so union
 	// several targeted queries inside ONE execute (same technique as #38).
-	const sweep = `const qs = ["projects search directory","repos code search","builders people leaderboard","hackathons compare winners","research corpus semantic","skills marketplace list","partners anchors match","clusters topics analyze ecosystem","changelog status health","audits security reports","people person lookup identity","rfps grants open","feedback submit","explain repo deepwiki"]; const rs = await Promise.all(qs.map(q => codemode.search(q, { service: "scout", limit: 20 }))); const ids = new Set(); for (const r of rs) for (const h of (r.hits ?? [])) if (h.id && h.id.startsWith("scout.")) ids.add(h.id); return [...ids].sort();`;
+	//
+	// The query list IS the instrument's reach. On 2026-09-06 it had no
+	// idea-vetting question in it, so vetIdea came back "missing beyond grace"
+	// while ranking FIRST for "should i build this on stellar". A sweep can
+	// only report on the vocabularies it actually asks.
+	const sweep = `const qs = ["projects search directory","repos code search","builders people leaderboard","hackathons compare winners","research corpus semantic","skills marketplace list","partners anchors match","clusters topics analyze ecosystem","changelog status health","audits security reports","people person lookup identity","rfps grants open","feedback submit","explain repo deepwiki","vet a build idea competitors prior art","should i build this on stellar","scf pitch funding readiness","verify claim quality report","rwa tokenized assets"]; const rs = await Promise.all(qs.map(q => codemode.search(q, { service: "scout", limit: 20 }))); const ids = new Set(); for (const r of rs) for (const h of (r.hits ?? [])) if (h.id && h.id.startsWith("scout.")) ids.add(h.id); return [...ids].sort();`;
 	const out = await rpc("tools/call", {
 		name: "execute",
 		arguments: { code: sweep },
@@ -217,8 +272,62 @@ async function catalogOps(): Promise<{
 			`execute returned unparseable payload: ${text.slice(0, 160)}`,
 		);
 	}
+	const discovered = ids.map((id) => id.replace(/^scout\./, "")).sort();
+
+	// An op the sweep did not surface is NOT necessarily absent. The sweep
+	// measures DISCOVERABILITY through 14 vocabulary queries; the sandbox is
+	// the authority on existence. vetIdea was reported "missing beyond grace"
+	// on 2026-09-06 while `typeof scout.vetIdea === "function"` — callable, just
+	// unreachable by those words. That distinction decides who owns the fix:
+	// callable-but-undiscoverable is OUR routing vocabulary, not their catalog.
+	const suspect = specOps.filter((o: string) => !discovered.includes(o));
+	let callable: string[] = [];
+	// Which suspects the catalog actually HOLDS. A catalogued op id-matches its
+	// own name hard — listAudits scores 451 for the query "listAudits" — while
+	// an op with no entry returns only neighbours at ~150. That difference is
+	// what separates "our words do not reach it" from "their index does not
+	// have it", and the two have different owners. Measured 2026-09-15:
+	// getRwaAssets, getQualityReport and verifyClaim were all callable in the
+	// sandbox and all returned zero self-hits, so every wording fix on our side
+	// would have been wasted work.
+	let catalogued: string[] = [];
+	if (suspect.length) {
+		const probe = `const names = ${JSON.stringify(suspect)}; return names.filter(n => typeof scout[n] === "function");`;
+		try {
+			const res = await rpc("tools/call", {
+				name: "execute",
+				arguments: { code: probe },
+			});
+			const t: string = res?.result?.content?.[0]?.text ?? "[]";
+			const start = t.indexOf("[");
+			callable =
+				start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
+		} catch {
+			callable = [];
+		}
+	}
+	if (suspect.length) {
+		const selfHit = `const names = ${JSON.stringify(suspect)}; const out = []; for (const n of names) { const r = await codemode.search(n, { service: "scout", limit: 5 }); if ((r.hits ?? []).some(h => h.id === "scout." + n)) out.push(n); } return out;`;
+		try {
+			const res = await rpc("tools/call", {
+				name: "execute",
+				arguments: { code: selfHit },
+			});
+			const t: string = res?.result?.content?.[0]?.text ?? "[]";
+			const start = t.indexOf("[");
+			catalogued =
+				start >= 0 ? JSON.parse(t.slice(start, t.indexOf("]", start) + 1)) : [];
+		} catch {
+			// Probe failed → claim nothing. Every suspect stays in the
+			// vocabulary bucket, which is the conservative attribution: it
+			// blames us, not them.
+			catalogued = suspect;
+		}
+	}
 	return {
-		ops: ids.map((id) => id.replace(/^scout\./, "")).sort(),
+		ops: discovered,
+		callableButUndiscovered: callable,
+		cataloguedSuspects: catalogued,
 		claimed,
 		auditRouted,
 	};
@@ -238,6 +347,8 @@ async function main() {
 		expectedOps: spec.ops,
 		catalogOps: null,
 		missingFromCatalog: [],
+		undiscoverable: [],
+		uncataloged: [],
 		laggingInCatalog: [],
 		extraInCatalog: [],
 		claimedOpCount: null,
@@ -246,13 +357,19 @@ async function main() {
 		notes: [],
 	};
 
+	await resolveToken();
 	if (!MCP_URL || !MCP_TOKEN) {
+		// A run that skipped its only upstream probe is not "ok". This used to
+		// print the warning and fall through to the success line — the same
+		// shape as the truth battery reporting "0 fail" with four slices dead
+		// (both 2026-09-06).
 		report.notes.push(
-			"RAVEN_MCP_URL/RAVEN_MCP_TOKEN not set — catalog half SKIPPED (local-only credentials).",
+			"no Raven credential (RAVEN_MCP_TOKEN, or ~/.config/stellarlight/raven.token) — the catalog half could not run.",
 		);
-		console.log(`\n⚠ ${report.notes[0]}`);
+		console.error(`\nINCONCLUSIVE: ${report.notes[0]}`);
+		process.exit(2);
 	} else {
-		const cat = await catalogOps();
+		const cat = await catalogOps(spec.ops);
 		report.checked = true;
 		report.catalogOps = cat.ops;
 		report.claimedOpCount = cat.claimed;
@@ -270,6 +387,16 @@ async function main() {
 				: null;
 			if (addedAt && ageDays !== null && ageDays <= GRACE_DAYS) {
 				report.laggingInCatalog.push({ op, addedAt, ageDays });
+			} else if (cat.callableButUndiscovered.includes(op)) {
+				// Present in the sandbox. Which half of the fix is ours depends
+				// on whether the CATALOG holds an entry at all.
+				if (cat.cataloguedSuspects.includes(op)) {
+					// Indexed, just not reached by our words — our routing text.
+					report.undiscoverable.push(op);
+				} else {
+					// No entry to rank. Nothing we write can surface it.
+					report.uncataloged.push(op);
+				}
 			} else {
 				report.missingFromCatalog.push(op);
 			}
@@ -281,6 +408,14 @@ async function main() {
 		for (const l of report.laggingInCatalog)
 			console.log(
 				`  ⚠ lagging (expected): ${l.op} shipped ${l.ageDays}d ago — awaiting their re-baseline (grace ${GRACE_DAYS}d)`,
+			);
+		for (const u of report.undiscoverable)
+			console.log(
+				`  ⚠ callable but undiscovered: ${u} — scout.${u} exists in the sandbox; our own discovery vocabulary does not reach it (OUR fix, not theirs)`,
+			);
+		for (const u of report.uncataloged)
+			console.log(
+				`  ⚠ callable but UNCATALOGED: ${u} — scout.${u} runs in the sandbox, but an exact-name query returns no entry for it, so no agent using codemode.search can discover it and no wording of ours can change that (THEIR index, past grace)`,
 			);
 		for (const m of report.missingFromCatalog)
 			console.log(`  ✗ missing beyond grace: ${m}`);
@@ -317,3 +452,10 @@ main().catch((err) => {
 	console.error("raven-drift-guard failed:", err.message ?? err);
 	process.exit(2);
 });
+
+// Global-scope collision guard: with no import/export, tsc puts this file
+// in the shared global scope where every script's main/BASE/PROBES collide —
+// and WHICH file draws the error depends on enumeration order, which differs
+// macOS vs linux (the baseline divergence of 2026-09-01). export{} makes it a
+// module; tsx runtime behavior is unchanged.
+export {};

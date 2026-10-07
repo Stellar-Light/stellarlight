@@ -11,7 +11,9 @@
 
 import { createHash } from "node:crypto";
 import type { Payload } from "payload";
+import { docKindOf, docVersionStatus } from "./doc-freshness";
 import { embedBatch } from "./embed";
+import { deriveCleanTitle } from "./title-quality";
 
 export const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
 
@@ -177,7 +179,13 @@ export function chunkMarkdown(opts: {
 	tags: string[];
 	publishedAt?: string;
 }): ResearchChunk[] {
-	const { md, parentDocId, title, url, tags, publishedAt } = opts;
+	const { md, parentDocId, url, tags, publishedAt } = opts;
+	// S6 title hygiene at the ONE point every ingester passes through: decode
+	// entities, strip trailing sentence punctuation, clamp overlong titles,
+	// never a bare date (falls back to the humanized URL slug). Content is
+	// untouched, so an improved title reaches existing rows via the
+	// metadata-drift path in upsertChunks — no re-embed.
+	const title = deriveCleanTitle(opts.title, url);
 	const lines = md.split("\n");
 	const sections: Array<{ heading: string | null; body: string[] }> = [];
 	let current: { heading: string | null; body: string[] } = {
@@ -228,8 +236,17 @@ export function chunkMarkdown(opts: {
 			continue;
 		}
 
-		// Split big sections on paragraph (blank line) boundaries, pack greedily
-		const paras = text.split(/\n\s*\n/);
+		// Split big sections on paragraph (blank line) boundaries, pack greedily.
+		// A paragraph with no blank line inside it (the 66k JSON example on the
+		// getTransactions page) used to ship whole: Payload's textarea cap is
+		// 40,000 (defaultMaxTextLength), so the write failed on every refresh
+		// and the ingester counted that chunk "new" forever — the first thing
+		// the Idempotence re-plan caught (2026-09-13). Oversized paragraphs are
+		// hard-split first (line boundaries, then fixed width), so every chunk
+		// honours MAX_CHARS_PER_CHUNK and the field's own "≤ 1500 tokens".
+		const paras = text
+			.split(/\n\s*\n/)
+			.flatMap((p) => splitOversized(p, MAX_CHARS_PER_CHUNK - prefix.length));
 		let buf = prefix;
 		for (const para of paras) {
 			if ((buf + para + "\n\n").length > MAX_CHARS_PER_CHUNK && buf.length) {
@@ -245,6 +262,31 @@ export function chunkMarkdown(opts: {
 	return chunks;
 }
 
+/** A paragraph longer than `max`: split at line boundaries, then a single
+ *  overlong line at fixed width. Lossless — every character lands in some
+ *  piece, in order. */
+export function splitOversized(text: string, max: number): string[] {
+	if (text.length <= max) return [text];
+	const out: string[] = [];
+	let buf = "";
+	for (const line of text.split("\n")) {
+		if (line.length > max) {
+			if (buf) out.push(buf);
+			buf = "";
+			for (let i = 0; i < line.length; i += max)
+				out.push(line.slice(i, i + max));
+			continue;
+		}
+		if (buf && buf.length + line.length + 1 > max) {
+			out.push(buf);
+			buf = "";
+		}
+		buf = buf ? `${buf}\n${line}` : line;
+	}
+	if (buf) out.push(buf);
+	return out;
+}
+
 /**
  * Load existing chunks for `source`, indexed by (parentDocId, chunkIndex).
  * Used by ingest scripts to dedup and skip re-embedding unchanged chunks.
@@ -256,9 +298,16 @@ export interface ExistingChunkRef {
 	publishedAt?: string | null;
 }
 
+/** A second stored doc on a (parentDocId, chunkIndex) key the map already holds. */
+export type DuplicateChunkRef = ExistingChunkRef & {
+	parentDocId: string;
+	chunkIndex: number;
+};
+
 export async function loadExistingChunks(
 	payload: Payload,
 	source: ResearchSource,
+	opts: { duplicates?: DuplicateChunkRef[] } = {},
 ): Promise<Map<string, Map<number, ExistingChunkRef>>> {
 	const map = new Map<string, Map<number, ExistingChunkRef>>();
 	const existing = await payload.find({
@@ -267,16 +316,28 @@ export async function loadExistingChunks(
 		limit: 10_000,
 		depth: 0,
 	});
-	for (const d of existing.docs as unknown as Array<
-		ExistingChunkRef & { parentDocId: string; chunkIndex: number }
-	>) {
+	for (const d of existing.docs as unknown as Array<DuplicateChunkRef>) {
 		if (!map.has(d.parentDocId)) map.set(d.parentDocId, new Map());
-		map.get(d.parentDocId)?.set(d.chunkIndex, {
+		const perDoc = map.get(d.parentDocId);
+		const ref: ExistingChunkRef = {
 			id: d.id,
 			contentHash: d.contentHash,
 			title: d.title ?? null,
 			publishedAt: d.publishedAt ?? null,
-		});
+		};
+		if (perDoc?.has(d.chunkIndex)) {
+			// The map keeps the first doc returned per key and names the rest,
+			// so an ingester can delete them. Keeping the last one in silence
+			// hid a submission ingested twice under two projects: the plan
+			// matched one copy, re-embedded the other, and never converged.
+			opts.duplicates?.push({
+				...ref,
+				parentDocId: d.parentDocId,
+				chunkIndex: d.chunkIndex,
+			});
+			continue;
+		}
+		perDoc?.set(d.chunkIndex, ref);
 	}
 	return map;
 }
@@ -314,8 +375,13 @@ export async function upsertChunks(opts: {
 	source: ResearchSource;
 	chunks: ResearchChunk[];
 	existing: Map<string, Map<number, ExistingChunkRef>>;
+	/** Classify only: print the plan (`replan: writes=N …`) and return the
+	 *  stats without embedding, writing, or re-stamping. The refresh lane's
+	 *  Idempotence step runs every ingester this way right after the execute
+	 *  pass and requires writes=0 (QUALITY.md §3, the second condition). */
+	dryRun?: boolean;
 }): Promise<UpsertStats> {
-	const { payload, source, chunks: rawChunks, existing } = opts;
+	const { payload, source, chunks: rawChunks, existing, dryRun = false } = opts;
 	const stats: UpsertStats = {
 		new: 0,
 		updated: 0,
@@ -370,6 +436,37 @@ export async function upsertChunks(opts: {
 		toEmbed.push(chunk);
 		if (prev) stats.updated += 1;
 		else stats.new += 1;
+	}
+
+	// One line, one format, in both modes — the lane greps `^replan: writes=`.
+	// `updated` already counts the metadata-only rows; the observedAt re-stamp
+	// is not a planned write (it advances every run by design).
+	const planLine = (verb: "replan" | "wrote") =>
+		`${verb}: writes=${stats.new + stats.updated} new=${stats.new} updated=${stats.updated} (meta-only ${metaOnly.length}) unchanged=${stats.unchanged} errors=${stats.errors}`;
+	if (dryRun) {
+		console.log(planLine("replan"));
+		// NAME the rows that did not converge. The lane fails the run with "see
+		// the ✗ rows" and then prints only a count, which is not something
+		// anyone can act on: it cannot distinguish a non-idempotent writer from
+		// a source that legitimately changed between the execute pass and this
+		// one, and those have opposite fixes. lumenloop-research has been
+		// re-planning exactly 4 writes with 0 meta-only drift — real content
+		// differences — and its article HTML is byte-stable between fetches,
+		// so the next run needs to say WHICH chunks before anyone can tell
+		// whether they are news URLs (expected to move) or articles (a bug).
+		// Capped: a genuinely broken source would otherwise print thousands.
+		if (toEmbed.length) {
+			const shown = toEmbed.slice(0, 12);
+			for (const c of shown) {
+				const verb = existing.get(c.parentDocId)?.get(c.chunkIndex)
+					? "changed"
+					: "new";
+				console.log(`  ✗ ${verb} · chunk ${c.chunkIndex} · ${c.url}`);
+			}
+			if (toEmbed.length > shown.length)
+				console.log(`  …and ${toEmbed.length - shown.length} more`);
+		}
+		return stats;
 	}
 
 	if (metaOnly.length) {
@@ -431,7 +528,10 @@ export async function upsertChunks(opts: {
 		}
 	}
 
-	if (toEmbed.length === 0) return stats;
+	if (toEmbed.length === 0) {
+		console.log(planLine("wrote"));
+		return stats;
+	}
 
 	console.log(`  Embedding ${toEmbed.length} chunks via Voyage AI…`);
 	const embeddings = await embedBatch(toEmbed.map((c) => c.content));
@@ -463,6 +563,9 @@ export async function upsertChunks(opts: {
 			auditor: chunk.auditor,
 			protocol: chunk.protocol,
 			severity: chunk.severity,
+			// doc-freshness signals (deterministic, idea:research-doc-freshness):
+			docKind: docKindOf({ source, url: chunk.url, title: chunk.title }),
+			docVersionStatus: docVersionStatus(chunk.content),
 			embedding,
 		};
 		try {
@@ -483,6 +586,7 @@ export async function upsertChunks(opts: {
 		}
 	}
 
+	console.log(planLine("wrote"));
 	return stats;
 }
 
@@ -538,6 +642,28 @@ export async function fetchSitemapUrls(
 }
 
 /** Strip HTML to a markdown-ish text blob (no proper parser, just regex). */
+/**
+ * Cut a site's "more from …" teaser off the end of an article body.
+ *
+ * lumenloop.com renders a related-post teaser INSIDE <article>: "View →
+ * More from research · 6d ago · 5 min · <another post's title and blurb>".
+ * The post it picks changes on every request, so the article's last chunk
+ * hashed differently on every ingest run (the corpus refresh's Idempotence
+ * step was red five days out of seven on exactly this), and every page
+ * carried a random teaser for an unrelated article as its own content.
+ * Cut at the teaser header; everything after it is the teaser.
+ */
+export function stripTrailingTeaser(body: string): string {
+	const m = body.match(
+		/(?:-\s*)?View\s*→\s*More from (?:research|news)|More from (?:research|news)(?=\s*(?:\d+[dhm] ago|today|yesterday))/i,
+	);
+	if (!m || m.index === undefined) return body;
+	return body
+		.slice(0, m.index)
+		.replace(/[\s\-–—·]+$/, "")
+		.trimEnd();
+}
+
 export function stripHtml(html: string): string {
 	return (
 		html

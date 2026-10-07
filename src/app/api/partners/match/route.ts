@@ -53,6 +53,7 @@ const PARTNER_TYPES = [
 	"audit-firm",
 	"legal",
 	"agency",
+	"asset-issuer",
 	"other",
 ];
 
@@ -215,7 +216,10 @@ export async function POST(req: NextRequest) {
 					"AI matchmaking isn't available right now — try the /partners directory filters.",
 				unavailable: true,
 			},
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 

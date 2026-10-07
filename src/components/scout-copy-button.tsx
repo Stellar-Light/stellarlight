@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { IconSwap, IconSwapItem } from "@/components/motion/icon-swap";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 
 /** Legacy execCommand-based copy. Returns true on success. */
@@ -59,17 +60,18 @@ export function ScoutCopyButton({ className, label = "Copy skill" }: Props) {
 			}
 			title="Copy the Stellar Scout skill manifest to your clipboard"
 		>
-			{copied ? (
-				<>
-					<Check className="w-4 h-4" />
-					Copied
-				</>
-			) : (
-				<>
-					<Copy className="w-4 h-4" />
-					{label}
-				</>
-			)}
+			<IconSwap>
+				{copied ? (
+					<IconSwapItem key="copied">
+						<Check className="w-4 h-4" />
+					</IconSwapItem>
+				) : (
+					<IconSwapItem key="copy">
+						<Copy className="w-4 h-4" />
+					</IconSwapItem>
+				)}
+			</IconSwap>
+			{copied ? "Copied" : label}
 		</button>
 	);
 }

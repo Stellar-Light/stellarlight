@@ -75,6 +75,14 @@ describe("surface-specific vocabulary preserved", () => {
 		expect(PROJECT_SYNONYMS.vibrant).toContain("vesseo");
 		expect(PROJECT_SYNONYMS.vesseo).toContain("vibrant");
 	});
+
+	it("EVM porter vocabulary reaches Stellar-native terms (2026-08-15 lesson)", () => {
+		expect(PROJECT_SYNONYMS["erc-3643"]).toContain("rwa");
+		expect(REPO_SYNONYMS["erc-3643"]).toContain("sep-57");
+		expect(REPO_SYNONYMS["msg.sender"]).toContain("require_auth");
+		expect(PROJECT_SYNONYMS.erc20).toContain("sep-41");
+		expect(REPO_SYNONYMS.solidity).toContain("soroban");
+	});
 	it("builders keeps regional payment rails", () => {
 		for (const v of ["boleto", "pix", "pagamento"])
 			expect(BUILDER_SYNONYMS.payments).toContain(v);
@@ -90,5 +98,27 @@ describe("mergeVocabulary", () => {
 		expect(merged.a).toEqual(["x", "y", "w"]);
 		expect(merged.b).toEqual(["z"]);
 		expect(merged.c).toEqual(["q"]);
+	});
+});
+
+describe("prototype-key queries (the q=constructor 500)", () => {
+	// Both live search surfaces 500'd on q=constructor: the merged synonym map
+	// was a plain object, so the lookup returned Object.prototype.constructor
+	// (truthy — `?? []` never fired) and the for..of over it threw. The maps
+	// are null-prototype now; a query token must never resolve to anything
+	// but its own entry.
+	it("SYNONYMS lookups on prototype keys are undefined", async () => {
+		const { SYNONYMS } = await import("../repo-search");
+		for (const k of ["constructor", "valueof", "tostring", "__proto__"]) {
+			const v = (SYNONYMS as Record<string, unknown>)[k];
+			expect(v === undefined || Array.isArray(v)).toBe(true);
+			expect(typeof v).not.toBe("function");
+		}
+	});
+	it("SPELLING_CORRECTIONS on prototype keys is undefined", async () => {
+		const { SPELLING_CORRECTIONS } = await import("../search-vocabulary");
+		expect(
+			(SPELLING_CORRECTIONS as Record<string, unknown>).constructor,
+		).toBeUndefined();
 	});
 });

@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 	if (!payload)
 		return NextResponse.json(
 			{ matches: [], unavailable: true },
-			{ status: 503 },
+			{ status: 503, headers: { "Retry-After": "2" } },
 		);
 
 	// Type hard-filters the candidate pool; region is folded into the need string

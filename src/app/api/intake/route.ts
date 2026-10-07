@@ -1,5 +1,6 @@
 import { getPayload } from "payload";
 import { z } from "zod";
+import { parseGithubIdentity } from "@/lib/github-identity";
 import { generateSlug, normalizeUrl } from "@/lib/utils/normalize";
 import configPromise from "@/payload.config";
 
@@ -30,6 +31,31 @@ const intakeSchema = z.object({
 		})
 		.optional(),
 });
+
+/**
+ * The submitted GitHub block, normalised. `orgLogin` is free text on the form,
+ * so it has arrived as a submission URL, an owner/repo pair, another forge's
+ * hostname and comma-joined junk — all of which every downstream reader
+ * rejects, leaving the row undiscoverable. Parse it into a real login here, at
+ * the boundary, and keep the repository when the submitter named one.
+ */
+function submittedGithub(
+	g:
+		| { orgLogin?: string; repos?: Array<{ owner: string; name: string }> }
+		| undefined,
+):
+	| { orgLogin?: string; repos: Array<{ owner: string; name: string }> }
+	| undefined {
+	const { orgLogin, repo } = parseGithubIdentity(g?.orgLogin);
+	const repos = [...(g?.repos ?? [])];
+	if (
+		repo &&
+		!repos.some((r) => r.owner === repo.owner && r.name === repo.name)
+	)
+		repos.push(repo);
+	if (!orgLogin && repos.length === 0) return undefined;
+	return { ...(orgLogin ? { orgLogin } : {}), repos };
+}
 
 export async function POST(request: Request) {
 	try {
@@ -96,18 +122,7 @@ export async function POST(request: Request) {
 				links: {
 					website: validated.website || undefined,
 				},
-				github:
-					validated.github?.repos && validated.github.repos.length > 0
-						? {
-								orgLogin: validated.github.orgLogin || undefined,
-								repos: validated.github.repos,
-							}
-						: validated.github?.orgLogin
-							? {
-									orgLogin: validated.github.orgLogin,
-									repos: [],
-								}
-							: undefined,
+				github: submittedGithub(validated.github),
 				verificationLevel: "Unverified",
 				provenance: {
 					source: "UserSubmitted",

@@ -1,0 +1,23 @@
+{
+ "slug": "chainsatlas",
+ "url": "https://chainsatlas.com/",
+ "finalUrl": "https://chainsatlas.com/",
+ "fetchedAt": "2026-09-05T17:02:05.652Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 17:02:05 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Pepyaka"
+ },
+ "bodyTextSha256": "7363f7e8620d4842b6b034b74db6207b75e131e406ed2587c6b8fbd57c0bde3c",
+ "bodyTextChars": 33,
+ "markers": [
+  {
+   "marker": "ConnectYourDomain Error",
+   "found": true,
+   "excerpt": "ConnectYourDomain Error | Wix.com"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

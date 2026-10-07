@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./load-env";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -17,6 +17,7 @@
  *   pnpm exec tsx scripts/data/curate-partners.ts            # dry run
  *   pnpm exec tsx scripts/data/curate-partners.ts --execute  # writes
  */
+import "../load-env";
 import { getPayload } from "payload";
 import configPromise from "../../src/payload.config";
 
@@ -32,6 +33,13 @@ const OWNER_CONFIRMED_DEAD: string[] = [
 	// built on Interledger / Open Payments, NOT Stellar — dropped from the
 	// Stellar anchor directory (not dead, just not Stellar). Owner-confirmed 2026-07-06.
 	"anchor-wallet-guru",
+	// their own site leads with "Critical Information: BRL Discontinued" —
+	// per terms set at issuance in 2019 and restated since June 2024,
+	// withdrawal to fiat reais is "not ensured after Jan 1st 2026" and
+	// remaining BRL balances on Stellar are "subject to administrative costs,
+	// clawbacks". The directory was presenting them as a fresh, verified
+	// BRL on/off ramp. Owner-confirmed 2026-09-03.
+	"ntokens",
 ];
 // Slugs of the pilot cohort (the select partners Anke tests with) —
 // owner-confirmed 2026-07-06: the original pilot trio.
@@ -124,11 +132,63 @@ const PARTNER_ENRICH: Record<
 // Explicit URL CORRECTIONS — OVERWRITE a stored URL that is wrong or unsafe.
 // boss-pay's seeded domain bossmoney.africa was hijacked (2026-07-06: 301s to a
 // Turkish gambling site super-bahis.live); the live product is bossmoney.com.
-// This is the ONLY place a non-empty field is overwritten — and only for safety.
 const URL_CORRECTIONS: Record<string, string> = {
 	"anchor-boss-pay": "https://www.bossmoney.com",
 	// 2026-07-09: hanawallet.io 301s permanently to hana.money (rebrand; live).
 	"hana-wallet": "https://hana.money",
+};
+
+// Explicit TYPE CORRECTIONS — OVERWRITE a wrong partnerType (the other place,
+// besides URL_CORRECTIONS, a non-empty field is overwritten — and again only
+// on verified fact, never impression). "anchor" had become a catch-all: 27 of
+// 44 partners carried it. A real anchor takes fiat in and pays fiat out
+// (SEP-6/24 deposit+withdrawal); an issuer mints an asset and stops there.
+// 2026-09-02 audit of all 27 anchor-typed rows, reclassified ONLY where the
+// partner's own words — tagline/description in our data, their own published
+// stellar.toml (seps/rampTypes), or their own site — show a different type.
+// Rows that are genuinely BOTH an issuer and a real, evidenced ramp were left
+// as `anchor` (prefer anchor when both, per the audit's own rule) — NOT
+// listed here: etherfuse (curator-verified USDC↔MXN on/off-ramp, see
+// RAMP_ENRICH above — real ramp alongside Stablebond issuance), clpx /
+// finclusive / zeam-money (each partner's OWN stellar.toml, fetched
+// 2026-08-12, publishes sep-6/24/31 + rampTypes — real anchor rails despite
+// an issuance-sounding tagline), aps-money (own site: "Payment Service
+// Provider... Accept payments globally... settle in the currency that suits
+// you" — real inbound+outbound money movement alongside its multi-currency
+// settlement tokens), and the existing MoneyGram/Bitso/Yellow Card/ntokens/
+// anchor-coins-ph/anchor-anclap/anchor-mykobo/anchor-honey-coin cohort (each
+// has toml-verified SEPs, a curator-verified ramp, or explicit deposit/
+// withdrawal/remittance language in its own description).
+const TYPE_CORRECTIONS: Record<string, string> = {
+	// Own tagline: "Franklin Resources, Inc. [NYSE:BEN] is a global investment
+	// management organization with subsidiaries operating as Franklin
+	// Templeton..." — issues the tokenized Franklin OnChain U.S. Government
+	// Money Fund (BENJI + GBENJI/GRBENJI/SGBENJI share classes). Own
+	// stellar.toml fetched 2026-08-12: seps:[] (no SEP-6/24/31 published), no
+	// rampTypes — no deposit/withdrawal capability of any kind.
+	"franklin-templeton": "asset-issuer",
+	// Own tagline: "GMO-Z.com Trust Company is building financial-grade
+	// digital assets. The first regulated digital JPY, GYEN. A trusted digital
+	// USD, ZUSD." Own stellar.toml fetched 2026-08-12: seps:[], no rampTypes.
+	"gmo-zcom-trust": "asset-issuer",
+	// Own tagline: "Australia's fast, stable, secure fiat-backed stablecoin.
+	// Get AUDD today..." — issues AUDD + NZDSC. Own stellar.toml fetched
+	// 2026-08-12: seps:[], no rampTypes.
+	audd: "asset-issuer",
+	// Own tagline: "Non-custodial MPC wallet with a Visa card for crypto and
+	// fiat spending" — describes a wallet product, not a ramp; `wallet`
+	// already exists as a type. No seps, no rampTypes.
+	"anchor-coca-wallet": "wallet",
+	// Different axis than the issuer class above (anchor-vs-infrastructure,
+	// not anchor-vs-issuer) — found during the same audit, flagged separately
+	// in the PR for visibility. Own site (blox.global, checked 2026-09-02):
+	// "The financial operating system for digital assets... Fiat, crypto, and
+	// stablecoins routed through a single API" — positions itself as
+	// infrastructure/routing, explicitly NOT a deposit-taking institution or
+	// fiat converter. Our stored description was an unresearched seed
+	// placeholder ("Blox Global — Stellar anchor (fiat on/off-ramp)"), not
+	// verified fact. No seps, no rampTypes.
+	"anchor-blox-global": "infrastructure",
 };
 
 /** F6 part 2 (audit root #6 / lessons class 23): tagline backfill for rows the
@@ -348,11 +408,12 @@ async function main() {
 		PILOT_SLUGS.length === 0 &&
 		Object.keys(PARTNER_ENRICH).length === 0 &&
 		Object.keys(URL_CORRECTIONS).length === 0 &&
+		Object.keys(TYPE_CORRECTIONS).length === 0 &&
 		Object.keys(FOUNDED_YEARS).length === 0 &&
 		Object.keys(RAMP_ENRICH).length === 0
 	) {
 		console.error(
-			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS / FOUNDED_YEARS first (owner-confirmed only).",
+			"All lists are empty — nothing to do. Fill OWNER_CONFIRMED_DEAD / PILOT_SLUGS / PARTNER_ENRICH / URL_CORRECTIONS / TYPE_CORRECTIONS / FOUNDED_YEARS first (owner-confirmed only).",
 		);
 		process.exit(1);
 	}
@@ -586,6 +647,31 @@ async function main() {
 		});
 	}
 
+	console.log(
+		"\n── Type corrections (OVERWRITE — anchor catch-all reclassification) ──",
+	);
+	for (const [slug, type] of Object.entries(TYPE_CORRECTIONS)) {
+		const d = bySlug.get(slug);
+		if (!d) {
+			console.log(`  WARN: no partner with slug "${slug}" — skipped`);
+			continue;
+		}
+		if (d.partnerType === type) {
+			console.log(`  ${d.name} (${slug}) — already ${type}, no-op`);
+			continue;
+		}
+		console.log(
+			`  ${d.name} (${slug}) — partnerType: ${d.partnerType ?? "(none)"} → ${type}`,
+		);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { partnerType: type },
+			note: `type fix → ${type}`,
+		});
+	}
+	if (Object.keys(TYPE_CORRECTIONS).length === 0) console.log("  (list empty)");
+
 	// Logo backfill — many partners are ALSO in the projects directory, which
 	// already has the correct curated logo. Their partner logoUrl (from
 	// stellar.toml) is often missing or wrong. Copy the matching project's logo
@@ -715,7 +801,8 @@ async function main() {
 
 	if (!EXECUTE) {
 		console.log(`\nDRY RUN — ${writes.length} write(s) planned, none applied.`);
-		process.exit(0);
+		// exit-stomp fix (writer-conformance C3): honor exitCode set above.
+		process.exit(process.exitCode ?? 0);
 	}
 	// Per-write isolation (2026-07-09 curate-projects incident: one
 	// ValidationError aborted a 13-write batch). A bad row fails loudly;
@@ -740,7 +827,7 @@ async function main() {
 		process.exitCode = 1;
 	}
 	console.log(`\nDONE: ${writes.length} write(s) applied.`);
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

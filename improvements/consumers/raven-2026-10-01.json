@@ -1,0 +1,528 @@
+{
+	"consumer": "raven",
+	"label": "Raven (agents.stellar.buzz)",
+	"buckets": [
+		"other"
+	],
+	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
+	"generatedAt": "2026-10-01T14:31:01.457Z",
+	"window": {
+		"since": "2026-09-01T14:31:01.457Z",
+		"days": 30
+	},
+	"totals": {
+		"calls": 124173,
+		"activeDays": 31,
+		"endpoints": 29,
+		"distinctReplayableQueries": 14963
+	},
+	"byEndpoint": [
+		{
+			"endpoint": "/api/research",
+			"calls": 57940,
+			"zeroResultCalls": 4021,
+			"avgResultCount": 8.6
+		},
+		{
+			"endpoint": "/api/projects/search",
+			"calls": 14081,
+			"zeroResultCalls": 64,
+			"avgResultCount": 10.5
+		},
+		{
+			"endpoint": "/api/partners/[slug]",
+			"calls": 7821,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"calls": 7394,
+			"zeroResultCalls": 362,
+			"avgResultCount": 13.2
+		},
+		{
+			"endpoint": "/api/contracts",
+			"calls": 6116,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/[slug]",
+			"calls": 5568,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/builders",
+			"calls": 5058,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/builds",
+			"calls": 4239,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/skills",
+			"calls": 2626,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/rfps",
+			"calls": 2326,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners",
+			"calls": 1951,
+			"zeroResultCalls": 181,
+			"avgResultCount": 6.3
+		},
+		{
+			"endpoint": "/api/analyze",
+			"calls": 1890,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons",
+			"calls": 1496,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/rwa",
+			"calls": 1199,
+			"zeroResultCalls": 1,
+			"avgResultCount": 54.8
+		},
+		{
+			"endpoint": "/api/audits",
+			"calls": 1085,
+			"zeroResultCalls": 951,
+			"avgResultCount": 1.2
+		},
+		{
+			"endpoint": "/api/stablecoins",
+			"calls": 1078,
+			"zeroResultCalls": 9,
+			"avgResultCount": 20.7
+		},
+		{
+			"endpoint": "/api/vet-idea",
+			"calls": 387,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/people",
+			"calls": 364,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/explain",
+			"calls": 259,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/leaderboard",
+			"calls": 233,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/projects/resolve",
+			"calls": 208,
+			"zeroResultCalls": 90,
+			"avgResultCount": 0.6
+		},
+		{
+			"endpoint": "/api/clusters",
+			"calls": 197,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathon-brief",
+			"calls": 175,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/trust",
+			"calls": 155,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/scf-pitch",
+			"calls": 149,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/changes",
+			"calls": 94,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/match",
+			"calls": 69,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/compare",
+			"calls": 13,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/quality",
+			"calls": 2,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		}
+	],
+	"topQueriesReplayed": [
+		{
+			"endpoint": "/api/research",
+			"query": "how does the fee bump transaction mechanism work?",
+			"hits": 787,
+			"lastSeen": "2026-09-29T17:19:35.402Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 1,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what testing tools exist for fuzzing soroban contracts?",
+			"hits": 683,
+			"lastSeen": "2026-09-25T10:39:20.061Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.99,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what is the process for proposing a new cap?",
+			"hits": 621,
+			"lastSeen": "2026-09-25T10:39:27.318Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.73,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i verify a sep-10 web authentication challenge on the server?",
+			"hits": 601,
+			"lastSeen": "2026-09-29T17:19:32.353Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.94,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what is the recommended way to run a stellar rpc node?",
+			"hits": 533,
+			"lastSeen": "2026-09-25T10:39:34.782Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.9,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what is stellar disbursement platform used for?",
+			"hits": 506,
+			"lastSeen": "2026-09-25T10:39:42.374Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.99,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i estimate resource fees for a soroban transaction before submitting it?",
+			"hits": 445,
+			"lastSeen": "2026-09-25T10:39:49.929Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.97,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do path payments find a route between two assets?",
+			"hits": 441,
+			"lastSeen": "2026-09-25T10:38:56.839Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.89,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i create a multisig account with weighted signers?",
+			"hits": 425,
+			"lastSeen": "2026-09-25T10:40:05.022Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.87,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what changed in the latest javascript stellar sdk major version?",
+			"hits": 416,
+			"lastSeen": "2026-09-29T17:19:39.035Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.82,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i set home domain and publish a stellar.toml file?",
+			"hits": 392,
+			"lastSeen": "2026-09-25T10:39:59.048Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.94,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how can i pay transaction fees in a token other than xlm?",
+			"hits": 387,
+			"lastSeen": "2026-09-25T10:38:27.292Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.83,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what is reflector in the stellar ecosystem?",
+			"hits": 314,
+			"lastSeen": "2026-09-24T23:59:27.039Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.76,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what is the blend protocol that runs on stellar?",
+			"hits": 306,
+			"lastSeen": "2026-09-24T23:58:28.383Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.98,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i build a sep-7 link that asks a wallet to pay, or to sign a transaction i prepared?",
+			"hits": 302,
+			"lastSeen": "2026-09-24T23:35:28.027Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.94,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i deposit into a classic stellar liquidity pool and later withdraw?",
+			"hits": 300,
+			"lastSeen": "2026-09-24T23:32:56.975Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.93,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what per-ledger capacity does the current stellar fee documentation state for mainnet?",
+			"hits": 291,
+			"lastSeen": "2026-09-24T23:52:52.088Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.84,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i deploy the stellar asset contract for a classic asset so other contracts can hold that asse",
+			"hits": 289,
+			"lastSeen": "2026-09-24T23:37:04.502Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.96,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i configure a stellar account so that payments and signer changes need different sets of keys",
+			"hits": 288,
+			"lastSeen": "2026-09-24T23:34:07.560Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.84,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how does stellar choose which transactions enter a ledger when more are submitted than the ledger ca",
+			"hits": 287,
+			"lastSeen": "2026-09-24T23:41:22.282Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.84,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i issue a stellar asset the issuer can claw back, and then burn some of a holder's balance?",
+			"hits": 282,
+			"lastSeen": "2026-09-24T23:29:55.919Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.91,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "what do stellar transaction preconditions check before a transaction can enter a transaction set?",
+			"hits": 275,
+			"lastSeen": "2026-09-24T23:41:24.952Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.96,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how does a stellar wallet add moneygram cash-in and cash-out for usdc?",
+			"hits": 267,
+			"lastSeen": "2026-09-24T23:55:45.473Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.94,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i pay the network fee for a stellar transaction that somebody else has already signed?",
+			"hits": 266,
+			"lastSeen": "2026-09-24T23:32:36.236Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.87,
+				"advisoryNote": null
+			}
+		},
+		{
+			"endpoint": "/api/research",
+			"query": "how do i make one stellar account pay the base reserve for another account's new trustline?",
+			"hits": 265,
+			"lastSeen": "2026-09-24T23:29:11.539Z",
+			"today": {
+				"status": "ok",
+				"returned": 10,
+				"matchMode": "vector",
+				"topConfidence": 0.92,
+				"advisoryNote": null
+			}
+		}
+	],
+	"replaySummary": {
+		"graded": 25,
+		"ok": 25,
+		"okRate": 100
+	},
+	"contractChangesInWindow": 45
+}

@@ -120,7 +120,10 @@ export async function POST(req: NextRequest) {
 		// /ask degrades to cards-only (the client renders nothing for the answer).
 		return NextResponse.json(
 			{ unavailable: true },
-			{ status: 503, headers: rateLimitHeaders(limit) },
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
 		);
 	}
 
@@ -281,7 +284,10 @@ export async function POST(req: NextRequest) {
 		) {
 			return NextResponse.json(
 				{ unavailable: true },
-				{ status: 503, headers: rateLimitHeaders(limit) },
+				{
+					status: 503,
+					headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				},
 			);
 		}
 		if (err instanceof Anthropic.APIError) {

@@ -1,0 +1,24 @@
+{
+ "slug": "kunst21",
+ "url": "https://kunst21.com/",
+ "finalUrl": "https://www.kunst21.com/",
+ "fetchedAt": "2026-09-07T20:06:26.145Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Mon, 07 Sep 2026 20:06:26 GMT",
+  "etag": "W/\"68e0c444-e655\"",
+  "lastModified": "Sat, 04 Oct 2025 06:52:52 GMT",
+  "server": "nginx"
+ },
+ "bodyTextSha256": "0b6e979f2ac190593d652f034c8586026e86dc59e13af0695cf152643da13f6f",
+ "bodyTextChars": 2300,
+ "markers": [
+  {
+   "marker": "365",
+   "found": true,
+   "where": "text",
+   "excerpt": "365英国上市公司(集团)官方网站-Official Website 365英国上市公司(集团)官方网站-Official Website 首页 业务体系 投资者关系 资讯公告 社会责任 科技创新 关于我们 CN | EN 首页 业务体系 水力发电业务 抽水蓄能业务 国际业务 智慧综合能源业务 新能源业务 配售电业务 投融资业务 投资者关系 今日股价 信息透"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

@@ -1,14 +1,10 @@
-import "dotenv/config";
+import "./load-env";
+import "./load-env";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
-
-// Explicitly load .env and .env.local (dotenv/config may not load .env.local by default)
-loadEnv({ path: ".env" });
-loadEnv({ path: ".env.local", override: true });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

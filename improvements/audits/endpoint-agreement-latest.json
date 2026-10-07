@@ -1,0 +1,43 @@
+{
+	"generatedAt": "2026-10-07T12:19:25.234Z",
+	"source": "scripts/check-endpoint-agreement.ts",
+	"rule": "Resolution facts — is this alive, what replaced it — must be served on every agent-reachable path to an entity, not only the curated one.",
+	"tally": {
+		"checked": 6,
+		"agree": 6,
+		"missing": 0,
+		"couldNotCheck": 0
+	},
+	"rows": [
+		{
+			"repo": "paltalabs/defindex",
+			"verdict": "agree",
+			"missing": []
+		},
+		{
+			"repo": "kalepail/stellar-raven",
+			"verdict": "agree",
+			"missing": []
+		},
+		{
+			"repo": "stellar/js-stellar-sdk",
+			"verdict": "agree",
+			"missing": []
+		},
+		{
+			"repo": "blend-capital/blend-contracts",
+			"verdict": "agree",
+			"missing": []
+		},
+		{
+			"repo": "soroswap/core",
+			"verdict": "agree",
+			"missing": []
+		},
+		{
+			"repo": "YaleOpenLab/opensolar",
+			"verdict": "agree",
+			"missing": []
+		}
+	]
+}

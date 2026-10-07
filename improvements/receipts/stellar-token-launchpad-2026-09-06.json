@@ -1,0 +1,24 @@
+{
+ "slug": "stellar-token-launchpad",
+ "url": "https://tokenlaunchpad.eu/",
+ "finalUrl": "https://cryptix.ag/",
+ "fetchedAt": "2026-09-06T19:40:18.709Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 19:40:18 GMT",
+  "etag": "W/\"070abbe6e8f00b08e37eb25e7865115b\"",
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "0d7c7ea42cfd95037c0285874e582f0fba620c1c8af3a2cfb8f3f43b9e61300e",
+ "bodyTextChars": 6294,
+ "markers": [
+  {
+   "marker": "Cryptix",
+   "found": true,
+   "where": "text",
+   "excerpt": "Cryptix - Three Pillars. One End-to-End Partner. Skip to content Services Process Journal Contact Start your venture → Cryptix · Crypto Valley · Est. 2017 End-to-end venture buildi"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

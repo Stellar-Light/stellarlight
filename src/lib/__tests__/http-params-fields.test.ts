@@ -65,3 +65,25 @@ describe("pickFields", () => {
 		expect(Object.keys(out).sort()).toEqual(["fullName", "stars", "url"]);
 	});
 });
+
+// Tri-state boolean params (partners `accepting`, spec 1.9.12): absent and
+// empty mean NO filter — distinct from explicit false — and garbage still
+// reads "invalid" for the caller's 400.
+import { triStateBoolParam } from "../http-params";
+
+describe("triStateBoolParam", () => {
+	it("absent and empty are undefined (no filter)", () => {
+		expect(triStateBoolParam(null)).toBeUndefined();
+		expect(triStateBoolParam("")).toBeUndefined();
+		expect(triStateBoolParam("   ")).toBeUndefined();
+	});
+	it("explicit true/false forms parse as booleans", () => {
+		expect(triStateBoolParam("1")).toBe(true);
+		expect(triStateBoolParam("true")).toBe(true);
+		expect(triStateBoolParam("0")).toBe(false);
+		expect(triStateBoolParam("false")).toBe(false);
+	});
+	it("garbage stays invalid", () => {
+		expect(triStateBoolParam("__bogus__")).toBe("invalid");
+	});
+});

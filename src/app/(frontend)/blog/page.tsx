@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import BlogPostsGrid, {
@@ -7,10 +8,18 @@ import BlogPostsGrid, {
 import { Button } from "@/components/ui/button";
 import { getPayloadSafe } from "@/lib/payload-client";
 
+export const metadata: Metadata = {
+	title: "Stellar Ecosystem Research & Writing",
+	description:
+		"Research and analysis on the Stellar ecosystem, written from the index: what is shipping, what is funded and what the data actually shows.",
+	alternates: { canonical: "/blog" },
+};
+
 type SearchParams = Promise<{
 	page?: string;
 	category?: string;
 	tag?: string;
+	source?: string;
 }>;
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
@@ -27,6 +36,11 @@ export default async function BlogPage({
 	const page = Number(resolvedSearchParams.page) || 1;
 	const category = resolvedSearchParams.category;
 	const tag = resolvedSearchParams.tag;
+	const source =
+		resolvedSearchParams.source === "own" ||
+		resolvedSearchParams.source === "ecosystem"
+			? resolvedSearchParams.source
+			: undefined;
 
 	const categories = [
 		"Announcement",
@@ -85,7 +99,7 @@ export default async function BlogPage({
 
 				{/* Filters */}
 				<div className="mb-8 sm:mb-12 space-y-3 sm:space-y-4">
-					{(category || tag) && (
+					{(category || tag || source) && (
 						<div>
 							<Button
 								asChild
@@ -96,6 +110,28 @@ export default async function BlogPage({
 							</Button>
 						</div>
 					)}
+					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
+						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
+							Source
+						</span>
+						{[
+							{ key: undefined, label: "All" },
+							{ key: "own", label: "Written by Stellar Light" },
+							{ key: "ecosystem", label: "From the ecosystem" },
+						].map((s) => (
+							<Button
+								key={s.label}
+								asChild
+								size="sm"
+								variant={source === s.key ? "default" : "outline"}
+								className="rounded-full h-8 text-xs"
+							>
+								<Link href={`/blog${s.key ? `?source=${s.key}` : ""}`}>
+									{s.label}
+								</Link>
+							</Button>
+						))}
+					</div>
 					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-full sm:w-auto">
 							Categories
@@ -138,7 +174,12 @@ export default async function BlogPage({
 
 				{/* Posts Grid */}
 				<Suspense fallback={<BlogPostsGridSkeleton />}>
-					<BlogPostsGrid page={page} category={category} tag={tag} />
+					<BlogPostsGrid
+						page={page}
+						category={category}
+						tag={tag}
+						source={source}
+					/>
 				</Suspense>
 			</main>
 		</div>

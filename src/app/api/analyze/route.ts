@@ -24,7 +24,7 @@ import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
-import { computeEcosystemGaps } from "@/lib/ecosystem-gaps";
+import { computeEcosystemGaps, GAP_VERTICALS } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -45,38 +45,7 @@ const VALID_DIMENSIONS = [
 	"tvl",
 	"gaps",
 	"developers",
-] as const;
-
-// Buildable product verticals — the universe the `gaps` dimension measures
-// coverage against, so a canonical vertical with ZERO active projects surfaces
-// as whitespace rather than being invisible. EVERY entry MUST be a real value
-// of the projects `types` select (this list is a subset of it); a label that
-// isn't a `types` value can never appear in any project's types[] and would
-// report a permanent FALSE `absent`. That is why "Oracle" is NOT here: oracles
-// are typed by convention as category=Infrastructure with types=[] (Reflector/
-// Band/RedStone all carry types=[]), and "Oracle" isn't a `types` option at all
-// — its coverage isn't measurable on this axis (use searchProjects/category).
-// The broad catch-alls (Infrastructure / SDK / Analytics) are excluded because
-// they're not verticals; a caveat in the response says so.
-const GAP_VERTICALS = [
-	"Wallet",
-	"DEX",
-	"Lending",
-	"Bridge",
-	"Payments",
-	"Anchor",
-	"Indexer",
-	"Explorer",
-	"AI",
-	"Gaming",
-	"Education",
-	"Security",
-	"NFT",
-	"RWA",
-	"Stablecoin",
-	"Social Impact",
-	"RPC",
-	"Faucet",
+	"toolchain",
 ] as const;
 
 // One place for the funding methodology label — it is served in the response
@@ -154,6 +123,8 @@ export async function GET(req: NextRequest) {
 	const includeGaps = dimensionParam === "all" || dimensionParam === "gaps";
 	const includeDevelopers =
 		dimensionParam === "all" || dimensionParam === "developers";
+	const includeToolchain =
+		dimensionParam === "all" || dimensionParam === "toolchain";
 
 	const payload = await getPayloadSafe();
 
@@ -639,6 +610,90 @@ export async function GET(req: NextRequest) {
 			basis:
 				"Electric Capital Open Dev Data: monthly-active developers = distinct authors of code commits to Stellar-ecosystem open-source repos in the trailing 28 days (NOT a headcount or payroll figure; closed-source and non-committing contributors are uncounted). `exclusive` builds only on Stellar; `multichain` also commits to other ecosystems. Dated by asOf; deltas are point-in-time vs the snapshot. Peer MAD is the same methodology per chain for scale, not a quality ranking.",
 		};
+	}
+
+	// ── Toolchain rollup (code-truth track): which SDK generations the
+	// scanned Soroban corpus actually sits on, plus the deprecated roster —
+	// the "who is on an unsupported toolchain" report internal platform/devrel
+	// teams ask for. Presence facts (ciPresent/testsPresent) ride along as an
+	// engineering-practice snapshot. Commit-side, as-of the last scans.
+	if (includeToolchain && payload) {
+		try {
+			// The cap was 2000 while scannedRepos reported totalDocs (5616 on
+			// 2026-09-03), so the buckets summed to exactly the limit under a
+			// headline nearly 3x larger. "107 deprecated of 5616" reads as 1.9%
+			// when the measured rate is 5.4% - a 2.8x understatement of the one
+			// question this rollup exists to answer. The select is six small
+			// fields, so the corpus fits; measuredRepos below reports what was
+			// actually counted either way, so a future overflow states itself
+			// instead of quietly deflating the rate.
+			const TOOLCHAIN_SCAN_CAP = 20000;
+			const scanned = await payload.find({
+				collection: "repos",
+				where: { sorobanSdkVersion: { exists: true } },
+				limit: TOOLCHAIN_SCAN_CAP,
+				depth: 0,
+				overrideAccess: true,
+				select: {
+					fullName: true,
+					projectSlug: true,
+					sorobanSdkVersion: true,
+					versionStatus: true,
+					ciPresent: true,
+					testsPresent: true,
+				},
+			});
+			const byStatus: Record<string, number> = {};
+			let ciCount = 0;
+			let testsCount = 0;
+			let practiceKnown = 0;
+			const deprecated: Array<{
+				fullName: string;
+				projectSlug: string | null;
+				sorobanSdkVersion: string | null;
+			}> = [];
+			// biome-ignore lint/suspicious/noExplicitAny: select-narrowed docs
+			for (const r of scanned.docs as any[]) {
+				const st =
+					typeof r.versionStatus === "string" ? r.versionStatus : "unknown";
+				byStatus[st] = (byStatus[st] ?? 0) + 1;
+				if (typeof r.ciPresent === "boolean") {
+					practiceKnown += 1;
+					if (r.ciPresent) ciCount += 1;
+					if (r.testsPresent) testsCount += 1;
+				}
+				if (st === "deprecated" && deprecated.length < 50)
+					deprecated.push({
+						fullName: String(r.fullName),
+						projectSlug: r.projectSlug ?? null,
+						sorobanSdkVersion: r.sorobanSdkVersion ?? null,
+					});
+			}
+			const measuredRepos = (scanned.docs as unknown[]).length;
+			result.toolchain = {
+				scannedRepos: scanned.totalDocs,
+				// The denominator the buckets below were actually computed over.
+				// Rates must divide by THIS, not by scannedRepos: the two are equal
+				// only when nothing was truncated.
+				measuredRepos,
+				measurementComplete: measuredRepos >= scanned.totalDocs,
+				byVersionStatus: byStatus,
+				deprecatedRepos: deprecated,
+				deprecatedTotal: byStatus.deprecated ?? 0,
+				// deprecatedRepos is a sample capped at 50; deprecatedTotal is the
+				// real count, so the roster length is never mistaken for it.
+				deprecatedListTruncated: (byStatus.deprecated ?? 0) > deprecated.length,
+				engineeringPractice: {
+					reposWithPracticeFacts: practiceKnown,
+					ciPresent: ciCount,
+					testsPresent: testsCount,
+				},
+				basis:
+					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence — presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
+			};
+		} catch {
+			// best-effort — rollup absent on error, never fabricated
+		}
 	}
 
 	logApiHit({

@@ -19,6 +19,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	normalizeSection,
@@ -107,6 +108,7 @@ export async function GET(req: NextRequest) {
 	return NextResponse.json(
 		{
 			meta: {
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: PEOPLE_SOURCE,
 				observedAt: PEOPLE_OBSERVED_AT,
 				generatedAt: new Date().toISOString(),

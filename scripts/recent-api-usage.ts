@@ -1,6 +1,7 @@
 /** READ-ONLY. Shows AGENT-type API calls (agent/claude/codex/cursor) across the
  * whole history — i.e. bots like Pallet hitting the API — independent of human
  * curl/browser noise. Run via the recent-api-usage workflow (prod creds). */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

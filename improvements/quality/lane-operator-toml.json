@@ -1,0 +1,51 @@
+{
+ "lane": "operator-toml",
+ "generatedAt": "2026-10-07T14:42:22.338Z",
+ "stage": 1,
+ "cleanWeeks": 2,
+ "stageEntryThresholdWeeks": 2,
+ "lastRun": {
+  "id": 32083131139,
+  "at": "2026-08-18T00:05:28Z",
+  "event": "workflow_dispatch",
+  "conclusion": "success"
+ },
+ "lastCountedRunId": 36580665476,
+ "stamps": [
+  {
+   "slug": "agtrail",
+   "network": "mainnet"
+  },
+  {
+   "slug": "estrela",
+   "network": "mainnet"
+  },
+  {
+   "slug": "lumenswap",
+   "network": "mainnet"
+  },
+  {
+   "slug": "normal",
+   "network": "mainnet"
+  },
+  {
+   "slug": "reyts",
+   "network": "mainnet"
+  },
+  {
+   "slug": "sodax",
+   "network": "mainnet"
+  },
+  {
+   "slug": "stellar-carbon",
+   "network": "mainnet"
+  },
+  {
+   "slug": "xlmeme",
+   "network": "mainnet"
+  }
+ ],
+ "upgrades": [],
+ "corrections": [],
+ "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
+}

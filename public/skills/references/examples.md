@@ -27,9 +27,9 @@ Load when the user query matches one of these shapes — the patterns here show 
 ### Example 3 — SDF skill discovery
 **User:** "I want to write a Soroban contract. What do I need to know?"
 **Agent action:**
-1. `GET /api/skills/soroban` → load the full SDF Soroban skill content.
+1. `GET /api/skills/smart-contracts` → load the full SDF Soroban skill content.
 2. Use it to answer the user's question with cited references to the actual skill sections.
-3. Tell the user: *"For ongoing work, install this skill at `.claude/skills/stellar-soroban/SKILL.md` from `https://skills.stellar.org/skills/soroban/SKILL.md`."*
+3. Tell the user: *"For ongoing work, install this skill at `.claude/skills/stellar-smart-contracts/SKILL.md` from `https://skills.stellar.org/skills/smart-contracts/SKILL.md`."*
 
 ---
 
@@ -84,7 +84,7 @@ Load when the user query matches one of these shapes — the patterns here show 
    - If 3+: surface the leaders, their funding amounts, and what they shipped. *"Be prepared to differentiate from {top names}."*
 3. `GET /api/projects/search?q=invoice+factoring` (broader) → unfunded competitors / hackathon submissions that didn't get SCF money. Signal whether the unfunded ones abandoned (`hackathonStatus`) — useful for the user's pitch ("X tried this and shelved it because…").
 4. `GET /api/rfps?status=open&q=invoice` → check if there's a direct open RFP. **If yes** — pitch becomes "applying against the {RFP title} brief", which is a stronger SCF application than a cold pitch. **If no, also fetch** `GET /api/rfps?status=closed&q=invoice` to surface past RFPs (warn about prior takers per closed-RFP rules above).
-5. SDK rec: `GET /api/skills/soroban` and `/api/skills/assets` — required reading for a Soroban-based SME finance product. Tell user to install both for the build phase.
+5. SDK rec: `GET /api/skills/smart-contracts` and `/api/skills/assets` — required reading for a Soroban-based SME finance product. Tell user to install both for the build phase.
 6. Point them at the two essential references:
    - **SCF Handbook** (`https://stellar.gitbook.io/scf-handbook`) — read the application format, governance, award tiers, and verified-member rules before submitting.
    - **stellarlight.xyz/ideas** — full RFP listing + quarter tabs + the "Suggest a Need" form if no open RFP fits.
@@ -99,7 +99,7 @@ Load when the user query matches one of these shapes — the patterns here show 
 1. **Confirm user type:** *"Independent builder or team — so I'll lead with ecosystem traction + adjacent projects, not hackathon/grant specifics."*
 2. `GET /api/leaderboard` → ecosystem snapshot. Surface `.ecosystem.activeDevs28d`, `.ecosystem.commits28d`, `.ecosystem.multichainDevs28d`, `.ecosystem.stellarOnlyDevs28d`. For *cross-chain peer comparison* (Ethereum / Solana / etc.), chain a second call: `GET /api/research?source=ec-developer-report&q=stellar+L1+comparison`.
 3. `GET /api/projects/search?q=settlement+payment` → adjacent existing projects. Note which are SCF-funded vs not, which are abandoned.
-4. SDK rec: `GET /api/skills/soroban` + `/api/skills/agentic-payments` (settlement infra often touches both).
+4. SDK rec: `GET /api/skills/smart-contracts` + `/api/skills/agentic-payments` (settlement infra often touches both).
 5. Honest close: *"Independent builder or teams on Stellar typically still chase SCF funding eventually — even without a grant target now, vet your idea against the open RFPs at `https://stellarlight.xyz/ideas` to see if there's an aligned brief for the next round."*
 
 ---
@@ -114,7 +114,7 @@ Load when the user query matches one of these shapes — the patterns here show 
    - `GET /api/research?q=inflation+attack+share+price+deposit&source=audit&limit=5`
 3. **Cite each finding inline with auditor + severity + protocol metadata.** Don't just say *"there were oracle findings"* — say *"per the Certora audit of Blend Protocol V2 (HIGH severity), the oracle price feed can be manipulated when …"* with the URL. The chunks carry `.auditor`, `.protocol`, `.severity` — use them.
 4. **Filter by severity when the user is doing risk triage.** *"Show me only critical/high findings"* → re-query with the same `q` but mentally rank: chunks tagged `critical` or `high` first, then `medium`. Note: ~43% of audit chunks carry an inferred severity tag; the rest are TOC / scope / methodology sections and don't get a bucket.
-5. **Cross-link to skills.stellar.org** for the *how-to-fix* layer: `https://skills.stellar.org/skills/soroban/SKILL.md` covers safe oracle integration patterns; Scout surfaces what's been broken before, the SDF skill covers how to build it correctly. They compose.
+5. **Cross-link to skills.stellar.org** for the *how-to-fix* layer: `https://skills.stellar.org/skills/smart-contracts/SKILL.md` covers safe oracle integration patterns; Scout surfaces what's been broken before, the SDF skill covers how to build it correctly. They compose.
 6. **Honesty floor:** if zero findings come back for a specific attack class, say so — *"no Soroban audit in the corpus has documented a finding for X — that means either it's a real gap or our corpus doesn't cover the relevant protocols yet."* Don't invent risk.
 
 ---

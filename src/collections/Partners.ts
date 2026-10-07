@@ -63,6 +63,14 @@ const PARTNER_TYPES = [
 	{ label: "Audit firm", value: "audit-firm" },
 	{ label: "Legal / Compliance", value: "legal" },
 	{ label: "Agency / Dev shop", value: "agency" },
+	// "anchor" had become the catch-all for anything that mints a token on
+	// Stellar — a real anchor takes fiat in and pays fiat out (SEP-6/24
+	// deposit+withdrawal); an issuer mints an asset and stops there. 2026-09-02
+	// audit of the 27 anchor-typed rows found 3 pure issuers with nowhere
+	// honest to land (franklin-templeton/BENJI, gmo-zcom-trust/GYEN+ZUSD,
+	// audd) — own tagline is issuance, stellar.toml fetched with no SEPs, no
+	// rampTypes.
+	{ label: "Asset Issuer", value: "asset-issuer" },
 	{ label: "Other", value: "other" },
 ] as const;
 
@@ -78,7 +86,7 @@ const SECTORS = [
 	{ label: "Other", value: "other" },
 ] as const;
 
-const REGIONS = [
+export const REGIONS = [
 	{ label: "Global", value: "global" },
 	{ label: "North America", value: "north-america" },
 	{ label: "Latin America", value: "latam" },
@@ -167,6 +175,7 @@ export const Partners: CollectionConfig = {
 		delete: ({ req }) => isAdmin(req.user),
 		// Partners must not see each other in the admin list UI.
 		admin: ({ req }) => isAdmin(req.user),
+		unlock: ({ req }) => isAdmin(req.user),
 	},
 	hooks: {
 		beforeValidate: [
@@ -440,6 +449,24 @@ export const Partners: CollectionConfig = {
 					},
 				},
 			],
+		},
+		{
+			name: "tomlSourceUrl",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"SYSTEM-STAMPED: the stellar.toml URL the anchor-capability fields were last enriched from",
+			},
+		},
+		{
+			name: "tomlFetchedAt",
+			type: "text",
+			admin: {
+				position: "sidebar",
+				description:
+					"SYSTEM-STAMPED: ISO date of the last successful stellar.toml fetch+parse",
+			},
 		},
 
 		// ── On-chain proof (SYSTEM-OWNED — enrichment run owns it) ─────────

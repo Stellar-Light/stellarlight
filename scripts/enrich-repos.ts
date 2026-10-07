@@ -10,18 +10,40 @@
  *
  *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute]
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
 import {
+	type BatchRepoResult,
 	fetchRepoInfo,
+	fetchRepoInfoBatch,
+	gqlBatchStats,
 	listOwnerRepos,
 	type OwnerRepo,
 } from "../src/lib/github";
-import { repoGrade } from "../src/lib/repo-grade";
+import {
+	FIRST_PARTY_OWNERS,
+	isFirstParty,
+	repoGrade,
+	vouchingNoteCount,
+} from "../src/lib/repo-grade";
+import {
+	type AuditRecord,
+	buildKnowledgeNotes,
+} from "../src/lib/repo-knowledge";
+import { repoNameOwner, STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
+import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
+import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
+import { deriveTriageTags } from "../src/lib/repo-triage";
+import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(process.env.ENRICH_LIMIT || "0") || 0; // 0 = all
+// Targeted re-enrich (#777): --only owner/repo pins the pass to ONE repo —
+// re-stamps knowledgeNotes/activitySignals without burning the PAT budget on
+// a full corpus pass (which is what keeps starving mid-day).
+const onlyIdx = process.argv.indexOf("--only");
+const ONLY = onlyIdx >= 0 ? (process.argv[onlyIdx + 1] ?? "") : "";
 // Cap repos pulled per org so a giant or mis-linked org can't flood the index.
 // listOwnerRepos returns most-recently-pushed first, so this keeps the liveliest.
 const ORG_REPO_CAP = Number(process.env.ORG_REPO_CAP || "40") || 40;
@@ -76,6 +98,35 @@ function reposOf(p: Doc): Array<{ owner: string; name: string }> {
 // reposOf's two-segment regex skips it entirely — that's why flagship orgs
 // contributed ZERO code references. Detect the owner-only case so we can expand
 // it to the owner's repos via listOwnerRepos.
+/**
+ * The GitHub owner a project sits under, from a bare-org link OR a specific
+ * repo link OR the stored orgLogin. Distinct from orgLoginOf, which answers
+ * the narrower "does this project trigger an org fan-out".
+ *
+ * The distinction is the whole of sls-068: Fluxity links
+ * github.com/luanlabs/fluxity-v1-core, so orgLoginOf returns null for it and
+ * it was invisible as a sibling — Wagent's bare-org link then claimed every
+ * fluxity-* repo with nothing to argue against it.
+ */
+function ownerOf(p: Doc): string | null {
+	const gh = p.links?.github;
+	if (typeof gh === "string" && gh) {
+		const path = gh.replace(/^https?:\/\//, "").replace(/^www\./, "");
+		const m = path.match(/github\.com\/([^/?#\s]+)/i);
+		const login = m?.[1]?.trim();
+		if (
+			login &&
+			VALID_IDENT.test(login) &&
+			!NOT_A_USER.has(login.toLowerCase())
+		)
+			return login;
+	}
+	const stored = (p.github as { orgLogin?: string } | undefined)?.orgLogin;
+	if (typeof stored === "string" && stored && VALID_IDENT.test(stored))
+		return stored;
+	return null;
+}
+
 function orgLoginOf(p: Doc): string | null {
 	const gh = p.links?.github;
 	if (typeof gh !== "string" || !gh) return null;
@@ -105,6 +156,12 @@ function builderRep(b: Doc): number {
 	else if (commits >= 10) r = Math.max(r, 0.55);
 	return Math.min(1, r);
 }
+
+/** Lowercased: the corpus stores GitHub's canonical casing and our own list has
+ * drifted from it twice (10 names matched zero rows for months). Compare
+ * case-insensitively so a casing change cannot silently strip a canonical
+ * repo's score lift. */
+const CURATED = new Set(CURATED_CANONICAL_REPOS.map((n) => n.toLowerCase()));
 
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
@@ -163,10 +220,44 @@ async function main() {
 		`Loaded ${builders.length} builders (${repByGithub.size} github + ${repByRepo.size} repo reputation keys).`,
 	);
 
+	// Audit crosslink for knowledgeNotes: EXACT projectSlug join (never fuzzy).
+	const auditsByProject = new Map<string, AuditRecord[]>();
+	try {
+		const auditRes = await payload.find({
+			collection: "audits",
+			limit: 1000,
+			depth: 0,
+			// biome-ignore lint/suspicious/noExplicitAny: Payload find options shape
+		} as any);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const a of auditRes.docs as any[]) {
+			const slug = a.projectSlug ? String(a.projectSlug) : null;
+			if (!slug) continue;
+			if (!auditsByProject.has(slug)) auditsByProject.set(slug, []);
+			auditsByProject.get(slug)?.push({
+				projectSlug: slug,
+				auditor: a.auditor ?? null,
+				publishedAt: a.publishedAt ?? null,
+			});
+		}
+		console.log(
+			`Loaded audit crosslinks for ${auditsByProject.size} projects.`,
+		);
+	} catch (e) {
+		console.log(`Audit crosslink load failed (notes degrade): ${String(e)}`);
+	}
+
 	// Dedupe repos across projects; keep the highest-prominence owning project.
 	const byFull = new Map<
 		string,
-		{ owner: string; name: string; full: string; project: Doc }
+		{
+			owner: string;
+			name: string;
+			full: string;
+			project: Doc;
+			/** Named on the project record, not inferred from an org fan-out. */
+			explicit: boolean;
+		}
 	>();
 	for (const p of projects) {
 		for (const { owner, name } of reposOf(p)) {
@@ -174,7 +265,7 @@ async function main() {
 			const key = full.toLowerCase();
 			const prev = byFull.get(key);
 			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
-				byFull.set(key, { owner, name, full, project: p });
+				byFull.set(key, { owner, name, full, project: p, explicit: true });
 			}
 		}
 	}
@@ -183,7 +274,20 @@ async function main() {
 	// project's hackathon/SCF/prominence/builder grade. Existing explicit repos
 	// keep priority via the prominence guard.
 	const orgByLogin = new Map<string, { login: string; project: Doc }>();
+	// Every project linking the org, not only the winner: a studio org hosts
+	// several products, and a repo that NAMES one of them belongs to it rather
+	// than to whichever record happens to be most prominent (sls-068 — three
+	// luanlabs/fluxity-* repos were served under project Wagent).
+	const orgSiblings = new Map<string, Doc[]>();
 	for (const p of projects) {
+		// Sibling set uses the BROAD owner: a project linking one repo in the
+		// org must still be able to claim its own repos by name.
+		const owner = ownerOf(p);
+		if (owner) {
+			const okey = owner.toLowerCase();
+			orgSiblings.set(okey, [...(orgSiblings.get(okey) ?? []), p]);
+		}
+		// Fan-out is still triggered only by a BARE-org link.
 		const login = orgLoginOf(p);
 		if (!login) continue;
 		const key = login.toLowerCase();
@@ -192,13 +296,45 @@ async function main() {
 			orgByLogin.set(key, { login, project: p });
 		}
 	}
+	// The orgs that publish the protocol are indexed because they publish it —
+	// not because some product's record happens to name them.
+	//
+	// Until 2026-09-07 org fan-out was driven ENTIRELY by project rows carrying
+	// a bare-org github link, so SDF's presence in the index was an accident:
+	// `stellar` is expanded only because Freighter, MoneyGram and the Laboratory
+	// each list orgLogin=stellar. `stellar-experimental` — "Experiments at the
+	// frontier of the Stellar Development Foundation", 30 repos, all Stellar —
+	// is named by NO project row, so 18 of its 30 repos were absent from the
+	// index: henyey (a pure-Rust Stellar Core), stellar-spec (the protocol
+	// specifications), the Zig and C Soroban SDKs, contract-verifications, and
+	// stellar-raven itself.
+	//
+	// Seeded with a synthetic owner carrying no slug and zero prominence, so
+	// these repos inherit NO project authority and stand on their own merit plus
+	// the firstParty term in repoGrade. Never overrides a real project link: a
+	// first-party org a project already claims keeps that attribution.
+	const FIRST_PARTY_SEED: Doc = {
+		slug: undefined,
+		name: undefined,
+		prominence: 0,
+		provenance: { source: "FirstParty" },
+	};
+	let seeded = 0;
+	for (const owner of FIRST_PARTY_OWNERS) {
+		if (orgByLogin.has(owner)) continue;
+		orgByLogin.set(owner, { login: owner, project: FIRST_PARTY_SEED });
+		seeded++;
+	}
+	if (seeded)
+		console.log(
+			`Seeded ${seeded} first-party org(s) no project row names: ${[...FIRST_PARTY_OWNERS].filter((o) => orgByLogin.get(o)?.project === FIRST_PARTY_SEED).join(", ")}`,
+		);
+
 	// Stellar relevance gate: a bare-org link to a multi-chain org (Axelar,
 	// Allbridge, Pendulum) otherwise drags dozens of Cosmos/EVM/unrelated repos
 	// into the code-reference index. A DEDICATED Stellar org (most repos signal)
 	// keeps all its repos; a multi-chain/unrelated org keeps ONLY the repos that
 	// actually mention Stellar/Soroban in name/description/topics.
-	const STELLAR_SIGNAL =
-		/\b(stellar|soroban|lumen|xlm|sep-?\d|sdf|reflector|soroswap|aquarius|blend|freighter|passkey-?kit|scf)\b/i;
 	const isStellarRepo = (r: OwnerRepo) =>
 		STELLAR_SIGNAL.test(
 			`${r.name} ${r.description ?? ""} ${r.topics.join(" ")}`,
@@ -222,26 +358,65 @@ async function main() {
 		// (it's what fixed the Noether no-repos gap).
 		const trustedProvenance = p.provenance?.source !== "UserSubmitted";
 		const smallOrg = repos.length <= SMALL_ORG_MAX && trustedProvenance;
-		const keep = (dedicated || smallOrg ? repos : signal).slice(
-			0,
-			ORG_REPO_CAP,
-		);
+		// ORG_REPO_CAP protects the PAT budget from a large org flooding the
+		// index. The orgs that PUBLISH the protocol are not that risk: `stellar`
+		// (147 public repos), `stellar-deprecated` (81) and `stellar-experimental`
+		// (30) are a bounded, wholly-relevant 258, and every one of them is an
+		// answer an agent may need — including the archived ones, which are how
+		// an agent learns that stellar-deprecated/stellarterm is dead.
+		//
+		// Measured 2026-09-07: the cap is why 28 first-party repos were absent
+		// while 138 `stellar` rows were indexed — the cap admits 40 per
+		// expansion, and the rest of the org arrived only where some project
+		// happened to link a repo explicitly. Among the missing:
+		// stellar/stellar-confidential-token and stellar/mcp-stellar-xdr, both
+		// live, both current work.
+		const capped = isFirstParty(login) ? repos.length : ORG_REPO_CAP;
+		const keep = (dedicated || smallOrg ? repos : signal).slice(0, capped);
 		orgReposDropped += repos.length - keep.length;
+		const siblings = orgSiblings.get(login.toLowerCase()) ?? [p];
+		const siblingRefs = siblings.map((sp) => ({
+			slug: String(sp.slug ?? ""),
+			name: sp.name ? String(sp.name) : null,
+			prominence: (sp.prominence as number | undefined) ?? 0,
+		}));
+		const bySlug = new Map(siblings.map((sp) => [String(sp.slug ?? ""), sp]));
 		let taken = 0;
+		let reattributed = 0;
 		for (const r of keep) {
 			if (!VALID_IDENT.test(r.name)) continue;
 			const full = `${login}/${r.name}`;
 			const key = full.toLowerCase();
+			// The repo name is the strongest signal we have about which product
+			// in a shared org it belongs to. Fall back to the org winner when it
+			// names none of them.
+			const named = repoNameOwner(r.name, siblingRefs);
+			const owner = (named && bySlug.get(named.slug)) || p;
+			if (owner !== p) reattributed++;
 			const prev = byFull.get(key);
-			if (!prev || (p.prominence ?? 0) > (prev.project.prominence ?? 0)) {
-				byFull.set(key, { owner: login, name: r.name, full, project: p });
+			// A name match beats the org's prominence winner — that ordering IS
+			// the fix. It never beats an EXPLICIT claim on a project record:
+			// curation outranks inference, both directions.
+			const beatsPrev =
+				!prev ||
+				(!prev.explicit &&
+					(owner !== p ||
+						(owner.prominence ?? 0) > (prev.project.prominence ?? 0)));
+			if (beatsPrev) {
+				byFull.set(key, {
+					owner: login,
+					name: r.name,
+					full,
+					project: owner,
+					explicit: false,
+				});
 			}
 			taken++;
 		}
 		orgRepoCount += taken;
 		if (taken > 0)
 			console.log(
-				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : smallOrg ? " (small-org kept)" : ""} → ${taken} indexed`,
+				`  org ${login.padEnd(26)} ${repos.length} repos, ${signal.length} stellar${dedicated ? " (dedicated)" : smallOrg ? " (small-org kept)" : ""} → ${taken} indexed${reattributed ? `, ${reattributed} to a sibling by name` : ""}`,
 			);
 	}
 	if (orgByLogin.size)
@@ -250,20 +425,61 @@ async function main() {
 		);
 
 	let entries = [...byFull.values()];
+	if (ONLY)
+		entries = entries.filter(
+			(e) => e.full.toLowerCase() === ONLY.toLowerCase(),
+		);
 	if (LIMIT > 0) entries = entries.slice(0, LIMIT);
 	console.log(
 		`${entries.length} unique repos from ${projects.length} projects.\n`,
 	);
 
+	// Batched prefetch (GraphQL aliases): ~2,900 per-repo queries collapse to
+	// ~N/40 — the shared-PAT starvation fix. Per-alias isolation keeps the
+	// per-repo error semantics; a batch-level failure falls back to the old
+	// per-repo fetch path inside the loop.
+	const prefetched = new Map<string, BatchRepoResult>();
+	try {
+		const batched = await fetchRepoInfoBatch(
+			entries.map((e) => ({ owner: e.owner, name: e.name })),
+		);
+		batched.forEach((r, i) => {
+			if (r) prefetched.set(entries[i].full, r);
+		});
+		const st = gqlBatchStats();
+		console.log(
+			`GraphQL batched: ${st.queries} queries for ${st.repos} repos (was ${st.repos} queries unbatched)\n`,
+		);
+	} catch (e) {
+		console.log(
+			`  batch prefetch unavailable (${e instanceof Error ? e.message : e}) — per-repo fallback\n`,
+		);
+	}
+
 	let created = 0,
 		updated = 0,
 		failed = 0;
 	let writeFailed = 0;
+	/** Load-bearing fields this writer owns — what the read-back verifies. Not
+	 * the whole document: these are the values the ranking and attribution
+	 * actually depend on, so a silent drop here (#615) is what would hurt. */
+	const VERIFIED_FIELDS = [
+		"projectSlug",
+		"repoScore",
+		"repoScoreLabel",
+		"lastEnrichedAt",
+	] as const;
+	/** fullName → what was sent, so the read-back compares against the claim. */
+	const sentByRepo = new Map<string, Record<string, unknown>>();
+	/** doc id → human fullName, so mismatch output stays readable. */
+	const labelById = new Map<string, string>();
 	for (const { owner, name, full, project } of entries) {
 		let info: Awaited<ReturnType<typeof fetchRepoInfo>> | null = null;
 		let enrichError: string | null = null;
 		try {
-			info = await fetchRepoInfo(owner, name);
+			const pre = prefetched.get(full);
+			if (pre && "error" in pre) throw new Error(pre.error);
+			info = pre ? pre.info : await fetchRepoInfo(owner, name);
 		} catch (e) {
 			enrichError = e instanceof Error ? e.message : String(e);
 			failed++;
@@ -284,14 +500,48 @@ async function main() {
 		// Fetch the existing doc BEFORE grading so the persisted Code-Truth
 		// signals (codeDepth, written by scripts/scan/scan-repo-code.ts) feed the
 		// grade — a code-verified deep contract lifts repoScore even at 0 stars.
-		const existing = (
-			await payload.find({
+		//
+		// #783: GitHub fullNames are case-insensitive but Mongo equals is not —
+		// case-variant source lists used to CREATE twin docs; the lookup falls
+		// back to a case-insensitive match. (`like` is substring-insensitive —
+		// the JS filter makes it exact; see the contains-substring trap.)
+		const findRepoDoc = async (key: string): Promise<Doc | undefined> => {
+			const exact = (
+				await payload.find({
+					collection: "repos",
+					where: { fullName: { equals: key } },
+					limit: 1,
+					depth: 0,
+				})
+			).docs[0] as Doc | undefined;
+			if (exact) return exact;
+			const near = await payload.find({
 				collection: "repos",
-				where: { fullName: { equals: full } },
-				limit: 1,
+				where: { fullName: { like: key } },
+				limit: 5,
 				depth: 0,
-			})
-		).docs[0] as Doc | undefined;
+			});
+			return (near.docs as Doc[]).find(
+				(d) =>
+					String((d as { fullName?: string }).fullName ?? "").toLowerCase() ===
+					key.toLowerCase(),
+			);
+		};
+		let existing = await findRepoDoc(full);
+		// Rename loop (#843's lookup-side twin, found via the 2026-08-28 census:
+		// 381 duplicate rows, some repos stored 20×). When a project record
+		// lists a repo's OLD name, GitHub resolves the redirect and we WRITE the
+		// row under the canonical nameWithOwner — but this lookup only tried the
+		// listed name, so the row we wrote yesterday is unfindable today and
+		// every --execute pass created one more copy. The repo is the same repo
+		// under both names: look it up under the canonical name too.
+		if (!existing && info && info.nameWithOwner !== full) {
+			existing = await findRepoDoc(info.nameWithOwner);
+			if (existing)
+				console.log(
+					`  rename ${full} → ${info.nameWithOwner} (converging on the canonical row)`,
+				);
+		}
 		const grade = info
 			? repoGrade({
 					lastCommitAt: info.lastCommitAt,
@@ -305,16 +555,81 @@ async function main() {
 					hasDescription: !!(info.description && info.description.trim()),
 					topicCount: Array.isArray(info.topics) ? info.topics.length : 0,
 					openIssues: info.openIssues ?? 0,
+					commits90d: info.commits90d ?? null,
 					codeDepth:
 						typeof existing?.codeDepth === "number" ? existing.codeDepth : null,
+					// The code-driven lift is gated on external validation (see
+					// repo-grade.ts). Curated-canonical is the strongest such
+					// signal — a human named this repo THE answer for a concept —
+					// so it must reach the grader, or the canonical repos lose
+					// the very lift the gate was designed to preserve for them.
+					// `info.nameWithOwner` over `full`: after a rename the curated
+					// list names the canonical repo, and the block just above has
+					// already converged the row onto it.
+					curatedCanonical: CURATED.has(
+						(info.nameWithOwner ?? full).toLowerCase(),
+					),
+					// Stars are evidence the ecosystem AT LARGE noticed a repo,
+					// not that OURS did. A scan that affirmatively found no
+					// Stellar code discounts them; an unscanned repo is not
+					// punished. Without this, iancoleman/bip39 (4,314 stars, no
+					// Stellar code) outscored blend-capital/blend-contracts.
+					stellarProof:
+						typeof existing?.stellarProof === "string"
+							? existing.stellarProof
+							: null,
+					// A curated note is a human recording what this repo IS,
+					// dated and sourced — external validation in its own right.
+					// Internal notes are triage memory ("not worth surfacing") and must
+					// not read as external validation — see vouchingNoteCount.
+					knowledgeNoteCount: vouchingNoteCount(existing?.knowledgeNotes),
+					// The protocol org publishes the reference implementations
+					// and never receives an SCF award, so first-party repos read
+					// as unvouched-for until this reached the grader.
+					firstParty: isFirstParty(info.nameWithOwner ?? full),
+					// Facts the code scan already stored on the row. Reading them
+					// here is the point of scanning: releases, tests, CI and the
+					// live SDK pin are evidence the repo WORKS, earned by the
+					// code rather than inherited from whoever funded it.
+					testsPresent: existing?.testsPresent ?? null,
+					ciPresent: existing?.ciPresent ?? null,
+					lastReleaseAt: existing?.activitySignals?.lastReleaseAt ?? null,
+					versionStatus: existing?.versionStatus ?? null,
+					contractInterfaceCount: Array.isArray(existing?.contractInterface)
+						? existing.contractInterface.length
+						: 0,
+					codeScanned: existing?.codeScanState === "scanned",
+					name: info.nameWithOwner ?? full,
+					publishedPackageCount: Array.isArray(existing?.publishedPackages)
+						? existing.publishedPackages.length
+						: 0,
+					// The other half of the same divergence: regrade-repos passes
+					// judgeScore and this lane did not, so the 10 judged repos that
+					// ALSO carry a project link scored differently depending on
+					// which lane touched them last.
+					judgeScore:
+						typeof existing?.judgeScore === "number"
+							? existing.judgeScore
+							: null,
 				})
 			: { score: 0, label: "low" as const };
 
+		// #783: converge on GitHub's canonical casing when we fetched it;
+		// otherwise keep the existing doc's form (no churn between passes).
+		const writtenFullName =
+			info?.nameWithOwner ??
+			(existing as { fullName?: string } | undefined)?.fullName ??
+			full;
 		const data: Doc = {
-			fullName: full,
-			owner,
-			name,
-			url: info?.url ?? `https://github.com/${full}`,
+			fullName: writtenFullName,
+			// owner/name derive from the fullName actually WRITTEN, not from the
+			// project record's listed name. The census found rows whose fullName
+			// carried the canonical org while `owner` still carried the listed
+			// (pre-rename) org — an internally inconsistent row that defeats any
+			// owner-based join or dedupe heuristic.
+			owner: writtenFullName.split("/")[0] ?? owner,
+			name: writtenFullName.split("/")[1] ?? name,
+			url: info?.url ?? `https://github.com/${writtenFullName}`,
 			...(info
 				? {
 						description: info.description ?? null,
@@ -327,15 +642,72 @@ async function main() {
 						isFork: !!info.isFork,
 						isArchived: !!info.isArchived,
 						readmeExcerpt: info.readme ?? null,
+						activitySignals: {
+							commits90d: info.commits90d ?? null,
+							lastReleaseAt: info.lastReleaseAt ?? null,
+							releaseTag: info.releaseTag ?? null,
+							openPRs: info.openPRs ?? null,
+							asOf: new Date().toISOString(),
+						},
 					}
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
+			// sls-064 analog: curated generation relation — wholesale each pass.
+			// Keyed by the CANONICAL name the row is written under, never by
+			// `full` (the name the project record lists). For a moved or renamed
+			// repo `full` is the OLD path — hyperledger/solang, daccred/attest.so,
+			// gaudiatech/pyved-engine — so the registry lookup missed and this
+			// pass wrote `[]` over the notes backfill-knowledge-notes had stamped
+			// that morning: 7 curated-pool rows lost their notes on every day both
+			// lanes ran, found by the backfill's dry re-plan (2026-09-14).
+			successorRepo: REPO_SUCCESSIONS[writtenFullName.toLowerCase()] ?? null,
+			knowledgeNotes: buildKnowledgeNotes(
+				writtenFullName,
+				project.slug,
+				auditsByProject,
+				{
+					lastCommitAt:
+						info?.lastCommitAt ??
+						// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+						(existing as any)?.lastCommitAt ??
+						null,
+					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+					codeInUse: (existing as any)?.codeInUse ?? null,
+				},
+			),
 			hackathonWinner: !!project.hackathonPlacement,
 			scfAwarded: !!project.scf?.awarded,
 			builderReputation,
 			repoScore: grade.score,
 			repoScoreLabel: grade.label,
+			// Internal triage labels — derived wholesale each pass (self-healing:
+			// a repo that comes back to life untags). See src/lib/repo-triage.ts.
+			triageTags: deriveTriageTags({
+				fullName: full,
+				lastCommitAt:
+					info?.lastCommitAt ??
+					// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+					(existing as any)?.lastCommitAt ??
+					null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				stars: info?.stars ?? (existing as any)?.stars ?? null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				isFork: info?.isFork ?? (existing as any)?.isFork ?? null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				isArchived: info?.isArchived ?? (existing as any)?.isArchived ?? null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				farmScore: (existing as any)?.farmScore ?? null,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				judgedHackathon: (existing as any)?.judgedHackathon ?? null,
+				hackathonWinner: !!project.hackathonPlacement,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				source: (existing as any)?.source ?? null,
+				projectSlug: project.slug,
+				description: info?.description ?? null,
+				name: full.split("/")[1] ?? null,
+				commits90d: info?.commits90d ?? null,
+			}),
 			lastEnrichedAt: new Date().toISOString(),
 			enrichError,
 		};
@@ -348,24 +720,98 @@ async function main() {
 			// Per-write isolation (2026-07-09 curate-projects incident): one bad
 			// doc must not kill the rest of a multi-hundred-repo wave.
 			try {
+				let writtenId: string;
 				if (existing) {
 					await payload.update({ collection: "repos", id: existing.id, data });
+					writtenId = String(existing.id);
 					updated++;
 				} else {
-					await payload.create({ collection: "repos", data });
+					const madeDoc = await payload.create({ collection: "repos", data });
+					writtenId = String(madeDoc.id);
 					created++;
 				}
+				// Key by the fullName actually WRITTEN (canonical nameWithOwner) —
+				// `full` carries the project URL's casing, and the read-back $in is
+				// case-sensitive: 772/2093 rows read "not found" while persisted fine
+				// (2026-08-12 chase reds; the #788 lookup fallback got this, the
+				// read-back key didn't).
+				// #843: key by the DOCUMENT ID actually written — name-keyed
+				// read-back re-litigates identity and finds rename-twin rows
+				// (24 stale-duplicate artifacts on the first batched pass).
+				// The writer knows exactly which row it wrote; verify THAT row.
+				sentByRepo.set(writtenId, data as unknown as Record<string, unknown>);
+				labelById.set(
+					writtenId,
+					String((data as { fullName?: string }).fullName ?? full),
+				);
 			} catch (err) {
 				writeFailed++;
 				console.error(`  WRITE FAILED: ${full} — ${String(err)}`);
 			}
 		}
 	}
+	// ── read-back: prove the writes PERSISTED (lessons class 20/32, #615) ──
+	// "N created, N updated" counts resolved calls, not stored data.
+	// payload.update() drops keys with no schema field at that path without
+	// erroring, so a wave can report success having persisted nothing. Re-read
+	// every repo we claimed to write and compare against what we sent. Paged,
+	// because a full wave is many hundreds of rows.
+	let mismatchCount = 0;
+	if (EXECUTE && sentByRepo.size) {
+		console.log(`\n── Read-back (${sentByRepo.size} written repo(s)) ──`);
+		const mismatches = await verifyWrites(
+			sentByRepo,
+			async (ids) => {
+				const back = await payload.find({
+					collection: "repos",
+					where: { id: { in: ids } },
+					limit: ids.length,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return new Map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+					(back.docs as any[]).map((r) => [String(r.id), r] as const),
+				);
+			},
+			VERIFIED_FIELDS,
+			200,
+			async (key) => {
+				try {
+					const one = await payload.findByID({
+						collection: "repos",
+						id: key,
+						depth: 0,
+						overrideAccess: true,
+					});
+					return (one as Record<string, unknown>) ?? null;
+				} catch {
+					return null;
+				}
+			},
+		);
+		for (const m of mismatches) m.key = labelById.get(m.key) ?? m.key;
+		mismatchCount = mismatches.length;
+		if (mismatchCount) {
+			console.error(
+				`  ✗ ${mismatchCount} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${sentByRepo.size} repo(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
+		}
+	}
+
 	console.log(
-		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
+		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed, ${mismatchCount} did-not-persist.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
 	);
 	if (writeFailed) process.exitCode = 1;
-	process.exit(0);
+	// Was `process.exit(0)` — which STOMPED the exitCode set above, so a wave
+	// with write failures reported GREEN. That is lessons class 20's archetype
+	// verbatim (the 2026-07-09 curate-projects incident), still live here.
+	process.exit(process.exitCode ?? 0);
 }
 main().catch((e) => {
 	console.error("Fatal:", e);

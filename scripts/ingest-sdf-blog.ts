@@ -11,11 +11,8 @@
  *   npx tsx scripts/ingest-sdf-blog.ts --execute   # write to Payload
  *   npx tsx scripts/ingest-sdf-blog.ts --limit=10  # only first 10 posts
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { decodeHtmlEntities } from "../src/lib/decode-entities";
 import {
@@ -29,17 +26,40 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 const limitArg = args.find((a) => a.startsWith("--limit="));
-const limit = limitArg ? Number(limitArg.split("=")[1]) : 500;
+// 2026-09-02: the sitemap listed 568 blog URLs and the default cap was 500,
+// so the USDT0 launch announcement — published that morning — never entered
+// the corpus, and /stablecoins' news dock had nothing to say about its own
+// subject. Discovery merges a Set, so the cut is arbitrary, not oldest-first.
+// Dedup is a hash per chunk, so a bigger cap costs almost nothing.
+const limit = limitArg ? Number(limitArg.split("=")[1]) : 1200;
 
 const BASE = "https://stellar.org";
 
+/** fetch's Response.url carries fragments/query only if the server sent them;
+ * normalize so alias detection compares clean paths. */
+const stripHash = (u: string): string => u.split("#")[0].replace(/\/$/, "");
+
 async function fetchHtml(url: string): Promise<string> {
+	return (await fetchHtmlFinal(url)).html;
+}
+
+/** Fetch AND report where the redirect chain actually landed. The S8 mirror
+ * class resurrected itself here: stellar.org republished an article under a
+ * new slug with a 301 from the old one, our crawl followed the redirect but
+ * stored the post under the REQUESTED old slug, and every refresh re-created
+ * the mirror row the repair had just deleted. The final URL is the identity. */
+async function fetchHtmlFinal(
+	url: string,
+): Promise<{ html: string; finalUrl: string }> {
 	const res = await fetch(url, {
 		headers: { "User-Agent": "stellarlight-scout-ingest" },
 	});
 	if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
-	return res.text();
+	return { html: await res.text(), finalUrl: res.url || url };
 }
 
 /**
@@ -115,7 +135,14 @@ interface Post {
 }
 
 async function fetchPost(url: string): Promise<Post> {
-	const html = await fetchHtml(url);
+	const { html, finalUrl } = await fetchHtmlFinal(url);
+	// A cross-slug redirect means the article LIVES at finalUrl now; the
+	// requested slug is a historical alias. Storing under it creates a mirror
+	// row that the weekly S8 sweep flags and a repair deletes, forever.
+	if (stripHash(finalUrl) !== stripHash(url)) {
+		console.log(`  redirect: ${url} → ${finalUrl} (storing canonical)`);
+		url = stripHash(finalUrl);
+	}
 	const titleMatch =
 		html.match(
 			/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
@@ -160,7 +187,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: ${BASE}/blog\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "sdf-blog")
 		: new Map();
@@ -188,7 +216,10 @@ async function run() {
 	for (const url of urls) {
 		try {
 			const post = await fetchPost(url);
-			const slug = url.replace(`${BASE}/blog/`, "").replace(/\/$/, "");
+			// Identity comes from the POST (post-redirect canonical), never the
+			// crawl-list entry: an aliased slug must collapse into the canonical
+			// row instead of minting a mirror.
+			const slug = post.url.replace(`${BASE}/blog/`, "").replace(/\/$/, "");
 			if (!post.isArticle) {
 				skippedListings += 1;
 				listingDocIds.push(`blog/${slug}`);
@@ -205,7 +236,7 @@ async function run() {
 				md: `# ${post.title}\n\n${post.body}`,
 				parentDocId: `blog/${slug}`,
 				title: post.title,
-				url,
+				url: post.url,
 				tags: ["sdf-blog", "stellar.org"],
 				publishedAt: post.publishedAt,
 			});
@@ -245,7 +276,7 @@ async function run() {
 	);
 	console.log(`  to embed: ${stats.toEmbed} | post errors: ${postErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -253,7 +284,15 @@ async function run() {
 	// Prune poison: delete chunks of pages we just re-fetched and classified
 	// as listings (targeted — only pages verified non-article THIS run).
 	let pruned = 0;
-	for (const docId of listingDocIds) {
+	// --replan: a prune still pending after execute is a planned write too —
+	// reported on its own line; the lane sums every `replan:` line.
+	const wouldPrune = listingDocIds.reduce(
+		(n, id) => n + (existing.get(id)?.size ?? 0),
+		0,
+	);
+	if (replan && wouldPrune)
+		console.log(`replan: writes=${wouldPrune} (listing-page chunk prunes)`);
+	for (const docId of execute ? listingDocIds : []) {
 		const chunkMap = existing.get(docId);
 		if (!chunkMap) continue;
 		for (const { id } of chunkMap.values()) {
@@ -272,6 +311,7 @@ async function run() {
 		source: "sdf-blog",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

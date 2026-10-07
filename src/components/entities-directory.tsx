@@ -13,7 +13,17 @@ import { ArrowUpRight, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EntityLogo } from "@/components/entity-logo";
-import { type EntityStats, formatUSD } from "@/lib/entity-stats";
+import { type EntityStats, entitySummary, formatUSD } from "@/lib/entity-stats";
+
+function agoLabel(iso: string) {
+	const d = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
+	if (!Number.isFinite(d)) return "";
+	if (d <= 0) return "today";
+	if (d === 1) return "yesterday";
+	if (d < 30) return `${d}d ago`;
+	if (d < 365) return `${Math.floor(d / 30)}mo ago`;
+	return `${Math.floor(d / 365)}y ago`;
+}
 
 export interface EntityItem {
 	id: string;
@@ -27,6 +37,7 @@ export interface EntityItem {
 
 const SORTS = [
 	{ key: "scf", label: "Most funded" },
+	{ key: "active", label: "Most active" },
 	{ key: "projects", label: "Most projects" },
 	{ key: "name", label: "A–Z" },
 ] as const;
@@ -70,6 +81,12 @@ export function EntitiesDirectory({ items }: { items: EntityItem[] }) {
 		});
 		list.sort((a, b) => {
 			if (sort === "name") return a.name.localeCompare(b.name);
+			if (sort === "active")
+				return (
+					Date.parse(b.stats.lastCommitAt ?? "0") -
+						Date.parse(a.stats.lastCommitAt ?? "0") ||
+					b.stats.commits90d - a.stats.commits90d
+				);
 			if (sort === "projects")
 				return (
 					b.stats.projectCount - a.stats.projectCount ||
@@ -203,9 +220,9 @@ function EntityCard({ item }: { item: EntityItem }) {
 				<ArrowUpRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground flex-shrink-0 transition-colors" />
 			</div>
 
-			{item.description && (
+			{(item.description || entitySummary(item.name, stats)) && (
 				<p className="text-xs text-muted-foreground/90 leading-snug line-clamp-2 mb-3">
-					{item.description}
+					{item.description ?? entitySummary(item.name, stats)}
 				</p>
 			)}
 
@@ -223,6 +240,15 @@ function EntityCard({ item }: { item: EntityItem }) {
 				{stats.topCategory && (
 					<span className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/80 border border-border">
 						{stats.topCategory}
+					</span>
+				)}
+				{stats.lastCommitAt && (
+					<span
+						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/80 border border-border tabular-nums"
+						title={`latest commit across this org's indexed repos: ${stats.lastCommitAt.slice(0, 10)}`}
+					>
+						code {agoLabel(stats.lastCommitAt)}
+						{stats.commits90d > 0 ? ` · ${stats.commits90d} commits/90d` : ""}
 					</span>
 				)}
 			</div>

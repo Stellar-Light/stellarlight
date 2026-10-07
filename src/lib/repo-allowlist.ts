@@ -22,6 +22,14 @@ export const PROTECTED_OWNERS: ReadonlySet<string> = new Set(
 	[
 		"stellar",
 		"stellar-deprecated", // archived-but-canonical (e.g. reference impls) — still a legit reference
+		// "Experiments at the frontier of the Stellar Development Foundation"
+		// (the org's own description, read 2026-09-14) — SDF's frontier org, 30
+		// public repos. Added 2026-09-14: six of its repos sat at proof=none
+		// depth=0 because the canonical pin never covered them, including
+		// stellar-raven (the MCP server at raven.stellar.org) and the Zig and C
+		// Soroban SDKs — repos that are Soroban by definition in languages no
+		// dependency detector can see.
+		"stellar-experimental",
 		"soroban", // legacy soroban org
 		"soroswap",
 		"blend-capital",
@@ -100,4 +108,19 @@ export function isProtected(sig: ProtectionSignals): boolean {
 	if (sig.projectSlug && sig.projectSlug.trim() !== "") return true;
 	if ((sig.projectProminence ?? 0) > 0) return true;
 	return false;
+}
+
+/**
+ * Repos that must never be indexed, whatever pass finds them. Each entry
+ * names why — a denylist without reasons becomes folklore. Keys lowercase.
+ */
+export const DENIED_REPOS: ReadonlyMap<string, string> = new Map([
+	[
+		"brunomlr/stellar-docs",
+		"2023 personal copy of the Stellar docs, no description; admitted by name-match alone on 2026-08-21. The docs are a first-class Raven source (stellarDocs.*), not an ecosystem project.",
+	],
+]);
+
+export function isDenied(fullName: string | null | undefined): boolean {
+	return !!fullName && DENIED_REPOS.has(fullName.toLowerCase());
 }

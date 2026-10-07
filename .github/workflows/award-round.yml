@@ -1,0 +1,97 @@
+name: award round (create / status)
+# i³ Awards — open, close or draft a round.
+#
+# Every other step of the pipeline has a workflow (award-import, award-test-setup,
+# seed-i3-mock); the round LIFECYCLE was a hand edit in /admin, and it is the one
+# step with a documented foot-gun: /api/awards/round picks THE open round with no
+# slug, so two open rounds collide and the public ballot becomes arbitrary.
+#
+# Opening REFUSES while another round is open and names the one to draft first.
+# Closing and drafting are always allowed. Dry-run by default; every write is
+# read back.
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Round slug. Leave empty to just LIST every round and its status."
+        required: false
+        default: ""
+      create:
+        description: "CREATE this slug as a new DRAFT round (needs title; picks = 1 for the vote, N for nominations)."
+        type: boolean
+        required: false
+        default: false
+      title:
+        description: "Title. create: the title of the new round. Any status flip: a new title for the round (display only, safe in any status)."
+        required: false
+        default: ""
+      picks:
+        description: "Picks per category. create: the slot count (empty = 1). status=draft on a draft round: change it. LEAVE EMPTY for any other status flip — the script refuses --picks outside draft→draft."
+        required: false
+        default: ""
+      closes:
+        description: "Optional closesAt (ISO 8601), for create or a status flip"
+        required: false
+        default: ""
+      opens:
+        description: "Optional opensAt (ISO 8601), for create or a status flip. An open round refuses ballots until this time, so a round can be opened ahead of its start."
+        required: false
+        default: ""
+      status:
+        description: "New status"
+        type: choice
+        options: [draft, open, closed]
+        required: false
+        default: draft
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: award-round
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  round:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets, and an input pasted into
+      # `run:` is a command injection for anyone who can dispatch it.
+      - name: Set round status (dry-run unless execute=true)
+        env:
+          IN_SLUG: ${{ inputs.slug }}
+          IN_TITLE: ${{ inputs.title }}
+          IN_PICKS: ${{ inputs.picks }}
+          IN_CLOSES: ${{ inputs.closes }}
+          IN_OPENS: ${{ inputs.opens }}
+          IN_STATUS: ${{ inputs.status }}
+          IN_CREATE: ${{ inputs.create }}
+          IN_EXECUTE: ${{ inputs.execute }}
+        run: |
+          if [ -z "$IN_SLUG" ]; then
+            pnpm exec tsx scripts/data/award-round.ts --list
+            exit 0
+          fi
+          if [ "$IN_CREATE" = "true" ]; then
+            args=(--create --slug="$IN_SLUG" --title="$IN_TITLE" --picks="${IN_PICKS:-1}")
+          else
+            args=(--slug="$IN_SLUG" --status="$IN_STATUS")
+            if [ -n "$IN_PICKS" ]; then args+=(--picks="$IN_PICKS"); fi
+            if [ -n "$IN_TITLE" ]; then args+=(--title="$IN_TITLE"); fi
+          fi
+          if [ -n "$IN_OPENS" ]; then args+=(--opens="$IN_OPENS"); fi
+          if [ -n "$IN_CLOSES" ]; then args+=(--closes="$IN_CLOSES"); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-round.ts "${args[@]}"

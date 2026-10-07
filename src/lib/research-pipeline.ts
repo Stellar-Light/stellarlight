@@ -55,25 +55,125 @@ export function researchOverfetch(limit: number): number {
 	return Math.max(limit * 8, 48);
 }
 
+/** Atlas' ceiling for `numCandidates` on $vectorSearch. */
+export const VECTOR_NUM_CANDIDATES_MAX = 10_000;
+/**
+ * The deep pass's pool. Every $vectorSearch hit is a full document fetch on
+ * mongod (the embedding alone is 8 KB), so this is a bounded survey for the
+ * interim, not the whole index: once `source` is a filter field of the index
+ * the filter runs inside the index and no deep pass is needed.
+ */
+export const VECTOR_DEEP_LIMIT = 4_000;
+
+/** The definition the index is expected to carry (scripts/create-vector-index.ts writes it). */
+export const VECTOR_INDEX_FIELDS = [
+	{
+		type: "vector",
+		path: "embedding",
+		numDimensions: 1024,
+		similarity: "cosine",
+	},
+	{ type: "filter", path: "source" },
+] as const;
+
+/**
+ * Which paths the live vector index can filter on. Read once per instance
+ * (a listSearchIndexes call) and re-read every ten minutes, so an instance
+ * that started before the index gained `source` picks it up without a
+ * deploy. Unreadable (an Atlas blip, an older tier) reads as "none": the
+ * pool path still works, only slower for small sources.
+ */
+let filterPathsCache: { at: number; paths: Promise<Set<string>> } | null = null;
+const FILTER_PATHS_TTL_MS = 10 * 60 * 1000;
+export function vectorIndexFilterPaths(collection: {
+	listSearchIndexes: () => { toArray: () => Promise<unknown[]> };
+}): Promise<Set<string>> {
+	const now = Date.now();
+	if (!filterPathsCache || now - filterPathsCache.at >= FILTER_PATHS_TTL_MS) {
+		// One listSearchIndexes call per instance per ten minutes, shared by
+		// every request that arrives while it is in flight (a cold burst used
+		// to issue one per request). A read that fails is not kept: the next
+		// request asks again instead of running the widened pool pass for the
+		// whole window on the strength of one blip.
+		const paths = readVectorIndexFilterPaths(collection);
+		filterPathsCache = { at: now, paths };
+		paths.catch(() => {
+			filterPathsCache = null;
+		});
+	}
+	return filterPathsCache.paths.catch(() => new Set<string>());
+}
+
+async function readVectorIndexFilterPaths(collection: {
+	listSearchIndexes: () => { toArray: () => Promise<unknown[]> };
+}): Promise<Set<string>> {
+	const paths = new Set<string>();
+	try {
+		const all = (await collection.listSearchIndexes().toArray()) as Array<{
+			name?: string;
+			queryable?: boolean;
+			status?: string;
+			latestDefinition?: { fields?: Array<{ type?: string; path?: string }> };
+		}>;
+		const idx = all.find((i) => i.name === VECTOR_INDEX);
+		// the definition Atlas is SERVING, not one still building
+		if (idx && idx.queryable !== false && idx.status !== "PENDING") {
+			for (const f of idx.latestDefinition?.fields ?? []) {
+				if (f.type === "filter" && f.path) paths.add(f.path);
+			}
+		}
+	} catch (err) {
+		// unreadable: the caller takes the pool path for THIS request only
+		throw err;
+	}
+	return paths;
+}
+
 export function buildResearchVectorPipeline(opts: {
 	queryEmbedding: number[];
 	limit: number;
 	sourceFilter?: string | null;
+	/**
+	 * Survey a much deeper pool. A small source (paper, incident, lumenloop…)
+	 * can be absent from the generic top-1,200 entirely, which read as
+	 * "vector unavailable" and fell to keyword on every query; the route
+	 * takes this pass once when the pool pass returns nothing for a source
+	 * and the index cannot filter on `source` itself.
+	 */
+	deep?: boolean;
+	/**
+	 * The index carries `source` as a filter field: filter INSIDE
+	 * $vectorSearch, so the pool is that source's own nearest chunks and no
+	 * widening or deep pass is needed. See vectorIndexFilterPaths.
+	 */
+	indexFilter?: boolean;
 }): Record<string, unknown>[] {
 	const overfetch = researchOverfetch(opts.limit);
-	// Source-filtered queries survey a much deeper vector pool: the post-match
-	// survivors of a narrow source are a small fraction of the generic top-K.
-	// 6× (capped) keeps worst-case numCandidates well under Atlas' 10k limit
-	// while comfortably covering the corpus' per-source document counts.
-	const vsLimit = opts.sourceFilter ? Math.min(overfetch * 6, 1200) : overfetch;
+	const inIndex = Boolean(opts.sourceFilter && opts.indexFilter);
+	// Source-filtered queries without an index filter survey a much deeper
+	// vector pool: the post-match survivors of a narrow source are a small
+	// fraction of the generic top-K. 6× (capped) keeps worst-case
+	// numCandidates well under Atlas' 10k limit while comfortably covering
+	// the corpus' per-source document counts.
+	const vsLimit = inIndex
+		? overfetch
+		: opts.deep
+			? VECTOR_DEEP_LIMIT
+			: opts.sourceFilter
+				? Math.min(overfetch * 6, 1200)
+				: overfetch;
 	return [
 		{
 			$vectorSearch: {
 				index: VECTOR_INDEX,
 				path: "embedding",
 				queryVector: opts.queryEmbedding,
-				numCandidates: Math.min(Math.max(200, vsLimit * 5), 10_000),
+				numCandidates: Math.min(
+					Math.max(200, vsLimit * 5),
+					VECTOR_NUM_CANDIDATES_MAX,
+				),
 				limit: vsLimit,
+				...(inIndex ? { filter: { source: { $eq: opts.sourceFilter } } } : {}),
 			},
 		},
 		...(opts.sourceFilter
@@ -93,6 +193,12 @@ export function buildResearchVectorPipeline(opts: {
 				auditor: 1,
 				protocol: 1,
 				severity: 1,
+				// #778 final root cause: the DB rows carried capStatus all along —
+				// this $project silently dropped them before the route mapper ran
+				// (the mapper's `?? null` then read as "never stamped"). Keyword
+				// path was never affected (no select).
+				capStatus: 1,
+				capProtocolVersion: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},

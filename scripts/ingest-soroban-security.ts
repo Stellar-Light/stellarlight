@@ -20,15 +20,14 @@
  *   pnpm exec tsx scripts/ingest-soroban-security.ts             # dry run
  *   pnpm exec tsx scripts/ingest-soroban-security.ts --execute   # write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import { extractFindings } from "../src/lib/audit-findings";
 import {
+	AUDIT_RELATIONS,
 	canonicalAuditor,
+	composeAuditTitle,
 	normalizeIdentityText,
 	resolveAuditProjectSlug,
 } from "../src/lib/audit-identity";
@@ -43,6 +42,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 const limitFlag = args.find((a) => a.startsWith("--limit="));
 const LIMIT = limitFlag ? parseInt(limitFlag.split("=")[1], 10) : Infinity;
 
@@ -304,7 +306,13 @@ function promoteAuditHeadings(md: string): string {
 		/^# (Executive\s*Summary|Overview|Scope|Methodology|Disclaimer|Introduction|Appendix|Appendices|Conclusion|Summary\s+of\s+Findings|Detailed\s+Findings)\b/gim,
 		/^# (Critical|High|Medium|Low|Informational|Info|Severity)(\s|$)/gim,
 		/^# (\[[A-Z]?\d+\]\s*)/gm, // "# [A1] Foo"
-		/^# ([A-Z]{2,}-[A-Z]{2,}-[A-Z]{2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo"
+		// Finding IDs: 1+ leading letters, then 2+ further alpha groups, then
+		// digits. The previous form required exactly THREE groups of 2+ letters,
+		// so every VERIDISE id was missed — "V-SOR-APP-VUL-003" (four groups,
+		// single-letter prefix) and "V-BLND-VUL-001" alike. Their findings never
+		// became their own chunk, so an exact-identifier lookup reported a
+		// confident MISS for a real audit item (stellarlight#1031).
+		/^# ([A-Z]+(?:-[A-Z]{2,}){2,}-\d+\s*)/gm, // "# OS-BCL-ADV-00 Foo", "# V-SOR-APP-VUL-003 Foo"
 		/^# (F-\d{4}-\d+\s*)/gm, // Hacken "# F-2026-15609 Foo"
 		/^# ([A-Z]{3}\d{3}\s+)/gm, // Coinspect "# TRI001 Foo"
 	];
@@ -332,7 +340,8 @@ async function run() {
 		`  ${list.length} total, ${approved.length} approved, processing ${targets.length}`,
 	);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "audit")
 		: new Map();
@@ -385,9 +394,15 @@ async function run() {
 			// before anything becomes a title, tag, or filterable field.
 			const auditorClean = canonicalAuditor(meta.auditorName);
 			const protocolClean = normalizeIdentityText(meta.protocolName);
-			const title = `${protocolClean} — ${auditorClean}${
-				meta.name ? ` (${normalizeIdentityText(meta.name)})` : ""
-			}`;
+			// The portal's report `name` is usually the PDF's internal doc-title
+			// restating protocol + auditor, which pushed three live titles past
+			// the corpus sweep's 110-char bar. composeAuditTitle appends it only
+			// when it adds a word the prefix lacks AND stays under the bar.
+			const title = composeAuditTitle(
+				meta.protocolName,
+				meta.auditorName,
+				meta.name,
+			);
 			const url = REPORT_URL(meta.id);
 			const tags = [
 				"audit",
@@ -434,6 +449,23 @@ async function run() {
 				linkMapped: link.mapped,
 				findingsTotal: findings?.findingsTotal ?? null,
 				severityCounts: findings?.severityCounts ?? null,
+				// sls-064: extraction completeness — 7 vs null must read as
+				// different states of knowledge, never conflicting counts.
+				findingsExtraction:
+					findings?.findingsTotal != null
+						? ("extracted" as const)
+						: ("not-extracted" as const),
+				// sls-064: curated engagement relations (audit-identity.ts).
+				...(AUDIT_RELATIONS[meta.id]
+					? {
+							engagementId: AUDIT_RELATIONS[meta.id].engagementId,
+							reportVersion: AUDIT_RELATIONS[meta.id].reportVersion,
+							supersededByReportId:
+								AUDIT_RELATIONS[meta.id].supersededByReportId,
+							engagementStart: AUDIT_RELATIONS[meta.id].engagementStart,
+							engagementEnd: AUDIT_RELATIONS[meta.id].engagementEnd,
+						}
+					: {}),
 				publishedAt: meta.date,
 				// A human-published report date is a date-stamp; wall-clock
 				// minutes/seconds betray a portal upload timestamp masquerading as
@@ -501,7 +533,7 @@ async function run() {
 		);
 	}
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -524,7 +556,9 @@ async function run() {
 
 	let regCreated = 0;
 	let regUpdated = 0;
-	for (const r of registryRows) {
+	// --replan re-plans the research chunks only; the audits registry is
+	// written on --execute alone.
+	for (const r of execute ? registryRows : []) {
 		const { linkMapped: _drop, ...rest } = r;
 		const data = {
 			...rest,
@@ -557,6 +591,7 @@ async function run() {
 		source: "audit",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

@@ -8,6 +8,7 @@ import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
 import { HideOnStandalone } from "@/components/site-chrome";
 import { Navigation } from "@/components/ui/navigation";
+import { graph, organizationNode, webSiteNode } from "@/lib/structured-data";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 const inter = Inter({
@@ -129,6 +130,20 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 			    does NOT create a scroll container, so `position: sticky`
 			    descendants (e.g. the /awards ballot rail) actually pin. */}
 			<body className="min-h-screen font-sans antialiased overflow-x-clip">
+				{/* Site identity, once, for every page. Organization + WebSite with
+				    one @id each is what lets a crawler read the whole site as one
+				    entity instead of re-guessing per page; the SearchAction target
+				    is /directory?q=, which we already serve. JSON.stringify output,
+				    no user-controlled string in the body. */}
+				<script
+					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify output — see comment above
+					dangerouslySetInnerHTML={{
+						__html: JSON.stringify(
+							graph([organizationNode(appUrl), webSiteNode(appUrl)]),
+						),
+					}}
+				/>
 				<Providers>
 					{/* HideOnStandalone is a client visibility gate; the chrome it
 					    wraps stays SERVER-rendered (so Navigation's payload deps

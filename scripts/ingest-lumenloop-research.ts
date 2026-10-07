@@ -13,17 +13,15 @@
  *   npx tsx scripts/ingest-lumenloop-research.ts             # dry run
  *   npx tsx scripts/ingest-lumenloop-research.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,
 	fetchSitemapUrls,
 	loadExistingChunks,
 	stripHtml,
+	stripTrailingTeaser,
 	upsertChunks,
 } from "../src/lib/research-ingest";
 import { JUNK_URL_RE } from "../src/lib/research-rank";
@@ -31,10 +29,39 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const BASE = "https://lumenloop.com";
 const SITEMAP = `${BASE}/sitemap.xml`;
 const RESEARCH_PREFIX = `${BASE}/research/`;
+const NEWS_PREFIX = `${BASE}/news/`;
+
+/**
+ * Lumen Loop's /news/ section is their AGGREGATION of ecosystem coverage —
+ * ~1,950 URLs against ~35 under /research/. Crawling all of it would be a
+ * large fetch-and-embed bill for a corpus that is mostly not about the things
+ * we serve, so we take the slice we actually surface: items whose SLUG names
+ * a stablecoin subject.
+ *
+ * Slug-matching (not body-matching) is deliberate. The slug is derived from
+ * the headline, so it says what the piece is ABOUT — a weekly roundup that
+ * mentions USDC in passing never has USDC in its slug. That is exactly the
+ * distinction the /stablecoins news dock needs and could not make while the
+ * only lumenloop source here was 35 research posts, 16 of them roundups.
+ */
+const NEWS_SLUG_TERMS = [
+	"stablecoin",
+	"usdc",
+	"eurc",
+	"pyusd",
+	"usdy",
+	"usdglo",
+	"usst",
+	"tokenized-dollar",
+	"anchor",
+];
 
 async function fetchHtml(url: string): Promise<string> {
 	const res = await fetch(url, {
@@ -72,7 +99,9 @@ async function fetchArticle(url: string): Promise<Article> {
 	const main =
 		html.match(/<article[\s\S]*?<\/article>/i) ||
 		html.match(/<main[\s\S]*?<\/main>/i);
-	const body = stripHtml(main ? main[0] : html);
+	// The teaser block after the article changes on every request; see
+	// stripTrailingTeaser.
+	const body = stripTrailingTeaser(stripHtml(main ? main[0] : html));
 	return { url, title, body, publishedAt };
 }
 
@@ -81,7 +110,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: ${BASE}/research\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "lumenloop-research")
 		: new Map();
@@ -100,26 +130,46 @@ async function run() {
 	);
 	console.log(`  ${researchUrls.length} research articles`);
 
+	const newsUrls = allUrls.filter(
+		(u) =>
+			u.startsWith(NEWS_PREFIX) &&
+			!JUNK_URL_RE.test(u) &&
+			NEWS_SLUG_TERMS.some((t) => u.slice(NEWS_PREFIX.length).includes(t)),
+	);
+	console.log(
+		`  ${newsUrls.length} stablecoin news items (of ${allUrls.filter((u) => u.startsWith(NEWS_PREFIX)).length} total news URLs)`,
+	);
+
 	const allChunks: ReturnType<typeof chunkMarkdown> = [];
 	let postErrors = 0;
 
-	for (const url of researchUrls) {
-		try {
-			const post = await fetchArticle(url);
-			if (post.body.length < 200) continue;
-			const slug = url.replace(RESEARCH_PREFIX, "").replace(/\/$/, "");
-			const chunks = chunkMarkdown({
-				md: `# ${post.title}\n\n${post.body}`,
-				parentDocId: `research/${slug}`,
-				title: post.title,
-				url,
-				tags: ["lumenloop-research", "lumenloop", "ecosystem-analysis"],
-				publishedAt: post.publishedAt,
-			});
-			allChunks.push(...chunks);
-		} catch (err) {
-			console.error(`  ✗ ${url}: ${(err as Error).message}`);
-			postErrors += 1;
+	const lanes: Array<{ urls: string[]; prefix: string; kind: string }> = [
+		{ urls: researchUrls, prefix: RESEARCH_PREFIX, kind: "research" },
+		{ urls: newsUrls, prefix: NEWS_PREFIX, kind: "news" },
+	];
+
+	for (const lane of lanes) {
+		for (const url of lane.urls) {
+			try {
+				const post = await fetchArticle(url);
+				if (post.body.length < 200) continue;
+				const slug = url.replace(lane.prefix, "").replace(/\/$/, "");
+				const chunks = chunkMarkdown({
+					md: `# ${post.title}\n\n${post.body}`,
+					parentDocId: `${lane.kind}/${slug}`,
+					title: post.title,
+					url,
+					tags:
+						lane.kind === "news"
+							? ["lumenloop-research", "lumenloop", "stablecoin-news"]
+							: ["lumenloop-research", "lumenloop", "ecosystem-analysis"],
+					publishedAt: post.publishedAt,
+				});
+				allChunks.push(...chunks);
+			} catch (err) {
+				console.error(`  ✗ ${url}: ${(err as Error).message}`);
+				postErrors += 1;
+			}
 		}
 	}
 
@@ -142,7 +192,7 @@ async function run() {
 	);
 	console.log(`  to embed: ${stats.toEmbed} | post errors: ${postErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -152,6 +202,7 @@ async function run() {
 		source: "lumenloop-research",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

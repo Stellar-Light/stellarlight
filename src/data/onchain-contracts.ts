@@ -30,6 +30,28 @@ export interface OnchainSeed {
 
 export const ONCHAIN_SEEDS: OnchainSeed[] = [
 	{
+		// kalepail/KALE-sc README "Network | MAINNET" table (verified 2026-09-05):
+		// farm contract CDL74…, asset KALE:GBDVX4…, SAC CB23…. stellar.expert
+		// shows the asset at 11,272 holders and 83M payments (domain kalepail.com);
+		// the row (prominence 90) had an empty onchain block until this entry.
+		slug: "kale",
+		contracts: [
+			{
+				address: "CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA",
+				label: "KALE farm contract",
+			},
+			{
+				address: "CB23WRDQWGSP6YPMY4UV5C4OW5CBTXKYN3XEATG7KJEZCXMJBYEHOUOV",
+				label: "KALE token (SAC)",
+			},
+		],
+		asset: {
+			code: "KALE",
+			issuer: "GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE",
+		},
+		source: "https://github.com/kalepail/KALE-sc#readme",
+	},
+	{
 		// blend-capital/blend-utils mainnet.contracts.json (verified 2026-07-20)
 		slug: "blend",
 		contracts: [
@@ -391,5 +413,55 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 		],
 		source:
 			"https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/configs/networks.json",
+	},
+	{
+		// 2026-09-26. Bridge + messenger from the operator's docs/DEPLOYMENT.md
+		// (STELLAR_MAINNET_BRIDGE / _MESSENGER); the seven Principal Token
+		// markets from the operator's own product API
+		// (app.spectra.finance/api/v1/stellar/pools). All nine created on
+		// mainnet by the same deployer account (stellar.expert, GCNC7GXV…).
+		// PT labels carry the maturity the operator names; a matured PT is
+		// still the operator's contract, never removed here.
+		slug: "spectra-finance",
+		contracts: [
+			{
+				address: "CACMUSAUMYFVDLWMGDQE7C5M3L4DVZLXY3U3FSVW3KQ4N747RI6I67YW",
+				label: "EVM to Stellar PT bridge",
+			},
+			{
+				address: "CCKTCZMLA2YQTJ7OU77BXHVJZTN7IQF4LARYFIDZTMAVBX6K5BMMJBEX",
+				label: "bridge messenger",
+			},
+			{
+				address: "CAAOR5F43GSQZYJESHIVLGZBMHMH3UVJMSBEHFKCUBKOUQSZMQC5UCMK",
+				label: "PT sw-USDC (Blend USDC) 2026/11/01",
+			},
+			{
+				address: "CA7KTCVDJXQBC7PB6CANFEBPKAQUGVG6SIZVHGFPQCDX3APPTSROJ6AS",
+				label: "PT sw-EURC (Blend EURC) 2026/11/01",
+			},
+			{
+				address: "CD5YZRFQCATFOFZPWE4XDYJZMXAZSW5ROTIAO4D65Q7KTMZIEWGB7H7W",
+				label: "PT earnXLM 2026/11/03",
+			},
+			{
+				address: "CCJ43PIDUBSVX4FAI3MJJTFWC3ZXLECARFNJUOUUTKHB5JP32Q75LVPN",
+				label: "PT earnUSDC 2026/11/03",
+			},
+			{
+				address: "CDRK5SWZ7DQJ4BZUAZQABPSP7MZS4NO4PPW7LW6CVD5THZDVE63MVLJJ",
+				label: "PT sw-deJTRSY (Centrifuge) 2026/10/16",
+			},
+			{
+				address: "CAAQJ6CN3KWJUG2CTUFUV27IL2BBWEIQKQA27HR7KFFZXROLHN6ELMBI",
+				label: "PT sw-deJTRSY (Centrifuge) 2026/12/15",
+			},
+			{
+				address: "CDHIBKKS53XQAMIDVL7SZLPM2DEHH3OCO7SU6IE3OW65LESYF5K5ABMU",
+				label: "PT sw-deJTRSY (Centrifuge) 2027/03/15",
+			},
+		],
+		source:
+			"https://github.com/perspectivefi/spectra-stellar-bridge-public/blob/main/docs/DEPLOYMENT.md (bridge, messenger); https://app.spectra.finance/api/v1/stellar/pools (PT markets)",
 	},
 ];

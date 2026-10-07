@@ -1,0 +1,40 @@
+name: Import Replit stablecoin history (manual)
+
+# One-off: pull the retired Replit service's daily snapshot series over HTTP
+# and upsert it into stablecoin-snapshots with source=replit-import. Never
+# overwrites rows our own pipeline wrote. Dry run by default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Import
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        shell: bash
+        run: |
+          args=""
+          if [ "${{ inputs.execute }}" = "true" ]; then args="--execute"; fi
+          pnpm exec tsx scripts/data/import-replit-stablecoin-history.ts $args

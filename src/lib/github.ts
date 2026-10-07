@@ -1,8 +1,8 @@
 const GQL = "https://api.github.com/graphql";
 
-const Q_REPO = `
-  query RepoInfo($owner: String!, $name: String!) {
-    repository(owner: $owner, name: $name) {
+// Shared field set so the single and BATCHED fetch stay byte-identical.
+const REPO_FRAGMENT = `
+  fragment RepoFields on Repository {
       url
       nameWithOwner
       description
@@ -18,10 +18,24 @@ const Q_REPO = `
       readmeLower: object(expression: "HEAD:readme.md") { ... on Blob { text } }
       readmeRst: object(expression: "HEAD:README.rst") { ... on Blob { text } }
       readmeTxt: object(expression: "HEAD:README") { ... on Blob { text } }
-      defaultBranchRef { target { ... on Commit { committedDate } } }
-    }
+      defaultBranchRef {
+        target {
+          ... on Commit {
+            committedDate
+            recent: history(since: $since) { totalCount }
+          }
+        }
+      }
+      latestRelease { publishedAt tagName }
+      pullRequests(states: OPEN) { totalCount }
   }
 `;
+
+const Q_REPO = `
+  query RepoInfo($owner: String!, $name: String!, $since: GitTimestamp!) {
+    repository(owner: $owner, name: $name) { ...RepoFields }
+  }
+${REPO_FRAGMENT}`;
 
 // List an owner's (org OR user) public, non-archived repo names, most-recently
 // pushed first. Used to expand a bare-org github link (github.com/soroswap) into
@@ -108,9 +122,12 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		headers.Authorization = `Bearer ${token.trim()}`;
 	}
 
+	// Velocity window for activitySignals.commits90d — commits on the default
+	// branch in the 90 days before this fetch.
+	const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
 	const requestBody = JSON.stringify({
 		query: Q_REPO,
-		variables: { owner, name },
+		variables: { owner, name, since },
 	});
 
 	const res = await fetch(GQL, {
@@ -236,6 +253,11 @@ export async function fetchRepoInfo(owner: string, name: string) {
 		throw new Error("Repository not found");
 	}
 
+	return normalizeRepoNode(r);
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: GraphQL node shape
+export function normalizeRepoNode(r: any) {
 	const stargazerCount =
 		typeof r.stargazerCount === "number"
 			? r.stargazerCount
@@ -276,5 +298,176 @@ export async function fetchRepoInfo(owner: string, name: string) {
 			r.pushedAt) as string,
 		openIssues,
 		stargazerCount,
+		commits90d: (r.defaultBranchRef?.target?.recent?.totalCount ?? null) as
+			| number
+			| null,
+		lastReleaseAt: (r.latestRelease?.publishedAt ?? null) as string | null,
+		releaseTag: (r.latestRelease?.tagName ?? null) as string | null,
+		openPRs: (r.pullRequests?.totalCount ?? null) as number | null,
 	};
+}
+
+export type RepoInfo = ReturnType<typeof normalizeRepoNode>;
+
+// ── Batched repo info (GraphQL aliases) ─────────────────────────────────
+// The enrich full pass called fetchRepoInfo once per repo (~2,900
+// point-costing queries/pass on ONE shared PAT budget) — the starvation
+// class behind the failed waves. Aliases put up to 40 repositories in one
+// query against the same REPO_FRAGMENT, so single and batched results stay
+// byte-identical through normalizeRepoNode.
+
+const GH_NAME_RE = /^[A-Za-z0-9_.-]+$/;
+// 40-alias queries (x4 README blob objects each) drew 502s from GitHub —
+// smaller chunks keep the response inside what the API will serve.
+export const BATCH_SIZE = 15;
+
+/** Pure query builder (unit-tested): throws on names that could break out
+ * of the string literal — GitHub logins/repos are [A-Za-z0-9_.-] only. */
+export function buildBatchQuery(
+	pairs: { owner: string; name: string }[],
+): string {
+	const aliases = pairs
+		.map((p, i) => {
+			if (!GH_NAME_RE.test(p.owner) || !GH_NAME_RE.test(p.name))
+				throw new Error(`invalid owner/name: ${p.owner}/${p.name}`);
+			return `    r${i}: repository(owner: "${p.owner}", name: "${p.name}") { ...RepoFields }`;
+		})
+		.join("\n");
+	return `\n  query RepoBatch($since: GitTimestamp!) {\n${aliases}\n  }\n${REPO_FRAGMENT}`;
+}
+
+let gqlBatchQueries = 0;
+let gqlBatchRepos = 0;
+export const gqlBatchStats = () => ({
+	queries: gqlBatchQueries,
+	repos: gqlBatchRepos,
+});
+
+export type BatchRepoResult = { info: RepoInfo } | { error: string };
+
+/** Fetch many repos in aliased chunks. Per-alias isolation: one missing/
+ * private repo yields {error} for THAT pair with the same message strings
+ * fetchRepoInfo throws, so call sites keep identical per-repo semantics.
+ * Batch-level failures (auth, rate limit, HTTP) throw — callers fall back
+ * to per-repo fetches. */
+export async function fetchRepoInfoBatch(
+	pairs: { owner: string; name: string }[],
+): Promise<BatchRepoResult[]> {
+	const token =
+		process.env.GITHUB_TOKEN?.trim() ||
+		process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim();
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+		"User-Agent": "stellar-ecosystem-directory",
+	};
+	if (token) headers.Authorization = `Bearer ${token}`;
+	const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
+
+	const out: BatchRepoResult[] = new Array(pairs.length);
+	for (let start = 0; start < pairs.length; start += BATCH_SIZE) {
+		const chunk = pairs.slice(start, start + BATCH_SIZE);
+		// pre-filter invalid names so one garbage entry can't sink its chunk
+		const valid: { pair: (typeof chunk)[number]; idx: number }[] = [];
+		chunk.forEach((pair, i) => {
+			if (GH_NAME_RE.test(pair.owner) && GH_NAME_RE.test(pair.name))
+				valid.push({ pair, idx: start + i });
+			else out[start + i] = { error: "Repository not found" };
+		});
+		if (!valid.length) continue;
+		// Per-chunk degradation: one failed chunk (502, transient) leaves ONLY
+		// its own slots unfilled — the caller's per-repo fallback covers them.
+		// The first live run abandoned the whole 2,900-repo prefetch on one 502.
+		// biome-ignore lint/suspicious/noExplicitAny: GraphQL envelope
+		let data: any = null;
+		for (let attempt = 0; attempt < 2 && !data; attempt++) {
+			try {
+				const res = await fetch(GQL, {
+					method: "POST",
+					headers,
+					body: JSON.stringify({
+						query: buildBatchQuery(valid.map((v) => v.pair)),
+						variables: { since },
+					}),
+				});
+				const parsed = JSON.parse(await res.text());
+				const topErr = Array.isArray(parsed.errors)
+					? // biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
+						parsed.errors.find((e: any) => !e.path)
+					: null;
+				if (
+					topErr?.type === "RATE_LIMITED" ||
+					/rate limit/i.test(topErr?.message ?? "")
+				)
+					throw new Error("GitHub API rate limit exceeded");
+				if (!res.ok || (!parsed.data && parsed.errors))
+					throw new Error(
+						`GitHub API error: ${parsed.errors?.[0]?.message ?? res.status}`,
+					);
+				data = parsed;
+			} catch (e) {
+				if (attempt === 0) await new Promise((r) => setTimeout(r, 2000));
+				else
+					console.error(
+						`  batch chunk failed (${e instanceof Error ? e.message : e}) — ${valid.length} repo(s) fall back to per-repo`,
+					);
+			}
+		}
+		if (!data) continue;
+		gqlBatchQueries++;
+		gqlBatchRepos += valid.length;
+		// biome-ignore lint/suspicious/noExplicitAny: GraphQL error shape
+		const errByAlias = new Map<string, any>();
+		for (const e of data.errors ?? [])
+			if (typeof e.path?.[0] === "string") errByAlias.set(e.path[0], e);
+		valid.forEach(({ idx }, i) => {
+			const node = data.data?.[`r${i}`];
+			if (node) {
+				out[idx] = { info: normalizeRepoNode(node) };
+				return;
+			}
+			const e = errByAlias.get(`r${i}`);
+			out[idx] = {
+				error:
+					e?.type === "NOT_FOUND"
+						? "Repository not found"
+						: e?.type === "FORBIDDEN"
+							? "Private repository - access denied"
+							: (e?.message ?? "Repository not found"),
+			};
+		});
+	}
+	return out;
+}
+
+// ── Does this repo still exist? ─────────────────────────────────────────
+/** Trinary-plus: what GitHub said when we asked for the repo itself. */
+export type RepoExistence = "gone" | "empty" | "alive" | "unchecked";
+
+/**
+ * Classify from the HTTP STATUS, never from the body.
+ *
+ * The trap this function exists to make impossible (measured 2026-09-14):
+ * `gh api repos/<x> --jq .full_name` prints GitHub's error JSON to stdout on
+ * a 404, so "the command produced output" reads as proof of existence. That
+ * check reported 162 alive / 0 gone for a population that was 126 gone.
+ *
+ * `gone` means GitHub answered 404 to US — deleted, renamed with no redirect,
+ * or turned private. All three mean the repo we advertise is not reachable by
+ * the reader we advertise it to, which is the fact a serving surface needs.
+ * Every OTHER non-200 (403/429 rate limit, 451, 5xx, a thrown fetch → null)
+ * is `unchecked`: a run that could not look must never read as a run that
+ * found death.
+ *
+ * `sizeKb` is the REST repo object's `size` (KB on disk). 0 is the unborn-HEAD
+ * repo whose git/trees API answers 409 "Git Repository is empty" — one call
+ * instead of two. ponytail: a sub-KB repo can round to 0 and read as empty;
+ * `empty` changes no serving decision, so the cost of that is a label.
+ */
+export function repoExistence(
+	status: number | null,
+	sizeKb?: number | null,
+): RepoExistence {
+	if (status === 404) return "gone";
+	if (status !== 200) return "unchecked";
+	return sizeKb === 0 ? "empty" : "alive";
 }

@@ -15,11 +15,22 @@
  *     old (or which have no repo at all), and separately the high-star + stale
  *     "borrowed clout" risks. REPORTED ONLY, never auto-marked — a human
  *     confirms before any of these flip.
+ *  3. SITE GONE candidates — an active row whose own website is proven dead or
+ *     is serving somebody else's content. This is the signal repo staleness
+ *     cannot see, and it is the Keybase problem from the other side: a product
+ *     can shut down while its repository keeps getting commits, and the tell is
+ *     that nobody renewed the domain. A parked page, lottery spam or a lapsed
+ *     registration on the URL the project itself cites is good evidence the
+ *     product is gone. An OFF-ORIGIN REDIRECT is reported apart: a rebrand and
+ *     an abandoned domain look identical from here, so it is a "go and look",
+ *     never a shutdown claim. Also REPORT ONLY — a domain is evidence about the
+ *     world, and hiding a row stays a human call.
  *
  * House rules: no deletes; dry-run first; run against prod via GitHub Action.
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
+import { NON_PRODUCT_VERDICTS } from "../src/lib/page-verdict";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -32,6 +43,8 @@ const STALE_MS = 18 * 30 * 24 * 60 * 60 * 1000; // ~18 months (report threshold)
 const DEAD_MONTHS = 36; // ~3 years — the auto-mark threshold
 
 // Hand-verified. Extend only after confirming a project is genuinely defunct.
+// ALSO add a STATUS_FIX row in scripts/data/curation-maps.ts for each slug, or
+// the nightly lumenloop sync writes the seed's Live label straight back.
 const CURATED_INACTIVE: string[] = ["keybase"];
 
 // Watchlist from prior review (memory) — NOT auto-marked; we print their live
@@ -73,7 +86,15 @@ async function main() {
 			await payload.update({
 				collection: "projects",
 				id: p.id,
-				data: { status: "Inactive" },
+				// A bare status write is reverted by the nightly lumenloop sync unless
+				// the slug also owns `status` in scripts/data/curation-maps.ts STATUS_FIX
+				// (that is what curatedFieldsFor reads). Keybase sat on this list, was
+				// marked twice in July, and was Live again by morning both times.
+				data: {
+					status: "Inactive",
+					statusBasis: "human-verified",
+					statusAsOf: new Date().toISOString(),
+				},
 				overrideAccess: true,
 			});
 			marked++;
@@ -215,8 +236,100 @@ async function main() {
 		}
 	}
 
+	// ---- 4. site-gone candidates (report only) ----
+	// Reads link-checks rather than re-probing: check-links already proves a URL
+	// dead (404/410/DNS/refused) and already classifies what a 200 SERVED, via
+	// page-verdict. A bot wall, a 5xx or a timeout is never a verdict there and
+	// so never reaches this list either.
+	const normUrl = (u: string) =>
+		(u ?? "")
+			.trim()
+			.toLowerCase()
+			.replace(/^(https?:\/\/)www\./, "$1")
+			.replace(/\/+$/, "");
+	const byWebsite = new Map<
+		string,
+		{ slug: string; status: string; url: string }
+	>();
+	for (const p of active.docs as Array<Record<string, any>>) {
+		const url = p?.links?.website;
+		if (url)
+			byWebsite.set(normUrl(url), { slug: p.slug, status: p.status, url });
+	}
+	type SiteRow = { slug: string; status: string; url: string; why: string };
+	const siteGone: SiteRow[] = [];
+	/** Redirects off-origin: could be a rebrand, could be a parked domain
+	 *  someone else bought. Reported apart so the shutdown claim stays clean. */
+	const movedOrGone: SiteRow[] = [];
+	if (byWebsite.size) {
+		const checks = await payload.find({
+			collection: "link-checks",
+			limit: 5000,
+			depth: 0,
+			overrideAccess: true,
+		});
+		for (const c of checks.docs as Array<Record<string, any>>) {
+			const hit = byWebsite.get(normUrl(c.url));
+			if (!hit) continue;
+			if (c.status === "broken" || c.status === "dead") {
+				siteGone.push({
+					...hit,
+					why: `dead — ${c.errorReason || c.statusCode || "proven broken"}`,
+				});
+			} else if (c.pageVerdict === "offsite-redirect") {
+				// NOT shutdown evidence on its own. page-verdict says it plainly:
+				// "a rebrand and a hijack look identical here; both need a human."
+				// The first run of this class proved it — gate.io (a live exchange
+				// redirecting to a regional domain) and benji (human-verified Live,
+				// on its own other domain) both landed in the shutdown list beside
+				// genuinely dead products. Separate bucket, separate claim.
+				movedOrGone.push({
+					...hit,
+					why: `redirects off-origin${c.finalHost ? ` → ${c.finalHost}` : ""}`,
+				});
+			} else if (c.pageVerdict && NON_PRODUCT_VERDICTS.has(c.pageVerdict)) {
+				// Answers 200 with content that is not a product: parked, spam, a
+				// placeholder or an unbuilt scaffold. Nobody ships that on purpose
+				// and keeps operating.
+				siteGone.push({
+					...hit,
+					why: `${c.pageVerdict}${c.pageTitle ? ` — "${String(c.pageTitle).slice(0, 48)}"` : ""}`,
+				});
+			}
+		}
+	}
 	console.log(
-		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length}`,
+		`\n=== SITE GONE candidates (report only — the row's own website is dead or serving someone else) ===`,
+	);
+	if (siteGone.length === 0) {
+		console.log("  none — every active row's website still serves its product");
+	} else {
+		for (const r of siteGone)
+			console.log(
+				`  ${r.slug.padEnd(26)} ${r.status.padEnd(12)} ${r.why}\n      ${r.url}`,
+			);
+		console.log(
+			`  ${siteGone.length} row(s). A lapsed or hijacked domain is evidence the product shut down — evidence about the WORLD, so the status flip stays a human call.`,
+		);
+	}
+
+	console.log(
+		`\n=== MOVED OR GONE (report only — the site redirects somewhere else) ===`,
+	);
+	if (movedOrGone.length === 0) {
+		console.log("  none");
+	} else {
+		for (const r of movedOrGone)
+			console.log(
+				`  ${r.slug.padEnd(26)} ${r.status.padEnd(12)} ${r.why}\n      ${r.url}`,
+			);
+		console.log(
+			`  ${movedOrGone.length} row(s). A rebrand and an abandoned domain look identical from here, so this is a "go and look", never a shutdown claim.`,
+		);
+	}
+
+	console.log(
+		`\nDONE. curated marked: ${EXECUTE ? marked : "(dry-run)"} · clearly-dead ${MARK_STALE && EXECUTE ? "marked: " + deadMarked : "candidates: " + dead.length} · watchlist: ${WATCHLIST.length} · total stale: ${rows.length} · site-gone: ${siteGone.length} · moved-or-gone: ${movedOrGone.length}`,
 	);
 	process.exit(0);
 }

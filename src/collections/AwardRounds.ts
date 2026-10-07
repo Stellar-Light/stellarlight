@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { isAdmin } from "./access";
 
 /**
  * i³ Awards — voting rounds (Impact / Innovation / Interoperability).
@@ -38,9 +39,9 @@ export const AwardRounds: CollectionConfig = {
 	access: {
 		// Round metadata is public (the /awards page serves it); writes are admin.
 		read: () => true,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		create: ({ req }) => isAdmin(req.user),
+		update: ({ req }) => isAdmin(req.user),
+		delete: ({ req }) => isAdmin(req.user),
 	},
 	fields: [
 		{
@@ -80,6 +81,38 @@ export const AwardRounds: CollectionConfig = {
 				position: "sidebar",
 				description:
 					"Only an OPEN round accepts ballots (and only inside the opensAt/closesAt window, when set).",
+			},
+		},
+		{
+			name: "testMode",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				position: "sidebar",
+				description:
+					"Pilot/test round — stamps every ballot on-chain with an 'i3-test' memo so throwaway votes are obvious. Leave OFF for the real round.",
+			},
+		},
+		{
+			name: "openToAll",
+			type: "checkbox",
+			defaultValue: false,
+			admin: {
+				position: "sidebar",
+				description:
+					"Rehearsal only: any valid Stellar address may vote on this round, no whitelist. Honoured ONLY while testMode is also on, so a real round can never be opened by this switch.",
+			},
+		},
+		{
+			name: "picksPerCategory",
+			type: "number",
+			required: true,
+			defaultValue: 1,
+			min: 1,
+			max: 10,
+			admin: {
+				description:
+					"How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters — every pick is one vote for that nominee.",
 			},
 		},
 		{
@@ -155,8 +188,76 @@ export const AwardRounds: CollectionConfig = {
 					"Optional. After this instant ballots are rejected. Voters may change their vote until then.",
 			},
 		},
+		{
+			// Written by the tansu-anchor lane after the results file is committed;
+			// served (and verified against mainnet) by /api/awards/anchor.
+			name: "anchor",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				readOnly: true,
+				description:
+					"Mainnet anchor of the PUBLISHED result via Tansu: { project, projectKey, commitSha, txHash, at }. Set by the tansu-anchor lane, not by hand.",
+			},
+		},
 	],
 	hooks: {
+		beforeChange: [
+			// The lane (award-round.ts) enforces these; /admin did not. Ballots
+			// cast under one slot count do not decode under another, two open
+			// rounds make /awards arbitrary, and a round with no close date has
+			// nothing to date a late ballot against.
+			async ({ data, originalDoc, operation, req }) => {
+				if (operation !== "update" || !originalDoc) return data;
+				const was = String(originalDoc.status ?? "draft");
+				const now = String(data?.status ?? was);
+				if (
+					data?.picksPerCategory !== undefined &&
+					Number(data.picksPerCategory) !==
+						Number(originalDoc.picksPerCategory ?? 1) &&
+					!(was === "draft" && now === "draft")
+				) {
+					throw new Error(
+						`picksPerCategory can only change while the round is and stays draft (this round is ${was}${was !== now ? ` → ${now}` : ""}).`,
+					);
+				}
+				if (now === "open" && was !== "open") {
+					const closes = data?.closesAt ?? originalDoc.closesAt;
+					if (!closes) {
+						throw new Error(
+							"An open round needs closesAt: without a close date nothing dates a late ballot. Set it, then open.",
+						);
+					}
+					// A round re-opened with last time's close date still on it is
+					// open in name only: roundOpenState refuses every ballot as
+					// "closed", and the lane's read-back sees status=open and calls
+					// it done. Caught in the 2026-09-24 rehearsal.
+					if (Date.parse(String(closes)) <= Date.now()) {
+						throw new Error(
+							`closesAt (${String(closes)}) is already in the past: an open round with an expired close date accepts no ballots. Set a future close date, then open.`,
+						);
+					}
+					const others = await req.payload.find({
+						collection: "award-rounds",
+						where: {
+							and: [
+								{ status: { equals: "open" } },
+								{ id: { not_equals: originalDoc.id } },
+							],
+						},
+						limit: 1,
+						depth: 0,
+						overrideAccess: true,
+					});
+					if (others.docs[0]) {
+						throw new Error(
+							`Another round is already open (${String(others.docs[0].slug)}); /awards serves THE open round, so draft it first.`,
+						);
+					}
+				}
+				return data;
+			},
+		],
 		beforeValidate: [
 			({ data }) => {
 				// The on-chain key is `i3.<roundSlug>.<categoryKey>` and manageData

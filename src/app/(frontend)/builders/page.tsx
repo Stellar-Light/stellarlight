@@ -1,58 +1,166 @@
-import {
-	ArrowLeft,
-	Briefcase,
-	Code2,
-	ExternalLink,
-	GitBranch,
-	Github,
-	Globe,
-	MapPin,
-	Twitter,
-	Users,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Users } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import {
+	type BuilderRowData,
+	BuildersDirectory,
+} from "@/components/builders-directory";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AMBASSADORS } from "@/data/stellar-ambassadors";
+import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
 import {
 	fetchAllBuilders,
 	type PassportBuilder,
 } from "@/lib/integrations/stellar-passport";
+import { getPayloadSafe } from "@/lib/payload-client";
 
-export const dynamic = "force-dynamic";
+// One source of truth: the Payload `builders` mirror (synced from Stellar
+// Passport daily by /api/sync/builders). The list used to hit the live
+// Passport demo host while /builders/[username] read the mirror, so a name
+// on the list could 404 when clicked. Live Passport is only a fallback for
+// an empty mirror. ISR, not force-dynamic: the mirror moves once a day.
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-	title: "Builders | Stellar Light",
+	title: "Stellar Builders & Developers",
 	description:
-		"Discover talented builders and developers in the Stellar ecosystem",
+		"The people building on Stellar, ranked by real code activity across indexed repositories rather than self-reported profiles.",
+	alternates: { canonical: "/builders" },
 };
 
 export default async function BuildersPage() {
 	let builders: PassportBuilder[] = [];
+	const activity = new Map<string, CodeActivity>();
+	let syncedAt: string | null = null;
 
-	try {
-		builders = await fetchAllBuilders();
-	} catch (error) {
-		console.error("Failed to fetch builders:", error);
+	const payload = await getPayloadSafe();
+	if (payload) {
+		try {
+			const mirror = await payload.find({
+				collection: "builders",
+				where: { visibility: { not_equals: "hidden" } },
+				limit: 1000,
+				depth: 0,
+			});
+			builders = mirror.docs as unknown as PassportBuilder[];
+			for (const d of mirror.docs as any[])
+				if (d.last_synced && (!syncedAt || d.last_synced > syncedAt))
+					syncedAt = d.last_synced;
+		} catch (error) {
+			console.error("builders mirror read failed:", error);
+		}
+	}
+	if (builders.length === 0) {
+		try {
+			builders = await fetchAllBuilders();
+		} catch (error) {
+			console.error("Failed to fetch builders:", error);
+		}
 	}
 
 	// Filter out builders without a github username
 	builders = builders.filter((b) => b.github_username);
 
-	// Separate featured and regular builders
-	const featuredBuilders = builders.filter((b) => b.is_featured);
-	const activeBuilders = builders
-		.filter((b) => !b.is_featured && (b.stats?.totalCommits30d ?? 0) > 0)
-		.sort(
-			(a, b) =>
-				(b.stats?.totalCommits30d ?? 0) - (a.stats?.totalCommits30d ?? 0),
-		);
-	const otherBuilders = builders.filter(
-		(b) => !b.is_featured && (b.stats?.totalCommits30d ?? 0) === 0,
-	);
+	// What each builder has actually shipped in the Stellar repos we index
+	// (owned, Passport-declared, contributor pass); see src/lib/builder-code.ts
+	if (payload && builders.length) {
+		try {
+			for (const [k, v] of await builderCodeActivity(payload, builders as any))
+				activity.set(k, v);
+		} catch (error) {
+			console.error("builders repo activity failed:", error);
+		}
+	}
+	const act = (b: PassportBuilder) =>
+		activity.get(String(b.github_username).toLowerCase());
+	// free-text locations ("São Paulo, Brazil", "Lagos, Nigeria") -> a country we can flag
+	const COUNTRIES: Array<[RegExp, string, string]> = [
+		[/brazil|brasil|são paulo|sao paulo|rio de janeiro/i, "BR", "Brazil"],
+		[/nigeria|lagos|abuja/i, "NG", "Nigeria"],
+		[/chile|santiago/i, "CL", "Chile"],
+		[/costa rica/i, "CR", "Costa Rica"],
+		[/argentina|buenos aires/i, "AR", "Argentina"],
+		[/mexico|méxico|cdmx/i, "MX", "Mexico"],
+		[/colombia|bogot/i, "CO", "Colombia"],
+		[/peru|lima/i, "PE", "Peru"],
+		[/india|bengaluru|bangalore|mumbai|delhi|hyderabad|jaipur/i, "IN", "India"],
+		[/indonesia|jakarta/i, "ID", "Indonesia"],
+		[/vietnam|hanoi|ho chi minh/i, "VN", "Vietnam"],
+		[/philippines|manila/i, "PH", "Philippines"],
+		[/t[üu]rkiye|turkey|istanbul|ankara/i, "TR", "Türkiye"],
+		[/kenya|nairobi/i, "KE", "Kenya"],
+		[/ghana|accra/i, "GH", "Ghana"],
+		[/south africa|cape town|johannesburg/i, "ZA", "South Africa"],
+		[/portugal|lisbon|lisboa|porto/i, "PT", "Portugal"],
+		[/spain|españa|madrid|barcelona/i, "ES", "Spain"],
+		[/germany|deutschland|berlin|munich/i, "DE", "Germany"],
+		[/france|paris/i, "FR", "France"],
+		[/united kingdom|\buk\b|england|london/i, "GB", "United Kingdom"],
+		[/canada|toronto|vancouver|montreal/i, "CA", "Canada"],
+		[
+			/united states|\busa?\b|new york|san francisco|california|texas|austin|miami|seattle|boston|chicago/i,
+			"US",
+			"United States",
+		],
+		[/uruguay|montevideo/i, "UY", "Uruguay"],
+		[/venezuela|caracas/i, "VE", "Venezuela"],
+		[/ecuador|quito/i, "EC", "Ecuador"],
+		[/bolivia/i, "BO", "Bolivia"],
+		[/pakistan|karachi|lahore/i, "PK", "Pakistan"],
+		[/bangladesh|dhaka/i, "BD", "Bangladesh"],
+		[/singapore/i, "SG", "Singapore"],
+		[/australia|sydney|melbourne/i, "AU", "Australia"],
+		[/italy|italia|milan|rome/i, "IT", "Italy"],
+		[/netherlands|amsterdam/i, "NL", "Netherlands"],
+		[/poland|warsaw/i, "PL", "Poland"],
+		[/ukraine|kyiv/i, "UA", "Ukraine"],
+		[/japan|tokyo/i, "JP", "Japan"],
+		[/korea|seoul/i, "KR", "South Korea"],
+		[/uae|dubai|emirates/i, "AE", "United Arab Emirates"],
+		[/egypt|cairo/i, "EG", "Egypt"],
+	];
+	const countryOf = (loc: string | null | undefined) => {
+		if (!loc) return null;
+		for (const [re, code, name] of COUNTRIES)
+			if (re.test(loc)) return { code, name };
+		return null;
+	};
+	const rows: BuilderRowData[] = builders.map((b) => {
+		const a = act(b);
+		const handle = String(b.github_username);
+		return {
+			handle,
+			name: b.display_name || handle,
+			avatar: b.avatar_url ?? null,
+			role: b.role_title ?? null,
+			location: b.location ?? null,
+			bio: b.bio ?? null,
+			twitter: b.twitter_handle ?? null,
+			website: b.website_url ?? null,
+			featured: !!b.is_featured,
+			commits30d: b.stats?.totalCommits30d ?? 0,
+			passportProjects: b.projects?.length ?? 0,
+			repos: a?.repos.length ?? 0,
+			stars: a?.stars ?? 0,
+			commits90d: a?.commits90d ?? 0,
+			lastCommitAt: a?.lastCommitAt ?? null,
+			projects: a
+				? [...a.projects.entries()].map(([slug, name]) => ({ slug, name }))
+				: [],
+			contributesTo: a
+				? [...a.contributesTo.entries()].map(([slug, name]) => ({ slug, name }))
+				: [],
+			languages: a?.languages ?? [],
+			country: countryOf(b.location),
+			ambassador: AMBASSADORS[handle.toLowerCase()]
+				? {
+						tier: AMBASSADORS[handle.toLowerCase()].tier,
+						region: AMBASSADORS[handle.toLowerCase()].region,
+					}
+				: null,
+		};
+	});
 
 	return (
 		<div className="min-h-screen relative">
@@ -65,77 +173,40 @@ export default async function BuildersPage() {
 					<span className="text-sm font-medium">Back to Home</span>
 				</Link>
 
-				<div className="mb-10">
-					<div className="flex items-center gap-3 mb-2">
-						<Code2 className="w-8 h-8 text-[#FDDA24]" />
-						<h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-							Stellar Builders
-						</h1>
-					</div>
+				<div className="mb-8">
+					<p className="text-xs font-medium uppercase tracking-wider text-neutral-500 mb-2">
+						Directory
+					</p>
+					<h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground mb-2">
+						Builders
+					</h1>
 					<p className="text-muted-foreground">
-						{builders.length} developers building on Stellar
+						{builders.length} developers building on Stellar. Profiles from
+						Stellar Passport, code activity from the repos we index.
+						{syncedAt
+							? ` Profiles synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
+							: ""}
 					</p>
 				</div>
 
-				{/* Featured Builders */}
-				{featuredBuilders.length > 0 && (
-					<section className="mb-12">
-						<h2 className="text-2xl font-bold mb-6">Featured</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							{featuredBuilders.map((builder) => (
-								<BuilderRow
-									key={builder.github_username}
-									builder={builder}
-									featured
-								/>
-							))}
-						</div>
-					</section>
+				{rows.length > 0 ? (
+					<BuildersDirectory rows={rows} />
+				) : (
+					<Card className="border border-border/50 bg-card">
+						<CardContent className="py-16 text-center">
+							<Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+							<p className="text-muted-foreground">
+								The builder directory is empty right now. Profiles come from
+								Stellar Passport; if you have one, it will appear after the next
+								sync.
+							</p>
+						</CardContent>
+					</Card>
 				)}
-
-				{/* Active Builders */}
-				{activeBuilders.length > 0 && (
-					<section className="mb-12">
-						<div className="flex items-center gap-3 mb-6">
-							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-							<h2 className="text-2xl font-bold">Most Active</h2>
-							<Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-								{activeBuilders.length}
-							</Badge>
-						</div>
-						<div className="space-y-3">
-							{activeBuilders.map((builder) => (
-								<BuilderRow key={builder.github_username} builder={builder} />
-							))}
-						</div>
-					</section>
-				)}
-
-				{/* All Other Builders */}
-				<section>
-					<h2 className="text-2xl font-bold mb-6">
-						All Builders ({otherBuilders.length})
-					</h2>
-
-					{otherBuilders.length > 0 ? (
-						<div className="space-y-3">
-							{otherBuilders.map((builder) => (
-								<BuilderRow key={builder.github_username} builder={builder} />
-							))}
-						</div>
-					) : builders.length === 0 ? (
-						<Card className="border border-border/50 bg-card">
-							<CardContent className="py-16 text-center">
-								<Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-								<p className="text-muted-foreground">No builders found</p>
-							</CardContent>
-						</Card>
-					) : null}
-				</section>
 
 				{/* CTA */}
-				<div className="mt-16 text-center py-12 px-8 rounded-xl bg-gradient-to-r from-primary/10 to-[#FDDA24]/10 border border-primary/20">
-					<h3 className="text-2xl font-bold mb-3">
+				<div className="mt-16 text-center py-12 px-8 rounded-2xl border border-border bg-card">
+					<h3 className="text-2xl font-semibold mb-3">
 						Are you building on Stellar?
 					</h3>
 					<p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -156,119 +227,5 @@ export default async function BuildersPage() {
 				</div>
 			</main>
 		</div>
-	);
-}
-
-function BuilderRow({
-	builder,
-	featured = false,
-}: {
-	builder: PassportBuilder;
-	featured?: boolean;
-}) {
-	const twitterUrl = builder.twitter_handle
-		? `https://twitter.com/${builder.twitter_handle.replace("@", "").replace("https://x.com/", "").replace("https://twitter.com/", "")}`
-		: null;
-
-	return (
-		<Card
-			className={`border ${featured ? "border-primary/30 bg-card/50" : "border-border/50 bg-card"} hover:bg-card/80 hover:border-primary/30 transition-all duration-150 hover:-translate-y-0.5`}
-		>
-			<CardContent className="p-5">
-				<div className="flex items-center gap-4">
-					{/* Avatar */}
-					<div className="flex-shrink-0">
-						{builder.avatar_url ? (
-							<Image
-								src={builder.avatar_url}
-								alt={builder.display_name}
-								width={48}
-								height={48}
-								className="rounded-full"
-							/>
-						) : (
-							<div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-lg font-bold">
-								{builder.display_name.charAt(0).toUpperCase()}
-							</div>
-						)}
-					</div>
-
-					{/* Info */}
-					<div className="flex-1 min-w-0">
-						<div className="flex items-center gap-2 flex-wrap">
-							<h3 className="font-semibold text-foreground truncate">
-								{builder.display_name}
-							</h3>
-							{featured && (
-								<Badge className="bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/30 text-xs">
-									Featured
-								</Badge>
-							)}
-						</div>
-						<div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
-							{builder.role_title && (
-								<span className="flex items-center gap-1 truncate">
-									<Briefcase className="w-3 h-3" />
-									{builder.role_title}
-								</span>
-							)}
-							{builder.location && (
-								<span className="flex items-center gap-1">
-									<MapPin className="w-3 h-3" />
-									{builder.location}
-								</span>
-							)}
-							{(builder.stats?.totalCommits30d ?? 0) > 0 && (
-								<span className="flex items-center gap-1">
-									<GitBranch className="w-3 h-3" />
-									{builder.stats!.totalCommits30d} commits / 30d
-								</span>
-							)}
-							{builder.projects && builder.projects.length > 0 && (
-								<span className="flex items-center gap-1">
-									<Code2 className="w-3 h-3" />
-									{builder.projects.length} project
-									{builder.projects.length !== 1 ? "s" : ""}
-								</span>
-							)}
-						</div>
-					</div>
-
-					{/* Social links */}
-					<div className="flex items-center gap-2 flex-shrink-0">
-						{builder.github_username && (
-							<a
-								href={`https://github.com/${builder.github_username}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Github className="w-4 h-4" />
-							</a>
-						)}
-						{builder.website_url && (
-							<a
-								href={builder.website_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Globe className="w-4 h-4" />
-							</a>
-						)}
-						{twitterUrl && (
-							<a
-								href={twitterUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-muted-foreground hover:text-foreground transition-colors p-1"
-							>
-								<Twitter className="w-4 h-4" />
-							</a>
-						)}
-					</div>
-				</div>
-			</CardContent>
-		</Card>
 	);
 }

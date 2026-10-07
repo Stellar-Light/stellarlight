@@ -25,7 +25,7 @@ export interface UnifiedSkill {
 	description: string;
 	source: string;
 	kind: string;
-	install: string;
+	install?: string;
 	installAlt?: { label: string; command: string }[];
 	repository?: string;
 	homepage?: string;
@@ -42,6 +42,7 @@ const SOURCE_FILTERS = [
 	{ key: "sdf", label: "SDF" },
 	{ key: "external", label: "Stellar ecosystem" },
 	{ key: "lumenloop", label: "Lumenloop" },
+	{ key: "community", label: "Community built" },
 ] as const;
 
 const KIND_FILTERS = [
@@ -226,10 +227,10 @@ export function SkillsMarketplace({
 							</div>
 							<ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5 text-xs leading-relaxed">
 								{[
-									"4,541-chunk research corpus across 9 primary sources",
+									"Research corpus of 9,000+ chunks across 9 primary sources",
 									"Severity-tagged Soroban audit findings (Certora · OtterSec · Halborn · Code4rena · 9 more)",
 									"Electric Capital macro data + SCF Handbook + Mazières SCP paper",
-									"14 open REST endpoints — anyone can build on stellarlight's data layer",
+									"Open REST API (see /api/openapi.json) — anyone can build on stellarlight's data layer",
 									"Both SKILL.md and MCP — install in Claude Code, Cursor, Claude.ai, ChatGPT, Gemini, Continue, Zed",
 									"8-step Deep Dive workflow with gap classification + evidence floor",
 								].map((line) => (
@@ -385,7 +386,11 @@ function SkillCard({ skill }: { skill: UnifiedSkill }) {
 				<span
 					className={`flex-shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full border ${sourceBadgeClass(skill.source)}`}
 				>
-					{skill.source === "sdf" ? "SDF" : skill.source}
+					{skill.source === "sdf"
+						? "SDF"
+						: skill.source === "community"
+							? "Community built"
+							: skill.source}
 				</span>
 			</div>
 
@@ -412,12 +417,14 @@ function SkillCard({ skill }: { skill: UnifiedSkill }) {
 			)}
 
 			{/* Install — terminal-y */}
-			<div className="mb-3">
-				<CopyCommand
-					command={skill.install}
-					className="flex items-center gap-2 rounded-lg bg-black/40 border border-border/30 px-3 py-2 font-mono text-xs text-foreground overflow-hidden"
-				/>
-			</div>
+			{skill.install && (
+				<div className="mb-3">
+					<CopyCommand
+						command={skill.install}
+						className="flex items-center gap-2 rounded-lg bg-black/40 border border-border/30 px-3 py-2 font-mono text-xs text-foreground overflow-hidden"
+					/>
+				</div>
+			)}
 
 			{/* Footer — tags + links */}
 			<div className="mt-auto pt-3 border-t border-border/30 flex items-center justify-between gap-2 flex-wrap">
@@ -510,12 +517,14 @@ function FeaturedCard({ skill }: { skill: UnifiedSkill }) {
 			)}
 
 			{/* Primary install — terminal-y aesthetic */}
-			<div className="mb-2">
-				<CopyCommand
-					command={skill.install}
-					className="flex items-center gap-2 rounded-lg bg-black/40 border border-border/30 px-3 py-2 font-mono text-xs text-foreground overflow-hidden"
-				/>
-			</div>
+			{skill.install && (
+				<div className="mb-2">
+					<CopyCommand
+						command={skill.install}
+						className="flex items-center gap-2 rounded-lg bg-black/40 border border-border/30 px-3 py-2 font-mono text-xs text-foreground overflow-hidden"
+					/>
+				</div>
+			)}
 
 			{/* Alt installs (e.g. -a codex, -a openclaw) */}
 			{skill.installAlt && skill.installAlt.length > 0 && (

@@ -1,0 +1,84 @@
+name: i3 awards — import nominees / voters
+
+# Bulk-seed a round from CSV: the Airtable nomination export, or the Pilot +
+# Navigator public keys.
+#
+# The CSV is pasted into the workflow input, never committed. Stellar public
+# keys are not secrets, but the voter roster is not ours to publish, so it
+# stays out of git and out of the logs beyond counts and truncated ids.
+#
+# DRY-RUN by default: it resolves every row, prints what it would write, and
+# writes nothing. Tick `execute` only after reading the dry-run output — a
+# nominee that resolves to the wrong project puts another company's logo on
+# the ballot.
+
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "What the CSV holds"
+        type: choice
+        required: true
+        options: [nominees, voters]
+      csv:
+        description: "CSV including its header row. nominees: project,category,blurb — voters: address,label"
+        type: string
+        required: true
+      round:
+        description: "Round slug. Leave empty to target the OPEN round."
+        type: string
+        required: false
+        default: ""
+      update:
+        description: "Nominees only: rewrite the blurb of rows that already exist (project,category match) when the CSV gives a different one. Safe on an open round; only the card text changes."
+        type: boolean
+        required: false
+        default: false
+      remove:
+        description: "Nominees only: REMOVE the listed project,category rows from the round instead of adding them. Refused on an open round."
+        type: boolean
+        required: false
+        default: false
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Import
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          # Through the environment, not argv — argv shows up in process lists
+          # and in the step's own echoed command line.
+          AWARD_IMPORT_CSV: ${{ inputs.csv }}
+          IN_KIND: ${{ inputs.kind }}
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ inputs.execute }}
+          IN_REMOVE: ${{ inputs.remove }}
+          IN_UPDATE: ${{ inputs.update }}
+        shell: bash
+        run: |
+          args=(--kind="$IN_KIND")
+          if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_REMOVE" = "true" ]; then args+=(--remove); fi
+          if [ "$IN_UPDATE" = "true" ]; then args+=(--update); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-import.ts "${args[@]}"

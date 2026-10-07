@@ -15,6 +15,17 @@
  * Wired into CI (.github/workflows/self-audit.yml, daily + manual).
  */
 
+import {
+	classifyExternalStatus,
+	probeExternal,
+} from "../src/lib/probe-external";
+import {
+	STATUS_FIX,
+	TYPE_ADD,
+	TYPES_ADD,
+	TYPES_SET,
+} from "./data/curation-maps";
+
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
 
 let fails = 0;
@@ -415,6 +426,121 @@ async function main() {
 		bad("repo ranking evidence (sls-047)", `fetch failed: ${String(err)}`);
 	}
 
+	// Curated-field read-back (lessons class 32, 2026-07-26): a curation
+	// registry row is a CLAIM about what the live API serves. Until now nothing
+	// checked it, so when the daily lumenloop sync began overwriting curated
+	// fields the whole curation layer silently stopped reaching production —
+	// curate logged "125 write(s) applied", every job exited 0, and 13 verified
+	// TYPES_SET rows from #414 sat reverted for two weeks. This reads the rows
+	// back off the LIVE API and fails when the registry and production disagree.
+	// Full population, never a sample (class 18).
+	try {
+		const targets = new Map<
+			string,
+			{ types?: string[]; typesInclude?: string[]; status?: string }
+		>();
+		for (const [slug, want] of Object.entries(TYPES_SET))
+			targets.set(slug, { ...targets.get(slug), types: want });
+		// Two additive maps exist (TYPES_ADD and the older TYPE_ADD — the Oracle
+		// vertical from guard D, 2026-08-27) and curate applies BOTH after the
+		// exact-sync. This check read only one, so four oracle rows whose Oracle
+		// tag came from TYPE_ADD read as "production drift" for five days
+		// (2026-09-05, standing self-audit red). Union them.
+		for (const [slug, add] of [
+			...Object.entries(TYPE_ADD),
+			...Object.entries(TYPES_ADD),
+		]) {
+			const cur = targets.get(slug);
+			targets.set(slug, {
+				...cur,
+				typesInclude: [...new Set([...(cur?.typesInclude ?? []), ...add])],
+			});
+		}
+		for (const [slug, fix] of Object.entries(STATUS_FIX))
+			targets.set(slug, { ...targets.get(slug), status: fix.to });
+
+		const slugs = [...targets.keys()].sort();
+		const drift: string[] = [];
+		let checked = 0;
+		let absent = 0;
+
+		for (let i = 0; i < slugs.length; i += 8) {
+			const batch = slugs.slice(i, i + 8);
+			const rows = await Promise.all(
+				batch.map(async (slug) => {
+					try {
+						const r = await j(
+							`/api/projects/search?q=${encodeURIComponent(slug)}&limit=5`,
+						);
+						return {
+							slug,
+							// biome-ignore lint/suspicious/noExplicitAny: dynamic JSON
+							doc: (r.projects ?? []).find((p: any) => p.slug === slug),
+						};
+					} catch {
+						return { slug, doc: undefined };
+					}
+				}),
+			);
+			for (const { slug, doc } of rows) {
+				// Not found is UNVERIFIABLE, not drift (#701): the record may be
+				// unpublished or below the search bar. Never accuse on absence.
+				if (!doc) {
+					absent++;
+					continue;
+				}
+				checked++;
+				const want = targets.get(slug);
+				if (!want) continue;
+				const live: string[] = Array.isArray(doc.types) ? doc.types : [];
+				// Exact-sync rows are compared as SETS against TYPES_SET plus what
+				// the additive maps append afterwards — that union is what curate
+				// leaves on the row, so it is the registry's own expectation.
+				if (want.types) {
+					const expected = [
+						...new Set([...want.types, ...(want.typesInclude ?? [])]),
+					];
+					const same =
+						expected.length === live.length &&
+						expected.every((t) => live.includes(t));
+					if (!same)
+						drift.push(
+							`${slug}.types: registry [${expected.join(", ")}] ≠ live [${live.join(", ")}]`,
+						);
+				} else if (want.typesInclude) {
+					const missing = want.typesInclude.filter((t) => !live.includes(t));
+					if (missing.length)
+						drift.push(
+							`${slug}.types: registry adds [${missing.join(", ")}] ≠ live [${live.join(", ")}]`,
+						);
+				}
+				if (want.status && doc.status && doc.status !== want.status)
+					drift.push(
+						`${slug}.status: registry "${want.status}" ≠ live "${doc.status}"`,
+					);
+			}
+		}
+
+		if (!checked)
+			warn(
+				"curated fields reach production",
+				`no curated slug was resolvable on the live API (${absent} absent) — unverifiable, not asserted`,
+			);
+		else if (drift.length)
+			bad(
+				"curated fields reach production",
+				`${drift.length} curated field(s) do NOT match the live API — the curation layer is not reaching production (lessons class 32; check whether a sibling writer overwrote them):\n      ${drift.slice(0, 15).join("\n      ")}${
+					drift.length > 15 ? `\n      …and ${drift.length - 15} more` : ""
+				}`,
+			);
+		else
+			ok(
+				`curated fields reach production: ${checked} curated record(s) match their registry rows${absent ? ` (${absent} unresolvable, not asserted)` : ""}`,
+			);
+	} catch (err) {
+		bad("curated fields reach production", `check failed: ${String(err)}`);
+	}
+
 	// Bridge corridor guard (2026-07-09): every Bridge-typed project must
 	// carry a non-empty supportedNetworks — an empty list is the
 	// omission-equals-negation trap that made Solana/EVM corridor queries
@@ -574,6 +700,52 @@ async function main() {
 	//     "semantic" (never "strict"/"majority" over pure guesses) and no
 	//     via:"semantic" row scoring above the 0.7 cap / "high" label. Guards
 	//     the confident-wrong-answer class for agent consumers.
+	// ---- A count must not depend on the page size ----
+	// q=evm answered total 91 at limit=10 and total 86 at limit=100 — same
+	// query, same data. The shadow-fold correction was computed on the PAGE and
+	// subtracted from the WHOLE-set count, so the number moved with `limit`.
+	// "How many X are there" is one of the most common agent questions; an
+	// answer that changes with an unrelated param is worse than no answer.
+	console.log("\n── counts.total is limit-invariant ──");
+	for (const probe of ["evm", "anchor", "wallet"]) {
+		try {
+			const totals = await Promise.all(
+				[10, 50, 100].map(async (n) => {
+					const d = await j(
+						`/api/projects/search?q=${encodeURIComponent(probe)}&limit=${n}`,
+					);
+					return { n, total: d?.meta?.counts?.total ?? null };
+				}),
+			);
+			const distinct = [...new Set(totals.map((t) => t.total))];
+			if (distinct.length === 1)
+				ok(
+					`counts.total stable for "${probe}" (${distinct[0]} at every limit)`,
+				);
+			else
+				bad(
+					`counts.total varies with limit ("${probe}")`,
+					`${totals.map((t) => `limit=${t.n}→${t.total}`).join(", ")} — a count that moves with page size is not a count`,
+				);
+			// …and at a limit that holds the whole set, total must equal what you
+			// actually got. Stability alone could be stably wrong.
+			const full = await j(
+				`/api/projects/search?q=${encodeURIComponent(probe)}&limit=100`,
+			);
+			const t = full?.meta?.counts?.total ?? 0;
+			const served = (full?.projects ?? []).length;
+			if (t <= 100 && t !== served)
+				bad(
+					`counts.total disagrees with the served page ("${probe}")`,
+					`total=${t} but limit=100 served ${served} row(s) — with the whole set on one page these must match`,
+				);
+			else if (t <= 100)
+				ok(`counts.total equals the served set for "${probe}"`);
+		} catch (e) {
+			bad(`counts.total invariant ("${probe}")`, `fetch failed: ${String(e)}`);
+		}
+	}
+
 	console.log("\n── Semantic-fallback honesty ──");
 	// Queries with no keyword hit in the directory — they exercise the
 	// zero-keyword rescue rung. If a probe starts keyword-matching (record
@@ -654,15 +826,26 @@ async function main() {
 			const at = key.lastIndexOf("@");
 			const name = key.slice(0, at);
 			const ver = key.slice(at + 1);
-			const r = await fetch(
-				`https://registry.npmjs.org/${encodeURIComponent(name).replace("%2F", "/")}/${ver}`,
-				{ headers: { "user-agent": "stellarlight-self-audit" } },
-			);
-			if (r.ok) ok(`npm: ${key} installable`);
-			else
+			const url = `https://registry.npmjs.org/${encodeURIComponent(name).replace("%2F", "/")}/${ver}`;
+			// Registry-unavailable is NOT "version missing" — a transient 504 made
+			// the 2026-07-23 audit report api-client@1.5.0/@1.5.1 uninstallable
+			// while both served 200 seconds later. probeExternal owns that
+			// distinction for every detector (class 32): only a 404/410 is a
+			// finding; 5xx/timeout is a WARNING, so an upstream outage can never
+			// fail this gate or fill the daily rolling issue with false reds.
+			const p = await probeExternal(url, {
+				userAgent: "stellarlight-self-audit",
+			});
+			if (p.verdict === "present") ok(`npm: ${key} installable`);
+			else if (p.verdict === "absent")
 				bad(
 					"advertised version missing",
-					`changelog names ${key} but the npm registry returns ${r.status} — published changelog must never advertise an uninstallable version (verify-before-advertise)`,
+					`changelog names ${key} but the npm registry returns ${p.detail} — published changelog must never advertise an uninstallable version (verify-before-advertise)`,
+				);
+			else
+				warn(
+					"advertised version unverifiable",
+					`could not reach the npm registry for ${key} (${p.detail}, ${p.attempts} attempt(s)) — registry unavailable is NOT evidence the version is missing; re-check ${url}`,
 				);
 		}
 	} catch (err) {
@@ -691,7 +874,18 @@ async function main() {
 				{ headers: { "user-agent": "stellarlight-self-audit" } },
 			);
 			if (!r.ok) {
-				bad(`skill mirror ${remote}`, `mirror fetch HTTP ${r.status}`);
+				// Same class-32 split as the npm check above: a 404 means the
+				// mirror really is missing that file (a finding); a raw.github
+				// 5xx/429 means we could not read it (a warning). This one keeps
+				// its own fetch rather than probeExternal because it needs the
+				// BODY to diff, so it borrows just the classifier.
+				if (classifyExternalStatus(r.status) === "absent")
+					bad(`skill mirror ${remote}`, `mirror fetch HTTP ${r.status}`);
+				else
+					warn(
+						`skill mirror ${remote}`,
+						`mirror unreadable (HTTP ${r.status}) — not evidence the mirror is stale`,
+					);
 				continue;
 			}
 			const theirs = (await r.text()).trim();

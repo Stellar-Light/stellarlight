@@ -1,0 +1,26 @@
+name: Aggregate feedback votes (nightly)
+on:
+  schedule:
+    - cron: "40 3 * * *" # nightly, after the health run
+  workflow_dispatch:
+    inputs:
+      execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Distinct-voter aggregation into feedbackSignal (≥5-voter floor before
+      # score). Cron executes; manual dispatch is dry-run unless execute=true.
+      # Zero votes = healthy cold-start green, by design.
+      - run: pnpm exec tsx scripts/aggregate-feedback.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

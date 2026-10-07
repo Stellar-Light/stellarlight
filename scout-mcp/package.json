@@ -1,6 +1,6 @@
 {
 	"name": "@stellar-light/scout-mcp",
-	"version": "1.1.12",
+	"version": "1.6.0",
 	"description": "Stellar Scout MCP server \u2014 agentic ecosystem research for Stellar builders, callable from Claude.ai / ChatGPT / Cursor / Gemini and any MCP client.",
 	"keywords": [
 		"mcp",
@@ -20,7 +20,8 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Stellar-Light/scout-mcp.git"
+		"url": "git+https://github.com/Stellar-Light/stellarlight.git",
+		"directory": "scout-mcp"
 	},
 	"license": "MIT",
 	"author": "stellarlight.xyz",
@@ -28,7 +29,7 @@
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"scout-mcp": "./dist/index.js"
+		"scout-mcp": "dist/index.js"
 	},
 	"files": [
 		"dist",

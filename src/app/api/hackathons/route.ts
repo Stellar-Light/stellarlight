@@ -21,16 +21,22 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import {
 	type DoraHacksHackathon,
 	fetchAllDoraHacksHackathons,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 interface HackathonRow {
@@ -62,7 +68,7 @@ function doraStatus(
 function doraToRow(h: DoraHacksHackathon): HackathonRow {
 	const startDate = new Date(h.start_time * 1000).toISOString().slice(0, 10);
 	const endDate = new Date(h.end_time * 1000).toISOString().slice(0, 10);
-	const url = getHackathonUrl(h.uname);
+	const url = getHackathonUrl(h);
 	return {
 		id: `dorahacks-${h.id}`,
 		name: h.title,
@@ -80,15 +86,34 @@ function doraToRow(h: DoraHacksHackathon): HackathonRow {
 				}
 			: null,
 		url,
-		source: "dorahacks",
+		source: h.source ?? "dorahacks",
 		prizePoolUSD: h.bonus_price || undefined,
 		hackersCount: h.hackers_count || undefined,
 	};
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	// One line per listing read that failed; a thinned page says so and is
+	// not cached for an hour.
+	const readWarnings: string[] = [];
+	const paramWarning = unknownParamWarning(
+		sp,
+		["status", "organizer", "source", "limit", "q"],
+		{
+			advertise: ["status", "organizer", "source", "limit", "q"],
+			hint: "Per-event detail (tracks, prizes, winners) lives on /api/hackathons/{slug}.",
+		},
+	);
 	const statusFilter = sp.get("status");
+	// Free-text name lookup (Raven prior-art review 2026-06-25: "scout_hackathons
+	// ignores free-text q" blocked named-event questions — resolve an event by
+	// name/organizer substring instead of forcing clients to page the catalog).
+	const q = sp.get("q")?.trim().toLowerCase() || null;
 	const organizerFilter = sp.get("organizer");
 	const sourceFilter = sp.get("source"); // "curated" | "dorahacks" | undefined
 	const limit = clampLimit(sp.get("limit"), 100, 300);
@@ -139,6 +164,7 @@ export async function GET(req: NextRequest) {
 					where,
 					limit: 300,
 					depth: 1,
+					joins: false,
 					sort: "-startDate",
 				});
 
@@ -177,20 +203,16 @@ export async function GET(req: NextRequest) {
 						source: "curated",
 					};
 				});
-			} catch {
-				// fall through
+			} catch (err) {
+				readWarnings.push(degradedWarning("curated hackathons", err));
 			}
 		}
 	}
-
-	// 2. Live DoraHacks feed.
-	if (sourceFilter !== "curated") {
-		try {
-			const doraHackathons = await fetchAllDoraHacksHackathons();
-			dora = doraHackathons.map(doraToRow);
-		} catch {
-			// fall through
-		}
+	try {
+		const doraHackathons = await fetchAllDoraHacksHackathons();
+		dora = doraHackathons.map(doraToRow);
+	} catch (err) {
+		readWarnings.push(degradedWarning("DoraHacks listing", err));
 	}
 
 	// 3. Merge. De-duplicate by externalUrl — if a curated entry already
@@ -211,9 +233,19 @@ export async function GET(req: NextRequest) {
 	) {
 		hackathons = hackathons.filter((h) => h.status === statusFilter);
 	}
+	if (sourceFilter) {
+		hackathons = hackathons.filter((h) => h.source === sourceFilter);
+	}
 	if (organizerFilter) {
 		hackathons = hackathons.filter(
 			(h) => h.organizer?.slug === organizerFilter,
+		);
+	}
+	if (q) {
+		hackathons = hackathons.filter((h) =>
+			`${h.name ?? ""} ${h.organizer?.name ?? ""} ${h.organizer?.slug ?? ""}`
+				.toLowerCase()
+				.includes(q),
 		);
 	}
 
@@ -229,10 +261,17 @@ export async function GET(req: NextRequest) {
 		return bt - at;
 	});
 
+	// Pre-slice count is the honest `total` for meta.counts — `curated` and
+	// `dorahacks` below are per-SOURCE totals of the merged set, which is a
+	// different denominator and cannot stand in for it.
+	const matchedBeforeLimit = hackathons.length;
+	const matchedRows = hackathons;
 	hackathons = hackathons.slice(0, limit);
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/hackathons",
 		filters: { status: statusFilter, source: sourceFilter, limit },
 	});
@@ -271,9 +310,18 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
+				...matchModeMeta(q ? "filtered" : "all"),
 				source: "https://stellarlight.xyz/hackathons",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning || readWarnings.length
+					? {
+							warnings: [
+								...(paramWarning ? [paramWarning] : []),
+								...readWarnings,
+							],
+						}
+					: {}),
 				filters: {
 					status: statusFilter,
 					organizer: organizerFilter,
@@ -281,17 +329,28 @@ export async function GET(req: NextRequest) {
 					limit,
 				},
 				counts: {
-					curated: curated.length,
-					dorahacks: dora.length,
+					// Counted from the rows THEMSELVES, not from the two input
+					// arrays: the code-curated events arrive through the DoraHacks
+					// fetch, so `dora.length` reported all 26 as dorahacks while
+					// `curated.length` (the Payload collection, empty) reported 0 —
+					// beside six served rows whose own source said "curated".
+					curated: matchedRows.filter((h) => h.source === "curated").length,
+					dorahacks: matchedRows.filter((h) => h.source === "dorahacks").length,
 					returned: hackathons.length,
+					total: matchedBeforeLimit,
 				},
 				...(fallbackChannels ? { fallbackChannels } : {}),
-			},
+			}),
 			hackathons,
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				...serverTiming(startedAt),
+				// a DoraHacks hiccup must not pin an empty hour into every consumer's cache
+				"Cache-Control":
+					hackathons.length === 0 || readWarnings.length > 0
+						? "no-store"
+						: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);

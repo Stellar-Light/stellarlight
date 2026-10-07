@@ -22,27 +22,65 @@
  *   npx tsx scripts/scan/scan-repo-code.ts --lang all --limit 40 # any language
  *   flags: --limit N (60) · --lang X|all (Rust) · --rescan · --stale-first · --budget N (800)
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "../load-env";
+import type { Where } from "payload";
 import { getPayload } from "payload";
-import { computeCodeDepth } from "../../src/lib/code-depth";
+import { deriveCodeDomains } from "../../src/lib/code-domains";
 import { computeFarmScore } from "../../src/lib/code-signals";
 import {
 	detectSdkCapabilities,
 	extractCodeSymbols,
+	extractContractInterface,
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
-import { computeJsDepth } from "../../src/lib/js-depth";
+import { routeCodeDepth } from "../../src/lib/depth-route";
 import { isKnownInfraNotDeployable } from "../../src/lib/known-infra";
+import { isAllowlisted } from "../../src/lib/repo-allowlist";
+import { extractStellarDeps } from "../../src/lib/stellar-deps";
+import {
+	formatMismatches,
+	type ReadBackMismatch,
+	verifyWrites,
+} from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
+import { poolWarning, SCANNED_POOL_CAP } from "./scan-repo-code-pool";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
 const EXECUTE = process.argv.includes("--execute");
+/** id → the exact payload sent, so the read-back compares against what this
+ *  wave claimed to write, never against what it meant to. */
+const sentById = new Map<string, Record<string, unknown>>();
+/** The scalar half of every outcome's write shape. diffWritten checks a row
+ *  only on the fields it sent, so one list covers scanned / error / incomplete. */
+const VERIFIED_FIELDS = [
+	"codeScanState",
+	"codeScannedAt",
+	"stellarProof",
+	"codeDepth",
+	"farmScore",
+	"codeScanNote",
+	"codeScanError",
+	"mainnetContractId",
+] as const;
 const RESCAN = process.argv.includes("--rescan");
+/**
+ * Retry ONLY the states routine waves exclude: `error` and `incomplete`.
+ *
+ * Those exclusions are right — the same rows re-fail every wave and burn the
+ * budget at the front of each run — but they were one-way. `--rescan` widens to
+ * EVERYTHING and sorts by -repoScore, so with any limit it re-scans the top of
+ * the index and never reaches an error row; nothing scheduled ever retried
+ * them. 433 repos were left permanently unverifiable, among them
+ * x402-foundation/x402 (6,582 stars, `submodule-contracts`), which then carries
+ * its stars into the ranking with no Stellar proof at all.
+ *
+ * Structural reasons DO resolve: a submodule gets inlined, a truncated tree
+ * shrinks, a 404 repo comes back. Monthly is often enough to catch that and
+ * rare enough to cost nothing.
+ */
+const RETRY_EXCLUDED = process.argv.includes("--retry-excluded");
 // Stale-first (gist gap 4): re-scan repos whose code CHANGED after their last
 // scan (lastCommitAt > codeScannedAt) — an SDK 0.7→26 upgrade otherwise keeps
 // its stale versionStatus until a wave happens to reach it. Weekly scheduled
@@ -61,7 +99,13 @@ const argOf = (name: string, dflt: string) => {
 const ONLY = argOf("--only", "");
 const LIMIT = Math.max(1, Number(argOf("--limit", "60")) || 60);
 const LANG = argOf("--lang", "Rust");
-const CALL_BUDGET = Math.max(100, Number(argOf("--budget", "650")) || 650);
+// Explicit --budget wins; with no flag the budget is POOL-AWARE, resolved in
+// main() from the live rate limit. The old constant default (650) was sized
+// for the 1,000/hr Actions token and silently starved every cron wave after
+// the 5,000/hr PAT landed — 12h of 2h-cadence waves yielded +47 scans
+// (found 2026-08-15). rate_limit is quota-exempt.
+const BUDGET_FLAG = argOf("--budget", "");
+let CALL_BUDGET = Math.max(100, Number(BUDGET_FLAG) || 650);
 
 const GH = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
 if (!GH) {
@@ -110,24 +154,84 @@ async function verifyMain() {
 			}),
 		);
 	}
-	process.exit(0);
+	process.exit(process.exitCode ?? 0);
 }
 
 async function main() {
 	if (process.argv.includes("--verify")) return verifyMain();
 	const payload = await getPayload({ config: await configPromise });
+	if (!BUDGET_FLAG) {
+		try {
+			const rl = (await (
+				await fetch("https://api.github.com/rate_limit", {
+					headers: { Authorization: `Bearer ${GH}` },
+				})
+			).json()) as { resources?: { core?: { remaining?: number } } };
+			const remaining = rl?.resources?.core?.remaining;
+			if (typeof remaining === "number")
+				CALL_BUDGET = Math.max(100, remaining - 400);
+			console.log(
+				`pool-aware budget: core remaining=${remaining ?? "?"} → budget=${CALL_BUDGET} (reserve 400)`,
+			);
+		} catch {
+			console.log(
+				`rate_limit probe failed — keeping fallback budget=${CALL_BUDGET}`,
+			);
+		}
+	}
 	console.log(
-		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls`,
+		`scan-repo-code — ${EXECUTE ? "EXECUTE (writing signals)" : "DRY RUN (no writes)"} · lang=${LANG} · limit=${LIMIT} · budget=${CALL_BUDGET} calls${RETRY_EXCLUDED ? " · mode=retry-excluded (error + incomplete only)" : ""}`,
 	);
 
-	// Wave selection: freshest first (most relevant to consumers), skip repos
-	// already scanned unless --rescan (error/incomplete always retry).
-	const where = {
+	// Wave selection: never-scanned AND pushed-since-scan repos compete on the
+	// same -repoScore,-lastCommitAt key (re-scan policy 2026-08-08); --rescan
+	// widens to everything (error/incomplete always retry).
+	// Explicitly typed: the three branches below produce different optional keys
+	// (`in` vs `not_in`), and inferring a union of those is what TS2322'd against
+	// Payload's `Where`. Naming the element type keeps the branches honest
+	// without a cast that would hide a real mistake.
+	const stateClauses: Where[] = RETRY_EXCLUDED
+		? // Retry ONLY what routine waves exclude. See --retry-excluded above.
+			[{ codeScanState: { in: ["error", "incomplete"] } }]
+		: RESCAN
+			? [] // --rescan deliberately widens to everything
+			: // error excluded 2026-08-15 (the same ~65 blob-unreadable dead repos
+				// re-erred EVERY wave, burning budget at the front of each run);
+				// incomplete excluded 2026-09-07 for the identical reason — all 14
+				// carry a STRUCTURAL note (`submodule-contracts`, `tree-incomplete`)
+				// so a re-scan produces the identical result every time. They were
+				// re-picked every two hours forever, ~840 calls a day, and every wave
+				// reported `scanned=0` as a success — a lane that CAN do no work then
+				// looks exactly like a lane that is failing to.
+				// `gone` excluded for the same reason it exists (2026-09-14): the
+				// repo is a 404, so every wave would re-pick it as "never scanned"
+				// and spend budget proving the same absence. check-gone-repos.ts
+				// re-probes gone rows and sets them back to `error` if they return.
+				[
+					{
+						codeScanState: {
+							not_in: ["scanned", "error", "incomplete", "gone"],
+						},
+					},
+				];
+	const where: Where = {
 		and: [
-			...(LANG !== "all" ? [{ primaryLanguage: { equals: LANG } }] : []),
-			...(RESCAN ? [] : [{ codeScanState: { not_equals: "scanned" } }]),
+			...(LANG !== "all"
+				? ([{ primaryLanguage: { equals: LANG } }] as Where[])
+				: []),
+			...stateClauses,
 		],
 	};
+	// Triaged repos (dead-long-tail, inert-fork, …) are human-vocabulary
+	// verdicts that scanning cannot change — skip them so wave budget goes to
+	// repos whose code truth matters. Allowlisted canon never carries tags
+	// (repo-triage.ts guard), so no canonical repo can ever be skipped.
+	// NOTE: reads need context.internal or the afterRead privacy hook strips
+	// triageTags and this filter silently never fires (the #896 class).
+	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+	const notTriaged = (d: any) =>
+		!(Array.isArray(d.triageTags) && d.triageTags.length > 0);
+	let skippedTriaged = 0;
 	// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
 	let docs: any[];
 	let eligible: number;
@@ -137,6 +241,10 @@ async function main() {
 			where: { fullName: { equals: ONLY } },
 			limit: 1,
 			depth: 0,
+			// The #896 class recurring in a second call site (audit 2026-08-31):
+			// without context.internal the afterRead privacy hook strips triageTags,
+			// so the notTriaged() filter above could never see them on --only runs.
+			context: { internal: true },
 		});
 		docs = res.docs;
 		eligible = res.docs.length;
@@ -146,6 +254,14 @@ async function main() {
 	} else if (STALE_FIRST) {
 		// Stale = scanned, but pushed since the scan. Payload where can't compare
 		// two fields, so fetch the scanned set (small select) + filter in memory.
+		// SORT MATTERS (2026-09-15): the fetch is capped, and TypeScript alone has
+		// 4,196 scanned rows against a 3,000 cap — so without an explicit sort the
+		// cap decides WHICH rows are visible by insertion order, and 1,196 of them
+		// can never be picked however stale they are. stellar/js-xdr sat at a
+		// 2026-08-14 scan with a 2026-08-31 push through four waves for exactly
+		// this reason. Ordering by most-recent push puts the rows that CAN be
+		// stale (lastCommitAt > codeScannedAt) inside the window, and matches the
+		// in-memory ranking applied below.
 		const scanned = await payload.find({
 			collection: "repos",
 			where: {
@@ -154,8 +270,10 @@ async function main() {
 					{ codeScanState: { equals: "scanned" } },
 				],
 			},
-			limit: 3000,
+			sort: "-lastCommitAt",
+			limit: SCANNED_POOL_CAP,
 			depth: 0,
+			context: { internal: true },
 			select: {
 				fullName: true,
 				repoScore: true,
@@ -164,55 +282,155 @@ async function main() {
 				codeScanState: true,
 				lastCommitAt: true,
 				codeScannedAt: true,
+				triageTags: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-		const stale = (scanned.docs as any[]).filter(
+		const staleAll = (scanned.docs as any[]).filter(
 			(d) =>
 				d.lastCommitAt &&
 				d.codeScannedAt &&
 				new Date(d.lastCommitAt).getTime() >
-					new Date(d.codeScannedAt).getTime(),
+					new Date(d.codeScannedAt).getTime() &&
+				// Same 24h re-scan cooldown as the default branch (2026-08-15).
+				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
 		);
+		const capWarn = poolWarning(scanned.docs.length, SCANNED_POOL_CAP);
+		if (capWarn) console.log(capWarn);
+		const stale = staleAll.filter(notTriaged);
+		skippedTriaged += staleAll.length - stale.length;
 		stale.sort((a, b) =>
 			String(b.lastCommitAt).localeCompare(String(a.lastCommitAt)),
 		);
 		eligible = stale.length;
 		docs = stale.slice(0, LIMIT);
 	} else {
-		const res = await payload.find({
-			collection: "repos",
-			where,
-			// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
-			// alone let stellar/js-stellar-sdk (repoScore 74, THE symbol-lookup
-			// target) sit behind hundreds of recently-pushed small repos — real
-			// symbol queries failed while R-SYM read 100% on the 5 repos that
-			// happened to be scanned. Canonical/high-score repos are what
-			// consumers actually look up; scan them first. (Comma-separated STRING —
-			// the array form is silently ignored by the Payload find; verified live
-			// 2026-07-11 when a rescan wave picked hackathon repos over score-74
-			// js-stellar-sdk.)
-			sort: "-repoScore,-lastCommitAt",
-			limit: LIMIT,
-			depth: 0,
-			select: {
-				fullName: true,
-				repoScore: true,
-				isFork: true,
-				isArchived: true,
-				codeScanState: true,
-			},
-		});
+		// Re-scan policy (2026-08-08): a stale scan is as missing as no scan.
+		// Eligible = never-scanned OR pushed-since-scan, ALL ranked by the same
+		// key, so a changed js-stellar-sdk (74) re-scans before a never-scanned
+		// hackathon repo — code truth stays fresh on the repos consumers actually
+		// query. (The old weekly --stale-first wave ranked by recency, which put
+		// hot small repos ahead of changed canonical SDKs — the 34/48 stale gap.)
+		// Payload `where` can't compare two fields → fetch the scanned pool small
+		// and filter in memory, same as the --stale-first branch.
+		const scannedPoolP = RESCAN
+			? // --rescan makes `where` include scanned repos already — skip the
+				// second pool so nothing double-counts.
+				Promise.resolve({ docs: [] })
+			: payload.find({
+					collection: "repos",
+					where: {
+						and: [
+							...(LANG !== "all"
+								? [{ primaryLanguage: { equals: LANG } }]
+								: []),
+							{ codeScanState: { equals: "scanned" } },
+						],
+					},
+					// Same cap, same reason to sort — see the --stale-first branch.
+					sort: "-lastCommitAt",
+					limit: SCANNED_POOL_CAP,
+					depth: 0,
+					context: { internal: true },
+					select: {
+						fullName: true,
+						repoScore: true,
+						isFork: true,
+						isArchived: true,
+						codeScanState: true,
+						lastCommitAt: true,
+						codeScannedAt: true,
+						triageTags: true,
+					},
+				});
+		// Page through the unscanned pool until the wave is FULL of scannable
+		// repos. A single over-fetch (LIMIT*2, sorted -repoScore) stopped
+		// advancing once the head of that order was mostly triaged: on
+		// 2026-09-01 three waves scanned 166, 9 and 4 repos with ~4,600 calls
+		// unspent each while 6,008 were eligible — the window never moved past
+		// the 834–996 triaged rows sitting at the top. Bounded at 12 pages
+		// (12×LIMIT*2 rows of a tiny select) so a fully-triaged pool still ends.
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
-		docs = res.docs as any[];
-		eligible = res.totalDocs;
+		const unscannedDocs: any[] = [];
+		let unscannedTotal = 0;
+		for (let page = 1; page <= 12; page++) {
+			const res = await payload.find({
+				collection: "repos",
+				where,
+				// Authority first, then freshness (2026-07-11 audit): -lastCommitAt
+				// alone let stellar/js-stellar-sdk (repoScore 74, THE symbol-lookup
+				// target) sit behind hundreds of recently-pushed small repos.
+				// (Comma-separated STRING — the array form is silently ignored by
+				// the Payload find; verified live 2026-07-11.)
+				sort: "-repoScore,-lastCommitAt",
+				limit: LIMIT * 2,
+				page,
+				depth: 0,
+				context: { internal: true },
+				select: {
+					fullName: true,
+					repoScore: true,
+					isFork: true,
+					isArchived: true,
+					codeScanState: true,
+					lastCommitAt: true,
+					triageTags: true,
+				},
+			});
+			unscannedTotal = res.totalDocs;
+			// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+			unscannedDocs.push(...(res.docs as any[]));
+			if (unscannedDocs.filter(notTriaged).length >= LIMIT || !res.hasNextPage)
+				break;
+		}
+		const scannedPool = await scannedPoolP;
+		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
+		const staleAll = (scannedPool.docs as any[]).filter(
+			(d) =>
+				d.lastCommitAt &&
+				d.codeScannedAt &&
+				new Date(d.lastCommitAt).getTime() >
+					new Date(d.codeScannedAt).getTime() &&
+				// 24h re-scan cooldown (2026-08-15): at the 2h cron cadence the
+				// unified policy re-scanned every fresh-commit canonical repo
+				// EVERY wave (12x/day) — the tail starved (+47 scans in 11h).
+				// Freshness intent is DAILY; clamp re-scan frequency to it.
+				Date.now() - new Date(d.codeScannedAt).getTime() > 24 * 36e5,
+		);
+		const stale = staleAll.filter(notTriaged);
+		const unscannedKept = unscannedDocs.filter(notTriaged);
+		skippedTriaged +=
+			staleAll.length -
+			stale.length +
+			(unscannedDocs.length - unscannedKept.length);
+		docs = [...unscannedKept, ...stale]
+			.sort(
+				(a, b) =>
+					(b.repoScore ?? 0) - (a.repoScore ?? 0) ||
+					String(b.lastCommitAt ?? "").localeCompare(
+						String(a.lastCommitAt ?? ""),
+					),
+			)
+			.slice(0, LIMIT);
+		eligible = unscannedTotal + stale.length;
+		// totalDocs counts triaged rows the filter drops — the log line below
+		// reports the skip so a shrinking pool is visible, not silent.
+		if (stale.length)
+			console.log(
+				`re-scan pool: ${stale.length} scanned repos pushed since their scan`,
+			);
 	}
 	console.log(
-		`eligible: ${eligible} · this wave: ${docs.length}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
+		`eligible: ${eligible} · this wave: ${docs.length}${skippedTriaged ? ` · skipped ${skippedTriaged} triaged` : ""}${STALE_FIRST ? " · mode=stale-first (pushed since last scan)" : ""}\n`,
 	);
 
 	let callsUsed = 0;
 	let scanned = 0;
+	// Interface-coverage accounting (no silent caps): a contract repo that
+	// extracts ZERO signatures is an extraction gap (the FxDAO trait-impl
+	// class), not a benign absence — count them so waves surface the gap.
+	let contractRepos = 0;
+	let contractReposWithIface = 0;
 	let errored = 0;
 	let incomplete = 0;
 	let budgetStopped = false;
@@ -240,32 +458,58 @@ async function main() {
 		try {
 			const r = await fetchRepoCode(gh, full);
 			callsUsed += (r?.pathsFetched ?? 2) + 5; // tree+meta+tags+readme overhead
+			// Canonical platform repos never need to PROVE they're Stellar —
+			// they ARE Stellar. The dep-based proof detector is self-
+			// referentially blind to them (js-stellar-sdk depends on
+			// stellar-base, not on an SDK → proof=none, depth=0; found
+			// 2026-08-15), and the unreadable-blob guard held rs-soroban-sdk
+			// in error since 2026-07-11. Pin proof by language and let depth
+			// compute from whatever WAS readable.
+			if (
+				r &&
+				isAllowlisted(full) &&
+				(r.proof === "none" || r.outcome !== "ok")
+			) {
+				const lang = String(doc.primaryLanguage ?? "").toLowerCase();
+				r.proof =
+					lang === "rust"
+						? "cargo-sdk"
+						: lang === "typescript" || lang === "javascript"
+							? "js-sdk"
+							: "lang-sdk";
+				r.outcome = "ok";
+				r.depthInput.proof = r.proof;
+				console.log(
+					`  pin    ${full.padEnd(44)} allowlisted-canonical proof=${r.proof}`,
+				);
+			}
 			if (!r) {
 				data = errorToWrite("no-tree/unfetchable", nowIso);
 				errored++;
 				line = `  error  ${full.padEnd(44)} no-tree`;
 			} else {
-				let depth =
-					r.outcome === "ok" ? computeCodeDepth(r.depthInput).codeDepth : 0;
-				// gist gap 1 phase 2: for JS/TS dapps, computeCodeDepth returns a
-				// FLAT 0.3 (it only scores Rust contracts). Replace it with the
-				// calibrated jsDepth when this is a JS repo with actual JS sources —
-				// real dapps rise above 0.3, boilerplate stays at/below it.
-				if (r.outcome === "ok" && r.proof === "js-sdk") {
-					const jd = computeJsDepth({
-						fullName: full,
-						blobs: r.depthInput.blobs,
-						stellarJsDep: r.facts.stellarJsDep,
-						scalars: {
-							isFork: r.meta.isFork,
-							tagCount: r.meta.tagCount,
-							readmeText: r.depthInput.scalars.readmeText,
-							topics: r.depthInput.scalars.topics ?? [],
-							nameLooksTemplate: r.meta.nameLooksTemplate,
-						},
-					});
-					if (!jd.reasons.includes("no-js-sources")) depth = jd.jsDepth;
-				}
+				// Depth routing lives in ONE place (src/lib/depth-route.ts): the
+				// reader is chosen by the SOURCES ACTUALLY FETCHED, not by the proof
+				// label. Routing by the label meant a mislabelled repo went to a
+				// reader that could not see its files and kept computeCodeDepth's
+				// flat 0.3 forever — live 2026-09-14, 63 of 71 Rust rows, 30 of 44
+				// JavaScript and 19 of 25 TypeScript rows on `lang-sdk` sat at
+				// exactly 0.300 (Creit-Tech/xBull-Wallet-Connect, soroswap/sdk,
+				// stellar/dts-xdr among them). The hybrid-repo rule this replaces —
+				// a vendored soroban crate must not let the Rust model score a
+				// sliver while a Kotlin/Java/Go/Python product is the repo's real
+				// mass — survives as the router's mass gate: a non-Rust reading only
+				// counts when its language leads by fetched non-test SLOC, so a
+				// pure-Rust repo with an incidental deploy script is untouched.
+				const route =
+					r.outcome === "ok"
+						? routeCodeDepth({
+								depth: r.depthInput,
+								stellarJsDep: r.facts.stellarJsDep,
+								nameLooksTemplate: r.meta.nameLooksTemplate,
+							})
+						: null;
+				const depth = route?.codeDepth ?? 0;
 				// Rust pub-surface first; JS/TS exported surface when there is none
 				// (gist gap 1 phase 1 — facts for the ~1,900 non-Rust repos).
 				const rustSymbols =
@@ -276,6 +520,26 @@ async function main() {
 						: extractJsSymbols(r.depthInput.blobs);
 				const sdkCapabilities =
 					r.outcome === "ok" ? detectSdkCapabilities(r.depthInput.blobs) : [];
+				const contractInterface =
+					r.outcome === "ok"
+						? extractContractInterface(r.depthInput.blobs)
+						: [];
+				const stellarDeps =
+					r.outcome === "ok" ? extractStellarDeps(r.scan.blobs) : [];
+				// Evidence-only domain classification (deps + caps + iface traits) —
+				// what the CODE proves the repo does, never what it claims.
+				const codeDomains =
+					r.outcome === "ok"
+						? deriveCodeDomains({
+								stellarDeps,
+								sdkCapabilities,
+								contractInterface,
+							})
+						: [];
+				if (r.outcome === "ok" && (r.facts?.contractMacroCount ?? 0) > 0) {
+					contractRepos++;
+					if (contractInterface.length > 0) contractReposWithIface++;
+				}
 				const farm =
 					r.outcome === "ok"
 						? computeFarmScore({
@@ -298,8 +562,14 @@ async function main() {
 						farmScore: farm.score,
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
+						contractInterface,
+						stellarDeps,
 						sdkCapabilities,
+						codeDomains,
+						scannedRef: r.scannedRef,
 						mainnetContractId: r.depthInput.scalars.mainnetContractId ?? null,
+						mainnetContractBasis:
+							r.depthInput.scalars.mainnetContractBasis ?? null,
 					},
 					nowIso,
 				);
@@ -325,7 +595,9 @@ async function main() {
 							: cur;
 					if (predicted > cur)
 						lifts.push({ full, proof: r.proof, depth, cur, predicted });
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} farm=${farm.score} syms=${symbols.length}`;
+					// `via=` is the reader the SOURCES chose — a wave log that says
+					// proof=lang-sdk via=js is the mislabel being read correctly.
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;
@@ -359,6 +631,59 @@ async function main() {
 				data,
 				overrideAccess: true,
 			});
+			sentById.set(String(doc.id), data);
+		}
+	}
+
+	// ── read-back: prove the writes PERSISTED (QUALITY.md §3, second condition)
+	// "wrote N docs" is a statement about the update calls, not about the data:
+	// an update resolves and silently drops keys with no schema field at that
+	// path (#615). (No call syntax in this comment on purpose — the write
+	// discipline test greps this file for update calls.) Re-read every row this wave claimed to write and diff it against
+	// what was sent — the same claim enrich-tvl makes, and the one this lane
+	// lacked while its `--verify` only PRINTED persisted rows for a human.
+	let mismatches: ReadBackMismatch[] = [];
+	if (EXECUTE && sentById.size) {
+		console.log(`\n── Read-back (${sentById.size} written row(s)) ──`);
+		mismatches = await verifyWrites(
+			sentById,
+			async (ids) => {
+				const back = await payload.find({
+					collection: "repos",
+					where: { id: { in: ids } },
+					limit: ids.length,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return new Map(
+					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+					back.docs.map((r: any) => [
+						String(r.id),
+						r as Record<string, unknown>,
+					]),
+				);
+			},
+			VERIFIED_FIELDS,
+			200,
+			async (id) => {
+				const one = await payload.findByID({
+					collection: "repos",
+					id,
+					depth: 0,
+					overrideAccess: true,
+				});
+				return (one as unknown as Record<string, unknown>) ?? null;
+			},
+		);
+		if (mismatches.length) {
+			console.error(
+				`  ✗ ${mismatches.length} field(s) did NOT persist as sent — the write reported success:\n${formatMismatches(mismatches)}`,
+			);
+			process.exitCode = 1;
+		} else {
+			console.log(
+				`  ✓ all ${sentById.size} row(s) hold the values written (${VERIFIED_FIELDS.join(", ")})`,
+			);
 		}
 	}
 
@@ -370,6 +695,10 @@ async function main() {
 	console.log(
 		"tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)",
 	);
+	if (contractRepos)
+		console.log(
+			`interface coverage: ${contractReposWithIface}/${contractRepos} contract repos in this wave extracted ≥1 signature${contractReposWithIface < contractRepos ? " — the gap rows are extraction misses worth a look" : ""}`,
+		);
 	if (lifts.length) {
 		console.log(
 			`\npredicted repoScore lifts after next enrich run (top ${Math.min(12, lifts.length)}):`,
@@ -379,7 +708,35 @@ async function main() {
 				`   ${l.full.padEnd(44)} ${String(l.cur).padStart(3)} → ~${l.predicted}  (proof=${l.proof} depth=${l.depth.toFixed(2)})`,
 			);
 	}
-	process.exit(0);
+	// An EMPTY wave and a BROKEN wave are different facts and must not print
+	// the same thing. Say which one this was, out loud, rather than exiting 0
+	// on a summary a reader has to interpret.
+	if (docs.length === 0) {
+		console.log(
+			`\n· no eligible repos this wave — the routine backlog is exhausted (${eligible} matched the state filter, ${skippedTriaged} of them triaged). Structurally unscannable rows (submodule-contracts, tree-incomplete) and prior errors are retried only under --rescan.`,
+		);
+		process.exit(process.exitCode ?? 0);
+	}
+	// Zero-work waves are FAILURES, not successes (2026-08-08: a rate-limit
+	// stop 0.8s in exited green — the run looked healthy on every dashboard
+	// while writing nothing; the quiet-detector class). A wave that selected
+	// repos but scanned none must go red so it's visible.
+	//
+	// `incomplete === 0` in this condition was load-bearing in the wrong
+	// direction until 2026-09-07: the 14 permanently-incomplete rows the wave
+	// re-picked every two hours SATISFIED it, so the guard could never fire
+	// while those rows were in the routine query. Excluding them (see the wave
+	// selection above) is what lets this guard work again.
+	if (docs.length > 0 && scanned === 0 && errored === 0 && incomplete === 0) {
+		console.log(
+			"\n✗ zero-work wave: repos were selected but none were scanned (rate limit or early stop) — exiting 1 so the run shows red.",
+		);
+		process.exit(1);
+	}
+	// exitCode, not 0: a read-back mismatch above sets it, and `exit(0)` here
+	// would stomp it — the class-20 bug where a run reports GREEN after 13
+	// writes died. Zero-work and read-back both reach the run's colour.
+	process.exit(process.exitCode ?? 0);
 }
 
 main().catch((e) => {

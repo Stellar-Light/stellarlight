@@ -1,0 +1,24 @@
+{
+ "slug": "quasar",
+ "url": "https://eiger.co/",
+ "finalUrl": "https://equilibrium.co/writing/scaling-distributed-systems-eiger-and-equilibrium-labs-unite",
+ "fetchedAt": "2026-09-06T04:15:17.443Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:15:17 GMT",
+  "etag": "W/\"e83b5d905b406c639919d9c40a9abd3d\"",
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "3f76259e9c7cc4fbd6f2f65f3e60d269a29468e831d6de445b836d1ec9365f4c",
+ "bodyTextChars": 11032,
+ "markers": [
+  {
+   "marker": "Eiger and Equilibrium Labs unite",
+   "found": true,
+   "where": "text",
+   "excerpt": "Scaling distributed systems: Eiger and Equilibrium Labs unite - Equilibrium Labs EQ Labs → About Projects EQ Ventures → About Portfolio Writing → Research News Get involved Collaborate Join us Part of Equilibr"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

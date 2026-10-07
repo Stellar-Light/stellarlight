@@ -1,28 +1,25 @@
 "use client";
 
 /**
- * Nominee "2026 in review" — a Family.co-style highlights sheet.
+ * Nominee "2026 in review", a Family.co-style highlights sheet.
  *
  * Opens in place of navigating to the project page: tap a nominee's Highlights
  * chip and their year springs up as a stack of playful moments. Motion is the
- * point — spring physics (haptics.lochie.me / family.co), staggered reveals,
+ * point, spring physics (haptics.lochie.me / family.co), staggered reveals,
  * a self-drawing sparkline for growth. Bottom sheet on mobile, centered on
  * desktop. Content is qualitative by design (see highlights.ts).
  */
 
-import {
-	ArrowUpRight,
-	Check,
-	Globe,
-	Rocket,
-	TrendingUp,
-	Trophy,
-	X,
-} from "lucide-react";
+import { ArrowUpRight, Check, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { type HighlightKind, highlightsFor } from "./highlights";
+import { GLYPH_PARTS } from "./glyphs";
+import {
+	type HighlightGlyph,
+	type HighlightKind,
+	highlightsFor,
+} from "./highlights";
 
 // stellar-markets ease + two springs: a settling one for the panel, a snappier
 // one with a touch of overshoot for the logo pop and taps.
@@ -82,17 +79,55 @@ function tvlCaption(tvl: NonNullable<HighlightNominee["tvl"]>): string {
 	return `TVL${src ? ` · ${src}` : ""}${when}`;
 }
 
-const KIND_META: Record<
-	HighlightKind,
-	{ Icon: typeof TrendingUp; tint: string }
-> = {
-	growth: { Icon: TrendingUp, tint: "text-emerald-300/90" },
-	launch: { Icon: Rocket, tint: "text-sky-300/90" },
-	reach: { Icon: Globe, tint: "text-violet-300/90" },
-	milestone: { Icon: Trophy, tint: "text-amber-300/90" },
+const KIND_TINT: Record<HighlightKind, string> = {
+	growth: "text-emerald-300/90",
+	launch: "text-sky-300/90",
+	reach: "text-violet-300/90",
+	milestone: "text-amber-300/90",
 };
 
-// A small self-drawing rising line — decorative momentum, not a plotted value.
+/**
+ * A moment's glyph is a small mechanism redrawn from yui540's gallery
+ * (awards.css, "Highlight glyphs"), not a stock icon. Each moment names its
+ * own; `delay` staggers them down the list as the sheet unrolls.
+ */
+function Glyph({ name, delay }: { name: HighlightGlyph; delay: number }) {
+	return (
+		<span
+			className={`sm-hk sm-hk-${name}`}
+			style={{ ["--sm-d" as string]: `${delay}s` }}
+			aria-hidden="true"
+		>
+			{Array.from({ length: GLYPH_PARTS[name] }, (_, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: a fixed part count
+				<i key={i} />
+			))}
+		</span>
+	);
+}
+
+/**
+ * The sheet slides in on a transform. A lazily loaded logo inside it waits
+ * for a scroll or layout that never comes (WebKit checks lazy images on
+ * scroll, not on transforms), so the sheet's logo loads eagerly, and a file
+ * that fails falls back to the site mark the way the ballot cards do.
+ */
+function SheetLogo({ src }: { src: string | null }) {
+	const [failed, setFailed] = useState(false);
+	return (
+		<Image
+			src={!failed && src ? src : "/logo.png"}
+			alt=""
+			width={56}
+			height={56}
+			loading="eager"
+			className="h-14 w-14 object-cover"
+			onError={() => setFailed(true)}
+		/>
+	);
+}
+
+// A small self-drawing rising line, decorative momentum, not a plotted value.
 function Sparkline() {
 	return (
 		<svg
@@ -124,7 +159,7 @@ function Sparkline() {
 	);
 }
 
-// Rolling-digit odometer — each digit column rolls up from 0 to its final
+// Rolling-digit odometer, each digit column rolls up from 0 to its final
 // digit (torph.lochie / family.co). Takes an already-formatted string so
 // separators like "." and "," stay put while the digits scroll. em-sized.
 function Odometer({ display, delay = 0 }: { display: string; delay?: number }) {
@@ -190,11 +225,23 @@ export function NomineeHighlightsModal({
 	isSelected,
 	onClose,
 	onVote,
+	canPick = true,
+	onConnect = null,
 }: {
 	nominee: HighlightNominee | null;
 	isSelected: boolean;
 	onClose: () => void;
 	onVote: (slug: string) => void;
+	/** Whether a pick can be made from here at all. */
+	canPick?: boolean;
+	/**
+	 * Set only when the reason picking is unavailable is that no wallet is
+	 * connected, then the CTA offers to connect instead of going dead. When
+	 * picking is unavailable for any other reason (not on the voter list, or
+	 * already voted) this is null and the CTA is simply not rendered, because
+	 * there is nothing the reader can do about it here.
+	 */
+	onConnect?: (() => void) | null;
 }) {
 	// Keep the last nominee around through the exit animation so content
 	// doesn't blank out as the sheet springs away.
@@ -213,11 +260,14 @@ export function NomineeHighlightsModal({
 	}, [nominee, onClose]);
 
 	const open = nominee !== null;
-	const data = shown;
+	// The nominee being opened, from its first frame; `shown` only carries the
+	// last one through the exit animation (it updates after paint, so reading
+	// it on open drew the previous nominee's logo for a frame).
+	const data = nominee ?? shown;
 	// Lead every sheet with the growth moment so the big TVL number lands in the
 	// SAME place across nominees. highlights.ts authors moments per-project, so
 	// the growth moment (the one carrying the TVL odometer) sat 1st for some and
-	// 3rd/last for others — the number jumping top↔bottom read as a bug. Stable
+	// 3rd/last for others, the number jumping top↔bottom read as a bug. Stable
 	// sort: growth to the front, everything else keeps its authored order.
 	const highlights = data
 		? [...highlightsFor(data.slug)].sort(
@@ -233,7 +283,7 @@ export function NomineeHighlightsModal({
 					className="fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-4"
 					role="dialog"
 					aria-modal="true"
-					aria-label={`${data.name} — 2026 highlights`}
+					aria-label={`${data.name}: 2026 highlights`}
 				>
 					<motion.button
 						type="button"
@@ -276,13 +326,7 @@ export function NomineeHighlightsModal({
 									transition={{ ...POP_SPRING, delay: 0.05 }}
 									className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#333] bg-[#111]"
 								>
-									<Image
-										src={data.logoUrl || "/logo.png"}
-										alt=""
-										width={56}
-										height={56}
-										className="h-14 w-14 object-cover"
-									/>
+									<SheetLogo key={data.slug} src={data.logoUrl} />
 								</motion.span>
 								<div className="min-w-0">
 									<motion.p
@@ -315,106 +359,99 @@ export function NomineeHighlightsModal({
 								</motion.p>
 							)}
 
-							{/* highlight moments — staggered spring-in */}
-							<motion.ul
-								initial="hidden"
-								animate="visible"
-								variants={{
-									hidden: {},
-									visible: {
-										transition: { staggerChildren: 0.07, delayChildren: 0.18 },
-									},
-								}}
-								className="space-y-2.5"
+							{/* The sheet UNROLLS: the body opens downward from nothing to
+							    its natural height and rolls back up on close. Height has to
+							    be animated for that, clipping alone reveals content but
+							    nothing actually opens, which is what the accordion this is
+							    after is really doing. motion handles the auto-height measure. */}
+							<motion.div
+								initial={{ height: 0, opacity: 0 }}
+								animate={{ height: "auto", opacity: 1 }}
+								exit={{ height: 0, opacity: 0 }}
+								transition={{ duration: 0.44, ease: [0.33, 1, 0.68, 1] }}
+								className="overflow-hidden"
 							>
-								{highlights.map((h) => {
-									const { Icon, tint } = KIND_META[h.kind];
-									// Real, dated TVL wins for a growth moment; else the authored
-									// count; else the little sparkline.
-									const metric: MetricSpec | null =
-										h.kind === "growth" && data.tvl
-											? {
-													prefix: "$",
-													...compactUsd(data.tvl.usd),
-													caption: tvlCaption(data.tvl),
-												}
-											: h.metric
+								<ul className="space-y-2.5">
+									{highlights.map((h, i) => {
+										const tint = KIND_TINT[h.kind];
+										// Real, dated TVL wins for a growth moment; else the authored
+										// count; else the little sparkline.
+										const metric: MetricSpec | null =
+											h.kind === "growth" && data.tvl
 												? {
-														prefix: h.metric.prefix,
-														display: String(h.metric.value),
-														suffix: h.metric.suffix,
-														caption: h.metric.caption,
+														prefix: "$",
+														...compactUsd(data.tvl.usd),
+														caption: tvlCaption(data.tvl),
 													}
-												: null;
-									return (
-										<motion.li
-											key={h.headline}
-											variants={{
-												hidden: { opacity: 0, y: 14, scale: 0.98 },
-												visible: {
-													opacity: 1,
-													y: 0,
-													scale: 1,
-													transition: POP_SPRING,
-												},
-											}}
-											className="rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
-										>
-											{/* One structure for every moment: icon in the left
-											    column, all content indented in the right — so a stat's
+												: h.metric
+													? {
+															prefix: h.metric.prefix,
+															display: String(h.metric.value),
+															suffix: h.metric.suffix,
+															caption: h.metric.caption,
+														}
+													: null;
+										return (
+											<li
+												key={h.headline}
+												className="rounded-2xl border border-[#2c2c2c] bg-[#202020] p-4"
+											>
+												{/* One structure for every moment: icon in the left
+											    column, all content indented in the right, so a stat's
 											    number lines up with a narrative's text. */}
-											<div className="flex items-start gap-3.5">
-												<span
-													className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
-												>
-													<Icon className="h-[18px] w-[18px]" strokeWidth={2} />
-												</span>
-												<div className="min-w-0 flex-1">
-													<p className="text-[15px] font-semibold leading-snug text-neutral-100">
-														{h.headline}
-													</p>
-													{metric ? (
-														<>
-															<div className="mt-3 flex items-end gap-[0.02em] text-[38px] font-semibold leading-none tracking-tight text-neutral-50">
-																{metric.prefix && (
-																	<span className="leading-none">
-																		{metric.prefix}
-																	</span>
-																)}
-																<Odometer
-																	display={metric.display}
-																	delay={0.4}
-																/>
-																{metric.suffix && (
-																	<span className="leading-none">
-																		{metric.suffix}
-																	</span>
-																)}
-															</div>
-															{metric.caption && (
-																<div className="mt-2 text-xs text-neutral-400">
-																	{metric.caption}
+												<div className="flex items-start gap-3.5">
+													<span
+														className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#333] bg-[#171717] ${tint}`}
+													>
+														<Glyph name={h.glyph} delay={0.35 + i * 0.1} />
+													</span>
+													<div className="min-w-0 flex-1">
+														<p className="text-[15px] font-semibold leading-snug text-neutral-100">
+															{h.headline}
+														</p>
+														{metric ? (
+															<>
+																<div className="mt-3 flex items-end gap-[0.02em] text-[38px] font-semibold leading-none tracking-tight text-neutral-50">
+																	{metric.prefix && (
+																		<span className="leading-none">
+																			{metric.prefix}
+																		</span>
+																	)}
+																	<Odometer
+																		display={metric.display}
+																		delay={0.4}
+																	/>
+																	{metric.suffix && (
+																		<span className="leading-none">
+																			{metric.suffix}
+																		</span>
+																	)}
 																</div>
-															)}
-														</>
-													) : (
-														<>
-															{h.kind === "growth" && (
-																<div className="mt-2.5 text-emerald-300/90">
-																	<Sparkline />
-																</div>
-															)}
-															<p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
-																{h.detail}
-															</p>
-														</>
-													)}
+																{metric.caption && (
+																	<div className="mt-2 text-xs text-neutral-400">
+																		{metric.caption}
+																	</div>
+																)}
+															</>
+														) : (
+															<>
+																{h.kind === "growth" && (
+																	<div className="mt-2.5 text-emerald-300/90">
+																		<Sparkline />
+																	</div>
+																)}
+																<p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
+																	{h.detail}
+																</p>
+															</>
+														)}
+													</div>
 												</div>
-											</div>
-										</motion.li>
-									);
-								})}
-							</motion.ul>
+											</li>
+										);
+									})}
+								</ul>
+							</motion.div>
 
 							{/* footer: vote CTA + full profile */}
 							<motion.div
@@ -427,30 +464,40 @@ export function NomineeHighlightsModal({
 								}}
 								className="mt-6 flex items-center gap-3"
 							>
-								<motion.button
-									type="button"
-									whileTap={{ scale: 0.97 }}
-									onClick={() => onVote(data.slug)}
-									className={`inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors ${
-										isSelected
-											? "border border-[#3f3f3f] bg-[#242424] text-neutral-100"
-											: "bg-neutral-100 text-black hover:bg-white"
-									}`}
-								>
-									{isSelected ? (
-										<>
-											<Check className="h-4 w-4" strokeWidth={3} />
-											Your pick
-										</>
-									) : (
-										`Vote for ${data.name}`
-									)}
-								</motion.button>
+								{(canPick || onConnect) && (
+									<motion.button
+										type="button"
+										whileTap={{ scale: 0.97 }}
+										onClick={() =>
+											canPick ? onVote(data.slug) : onConnect?.()
+										}
+										className={`inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors ${
+											isSelected
+												? "border border-[#3f3f3f] bg-[#242424] text-neutral-100"
+												: "bg-neutral-100 text-black hover:bg-white"
+										}`}
+									>
+										{!canPick ? (
+											"Connect wallet to vote"
+										) : isSelected ? (
+											<>
+												<Check className="h-4 w-4" strokeWidth={3} />
+												Your pick
+											</>
+										) : (
+											`Vote for ${data.name}`
+										)}
+									</motion.button>
+								)}
 								<a
 									href={data.projectUrl}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="inline-flex h-11 flex-shrink-0 items-center gap-1 rounded-full border border-[#333] px-4 text-sm font-medium text-neutral-300 transition-colors hover:border-[#4d4d4d] hover:text-neutral-100"
+									// Alone (not a Pilot, or already voted) it takes the row;
+									// otherwise it sits at its own width beside the vote button.
+									className={`inline-flex h-11 items-center justify-center gap-1 rounded-full border border-[#333] px-4 text-sm font-medium text-neutral-300 transition-colors hover:border-[#4d4d4d] hover:text-neutral-100 ${
+										canPick || onConnect ? "flex-shrink-0" : "flex-1"
+									}`}
 								>
 									Profile
 									<ArrowUpRight className="h-4 w-4" />

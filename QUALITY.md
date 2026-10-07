@@ -1,0 +1,1006 @@
+# QUALITY, the progression from "we fix what we trip over" to "agents run it"
+
+Companion to [PLAN.md](./PLAN.md) (what we build) and ARCHITECTURE.md (how it
+works). This is the working doc behind the /quality surface: why the same bug classes recur, the
+three layers that end that, the machinery that runs it, and the measurable ladder
+from human-driven fixing to agent-run operation.
+
+## 0. The honest diagnosis (2026-08-27)
+
+Six classes account for nearly every finding ever filed against us, by SDF
+reviewers, by stellar-raven, by our own batteries:
+
+1. **Identity**, a name should find its thing; phrasing must not break it
+   (sls-009, -076, the liveness/anchor bugs, slug-not-in-haystack).
+2. **Honest degradation**, when we relax, the response must say so
+   (matchMode families, vetIdea neighbours, exact-miss honesty).
+3. **Evidence population**, the field exists, rows are empty; collectors
+   have structural blind spots (redirect hops, bot walls, provenance nulls).
+4. **Taxonomy coverage**, a vertical without an enum member is invisible
+   (Exchange, Oracle).
+5. **Contract completeness**, opaque schemas, silently-ignored params
+   (resolver objects, listSkills q).
+6. **Cross-surface consistency**, two of our answers disagree (sls-073).
+
+Why fixes did not stick as classes: each fix landed **where the bug fired**,
+conventions live in ~35 hand-written operations instead of one enforced
+layer, guards **sample** instances instead of enforcing invariants, and the
+findings ledger records instances without a class-closure step. Detection
+outruns remediation by design; the pile grows.
+
+## 1. The three layers (every finding must land in one)
+
+**L1. Invariants (CI, cannot regress).** A class is dead only when code
+physically cannot ship a violation. Live today: contract freshness, spectral,
+routing budget, vocabulary-drift test, **schema opacity zero** (this PR -
+the resolver class, locked). Next: the *list-endpoint honesty conformance*
+(every list op provides matchMode + honest-empty + advertised params, one
+shared layer, one test that walks the spec and probes every op).
+
+**L2. Coverage SLOs (data, trend-tracked, ratchet-only).** Numbers that may
+only move up, published weekly to /quality, regression = red: Live rows with
+dated source (98%+ target; 91% → 98% on 2026-08-27), link-evidence coverage,
+typed-vertical reachability (every type with ≥2 rows has enum + intent +
+rows), scan coverage. A ratchet that dips pages a human.
+
+**L3. Adversarial discovery (rotating, never green-by-default).** The truth
+battery (guard D), golden parity, and **surveyor rounds**: fresh question
+sets from rotating personas (hacker, investor, integrator, historian) run
+through the live gateway. Slices D–F already derive expectations from
+curation instead of hand-written lists, extend that principle everywhere.
+
+**The closure rule (the whole point):** every finding, ours, Tyler's,
+kalepail's, gets a class label from §0 and must close as one of:
+`invariant-added` (L1) · `slo-added` (L2) · `bank-added` (L3) · `wont-fix`
+(with reason). *A fix with no layer is not closed.* The metric that matters
+is **recurrence after a silence-close**: a NEW finding on a (surface,
+failure-mode) pair we had already closed *on silence* — the detector stopped
+reporting and nobody re-probed. That is the closure rule's actual question:
+did we close without repairing, and did the same kind of failure come back?
+Steady state means that number reaches zero and stays there. Its exact-id
+sibling — a specific finding a detector raises again after closure, hardest
+when the closure was `verified` — is published beside it.
+
+The **headline close rate counts evidence only**: `verified` plus a `cleared`
+carrying a live re-probe stamp. A detector going quiet is not repair, and
+silence-closes are published apart as their own share rather than folded in.
+Both live in the artifact (`findings.closure`, `closingRate`, `silenceShare`)
+— never hand-copied into this document.
+
+The number this replaces, **repeat-class rate** (a finding whose §0 class had
+any prior finding), is kept as context under `classRecurrence`. With eight
+broad classes it is pinned near 100% however much repair lands, so it cannot
+be steered by; it is reported, not targeted.
+
+## 2. The machinery we already have, and the one loop it was missing
+
+We are not short on machinery. Mapping what EXISTS to the functions:
+
+| function | already running |
+|---|---|
+| daily sentinel | raven-eval-parity (guards A-D), category battery, canary, drift + freshness guards |
+| weekly sweeps | check-links, upgrade-status-basis, scan waves, partner freshness |
+| discovery engine | engines A-D detectors → improvements ledger → /quality |
+| adversarial rounds | the truth-battery waves + externally: stellar-raven's sls pipeline |
+| contract gate | contract:check, spectral, routing budget, vocabulary-drift test, opacity lock |
+
+What was missing is not a new lane, it is the **closure rule** (§1) binding
+them: today a detector files a finding, a human fixes an instance, the pile
+grows. The rule makes every finding terminate in a layer, and the repeat-class
+rate measures whether that actually happened.
+
+Two practices adopted from stellar-raven's `.agents/` discipline: dated
+append-only **round ledgers** for multi-lane efforts (exact commands and
+outputs, verdicts with stamps, "tests passed" is not evidence), and **"done
+means"** stated on every queued item.
+
+## 3. The autonomy ladder
+
+Stage advancement is earned per lane: **N consecutive intervention-free
+weeks** (human reviewed, changed nothing), then the gate opens.
+
+- **Stage 0 (past):** human does the work, agents assist.
+- **Stage 1 (now):** agents do the work end-to-end; human merges. Every PR
+  carries live verification in its body.
+- **Stage 2 (entry: 2 clean weeks/lane):** auto-merge on green for
+  bounded work, guard banks, lessons, docs, dry-run reports. Contract and
+  data-execute still human-gated.
+- **Stage 3 (entry: 4 clean weeks):** data mutations execute after
+  dry-run diff < threshold + mandatory read-back verify; the daily loop lands
+  root fixes in non-contract code.
+- **Stage 4 (steady state):** human gates only: contract version
+  changes, outward-facing posts, spend, and anything §0-class-new.
+
+**A second condition, added 2026-09-07: the lane must assert its own end
+state.** Weeks measure the absence of correction; they do not measure effect.
+A day of running the guards wide produced five distinct ways for a lane to
+report success while moving nothing, moving the wrong thing, or being silently
+undone hours later (lessons 33–37) — so quiet weeks can accumulate on a lane
+that is not working. Before a lane advances past Stage 1 it must make a claim
+about the world after it ran, checked by itself: a post-execute re-plan that
+must come back zero, a read-back of what it wrote, a count of what it skipped,
+or an explicit could-not-look exit code. `curate-projects` and `enrich-scf`
+have this (their Idempotence step caught three real defects on 2026-09-07);
+most write lanes do not, and that is the actual distance to Stage 2.
+
+**How a week is counted.** A week counts for a lane only when that lane
+executed ITSELF and nothing it wrote was corrected, and the weeks must be
+CONSECUTIVE ISO weeks running up to the current one — four scattered good weeks
+are not four clean weeks, and a lane that stops running stops earning the same
+day. An execute a human dispatched is a person operating the lane: it is
+reported and it earns nothing. Every counted execute is proven from that run's
+own job steps (a skipped step moved nothing), never from today's copy of the
+workflow file — an instrument that re-reads the past when you edit a YAML today
+is not an instrument. The roster of lanes that can write to production is
+derived at run time from `.github/workflows`;
+`improvements/lanes/lanes.json` supplies only what each lane writes, and a
+workflow missing from it is reported could-not-check.
+`scripts/check-lane-autonomy.ts` counts against GitHub's own run history into
+`improvements/audits/lane-autonomy-latest.json`, published on /quality. The
+reset is `improvements/lanes/interventions.json`, append-only: the newest entry
+for a lane restarts its clock, and **any PR that corrects what a lane wrote —
+or the read-back used to verify it — appends its entry there in the same PR.**
+An unlogged correction silently buys autonomy the lane did not earn. Reaching
+the bar publishes ELIGIBILITY; the promotion itself stays a human call.
+
+**Steady state =** 4 consecutive weeks of: all dailies green · recurrence
+after a silence-close at 0 · SLOs at target · zero externally-filed
+correctness findings. Then the service runs at Stage 3+ by default and humans
+do product, not repair.
+
+## 3b. Instrument tiers — what a prober earns the right to say
+
+A finding is never better than the instrument that produced it, so an
+instrument carries a tier of its own and may only speak at that tier.
+
+- **Tier A — can report an absence.** Every failure mode it can encounter has
+  a test that pins it, and each one is either a verdict or an explicit
+  could-not-check. Only a Tier A instrument may say "this is gone".
+- **Tier B — can report a presence.** It found something and can cite where.
+  A hit proves the thing exists; it says nothing about what it did not find.
+- **Tier C — can report only its own reading.** An untested prober, or one
+  that has just been changed. Its output is a queue for a human, never a
+  verdict, and never a write.
+
+The promotion rule is the same as the autonomy ladder's: an instrument reaches
+Tier A when its blind spots have been *enumerated and tested*, not when it has
+run cleanly for a while. A quiet instrument and a blind one produce identical
+output.
+
+**Why this exists (2026-09-06).** A weak-basis sweep made twelve false death
+calls before it made one true one: it did not follow 308 redirects, so eleven
+live sites that redirect read as 0-byte pages; it treated a 503 as a death; it
+could not tell a domain that no longer resolves from one that timed out; and it
+nearly retired a live product whose page title is the unedited "Create Next
+App". Separately, a package-registry probe matched 31 rows by name of which 26
+were collisions, and two of my own repair rules invented GitHub accounts and
+would have deleted a real repository.
+
+Two things are true of all of them. **None was caught by review** — every one
+was caught by a second, differently-shaped look: a dry run that printed the
+planned writes, a rendered read, an intersection gate that demanded the
+package point back at the row's own repository. And **the corrections already
+existed**: the shipped packet guard had solved redirects and refusal codes
+months earlier, and the sweep was a throwaway script that reimplemented the
+same logic badly. A prober that is not the shared prober starts at Tier C
+no matter how careful its author was.
+
+So: one prober per question, corrections land in it, and anything that wants
+to speak at Tier A imports it. `scripts/check-weak-basis-liveness.ts` is the
+worked example — it exists to sweep a different pool, and it calls
+`check-packet-stamps.ts`'s `probe` rather than fetching for itself.
+
+## 4. Phases
+
+- **P0. Name the classes, lock the first invariant.** `status: done`
+  This document · the opacity lock in CI · §0 class labels DERIVED from
+  every finding's failureMode (CLASS_OF in build-quality-artifact.ts — a
+  total, reviewable map; unmapped modes warn) · battery lanes on the rounds
+  format.
+  *Evidence:* `check-schema-opacity.ts` (the 47 baselined open maps were
+  paid down to ZERO in #1092; the ratchet now holds the floor at 0), QUALITY.md
+  itself.
+
+- **P1. Honesty layer, eval integrity, the dashboard.** `status: done`
+  The list-endpoint honesty layer + conformance ratchet (#1060) with the
+  8-op debt paid to zero via one shared vocabulary (#1061) · eval-bank
+  freeze with sha256 fingerprints and a vitest gate (#1063) · the bank
+  linter with live rot detection · persona rotation in the battery banks ·
+  the /quality dashboard with committed trend history (#1075), rebuilt
+  around findings, gap matrix and the miss funnel (#1077, #1078).
+  *Evidence:* `specs/honesty-baseline.json` (debt 0),
+  `scripts/eval/eval-baselines.json`, `improvements/quality/*.json`.
+
+- **P2. Entity truth: issuers, receipts, enumerations, dedupe.** `status: done`
+  sls-033 closed at root, typed enumerations are limit-independent sets
+  (#1064, #1065) · stablecoin issuer relations made conflation-proof, with
+  the `issued` claim family (#1068, #1069) · receipts-in-repo for
+  human-verified corrections (#1073) · repo dedupe: the 2026-08-28 census
+  found 381 duplicate rows (a rename-loop in enrich-repos creating a fresh
+  copy per pass); root cause fixed with a canonical-name lookup (#1081), the
+  381 orphans merged and deleted (run 33140742611), and the read-back guard
+  (`check-repo-dupes.ts`) verified 12938 rows = 12938 distinct fullNames. The
+  guard now runs after every enrich wave, so the phase stays done only while
+  the collection stays clean.
+  *Evidence:* battery slice G (enumeration integrity), slice H (verify
+  grades itself), `improvements/receipts/`,
+  `improvements/quality/entities.json` (repos.duplicateRows = 0),
+  `scripts/data/check-repo-dupes.ts` in enrich-repos.yml + dedupe-repos.yml.
+
+- **P3. Earned autonomy.** `status: in progress`
+  Stage-2 autonomy for bounded work · event-driven freshness (PLAN §5) ·
+  steady-state review.
+  *Shipped so far:* the daily pipeline now rebuilds its own quality
+  artifacts and commits them, and the stale-finding sweep re-probes the
+  ledger instead of letting counts drift. 2026-08-28: the FIRST bounded
+  agent lane is live — the deployment-evidence gap (sls-079) is worked
+  mechanically by the weekly curation pass via the operator-toml chain
+  (the project's own stellar.toml -> declared code+issuer -> confirmed on
+  Horizon mainnet; full chain or abstain, basis labeled "operator-toml" so
+  a machine stamp never impersonates a human one). The lane reproduces the
+  2026-08-28 hand-worked queue's mechanical half; judgment cases (operator
+  docs, bundles) stay human.
+  2026-08-29: the closure rule's METRIC exists — repeat-class rate is
+  computed from the ledger and published on /quality (first measurement:
+  30-day rate 100%, 168/168 new findings in already-seen classes; lifetime
+  98.7% across 6 classes + meta-eval. The treadmill, now with a number).
+  *Remaining:* five lanes at Stage 2 (enrich-tvl, scan-repo-code, refresh-research-corpus on 2026-09-13; enrich-repo-activity and refresh-stablecoins on 2026-09-14, each on an end-state claim proven twice in its own log), 7 eligible at 4+ clean weeks. Detection is autonomous; repair has a lane (`repair-lane.yml`, one open ledger row per day) and the four hand-run tracks have one (`task-lane.yml`: notes Tue, claims Wed, packets Thu, gap Fri) — both PR-only, headless agent, no production secrets, protected or allowed paths enforced by a diff-guard, the attempt log on main as the end-state claim. First-day proof: the repair lane found and fixed a real defect (lulpay's SCF record, #1568); the task lane delivered a 40-row packet (#1574); PR creation needs the repo to allow Actions to open PRs. Stage 3 stays closed until the lanes have weeks.
+
+  *Log (moved off the board 2026-09-14):* one lane is not a system — the gap matrix's other rows (typed, sourced, knowledge notes) still close by hand, and Stage 2 requires N intervention-free weeks before auto-merge opens for bounded lanes. **The count is no longer zero, and it never was.** On 2026-09-07 the counter read 0 of 63 lanes eligible, and all three causes were the METER: a lane whose write step is NAMED rather than an inline `run:` was unclassifiable and silently uncounted; unknown verdicts were cached so the first fix stayed invisible; and both week walks demanded the CURRENT partial week, so every lane reset to zero each Monday and the board could only ever show a number on a Sunday night. Fixed: **8 lanes are eligible at 4+ intervention-free weeks, 3 clean across the full window.** Eligibility publishes; the promotion stays a human call. **First promotion, 2026-09-13.** Two lanes to Stage 2 — `enrich-tvl` and `scan-repo-code`, both 8 of 8 weeks clean — recorded in `improvements/lanes/lanes.json` (`stage`, `promotedAt`, `endStateClaim`); the checker now reports `2` for a recorded promotion and `2→1` the moment interventions.json carries a correction dated after it, so the stage can be lost the way it was earned. The third 8/8 lane, `refresh-research-corpus`, was held at Stage 1 by the second condition that morning — twelve ingesters, and none read back what it wrote — and promoted the same evening once the claim was made real (#1547): every ingester now re-plans right after the execute pass (`--replan` — the same fetch, the same DB diff, no write) and the lane's `Idempotence` step requires `writes=0` from each; an ingester that cannot re-plan is could-not-check, named, never counted clean. Building it showed why the hold was right: eleven of the fifteen dry modes had never touched the DB (a preview, not a plan), and six write paths keyed on the DB handle instead of `--execute` — a re-plan would have written. Proven in the lane's own log the same evening, twice: the first pass (run 34788208252) went RED — 13 of 15 sources `writes=0`, and the two that were not were real: a 66k-char JSON example the chunker never split, which Payload's 40,000-char cap had rejected on every daily refresh ("new: 1" forever), and two Electric Capital PDFs mapped to one document id, rewriting each other's chunks every run. Fixed (#1548), re-dispatched: run 34789494804, `0 writes planned after execute across 15 re-planned source(s)`. A claim that catches two standing defects on its first pass is a claim. `scan-repo-code` only qualified after its claim was made real: its `--verify` printed persisted rows for a human and asserted nothing, so the scheduled wave now reads back every row it wrote via `verifyWrites` and exits 1 on a mismatch — the same claim `enrich-tvl` already made. Proven in the lane's own log the same evening (run 34781844815, a `--rescan` wave because the routine backlog was exhausted): `── Read-back (10 written row(s)) ── ✓ all 10 row(s) hold the values written`.
+- **P4. Basis strength at scale.** `status: in progress`
+  The board's own #1 limitation, made the phase: 842/979 rows (86%) rest
+  on the weakest honest bases (site-liveness, source-inherited). P3 proved
+  one bounded lane (operator-toml); P4 runs the basis-upgrade lanes across
+  the population — operator-toml wherever a toml exists, onchain-activity
+  from Horizon for issuer/contract rows, dated operator announcements
+  where a human already verified one — and pays the 59 untyped rows to
+  zero so exact type enumerations see the whole population. A machine
+  stamp never impersonates a human one: basis labels stay honest per the
+  P3 lane rule.
+  *Checks (live before the phase starts):* rowQuality.statusBasisMix +
+  basisStrength on /quality measure the weak-basis share — the phase
+  ratchet is that share, which may only FALL; done when weak bases are
+  under 50% of rows. The untyped count is published in knownLimitations;
+  done at 0.
+  *Shipped so far:* 2026-08-31→09-01 — the basis-upgrade lanes exist and
+  have run against the population: evidence A (asset movement deltas
+  between two dated stellar.expert readings), B (DeFiLlama TVL ≤14d) and
+  C (Horizon, same day — issuer payments asset-matched over 20 records,
+  XLM-pair trade fallback), every probe trinary (hit / checked-empty /
+  could-not-check reaches the summary and the exit code). 35 rows now rest
+  on onchain-activity; a two-auditor pass (agent + Grok) reverted 4
+  uncorrected-probe upgrades, one of which re-earned its upgrade the same
+  run under the corrected rule. Asset keys joined from the stablecoin
+  registry (12) and operators' own stellar.toml (7) so deltas compound
+  weekly. Death receipts: 42 stamped, 8 retracted after audit (a live-200
+  page cannot stand as "observed dead"), 2 re-stamped once their domains
+  went hard-dead. Untyped 59→2 (both honest residuals). Weak share: read
+  `strongBasisSplit` and `strongByBasis` in
+  `improvements/quality/entities.json` — the number is no longer
+  hand-printed here, because on 2026-09-05 this file said 84%, the board
+  62.7% and knownLimitations 62% for one SLO. The 2026-09-04 drop
+  (794→617 weak) was 173 rows on two NEW evidence tiers (repo-activity,
+  product-integration) plus 4 within the pre-existing onchain-activity
+  tier: real evidence, and a change in what counts — reported as two
+  numbers from now on, never as the ratchet falling.
+  *Remaining:* done bar is weak bases under 50% of Live rows; 453 of 830 (54.6%) on 2026-09-13 — read `strongBasisSplit` for today's figure. The machine levers are measured out (onchain-eligible 5, repo-activity 0); the ~39 rows that must move are the owner triage table (relink / Inactive / leave), human work.
+
+  *Log (moved off the board 2026-09-14):* the done bar is weak bases under 50%; the share is 453 of 830 Live rows (54.6%) as of 2026-09-13 (486/832, 58%, on 09-07), so ~39 rows must move — read `strongBasisSplit` for the current figure, this sentence is a dated snapshot. **Measured 2026-09-07, the obvious lever awards nothing.** `repo-activity` is the basis for rows whose own source moving IS their liveness, and of the 114 library-typed weak rows: 74 have **no linked repo at all**, and the other 40 have repos whose freshest commit is **392 days old**, past the 365-day window. Eligible today: **0**. Those rows are weak because the evidence does not exist, not because a lane has not run — a different problem, and one no lane fixes. Finding the 74 missing repos was tried the same day, by reading each row's OWN site for the GitHub links it publishes: 48 publish none, 9 have no website, 8 would not load, 3 resolved, 2 survived an intersection check. That lever is now measured and small. What DID move: 13 rows to operator-announcement from store listings the operator publishes on their own site (Apple lookup by id / Play "Updated on", release inside 90 days), which is the corpus-announcement lever in its cheapest form. 144 weak rows have a website that never answered a successful check — their reason is printed as an owner triage table (relink / Inactive / leave), and that is human work, not a lane. The XLM-denominated channel deposit has no USD ceiling until a price source that path may depend on exists.
+- **P5. The knowledge layer consumers keep asking for.** `status: in progress`
+  The consumer-measured gap, not a wishlist: knowledgeNotes exist on 16 of
+  206 curated-pool repos; supersededBy/deprecatedAt exist nowhere;
+  contracts join rows only where the P3 lane reached; builder/org identity
+  is thinner than project identity. P5 = curated, DATED repo facts
+  (supersededBy, deprecatedAt, migration notes) across the curated pool;
+  contracts as first-class joined entities; builder/org coverage held to
+  the same standard as project rows.
+  *Checks (live before the phase starts):* repoQuality.withKnowledgeNotes
+  and joinedToMainnetContract are already served on /quality — committed
+  as floors that may only RISE. Every fact carries the date that covers
+  IT: the answer-dating guard already enforces the dating contract, so an
+  undated note never counts toward the floor.
+  *Shipped so far:* 2026-09-01 — the curated knowledgeNotes registry grew
+  16→~29 repos, every note dated and source-cited, including the
+  supersession facts consumers actually ask for as prose (stellar/go →
+  go-stellar-sdk, the Horizon monorepo split, the js-sdk deprecation
+  chain, protocol ceilings). explainRepo now answers from a dated note
+  ahead of an undated DeepWiki walkthrough (`answerSource:
+  "knowledge-note"`, `answerAsOf` RFC 3339), matched by exact identifier
+  or by hand-authored trigger phrases; the matcher was hijack-hardened
+  (citation URLs and bare domains can no longer route a note). sls-080
+  closed on the consumer's own probe and independently re-verified by
+  Raven on 2026-09-01. 2026-09-04/05 — the product-level knowledge sls-023
+  asked for (which product is actually issued on Stellar, by whom, with
+  what controls) exists as a verified RWA registry: 97 tokens re-verified
+  from the issuer's own stellar.toml or the Soroban contract itself, feeding
+  `products`, `deployment` and on-chain `controls` on project rows, pinned
+  hourly on production (#1298–#1306). 2026-09-05 — supersededBy /
+  deprecatedAt / supersessionKind are FIELDS on repo rows: 50 notes carried
+  the prose, 34 became a curated dated map keyed by the superseded repo,
+  `successorRepo` is derived from it, and a test holds prose and fields
+  together (spec 1.9.36, #1307).
+  *Remaining:* every curated-pool row (repoScore ≥ 50) carries a public note or a triage verdict as of 2026-09-14 (waves 4–6: 345 → 394 public-noted repos on the detector; the DB floor follows the daily backfill). Still open: contracts as first-class joined entities (11 of the 308 expected-tier repos).
+
+  *Log (moved off the board 2026-09-14):* knowledge notes cover **222 of the 382-row curated pool** (2026-09-07); the three still listed carry INTERNAL triage notes, which is the metric's own correct state for a repo examined and found to state no durable public fact. 12,851 indexed repos carry no note — the long tail is by design, the curated pool is the floor that rises. **Two gaps closed by measurement rather than by building, 2026-09-07.** 85 of 100 contracts serve no project join — every one of them from a repo that genuinely has no project link, so the join is honest and absent, not missing. And 142 of 171 builders show `projectCount: 0` while the code-derived join under `onStellar.builds` is correct and populated; the api-reference already routes consumers there. A repo-misattribution detector was built the same day and **thrown away**: it flagged 1,789 of 2,361 rows, nearly all correctly attributed, and a guard that cries wolf on three quarters of its population is worse than none. Still open: contracts as first-class joined entities only where the P3 lane reached (11 of the 308 expected-tier repos). Supersession is curated (62 entries): a repo archived after its note was written is not covered until the note is, which the note-freshness lane does not yet detect. Supersession now resolves on EVERY read path — it was served by repo-search and withheld by the collection until 2026-09-07, so the same repo answered two different truths depending on the URL.
+
+## State of the program — as of 2026-09-05
+
+Kept current by rule: any PR that adds, changes or retires a lane, moves a
+phase status, or opens/closes a blocker updates this block in the same PR.
+An agent must be able to answer these six without archaeology.
+
+**What are we actually trying to do.** End the recurring §0 defect classes
+by forcing every finding into a layer (guard / SLO / bank / won't-fix), and
+earn autonomy until bounded agent lanes run quality without drop — the
+owner needed only for contracts, posts, spend and a new §0 class. P1–P5
+above are the phases; the done-bars are theirs.
+
+**Who owns it.** The program, /quality and the ledger: Shubh. Lanes —
+enrich-repos (weekly, Monday), refresh-stablecoins (6h), refresh-rwa (6h),
+basis lanes (onchain / product / repo-activity, dispatch), dedup (manual:
+dry-run, then execute with a read-back) — all Shubh until a lane earns its intervention-free weeks. Raven's
+router scorer and catalog: upstream (stellar-experimental/stellar-raven).
+Golden questions: Raph. External findings: Tyler / kalepail / SDF reviewers.
+
+**What changed this week (2026-08-31 → 09-05).** ~120 merged PRs
+(#1229–#1348; the 09-05 day addendum below covers #1311 onward): the RWA product model for sls-023 (registry, products,
+deployment, controls, an hourly pin, a six-hour measuring lane);
+supersession as fields on repo rows; a partition-sum guard; fixes across
+every scout.* surface — hackathon submissions truncated at 300, outcomes
+served as 0/0/0/0, a winner's award serving the whole pool, contract
+ownership stamped on other people's contracts, builders ranked by a
+featured flag, an audit count that was a subset, a chart drawing gaps as
+zero. And a cross-vendor audit that found the first sls-023 close-out
+overclaimed and 34 one-holder assets served as live — both corrected.
+On 09-06: SCF awards beyond the listing cap (#1397: 112 rows, 147 award
+records, executed and read back), a fossil join cleared (#1399), and the
+enrich↔curate write fights ended behind an idempotence gate (#1400, #1401)
+— the SCF addendum below.
+
+**What's blocked.**
+- Raven router: the intended op is excluded when a question contains
+  another op's id noun (stellar-raven #124, filed 2026-09-03) — upstream
+  scorer; Scout-side vocabulary does not fix this class. Measured
+  2026-09-05: 2 misses of this class, 1 named-entity miss and 1 bare-name
+  miss (no operation text carries project names), and 3 where a long
+  description wins on stopword density — all the scorer's, not vocabulary.
+- Raven catalog text: the deployed catalog (manifest 2026-09-03T17:09Z)
+  still serves pre-08-31 descriptions for getRfps/explainRepo/getPartners
+  and none of the 09-02/09-03 x-routing words — 9 routing misses are
+  `catalog-lag`. Not filed — lag, not drift; the artifact's `catalogView`
+  says when it clears.
+- Raven catalog lag: `getRwaAssets` (since 2026-09-04) and `verifyClaim`
+  (since 2026-08-27) not exposed. Not filed — lag, not drift.
+- App-only weak rows (`strongBasisSplit.appOnly`; 550 on the 09-05 evening
+  board) and the never-answered sites: human triage (relink / Inactive /
+  leave). The verification-packet lane is the instrument, under the
+  tightened Live rule in the day addendum. Since 2026-09-01.
+- 3 dedup clusters vetoed for a human (EURC is a name-only false positive;
+  Passport would hide an SDF-verified row; LumosDAO's keeper is a Draft).
+  The other 19 executed 2026-09-05. Since 2026-09-04.
+- Corpus-announcement lane (P4's named lever): tested 2026-09-05, 2 of 18
+  sampled weak projects appear in a dated corpus doc, one a false match —
+  our corpus is not where operator launch posts live. Not viable as designed.
+
+**Which commitment is at risk.**
+- P4 done-bar (weak < 50%): read `strongBasisSplit.weakLiveRows` over
+  `servedPopulation` in improvements/quality/entities.json (571 of 984 at the
+  09-05 evening regeneration, after eight stamps were withdrawn; the figure
+  is not hand-maintained here). The day's drop, decomposed so it is never
+  read as new facts:
+  13 propagated from receipted deployment evidence (a copy, not new
+  evidence); 38 owner-approved packet stamps, of which 34 kept their status,
+  2 Live verdicts were overturned by the owner within the hour (orbitcdp,
+  skyhitz) and 8 stamps were withdrawn the same evening because the packet's
+  own text showed thin evidence; 3 curated. New status truth today: five
+  receipted deaths. Nothing here is a new evidence tier.
+- P3 Stage 2 (auto-merge after N intervention-free weeks): counted for
+  the first time this week — the per-lane figures are in
+  improvements/audits/lane-autonomy-latest.json and on /quality. Nothing
+  is promoted on them yet, and the RWA and basis lanes restarted their
+  clocks on 09-04/09-05 (improvements/lanes/interventions.json).
+- The closure rule's own metric: recurrence after a silence-close is well
+  clear of zero, and the majority of this ledger's closures were closed on
+  silence rather than re-probed — detection is outrunning remediation exactly
+  as §0 warned. Live numbers: `findings.closure.recurredAfterSilence` and
+  `closingRate` / `silenceShare` in the /quality artifact. (The old figure
+  quoted here, a 100% trailing-30d repeat-CLASS rate, could not have been
+  anything else — see §1.)
+
+**What should happen next (ordered).**
+1. DONE 2026-09-05 (#1327) — silence-close is out of the headline close
+   rate: closingRate counts verified + re-probed only (0.41), silenceShare is
+   published apart (0.55), and the steering metric is recurrence after a
+   silence-close (findings.closure.recurredAfterSilence). Caveats stated in
+   the code: a re-detected verified finding is flagged (regressedFromVerified)
+   because applyWaves re-asserts verified; reopenedShareOfClosures is a lower
+   bound because a re-clear erases its own reopen stamp.
+2. DONE 2026-09-05 — the routing battery grades the INTENDED op. This is a
+   NEW series (persona bank + intended-op expectations + evidence-classed
+   misses), not the old 32-probe "some scout op present" series: 48/65 overall,
+   persona 16/28 (T1 2/7 · T2 3/5 · T3 5/8 · T4 6/8); 9 of 17 misses are
+   catalog lag (Raven's manifest is dated 2026-09-03T17:09Z and still serves
+   pre-08-31 descriptions for getRfps/explainRepo/getPartners). The old
+   series is unchanged at 32/37. Nothing external is closed by this.
+3. DONE in kind 2026-09-05: `onchainEligible` 34 → 13 after a snapshot
+   refresh (2 awarded, 18 with no movement in the window). The residue is
+   could-not-earn until the chain moves; re-run after each weekly snapshot.
+4. Human call on the 3 vetoed dedup clusters and the dead repo links
+   (owner: Shubh; done = executed or declined per cluster, in the dry-run's
+   own format).
+5. Act on the intervention-free week counter, which now exists and is
+   published (improvements/audits/lane-autonomy-latest.json, on /quality,
+   registry improvements/lanes/lanes.json). Done = every lane the artifact
+   reports as eligible is promoted or declined with the reason recorded
+   here, and the append rule holds — a PR that corrects a lane's output
+   logs it in improvements/lanes/interventions.json in that same PR.
+6. SCF residue (2026-09-06): three awarded rows with no SCF page anywhere
+   (orally $48k, zenex, soropg — `awarded: true` predates provenance; owner
+   call or a receipt each); anclap-r4u carries three awards ($325,762 ·
+   $146,400 · $100,000) and we have no Anclap row — `pen` is its asset row
+   and a company award does not belong there. DONE 2026-09-06 (#1403): the
+   nebulavrf card was the RSC chunk-split trap — the verdict parser read raw
+   markup and a cut inside a field truncated it; it now reads the rebuilt
+   stream, which also corrected 9 rows whose served award type was a
+   fragment ("B", "Legacy v5", "Legac"). enrich-scf carries the same
+   post-execute Idempotence step as curate; first run after the fix: 0.
+
+### Night-shift addendum (2026-09-05, 04:30–06:30 UTC)
+
+**What changed tonight (2026-09-05, 04:30–06:00 UTC).** 14 merged PRs
+(#1311–#1324), seven bounded agents, two cross-vendor audits. Every scout.*
+surface touched. Production writes, each dry-run, executed and read back:
+dedup 11 records hidden (3 clusters vetoed for a human), deployment→status
+propagation 13 rows, curated row facts 12 (142 writes incl. standing
+re-applies), all read back 100%. Fixes served live: a typed set no longer
+gated by q (Exchange 15→18), unknown partner regions 400 with the vocabulary
+(labels/case normalised), material-change counts on /api/changes, builders
+admitted by owned-repo language (rust 8→33), two audit reports joined to
+their projects, a hijacked website link no longer re-written nightly, the
+nightly knowledge-notes backfill actually executing (3 scheduled no-op runs
+found), lane autonomy measured (62 lanes; 11 at 4+ weeks; 0 could-not-check),
+routing graded on the intended op (48/65; persona 16/28), a partition guard
+that names vacuous checks. Truth battery 112/112 (was 110/112); golden 51/51.
+
+**Blocked (unchanged + new).**
+- Raven catalog: manifest 2026-09-03T17:09Z, pre-08-31 descriptions still
+  served for getRfps/explainRepo/getPartners — every routing-vocabulary fix
+  since 08-31 is unmeasured until a re-baseline. Upstream; not filed as drift.
+- Raven scorer counts stopwords in its gated pass (evidence in
+  improvements/engine/raven-routing-latest.json) — candidate issue, unfiled.
+- The Inactive/site-liveness class was triaged (#1326, 31 rows); the
+  duplicates among them are Draft shadows since 2026-09-05 (#1337 executed,
+  44 rows). Real deaths in that class still need the owner's verdict.
+- 2 rows with a strong deployment basis and no citable artifact remain
+  (`strongBasisSplit.deploymentStrongStatusWeak`); xoxno and huma earned
+  onchain-activity on the 2026-09-05 snapshot refresh.
+
+**At risk.** P4 weak share: tonight moved 13 by propagation and 3 by curated
+evidence; the served denominator stayed 984 (shadows are Draft now, and the
+board's population did not move). P3 Stage 2: the
+counter exists now; curate-projects shows 89 executes in 8 weeks of which 1
+was unattended — autonomy is measured, not earned.
+
+**Next (ordered).** 1. DONE (#1325): STRONG_BASES names the five real tiers.
+2. DONE (#1337/#1338, executed): duplicates are Draft shadows with one
+owner. 3. DONE (#1331): a skipped execute step counts as never-ran.
+4. Re-run the routing battery after Raven re-baselines (anything filed
+upstream is the owner's call; nothing is drafted). 5. DONE (#1327).
+
+### Day addendum (2026-09-05, 15:00–19:00 UTC)
+
+**What changed.** #1340–#1348. Stablecoin page: USDT0 mark, a header logo
+that never rendered, finger scrubbing on bar charts with a haptic tick
+(web-haptics), a dollar y-axis. Board: `open` means ours (3), 16 routing
+misses carried as waiting-on-upstream, 3 refreshes. Duplicates: one owner
+(fold writes Draft + canonicalSlug; search folds by name at any status;
+the feed never writes onto a shadow) — 44 rows executed and read back.
+Knowledge notes: 47 repos gained dated, sourced notes (nightly backfill
+stamps them). Partners: 10 enriched from their own stellar.toml (SEPs,
+assets, ramps). Verification packets: 100 built; the owner approved the
+high tier (38 rows) and it was executed and read back; within the hour the
+owner overturned two Live verdicts (orbitcdp, skyhitz — both pages carry
+empty protocol stats under a "live" banner) and a cross-vendor audit showed
+8 more stamps rested on evidence the packet's own text called thin; those 8
+were withdrawn to site-liveness the same evening. Mirror pushed; the skill
+reference documents /api/rwa; the health lane is green.
+
+**Blocked.** Medium (32) and low (30) packet tiers: NOT to be applied under
+the old rule; re-grade under the rule below first. Raven catalog lag and
+scorer: unchanged, upstream, nothing drafted.
+
+**At risk.** The packet method itself: its Live rule ("a 200 page with
+product copy and a repo pushed in 90 days") returned two dead products to
+Live and stamped eight more on thin evidence — 10 of 34 high-tier Live
+verdicts. The tightened rule: a Live verdict is the product's own state
+(stats, app, chain), never a banner, title or CTA; empty or zero metrics on
+the page veto Live; the second signal is this product's own repository
+(not a hackathon, seeder, fund or shared repo, and never a 404 substitute);
+a page rendering under ~300 characters is not substantive.
+
+**Next (ordered).** 1. DONE 2026-09-05 late: both remaining packet tiers re-graded under the
+product-state rule and their Live rows applied after an independent re-probe per row —
+medium 8 of 10 (#1367; litemint, tellus-cooperative held) plus its 5 Inactive re-grades
+(#1376, receipted: polaris-lend, every-finance, muwp, didstellar, transfermole), low 12 of
+16 (#1371; getblock, kotani-pay, plutope, mystic held). Every stamp is now re-probed weekly by the packet-stamps
+guard (#1368, #1372, #1374: 67 hold, 0 contradicted, 8 client-rendered shells it cannot
+read without a browser). 2. DONE 2026-09-06: the medium tier's Development re-grades — neovestor applied
+(waitlist product, receipted), Stellar Passport overridden by the owner and stamped Live
+(#1380). litemint and tellus-cooperative stamped Live on the owner's verdict (#1382). Two agents
+re-verified the 17 undecided rows under the product-state rule (drafts
+2026-09-06-deep-verify-a/b, #1384/#1385): 7 earned Live on product state and are stamped
+(#1386, read back 7/7). The downgrades were owner-approved and applied
+(#1388, read back 6/6): mystic, fairblock, vanna-finance, the-give-hub → Development;
+wagelink → Inactive (receipted); spydra's stamp withdrawn (STATUS_FIX gained `withdraw:
+true` for deliberate retractions). Next 100 weak rows packeted by three agents (#1392/#1394/#1395): 29 Live
+rows stamped after the coordinator re-probed each with its own instrument (#1396, read
+back 29/29); 5 held (cartwey, fastbuka: the shipped app names no Stellar; horizon-as-a-
+service, hot-protocol, k3-labs: docs-only); 21 status moves (9 Development, 5 Pre-Release,
+7 Inactive, receipted where dead) await the owner; 45 cannot-tell. Also open: token-tails
+(Live on low evidence) and plutope, kotani-pay, tala (cannot-tell) (improvements/drafts/2026-09-05-verification-packets-*.md). 3. Give the guard a
+rendered check for the 8 client-rendered stamps (an agent with a browser, weekly). 4. Re-run
+the routing battery after Raven re-baselines (their drift monitor, issue #91, is queueing
+our spec changes — batch routing-text edits).
+
+### SCF addendum (2026-09-06, 05:00–06:30 UTC)
+
+**Awards beyond the listing cap (#1397).** `/backend/projects` serves the same
+500 rows whatever it is asked. Discovery ran once, offline — the official round
+pages (46 rounds, 3,195 submissions keyed by project record id) plus the Wayback
+CDX index for the awards SCF does not number — and produced a curated
+`SCF_PAGES_BEYOND_CAP` map: 112 rows, 147 award records, $7.77M disclosed.
+Every page parsed with the shared verdict parser; every match confirmed by a
+site / GitHub org / X handle the page shares with our row, or a coined name
+where a legacy page carries no links. Executed from main after a dry run: 125
+writes (112 beyond-cap + 13 ordinary listing drifts), read back (Mystic r29
+$47,000; Blocknify r6 + r7; xycloans r13 + Liquidity '24 Q1; the Soneso SDK
+Public Goods awards).
+
+**A fossil join (#1399).** `pen` (Anclap's asset row) carried OpenGrants's SCF
+record — the pre-08-12 substring matcher ("opengrants" ⊃ "pen"). `SCF_FIX`
+gained `unlink`; the page now joins our `opengrants` row (opengrants.net and
+github.com/metagov/daostar on both sides).
+
+**One field, one writer (#1400, #1401).** Reading the curate lane right after
+an execute: a dry run still planned 11 SCF writes and the enrich dry run 4 —
+the same rows, opposite directions. Two lanes and three curate maps wrote one
+field: exact-sync vs promote-only on `awardedRounds`; rows with TWO SCF pages
+where the last page written won and the other page's award ($60k–$138k) was
+dropped every other run; a human-verified total ($291k paid, aquarius)
+overwritten by the page's $391k; badge-inherited rounds no page carries. Nobody
+saw it because 141 unchanged status stamps were re-written on every execute —
+"143 applied" carried no information. Fixes: enrich folds pages mapped to one
+row (union of awards, sum of the pages' own totals, the project-named page as
+the citation, a WARN on name-only pairs); human-verified blocks are
+additive-only for the machine lane; curate stamps and aliases skip when in
+sync; linkage entries the pages contradict corrected (policywright,
+account-demolisher, coala-pay, fastbuka); tucambio's dead slug replaced by its
+live page. `curate-projects.yml` re-runs the dry run after every execute and
+fails if anything is still planned — first run: 0. Wave 2 re-keys a page the
+matcher joined to a lineage shadow onto its canonical row (liqvidxyz) and joins
+trustswap, fastbuka (Choppaddi is its page retitled, same hash) and
+scaffold-stellar.
+
+**The audit that catches this class from outside:** awarded rows whose
+`awardedRounds` has a round absent from `roundAwards` — 8 before, 1 after
+(nebulavrf — which turned out to be the RSC chunk-split trap in the verdict
+parser: raw markup, a cut inside a field; #1403 reads the rebuilt stream and
+also repaired 9 rows served with a truncated award type). Awarded rows with no
+round award at all: 11 → 6, of which 3 are Draft shadows and 3 have no SCF page
+anywhere (orally, zenex, soropg — uncited, under next steps).
+
+**Board.** Weak 504 of 984 (51.2%) — unchanged: an SCF award is provenance,
+not a status basis. 606 awarded rows, 580 cite their page, disclosed totals
+sum to $61.0M.
+
+### Repo addendum (2026-09-06, 16:00–18:00 UTC)
+
+**The award parser called a partial award nothing (#1406).** `parseRoundVerdicts`
+matched the status exactly, so SCF's `Awarded (50%)` / `Awarded (10%)` — the
+percentage is how much has been DISBURSED, not the verdict — fell into the
+neutral bucket. Measured on the live pages: soropg had no award at all, clob
+was missing SCF #20 ($14,792.10) while serving #29, qstn's #20 came through
+with `submissions=0`, an incoherent state. Five such cards sit across the 46
+numbered round pages, plus the Public Goods rounds the round pages never list.
+
+**A $150,000 award on the wrong row (#1407).** SCF has one Hermes page, and it
+links github.com/zenith-protocols — our `zenex` row (zenex.trade, described on
+our own row as "Zenex, formerly Hermes"; the owner confirmed the rename). The
+name matcher had given it to `hermes`, a different live product (OrbitCDP's
+perp exchange, github.com/orbit-cdp/hermes). Same class as yesterday's
+`pen`/OpenGrants fossil, caught the same way: only the link intersection
+decides. Bound in `SCF_SLUG_OVERRIDES`, the wrong row unlinked in `SCF_FIX`.
+
+**A sentinel served as a round number (#1407, #1409, #1412).** SCF encodes an
+award it does not number as a negative `lastAwardedRound`; six rows served
+`-326`. Fixing it took three passes and both failures were caught by our own
+gates before anyone saw them: clamping the value on the SIGNAL path flipped
+every Public Goods row to `awarded=false` (the dry run caught it), and then
+comparing the clamped stored value against the raw signal made those six rows
+re-plan forever (the idempotence replan caught it, on its first real firing).
+`soropg`'s page was also beyond the listing cap, so no pass had ever visited it
+(#1411). Final execute: 18 rows, read back, idempotence replan 0.
+
+**GitHub-shaped fields hold free text (#1410).** The public intake form took
+`github.orgLogin` as free text, so 33 rows held a submission URL, an
+`owner/repo` pair, another forge's hostname (`gitlab.com`, `bitbucket.org`,
+`docs.google.com`), GitHub's own `orgs` path, or comma-joined junk. Every
+reader rejects those shapes, so the rows were never fanned out to their repos
+and the API served a hostname where a login belongs. One reader now
+(`parseGithubIdentity`, 8 tests) applied at the boundary AND as a DERIVED
+repair pass in curate — not a 33-entry map, so it converges. 35 writes applied
+and read back; 12 rows also recovered the repository their URL named.
+
+**A detector nobody read (#1413, #1415).** The daily link checker has been
+proving URLs broken for months: 108 today, 53 on github.com, 103 cited by
+project rows, 26 of those on Live rows. Its only consumer was the admin
+dashboard, so none of it ever reached the board. Found from the repo side —
+rows storing a GitHub link with no indexed repo — not from the detector. It now
+writes `improvements/audits/link-health-latest.json` and the ledger reads it
+under a new `broken-link` maintenance mode: refresh queue 107, open still 2.
+The first run came through `UNSTAMPED` because the date was in `asOf` and
+`evidenceStamp` reads `generatedAt`; 108 findings were demoted for want of a
+field name.
+
+**The same free text, one level down (#1417, #1419, #1421).** `github.repos[]`
+held 16 entries naming no GitHub repository: another forge's host as the owner,
+GitHub's own `orgs` path, a person's display name (`Omkar Nanavare`, beside the
+correct `OmcarSN` on the same row), and a second URL glued to the repo name.
+Two of my own repair rules then reached past their evidence, and the dry run
+caught both before any write: trimming an owner to its first word invented the
+accounts `Omkar` and `anclap`, and a hostname-shaped rejection on the NAME
+would have deleted `jamiels/ramm.ai`, a real repository named after its product
+domain. The owner is now never inferred — only whitespace-trimmed, and dropped
+if anything else remains. 22 writes applied, replan 0.
+
+**Hermes is Zenex (#1420).** Owner history: Orbit CDP was built by Zenith and
+Orbit died; Hermes was Zenith's product, renamed to Zenex. So the `hermes` row
+was the same product under its Orbit-era home, and the duplicate is what made
+this morning's $150,000 misattribution available in the first place. Folded
+into `zenex`.
+
+**Repo coverage, measured correctly.** A first count said 747 of 1,103 rows had
+no repository — it read `project.github.repos`, a curated seed list. The
+authoritative link is `repo.projectSlug`: 527 rows have at least one indexed
+repo, 576 do not, 402 of those Live. Of the non-Draft rows with a stored GitHub
+link and no indexed repo, 41 of the links are dead (now queued) and the rest
+are mostly partners whose repositories are not Stellar code, which the relevance
+gate correctly declines. Discovery over the 586 no-repo Live/Development rows
+confirmed 82 owners by intersection; 70 already stored the right link, and the
+12 that did not were written (#1414).
+
+### Second wide sweep (2026-09-07, 00:00–01:30 UTC)
+
+Same method, run again after the first round of fixes. Three more instruments
+were reporting health they had not earned, and all three were mine.
+
+**A third credential gap, and this one printed "ok".** `check-raven-drift`
+read its token from the environment only; with none present it pushed a warning
+note, skipped the entire catalog half, and fell through to the success line at
+exit 0. Same shape as the truth battery's "0 fail" with four slices dead. It now
+resolves the durable token lazily (that file deliberately has no top-level
+import, to stay in global scope) and exits 2 INCONCLUSIVE with no credential.
+
+**Running, it then accused Raven of dropping two operations.** `vetIdea` and
+`partnerOnboard` came back "missing beyond grace — worth a (polite) upstream
+ping". Both were wrong:
+
+- `vetIdea` **ranks first** for "should i build this on stellar", tested
+  directly. The sweep unions 14 vocabulary queries and none of them asked an
+  idea-vetting question. **The query list IS the instrument's reach.**
+- `partnerOnboard` is `x-side-effecting: true`, deliberately outside the agent
+  research surface — a research sweep must never expect it.
+
+The guard now probes the sandbox for every suspect and splits **callable but
+undiscovered** (ours) from **missing** (theirs), and the expected set excludes
+side-effecting ops. End state: 30 catalog ops against 30 claimed, three lagging
+inside grace, zero missing. Manufacturing upstream complaints out of our own
+blind spots is precisely what the catalog-lag rule exists to prevent.
+
+**P5, measured before writing.** Knowledge notes cover 193 of 2,361
+project-linked repos. The gap is not evenly valuable, so the batch targets rows
+where a consumer is actively misled — multi-repo projects whose repo NAME does
+not say which half of the product it is. Four notes, each quoting the repo's own
+README: the Aquarius governance frontend (despite a `-soroban` suffix), Slender's
+UI, Blend's bootstrapper interface (whose contracts live in a repo its README
+links), and the Sorosan SDK/client pair told apart only by package name. Two
+candidates got **no** note on purpose: their READMEs are unmodified
+create-next-app boilerplate, and "this repo has no description" is not a fact
+worth publishing.
+
+**Two negative results worth recording, so nobody "fixes" them later.**
+85 of 100 contracts carry no project — every one of them from a repo that
+genuinely has no project link, so the join is honest, not missing. And 142 of
+171 builders show `projectCount: 0` while the code-derived join under
+`onStellar.builds` is correct and populated; the api-reference already directs
+consumers there. I also built a repo-misattribution detector and **threw it
+away**: it flagged 1,789 of 2,361 rows, nearly all correct. A guard that cries
+wolf on three quarters of its population is worse than no guard.
+
+### Wide-sweep addendum (2026-09-06, 22:30–00:00 UTC)
+
+Running every guard wide, plus both eval engines, on the theory that a guard
+tested on a hand-picked list is Tier C for every shape outside it (§3b).
+
+**The truth battery was 32 tests short and said "0 fail".** Four slices died on
+`SyntaxError: Unexpected end of JSON input` while the summary read
+`80 pass · 0 fail`. The helper parsed Raven's body without ever checking the
+HTTP status, so a refusal surfaced as a parse error that looked like our bug.
+With the status printed, the cause was **HTTP 401**: the battery reads
+`RAVEN_TOKEN` from the environment only, so outside CI it sent unauthenticated
+requests. It now falls back to the durable token file and exits INCONCLUSIVE
+with no credential — an unauthenticated 401 is not a test result. Restored to
+**112 pass · 0 fail · 0 slice errors**.
+
+**Six vacuous invariants were hiding a served contradiction.**
+`check-sum-invariants` reported six partitions holding only because their
+denominator was zero. Behind one of them: `stellar-builder-summit-2026`
+published **12 winners beside `totalSubmissions: 0`** — a hackathon nobody
+entered that twelve people won. The curated São Paulo sprint has no submission
+roster anywhere, so the API counted zero rows and served that as the count.
+Three defects in one thread:
+
+- The count is now `null` when we hold no roster, and the outcome funnel is
+  `null` over an unknown denominator. The DoraHacks branch of that same file
+  already carried the comment "zero is a measurement; absence of one is not" —
+  the curated branch did not follow it.
+- **The fix landed on one of two call sites.** Production kept serving `0`
+  because the code-curated events ride the DoraHacks branch, not the curated
+  one. Same rule, second place, found only by reading production after the
+  deploy.
+- That branch also hardcoded `source: "dorahacks"` for every row, so the detail
+  route disagreed with the list route about what the summit is.
+
+**A published value that does not work as a filter.**
+`/api/hackathons?source=curated` returned **0 rows** while the unfiltered
+response carried six whose own `source` said `curated`, and `meta.counts` said
+`{curated: 0, dorahacks: 26}` beside them. The route skipped the DoraHacks
+fetch when asked for curated — dropping exactly the requested rows — and
+counted from its two input arrays instead of from the merged rows. Both now
+read each row's own `source`.
+
+After the data became honest, the vacuous count went **6 → 0**: rows we hold no
+count for are skipped rather than counted as trivial passes.
+
+**The merge gate itself was the same bug.** My gate passed a PR whose only
+reported row was Vercel's comment bot — the Actions checks had not been created
+yet, so "nothing is running" was true and vacuous. It now requires at least one
+Actions check and settles: after the rows go quiet it waits and re-reads, and a
+new row restarts the wait. It cannot demand a fixed set of names, because
+path-filtered workflows honestly skip. Moved out of a scratchpad into
+`scripts/gate-pr.sh`. On its first use it caught a real FAILURE the old one
+would have merged past.
+
+**Raven, asked directly.** It exposes 30 Scout operations and proxies our live
+API — `getStatus` through Raven returned tonight's `projects.lastUpdatedAt`, so
+the routing misses classed as "catalog-lag" are about its manifest, not stale
+data. Routing holds at **48/65 (74%)**, and the golden set at **51/51**.
+
+## Lessons — 2026-09-07 (five shapes, and what they cost autonomy)
+
+A long day of running the guards wide produced ~20 defects. They are not
+twenty problems; they are five shapes, each recurring across unrelated
+subsystems. Naming the shape is worth more than the twenty fixes.
+
+33. **"X is not moving the data" — five costumes in one day.** Editing the
+    curation map is not moving the data (needs an execute). Arming a cron is
+    not moving the data. **Fixing a scoring formula is not moving the data** —
+    `repoScore` is computed at write time by whichever lane owns a row, and the
+    hackathon rows are graded once at ingest and never again, so the ranking
+    fix reached nothing until `regrade-repos` recomputed 9,056 rows. **Writing
+    a knowledge note is not moving the data** — the backfill lane writes it,
+    and a mixed-case key silently stamped nothing. **Writing the plan is not
+    moving the data** — the board reads a generated artifact, so measured phase
+    text sat unpublished until it was rebuilt. Ask, every time: what reads this,
+    and when does it next run?
+34. **An instrument that cannot fail is not a check.** `check-raven-drift`
+    printed "ok" while skipping its entire catalog half for want of a
+    credential. Two guards exited 1 — the code meaning "the data is wrong" —
+    when the database refused the connection, and no `.catch` could see it
+    because Payload's mongo adapter calls `process.exit(1)` itself. The health
+    guard counted its OWN red streak, reported itself, exited 1 again, and
+    could never reach the green run that would clear it. Each looked healthy or
+    looked broken for reasons that had nothing to do with the data.
+35. **One field, two writers, three different collisions.** Two lanes on
+    different schedules (the feed sync restored 81 dead links the same day
+    curate removed them, because ownership is granted map-by-map by hand). Two
+    maps naming the same value (a status source set and retracted every run).
+    Two sections in ONE run, each spreading a stale copy of the same group, so
+    the second resurrected what the first cleared. The post-execute idempotence
+    gate catches the third and is blind to the first — cross-lane stability
+    needs the ownership declaration, which is now enforced by a test rather
+    than remembered.
+36. **A name is a hypothesis; a link is evidence.** 26 of 31 package matches
+    were collisions until the package had to point back at the row's own repo.
+    6 of 7 fuzzy repo successors were rejected once corroboration was required.
+    A project's site linking `Soneso/as-soroban-sdk` names a **dependency**,
+    not its own repo. The gate is always the same: something outside the name
+    must tie the two together.
+37. **A model that conflates two opposite meanings will report the wrong one.**
+    `broken-link` covered both "our citation is wrong" and "the product died,
+    exactly as we already recorded" — the same finding, the same resolution,
+    indistinguishable. A hackathon judge score meant "good submission" and was
+    read as "canonical reference", putting twelve student projects above every
+    SDK. 4,314 stars earned in another ecosystem counted as Stellar authority.
+    Split the meanings and the numbers start answering the question asked.
+
+**What this costs autonomy, and the adaptation.** The ladder's gate is N
+intervention-free weeks per lane. Every shape above is a way for a lane to
+report success while moving nothing, moving the wrong thing, or being silently
+undone hours later — so clean weeks can accumulate on a lane that is not
+working. Weeks measure *absence of correction*; they do not measure *effect*.
+
+So the promotion bar gains a second condition, and it is one a lane can prove
+about itself:
+
+> **A lane may not advance past Stage 1 until it asserts its own end state.**
+> Not "the run exited 0", but a claim about the world after it ran, checked by
+> the lane itself: a post-execute re-plan that must come back zero, a read-back
+> of what was written, a count of what it skipped, or an explicit
+> could-not-look exit. A lane that cannot say what changed cannot be trusted to
+> run unattended, however many quiet weeks it has.
+
+`curate-projects` and `enrich-scf` already do this (the Idempotence step, which
+caught three real defects today). `regrade-repos` prints its largest moves
+before writing. The rest of the write lanes do not, and that — not elapsed
+time — is what stands between here and Stage 2.
+
+## Lessons — 2026-09-06 (the instrument speaks first)
+
+29. **A guard tested on a hand-picked list is Tier C everywhere else.** Every
+    defect found tonight was found by pointing an existing checker at rows it
+    had never seen — the packet guard's dash rule, its pre-launch blind spot,
+    the battery's 401, the hackathon counts. Running wide IS the test.
+30. **"0 fail" is a claim about the tests that ran.** Four slices vanished and
+    the headline stayed green. A suite must report what it did not run as
+    loudly as what failed.
+31. **A vacuous check is a place to look, not a place to relax.** Six
+    invariants held trivially; one of them was standing on a served
+    contradiction. Chase the zero denominators.
+32. **Fix every call site or verify production, ideally both.** The null-count
+    rule landed on one of two branches computing the same number, and only
+    reading the deployed API afterwards revealed it.
+
+24. **An instrument's blind spot looks exactly like a finding.** Unfollowed
+    308s, a 5xx, a client-rendered page and a default page title each produced
+    a confident "this product is dead". Enumerate what the prober cannot see
+    and give each case its own could-not-check before trusting one verdict.
+25. **A second prober is a second set of the same bugs.** The corrections for
+    redirects and refusal codes already existed in the packet guard; a
+    throwaway sweep re-derived them wrong. One question, one prober, and the
+    sweeps import it.
+26. **A dry run catches what review does not.** Every one of the day's six
+    near-misses was caught by printing the planned writes or by rendering the
+    page — none by reading the diff. Plan output is not a formality before an
+    execute; it is the test.
+27. **A match needs an intersection, not a name.** 26 of 31 package matches
+    were collisions until the package had to point back at the row's own
+    repository. Same shape as the SCF `opengrants`/`pen` fossil and the
+    Hermes misattribution: a name is a hypothesis, a link is evidence.
+28. **Funding is not membership.** RAMM held a real SCF award and real Soroban
+    contracts, but every network reference was Futurenet and the company now
+    ships something else. An award proves a proposal was funded, never that a
+    product exists in the ecosystem today.
+
+## Lessons — 2026-09-06 (one field, one writer)
+
+1. A write count is not a signal. 141 stamps re-written per execute made
+   "143 applied" meaningless and hid rows that flipped every run. The check
+   every writing lane should carry: run the dry run again after the execute;
+   anything still planned is a fight or a writer that does not read back
+   (curate has it; enrich-scf next).
+2. Before adding a map entry, ask which other writer owns the field. `scf.*`
+   now: enrich exact for official-record rows, `SCF_FIX` for human-verified
+   rows, linkage only promotes what a page shows.
+3. A positive award claim needs a page. "Never accuse on silence" is about
+   deaths; three linkage rounds (#42, #29/#41, #31) had no page and were
+   re-added for weeks.
+4. Renamed SCF pages keep their hash suffix; a dead stored slug with a live
+   same-hash page is a rename, not a new project (choppaddi-vmf, liqvid-hrr).
+
+18. One value, two jobs: SCF's negative round is both the award SIGNAL and a
+    stored field. Clamp only at the write site, and compare like with like —
+    `stored !== clamp(raw)`. Comparing a clamped store against a raw signal is
+    a permanent flip-flop.
+19. Measure with the field that owns the fact. Repo coverage read from the
+    curated seed list said 68% of rows had no repository; the authoritative
+    linkage said 52%. Check which writer owns a field before counting it.
+20. Before building a detector, find out who reads the one that exists. The
+    link checker proved 108 URLs broken every day and queued them nowhere.
+21. A guard that cannot finish gives no verdict, and a cancelled run reads
+    much like a clean one. Curate applied 35 writes and had its idempotence
+    replan killed by an 8-minute job cap.
+23. A repair rule must not reach past its evidence. Trimming an unparseable
+    owner to its first word invents an account; rejecting a domain-shaped repo
+    name deletes a real one. When the right value cannot be known, drop the
+    entry and say so — both errors were caught by a dry run, neither by review.
+22. Free text in a typed field is an input-validation bug, not a data-entry
+    mistake. Normalize at the boundary, then repair with a DERIVED pass that
+    re-normalises to itself — a hand-listed map cannot converge.
+
+## Lessons — 2026-09-05 evening (owner corrections + cross-vendor audit)
+
+1. A Live verdict is the product's own state, never chrome. orbitcdp went
+   Inactive → Live on the banner "Live on Stellar" and a Launch App button
+   while the same page served empty protocol stats.
+2. Empty or zero metrics on the page veto Live even with a 200 and a
+   same-day repo push. skyhitz: title "Gravity. Mainnet", repo pushed that
+   day, Total Mass 0.00 HITZ, Balance —.
+3. The second live signal is this product's own repository. Not a hackathon
+   repo (hot-wallet), a seeder (tala), a shared repo (wagelink/zebec), or an
+   org-newest substitute for a 404 (normal, vanna-finance). A page the
+   packet itself records at 8, 17 or 40 rendered characters is not
+   substantive (wagelink, untangled, fairblock).
+4. One field, one writer, registered before either lane runs unattended.
+   dedup wrote Draft, curate wrote Inactive, sync wrote Live on the same
+   status field in one day; the fix landed in three PRs and two more
+   writers were found by audit the same evening.
+5. Recategorization is reported as its own number, never as progress. The
+   day's 54-row weak-share drop is 13 propagated + 38 stamped + 3 curated;
+   the status truths gained are five receipted deaths.
+6. Numbers come from the run's own steps or the fetched page, never from an
+   agent's note. The packets cited titles while the pages' stats were dashes.
+
+## Lessons — 2026-09-05 cross-vendor audit of the program
+
+Rules an agent follows (each verified against evidence; the auditor's
+other claims were checked and, where wrong, are not here):
+
+1. A new enum member and every aggregator that classifies it ship in the
+   same PR — or the PR does not merge. (statusBasis gained two tiers; the
+   strong-metric ignored both; 173 rows earned evidence and the headline
+   moved by 4.)
+2. A classifier change never moves a ratchet series. Report
+   "recategorized N" and "upgraded M" as two numbers.
+3. A close-out on an external finding states the finding's OWN probe and
+   its remaining miss count. "Fixed and verified live" without that number
+   is banned.
+4. A new guard's first alarm is a candidate false alarm. It may not page
+   until it has a known-bad and a known-good fixture. (The partition
+   guard's first two alarms were its own wrong denominators.)
+5. A sum check whose denominator is 0 is vacuous — reported, never counted
+   as a pass.
+6. A third-party list is asserted against the source's own total; if the
+   source ignores paging, the served count is could-not-check, never a
+   number. (DoraHacks 50/page; SCF capped at 500.)
+7. Live ∧ (holders ≤ 1 ∨ a "coming soon" page ∨ a 200 that is a parked
+   domain) is never served as a live market.
+8. An independent audit — second agent or human — precedes closing any
+   externally-filed finding.
+9. A guard artifact under improvements/audits is only as fresh as its
+   last local `--json` commit; CI runs do not persist it. Read its date
+   before citing it.
+10. A bounded-lane count increments only when the PR body carries its
+    write-set, a dry-run, an execute and a live read-back.
+11. Score routing on the intended operation id. "Some scout op appeared"
+    is not a hit.
+12. Do not answer a routing miss with vocabulary once the failure mode is
+    id-noun exclusion; that is the scorer's, upstream.
+13. A lane earns a run only when its execute step concluded `success`; a run
+    whose steps were skipped is a no-op, and the health guard reports it as
+    never-ran. (3 scheduled note-backfill runs executed nothing; a first count said 18 by reading completed runs, not schedule runs.)
+14. An artifact licenses only the tier it can support: asset movement →
+    onchain-activity; an operator's toml or a receipt → human-verified /
+    product-integration. A strong basis copied across records without a
+    tier-consistent artifact is a could-not-propagate.
+15. A filter with a closed vocabulary rejects unknown values with the
+    vocabulary (400) after normalising case and labels; it never serves an
+    unfiltered-looking zero.
+16. Evidence date, never observation day, on every provenance stamp — a repo's
+    push date, a receipt's date, an announcement's date.
+17. One field, one owner: when two lanes can write the same field with
+    different verdicts (dedup's Draft vs the merge fold's Inactive), the later
+    one wins silently. Register ownership or merge the lanes before either
+    runs unattended.
+
+Recorded lessons this week violated (so the loop is honest): verify before
+advertise (#494, twice); examples are probes, not targets (11 of 61 treated
+as closing a 61-row probe); review new guards adversarially; ledger closure
+is not repair (298 silence-closes behind a 0.99 close rate); stale evidence
+is not a finding (a guard artifact cited at 08-31 on 09-05; this file's own
+P4 number).
+
+What this is not: an org-chart cosplay. Lanes are prompts + charters +
+write-sets; the ladder is entry criteria; the scoreboard is generated from
+the same ledger everything already writes to. The only new invention is the
+closure rule, and it is the one that ends the weekly déjà vu.

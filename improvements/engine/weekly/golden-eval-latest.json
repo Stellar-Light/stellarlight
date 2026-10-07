@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7598240971565247,
+      "topScore": 0.7598240375518799,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8357759714126587,
+      "topScore": 0.8371003866195679,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -63,7 +63,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8850046396255493,
+      "topScore": 0.8850044012069702,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -71,7 +71,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Increment a counter and store the incremented value."
+      "sample": "Increment a counter and store the incremented value"
     },
     {
       "id": "dapp-freighter",
@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8109979629516602,
+      "topScore": 0.8108398914337158,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7707698345184326,
+      "topScore": 0.8238687515258789,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -143,7 +143,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Five Years of Bitso and Stellar: From Remittance Corridor to"
+      "sample": "Stellar USDC to GCash off-ramp (SCF submission, SCF #17)"
     },
     {
       "id": "dossier-blend-safety",
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8034660220146179,
+      "topScore": 0.8034659624099731,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -171,7 +171,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8419243097305298,
+      "topScore": 0.8368697166442871,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core — Veridise (Soroban Stellar Soroban Cor"
+      "sample": "Stellar Soroban Core — Veridise (Auditing Report for Soroban"
     },
     {
       "id": "ecosystem-rwa-map",
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8247630596160889,
+      "topScore": 0.8247631788253784,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -279,7 +279,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8241767883300781,
+      "topScore": 0.8246715068817139,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -297,7 +297,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8296041488647461,
+      "topScore": 0.8296414017677307,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7763291597366333,
+      "topScore": 0.7768274545669556,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8449501991271973,
+      "topScore": 0.849909782409668,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8056342005729675,
+      "topScore": 0.8091201782226562,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -395,7 +395,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Q1 2026: Execution at network scale"
+      "sample": "Q2 2026: What Stellar was built for has arrived"
     },
     {
       "id": "ecosystem-stablecoin-anchor",
@@ -431,7 +431,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SocketFi"
+      "sample": "Stellar Passport"
     },
     {
       "id": "protocol-current-base-reserve",
@@ -477,7 +477,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 74,
+      "topScore": 66,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -485,7 +485,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "nethermindeth/stellar-private-payments"
+      "sample": "stellar-experimental/who-ate-gerald"
     },
     {
       "id": "repos-x402",
@@ -495,7 +495,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 85,
+      "topScore": 73,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -513,7 +513,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 58,
+      "topScore": 87,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -531,7 +531,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 85,
+      "topScore": 78,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -549,7 +549,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 73,
+      "topScore": 84,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -557,7 +557,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "trustless-work/trustlesswork-smart-contract-stellar"
+      "sample": "Trustless-Work/trustlesswork-smart-contract-stellar"
     },
     {
       "id": "repos-soroswap",
@@ -567,7 +567,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 61,
+      "topScore": 63,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -575,7 +575,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "everyfinance/onchain-manager-dapp"
+      "sample": "soroswap/soroswap-ui"
     },
     {
       "id": "bridge-evm-to-stellar",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094740271568298,
+      "topScore": 0.7094740867614746,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -629,7 +629,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Welcome to the SCF Handbook!"
+      "sample": "Welcome to the SCF Handbook"
     },
     {
       "id": "cap-lookup",
@@ -639,7 +639,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7854732275009155,
+      "topScore": 0.785473108291626,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -657,7 +657,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7200591564178467,
+      "topScore": 0.709642144693438,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -675,7 +675,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6796720623970032,
+      "topScore": 0.7108401656150818,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -683,7 +683,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
+      "sample": "Stellar Weekly Roundup: Week of Sep 11, 2026"
     },
     {
       "id": "blend-incident-facts",
@@ -711,7 +711,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7407970428466797,
+      "topScore": 0.7407969832420349,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -729,7 +729,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7038456201553345,
+      "topScore": 0.7038456797599792,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -783,7 +783,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6947882771492004,
+      "topScore": 0.6947882175445557,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -801,7 +801,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535136580467224,
+      "topScore": 0.8535137176513672,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -809,7 +809,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF bug-bounty consolidation (effective 2026-05-07): single "
+      "sample": "SDF bug-bounty consolidation (effective 2026-05-07)"
     },
     {
       "id": "q-org-sdf-structure-mandate",
@@ -819,7 +819,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8588098883628845,
+      "topScore": 0.8588099479675293,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -837,7 +837,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8134470582008362,
+      "topScore": 0.813447117805481,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
+      "topScore": 0.8225382566452026,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -881,7 +881,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "DFNS"
+      "sample": "Normal"
     },
     {
       "id": "pg-award-recipients",
@@ -900,6 +900,61 @@
       "junk": 0,
       "badTitle": 0,
       "sample": "Python Stellar SDK"
+    },
+    {
+      "id": "soroban-hosterror-decode",
+      "category": "soroban-dev",
+      "mode": "research",
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
+      "forbiddenHits": [],
+      "topScore": 0.7419469356536865,
+      "urlOk": true,
+      "scoreOk": true,
+      "top1Ok": null,
+      "uniqueOk": null,
+      "thin": false,
+      "junk": 0,
+      "badTitle": 0,
+      "sample": "Debugging Contract Errors"
+    },
+    {
+      "id": "soroban-storage-ttl-cap",
+      "category": "soroban-dev",
+      "mode": "research",
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
+      "forbiddenHits": [],
+      "topScore": 0.8397256135940552,
+      "urlOk": true,
+      "scoreOk": true,
+      "top1Ok": null,
+      "uniqueOk": null,
+      "thin": false,
+      "junk": 0,
+      "badTitle": 0,
+      "sample": "Extend a deployed contract's TTL with code"
+    },
+    {
+      "id": "soroban-test-event-assertions",
+      "category": "soroban-dev",
+      "mode": "research",
+      "status": "PASS",
+      "matched": true,
+      "missingRegexes": [],
+      "forbiddenHits": [],
+      "topScore": 0.8496288657188416,
+      "urlOk": true,
+      "scoreOk": true,
+      "top1Ok": null,
+      "uniqueOk": null,
+      "thin": false,
+      "junk": 0,
+      "badTitle": 0,
+      "sample": "Publish events from a smart contract"
     }
-  ]
+  ],
+  "generatedAt": "2026-10-07T12:03:06Z"
 }

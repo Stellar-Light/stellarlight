@@ -1,0 +1,102 @@
+# Ask GitHub what our own lanes actually did.
+#
+# Weekly, because the failure it catches arrives without any edit of ours: an
+# upstream action releases a new major, a PAT expires, a cron stops firing. The
+# lane it was written for (consumption-guard) broke the day pnpm 11 shipped and
+# stayed broken silently, because nothing was watching the watchers.
+#
+# The meta-case of the script's own convention: a red at "Report" is the board
+# carrying a finding about SOME OTHER lane — this lane doing its job. A red at
+# the artifact or commit steps is this lane itself broken:
+# workflow-health: signal-steps: ^Report$
+#
+# 2026-08-31: the scout-mcp mirror drifted (1.2.1 description changes), two
+# runs honestly died at "Mirror drift", and the checker's ALWAYS-RED verdict
+# then keyed on the FIRST failure's step even after the sync landed and the
+# latest run died only at Report (a declared signal) — so every subsequent
+# Report inherited the verdict and re-failed: the checker was evidence about
+# itself. This edit resets the since-last-edited window on the now-synced
+# reality. Known refinement for the checker: ALWAYS-RED should test the
+# LATEST conclusive failure's step against signal-steps, not the first's.
+name: workflow-health
+
+on:
+  schedule:
+    - cron: "41 6 * * 1"
+  # Also on any change to the workflows themselves — a new lane should be
+  # verified against reality, not just against a YAML parser.
+  push:
+    branches: [main]
+    paths: [".github/workflows/**", "scripts/check-workflow-health.ts"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: workflow-health
+  cancel-in-progress: true
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Full history: the check compares each workflow's blob against the
+      # version that ran, and asks git when the file last changed.
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      # --json writes the artifact and exits 0; the human-readable run below is
+      # what turns the finding into a red. Splitting them means a bad exit code
+      # can never cost us the artifact the board reads.
+      - name: Write the /quality artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-workflow-health.ts --json
+
+      - name: Commit it
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/workflow-health-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "chore(quality): workflow health [skip ci]"
+          # Rebase-and-retry: a dispatched run of this lane raced a deploy-nudge
+          # push on 2026-08-31 — non-fast-forward, step failed, and the lane
+          # would have flagged ITSELF as FAILING on the next weekly sweep. The
+          # artifact is a fresh measurement, so replaying it on top of whatever
+          # landed first is always correct. -X theirs covers the OTHER race —
+          # two runs of this lane both rewriting the artifact is a rebase
+          # CONFLICT, and on a rebase "theirs" is the commit being replayed,
+          # i.e. OUR fresh artifact; without it the worktree wedged mid-rebase
+          # and every retry failed (cross-vendor audit, 2026-08-31). The abort
+          # keeps a failed rebase from poisoning the next loop iteration.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase -X theirs || git rebase --abort
+          done
+          git push
+
+      # The scout-mcp mirror, watched WITHOUT a secret. The sync automation is
+      # retired (operator declined to mint a credential after the PAT died);
+      # the mirror is pushed manually, and this read-only tree comparison is
+      # what notices it falling behind. A red HERE is this lane working as
+      # designed — but it is a real drift someone must fix, so it is NOT a
+      # declared signal step.
+      - name: Mirror drift (scout-mcp)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-mirror-drift.ts
+
+      - name: Report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm exec tsx scripts/check-workflow-health.ts

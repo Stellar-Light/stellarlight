@@ -1,6 +1,10 @@
 # Engine C — the weekly self-improvement loop. Runs Engine A (recall matrix)
 # + Engine B (data sweeps), builds one rolling "Retrieval health" tracker
 # issue (edited each week = week-over-week state), red on any A floor breach.
+#
+# A red at this step is a floor breach reported into the tracker issue, not
+# the lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Fail run on floor breach$
 name: engine-c-health
 on:
   schedule:
@@ -63,6 +67,9 @@ jobs:
         # /tmp/scf.json from the step above — no extra scrape, no extra Actions
         # minutes. A missing report never accuses (scrape-failure safe).
         continue-on-error: true
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           set -o pipefail
           if [ ! -s /tmp/scf.json ]; then
@@ -114,6 +121,9 @@ jobs:
           fi
       - name: Engine C report
         id: report
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           PREV_FLAG=""
           [ -f /tmp/prev/a.json ] && PREV_FLAG="--prev=/tmp/prev"
@@ -148,6 +158,18 @@ jobs:
             /tmp/e.json
             /tmp/coverage.json
           retention-days: 30
+      - name: Through-Raven consumer loop (golden Qs via the live gateway)
+        # The /quality `raven-consumer-path` row reads this artifact, and until
+        # now the ONLY way to refresh it was a human running the script locally
+        # with the token — so the row sat at 2026-08-28 for eighteen days, past
+        # its own freshness budget, looking like a measurement. Read-only: it
+        # asks Raven the curated golden questions and grades the answers.
+        # Weekly, not daily: it is 47 calls into a partner's gateway.
+        continue-on-error: true
+        env:
+          RAVEN_MCP: https://agents.stellar.buzz/mcp
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/raven-loop.ts
       - name: Commit weekly evidence to improvements/engine/weekly/
         # The /quality scoreboard renders ONLY committed artifacts — a CI
         # artifact that expires in 30 days can't back a public number. Each
@@ -166,11 +188,23 @@ jobs:
             [corpus]=corpus-health [scf]=scf-crosscheck [golden]=golden-eval
             [e]=engine-e-contract [coverage]=corpus-coverage
           )
+          # Stamp `generatedAt` on the way in. The ledger has to tell "this
+          # detector re-confirmed the finding today" from "nobody has looked
+          # since" — without a timestamp on the artifact those are the same
+          # bytes, and on 2026-07-26 that cost us: every open high-severity
+          # finding traced to an artifact 5 days past its weekly refresh and
+          # ranked top of the backlog, while a live re-probe showed 13 of them
+          # already fixed. Stamped here rather than in each eval because this is
+          # the one chokepoint all 8 pass through.
           copied=0
           for key in "${!MAP[@]}"; do
             src="/tmp/${key}.json"
             if [ -s "$src" ] && python3 -c "import json;json.load(open('$src'))" 2>/dev/null; then
-              cp "$src" "improvements/engine/weekly/${MAP[$key]}-latest.json"
+              dst="improvements/engine/weekly/${MAP[$key]}-latest.json"
+              # Only a JSON OBJECT can carry the stamp; a top-level array is
+              # copied through unchanged and its findings then read as
+              # unconfirmed — the honest default when we can't date the run.
+              STAMP_SRC="$src" STAMP_DST="$dst" STAMP_KEY="${MAP[$key]}" python3 -c 'import json,os,datetime; d=json.load(open(os.environ["STAMP_SRC"])); d.update({"generatedAt":datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),"evalKey":os.environ["STAMP_KEY"]}) if isinstance(d,dict) else None; json.dump(d,open(os.environ["STAMP_DST"],"w"),indent=2)'
               copied=$((copied+1))
             else
               echo "skip ${key}.json (missing or not valid JSON)"
@@ -181,10 +215,15 @@ jobs:
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
           git add improvements/engine/weekly/
-          if git diff --cached --quiet; then
-            echo "evidence unchanged — nothing to commit"
-            exit 0
-          fi
+          # raven-loop.ts writes its own fixed path (the ledger reads it
+          # there too), so it is added alongside rather than routed
+          # through the MAP above.
+          git add improvements/engine/raven-loop-latest.json || true
+          # No `git diff --quiet` short-circuit any more. It used to skip the
+          # commit when findings were byte-identical — suppressing the one
+          # record that proves the detector ran at all, which is exactly the
+          # signal the ledger needs. The stamp makes every run a real diff:
+          # a commit per run is the point, not noise.
           git commit -m "chore(engine): weekly evidence $(date -u +%Y-%m-%d) (${copied}/8 evals) [skip ci]"
           git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
           git push

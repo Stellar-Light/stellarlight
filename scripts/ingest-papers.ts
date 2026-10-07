@@ -10,14 +10,12 @@
  *   npx tsx scripts/ingest-papers.ts             # dry run
  *   npx tsx scripts/ingest-papers.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
 
 // pdf-parse 2.x ships a `PDFParse` class via CJS; pull it through createRequire
+import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
+import { paperDate, toPublishedAt } from "../src/lib/doc-dates";
 import {
 	chunkMarkdown,
 	loadExistingChunks,
@@ -40,6 +38,9 @@ async function extractPdfText(buf: Buffer): Promise<string> {
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 interface Paper {
 	id: string;
@@ -79,7 +80,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: hand-curated Stellar papers (${PAPERS.length})\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "paper")
 		: new Map();
@@ -100,6 +102,11 @@ async function run() {
 				console.log("  ⚠ PDF text too short, skipping");
 				continue;
 			}
+			// S7: the paper states its own date (the SCP whitepaper's "Draft of
+			// February 25, 2016" page footer) — stamped on every chunk; existing
+			// rows heal via upsertChunks' metadata-drift path, no re-embed.
+			const docDate = paperDate(text);
+			console.log(`  date: ${docDate ?? "none stated"}`);
 			// Synthesize a markdown wrapper so chunkMarkdown can split sensibly.
 			// Treat double-newlines in PDF text as paragraph breaks.
 			const md = `# ${paper.title}\n\n${text}`;
@@ -109,6 +116,7 @@ async function run() {
 				title: paper.title,
 				url: paper.url,
 				tags: paper.tags,
+				publishedAt: docDate ? toPublishedAt(docDate) : undefined,
 			});
 			allChunks.push(...chunks);
 		} catch (err) {
@@ -136,7 +144,7 @@ async function run() {
 	);
 	console.log(`  to embed: ${stats.toEmbed} | paper errors: ${paperErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -146,6 +154,7 @@ async function run() {
 		source: "paper",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

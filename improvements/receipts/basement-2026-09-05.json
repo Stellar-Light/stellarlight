@@ -1,0 +1,28 @@
+{
+ "slug": "basement",
+ "url": "https://basement.dev/",
+ "finalUrl": "https://basement.dev/",
+ "fetchedAt": "2026-09-05T17:02:05.098Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 17:02:04 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Framer/feb0bfd"
+ },
+ "bodyTextSha256": "3133b4bc1082428fe9bd0dfea4c0695645f441d773a48d3a3bfa880d35ffc07e",
+ "bodyTextChars": 83,
+ "markers": [
+  {
+   "marker": "Site Not Found",
+   "found": true,
+   "excerpt": "Site Not Found | Framer Site Not Found There is no site configured at this address."
+  },
+  {
+   "marker": "no site configured",
+   "found": true,
+   "excerpt": "Site Not Found | Framer Site Not Found There is no site configured at this address."
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

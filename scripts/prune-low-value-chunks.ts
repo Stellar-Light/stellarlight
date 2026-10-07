@@ -17,12 +17,10 @@
  * with the row, no re-embed cost.
  */
 
+import "./load-env";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
 import { isLowValueChunk } from "../src/lib/research-ingest";
-
-loadEnv({ path: ".env.local" });
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;

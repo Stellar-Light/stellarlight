@@ -16,19 +16,36 @@
  *
  * Env required: PAYLOAD_SECRET, MONGODB_URI/DATABASE_URI, VOYAGE_API_KEY.
  */
-import { config as loadEnv } from "dotenv";
 
-// .env.local first (Next.js convention), then .env as fallback
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { createHash } from "node:crypto";
 import { getPayload } from "payload";
+import { CAP_REGISTRY } from "../src/data/cap-registry";
+import { parseCapPreamble } from "../src/lib/cap-preamble";
+import { preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import { embedBatch } from "../src/lib/embed";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
+
+// #778: the committed cap-registry (generated via shallow clone, immune to
+// API rate limits) is the status/protocolVersion source of truth. Live-fetch
+// preamble parsing stays as fallback for CAPs the registry doesn't know yet.
+const REGISTRY_BY_CAP = new Map(CAP_REGISTRY.map((r) => [r.cap, r]));
+// #785: legacy docs from older ingests carry non-standard parentDocIds the
+// cap-N pattern can't parse — fall back to an EXACT normalized-title match
+// against the registry (never fuzzy; ambiguity never stamps).
+const REGISTRY_BY_TITLE = new Map(
+	CAP_REGISTRY.map((r) => [r.title.trim().toLowerCase(), r]),
+);
+const capNumOf = (parentDocId: string): number | null => {
+	const m = parentDocId.match(/^cap-0*(\d+)$/);
+	return m ? Number(m[1]) : null;
+};
 
 const GITHUB_API = "https://api.github.com/repos/stellar/stellar-protocol";
 const RAW_BASE =
@@ -48,6 +65,10 @@ interface SepChunk {
 	content: string; // chunk markdown
 	contentHash: string;
 	tags: string[]; // ["cap", "sep-24", ...]
+	capStatus: string | null;
+	capProtocolVersion: number | null;
+	/** Doc-level date from the CAP preamble (Created:; CAPs carry no Updated:). */
+	publishedAt: string | null;
 }
 
 const MAX_CHARS_PER_CHUNK = 6000; // ~1500 tokens at 4 chars/tok
@@ -213,13 +234,26 @@ async function run() {
 	console.log(`  ${files.length} SEP files found`);
 	stats.sepsFetched = files.length;
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 
 	// Existing chunks by parentDocId → Map<chunkIndex, {id, contentHash, title}>
 	const existingBySep = new Map<
 		string,
-		Map<number, { id: string; contentHash: string; title: string | null }>
+		Map<
+			number,
+			{
+				id: string;
+				contentHash: string;
+				title: string | null;
+				capStatus: string | null;
+				capProtocolVersion: number | null;
+				publishedAt: string | null;
+			}
+		>
 	>();
+	// Hoisted: the --replan plan line below counts the deletes still pending.
+	let shadowDupes = 0;
 	if (payload) {
 		console.log("Loading existing chunks for dedup…");
 		const existing = await payload.find({
@@ -228,24 +262,145 @@ async function run() {
 			limit: 10_000,
 			depth: 0,
 		});
+		// #785 (final layer): legacy duplicate rows share (parentDocId,
+		// chunkIndex) with a maintained row — the map's last-write-wins used to
+		// SHADOW one of them (invisible to the backfill) while the serving-side
+		// per-doc collapse could still SERVE it. On collision keep the
+		// maintained row (non-null capStatus, tiebreak newest id) and DELETE
+		// the shadowed duplicate (execute mode; dry run reports).
 		for (const d of existing.docs as unknown as Array<{
 			id: string;
 			parentDocId: string;
 			chunkIndex: number;
 			contentHash: string;
 			title?: string | null;
+			capStatus?: string | null;
+			capProtocolVersion?: number | null;
+			publishedAt?: string | null;
 		}>) {
 			if (!existingBySep.has(d.parentDocId))
 				existingBySep.set(d.parentDocId, new Map());
-			existingBySep.get(d.parentDocId)!.set(d.chunkIndex, {
+			const slot = existingBySep.get(d.parentDocId)!;
+			const cur = {
 				id: d.id,
 				contentHash: d.contentHash,
 				title: d.title ?? null,
-			});
+				capStatus: d.capStatus ?? null,
+				capProtocolVersion: d.capProtocolVersion ?? null,
+				publishedAt: d.publishedAt ?? null,
+			};
+			const prev = slot.get(d.chunkIndex);
+			if (!prev) {
+				slot.set(d.chunkIndex, cur);
+				continue;
+			}
+			const keep =
+				(prev.capStatus !== null) !== (cur.capStatus !== null)
+					? prev.capStatus !== null
+						? prev
+						: cur
+					: prev.id > cur.id
+						? prev
+						: cur;
+			const drop = keep === prev ? cur : prev;
+			slot.set(d.chunkIndex, keep);
+			shadowDupes++;
+			console.log(
+				`  shadow dupe ${d.parentDocId}#${d.chunkIndex}: ${execute ? "deleting" : "would delete"} ${drop.id} (keeping ${keep.id})`,
+			);
+			if (execute && payload) {
+				try {
+					await payload.delete({ collection: "research-docs", id: drop.id });
+				} catch (err) {
+					console.error(`  ✗ shadow delete: ${(err as Error).message}`);
+					stats.errors++;
+				}
+			}
 		}
+		if (shadowDupes)
+			console.log(`  ${shadowDupes} shadowed duplicate chunk row(s) resolved`);
 		const total = [...existingBySep.values()].reduce((s, m) => s + m.size, 0);
 		console.log(`  ${total} existing SEP chunks already in collection`);
+		// #785 (diagnosis only — no writes): the vector serving path aggregates
+		// the Mongo collection directly, but payload.find can silently skip rows
+		// it can't hydrate (legacy pre-Payload seeds). Such ghosts serve null
+		// facts forever and no Payload-side pass can reach them. This block only
+		// REPORTS the divergence — ids logged for a human-reviewed cleanup.
+		// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+		const rawCol = (payload as any)?.db?.connection?.db?.collection(
+			"research-docs",
+		);
+		if (rawCol) {
+			const rawDocs = await rawCol
+				.find({ source: "cap" })
+				.project({
+					_id: 1,
+					parentDocId: 1,
+					chunkIndex: 1,
+					title: 1,
+					capStatus: 1,
+				})
+				.toArray();
+			const payloadIds = new Set(
+				(existing.docs as Array<{ id: string }>).map((d) => String(d.id)),
+			);
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			const ghosts = rawDocs.filter((r: any) => !payloadIds.has(String(r._id)));
+			console.log(
+				`  raw mongo source=cap: ${rawDocs.length} vs payload.find: ${existing.docs.length} → ${ghosts.length} payload-invisible ghost(s)`,
+			);
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			for (const g of ghosts as any[])
+				console.log(
+					`  ghost ${String(g._id)} pid=${g.parentDocId ?? "?"} idx=${g.chunkIndex ?? "?"} capStatus=${g.capStatus ?? "null"} title=${String(g.title ?? "").slice(0, 50)}`,
+				);
+			// #785 targeted dump: chunk …549 of cap-0046 serves null while its
+			// sibling …53f serves Final, yet every stamping pass reports nothing
+			// to stamp. Print the STORED truth for every cap-0046 row so the
+			// contradiction resolves on evidence.
+			// biome-ignore lint/suspicious/noExplicitAny: raw rows
+			for (const r of rawDocs.filter((d: any) =>
+				String(d.parentDocId ?? "").includes("0046"),
+			) as any[])
+				console.log(
+					`  cap-0046 row ${String(r._id)} pid=${r.parentDocId} idx=${r.chunkIndex} capStatus=${JSON.stringify(r.capStatus ?? null)} title=${String(r.title ?? "").slice(0, 40)}`,
+				);
+		}
 	}
+
+	// #778 backfill: existing rows with NULL capStatus never got stamped —
+	// stamping used to require a successful per-file GitHub fetch, and starved
+	// fetches skipped the file silently. Registry-only pass: pure DB + the
+	// committed registry, no GitHub calls, idempotent.
+	let registryStamped = 0;
+	for (const [pid, chunks] of existingBySep) {
+		const byPid = REGISTRY_BY_CAP.get(capNumOf(pid) ?? -1);
+		for (const c of chunks.values()) {
+			if (c.capStatus !== null) continue;
+			const reg =
+				byPid ?? REGISTRY_BY_TITLE.get((c.title ?? "").trim().toLowerCase());
+			if (!reg || reg.status === null) continue;
+			registryStamped++;
+			if (execute && payload) {
+				try {
+					await payload.update({
+						collection: "research-docs",
+						id: c.id,
+						data: {
+							capStatus: reg.status,
+							capProtocolVersion: reg.protocolVersion ?? undefined,
+						},
+					});
+				} catch (err) {
+					console.error(`  ✗ registry stamp ${pid}: ${(err as Error).message}`);
+					stats.errors++;
+				}
+			}
+		}
+	}
+	console.log(
+		`  registry backfill: ${registryStamped} null-capStatus chunk(s) ${execute ? "stamped" : "would be stamped (dry)"}`,
+	);
 
 	const toEmbed: SepChunk[] = [];
 
@@ -255,7 +410,17 @@ async function run() {
 		try {
 			const md = await fetchSepMarkdown(file.path);
 			const title = extractTitle(md, parentDocId);
-			const chunks = chunkMarkdown(md, parentDocId, title, url);
+			const preamble = parseCapPreamble(md);
+			// S7: the CAP preamble states Created: (CAPs carry no Updated:) —
+			// one date per doc, stamped on every chunk.
+			const docDate = preambleDate(md);
+			const reg = REGISTRY_BY_CAP.get(capNumOf(parentDocId) ?? -1);
+			const chunks = chunkMarkdown(md, parentDocId, title, url).map((c) => ({
+				...c,
+				capStatus: reg?.status ?? preamble.status,
+				capProtocolVersion: reg?.protocolVersion ?? preamble.protocolVersion,
+				publishedAt: docDate,
+			}));
 			stats.chunksTotal += chunks.length;
 
 			const existing = existingBySep.get(parentDocId);
@@ -267,16 +432,32 @@ async function run() {
 					// rows through the embed path. Content-identical + drifted
 					// title → update in place, no re-embed. (This script has its
 					// own upsert loop — the shared upsertChunks fix doesn't apply.)
-					if (payload && (prev.title ?? "") !== chunk.title) {
+					const dateDrift =
+						chunk.publishedAt !== null &&
+						(prev.publishedAt ?? "").slice(0, 10) !== chunk.publishedAt;
+					const factsDrifted =
+						(prev.capStatus ?? null) !== (chunk.capStatus ?? null) ||
+						(prev.capProtocolVersion ?? null) !==
+							(chunk.capProtocolVersion ?? null) ||
+						dateDrift;
+					if (payload && ((prev.title ?? "") !== chunk.title || factsDrifted)) {
 						stats.chunksUpdated++;
+						if (!execute) continue; // --replan counts it, never writes it
 						try {
 							await payload.update({
 								collection: "research-docs",
 								id: prev.id,
-								data: { title: chunk.title },
+								data: {
+									title: chunk.title,
+									capStatus: chunk.capStatus ?? undefined,
+									capProtocolVersion: chunk.capProtocolVersion ?? undefined,
+									...(dateDrift
+										? { publishedAt: toPublishedAt(chunk.publishedAt!) }
+										: {}),
+								},
 							});
 							console.log(
-								`  title fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'`,
+								`  metadata fixed ${chunk.parentDocId}#${chunk.chunkIndex}: '${chunk.title}'${dateDrift ? ` publishedAt→${chunk.publishedAt}` : ""}`,
 							);
 						} catch (err) {
 							console.error(
@@ -307,6 +488,10 @@ async function run() {
 	console.log(`  to embed: ${toEmbed.length}`);
 
 	if (!execute) {
+		if (replan)
+			console.log(
+				`replan: writes=${stats.chunksNew + stats.chunksUpdated + registryStamped + shadowDupes} new=${stats.chunksNew} updated=${stats.chunksUpdated} (registry stamps ${registryStamped}, shadow-dupe deletes ${shadowDupes}) unchanged=${stats.chunksUnchanged} errors=${stats.errors}`,
+			);
 		console.log("");
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		return;
@@ -340,6 +525,9 @@ async function run() {
 			?.get(chunk.chunkIndex);
 		const data = {
 			source: "cap" as const,
+			...(chunk.publishedAt
+				? { publishedAt: toPublishedAt(chunk.publishedAt) }
+				: {}),
 			title: chunk.title,
 			section: chunk.section ?? undefined,
 			url: chunk.url,
@@ -348,6 +536,8 @@ async function run() {
 			content: chunk.content,
 			contentHash: chunk.contentHash,
 			tags: chunk.tags.map((tag) => ({ tag })),
+			capStatus: chunk.capStatus ?? undefined,
+			capProtocolVersion: chunk.capProtocolVersion ?? undefined,
 			embedding,
 		};
 		try {

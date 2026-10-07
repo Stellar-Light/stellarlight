@@ -1,0 +1,295 @@
+{
+ "generatedAt": "2026-10-07T08:52:51.627Z",
+ "asOf": "2026-10-07T08:52:51.627Z",
+ "source": "scripts/check-links.ts",
+ "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
+ "checked": 2653,
+ "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
+ "broken": [
+  {
+   "url": "https://AbuUsama.eth",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/6abca56d9b8cac7eec1faa21.website_url"
+   ],
+   "citedByStatus": [
+    "6abca56d9b8cac7eec1faa21: n/a"
+   ]
+  },
+  {
+   "url": "https://adaptive-goal-management.herokuapp.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/command-robotics.links.website"
+   ],
+   "citedByStatus": [
+    "command-robotics: Live"
+   ]
+  },
+  {
+   "url": "https://blaqshyd.me",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/69d19a831a0f3c3e3c27072e.website_url"
+   ],
+   "citedByStatus": [
+    "69d19a831a0f3c3e3c27072e: n/a"
+   ]
+  },
+  {
+   "url": "https://github.com/elsa-care",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/borderless.links.github"
+   ],
+   "citedByStatus": [
+    "borderless: n/a"
+   ]
+  },
+  {
+   "url": "https://github.com/gustavo-f0ntz",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "builders/6a2a4efab6c85e93c7be0090.github_username"
+   ],
+   "citedByStatus": [
+    "6a2a4efab6c85e93c7be0090: n/a"
+   ]
+  },
+  {
+   "url": "https://github.com/jet-lab/polaris",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/jet-protocol.links.github"
+   ],
+   "citedByStatus": [
+    "jet-protocol: n/a"
+   ]
+  },
+  {
+   "url": "https://github.com/mrkanchwala/safu-protocol",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/safu.links.github",
+    "projects/safu-protocol.links.github"
+   ],
+   "citedByStatus": [
+    "safu: Live",
+    "safu-protocol: Development"
+   ]
+  },
+  {
+   "url": "https://github.com/WalletGuruLLC/paystreme",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/wallet-guru.links.github"
+   ],
+   "citedByStatus": [
+    "wallet-guru: n/a"
+   ]
+  },
+  {
+   "url": "https://komet.runtimeverification.com",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/komet.links.website"
+   ],
+   "citedByStatus": [
+    "komet: Live"
+   ]
+  },
+  {
+   "url": "https://letsping.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "partner-accounts/anchor-ping.websiteUrl"
+   ],
+   "citedByStatus": [
+    "anchor-ping: n/a"
+   ]
+  },
+  {
+   "url": "https://moonpay.com/stellar",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/moonpay.links.website"
+   ],
+   "citedByStatus": [
+    "moonpay: Live"
+   ]
+  },
+  {
+   "url": "https://nebula.eiger.co",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "entities/eiger.links.website"
+   ],
+   "citedByStatus": [
+    "eiger: n/a"
+   ]
+  },
+  {
+   "url": "https://padparadscho.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "builders/6a9a5e6d32df846e8503fdaf.website_url"
+   ],
+   "citedByStatus": [
+    "6a9a5e6d32df846e8503fdaf: n/a"
+   ]
+  },
+  {
+   "url": "https://pakana.net",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/pakananet.links.website",
+    "projects/pakana.links.website"
+   ],
+   "citedByStatus": [
+    "pakananet: Live",
+    "pakana: Draft"
+   ]
+  },
+  {
+   "url": "https://pathpulse.ai",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/pathpulse-ai.links.website"
+   ],
+   "citedByStatus": [
+    "pathpulse-ai: Live"
+   ]
+  },
+  {
+   "url": "https://spacemeet.co",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/6ac099ed9349b8542e29cfdd.website_url"
+   ],
+   "citedByStatus": [
+    "6ac099ed9349b8542e29cfdd: n/a"
+   ]
+  },
+  {
+   "url": "https://stabble.org",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/stabble.links.website"
+   ],
+   "citedByStatus": [
+    "stabble: Live"
+   ]
+  },
+  {
+   "url": "https://techfiesta.dev",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "entities/techfiesta.links.website"
+   ],
+   "citedByStatus": [
+    "techfiesta: n/a"
+   ]
+  },
+  {
+   "url": "https://www.grupoamonet.com.br",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "builders/69d19a821a0f3c3e3c2706e2.website_url"
+   ],
+   "citedByStatus": [
+    "69d19a821a0f3c3e3c2706e2: n/a"
+   ]
+  }
+ ],
+ "brokenOnRetired": [
+  {
+   "url": "https://chainsatlas.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/chainatlas.links.website"
+   ],
+   "citedByStatus": [
+    "chainatlas: Inactive"
+   ]
+  },
+  {
+   "url": "https://docking.zone",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/docking-zone.links.website"
+   ],
+   "citedByStatus": [
+    "docking-zone: Inactive"
+   ]
+  },
+  {
+   "url": "https://github.com/stackman27/soroban-opt-oracle",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/soroban-optimsitic-oracle.links.website",
+    "projects/soroban-optimsitic-oracle.links.github"
+   ],
+   "citedByStatus": [
+    "soroban-optimsitic-oracle: Draft",
+    "soroban-optimsitic-oracle: Draft"
+   ]
+  },
+  {
+   "url": "https://octoplace.io",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/octo.links.website"
+   ],
+   "citedByStatus": [
+    "octo: Draft"
+   ]
+  },
+  {
+   "url": "https://sorobanpulse.app",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/sorobanpulse.links.website",
+    "projects/soroban-pulse.links.website"
+   ],
+   "citedByStatus": [
+    "sorobanpulse: Draft",
+    "soroban-pulse: Inactive"
+   ]
+  },
+  {
+   "url": "https://stellartpad-production.up.railway.app",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/stellartpad.links.website"
+   ],
+   "citedByStatus": [
+    "stellartpad: Draft"
+   ]
+  }
+ ]
+}

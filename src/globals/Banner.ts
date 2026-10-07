@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { adminOnly } from "../collections/access";
 
 export const Banner: GlobalConfig = {
 	slug: "banner",
@@ -7,7 +8,7 @@ export const Banner: GlobalConfig = {
 	},
 	access: {
 		read: () => true,
-		update: ({ req }) => !!req.user,
+		update: adminOnly,
 	},
 	fields: [
 		{

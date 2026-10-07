@@ -1,0 +1,75 @@
+name: tansu anchor (testnet)
+# i³ Awards — anchor a published result on TESTNET through Tansu (tansu.dev).
+#
+# Everything about the vote is on testnet (Pilots use testnet-assigned
+# wallets); the award-ballots mirror is the durable record across resets.
+# This gives the PUBLISHED RESULT an on-chain record where the vote lives:
+# register `stellarlight` on Tansu (5 test XLM collateral, the lane friendbots
+# its own key), then commit the git SHA of the results file. Nobody opens a
+# dApp. `status` needs no key; `register`/`commit` simulate with the public
+# key (repo variable TANSU_MAINTAINER_PUBLIC) and execute with the secret.
+# `manifest` is the PRE-VOTE anchor — run it when a round OPENS. It commits a
+# digest of the electorate and the ballot (nominees, whitelist, categories,
+# picks, dates) computed from the round itself, so the round is fixed in public
+# before anyone votes; /api/awards/anchor recomputes it later and says whether
+# it still matches. `commit` is the post-vote anchor of the results file.
+# Tansu stores ONE hash per project, so the later anchor overwrites the earlier
+# on chain and each one's transaction is what stays provable — both recorded.
+#
+# After a testnet reset, run `register` again. Dry-run by default; every
+# write is read back.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "What to do"
+        type: choice
+        options: [status, register, commit, manifest]
+        required: true
+        default: status
+      round:
+        description: "Round slug (commit / manifest)"
+        required: false
+        default: ""
+      sha:
+        description: "Git SHA to anchor (commit only). Empty = this run's main HEAD."
+        required: false
+        default: ""
+      execute:
+        description: "Actually sign + submit on testnet. Unchecked = simulate only."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: tansu-anchor
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TANSU_MAINTAINER_SECRET: ${{ secrets.TANSU_MAINTAINER_SECRET }}
+      TANSU_MAINTAINER_PUBLIC: ${{ vars.TANSU_MAINTAINER_PUBLIC }}
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds the maintainer key.
+      - name: Tansu (${{ inputs.action }}; dry-run unless execute=true)
+        env:
+          IN_ACTION: ${{ inputs.action }}
+          IN_ROUND: ${{ inputs.round }}
+          IN_SHA: ${{ inputs.sha || github.sha }}
+          IN_EXECUTE: ${{ inputs.execute }}
+        run: |
+          args=("--$IN_ACTION" --sha="$IN_SHA")
+          if [ -n "$IN_ROUND" ]; then args+=(--round="$IN_ROUND"); fi
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/tansu-anchor.ts "${args[@]}"

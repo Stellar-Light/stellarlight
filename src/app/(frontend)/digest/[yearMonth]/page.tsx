@@ -38,7 +38,7 @@ export async function generateMetadata({
 	);
 
 	return {
-		title: `${monthName} ${year} Ecosystem Digest | Stellar Light`,
+		title: `${monthName} ${year} Stellar Ecosystem Digest`,
 		description: `Monthly digest of Stellar ecosystem activity for ${monthName} ${year}`,
 	};
 }

@@ -2,6 +2,10 @@
 # live data itself (every record's fields imply its queries) and scores
 # recall per bucket. Red = a bucket fell below its floor; the rolling-issue
 # step files/updates one tracked issue and closes it again on green.
+#
+# A red at this step is the detector reporting a finding, not the lane
+# breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 name: generated-recall
 on:
   schedule:
@@ -11,7 +15,7 @@ concurrency:
   group: generated-recall
   cancel-in-progress: false
 permissions:
-  contents: read
+  contents: write
   issues: write
 jobs:
   recall:
@@ -19,7 +23,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      # No version, and package.json has no packageManager field for it to
+      # read — the action exits before installing anything. Every other lane
+      # pins the major here.
       - uses: pnpm/action-setup@v4
+        with: { version: 10 }
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -28,7 +36,44 @@ jobs:
       - name: Run Engine A
         id: engine
         continue-on-error: true
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/eval/generated-recall.ts | tee engine-a.log $GITHUB_STEP_SUMMARY
+
+      # The engine wrote its artifact and nothing carried the number across, so
+      # /quality reported the north star "measured 10 days ago" while this lane
+      # had run the day before. Appending here keeps the headline tracking the
+      # engine instead of a hand-edited file. Idempotent: it appends only when
+      # the artifact is newer than the last point.
+      - name: Append to the north-star series
+        run: pnpm exec tsx scripts/quality/append-north-star.ts --execute
+
+      # Without this the append lives and dies inside the runner, which is the
+      # same "nothing consumed it" defect one layer down.
+      - name: Commit the series
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/north-star-series.json || true
+          git diff --cached --quiet || git commit -m "data(quality): north-star point from Engine A [skip ci]"
+          git diff --quiet HEAD origin/main -- improvements/audits/north-star-series.json 2>/dev/null || {
+            # Push races and dirty trees both hit this step (2026-09-15): the
+          # gone-repos lane's dry run lost its artifact to `cannot lock ref
+          # 'refs/heads/main'` while another lane pushed, and its execute run to
+          # `cannot pull with rebase: You have unstaged changes` — so the probe's
+          # own record never persisted and every later run would have re-reported
+          # the same 147 findings as new. This is the retry shape lane-autonomy
+          # and packet-stamps already use: push first, and on rejection rebase
+          # keeping THIS run's measurement (`-X theirs` — in a rebase the sides
+          # are swapped, so `theirs` is the commit being replayed). --autostash
+          # covers a working tree the script dirtied after `git add`.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push
+          }
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:

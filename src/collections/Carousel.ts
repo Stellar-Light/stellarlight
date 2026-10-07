@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 export const Carousel: CollectionConfig = {
 	slug: "carousel",
@@ -8,9 +9,9 @@ export const Carousel: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
-		create: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

@@ -1,0 +1,23 @@
+{
+ "slug": "stronghold",
+ "fetchedAt": "2026-08-28",
+ "context": "sls-079 deployment queue pass",
+ "markers": [
+  {
+   "found": true,
+   "excerpt": "code=\"SHX\" issuer=\"GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH\"",
+   "marker": "operator toml"
+  },
+  {
+   "found": true,
+   "excerpt": "amount 35512014036.29, num_accounts 91389",
+   "marker": "horizon asset (declared issuer)"
+  }
+ ],
+ "url": "https://stronghold.co/.well-known/stellar.toml",
+ "decidedDeployment": {
+  "network": "mainnet",
+  "basis": "human-verified"
+ },
+ "verdict": "mainnet"
+}

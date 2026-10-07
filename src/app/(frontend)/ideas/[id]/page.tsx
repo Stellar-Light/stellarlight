@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { IdeaShareButton } from "@/components/idea-share-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CATEGORY_LABELS, IDEAS } from "@/data/ideas";
+import { CATEGORY_LABELS, IDEAS, rfpStatus } from "@/data/ideas";
 
 type Params = Promise<{ id: string }>;
 
@@ -39,6 +39,10 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 		notFound();
 	}
 
+	// sls-060: the page must agree with the API — closed briefs are past
+	// rounds and no longer fundable, so the funding CTA is status-aware.
+	const status = rfpStatus(idea.quarter);
+
 	return (
 		<div className="min-h-screen relative">
 			<main className="max-w-6xl mx-auto px-4 sm:px-6 py-16 pt-28">
@@ -64,6 +68,21 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 							>
 								{CATEGORY_LABELS[idea.category] || idea.category}
 							</Badge>
+							{status === "closed" ? (
+								<Badge
+									variant="secondary"
+									className="px-3 py-1 text-xs font-medium rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/30"
+								>
+									Closed — past round
+								</Badge>
+							) : (
+								<Badge
+									variant="secondary"
+									className="px-3 py-1 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/30"
+								>
+									Open
+								</Badge>
+							)}
 						</div>
 						<h1 className="text-3xl md:text-4xl font-bold text-foreground">
 							{idea.title}
@@ -101,26 +120,55 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 
 						{/* Sidebar */}
 						<div className="space-y-6">
-							<Card className="border border-border/50 bg-card">
-								<CardContent className="p-6">
-									<h3 className="text-lg font-semibold mb-3 text-foreground">
-										Apply for Funding
-									</h3>
-									<p className="text-sm text-muted-foreground mb-4">
-										Ready to build this? Apply for an SCF grant to fund your
-										project.
-									</p>
-									<a
-										href="https://communityfund.stellar.org/"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity"
-									>
-										Apply for Funding
-										<ExternalLink className="w-3.5 h-3.5" />
-									</a>
-								</CardContent>
-							</Card>
+							{status === "closed" ? (
+								<Card className="border border-amber-500/30 bg-card">
+									<CardContent className="p-6">
+										<h3 className="text-lg font-semibold mb-3 text-foreground">
+											This brief is closed
+										</h3>
+										<p className="text-sm text-muted-foreground mb-4">
+											This RFP belongs to a past round and is no longer
+											fundable. Browse the currently open briefs instead.
+										</p>
+										<Link
+											href="/ideas"
+											className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity"
+										>
+											View open RFPs
+										</Link>
+										<a
+											href="https://communityfund.stellar.org/"
+											target="_blank"
+											rel="noopener noreferrer"
+											className="mt-2 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+										>
+											Visit the Community Fund
+											<ExternalLink className="w-3.5 h-3.5" />
+										</a>
+									</CardContent>
+								</Card>
+							) : (
+								<Card className="border border-border/50 bg-card">
+									<CardContent className="p-6">
+										<h3 className="text-lg font-semibold mb-3 text-foreground">
+											Apply for Funding
+										</h3>
+										<p className="text-sm text-muted-foreground mb-4">
+											Ready to build this? Apply for an SCF grant to fund your
+											project.
+										</p>
+										<a
+											href="https://communityfund.stellar.org/"
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity"
+										>
+											Apply for Funding
+											<ExternalLink className="w-3.5 h-3.5" />
+										</a>
+									</CardContent>
+								</Card>
+							)}
 
 							<Card className="border border-border/50 bg-card">
 								<CardContent className="p-6">

@@ -1,0 +1,24 @@
+{
+ "slug": "ramm",
+ "url": "https://ramm.ai/",
+ "finalUrl": "https://ramm.ai/",
+ "fetchedAt": "2026-09-06T19:22:25.472Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 19:22:25 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "c71324318ee2cb5720e34051381e85f86f8bb0e50e8eaea52b89f31b53563045",
+ "bodyTextChars": 53,
+ "markers": [
+  {
+   "marker": "Popupz",
+   "found": true,
+   "where": "text",
+   "excerpt": "RAMM.AI — Building Popupz.ai AI Marketspace Edit with"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

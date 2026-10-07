@@ -17,34 +17,60 @@
  * Rate limited: 60 req/min per IP (these queries cost Voyage credits).
  */
 
-import { type NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
-import { EMBEDDING_MODEL, embed } from "@/lib/embed";
-import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { degradedWarning, withPartial } from "@/lib/degraded-read";
+import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
+import {
+	clampLimit,
+	parseFields,
+	pickFields,
+	unknownParamWarning,
+} from "@/lib/http-params";
+import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints } from "@/lib/lane-hints";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import {
+	type RateLimitResult,
+	rateLimit,
+	rateLimitHeaders,
+} from "@/lib/rate-limit";
 import {
 	buildResearchVectorPipeline,
 	cosineVectorScore,
+	vectorIndexFilterPaths,
 } from "@/lib/research-pipeline";
 import {
 	anchorDocUrls,
+	findingIdentifierTargets,
 	hasFullLexicalCoverage,
+	identifierIsPresent,
 	identifierTargets,
+	matchesVersionTarget,
 	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
 	RECENCY_SUPPLEMENT_WINDOW_DAYS,
 	rankResearchChunks,
 	recencyContentTokens,
 	recencyIntent,
+	researchOrder,
 	selectRecencySupplement,
+	versionTargets,
 } from "@/lib/research-rank";
+import { RESEARCH_SOURCES, requestedSources } from "@/lib/research-sources";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+/** A source-scoped request runs the lexical refill scan only for queries this short. */
+const LEXICAL_REFILL_MAX_TOKENS_SCOPED = 3;
+// Long enough for a slow vector pass plus the keyword fallback, never a hang.
+export const maxDuration = 30;
 export const revalidate = 60;
 
 const RATE_LIMIT_MAX = 60;
@@ -63,37 +89,79 @@ interface ResearchRow {
 	 * the source (null for sources that don't stamp it). Distinct from
 	 * publishedAt (the page's own stated date). */
 	observedAt: string | null;
+	docKind: string | null;
+	docVersionStatus: string | null;
 	score?: number;
 	// Audit-specific (only present when source === "audit")
 	auditor?: string | null;
 	protocol?: string | null;
 	severity?: string | null;
+	// CAP crosswalk (source === "cap"; #785 — every serving path must carry these)
+	capStatus?: string | null;
+	capProtocolVersion?: number | null;
 }
 
-export async function GET(req: NextRequest) {
-	// Rate-limit first so abusers don't even reach the embedding call.
-	const limit = rateLimit(req, {
-		endpoint: "/api/research",
-		limit: RATE_LIMIT_MAX,
-		windowMs: RATE_LIMIT_WINDOW_MS,
-	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
+// A scoped query that returns nothing must say whether the SOURCE is empty
+// (no documents at all) rather than a miss: a partner routed every funding
+// question to source=scf-proposal and read "vector search unavailable" for a
+// source that holds no documents. One count per source per instance per ten
+// minutes, shared by concurrent requests.
+const sourceCountMemos = new Map<string, () => Promise<number>>();
+function sourceDocCount(source: string): Promise<number> {
+	let get = sourceCountMemos.get(source);
+	if (!get) {
+		get = instanceMemo(600_000, async () => {
+			const payload = await getPayloadSafe();
+			if (!payload) throw new Error("no database handle");
+			const res = await payload.count({
+				collection: "research-docs",
+				where: { source: { equals: source } },
+			});
+			return res.totalDocs;
+		});
+		sourceCountMemos.set(source, get);
 	}
+	return get();
+}
+
+async function research(
+	req: NextRequest,
+	internal = false,
+): Promise<NextResponse> {
+	const startedAt = Date.now();
+	// internal = one source of a multi-source request: the outer call is rate
+	// limited and logged once, and the advisory's wide search is skipped.
+	const log: typeof logApiHit = internal ? () => {} : logApiHit;
+	// Phase timings for the Server-Timing header: where a request spends its
+	// time, so a slow answer can be read as cold start, embedding, vector
+	// search or ranking without a log dive. Durations in ms.
+	const phases: Array<[string, number]> = [];
+	let phaseStart = startedAt;
+	const mark = (name: string) => {
+		const now = Date.now();
+		phases.push([name, now - phaseStart]);
+		phaseStart = now;
+	};
+	// Rate-limit first so abusers don't even reach the embedding call.
+	const limit: RateLimitResult = internal
+		? {
+				allowed: true,
+				limit: RATE_LIMIT_MAX,
+				remaining: RATE_LIMIT_MAX,
+				resetAt: Date.now() + RATE_LIMIT_WINDOW_MS,
+			}
+		: rateLimit(req, {
+				endpoint: "/api/research",
+				limit: RATE_LIMIT_MAX,
+				windowMs: RATE_LIMIT_WINDOW_MS,
+			});
+	if (!limit.allowed) return tooMany(req, startedAt, limit);
 
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = researchParamWarning(sp);
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -111,28 +179,17 @@ export async function GET(req: NextRequest) {
 	const auditorFilter = sp.get("auditor");
 	const protocolFilter = sp.get("protocol");
 	const severityFilter = sp.get("severity")?.toLowerCase() ?? null;
-	const limitParam = clampLimit(sp.get("limit"), 8, 25);
+	const limitParam = clampLimit(sp.get("limit") ?? sp.get("perSource"), 8, 25);
+	const limitRaw = Math.floor(Number(sp.get("limit")));
+	const limitNote =
+		Number.isFinite(limitRaw) && limitRaw > 25
+			? `limit ${limitRaw} was clamped to 25, the maximum rows per call; scope by source or page with offset for more`
+			: null;
 	const fieldsWanted = parseFields(sp.get("fields"));
 
 	// Single source of truth for valid `source` values. Kept in sync with
 	// the ResearchSource type in src/lib/research-ingest.ts.
-	const VALID_SOURCES = [
-		"sdf-blog",
-		"scf-handbook",
-		"sep",
-		"cap",
-		"dev-docs",
-		"paper",
-		"scf-proposal",
-		"lumenloop",
-		"lumenloop-research",
-		"audit",
-		"incident",
-		"security-program",
-		"sdf-org",
-		"ec-developer-report",
-		"release",
-	] as const;
+	const VALID_SOURCES = RESEARCH_SOURCES;
 
 	if (!q) {
 		return NextResponse.json(
@@ -201,233 +258,336 @@ export async function GET(req: NextRequest) {
 	const effectiveSource = auditScoped ? "audit" : sourceFilter;
 
 	const payload = await getPayloadSafe();
+	mark("init");
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "payload unavailable" },
-			{ status: 503, headers: rateLimitHeaders(limit) },
-		);
+		return apiError({
+			status: 503,
+			error: "research store unavailable",
+			advisory:
+				"The database handle could not be opened. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	let mode: "vector" | "keyword" = "vector";
+	// Why the response is keyword when it is: the label used to say "vector
+	// search unavailable" for every fallback, including a source that simply
+	// had no rows in the pool while the embedding worked fine.
+	let vectorNote: string | null = null;
 	let chunks: ResearchRow[] = [];
 	// Kept in scope past the try so the recency pool supplement can score
 	// direct-fetched chunks with the same cosine scale as the vector pool.
 	let queryEmbedding: number[] | null = null;
+	// Both retrieval stages failing is an outage the caller must retry, not
+	// an empty answer; the deliberate 0-row fall-through is not a failure.
+	let vectorStageFailed = false;
+	let keywordFailed = false;
+	// A declared source with no documents answers as an EMPTY VECTOR page: no
+	// keyword pass (there is nothing to rank), no corpus-wide advisory, no
+	// "vector unavailable" label. A consumer's fallback detector reads the
+	// mode; keyword here said the vector stage failed when the source was
+	// simply empty. sourceDocCount is memoized per source for ten minutes.
+	const sourceDocs = effectiveSource
+		? await sourceDocCount(effectiveSource).catch(() => null)
+		: null;
+	const sourceKnownEmpty = sourceDocs === 0;
+
+	// Shared doc→row mapper: the sourceAdvisory ranks the corpus-wide pool
+	// through the EXACT same shape+regime as the served results.
+	const rowOfDoc = (d: {
+		_id: string;
+		source: string;
+		title: string;
+		section?: string;
+		url: string;
+		content: string;
+		chunkIndex: number;
+		publishedAt?: string;
+		observedAt?: string;
+		docKind?: string;
+		docVersionStatus?: string;
+		auditor?: string;
+		protocol?: string;
+		severity?: string;
+		capStatus?: string;
+		capProtocolVersion?: number;
+		score?: number;
+	}) => ({
+		id: String(d._id),
+		source: d.source,
+		title: d.title,
+		section: d.section ?? null,
+		url: d.url,
+		content: d.content,
+		chunkIndex: d.chunkIndex,
+		publishedAt: d.publishedAt ?? null,
+		observedAt: d.observedAt ?? null,
+		docKind: d.docKind ?? null,
+		docVersionStatus: d.docVersionStatus ?? null,
+		auditor: d.auditor ?? null,
+		protocol: d.protocol ?? null,
+		severity: d.severity ?? null,
+		capStatus: d.capStatus ?? null,
+		capProtocolVersion: d.capProtocolVersion ?? null,
+		score: d.score,
+	});
 
 	// Try vector search first. If Atlas vector search isn't configured
 	// or the corpus is empty, fall back to keyword.
-	try {
-		queryEmbedding = await embed(q);
-
-		// We use the underlying mongoose connection to run the $vectorSearch
-		// aggregation since Payload's `find()` doesn't expose vector ops.
-		// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
-		const db = (payload.db as any)?.connection?.db;
-		const collection = db?.collection("research-docs");
-		if (!collection) throw new Error("research-docs collection unavailable");
-
-		// NOTE: source filter is applied as a post-pipeline $match rather
-		// than $vectorSearch.filter. The latter requires `source` to be
-		// declared as a filter field in the vector index definition, which
-		// our minimal index doesn't have. The builder over-fetches and
-		// post-filters instead so callers can use ?source= without an index
-		// rebuild — and widens the vector stage for filtered queries so the
-		// pool keeps enough DISTINCT in-source documents for the per-doc
-		// collapse (sls-019: a starved cap pool made the refill serve
-		// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
-		const pipeline = buildResearchVectorPipeline({
-			queryEmbedding,
-			limit: limitParam,
-			sourceFilter: effectiveSource,
-		});
-
-		const docs = await collection.aggregate(pipeline).toArray();
-		// If Atlas Vector Search index isn't created yet, $vectorSearch
-		// silently returns []. Force-fall-through to keyword in that case so
-		// the endpoint stays useful before the index is set up.
-		if (docs.length === 0) {
-			throw new Error("vector search returned 0 results — falling back");
-		}
-		chunks = docs.map(
-			(d: {
-				_id: string;
-				source: string;
-				title: string;
-				section?: string;
-				url: string;
-				content: string;
-				chunkIndex: number;
-				publishedAt?: string;
-				observedAt?: string;
-				auditor?: string;
-				protocol?: string;
-				severity?: string;
-				score?: number;
-			}) => ({
-				id: String(d._id),
-				source: d.source,
-				title: d.title,
-				section: d.section ?? null,
-				url: d.url,
-				content: d.content,
-				chunkIndex: d.chunkIndex,
-				publishedAt: d.publishedAt ?? null,
-				observedAt: d.observedAt ?? null,
-				auditor: d.auditor ?? null,
-				protocol: d.protocol ?? null,
-				severity: d.severity ?? null,
-				score: d.score,
-			}),
-		);
-	} catch {
-		// Fall back to keyword search using Payload's standard find.
-		// Ranking is BM25-lite: term frequency × field-position weight,
-		// with length normalization and a phrase-proximity bonus.
-		//
-		// The previous scoring just counted unique tokens appearing AT
-		// LEAST ONCE in title+content — so a chunk mentioning "oracle"
-		// 50 times got the same score as one mentioning it incidentally.
-		// That made vector-fallback retrieval near-random, which is
-		// exactly what production exhibits when VOYAGE_API_KEY is unset.
-		mode = "keyword";
+	if (sourceKnownEmpty) {
+		mark("embed");
+		mark("vector");
+	} else {
 		try {
-			const rawTokens = q
-				.toLowerCase()
-				.split(/\s+/)
-				.filter((t) => t.length > 1);
+			queryEmbedding = await embed(q);
+			mark("embed");
 
-			// Money is written with separators in the source documents
-			// ("$300,000") while a person or agent asking about it usually types
-			// the bare digits ("300000"). Tokens are matched with `contains`, a
-			// substring test, so those two never meet: a query for 300000 misses
-			// the handbook page that states the $300,000 lifetime cap, and the
-			// empty result reads as "there is no such rule" — the omission-as-
-			// negation failure this corpus exists to avoid. Emit both spellings
-			// for any numeric token so either phrasing finds the same passage.
-			// Verified 2026-07-23: `300,000` found the rule, `300000` did not.
-			const tokenSet = new Set<string>();
-			for (const t of rawTokens) {
-				tokenSet.add(t);
-				if (/^\$?[\d,]+$/.test(t)) {
-					const bare = t.replace(/[$,]/g, "");
-					// Years are 4-digit numbers too, and grouping one produces a
-					// nonsense token ("2026" → "2,026"). Money at that width is
-					// real ($5,000), so exclude by value rather than by length.
-					const isYear =
-						bare.length === 4 && Number(bare) >= 1900 && Number(bare) <= 2099;
-					if (bare.length > 3 && !isYear) {
-						tokenSet.add(bare);
-						// 300000 → 300,000
-						tokenSet.add(bare.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-					}
-				}
-			}
-			const tokens = [...tokenSet];
+			// We use the underlying mongoose connection to run the $vectorSearch
+			// aggregation since Payload's `find()` doesn't expose vector ops.
+			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+			const db = (payload.db as any)?.connection?.db;
+			const collection = db?.collection("research-docs");
+			if (!collection) throw new Error("research-docs collection unavailable");
 
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
-			const where: any = {};
-			if (effectiveSource) where.source = { equals: effectiveSource };
-			if (tokens.length) {
-				where.or = tokens.map((t) => ({
-					or: [{ title: { contains: t } }, { content: { contains: t } }],
-				}));
-			}
-
-			// Pull a wider candidate pool (200) so ranking has room to
-			// surface high-relevance chunks past position 50 — Mongo
-			// returns matches in storage order, not relevance order.
-			const result = await payload.find({
-				collection: "research-docs",
-				where,
-				limit: 200,
-				depth: 0,
+			// NOTE: source filter is applied as a post-pipeline $match rather
+			// than $vectorSearch.filter. The latter requires `source` to be
+			// declared as a filter field in the vector index definition, which
+			// our minimal index doesn't have. The builder over-fetches and
+			// post-filters instead so callers can use ?source= without an index
+			// rebuild — and widens the vector stage for filtered queries so the
+			// pool keeps enough DISTINCT in-source documents for the per-doc
+			// collapse (sls-019: a starved cap pool made the refill serve
+			// cap-0035 nine times on one page). See src/lib/research-pipeline.ts.
+			const indexFilter = effectiveSource
+				? (await vectorIndexFilterPaths(collection)).has("source")
+				: false;
+			const pipeline = buildResearchVectorPipeline({
+				queryEmbedding,
+				limit: limitParam,
+				sourceFilter: effectiveSource,
+				indexFilter,
 			});
 
-			const allDocs = result.docs as unknown as Array<{
-				id: string;
-				source: string;
-				title: string;
-				section?: string;
-				url: string;
-				content: string;
-				chunkIndex: number;
-				publishedAt?: string;
-				observedAt?: string;
-				auditor?: string;
-				protocol?: string;
-				severity?: string;
-			}>;
-
-			// Compute mean content length for length-normalization
-			const meanLen = allDocs.length
-				? allDocs.reduce((s, d) => s + d.content.length, 0) / allDocs.length
-				: 1;
-
-			function escapeRe(s: string) {
-				return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			let docs = await collection.aggregate(pipeline).toArray();
+			if (docs.length === 0 && effectiveSource && !indexFilter) {
+				// A small source can be absent from the generic top pool entirely;
+				// survey a deeper pool once before calling it a miss.
+				docs = await collection
+					.aggregate(
+						buildResearchVectorPipeline({
+							queryEmbedding,
+							limit: limitParam,
+							sourceFilter: effectiveSource,
+							deep: true,
+						}),
+					)
+					.toArray();
 			}
-
-			function score(d: { title: string; section?: string; content: string }) {
-				if (!tokens.length) return 1;
-				const title = d.title.toLowerCase();
-				const section = (d.section ?? "").toLowerCase();
-				const body = d.content.toLowerCase();
-
-				let s = 0;
-				let matchedTokens = 0;
-				for (const t of tokens) {
-					const re = new RegExp(`\\b${escapeRe(t)}\\b`, "g");
-					const tfTitle = (title.match(re) || []).length;
-					const tfSection = (section.match(re) || []).length;
-					const tfBody = (body.match(re) || []).length;
-					const tfTotal = tfTitle + tfSection + tfBody;
-					if (tfTotal === 0) continue;
-					matchedTokens += 1;
-					// log(1+tf) avoids one mega-frequent token swamping
-					// everything; field weights: title 3×, section 2×, body 1×.
-					s +=
-						Math.log(1 + tfBody) +
-						2 * Math.log(1 + tfSection) +
-						3 * Math.log(1 + tfTitle);
-				}
-				if (matchedTokens === 0) return 0;
-				// All-tokens-matched bonus (favors strict over partial)
-				if (matchedTokens === tokens.length) s *= 1.5;
-				// Phrase-proximity bonus: full query as a substring is a
-				// strong signal — bump 1.8× when present in body
-				if (tokens.length >= 2) {
-					const phrase = tokens.join(" ");
-					if (body.includes(phrase)) s *= 1.8;
-				}
-				// Length normalization: penalize chunks much longer than
-				// the mean so a 6000-char chunk doesn't dominate over a
-				// 1500-char chunk just by surface area.
-				const lenPenalty = 1 / Math.sqrt(d.content.length / meanLen);
-				return s * lenPenalty;
+			// If Atlas Vector Search index isn't created yet, $vectorSearch
+			// silently returns []. Force-fall-through to keyword in that case so
+			// the endpoint stays useful before the index is set up.
+			mark("vector");
+			if (docs.length === 0) {
+				vectorNote = effectiveSource
+					? `vector: the query was embedded, but no chunk of source "${effectiveSource}" is in the vector index; keyword ranking was used`
+					: "vector: the query was embedded, but the vector index returned nothing; keyword ranking was used";
+				throw new Error("vector search returned 0 results — falling back");
 			}
+			chunks = docs.map(rowOfDoc);
+		} catch (err) {
+			if (!vectorNote) {
+				vectorStageFailed = true;
+				const why =
+					err instanceof Error && /abort|timeout/i.test(err.message)
+						? `the embedding service did not answer within ${EMBED_TIMEOUT_MS / 1000} s`
+						: "the embedding or vector stage failed";
+				vectorNote = `vector: ${why}; keyword ranking was used`;
+			}
+			// Fall back to keyword search using Payload's standard find.
+			// Ranking is BM25-lite: term frequency × field-position weight,
+			// with length normalization and a phrase-proximity bonus.
+			//
+			// The previous scoring just counted unique tokens appearing AT
+			// LEAST ONCE in title+content — so a chunk mentioning "oracle"
+			// 50 times got the same score as one mentioning it incidentally.
+			// That made vector-fallback retrieval near-random, which is
+			// exactly what production exhibits when VOYAGE_API_KEY is unset.
+			mode = "keyword";
+			try {
+				const rawTokens = q
+					.toLowerCase()
+					.split(/\s+/)
+					.filter((t) => t.length > 1);
 
-			chunks = allDocs
-				.map((d) => ({
-					id: String(d.id),
-					source: d.source,
-					title: d.title,
-					section: d.section ?? null,
-					url: d.url,
-					content: d.content,
-					chunkIndex: d.chunkIndex,
-					publishedAt: d.publishedAt ?? null,
-					observedAt: d.observedAt ?? null,
-					auditor: d.auditor ?? null,
-					protocol: d.protocol ?? null,
-					severity: d.severity ?? null,
-					score: score(d),
-				}))
-				.filter((d) => (d.score ?? 0) > 0)
-				.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-				.slice(0, Math.max(limitParam * 8, 48));
-		} catch {
-			chunks = [];
+				// Money is written with separators in the source documents
+				// ("$300,000") while a person or agent asking about it usually types
+				// the bare digits ("300000"). Tokens are matched with `contains`, a
+				// substring test, so those two never meet: a query for 300000 misses
+				// the handbook page that states the $300,000 lifetime cap, and the
+				// empty result reads as "there is no such rule" — the omission-as-
+				// negation failure this corpus exists to avoid. Emit both spellings
+				// for any numeric token so either phrasing finds the same passage.
+				// Verified 2026-07-23: `300,000` found the rule, `300000` did not.
+				const tokenSet = new Set<string>();
+				for (const t of rawTokens) {
+					tokenSet.add(t);
+					if (/^\$?[\d,]+$/.test(t)) {
+						const bare = t.replace(/[$,]/g, "");
+						// Years are 4-digit numbers too, and grouping one produces a
+						// nonsense token ("2026" → "2,026"). Money at that width is
+						// real ($5,000), so exclude by value rather than by length.
+						const isYear =
+							bare.length === 4 && Number(bare) >= 1900 && Number(bare) <= 2099;
+						if (bare.length > 3 && !isYear) {
+							tokenSet.add(bare);
+							// 300000 → 300,000
+							tokenSet.add(bare.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+						}
+					}
+				}
+				const tokens = [...tokenSet];
+
+				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
+				const where: any = {};
+				if (effectiveSource) where.source = { equals: effectiveSource };
+				if (tokens.length) {
+					where.or = tokens.map((t) => ({
+						or: [{ title: { contains: t } }, { content: { contains: t } }],
+					}));
+				}
+
+				// Pull a wider candidate pool (200) so ranking has room to
+				// surface high-relevance chunks past position 50 — Mongo
+				// returns matches in storage order, not relevance order.
+				const result = await payload.find({
+					collection: "research-docs",
+					where,
+					limit: 200,
+					depth: 0,
+					pagination: false,
+					select: { embedding: false },
+				});
+
+				const allDocs = result.docs as unknown as Array<{
+					id: string;
+					source: string;
+					title: string;
+					section?: string;
+					url: string;
+					content: string;
+					chunkIndex: number;
+					publishedAt?: string;
+					observedAt?: string;
+					docKind?: string;
+					docVersionStatus?: string;
+					auditor?: string;
+					protocol?: string;
+					severity?: string;
+					capStatus?: string;
+					capProtocolVersion?: number;
+				}>;
+
+				// Compute mean content length for length-normalization
+				const meanLen = allDocs.length
+					? allDocs.reduce((s, d) => s + d.content.length, 0) / allDocs.length
+					: 1;
+
+				function escapeRe(s: string) {
+					return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+				}
+
+				function score(d: {
+					title: string;
+					section?: string;
+					content: string;
+				}) {
+					if (!tokens.length) return 1;
+					const title = d.title.toLowerCase();
+					const section = (d.section ?? "").toLowerCase();
+					const body = d.content.toLowerCase();
+
+					let s = 0;
+					let matchedTokens = 0;
+					for (const t of tokens) {
+						const re = new RegExp(`\\b${escapeRe(t)}\\b`, "g");
+						const tfTitle = (title.match(re) || []).length;
+						const tfSection = (section.match(re) || []).length;
+						const tfBody = (body.match(re) || []).length;
+						const tfTotal = tfTitle + tfSection + tfBody;
+						if (tfTotal === 0) continue;
+						matchedTokens += 1;
+						// log(1+tf) avoids one mega-frequent token swamping
+						// everything; field weights: title 3×, section 2×, body 1×.
+						s +=
+							Math.log(1 + tfBody) +
+							2 * Math.log(1 + tfSection) +
+							3 * Math.log(1 + tfTitle);
+					}
+					if (matchedTokens === 0) return 0;
+					// All-tokens-matched bonus (favors strict over partial)
+					if (matchedTokens === tokens.length) s *= 1.5;
+					// Phrase-proximity bonus: full query as a substring is a
+					// strong signal — bump 1.8× when present in body
+					if (tokens.length >= 2) {
+						const phrase = tokens.join(" ");
+						if (body.includes(phrase)) s *= 1.8;
+					}
+					// Length normalization: penalize chunks much longer than
+					// the mean so a 6000-char chunk doesn't dominate over a
+					// 1500-char chunk just by surface area.
+					const lenPenalty = 1 / Math.sqrt(d.content.length / meanLen);
+					return s * lenPenalty;
+				}
+
+				chunks = allDocs
+					.map((d) => ({
+						id: String(d.id),
+						source: d.source,
+						title: d.title,
+						section: d.section ?? null,
+						url: d.url,
+						content: d.content,
+						chunkIndex: d.chunkIndex,
+						publishedAt: d.publishedAt ?? null,
+						observedAt: d.observedAt ?? null,
+						docKind: d.docKind ?? null,
+						docVersionStatus: d.docVersionStatus ?? null,
+						auditor: d.auditor ?? null,
+						protocol: d.protocol ?? null,
+						severity: d.severity ?? null,
+						capStatus: d.capStatus ?? null,
+						capProtocolVersion: d.capProtocolVersion ?? null,
+						score: score(d),
+					}))
+					.filter((d) => (d.score ?? 0) > 0)
+					.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+					.slice(0, Math.max(limitParam * 8, 48));
+			} catch {
+				chunks = [];
+				keywordFailed = true;
+			}
 		}
+	}
+
+	if (vectorStageFailed && keywordFailed) {
+		log({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/research",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "research read failed",
+			advisory:
+				"Both the vector and the keyword stage failed to read the corpus. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	// Exact-identifier retrieval guarantee (sls-019): when the query names a
@@ -451,6 +611,8 @@ export async function GET(req: NextRequest) {
 					},
 					limit: 25,
 					depth: 0,
+					pagination: false,
+					select: { embedding: false },
 				});
 				for (const d of direct.docs as unknown as Array<{
 					id: string;
@@ -462,9 +624,13 @@ export async function GET(req: NextRequest) {
 					chunkIndex: number;
 					publishedAt?: string;
 					observedAt?: string;
+					docKind?: string;
+					docVersionStatus?: string;
 					auditor?: string;
 					protocol?: string;
 					severity?: string;
+					capStatus?: string;
+					capProtocolVersion?: number;
 				}>) {
 					chunks.push({
 						id: String(d.id),
@@ -476,9 +642,15 @@ export async function GET(req: NextRequest) {
 						chunkIndex: d.chunkIndex,
 						publishedAt: d.publishedAt ?? null,
 						observedAt: d.observedAt ?? null,
+						docKind: d.docKind ?? null,
+						docVersionStatus: d.docVersionStatus ?? null,
 						auditor: d.auditor ?? null,
 						protocol: d.protocol ?? null,
 						severity: d.severity ?? null,
+						// #785: the identifier-pin path is how "CAP-46" queries serve
+						// their row — it must carry the cap fields like every other path.
+						capStatus: d.capStatus ?? null,
+						capProtocolVersion: d.capProtocolVersion ?? null,
 						// No retrieval score: confidence floors relevance for
 						// exact-ID matches, and the pin sets the rank.
 					});
@@ -530,6 +702,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 10,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as Array<
 				Record<string, unknown>
@@ -545,9 +719,13 @@ export async function GET(req: NextRequest) {
 					chunkIndex: Number(d.chunkIndex ?? 0),
 					publishedAt: (d.publishedAt as string) ?? null,
 					observedAt: (d.observedAt as string) ?? null,
+					docKind: (d.docKind as string) ?? null,
+					docVersionStatus: (d.docVersionStatus as string) ?? null,
 					auditor: (d.auditor as string) ?? null,
 					protocol: (d.protocol as string) ?? null,
 					severity: (d.severity as string) ?? null,
+					capStatus: (d.capStatus as string) ?? null,
+					capProtocolVersion: (d.capProtocolVersion as number) ?? null,
 					// No score: the chunk literally contains the figure asked
 					// about, which beats any cosine estimate of whether it might.
 				});
@@ -568,9 +746,13 @@ export async function GET(req: NextRequest) {
 		chunkIndex: number;
 		publishedAt?: string;
 		observedAt?: string;
+		docKind?: string;
+		docVersionStatus?: string;
 		auditor?: string;
 		protocol?: string;
 		severity?: string;
+		capStatus?: string;
+		capProtocolVersion?: number;
 		embedding?: number[];
 	}
 	const toRow = (d: RawResearchDoc, score?: number): ResearchRow => ({
@@ -583,9 +765,17 @@ export async function GET(req: NextRequest) {
 		chunkIndex: d.chunkIndex,
 		publishedAt: d.publishedAt ?? null,
 		observedAt: d.observedAt ?? null,
+		docKind: d.docKind ?? null,
+		docVersionStatus: d.docVersionStatus ?? null,
 		auditor: d.auditor ?? null,
 		protocol: d.protocol ?? null,
 		severity: d.severity ?? null,
+		// #785 true root cause: this shared supplement mapper (recency + lexical
+		// pool paths) omitted the cap fields — stored values were fine all along;
+		// rows entering via a supplement served null. Third serving path missed
+		// by both #764 (main mappers) and #784 (vector $project).
+		capStatus: d.capStatus ?? null,
+		capProtocolVersion: d.capProtocolVersion ?? null,
 		...(score != null ? { score } : {}),
 	});
 
@@ -630,6 +820,7 @@ export async function GET(req: NextRequest) {
 				sort: "-publishedAt",
 				limit: 40,
 				depth: 0,
+				pagination: false,
 			});
 			const have = new Set(chunks.map((c) => c.id));
 			const candidates = (recent.docs as unknown as RawResearchDoc[]).filter(
@@ -661,7 +852,16 @@ export async function GET(req: NextRequest) {
 		const poolCovered =
 			!lexTokens.length ||
 			chunks.some((c) => hasFullLexicalCoverage(c, lexTokens));
-		if (!poolCovered) {
+		// The refill is a `contains` regex over every chunk's content, a full
+		// scan of the source. It exists for lookup-shaped queries (a product
+		// name, a ticker), which are short. A long question fanned out across
+		// every source by an agent almost never has full coverage inside one
+		// source, so it paid the scan sixteen times per question for a
+		// supplement that ranking then had no use for. Scoped requests run it
+		// only for short queries; unscoped requests keep it.
+		const refillWorthIt =
+			!effectiveSource || lexTokens.length <= LEXICAL_REFILL_MAX_TOKENS_SCOPED;
+		if (!poolCovered && refillWorthIt) {
 			try {
 				// biome-ignore lint/suspicious/noExplicitAny: Payload Where is awkward
 				const lexWhere: any = {
@@ -679,6 +879,7 @@ export async function GET(req: NextRequest) {
 					where: lexWhere,
 					limit: 30,
 					depth: 0,
+					pagination: false,
 				});
 				const have = new Set(chunks.map((c) => c.id));
 				for (const d of lex.docs as unknown as RawResearchDoc[]) {
@@ -690,6 +891,39 @@ export async function GET(req: NextRequest) {
 			} catch {
 				// supplement is best-effort — the pool result still serves
 			}
+		}
+	}
+
+	// Release-tag lookup (versionTargets in research-rank.ts): the pinned
+	// document must be IN the pool to be pinned. Fetch by title when the
+	// vector pool missed it — same fetch-not-rank root as the CAP/SEP path.
+	const vTargets = versionTargets(q);
+	if (
+		vTargets.length &&
+		!chunks.some((c) => matchesVersionTarget(c.title, vTargets))
+	) {
+		try {
+			const direct = await payload.find({
+				collection: "research-docs",
+				where: {
+					and: [
+						{ or: vTargets.map((t) => ({ title: { like: t } })) },
+						...(effectiveSource
+							? [{ source: { equals: effectiveSource } }]
+							: []),
+					],
+				},
+				limit: 10,
+				depth: 0,
+				pagination: false,
+				select: { embedding: false },
+			});
+			const have = new Set(chunks.map((c) => c.id));
+			for (const d of direct.docs as unknown as RawResearchDoc[]) {
+				if (!have.has(String(d.id))) chunks.push(toRow(d));
+			}
+		} catch {
+			// best-effort — the pool result still serves
 		}
 	}
 
@@ -712,6 +946,8 @@ export async function GET(req: NextRequest) {
 				},
 				limit: 24,
 				depth: 0,
+				pagination: false,
+				select: { embedding: false },
 			});
 			for (const d of direct.docs as unknown as RawResearchDoc[]) {
 				chunks.push(toRow(d));
@@ -759,8 +995,73 @@ export async function GET(req: NextRequest) {
 		query: q,
 	});
 
-	logApiHit({
+	// Category-conduct advisory (the docs-search edge-behavior class + our
+	// semantic-honesty doctrine): a source-scoped vector search NEVER goes
+	// empty — it returns the nearest in-source neighbors however weak, so an
+	// agent cannot distinguish "this category is thin for the query" from
+	// "the query is bad" unless we SAY stronger corpus-wide matches exist.
+	// One extra aggregate on the already-computed embedding, only on the
+	// weak-filtered path — the advisory is the answer, not a re-rank.
+	let sourceAdvisory: {
+		note: string;
+		inSourceTopScore: number;
+		corpusWideTopScore: number;
+		corpusWideTopSource: string | null;
+	} | null = null;
+	// Trigger on the RAW-score gap, not composite confidence: authority+
+	// freshness floor most in-source tops above 0.6 confidence even when
+	// relevance is weak (the first calibration never fired). One extra
+	// aggregate per source-filtered vector query; embedding reused.
+	if (sourceFilter && queryEmbedding && !sourceKnownEmpty && !internal) {
+		try {
+			// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
+			const db = (payload.db as any)?.connection?.db;
+			const collection = db?.collection("research-docs");
+			// The advisory fires only when the corpus-wide top beats the served
+			// in-source top by 0.1; a served top above 0.9 cannot be beaten, so
+			// the second vector search is skipped for it.
+			const inConf = results[0]?.confidence?.score ?? 0;
+			if (collection && inConf <= 0.9) {
+				const wide = await collection
+					.aggregate(
+						buildResearchVectorPipeline({
+							queryEmbedding,
+							limit: limitParam,
+							sourceFilter: null,
+						}),
+					)
+					.toArray();
+				// SAME regime both sides: rank the wide pool exactly like the
+				// served results, then compare served-confidence to served-
+				// confidence. Raw-pipeline tops include chunks the real ranking
+				// demotes (dupes, low-value) — comparing them to a served top
+				// over-fired on perfect in-category matches twice.
+				// biome-ignore lint/suspicious/noExplicitAny: same doc shape as the main path
+				const wideRanked = rankResearchChunks((wide as any[]).map(rowOfDoc), {
+					limit: 1,
+					mode,
+					query: q,
+				});
+				const wideTop = wideRanked[0];
+				const wideConf = wideTop?.confidence?.score ?? 0;
+				if (wideTop && wideConf > inConf + 0.1) {
+					sourceAdvisory = {
+						note: `stronger matches exist OUTSIDE source=${sourceFilter} — the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
+						inSourceTopScore: Math.round(inConf * 100) / 100,
+						corpusWideTopScore: Math.round(wideConf * 100) / 100,
+						corpusWideTopSource: wideTop.source ?? null,
+					};
+				}
+			}
+		} catch {
+			// advisory is best-effort; never fail the request for it
+		}
+	}
+
+	log({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/research",
 		query: q,
 		filters: {
@@ -775,17 +1076,69 @@ export async function GET(req: NextRequest) {
 		matchMode: mode,
 	});
 
+	// sls-071: a finding identifier is present verbatim or it is a miss. Vector
+	// search never goes empty, so without this an absent id returns the
+	// report's boilerplate — and scored HIGHER than a real id did. Say so
+	// rather than let a nearest neighbour read as the finding.
+	const findingIds = findingIdentifierTargets(q);
+	const missedIds = findingIds.filter(
+		(id) =>
+			!identifierIsPresent(
+				id,
+				results.flatMap((r) => [
+					(r as { content?: string }).content,
+					(r as { title?: string }).title,
+				]),
+			),
+	);
+	const exactMiss =
+		missedIds.length > 0
+			? {
+					identifiers: missedIds,
+					note: `The indexed corpus contains no chunk carrying ${missedIds.length === 1 ? "this identifier" : "these identifiers"} verbatim. The rows below are the nearest SEMANTIC neighbours of the query — they are not that finding, and their confidence scores rank similarity, not a match. Do not report ${missedIds.join(", ")} as found, and do not infer its content from these rows.`,
+				}
+			: null;
+
+	// Empty source or a miss: only an empty source gets the empty-source note.
+	const sourceEmptyNote = sourceKnownEmpty
+		? `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`
+		: null;
+
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
+				...matchModeMeta(mode),
 				...(laneHints("research", { empty: results.length === 0 })
 					? { hints: laneHints("research", { empty: results.length === 0 }) }
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning || limitNote || vectorNote || sourceEmptyNote
+					? {
+							warnings: [
+								paramWarning,
+								limitNote,
+								vectorNote,
+								sourceEmptyNote,
+							].filter(Boolean),
+						}
+					: {}),
+				...(sourceEmptyNote ? { sourceEmpty: true } : {}),
+				// How many documents the scoped source holds, so a consumer can
+				// skip a source below its per-source take before sending.
+				...(effectiveSource && sourceDocs !== null
+					? { sourceDocCount: sourceDocs }
+					: {}),
+				...(sourceAdvisory ? { sourceAdvisory } : {}),
+				...(exactMiss ? { exactMiss } : {}),
 				query: q,
 				mode,
 				model: mode === "vector" ? EMBEDDING_MODEL : null,
+				// Hash of `results` alone: generatedAt changes every call, the
+				// evidence does not; a consumer comparing two reads hashes this.
+				resultsHash: createHash("sha256")
+					.update(JSON.stringify(results))
+					.digest("hex"),
 				filters: {
 					source: sourceFilter,
 					auditor: auditorFilter,
@@ -793,7 +1146,18 @@ export async function GET(req: NextRequest) {
 					severity: severityFilter,
 					limit: limitParam,
 				},
-				counts: { returned: results.length },
+				counts: {
+					returned: results.length,
+					// Deliberately null, never `results.length`. Retrieval here ranks a
+					// bounded candidate pool by similarity — there is no crisp set of
+					// "all matching rows" to count, so any number would falsely assert
+					// a complete read (the same trap as a capped total reported as if
+					// it were the population). `totalBasis` disambiguates the null:
+					// this is "unknowable by construction", not "zero" or "not
+					// computed yet" — do not conclude absence from this response.
+					total: null,
+					totalBasis: "unbounded-similarity-ranking",
+				},
 				// Per-result `confidence`: a 0–1 score + label (high/medium/low)
 				// blending relevance, source-aware freshness, and source
 				// authority. Deterministic + versioned so agents can rely on it.
@@ -802,12 +1166,20 @@ export async function GET(req: NextRequest) {
 					fields: ["relevance", "freshness", "authority"],
 					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it — applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key).",
 				},
-			},
+			}),
 			results: results.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {
 				...rateLimitHeaders(limit),
+				// The mechanism, readable without parsing the body; and our own
+				// wall time, so a consumer can tell our latency from the network's.
+				"X-Scout-Match-Mode": mode,
+				"Server-Timing": [
+					...phases.map(([n, d]) => `${n};dur=${d}`),
+					`rank;dur=${Date.now() - phaseStart}`,
+					`total;dur=${Date.now() - startedAt}`,
+				].join(", "),
 				// Don't aggressively cache — query strings vary by user
 				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
 			},
@@ -816,6 +1188,321 @@ export async function GET(req: NextRequest) {
 }
 
 // sls-004: method misuse answers JSON (Next's automatic 405 has an empty body).
+// Say when a param was dropped (the projects/search treatment, 2026-07-11
+// audit): a filter we never read returns an unfiltered list the caller reads
+// as filtered. Warned, not 400'd: the contract is additive-only.
+function researchParamWarning(sp: URLSearchParams): string | null {
+	return unknownParamWarning(
+		sp,
+		[
+			"q",
+			"query",
+			"keyword",
+			"search",
+			"source",
+			"sources",
+			"auditor",
+			"protocol",
+			"severity",
+			"limit",
+			"perSource",
+			"fields",
+		],
+		{
+			advertise: [
+				"q",
+				"source",
+				"sources",
+				"auditor",
+				"protocol",
+				"severity",
+				"limit",
+				"perSource",
+				"fields",
+			],
+			hint: "Research is a semantic corpus: unmatched intents belong in q rather than in a filter.",
+		},
+	);
+}
+
+function tooMany(
+	req: NextRequest,
+	startedAt: number,
+	limit: RateLimitResult,
+): NextResponse {
+	logApiHit({ req, startedAt, status: 429, endpoint: "/api/research" });
+	return apiError({
+		status: 429,
+		error: "rate limit exceeded",
+		advisory:
+			"This instance's per-minute window is spent; the limit is counted per serverless instance (X-RateLimit-Scope). Wait Retry-After and resend.",
+		retryAfterSeconds: Math.max(
+			1,
+			Math.ceil((limit.resetAt - Date.now()) / 1000),
+		),
+		startedAt,
+		headers: rateLimitHeaders(limit),
+	});
+}
+
+export async function GET(req: NextRequest) {
+	const sp = req.nextUrl.searchParams;
+	const sources = requestedSources(sp);
+	if (!sources) return research(req);
+	if (sources.length > 1) return researchMany(req, sources);
+	// `sources=<one>` is the single-source call.
+	const url = new URL(req.nextUrl);
+	if (sp.has("sources")) url.searchParams.delete("sources");
+	if (sources.length) url.searchParams.set("source", sources[0]);
+	else url.searchParams.delete("source");
+	return research(new NextRequest(url, { headers: req.headers }));
+}
+
+// Several sources in one call, for a consumer that routes a question to a
+// dozen sources and takes up to N rows from each (a partner sent 13 scoped
+// calls per question). Each source runs the single-source pipeline as it is,
+// so its rows are exactly what `source=<one>&limit=<perSource>` returns
+// (meta.bySource carries each source's resultsHash to prove it). The query is
+// embedded once (embed() shares one in-flight call), and four sources run at
+// a time so the instance's five pooled connections are not all taken.
+// ponytail: one rate-limit token per call; weight it by source count if a
+// caller ever makes this the expensive path.
+const FANOUT_CONCURRENCY = 4;
+
+async function researchMany(
+	req: NextRequest,
+	sources: string[],
+): Promise<NextResponse> {
+	const startedAt = Date.now();
+	const limit = rateLimit(req, {
+		endpoint: "/api/research",
+		limit: RATE_LIMIT_MAX,
+		windowMs: RATE_LIMIT_WINDOW_MS,
+	});
+	if (!limit.allowed) return tooMany(req, startedAt, limit);
+	const sp = req.nextUrl.searchParams;
+	const unknown = sources.filter((s) => !RESEARCH_SOURCES.includes(s as never));
+	if (unknown.length) {
+		return NextResponse.json(
+			{
+				error: `unknown source${unknown.length > 1 ? "s" : ""}: ${unknown.map((s) => `'${s}'`).join(", ")}`,
+				hint: "see validSources for the full list",
+				validSources: RESEARCH_SOURCES,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	const perRaw = sp.get("perSource") ?? sp.get("limit");
+	const perSource = clampLimit(perRaw, 8, 25);
+	const perN = Math.floor(Number(perRaw));
+	const perNote =
+		Number.isFinite(perN) && perN > 25
+			? `perSource ${perN} was clamped to 25, the maximum rows per source`
+			: null;
+	const q =
+		(
+			sp.get("q") ??
+			sp.get("query") ??
+			sp.get("keyword") ??
+			sp.get("search")
+		)?.trim() ?? "";
+	// Each source's request carries only the parameters research reads, so a
+	// stray parameter is reported once (below), not once per source.
+	const base = new URL(req.nextUrl.pathname, req.nextUrl.origin);
+	if (q) base.searchParams.set("q", q);
+	for (const k of ["auditor", "protocol", "severity", "fields"]) {
+		const v = sp.get(k);
+		if (v !== null) base.searchParams.set(k, v);
+	}
+	base.searchParams.set("limit", String(perSource));
+
+	const answers = await mapLimit(
+		sources,
+		FANOUT_CONCURRENCY,
+		async (source) => {
+			const url = new URL(base);
+			url.searchParams.set("source", source);
+			try {
+				const res = await research(
+					new NextRequest(url, { headers: req.headers }),
+					true,
+				);
+				// biome-ignore lint/suspicious/noExplicitAny: our own response body
+				const body: any = await res.json().catch(() => null);
+				return { source, status: res.status, body };
+			} catch (e) {
+				return { source, status: 503, body: { error: String(e) } };
+			}
+		},
+	);
+	// A malformed request (no q, a filter that contradicts a source) is the
+	// caller's to fix: answer the 400 itself, not a page missing sources.
+	const bad = answers.find((a) => a.status === 400);
+	if (bad) {
+		return NextResponse.json(bad.body, {
+			status: 400,
+			headers: rateLimitHeaders(limit),
+		});
+	}
+	const ok = answers.filter((a) => a.status === 200 && a.body?.meta);
+	const failed = answers.filter((a) => !(a.status === 200 && a.body?.meta));
+	if (ok.length === 0) {
+		logApiHit({ req, startedAt, status: 503, endpoint: "/api/research" });
+		return apiError({
+			status: 503,
+			error: "research store unavailable",
+			advisory:
+				"No requested source could be read. This is an outage, NOT an empty result. Retry after a moment.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
+	}
+	// One ranking across sources, by the rule each source already uses for
+	// its own rows (researchOrder). Grouped in request order, a reader that
+	// keeps the first rows saw whichever sources were named first: on Raven's
+	// golden cards the gold document reached the top 5 for 14% of them, 71%
+	// ranked (scripts/eval/raven-source-recall.ts, 2026-10-03). Each row
+	// still names its source; meta.bySource keeps the per-source view.
+	// biome-ignore lint/suspicious/noExplicitAny: rows are our own result rows
+	const results: any[] = ok
+		.flatMap((a) => a.body.results ?? [])
+		.sort(researchOrder(q));
+	const mode: "vector" | "keyword" = ok.every(
+		(a) => a.body.meta.mode === "vector",
+	)
+		? "vector"
+		: "keyword";
+	const paramWarning = researchParamWarning(sp);
+	const warnings = [
+		...(paramWarning ? [paramWarning] : []),
+		...(perNote ? [perNote] : []),
+		...ok.flatMap((a) =>
+			((a.body.meta.warnings ?? []) as string[]).map(
+				(w) => `source=${a.source}: ${w}`,
+			),
+		),
+		...failed.map((a) =>
+			degradedWarning(
+				`research source=${a.source}`,
+				`${a.status} ${a.body?.error ?? "read failed"}; its rows are missing from this page`,
+			),
+		),
+	];
+	// An identifier is missing from this page only when every source missed it.
+	const missLists = ok.map(
+		(a) => (a.body.meta.exactMiss?.identifiers ?? []) as string[],
+	);
+	const missed = missLists.reduce((acc, l) => acc.filter((x) => l.includes(x)));
+	const missNote = ok.find((a) => a.body.meta.exactMiss)?.body.meta.exactMiss;
+	const empty = results.length === 0;
+	logApiHit({
+		req,
+		startedAt,
+		status: 200,
+		endpoint: "/api/research",
+		query: q,
+		filters: {
+			source: sources.join(","),
+			perSource,
+			auditor: sp.get("auditor"),
+			protocol: sp.get("protocol"),
+			severity: sp.get("severity"),
+			mode,
+		},
+		resultCount: results.length,
+		matchMode: mode,
+	});
+	return NextResponse.json(
+		{
+			meta: withPartial({
+				...matchModeMeta(mode),
+				...(laneHints("research", { empty })
+					? { hints: laneHints("research", { empty }) }
+					: {}),
+				source: "https://stellarlight.xyz/api/research",
+				generatedAt: new Date().toISOString(),
+				...(warnings.length ? { warnings } : {}),
+				...(missed.length && missNote
+					? { exactMiss: { ...missNote, identifiers: missed } }
+					: {}),
+				query: q,
+				mode,
+				model: ok.some((a) => a.body.meta.mode === "vector")
+					? EMBEDDING_MODEL
+					: null,
+				resultsHash: createHash("sha256")
+					.update(JSON.stringify(results))
+					.digest("hex"),
+				filters: {
+					source: sources.join(","),
+					sources,
+					perSource,
+					auditor: sp.get("auditor"),
+					protocol: sp.get("protocol"),
+					severity: sp.get("severity")?.toLowerCase() ?? null,
+					limit: perSource,
+				},
+				counts: {
+					returned: results.length,
+					total: null,
+					totalBasis: "unbounded-similarity-ranking",
+				},
+				bySource: answers.map((a) =>
+					a.status === 200 && a.body?.meta
+						? {
+								source: a.source,
+								status: 200,
+								returned: a.body.meta.counts?.returned ?? 0,
+								matchMode: a.body.meta.mode,
+								...(a.body.meta.sourceDocCount !== undefined
+									? { sourceDocCount: a.body.meta.sourceDocCount }
+									: {}),
+								...(a.body.meta.sourceEmpty ? { sourceEmpty: true } : {}),
+								resultsHash: a.body.meta.resultsHash,
+							}
+						: {
+								source: a.source,
+								status: a.status,
+								returned: 0,
+								error: a.body?.error ?? "read failed",
+							},
+				),
+				scoreModel: ok[0].body.meta.scoreModel,
+			}),
+			results,
+		},
+		{
+			headers: {
+				...rateLimitHeaders(limit),
+				"X-Scout-Match-Mode": mode,
+				...serverTiming(startedAt),
+				"Cache-Control": failed.length
+					? "no-store"
+					: "public, s-maxage=60, stale-while-revalidate=300",
+			},
+		},
+	);
+}
+
+async function mapLimit<T, R>(
+	items: T[],
+	n: number,
+	fn: (x: T) => Promise<R>,
+): Promise<R[]> {
+	const out: R[] = new Array(items.length);
+	let next = 0;
+	await Promise.all(
+		Array.from({ length: Math.min(n, items.length) }, async () => {
+			while (next < items.length) {
+				const i = next++;
+				out[i] = await fn(items[i]);
+			}
+		}),
+	);
+	return out;
+}
+
 export const POST = methodNotAllowed(["GET"]);
 export const PUT = methodNotAllowed(["GET"]);
 export const DELETE = methodNotAllowed(["GET"]);

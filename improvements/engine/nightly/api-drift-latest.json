@@ -1,0 +1,18 @@
+{
+	"generatedAt": "2026-10-07T12:02:35.081Z",
+	"detector": "api-drift",
+	"failures": [
+		{
+			"probe": "status.endpoints lists /api/hackathons/builds/{id}",
+			"note": "OpenAPI documents /api/hackathons/builds/{id} but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "status.endpoints lists /api/hackathons/analyze",
+			"note": "OpenAPI documents /api/hackathons/analyze but /api/status.endpoints[] omits it"
+		},
+		{
+			"probe": "status.endpoints lists /api/hackathons/review",
+			"note": "OpenAPI documents /api/hackathons/review but /api/status.endpoints[] omits it"
+		}
+	]
+}

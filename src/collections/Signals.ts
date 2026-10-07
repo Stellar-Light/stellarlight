@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 export const Signals: CollectionConfig = {
 	slug: "signals",
@@ -7,6 +8,9 @@ export const Signals: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{

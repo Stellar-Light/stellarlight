@@ -1,0 +1,202 @@
+name: Nightly health (detectors → issue)
+
+# The crawl phase of the self-sustaining loop (improvements/ideas/
+# idea-self-sustaining-agents.md): run the deterministic detector suite
+# nightly and file/update ONE triaged issue when something goes red — the
+# maintainer wakes up to findings with probes, not to sweeps to run.
+# Deterministic only: no LLM, no DB writes. Public live API + repo files,
+# except check-scan-coverage, which reads the repos collection directly.
+
+on:
+  schedule:
+    - cron: "45 5 * * *" # daily 05:45 UTC, after the 03:00 scan wave
+  workflow_dispatch:
+
+permissions:
+  # write: nightly findings artifacts + the re-fed ledger are committed so
+  # the improvement ledger (committed-artifacts-only) sees this layer at all.
+  contents: write
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+
+      # Every detector also writes improvements/engine/nightly/<name>-latest.json
+      # (scripts/nightly-findings.ts) — empty failures = the auto-clear signal.
+
+      # Each detector runs regardless of the others; exit codes collected.
+      - name: API drift (live ⇄ spec ⇄ docs)
+        id: drift
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
+        run: pnpm exec tsx scripts/check-api-drift.ts 2>&1 | tee /tmp/drift.log
+      - name: Field population (values arrive, not just shape)
+        id: fields
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
+        run: pnpm exec tsx scripts/check-field-population.ts 2>&1 | tee /tmp/fields.log
+      - name: Golden retrieval eval
+        id: golden
+        continue-on-error: true
+        # --json refreshes the SAME weekly artifact the ledger already reads
+        # (same finding ids, fresher lastSeen); human log goes to stderr for the
+        # issue tail. generatedAt stamped below (stale-evidence rule).
+        run: |
+          RC=0
+          pnpm exec tsx scripts/eval/run-golden.ts --json > /tmp/golden.json 2> /tmp/golden.log || RC=$?
+          if jq -e .graded /tmp/golden.json > /dev/null 2>&1; then
+            jq --arg t "$(date -u +%FT%TZ)" '. + {generatedAt: $t}' /tmp/golden.json \
+              > improvements/engine/weekly/golden-eval-latest.json
+          fi
+          exit $RC
+      - name: Verify advertised claims
+        id: claims
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
+        run: pnpm exec tsx scripts/verify-claims.ts 2>&1 | tee /tmp/claims.log
+      - name: Record completeness (full-corpus sweeps)
+        id: completeness
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly }
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
+        run: pnpm exec tsx scripts/check-record-completeness.ts 2>&1 | tee /tmp/completeness.log
+      - name: Battery coverage (raven's eval questions vs our corpus)
+        id: battery
+        continue-on-error: true
+        env: { FINDINGS_DIR: improvements/engine/nightly, GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/eval/battery-coverage.ts 2>&1 | tee /tmp/battery.log
+          RC=${PIPESTATUS[0]}
+          # 2 = could not look (rate limit / outage reading their repo). That is
+          # not evidence about their battery, so it must not be reported as a
+          # red finding — it says so in the log and the step passes.
+          if [ "$RC" = "2" ]; then echo "battery-coverage: could not check — not counted as red"; exit 0; fi
+          exit $RC
+      - name: Note freshness (registry facts re-verified after asOf)
+        id: notefresh
+        continue-on-error: true
+        # GITHUB_TOKEN: the repo-state pass reads archivedAt over GraphQL,
+        # which refuses unauthenticated calls; without it that pass reports
+        # itself skipped rather than going red.
+        env:
+          FINDINGS_DIR: improvements/engine/nightly
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: pnpm exec tsx scripts/check-note-freshness.ts 2>&1 | tee /tmp/notefresh.log
+
+      # The one detector here that reads the DB rather than the public API:
+      # it needs overrideAccess to count the TRUE corpus, so a future access
+      # rule can never make it under-report coverage as "all scanned".
+      # Without these it died on "missing secret key" before its first query
+      # and reported `failure` into the issue below every night — a crash
+      # that read as "scan coverage is red" (2026-08-19).
+      - name: Scan coverage (never-scanned + stale prominent repos)
+        id: scancov
+        continue-on-error: true
+        env:
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        shell: bash
+        run: pnpm exec tsx scripts/check-scan-coverage.ts 2>&1 | tee /tmp/scan-coverage.log
+
+      # Moved here 2026-09-13 from the API drift guard, which runs with no
+      # install and could never resolve this script's @stellar/stellar-sdk
+      # import (RPC simulation, XDR envelope parsing, contract-id preimage
+      # derivation — not droppable). It is a detector, so it belongs with the
+      # detectors: could-not-check is handled inside the script and reported
+      # apart, never as "nothing declared".
+      - name: RWA issuer reconcile (a tracked issuer's toml declares nothing the registry lacks)
+        id: rwarecon
+        continue-on-error: true
+        shell: bash
+        run: pnpm exec tsx scripts/data/reconcile-rwa-issuers.ts 2>&1 | tee /tmp/rwa-reconcile.log
+
+      - name: Feed the improvement ledger + commit the evidence
+        # continue-on-error: the red-issue step below must file even if the
+        # feed/commit hiccups (its own step shows red in the run UI).
+        continue-on-error: true
+        run: |
+          pnpm exec tsx scripts/improvement-ledger.ts
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add -A improvements/
+          # generatedAt makes every run a real diff — a commit per run IS the
+          # "detector ran at all" record (same rule as the weekly evidence).
+          git commit -m "chore(nightly): detector findings $(date -u +%Y-%m-%d) [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git push
+
+      - name: File or update the health issue on reds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRIFT: ${{ steps.drift.outcome }}
+          FIELDS: ${{ steps.fields.outcome }}
+          GOLDEN: ${{ steps.golden.outcome }}
+          CLAIMS: ${{ steps.claims.outcome }}
+          COMPLETENESS: ${{ steps.completeness.outcome }}
+          BATTERY: ${{ steps.battery.outcome }}
+          SCANCOV: ${{ steps.scancov.outcome }}
+          RWARECON: ${{ steps.rwarecon.outcome }}
+        run: |
+          set -e
+          REDS=""
+          [ "$DRIFT" = "failure" ] && REDS="$REDS drift"
+          [ "$FIELDS" = "failure" ] && REDS="$REDS field-population"
+          [ "$GOLDEN" = "failure" ] && REDS="$REDS golden-eval"
+          [ "$CLAIMS" = "failure" ] && REDS="$REDS verify-claims"
+          [ "$COMPLETENESS" = "failure" ] && REDS="$REDS record-completeness"
+          [ "$BATTERY" = "failure" ] && REDS="$REDS battery-coverage"
+          [ "$SCANCOV" = "failure" ] && REDS="$REDS scan-coverage"
+          [ "$RWARECON" = "failure" ] && REDS="$REDS rwa-reconcile"
+          if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
+          TITLE="Nightly health: red findings"
+          BODY_FILE=/tmp/body.md
+          {
+            echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
+            echo
+            for d in drift fields golden claims completeness battery scan-coverage rwa-reconcile; do
+              LOG=/tmp/$d.log
+              case $d in
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;; scan-coverage) OUT=$SCANCOV;; rwa-reconcile) OUT=$RWARECON;;
+              esac
+              [ "$OUT" = "failure" ] || continue
+              echo "<details><summary>$d — failing output (tail)</summary>"
+              echo
+              echo '```'
+              tail -40 "$LOG" 2>/dev/null || echo "(no log)"
+              echo '```'
+              echo "</details>"
+              echo
+            done
+            echo "_Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}_"
+          } > "$BODY_FILE"
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" --body-file "$BODY_FILE"
+            echo "commented on existing issue #$EXISTING"
+          else
+            gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body-file "$BODY_FILE"
+            echo "created health issue"
+          fi

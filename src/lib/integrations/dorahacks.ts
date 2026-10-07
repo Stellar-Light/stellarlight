@@ -10,6 +10,8 @@ export interface DoraHacksOrganization {
 	logo?: string;
 }
 
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+
 export interface DoraHacksHackathon {
 	id: number;
 	title: string;
@@ -25,32 +27,94 @@ export interface DoraHacksHackathon {
 	field?: string; // Comma-separated tags
 	ecosystem?: string;
 	organization?: DoraHacksOrganization;
+	/** Curated (non-DoraHacks) events carry their own URL and source. */
+	external_url?: string;
+	source?: "dorahacks" | "curated";
+	/**
+	 * What the event actually is. Not everything we track is a hackathon with
+	 * submissions and a prize pool — some are multi-month builder programs or
+	 * IRL summits, and saying so on the card is the difference between a
+	 * directory and a pile. Absent means hackathon (every DoraHacks row).
+	 */
+	kind?: EventKind;
 }
+
+export type EventKind = "hackathon" | "program" | "summit";
+
+export const EVENT_KIND_LABEL: Record<EventKind, string> = {
+	hackathon: "Hackathon",
+	program: "Builder program",
+	summit: "Summit",
+};
 
 export interface DoraHacksResponse {
 	count: number;
 	results: DoraHacksHackathon[];
 }
 
-const DORAHACKS_API_BASE = "https://dorahacks.io/api";
-const STELLAR_ORG_IDS = [3096, 3853]; // SDF and Tellus
+// 2026-08: DoraHacks retired the legacy /api/hackathon/ + /api/hackathon-buidls/
+// endpoints (404) in favor of /api/v1/hub/*, renaming organization_id→owner_id,
+// start_time/end_time→timeline_start/timeline_end, field→tags, organization→
+// owner, and dropping the status + vote_count fields entirely. Everything below
+// maps the v1 hub shapes back onto the legacy interfaces so downstream
+// consumers keep working unchanged.
+const DORAHACKS_API_BASE = "https://dorahacks.io/api/v1/hub";
+// Organizations that run Stellar hackathons on DoraHacks. SDF and Tellus were
+// the only two for a year; BAF (Hack+ Alebrije, GIVE, Hack+ Buenos Aires),
+// NearX (PULSO) and Mulheres Que Codam joined in 2025-26. The ecosystem
+// search below catches new organizers whose titles say "Stellar"; the org
+// list catches events whose titles do not (Alebrije, Código Raíz).
+const STELLAR_ORG_IDS = [3096, 3853, 3740, 15761, 14803];
+const STELLAR_RE = /stellar|soroban/i;
 
 /**
- * Fetches hackathons from a specific DoraHacks organization
+ * Fetches hackathons from a specific DoraHacks organization, mapped to the
+ * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
+ * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
+/**
+ * A timed-out upstream read must not be mistaken for a complete one: the
+ * callers that cache an index rethrow it, so a stale complete index beats a
+ * fresh partial one.
+ */
+const isAbortError = (e: unknown): boolean =>
+	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
+	return fetchHubHackathons(`owner_id=${orgId}`, `org ${orgId}`);
+}
+
+/** Title search across all of DoraHacks, then filtered to Stellar-relevant rows. */
+async function fetchSearchHackathons(
+	term: string,
+): Promise<DoraHacksHackathon[]> {
+	const rows = await fetchHubHackathons(
+		`search=${encodeURIComponent(term)}`,
+		`search ${term}`,
+	);
+	return rows.filter(
+		(h) =>
+			STELLAR_RE.test(h.title) ||
+			STELLAR_RE.test(h.ecosystem ?? "") ||
+			(h.organization?.id != null &&
+				STELLAR_ORG_IDS.includes(h.organization.id)),
+	);
+}
+
+async function fetchHubHackathons(
+	query: string,
+	label: string,
+): Promise<DoraHacksHackathon[]> {
+	const orgId = label;
 	try {
-		const url = `${DORAHACKS_API_BASE}/hackathon/?organization_id=${orgId}&page=1&page_size=50&sort_by=-end_time`;
+		const url = `${DORAHACKS_API_BASE}/hackathons?page=1&page_size=50&sort_by=-timeline_end&${query}`;
 
 		const response = await fetch(url, {
-			headers: {
-				Accept: "application/json",
-				Referer: "https://dorahacks.io/org/stellar",
-				"User-Agent": "Mozilla/5.0 (compatible; StellarLight/1.0)",
-			},
+			headers: DORA_BROWSER_HEADERS,
 			next: { revalidate: 3600 }, // Cache for 1 hour
+			signal: AbortSignal.timeout(5000),
 		});
 
 		if (!response.ok) {
@@ -60,8 +124,40 @@ async function fetchOrgHackathons(
 			return [];
 		}
 
-		const data: DoraHacksResponse = await response.json();
-		return data.results || [];
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const data: any = await response.json();
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const rows: any[] = Array.isArray(data?.results) ? data.results : [];
+		// Only page 1 is read. Every Stellar listing fits on it today (the
+		// largest, the "stellar" search, lists 19 events), so a second page
+		// means events are being missed: say so instead of serving a short list.
+		if (data?.next)
+			console.warn(
+				`DoraHacks ${label}: more than ${rows.length} events listed and only page 1 was read; the rest are missing.`,
+			);
+		const now = Date.now() / 1000;
+		return rows
+			.filter((r) => typeof r?.id === "number")
+			.map((r) => ({
+				id: r.id,
+				title: typeof r.title === "string" ? r.title : "Untitled",
+				uname: typeof r.uname === "string" ? r.uname : String(r.id),
+				image_url: typeof r.image_url === "string" ? r.image_url : undefined,
+				start_time: typeof r.timeline_start === "number" ? r.timeline_start : 0,
+				end_time: typeof r.timeline_end === "number" ? r.timeline_end : 0,
+				bonus_price: typeof r.bonus_price === "number" ? r.bonus_price : 0,
+				hackers_count:
+					typeof r.hackers_count === "number" ? r.hackers_count : 0,
+				winner_announced: !!r.winner_announced,
+				status:
+					typeof r.timeline_end === "number" && r.timeline_end <= now ? 2 : 1,
+				field: typeof r.tags === "string" ? r.tags : undefined,
+				ecosystem: typeof r.ecosystem === "string" ? r.ecosystem : undefined,
+				organization:
+					r.owner && typeof r.owner === "object"
+						? { id: r.owner.id, name: r.owner.name, logo: r.owner.logo }
+						: undefined,
+			}));
 	} catch (error) {
 		console.error(`Error fetching hackathons for org ${orgId}:`, error);
 		return [];
@@ -74,10 +170,11 @@ async function fetchOrgHackathons(
 export async function fetchAllDoraHacksHackathons(): Promise<
 	DoraHacksHackathon[]
 > {
-	// Fetch from both organizations in parallel
-	const results = await Promise.allSettled(
-		STELLAR_ORG_IDS.map((orgId) => fetchOrgHackathons(orgId)),
-	);
+	// Fetch every known organizer plus an ecosystem-wide title search, in parallel
+	const results = await Promise.allSettled([
+		...STELLAR_ORG_IDS.map((orgId) => fetchOrgHackathons(orgId)),
+		fetchSearchHackathons("stellar"),
+	]);
 
 	// Combine results from successful fetches
 	const allHackathons = results
@@ -88,9 +185,20 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 		.flatMap((result) => result.value);
 
 	// Deduplicate by ID (in case same hackathon appears in both orgs)
-	const uniqueHackathons = Array.from(
-		new Map(allHackathons.map((h) => [h.id, h])).values(),
+	const uniqueHackathons: DoraHacksHackathon[] = Array.from(
+		new Map(
+			allHackathons.map((h) => [h.id, { ...h, source: "dorahacks" as const }]),
+		).values(),
 	);
+
+	// Events that never touch DoraHacks (HackMeridian, Rise In, Luma
+	// residencies) come from the curated file; status derives from dates now.
+	const now = Date.now() / 1000;
+	const curated = CURATED_HACKATHONS.map((h) => ({
+		...h,
+		status: h.end_time <= now ? 2 : 1,
+	}));
+	uniqueHackathons.push(...curated);
 
 	// Sort: active first (status === 1), then by end_time descending
 	return uniqueHackathons.sort((a, b) => {
@@ -101,8 +209,41 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 	});
 }
 
-// Browser-like headers — the /hackathon-buidls/ submissions endpoint rejects the
-// short StellarLight UA with 405 (the /hackathon/ list endpoint accepts it).
+/**
+ * DoraHacks events with a final roster: ended, or winners announced, newest
+ * first. Curated rows are skipped: they have no DoraHacks roster to read.
+ */
+export function endedDoraHacksEvents(
+	hacks: DoraHacksHackathon[],
+): DoraHacksHackathon[] {
+	return hacks
+		.filter(
+			(h) => h.source !== "curated" && (h.status === 2 || h.winner_announced),
+		)
+		.sort((a, b) => (b.end_time ?? 0) - (a.end_time ?? 0));
+}
+
+/**
+ * How a DoraHacks event is named on everything we serve. The slug is the
+ * event's own `uname`, the one /api/hackathons lists and
+ * /api/hackathons/{slug} opens. Submissions used to carry a slug made from
+ * the title instead, so 10 of the 12 events with recorded winners could not
+ * be opened from one of their submissions.
+ */
+export function doraEventRef(
+	h: Pick<DoraHacksHackathon, "title" | "uname" | "end_time">,
+): { title: string; slug: string; endedAt: string | null } {
+	return {
+		title: h.title,
+		slug: h.uname,
+		endedAt: h.end_time
+			? new Date(h.end_time * 1000).toISOString().slice(0, 10)
+			: null,
+	};
+}
+
+// Browser-like headers — the whole /api/v1/hub surface rejects short bot-style
+// UAs with a 405 "Human Verification" page, so every DoraHacks call uses these.
 const DORA_BROWSER_HEADERS = {
 	Accept: "application/json",
 	"Accept-Language": "en-US,en;q=0.9",
@@ -122,7 +263,9 @@ export interface DoraHacksSubmission {
 	hackathonPlacement: string | null; // e.g. "1st Place" / "Winners" — null if not a winner
 	award: string | null; // e.g. "Blend Composability Award"
 	isWinner: boolean;
-	voteCount: number;
+	/** null when the source does not expose votes — NOT zero. The v1 hub API
+	 *  stopped serving vote counts; publishing 0 asserted a measurement. */
+	voteCount: number | null;
 	url: string;
 	source: "dorahacks";
 }
@@ -141,68 +284,247 @@ function cleanDescription(raw: unknown): string | null {
 }
 
 /**
- * Fetches the live submission ("buidl") roster for one DoraHacks hackathon by
- * uname. Read-through: returns [] on any error (feed down / WAF / unknown slug)
- * so callers degrade gracefully. Winners are derived from `winner_prizes`.
+ * Winner lookup for one hackathon: buidl id → prize name + award title, from
+ * the /hackathon-winner-assignments announcement. The v1 hub API no longer puts
+ * `winner_prizes` on buidl rows — this endpoint's `award_list[].prizes[]`
+ * ("1st Place - $5,000 in XLM" → buidl ids) is where winners live now. Empty
+ * map on any error or before winners are announced.
+ */
+async function fetchWinnerPrizeMap(
+	uname: string,
+): Promise<Map<number, { placement: string; award: string | null }>> {
+	const map = new Map<number, { placement: string; award: string | null }>();
+	try {
+		const res = await fetch(
+			`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
+			{
+				headers: DORA_BROWSER_HEADERS,
+				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
+			},
+		);
+		if (!res.ok) return map;
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const data: any = await res.json();
+		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+		const awards: any[] = Array.isArray(data?.award_list)
+			? data.award_list
+			: [];
+		for (const a of awards) {
+			for (const p of Array.isArray(a?.prizes) ? a.prizes : []) {
+				for (const bid of Array.isArray(p?.buidls) ? p.buidls : []) {
+					if (typeof bid === "number" && !map.has(bid)) {
+						map.set(bid, {
+							placement: typeof p?.name === "string" ? p.name : "Winner",
+							award: typeof a?.title === "string" ? a.title : null,
+						});
+					}
+				}
+			}
+		}
+	} catch (err) {
+		console.error(`Error fetching DoraHacks winners for ${uname}:`, err);
+		if (isAbortError(err)) throw err;
+	}
+	return map;
+}
+
+/**
+ * Fetches the live submission ("buidl") roster for one DoraHacks hackathon.
+ * The v1 hub buidls endpoint is keyed by numeric hackathon id (uname is still
+ * needed for the winner-assignments join), and each row nests the project
+ * under `buidl`. Read-through: returns [] on any error (feed down / WAF /
+ * unknown id) so callers degrade gracefully.
  */
 export async function fetchHackathonSubmissions(
-	uname: string,
+	hackathon: Pick<DoraHacksHackathon, "id" | "uname">,
 ): Promise<DoraHacksSubmission[]> {
 	const out: DoraHacksSubmission[] = [];
 	try {
+		const winners = await fetchWinnerPrizeMap(hackathon.uname);
 		let page = 1;
-		// Hard page cap — DoraHacks events are at most a few hundred submissions.
-		for (let i = 0; i < 6; i++) {
-			const url = `${DORAHACKS_API_BASE}/hackathon-buidls/${encodeURIComponent(
-				uname,
-			)}/?page=${page}&page_size=100`;
+		let reportedTotal: number | null = null;
+		// The cap is a runaway guard, NOT a size assumption. It used to be 6
+		// pages on the reasoning that "DoraHacks events are at most a few
+		// hundred submissions" — but we ask for page_size=100 and DoraHacks
+		// serves 50 regardless, so six pages was 300 rows, not 600. Stellar
+		// Hacks: Real-World ZK has 345, and we published 300 with no hint that
+		// anything was missing (found 2026-09-03 by checking our count against
+		// DoraHacks' own). A truncated read that reports a count is the same
+		// failure as an empty array asserting emptiness.
+		for (let i = 0; i < 40; i++) {
+			const url = `${DORAHACKS_API_BASE}/hackathons/${hackathon.id}/buidls?page=${page}&page_size=100`;
 			const res = await fetch(url, {
 				headers: DORA_BROWSER_HEADERS,
 				next: { revalidate: 3600 },
+				signal: AbortSignal.timeout(5000),
 			});
 			if (!res.ok) break;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const data: any = await res.json();
+			// DoraHacks reports the true total on every page — keep it so the
+			// end of the loop can PROVE it read everything rather than assume.
+			if (typeof data?.count === "number") reportedTotal = data.count;
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const results: any[] = Array.isArray(data?.results) ? data.results : [];
 			for (const s of results) {
-				const prizes = Array.isArray(s?.winner_prizes) ? s.winner_prizes : [];
-				const isWinner = prizes.length > 0;
+				const b = s?.buidl;
+				if (!b || typeof b.id !== "number") continue;
+				const prize = winners.get(b.id) ?? null;
+				const trackName = Array.isArray(s?.tracks)
+					? (s.tracks.find(
+							// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+							(t: any) =>
+								typeof t?.name === "string" && t.name !== "[DEFAULT_TRACK]",
+						)?.name ?? null)
+					: null;
 				out.push({
-					id: `dorahacks-buidl-${s?.id}`,
-					name: typeof s?.name === "string" ? s.name : "Untitled",
-					description: cleanDescription(s?.project_description),
+					id: `dorahacks-buidl-${b.id}`,
+					name: typeof b.name === "string" ? b.name : "Untitled",
+					description: cleanDescription(b.vision),
 					githubUrl:
-						typeof s?.github_page === "string" && s.github_page
-							? s.github_page
+						typeof b.github_url === "string" && b.github_url
+							? b.github_url
 							: null,
 					demoUrl:
-						typeof s?.demo_link === "string" && s.demo_link
-							? s.demo_link
-							: null,
+						typeof b.demo_url === "string" && b.demo_url ? b.demo_url : null,
 					videoUrl:
-						typeof s?.demo_video === "string" && s.demo_video
-							? s.demo_video
+						typeof b.demo_video_url === "string" && b.demo_video_url
+							? b.demo_video_url
 							: null,
-					track:
-						s?.track_obj?.name ??
-						(typeof s?.track === "string" ? s.track : null) ??
-						null,
-					hackathonPlacement: isWinner ? (prizes[0]?.name ?? "Winner") : null,
-					award: isWinner ? (prizes[0]?.award?.title ?? null) : null,
-					isWinner,
-					voteCount: typeof s?.vote_count === "number" ? s.vote_count : 0,
-					url: `https://dorahacks.io/buidl/${s?.id}`,
+					track: trackName,
+					hackathonPlacement: prize ? prize.placement : null,
+					award: prize?.award ?? null,
+					isWinner: !!prize,
+					// The v1 hub API no longer exposes vote counts. This used to be
+					// 0, which reads as "nobody voted" rather than "we cannot
+					// see votes" — every submission on the surface claimed zero.
+					voteCount: null,
+					url: `https://dorahacks.io/buidl/${b.id}`,
 					source: "dorahacks",
 				});
 			}
 			if (!data?.next) break;
 			page += 1;
 		}
+		// Say so when the read was short. Silence here is what let a 13%
+		// under-count ship as though it were the whole set.
+		if (reportedTotal !== null && out.length < reportedTotal)
+			console.error(
+				`DoraHacks ${hackathon.uname}: read ${out.length} of ${reportedTotal} submissions — TRUNCATED (page cap hit). The published count will be short.`,
+			);
 	} catch (err) {
-		console.error(`Error fetching DoraHacks submissions for ${uname}:`, err);
+		console.error(
+			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
+			err,
+		);
+		if (isAbortError(err)) throw err;
 	}
 	return out;
+}
+
+/** One submission's own page, beyond what the event roster lists. */
+export interface DoraHacksBuidlDetail {
+	/** The team's full write-up, markdown as published. null = none written. */
+	description: string | null;
+	/** What the team tagged itself with ("layer1:Stellar", "category:..."). Self-reported. */
+	selfTags: string[];
+	/** Deleted or made private on DoraHacks. */
+	hidden: boolean;
+}
+
+/**
+ * Read one submission's page record. null = DoraHacks answered that it has
+ * no such submission (404). Any other failure throws, so a caller can tell
+ * "gone" from "could not check".
+ */
+export async function fetchBuidlDetail(
+	buidlId: number,
+): Promise<DoraHacksBuidlDetail | null> {
+	const res = await fetch(`${DORAHACKS_API_BASE}/buidls/${buidlId}`, {
+		headers: DORA_BROWSER_HEADERS,
+		signal: AbortSignal.timeout(10_000),
+	});
+	if (res.status === 404) return null;
+	if (!res.ok)
+		throw new Error(`DoraHacks buidl ${buidlId}: HTTP ${res.status}`);
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const d: any = await res.json();
+	const tags: unknown[] = Array.isArray(d?.other_infrastructures)
+		? d.other_infrastructures
+		: [];
+	return {
+		description:
+			typeof d?.description === "string" && d.description.trim()
+				? d.description.trim()
+				: null,
+		selfTags: tags
+			.filter((t): t is string => typeof t === "string" && !!t.trim())
+			.map((t) => t.trim())
+			.slice(0, 30),
+		hidden: !!d?.is_deleted || !!d?.is_private,
+	};
+}
+
+/** One DoraHacks event's own page: what the organizer published. */
+export interface DoraHacksEventDetail {
+	/** The event page, markdown as published (brief, resources, prizes, rules). */
+	description: string | null;
+	summary: string | null;
+	tracks: string[];
+	/** The submission form requires a public repo / a demo video. */
+	repoRequired: boolean;
+	videoRequired: boolean;
+	/** The submission form's own questions, as asked. */
+	submissionQuestions: string[];
+}
+
+/** An event's page from /hackathons/{uname}. null = not found (404); throws
+ * on any other failure, so a failed read never passes for "nothing
+ * published". Only public fields are read. */
+export async function fetchHackathonDetail(
+	uname: string,
+): Promise<DoraHacksEventDetail | null> {
+	const res = await fetch(
+		`${DORAHACKS_API_BASE}/hackathons/${encodeURIComponent(uname)}`,
+		{ headers: DORA_BROWSER_HEADERS, signal: AbortSignal.timeout(10_000) },
+	);
+	if (res.status === 404) return null;
+	if (!res.ok) throw new Error(`DoraHacks event ${uname}: HTTP ${res.status}`);
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const d: any = await res.json();
+	const text = (v: unknown) =>
+		typeof v === "string" && v.trim() ? v.trim() : null;
+	let form: unknown = [];
+	try {
+		form =
+			typeof d?.submission_form === "string"
+				? JSON.parse(d.submission_form)
+				: (d?.submission_form ?? []);
+	} catch {
+		form = [];
+	}
+	return {
+		description: text(d?.description),
+		summary: text(d?.summary),
+		tracks: (Array.isArray(d?.tracks) ? d.tracks : [])
+			.map((t: { name?: unknown; title?: unknown }) =>
+				text(t?.name ?? t?.title),
+			)
+			.filter(
+				(t: string | null): t is string => !!t && t !== "[DEFAULT_TRACK]",
+			),
+		repoRequired: !!d?.mandatory_git_repo_link,
+		videoRequired: !!d?.mandatory_video_link,
+		// "Did you make sure...?$mode:single$option:Yes": the question is the
+		// text before the form's own markup.
+		submissionQuestions: (Array.isArray(form) ? form : [])
+			.map((q: { question?: unknown }) =>
+				typeof q?.question === "string" ? q.question.split("$")[0].trim() : "",
+			)
+			.filter(Boolean)
+			.slice(0, 20),
+	};
 }
 
 /** Parse a DoraHacks placement label ("1st Place - $5,000 in XLM") into a
@@ -242,7 +564,7 @@ export interface LiveRecentWinners {
 /**
  * Build the "Recent Winners" highlight LIVE from DoraHacks: the most-recent
  * ended hackathon whose winners are announced, with its ranked winners derived
- * from each buidl's `winner_prizes`. This is what makes the highlight
+ * from the winner-assignments prizes. This is what makes the highlight
  * auto-update the moment DoraHacks marks winners — no manual data edit. Returns
  * null if none resolve (the caller falls back to the curated constant), and
  * tries the two most-recent ended events in case the very newest hasn't
@@ -255,7 +577,7 @@ export async function fetchLatestHackathonWinners(
 		.filter((h) => h.status === 2 && h.winner_announced)
 		.sort((a, b) => b.end_time - a.end_time);
 	for (const h of ended.slice(0, 2)) {
-		const subs = await fetchHackathonSubmissions(h.uname);
+		const subs = await fetchHackathonSubmissions(h);
 		const winners = subs
 			.filter((s) => s.isWinner)
 			.map((s) => {
@@ -325,7 +647,11 @@ export function formatPrize(amount: number): string {
 /**
  * Gets the DoraHacks hackathon URL
  */
-export function getHackathonUrl(uname: string): string {
+export function getHackathonUrl(
+	h: string | Pick<DoraHacksHackathon, "uname" | "external_url">,
+): string {
+	if (typeof h !== "string" && h.external_url) return h.external_url;
+	const uname = typeof h === "string" ? h : h.uname;
 	return `https://dorahacks.io/hackathon/${uname}/detail`;
 }
 

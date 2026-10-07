@@ -66,3 +66,13 @@ This doc prevents both. Read it before shipping any new public surface. (How the
 ## When this doc is out of date
 
 Update it in the same PR that changes the surface map (new package, new endpoint family, new distribution channel). A stale map is how positioning gaps happen.
+
+## Field-population probes (2026-08-08)
+
+A PR that adds a **served field** must add a probe to
+`scripts/check-field-population.ts`, pinned to a row where the field is
+guaranteed (a curated entry or a hand-verified backfill target). The daily
+api-drift workflow runs it: drift checks the shape agrees with the spec,
+the population guard checks the values actually arrive. Known regressions
+carry `knownFailing: "#issue"` — reported daily as ⚠, non-fatal, removed
+when the issue closes.

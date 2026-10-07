@@ -15,22 +15,48 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
 	applyBuilderNameOverride,
 	handleForName,
+	nameCandidatesFor,
 } from "@/data/builder-name-overrides";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
+import { type BuilderLike, builderCodeActivity } from "@/lib/builder-code";
 import {
 	type BuilderProject,
 	type BuilderRow,
 	codeDerivedBuilderRow,
+	emptyOnStellar,
 	isHandleQuery,
+	onStellarBlock,
 	SKILL_HINT,
 } from "@/lib/builder-code-derived";
+import {
+	admitByCodeLanguage,
+	CODE_EVIDENCE_CAP,
+	languageCandidates,
+} from "@/lib/builder-code-language";
 import { BUILDER_SYNONYMS } from "@/lib/builder-vocabulary";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
+	withReadTimeout,
+} from "@/lib/degraded-read";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { NOT_GONE } from "@/lib/repo-grade";
 import { findPeopleByName } from "@/lib/sdf-people";
+import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 // BuilderRow / BuilderMatch / BuilderCodeEvidence / BuilderProject + SKILL_HINT
@@ -148,7 +174,15 @@ const SUPPORTED_PARAMS = [
 	"fields",
 ] as const;
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Strict unknown-param rejection (sls-040 / #521): `?scfTier=high` (and any
 	// other unsupported key) was silently ignored — the caller got the full
@@ -183,7 +217,16 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let builders: BuilderRow[] = [];
 	let totalMatching = 0;
+	// Every backend read below that fails or times out adds ONE line here
+	// (degraded-read.ts) and the page is served from whatever did load.
+	// Before this a failed read was a quiet 200 with 0 rows — 13 of 100 login
+	// lookups under the 2026-09-14 eval load — which an agent reads as "no
+	// such builder" and the eval read as a miss.
+	const warnings: string[] = [];
+	const rawByLogin = new Map<string, Record<string, unknown>>();
 
+	if (!payload)
+		warnings.push(degradedWarning("builders roster", "no database handle"));
 	if (payload) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
@@ -216,14 +259,33 @@ export async function GET(req: NextRequest) {
 				}
 			}
 
-			const result = await payload.find({
-				collection: "builders",
-				where,
-				limit: 300,
-				depth: 0,
-				sort: "-is_featured",
-			});
+			// Value form (not the surrounding catch): a failed roster read still
+			// lets the code-derived owner rung below answer a handle query.
+			const roster = await degradedRead(
+				"builders roster",
+				() =>
+					payload.find({
+						collection: "builders",
+						where,
+						limit: 300,
+						depth: 0,
+						sort: "-is_featured",
+					}),
+				{ docs: [] as unknown[] },
+				DEFAULT_READ_TIMEOUT_MS,
+			);
+			if (roster.warning) warnings.push(roster.warning);
+			const result = roster.value;
 
+			// Raw docs by login: the page-level onStellar join needs the Passport
+			// repo declarations + the contributor pass (builders.contributions),
+			// which the mapped BuilderRow deliberately does not carry.
+			for (const d of result.docs as unknown as Array<
+				Record<string, unknown>
+			>) {
+				const login = String(d.github_username ?? "");
+				if (login) rawByLogin.set(login.toLowerCase(), d);
+			}
 			builders = (
 				result.docs as Array<{
 					github_username: string;
@@ -261,6 +323,7 @@ export async function GET(req: NextRequest) {
 					url: `https://stellarlight.xyz/builders/${b.github_username}`,
 					match: null,
 					codeEvidence: null,
+					onStellar: null,
 				};
 			});
 
@@ -271,6 +334,93 @@ export async function GET(req: NextRequest) {
 			// mention as if it were verified experience.
 			if (q) {
 				const tokens = q.split(/\s+/).filter(Boolean);
+				// A query token that IS a primary language in the repo index admits
+				// the builders who OWN such a repo, even when their profile prose
+				// never says the word. Measured 2026-09-05: ?q=rust returned 8 rows
+				// while 40 of the 170 served carry "Rust" in onStellar.languages —
+				// "who are experienced Rust Soroban devs" missed most of them.
+				// The match is EXACT and case-insensitive, via GitHub's own casing
+				// (languageCandidates). `primaryLanguage: { like: t }` was a
+				// SUBSTRING test, so `java` matched every JavaScript repo: the page
+				// filled with rows the exact check below discards and the real Java
+				// owners fell off the end. 1-char tokens are skipped rather than
+				// flooding the net (so q="c" stays prose-only).
+				const langProbes = [...new Set(tokens)]
+					.filter((t) => t.length > 1)
+					.slice(0, 4);
+				const langReposByOwner = new Map<string, Record<string, unknown>[]>();
+				if (langProbes.length && builders.length) {
+					try {
+						// ponytail: paged to LANG_REPO_MAX repos; beyond that the roster
+						// is capped and `meta.warnings` says so rather than silently
+						// dropping owners. Raise the ceiling if a real query hits it.
+						const LANG_PAGE = 500;
+						const LANG_REPO_MAX = 2000;
+						// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
+						const langWhere: any = {
+							and: [
+								{ owner: { in: builders.map((b) => b.githubUsername) } },
+								// A 404 repo must not admit a builder to a language
+								// roster — nor be counted in the capped-roster warning.
+								NOT_GONE,
+								{
+									or: langProbes.flatMap((t) =>
+										languageCandidates(t).map((v) => ({
+											primaryLanguage: { equals: v },
+										})),
+									),
+								},
+							],
+						};
+						let page = 1;
+						let read = 0;
+						let langTotal = 0;
+						for (;;) {
+							const lres = await payload.find({
+								collection: "repos",
+								where: langWhere,
+								limit: LANG_PAGE,
+								page,
+								depth: 0,
+								select: {
+									owner: true,
+									fullName: true,
+									url: true,
+									primaryLanguage: true,
+									stars: true,
+									lastCommitAt: true,
+									repoScore: true,
+								},
+							});
+							langTotal = lres.totalDocs;
+							for (const d of lres.docs as unknown as Array<
+								Record<string, unknown>
+							>) {
+								const k = String(d.owner ?? "").toLowerCase();
+								const arr = langReposByOwner.get(k);
+								if (arr) arr.push(d);
+								else langReposByOwner.set(k, [d]);
+							}
+							read += lres.docs.length;
+							if (
+								!lres.docs.length ||
+								!lres.hasNextPage ||
+								read >= LANG_REPO_MAX
+							)
+								break;
+							page++;
+						}
+						if (read < langTotal)
+							warnings.push(
+								`Code-language admission read ${read} of ${langTotal} owned repos matching [${langProbes.join(", ")}] (roster capped at ${LANG_REPO_MAX}) — builders whose only repo in that language falls outside the page are missing from these results. Narrow the query or filter by location to shrink the roster.`,
+							);
+					} catch {
+						// best-effort: on failure admission stays prose-only, as before
+						warnings.push(
+							"Code-language admission could not run (repo index lookup failed) — results are prose-only, so builders proven only by an owned repo's language may be missing.",
+						);
+					}
+				}
 				builders = builders.filter((b) => {
 					const fields: Array<[field: string, text: string]> = [
 						// F1: githubUsername is the record's primary key — q must match it
@@ -290,6 +440,11 @@ export async function GET(req: NextRequest) {
 					const matchedFields = new Set<string>();
 					const matchedProjects = new Map<string, string | null>();
 					const matchedTerms: Record<string, string> = {};
+					const code = admitByCodeLanguage(
+						tokens,
+						langReposByOwner.get(b.githubUsername.toLowerCase()) ?? [],
+					);
+					let viaCode = false;
 					// Each concept must be present (AND across tokens), but a token
 					// matches via any of its synonyms/stems (sls-010) — so
 					// "payments" also hits a "boleto/PIX/remittance" bio.
@@ -312,7 +467,21 @@ export async function GET(req: NextRequest) {
 								}
 							}
 						}
-						if (!tokenHit) return false;
+						// AND still holds: a token the prose missed is admitted ONLY if
+						// it names a language this builder ships in. Anything else
+						// (a location, a product word) still has to hit the prose.
+						if (!tokenHit) {
+							if (!(t in code.terms)) return false;
+							viaCode = true;
+						}
+					}
+					if (viaCode) {
+						// Provenance for the code path: the evidence is the repo, not
+						// the profile — say so, and name the language as INDEXED.
+						matchedFields.add("codeEvidence");
+						for (const [t, lang] of Object.entries(code.terms))
+							matchedTerms[t] ??= lang;
+						b.codeEvidence = code.repos;
 					}
 					b.match = {
 						matchedFields: [...matchedFields],
@@ -320,13 +489,22 @@ export async function GET(req: NextRequest) {
 							([name, slug]) => ({ name, slug }),
 						),
 						matchedTerms,
-						basis: "profile-text",
+						basis: viaCode ? "code-language" : "profile-text",
 					};
 					return true;
 				});
 			}
 
 			totalMatching = builders.length;
+			// Prose hits outrank code-language candidates, so a candidate never
+			// pushes a real prose match off the page. Sort is stable, so the DB's
+			// -is_featured order survives inside each group.
+			if (q)
+				builders.sort(
+					(a, b) =>
+						Number(a.match?.basis === "code-language") -
+						Number(b.match?.basis === "code-language"),
+				);
 			builders = builders.slice(offset, offset + limit);
 
 			// sls-041: repository-backed evidence, fetched ONLY for the returned
@@ -337,28 +515,36 @@ export async function GET(req: NextRequest) {
 			// itself is signal ("no direct code evidence in the index").
 			if (q && builders.length) {
 				const tokens = q.split(/\s+/).filter(Boolean);
-				for (const b of builders) b.codeEvidence = [];
+				// `??=`: a code-language row already carries the repos that admitted
+				// it — top that up here, don't wipe it.
+				for (const b of builders) b.codeEvidence ??= [];
 				try {
 					const byOwner = new Map(
 						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
 					);
-					const rres = await payload.find({
-						collection: "repos",
-						where: { owner: { in: builders.map((b) => b.githubUsername) } },
-						limit: 300,
-						depth: 0,
-						select: {
-							fullName: true,
-							owner: true,
-							url: true,
-							description: true,
-							topics: true,
-							primaryLanguage: true,
-							stars: true,
-							lastCommitAt: true,
-							repoScore: true,
-						},
-					});
+					const rres = await withReadTimeout(
+						payload.find({
+							collection: "repos",
+							where: {
+								...NOT_GONE,
+								owner: { in: builders.map((b) => b.githubUsername) },
+							},
+							limit: 300,
+							depth: 0,
+							select: {
+								fullName: true,
+								owner: true,
+								url: true,
+								description: true,
+								topics: true,
+								primaryLanguage: true,
+								stars: true,
+								lastCommitAt: true,
+								repoScore: true,
+							},
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
 					for (const d of rres.docs as unknown as Array<
 						Record<string, unknown>
 					>) {
@@ -377,9 +563,13 @@ export async function GET(req: NextRequest) {
 						const hits = tokens.some((t) =>
 							expandBuilderTerm(t).some((v) => hay.includes(v)),
 						);
-						if (!hits || holder.codeEvidence.length >= 5) continue;
+						if (!hits || holder.codeEvidence.length >= CODE_EVIDENCE_CAP)
+							continue;
+						const full = String(d.fullName ?? "");
+						// already seeded by the code-language admission above
+						if (holder.codeEvidence.some((e) => e.fullName === full)) continue;
 						holder.codeEvidence.push({
-							fullName: String(d.fullName ?? ""),
+							fullName: full,
 							url: (d.url as string) ?? null,
 							primaryLanguage: (d.primaryLanguage as string) ?? null,
 							stars: typeof d.stars === "number" ? d.stars : 0,
@@ -387,8 +577,9 @@ export async function GET(req: NextRequest) {
 							repoScore: typeof d.repoScore === "number" ? d.repoScore : 0,
 						});
 					}
-				} catch {
-					// best-effort — codeEvidence stays [] on error
+				} catch (e) {
+					// best-effort — codeEvidence stays [] on error, and says so
+					warnings.push(degradedWarning("builders code evidence", e));
 				}
 			}
 
@@ -414,25 +605,32 @@ export async function GET(req: NextRequest) {
 			if (q && !location && totalMatching === 0 && derivedHandle) {
 				// `like` is a substring/case-insensitive net; the exact-login filter
 				// below is the precise cut (q="kale" must NOT become owner kalepail).
-				const owned = await payload.find({
-					collection: "repos",
-					where: { owner: { like: derivedHandle } },
-					limit: 200,
-					depth: 0,
-					select: {
-						fullName: true,
-						owner: true,
-						url: true,
-						primaryLanguage: true,
-						stars: true,
-						lastCommitAt: true,
-						repoScore: true,
-						projectSlug: true,
-						projectName: true,
-					},
-				});
+				const owned = await degradedRead(
+					"builders code-derived owner lookup",
+					() =>
+						payload.find({
+							collection: "repos",
+							where: { ...NOT_GONE, owner: { like: derivedHandle } },
+							limit: 200,
+							depth: 0,
+							select: {
+								fullName: true,
+								owner: true,
+								url: true,
+								primaryLanguage: true,
+								stars: true,
+								lastCommitAt: true,
+								repoScore: true,
+								projectSlug: true,
+								projectName: true,
+							},
+						}),
+					{ docs: [] as unknown[] },
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				if (owned.warning) warnings.push(owned.warning);
 				const mine = (
-					owned.docs as unknown as Array<Record<string, unknown>>
+					owned.value.docs as unknown as Array<Record<string, unknown>>
 				).filter((d) => String(d.owner ?? "").toLowerCase() === derivedHandle);
 				const row = codeDerivedBuilderRow(derivedHandle, mine);
 				if (row) {
@@ -440,13 +638,112 @@ export async function GET(req: NextRequest) {
 					totalMatching = 1;
 				}
 			}
-		} catch {
-			// fall through
+		} catch (e) {
+			// Every read above is wrapped; this is the filter/sort pass throwing
+			// on a data-shape surprise — still an incomplete page, still said.
+			warnings.push(degradedWarning("builders search", e));
 		}
+
+		// onStellar — what each RETURNED builder has actually shipped, from the
+		// repos we index: the same join the /builders/[username] page renders
+		// (owned repos + Passport-declared repos + the contributor pass + a
+		// project whose GitHub org IS the person). Query-independent and on
+		// every row, unlike `codeEvidence` (query-scoped) and `projects`
+		// (Passport-declared). Before this, the unfiltered listing — the call
+		// Raven makes 450+ times a week — read projectCount 0 / codeEvidence
+		// null on every row: an empty ecosystem. Page-scoped (≤ limit rows),
+		// best-effort: null on failure, never a block of zeros.
+		if (builders.length) {
+			try {
+				const activity = await withReadTimeout(
+					builderCodeActivity(
+						payload,
+						builders.map((b) => {
+							const raw = rawByLogin.get(b.githubUsername.toLowerCase());
+							return {
+								github_username: b.githubUsername,
+								projects: (raw?.projects as BuilderLike["projects"]) ?? null,
+								contributions:
+									(raw?.contributions as BuilderLike["contributions"]) ?? null,
+							};
+						}),
+					),
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				for (const b of builders) {
+					const a = activity.get(b.githubUsername.toLowerCase());
+					b.onStellar = a ? onStellarBlock(a) : emptyOnStellar();
+				}
+				// Order by the activity we just joined. The DB sort is
+				// `-is_featured`, and onStellar is computed AFTER it, so until
+				// now the roster came back featured-first then effectively
+				// arbitrary: a builder with 833 commits in 90 days sat below
+				// three with zero, one of whose last commit was a year old
+				// (observed 2026-09-03). This endpoint is for finding someone
+				// to recruit or collaborate with — it never promised a ranking,
+				// but showing an inactive profile above an active one serves
+				// that badly when the evidence to order by is already in hand.
+				// Featured profiles keep their place at the top; a builder whose
+				// activity could not be computed (onStellar null) sorts last
+				// rather than being treated as a zero.
+				const rank = (b: (typeof builders)[number]) => {
+					const o = b.onStellar;
+					if (!o) return [-1, -1, -1] as const;
+					return [
+						o.commits90d ?? 0,
+						o.contributedCommits12m ?? 0,
+						o.lastCommitAt ? Date.parse(o.lastCommitAt) || 0 : 0,
+					] as const;
+				};
+				// A code-language row is a candidate, not a prose match: it sorts
+				// below every prose hit (featured or not), and among themselves by
+				// how recently the repo that admitted them was committed to.
+				const candidate = (b: (typeof builders)[number]) =>
+					b.match?.basis === "code-language";
+				const evidenceAt = (b: (typeof builders)[number]) =>
+					Date.parse(
+						b.codeEvidence?.[0]?.lastCommitAt ??
+							b.onStellar?.lastCommitAt ??
+							"",
+					) || 0;
+				builders.sort((x, y) => {
+					if (candidate(x) !== candidate(y)) return candidate(x) ? 1 : -1;
+					if (candidate(x)) return evidenceAt(y) - evidenceAt(x);
+					if (!!y.isFeatured !== !!x.isFeatured) return y.isFeatured ? 1 : -1;
+					const a = rank(x);
+					const b2 = rank(y);
+					return b2[0] - a[0] || b2[1] - a[1] || b2[2] - a[2];
+				});
+			} catch (e) {
+				// leave onStellar null — "could not compute", not "nothing" — and
+				// say which read could not compute it
+				warnings.push(degradedWarning("builders on-Stellar activity", e));
+			}
+		}
+	}
+
+	// An empty page behind a failed read is an outage, not a checked-empty.
+	if (isDegraded(warnings) && builders.length === 0) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/builders",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "builders read failed",
+			advisory: `${warnings.join("; ")}. This is an outage, NOT a claim that no builder matches. Retry after a moment.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/builders",
 		query: q,
 		filters: { location, limit },
@@ -460,13 +757,18 @@ export async function GET(req: NextRequest) {
 	let collectionTotal = totalMatching;
 	if (payload && totalMatching === 0) {
 		try {
-			const c = await payload.count({
-				collection: "builders",
-				where: { visibility: { not_equals: "hidden" } },
-			});
+			const c = await withReadTimeout(
+				payload.count({
+					collection: "builders",
+					where: { visibility: { not_equals: "hidden" } },
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			collectionTotal = c.totalDocs;
-		} catch {
-			// keep collectionTotal as-is on a count failure
+		} catch (e) {
+			// keep collectionTotal as-is on a count failure — and say so: the
+			// advisory below reads 0 as "unseeded", which a failed count is not
+			warnings.push(degradedWarning("builders collection count", e));
 		}
 	}
 
@@ -494,74 +796,143 @@ export async function GET(req: NextRequest) {
 	// identify them concretely (name/role/section) instead of just saying "not a
 	// builder" — this is the honest, positive answer to "who is <person>".
 	const sdfMatches = personLookup && q ? findPeopleByName(q) : [];
+	// Curated builders whose name partially matches — offered as candidates in
+	// the empty-state advisory, never auto-resolved into a row.
+	const nameSuggestions = q ? nameCandidatesFor(q) : [];
 
 	const builderAdvisory =
 		totalMatching > 0
 			? undefined
-			: collectionTotal === 0
+			: isDegraded(warnings) && totalMatching === 0
 				? {
 						summary:
-							"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
+							"A builders read failed during this request (see meta.warnings). The empty result is an outage, NOT a filter miss and NOT an empty directory. Retry after a moment.",
 						channels: builderChannels,
 					}
-				: sdfMatches.length
+				: collectionTotal === 0 && !isDegraded(warnings)
 					? {
-							summary: `${sdfMatches
-								.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
-								.join(
-									"; ",
-								)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
-							scope:
-								"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
-							sdfPeople: sdfMatches,
-							tryInstead: [
-								{
-									endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
-									why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
-								},
-							],
+							summary:
+								"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
 							channels: builderChannels,
 						}
-					: personLookup
+					: sdfMatches.length
 						? {
-								summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+								summary: `${sdfMatches
+									.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
+									.join(
+										"; ",
+									)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
 								scope:
 									"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+								sdfPeople: sdfMatches,
 								tryInstead: [
 									{
-										endpoint: "/api/people",
-										why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
-									},
-									{
-										endpoint: "/api/research",
-										why: "doc/spec/blog authorship across the SDF corpus",
+										endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+										why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
 									},
 								],
 								channels: builderChannels,
 							}
-						: {
-								summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory.`,
-								channels: builderChannels,
-							};
+						: personLookup
+							? {
+									summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+									scope:
+										"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
+									tryInstead: [
+										{
+											endpoint: "/api/people",
+											why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
+										},
+										{
+											endpoint: "/api/research",
+											why: "doc/spec/blog authorship across the SDF corpus",
+										},
+									],
+									channels: builderChannels,
+								}
+							: {
+									// The last-resort branch used to end the conversation: a flat
+									// "none match these filters" with nowhere to go. That reads as
+									// "we don't know this", when for the real queries that land
+									// here we usually DO hold the answer somewhere else — `rice`
+									// is Justin Rice in /api/people, `reflector` and `strupey` are
+									// projects, `tyler` is a curated builder under @kalepail. An
+									// index answering only for itself turns its own scope
+									// boundary into a claim about the ecosystem.
+									summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
+										nameSuggestions.length
+											? `. The directory does hold ${nameSuggestions
+													.map((c) => `${c.name} (@${c.handle})`)
+													.join(
+														", ",
+													)} — if that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
+											: ""
+									}`,
+									...(nameSuggestions.length
+										? { didYouMean: nameSuggestions }
+										: {}),
+									// Named surfaces, not a shrug: whatever this is, one of these
+									// indexes is the one that would hold it.
+									tryInstead: [
+										{
+											endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a person's name — the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
+										},
+										{
+											endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a PROJECT or product name rather than a person — single-word queries here are very often a project",
+										},
+										{
+											endpoint: `/api/repos/search?q=${encodeURIComponent(q ?? "")}`,
+											why: "if the query is a GitHub org/repo name — indexed code the builder directory doesn't mirror",
+										},
+									],
+									channels: builderChannels,
+								};
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
+				...matchModeMeta(q ? "expanded" : "all"),
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),
 				filters: { q, location, limit, offset },
 				counts: { returned: builders.length, total: totalMatching },
+				...(warnings.length ? { warnings } : {}),
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name).",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word — matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis — the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
-			},
+				// sls-025 shape, ported from /api/repos/search: a zero-result page
+				// says exactly what WAS searched. `strupey` was the 4th-most-asked
+				// query on this endpoint (17 real hits in 14d) and answered `[]`
+				// with no signal — which an agent reads as "no such person",
+				// though the only honest claim is "not in these two indexes".
+				...(q && builders.length === 0
+					? {
+							searched: {
+								tokens: q.split(/\s+/).filter(Boolean),
+								indexes: [
+									"builder profiles (Stellar Passport: displayName, githubUsername, bio, roleTitle, projects)",
+									"code-derived owners (GitHub logins owning indexed Stellar repos, no profile required)",
+									"primary language of the repos each builder owns (a language token admits its owners even when their prose never says it)",
+								],
+								note: "0 builders matched. All three identity paths were searched — the curated profile index, the code-derived owner index AND the owned-repo language index — including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
+							},
+						}
+					: {}),
+			}),
 			builders: builders.map((b) => pickFields(b, fieldsWanted)),
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+				...serverTiming(startedAt),
+				// A page a failed read thinned is never pinned — an hour of a
+				// degraded roster served to every caller is the wrong trade.
+				"Cache-Control": isDegraded(warnings)
+					? "no-store"
+					: "public, s-maxage=3600, stale-while-revalidate=7200",
 			},
 		},
 	);

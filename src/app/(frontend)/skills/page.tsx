@@ -4,15 +4,21 @@ import {
 	CURATED_SKILLS,
 	type CuratedSkill,
 } from "@/lib/integrations/curated-skills";
-import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
+import {
+	fetchSdfSkillCatalog,
+	mergeSkillLists,
+	registrySkillView,
+	SKILLS_REGISTRY,
+} from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-	title: "Skills Marketplace | Stellar AI Tools | StellarLight",
+	title: "Stellar Skills for AI Agents",
 	description:
-		"The canonical directory of AI skills, MCP servers, and agent tools for Stellar builders. Official SDF skills, Stellarlight tools, lumenloop, and community submissions — all installable via npx in one click.",
+		"Installable skills that teach an AI agent to build on Stellar: smart contracts, assets, payments, data and dapp patterns, each backed by the live docs.",
+	alternates: { canonical: "/skills" },
 };
 
 interface UnifiedSkill {
@@ -22,7 +28,8 @@ interface UnifiedSkill {
 	description: string;
 	source: string;
 	kind: string;
-	install: string;
+	registry?: string;
+	install?: string;
 	installAlt?: { label: string; command: string }[];
 	repository?: string;
 	homepage?: string;
@@ -40,22 +47,10 @@ interface UnifiedSkill {
  */
 async function loadSkills(): Promise<UnifiedSkill[]> {
 	// SDF skills (proxied)
-	const sdfRaw = await fetchSdfSkillCatalog().catch(() => []);
-	const sdf: UnifiedSkill[] = sdfRaw.map((s) => ({
-		slug: s.name,
-		name: humanize(s.name),
-		tagline: s.description.split(/[.!?]\s/)[0],
-		description: s.description,
-		source: "sdf",
-		kind: "skill-md",
-		install: `npx skills add stellar/${s.name}`,
-		homepage: s.url,
-		compatibility: ["Claude Code", "Codex", "Cursor", "OpenClaw"],
-		targetUser: ["dev"],
-		tags: [s.name, "SDF"],
-	}));
+	const catalog = await fetchSdfSkillCatalog().catch(() => null);
+	const sdf: UnifiedSkill[] = (catalog?.skills ?? []).map(registrySkillView);
+	const registryNames = new Set((catalog?.skills ?? []).map((s) => s.name));
 
-	// Curated
 	const curated: UnifiedSkill[] = CURATED_SKILLS.map((s: CuratedSkill) => ({
 		slug: s.slug,
 		name: s.name,
@@ -63,6 +58,9 @@ async function loadSkills(): Promise<UnifiedSkill[]> {
 		description: s.description,
 		source: s.source,
 		kind: s.kind,
+		...(s.registryName && registryNames.has(s.registryName)
+			? { registry: SKILLS_REGISTRY }
+			: {}),
 		install: s.install,
 		installAlt: s.installAlt,
 		repository: s.repository,
@@ -122,16 +120,12 @@ async function loadSkills(): Promise<UnifiedSkill[]> {
 		}
 	}
 
-	// Dedup by slug (curated wins over SDF wins over community)
-	const seen = new Set<string>();
-	const merged: UnifiedSkill[] = [];
-	for (const list of [curated, sdf, community]) {
-		for (const s of list) {
-			if (seen.has(s.slug)) continue;
-			seen.add(s.slug);
-			merged.push(s);
-		}
-	}
+	const { all: merged } = mergeSkillLists(
+		curated,
+		sdf,
+		community,
+		CURATED_SKILLS.flatMap((s) => (s.registryName ? [s.registryName] : [])),
+	);
 
 	// Featured first, then alpha
 	merged.sort((a, b) => {
@@ -141,17 +135,6 @@ async function loadSkills(): Promise<UnifiedSkill[]> {
 	});
 
 	return merged;
-}
-
-function humanize(slug: string): string {
-	return slug
-		.split("-")
-		.map((w) => {
-			if (w === "zk") return "ZK";
-			if (w === "dapp") return "dApp";
-			return (w[0]?.toUpperCase() ?? "") + w.slice(1);
-		})
-		.join(" ");
 }
 
 export default async function SkillsPage() {

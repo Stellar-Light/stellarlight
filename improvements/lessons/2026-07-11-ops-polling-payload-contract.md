@@ -1,5 +1,7 @@
 # Ops: polling loops, Payload API shapes, contract gates (2026-07-11)
 
+Guard: .github/workflows/contract-gate.yml — contract:check fails a spec edit shipped without regenerated specs/openapi.json + api-client types (the polling-loop ban, the sort-string trap and the shared rate budget are process rules with no check)
+
 **Background CI-wait loops are banned.** Two multi-hour hangs from the same bug: a wait-loop's inline jq had broken quote-escaping, errored on every poll, treated error as "pending", and slept in circles — while the PR it watched had been green for an hour. Check-and-merge in the foreground with short direct calls; if a wait is unavoidable, the failure mode of the CHECK must be loud, never "keep waiting".
 
 **Payload find() gotchas (verified live):** `sort` must be a comma-separated STRING — the array form `["-a","-b"]` is silently ignored (a rescan wave picked hackathon repos over the score-74 SDK). Add to the existing list: stored URLs are www-stripped; logger writes stdout.

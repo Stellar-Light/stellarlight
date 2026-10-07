@@ -3,6 +3,7 @@
  * opens "Hermes is a decentralized perpetual exchange…". Tag Zenex SCF + clean
  * the description; retire the stale duplicate Hermes record (Draft). Verified by
  * the audit (SCF #32 + GitHub rename zenith-protocols/hermes). Dry-run default. */
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

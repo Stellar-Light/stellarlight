@@ -1,0 +1,28 @@
+{
+ "slug": "pluto-loans",
+ "url": "https://plutoloans.com/",
+ "finalUrl": null,
+ "fetchedAt": "2026-08-28T00:00:00.000Z",
+ "httpStatus": 0,
+ "headers": {
+  "date": null,
+  "etag": null,
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": null,
+ "bodyTextChars": 0,
+ "markers": [
+  {
+   "marker": "domain resolves",
+   "found": false,
+   "excerpt": "curl returned HTTP 000 with a zero-byte body: the host does not resolve. Not a 404 page, not a parked page, no server answered."
+  },
+  {
+   "marker": "recent repository activity",
+   "found": false,
+   "excerpt": "plutodao newest push: loans-sdk 2023-07-20; loans-sdk-demo 2023-07-18; gov 2022-08-01. No activity in over two years."
+  }
+ ],
+ "note": "Negative-evidence receipt for an Inactive ruling. Captured by hand because capture-receipt.ts requires a 200 to hash a body; a dead host has no body, and that absence IS the evidence. Re-check by resolving the domain and reading plutodao's push dates. fetchedAt was hand-typed as 2026-08-29 (a future date at capture time); corrected to the actual capture day 2026-08-28. Negative-evidence receipt: httpStatus 0 = no server answered."
+}

@@ -21,13 +21,12 @@
  * first login.
  */
 
+import "./load-env";
 import { randomBytes } from "node:crypto";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
 
 // Next.js reads .env.local; tsx scripts must load it explicitly.
-loadEnv({ path: ".env.local" });
 
 const PUBLISH = process.argv.includes("--publish");
 

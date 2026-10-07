@@ -24,6 +24,9 @@ jobs:
         with: { node-version: "24", cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - name: Build the queue
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/status-recency-report.ts --limit=10 | tee queue.md | tee -a $GITHUB_STEP_SUMMARY
       - name: Upsert the rolling queue issue
         env:

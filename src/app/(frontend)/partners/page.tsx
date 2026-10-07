@@ -21,9 +21,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
  */
 
 export const metadata: Metadata = {
-	title: "Stellar Partners | Stellar Light",
+	title: "Stellar Partners & Service Providers",
 	description:
-		"Ecosystem partners builders can integrate with on Stellar — anchors, on/off ramps, infrastructure, tooling, protocols. Each profile is partner-maintained and freshness-verified.",
+		"Anchors, infrastructure providers, audit firms and integration partners serving the Stellar ecosystem, with what each one actually offers.",
+	alternates: { canonical: "/partners" },
 };
 
 export const revalidate = 60;

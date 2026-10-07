@@ -1,5 +1,9 @@
 # 2026-07-16 — slice truth, gated floors, windowed guards (quality-week lessons)
 
+Guard: src/lib/__tests__/research-rank.test.ts — class 17: the full-lexical floor needs the discriminating gate and never fires on a recencyIntent query
+Guard: scripts/eval/golden-questions.json — class 17: "SCF handbook link" and the protocol-currency cases are the permanent net
+Guard: none — class 16: nothing pins stellarTvlOf() to chainTvls.Stellar; a test would feed a multichain protocol JSON and assert the headline total is never written as Stellar TVL (classes 18–19 are methods, not checks)
+
 Four durable classes surfaced in one week (waves: `quality-week-2026-07-13-16.md`).
 Each got a mechanized guard; the classes join the README table (#16–#19).
 

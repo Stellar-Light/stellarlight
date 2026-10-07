@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * ResearchDocs — chunked, embedded primary-source content for the
@@ -56,10 +57,10 @@ export const ResearchDocs: CollectionConfig = {
 			"Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.",
 	},
 	access: {
-		read: ({ req }) => !!req.user,
+		read: adminOnly,
 		create: () => false,
 		update: () => false,
-		delete: ({ req }) => !!req.user,
+		delete: adminOnly,
 	},
 	fields: [
 		{
@@ -82,6 +83,10 @@ export const ResearchDocs: CollectionConfig = {
 				{
 					label: "Lumenloop Research (ecosystem analyses + weekly roundups)",
 					value: "lumenloop-research",
+				},
+				{
+					label: "Repo docs (canonical in-repo documentation)",
+					value: "repo-docs",
 				},
 				{
 					label: "Audit (sorobansecurity.com)",
@@ -144,6 +149,14 @@ export const ResearchDocs: CollectionConfig = {
 					"Severity bucket. For audits, inferred from the chunk's section heading; for incidents, the impact of the exploit. Set when source='audit' or source='incident'.",
 			},
 		},
+		{
+			// CAP crosswalk facts (source=cap only), parsed from the CAP's own
+			// preamble at ingest: whether the CAP is real (Status) and which
+			// protocol shipped it (Protocol version). Null = absent/TBD upstream.
+			name: "capStatus",
+			type: "text",
+		},
+		{ name: "capProtocolVersion", type: "number" },
 		{
 			name: "title",
 			type: "text",
@@ -220,6 +233,22 @@ export const ResearchDocs: CollectionConfig = {
 			type: "date",
 			admin: {
 				description: "Original publish date of the parent doc, if known",
+			},
+		},
+		{
+			name: "docKind",
+			type: "text",
+			admin: {
+				description:
+					"spec | guide | article | data — separates staleness-sensitive docs (guides) from canonical ones (specs: old AND authoritative). Deterministic, stamped at ingest.",
+			},
+		},
+		{
+			name: "docVersionStatus",
+			type: "text",
+			admin: {
+				description:
+					"current | supported | deprecated — SDK-version verdict for version-bearing content (wasm32-unknown-unknown => deprecated), via the same dated table repos use. Null = names no version signal.",
 			},
 		},
 		{

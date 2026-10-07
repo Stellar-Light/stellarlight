@@ -61,6 +61,10 @@ interface LogArgs {
 	resultCount?: number;
 	/** Match tier served (projects/search) or retrieval mode (research). */
 	matchMode?: string;
+	/** HTTP status answered (200 on the success path, the 5xx on a failure path). */
+	status?: number;
+	/** Date.now() at the start of the handler; the log stores the elapsed ms. */
+	startedAt?: number;
 }
 
 /** Log a hit. Always returns immediately — DB write is fire-and-forget. */
@@ -71,7 +75,13 @@ export function logApiHit({
 	filters,
 	resultCount,
 	matchMode,
+	status,
+	startedAt,
 }: LogArgs): void {
+	const durationMs =
+		typeof startedAt === "number"
+			? Math.max(0, Date.now() - startedAt)
+			: undefined;
 	const ua = req.headers.get("user-agent");
 	const scoutVersion = req.headers.get("x-scout-version") || undefined;
 	const country =
@@ -96,6 +106,10 @@ export function logApiHit({
 			if (!payload) return;
 			await payload.create({
 				collection: "api-usage",
+				// A fire-and-forget insert needs no transaction; on a replica set
+				// each one otherwise costs a start, a majority commit and a
+				// connection the request path is waiting for.
+				disableTransaction: true,
 				data: {
 					endpoint,
 					query: cleanQuery,
@@ -105,6 +119,8 @@ export function logApiHit({
 					filtersJson,
 					...(typeof resultCount === "number" ? { resultCount } : {}),
 					...(matchMode ? { matchMode } : {}),
+					...(typeof status === "number" ? { status } : {}),
+					...(typeof durationMs === "number" ? { durationMs } : {}),
 				},
 			});
 		} catch {

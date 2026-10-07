@@ -22,6 +22,16 @@
  * URLs that no longer appear anywhere in the directory get deleted
  * (so the dashboard only shows URLs currently referenced).
  *
+ * Two verdicts, two histories (lessons class 32 — see src/lib/probe-external):
+ *   error   PROVEN broken — 404/410, host does not resolve, connection
+ *           refused. A finding on the first run (consecutiveFailures).
+ *   blocked NO verdict — bot wall, 5xx, timeout, bad certificate. Proves
+ *           nothing on any single run, so it never counts as a failure;
+ *           instead consecutiveUnverifiable tracks the streak and
+ *           UNVERIFIABLE_RUNS_TO_ESCALATE consecutive runs sets needsReview.
+ *           That is how a permanently sick origin still reaches a human
+ *           without a transient 503 being reported as a dead link.
+ *
  * Usage:
  *   pnpm exec tsx scripts/check-links.ts             # report mode only
  *   pnpm exec tsx scripts/check-links.ts --execute   # actually write to DB
@@ -30,14 +40,30 @@
  * notification when new failures appear.
  */
 
-import { config as loadEnv } from "dotenv";
-
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
-import { getPayload } from "payload";
+import "./load-env";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
+import {
+	type LinkStatus,
+	nextLinkHistory,
+	UNVERIFIABLE_RUNS_TO_ESCALATE,
+} from "../src/lib/link-history";
+import {
+	classifyPage,
+	type PageVerdict,
+	readPage,
+} from "../src/lib/page-verdict";
+import {
+	classifyExternalError,
+	classifyExternalStatus,
+	isBotWall,
+} from "../src/lib/probe-external";
 import configPromise from "../src/payload.config";
+import { getPayloadOrInconclusive } from "./lib/payload-connect";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const EXECUTE = process.argv.includes("--execute");
 const CONCURRENCY = 5;
@@ -45,7 +71,7 @@ const TIMEOUT_MS = 10_000;
 const USER_AGENT =
 	"StellarLightLinkChecker/1.0 (+https://stellarlight.xyz; admin@stellarlight.xyz)";
 
-type Status = "ok" | "redirect" | "blocked" | "error";
+type Status = LinkStatus;
 
 interface Target {
 	collection: string;
@@ -60,6 +86,9 @@ interface CheckResult {
 	statusCode: number | null;
 	errorReason: string | null;
 	redirectTo: string | null;
+	pageTitle?: string | null;
+	pageVerdict?: PageVerdict | null;
+	finalHost?: string | null;
 }
 
 interface UrlEntry {
@@ -100,6 +129,7 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 	for (const p of projects.docs as Array<{
 		slug: string;
 		name: string;
+		status?: string;
 		links?: {
 			website?: string;
 			github?: string;
@@ -111,6 +141,14 @@ async function collectAllUrls(payload: any): Promise<Map<string, Target[]>> {
 			collection: "projects",
 			recordSlug: p.slug,
 			recordName: p.name,
+			// A broken link means two different things and they were counted as
+			// one. On a LIVE row it is a defect: either our citation is wrong, or
+			// the product died and we have not noticed — both need a human. On a
+			// row we already call Inactive or Draft it is CORROBORATION: the site
+			// is gone because the project is, which is what the row already says.
+			// apay.io is the example — 404, and the row has read "Product dead
+			// (human-confirmed 2026-07-11)" since July.
+			recordStatus: p.status ?? null,
 		};
 		add(p.links?.website, { ...ctx, field: "links.website" });
 		add(p.links?.github, { ...ctx, field: "links.github" });
@@ -290,37 +328,110 @@ async function checkUrl(url: string): Promise<CheckResult> {
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
 	try {
-		const res = await fetch(url, {
-			method: "HEAD",
-			redirect: "manual",
-			headers: {
-				"User-Agent": USER_AGENT,
-				Accept: "*/*",
-			},
-			signal: controller.signal,
-		});
-
-		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
-		// Retry with GET if HEAD says it's broken.
-		if (
-			res.status >= 400 &&
-			res.status !== 401 &&
-			res.status !== 403 &&
-			res.status !== 429 &&
-			res.status < 500
-		) {
-			const getRes = await fetch(url, {
-				method: "GET",
+		const hop = (method: "HEAD" | "GET", u: string) =>
+			fetch(u, {
+				method,
 				redirect: "manual",
 				headers: { "User-Agent": USER_AGENT, Accept: "*/*" },
 				signal: controller.signal,
 			});
-			return summarize(getRes, url);
+		// A SAME-SITE redirect is a hop, not an outcome. nodies.app answers
+		// 308 -> https://www.nodies.app/ which serves 200 — a perfectly live
+		// site — but "redirect" never stamps lastSuccessAt (link-history.ts),
+		// so every www/apex/https-canonicalizing site sat forever with no
+		// successful check, the basis upgrader skipped it, and its row showed
+		// Live with no source (386 rows on the 2026-08-27 dry run; guard D's
+		// F slice). Follow up to 3 same-site hops and judge the FINAL answer.
+		// An OFFSITE redirect stays a first-class result — the parked-domain /
+		// hijack detector depends on seeing it (45 found in the 08-21 sweep).
+		const sameSite = (a: string, b: string) =>
+			a.replace(/^www\./, "") === b.replace(/^www\./, "");
+		const followSameSite = async (
+			first: Response,
+			method: "HEAD" | "GET",
+		): Promise<Response> => {
+			let res = first;
+			let hops = 0;
+			let cur = url;
+			while (
+				res.status >= 300 &&
+				res.status < 400 &&
+				hops < 3 &&
+				res.headers.get("location")
+			) {
+				// resolve against the CURRENT hop — a relative Location on hop 2+
+				// must not resolve against the original URL
+				const next = new URL(res.headers.get("location") as string, cur);
+				if (!sameSite(new URL(url).hostname, next.hostname)) break;
+				hops++;
+				cur = next.href;
+				res = await hop(method, cur);
+			}
+			return res;
+		};
+		let res = await followSameSite(await hop("HEAD", url), "HEAD");
+
+		// Some sites (GitHub for one) return 404/405 on HEAD but 200 on GET.
+		// Retry with GET if HEAD says it's broken — but not through a bot wall,
+		// where a second request just burns the target's rate limit. The GET
+		// must walk same-site hops too: lulpay.com answers HEAD 405 with no
+		// Location, then GET 301 -> www.lulpay.com -> 200. Judging the bare GET
+		// stamped "redirect" — never a success — on every HEAD-rejecting,
+		// canonicalizing host (2026-09-01 no-check triage: lul, lulpay,
+		// loto-punto, venerez). Falling through (instead of returning here)
+		// also lets a GET 200 reach the page-verdict read below.
+		if (res.status >= 400 && res.status < 500 && !isBotWall(res.status)) {
+			res = await followSameSite(await hop("GET", url), "GET");
 		}
 
-		return summarize(res, url);
+		const base = summarize(res, url);
+		if (base.status === "ok") {
+			// The 2xx is only the beginning of the evidence (class: a 200 is not
+			// a business). Read what it served; any failure here leaves the
+			// verdict unknown, never downgrades.
+			try {
+				const page = await readPage(url, controller.signal, USER_AGENT);
+				const finalHost = page.finalUrl
+					? new URL(page.finalUrl).hostname
+					: null;
+				const v = classifyPage({
+					title: page.title,
+					metaDescription: page.meta,
+					bodyStart: page.body,
+					requestedHost: new URL(url).hostname,
+					finalHost,
+				});
+				return {
+					...base,
+					pageTitle: page.title?.slice(0, 120) ?? null,
+					pageVerdict: v.verdict,
+					finalHost,
+				};
+			} catch {
+				return { ...base, pageVerdict: "unknown" };
+			}
+		}
+		if (base.status === "redirect" && base.redirectTo) {
+			const finalHost = new URL(base.redirectTo).hostname;
+			const v = classifyPage({
+				requestedHost: new URL(url).hostname,
+				finalHost,
+			});
+			return {
+				...base,
+				finalHost,
+				pageVerdict: v.verdict === "offsite-redirect" ? v.verdict : null,
+			};
+		}
+		return base;
 	} catch (err) {
 		const e = err as Error & { code?: string; cause?: unknown };
+		// Class 32: a thrown fetch splits two ways. ENOTFOUND / ECONNREFUSED
+		// means the host is GONE — proven broken on the first run. A timeout or
+		// a bad certificate means we could not look; the cert error in
+		// particular proves a server IS there. Those become `blocked` and are
+		// escalated by streak length, not by a single run.
+		const { verdict } = classifyExternalError(err);
 		let reason: string;
 		if (e.name === "AbortError") {
 			reason = `timeout ${TIMEOUT_MS / 1000}s`;
@@ -333,7 +444,7 @@ async function checkUrl(url: string): Promise<CheckResult> {
 		}
 		return {
 			url,
-			status: "error",
+			status: verdict === "absent" ? "error" : "blocked",
 			statusCode: null,
 			errorReason: reason,
 			redirectTo: null,
@@ -360,12 +471,9 @@ function summarize(res: Response, requestedUrl: string): CheckResult {
 	// Bot-protection walls (X/Twitter, LinkedIn, Cloudflare challenges): the
 	// link may be perfectly alive but unverifiable by a bot. Distinct status so
 	// it never pollutes the error count — "can't verify" is not "dead".
-	if (
-		res.status === 401 ||
-		res.status === 403 ||
-		res.status === 429 ||
-		res.status === 999
-	) {
+	// This file had the idea first; isBotWall now shares the set with every
+	// other detector (src/lib/probe-external, class 32).
+	if (isBotWall(res.status)) {
 		return {
 			url,
 			status: "blocked",
@@ -382,6 +490,22 @@ function summarize(res: Response, requestedUrl: string): CheckResult {
 			statusCode: res.status,
 			errorReason: null,
 			redirectTo: location ? new URL(location, url).href : null,
+		};
+	}
+	// A 5xx is the ORIGIN failing, not the link being wrong — one run proves
+	// nothing (class 32). It joins the bot walls in `blocked`, and the streak
+	// counter escalates it: a URL nobody could verify for
+	// UNVERIFIABLE_RUNS_TO_ESCALATE consecutive days sets `needsReview`, so a
+	// permanently sick origin still reaches a human instead of resting at
+	// "blocked" forever. Only a verdict of `absent` (404/410 here) is an error
+	// on sight.
+	if (classifyExternalStatus(res.status) !== "absent") {
+		return {
+			url,
+			status: "blocked",
+			statusCode: res.status,
+			errorReason: `server-error HTTP ${res.status}`,
+			redirectTo: null,
 		};
 	}
 	return {
@@ -418,7 +542,7 @@ async function main() {
 	console.log(`Curator Agent — Link health checker`);
 	console.log(`Mode: ${EXECUTE ? "EXECUTE (writes to DB)" : "DRY RUN"}\n`);
 
-	const payload = await getPayload({ config: await configPromise });
+	const payload = await getPayloadOrInconclusive(await configPromise);
 	const urls = await collectAllUrls(payload);
 
 	const entries: UrlEntry[] = Array.from(urls.entries()).map(
@@ -450,9 +574,9 @@ async function main() {
 	console.log(`  ok:       ${ok}`);
 	console.log(`  redirect: ${redirect}`);
 	console.log(
-		`  blocked:  ${blocked} (bot-protection — unverifiable, not dead)`,
+		`  blocked:  ${blocked} (no verdict this run — bot wall / 5xx / timeout / bad cert)`,
 	);
-	console.log(`  error:    ${error}\n`);
+	console.log(`  error:    ${error} (proven broken — 404/410/DNS/refused)\n`);
 
 	if (error > 0) {
 		console.log(`Errors:`);
@@ -461,6 +585,127 @@ async function main() {
 				? `HTTP ${r.statusCode}`
 				: (r.errorReason ?? "unknown");
 			console.log(`  ${code.padEnd(20)} ${r.url}`);
+			for (const t of r.targets) {
+				console.log(`      ↳ ${t.collection}/${t.recordSlug}.${t.field}`);
+			}
+		}
+		console.log("");
+	}
+
+	// The proven-broken set, written where the improvement ledger can read it.
+	// This checker has been finding these every day and the only consumer was
+	// the admin dashboard, so 108 dead citations — 41 of them GitHub links on
+	// project rows, 26 on Live ones — were detected daily and never queued for
+	// anyone. Only `error` is written: a blocked probe proves nothing, and the
+	// escalation for those is the streak below, not this file.
+	// A citation is "only on retired rows" when EVERY record that cites it is
+	// already Inactive or Draft. One live citer is enough to make it a defect —
+	// a shared URL is not excused by the dead rows that also point at it.
+	const RETIRED = new Set(["Inactive", "Draft"]);
+	const brokenRows = results
+		.filter((r) => r.status === "error")
+		.map((r) => {
+			const citers = r.targets.filter((t) => t.collection === "projects");
+			return {
+				onlyOnRetired:
+					citers.length > 0 &&
+					citers.every((t) =>
+						RETIRED.has(String((t as { recordStatus?: string }).recordStatus)),
+					),
+				row: {
+					url: r.url,
+					httpStatus: r.statusCode ?? null,
+					reason: r.errorReason ?? null,
+					targets: r.targets.map(
+						(t) => `${t.collection}/${t.recordSlug}.${t.field}`,
+					),
+					citedByStatus: r.targets.map(
+						(t) =>
+							`${t.recordSlug}: ${(t as { recordStatus?: string }).recordStatus ?? "n/a"}`,
+					),
+				},
+			};
+		});
+
+	{
+		const dir = join(ROOT, "improvements/audits");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(
+			join(dir, "link-health-latest.json"),
+			`${JSON.stringify(
+				{
+					// generatedAt is the stamp the improvement ledger reads
+					// (evidenceStamp: generatedAt / ranAt / meta.generatedAt).
+					// Written as asOf alone, the whole file came through
+					// "UNSTAMPED — findings count as unconfirmed": 108 real
+					// findings, every one of them demoted, because the run date
+					// was in a field nobody reads. asOf stays for readers.
+					generatedAt: new Date().toISOString(),
+					asOf: new Date().toISOString(),
+					source: "scripts/check-links.ts",
+					rule: "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
+					checked: results.length,
+					brokenSplit:
+						"broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
+					broken: brokenRows
+						.filter((r) => !r.onlyOnRetired)
+						.map((r) => r.row)
+						.sort((a, b) => a.url.localeCompare(b.url)),
+					brokenOnRetired: brokenRows
+						.filter((r) => r.onlyOnRetired)
+						.map((r) => r.row)
+						.sort((a, b) => a.url.localeCompare(b.url)),
+				},
+				null,
+				1,
+			)}\n`,
+		);
+		const onRetired = brokenRows.filter((r) => r.onlyOnRetired).length;
+		console.log(
+			`Wrote improvements/audits/link-health-latest.json (${error} proven broken: ${error - onRetired} need a human, ${onRetired} only cited by rows already retired).\n`,
+		);
+	}
+
+	// Class 32 escalation: no single unverifiable probe is a finding, but a URL
+	// nobody has been able to verify for UNVERIFIABLE_RUNS_TO_ESCALATE runs is.
+	// Read the stored streaks so the DRY RUN reports this too — otherwise the
+	// escalation would only ever be visible after a write.
+	const blockedResults = results.filter((r) => r.status === "blocked");
+	const streaks = new Map<string, number>();
+	if (blockedResults.length > 0) {
+		try {
+			const prior = await payload.find({
+				collection: "link-checks" as any,
+				where: { url: { in: blockedResults.map((r) => r.url) } },
+				limit: blockedResults.length,
+				depth: 0,
+			});
+			for (const d of prior.docs as Array<{
+				url: string;
+				consecutiveUnverifiable?: number;
+			}>)
+				streaks.set(d.url, d.consecutiveUnverifiable ?? 0);
+		} catch (err) {
+			// A read failure must not sink the run; the streaks are reporting only.
+			console.warn(`  (streak lookup skipped: ${(err as Error).message})`);
+		}
+	}
+	const escalated = blockedResults
+		.map((r) => ({ r, runs: (streaks.get(r.url) ?? 0) + 1 }))
+		.filter(({ runs }) => runs >= UNVERIFIABLE_RUNS_TO_ESCALATE)
+		.sort((a, b) => b.runs - a.runs);
+
+	if (escalated.length > 0) {
+		console.log(
+			`Persistently unverifiable (≥${UNVERIFIABLE_RUNS_TO_ESCALATE} consecutive runs) — THESE ARE FINDINGS:`,
+		);
+		console.log(
+			`  Not proven broken, but nobody has known their state for that many runs.\n`,
+		);
+		for (const { r, runs } of escalated) {
+			console.log(
+				`  ${String(`${runs} runs`).padEnd(10)} ${(r.errorReason ?? "unknown").padEnd(24)} ${r.url}`,
+			);
 			for (const t of r.targets) {
 				console.log(`      ↳ ${t.collection}/${t.recordSlug}.${t.field}`);
 			}
@@ -492,34 +737,36 @@ async function main() {
 					consecutiveFailures: number;
 					firstFailedAt?: string | null;
 					lastSuccessAt?: string | null;
+					consecutiveUnverifiable?: number;
+					firstUnverifiableAt?: string | null;
 			  }
 			| undefined;
 
-		const isFailingNow = r.status === "error";
-		const wasFailing = prev && prev.status !== "ok";
-
-		const consecutiveFailures = isFailingNow
-			? (prev?.consecutiveFailures ?? 0) + 1
-			: 0;
-		const firstFailedAt = isFailingNow
-			? wasFailing
-				? (prev?.firstFailedAt ?? now.toISOString())
-				: now.toISOString()
-			: null;
-		const lastSuccessAt =
-			r.status === "ok" ? now.toISOString() : (prev?.lastSuccessAt ?? null);
+		const h = nextLinkHistory(prev, r.status, now);
 
 		const data = {
 			url: r.url,
 			status: r.status,
+			// Liveness hardening: persist what the 2xx served. undefined =
+			// leave unchanged (Review finding 11) — only overwrite when read.
+			...(r.pageVerdict !== undefined
+				? {
+						pageTitle: r.pageTitle ?? null,
+						pageVerdict: r.pageVerdict,
+						finalHost: r.finalHost ?? null,
+					}
+				: {}),
 			// Review finding 11: undefined = "leave unchanged" in Payload updates —
 			// stale errorReason/redirectTo survived a URL recovering. null CLEARS.
 			statusCode: r.statusCode ?? null,
 			errorReason: r.errorReason ?? null,
 			redirectTo: r.redirectTo ?? null,
-			consecutiveFailures,
-			firstFailedAt: firstFailedAt ?? null,
-			lastSuccessAt: lastSuccessAt ?? undefined,
+			consecutiveFailures: h.consecutiveFailures,
+			firstFailedAt: h.firstFailedAt,
+			lastSuccessAt: h.lastSuccessAt ?? undefined,
+			consecutiveUnverifiable: h.consecutiveUnverifiable,
+			firstUnverifiableAt: h.firstUnverifiableAt,
+			needsReview: h.needsReview,
 			lastChecked: now.toISOString(),
 			targets: r.targets.map((t) => ({
 				collection: t.collection,
@@ -591,7 +838,24 @@ async function main() {
 	process.exit(writeFailed ? 1 : 0);
 }
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
+/**
+ * A crash is NOT a finding. Exit 1 is this guard's declared signal — "I looked
+ * and something is wrong with the data" — and a database that would not
+ * connect used to exit 1 too, so an outage was indistinguishable from a
+ * defect: the same red, chased the same way, for a problem that is not in the
+ * data at all. Exit 2 is "I could not look", which every other guard here
+ * already uses.
+ */
+main().catch((e) => {
+	const msg = String((e as Error)?.message ?? e);
+	const cannotReach =
+		/bad auth|authentication failed|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|connect ECONN|MongoServerSelectionError|getaddrinfo/i.test(
+			msg,
+		);
+	console.error(
+		cannotReach
+			? `INCONCLUSIVE: could not reach the store — ${msg.slice(0, 160)}. No verdict.`
+			: `INCONCLUSIVE (did not complete): ${msg.slice(0, 200)}`,
+	);
+	process.exit(2);
 });

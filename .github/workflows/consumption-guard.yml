@@ -1,0 +1,87 @@
+# The lane for the class that keeps beating us.
+#
+# Every significant defect found on 2026-08-30 was one shape: machinery exists,
+# is tested, produces a value, and NOTHING CONSUMES IT. The lesson was written
+# into PLAN.md and then repeated four times the same day — because a doc cannot
+# fail a build and this can.
+#
+# Runs on every push/PR touching the engines or the serving paths, and weekly so
+# a field can't quietly lose its last consumer through unrelated refactors.
+name: consumption-guard
+
+on:
+  push:
+    branches: [main]
+    paths: ["src/**", "scripts/**", "improvements/**"]
+  pull_request:
+    paths: ["src/**", "scripts/**", "improvements/**"]
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions: { contents: read }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # The repo-wide setup block, copied verbatim from the workflows that pass.
+      # `npm i -g pnpm` was here and installed pnpm 11, which engines.pnpm
+      # (^9 || ^10) rejects — an install that was correct the week it was
+      # written and broke on upstream's release schedule.
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Exits 1 when a computed field reaches no serving path. That is the
+      # merge gate: dead machinery does not land.
+      - name: Every computed value must reach a serving path
+        run: pnpm exec tsx scripts/check-consumption.ts
+
+      # scripts/** is outside the main tsconfig, so the repo's `tsc --noEmit`
+      # is clean while the scripts that write to prod are unchecked. Two broken
+      # scripts shipped that way on 2026-08-30 behind a green CI run. Ratcheted
+      # against a frozen baseline so the existing 63 errors do not block, and
+      # nothing new lands.
+      - name: No new type errors in scripts/
+        run: pnpm exec tsx scripts/check-scripts-types.ts
+
+      # Two artifacts reporting the same quantity must agree. /quality showed
+      # "Open findings 56" as its headline directly above a row reading
+      # "27 open" — neither artifact wrong about itself, nothing requiring them
+      # to be refreshed together, and nothing noticing they had diverged.
+      - name: Cross-artifact quantities agree
+        run: pnpm exec tsx scripts/check-artifact-agreement.ts
+
+      # A partition must sum to its denominator. Hackathon outcomes served
+      # 0/0/0/0 beside 300 submissions; toolchain buckets summed to the 2,000-row
+      # query cap under a 5,616 headline; a changelog said four deployed-no-supply
+      # rows where the surface served one. Every part was locally plausible and
+      # nothing added the buckets up. Exit 2 = could not read the surface, which
+      # is neither red nor green.
+      #
+      # NOT on pull_request. This reads the LIVE API, so on a PR it reports the
+      # state of production — which the PR has not changed yet. That inverts the
+      # gate twice over: a PR that FIXES a served defect is red until it
+      # deploys, and a PR that introduces one is green because production is
+      # still fine. Both happened on 2026-09-07 (the hackathon "12 winners of 0
+      # submissions" fix had to be split in two so neither half merged past a
+      # red check that was describing a defect it was repairing).
+      #
+      # It stays blocking where it is meaningful: on push to main after the
+      # deploy, on the weekly cron, and on demand. Same reasoning the curated
+      # canonical step below already carries.
+      - name: Served partitions sum to their denominators
+        if: github.event_name != 'pull_request'
+        run: pnpm exec tsx scripts/check-sum-invariants.ts
+
+      # Fable's audit finding #4: check-curated-canonical.ts was written to
+      # "exit 1 so a lane can gate on it" — and no lane existed. The curated
+      # list breaks on GitHub's clock (renames, casing), which no local change
+      # can predict, so it is checked on the weekly cron as well as on push.
+      - name: Curated canonical list still resolves
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: pnpm exec tsx scripts/check-curated-canonical.ts

@@ -9,13 +9,31 @@
  * the repoScore quality grade.
  */
 
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+} from "@/lib/degraded-read";
+import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
+import { currentRepo, repoSupersession } from "@/lib/repo-relations";
+import { CAP_REGISTRY } from "../data/cap-registry";
 import { symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
+import {
+	activityStateOf,
+	isFirstParty,
+	NOT_GONE,
+	type RepoActivityState,
+	type RepoKind,
+	type RepoKindBasis,
+	repoKindOf,
+} from "./repo-grade";
 import {
 	anchorTokens,
 	CORE_SYNONYMS,
 	mergeVocabulary,
 } from "./search-vocabulary";
+import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
@@ -53,12 +71,50 @@ interface RepoDoc {
 	isDeployableContract?: boolean | null;
 	sorobanSdkVersion?: string | null;
 	versionStatus?: string | null;
+	ciPresent?: boolean | null;
+	testsPresent?: boolean | null;
 	codeScanState?: string | null;
 	codeScannedAt?: string | null;
+	scannedRef?: unknown;
 	codeSymbols?: unknown;
+	contractInterface?: unknown;
+	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
+	codeDomains?: unknown;
+	activitySignals?: {
+		commits90d?: number | null;
+		lastReleaseAt?: string | null;
+		releaseTag?: string | null;
+		openPRs?: number | null;
+		asOf?: string | null;
+	} | null;
+	knowledgeNotes?: Array<{
+		note?: string | null;
+		source?: string | null;
+		asOf?: string | null;
+	}> | null;
+	codeInUse?: {
+		contracts?: number | null;
+		events?: number | null;
+		eventsDelta?: number | null;
+		subinvocations?: number | null;
+		subinvocationsDelta?: number | null;
+		asOf?: string | null;
+	} | null;
 }
+
+/** How well the returned page actually matched the query (honest-absence). */
+export type RepoMatchMode = "strict" | "partial" | "weak" | "all" | "none";
+
+export const MATCH_MODE_LABEL: Record<RepoMatchMode, string> = {
+	strict: "every query term matched",
+	partial: "some query terms matched — rows may be adjacent to the intent",
+	// The one that matters: rows exist but nothing the caller asked for hit.
+	weak: "no query term matched — these are ranked neighbours, NOT matches (verify relevance before relying on them; an empty result would have been the honest answer if none are right)",
+	all: "no query supplied — ranked by repo quality",
+	none: "the search failed; this is not evidence of absence",
+};
 
 export interface RepoResult {
 	fullName: string;
@@ -74,6 +130,50 @@ export interface RepoResult {
 	homepageUrl: string | null;
 	isFork: boolean;
 	isArchived: boolean;
+	/** Observable activity state, derived at serve time from lastCommitAt +
+	 * isArchived. `archived` is the owner's own verdict; `dormant` is an
+	 * observation about a KNOWN commit date; `unknown` means we hold no date —
+	 * never read it as dead (repo-stale ≠ defunct). */
+	activityState: RepoActivityState;
+	/** What KIND of repo this is, derived at read time from the row's own
+	 * signals — first match wins: archived → fork → hackathon (judged) →
+	 * template-or-tutorial (name) → contract (served
+	 * codeVerified.isDeployableContract) → application (linked directory
+	 * product) → code. kindBasis names the deciding signal. */
+	kind: RepoKind;
+	kindBasis: RepoKindBasis;
+	/** Velocity + release snapshot from the last enrich pass (asOf dates it):
+	 * commits90d = default-branch commits in the 90 days before asOf; null =
+	 * not yet captured for this repo, never zero. */
+	activitySignals: {
+		commits90d: number | null;
+		lastReleaseAt: string | null;
+		releaseTag: string | null;
+		openPRs: number | null;
+		asOf: string | null;
+	} | null;
+	/** Dated facts with sources (curated + derived:audit) — see the repo-intel
+	 * knowledge discipline; [] when none. Facts, never summaries. */
+	knowledgeNotes: Array<{ note: string; source: string; asOf: string | null }>;
+	/** Mainnet usage rollup for contracts attributed to this repo (weekly,
+	 * stellar.expert). Lifetime events/subinvocations + deltas since the prior
+	 * snapshot (null until one exists). null = no verified contract joined —
+	 * NOT a claim the code is unused. */
+	successorRepo: string | null;
+	/** P5 (2026-09-05): supersession as FIELDS, from the curated dated map —
+	 * where to go instead, the repo's own date for it, and the kind. null =
+	 * no curated supersession statement, never 'not superseded'. */
+	supersededBy: string | null;
+	deprecatedAt: string | null;
+	supersessionKind: "archived" | "renamed" | "deprecated" | "superseded" | null;
+	codeInUse: {
+		contracts: number;
+		events: number | null;
+		eventsDelta: number | null;
+		subinvocations: number | null;
+		subinvocationsDelta: number | null;
+		asOf: string;
+	} | null;
 	project: { slug: string; name: string | null } | null;
 	hackathonWinner: boolean;
 	scfAwarded: boolean;
@@ -82,6 +182,10 @@ export interface RepoResult {
 	judgedHackathon: string | null;
 	repoScore: number;
 	repoScoreLabel: string | null;
+	/** Quality tier: quality | community | archive. Archive is demoted, never deleted. */
+	tier: string;
+	/** How the repo entered the index: project-link (curated directory) | ec-taxonomy (Electric Capital's public list). */
+	source: string;
 	score: number;
 	/** DeepWiki AI-generated wiki of this repo's internals — hand off here for deep "where/how" code questions. */
 	deepWikiUrl: string;
@@ -116,16 +220,41 @@ export interface RepoResult {
 export interface CodeVerified {
 	/** Strongest→weakest relevance proof from the code: cargo-sdk | contract-macros | lang-sdk | js-sdk | stellar-toml. */
 	stellarProof: string;
-	/** 0-1 substance of the actual contract code (auth/storage/arith/branch, not presence). Null if non-Rust proof. */
+	/** 0-1 substance of the actual Rust code, read as what it is: a contract on
+	 * its entry points, auth-gated writes, cross-calls and state; a library or
+	 * tool (an SDK, a contract library, a CLI) on its public API surface, code
+	 * mass, tests and releases. Substance, not presence — a scaffold, a
+	 * tutorial or an unreleased fork stays low either way. Null if non-Rust proof. */
 	codeDepth: number | null;
 	/** Cargo cdylib — a real deployable Soroban contract (vs tooling/SDK/frontend that merely uses Stellar). */
 	isDeployableContract: boolean;
 	/** Raw soroban-sdk version requirement (sourced fact, never a bare protocol int). */
+	/** Engineering-practice presence facts from the code scan (tree-level):
+	 * a CI config exists / test files exist. Presence only — never a claim CI
+	 * passes or coverage is good. null = not yet scanned. */
+	ciPresent: boolean | null;
+	testsPresent: boolean | null;
 	sorobanSdkVersion: string | null;
 	/** current | supported | deprecated | unknown — vs the latest protocol at scan time. */
 	versionStatus: string | null;
 	/** When the code was last scanned (ISO). */
 	scannedAt: string | null;
+	codeConfidence: FactConfidence | null;
+	/** Commit SHA the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. */
+	scannedRef: string | null;
+	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
+	contractInterface: string[];
+	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
+	targetProtocol: number | null;
+	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
+	protocolCaps: Array<{
+		cap: number;
+		title: string;
+		status: string | null;
+		url: string;
+	}>;
+	/** Stellar-ecosystem dependencies from the repo's manifests (allowlist-matched package names) — the dependency graph: forward = the repo's stack, reverse = query a package name to find its dependents. */
+	stellarDeps: string[];
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
@@ -137,6 +266,11 @@ export interface CodeVerified {
 	 * signing, soroban-rpc, sep10-auth, wallet-kit, …) — what a dapp actually
 	 * DOES with the SDK; [] until scanned post-2026-07-09 or no JS sources. */
 	sdkCapabilities: string[];
+	/** Evidence-only domain labels (defi-lending, defi-amm, oracle,
+	 * payments-x402, wallet-infra, anchor-ramp, indexer, …) — what the CODE
+	 * proves the repo does, derived at scan time from deps + capability tags
+	 * + interface traits, never from topics/README self-description. */
+	codeDomains: string[];
 }
 
 // A scan finished AND produced actual Stellar code evidence. stellarProof
@@ -163,16 +297,50 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 			? false
 			: !!d.isDeployableContract,
 		sorobanSdkVersion: d.sorobanSdkVersion ?? null,
+		ciPresent: typeof d.ciPresent === "boolean" ? d.ciPresent : null,
+		testsPresent: typeof d.testsPresent === "boolean" ? d.testsPresent : null,
 		versionStatus: d.versionStatus ?? null,
 		scannedAt: d.codeScannedAt ?? null,
+		codeConfidence: factConfidence(
+			d.codeScannedAt ? "code-scan" : null,
+			d.codeScannedAt,
+		),
+		scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
 		symbols: Array.isArray(d.codeSymbols)
 			? d.codeSymbols
 					.filter((s): s is string => typeof s === "string")
 					.slice(0, 20)
 			: [],
+		contractInterface: Array.isArray(d.contractInterface)
+			? d.contractInterface.filter((s): s is string => typeof s === "string")
+			: [],
+		stellarDeps: Array.isArray(d.stellarDeps)
+			? d.stellarDeps.filter((s): s is string => typeof s === "string")
+			: [],
+		targetProtocol: protocolForSdkMajor(
+			parseSdkMajor(d.sorobanSdkVersion ?? null),
+		),
+		protocolCaps: (() => {
+			const tp = protocolForSdkMajor(
+				parseSdkMajor(d.sorobanSdkVersion ?? null),
+			);
+			if (tp === null) return [];
+			return CAP_REGISTRY.filter((r) => r.protocolVersion === tp)
+				.sort((a, b) => a.cap - b.cap)
+				.slice(0, 10)
+				.map((r) => ({
+					cap: r.cap,
+					title: r.title,
+					status: r.status,
+					url: r.url,
+				}));
+		})(),
 		mainnetContractId: d.mainnetContractId ?? null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)
 			? d.sdkCapabilities.filter((s): s is string => typeof s === "string")
+			: [],
+		codeDomains: Array.isArray(d.codeDomains)
+			? d.codeDomains.filter((s): s is string => typeof s === "string")
 			: [],
 	};
 }
@@ -194,6 +362,11 @@ const REPO_SYNONYM_OVERLAY: Record<string, string[]> = {
 	zkp: ["zkp", "proof"],
 	wallet: ["wallet", "keypair", "signer", "passkey"],
 	sdk: ["sdk", "client"],
+	// battery q-tool-indexer: the natural phrasing says "indexing"; the
+	// corpus rows say "indexer"/"index" — plural-stripping alone never folds
+	// them, so the query's second intent token contributed nothing.
+	indexing: ["indexing", "indexer", "index"],
+	indexer: ["indexer", "indexing"],
 	stablecoin: ["stablecoin", "anchor"],
 };
 
@@ -302,8 +475,23 @@ function positiveIdentityHit(hay: string, term: string): boolean {
  * demoting everything (same contract as project search).
  */
 export function repoAnchorIdentity(tokens: string[], zones: string[]): boolean {
-	const anchors = anchorTokens(tokens);
-	if (!anchors.length) return true;
+	const all = anchorTokens(tokens);
+	if (!all.length) return true;
+	// Ecosystem words confer no identity when a more specific anchor exists:
+	// for "soroban event indexer" a repo whose only zone hit is a `soroban`
+	// topic tag was earning the same identity credit as the one whose name IS
+	// the indexer — and the inUse tier below identity then floated verified
+	// contracts above every actual indexer (battery q-tool-indexer case:
+	// reflector at score 5 outranked SoroTrail at 20.8). A query that is ONLY
+	// ecosystem words keeps them — there is nothing more specific to be.
+	// "contract(s)" joined 2026-09-01 (battery q-tool-indexer, issue #1184):
+	// in a Soroban corpus the word confers no identity when anything more
+	// specific is present — "indexing Soroban contract events" was granting
+	// reflector-CONTRACT identity credit via its NAME, and the inUse tier
+	// then floated the oracle to #1 for an indexer-discovery question.
+	const ECOSYSTEM = new Set(["stellar", "soroban", "contract", "contracts"]);
+	const specific = all.filter((t) => !ECOSYSTEM.has(t));
+	const anchors = specific.length ? specific : all;
 	return anchors.some((t) =>
 		termsForToken(t).some((v) => zones.some((z) => positiveIdentityHit(z, v))),
 	);
@@ -412,6 +600,8 @@ const STOPWORDS = new Set<string>([
 	"whom",
 	"whether",
 	// generic NL-question verbs (no domain words)
+	"find",
+	"finding",
 	"work",
 	"works",
 	"working",
@@ -420,6 +610,10 @@ const STOPWORDS = new Set<string>([
 	"used",
 	"using",
 	"build",
+	// inflection gap caught by battery q-tool-indexer (2026-09-01): "build"
+	// was stopped but "…or building a Stellar indexer" scored, feeding the
+	// coverage multiplier on junk rows.
+	"building",
 	"explain",
 	"describe",
 	"tell",
@@ -449,6 +643,20 @@ const STOPWORDS = new Set<string>([
 	// ~10/15 verticals in the sweep. Hyphenated names ("stellar-core",
 	// "js-stellar-sdk") are single tokens and are NOT affected — only the bare word.
 	"stellar",
+	// Surface-meta words (battery q-tool-indexer, 2026-09-01): every repo row
+	// IS an open-source GitHub repository, so "github"/"repo(s)" carry the
+	// same ~zero discriminating signal as the bare "stellar" — in the
+	// referee's 16-token question ("Find me open-source GitHub repos for…")
+	// they fed the coverage multiplier and floated rows matching six filler
+	// words over the row whose NAME is the answer. Shared with project
+	// search deliberately: probed live there too, the tokens only retrieved
+	// incidental "available on GitHub" prose mentions (rabet, a wallet, led
+	// q=github), never a github-tooling project.
+	"github",
+	"repo",
+	"repos",
+	"repository",
+	"repositories",
 	// "protocol" — same failure mode as "stellar": a generic token that name-matches
 	// any "*-protocol" repo at weight 5. "swap protocol" surfaced ZKLiquid-protocol
 	// + stellar/stellar-protocol (a governance-discussion repo); "oracle protocol"
@@ -501,12 +709,8 @@ export function isContentStopword(t: string): boolean {
 
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
-const SDF_OWNERS = new Set([
-	"stellar",
-	"soroban",
-	"stellar-deprecated",
-	"stellardevelopmentfoundation",
-]);
+// SDF ownership comes from repo-grade's FIRST_PARTY_OWNERS — one definition,
+// so the ranker and the grade can never disagree about who is first-party.
 
 // Tiebreak signals applied ABOVE the authority grade, most → least decisive:
 // SDF-org ownership, then "alive" (committed within a year), then an explicit
@@ -522,7 +726,7 @@ const SDF_OWNERS = new Set([
 // tools, payment-gateway SDKs) are ALSO project-linked, so that boost buried
 // strong unlinked repos (zk hackathon winners) under mediocre linked ones.
 function isSdfOwned(owner: string): boolean {
-	return SDF_OWNERS.has(owner);
+	return isFirstParty(owner);
 }
 function isAlive(lastCommitAt?: string | null): boolean {
 	if (!lastCommitAt) return false;
@@ -553,12 +757,35 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 			"stellar/rs-soroban-sdk",
 		],
 	},
-	// Horizon (the real implementation lives in stellar/go)
-	{ test: /\bhorizon\b/, repos: ["stellar/go", "stellar/stellar-horizon"] },
+	// Horizon SPLIT OUT of the stellar/go monorepo into stellar/stellar-horizon
+	// — the split repo is where the living code (and constants like
+	// MaxSupportedProtocolVersion = 28) now moves, while the monorepo's frozen
+	// copy answers with era-of-the-split values (sls-080/#1134: DeepWiki on
+	// stellar/go said 22–25 for a constant the split repo defines as 28).
+	// Order matters: canonicalFor takes repos[0].
+	{ test: /\bhorizon\b/, repos: ["stellar/stellar-horizon", "stellar/go"] },
+	// Ledger/event indexing (issue #1184, battery q-tool-indexer — a red
+	// standing since 08-16): the referee's natural question ("…repos for
+	// indexing Soroban contract events or building a Stellar indexer") is so
+	// token-diffuse that its OR-pool fills with high-repoScore noise and the
+	// authoritative repos never reach the 600-cap candidate page. This is
+	// exactly the class CANONICAL exists for. Role order per the official
+	// indexers docs: turnkey indexer, Galexie ledger exporter, ETL, the ingest
+	// library's home, community prior art.
+	{
+		test: /\bindex(er|ers|ing)\b|\betl\b|\bingest(ion)?\b/,
+		repos: [
+			"stellar/stellar-ledger-data-indexer",
+			"stellar/stellar-galexie",
+			"stellar/stellar-etl",
+			"stellar/go-stellar-sdk",
+			"subquery/stellar-subql-starter",
+		],
+	},
 	// RPC
 	{
 		test: /\b(soroban[\s-]*)?rpc\b/,
-		repos: ["stellar/stellar-rpc", "stellar/soroban-rpc"],
+		repos: ["stellar/stellar-rpc", "stellar/stellar-rpc"],
 	},
 	// XDR
 	{
@@ -607,7 +834,7 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// anchor / SEP infra
 	{
 		test: /\banchor\s*platform\b/,
-		repos: ["stellar/anchor-platform", "stellar/java-stellar-anchor-sdk"],
+		repos: ["stellar/anchor-platform", "stellar/anchor-platform"],
 	},
 	// quickstart / run a node
 	{
@@ -621,17 +848,44 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	},
 	{ test: /\b(rust|soroban)\s*sdk\b/, repos: ["stellar/rs-soroban-sdk"] },
 	{ test: /\bpython\s*sdk\b/, repos: ["StellarCN/py-stellar-base"] },
-	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go"] },
+	// stellar/go is ARCHIVED (verified 2026-09-01): the SDK moved to
+	// stellar/go-stellar-sdk (new module path, semver reset) and the services
+	// split to their own repos. The living repo leads; the archived monorepo
+	// stays second for historical questions about pre-split code.
+	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go-stellar-sdk", "stellar/go"] },
 ];
 
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
+/**
+ * A query that IS a fully-qualified repo name (`owner/name`, nothing else) is
+ * the most explicit routing signal there is — it names the repo, not a
+ * concept. 2026-09-01: `q=stellar/stellar-etl` wordy-split into "etl" and the
+ * concept map sent it to stellar-ledger-data-indexer, so the row's own
+ * knowledge notes never surfaced. Returns the name, or null for anything
+ * that is not exactly one owner/name token.
+ */
+export function explicitRepoName(q: string): string | null {
+	const m = q.trim().match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
+	return m ? `${m[1]}/${m[2]}` : null;
+}
+
 export function canonicalFor(q: string): string[] {
+	// An IDENTIFIER is not a concept phrase: a single-word camelCase/snake_case
+	// query (`contractErrorCodeFromNumber`) wordy-splits into concept
+	// vocabulary ("error code") and floated stellar-core above the repo that
+	// DEFINES the symbol. Concept mapping reads phrases people type; an
+	// identifier belongs to the symbol index, so it maps to nothing here.
+	// The same holds for a bare owner/name — see explicitRepoName.
+	const w = q.trim();
+	if (w && !/\s/.test(w) && /[a-z][A-Z]|_/.test(w)) return [];
+	if (explicitRepoName(w)) return [];
 	const hay = wordy(q);
 	const out: string[] = [];
 	for (const c of CANONICAL) {
 		if (c.test.test(hay))
-			for (const r of c.repos) if (!out.includes(r)) out.push(r);
+			for (const r of c.repos.map(currentRepo))
+				if (!out.includes(r)) out.push(r);
 	}
 	return out;
 }
@@ -659,7 +913,13 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bescrows?\b|\bmilestone/,
 		repos: [
 			"Trustless-Work/trustlesswork-smart-contract-stellar",
-			"devasignhq/soroban-escrow",
+			// Was devasignhq/soroban-escrow, which 404s as of 2026-08-31 —
+			// deleted or renamed WITHOUT a redirect, so the curated guard's
+			// rescan could only ever record `error`. The org's live successor
+			// is bounty-escrow: verified by reading its Cargo.toml (package
+			// devasign_task_escrow, soroban-sdk =23.5.3, cdylib) — a real
+			// Soroban escrow contract, not a name coincidence.
+			"devasignhq/bounty-escrow",
 		],
 	},
 	// cross-chain bridges. Verified in-index 2026-07-06 (descriptions confirm each
@@ -670,7 +930,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\bbridges?\b|\bcross[\s-]?chain\b|\binteroperab/,
 		repos: [
 			"allbridge-io/allbridge-core-soroban-contracts",
-			"rozoai/rozo-intents-contracts",
+			"RozoAI/rozo-intents-contracts",
 			"lightsail-network/crossmesh-ingress-contracts",
 			"axelarnetwork/axelar-amplifier-stellar",
 			"allbridge-io/allbridge-core-js-sdk",
@@ -700,7 +960,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// the bridge vertical, which is fine — both are legitimately relevant.
 	{
 		test: /\bamms?\b|\bdex\b|\bdecentralized\s*exchange\b|\bswaps?\b|\bliquidity\s*pools?\b/,
-		repos: ["soroswap/core", "phoenix-protocol-group/phoenix-contracts"],
+		repos: ["soroswap/core", "Phoenix-Protocol-Group/phoenix-contracts"],
 	},
 	// DAO / governance. A DeFi vault (dogstarapps/arka.fund) + an agent wallet
 	// (OrbitSafe) led on authority over soroban-governor — the canonical Soroban
@@ -722,8 +982,8 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	{
 		test: /\brwa\b|\breal[\s-]?world[\s-]?assets?\b|\btokeniz(?:ation|ed)\b/,
 		repos: [
-			"simplytokenized/soroban-smart-contracts",
-			"shamba-records-limited/microvault",
+			"SimplyTokenized/soroban-smart-contracts",
+			"Shamba-Records-Limited/microvault",
 		],
 	},
 	// lending / money-market. Boxy-ordered (2026-07-06): Blend is THE flagship
@@ -740,13 +1000,22 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// "wallet" token in name/topics/desc (freighter's don't), so SDK/demo repos
 	// swept the page. All three verified in-index 2026-07-19: stellar/freighter
 	// (the canonical extension wallet, alive), creit-tech/xbull-wallet, and
-	// kalepail/passkey-kit (the actively-maintained smart-wallet kit).
+	// kalepail/passkey-kit (the actively-maintained smart-wallet kit), since
+	// moved to stellar/passkey-kit and archived. The stale pick floated the
+	// archived repo first for "passkey smart wallet" and left the live one
+	// sixth; picks now also resolve through the supersession map (currentRepo),
+	// so the next move cannot strand a float the same way.
+	// 2026-08-14: + creit-tech/stellar-wallets-kit — THE canonical multi-wallet
+	// connect kit (the library dapps embed to support every wallet at once) was
+	// missing from its own family's float, so it ranked 7th for "wallet kit".
+	// Verified in-index same day.
 	{
 		test: /\bwallets?\b|\bsmart[\s-]?wallets?\b/,
 		repos: [
 			"stellar/freighter",
-			"creit-tech/xbull-wallet",
-			"kalepail/passkey-kit",
+			"Creit-Tech/xBull-Wallet",
+			"stellar/passkey-kit",
+			"Creit-Tech/Stellar-Wallets-Kit",
 		],
 	},
 	// anchors / ramps (2026-07-19 eval): flagship anchor OPERATORS are closed-
@@ -754,12 +1023,39 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 	// "anchor" collides with Solana's Anchor framework (spl-governance-anchor
 	// surfaced in the top 10). All verified in-index: anchor-platform (the
 	// canonical anchor server), stellar-anchor-tests, php-anchor-sdk.
+	// Web authentication (SEP-10 / SEP-45). There was NO auth vertical at all
+	// until 2026-09-08, though SEP-10 is the most widely implemented SEP in the
+	// ecosystem: q="SEP-10 web authentication" floated stellar/stellar-protocol
+	// (the spec DISCUSSION repo) and then a scatter of frontends.
+	//
+	// Both entries verified in-index with live scores:
+	//   stellar/sep45-reference  SDF's own SEP-45 reference implementation —
+	//                            first, because for the literal SEP-45 question
+	//                            the reference is the answer.
+	//   fazzatti/colibri         @colibri/webauth implements unified SEP-10 AND
+	//                            SEP-45 with deterministic account routing and
+	//                            strict challenge verification — a production
+	//                            library rather than a reference, which is what
+	//                            an agent asking "how do I implement this"
+	//                            needs. Nine registry-verified JSR packages,
+	//                            95 commits/90d, tests + CI + codecov gate.
+	//
+	// colibri's inclusion is the OWNER'S VERDICT, recorded as such (boxy,
+	// 2026-09-08): "the person behind is very credible and i think this repo
+	// just needs a higher grading because i have the human info on it". That is
+	// the intended use of this list — a human writing down domain knowledge the
+	// formula cannot observe — not a coefficient bent until one repo ranks where
+	// it was expected to.
+	{
+		test: /\bsep[\s-]?(?:10|45)\b|\bweb\s*auth(?:entication|n)?\b|\bchallenge\s*transactions?\b/,
+		repos: ["stellar/sep45-reference", "fazzatti/colibri"],
+	},
 	{
 		test: /\banchors?\b|\bon[\s-]?ramps?\b|\boff[\s-]?ramps?\b/,
 		repos: [
 			"stellar/anchor-platform",
 			"stellar/stellar-anchor-tests",
-			"argo-navis-dev/php-anchor-sdk",
+			"Argo-Navis-Dev/php-anchor-sdk",
 		],
 	},
 	// streaming payments / money streaming (golden repos-streaming-payments,
@@ -778,7 +1074,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 		test: /\b(?:stream|streaming)\s+(?:payments?|money|tokens?)\b|\b(?:payments?|money|token)[\s-]?stream(?:ing|s)?\b/,
 		repos: [
 			"luanlabs/fluxity-v1-core",
-			"rahimklaber/sstream",
+			"rahimklaber/SStream",
 			"luanlabs/fluxity-interface",
 		],
 	},
@@ -786,14 +1082,34 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 
 // Curated flagship repos for a query, priority order, deduped. Empty for queries
 // that don't hit a curated vertical (so normal queries are untouched).
+/** Every repo the curated maps can inject, flattened and deduped.
+ *
+ * Exported so a GUARD can verify the list against the corpus. These names are
+ * hand-maintained authored truth: `canonicalFor` will float them to the top of
+ * a result set, so a name that is stale (upstream renamed it) or absent (never
+ * ingested) silently degrades the exact queries curation exists to fix. Nothing
+ * re-verified them until scripts/check-curated-canonical.ts. */
+export const CURATED_CANONICAL_REPOS: string[] = [
+	...new Set([
+		...CANONICAL.flatMap((c) => c.repos),
+		...VERTICAL_FLAGSHIPS.flatMap((c) => c.repos),
+	]),
+];
+
 export function flagshipsFor(q: string): string[] {
+	// Same identifier guard as canonicalFor: a single-word camelCase/snake
+	// symbol query is not a vertical phrase — its wordy split must not fire
+	// flagship floats off fragment vocabulary.
+	const w = q.trim();
+	if (w && !/\s/.test(w) && /[a-z][A-Z]|_/.test(w)) return [];
 	const hay = wordy(q);
 	const out: string[] = [];
 	const firedTests: RegExp[] = [];
 	for (const v of VERTICAL_FLAGSHIPS) {
 		if (v.test.test(hay)) {
 			firedTests.push(v.test);
-			for (const r of v.repos) if (!out.includes(r)) out.push(r);
+			for (const r of v.repos.map(currentRepo))
+				if (!out.includes(r)) out.push(r);
 		}
 	}
 	if (out.length < 2) return out;
@@ -835,20 +1151,105 @@ export async function searchRepos(
 		offset?: number;
 		language?: string;
 		minScore?: number;
+		/** Filter to one activity state (validated by the route). */
+		activity?: RepoActivityState | "";
+		/** Filter to repos whose scanned sdkCapabilities include this tag
+		 * (validated by the route against the closed set). Scan-derived: an
+		 * unscanned repo can never match — absence of a scan is not absence
+		 * of the capability. */
+		capability?: string;
+		/** Filter to repos whose scanned codeDomains include this label
+		 * (validated by the route against CODE_DOMAINS). Same scan-derived
+		 * caveat as capability. */
+		domain?: string;
+		/** Filter to repos whose scanned stellarDeps include this package —
+		 * the dependency graph's reverse read ("who builds on passkey-kit").
+		 * Open set (any allowlisted ecosystem package name), matched exact
+		 * case-insensitive; scan-derived caveat applies. */
+		dependsOn?: string;
 	} = {},
 ): Promise<{
 	repos: RepoResult[];
 	total: number;
 	canonical: string[];
 	searched: RepoSearchSearched;
+	/** Honest-absence: how well this page actually matched the query. */
+	matchMode: RepoMatchMode;
+	matchModeLabel: string;
+	/** One line per backend read that failed or timed out (degraded-read.ts):
+	 * the page was served from whatever DID load. Empty when every read ran. */
+	warnings: string[];
 }> {
-	const { limit = 20, offset = 0, language = "", minScore = 0 } = opts;
+	const {
+		limit = 20,
+		offset = 0,
+		language = "",
+		minScore = 0,
+		activity = "",
+		capability = "",
+		domain = "",
+		dependsOn = "",
+	} = opts;
 	const tokens = contentTokens(q);
+	// Single-word IDENTIFIER queries (camelCase/snake_case symbols — the R-SYM
+	// class): contentTokens splits `contractErrorCodeFromNumber` into concept
+	// fragments [contract, error, code, number], so the repo DEFINING the
+	// symbol competes on fragment luck while symbolsHaystack's raw joined form
+	// (kept for exactly this lookup) never sees the query — ACTA-Team/
+	// did-stellar scored 32.3 and ranked 7th under score-0 canonicals. Mirror
+	// the project-side single-word rebuild: keep discriminating fragments,
+	// append the joined form.
+	const rawWord = q.trim();
+	// When the rebuild fires, the joined form IS the query's identity subject:
+	// fragments stay for recall/scoring, but letting them confer identity gave
+	// mainnet contracts an anchorIdentity tie off the word "contract" inside
+	// the identifier, and the inUse tier then floated them above the defining
+	// repo (live: reflector 10.4 / blend 3 above did-stellar 46.2).
+	let identifierJoined = "";
+	if (rawWord && !/\s/.test(rawWord) && /[a-z][A-Z]|_/.test(rawWord)) {
+		const joined = rawWord.toLowerCase().replace(/[^a-z0-9]/g, "");
+		if (joined.length > 2 && !(tokens.length === 1 && tokens[0] === joined)) {
+			const kept = tokens.filter(
+				(t) => t.length >= 3 && !isContentStopword(t) && t !== joined,
+			);
+			tokens.length = 0;
+			tokens.push(...kept, joined);
+			identifierJoined = joined;
+		}
+	}
 	const searched: RepoSearchSearched = {
 		tokens,
 		expandedTerms: [...new Set(tokens.flatMap(termsForToken))].slice(0, 40),
 	};
-	if (!payload) return { repos: [], total: 0, canonical: [], searched };
+	// A read that failed or timed out SAYS so (degraded-read.ts): one line per
+	// read on `warnings`, the page served from whatever did load. A failed
+	// supplement thins the pool; a failed main fetch (or no DB handle) is the
+	// `none` shape — "the search failed; this is not evidence of absence".
+	// Before this, any throw in here became a quiet 200 with 0 rows (10 of 30
+	// symbol lookups under the 2026-09-14 eval load).
+	const warnings: string[] = [];
+	const failed = (why: string[]) => ({
+		repos: [],
+		total: 0,
+		canonical: [],
+		searched,
+		matchMode: "none" as RepoMatchMode,
+		matchModeLabel: MATCH_MODE_LABEL.none,
+		warnings: why,
+	});
+	// No DB handle: an infrastructure failure, NOT an absence proof.
+	if (!payload)
+		return failed([degradedWarning("repos search", "no database handle")]);
+	const find = async (op: string, args: unknown) => {
+		const r = await degradedRead(
+			op,
+			() => payload.find(args),
+			{ docs: [] as unknown[] },
+			DEFAULT_READ_TIMEOUT_MS,
+		);
+		if (r.warning) warnings.push(r.warning);
+		return r.value;
+	};
 	try {
 		// Push the keyword match INTO the DB query so we fetch only CANDIDATE
 		// repos, not the whole collection. It grew past 2,000 docs and pulling
@@ -857,8 +1258,13 @@ export async function searchRepos(
 		// boundary scoring below is the precise filter — same design as
 		// /api/projects/search. A no-query browse is capped to the top-scored
 		// page instead of the full collection.
+		// NOT_GONE on EVERY candidate source below: a repo GitHub 404s is not an
+		// answer to any query, and it was winning its own name (safetrust-ZK,
+		// FundBlock, stellarsight — measured live 2026-09-14). Applied in the DB
+		// `where` rather than as an in-memory filter so a gone row never takes a
+		// slot in the 600-row candidate window from a live one.
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-		const where: any = {};
+		const where: any = { ...NOT_GONE };
 		if (language) where.primaryLanguage = { like: language };
 		if (tokens.length) {
 			where.or = tokens.flatMap((t) =>
@@ -876,13 +1282,26 @@ export async function searchRepos(
 					// name ("escrow" ⇢ release_escrow) must still be a candidate.
 					// codeSymbols is json like topics — same per-element regex match.
 					{ codeSymbols: { like: v } },
+					// dependency-graph reverse read: "passkey-kit" surfaces dependents.
+					{ stellarDeps: { like: v } },
 				]),
 			);
 		}
-		const res = await payload.find({
+		// Structured filters drive candidate INCLUSION, not just the in-memory
+		// post-filter (the sls-018 class): with no q the browse pool is the
+		// top-200 by repoScore, and domain/dependsOn/capability carriers are
+		// mostly apps below that cut — domain=oracle served [] while the corpus
+		// held 590 tagged rows; dependsOn=soroban-sdk served 9 of 299
+		// (2026-08-15). `like` on array fields matches per-element (same as
+		// topics above); the exact in-memory filters below stay the precise pass.
+		if (domain) where.codeDomains = { like: domain };
+		if (dependsOn) where.stellarDeps = { like: dependsOn };
+		if (capability) where.sdkCapabilities = { like: capability };
+		const hasStructuredFilter = Boolean(domain || dependsOn || capability);
+		const res = await find("repos candidate fetch", {
 			collection: "repos",
 			where,
-			limit: tokens.length ? 600 : 200,
+			limit: tokens.length || hasStructuredFilter ? 600 : 200,
 			sort: "-repoScore",
 			depth: 0,
 			// Drop the README excerpt — it's the largest per-doc field and the
@@ -891,6 +1310,8 @@ export async function searchRepos(
 			// win on the repos collection.
 			select: { readmeExcerpt: false },
 		});
+		// The main fetch is the pool; without it there is nothing to rank.
+		if (warnings.length) return failed(warnings);
 		// Curated concept → canonical repo injection. The authoritative SDF repo for
 		// an infra/protocol question often isn't a keyword candidate, so fetch the
 		// curated set and float it to the top in priority order (canonRank).
@@ -905,9 +1326,9 @@ export async function searchRepos(
 		const injectList = [...new Set([...canonList, ...flagList])];
 		let rawDocs = res.docs as unknown as RepoDoc[];
 		if (injectList.length) {
-			const cres = await payload.find({
+			const cres = await find("repos canonical inject", {
 				collection: "repos",
-				where: { fullName: { in: injectList } },
+				where: { ...NOT_GONE, fullName: { in: injectList } },
 				limit: injectList.length,
 				depth: 0,
 				select: { readmeExcerpt: false },
@@ -928,9 +1349,10 @@ export async function searchRepos(
 		// key below then ranks them on merit within their stellarness tier.
 		const queryAnchors = anchorTokens(tokens);
 		if (queryAnchors.length) {
-			const ares = await payload.find({
+			const ares = await find("repos identity supplement", {
 				collection: "repos",
 				where: {
+					...NOT_GONE,
 					or: queryAnchors.flatMap((t) => [
 						{ fullName: { like: t } },
 						{ topics: { like: t } },
@@ -949,14 +1371,103 @@ export async function searchRepos(
 				),
 			];
 		}
+		// Identity-form queries get an EXACT-NAME supplemental fetch. The anchor
+		// supplement above fetches `fullName like <anchor token>` sorted by
+		// score with a 100-row cap — and after the 2026-08-14 EC ingest (+~10k
+		// rows) a query like "stellar-indexer-sdk" has >100 higher-scored
+		// "indexer" repos, so the repo literally NAMED for the query
+		// (Creit-Tech/Stellar-Indexer-SDK, repoScore 29) was flooded out of the
+		// pool before the sls-025 alias rule below could rank it: absent at
+		// limit=50 for its own name from 2026-08-14 (field-population guard,
+		// daily). The alias rule can only pin what the pool holds. Fetch the
+		// literal query as a fullName/name substring — raw form plus
+		// hyphens-for-spaces ("stellar wallets kit" → "stellar-wallets-kit").
+		// Same gates as qIsIdentifier / qIsSpacedName below, plus ≥5 chars so a
+		// ticker can't match half the index; a vocabulary word never qualifies,
+		// so it cannot ride name-identity over the F4 evidence policy.
+		const qRaw = q.trim();
+		const qLooksLikeName =
+			/[-_/.0-9]/.test(qRaw) ||
+			/[a-z][A-Z]/.test(qRaw) ||
+			(qRaw.split(/\s+/).length >= 3 && normAlias(qRaw).length >= 8);
+		if (qLooksLikeName && qRaw.length >= 5) {
+			const forms = [...new Set([qRaw, qRaw.replace(/\s+/g, "-")])];
+			const nres = await find("repos exact-name supplement", {
+				collection: "repos",
+				where: {
+					...NOT_GONE,
+					or: forms.flatMap((f) => [
+						{ fullName: { like: f } },
+						{ name: { like: f } },
+					]),
+				},
+				limit: 20,
+				sort: "-repoScore",
+				depth: 0,
+				select: { readmeExcerpt: false },
+			});
+			const seenN = new Set(rawDocs.map((d) => d.fullName.toLowerCase()));
+			rawDocs = [
+				...rawDocs,
+				...(nres.docs as unknown as RepoDoc[]).filter(
+					(d) => !seenN.has(d.fullName.toLowerCase()),
+				),
+			];
+		}
 		// sls-025: separator-insensitive identity form of the query, computed once.
 		// Alias identity applies ONLY to identifier-form queries (containing a
 		// digit or -,_,/,. — "stellar8004", "passkey-kit", "subquery/stellar-subql-starter").
 		// A broad vocabulary query ("wallet", "nft marketplace") must never ride
 		// name-identity over the F4 Stellar-evidence policy — the audit's tier-0
 		// name-hit class would come straight back.
-		const qIsIdentifier = /[-_/.0-9]/.test(q.trim());
-		const qNorm = qIsIdentifier ? normAlias(q) : "";
+		// camelCase counts as identifier-form (round-9 battery: q="TiwalaPay"
+		// split to tiwala+pay, 173 pay-repos flooded in, and F4 correctly
+		// ranked code-verified rows above the unscanned exact-name match —
+		// right for vocabulary, wrong for identity. Nobody types camelCase
+		// for a vocabulary query, so an internal lower→upper transition is
+		// as strong an identity signal as a hyphen or digit.
+		const qIsIdentifier =
+			/[-_/.0-9]/.test(q.trim()) || /[a-z][A-Z]/.test(q.trim());
+		// Golden repos-soroswap: a PLAIN single-word query that IS an org's whole
+		// name ("soroswap") got no identity path — the org's own repos capped at
+		// owner-hay weight 3 while integrators with a topic hit scored 5, and
+		// authority ordering buried soroswap/core in 6th. Owner-exact alias fixes
+		// it. Guards: single token only (vocabulary queries like "nft marketplace"
+		// never qualify), ≥5 chars (3–4 char tickers sit one edit apart — same
+		// floor as didYouMean), and the plain-word form matches the OWNER only —
+		// never repoPart, so a repo merely NAMED "wallet" can't ride identity over
+		// the F4 evidence policy, and never substrings, so "oracle" still can't
+		// reach Blockchain-Oracle (the scoring rule above stands).
+		const qIsPlainName =
+			!qIsIdentifier && tokens.length === 1 && q.trim().length >= 5;
+		// Spaced product names ("stellar wallets kit" IS Creit-Tech/
+		// Stellar-Wallets-Kit): a multi-word query with no separators can still
+		// be a repo's exact name with hyphens spoken as spaces — normAlias
+		// already equates the two forms; only this gate blocked it. Guards:
+		// ≥3 RAW words (raw, not contentTokens — "stellar" is a stopword, so
+		// token count undercounts the very queries this serves) so two-word
+		// vocabulary ("nft marketplace") can never ride name-identity over the
+		// F4 evidence policy, plus a ≥8-char normalized floor.
+		const qIsSpacedName =
+			!qIsIdentifier &&
+			q.trim().split(/\s+/).length >= 3 &&
+			normAlias(q).length >= 8;
+		const qNorm =
+			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
+		// The language filter rides the first candidate query, but three more
+		// candidate sources (canonical/flagship injection, the anchor-token net,
+		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
+		// Python served TypeScript rows with no warning while ?language=Python
+		// alone filtered correctly (through-Raven battery, 2026-09-05). Every
+		// source passes the same gate here, once, after the last merge.
+		if (language) {
+			const want = language.toLowerCase();
+			rawDocs = rawDocs.filter((d) =>
+				String(d.primaryLanguage ?? "")
+					.toLowerCase()
+					.includes(want),
+			);
+		}
 		const docs = rawDocs.map((r) => {
 			const topics = topicList(r.topics);
 			// Field-weighted relevance: WHERE a term hits matters more than that it
@@ -978,9 +1489,22 @@ export async function searchRepos(
 			const tops = wordy(topics.join(" "));
 			const desc = wordy(`${r.description ?? ""} ${r.primaryLanguage ?? ""}`);
 			const readme = wordy(r.readmeExcerpt ?? "");
+			const notes = wordy(
+				(Array.isArray(r.knowledgeNotes) ? r.knowledgeNotes : [])
+					.map((n) => (typeof n?.note === "string" ? n.note : ""))
+					.join(" "),
+			);
 			// Snake/camel split so \b matching works on symbol names (regex \b
 			// treats _ as a word char — "escrow" never hits "release_escrow" raw).
 			const syms = symbolsHaystack(r.codeSymbols);
+			// Dependency-graph reverse read: deps must be SCORABLE, not just
+			// candidate-eligible — a dependent that only matches via stellarDeps
+			// scored 0 and was dropped before ranking (sep-40-oracle → blend
+			// missing). Hyphens/@/slashes are natural \b boundaries, so the raw
+			// join suffices.
+			const deps = Array.isArray(r.stellarDeps)
+				? r.stellarDeps.join(" ").toLowerCase()
+				: "";
 			// F4 (audit root #4): owner is searchable — q=allbridge must reach
 			// allbridge-io/* even when the repo name doesn't repeat the org.
 			// Same stopword-filtered tokens as everything else, so generic words
@@ -994,12 +1518,12 @@ export async function searchRepos(
 			const descLead = wordy(
 				(r.description ?? "").slice(0, IDENTITY_LEAD_CHARS),
 			);
-			const anchorIdentity = repoAnchorIdentity(tokens, [
-				name,
-				tops,
-				syms,
-				descLead,
-			])
+			// Identifier queries: identity is the JOINED symbol, never its
+			// fragments (see the rebuild above).
+			const anchorIdentity = repoAnchorIdentity(
+				identifierJoined ? [identifierJoined] : tokens,
+				[name, tops, syms, descLead],
+			)
 				? 1
 				: 0;
 			let score = 0;
@@ -1014,7 +1538,16 @@ export async function searchRepos(
 					// repo IMPLEMENTS the concept than a description mention — but a
 					// name/topic hit stays highest (it's the repo's own claimed identity).
 					else if (hit(syms)) best = 4;
-					else if (hit(desc) || hit(ownerHay)) best = 3;
+					// Curated, dated repo facts (knowledgeNotes) are description-
+					// strength evidence: a note recording "security advisories
+					// CVE-… fixed in …" must let the SDK repo match an advisory
+					// question the README never mentions.
+					else if (hit(desc) || hit(ownerHay) || hit(notes)) best = 3;
+					// A manifest dependency on the queried package is real usage
+					// evidence (the reverse dependency-graph read) — above a README
+					// mention, below identity: reflector outranks its consumers on
+					// "sep-40-oracle", but dependents surface instead of scoring 0.
+					else if (hit(deps)) best = 2;
 					else if (hit(readme)) best = 1;
 					if (best > 0) {
 						score += best;
@@ -1033,9 +1566,12 @@ export async function searchRepos(
 			// ≥3 chars so degenerate short queries can't ride it.
 			const alias =
 				qNorm.length >= 3 &&
-				(normAlias(repoPart) === qNorm ||
-					normAlias(ownerRaw) === qNorm ||
-					normAlias(r.fullName) === qNorm)
+				(qIsIdentifier || qIsSpacedName
+					? normAlias(repoPart) === qNorm ||
+						normAlias(ownerRaw) === qNorm ||
+						normAlias(r.fullName) === qNorm
+					: // Plain-word queries: owner identity ONLY (see qIsPlainName).
+						normAlias(ownerRaw) === qNorm)
 					? 1
 					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose
@@ -1075,6 +1611,22 @@ export async function searchRepos(
 					: mention === 1
 						? 1
 						: 0;
+			// Verified mainnet usage (code-truth 5): the repo's attributed
+			// contract has real lifetime events per stellar.expert. Coarse
+			// binary tier — the fact that it IS used, not how much.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const inUse = ((r as any).codeInUse?.events ?? 0) > 0 ? 1 : 0;
+			// sls-064 analog: superseded generations rank below their successors
+			// and live peers at equal relevance — the relation is curated, the
+			// demotion is mechanical.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const superseded = (r as any).successorRepo ? 1 : 0;
+			// Tier demotion (tag-and-demote, never delete): archive-tier repos
+			// (GitHub-archived, or dead-and-unstarred — most of the EC-taxonomy
+			// long tail) sink below every same-relevance competitor while staying
+			// name-findable. Mirrors the Inactive-projects pattern.
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+			const arch = (r as any).tier === "archive" ? 1 : 0;
 			return {
 				r,
 				topics,
@@ -1084,9 +1636,12 @@ export async function searchRepos(
 				sdf,
 				alive,
 				stale2y,
+				superseded,
+				arch,
 				mention,
 				stellarness,
 				anchorIdentity,
+				inUse,
 				crank,
 				frank,
 			};
@@ -1102,6 +1657,30 @@ export async function searchRepos(
 			: docs;
 		if (minScore > 0)
 			filtered = filtered.filter((d) => (d.r.repoScore ?? 0) >= minScore);
+		if (activity)
+			filtered = filtered.filter(
+				(d) => activityStateOf(d.r.lastCommitAt, d.r.isArchived) === activity,
+			);
+		if (capability)
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).sdkCapabilities ?? []).includes(capability),
+			);
+		if (domain)
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).codeDomains ?? []).includes(domain),
+			);
+		if (dependsOn) {
+			const want = dependsOn.toLowerCase();
+			filtered = filtered.filter((d) =>
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				((d.r as any).stellarDeps ?? []).some(
+					(dep: unknown) =>
+						typeof dep === "string" && dep.toLowerCase() === want,
+				),
+			);
+		}
 		// Sort order, most → least decisive: query relevance, SDF-org ownership,
 		// alive (committed within a year), explicit stellar/soroban mention, THEN
 		// the authority grade and stars. Putting these signals ABOVE repoScore
@@ -1111,11 +1690,13 @@ export async function searchRepos(
 		filtered.sort(
 			(a, b) =>
 				a.crank - b.crank ||
-				a.frank - b.frank ||
-				// Exact alias identity (sls-025) beats everything below the curated
-				// floats: when the query IS a repo's owner/name/path, that repo must
-				// outrank keyword and semantic neighbors.
+				// Exact alias identity (sls-025) ABOVE the flagship family float:
+				// when the query IS a repo's owner/name/path, that repo must outrank
+				// even curated family flagships (q="stellar-wallets-kit" was losing
+				// to the wallet float's other three seeds). Canonical corrections
+				// (crank) still rank higher — they fix wrong-repo identities.
 				b.alias - a.alias ||
+				a.frank - b.frank ||
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
 				// relevance still dominates within a tier.
 				b.stellarness - a.stellarness ||
@@ -1125,11 +1706,23 @@ export async function searchRepos(
 				// mid-prose plus a secondary token — but identity never lets a
 				// no-evidence repo beat a code-verified one (the F4 contract).
 				b.anchorIdentity - a.anchorIdentity ||
+				// Verified mainnet usage BEFORE raw keyword coverage (code-truth 5,
+				// the round-5 oracle case: keyword-luckier feeders outranked the
+				// one oracle demonstrably live on mainnet). Identity still beats
+				// usage (alias/anchorIdentity above); coarse binary so relevance
+				// dominates within the tier; no-usage rows are untouched relative
+				// to each other.
+				b.inUse - a.inUse ||
 				b.score - a.score ||
+				// Archive-tier demotion binds tightest of the demotions: an
+				// archived/dead-and-unstarred repo sinks below every live
+				// same-relevance competitor (EC long-tail guard, task #115).
+				a.arch - b.arch ||
 				// Hard-stale demotion, then liveness, BEFORE org authority: a
 				// dead SDF MVP must not outrank a live flagship at equal
 				// relevance (2026-07-19 answer-key eval — `sdf` deciding before
 				// `alive` let 49-month-dead repos ride org ownership).
+				a.superseded - b.superseded ||
 				a.stale2y - b.stale2y ||
 				b.alive - a.alive ||
 				b.sdf - a.sdf ||
@@ -1154,6 +1747,53 @@ export async function searchRepos(
 				homepageUrl: r.homepageUrl ?? null,
 				isFork: !!r.isFork,
 				isArchived: !!r.isArchived,
+				activityState: activityStateOf(r.lastCommitAt, r.isArchived),
+				activitySignals:
+					r.activitySignals && r.activitySignals.asOf
+						? {
+								commits90d: r.activitySignals.commits90d ?? null,
+								lastReleaseAt: r.activitySignals.lastReleaseAt ?? null,
+								releaseTag: r.activitySignals.releaseTag ?? null,
+								openPRs: r.activitySignals.openPRs ?? null,
+								asOf: r.activitySignals.asOf ?? null,
+							}
+						: null,
+				successorRepo:
+					(r as { successorRepo?: string | null }).successorRepo ?? null,
+				// Read-time from the curated dated map; the stored successorRepo is the
+				// weekly-stamped view of the same map. A stored value is never overridden.
+				supersededBy:
+					(r as { successorRepo?: string | null }).successorRepo ??
+					repoSupersession(r.fullName)?.supersededBy ??
+					null,
+				deprecatedAt: repoSupersession(r.fullName)?.deprecatedAt ?? null,
+				supersessionKind:
+					repoSupersession(r.fullName)?.supersessionKind ?? null,
+				codeInUse:
+					r.codeInUse?.asOf && typeof r.codeInUse.contracts === "number"
+						? {
+								contracts: r.codeInUse.contracts,
+								events: r.codeInUse.events ?? null,
+								eventsDelta: r.codeInUse.eventsDelta ?? null,
+								subinvocations: r.codeInUse.subinvocations ?? null,
+								subinvocationsDelta: r.codeInUse.subinvocationsDelta ?? null,
+								asOf: r.codeInUse.asOf,
+							}
+						: null,
+				knowledgeNotes: Array.isArray(r.knowledgeNotes)
+					? r.knowledgeNotes
+							.filter((n) => typeof n?.note === "string" && n.note)
+							// Internal notes are triage memory (why a long-tail repo
+							// isn't worth surfacing/deep-indexing) — they NEVER serve.
+							.filter(
+								(n) => (n as { visibility?: string }).visibility !== "internal",
+							)
+							.map((n) => ({
+								note: String(n.note),
+								source: typeof n.source === "string" ? n.source : "curated",
+								asOf: n.asOf ?? null,
+							}))
+					: [],
 				project: r.projectSlug
 					? { slug: r.projectSlug, name: r.projectName ?? null }
 					: null,
@@ -1164,6 +1804,17 @@ export async function searchRepos(
 				judgedHackathon: r.judgedHackathon ?? null,
 				repoScore: r.repoScore ?? 0,
 				repoScoreLabel: r.repoScoreLabel ?? null,
+				tier: (r as { tier?: string }).tier ?? "community",
+				// The tier's basis and date, beside the tier — a verdict without
+				// its reasons is class 33's shape (provenance elsewhere inviting a
+				// wrong inference), and tierChangedAt is what dates `tier` for the
+				// answer-dating contract. Null until the CTL has judged the row.
+				tierReason: Array.isArray((r as { tierReason?: unknown }).tierReason)
+					? (r as unknown as { tierReason: string[] }).tierReason
+					: null,
+				tierChangedAt:
+					(r as { tierChangedAt?: string | null }).tierChangedAt ?? null,
+				source: (r as { source?: string }).source ?? "project-link",
 				score,
 				deepWikiUrl: `https://deepwiki.com/${r.fullName}`,
 				canonical: crank < 9999,
@@ -1180,14 +1831,47 @@ export async function searchRepos(
 								? "mentioned"
 								: "none") as RepoResult["stellarEvidence"],
 				codeVerified: codeVerifiedOf(r),
+			}))
+			// kind is a function of the SERVED row — the same signals a consumer
+			// already sees, so the label can be audited against them.
+			.map((row) => ({
+				...row,
+				...repoKindOf({
+					isArchived: row.isArchived,
+					isFork: row.isFork,
+					judgedHackathon: row.judgedHackathon,
+					name: row.fullName,
+					isDeployableContract: row.codeVerified?.isDeployableContract,
+					projectSlug: row.project?.slug,
+				}),
 			}));
+		// Guard B / honest absence: a row that matched NO query token is a
+		// neighbour, not a hit. searchProjects already says so via matchMode +
+		// matchModeLabel; searchRepos returned the same kind of guess unlabelled,
+		// so an agent reported "zzqqxx nonexistent protocol" results as findings.
+		// Report the quality of the page we are actually serving.
+		const bestMatched = filtered
+			.slice(offset, offset + limit)
+			.reduce((m, x) => Math.max(m, x.matched ?? 0), 0);
+		const matchMode: RepoMatchMode = !tokens.length
+			? "all"
+			: bestMatched === 0
+				? "weak"
+				: bestMatched === tokens.length
+					? "strict"
+					: "partial";
 		return {
 			repos,
 			total,
 			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
 			searched,
+			matchMode,
+			matchModeLabel: MATCH_MODE_LABEL[matchMode],
+			warnings,
 		};
-	} catch {
-		return { repos: [], total: 0, canonical: [], searched };
+	} catch (e) {
+		// Every read is wrapped above, so this is the ranking pass throwing on
+		// a data-shape surprise — still a failed search, still said.
+		return failed([...warnings, degradedWarning("repos search", e)]);
 	}
 }

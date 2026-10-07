@@ -1,0 +1,24 @@
+{
+ "slug": "sorosan",
+ "url": "https://sorosan-dapp.vercel.app/",
+ "finalUrl": "https://sorosan-dapp.vercel.app/",
+ "fetchedAt": "2026-09-06T19:21:56.985Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 19:21:56 GMT",
+  "etag": "W/\"12cf1f0e6c11e536783fd7fac701dc5e\"",
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "eb3b666d8448925a3c4f0d0ee50b047c15eb803a8b695103cb0e8cf84b59255b",
+ "bodyTextChars": 90,
+ "markers": [
+  {
+   "marker": "Create Next App",
+   "found": true,
+   "where": "text",
+   "excerpt": "Create Next App poc for . h1 bc Deploy now Read our docs Learn Examples Go to nextjs.org →"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

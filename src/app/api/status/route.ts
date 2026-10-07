@@ -15,7 +15,7 @@
 import { NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
-import { SDF_SKILL_NAMES } from "@/lib/integrations/sdf-skills";
+import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { API_VERSION, SCOUT_SERVICE_VERSION } from "@/lib/version";
@@ -133,12 +133,19 @@ export async function GET() {
 		notes: `Electric Capital snapshot, as of ${ecData.asOf}`,
 	};
 
+	// sls-062: derive from the SAME live catalog /api/skills serves (llms.txt
+	// names filtered to resolvable SKILL.mds, 24h-cached) — the static fallback
+	// list's length drifted to 9 while the directory served 7. One population,
+	// one count; [] fetch failure degrades to null, never a stale number.
+	const sdfSkillCatalog = await fetchSdfSkillCatalog().catch(() => null);
 	const sdfSkills: SourceStatus = {
 		name: "sdfSkills",
-		count: SDF_SKILL_NAMES.length,
+		count: sdfSkillCatalog
+			? sdfSkillCatalog.skills.filter((s) => !s.community).length
+			: null,
 		lastUpdatedAt: null,
 		notes:
-			"Proxied from skills.stellar.org (server-cached 24h). Live freshness shown on the upstream site.",
+			"Proxied from skills.stellar.org (server-cached 24h); count = the SDF-authored section, the same rows /api/skills?source=sdf serves. The registry's Community Built section is served as source=community. Live freshness shown on the upstream site.",
 	};
 
 	const usage = await getUsageStats();
@@ -172,12 +179,16 @@ export async function GET() {
 			},
 			endpoints: [
 				"/api/status",
+				"/api/quality",
+				"/api/verify",
 				"/api/audits",
 				"/api/changelog",
+				"/api/changes",
 				"/api/leaderboard",
 				"/api/hackathons",
 				"/api/hackathons/{slug}",
 				"/api/hackathons/compare",
+				"/api/hackathons/builds",
 				"/api/analyze",
 				"/api/clusters",
 				"/api/builders",
@@ -187,6 +198,8 @@ export async function GET() {
 				"/api/repos/explain",
 				"/api/rfps",
 				"/api/research",
+				"/api/stablecoins",
+				"/api/rwa",
 				"/api/feedback",
 				"/api/skills",
 				"/api/skills/{name}",
@@ -196,6 +209,15 @@ export async function GET() {
 				"/api/partners/assistant",
 				"/api/partners/onboard",
 				"/api/partners/submit-listing",
+				// Drift guard 2026-08-21: every spec path must be listed here —
+				// six composites shipped without it and the guard ran red daily
+				// from 2026-08-13 with nobody reading it.
+				"/api/projects/resolve",
+				"/api/vet-idea",
+				"/api/scf-pitch",
+				"/api/hackathon-brief",
+				"/api/repos/trust",
+				"/api/contracts",
 			],
 			docs: "https://stellarlight.xyz/scout",
 			skill: "https://stellarlight.xyz/skills/stellar-scout.md",

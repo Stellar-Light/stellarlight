@@ -1,0 +1,42 @@
+name: Through-Raven category battery
+
+# stellar-raven #39: an SDF reviewer found a defunct issuer recommended first
+# for "what card services can I integrate" — we learned about our own data
+# from the consumer. This asks the REAL Raven gateway the same shape of
+# question for every category, weekly, and grades the answers against the
+# Stellar Playbook. Report-only; the summary is the signal. Needs the
+# RAVEN_TOKEN secret (an OAuth bearer issued by the Raven owner).
+
+on:
+  schedule:
+    # Wednesdays 06:00 UTC — after Tuesday's builder sweep and Monday's
+    # enrich-repos / basis upgrade, so it grades the refreshed data.
+    - cron: "0 6 * * 3"
+  workflow_dispatch:
+    inputs:
+      gate:
+        description: "Exit red when an Inactive row sits in any category's top 5."
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  battery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Ask Raven
+        env:
+          RAVEN_TOKEN: ${{ secrets.RAVEN_TOKEN }}
+        run: pnpm exec tsx scripts/eval/raven-category-battery.ts ${{ inputs.gate && '--gate' || '' }}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPayload, type Where } from "payload";
+import { checkinRecipient } from "@/lib/partner-invite";
 import configPromise from "@/payload.config";
 
 /**
@@ -7,6 +8,9 @@ import configPromise from "@/payload.config";
  *
  *   GET /api/cron/partner-digest            (Vercel Cron, Bearer CRON_SECRET)
  *   GET /api/cron/partner-digest?dryRun=1   (compute + report, send/write nothing)
+ *   GET /api/cron/partner-digest?checkin=all (operator override: the check-in is
+ *                                            due for every published partner now,
+ *                                            whatever its clock says)
  *
  * Runs weekly and sends AT MOST one email per partner, bundling two things so
  * a partner is never pinged twice:
@@ -24,9 +28,10 @@ import configPromise from "@/payload.config";
  *
  * A partner with no new leads and no check-in due gets NO email that week.
  *
- * Payload has no email adapter wired yet, so sendEmail logs to console — the
- * lead/check-in bookkeeping (marking leads notified, bumping nextReminderAt)
- * still runs so the system is correct the moment an adapter is added.
+ * Recipient: the account's real login email, else the listing's public
+ * contactEmail (curated partners sign in through a curated+slug placeholder
+ * that must never receive mail). "Sent" means a real address was mailed
+ * without error; only then does the quarterly clock reset.
  */
 
 export const dynamic = "force-dynamic";
@@ -45,7 +50,9 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const dryRun = new URL(request.url).searchParams.get("dryRun") === "1";
+	const params = new URL(request.url).searchParams;
+	const dryRun = params.get("dryRun") === "1";
+	const forceCheckin = params.get("checkin") === "all";
 	const now = Date.now();
 
 	try {
@@ -53,6 +60,7 @@ export async function GET(request: Request) {
 
 		const partners = await payload.find({
 			collection: "partner-accounts",
+			where: { status: { equals: "published" } },
 			limit: 1000,
 			depth: 0,
 		});
@@ -84,7 +92,16 @@ export async function GET(request: Request) {
 			slug: string;
 			leadCount: number;
 			checkin: boolean;
+			to: string | null;
 		}> = [];
+		const noAddress: string[] = [];
+		const sendFailed: string[] = [];
+		// Clock summary so a dry run explains a quiet week.
+		const clocks = {
+			due: 0,
+			future: 0,
+			earliestFutureAt: null as string | null,
+		};
 
 		for (const p of partners.docs) {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -96,11 +113,22 @@ export async function GET(request: Request) {
 			const reminderDueAt = doc.nextReminderAt
 				? new Date(doc.nextReminderAt).getTime()
 				: 0;
-			const checkinDue = !doc.nextReminderAt || reminderDueAt <= now;
+			const clockDue = !doc.nextReminderAt || reminderDueAt <= now;
+			if (clockDue) clocks.due++;
+			else {
+				clocks.future++;
+				if (
+					!clocks.earliestFutureAt ||
+					doc.nextReminderAt < clocks.earliestFutureAt
+				)
+					clocks.earliestFutureAt = doc.nextReminderAt;
+			}
+			const checkinDue = forceCheckin || clockDue;
 
 			if (leadCount === 0 && !checkinDue) continue;
 
 			// ── Compose the one weekly email ──
+			const to = checkinRecipient(doc);
 			const sections: string[] = [`Hi ${doc.name},`];
 			if (leadCount > 0) {
 				const needs = (leads?.needs ?? [])
@@ -113,27 +141,30 @@ export async function GET(request: Request) {
 			}
 			if (checkinDue) {
 				sections.push(
-					`Quarterly check-in: are you still active and taking work? Take a moment to confirm and refresh your profile (services, regions, pricing, availability) — it keeps you matchable and ranked ahead of stale partners.\n\nUpdate in a quick chat: ${DASHBOARD_URL}`,
+					`Quarterly check-in: is ${doc.name} still active on Stellar and taking work? Take a minute to review your listing and update anything that changed (services, regions, pricing, availability). Sign in with this address: ${DASHBOARD_URL}\n\nA current profile stays matchable and ranks ahead of stale ones.`,
 				);
 			}
-			sections.push("— Stellar Light");
+			sections.push("Stellar Light");
 
 			const subject =
 				leadCount > 0
-					? `${leadCount} builder${leadCount === 1 ? "" : "s"} looked for what you offer${checkinDue ? " — plus your quarterly check-in" : ""}`
-					: "Your Stellar Light quarterly check-in — still active?";
+					? `${leadCount} builder${leadCount === 1 ? "" : "s"} looked for what you offer${checkinDue ? ", plus your quarterly check-in" : ""}`
+					: "Your Stellar Light quarterly check-in: still active?";
 
+			// A failed or addressless check-in comes back next week instead of
+			// silently counting as done.
+			let delivered = dryRun && Boolean(to);
 			if (!dryRun) {
-				if (doc.email) {
+				if (to) {
 					try {
 						await payload.sendEmail({
-							to: doc.email,
+							to,
 							subject,
 							text: sections.join("\n\n"),
 						});
+						delivered = true;
 					} catch {
-						// Email backend not configured / transient — never block the
-						// bookkeeping below on a failed send.
+						sendFailed.push(slug);
 					}
 				}
 				// Mark leads notified so the next digest doesn't repeat them.
@@ -153,8 +184,8 @@ export async function GET(request: Request) {
 						}
 					}
 				}
-				// Reset the quarterly clock when the check-in went out.
-				if (checkinDue) {
+				// Reset the quarterly clock only when the check-in went out.
+				if (checkinDue && delivered) {
 					try {
 						await payload.update({
 							collection: "partner-accounts",
@@ -173,9 +204,12 @@ export async function GET(request: Request) {
 				leadsCleared += leadCount;
 			}
 
-			emailsSent++;
-			if (checkinDue) checkinsSent++;
-			digests.push({ slug, leadCount, checkin: checkinDue });
+			if (!to) noAddress.push(slug);
+			if (delivered) {
+				emailsSent++;
+				if (checkinDue) checkinsSent++;
+			}
+			digests.push({ slug, leadCount, checkin: checkinDue && delivered, to });
 		}
 
 		// ── Retention: prune delivered leads past the window ─────────────────
@@ -213,10 +247,14 @@ export async function GET(request: Request) {
 		return NextResponse.json({
 			success: true,
 			dryRun,
+			forceCheckin,
+			clocks,
 			partnersScanned: partners.docs.length,
 			emailsSent,
 			checkinsSent,
 			leadsCleared,
+			noAddress,
+			sendFailed,
 			[dryRun ? "leadsWouldPrune" : "leadsPruned"]: leadsPruned,
 			digests,
 			ranAt: new Date(now).toISOString(),

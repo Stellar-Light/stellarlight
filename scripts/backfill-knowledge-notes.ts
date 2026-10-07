@@ -1,0 +1,175 @@
+/**
+ * Stamp curated knowledge notes onto their repo rows — directly from the
+ * registry, zero GitHub calls.
+ *
+ * The enrich loop only writes knowledgeNotes for PROJECT-LINKED repos (the
+ * third instance of the project-scoped-writer class, found 2026-08-16:
+ * sushi-labs/sushiswap enriched "success" with zero notes stamped). This
+ * backfill covers every registry-keyed repo regardless of linkage, with the
+ * same audits crosslink enrich would build.
+ *
+ *   pnpm exec tsx scripts/backfill-knowledge-notes.ts             # dry run
+ *   pnpm exec tsx scripts/backfill-knowledge-notes.ts --execute   # write
+ */
+import "./load-env";
+
+import { getPayload } from "payload";
+import {
+	type AuditRecord,
+	buildKnowledgeNotes,
+	REPO_KNOWLEDGE_NOTES,
+} from "../src/lib/repo-knowledge";
+import configPromise from "../src/payload.config";
+
+const EXECUTE = process.argv.includes("--execute");
+
+async function main(): Promise<number> {
+	console.log(`Mode: ${EXECUTE ? "EXECUTE" : "DRY RUN"}`);
+	const payload = await getPayload({ config: await configPromise });
+
+	let stamped = 0;
+	let same = 0;
+	let missing = 0;
+	let mismatches = 0;
+
+	for (const key of Object.keys(REPO_KNOWLEDGE_NOTES)) {
+		// Registry keys may be lowercase OR GitHub's own casing; rows keep
+		// GitHub's casing
+		// (0xNana/SearchPay, Creit-Tech/…). Mongo `equals` is case-sensitive, so
+		// every mixed-case repo reported "missing row" and was never stamped —
+		// 131 of 325 keys on 2026-09-02, including batch-1 rows the board had
+		// listed as un-noted for weeks. `like` is a case-insensitive substring
+		// match; the exact-key filter below keeps it from grabbing a sibling.
+		const res = await payload.find({
+			collection: "repos",
+			where: { fullName: { like: key } },
+			// substring match: a short key like stellar/go also matches
+			// stellar/go-stellar-sdk and every fork — leave room so the exact
+			// row is never pushed past the page and reported 'missing'
+			limit: 50,
+			depth: 0,
+			context: { internal: true },
+		});
+		const d = (res.docs as Array<{ fullName?: string }>).find(
+			// Both sides lowercased. Comparing a lowercased row to the key AS
+			// WRITTEN meant a key in GitHub's own casing could never match: ten
+			// entries — every note added on 2026-09-07 among them — reported
+			// "missing row" and were silently never stamped, while the board went
+			// on listing those repos as un-noted. A registry key's capitalisation
+			// must not decide whether a fact reaches the row.
+			(x) => String(x.fullName ?? "").toLowerCase() === key.toLowerCase(),
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		) as any;
+		if (!d) {
+			console.log(`  missing row: ${key}`);
+			missing += 1;
+			continue;
+		}
+		const slug: string | null = d.projectSlug ? String(d.projectSlug) : null;
+		const auditsByProject = new Map<string, AuditRecord[]>();
+		if (slug) {
+			const ares = await payload.find({
+				collection: "audits",
+				where: { projectSlug: { equals: slug } },
+				limit: 100,
+				depth: 0,
+			});
+			auditsByProject.set(
+				slug,
+				// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+				(ares.docs as any[]).map((a) => ({
+					projectSlug: slug,
+					auditor: a.auditor ? String(a.auditor) : null,
+					publishedAt: a.publishedAt ? String(a.publishedAt) : null,
+				})),
+			);
+		}
+		const notes = buildKnowledgeNotes(
+			String(d.fullName),
+			slug,
+			auditsByProject,
+			{
+				lastCommitAt: d.lastCommitAt ?? null,
+				codeInUse: d.codeInUse ?? null,
+			},
+		);
+		// Compare every STORED subfield, not the text alone: a visibility flip
+		// or a re-dated curated fact (asOf) must reach the row too. `triggers`
+		// are not a stored subfield (Payload drops them) and derived notes carry
+		// a fresh asOf every run — comparing either would churn every row daily.
+		const shape = (n: {
+			note?: string;
+			source?: string;
+			asOf?: string | null;
+			visibility?: string | null;
+		}) => [
+			n.note,
+			n.source,
+			n.source === "curated" ? (n.asOf ?? null) : null,
+			n.visibility ?? "public",
+		];
+		const cur = JSON.stringify((d.knowledgeNotes ?? []).map(shape));
+		const next = JSON.stringify(notes.map(shape));
+		if (cur === next) {
+			same += 1;
+			continue;
+		}
+		console.log(
+			`  ${d.fullName}: ${(d.knowledgeNotes ?? []).length} → ${notes.length} notes`,
+		);
+		if (!EXECUTE) continue;
+		await payload.update({
+			collection: "repos",
+			id: String(d.id),
+			data: { knowledgeNotes: notes },
+		});
+		const check = (await payload.findByID({
+			collection: "repos",
+			id: String(d.id),
+			depth: 0,
+			context: { internal: true },
+			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
+		})) as any;
+		if ((check?.knowledgeNotes ?? []).length !== notes.length) {
+			mismatches += 1;
+			console.error(`  ✗ read-back mismatch ${d.fullName}`);
+		}
+		stamped += 1;
+	}
+
+	console.log(
+		`\nregistry keys: ${Object.keys(REPO_KNOWLEDGE_NOTES).length} · ${EXECUTE ? "stamped" : "would stamp"}: ${stamped || "(dry)"} · unchanged: ${same} · missing rows: ${missing} · mismatches: ${mismatches}`,
+	);
+	// END-STATE ASSERTION (QUALITY.md §3, added 2026-09-07). A run that stamped
+	// nothing looks exactly like a run with nothing to stamp, and on 2026-09-07
+	// that is precisely what happened: ten registry keys written in GitHub's own
+	// casing resolved to no row, the run reported "missing rows: 10 · unchanged:
+	// 594" and exited 0, and the board went on listing those repos as un-noted
+	// for as long as it had been true.
+	//
+	// So the lane now makes a claim about the world after it ran: every registry
+	// key resolves to a row. A key that does not is a defect in the registry or
+	// in the lookup — never a line of output nobody reads.
+	if (missing > 0) {
+		console.error(
+			`\n${missing} registry key(s) resolved to NO ROW — the notes they carry reach nothing. A key in GitHub's own casing used to fail here silently; check the key against the row's fullName.`,
+		);
+	}
+	if (mismatches > 0) {
+		console.error(
+			`\n${mismatches} row(s) did not read back with the notes just written.`,
+		);
+	}
+	if (missing === 0 && mismatches === 0 && EXECUTE)
+		console.log(
+			`end state: every one of the ${Object.keys(REPO_KNOWLEDGE_NOTES).length} registry keys resolves to a row, and every write read back.`,
+		);
+	return mismatches > 0 || missing > 0 ? 1 : 0;
+}
+
+main()
+	.then((code) => process.exit(code))
+	.catch((e) => {
+		console.error("FATAL:", e);
+		process.exit(1);
+	});

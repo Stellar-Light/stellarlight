@@ -1,0 +1,33 @@
+{
+ "slug": "soundness",
+ "url": "https://soundness.xyz/",
+ "finalUrl": "https://soundness.xyz/",
+ "fetchedAt": "2026-09-05T17:02:07.272Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sat, 05 Sep 2026 17:02:07 GMT",
+  "etag": null,
+  "lastModified": "Thu, 18 Jun 2026 07:43:59 GMT",
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "2943e4e6236158de6a711608acdf5099f7865bb51cfce1e78bfe6b7f5db4c3a6",
+ "bodyTextChars": 1683,
+ "markers": [
+  {
+   "marker": "winding down",
+   "found": true,
+   "excerpt": "Soundness — Winding Down Important Project notice Soundness is winding down... After bringing post-quantum security to blockchains, the project is closing. Soundness is no longer being develop"
+  },
+  {
+   "marker": "no longer being developed",
+   "found": true,
+   "excerpt": " Soundness is winding down... After bringing post-quantum security to blockchains, the project is closing. Soundness is no longer being developed or maintained, and all services are now offline. Follow us on X View the open-source repos If you used Soundness What happens now All dashboards and accou"
+  },
+  {
+   "marker": "services are now offline",
+   "found": true,
+   "excerpt": "-quantum security to blockchains, the project is closing. Soundness is no longer being developed or maintained, and all services are now offline. Follow us on X View the open-source repos If you used Soundness What happens now All dashboards and accounts are offline. The hosted services, including t"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

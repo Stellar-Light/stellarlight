@@ -1,0 +1,51 @@
+{
+  "asOf": "2026-08-30T23:31:54.603Z",
+  "source": "scripts/grok-repo-audit.ts",
+  "model": "grok",
+  "graded": 7,
+  "agreed": 2,
+  "agreementRate": 29,
+  "skippedLowConfidence": 5,
+  "divergences": [
+    {
+      "repo": "payrouteshq/stellartools",
+      "ours": "active-project",
+      "grok": "dead",
+      "confidence": 0.85,
+      "agree": false,
+      "reason": "Placeholder; gathering actual repo evidence before classifying."
+    },
+    {
+      "repo": "untangledfinance/oz-policy-builder",
+      "ours": "active-project",
+      "grok": "dead",
+      "confidence": 0.55,
+      "agree": false,
+      "reason": "Need to inspect the GitHub repo itself (activity, ownership, purpose) before classifying it in the Stellar ecosystem."
+    },
+    {
+      "repo": "hyperledger-solang/solang",
+      "ours": "active-project",
+      "grok": "canonical-infra",
+      "confidence": 0.92,
+      "agree": false,
+      "reason": "Hyperledger Solang is an actively maintained Solidity-to-WASM compiler (Apache-2.0) with a Stellar/Soroban target as first-class output, not a tutorial or product app. The Stellar docs and stellar-cli treat it as the supported Solidity compiler for smart contracts on Stellar; recent 0.3.4 (Feb 2026) still ships stellar-sdk and stellar examples."
+    },
+    {
+      "repo": "Shamba-Records-Limited/microvault",
+      "ours": "canonical-infra",
+      "grok": "dead",
+      "confidence": 0.5,
+      "agree": false,
+      "reason": "Gathering repo evidence before classifying."
+    },
+    {
+      "repo": "Consulting-Manao/tansu",
+      "ours": "canonical-infra",
+      "grok": "active-project",
+      "confidence": 0.72,
+      "agree": false,
+      "reason": "Consulting-Manao/tansu is a live Stellar/Soroban dApp (DAO/governance product) with recent commits, a working site, and product-level code — not an official SDK and not a starter template."
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+	"generatedAt": "2026-10-07T12:13:20.990Z",
+	"detector": "note-freshness",
+	"failures": [
+		{
+			"probe": "note-stale:dfns/dfns-sdk-ts:npm:@dfns/sdk",
+			"note": "note (asOf 2026-09-03) cites 0.8.29; registry latest is 0.8.31 (published 2026-09-28)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:coinfabrik/scout-soroban:crates:cargo-scout-audit",
+			"note": "note (asOf 2026-09-02) cites 0.3.16; registry latest is 0.3.17 (published 2026-09-25)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
+			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.1 (published 2026-10-01)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:blindpaylabs/blindpay-mcp:npm:@blindpay/mcp",
+			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.8.0 (published 2026-09-21)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.15.0 (published 2026-09-27)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:airgap-it/airgap-coin-lib:npm:@airgap/stellar",
+			"note": "note (asOf 2026-09-02) cites 0.13.47; registry latest is 0.14.0 (published 2026-09-24)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:keybase/client:docker:keybaseio/client",
+			"note": "note (asOf 2026-09-02) cites 2026-06-05; registry latest is 2026-09-17 (published 2026-09-17)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_js",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_wasm",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:rango-exchange/rango-sdk:npm:rango-sdk",
+			"note": "note (asOf 2026-09-02) cites 0.5.0; registry latest is 0.6.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:rango-exchange/rango-sdk:npm:rango-sdk-basic",
+			"note": "note (asOf 2026-09-02) cites 0.5.0; registry latest is 0.6.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:lightsail-network/strledger:pypi:strledger",
+			"note": "note (asOf 2026-09-02) cites 0.10.1; registry latest is 0.11.0 (published 2026-09-29)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:blend-capital/blend-sdk-js:npm:@blend-capital/blend-sdk",
+			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 3.3.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-05 (published 2026-10-05)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
+			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.35.1 (published 2026-09-15)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.14.0 (published 2026-09-28)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.8.0 (published 2026-09-28)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/rs-stellar-xdr:crates:stellar-xdr",
+			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 28.0.1 (published 2026-09-29)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-05 (published 2026-10-05)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:horizontalsystems/stellar-web-sdk:npm:stellar-web-sdk",
+			"note": "note (asOf 2026-09-07) cites 0.2.0; registry latest is 0.2.1 (published 2026-09-16)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-cli:crates:stellar-cli",
+			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 28.1.0 (published 2026-09-26)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-22 (published 2026-09-22)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/passkey-kit:npm:passkey-kit",
+			"note": "note (asOf 2026-09-13) cites 0.18.3; registry latest is 0.19.1 (published 2026-09-18)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:creit-tech/stellar-wallets-kit:npm:@creit.tech/stellar-wallets-kit",
+			"note": "note (asOf 2026-09-01) cites 2.6.0; registry latest is 2.7.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/js-stellar-sdk:npm:@stellar/stellar-sdk",
+			"note": "note (asOf 2026-09-14) cites 17.1.0; registry latest is 17.2.1 (published 2026-10-01)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:creit-tech/xbull-wallet:npm:@creit.tech/stellar-wallets-kit",
+			"note": "note (asOf 2026-09-01) cites 2.6.0; registry latest is 2.7.0 (published 2026-09-23)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:Fundable-Protocol/fundable-sdk:npm:@fundable/sdk",
+			"note": "note (asOf 2026-09-14) cites 0.2.3; registry latest is 0.3.0 (published 2026-09-24)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.8.2 (published 2026-10-05)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:DcentWallet/dcent-web-connector:npm:dcent-web-connector",
+			"note": "note (asOf 2026-09-14) cites 2.0.0; registry latest is 2.1.0 (published 2026-09-30)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar-expert/stellar-tx-signers-inspector:npm:@stellar-expert/tx-signers-inspector",
+			"note": "note (asOf 2026-09-14) cites 2.0.0; registry latest is 3.0.0 (published 2026-10-01)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:TrustLine-id/stellar-sdk:crates:trustline-sdk",
+			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.2.0 (published 2026-09-29)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.15 (published 2026-10-06)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:winsznx/routedock:npm:@routedock/routedock",
+			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.3.0 (published 2026-10-05)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
+			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.6 (published 2026-09-30)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar-registry/cli:crates:stellar-registry-cli",
+			"note": "note (asOf 2026-09-14) cites 0.1.1; registry latest is 0.1.2 (published 2026-09-29)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:stellar/rs-soroban-poseidon:crates:soroban-poseidon",
+			"note": "note (asOf 2026-09-14) cites 27.0.0; registry latest is 28.0.0 (published 2026-09-22)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:BlaineHeffron/soroban-sdk-tools:crates:soroban-sdk-tools",
+			"note": "note (asOf 2026-09-14) cites 0.1.3; registry latest is 0.1.4 (published 2026-09-28)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.1.1 (published 2026-09-28)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
+			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.12.0 (published 2026-10-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:comzzy-comzzy/datavend",
+			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:soomtochukwu/tradeflow",
+			"note": "public note asOf 2026-05-15; github.com/soomtochukwu/tradeflow is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:stellar/mcp-stellar-xdr",
+			"note": "public note asOf 2026-09-14; repo archived 2026-09-24 — the note describes a live repo",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:Kali-Decoder/stellar-crates-tinder",
+			"note": "public note asOf 2026-09-14; github.com/Kali-Decoder/stellar-crates-tinder is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:0xasuna/zkshotroul",
+			"note": "public note asOf 2026-09-14; github.com/0xasuna/zkshotroul is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:axis-markets/stellarexpert-data-source",
+			"note": "public note asOf 2026-09-14; github.com/axis-markets/stellarexpert-data-source is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:axis-markets/demo-server",
+			"note": "public note asOf 2026-09-14; github.com/axis-markets/demo-server is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		}
+	]
+}

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * ScoutFeedback — write-only public ingestion of feedback from agents
@@ -43,9 +44,9 @@ export const ScoutFeedback: CollectionConfig = {
 		// overrideAccess. Leaving this open let anyone POST /api/scout-feedback
 		// straight past the limiter (unbounded on the M0).
 		create: () => false,
-		read: ({ req }) => !!req.user,
-		update: ({ req }) => !!req.user,
-		delete: ({ req }) => !!req.user,
+		read: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{
@@ -59,13 +60,39 @@ export const ScoutFeedback: CollectionConfig = {
 				{ label: "Wrong / misleading answer", value: "wrong-answer" },
 				{ label: "Suggestion / improvement", value: "suggestion" },
 				{ label: "Other", value: "other" },
+				// Vote kinds (feedback→quality loop): polarity IS the kind. Votes
+				// carry a target and may omit message; the ROUTE enforces per-kind
+				// requiredness (it is this collection's only writer).
+				{ label: "Vote: worked", value: "worked" },
+				{ label: "Vote: did not work", value: "did-not-work" },
 			],
 		},
 		{
 			name: "message",
 			type: "textarea",
-			required: true,
-			admin: { description: "The freeform feedback text from the agent." },
+			admin: {
+				description:
+					"The freeform feedback text from the agent. Required for report kinds (route-enforced); optional on votes.",
+			},
+		},
+		{
+			name: "targetSurface",
+			type: "select",
+			index: true,
+			options: ["projects", "repos"],
+			admin: {
+				description:
+					"Vote target surface. Required for vote kinds (route-enforced); optional context on reports.",
+			},
+		},
+		{
+			name: "targetSlug",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"Vote target identity: project slug, or repo fullName (owner/name).",
+			},
 		},
 		{
 			name: "query",

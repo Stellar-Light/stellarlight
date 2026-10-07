@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 /**
  * Funding-v2 snapshot ledger (sls-044, #520).
@@ -27,9 +28,9 @@ export const FundingSnapshots: CollectionConfig = {
 		read: () => true,
 		// Writes come from the analyze route via the local API (overrideAccess);
 		// no user-facing create/update path.
-		create: ({ req }) => !!req.user,
+		create: adminOnly,
 		update: () => false,
-		delete: ({ req }) => !!req.user,
+		delete: adminOnly,
 	},
 	fields: [
 		{

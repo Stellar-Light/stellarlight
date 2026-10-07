@@ -1,22 +1,25 @@
 /**
  * GET /api/awards/eligibility?address=G...[&round=<slug>]
  *
- * Called when a wallet connects on /awards: is this address on the round's
- * whitelist, is the testnet account funded, and what has it already voted
- * for (so a returning voter sees their current ballot pre-selected —
- * "you can change your vote until closesAt" needs the current vote).
+ * Is this address on the round's voter list, and is voting open? Nothing
+ * else. This endpoint is unauthenticated and the ballot is anonymous, so it
+ * must never answer "has this address voted" or "what did it vote", it used
+ * to do both, which made it a participation-and-choice oracle for the whole
+ * electorate. Whether an address has voted is learned only behind the
+ * owner's signature: /api/awards/ballot-status answers a signed check, and
+ * /api/awards/submit answers already_voted; the page locks on either.
  *
- * Only the QUERIED address's own votes are returned — the same data anyone
- * can read from public testnet Horizon for that account. The aggregate
- * results endpoint never exposes address→choice; this one requires you to
- * name the address you're asking about.
+ * No funding here any more either. Ballots are written by the relay, which
+ * pays; a voter's account never needs to exist on-chain.
+ *
+ * Membership itself is public information (the list derives from the public
+ * SCF voting contract), so answering it is not a leak.
  */
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { decodeAccountVotes, roundOpenState } from "@/lib/awards/ballot";
-import { loadRound } from "@/lib/awards/round";
-import { fetchTestnetAccount, friendbotFundUrl } from "@/lib/awards/stellar";
+import { roundOpenState } from "@/lib/awards/ballot";
+import { loadRoundResult } from "@/lib/awards/round";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -25,7 +28,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
 	const limit = rateLimit(req, {
 		endpoint: "/api/awards/eligibility",
-		limit: 60,
+		// Per-IP, and the whole room shares one NAT at the venue: see ballot-xdr.
+		limit: 300,
 		windowMs: 5 * 60 * 1000,
 	});
 	if (!limit.allowed) {
@@ -34,73 +38,40 @@ export async function GET(req: NextRequest) {
 			{ status: 429, headers: rateLimitHeaders(limit) },
 		);
 	}
-
 	const address = (req.nextUrl.searchParams.get("address") ?? "")
 		.trim()
 		.toUpperCase();
 	if (!StrKey.isValidEd25519PublicKey(address)) {
 		return NextResponse.json(
-			{ error: "provide a valid Stellar address (?address=G...)" },
+			{ error: "provide a valid Stellar address as ?address=" },
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
-
-	const loaded = await loadRound(req.nextUrl.searchParams.get("round"));
+	const read = await loadRoundResult(req.nextUrl.searchParams.get("round"));
+	if (!read.ok) {
+		return NextResponse.json(
+			{
+				error: "round_unavailable",
+				message:
+					"The round could not be read right now. Nothing was changed. Try again in a moment.",
+			},
+			{
+				status: 503,
+				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+			},
+		);
+	}
+	const loaded = read.loaded;
 	if (!loaded) {
 		return NextResponse.json(
 			{ error: "no award round exists" },
 			{ status: 404, headers: rateLimitHeaders(limit) },
 		);
 	}
-
-	const whitelisted = loaded.whitelist.has(address);
-	if (!whitelisted) {
-		// Not on the list → read-only mode. No Horizon lookup needed.
-		return NextResponse.json(
-			{
-				round: loaded.round.slug,
-				whitelisted: false,
-				funded: null,
-				votes: null,
-				voting: roundOpenState(loaded.round),
-			},
-			{ headers: rateLimitHeaders(limit) },
-		);
-	}
-
-	const result = await fetchTestnetAccount(address);
-	if (result.funded === null) {
-		return NextResponse.json(
-			{ error: `could not reach testnet Horizon: ${result.error}` },
-			{ status: 502, headers: rateLimitHeaders(limit) },
-		);
-	}
-	if (result.funded === false) {
-		return NextResponse.json(
-			{
-				round: loaded.round.slug,
-				whitelisted: true,
-				funded: false,
-				votes: null,
-				voting: roundOpenState(loaded.round),
-				friendbot: friendbotFundUrl(address),
-				note: "This testnet account isn't funded yet — hit friendbot, then vote.",
-			},
-			{ headers: rateLimitHeaders(limit) },
-		);
-	}
-
-	const votes = decodeAccountVotes(
-		loaded.round,
-		loaded.nominees,
-		result.account.data,
-	);
 	return NextResponse.json(
 		{
 			round: loaded.round.slug,
-			whitelisted: true,
-			funded: true,
-			votes: Object.keys(votes).length > 0 ? votes : null,
+			whitelisted: loaded.whitelist.has(address),
 			voting: roundOpenState(loaded.round),
 		},
 		{ headers: rateLimitHeaders(limit) },

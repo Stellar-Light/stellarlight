@@ -7,6 +7,7 @@
  * Run:
  *   DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/create-project-vector-index.ts
  */
+import "./load-env";
 import { createRequire } from "node:module";
 
 const req = createRequire(import.meta.url);

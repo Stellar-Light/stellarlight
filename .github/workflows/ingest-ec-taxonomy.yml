@@ -1,0 +1,66 @@
+name: Ingest EC taxonomy (staged)
+
+# Electric Capital crypto-ecosystems → repos index (metadata-only, tiered).
+# MANUAL DISPATCH ONLY until the staged first ingest completes — no cron.
+# Sequencing (task #116): run execute waves only once SCAN_PAT exists, so the
+# scan pipeline can keep up with the new coverage. Dry-run first, inspect the
+# wave report, then execute. Resume with skip=<offset> on BUDGET-STOPPED.
+# After every execute wave the live answer-key probes gate the result: if
+# canonical references get displaced by the new rows, the run goes red.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+      limit:
+        description: "Max new repos this wave"
+        type: string
+        default: "2000"
+      skip:
+        description: "Resume offset (from a BUDGET-STOPPED report)"
+        type: string
+        default: "0"
+      backfill_tiers:
+        description: "Also backfill tier on existing rows (run while enrich is idle)"
+        type: boolean
+        default: false
+      sync_removals:
+        description: "Archive EC-removed rows (guards: allowlist, fresh-commit review list)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ingest-ec-taxonomy
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Same budget pool as the scan waves — the script reads the GraphQL
+      # rateLimit meter and BUDGET-STOPs before starving it.
+      GITHUB_TOKEN: ${{ secrets.STELLAR_LIGHT_SCOUT_MCP_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Ingest wave
+        run: >
+          pnpm exec tsx scripts/ingest-ec-taxonomy.ts
+          --limit=${{ inputs.limit }} --skip=${{ inputs.skip }}
+          ${{ inputs.execute && '--execute' || '' }}
+          ${{ inputs.backfill_tiers && '--backfill-tiers' || '' }}
+          ${{ inputs.sync_removals && '--sync-removals' || '' }}
+      - name: Post-ingest answer-key probes (live)
+        if: inputs.execute
+        run: pnpm exec tsx scripts/eval/repo-search-live-probes.ts

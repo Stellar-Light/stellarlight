@@ -11,9 +11,16 @@
  *   npx tsx scripts/enrich-from-scf.ts                  # Dry run
  *   npx tsx scripts/enrich-from-scf.ts --execute        # Write to DB
  */
-import "dotenv/config";
+import "./load-env";
 import { getPayload } from "payload";
+import {
+	cleanTitle as cleanScfTitle,
+	normSpaceless,
+	stemSlugHash,
+	titlePrefixMatch,
+} from "../src/lib/identity";
 import configPromise from "../src/payload.config";
+import { curatedFieldsFor } from "./data/curation-maps";
 import { parseRoundVerdicts } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
@@ -34,13 +41,9 @@ const stats = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Normalize a name for fuzzy matching */
-function normalize(name: string): string {
-	return name
-		.toLowerCase()
-		.replace(/[^a-z0-9]/g, "")
-		.trim();
-}
+/** EQUALITY-ONLY normalization — see src/lib/identity.ts for why
+ * containment on this form is banned (the 18-row poisoning). */
+const normalize = normSpaceless;
 
 /** Generate slug from name */
 function toSlug(name: string): string {
@@ -51,6 +54,39 @@ function toSlug(name: string): string {
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "");
 }
+
+/** The page's own `"siteUrls":{...}` object, brace-matched off the rebuilt
+ * flight stream. One per page (checked on 531 pages, 2026-10-03). */
+function siteUrlsOf(txt: string): Record<string, unknown> | null {
+	const at = txt.indexOf('"siteUrls":{');
+	if (at < 0) return null;
+	const start = txt.indexOf("{", at);
+	let depth = 0;
+	for (let i = start; i < txt.length; i++) {
+		if (txt[i] === "{") depth++;
+		else if (txt[i] === "}" && --depth === 0) {
+			try {
+				return JSON.parse(txt.slice(start, i + 1));
+			} catch {
+				return null;
+			}
+		}
+	}
+	return null;
+}
+
+/** An owner or owner/repo GitHub URL, nothing else: the field also carries
+ * GitLab links, Google Docs and comma-joined pairs on real pages. */
+const GITHUB_URL =
+	/^https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)?\/?$/;
+const githubUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && GITHUB_URL.test(v.trim()) ? v.trim() : undefined;
+/** A single absolute http(s) URL. Bare handles ("@telluscoop") and
+ * scheme-less hosts are dropped rather than guessed at. */
+const httpUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && /^https?:\/\/[^\s,]+$/.test(v.trim())
+		? v.trim()
+		: undefined;
 
 /** Download image buffer */
 async function downloadImage(
@@ -93,8 +129,19 @@ async function scrapeDetailPage(slug: string): Promise<{
 	github?: string;
 	totalAwarded?: number;
 	awardedRounds?: number[];
+	roundAwards?: Array<{
+		awardName?: string | null;
+		round: number | null;
+		amountUSD: number | null;
+		awardType: string | null;
+	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
+	/** Page-level project record (title / slug / lastAwardedRound), read for
+	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
+	pageSlug?: string;
+	title?: string;
+	lastAwardedRound?: number;
 } | null> {
 	try {
 		const res = await fetch(
@@ -156,6 +203,47 @@ async function scrapeDetailPage(slug: string): Promise<{
 			}
 		}
 
+		// Page-level project record — the same fields a listing row carries —
+		// for pages the listing never serves (SCF_PAGES_BEYOND_CAP). pageSlug
+		// doubles as the identity check: an unknown slug renders 200 with no
+		// project payload (soft-404), which must read as could-not-parse.
+		// Read off the REBUILT flight stream, not the raw HTML: the stream is
+		// cut into <script> chunks at arbitrary points, and a cut inside this
+		// field sequence blanked the identity check on 3 of 113 pages in the
+		// first dry run (mojoflower-mq4, sorostarter-9b2, opengrants-fdb).
+		const flight = [
+			...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
+		]
+			.map((m) => {
+				try {
+					return JSON.parse(m[1]) as string;
+				} catch {
+					return "";
+				}
+			})
+			.join("");
+		const txt = flight || html.replace(/\\"/g, '"');
+		const pageRec = txt.match(
+			/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
+		);
+		if (pageRec) {
+			result.title = pageRec[1];
+			result.pageSlug = pageRec[2];
+		}
+		const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
+		if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
+
+		// Links (2026-10-03). The page is App Router, so the __NEXT_DATA__ read
+		// above never matches and no link had been read since the site moved:
+		// the last run added 0 links across 472 matched projects. The project's
+		// own submission carries them as siteUrls on the flight stream.
+		const urls = siteUrlsOf(txt);
+		if (urls) {
+			result.website ??= httpUrl(urls.website);
+			result.twitter ??= httpUrl(urls.x ?? urls.twitter);
+			result.github ??= githubUrl(urls.github);
+		}
+
 		// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
 		// The old "grab every SCF #N on the page" scrape read the badge/
 		// submission arrays, which include NOT-awarded submission rounds —
@@ -169,6 +257,17 @@ async function scrapeDetailPage(slug: string): Promise<{
 				.map(Number)
 				.sort((a, b) => a - b);
 		}
+		// sls-058 defect 2: per-awarded-round official record (published budget
+		// + award type) from the same submission cards — the reconciling basis
+		// for the page's own totalAwarded.
+		if (verdicts.awards.length > 0) {
+			result.roundAwards = verdicts.awards.map((a) => ({
+				round: a.round,
+				awardName: a.awardName,
+				amountUSD: a.budgetUSD,
+				awardType: a.awardType,
+			}));
+		}
 		// Surfaced for the no-resurrect guard below (main loop): a page that
 		// parses ≥1 submission with ZERO awarded is affirmative evidence of
 		// non-award.
@@ -180,6 +279,17 @@ async function scrapeDetailPage(slug: string): Promise<{
 		return null;
 	}
 }
+
+/**
+ * SCF encodes an award it does not number (Public Goods, Liquidity, RFP) as a
+ * NEGATIVE lastAwardedRound code on the page — the award-detection below reads
+ * those codes deliberately. They are not round numbers, so they must never
+ * reach the stored field: six rows served `lastAwardedRound: -326` (and one
+ * page carries -226), which reads as a real round to every consumer. Awards
+ * without a number carry their own `awardName` in roundAwards instead.
+ */
+const storedRound = (v: unknown): number | null =>
+	typeof v === "number" && v > 0 ? v : null;
 
 async function main() {
 	console.log("=== Enrich Projects from Stellar Community Fund ===");
@@ -198,6 +308,14 @@ async function main() {
 	const scfProjects: any[] = await scfRes.json();
 	stats.scfProjects = scfProjects.length;
 	console.log(`Fetched ${scfProjects.length} SCF projects\n`);
+	// An EMPTY listing is an outage, not a clean sweep (the silent-params /
+	// empty-vs-empty class): 200-with-zero-rows must not exit green.
+	if (scfProjects.length === 0) {
+		console.error(
+			"✗ SCF listing returned 0 projects — outage or contract change; exiting 1.",
+		);
+		process.exit(1);
+	}
 
 	// 2. Connect to Payload
 	console.log("Connecting to database...");
@@ -228,37 +346,324 @@ async function main() {
 	}
 
 	// 4. Match and enrich
+	// sls-061 (#767): SCF titles that no normalization reaches — the API title
+	// names the PRODUCT/SUBMISSION, our record names the project. Keyed by the
+	// SCF slug (stable), mapped to OUR slug. Each pair verified 2026-08-07
+	// against the SCF page + our record before adding; never guessed.
+	const SCF_SLUG_OVERRIDES: Record<string, string> = {
+		// nightly-completeness residual since 2026-08-31: coala-pay is awarded
+		// (rounds 22, 31, 35 — see SCF_SUBMISSION_LINKS in curate-projects.ts)
+		// but both SCF pages are submission-named, so no round award was ever
+		// populated. r22 page-verified on anticipatory-aid-on-soroban-f7j, r35 on
+		// coala-pay-billy-wallet-9mi (2026-09-01).
+		"anticipatory-aid-on-soroban-f7j": "coala-pay",
+		"coala-pay-billy-wallet-9mi": "coala-pay",
+		// One row, several pages (2026-09-06): the second page is submission-
+		// named and carries a later round. Every pair host-matched to our row
+		// and page-parsed; the fold below keeps every page's award (before it,
+		// the last page written won and curate's promote-only linkage put the
+		// dropped round back — the row flipped on every execute).
+		"prices-api-rfp-ctx-1vo": "ctx", // r41 $138,000 · rates.ctx.com (ctxcom-evm carries r19)
+		"octopos-g6i": "untangled", // r41 $120,000 · stellar.untangled.finance (untangled-qcs carries r31 + Liquidity '25 Q3)
+		"institutional-liquidity-infrastructure-for-stellar-k5c": "lobster", // r42 $115,000 · lobster-protocol.com, github.com/lobster-protocol (lobster-vzw carries r36)
+		// tucambio's stored slug tucambio-wallets-lru renders no project payload
+		// (soft-404); the project's page is submission-named.
+		"seasonal-workers-payroll-lru": "tucambio", // r37 $75,000 + r43 $100,000 · tucambio.app, github.com/tucambioapp
+		// Wave 2 (2026-09-06): rows the title-prefix matcher rightly rejects
+		// ("Team Finance" ≠ "TrustSwap: Team Finance"; "Choppaddi" is FastBuka's
+		// page retitled — same hash vmf, choppaddi.com is the row's site).
+		"trustswap-team-finance-coa": "trustswap", // r36 $120,000 · team.finance
+		"choppaddi-vmf": "fastbuka", // r38 $70,000 + r44 $80,000 (#35 not awarded) · choppaddi.com; folds with fast-buka-delivery-nbo (no submissions)
+		// 2026-09-06: SCF's "Hermes: Stellar's Own Perpetual Exchange" links
+		// github.com/zenith-protocols — that is our ZENEX row (zenex.trade, org
+		// zenith-protocols, described "Zenex, formerly Hermes"). The name matcher
+		// gave the page to our unrelated `hermes` row (OrbitCDP's perp exchange,
+		// github.com/orbit-cdp/hermes), which carried $150,000 that is not its
+		// award; that row is unlinked in SCF_FIX. Two live products share a name,
+		// so only the link intersection decides.
+		"hermes-isy": "zenex", // #32 $150,000 · github: github.com/zenith-protocols
+		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
+		"coinsph-stellar-remittances-qwo": "coins-ph",
+		"identity-operating-system-idos-nqg": "idos",
+		"peer-by-honeycoin-inz": "honey-coin",
+		"pelago-airswift-nkm": "airswift",
+		// Soroban → Stellar rename class (product renamed, SCF page didn't).
+		"soroban-security-portal-7ea": "stellar-security-portal",
+		// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
+		// slugs, each page-verified locally — parseRoundVerdicts on the official
+		// page reproduces the finding's exact round + budget before mapping.
+		// vottun disambiguated by evidence: the developer-platform page carries
+		// the r27 award; the wirex-vottun page does not.
+		// Seed-review linkage (2026-09-01): four rows from the 2026-08-31
+		// absence review whose SCF page titles are submission-named, so the
+		// name matcher can never join them — the review's own evidence URLs
+		// carry the page slugs. Each page-verified via parseRoundVerdicts
+		// before mapping: pagcrypto r42/$96k · upesa r42/$86k (its stored r41
+		// is NOT page-awarded — linkage lets the crosscheck adjudicate it) ·
+		// roberto-sanz r22/$9k + r24/$30k · verseprop r33/$112,020 (stored
+		// r31/r32 not page-awarded — same adjudication path). Coala Pay
+		// deliberately NOT mapped: the only listed page ("Billy Wallet")
+		// shows r35/$60k vs our stored [22,31] — likely multiple pages per
+		// project; a wrong single-page join would mis-scope totals.
+		// Legacy-award linkage wave 2 (2026-09-01): the remaining nine
+		// no-linkage rows' page slugs were sitting in the seed-review map's
+		// own evidence URLs all along. Every page verified via
+		// parseRoundVerdicts before mapping; eight agree exactly with stored
+		// rounds, escala's page marks #42/#43 "Not Awarded" (award = #44/$70k
+		// — map corrected in the same change). Coala Pay stays deliberately
+		// UNJOINED: it is a real multi-page project (r22 on
+		// anticipatory-aid-on-soroban-f7j, r35 on coala-pay-billy-wallet-9mi,
+		// r31 unverdicted on both) and a single-slug join would let the
+		// exact-replace drop the unverdicted round.
+		"stellar-women-bootcamp-r5v": "womenbiz",
+		"embedded-collective-investment-via-soroban-syi": "escala",
+		"confidential-transfers-and-balances-hdt": "fairblock",
+		"solo-labs-iy1": "ichi",
+		"soroban-disassembler-working-title-ply": "inferera",
+		"advanced-debugging-for-soroban-contracts-5sr": "simbolik",
+		"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh":
+			"soroban-decompiler",
+		"stellar-surge-1gh": "dfs-labs",
+		"smart-account-onboarding-8yr": "the-aha-company",
+		"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu":
+			"pagcrypto",
+		"liquid-by-upesa-dvq": "upesa",
+		"social-podcast-ini": "roberto-sanz-criptomonedas",
+		"a-real-estate-tokenization-platform-ss1": "verseprop",
+		"allbridge-core-3lc": "allbridge",
+		"obsrvr-prism-fvl": "obsrvr",
+		"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
+		"digibank-non-custodial-n1t": "digibank",
+		"vottun-developer-platform-c2v": "vottun",
+		"upesa-formerly-utoken-pbs": "utoken",
+		"usdc-swap-stellar-cctp-bridge-yv8": "usdc-swap",
+		"transfuse-multichain-asset-bridge-iyi": "transfuse",
+		"catalyst-blockchain-manager-woe": "catalyst",
+		"blade-tradfi-to-defi-bridge-zgq": "blade",
+		// title-prefix rule casualties, same-entity page-verified (2026-08-12):
+		// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
+		// Treasury = Cash Abroad's second submission.
+		"greep-pos-greep-pay-hfe": "greeppay",
+		"zkcrossdex-ipb": "zkcross",
+		"cashabroad-smart-treasury-wla": "cash-abroad",
+		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
+		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
+		// `band`, which otherwise matches nothing and would keep stale data.
+		"band-protocol-2ob": "band",
+	};
+
+	// Pages BEYOND the 500-row listing cap (2026-09-06). /backend/projects
+	// serves the same 500 rows whatever it is asked (search/round/page/offset/
+	// limit/sort all ignored), so an SCF project outside that page can never
+	// reach the name matcher above — Blend was patched by hand, Mystic
+	// Finance's r29 award sat unread. Discovery ran ONCE, offline: the official
+	// per-round pages (/awards/<recId>, 46 rounds, 3,195 submissions keyed by
+	// project record id; /project/<recId> resolves to the canonical page) for
+	// numbered rounds, plus the Wayback CDX index of /project/* for the awards
+	// SCF does not number (Liquidity, Public Goods). Every entry: page parsed
+	// with parseRoundVerdicts, and the site / GitHub org / X handle on the page
+	// matched our row's links — or, where the page carries no links, the name
+	// is coined / Stellar-specific and unambiguous (marked "name"). Keyed by
+	// OUR slug → SCF page slug: the reverse of SCF_SLUG_OVERRIDES, which only
+	// re-keys rows already IN the listing and can never reach these.
+	// Left out on purpose: pages whose cards are all negative verdicts,
+	// Kickstart-only pages ("SCF Kickstart #N" cards are neutral to the
+	// parser), and name collisions (SCF #2's 2018 "StellarPay" ≠ our x402
+	// row; Wally / Sendit / Relax / Grip / Amber carry no links to confirm),
+	// and pages already attached to another row — one page never joins two
+	// rows; a fossil join is cleared by curation first (pen ← opengrants-fdb,
+	// SCF_FIX unlink, 2026-09-06) and only then mapped here.
+	// Amounts are the page's own budgets; "undisclosed" = award confirmed,
+	// no budget on the page (stored as amountUSD null, never 0).
+	const SCF_PAGES_BEYOND_CAP: Record<string, string> = {
+		accelar: "accelar-2td", // #26 $33,000 · site+github: accelar.io, github.com/accelar-labs
+		"art-club": "art-club-ia2", // #26 $40,000 · github: github.com/grmarkkes
+		artizen: "artizen-ngf", // #33 $130,000 · site+github: artizen.fund, github.com/artizen-fund
+		assetdesk: "assetdesk-kqx", // #19 $70,000 · site: assetdesk.xyz
+		astrocore: "astrocore-4xe", // #2 undisclosed · name: astroband's Stellar core port, SCF #2
+		astrograph: "astrograph-thf", // #1 undisclosed · name: astroband's Stellar GraphQL, SCF #1
+		autify: "autify-network-nxv", // #14 $15,000 · site: autifynetwork.com
+		"scaffold-stellar": "scaffold-stellar-ldy", // PG Q2 '26 undisclosed · github: github.com/theahaco — awarded=true was hand-patched with no page
+		blend: "blend-mfy", // Liquidity '24 Q1 $50,000 · site+github: blend.capital, github.com/blend-capital — awarded=true was hand-patched with no page; the page is not numbered-round listed (Wayback CDX only)
+		blockedenxyz: "blockedenxyz-6du", // #18 $139,999 · site+github: blockeden.xyz, github.com/blockedenhq
+		blocknify: "blocknify-5bv", // #6 $4,543.37 · #7 $131,973.75 · name: coined name
+		borderless: "borderless-u3x", // #20 $43,000 · #22 $82,500 · site+github: borderlesspayments.xyz, github.com/borderless-payments
+		bravepay: "bravepay-tze", // #11 $200,000 · site: bravepay.net
+		btq: "btq-jva", // #14 $10,000 · site: btq.com
+		cede: "cede-labs-fxy", // #31 $119,800 · site+github: cede.store, github.com/cedelabs
+		chaincerts: "chaincerts-u04", // #13 $75,000 · #18 $103,125 · site+github: chaincerts.co, github.com/kommitters
+		"chainlink-oracles-relayer": "chainlink-oracles-relayer-c5f", // #15 $38,400 · site+github: docs.relink.services, github.com/relinkservices
+		chef: "chef-c8c", // #22 $18,000 · site: github.io/stellar-chef, stellar-chef.github.io
+		chronospay: "chronospay-nrb", // #11 $65,000 · site: chronospay.io
+		"city-states": "city-states-medieval-70v", // #2 undisclosed · name: our host citystatesm = "City States: Medieval"
+		clear: "clear-4rw", // #26 $45,000 · site: borderlesspayments.xyz
+		"clickpesa-debt-fund": "clickpesa-debt-fund-ssc", // #26 $30,000 · #28 $95,000 · name: product-named, same company (ClickPesa)
+		clob: "clob-qoi", // #29 $72,019 · site: ideasoft.io
+		coinsender: "coinsender-f7q", // #24 $23,440 · site+github: coinsender.io, github.com/megadev-ou
+		constellation: "constellation-protocol-4uv", // #19 $110,000 · #23 $100,000 · github: github.com/constellation-protocol
+		copperx: "copperx-gateway-and-payout-yhf", // #29 $50,000 · site+github: copperx.io, github.com/copperxhq
+		dappradar: "dappradar-e06", // #27 $50,000 · #34 $95,000 · site: dappradar.com, x.com/dappradar
+		deb: "deb-sj5", // #6 $653.09 · site: demo.drivedeb.com, drivedeb.com
+		dropzey: "dropzey-in4", // #23 $38,500 · site+github: dropzey.com, github.com/zainh332
+		"elixir-stellar-sdk": "elixir-stellar-sdk-wib", // #10 $12,000 · github: github.com/kommitters
+		elsa: "elsa-wallet-banking-filipinos-hcg", // #11 $95,000 · site: elsa.care
+		emigro: "emigro-jp6", // #17 $46,400 · #20 $33,920 · #25 $90,000 · site+github: emigro.co, github.com/emigro
+		empowch: "empowch-eh9", // #11 $25,000 · site: empowch.com
+		fijicoin: "fijicoin-frq", // #8 $50,000 · site: mai.money
+		"flutter-stellar-sdk": "flutter-stellar-sdk-ilm", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+		flux: "flux-yu0", // #22 $38,000 · site: iflux.app
+		"fx-swap": "fx-swap-by-hedgehog-unu", // #21 $42,450 · site: hedgeeffective.com
+		getpaid: "getpaid-z9y", // #9 $192,500 · site: getpaid.africa
+		"governance-modules-library": "governance-modules-library-nr4", // #22 $27,000 · #26 $74,000 · github: github.com/blockscience
+		handlpay: "handlpay-ah3", // #30 $60,000 · site+github: github.com/handlpay, handlpay.com
+		hiyield: "hiyield-0e4", // #18 $150,000 · site: hiyield.xyz
+		icanproveit: "icanproveit-proof-of-learning-icn", // #26 $50,000 · github: github.com/tuvalusoftware
+		idunu: "idunu-help-kids-thrive-3tm", // #21 $15,000 · #25 $15,000 · name: coined name
+		"infinity-wallet": "infinity-wallet-f7m", // #16 $130,000 · site+github: github.com/infinitywallet, infinitywallet.io
+		"ios-stellar-sdk": "ios-stellar-sdk-tdq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/soneso
+		"java-stellar-sdk": "java-stellar-sdk-btq", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · github: github.com/lightsail-network
+		"js-worker-sdk": "js-worker-sdk-rjo", // #24 $12,500 · #27 $35,000 · github: github.com/cloudouble
+		katagames: "katagames-r2t", // #11 $25,000 · site: kata.games, x.com/createplayearn
+		keizai: "keizai-qfe", // #21 $43,000 · #28 $41,000 · github: github.com/keizai-tools
+		"kmac-state-machine-template": "kmac-state-machine-template-extension-jqw", // #20 $7,500 · github: github.com/huitemagico
+		"kotlin-stellar-sdk": "kotlin-stellar-sdk-fjl", // #9 $11,500 · github: github.com/rahimklaber
+		kript: "kript-pva", // #27 $35,000 · #32 $77,000 · site: kriptup.io
+		kunst21: "kunst21com-ray", // #9 undisclosed · name: SCF title is our host kunst21.com
+		"legacy-suite": "legacy-suite-on-stellar-zpd", // #24 $49,998 · site+github: github.com/avento-labs, legacysuite.com
+		lumenscan: "lumenscan-bwl", // #4 undisclosed · name: Lumen-specific name
+		mica: "mica-ckw", // #16 $138,700 · site+github: github.com/micatechnology, mica.rent
+		mojoflower: "mojoflower-mq4", // #7 $196,415 · #11 $47,500 · #17 $100,000 · github: github.com/mojoflower-garden
+		mystic: "mystic-finance-xp7", // #29 $47,000 · site: mysticfinance.xyz
+		"net-sdk": "net-sdk-cfe", // PG Q2 '26 undisclosed · PG Q4 '25 undisclosed · github: github.com/beans-bv
+		"nirvana-labs": "nirvana-labs-4eh", // #26 $36,000 · site: nirvanalabs.io
+		oinc: "oinc-kix", // #17 $105,000 · site: com.br, useoinc.com.br
+		okashi: "okashi-oee", // #13 $82,000 · #15 $124,800 · #20 $100,000 · #24 $100,000 · site+github: github.com/okashi-dev, okashi.dev
+		omnilumen: "omnilumen-dyk", // #28 $50,000 · github: github.com/omnilumen
+		// scf.awarded was true with $48,000 and no page anywhere — an uncited award.
+		// The page's own SCF #27 Legacy v5.0 Activation budget is $48,000, equal to
+		// the figure already on our row, and its links (orally.net,
+		// github.com/orally-network) match the product's name.
+		orally: "orally-network-76g", // #27 $48,000 · amount+name
+		"open-gamefi-sdk": "open-gamefi-sdk-ibv", // #28 $39,000 · github: github.com/yanis7774
+		opengrants: "opengrants-fdb", // PG Q2 '26 undisclosed · PG Q3 '25 undisclosed · PG Q4 '25 undisclosed · site+github: opengrants.net, github.com/metagov/daostar
+		ortege: "ortege-ai-tsm", // #18 $11,200 · #22 $40,000 · #26 $100,000 · github: github.com/ortege-xyz
+		paysapp: "paysapp-l02", // #3 undisclosed · name: coined name (kuyawa)
+		"planet-pay": "planet-pay-lxg", // #14 $49,500 · #21 $96,000 · github: github.com/scalemote
+		plutope: "plutope-merchant-app-zmh", // #27 $33,400 · github: github.com/plutopein, x.com/plutopeio
+		poma: "poma-protocol-s3f", // #29 $14,000 · github: github.com/poma-protocol, x.com/pomaprotocol
+		qolaq: "qolaq-wev", // #13 $150,000 · site: qolaq.org
+		qstn: "qstn-3rv", // #20 $2,500 · site: qstn.us
+		ramm: "ramm-global-retail-commerce-zbg", // #22 $38,500 · site+github: github.com/jamiels, ramm.ai
+		rarible: "rariblecom-stellar-ujd", // #30 $150,000 · site+github: github.com/rarible, rarible.com
+		sanctum: "sanctum-cfe", // #23 $50,000 · #25 $85,000 · github: github.com/zkbricks
+		securx: "securx-medical-prescriptions-xmt", // #27 $42,400 · site: securxtech.wixsite.com, wixsite.com/securx
+		silicore: "silicore-wrz", // #29 $31,000 · github: github.com/ilanklim
+		"simple-signer": "simple-signer-ei9", // #9 $10,000 · github: github.com/fsodano
+		solarkraft: "solarkraft-jdu", // #24 $50,000 · #29 $67,000 · github: github.com/freespek
+		"soroban-explorer": "soroban-explorer-rtb", // #19 $61,000 · #23 $100,000 · site: sorobanexp.com
+		"soroban-polygon-interop": "soroban-polygon-interop-3gz", // #27 $42,755 · site: entethalliance.github.io, github.io/crosschain-interoperability
+		"soroban-pre-order-contract": "soroban-pre-order-contract-ucp", // #12 $1,000 · github: github.com/aolieman
+		"soroban-react": "soroban-react-khv", // #20 $25,000 · github: github.com/paltalabs
+		sorobanmath: "sorobanmath-zuo", // #20 $40,000 · github: github.com/rahul-soshte
+		sorobuild: "sorobuild-zhc", // #22 $44,800 · name: Soroban-specific coined name
+		sorosan: "sorosan-twd", // #20 $29,000 · github: github.com/sorosan
+		// scf.slug soropg-zcg was hand-set, but the page is outside the 500-row
+		// listing, so no pass ever visited it: the row served awarded=true with an
+		// empty roundAwards and the page's -226 sentinel as its round. Its one
+		// award is a partial disbursement ("Awarded (50%)"), which only became
+		// readable with the status fix in the same batch.
+		soropg: "soropg-zcg", // PG Q2 '26 undisclosed · site+github: soropg.com, github.com/jamesbachini
+		sorosplits: "sorosplits-9w7", // #19 $59,700 · #23 $94,000 · site+github: github.com/findolor, sorosplits.xyz
+		sorostarter: "sorostarter-9b2", // #29 $47,175 · github: github.com/sorostarter, x.com/sorostarter
+		spacewalk: "spacewalk-sel", // #11 $100,000 · site+github: github.com/pendulum-chain, pendulumchain.org
+		spatium: "spatium-wallet-7ii", // #13 $148,000 · #22 $35,200 · name: coined wallet name, spatium.net on page
+		starloom: "starloom-ox2", // #26 $45,900 · site: starloom.io
+		"stellar-nest": "stellar-nest-thq", // #25 $14,800 · github: github.com/alkeops
+		"stellar-tip": "stellar-tip-pj5", // #4 undisclosed · name: Stellar-specific name
+		"stellar-token-launchpad": "stellar-token-launchpad-flp", // #24 $40,000 · site+github: github.com/cryptixag, tokenlaunchpad.eu
+		"stellar-tools": "stellar-tools-6qw", // #26 $18,700 · site+github: github.com/joaquinsoza, stellartools.xyz
+		stellarguard: "stellarguard-41d", // #1 undisclosed · name: Stellar-specific name
+		stellarmint: "stellarmint-ece", // #5 $51,277.94 · site: stellarmint.io
+		stellarport: "stellarport-gfe", // #2 undisclosed · name: Stellar-specific name
+		stellarprodev: "stellarprodev-z0n", // #17 $39,880 · #29 $26,000 · site+github: github.com/omeganetwork-tech, stellarpro.dev
+		stellarscamreport: "stellarscamreport-wir", // #6 $5,445 · site: stellarscam.report
+		stellot: "stellot-vp7", // #4 undisclosed · name: Stellar-specific coined name
+		"storehouse-gold": "storehouse-gold-to-stellar-nlz", // #26 $50,000 · name: distinctive product name
+		stroopyai: "stroopyai-e5a", // #20 $21,370 · site: stroopy.ai
+		tap4change: "tap4change-wgd", // #21 $73,280 · site: tap4change.org
+		taskio: "taskio-87z", // #7 $283,499 · site: task.io
+		teken: "teken-easy-multi-signatures-avi", // #28 $29,500 · github: github.com/moonbite-gmbh
+		"timed-transactions-api": "timed-transactions-api-shu", // #1 undisclosed · name: SCF #1 project, name unambiguous
+		tracee: "tracee-jnz", // #16 $128,925 · github: github.com/tracee1910
+		triiyo: "triiyo-5cf", // #22 $50,303 · site: triiyo.com
+		uils: "uils-yl5", // #17 $141,027.50 · name: coined name, uils.la on page, no links on our row
+		walletban: "walletban-n32", // #20 $20,000 · site: walletban.xyz
+		"web3-antivirus": "web3-antivirus-w3a-a37", // #28 $50,000 · github: github.com/web3-antivirus
+		xycloans: "xycloans-qqr", // #13 $31,800 · Liquidity '24 Q1 $50,000 · github: github.com/xycloo
+		zentra: "zentra-cxp", // #23 $18,200 · site+github: github.com/tosinshada, tide-soroban-contract-frontend.vercel.app
+		ziriz: "ziriz-my0", // #22 $48,000 · github: github.com/zirizapp
+	};
+
 	const matched: { scf: any; ours: any }[] = [];
 	const unmatched: string[] = [];
 
 	for (const scf of scfProjects) {
 		// Trim parenthetical/whitespace noise from SCF titles before normalizing
 		// (e.g. "Soroban Optimistic Oracle  (SOO) " → "soroban optimistic oracle").
-		const cleanTitle = scf.title.replace(/\s*\([^)]*\)\s*/g, " ").trim();
+		const cleanTitle = cleanScfTitle(scf.title);
 		const normTitle = normalize(cleanTitle);
 		const scfSlug = toSlug(cleanTitle);
 		// SCF slugs carry a trailing hash (e.g. "warp-drive-7tk") — stem it so it
 		// joins our "warp-drive" / "warpdrive" records.
-		const scfSlugStem = String(scf.slug || "").replace(/-[a-z0-9]{2,5}$/i, "");
+		const scfSlugStem = stemSlugHash(String(scf.slug || ""));
 
 		let ours =
+			bySlug.get(SCF_SLUG_OVERRIDES[String(scf.slug)] ?? "") ||
 			byNormName.get(normTitle) ||
 			bySlug.get(scfSlug) ||
 			bySlug.get(scf.slug) ||
 			bySlug.get(scfSlugStem) ||
 			byNormName.get(normalize(scfSlugStem));
 
-		// Try partial matching for common patterns (last resort; guard tiny stems
-		// to avoid e.g. "velo" swallowing "velocity").
+		// Partial matching, last resort — TITLE-PREFIX ONLY (sls-043 regression,
+		// 2026-08-12): normalize() strips spaces, so plain substring containment
+		// matched across word seams ("Soroban Disassembler" → soro**band**issa…
+		// wrote another project's r41/$100k onto Band Protocol; "ars" absorbed
+		// FOUR different projects via stell**ars**/…). Even word-boundary
+		// containment fails for generic one-word names ("Basilic — Stablecoin
+		// Rails…" is not the project "Rails"). The rule the data supports: the
+		// official TITLE must START with our project's name at a token boundary
+		// (or vice versa) — "Band Protocol" ↔ "Band" ✓, "DIA Oracles" ↔ "DIA" ✓,
+		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
+		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
 		if (!ours && normTitle.length >= 4) {
 			for (const [key, proj] of byNormName) {
-				if (key.includes(normTitle) || normTitle.includes(key)) {
+				if (!key || (!key.includes(normTitle) && !normTitle.includes(key)))
+					continue;
+				if (titlePrefixMatch(cleanTitle, String(proj.name ?? ""))) {
 					ours = proj;
-					break;
+				} else {
+					console.log(
+						`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
+					);
 				}
+				break;
 			}
 		}
 
+		// A lineage shadow (Draft + canonicalSlug, #1337) is not a record. The
+		// name matcher joined "Liqvid" to the parked duplicate `liqvid` and wrote
+		// the page there, while the canonical `liqvidxyz` kept a dead slug and no
+		// round awards. Re-key to the canonical row — one page, one row.
+		if (ours?.canonicalSlug) {
+			const canon = bySlug.get(String(ours.canonicalSlug));
+			if (canon) {
+				console.log(
+					`  ${ours.slug}: shadow of ${canon.slug} — page ${scf.slug} re-keyed to the canonical row`,
+				);
+				ours = canon;
+			}
+		}
 		if (ours) {
 			matched.push({ scf, ours });
 		} else {
@@ -279,8 +684,174 @@ async function main() {
 		console.log("");
 	}
 
+	// 4b. Beyond-cap pages: fetched here, parsed by the SAME scrapeDetailPage,
+	// queued as synthetic listing rows for the loop below. Trinary on purpose
+	// (awarded / not-awarded-on-page / could-not-parse): a page that cannot be
+	// read is reported and exits 2 — never a silent "not awarded".
+	const beyondCap = {
+		queued: [] as string[],
+		notAwarded: [] as string[],
+		unparseable: [] as string[],
+	};
+	const listedSlugs = new Set(scfProjects.map((p) => String(p.slug)));
+	const matchedOurSlugs = new Set(matched.map((m) => m.ours.slug));
+	for (const [ourSlug, scfSlug] of Object.entries(SCF_PAGES_BEYOND_CAP)) {
+		if (listedSlugs.has(scfSlug) || matchedOurSlugs.has(ourSlug)) {
+			console.log(
+				`  beyond-cap ${scfSlug}: now served by the listing — the normal path owns it`,
+			);
+			continue;
+		}
+		const ours = bySlug.get(ourSlug);
+		if (!ours) {
+			beyondCap.unparseable.push(`${scfSlug} (our row ${ourSlug} missing)`);
+			continue;
+		}
+		const detail = await scrapeDetailPage(scfSlug);
+		await sleep(300);
+		if (!detail) {
+			beyondCap.unparseable.push(`${scfSlug} (HTTP error or network failure)`);
+			continue;
+		}
+		if (detail.pageSlug !== scfSlug) {
+			beyondCap.unparseable.push(
+				`${scfSlug} (no project payload at that slug)`,
+			);
+			continue;
+		}
+		const awardedOnPage =
+			(detail.roundAwards?.length ?? 0) > 0 ||
+			(detail.awardedRounds?.length ?? 0) > 0 ||
+			(detail.verdictAwardedAny ?? 0) > 0;
+		if (!awardedOnPage) {
+			if ((detail.verdictSubmissions ?? 0) > 0)
+				beyondCap.notAwarded.push(scfSlug);
+			else beyondCap.unparseable.push(`${scfSlug} (page verdicts nothing)`);
+			continue;
+		}
+		beyondCap.queued.push(scfSlug);
+		matched.push({
+			scf: {
+				slug: scfSlug,
+				title: detail.title ?? ours.name,
+				// NOT storedRound() here: this value is the award SIGNAL that
+				// isAwarded reads below, and a non-numbered award is encoded as a
+				// negative code. Clamping it here flipped every Public Goods row
+				// (the four Stellar SDKs, opengrants, scaffold-stellar) to
+				// awarded=false in the 2026-09-06 dry run. The clamp belongs only
+				// where the value is STORED.
+				lastAwardedRound: detail.lastAwardedRound ?? null,
+				detail,
+			},
+			ours,
+		});
+	}
+	console.log(
+		`Beyond-cap pages: ${beyondCap.queued.length} awarded (queued) · ${beyondCap.notAwarded.length} not awarded on page (no write) · ${beyondCap.unparseable.length} could not parse\n`,
+	);
+
+	// One row, several pages (2026-09-06). A project with a submission-named
+	// second page (ctx, untangled, lobster, coala-pay) was written once PER
+	// PAGE and the last page won: the exact-replace dropped the other page's
+	// award on every execute, curate's promote-only linkage put it back, and
+	// the row flipped between runs. Pages mapped to one row are read first and
+	// folded into one record: rounds and round awards are the union, the total
+	// is the sum of the pages' own totals (undefined when any page withholds
+	// it — never derived from round sums), and the citable slug is the page the
+	// name matcher joined (the project-named one), else the page with the
+	// latest numbered round.
+	const byRow = new Map<string, { scf: any; ours: any }[]>();
+	for (const m of matched) {
+		const list = byRow.get(m.ours.slug) ?? [];
+		list.push(m);
+		byRow.set(m.ours.slug, list);
+	}
+	const folded: { scf: any; ours: any }[] = [];
+	for (const list of byRow.values()) {
+		if (list.length === 1) {
+			folded.push(list[0]);
+			continue;
+		}
+		for (const m of list) {
+			if (m.scf.detail === undefined) {
+				m.scf.detail = await scrapeDetailPage(String(m.scf.slug));
+				await sleep(300);
+			}
+		}
+		const ours = list[0].ours;
+		const viaOverride = (p: any) =>
+			Number(SCF_SLUG_OVERRIDES[String(p.slug)] === ours.slug);
+		const top = (p: any) =>
+			Math.max(0, ...((p.detail?.awardedRounds ?? []) as number[]));
+		const pages = list
+			.map((m) => m.scf)
+			.sort(
+				(a, b) =>
+					viaOverride(a) - viaOverride(b) ||
+					top(b) - top(a) ||
+					String(a.slug).localeCompare(String(b.slug)),
+			);
+		const primary = pages[0];
+		// Two NAME-matched pages on one row are two SCF records titled alike —
+		// a rename (wellspring-xuv is the team's RampMeDaddy page retitled
+		// "Wellspring") or a second product of one company (cashabroad's Smart
+		// Treasury). Say so in the log: a fold of two unrelated projects that
+		// merely share a name would look identical, and only a reader can tell.
+		if (pages.filter((p) => !viaOverride(p)).length > 1)
+			console.log(
+				`  WARN ${ours.slug}: ${pages.filter((p) => !viaOverride(p)).length} pages joined by NAME alone (${pages
+					.filter((p) => !viaOverride(p))
+					.map((p) => p.slug)
+					.join(
+						", ",
+					)}) — confirm they are one project before trusting the fold`,
+			);
+		const details = pages.map((p) => p.detail).filter(Boolean);
+		const totals = details.map((d) => d.totalAwarded);
+		const seen = new Set<string>();
+		const detail = {
+			...(primary.detail ?? {}),
+			totalAwarded:
+				details.length === pages.length &&
+				totals.every((t) => typeof t === "number")
+					? totals.reduce((a, b) => a + b, 0)
+					: undefined,
+			awardedRounds: [
+				...new Set(details.flatMap((d) => d.awardedRounds ?? [])),
+			].sort((a, b) => a - b),
+			roundAwards: details
+				.flatMap((d) => d.roundAwards ?? [])
+				.filter((r) => {
+					const k = `${r.round ?? ""}|${r.awardName ?? ""}|${r.amountUSD ?? ""}`;
+					if (seen.has(k)) return false;
+					seen.add(k);
+					return true;
+				}),
+			verdictSubmissions: details.reduce(
+				(n, d) => n + (d.verdictSubmissions ?? 0),
+				0,
+			),
+			verdictAwardedAny: details.reduce(
+				(n, d) => n + (d.verdictAwardedAny ?? 0),
+				0,
+			),
+		};
+		const lastAwardedRound =
+			Math.max(...pages.map((p) => Number(p.lastAwardedRound) || 0)) ||
+			primary.lastAwardedRound;
+		console.log(
+			`  ${ours.slug}: ${pages.length} SCF pages folded → ${primary.slug} (${pages
+				.map(
+					(p) =>
+						`${p.slug} ${p.detail ? `#${(p.detail.awardedRounds ?? []).join(" #") || "—"}` : "unread"}`,
+				)
+				.join(" + ")})`,
+		);
+		folded.push({ scf: { ...primary, lastAwardedRound, detail }, ours });
+	}
+
 	// 5. Enrich matched projects
-	for (const { scf, ours } of matched) {
+	for (const { scf, ours } of folded) {
 		console.log(
 			`  ${ours.name} ← SCF "${scf.title}" (round ${scf.lastAwardedRound})`,
 		);
@@ -290,7 +861,8 @@ async function main() {
 		const currentScf = ours.scf || {};
 
 		// Scrape detail page early so we can include totalAwarded in SCF data
-		const detail = await scrapeDetailPage(scf.slug);
+		const detail: Awaited<ReturnType<typeof scrapeDetailPage>> =
+			scf.detail ?? (await scrapeDetailPage(scf.slug));
 
 		// The SCF API encodes special award types (Liquidity / Public Goods / RFP)
 		// as NEGATIVE lastAwardedRound codes — those ARE awards. The old
@@ -304,15 +876,87 @@ async function main() {
 			(detail?.totalAwarded ?? 0) > 0 ||
 			(detail?.awardedRounds?.length ?? 0) > 0;
 
-		const hasNewData =
+		const pageDiffers =
+			// provenance first-stamp: a row missing the citation trio IS new data
+			// (the trio ships 2026-08-12; without this the stamp only rides award
+			// deltas and an already-converged corpus never gets it — the
+			// advertised-but-never-persisted class, on the provenance feature
+			// itself)
+			!currentScf.basis ||
+			currentScf.sourceUrl !==
+				`https://communityfund.stellar.org/project/${scf.slug}` ||
 			currentScf.awarded !== isAwarded ||
-			currentScf.lastAwardedRound !== scf.lastAwardedRound ||
+			// Compare like with like: the stored field is clamped by storedRound,
+			// so testing it against the RAW page signal made every non-numbered
+			// award row differ forever — it wrote null, still saw -326, and
+			// re-planned on the next run. The Idempotence step caught exactly
+			// that: 6 rows (the four Stellar SDKs, opengrants, scaffold-stellar)
+			// still planned after the 2026-09-06 execute.
+			currentScf.lastAwardedRound !== storedRound(scf.lastAwardedRound) ||
 			currentScf.slug !== scf.slug ||
 			(detail?.totalAwarded &&
 				currentScf.totalAwarded !== detail.totalAwarded) ||
 			(detail?.awardedRounds &&
 				JSON.stringify(currentScf.awardedRounds) !==
-					JSON.stringify(detail.awardedRounds));
+					JSON.stringify(detail.awardedRounds)) ||
+			// roundAwards drift: compare on the value tuple only — the stored
+			// rows carry Payload array-row ids the scrape doesn't have.
+			// awardName is part of the tuple: a non-numbered award has round
+			// null, so without the name two different Liquidity Awards compare
+			// equal and a real change would read as no drift.
+			(detail?.roundAwards &&
+				JSON.stringify(
+					(currentScf.roundAwards ?? []).map(
+						(r: {
+							round: number | null;
+							awardName?: string | null;
+							amountUSD?: number | null;
+							awardType?: string | null;
+						}) => [
+							r.round ?? null,
+							r.awardName ?? null,
+							r.amountUSD ?? null,
+							r.awardType ?? null,
+						],
+					),
+				) !==
+					JSON.stringify(
+						detail.roundAwards.map((r) => [
+							r.round ?? null,
+							r.awardName ?? null,
+							r.amountUSD,
+							r.awardType,
+						]),
+					));
+
+		// One field, one writer (2026-09-06): a human-verified block (curate
+		// SCF_FIX) is the writer of record for its values — the page's total can
+		// include an ineligible round (aquarius: page $391k, paid $291k) and its
+		// award types are not what the human recorded. This lane only ADDS to
+		// such a row: rounds and round awards the page shows that the block
+		// lacks (union; stored tuples win), plus the citation when missing.
+		// Before this the two lanes flipped aquarius, stride, palremit and
+		// autoaction on every execute.
+		const humanOwned = currentScf.basis === "human-verified";
+		const storedRounds: number[] = (currentScf.awardedRounds ?? []).map(Number);
+		// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+		const storedRA: any[] = currentScf.roundAwards ?? [];
+		// biome-ignore lint/suspicious/noExplicitAny: scrape + Payload rows
+		const raKey = (r: any) => `${r.round ?? ""}|${r.awardName ?? ""}`;
+		const storedRAKeys = new Set(storedRA.map(raKey));
+		const addRounds = (detail?.awardedRounds ?? []).filter(
+			(r) => !storedRounds.includes(r),
+		);
+		const addRA = (detail?.roundAwards ?? []).filter(
+			(r) => !storedRAKeys.has(raKey(r)),
+		);
+		const pageUrl = `https://communityfund.stellar.org/project/${scf.slug}`;
+		const hasNewData = humanOwned
+			? addRounds.length > 0 ||
+				addRA.length > 0 ||
+				currentScf.slug !== scf.slug ||
+				currentScf.sourceUrl !== pageUrl
+			: pageDiffers;
 
 		// No-resurrect guard (2026-07-11): if this record is already
 		// awarded=false and the official page affirmatively shows ZERO awarded
@@ -330,18 +974,57 @@ async function main() {
 			console.log(
 				`    SCF: NO-RESURRECT — awarded=false stands (official page shows ${detail?.verdictSubmissions} submission(s), zero awarded)`,
 			);
+		} else if (hasNewData && humanOwned) {
+			const pageLast = Number(scf.lastAwardedRound) || 0;
+			const storedLast = Number(currentScf.lastAwardedRound) || 0;
+			updateData.scf = {
+				...currentScf,
+				slug: scf.slug,
+				sourceUrl: pageUrl,
+				asOf: new Date().toISOString().slice(0, 10),
+				lastAwardedRound: storedRound(
+					pageLast > storedLast ? pageLast : currentScf.lastAwardedRound,
+				),
+				awardedRounds: [...storedRounds, ...addRounds].sort((a, b) => a - b),
+				roundAwards: [
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+					...storedRA.map((r: any) => ({
+						round: r.round ?? null,
+						awardName: r.awardName ?? null,
+						amountUSD: r.amountUSD ?? null,
+						awardType: r.awardType ?? null,
+					})),
+					...addRA,
+				],
+			};
+			console.log(
+				`    SCF (human-verified, additive): +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
+			);
+			stats.scfDataUpdated++;
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
-				lastAwardedRound: scf.lastAwardedRound,
+				lastAwardedRound: storedRound(scf.lastAwardedRound),
 				slug: scf.slug,
+				// provenance trio: parsed from the official page, dated, citable.
+				// human-verified (curate SCF_FIX) outranks the page and must survive
+				// enrich passes — the curation-reverted-by-sync class.
+				basis:
+					currentScf.basis === "human-verified"
+						? "human-verified"
+						: "official-record",
+				asOf: new Date().toISOString().slice(0, 10),
+				sourceUrl: `https://communityfund.stellar.org/project/${scf.slug}`,
 				...(detail?.totalAwarded ? { totalAwarded: detail.totalAwarded } : {}),
 				...(detail?.awardedRounds
 					? { awardedRounds: detail.awardedRounds }
 					: {}),
+				...(detail?.roundAwards?.length
+					? { roundAwards: detail.roundAwards }
+					: {}),
 			};
 			console.log(
-				`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}, totalAwarded=${detail?.totalAwarded ?? "N/A"}`,
+				`    SCF: awarded=${isAwarded}, round=${scf.lastAwardedRound}, slug=${scf.slug}, totalAwarded=${detail?.totalAwarded ?? "N/A"}, roundAwards=${detail?.roundAwards?.map((r) => `#${r.round}:$${r.amountUSD ?? "?"}`).join(" ") ?? "N/A"}`,
 			);
 			stats.scfDataUpdated++;
 		}
@@ -395,12 +1078,19 @@ async function main() {
 				console.log(`    DESC: "${detail.description.slice(0, 60)}..."`);
 			}
 
-			// Add links we're missing
+			// Add links we're missing. A field a curation registry owns (a
+			// removed dead or hijacked link) is never refilled from the page, or
+			// this lane and curate would flip it on alternate runs.
 			const currentLinks = ours.links || {};
 			const newLinks: any = { ...currentLinks };
 			let linksChanged = false;
+			const owned = curatedFieldsFor(String(ours.slug ?? ""));
 
-			if (detail.website && !currentLinks.website) {
+			if (
+				detail.website &&
+				!currentLinks.website &&
+				!owned.has("links.website")
+			) {
 				newLinks.website = detail.website;
 				linksChanged = true;
 			}
@@ -408,7 +1098,7 @@ async function main() {
 				newLinks.twitter = detail.twitter;
 				linksChanged = true;
 			}
-			if (detail.github && !currentLinks.github) {
+			if (detail.github && !currentLinks.github && !owned.has("links.github")) {
 				newLinks.github = detail.github;
 				linksChanged = true;
 			}
@@ -458,6 +1148,13 @@ async function main() {
 	console.log(`  Links:            ${stats.linksAdded}`);
 	console.log(`Skipped (no new):   ${stats.skipped}`);
 	console.log(`Errors:             ${stats.errors}`);
+	console.log(
+		`Beyond-cap pages:   ${beyondCap.queued.length} awarded · ${beyondCap.notAwarded.length} not awarded on page · ${beyondCap.unparseable.length} could not parse`,
+	);
+	for (const s of beyondCap.notAwarded)
+		console.log(`  not awarded on page: ${s}`);
+	for (const s of beyondCap.unparseable)
+		console.log(`  could not parse:     ${s}`);
 
 	if (dryRun) {
 		console.log(
@@ -465,6 +1162,22 @@ async function main() {
 		);
 	}
 
+	// Failed writes must not exit green (2026-08-08 sweep).
+	if (stats.errors > 0) {
+		console.error(
+			`\n✗ ${stats.errors} write error(s) — exiting 1 so the run shows red.`,
+		);
+		process.exit(1);
+	}
+	// A curated page that reads not-awarded or cannot be parsed means the map
+	// is stale or the page moved — its own exit code, so "could not look"
+	// never reads as "checked, absent".
+	if (beyondCap.notAwarded.length > 0 || beyondCap.unparseable.length > 0) {
+		console.error(
+			`\n✗ ${beyondCap.notAwarded.length + beyondCap.unparseable.length} beyond-cap page(s) disagree with the map — exiting 2.`,
+		);
+		process.exit(2);
+	}
 	process.exit(0);
 }
 

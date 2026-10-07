@@ -1,0 +1,30 @@
+{
+ "slug": "vanna-finance",
+ "url": "https://docs.vanna.finance/developers/deployed-contracts.md",
+ "finalUrl": "https://docs.vanna.finance/developers/deployed-contracts.md",
+ "fetchedAt": "2026-09-06T02:10:04.637Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 02:10:04 GMT",
+  "etag": null,
+  "lastModified": "Sun, 06 Sep 2026 02:10:04 GMT",
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "f41d6152a9a98efa14c81aec740a6ca03e4771f35296d55b8bf2c9a962b51e20",
+ "bodyTextChars": 6374,
+ "markers": [
+  {
+   "marker": "All contracts are deployed on **Stellar Testnet**",
+   "found": true,
+   "where": "text",
+   "excerpt": "na Protocol contract addresses on Stellar Testnet, including lending pools, tokens, and external protocol integrations. All contracts are deployed on **Stellar Testnet**. Mainnet addresses will be published at launch. **Network passphrase:** `Test SDF Network ; September 2015`\\ **Soroban RPC:** `htt"
+  },
+  {
+   "marker": "Mainnet addresses will be published at launch",
+   "found": true,
+   "where": "text",
+   "excerpt": "including lending pools, tokens, and external protocol integrations. All contracts are deployed on **Stellar Testnet**. Mainnet addresses will be published at launch. **Network passphrase:** `Test SDF Network ; September 2015`\\ **Soroban RPC:** `https://soroban-testnet.stellar.org`\\ **Horizon:** `ht"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

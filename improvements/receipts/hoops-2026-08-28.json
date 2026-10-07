@@ -1,0 +1,28 @@
+{
+ "slug": "hoops",
+ "url": "https://hoops.finance/",
+ "finalUrl": "https://hoops.fi/",
+ "fetchedAt": "2026-08-28T00:38:30.957Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Fri, 28 Aug 2026 00:38:30 GMT",
+  "etag": "\"7tq5vm8wmi1jcl\"",
+  "lastModified": null,
+  "server": null
+ },
+ "bodyTextSha256": "337c57fb64f47f2d28c9b07486fa4b17621d4e236f76cc4371d706c64584dc97",
+ "bodyTextChars": 3953,
+ "markers": [
+  {
+   "marker": "TESTNET",
+   "found": true,
+   "excerpt": "for any Stellar or Soroban asset. ONLINE Hoops FlashPool Incentivized liquidity pools with dynamic, game-based rewards. TESTNET Hoops Vaults Risk-assessed savings accounts that compound yield on autopilot. TESTNET Hoops Copilot AI-native research assistant powered by Hoops data. DEVELOPMENT Hoops SD"
+  },
+  {
+   "marker": "JOIN THE WAITLIST",
+   "found": true,
+   "excerpt": "ime market data, friction-free swaps, and automated yield so anyone can build, trade, and save—without the gatekeepers. JOIN THE WAITLIST SCROLL TO EXPLORE Start here New to Hoops? Get started with our platform in minutes. Preview the App Read the docs Join the community How Hoops Works Three simple"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

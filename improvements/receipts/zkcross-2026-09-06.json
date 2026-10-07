@@ -1,0 +1,24 @@
+{
+ "slug": "zkcross",
+ "url": "https://zkcross-network-1.gitbook.io/learn.zkcross.network/ecosystem-validation/production-validation.md",
+ "finalUrl": "https://zkcross-network-1.gitbook.io/learn.zkcross.network/ecosystem-validation/production-validation.md",
+ "fetchedAt": "2026-09-06T04:19:25.882Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:19:25 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "d2f775c50f8147c57705b9ac7c20598c0e8b4f1e9e914e146a29c6a2225d8929",
+ "bodyTextChars": 2795,
+ "markers": [
+  {
+   "marker": "zkCrossDEX served as the main proving ground for this phase",
+   "found": true,
+   "where": "text",
+   "excerpt": " It came from deploying infrastructure into different ecosystems with different technical and operational requirements. zkCrossDEX served as the main proving ground for this phase. It was not just a product surface. It was the operational wrapper through which zkCross hardened routing, settlement, s"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

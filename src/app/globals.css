@@ -58,6 +58,26 @@
 		--chart-segment-background: rgba(253, 218, 36, 0.1);
 		--chart-segment-line: rgba(253, 218, 36, 0.3);
 
+		/* The tooltip panel referenced --chart-tooltip-background, which was
+		   never defined — so the panel resolved to NO background and kept only
+		   its backdrop blur. Bright series colours bled straight through it and
+		   the numbers were unreadable on a busy chart. Near-opaque so the
+		   readout always wins over whatever it covers, with the marker border
+		   for an edge. */
+		--chart-tooltip-background: rgba(23, 23, 23, 0.96);
+		--chart-tooltip-border: #2F2F2F;
+		--chart-tooltip-foreground: #E5E5E5;
+
+		/* The scatter/terminal-marker palette (--chart-1 … --chart-5) and the
+		   brush border were referenced by the kit and equally undefined; an
+		   undefined stroke paints nothing at all. */
+		--chart-1: #FDDA24;
+		--chart-2: #4EA8DE;
+		--chart-3: #56C596;
+		--chart-4: #E5747C;
+		--chart-5: #B79CED;
+		--chart-brush-border: #2F2F2F;
+
 		/* --font-sans/serif/mono are set by next/font on <html> (layout.tsx) —
 		   the single source. Declaring them here shadowed those variables at
 		   equal specificity, and the unquoted "Source Serif 4" (identifier
@@ -272,5 +292,87 @@
 
 	.gradient-border:hover::before {
 		opacity: 1;
+	}
+}
+
+/* Top-Stablecoins rail on /stablecoins — the list is rendered twice and the
+   track slides up exactly half its height, so the loop is seamless. */
+@keyframes scroll-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+.animate-scroll-up {
+  animation: scroll-up 22s linear infinite;
+}
+.animate-scroll-up:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-up { animation: none; }
+}
+
+/* ── Entrance motion (2026-08-22) ───────────────────────────────────────
+   Two primitives, techniques after yui540/css-animations (MIT): a clip-path
+   wipe for a headline on load, and a 40 ms stagger for a set of siblings —
+   stat tiles, the first table rows. Restraint is the rule: one reveal per
+   page load, on the design system's swift-out curve, never on scroll or
+   hover, nothing loops. Both are off under prefers-reduced-motion. */
+@keyframes reveal-wipe {
+	from {
+		clip-path: inset(0 100% 0 0);
+		transform: translateX(-6px);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+		transform: translateX(0);
+	}
+}
+@keyframes fade-up-8 {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.reveal-wipe {
+	animation: reveal-wipe 0.9s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+}
+.stagger-in > * {
+	animation: fade-up-8 0.35s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+}
+.stagger-in > :nth-child(2) { animation-delay: 40ms; }
+.stagger-in > :nth-child(3) { animation-delay: 80ms; }
+.stagger-in > :nth-child(4) { animation-delay: 120ms; }
+.stagger-in > :nth-child(5) { animation-delay: 160ms; }
+.stagger-in > :nth-child(6) { animation-delay: 200ms; }
+.stagger-in > :nth-child(7) { animation-delay: 240ms; }
+.stagger-in > :nth-child(8) { animation-delay: 280ms; }
+@media (prefers-reduced-motion: reduce) {
+	.reveal-wipe,
+	.stagger-in > * {
+		animation: none;
+	}
+}
+
+/* Push/pull: a body that just changed subject (a different asset or issuer
+   in the drawer) enters from the right. The chart range toggles use the
+   motion/react equivalent with direction (see stablecoin-explorer). */
+@keyframes push-in {
+	from {
+		opacity: 0;
+		transform: translateX(16px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+.push-in {
+	animation: push-in 0.25s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+	.push-in {
+		animation: none;
 	}
 }

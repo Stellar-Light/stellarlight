@@ -24,15 +24,22 @@ name: Sync scout-mcp to distribution repo
 # node_modules/ and dist/ are NOT mirrored — the standalone repo regenerates
 # them via `pnpm install` + `pnpm build` on its own. .gitignore'd in both.
 
+# RETIRED AS AUTOMATION — operator decision, 2026-08-31.
+#
+# This lane pushed scout-mcp/ to the distribution repo with a PAT that
+# expired 2026-07-03; it then failed 19 straight times while the mirror
+# went two months stale. The operator declined to mint a replacement PAT or
+# deploy key, so the mirror is synced MANUALLY (clone mirror, rsync
+# scout-mcp/ over it with --delete, commit, push — the exact steps below,
+# run by a person or agent with push rights). Drift is watched WITHOUT any
+# secret by scripts/check-mirror-drift.ts inside the workflow-health lane:
+# the board goes red when the mirror falls behind, and the fix is one
+# manual sync.
+#
+# workflow_dispatch stays so the automation revives instantly if a secret
+# ever appears — the secret check below still guards it.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "scout-mcp/**"
   workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   sync:

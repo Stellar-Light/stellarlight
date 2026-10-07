@@ -19,11 +19,8 @@
  *   npx tsx scripts/link-canonical-slug.ts            # dry run (report only)
  *   npx tsx scripts/link-canonical-slug.ts --execute  # write canonicalSlug
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import configPromise from "../src/payload.config";
 

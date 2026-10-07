@@ -10,6 +10,37 @@
  * same PR, run `pnpm contract:write`, and add a changelog entry — CI fails
  * otherwise.
  */
+import {
+	RWA_KINDS,
+	RWA_PRODUCT_KINDS,
+	RWA_STATES,
+	RWA_VERIFICATION_LEVELS,
+} from "../data/rwa-registry";
+import { CODE_DOMAINS } from "./code-domains";
+import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
+import {
+	BUILD_MATCH_MODES,
+	BUILD_SEARCH_MODES,
+	LINK_BASES,
+	REVIEW_CHECK_IDS,
+	REVIEW_RESOLVED_BY,
+} from "./hackathon-build-links";
+import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
+import { RESEARCH_MODES } from "./match-mode";
+import { PARTNER_TYPES } from "./partner-match";
+import { DEPLOYMENT_NETWORKS } from "./project-deployment";
+import {
+	PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+	STATUS_BASES,
+} from "./project-status";
+import { PROJECT_TYPES } from "./project-types";
+import { RATE_LIMIT_SCOPE } from "./rate-limit";
+import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
+import { RESEARCH_SOURCES } from "./research-sources";
+import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { PRICE_BASES } from "./stablecoins";
+import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
 const SITE_URL = "https://stellarlight.xyz";
@@ -24,6 +55,602 @@ interface OpenAPISpec {
 	paths: Record<string, unknown>;
 	components: Record<string, unknown>;
 }
+
+// sls-077: ONE claim-type enum, used by the verify request param AND the 200
+// response schema. The drift was two hand-maintained copies: `issued` was
+// added to the request enum and forgotten in the response enum, so a
+// generated consumer could not project a valid live response from the
+// contract, and Raven gates exposure of GET /api/verify on exactly that.
+const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
+
+// ── Shared response fragments (opacity ratchet burn-down) ──────────────────
+// Each fragment mirrors a serializer that several operations share, typed
+// from live observation + the serializer's own TS interface. Keeping ONE
+// schema per shared shape here is what keeps the copies from drifting.
+
+/** One-shot report meta — {source, generatedAt, note} (scf-pitch,
+ * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
+const REPORT_META_SCHEMA = {
+	type: "object",
+	properties: {
+		source: { type: "string" },
+		generatedAt: { type: "string", format: "date-time" },
+		note: { type: "string" },
+	},
+};
+
+/** ScfPitchReport["round"] — live SCF round state; never asserts a negative
+ * on fetch failure (source: "unavailable" = verify yourself). */
+const SCF_ROUND_SCHEMA = {
+	type: "object",
+	properties: {
+		source: {
+			type: "string",
+			enum: ["live", "unavailable"],
+			description:
+				"unavailable = the live round check failed; open is [] but says nothing about actual round state.",
+		},
+		open: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					round: { type: "integer" },
+					phase: { type: "string", nullable: true },
+					submissionDeadline: {
+						type: "string",
+						nullable: true,
+						description: "ISO date (YYYY-MM-DD) when known.",
+					},
+				},
+			},
+		},
+		note: { type: "string" },
+	},
+};
+
+/** ScfPitchReport["fundedPeers"] items — awarded ACTIVE projects in the
+ * vertical, largest award first. */
+const SCF_FUNDED_PEER_SCHEMA = {
+	type: "object",
+	properties: {
+		slug: { type: "string" },
+		name: { type: "string", nullable: true },
+		totalAwardedUSD: { type: "number", nullable: true },
+		lastAwardedRound: { type: "integer", nullable: true },
+	},
+};
+
+/** ScfPitchReport["fundingBar"]. */
+const SCF_FUNDING_BAR_SCHEMA = {
+	type: "object",
+	properties: {
+		fundedProjects: {
+			type: "integer",
+			description:
+				"Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count.",
+		},
+		totalAwardedUSD: {
+			type: "number",
+			description:
+				"Recorded award USD across all fundedProjects, not just the listed peers.",
+		},
+		basis: { type: "string" },
+	},
+};
+
+/** Derived repo-kind label + its basis — shared by the Repo row and explainRepo.repoMeta. */
+const REPO_KIND_PROPS = {
+	kind: {
+		type: "string",
+		enum: [...REPO_KINDS],
+		description:
+			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
+	},
+	kindBasis: {
+		type: "string",
+		description:
+			"The signal that decided kind, so the label can be weighed: isArchived | isFork | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
+	},
+};
+
+/** Vertical coverage row (TypeCoverage in ecosystem-gaps.ts) — shared by
+ * analyze `gaps.byType` and (with `basis`) the vet-idea `gap` block. */
+const TYPE_COVERAGE_PROPS = {
+	type: { type: "string" },
+	total: { type: "integer" },
+	live: { type: "integer" },
+	inProgress: {
+		type: "integer",
+		description: "Active-but-not-yet-Live (Development / Pre-Release).",
+	},
+	scfFunded: { type: "integer" },
+	hackathonWinners: { type: "integer" },
+};
+
+/** What a hackathon build became: shared by searchHackathonBuilds and
+ * hackathonBrief. Optional on purpose: absent means the link was not checked
+ * (the build was read live from DoraHacks), which is not "no project". */
+const BUILD_PROJECT_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+	properties: {
+		slug: { type: "string" },
+		name: { type: "string" },
+		basis: {
+			type: "string",
+			enum: [...LINK_BASES],
+			description:
+				"repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).",
+		},
+		status: {
+			type: "string",
+			nullable: true,
+			enum: [...PROJECT_STATUSES],
+			description:
+				"The project's directory status today. Absent when it could not be read (unknown).",
+		},
+		scfAwarded: {
+			type: "boolean",
+			description:
+				"Whether SCF funded the project. Absent when it could not be read (unknown).",
+		},
+		factsReadAt: {
+			type: "string",
+			format: "date-time",
+			description:
+				"When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.",
+		},
+	},
+	required: ["slug", "name"],
+};
+
+/** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
+ * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
+const buildFilterParams = (qDescription: string) => [
+	{
+		name: "q",
+		in: "query",
+		required: false,
+		description: qDescription,
+		schema: { type: "string" },
+	},
+	{
+		name: "mode",
+		in: "query",
+		required: false,
+		description:
+			"How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+		schema: {
+			type: "string",
+			enum: [...BUILD_SEARCH_MODES],
+			default: "keyword",
+		},
+	},
+	{
+		name: "winnersOnly",
+		in: "query",
+		required: false,
+		description:
+			"Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
+		schema: {
+			type: "string",
+			enum: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
+		},
+	},
+	{
+		name: "hackathon",
+		in: "query",
+		required: false,
+		description:
+			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+		schema: { type: "string" },
+	},
+	{
+		name: "track",
+		in: "query",
+		required: false,
+		description: "Filter by hackathon track (substring match).",
+		schema: { type: "string" },
+	},
+	{
+		name: "category",
+		in: "query",
+		required: false,
+		description:
+			"Only submissions sorted into this directory project type. Submissions not categorized yet are left out, so the set is a floor.",
+		schema: { type: "string", enum: [...PROJECT_TYPES] },
+	},
+	{
+		name: "package",
+		in: "query",
+		required: false,
+		description:
+			"Only builds whose repo declares this Stellar package, exact name (passkey-kit, soroban-sdk, @x402/stellar). Builds whose repo was not read are left out, so the set is a floor, not everyone who used it.",
+		schema: { type: "string" },
+	},
+];
+
+/** The filters as applied, echoed in meta. */
+const BUILD_FILTERS_ECHO_SCHEMA = {
+	type: "object",
+	description:
+		"The filters as applied: an echo, so a caller can see what was honoured.",
+	properties: {
+		q: { type: "string", nullable: true },
+		winnersOnly: { type: "boolean" },
+		hackathon: {
+			type: "array",
+			nullable: true,
+			items: { type: "string" },
+		},
+		track: { type: "string", nullable: true },
+		category: { type: "string", nullable: true },
+		package: { type: "string", nullable: true },
+		limit: { type: "integer" },
+		mode: { type: "string", enum: [...BUILD_SEARCH_MODES] },
+	},
+};
+
+/** One facet value's count, for analyzeHackathonSubmissions. */
+const FACET_VALUE_SCHEMA = {
+	type: "object",
+	properties: {
+		value: { type: "string" },
+		builds: { type: "integer" },
+		winners: {
+			type: "integer",
+			description: "Of `builds`, how many placed.",
+		},
+		share: {
+			type: "number",
+			nullable: true,
+			description:
+				"builds / known (0 to 1); null when no build's value is known.",
+		},
+	},
+};
+
+/** builds / known / unknown and the values: a facet counted over one set. */
+const FACET_COUNT_PROPS = {
+	builds: { type: "integer", description: "Builds in the set." },
+	known: {
+		type: "integer",
+		description: "Builds whose value is known: every share's denominator.",
+	},
+	unknown: {
+		type: "integer",
+		description:
+			"Builds whose value is unknown (meta.facet.unknownMeans): never counted as none.",
+	},
+	values: { type: "array", items: FACET_VALUE_SCHEMA },
+};
+
+/** One event's stored submissions profiled by the analytics engine:
+ * compareHackathons' and getHackathon's `profile`. */
+const EVENT_PROFILE_SCHEMA = {
+	type: "object",
+	description:
+		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions.",
+	properties: {
+		submissions: { type: "integer" },
+		winners: { type: "integer" },
+		category: { type: "object", properties: FACET_COUNT_PROPS },
+		library: { type: "object", properties: FACET_COUNT_PROPS },
+		package: { type: "object", properties: FACET_COUNT_PROPS },
+		activity: { type: "object", properties: FACET_COUNT_PROPS },
+		project: {
+			type: "object",
+			description: "Became a directory project (a floor).",
+			properties: FACET_COUNT_PROPS,
+		},
+		projectStatus: { type: "object", properties: FACET_COUNT_PROPS },
+		scf: { type: "object", properties: FACET_COUNT_PROPS },
+	},
+};
+
+/** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
+ * computation /api/vet-idea serves, embedded by scf-pitch + hackathon-brief. */
+const VET_BLOCK_SCHEMA = {
+	type: "object",
+	description:
+		"Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row.",
+	properties: {
+		competitors: {
+			type: "object",
+			properties: {
+				matchMode: {
+					type: "string",
+					enum: ["vertical", "vertical+scored", "scored", "weak"],
+					description:
+						"How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
+				},
+				matchModeLabel: { type: "string" },
+				repos: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							fullName: { type: "string" },
+							tier: {
+								type: "string",
+								nullable: true,
+								description:
+									"The repo's grade tier, read live from the index with this response; not dated per row.",
+							},
+							activityState: { type: "string" },
+							stars: { type: "integer", nullable: true },
+							codeDomains: { type: "array", items: { type: "string" } },
+						},
+					},
+				},
+				projects: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							slug: { type: "string" },
+							name: { type: "string", nullable: true },
+							status: {
+								type: "string",
+								nullable: true,
+								description:
+									"The project's directory status, read live with this response; not dated per row.",
+							},
+							types: { type: "array", items: { type: "string" } },
+						},
+					},
+				},
+			},
+		},
+		maturity: {
+			type: "object",
+			properties: {
+				auditedProjects: { type: "integer" },
+				liveOnMainnetRepos: { type: "integer" },
+				basis: { type: "string" },
+			},
+		},
+		priorArt: {
+			type: "object",
+			properties: {
+				repos: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							fullName: { type: "string" },
+							hackathonWinner: { type: "boolean" },
+							activityState: { type: "string" },
+							lastCommitAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+						},
+					},
+				},
+				note: { type: "string" },
+			},
+		},
+		gap: {
+			type: "object",
+			nullable: true,
+			description:
+				"SUPPLY-side coverage of the idea's vertical: a gap is not demand. Null when no vertical mapped.",
+			properties: {
+				...TYPE_COVERAGE_PROPS,
+				basis: { type: "string" },
+			},
+		},
+	},
+};
+
+/** TrustReport["usage"] — on-chain enrichment rollup (null = no attributed
+ * on-chain activity on record). */
+const TRUST_USAGE_SCHEMA = {
+	type: "object",
+	nullable: true,
+	properties: {
+		contracts: { type: "integer" },
+		events: { type: "integer", nullable: true },
+		eventsDelta: { type: "integer", nullable: true },
+		subinvocations: { type: "integer", nullable: true },
+		asOf: { type: "string", format: "date-time" },
+	},
+};
+
+/** ContractRow["codeInUse"] — same enrichment rollup minus subinvocations. */
+const CONTRACT_CODE_IN_USE_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"On-chain usage attributed to the repo's contract(s); null = no attributed activity on record, never 'unused'.",
+	properties: {
+		contracts: { type: "integer" },
+		events: { type: "integer", nullable: true },
+		eventsDelta: { type: "integer", nullable: true },
+		asOf: { type: "string", format: "date-time" },
+	},
+};
+
+/** One audit-report row ({auditor, publishedAt, title}, all nullable). */
+const AUDIT_REPORT_ROW_SCHEMA = {
+	type: "object",
+	properties: {
+		auditor: { type: "string", nullable: true },
+		publishedAt: { type: "string", format: "date-time", nullable: true },
+		title: { type: "string", nullable: true },
+	},
+};
+
+/** One stored submission in full: getHackathonSubmission's `build` and
+ * reviewSubmission's `review.submission`. */
+const BUILD_DETAIL_SCHEMA = {
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		name: { type: "string" },
+		summary: {
+			type: "string",
+			nullable: true,
+			description: "DoraHacks' one-line summary.",
+		},
+		writeUp: {
+			type: "string",
+			nullable: true,
+			description:
+				"The team's own write-up, markdown as published: a claim about what they built, not evidence that it shipped. null = the team wrote none.",
+		},
+		selfTags: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported.",
+		},
+		hackathon: {
+			type: "object",
+			properties: {
+				title: { type: "string" },
+				slug: { type: "string" },
+				endedAt: { type: "string", nullable: true },
+			},
+		},
+		track: { type: "string", nullable: true },
+		placement: { type: "string", nullable: true },
+		award: { type: "string", nullable: true },
+		prizeUsd: { type: "number", nullable: true },
+		isWinner: { type: "boolean" },
+		links: {
+			type: "object",
+			properties: {
+				dorahacks: { type: "string" },
+				github: { type: "string", nullable: true },
+				demo: { type: "string", nullable: true },
+				video: { type: "string", nullable: true },
+			},
+		},
+		repo: {
+			type: "string",
+			nullable: true,
+			description:
+				"owner/name from the GitHub link; null for an account or org link.",
+		},
+		project: BUILD_PROJECT_SCHEMA,
+		stack: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Stellar packages the repo declares in its package.json and Cargo.toml files. Present only when the repo was read: absent = unknown; [] = declares none.",
+		},
+		stackReadAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the repo's manifests; null = never read.",
+		},
+		repoMissingAt: {
+			type: "string",
+			nullable: true,
+			description:
+				"When the repo last answered not found (deleted, renamed away or private); null = it has not.",
+		},
+		categories: {
+			type: "array",
+			description:
+				"Directory project types this submission was sorted into, best first. Absent = not categorized yet.",
+			items: {
+				type: "object",
+				properties: {
+					type: {
+						type: "string",
+						enum: [...PROJECT_TYPES],
+					},
+					score: {
+						type: "number",
+						description:
+							"0 to 1: the similarity-weighted share of the submission's nearest directory projects that carry this type. Not dated per item: categoriesAt dates the whole list.",
+					},
+					precision: {
+						type: "number",
+						description:
+							"The type's leave-one-out precision on the hand-typed directory at its cut. Not dated per item: categoriesAt dates the whole list.",
+					},
+					recall: {
+						type: "number",
+						description:
+							"The type's leave-one-out recall there: a low recall means counts of this type undercount. Not dated per item: categoriesAt dates the whole list.",
+					},
+				},
+			},
+		},
+		categoriesAt: {
+			type: "string",
+			nullable: true,
+			description: "When it was categorized; null = not yet.",
+		},
+		categoriesMethod: {
+			type: "string",
+			nullable: true,
+			description:
+				"How the categories were assigned, with the method's measured precision and recall on the hand-typed directory.",
+		},
+		activity: {
+			type: "object",
+			description:
+				"The repo's activity. Absent = not read (no repo link, or not read yet).",
+			properties: {
+				lastCommitAt: {
+					type: "string",
+					nullable: true,
+					description: "Last commit on the default branch.",
+				},
+				archived: { type: "boolean" },
+			},
+		},
+		activityCheckedAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the repo's activity; null = never.",
+		},
+		firstSeenAt: { type: "string", format: "date-time" },
+		lastSeenAt: {
+			type: "string",
+			format: "date-time",
+			description:
+				"Last time the event's DoraHacks roster listed it. Older than a day or two = DoraHacks stopped listing it; we keep it.",
+		},
+		writeUpReadAt: {
+			type: "string",
+			nullable: true,
+			description: "When we last read the submission page.",
+		},
+	},
+};
+
+/** The SCF pitch report: scfPitch's `report` and
+ * reviewSubmission's `review.pitch`. */
+const SCF_PITCH_REPORT_SCHEMA = {
+	type: "object",
+	properties: {
+		idea: { type: "string" },
+		vertical: { type: "string", nullable: true },
+		round: SCF_ROUND_SCHEMA,
+		fundedPeers: {
+			type: "array",
+			items: SCF_FUNDED_PEER_SCHEMA,
+		},
+		fundingBar: SCF_FUNDING_BAR_SCHEMA,
+		vet: VET_BLOCK_SCHEMA,
+		angles: {
+			type: "array",
+			items: { type: "string" },
+			description:
+				"Deterministic derivations from served facts: each names its evidence; not judgments.",
+		},
+	},
+};
 
 export const spec: OpenAPISpec = {
 	openapi: "3.1.0",
@@ -40,19 +667,19 @@ export const spec: OpenAPISpec = {
 			"Data sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.",
 			"",
 			"## Routing metadata (description vs x-routing)",
-			"Operation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer — sls-051); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.",
+			"Operation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.",
 			"",
 			"## Versioning",
 			"Every response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.",
 			"",
 			"## Rate limits",
-			"None enforced today — the API is public and unauthenticated. When limits are introduced they will be advertised via `X-RateLimit-*` and `Retry-After` headers and documented here BEFORE enforcement, so autonomous consumers can adopt back-off ahead of time. Be courteous: cache where `Cache-Control` allows, and prefer `offset` pagination over hammering.",
+			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. The response `meta.counts` carries `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice). Page until `offset + returned >= total`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.",
 			"",
 			"## Ordering & relevance",
-			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.',
+			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.',
 		].join("\n"),
 		contact: {
 			name: "Stellar Light",
@@ -161,9 +788,1446 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/quality": {
+			get: {
+				operationId: "getQualityReport",
+				tags: ["Verification"],
+				summary:
+					"Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state",
+				description:
+					"Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.",
+				// sls-078: every keyword ANCHORED to this source. The prior list carried
+				// standalone words (trust, coverage, health, provenance, limitations)
+				// and Raven measured the op hijacking 56 of 338 unrelated top-5
+				// routings — a question about Soroban msg.sender routed HERE. The
+				// op answers questions about Scout/Stellar Light's own data quality
+				// and nothing else, and its routing text now says only that.
+				"x-routing": {
+					purpose:
+						"Source calibration for THIS service only: how trustworthy is Stellar Light / Scout's own data, measured, with its known weak spots.",
+					keywords: [
+						"stellarlight data quality",
+						"scout data quality",
+						"how reliable is this directory",
+						"how reliable is this source",
+						"this source's limitations",
+						"scout quality report",
+						"directory data provenance",
+						"quality of this data set",
+					],
+					useWhen: [
+						"the question is explicitly about Scout / Stellar Light / this directory's own data quality, coverage, or limitations",
+						"deciding how much weight to give THIS service's answers",
+						"explaining why one of THIS service's answers is uncertain or a row is thin",
+					],
+					notFor: [
+						"any technical, protocol, SDK, or operational question that merely contains words like trust, confidence, source, coverage, health, or limitations without asking about THIS service's data (route to docs/search instead)",
+						"trust or health of a PROJECT or PRODUCT in the directory -> searchProjects / verifyClaim",
+						"verifying ONE specific claim -> verifyClaim",
+						"the freshness/changelog of the API contract -> getChangelog",
+						"per-row confidence on a search result (already served inline)",
+					],
+					exampleQuestions: [
+						"How reliable is Stellar Light's status data?",
+						"What are the known limitations of the Scout directory?",
+					],
+				},
+				responses: {
+					"200": {
+						description: "The quality self-report",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												measuredAt: { type: "string", format: "date-time" },
+												apiVersion: { type: "string" },
+												humanPage: { type: "string" },
+												methodology: { type: "string" },
+												cachePolicy: {
+													type: "string",
+													description:
+														"How stale this response may legitimately be (cache + stale-while-revalidate). Read measuredAt, not the clock.",
+												},
+											},
+										},
+										verdict: {
+											type: "object",
+											description:
+												"READ FIRST. Derived from guard states, never authored: counts of guards holding / breached / stale, the one definition of open used everywhere in this document, and two sentence lists, safeToRelyOn and doNotRelyOn.",
+											properties: {
+												guardsHolding: { type: "integer" },
+												guardsBreached: { type: "integer" },
+												guardsStale: { type: "integer" },
+												openFindings: { type: "integer" },
+												openDefinition: { type: "string" },
+												projectRows: { type: "integer" },
+												meanRowEvidence: { type: "integer" },
+												safeToRelyOn: {
+													type: "array",
+													items: { type: "string" },
+												},
+												doNotRelyOn: {
+													type: "array",
+													items: { type: "string" },
+												},
+											},
+										},
+										northStar: {
+											type: "object",
+											description:
+												"The one number the engine system optimizes (full-surface audit ok-rate), served WITH its age. warning is non-null whenever it should not be read as current (stale, below target, or a series measured over changing probe counts).",
+											properties: {
+												target: { type: "integer" },
+												latest: {
+													type: "object",
+													properties: {
+														date: { type: "string" },
+														label: { type: "string" },
+														okRate: { type: "integer" },
+														ok: { type: "integer", nullable: true },
+														probes: { type: "integer" },
+														evidence: { type: "string" },
+													},
+												},
+												series: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															date: { type: "string" },
+															label: { type: "string" },
+															okRate: { type: "integer" },
+															ok: { type: "integer", nullable: true },
+															probes: { type: "integer" },
+															evidence: { type: "string" },
+														},
+													},
+												},
+												ageDays: { type: "integer" },
+												stale: { type: "boolean" },
+												belowTarget: { type: "boolean" },
+												warning: { type: "string", nullable: true },
+												comparableSeries: { type: "boolean" },
+											},
+										},
+										progress: {
+											type: "array",
+											description:
+												"Where this service stands against its own published quality plan (QUALITY.md). A phase cannot show done here without being done there, and remaining work is served with the same weight as finished work.",
+											items: {
+												type: "object",
+												properties: {
+													id: { type: "string" },
+													title: { type: "string" },
+													state: {
+														type: "string",
+														enum: [
+															"done",
+															"in-progress",
+															"not-started",
+															"unknown",
+														],
+													},
+													evidence: { type: "string", nullable: true },
+													shippedSoFar: { type: "string", nullable: true },
+													remaining: { type: "string", nullable: true },
+												},
+											},
+										},
+										library: {
+											type: "object",
+											description:
+												"The written record behind the numbers — lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative.",
+											properties: {
+												lessons: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															date: { type: "string" },
+															title: { type: "string" },
+															lessonCount: { type: "integer" },
+															bytes: { type: "integer" },
+														},
+													},
+												},
+												audits: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															name: { type: "string" },
+														},
+													},
+												},
+												receipts: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															file: { type: "string" },
+															slug: { type: "string" },
+															url: { type: "string" },
+															fetchedAt: { type: "string" },
+															markers: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										knownLimitations: {
+											type: "array",
+											description:
+												"Read first. Each entry is derived from a measurement, not authored: what the limit IS, the number behind it, and what to do instead.",
+											items: {
+												type: "object",
+												properties: {
+													area: { type: "string" },
+													limit: { type: "string" },
+													measurement: { type: "string" },
+													instead: { type: "string" },
+												},
+											},
+										},
+										perOperation: {
+											type: "object",
+											description:
+												"Per-OPERATION contract quality, keyed by the operationId a caller invokes. contractProbe: clean (probe reached it, no violations) / violations (reached, listed) / skipped (could not check, reason given) / unmeasured (never reached). An unmeasured operation is NOT a passing one.",
+											properties: {
+												definition: { type: "string" },
+												probedAt: { type: "string" },
+												counts: {
+													type: "object",
+													properties: {
+														clean: { type: "integer" },
+														violations: { type: "integer" },
+														skipped: { type: "integer" },
+														unmeasured: { type: "integer" },
+													},
+												},
+												operations: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															operationId: { type: "string" },
+															method: { type: "string" },
+															path: { type: "string" },
+															contractProbe: {
+																type: "string",
+																enum: [
+																	"clean",
+																	"violations",
+																	"skipped",
+																	"unmeasured",
+																],
+															},
+															skipReason: { type: "string", nullable: true },
+															violations: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		kind: { type: "string" },
+																		name: { type: "string" },
+																		evidence: { type: "string" },
+																	},
+																},
+															},
+															fieldDrift: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		kind: { type: "string" },
+																		field: { type: "string" },
+																	},
+																},
+															},
+															probedAt: { type: "string" },
+														},
+													},
+												},
+											},
+										},
+										consumerFindings: {
+											type: "object",
+											description:
+												"Defects filed against this service by its largest agent consumer (stellar-raven), from THEIR evaluation battery. counts is their answer key; ourResponse is our own linked-issue state and is fenced off deliberately, a score computed from a variable we control is not an external grade.",
+											properties: {
+												generatedAt: { type: "string", format: "date-time" },
+												consumer: { type: "string" },
+												definition: { type: "string" },
+												counts: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+													description:
+														"THEIR status vocabulary -> count, verbatim from their records.",
+												},
+												ourResponse: {
+													type: "object",
+													properties: {
+														fixShipped: { type: "integer" },
+														fixShippedIds: {
+															type: "array",
+															items: { type: "string" },
+														},
+														fixApplicable: { type: "integer" },
+														declined: { type: "integer" },
+														distinctIssuesClosed: { type: "integer" },
+														scoredBy: { type: "string" },
+														note: { type: "string" },
+													},
+												},
+												total: { type: "integer" },
+												records: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															title: { type: "string" },
+															status: { type: "string" },
+															discovered: { type: "string", nullable: true },
+															disposition: { type: "string", nullable: true },
+															sourceUrl: { type: "string" },
+															ourIssue: { type: "integer", nullable: true },
+															ourResponse: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	issue: { type: "integer" },
+																	state: { type: "string" },
+																	closedAt: { type: "string", nullable: true },
+																	url: { type: "string" },
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+										flow: {
+											type: "object",
+											description:
+												"Findings as a node/link graph: detector -> surface -> outcome, whole-ledger counts (not a sample). nodes carry a column index (0 detector, 1 surface, 2 outcome) and a throughput value; links carry source/target node indexes and the count flowing between them.",
+											properties: {
+												definition: { type: "string" },
+												nodes: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															label: { type: "string" },
+															column: { type: "integer" },
+															value: { type: "integer" },
+														},
+													},
+												},
+												links: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															source: { type: "integer" },
+															target: { type: "integer" },
+															sourceId: { type: "string" },
+															targetId: { type: "string" },
+															value: { type: "integer" },
+														},
+													},
+												},
+											},
+										},
+										missFunnel: {
+											type: "object",
+											description:
+												"Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt.",
+											properties: {
+												generatedAt: { type: "string", format: "date-time" },
+												population: {
+													type: "object",
+													properties: {
+														openRecallMisses: { type: "integer" },
+														replayableOpenRecallMisses: { type: "integer" },
+														unclassified: {
+															type: "integer",
+															description:
+																"Open recall findings whose probe shape this funnel cannot replay. Real findings the funnel is blind to, not cleared ones.",
+														},
+														unclassifiedExamples: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	probe: { type: "string" },
+																},
+															},
+														},
+														coveragePct: { type: "integer" },
+														sampled: { type: "integer" },
+														note: { type: "string" },
+													},
+												},
+												stages: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															stage: {
+																type: "string",
+																enum: [
+																	"passing",
+																	"ranking",
+																	"admission",
+																	"identity",
+																	"corpus",
+																],
+															},
+															label: { type: "string" },
+															owner: { type: "string" },
+															note: { type: "string" },
+															count: { type: "integer" },
+															share: { type: "integer" },
+															examples: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										gapMatrix: {
+											type: "object",
+											description:
+												"Entity x missing-field map with REAL identifiers — the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked.",
+											properties: {
+												definition: { type: "string" },
+												rows: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															entity: {
+																type: "string",
+																enum: ["project", "repo"],
+															},
+															field: { type: "string" },
+															missing: { type: "integer" },
+															of: { type: "integer" },
+															share: { type: "number" },
+															whyItMatters: { type: "string" },
+															closedBy: { type: "string" },
+															exampleSource: { type: "string" },
+															examplePoolSize: { type: "integer" },
+															exampleCap: { type: "integer" },
+															exampleTruncated: { type: "boolean" },
+															examples: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										surfaces: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													surface: { type: "string" },
+													means: { type: "string", nullable: true },
+													openFindings: { type: "integer" },
+													clearedFindings: { type: "integer" },
+													verifiedFindings: { type: "integer" },
+												},
+											},
+										},
+										findings: {
+											type: "object",
+											properties: {
+												open: { type: "integer" },
+												refreshQueue: {
+													type: "integer",
+													description:
+														"Open rows that are a refresh, not a defect: a note citing a version upstream has bumped, an archived repo with no recorded successor, a URL a probe proved dead. Counted apart so `open` stays a backlog someone can burn down.",
+												},
+												blockedUpstream: {
+													type: "integer",
+													description:
+														"Open rows a consumer we do not control decides.",
+												},
+												cleared: { type: "integer" },
+												verifiedClosed: { type: "integer" },
+												total: { type: "integer" },
+												states: {
+													type: "string",
+													description:
+														"The partition rule: open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint.",
+												},
+												note: { type: "string" },
+												byFailureMode: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															mode: { type: "string" },
+															surface: { type: "string" },
+															open: { type: "integer" },
+															cleared: { type: "integer" },
+															verified: { type: "integer" },
+														},
+													},
+												},
+												openByAge: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															bucket: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												recentlyCleared: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															probe: { type: "string" },
+															surface: { type: "string" },
+															failureMode: { type: "string" },
+															clearedAt: { type: "string" },
+														},
+													},
+												},
+											},
+										},
+										rowQuality: {
+											type: "object",
+											properties: {
+												read: { type: "integer" },
+												population: {
+													type: "integer",
+													description:
+														"Total rows in the collection. read should equal it; the counts here are a census, not a sample.",
+												},
+												coveragePct: { type: "integer" },
+												frame: { type: "string" },
+												sampled: { type: "integer" },
+												weakestTotal: { type: "integer" },
+												weakestTruncated: { type: "boolean" },
+												meanScore: { type: "integer" },
+												scoreDefinition: { type: "string" },
+												strongBases: {
+													type: "array",
+													items: { type: "string" },
+												},
+												basisStrength: { type: "string" },
+												statusBasisMix: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															basis: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												missingByField: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															field: { type: "string" },
+															count: { type: "integer" },
+														},
+													},
+												},
+												weakestRows: {
+													type: "array",
+													description:
+														"The curation queue: each row's slug, evidence score, and exactly which facts are missing.",
+													items: {
+														type: "object",
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string" },
+															status: { type: "string", nullable: true },
+															statusBasis: { type: "string", nullable: true },
+															prominence: { type: "integer" },
+															score: { type: "integer" },
+															factsPresent: { type: "integer" },
+															factsTotal: { type: "integer" },
+															missing: {
+																type: "array",
+																items: { type: "string" },
+															},
+														},
+													},
+												},
+											},
+										},
+										repoQuality: {
+											type: "object",
+											properties: {
+												read: { type: "integer" },
+												population: { type: "integer" },
+												coverage: {
+													type: "object",
+													description:
+														"Coverage rates against the population each metric TARGETS. Two populations with different intent: the curated index (project-link + builder-owned rows a directory record claims) and the ec-taxonomy tail (indexed for completeness, scanned opportunistically, low coverage there is intended). Whole-census withCodeDepth/withNotes/withMainnet remain for continuity but carry no intent.",
+													properties: {
+														curatedIndex: {
+															type: "object",
+															properties: {
+																repos: { type: "integer" },
+																means: { type: "string" },
+																withCodeDepth: { type: "integer" },
+																depthPct: { type: "integer" },
+															},
+														},
+														tail: {
+															type: "object",
+															properties: {
+																repos: { type: "integer" },
+																means: { type: "string" },
+																withCodeDepth: { type: "integer" },
+															},
+														},
+														knowledgeNotes: {
+															type: "object",
+															properties: {
+																pool: { type: "integer" },
+																poolMeans: { type: "string" },
+																withNotes: { type: "integer" },
+															},
+														},
+														mainnetJoin: {
+															type: "object",
+															properties: {
+																pool: { type: "integer" },
+																poolMeans: { type: "string" },
+																joined: { type: "integer" },
+															},
+														},
+													},
+												},
+												duplicateRows: {
+													type: "integer",
+													description:
+														"Rows whose fullName duplicates another row. Storage debt, tracked here until zero; all counts are over DISTINCT repos.",
+												},
+												duplicateNote: { type: "string" },
+												frame: { type: "string" },
+												sampled: { type: "integer" },
+												topGraded: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															repoScore: { type: "integer", nullable: true },
+															tier: { type: "string", nullable: true },
+															activity: {
+																type: "string",
+																nullable: true,
+																description:
+																	"Derived from lastCommitAt: active (<=90d) / slowing (<=365d) / dormant / archived. null = no commit date held; unknown is not dormant.",
+															},
+															language: { type: "string", nullable: true },
+															projectSlug: { type: "string", nullable: true },
+															source: { type: "string", nullable: true },
+															notes: { type: "integer" },
+															codeDepth: { type: "integer", nullable: true },
+															deployable: {
+																type: "boolean",
+																description:
+																	"the scanner marked this row a deployable contract",
+															},
+															mainnetJoined: {
+																type: "boolean",
+																description:
+																	"a verified mainnet contract is attributed to this repo (raw field mainnetContractId)",
+															},
+														},
+													},
+												},
+												thinnestEvidence: {
+													type: "array",
+													description:
+														"Indexed but thinly evidenced — the repo work queue.",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															repoScore: { type: "integer", nullable: true },
+															tier: { type: "string", nullable: true },
+															activity: { type: "string", nullable: true },
+															language: { type: "string", nullable: true },
+															projectSlug: { type: "string", nullable: true },
+															notes: { type: "integer" },
+															codeDepth: { type: "integer", nullable: true },
+															deployable: {
+																type: "boolean",
+																description:
+																	"the scanner marked this row a deployable contract",
+															},
+															mainnetJoined: {
+																type: "boolean",
+																description:
+																	"a verified mainnet contract is attributed to this repo (raw field mainnetContractId)",
+															},
+														},
+													},
+												},
+												withCodeDepth: { type: "integer" },
+												withKnowledgeNotes: { type: "integer" },
+												joinedToMainnetContract: { type: "integer" },
+											},
+										},
+										guards: {
+											type: "array",
+											description:
+												"Every guard with its promise and THREE-state verdict: holding (measured and passing on fresh evidence), breached (measured and failing), stale (evidence older than the guard's own freshness window; neither passing nor failing). holding is true ONLY in the holding state, so a stale guard is never green.",
+											items: {
+												type: "object",
+												properties: {
+													key: { type: "string" },
+													title: { type: "string" },
+													promise: { type: "string" },
+													measure: {
+														type: "object",
+														description:
+															"The headline as numbers, so a consumer never parses prose. of is null for rates and bare counts.",
+														properties: {
+															value: { type: "number" },
+															of: { type: "integer", nullable: true },
+															unit: { type: "string" },
+														},
+													},
+													value: { type: "string" },
+													state: {
+														type: "string",
+														enum: ["holding", "breached", "stale"],
+													},
+													severity: {
+														type: "string",
+														enum: ["high", "medium", "low"],
+													},
+													holding: { type: "boolean" },
+													asOf: { type: "string" },
+													ageDays: { type: "integer" },
+													cadence: {
+														type: "string",
+														enum: ["weekly", "on-deploy", "baseline"],
+													},
+													freshnessDays: { type: "integer" },
+													details: {
+														type: "array",
+														items: { type: "string" },
+													},
+													evidence: { type: "string" },
+												},
+											},
+										},
+										trend: {
+											type: "array",
+											description:
+												"Committed daily history; a null metric means it was not measured that day, never zero.",
+											items: {
+												type: "object",
+												properties: {
+													date: { type: "string" },
+													batteryPass: { type: "integer", nullable: true },
+													batteryFail: { type: "integer", nullable: true },
+													batteryErrors: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Battery slices that CRASHED that day. A crashed slice is not a pass and not a fail; without this counter a crashed run rendered as a perfect green day.",
+													},
+													parityPass: { type: "integer", nullable: true },
+													openMaps: { type: "integer", nullable: true },
+													honestyDebt: { type: "integer", nullable: true },
+													sampled: { type: "integer", nullable: true },
+													population: { type: "integer", nullable: true },
+													liveRows: { type: "integer", nullable: true },
+													liveNoSource: { type: "integer", nullable: true },
+													humanVerified: { type: "integer", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/verify": {
+			get: {
+				operationId: "verifyClaim",
+				tags: ["Verification"],
+				summary:
+					"Verify a claim (audited / live / maintained / issued) against indexed evidence — verdict + evidence + confidence",
+				description:
+					"Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier — Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle' — the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.",
+				"x-routing": {
+					purpose:
+						"Fact-check an audit claim about a project with dated evidence, instead of inferring from search results.",
+					keywords: [
+						"verify",
+						"verification",
+						"fact check",
+						"is it audited",
+						"audit claim",
+						"audited by",
+						"security audit status",
+						"claim",
+						"evidence",
+					],
+					useWhen: [
+						"is <project> audited / was it audited by <firm>",
+						"verifying an audit claim found in a pitch, README, or post",
+						"needs a verdict with evidence and dates, not search rows",
+					],
+					notFor: [
+						"browsing or reading the audit reports themselves -> listAudits",
+						"liveness/status questions ('is X live') -> searchProjects or resolveProject",
+						"code quality or maintenance signals -> getRepoTrust",
+					],
+					exampleQuestions: [
+						"Is Blend audited?",
+						"Was Soroswap audited by OtterSec?",
+					],
+				},
+				parameters: [
+					{
+						name: "claim",
+						in: "query",
+						description:
+							"Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing.",
+						schema: { type: "string" },
+					},
+					{
+						name: "type",
+						in: "query",
+						description: "Structured alternative to claim.",
+						schema: {
+							type: "string",
+							enum: VERIFY_CLAIM_TYPES,
+						},
+					},
+					{
+						name: "subject",
+						in: "query",
+						description:
+							"Project name, slug, alias, or former name (required with type=).",
+						schema: { type: "string" },
+					},
+					{
+						name: "auditor",
+						in: "query",
+						description:
+							"Restrict to reports by this firm (case/spacing-insensitive substring). A filtered miss names who DID audit in auditorsOnRecord.",
+						schema: { type: "string" },
+					},
+					{
+						name: "since",
+						in: "query",
+						description:
+							"Only reports with engagement/publication on or after this date (YYYY-MM or YYYY-MM-DD).",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Verdict with evidence (also served for unresolved subjects)",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												methodology: {
+													type: "string",
+													description:
+														"What each verdict asserts — quote it rather than paraphrasing.",
+												},
+												searched: {
+													type: "object",
+													description: "The denominators behind the verdict.",
+													properties: { audits: { type: "integer" } },
+												},
+											},
+										},
+										claim: {
+											type: "object",
+											description: "The parsed claim as understood.",
+											properties: {
+												type: {
+													type: "string",
+													enum: VERIFY_CLAIM_TYPES,
+												},
+												subject: { type: "string" },
+												auditor: { type: "string" },
+												since: { type: "string" },
+											},
+										},
+										subject: {
+											type: "object",
+											description:
+												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence — the same labeled data the directory serves.",
+											properties: {
+												asked: { type: "string" },
+												resolvedSlug: { type: "string" },
+												resolvedName: { type: "string" },
+												matchedOn: {
+													type: "string",
+													enum: [
+														"slug",
+														"canonical-slug",
+														"alias",
+														"name",
+														"repo",
+													],
+												},
+												status: { type: "string", nullable: true },
+												statusBasis: { type: "string", nullable: true },
+												statusAsOf: { type: "string", nullable: true },
+												statusSourceUrl: { type: "string", nullable: true },
+												types: { type: "array", items: { type: "string" } },
+												links: {
+													type: "object",
+													properties: {
+														website: { type: "string", nullable: true },
+														github: { type: "string", nullable: true },
+														docs: { type: "string", nullable: true },
+													},
+												},
+												verificationLevel: { type: "string", nullable: true },
+												supportedNetworks: {
+													type: "array",
+													items: { type: "string" },
+												},
+												prominence: { type: "integer", nullable: true },
+											},
+										},
+										verdict: {
+											type: "string",
+											enum: [
+												"supported",
+												"contradicted",
+												"unsupported",
+												"unresolved",
+											],
+											description:
+												"supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false' — see statement); unresolved = unknown subject.",
+										},
+										statement: {
+											type: "string",
+											description:
+												"One-sentence verdict with dates and denominators, safe to relay verbatim.",
+										},
+										evidence: {
+											type: "array",
+											description:
+												"Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source).",
+											items: {
+												type: "object",
+												properties: {
+													kind: {
+														type: "string",
+														enum: [
+															"audit-report",
+															"status-record",
+															"code-activity",
+															"curated-note",
+														],
+													},
+													auditor: { type: "string", nullable: true },
+													title: { type: "string", nullable: true },
+													reportUrl: { type: "string", nullable: true },
+													engagementEnd: { type: "string", nullable: true },
+													publishedAt: { type: "string", nullable: true },
+													findingsTotal: { type: "integer", nullable: true },
+													dateBasis: { type: "string", nullable: true },
+													observedAt: { type: "string", nullable: true },
+													status: { type: "string", nullable: true },
+													statusBasis: { type: "string", nullable: true },
+													statusAsOf: { type: "string", nullable: true },
+													statusSourceUrl: { type: "string", nullable: true },
+													repo: { type: "string" },
+													lastCommitAt: { type: "string", nullable: true },
+													activityState: { type: "string", nullable: true },
+													isArchived: { type: "boolean" },
+													stars: { type: "integer", nullable: true },
+													repoScoreLabel: { type: "string", nullable: true },
+													note: { type: "string" },
+													source: { type: "string" },
+													asOf: { type: "string", nullable: true },
+												},
+											},
+										},
+										confidence: {
+											type: "object",
+											nullable: true,
+											description:
+												"factConfidence over the newest evidence (basis × freshness). null when there is no evidence to score.",
+											properties: {
+												score: { type: "number" },
+												label: { type: "string" },
+												ageDays: { type: "integer", nullable: true },
+											},
+										},
+										currencyNote: {
+											type: "string",
+											description:
+												"Present when the newest report predates the subject's latest code activity by >90 days.",
+										},
+										auditorsOnRecord: {
+											type: "array",
+											items: { type: "string" },
+											description:
+												"On an auditor-filtered miss: who DID audit the subject.",
+										},
+										resolution: {
+											type: "object",
+											description:
+												"Only when verdict=unresolved: the resolver's own note.",
+											properties: { note: { type: "string" } },
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Unparseable claim or unsupported claim type",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: { type: "string" },
+										supportedClaims: {
+											type: "array",
+											items: { type: "string" },
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/projects/resolve": {
+			get: {
+				operationId: "resolveProject",
+				tags: ["Discovery"],
+				summary: "Resolve a historical project name to what it is now",
+				description:
+					"Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (\u2192 searchProjects). A miss means NOT TRACKED HERE \u2014 never that the name never existed, never that it is defunct.",
+				"x-routing": {
+					purpose:
+						"Turn a stale or unfamiliar project name into its current identity, successor, and status evidence.",
+					keywords: [
+						"renamed",
+						"superseded",
+						"what happened to",
+						"no longer exists",
+						"dead project",
+						"defunct",
+						"successor",
+						"former name",
+						"old name",
+						// Bare project NAMES route here, per the findings queue's C10
+						// decision: resolveProject exists to turn a name into identity,
+						// and growing searchProjects' name list toward 64+ would recreate
+						// the C7 leak at scale. Measured with the scorer replica over the
+						// full 65-probe bank before editing (2026-09-13): "reflector
+						// oracle on Stellar" resolveProject rank 17 → 2, no other probe
+						// changed. Per-name coverage does not scale — freighter is today's
+						// identical miss — the scalable answer is Raven's per-entry
+						// knownAliases, which is theirs; this carries the name we hold at
+						// confidence 0.97 and lose to the research op's incident cluster.
+						"reflector",
+					],
+					useWhen: [
+						"a name in an old article or repo matches nothing in the current directory",
+						"deciding whether a project was renamed or actually wound down",
+						"reconciling an outdated reference before citing it",
+					],
+					exampleQuestions: [
+						"What happened to Passport on Stellar?",
+						"Is this project still around or was it renamed?",
+						"This blog post mentions a project I cannot find \u2014 what is it now?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"The name, slug, or stellarlight project URL encountered. Matched against slugs, then aliases, then normalized names.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Resolution, including an explicit miss",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["found", "query", "note"],
+									properties: {
+										meta: {
+											type: "object",
+											description:
+												"Response provenance. Present on every 200; previously served but undeclared, so a generated type could not project it.",
+											properties: {
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												searched: {
+													type: "integer",
+													description:
+														"How many project records were searched \u2014 the denominator behind a miss.",
+												},
+												methodology: {
+													type: "string",
+													description:
+														"Match order and what a miss does and does not claim. Safe to surface to a user.",
+												},
+											},
+										},
+										query: { type: "string" },
+										found: {
+											type: "boolean",
+											description:
+												"false = the name is not tracked in this directory. NOT a claim it never existed or is defunct.",
+										},
+										matchedOn: {
+											type: "string",
+											nullable: true,
+											enum: ["slug", "canonical-slug", "alias", "name", "repo"],
+											description:
+												"How the query matched. An exact slug is a stronger identification than a normalized name.",
+										},
+										subject: {
+											type: "object",
+											nullable: true,
+											description:
+												"The record the query names, which may itself be superseded.",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												status: {
+													type: "string",
+													description:
+														"Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis \u2014 a label alone is not proof.",
+												},
+											},
+										},
+										current: {
+											type: "object",
+											nullable: true,
+											description:
+												"Where to look now. Identical to subject when nothing moved.",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												status: { type: "string" },
+												url: {
+													type: "string",
+													format: "uri",
+													description:
+														"Canonical project page for the CURRENT record.",
+												},
+											},
+										},
+										superseded: { type: "boolean" },
+										evidence: {
+											type: "object",
+											nullable: true,
+											description:
+												"Dated basis for the status. `unsourced: true` means we assert it with no citable source \u2014 our unverified record, not an established fact about a named company.",
+											properties: {
+												statusAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"When the status was OBSERVED, not when the record changed.",
+												},
+												statusBasis: {
+													type: "string",
+													nullable: true,
+													description:
+														"How the status was established (e.g. human-verified, site-liveness, source-inherited). site-liveness means only that a page answered.",
+												},
+												statusSourceUrl: {
+													type: "string",
+													nullable: true,
+													description:
+														"Citable source for the status, when one exists.",
+												},
+												unsourced: {
+													type: "boolean",
+													description:
+														"true = asserted with NO citable source. Do not report it as an established fact about a named company.",
+												},
+											},
+										},
+										note: {
+											type: "string",
+											description:
+												"Plain-words statement of what was resolved and what it does not claim.",
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Missing or unknown query param",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ErrorResponse" },
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/changes": {
+			get: {
+				operationId: "getChanges",
+				"x-routing": {
+					purpose:
+						"Which directory rows changed since a timestamp — a reconciliation feed for cached or remembered claims.",
+					keywords: [
+						"what changed",
+						"changed since",
+						"change feed",
+						"delta since",
+						"diff since",
+						"reconcile cache",
+						"stale memory",
+						"rows moved",
+						"updated since",
+						"recent updates to the directory",
+					],
+					useWhen: [
+						"you hold cached or remembered Scout facts and want only the rows that moved since a time",
+						"reconciling agent memory or an institutional cache against the live directory",
+					],
+					exampleQuestions: [
+						"Which projects changed status since last Tuesday?",
+						"What moved in the directory since my last sync?",
+					],
+					notFor: [
+						"what changed in the API or MCP surface -> getChangelog",
+						"searching or browsing projects -> searchProjects",
+					],
+				},
+				tags: ["Discovery"],
+				summary: "Change feed: which rows moved since a given time",
+				description:
+					'Reconciliation feed for consumers holding cached or remembered claims (agent memory, institutional cache): every project/repo/partner row whose data changed after `since`, newest-first per surface, with `facets` naming which dated fact families moved (status, scf-awards, code-facts, toml; ["row"] = undated change, re-read the row). **Use when:** you stored our answers earlier and want to refresh only what moved. **Not for:** what the change WAS (re-read the row via its search endpoint) or contract/API changes (\u2192 /api/changelog). Absence = unchanged since `since`, never an existence claim.',
+				parameters: [
+					{
+						name: "since",
+						in: "query",
+						required: true,
+						description:
+							"ISO date (YYYY-MM-DD) or datetime; rows with changes strictly after this instant are returned. 400 on malformed, pre-2020, or future values.",
+						schema: { type: "string" },
+					},
+					{
+						name: "surfaces",
+						in: "query",
+						required: false,
+						description:
+							"CSV subset of projects,repos,partners (default all three).",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						required: false,
+						description:
+							"Max rows PER SURFACE, newest-first (1\u2013500, default 100). meta.truncated.<surface> signals more.",
+						schema: { type: "integer", minimum: 1, maximum: 500 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Changed rows, newest-first per surface",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["changes", "meta"],
+									properties: {
+										changes: {
+											type: "array",
+											items: {
+												type: "object",
+												required: ["surface", "changedAt", "facets"],
+												properties: {
+													surface: {
+														type: "string",
+														enum: ["projects", "repos", "partners"],
+													},
+													slug: {
+														type: "string",
+														description:
+															"projects/partners identity (absent on repos rows)",
+													},
+													fullName: {
+														type: "string",
+														description:
+															"repos identity owner/name (absent on other rows)",
+													},
+													changedAt: { type: "string", format: "date-time" },
+													facets: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															'Dated fact families that moved past `since`: status, scf-awards, code-facts, toml. ["row"] = the row changed but no dated facet localizes it.',
+													},
+												},
+											},
+										},
+										meta: {
+											type: "object",
+											properties: {
+												since: { type: "string", format: "date-time" },
+												asOf: { type: "string", format: "date-time" },
+												surfaces: { type: "array", items: { type: "string" } },
+												limitPerSurface: { type: "integer" },
+												sourceAdvisory: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty \u2014 it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest \u0027category is thin for this query\u0027 signal and consider dropping the filter.",
+													properties: {
+														note: { type: "string" },
+														inSourceTopScore: { type: "number" },
+														corpusWideTopScore: { type: "number" },
+														corpusWideTopSource: {
+															type: "string",
+															nullable: true,
+														},
+													},
+												},
+												exactMiss: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report\u0027s section boilerplate, scored as though it were a match. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match.",
+													properties: {
+														identifiers: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"The identifiers the query named that the corpus does not contain.",
+														},
+														note: { type: "string" },
+													},
+												},
+												counts: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												truncated: {
+													type: "object",
+													additionalProperties: { type: "boolean" },
+												},
+												byFacet: {
+													type: "object",
+													description:
+														"Per surface, the number of rows whose DATED fact family moved past `since`, counted over the whole surface (not the returned page): projects {status, scf-awards, deployment}, repos {code-facts}, partners {toml}. This is the material-change number; counts.<surface> is every write, and enrichment lanes bump updatedAt on hundreds of rows a week. Facets overlap. A lane that stamps an evidence date older than `since` (statusAsOf is the day the evidence was observed, never the write day) shows as `row`, not as a facet.",
+													additionalProperties: {
+														type: "object",
+														additionalProperties: { type: "integer" },
+													},
+												},
+												note: {
+													type: "string",
+													description:
+														"How to read counts vs byFacet, stated on every response.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored.",
+					},
+				},
+			},
+		},
 		"/api/changelog": {
 			get: {
 				operationId: "getChangelog",
+				"x-routing": {
+					purpose:
+						"What changed in the Scout API, MCP tools, and client — the contract-level changelog.",
+					keywords: [
+						"changelog",
+						"api changelog",
+						"release notes for scout",
+						"api changes",
+						"what changed in the api",
+						"new endpoint",
+						"removed endpoint",
+						"breaking change",
+						"spec version",
+						"mcp tool changes",
+					],
+					useWhen: [
+						"you cached the API or MCP surface earlier and want to know what moved before relying on it",
+						"which spec version added or changed an endpoint, tool, parameter or enum",
+					],
+					exampleQuestions: [
+						"What changed in the Scout API recently?",
+						"Did any MCP tools get added or removed this month?",
+					],
+					notFor: [
+						"which DATA rows changed -> getChanges",
+						"Stellar protocol upgrade history -> searchResearch",
+					],
+				},
 				tags: ["Discovery"],
 				summary: "Recent changes to the API, MCP tools, and client",
 				description:
@@ -196,7 +2260,54 @@ export const spec: OpenAPISpec = {
 										service: { type: "string" },
 										version: { type: "string" },
 										generatedAt: { type: "string", format: "date-time" },
-										meta: { type: "object" },
+										meta: {
+											type: "object",
+											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
+												counts: {
+													type: "object",
+													properties: {
+														returned: { type: "integer" },
+														total: { type: "integer" },
+													},
+												},
+												returned: {
+													type: "integer",
+													deprecated: true,
+													description:
+														"Deprecated flat copy — read meta.counts.returned.",
+												},
+												total: {
+													type: "integer",
+													deprecated: true,
+													description:
+														"Deprecated flat copy — read meta.counts.total.",
+												},
+												latest: {
+													type: "string",
+													format: "date",
+													nullable: true,
+													description: "Date of the newest entry.",
+												},
+												filters: {
+													type: "object",
+													properties: {
+														since: {
+															type: "string",
+															format: "date",
+															nullable: true,
+														},
+														limit: { type: "integer", nullable: true },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
 										entries: {
 											type: "array",
 											items: {
@@ -235,7 +2346,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Search Stellar projects — look up a project by name, or find prior art / competitors",
 				description:
-					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters. Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
+					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters (Wallet, DEX, Oracle, Lending, Payments, Stablecoin, RWA…). Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Directory lookup of built Stellar projects/products — status, SCF funding, builder, links. Keyword+synonym ranked by prominence/verification/funding/Live status, semantic fallback when keyword hits are thin.",
@@ -248,6 +2359,22 @@ export const spec: OpenAPISpec = {
 						"teams",
 						"companies",
 						"startups",
+						"card issuing",
+						"debit cards",
+						"card program",
+						"what services can I integrate",
+						"which providers support stellar",
+						"DEXes",
+						"AMMs",
+						"oracles",
+						"indexers",
+						"custody providers",
+						"lending protocols",
+						"oracle",
+						"price feeds",
+						"centralized exchanges",
+						"CEX",
+						"which exchanges list XLM",
 						"directory",
 						"look up a project by name",
 						"find a specific project",
@@ -291,6 +2418,12 @@ export const spec: OpenAPISpec = {
 						"block explorers",
 						"stellar.expert",
 						"stellarchain",
+						// Category vocabulary, not a name. "which Stellar wallets support
+						// Soroban contracts" lost to listContracts on its id noun; this
+						// phrase lifts searchProjects 6 → 2 in the replica with no other
+						// probe moving (2026-09-13). "wallets" alone was already covered
+						// and did nothing — the gain is the two-token phrase.
+						"soroban wallet",
 						"rosca",
 						"susu",
 						"chama",
@@ -301,6 +2434,14 @@ export const spec: OpenAPISpec = {
 						"scf-funded",
 						"live",
 						"inactive",
+
+						"oracle provider",
+						"oracle project",
+						"oracle on stellar",
+						"which oracle",
+						"price oracle",
+						"oracles on stellar",
+						"find an oracle",
 					],
 					useWhen: [
 						"who has built / has anyone built / is there a live or SCF-funded project for X",
@@ -315,6 +2456,8 @@ export const spec: OpenAPISpec = {
 						"raw GitHub source repos ranked by code quality -> searchRepos",
 						"editorial/analysis content about a product (articles, interviews, metrics commentary, deep dives) -> content platforms, not this directory",
 						"category counts or whitespace -> getClusters",
+						"ranking projects by GitHub activity / stars / commits -> getLeaderboard",
+						"ramp DIRECTION or corridor for a specific anchor (on-ramp vs off-ramp, which country) -> getPartners, which carries rampTypes",
 						"a TVL-complete DeFi rollup -> analyzeEcosystem dimension=tvl (the types taxonomy has no DeFi umbrella; RWA/Infrastructure-typed protocols like Spiko carry most Stellar TVL, so type=DEX+Lending rosters miss them)",
 					],
 					exampleQuestions: [
@@ -352,29 +2495,7 @@ export const spec: OpenAPISpec = {
 							"Filter to projects whose `types[]` includes this product type — server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes.",
 						schema: {
 							type: "string",
-							enum: [
-								"Wallet",
-								"DEX",
-								"Lending",
-								"Bridge",
-								"Infrastructure",
-								"Payments",
-								"Anchor",
-								"SDK",
-								"Indexer",
-								"Explorer",
-								"Analytics",
-								"AI",
-								"Gaming",
-								"Education",
-								"Security",
-								"NFT",
-								"RWA",
-								"Stablecoin",
-								"Social Impact",
-								"RPC",
-								"Faucet",
-							],
+							enum: [...PROJECT_TYPES],
 						},
 					},
 					{
@@ -390,13 +2511,7 @@ export const spec: OpenAPISpec = {
 							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
 						schema: {
 							type: "string",
-							enum: [
-								"Live",
-								"Inactive",
-								"Development",
-								"Pre-Release",
-								"Pre-Development",
-							],
+							enum: [...RESOLVABLE_PROJECT_STATUSES],
 						},
 					},
 					{ $ref: "#/components/parameters/limit" },
@@ -485,6 +2600,10 @@ export const spec: OpenAPISpec = {
 						"What OpenZeppelin contracts exist for Stellar?",
 						"Show me passkey smart-wallet repos",
 						"Is there a Groth16 proof verifier for Soroban?",
+						// 2026-09-05 routing battery (T1): a newcomer wants code to
+						// "copy" — templates/starters/examples are this op's job, but
+						// the word itself was in no field.
+						"Show me example Stellar projects I can copy or fork",
 					],
 				},
 				parameters: [
@@ -502,6 +2621,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references.",
 						schema: { type: "integer", minimum: 0, maximum: 100, default: 0 },
+					},
+					{
+						name: "activity",
+						in: "query",
+						description:
+							"Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days — an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list.",
+						schema: {
+							type: "string",
+							enum: ["active", "maintained", "dormant", "archived", "unknown"],
+						},
 					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
@@ -525,7 +2654,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Repos"],
 				summary: "Deep code answer about a Stellar repo (routing × DeepWiki)",
 				description:
-					"Source-grounded ANSWER to a deep code question about a Stellar internal — routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls), then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.",
+					"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.",
 				"x-routing": {
 					purpose:
 						"Deep 'where/how' code answers grounded in the authoritative Stellar repo's internals.",
@@ -545,6 +2674,20 @@ export const spec: OpenAPISpec = {
 						"implementation",
 						"defined",
 						"deepwiki",
+
+						"how does it calculate",
+						"calculate",
+						"in the code",
+						"how is it implemented",
+						"where in the code",
+						"interest rate model",
+						"how does the contract",
+						"algorithm",
+						"formula",
+						"mechanism",
+						"code walkthrough",
+						"explain the code",
+						"how does the code",
 					],
 					useWhen: [
 						"'where is X defined / how does Y work' for a Stellar internal (error/result codes, consensus/SCP, ledger, XDR, a SEP's implementation)",
@@ -595,6 +2738,12 @@ export const spec: OpenAPISpec = {
 												source: { type: "string" },
 												generatedAt: { type: "string", format: "date-time" },
 												note: { type: "string" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"THIS OPERATION ONLY: present on deepwiki-grounded answers, carrying the answer-dating disclaimer (answerAsOf is null; scannedAt/scannedRef/lastCommitAt date OUR SOURCE SCAN, not the answer). Unlike the shared Meta.warnings (ignored-query-param disclosure), it says nothing about your request parameters.",
+												},
 											},
 										},
 										q: { type: "string" },
@@ -603,13 +2752,13 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit | canonical | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name — that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
 										},
 										repoMeta: {
 											type: "object",
 											nullable: true,
 											description:
-												"Freshness/status of the routed repo from the StellarLight index — attach lastCommitAt as the as-of date when citing the answer. Null when the repo isn't indexed or nothing routed.",
+												"Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed.",
 											properties: {
 												lastCommitAt: {
 													type: "string",
@@ -619,6 +2768,7 @@ export const spec: OpenAPISpec = {
 												stars: { type: "integer", nullable: true },
 												isArchived: { type: "boolean" },
 												repoScoreLabel: { type: "string", nullable: true },
+												...REPO_KIND_PROPS,
 											},
 										},
 										codeVerified: {
@@ -632,16 +2782,60 @@ export const spec: OpenAPISpec = {
 												isDeployableContract: {
 													type: "boolean",
 													description:
-														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable' (sls-046).",
+														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'.",
 												},
 												sorobanSdkVersion: { type: "string", nullable: true },
 												versionStatus: { type: "string", nullable: true },
+												codeConfidence: {
+													type: "object",
+													nullable: true,
+													description:
+														"Deterministic trust score for the code facts (basis code-scan \u00d7 freshness of scannedAt). Null when never scanned.",
+													properties: {
+														score: { type: "number" },
+														label: {
+															type: "string",
+															enum: ["high", "medium", "low"],
+														},
+														ageDays: { type: "integer", nullable: true },
+													},
+												},
 												scannedAt: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 												},
+												scannedRef: {
+													type: "string",
+													nullable: true,
+													description:
+														"Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
+												},
 												symbols: {
+													type: "array",
+													items: { type: "string" },
+												},
+												contractInterface: {
+													type: "array",
+													items: { type: "string" },
+												},
+												targetProtocol: {
+													type: "integer",
+													nullable: true,
+												},
+												protocolCaps: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															cap: { type: "integer" },
+															title: { type: "string" },
+															status: { type: "string", nullable: true },
+															url: { type: "string" },
+														},
+													},
+												},
+												stellarDeps: {
 													type: "array",
 													items: { type: "string" },
 												},
@@ -660,6 +2854,40 @@ export const spec: OpenAPISpec = {
 											nullable: true,
 											description:
 												"DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned).",
+										},
+										answerSource: {
+											type: "string",
+											nullable: true,
+											description:
+												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced — cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it — where they disagree, the dated fact wins.",
+										},
+										answerAsOf: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+											description:
+												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — day-granular, serialized as that day's 00:00:00Z — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
+										},
+										knowledgeNotes: {
+											type: "array",
+											description:
+												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo — deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories — whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date.",
+											items: {
+												type: "object",
+												required: ["note", "source", "asOf"],
+												properties: {
+													note: { type: "string" },
+													source: {
+														type: "string",
+														description:
+															"'curated' (hand-verified) or 'derived:audit'.",
+													},
+													asOf: {
+														type: "string",
+														description: "YYYY-MM-DD the fact was verified.",
+													},
+												},
+											},
 										},
 										answered: {
 											type: "boolean",
@@ -712,7 +2940,7 @@ export const spec: OpenAPISpec = {
 					"Browse/LIST Stellar hackathon events — a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.",
 				"x-routing": {
 					purpose:
-						"List/browse Stellar hackathon events (curated + DoraHacks SDF orgs 3096/3853) and resolve event slugs.",
+						"List/browse Stellar hackathon events (curated + every Stellar organizer on DoraHacks) and resolve event slugs.",
 					keywords: [
 						"hackathon",
 						"hackathons",
@@ -760,6 +2988,13 @@ export const spec: OpenAPISpec = {
 						schema: { type: "string" },
 					},
 					{
+						name: "q",
+						in: "query",
+						description:
+							"Free-text name lookup — matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents).",
+						schema: { type: "string" },
+					},
+					{
 						name: "source",
 						in: "query",
 						description: "Restrict to one feed (curated vs DoraHacks)",
@@ -785,7 +3020,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Get one hackathon's full detail",
 				description:
-					"Full detail for ONE hackathon by slug — every submission with placement, prize, track, and post-hack status; derives `winners`, per-track aggregates, and a `stats` outcome funnel. DoraHacks-only events read live, degrading to a winner roster + `meta.note`. Needs an exact slug — resolve via getHackathons first. Not for listing/browsing events → use getHackathons.",
+					"Full detail for ONE hackathon by slug: every submission with placement, prize and track; `winners`, per-track aggregates and a `stats` funnel. DoraHacks events serve the stored copy: the event page, `rules` (submission requirements, and judging criteria where the organizer published them) and a `profile` of the submissions (categories, libraries, activity after the event, what they became). Needs an exact slug; resolve via getHackathons first. Not for listing events → use getHackathons.",
 				"x-routing": {
 					purpose:
 						"One hackathon's winners, submissions, tracks, and outcome stats.",
@@ -804,12 +3039,17 @@ export const spec: OpenAPISpec = {
 						"abandoned",
 						"outcome funnel",
 						"scfAwarded",
+						"judging criteria",
+						"submission requirements",
+						"rules",
 					],
 					useWhen: [
 						"who won [event] / who won its soroban track",
+						"who won the most recent or latest Stellar hackathon",
 						"what projects were submitted to [event]",
 						"what tracks did [event] have and what did they pay",
 						"how many [event] submissions are still being built",
+						"how is [event] judged / what does a submission to [event] need",
 					],
 					notFor: [
 						"listing/browsing many events -> getHackathons",
@@ -820,6 +3060,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who won the Stellar x402 hackathon?",
 						"What tracks did the event have and what did they pay?",
+						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?",
 					],
 				},
 				parameters: [
@@ -859,7 +3100,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Compare 2–5 hackathons side-by-side",
 				description:
-					"Side-by-side comparison of 2–5 hackathons by slug — per-event snapshot (prize pool, submissions, winners, prize-per-winner, and cohort DURABILITY — stillActiveCount/liveCount/activeRatePct, how many of the event's projects are still alive today; curated events only) plus a `deltas` block flagging the spreads incl. the most durable cohort. Unresolved slugs return source:'not-found' without inflating counts. Requires ≥2 known slugs — resolve via getHackathons. Not for ecosystem-wide totals across ALL events → use analyzeEcosystem.",
+					"Side-by-side comparison of 2–5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.",
 				"x-routing": {
 					purpose:
 						"Compare 2–5 named hackathons on prizes, turnout, and outcomes.",
@@ -880,6 +3121,8 @@ export const spec: OpenAPISpec = {
 						"survival rate",
 						"which projects survived",
 						"most durable cohort",
+						"what changed between",
+						"category shift",
 					],
 					useWhen: [
 						"which Stellar hackathon should I enter",
@@ -896,6 +3139,7 @@ export const spec: OpenAPISpec = {
 						"Was event A bigger than event B?",
 						"Compare the last two SDF hackathons on prize money",
 						"Which hackathon's projects are still active today?",
+						"How did the projects change from one Stellar hackathon to the next, and what did the winners build?",
 					],
 				},
 				parameters: [
@@ -919,7 +3163,106 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Comparison rollup",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Side-by-side hackathon comparison (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												counts: {
+													type: "object",
+													description:
+														"How many of the requested slugs resolved.",
+													properties: {
+														requested: { type: "integer" },
+														returned: { type: "integer" },
+														notFound: { type: "integer" },
+													},
+												},
+											},
+										},
+										hackathons: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													slug: { type: "string" },
+													name: { type: "string" },
+													status: { type: "string" },
+													startDate: { type: "string", nullable: true },
+													endDate: { type: "string", nullable: true },
+													externalUrl: { type: "string", nullable: true },
+													prizePoolUSD: {
+														type: "number",
+														nullable: true,
+														description:
+															"null when the source publishes none: unknown, never zero.",
+													},
+													source: { type: "string" },
+													hackersCount: { type: "integer", nullable: true },
+													submissionCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions.",
+													},
+													winnerCount: { type: "integer", nullable: true },
+													prizePerWinnerUSD: { type: "number", nullable: true },
+													stillActiveCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Curated events only: the event's directory projects still active today.",
+													},
+													liveCount: { type: "integer", nullable: true },
+													activeRatePct: { type: "number", nullable: true },
+													profile: EVENT_PROFILE_SCHEMA,
+												},
+											},
+										},
+										deltas: {
+											type: "object",
+											description: "What differs across the compared events.",
+											properties: {
+												notes: { type: "array", items: { type: "string" } },
+												facetShifts: {
+													type: "array",
+													description:
+														"Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set.",
+													items: {
+														type: "object",
+														properties: {
+															facet: {
+																type: "string",
+																enum: [...SHIFT_FACETS],
+															},
+															value: { type: "string" },
+															shares: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		slug: { type: "string" },
+																		share: { type: "number", nullable: true },
+																	},
+																},
+															},
+															spread: { type: "number" },
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -931,7 +3274,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
 				description:
-					"Topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks) — the PROTOTYPE layer of prior art, most of which never becomes a directory project. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement/award, votes, and repo/demo links. `winnersOnly=1` = prize winners; `track` filters by track. Absence is a real whitespace signal, not proof it was never tried. For SHIPPED products in the directory → use searchProjects.",
+					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
@@ -948,6 +3291,10 @@ export const spec: OpenAPISpec = {
 						"winning projects",
 						"winning builds",
 						"hackathon winners by topic",
+						"won prizes",
+						"x402 builds",
+						"search by meaning",
+						"similar hackathon projects",
 					],
 					useWhen: [
 						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
@@ -964,31 +3311,14 @@ export const spec: OpenAPISpec = {
 						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
+						"Which x402 projects won prizes at Stellar hackathons?",
+						"Which Stellar hackathon projects were built with passkey-kit?",
 					],
 				},
 				parameters: [
-					{
-						name: "q",
-						in: "query",
-						required: false,
-						description:
-							"Topic to search build names + descriptions (prior-art lookup).",
-						schema: { type: "string" },
-					},
-					{
-						name: "winnersOnly",
-						in: "query",
-						required: false,
-						description: "Set to 1 to return only prize-winning builds.",
-						schema: { type: "string", enum: ["1", "true"] },
-					},
-					{
-						name: "track",
-						in: "query",
-						required: false,
-						description: "Filter by hackathon track (substring match).",
-						schema: { type: "string" },
-					},
+					...buildFilterParams(
+						"Topic to search build names + descriptions (prior-art lookup).",
+					),
 					{
 						name: "limit",
 						in: "query",
@@ -1000,8 +3330,663 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Matching hackathon builds",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Hackathon build submissions (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: [...BUILD_MATCH_MODES],
+													description:
+														"How rows matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both blended; all = no text query (structured filters only).",
+												},
+												matchModeLabel: { type: "string" },
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												upstream: {
+													type: "string",
+													description:
+														"Where the raw builds came from (DoraHacks).",
+												},
+												mode: {
+													type: "object",
+													description:
+														"The search mode asked for and the one that served. They differ only when search by meaning could not run.",
+													properties: {
+														requested: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+														served: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+													},
+												},
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when something limited this answer, e.g. search by meaning could not run.",
+												},
+												filters: BUILD_FILTERS_ECHO_SCHEMA,
+												counts: {
+													type: "object",
+													description:
+														"returned vs total — how much the filters narrowed.",
+													properties: {
+														indexedBuilds: {
+															type: "integer",
+															description: "Total builds in the index.",
+														},
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+													},
+												},
+												stack: {
+													type: "object",
+													description:
+														"Which Stellar packages the matched builds' repos declare, over every matched build (not just this page). winnersOnly=1 with no q = what winners build on; add q for a topic.",
+													properties: {
+														buildsMatched: { type: "integer" },
+														buildsRead: {
+															type: "integer",
+															description:
+																"Matched builds whose repo was read; packages are counted over these.",
+														},
+														packages: {
+															type: "array",
+															description: "Most-declared first, at most 15.",
+															items: {
+																type: "object",
+																properties: {
+																	name: { type: "string" },
+																	builds: { type: "integer" },
+																	winners: { type: "integer" },
+																},
+															},
+														},
+														note: { type: "string" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										builds: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+														description:
+															"Opens the full submission in getHackathonSubmission.",
+													},
+													name: { type: "string" },
+													description: { type: "string", nullable: true },
+													url: { type: "string", nullable: true },
+													demoUrl: { type: "string", nullable: true },
+													githubUrl: { type: "string", nullable: true },
+													hackathon: { type: "string" },
+													hackathonSlug: {
+														type: "string",
+														description:
+															"The event's slug, the one getHackathons lists and getHackathon opens.",
+													},
+													track: { type: "string", nullable: true },
+													placement: {
+														type: "string",
+														nullable: true,
+														description:
+															"This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner.",
+													},
+													award: {
+														type: "string",
+														nullable: true,
+														description:
+															"Award CATEGORY title as DoraHacks published it ('10K Prize Pool', '$10,000 XLM Prize'), shared by every placement inside that category — NOT this build's payout. For what the build itself won use `prizeUsd` (null = undisclosed) or `placement`; reading this string as the prize overstates a 3rd place several times over.",
+													},
+													isWinner: {
+														type: "boolean",
+														description:
+															"Placed in the event; absence of a win is not a quality judgement.",
+													},
+													prizeUsd: {
+														type: "number",
+														nullable: true,
+														description:
+															"What this build itself won in USD, parsed from its own placement string; null = not stated there (DoraHacks often names the amount only on the award category).",
+													},
+													votes: { type: "integer", nullable: true },
+													endedAt: { type: "string", nullable: true },
+													project: BUILD_PROJECT_SCHEMA,
+													stack: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none.",
+													},
+													categories: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission.",
+													},
+													matchedTerms: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Which query terms this build matched — the evidence behind its inclusion.",
+													},
+													similarity: {
+														type: "number",
+														description:
+															"Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it.",
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
+				},
+			},
+		},
+		"/api/hackathons/builds/{id}": {
+			get: {
+				operationId: "getHackathonSubmission",
+				tags: ["Hackathons"],
+				summary: "One Stellar hackathon submission in full",
+				description:
+					"One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.",
+				"x-routing": {
+					purpose:
+						"Read one hackathon submission in full: what the team wrote, its links and placement, and what it became.",
+					keywords: [
+						"hackathon submission",
+						"submission details",
+						"full write-up",
+						"dorahacks link",
+						"what did this team submit",
+					],
+					useWhen: [
+						"you hold a submission id or a dorahacks.io/buidl link and need the full write-up",
+						"what exactly did <winner> submit, and did it become a project",
+					],
+					notFor: [
+						"finding submissions on a topic -> searchHackathonBuilds",
+						"one event's winners and roster -> getHackathon",
+					],
+					exampleQuestions: [
+						"Show me everything TollPay submitted to Stellar Hacks: Agents.",
+						"What does this DoraHacks submission do: dorahacks.io/buidl/42585?",
+					],
+				},
+				parameters: [
+					{
+						name: "id",
+						in: "path",
+						required: true,
+						description:
+							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The stored submission.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												upstream: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												note: { type: "string" },
+											},
+										},
+										build: BUILD_DETAIL_SCHEMA,
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Not a submission id, or a query parameter (this operation takes none).",
+					},
+					"404": {
+						description:
+							"Not in Scout's store (absence of a record, not proof the submission never existed).",
+					},
+					"503": {
+						description: "The store did not answer; retry after Retry-After.",
+					},
+				},
+			},
+		},
+		"/api/hackathons/analyze": {
+			get: {
+				operationId: "analyzeHackathonSubmissions",
+				tags: ["Hackathons"],
+				summary:
+					"Trends and counts across Stellar hackathon submissions, with lift",
+				description:
+					"Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+				"x-routing": {
+					purpose:
+						"Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
+					keywords: [
+						"hackathon trends",
+						"trend",
+						"across hackathons",
+						"event by event",
+						"share of submissions",
+						"percentage",
+						"breakdown",
+						"distribution",
+						"categories",
+						"category share",
+						"which sdks",
+						"tech stack",
+						"libraries used",
+						"winners vs",
+						"what winners did differently",
+						"lift",
+						"kept building",
+						"after the hackathon",
+						"cohort",
+					],
+					useWhen: [
+						"what share of hackathon submissions are <category>, event by event",
+						"how did <topic> change across Stellar hackathons",
+						"which SDKs or packages do hackathon winners use",
+						"what did the winners do differently",
+						"how many hackathon projects kept building after the event",
+						"what happened to <topic> hackathon projects afterwards: kept building, went quiet, became a directory project",
+					],
+					notFor: [
+						"finding the builds themselves -> searchHackathonBuilds",
+						"one submission in full -> getHackathonSubmission",
+						"event dates, prize pools and registrations -> getHackathons / compareHackathons",
+					],
+					exampleQuestions: [
+						"What share of Stellar hackathon submissions are payments projects, event by event?",
+						"How did AI agent projects change across Stellar hackathons?",
+						"Which SDKs and libraries do Stellar hackathon winners use most?",
+						"What did winning Stellar hackathon projects do differently from the rest?",
+						"How many Stellar hackathon projects kept building after the event?",
+					],
+				},
+				parameters: [
+					{
+						name: "facet",
+						in: "query",
+						required: false,
+						description:
+							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year.",
+						schema: {
+							type: "string",
+							enum: [...FACET_IDS],
+							default: "category",
+						},
+					},
+					{
+						name: "by",
+						in: "query",
+						required: false,
+						description:
+							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q.",
+						schema: { type: "string", enum: [...GROUP_FACETS] },
+					},
+					{
+						name: "value",
+						in: "query",
+						required: false,
+						description:
+							"Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value.",
+						schema: { type: "string" },
+					},
+					{
+						name: "top",
+						in: "query",
+						required: false,
+						description:
+							"Most values to report per set (default 10, or 5 with by; max 30).",
+						schema: { type: "integer", default: 10, maximum: 30 },
+					},
+					...buildFilterParams(
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+					),
+				],
+				responses: {
+					"200": {
+						description: "The facet counted over the filtered submissions.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: [...BUILD_MATCH_MODES],
+													description:
+														"How submissions matched q: filtered = the query's words (with stems and synonyms); vector = similarity in meaning; hybrid = both; all = no q.",
+												},
+												matchModeLabel: { type: "string" },
+												mode: {
+													type: "object",
+													properties: {
+														requested: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+														served: {
+															type: "string",
+															enum: [...BUILD_SEARCH_MODES],
+														},
+													},
+												},
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+												},
+												source: { type: "string" },
+												upstream: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: BUILD_FILTERS_ECHO_SCHEMA,
+												facet: {
+													type: "object",
+													properties: {
+														id: { type: "string", enum: [...FACET_IDS] },
+														counts: {
+															type: "string",
+															description: "What one value counts.",
+														},
+														unknownMeans: {
+															type: "string",
+															nullable: true,
+															description:
+																"Why a build's value can be unknown; null when it never is.",
+														},
+														measured: {
+															type: "array",
+															description:
+																"facet=category only: each reported type's precision and recall, measured leave-one-out on the hand-typed directory at its cut. A type with low recall undercounts; balanced precision and recall track its true share.",
+															items: {
+																type: "object",
+																properties: {
+																	type: { type: "string" },
+																	precision: { type: "number" },
+																	recall: { type: "number" },
+																},
+															},
+														},
+													},
+												},
+												by: {
+													type: "string",
+													nullable: true,
+													enum: [...GROUP_FACETS],
+												},
+												value: { type: "string", nullable: true },
+												counts: {
+													type: "object",
+													properties: {
+														indexedBuilds: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										total: {
+											type: "object",
+											description: "The facet over every matched submission.",
+											properties: {
+												field: {
+													type: "integer",
+													description:
+														"Builds passing every filter except q; builds / field is the share that matched q.",
+												},
+												...FACET_COUNT_PROPS,
+											},
+										},
+										groups: {
+											type: "array",
+											description:
+												"Present with `by`: the facet within each group. Events and years run oldest first; a group where nothing matched reports zero.",
+											items: {
+												type: "object",
+												properties: {
+													value: { type: "string" },
+													title: {
+														type: "string",
+														description: "by=event: the event's title.",
+													},
+													endedAt: { type: "string", nullable: true },
+													field: {
+														type: "integer",
+														description:
+															"Builds in this group before q: the group's whole field.",
+													},
+													...FACET_COUNT_PROPS,
+												},
+											},
+										},
+										winnersVsOthers: {
+											type: "object",
+											description:
+												"Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement.",
+											properties: {
+												winnersKnown: { type: "integer" },
+												othersKnown: { type: "integer" },
+												values: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															winners: { type: "integer" },
+															others: { type: "integer" },
+															winnersShare: { type: "number", nullable: true },
+															othersShare: { type: "number", nullable: true },
+															lift: {
+																type: "number",
+																nullable: true,
+																description:
+																	"winnersShare / othersShare: above 1 = more common among winners. null when either share is unknown or zero. Small counts are noise.",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones.",
+					},
+					"503": {
+						description:
+							"The index could not be built; retry after Retry-After.",
+					},
+				},
+			},
+		},
+		"/api/hackathons/review": {
+			get: {
+				operationId: "reviewSubmission",
+				tags: ["Hackathons"],
+				summary: "Review a hackathon project from its GitHub or DoraHacks link",
+				description:
+					"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.",
+				"x-routing": {
+					purpose:
+						"Get feedback on your own hackathon project before you apply to SCF: what the evidence shows, what is missing, who built close to it, and who is funded.",
+					keywords: [
+						"review my project",
+						"feedback on my project",
+						"my hackathon project",
+						"my submission",
+						"what's weak",
+						"what is missing",
+						"before I apply",
+						"apply to SCF",
+						"github link",
+						"dorahacks link",
+						"is my project ready",
+					],
+					useWhen: [
+						"here is my hackathon project (a GitHub or DoraHacks link): what is weak about it",
+						"what is missing before I apply to SCF with this project",
+						"who built something close to my submission, and did they win",
+					],
+					notFor: [
+						"an idea with no link -> vetIdea / scfPitch",
+						"a repo's own trust signals outside hackathons -> getRepoTrust",
+						"one submission's full write-up only -> getHackathonSubmission",
+					],
+					exampleQuestions: [
+						"Here is my hackathon project: github.com/rajkaria/toll. What's weak about it before I apply to SCF?",
+						"Review my Stellar hackathon submission: dorahacks.io/buidl/42585.",
+					],
+				},
+				parameters: [
+					{
+						name: "link",
+						in: "query",
+						required: true,
+						description:
+							"The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest.",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The review.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												note: { type: "string" },
+											},
+										},
+										review: {
+											type: "object",
+											properties: {
+												link: { type: "string" },
+												resolvedBy: {
+													type: "string",
+													enum: [...REVIEW_RESOLVED_BY],
+												},
+												otherSubmissionsOfRepo: {
+													type: "integer",
+													description:
+														"Other stored submissions of the same repo, not reviewed here.",
+												},
+												submission: BUILD_DETAIL_SCHEMA,
+												checks: {
+													type: "array",
+													description:
+														"Mechanical checks over the submission's own facts, each a finding with its evidence. Not dated per item: the submission's own read dates (stackReadAt, activityCheckedAt, writeUpReadAt, project.factsReadAt) date them.",
+													items: {
+														type: "object",
+														properties: {
+															id: {
+																type: "string",
+																enum: [...REVIEW_CHECK_IDS],
+															},
+															ok: {
+																type: "boolean",
+																nullable: true,
+																description:
+																	"true = in place; false = missing or a warning sign; null = could not be checked, never a no.",
+															},
+															finding: { type: "string" },
+														},
+													},
+												},
+												similar: {
+													type: "object",
+													description:
+														"The stored submissions closest in meaning to this one, by its own embedding.",
+													properties: {
+														checked: {
+															type: "boolean",
+															description:
+																"false = search by meaning could not run: unknown, not 'nothing similar'.",
+														},
+														builds: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	name: { type: "string" },
+																	hackathon: { type: "string" },
+																	isWinner: { type: "boolean" },
+																	placement: { type: "string", nullable: true },
+																	similarity: { type: "number" },
+																	project: BUILD_PROJECT_SCHEMA,
+																},
+															},
+														},
+													},
+												},
+												categoryContext: {
+													type: "object",
+													nullable: true,
+													description:
+														"How crowded the submission's top category is across every stored submission. null when it is not categorized.",
+													properties: {
+														type: { type: "string", enum: [...PROJECT_TYPES] },
+														submissions: { type: "integer" },
+														winners: { type: "integer" },
+														shareOfSubmissions: {
+															type: "number",
+															nullable: true,
+														},
+													},
+												},
+												pitch: SCF_PITCH_REPORT_SCHEMA,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "No link, or a parameter other than link." },
+					"404": {
+						description:
+							"No stored submission matches the link (not proof it was never submitted).",
+					},
+					"503": { description: "The store did not answer; retry." },
 				},
 			},
 		},
@@ -1066,6 +4051,7 @@ export const spec: OpenAPISpec = {
 						"a funded project/product or 'who built X (the company)' -> searchProjects",
 						"the GitHub repo/code itself -> searchRepos",
 						"ecosystem-wide dev counts/activity stats -> getLeaderboard",
+						"paid work / jobs / bounties FOR a contributor (worker side, not who-to-hire) -> getRfps",
 						"SCF-tier or award-track filtering (unsupported — no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
@@ -1109,14 +4095,32 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												matchBasis: {
-													type: "string",
-													description:
-														"What a skill match IS (sls-041): free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts.",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "expanded"],
+															description:
+																"How rows matched q: expanded = matched via synonym/stem expansion of the query terms (verify relevance for niche terms); all = no text query.",
+														},
+														matchModeLabel: { type: "string" },
+														warnings: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead — the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only).",
+														},
+														matchBasis: {
+															type: "string",
+															description:
+																"What a skill match IS: free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts.",
+														},
+													},
 												},
-											},
+											],
 										},
 										builders: {
 											type: "array",
@@ -1208,30 +4212,55 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												source: {
-													type: "string",
-													description:
-														"The roster page each row is quoted from (stellar.org/foundation/team).",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
+														source: {
+															type: "string",
+															description:
+																"The roster page each row is quoted from (stellar.org/foundation/team).",
+														},
+														docKind: {
+															type: "string",
+															nullable: true,
+															enum: ["spec", "guide", "article", "data"],
+															description:
+																"Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits \u2014 old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.",
+														},
+														docVersionStatus: {
+															type: "string",
+															nullable: true,
+															description:
+																"SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal \u2014 honest absence, never unknown.",
+														},
+														observedAt: {
+															type: "string",
+															description:
+																"Date the roster was last observed from the source (YYYY-MM-DD).",
+														},
+														sections: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Distinct roster sections present (Leadership, Board of directors, Advisors).",
+														},
+														matchBasis: {
+															type: "string",
+															description:
+																"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
+														},
+													},
 												},
-												observedAt: {
-													type: "string",
-													description:
-														"Date the roster was last observed from the source (YYYY-MM-DD).",
-												},
-												sections: {
-													type: "array",
-													items: { type: "string" },
-													description:
-														"Distinct roster sections present (Leadership, Board of directors, Advisors).",
-												},
-												matchBasis: {
-													type: "string",
-													description:
-														"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
-												},
-											},
+											],
 										},
 										people: {
 											type: "array",
@@ -1255,11 +4284,21 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "List ecosystem partners",
 				description:
-					"Published ecosystem partner directory — service providers a builder hires or integrates: anchors, on/off-ramps, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
+					"Published Stellar ecosystem partner directory — service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Directory of hireable/integratable ecosystem partners with verified activity signals.",
 					keywords: [
+						"audit firms",
+						"auditors",
+						"who can audit my contract",
+						"on-ramp providers",
+						"off-ramp providers",
+						"KYC providers",
+						"find a partner",
+						"find partner",
+						"who can i work with",
+						"integration partner",
 						"partner",
 						"partners",
 						"anchor",
@@ -1287,6 +4326,22 @@ export const spec: OpenAPISpec = {
 						"'who should audit my Soroban contract' (type=audit-firm)",
 						"find an anchor or on/off-ramp in {region}",
 						"partner discovery for an integration",
+						// THE TIEBREAKER. Both this operation and searchProjects
+						// declared ramp vocabulary — on-ramp / off-ramp / ramps /
+						// anchors here, anchors / on-off-ramps there — with nothing in
+						// either notFor to break the tie, so "on and off ramps for
+						// Stellar payments" was contested by construction. The split
+						// follows the data: 24 anchor-typed partners here (2026-09-02
+						// audit moved 5 non-ramp rows off "anchor" — 3 asset-issuer, 1
+						// wallet, 1 infrastructure), 9 of them with rampTypes populated,
+						// against 42 type=Anchor projects in the directory. Direction and
+						// corridor are the facts only this side holds; the roster is
+						// larger on the other.
+						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
+						// 2026-09-05 routing battery (T3): partner rows carry `seps`
+						// (SEP-6 / SEP-24 / SEP-31, read from stellar.toml), but no field
+						// said "implement" or "SEP-24", so the question gated out.
+						"which anchors implement SEP-24 / SEP-6 / SEP-31 — `seps` is read from each partner's stellar.toml (null = not fetched, [] = none implemented)",
 					],
 					notFor: [
 						"projects/products that were BUILT -> searchProjects",
@@ -1296,6 +4351,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who can audit my Soroban contract?",
 						"Find a USDC off-ramp partner in Mexico",
+						"Which anchors implement SEP-24?",
 					],
 				},
 				parameters: [
@@ -1305,18 +4361,7 @@ export const spec: OpenAPISpec = {
 						description: "Filter by partner type",
 						schema: {
 							type: "string",
-							enum: [
-								"anchor",
-								"on-off-ramp",
-								"infrastructure",
-								"tooling",
-								"protocol",
-								"wallet",
-								"audit-firm",
-								"legal",
-								"agency",
-								"other",
-							],
+							enum: [...PARTNER_TYPES],
 						},
 					},
 					{
@@ -1329,8 +4374,21 @@ export const spec: OpenAPISpec = {
 					{
 						name: "region",
 						in: "query",
-						description: "Filter by region served (global, latam, africa, …)",
-						schema: { type: "string" },
+						description:
+							'Filter by region served — a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text.',
+						schema: {
+							type: "string",
+							enum: [
+								"global",
+								"north-america",
+								"latam",
+								"europe",
+								"africa",
+								"mena",
+								"asia",
+								"oceania",
+							],
+						},
 					},
 					{
 						// Param-level doc ONLY — op description deliberately untouched
@@ -1345,8 +4403,8 @@ export const spec: OpenAPISpec = {
 						name: "accepting",
 						in: "query",
 						description:
-							"Set to 1 to return only partners currently accepting new clients",
-						schema: { type: "string", enum: ["1"] },
+							"1 = only partners currently accepting new clients; 0 = only partners NOT accepting (an empty page here is the honest answer when every published partner accepts). Omit for no filter. `meta.filters.accepting` echoes the applied value, null when omitted.",
+						schema: { type: "string", enum: ["1", "0"] },
 					},
 					{
 						// Param-level doc ONLY — the operation description above is
@@ -1377,6 +4435,30 @@ export const spec: OpenAPISpec = {
 		"/api/partners/{slug}": {
 			get: {
 				operationId: "getPartner",
+				"x-routing": {
+					purpose: "The full public profile of one partner, by slug.",
+					keywords: [
+						"partner profile",
+						"partner details",
+						"partner by slug",
+						"this partner",
+						"partner contact",
+						"partner services",
+						"partner regions",
+						"partner freshness",
+					],
+					useWhen: [
+						"you already know the partner's slug (from getPartners) and need the full profile — services, sectors, regions, docs, contact, freshness",
+					],
+					exampleQuestions: [
+						"Show me the full profile for partner X",
+						"What services and regions does partner X cover?",
+					],
+					notFor: [
+						"discovering or listing partners -> getPartners",
+						"ranking partners against a need -> matchPartners",
+					],
+				},
 				tags: ["Partners"],
 				summary: "Get one partner's full profile",
 				description:
@@ -1393,7 +4475,127 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Partner profile",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One partner's full profile (previously an opaque object).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										partner: {
+											type: "object",
+											description:
+												"The full partner profile — every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												partnerType: { type: "string" },
+												tagline: { type: "string", nullable: true },
+												description: { type: "string", nullable: true },
+												logoUrl: { type: "string", nullable: true },
+												websiteUrl: { type: "string", nullable: true },
+												foundedYear: { type: "integer", nullable: true },
+												services: { type: "array", items: { type: "string" } },
+												sectors: { type: "array", items: { type: "string" } },
+												regions: { type: "array", items: { type: "string" } },
+												assets: { type: "array", items: { type: "string" } },
+												seps: {
+													type: "array",
+													items: { type: "string" },
+													description: "SEP standards the partner implements.",
+												},
+												rampTypes: {
+													type: "array",
+													nullable: true,
+													items: {
+														type: "string",
+														enum: ["on-ramp", "off-ramp"],
+													},
+													description:
+														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed — the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
+												},
+												country: { type: "string", nullable: true },
+												acceptingClients: { type: "boolean" },
+												typicalEngagement: { type: "string", nullable: true },
+												leadTime: { type: "string", nullable: true },
+												pricingModel: { type: "string", nullable: true },
+												pricingNotes: { type: "string", nullable: true },
+												docsUrl: { type: "string", nullable: true },
+												githubOrg: { type: "string", nullable: true },
+												contactEmail: { type: "string", nullable: true },
+												contactChannel: { type: "string", nullable: true },
+												responseSla: { type: "string", nullable: true },
+												tomlSourceUrl: { type: "string", nullable: true },
+												tomlFetchedAt: { type: "string", nullable: true },
+												caseStudies: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															title: { type: "string" },
+															url: { type: "string", nullable: true },
+															projectSlug: {
+																type: "string",
+																nullable: true,
+																description:
+																	"Slug in the projects directory, when the case study's project is listed there.",
+															},
+														},
+													},
+												},
+												verified: {
+													type: "object",
+													description:
+														"Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade.",
+													properties: {
+														githubLastCommitAt: {
+															type: "string",
+															nullable: true,
+														},
+														githubCommits90d: {
+															type: "integer",
+															nullable: true,
+														},
+														onchainActive: { type: "boolean", nullable: true },
+														onchainNote: { type: "string", nullable: true },
+														scfInvolvement: { type: "string", nullable: true },
+														lastAutoVerifyAt: {
+															type: "string",
+															nullable: true,
+														},
+													},
+												},
+												freshness: {
+													type: "object",
+													description: "Row-currency signals used by matching.",
+													properties: {
+														status: { type: "string" },
+														lastPartnerUpdateAt: {
+															type: "string",
+															nullable: true,
+														},
+														isCurrent: { type: "boolean" },
+														excludeFromMatching: { type: "boolean" },
+													},
+												},
+												url: {
+													type: "string",
+													description:
+														"Canonical stellarlight.xyz profile URL.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					"404": {
 						description: "Partner not found or not published",
@@ -1409,6 +4611,33 @@ export const spec: OpenAPISpec = {
 		"/api/partners/match": {
 			post: {
 				operationId: "matchPartners",
+				"x-routing": {
+					purpose:
+						"Rank published partners against a plain-language builder need, each with a one-line reason.",
+					keywords: [
+						"which partner should I use",
+						"best partner for",
+						"match partners",
+						"partner recommendation",
+						"find a partner for",
+						"who can help me with",
+						"rank partners",
+						"provider for my use case",
+						"off-ramp provider for",
+						"which provider fits",
+					],
+					useWhen: [
+						"a builder describes a need in plain language (corridor, SEP, service) and wants the published partners ranked by fit",
+					],
+					exampleQuestions: [
+						"Which partner is the best fit for a USDC off-ramp in Mexico with SEP-24?",
+						"Who should I work with for KYC in Brazil?",
+					],
+					notFor: [
+						"browsing all partners -> getPartners",
+						"one known partner's profile -> getPartner",
+					],
+				},
 				tags: ["Partners"],
 				summary: "AI-rank partners against a plain-language need",
 				description:
@@ -1433,13 +4662,107 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Ranked matches with reasons",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"AI partner matches for a stated need (previously opaque).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												model: { type: "string" },
+												candidatesConsidered: {
+													type: "integer",
+													description: "The denominator behind the matches.",
+												},
+												note: { type: "string" },
+											},
+										},
+										need: { type: "string" },
+										matches: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													partner: {
+														type: "object",
+														description: "The matched partner row.",
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string" },
+															partnerType: { type: "string" },
+															tagline: { type: "string", nullable: true },
+															websiteUrl: { type: "string", nullable: true },
+															acceptingClients: {
+																type: "boolean",
+																nullable: true,
+															},
+															sectors: {
+																type: "array",
+																items: { type: "string" },
+															},
+															regions: {
+																type: "array",
+																items: { type: "string" },
+															},
+															freshness: {
+																type: "object",
+																properties: {
+																	status: { type: "string" },
+																},
+															},
+															url: {
+																type: "string",
+																description: "Public profile page.",
+															},
+														},
+													},
+													score: {
+														type: "number",
+														description:
+															"Relevance of this partner to the need.",
+													},
+													reason: {
+														type: "string",
+														description: "Why it matched — safe to surface.",
+													},
+												},
+											},
+										},
+										summary: { type: "string", nullable: true },
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {
 						description:
 							"AI backend unavailable — fall back to GET /api/partners",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1502,12 +4825,122 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Assistant reply (+ matches when a need was searched)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One assistant turn, plus any partners it grounded the answer in.",
+									properties: {
+										reply: {
+											type: "string",
+											description: "The assistant's next message, plain text.",
+										},
+										matches: {
+											type: "array",
+											description:
+												"Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
+											items: {
+												type: "object",
+												description: "A public partner record.",
+												properties: {
+													slug: { type: "string" },
+													name: { type: "string" },
+													partnerType: { type: "string" },
+													tagline: { type: "string", nullable: true },
+													description: {
+														type: "string",
+														nullable: true,
+														description:
+															"Truncated (≤180 chars) — card fallback when tagline is empty.",
+													},
+													websiteUrl: { type: "string", nullable: true },
+													acceptingClients: {
+														type: "boolean",
+														nullable: true,
+													},
+													sectors: {
+														type: "array",
+														items: { type: "string" },
+													},
+													regions: {
+														type: "array",
+														items: { type: "string" },
+													},
+													assets: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES.",
+													},
+													seps: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"SEP standards implemented (sep-6, sep-24, sep-31).",
+													},
+													tomlSourceUrl: { type: "string", nullable: true },
+													tomlFetchedAt: { type: "string", nullable: true },
+													rampTypes: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server.",
+													},
+													country: { type: "string", nullable: true },
+													contactable: {
+														type: "boolean",
+														description:
+															"True when the partner has a direct contact path (email or channel).",
+													},
+													logoUrl: { type: "string", nullable: true },
+													freshness: { type: "string" },
+													url: {
+														type: "string",
+														description: "Public profile page.",
+													},
+												},
+											},
+										},
+										intent: {
+											type: "string",
+											nullable: true,
+											description:
+												"What the assistant judged the caller is trying to do.",
+										},
+										canList: {
+											type: "boolean",
+											description:
+												"Whether the caller is eligible to submit a listing from here.",
+										},
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {
 						description: "AI backend unavailable",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1515,6 +4948,10 @@ export const spec: OpenAPISpec = {
 		"/api/partners/onboard": {
 			post: {
 				operationId: "partnerOnboard",
+				// Part of the get-listed flow (feeds submit-listing), not an agent
+				// research call — same class as assistant/submit-listing, and the
+				// skill reference guard skips side-effecting ops on purpose.
+				"x-side-effecting": true,
 				tags: ["Partners"],
 				summary: "AI onboarding helpers: interview chat + profile extraction",
 				description:
@@ -1547,12 +4984,93 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "`{reply}` (chat mode) or `{fields}` (extract mode)",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"mode=chat returns the next assistant turn; mode=extract returns structured partner-owned profile fields. The extract schema contains ONLY partner-owned manual fields — a verified/auto field can never be emitted here, and nothing is written by this endpoint.",
+									properties: {
+										reply: {
+											type: "string",
+											nullable: true,
+											description: "mode=chat: the next assistant turn.",
+										},
+										fields: {
+											type: "object",
+											nullable: true,
+											description:
+												"mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific.",
+											properties: {
+												partnerType: {
+													type: "string",
+													nullable: true,
+													description:
+														"One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | asset-issuer | other. Null when genuinely unclear from the transcript.",
+												},
+												tagline: { type: "string", nullable: true },
+												description: { type: "string", nullable: true },
+												services: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Granular lowercase hyphenated service tags (e.g. 'usdc-off-ramp-mexico').",
+												},
+												sectors: {
+													type: "array",
+													items: { type: "string" },
+												},
+												regions: {
+													type: "array",
+													items: { type: "string" },
+												},
+												acceptingClients: {
+													type: "boolean",
+													nullable: true,
+												},
+												typicalEngagement: {
+													type: "string",
+													nullable: true,
+												},
+												leadTime: { type: "string", nullable: true },
+												pricingModel: { type: "string", nullable: true },
+												pricingNotes: { type: "string", nullable: true },
+												websiteUrl: { type: "string", nullable: true },
+												docsUrl: { type: "string", nullable: true },
+												githubOrg: { type: "string", nullable: true },
+												contactEmail: { type: "string", nullable: true },
+												contactChannel: { type: "string", nullable: true },
+												responseSla: { type: "string", nullable: true },
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					"429": { description: "Rate limited" },
 					"503": {
 						description: "AI backend unavailable",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
+									properties: {
+										error: {
+											type: "string",
+											description: "Human-readable reason, safe to show.",
+										},
+										unavailable: {
+											type: "boolean",
+											description:
+												"Always true here — the feature is off, not the request wrong.",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1582,7 +5100,76 @@ export const spec: OpenAPISpec = {
 									fields: {
 										type: "object",
 										description:
-											"Profile fields (typically the /api/partners/onboard extract output)",
+											"Profile fields (typically the /api/partners/onboard extract output). Unknown keys are ignored; enum-checked keys (partnerType, sectors, regions, pricingModel) fall back / are dropped rather than erroring.",
+										properties: {
+											partnerType: {
+												type: "string",
+												enum: [...PARTNER_TYPES],
+											},
+											tagline: { type: "string", maxLength: 140 },
+											description: { type: "string", maxLength: 4000 },
+											services: {
+												type: "array",
+												items: { type: "string" },
+												description:
+													"Lowercase hyphenated service tags the matchmaker matches on.",
+											},
+											sectors: {
+												type: "array",
+												items: {
+													type: "string",
+													enum: [
+														"defi",
+														"payments",
+														"rwa",
+														"stablecoins",
+														"identity",
+														"data",
+														"ai",
+														"gaming",
+														"other",
+													],
+												},
+											},
+											regions: {
+												type: "array",
+												items: {
+													type: "string",
+													enum: [
+														"global",
+														"north-america",
+														"latam",
+														"europe",
+														"africa",
+														"mena",
+														"asia",
+														"oceania",
+													],
+												},
+											},
+											acceptingClients: { type: "boolean" },
+											typicalEngagement: { type: "string", maxLength: 300 },
+											leadTime: { type: "string", maxLength: 300 },
+											pricingModel: {
+												type: "string",
+												enum: [
+													"free",
+													"freemium",
+													"subscription",
+													"usage-based",
+													"fixed",
+													"hourly",
+													"rev-share",
+													"custom",
+												],
+											},
+											pricingNotes: { type: "string", maxLength: 1000 },
+											websiteUrl: { type: "string", maxLength: 300 },
+											docsUrl: { type: "string", maxLength: 300 },
+											githubOrg: { type: "string", maxLength: 100 },
+											contactChannel: { type: "string", maxLength: 200 },
+											responseSla: { type: "string", maxLength: 200 },
+										},
 									},
 								},
 							},
@@ -1592,7 +5179,24 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "`{ok:true, mode:'draft'|'claim'}`",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Submission accepted for review. Admin review is the only gate to publication, so a submission never surfaces publicly on its own.",
+									properties: {
+										ok: { type: "boolean" },
+										mode: {
+											type: "string",
+											enum: ["draft", "claim"],
+											description:
+												"draft = a new listing; claim = claiming an existing one.",
+										},
+									},
+								},
+							},
+						},
 					},
 					"400": {
 						description: "Missing/invalid orgName or contactEmail",
@@ -1612,7 +5216,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Funding"],
 				summary: "List Stellar RFPs (SCF-funded sponsor briefs)",
 				description:
-					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — open briefs are fundable in the current SCF round; closed ones are past rounds kept for context. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built'. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
+					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Open/closed Stellar RFPs, sponsor briefs, and the live SCF round submission window.",
@@ -1634,6 +5238,28 @@ export const spec: OpenAPISpec = {
 						"closed",
 						"kelp",
 						"hummingbot",
+						// WORKER SIDE. Every term above is written from the funder's
+						// vocabulary — rfp, brief, grant, round — and none of "jobs",
+						// "freelance" or "paid work" appeared anywhere in this
+						// 9,000-line spec. So "jobs bounties and freelance work for
+						// Stellar contributors" routed to getBuilders, which answers
+						// "who can I hire": it returned a list of people TO the person
+						// looking for work, the exact inverse of the intent.
+						"jobs",
+						"freelance",
+						"paid work",
+						"where can I earn",
+						"get paid to build",
+						"contract work",
+
+						"freelance work",
+						"work for contributors",
+						"jobs for stellar developers",
+						"bounties for developers",
+						"contributor opportunities",
+						"earn by contributing",
+						"paid work for contributors",
+						"freelance work for stellar contributors",
 					],
 					useWhen: [
 						"what RFPs/bounties/grants match my idea / are open",
@@ -1651,6 +5277,10 @@ export const spec: OpenAPISpec = {
 						"What RFPs are open this quarter?",
 						"Is there a sponsor brief for X I could get funded to build?",
 						"Which SCF round is open and when does it close?",
+						// 2026-09-05 routing battery (T1): a newcomer asks who "gives
+						// out" grants — neither word was in any field.
+						"Who gives out grants for building on Stellar?",
+						"Which SCF RFPs are open right now?",
 					],
 				},
 				parameters: [
@@ -1658,7 +5288,7 @@ export const spec: OpenAPISpec = {
 						name: "status",
 						in: "query",
 						description:
-							"Open RFPs are fundable for the current SCF quarter; closed are prior rounds",
+							"`open` = the brief is still soliciting build proposals. It is NOT a fundability claim: whether SCF accepts a submission today depends on meta.scfRound.submissionWindow and currentPhase. `closed` = a prior round, surfaced for context.",
 						schema: { type: "string", enum: ["open", "closed"] },
 					},
 					{
@@ -1689,11 +5319,55 @@ export const spec: OpenAPISpec = {
 										meta: {
 											type: "object",
 											properties: {
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when the request carried query parameters this endpoint does not read: names them and states the results are NOT filtered by them.",
+												},
 												activeQuarter: { type: "string" },
+												activeQuarterLabel: {
+													type: "string",
+													description:
+														"Human label for activeQuarter (e.g. 'Q3 2026').",
+												},
+												quarters: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every quarter key the quarter filter accepts, newest first.",
+												},
+												categories: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every category value present in the current brief set — the category filter's live vocabulary.",
+												},
+												submitNewBriefAt: {
+													type: "string",
+													format: "uri",
+													description:
+														"Where a team submits a NEW brief/idea (the SCF ideas board) — hand off here when asked how to propose one.",
+												},
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													description:
+														"Echo of the filter values this response was computed under (null = not applied).",
+													properties: {
+														q: { type: "string", nullable: true },
+														category: { type: "string", nullable: true },
+														quarter: { type: "string", nullable: true },
+														status: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
+												},
 												counts: {
 													type: "object",
 													description:
-														"total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy (sls-045). See countBasis.",
+														"total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy. See countBasis.",
 													properties: {
 														total: { type: "integer" },
 														open: { type: "integer" },
@@ -1721,7 +5395,32 @@ export const spec: OpenAPISpec = {
 															type: "integer",
 															nullable: true,
 															description:
-																"Round currently open for submissions; null when no round is confirmed open as of asOf.",
+																"Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit.",
+														},
+														currentPhase: {
+															type: "string",
+															nullable: true,
+															description:
+																"Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). A non-submission phase means an open brief is NOT submittable today.",
+														},
+														roundsInProgress: {
+															type: "array",
+															nullable: true,
+															description:
+																"Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens.",
+															items: {
+																type: "object",
+																properties: {
+																	round: { type: "integer" },
+																	phase: { type: "string", nullable: true },
+																	submissionDeadline: {
+																		type: "string",
+																		nullable: true,
+																		description:
+																			"ISO date the round stops accepting submissions; a date in the past means closed, not open.",
+																	},
+																},
+															},
 														},
 														lastConfirmedRound: {
 															type: "integer",
@@ -1747,6 +5446,12 @@ export const spec: OpenAPISpec = {
 															},
 														},
 														asOf: { type: "string", format: "date" },
+														source: {
+															type: "string",
+															enum: ["live", "unavailable"],
+															description:
+																"Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state.",
+														},
 														verifyAt: { type: "string", format: "uri" },
 													},
 												},
@@ -1759,7 +5464,939 @@ export const spec: OpenAPISpec = {
 										funding: {
 											type: "string",
 											description:
-												"Funding-context sentence for the whole list: winners of OPEN RFPs are eligible for SCF grant funding in the current round; closed RFPs are past rounds, surfaced for context but no longer fundable.",
+												"Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window — that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/scf-pitch": {
+			get: {
+				operationId: "scfPitch",
+				tags: ["Composite"],
+				summary:
+					"SCF pitch prep — live round, funded peers, gap, prior art, angles in one call",
+				description:
+					"The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Prepare/ground an SCF grant application: round timing, funded competition, and evidence-based angles.",
+					keywords: [
+						"scf",
+						"scf pitch",
+						"community fund",
+						"grant application",
+						"apply for funding",
+						"is a round open",
+						"submission deadline",
+						"who got funded",
+						"pitch my idea",
+					],
+					useWhen: [
+						"'i want to apply to SCF with X — what should the pitch say' (one call)",
+						"'is an SCF round open right now and when does it close'",
+						"'who already got SCF money in this vertical and how much'",
+					],
+					notFor: [
+						"general idea vetting without the funding lens (vetIdea)",
+						"RFP browsing (getRfps) or award history research (searchResearch)",
+					],
+					exampleQuestions: [
+						"Help me prepare my Stellar Community Fund application.",
+						"Is an SCF round open now, and who in my vertical already got funded?",
+						"What angles should my SCF pitch take for a payments idea?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description: "Short idea description, 3-200 chars.",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The pitch-prep report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: REPORT_META_SCHEMA,
+										report: SCF_PITCH_REPORT_SCHEMA,
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing/too-short q or unknown params." },
+				},
+			},
+		},
+		"/api/hackathon-brief": {
+			get: {
+				operationId: "hackathonBrief",
+				tags: ["Composite"],
+				summary:
+					"Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
+				description:
+					"One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"ONE call for a hackathon team: is it built, what to fork (with trust), what is live to build against, is there money after, and what the demo must not claim.",
+					keywords: [
+						"hackathon",
+						"hackathon brief",
+						"we're at a hackathon",
+						"48 hours",
+						"what should we build",
+						"what should we fork",
+						"starting point",
+						"starter repo",
+						"is this already built",
+						"hackmeridian",
+						"build brief",
+						"what not to claim",
+					],
+					useWhen: [
+						"'we're at HackMeridian and want to build X — where do we start' (one call instead of five)",
+						"'give us a brief for a confidential-token payroll idea'",
+						"'is this idea taken and what's safe to fork'",
+					],
+					notFor: [
+						"a single question that one lower-level call answers (vetIdea / getRepoTrust / listContracts / scfPitch)",
+						"rails — stablecoins and partners are separate calls; open RFPs → getRfps",
+						"non-Stellar ideas — vertical will not resolve; say so",
+					],
+					exampleQuestions: [
+						"We have 48 hours at a hackathon to build an x402 paywall. Where do we start?",
+						"Give my hackathon team a build brief for a passkey wallet.",
+						"Is this hackathon idea taken, and which repo is safe to fork?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"Short idea description, 3-200 chars (e.g. 'confidential token payroll').",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The hackathon brief.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: REPORT_META_SCHEMA,
+										report: {
+											type: "object",
+											properties: {
+												idea: { type: "string" },
+												vertical: {
+													type: "string",
+													nullable: true,
+													description:
+														"Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless.",
+												},
+												vet: VET_BLOCK_SCHEMA,
+												builds: {
+													type: "array",
+													description:
+														"Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all.",
+													items: {
+														type: "object",
+														properties: {
+															id: {
+																type: "string",
+																description:
+																	"Opens the full submission in getHackathonSubmission.",
+															},
+															name: { type: "string" },
+															hackathon: { type: "string" },
+															endedAt: { type: "string", nullable: true },
+															isWinner: { type: "boolean" },
+															placement: { type: "string", nullable: true },
+															githubUrl: { type: "string", nullable: true },
+															url: { type: "string", nullable: true },
+															project: BUILD_PROJECT_SCHEMA,
+														},
+													},
+												},
+												startFrom: {
+													type: "array",
+													description:
+														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
+													items: {
+														type: "object",
+														properties: {
+															repo: {
+																type: "object",
+																properties: {
+																	fullName: { type: "string" },
+																	url: { type: "string", nullable: true },
+																	stars: { type: "integer", nullable: true },
+																	lastCommitAt: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	isArchived: { type: "boolean" },
+																	tier: { type: "string", nullable: true },
+																	activityState: { type: "string" },
+																},
+															},
+															project: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	slug: { type: "string" },
+																	name: { type: "string", nullable: true },
+																},
+															},
+															codeTruth: {
+																type: "object",
+																description:
+																	"TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																properties: {
+																	scanState: {
+																		type: "string",
+																		nullable: true,
+																		enum: [...CODE_SCAN_STATES],
+																		description:
+																			"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
+																	},
+																	scannedAt: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	stellarProof: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	codeDepth: {
+																		type: "number",
+																		nullable: true,
+																	},
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	sdkCapabilities: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	interfaceSize: { type: "integer" },
+																	mainnetContractId: {
+																		type: "string",
+																		nullable: true,
+																	},
+																},
+															},
+															usage: TRUST_USAGE_SCHEMA,
+															audits: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	count: { type: "integer" },
+																	latest: AUDIT_REPORT_ROW_SCHEMA,
+																},
+															},
+															auditDrift: {
+																type: "object",
+																nullable: true,
+																properties: {
+																	latestAuditAt: { type: "string" },
+																	lastCommitAt: { type: "string" },
+																	daysOfDrift: { type: "integer" },
+																},
+															},
+															succession: {
+																type: "object",
+																properties: {
+																	successorRepo: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	predecessors: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
+															},
+															signals: {
+																type: "array",
+																items: { type: "string" },
+																description:
+																	"Closed deterministic fact vocabulary (same set as /api/repos/trust signals) — not a score.",
+															},
+															fullReport: {
+																type: "string",
+																description:
+																	"Path to the full /api/repos/trust report (incl. the complete contractInterface).",
+															},
+														},
+													},
+												},
+												liveContracts: {
+													type: "object",
+													properties: {
+														domain: {
+															type: "string",
+															nullable: true,
+															description:
+																"Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis.",
+														},
+														basis: { type: "string" },
+														contracts: {
+															type: "array",
+															description:
+																"Verified-contract rows for the domain — the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt.",
+															items: {
+																type: "object",
+																properties: {
+																	contractId: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	repo: {
+																		type: "object",
+																		properties: {
+																			fullName: { type: "string" },
+																			url: {
+																				type: "string",
+																				nullable: true,
+																			},
+																		},
+																	},
+																	project: {
+																		type: "object",
+																		nullable: true,
+																		properties: {
+																			slug: { type: "string" },
+																			name: {
+																				type: "string",
+																				nullable: true,
+																			},
+																		},
+																	},
+																	stellarProof: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	interfaceSize: { type: "integer" },
+																	codeInUse: CONTRACT_CODE_IN_USE_SCHEMA,
+																},
+															},
+														},
+														note: { type: "string" },
+													},
+												},
+												funding: {
+													type: "object",
+													properties: {
+														round: SCF_ROUND_SCHEMA,
+														fundedPeers: {
+															type: "array",
+															items: SCF_FUNDED_PEER_SCHEMA,
+														},
+														fundingBar: SCF_FUNDING_BAR_SCHEMA,
+													},
+												},
+												whatNotToClaim: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Bad or unknown query param." },
+					"429": { description: "Rate limited (30/min/IP)." },
+					"503": { description: "Index unavailable." },
+				},
+			},
+		},
+		"/api/vet-idea": {
+			get: {
+				operationId: "vetIdea",
+				tags: ["Composite"],
+				summary:
+					"Vet a build idea — competitors, maturity, prior art, gap, funding in one call",
+				description:
+					"The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Assess a BUILD IDEA against the ecosystem: what exists, how mature, was it tried, is the vertical funded.",
+					keywords: [
+						"vet idea",
+						"validate idea",
+						"should i build",
+						"what already exists",
+						"competitors",
+						"competitive landscape",
+						"market gap",
+						"prior art",
+						"has anyone built",
+						"scf fundable",
+					],
+					useWhen: [
+						"'i want to build a lending protocol — what exists already' (one call instead of five)",
+						"'is the wallet space crowded on stellar' — gap + competitors + maturity",
+						"'has anyone tried this at a hackathon' — priorArt with alive/dead state",
+					],
+					notFor: [
+						"single-repo assessment (getRepoTrust) or plain discovery (searchRepos/searchProjects)",
+						"demand claims — gap is SUPPLY-side coverage only",
+					],
+					exampleQuestions: [
+						"I want to build a lending protocol on Stellar. What already exists?",
+						"Vet this idea: a payroll app that pays contractors in USDC.",
+						"Is the wallet space on Stellar crowded, and is anyone funded in it?",
+						"Should I build this on Stellar or has it been done?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"Short idea description, 3-200 chars (e.g. 'lending protocol for RWAs').",
+						schema: { type: "string", minLength: 3, maxLength: 200 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The vet-idea report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: REPORT_META_SCHEMA,
+										report: {
+											type: "object",
+											properties: {
+												idea: { type: "string" },
+												vertical: {
+													type: "string",
+													nullable: true,
+													description:
+														"Detected buildable vertical (closed set from the gaps axis); null = unmapped, not marketless.",
+												},
+												competitors: {
+													type: "object",
+													properties: {
+														repos: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	fullName: { type: "string" },
+																	tier: { type: "string", nullable: true },
+																	activityState: { type: "string" },
+																	stars: { type: "integer", nullable: true },
+																	codeDomains: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
+															},
+														},
+														projects: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	slug: { type: "string" },
+																	name: { type: "string", nullable: true },
+																	status: {
+																		type: "string",
+																		nullable: true,
+																	},
+																	types: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
+															},
+														},
+														matchMode: {
+															type: "string",
+															enum: ["vertical", "scored", "weak"],
+															description:
+																"How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.",
+														},
+														matchModeLabel: { type: "string" },
+													},
+												},
+												maturity: {
+													type: "object",
+													properties: {
+														auditedProjects: { type: "integer" },
+														liveOnMainnetRepos: { type: "integer" },
+														basis: { type: "string" },
+													},
+												},
+												priorArt: {
+													type: "object",
+													properties: {
+														repos: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	fullName: { type: "string" },
+																	hackathonWinner: { type: "boolean" },
+																	activityState: { type: "string" },
+																	lastCommitAt: {
+																		type: "string",
+																		format: "date-time",
+																		nullable: true,
+																	},
+																},
+															},
+														},
+														note: { type: "string" },
+													},
+												},
+												gap: {
+													type: "object",
+													nullable: true,
+													description:
+														"Supply-side coverage of the detected vertical (same computation as analyze?dimension=gaps).",
+													properties: {
+														...TYPE_COVERAGE_PROPS,
+														basis: { type: "string" },
+													},
+												},
+												funding: {
+													type: "object",
+													nullable: true,
+													properties: {
+														scfAwardedProjects: { type: "integer" },
+														basis: { type: "string" },
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": { description: "Missing/too-short q or unknown params." },
+				},
+			},
+		},
+		"/api/repos/trust": {
+			get: {
+				operationId: "getRepoTrust",
+				tags: ["Code"],
+				summary:
+					"Trust report for one Stellar GitHub repo: maintained, audited, used on mainnet",
+				description:
+					"One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Assess ONE repo's trustworthiness/maintenance/audit state from verified evidence in a single call.",
+					keywords: [
+						"trust",
+						"trustworthy",
+						"is it maintained",
+						"actively maintained",
+						"is it audited",
+						"audit drift",
+						"should i depend on",
+						"dependency safety",
+						"abandoned",
+						"production ready",
+						"contract interface",
+					],
+					useWhen: [
+						"'is <repo> still maintained / audited / used on mainnet' — one call instead of five",
+						"'has the code changed since its last audit' (auditDrift)",
+						"verifying generated contract calls against the real scanned interface",
+					],
+					notFor: [
+						"discovering which repos exist (searchRepos) or contract enumeration (listContracts)",
+						"repos we have not indexed — 404 is absence of evidence, not a verdict",
+					],
+					exampleQuestions: [
+						"Is stellar/passkey-kit maintained and audited?",
+						"Is this Stellar repo safe to depend on?",
+						"Has this contract's code changed since its last audit?",
+					],
+				},
+				parameters: [
+					{
+						name: "repo",
+						in: "query",
+						required: true,
+						description:
+							"owner/name, e.g. reflector-network/reflector-contract",
+						schema: { type: "string" },
+					},
+				],
+				responses: {
+					"200": {
+						description: "The trust report.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: REPORT_META_SCHEMA,
+										report: {
+											type: "object",
+											properties: {
+												repo: {
+													type: "object",
+													properties: {
+														fullName: { type: "string" },
+														url: { type: "string", nullable: true },
+														stars: { type: "integer", nullable: true },
+														lastCommitAt: { type: "string", nullable: true },
+														isArchived: { type: "boolean" },
+														tier: { type: "string", nullable: true },
+														activityState: { type: "string" },
+													},
+												},
+												project: {
+													type: "object",
+													nullable: true,
+													properties: {
+														slug: { type: "string" },
+														name: { type: "string", nullable: true },
+													},
+												},
+												codeTruth: {
+													type: "object",
+													properties: {
+														scanState: {
+															type: "string",
+															nullable: true,
+															enum: [...CODE_SCAN_STATES],
+															description:
+																"Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos and builder code evidence. null = never stamped.",
+														},
+														scannedAt: { type: "string", nullable: true },
+														stellarProof: { type: "string", nullable: true },
+														codeDepth: { type: "number", nullable: true },
+														codeDomains: {
+															type: "array",
+															items: { type: "string" },
+														},
+														sdkCapabilities: {
+															type: "array",
+															items: { type: "string" },
+														},
+														interfaceSize: { type: "integer" },
+														contractInterface: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Scanned public fn signatures (up to 60) — verify generated calls against these.",
+														},
+														mainnetContractId: {
+															type: "string",
+															nullable: true,
+														},
+													},
+												},
+												usage: TRUST_USAGE_SCHEMA,
+												audits: {
+													type: "object",
+													nullable: true,
+													description:
+														"Null = no PUBLISHED audit at our registry — never 'unaudited'.",
+													properties: {
+														count: { type: "integer" },
+														latest: AUDIT_REPORT_ROW_SCHEMA,
+														reports: {
+															type: "array",
+															items: AUDIT_REPORT_ROW_SCHEMA,
+														},
+													},
+												},
+												auditDrift: {
+													type: "object",
+													nullable: true,
+													description:
+														"Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today.",
+													properties: {
+														latestAuditAt: { type: "string" },
+														lastCommitAt: { type: "string" },
+														daysOfDrift: { type: "integer" },
+													},
+												},
+												succession: {
+													type: "object",
+													properties: {
+														successorRepo: { type: "string", nullable: true },
+														predecessors: {
+															type: "array",
+															items: { type: "string" },
+														},
+													},
+												},
+												signals: {
+													type: "array",
+													items: {
+														type: "string",
+														enum: [...TRUST_SIGNALS],
+													},
+													description:
+														"Closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: "Missing/invalid repo param or unknown params.",
+					},
+					"404": {
+						description:
+							"Repo not in the index (absence of evidence, not a verdict).",
+					},
+				},
+			},
+		},
+		"/api/contracts": {
+			get: {
+				operationId: "listContracts",
+				tags: ["Code"],
+				summary:
+					"Evidence-gated registry of verified mainnet Soroban contracts",
+				description:
+					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
+				"x-routing": {
+					purpose:
+						"Enumerate/filter VERIFIED mainnet contracts as entities — which contracts exist with code+usage+audit evidence, per domain or project.",
+					keywords: [
+						"contracts",
+						"mainnet contracts",
+						"deployed contracts",
+						"verified contracts",
+						"soroban contracts",
+						"contract registry",
+						"which contracts are live",
+						"contract address",
+					],
+					useWhen: [
+						"'which verified contracts are live on mainnet' / 'show deployed DeFi contracts' (filter with domain=)",
+						"'what contract does project X run' — q=<project>",
+						"joining a contract to its code, usage, and audit evidence in one call",
+					],
+					notFor: [
+						"repo-level discovery (searchRepos) or full audit rows (listAudits)",
+						"any claim about contracts we have NOT verified — absence is not nonexistence",
+						// This operation is ENTITY-shaped — "which contracts exist" —
+						// and every one of its keywords contains the token "contract",
+						// so a short blob with total term concentration outscores
+						// longer, diffuse blobs on any query carrying that word,
+						// whatever the intent. Measured against Raven's own scorer it
+						// won "how do I write a Soroban smart contract in Rust" (204 vs
+						// searchRepos 163), "how do I deploy a contract" (192), "how to
+						// test a Soroban contract" (188), and "who can audit my
+						// contract" (95) — the last beating getPartners at 65 despite
+						// getPartners carrying that literal phrase. Keywords stay
+						// entity-shaped; these name where the how-to families belong.
+						"how do I write / deploy / test a contract -> searchResearch (docs, SEPs, guides) or searchRepos (working examples)",
+						"how does X work in the code / where is X implemented -> explainRepo",
+						"who should audit my contract / which firms audit -> getPartners (type=audit-firm)",
+					],
+					exampleQuestions: [
+						"Which verified Soroban contracts are live on mainnet?",
+						"What mainnet contract does Blend run?",
+						"Show deployed DeFi contracts with audit and usage evidence.",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						description:
+							"Substring over repo fullName, project slug/name, or contract id.",
+						schema: { type: "string" },
+					},
+					{
+						name: "domain",
+						in: "query",
+						description:
+							"Filter by code-evidenced domain (closed set; unknown values 400).",
+						schema: {
+							type: "string",
+							enum: [...CODE_DOMAINS],
+						},
+					},
+					{
+						name: "limit",
+						in: "query",
+						schema: { type: "integer", default: 20, maximum: 100 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						schema: { type: "integer", default: 0 },
+					},
+				],
+				responses: {
+					"200": {
+						description: "Verified contract rows, most-evidenced first.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: ["all", "filtered"],
+													description:
+														"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+												},
+												matchModeLabel: { type: "string" },
+												source: { type: "string" },
+												generatedAt: {
+													type: "string",
+													format: "date-time",
+												},
+												filters: {
+													type: "object",
+													properties: {
+														q: { type: "string", nullable: true },
+														domain: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
+												},
+												counts: {
+													type: "object",
+													properties: {
+														returned: { type: "integer" },
+														total: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										contracts: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													contractId: {
+														type: "string",
+														nullable: true,
+														description:
+															"Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded. When the repo published no id but on-chain enrichment attributed contracts to it, the first attributed address is served here with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null only when neither exists. Read `contractBasis` before treating it as the repo's own deployment.",
+													},
+													contractBasis: {
+														type: "string",
+														nullable: true,
+														enum: [
+															"self-validated",
+															"published",
+															"onchain-attributed",
+														],
+														description:
+															"Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. onchain-attributed = the repo published no id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null = recorded before the basis was tracked.",
+													},
+													verifiedContracts: {
+														type: "array",
+														description:
+															"Every mainnet address on-chain enrichment attributed to this repo (stellar.expert names it as the source), with the enrichment's label and the reading date that attributed it. Empty = nothing attributed, never a claim the repo deploys nothing.",
+														items: {
+															type: "object",
+															properties: {
+																address: { type: "string" },
+																label: { type: "string", nullable: true },
+																asOf: {
+																	type: "string",
+																	format: "date-time",
+																	nullable: true,
+																	description:
+																		"When on-chain enrichment last read this contract (the project's onchain.asOf); null only if the enrichment never stamped a date.",
+																},
+															},
+															required: ["address", "label", "asOf"],
+														},
+													},
+													repo: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															url: { type: "string", nullable: true },
+														},
+													},
+													project: {
+														type: "object",
+														nullable: true,
+														properties: {
+															slug: { type: "string" },
+															name: { type: "string", nullable: true },
+														},
+													},
+													stellarProof: { type: "string", nullable: true },
+													codeDepth: { type: "number", nullable: true },
+													codeDomains: {
+														type: "array",
+														items: { type: "string" },
+													},
+													interfaceSize: { type: "integer" },
+													interfacePreview: {
+														type: "array",
+														items: { type: "string" },
+													},
+													codeInUse: CONTRACT_CODE_IN_USE_SCHEMA,
+													audits: {
+														type: "object",
+														nullable: true,
+														description:
+															"Per-project audit rollup: count + latest auditor/date. Null = none on record at our source, NOT 'unaudited'.",
+														properties: {
+															count: { type: "integer" },
+															latestAuditor: {
+																type: "string",
+																nullable: true,
+															},
+															latestPublishedAt: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+														},
+													},
+													successorRepo: { type: "string", nullable: true },
+													scannedAt: { type: "string", nullable: true },
+												},
+											},
 										},
 									},
 								},
@@ -1792,6 +6429,12 @@ export const spec: OpenAPISpec = {
 						"veridise",
 						"halborn",
 						"which projects are audited",
+						"smart contract audit",
+						"contract audits",
+						"audited contracts",
+						"published audits",
+						"recent audits",
+						"audits in the last year",
 						"audit history",
 					],
 					useWhen: [
@@ -1807,6 +6450,7 @@ export const spec: OpenAPISpec = {
 						"Which audit firms have reviewed Blend?",
 						"List the OtterSec audits of Stellar projects",
 						"What are the newest Soroban audits?",
+						"Which projects had a smart contract audit published in the last year?",
 					],
 				},
 				parameters: [
@@ -1858,7 +6502,23 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
+													},
+												},
+											],
+										},
 										audits: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Audit" },
@@ -1870,8 +6530,96 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"Unknown parameter or invalid value (params are never silently ignored)",
-						content: { "application/json": { schema: { type: "object" } } },
+							"Unknown parameter (named with the supported set in hint) or invalid value; parameters are never silently ignored.",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"The structured audit registry — one row per published report, so an agent can enumerate and filter audits instead of hoping vector retrieval surfaces the right chunk.",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													description:
+														"The filters actually applied — echoed so a caller can tell a narrow query from an empty corpus.",
+													properties: {
+														project: { type: "string", nullable: true },
+														auditor: { type: "string", nullable: true },
+														q: { type: "string", nullable: true },
+														since: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														offset: { type: "integer" },
+													},
+												},
+												counts: {
+													type: "object",
+													description:
+														"matched is the denominator behind returned; total is the whole registry.",
+													properties: {
+														total: { type: "integer" },
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+													},
+												},
+												note: { type: "string" },
+											},
+										},
+										audits: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													reportId: { type: "integer" },
+													title: { type: "string" },
+													reportUrl: { type: "string" },
+													auditor: { type: "string" },
+													protocol: { type: "string" },
+													projectSlug: {
+														type: "string",
+														nullable: true,
+														description:
+															"Directory project this report is linked to, when the link is hand-verified.",
+													},
+													projectName: { type: "string", nullable: true },
+													linkBasis: {
+														type: "string",
+														nullable: true,
+														description:
+															"How the project link was established — provenance, not a guess.",
+													},
+													publishedAt: { type: "string", nullable: true },
+													dateBasis: {
+														type: "string",
+														nullable: true,
+														description:
+															"Where the date came from; absent means we do not know it.",
+													},
+													observedAt: { type: "string", nullable: true },
+													findingsTotal: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Null means findings were not extractable from this report, NOT that it found nothing.",
+													},
+													severityCounts: {
+														type: "object",
+														description:
+															"Per-severity counts when extraction succeeded. An absent severity means zero of that severity were reported.",
+														additionalProperties: { type: "integer" },
+													},
+													engagementId: { type: "string", nullable: true },
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1925,8 +6673,21 @@ export const spec: OpenAPISpec = {
 						"incident",
 						"post-mortem",
 						"oracle manipulation",
-						"yieldblox",
-						"reflector",
+						// QUALIFIED, not bare. These are directory projects, and a
+						// bare project name on someone else's operation makes that
+						// operation the router's answer for the project itself:
+						// "reflector oracle on Stellar" ranked searchResearch 97 over
+						// searchProjects 81, for a project we hold at confidence 0.97.
+						// The security cluster wants the INCIDENTS, so the phrases say
+						// so and the names stop being attractors.
+						//
+						// A sweep of all 287 single-token routing keywords found 17
+						// that are directory project names. The other 15 are on the
+						// operation that SERVES them — audit firms on listAudits,
+						// stablecoins on getStablecoins, Soroswap and Stellarchain on
+						// searchProjects — which is correct and left alone. The defect
+						// is a name on a DIFFERENT operation, and that was these two
+						// plus "dune" on getLeaderboard.
 						"reentrancy",
 						"soroban-sdk security advisories",
 						"cve",
@@ -1979,6 +6740,33 @@ export const spec: OpenAPISpec = {
 						"release.yml",
 						"stellar lab",
 						"stellar.expert",
+						// RAVEN T1 (2026-09-01): their research-lane routing box is spent after,
+						// three verified FAILs and reopens only on "an upstream card change" — this,
+						// is that change. Their failing cases are protocol-history and incident,
+						// questions ("why did Protocol 24 ship so soon after 23, and what was the,
+						// state-archival bug?"; "walk me through the upgrade history P19→latest").,
+						// Specific multi-word phrases, never bare "protocol": a bare term would,
+						// match every 2-token protocol query at 100% coverage (the sls-078 class).,
+						"protocol upgrade history",
+						"protocol version history",
+						"upgrade timeline",
+						"protocol 19",
+						"protocol 20",
+						"protocol 21",
+						"protocol 22",
+						"protocol 23",
+						"protocol 24",
+						"why was protocol shipped",
+						"why did protocol ship",
+						"shipped so soon after",
+						"state-archival bug",
+						"state archival incident",
+						"whisk",
+						"network upgrade",
+						"release notes",
+						"headline feature",
+						"root cause",
+						"incident timeline",
 					],
 					useWhen: [
 						"SDF organizational questions (enterprise fund, mandate, leadership, structure)",
@@ -1990,6 +6778,7 @@ export const spec: OpenAPISpec = {
 						"SDF org/mission/legal structure; protocol history (SCP whitepaper, authors); ecosystem programs (ambassadors, regional chapters, bootcamps)",
 						"Soroban security incidents (reentrancy, sdk advisories/CVEs, DoS); ecosystem history (Protocol 20 mainnet launch, XLM initial supply, UNHCR aid, Enterprise Fund)",
 						"making an issued asset tradable/visible on exchanges, wallets, explorers, aggregators; contract source verification (release.yml, Stellar Lab vs stellar.expert); fact-checking a claim about Stellar",
+						"protocol upgrade HISTORY and WHY a version shipped (Protocol 19 → latest, each release's headline feature, timelines); incidents and post-mortems of network upgrades (e.g. the Protocol 24 state-archival bug) — history and causes, not how-a-feature-works docs",
 					],
 					notFor: [
 						"what products exist or their funding/status -> searchProjects",
@@ -2002,6 +6791,8 @@ export const spec: OpenAPISpec = {
 						"Has there been a reentrancy incident on Soroban?",
 						"How do I apply for an SCF Build Award?",
 						"How do I make my issued asset visible on exchanges and explorers?",
+						"Why did Stellar ship Protocol 24 so soon after Protocol 23, and what was the state-archival bug?",
+						"Walk me through Stellar's protocol upgrade history from Protocol 19 to the latest version, with each release's headline feature.",
 					],
 				},
 				parameters: [
@@ -2023,27 +6814,8 @@ export const spec: OpenAPISpec = {
 						name: "source",
 						in: "query",
 						description:
-							"Optional source filter. Use 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when — protocol upgrade tags).",
-						schema: {
-							type: "string",
-							enum: [
-								"sdf-blog",
-								"scf-handbook",
-								"sep",
-								"cap",
-								"dev-docs",
-								"paper",
-								"scf-proposal",
-								"lumenloop",
-								"lumenloop-research",
-								"audit",
-								"incident",
-								"security-program",
-								"sdf-org",
-								"ec-developer-report",
-								"release",
-							],
-						},
+							"Optional source filter. A declared source that holds no documents yet answers an empty vector page with meta.sourceEmpty true and meta.sourceDocCount 0 (an empty source, not a miss); every source-scoped call carries meta.sourceDocCount. Use 'scf-proposal' for what an SCF project proposed in its own words (one document per submission on communityfund.stellar.org, every status: the proposal's sections plus round, status, award type and requested budget), 'scf-handbook' for the program's rules, 'audit' for security questions, 'incident' for exploit/post-mortem history, 'security-program' for bug-bounty / vulnerability-disclosure program status (which program is current, where to report), 'sdf-org' for SDF's canonical organizational pages (mandate, legal structure/terms, foundation, team, enterprise fund, quarterly-reports index), 'ec-developer-report' for ecosystem stats, 'paper' for foundational protocol questions, 'release' for stellar-core/CLI/SDK release notes (what shipped, when, protocol upgrade tags). Several sources in one call: see `sources` (a comma here is read the same way).",
+						schema: { type: "string", enum: [...RESEARCH_SOURCES] },
 					},
 					{
 						name: "auditor",
@@ -2082,23 +6854,209 @@ export const spec: OpenAPISpec = {
 						description: "Max results (default 8, max 25)",
 						schema: { type: "integer", minimum: 1, maximum: 25, default: 8 },
 					},
+					{
+						name: "sources",
+						in: "query",
+						description:
+							"Several declared sources in one call, comma-separated (e.g. cap,sep,dev-docs); a comma in `source` is read the same way. Each source is searched exactly as `source=<one>&limit=<perSource>` would search it, and all rows come back in ONE ranking across sources: identifier-named documents first, then confidence, the rule each source already uses for its own rows. A reader that keeps only the first rows gets the best of every source, not the first sources named. Each row names its source. meta.bySource carries each source's status, returned count, matchMode, sourceDocCount and resultsHash. The rows are the single-source call's rows; scores can differ in the fourth decimal between any two calls that embed the query separately (two single-source calls on different instances do too), which can swap near-tied rows, so compare row ids across separate calls. A source that cannot be read is named in meta.warnings and bySource while the others answer; no source readable is a 503. Counts as one request against the rate limit. No sourceAdvisory on this form.",
+						style: "form",
+						explode: false,
+						schema: {
+							type: "array",
+							items: { type: "string", enum: [...RESEARCH_SOURCES] },
+						},
+					},
+					{
+						name: "perSource",
+						in: "query",
+						description:
+							"Rows per source when several sources are requested (default 8, max 25; `limit` is read when absent). With one source it is the same as `limit`.",
+						schema: { type: "integer", minimum: 1, maximum: 25, default: 8 },
+					},
 					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
 					"200": {
 						description: "Research results",
+						headers: {
+							"X-Scout-Match-Mode": {
+								description:
+									"The retrieval mode that produced this page, the same value as meta.matchMode: `vector` or `keyword`.",
+								schema: { type: "string", enum: [...RESEARCH_MODES] },
+							},
+							"Server-Timing": {
+								description:
+									"Our own wall time per phase in milliseconds (init, embed, vector, rank, total), so a consumer can split our time from transfer time.",
+								schema: { type: "string" },
+							},
+						},
 						content: {
 							"application/json": {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["vector", "keyword"],
+															description:
+																"vector = similarity ranking over embeddings (conceptual, not literal keyword truth); keyword = vector search unavailable, coarse keyword match over title and content.",
+														},
+														matchModeLabel: { type: "string" },
+														query: {
+															type: "string",
+															description: "The query as the server parsed it.",
+														},
+														mode: {
+															type: "string",
+															enum: ["vector", "keyword"],
+															description:
+																"How this page was retrieved: 'vector' = semantic similarity over embeddings (the normal path); 'keyword' = literal-match fallback when embeddings are unavailable. Scores are not comparable across modes.",
+														},
+														model: {
+															type: "string",
+															nullable: true,
+															description:
+																"Embedding model used for vector retrieval (e.g. voyage-3); null in keyword mode.",
+														},
+														scoreModel: {
+															type: "object",
+															description:
+																"What `confidence.score` measures in this response; read it before comparing scores across sources.",
+															properties: {
+																version: { type: "string" },
+																fields: {
+																	type: "array",
+																	items: { type: "string" },
+																},
+																note: { type: "string" },
+															},
+														},
+														sourceEmpty: {
+															type: "boolean",
+															description:
+																"True when the `source` filter names a declared source that holds no documents yet. The page is an empty vector page (no keyword pass, no advisory): an empty source, not a miss. Drop the filter or pick another source.",
+														},
+														sourceDocCount: {
+															type: "integer",
+															description:
+																"How many documents the corpus holds for the `source` filter (present only on source-scoped calls). A consumer can skip a source below its per-source take before sending.",
+														},
+														resultsHash: {
+															type: "string",
+															description:
+																"sha256 of the `results` array. `generatedAt` changes on every call, the evidence does not; compare this to tell two reads apart.",
+														},
+														bySource: {
+															type: "array",
+															description:
+																"Present on a several-source call (`sources`): one entry per requested source, in the order given. resultsHash hashes this source's rows, the rows its single-source call (same q, limit=perSource) returns; across separate calls compare row ids, since scores can differ in the fourth decimal; status other than 200 means that source could not be read and its rows are missing (also named in meta.warnings).",
+															items: {
+																type: "object",
+																properties: {
+																	source: {
+																		type: "string",
+																		enum: [...RESEARCH_SOURCES],
+																	},
+																	status: {
+																		type: "integer",
+																		description:
+																			"HTTP status of this source's read (200 = answered). Not dated: it describes this response only.",
+																	},
+																	returned: { type: "integer" },
+																	matchMode: {
+																		type: "string",
+																		enum: [...RESEARCH_MODES],
+																	},
+																	sourceDocCount: { type: "integer" },
+																	sourceEmpty: { type: "boolean" },
+																	resultsHash: { type: "string" },
+																	error: { type: "string" },
+																},
+															},
+														},
+														sourceAdvisory: {
+															type: "object",
+															description:
+																"Present when stronger matches exist outside the requested `source`: the in-source top is a weak neighbour of the question. Not emitted for an empty source.",
+															properties: {
+																note: { type: "string" },
+																inSourceTopScore: { type: "number" },
+																corpusWideTopScore: { type: "number" },
+																corpusWideTopSource: {
+																	type: "string",
+																	nullable: true,
+																},
+															},
+														},
+													},
+												},
+											],
+										},
 										results: {
 											type: "array",
 											items: { $ref: "#/components/schemas/ResearchResult" },
 										},
 									},
 								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"The call is wrong: missing q, an unknown source, or audit-only filters on a non-audit source. Fix the call; do not retry it as is.",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RequestError" },
+							},
+						},
+					},
+					"429": {
+						description:
+							"This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds until this instance's window resets.",
+								schema: { type: "integer" },
+							},
+							"X-RateLimit-Scope": {
+								description:
+									"Always `instance`: the counter is per serverless instance, not global.",
+								schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
+							},
+							"Server-Timing": {
+								description: "Our own wall time, as on a 200.",
+								schema: { type: "string" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
+					"503": {
+						description:
+							"A read failed: the database handle could not be opened, or both the vector and the keyword stage threw. An outage, NOT an empty result: retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description:
+									"Seconds to wait before resending (2 on database reads).",
+								schema: { type: "integer" },
+							},
+							"Server-Timing": {
+								description: "Our own wall time, as on a 200.",
+								schema: { type: "string" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
 							},
 						},
 					},
@@ -2111,7 +7069,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "List AI skills for Stellar builders",
 				description:
-					"Catalog of installable Stellar AI skills/tools — SDF's official skills.stellar.org set merged with curated and community entries. Each entry carries an `install` command, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool), and repo/docs links; filter by `source`/`kind`. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
+					"Catalog of installable Stellar AI skills/tools: both sections of SDF's skills.stellar.org registry (source=sdf for the SDF-authored set, source=community for Community Built entries, listed but not reviewed by SDF) merged with curated entries and approved submissions. Each entry carries `install`, `kind` (skill-md | mcp-server | sdk | cli | agent-kit | tool) and repo/docs links; filter by `source`/`kind`. meta.registry says what the registry listed, resolved and could not fetch. Answers 'what Stellar AI skills / MCP servers can I install'. Not for ONE named skill's full content → use getSkill.",
 				"x-routing": {
 					purpose:
 						"Browse installable Stellar AI skills, MCP servers, SDKs, CLIs, and agent kits.",
@@ -2131,6 +7089,10 @@ export const spec: OpenAPISpec = {
 						"skills.stellar.org",
 						"marketplace",
 						"catalog",
+						"x402",
+						"agent payments",
+						"accept payments",
+						"which skill should I install",
 					],
 					useWhen: [
 						"what Stellar AI skills / MCP servers / SDKs can I install",
@@ -2146,9 +7108,18 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"What MCP servers exist for Stellar?",
 						"Is there a skill for anchors?",
+						"Which skill should my agent install to accept x402 payments?",
 					],
 				},
 				parameters: [
+					{
+						name: "q",
+						in: "query",
+						description:
+							"Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored — a query returned the full catalog.",
+						schema: { type: "string" },
+					},
+
 					{
 						name: "source",
 						in: "query",
@@ -2189,7 +7160,51 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														matchMode: {
+															type: "string",
+															enum: ["all", "filtered"],
+															description:
+																"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+														},
+														matchModeLabel: { type: "string" },
+														validKinds: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the kind filter accepts (unknown values 400 with this list).",
+														},
+														validSources: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the source filter accepts (unknown values 400 with this list).",
+														},
+														registry: {
+															type: "object",
+															description:
+																"What the skills.stellar.org registry contributed to this page: listed = names in its llms.txt (both sections), served = those whose SKILL.md resolved, merged = registry copies replaced by a curated entry of the same skill, unreachable = listed names whose SKILL.md could not be fetched (named, never hidden). live=false means the registry did not answer and the SDF set came from a fallback list, so community-built entries are missing.",
+															properties: {
+																url: { type: "string" },
+																live: { type: "boolean" },
+																listed: { type: "integer" },
+																served: { type: "integer" },
+																merged: { type: "integer" },
+																unreachable: {
+																	type: "array",
+																	items: { type: "string" },
+																},
+															},
+														},
+													},
+												},
+											],
+										},
 										skills: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Skill" },
@@ -2208,7 +7223,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "Get one skill's full content",
 				description:
-					"Full detail for ONE skill by slug or display name — metadata plus, for SDF official skills, the complete raw SKILL.md text (`.skill.content`, fetched live from skills.stellar.org). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
+					"Full detail for ONE skill by slug or display name — metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
 				"x-routing": {
 					purpose:
 						"One skill's full SKILL.md content, metadata, and install command.",
@@ -2218,7 +7233,7 @@ export const spec: OpenAPISpec = {
 						"install command",
 						"instructions",
 						"agentic payments",
-						"soroban skill",
+						"smart-contracts skill",
 						"stellar-scout",
 					],
 					useWhen: [
@@ -2230,7 +7245,7 @@ export const spec: OpenAPISpec = {
 					],
 					exampleQuestions: [
 						"Show me the SKILL.md for agentic-payments",
-						"How do I install the soroban skill?",
+						"How do I install the smart-contracts skill?",
 					],
 				},
 				parameters: [
@@ -2239,14 +7254,82 @@ export const spec: OpenAPISpec = {
 						in: "path",
 						required: true,
 						description:
-							"Skill slug (e.g. 'soroban', 'stellar-scout', 'rozo-intent-pay')",
+							"Skill slug (e.g. 'smart-contracts', 'stellar-scout', 'rozo-intent-pay')",
 						schema: { type: "string" },
 					},
 				],
 				responses: {
 					"200": {
 						description: "Skill detail with content",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"One skill's full record, including SKILL.md content for sources that ship one (metadata-only otherwise).",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												operator: {
+													type: "string",
+													description: "Who runs this skill's upstream.",
+												},
+											},
+										},
+										skill: {
+											type: "object",
+											properties: {
+												slug: { type: "string" },
+												name: { type: "string" },
+												description: { type: "string", nullable: true },
+												tagline: { type: "string", nullable: true },
+												source: {
+													type: "string",
+													description:
+														"Which catalog the skill comes from (e.g. sdf-official, stellarlight).",
+												},
+												targetUser: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Audiences it serves: dev / founder / agent.",
+												},
+												tags: { type: "array", items: { type: "string" } },
+												kind: {
+													type: "string",
+													description:
+														"skill-md | mcp-server | sdk | cli | agent-kit | tool",
+												},
+												install: {
+													type: "string",
+													nullable: true,
+													description: "The command to install it.",
+												},
+												installAlt: { type: "string", nullable: true },
+												homepage: { type: "string", nullable: true },
+												repository: { type: "string", nullable: true },
+												docs: { type: "string", nullable: true },
+												featured: { type: "boolean" },
+												compatibility: {
+													type: "array",
+													items: { type: "string" },
+													description: "Agent hosts known to run it.",
+												},
+												content: {
+													type: "string",
+													nullable: true,
+													description:
+														"Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					"404": {
 						description: "Skill not found",
@@ -2306,6 +7389,10 @@ export const spec: OpenAPISpec = {
 						"What's the most crowded category on Stellar?",
 						"How many projects are in RWA vs wallets?",
 						"Where is there room to build?",
+						// 2026-09-05 routing battery (T4): "verticals" and "least" were
+						// absent from every field, so the question gated out entirely.
+						"Which verticals on Stellar have the least competition?",
+						"How crowded is lending on Stellar?",
 					],
 				},
 				parameters: [
@@ -2335,12 +7422,29 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									properties: {
 										meta: {
-											type: "object",
-											properties: {
-												population: {
-													$ref: "#/components/schemas/PopulationScope",
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														population: {
+															$ref: "#/components/schemas/PopulationScope",
+														},
+														dimensions: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Every value the dimension param accepts — the live vocabulary for cluster views.",
+														},
+														notes: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"Reading notes for the active dimension (counting caveats, taxonomy conventions). May be empty.",
+														},
+													},
 												},
-											},
+											],
 										},
 										clusters: {
 											type: "array",
@@ -2360,7 +7464,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers`: hackathon + SCF-funding totals (per-round + Built/Abandoned funnel), per-category distribution, DeFi TVL (DefiLlama, dated), `gaps` (per-vertical whitespace — under-built/unproven/absent, for 'what should I build?'), and `developers` (current Electric Capital monthly-active-dev count + month/year trend, tenure, geography, peer scale). gaps + developers are SUPPLY/commit-side and as-of dated — never demand or a headcount.",
+					"The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace — what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated — never demand or a headcount.",
 				"x-routing": {
 					purpose:
 						"Ecosystem-wide macro totals: hackathons, SCF funding, category distribution, TVL.",
@@ -2377,6 +7481,9 @@ export const spec: OpenAPISpec = {
 						"totalPrizePoolUSD",
 						"registered hackers",
 						"scf funding distributed",
+						"stellar community fund",
+						"awarded in total",
+						"total awarded",
 						"mean award",
 						"per-round breakdown",
 						"status funnel",
@@ -2384,6 +7491,7 @@ export const spec: OpenAPISpec = {
 						"category distribution",
 						"project counts by category",
 						"tvl",
+						"total value locked",
 						"defi tvl",
 						"defillama",
 						"top protocols by tvl",
@@ -2430,6 +7538,10 @@ export const spec: OpenAPISpec = {
 						"Which product verticals have no Live projects yet?",
 						"How many active developers are building on Stellar? (dimension=developers)",
 						"Is Stellar's developer base growing year over year?",
+						// 2026-09-05 routing battery (T1): the newcomer's version of the
+						// developers question — "anyone", "actually", "dead" were in no
+						// field. dimension=developers is the dated answer.
+						"Is anyone actually still building on Stellar, or is it dead? (dimension=developers)",
 					],
 				},
 				parameters: [
@@ -2447,6 +7559,7 @@ export const spec: OpenAPISpec = {
 								"tvl",
 								"gaps",
 								"developers",
+								"toolchain",
 							],
 							default: "all",
 						},
@@ -2466,13 +7579,325 @@ export const spec: OpenAPISpec = {
 												population: {
 													$ref: "#/components/schemas/PopulationScope",
 												},
+												dimension: {
+													type: "string",
+													description:
+														"The dimension this response was computed for.",
+												},
+												validDimensions: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Every value the dimension param accepts (unknown values 400 with this list).",
+												},
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										toolchain: {
+											type: "object",
+											description:
+												"Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain.",
+											properties: {
+												scannedRepos: {
+													type: "integer",
+													description:
+														"Repos in the corpus carrying a soroban-sdk version — the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this.",
+												},
+												measuredRepos: {
+													type: "integer",
+													description:
+														"How many repos byVersionStatus was actually computed over. Equal to scannedRepos when measurementComplete is true; smaller when the scan hit its cap. THIS is the denominator for any rate.",
+												},
+												measurementComplete: {
+													type: "boolean",
+													description:
+														"false = the buckets describe only part of the population; a rate taken against scannedRepos would understate every status.",
+												},
+												deprecatedTotal: { type: "integer" },
+												deprecatedListTruncated: {
+													type: "boolean",
+													description:
+														"true = deprecatedRepos is a capped sample (50) and shorter than deprecatedTotal; never read its length as the count.",
+												},
+												byVersionStatus: {
+													type: "object",
+													additionalProperties: { type: "integer" },
+												},
+												deprecatedRepos: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															fullName: { type: "string" },
+															projectSlug: { type: "string", nullable: true },
+															sorobanSdkVersion: {
+																type: "string",
+																nullable: true,
+															},
+														},
+													},
+												},
+											},
+										},
+										categories: {
+											type: "object",
+											description:
+												"Present for dimension=all|categories: project counts by category over the active population (see meta.population).",
+											properties: {
+												totalProjects: { type: "integer" },
+												scope: { type: "string" },
+												distribution: {
+													type: "array",
+													description:
+														"Per-category rollup, largest projectCount first.",
+													items: {
+														type: "object",
+														properties: {
+															category: { type: "string" },
+															projectCount: { type: "integer" },
+															scfFundedCount: { type: "integer" },
+															scfTotalUSD: { type: "number" },
+															hackathonWinnerCount: { type: "integer" },
+														},
+													},
+												},
+											},
+										},
+										developers: {
+											type: "object",
+											description:
+												"Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt.",
+											properties: {
+												asOf: {
+													type: "string",
+													format: "date",
+													description:
+														"Electric Capital snapshot date — cite THIS, not generatedAt.",
+												},
+												source: { type: "string" },
+												sourceUrl: { type: "string", nullable: true },
+												monthlyActiveDevs: {
+													type: "object",
+													properties: {
+														total: { type: "integer" },
+														exclusive: {
+															type: "integer",
+															description:
+																"Devs building ONLY on Stellar — the truer measure of committed builders.",
+														},
+														multichain: { type: "integer" },
+														allTimePeak: { type: "integer" },
+														allTimePeakDay: {
+															type: "string",
+															format: "date",
+														},
+														trend: {
+															type: "object",
+															properties: {
+																vs30dAgo: { type: "integer" },
+																vs90dAgo: { type: "integer" },
+																vs1yAgo: { type: "integer" },
+																momPct: { type: "number", nullable: true },
+																yoyPct: { type: "number", nullable: true },
+															},
+														},
+													},
+												},
+												commits28d: { type: "integer", nullable: true },
+												tenure: {
+													type: "object",
+													nullable: true,
+													properties: {
+														fullTime: { type: "integer" },
+														partTime: { type: "integer" },
+														oneTime: { type: "integer" },
+													},
+												},
+												geography: {
+													type: "object",
+													nullable: true,
+													properties: {
+														located: { type: "integer" },
+														unknown: { type: "integer" },
+														topCountries: {
+															type: "array",
+															items: {
+																type: "object",
+																properties: {
+																	country: { type: "string" },
+																	devs: { type: "integer" },
+																},
+															},
+														},
+													},
+												},
+												peerChains: {
+													type: "array",
+													description:
+														"Peer-chain MAD for scale context, not a quality ranking.",
+													items: {
+														type: "object",
+														properties: {
+															chain: { type: "string" },
+															monthlyActiveDevs: { type: "integer" },
+														},
+													},
+												},
+												basis: { type: "string" },
+											},
+										},
+										gaps: {
+											type: "object",
+											description:
+												"Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
+											properties: {
+												scope: { type: "string" },
+												basis: { type: "string" },
+												byType: {
+													type: "array",
+													description:
+														"Every vertical (incl. absent ones) with its coverage, thinnest first.",
+													items: {
+														type: "object",
+														properties: TYPE_COVERAGE_PROPS,
+													},
+												},
+												signals: {
+													type: "object",
+													properties: {
+														unproven: {
+															type: "array",
+															items: { type: "string" },
+														},
+														underbuilt: {
+															type: "array",
+															items: { type: "string" },
+														},
+														absent: {
+															type: "array",
+															items: { type: "string" },
+														},
+													},
+												},
+												thresholds: {
+													type: "object",
+													properties: {
+														underbuiltMax: { type: "integer" },
+													},
+												},
+											},
+										},
+										hackathons: {
+											type: "object",
+											description:
+												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+											properties: {
+												totalEvents: { type: "integer" },
+												byStatus: {
+													type: "object",
+													properties: {
+														upcoming: { type: "integer" },
+														active: { type: "integer" },
+														completed: { type: "integer" },
+													},
+												},
+												totalPrizePoolUSD: { type: "number" },
+												totalRegisteredHackers: { type: "integer" },
+											},
+										},
+										tvl: {
+											type: "object",
+											description:
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'.",
+											properties: {
+												totalTvlUSD: { type: "number" },
+												trackedProjects: { type: "integer" },
+												asOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"Most recent per-project tvlAsOf refresh — null when nothing is tracked.",
+												},
+												provider: { type: "string" },
+												top10: {
+													type: "array",
+													items: {
+														type: "object",
+														properties: {
+															slug: { type: "string", nullable: true },
+															name: { type: "string", nullable: true },
+															tvlUSD: { type: "number" },
+															tvlAsOf: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+														},
+													},
+												},
+												basis: { type: "string" },
 											},
 										},
 										funding: {
 											type: "object",
 											description:
-												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash (sls-044): a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
+												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
 											properties: {
+												computedAt: {
+													type: "string",
+													format: "date-time",
+													description:
+														"When THIS response's funding rollup was computed.",
+												},
+												methodologyVersion: { type: "string" },
+												countBasis: {
+													type: "string",
+													description:
+														"Plain-language statement of what the funding numbers count (in-house rollup basis vs SDF's own counters).",
+												},
+												scfAwardedProjects: {
+													type: "integer",
+													description:
+														"Projects in the awarded set this rollup sums over.",
+												},
+												scfTotalDistributedUSD: {
+													type: "number",
+													description:
+														"Sum of scfTotalAwardedUSD over the awarded set — an in-house rollup; reconcile per-project via scfRoundAwards.",
+												},
+												meanAwardUSD: { type: "number", nullable: true },
+												byRound: {
+													type: "array",
+													description:
+														"Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at.",
+													items: {
+														type: "object",
+														properties: {
+															round: { type: "string" },
+															count: {
+																type: "integer",
+																description:
+																	"Per-round MEMBERSHIP — a project counts in each round it won, so summing counts exceeds scfAwardedProjects.",
+															},
+															totalUSD: { type: "number" },
+														},
+													},
+												},
+												postHackathonStatusFunnel: {
+													type: "object",
+													description:
+														"Outcome funnel for hackathon-linked active projects. Besides `scope`, keys are post-hackathon status names (Built / In Progress / Abandoned / Unknown, plus any other recorded status) mapping to project counts.",
+													properties: {
+														scope: {
+															type: "string",
+															description:
+																"Which projects the funnel tallies (hackathon-linked only, with the population size).",
+														},
+													},
+													additionalProperties: { type: "integer" },
+												},
 												projectSetHash: { type: "string" },
 												snapshotAsOf: {
 													type: "string",
@@ -2573,7 +7998,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Ranked list of active Stellar projects (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = latest-commit recency (NOT commit volume); issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
+					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
 						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
@@ -2599,7 +8024,10 @@ export const spec: OpenAPISpec = {
 						"open issues",
 						"backlog",
 						"csv",
-						"dune",
+						// "Dune" here means Dune-style analytics export, but the bare
+						// token also names a project in our directory, so it competed
+						// for "what is Dune". Qualified to the intent it was added for.
+						"dune-style analytics export",
 						"export",
 						"developer counts",
 						"active devs",
@@ -2619,6 +8047,16 @@ export const spec: OpenAPISpec = {
 						"largest stablecoin",
 						"asset supply",
 						"token holders",
+
+						"github activity",
+						"by github activity",
+						"projects by github activity",
+						"developer activity ranking",
+						"ranked by commits",
+						"most active projects",
+						"top stellar projects",
+						"activity leaderboard",
+						"ranked by activity",
 					],
 					useWhen: [
 						"which projects have open issues / the biggest issue backlog",
@@ -2683,29 +8121,7 @@ export const spec: OpenAPISpec = {
 							type: "array",
 							items: {
 								type: "string",
-								enum: [
-									"Wallet",
-									"DEX",
-									"Lending",
-									"Bridge",
-									"Infrastructure",
-									"Payments",
-									"Anchor",
-									"SDK",
-									"Indexer",
-									"Explorer",
-									"Analytics",
-									"AI",
-									"Gaming",
-									"Education",
-									"Security",
-									"NFT",
-									"RWA",
-									"Stablecoin",
-									"Social Impact",
-									"RPC",
-									"Faucet",
-								],
+								enum: [...PROJECT_TYPES],
 							},
 						},
 						style: "form",
@@ -2732,12 +8148,50 @@ export const spec: OpenAPISpec = {
 											description:
 												"Carries filters, metricDefinitions (what each served metric IS), generatedAt, and dataAsOf.",
 											properties: {
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													description:
+														"Echo of the applied sort/range/category/type scope (null = not applied).",
+													properties: {
+														sort: { type: "string" },
+														range: { type: "string" },
+														category: { type: "string", nullable: true },
+														limit: { type: "integer" },
+														type: {
+															type: "array",
+															items: { type: "string" },
+															nullable: true,
+															description:
+																"The exact project types kept (EITHER-membership); null = no type filter.",
+														},
+													},
+												},
+												counts: {
+													type: "object",
+													description:
+														"Row counts for this response (returned rows; population size where stated).",
+													properties: {
+														returned: { type: "integer" },
+														total: {
+															type: "integer",
+															description:
+																"Rows matching the filter pre-slice.",
+														},
+													},
+												},
+												docs: {
+													type: "string",
+													description:
+														"Pointer to the metric documentation for this endpoint (what each column means and how it is computed).",
+												},
 												dataAsOf: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 													description:
-														"sls-036: the repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.",
+														"The repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.",
 												},
 												metricDefinitions: {
 													type: "object",
@@ -2804,7 +8258,104 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"200": {
 						description: "Feedback request schema",
-						content: { "application/json": { schema: { type: "object" } } },
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									description:
+										"Self-describing contract for POST /api/feedback — GET it to learn the body shape rather than guessing.",
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+											},
+										},
+										schema: {
+											type: "object",
+											properties: {
+												method: { type: "string" },
+												contentType: { type: "string" },
+												body: {
+													type: "object",
+													description:
+														"Field-by-field description of the POST body — values are human-readable usage notes, except kind, which lists the allowed values.",
+													properties: {
+														kind: {
+															type: "array",
+															items: { type: "string" },
+															description:
+																"The allowed kind values (the POST field takes ONE of them).",
+														},
+														message: { type: "string" },
+														target: {
+															type: "object",
+															properties: {
+																surface: { type: "string" },
+																slug: { type: "string" },
+															},
+														},
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																endpoint: { type: "string" },
+																skillVersion: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
+												},
+												example: {
+													type: "object",
+													description: "A ready-to-send example body.",
+													properties: {
+														kind: { type: "string" },
+														message: { type: "string" },
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																endpoint: { type: "string" },
+																skillVersion: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
+												},
+												voteExample: {
+													type: "object",
+													description: "An example of the vote-shaped variant.",
+													properties: {
+														kind: { type: "string" },
+														target: {
+															type: "object",
+															properties: {
+																surface: { type: "string" },
+																slug: { type: "string" },
+															},
+														},
+														context: {
+															type: "object",
+															properties: {
+																query: { type: "string" },
+																agentName: { type: "string" },
+															},
+														},
+													},
+												},
+												rateLimit: {
+													type: "string",
+													description:
+														"The limit in words, so a caller can pace itself.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2859,13 +8410,352 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/rwa": {
+			get: {
+				operationId: "getRwaAssets",
+				tags: ["Ecosystem"],
+				summary: "Tokenized real-world assets verified on Stellar",
+				description:
+					"Every tokenized real-world asset rwa.xyz lists on Stellar (97 tokens, 52 issuers), each re-verified on-chain: classic assets from the issuer's own stellar.toml plus Horizon where the toml declares them (else on-chain-only), Soroban tokens from the contract's own metadata via RPC. state is live | issued-single-holder | deployed-no-supply | not-found; rows carry verificationLevel, evidenceUrl, verifiedAt, and pairedWith for a tranche deployed twice. Includes the fiat stablecoins rwa.xyz classes as RWA (productKind=stablecoin). Curated registry: absence means untracked, never 'not on Stellar'.",
+				"x-routing": {
+					purpose:
+						"Which real-world-asset tokens (tokenized funds, treasuries, bonds, real estate, gold) are actually issued on Stellar, by whom, with on-chain evidence and a verification level.",
+					keywords: [
+						"rwa",
+						"real world asset",
+						"real-world assets",
+						"tokenized",
+						"tokenized fund",
+						"tokenized treasury",
+						"tokenized real estate",
+						"money market fund",
+						"t-bills",
+						"benji",
+						"wisdomtree",
+						"spiko",
+						"etherfuse",
+						"stablebond",
+						"franklin templeton",
+						"issued on stellar",
+						"live on stellar",
+					],
+					useWhen: [
+						"which RWA / tokenized funds / treasuries / bonds / real estate are live on Stellar, and who issues them",
+						"is product X (BENJI, WisdomTree GOLD, Spiko USTBL, Etherfuse CETES) actually issued on Stellar today — with the contract or issuer and evidence",
+						"the largest RWA tokens or issuers on Stellar by rwa.xyz value",
+					],
+					notFor: [
+						"fiat stablecoin market caps, pegs, supply -> getStablecoins",
+						"an issuer's company profile, funding or repos -> searchProjects",
+						"how to issue an asset or build a tokenization contract -> stellarDocs / skills",
+					],
+					exampleQuestions: [
+						"Which real world assets are live on Stellar?",
+						"Is Franklin Templeton's BENJI actually issued on Stellar?",
+						"What tokenized treasury funds exist on Stellar and who issues them?",
+						"What is the biggest RWA token on Stellar?",
+					],
+				},
+				parameters: [
+					{
+						name: "state",
+						in: "query",
+						description:
+							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one.",
+						schema: {
+							type: "string",
+							enum: [...RWA_STATES],
+						},
+					},
+					{
+						name: "level",
+						in: "query",
+						description: "Filter by verificationLevel (see methodology).",
+						schema: {
+							type: "string",
+							enum: [...RWA_VERIFICATION_LEVELS],
+						},
+					},
+					{
+						name: "kind",
+						in: "query",
+						description:
+							"classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets).",
+						schema: { type: "string", enum: [...RWA_KINDS] },
+					},
+					{
+						name: "project",
+						in: "query",
+						description:
+							"Directory project slug — the rows that feed that project's `products`.",
+						schema: { type: "string" },
+					},
+					{
+						name: "limit",
+						in: "query",
+						description: "Max rows (default 100, max 100).",
+						schema: { type: "integer", default: 100, maximum: 100 },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Verified RWA tokens, sorted by rwa.xyz USD value (rows without one last).",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: ["meta", "assets"],
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												source: { type: "string" },
+												generatedAt: { type: "string", format: "date-time" },
+												registryAsOf: {
+													type: "string",
+													description:
+														"Date every row was last re-verified on-chain.",
+												},
+												filters: {
+													type: "object",
+													description:
+														"The filters this response was computed under; null = not applied.",
+													properties: {
+														state: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														level: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														kind: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														project: {
+															type: "string",
+															nullable: true,
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+														limit: {
+															type: "integer",
+															description:
+																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+														},
+													},
+												},
+												counts: {
+													type: "object",
+													properties: {
+														registry: { type: "integer" },
+														rwaxyzListed: {
+															type: "integer",
+															description:
+																"Rows admitted by rwa.xyz's listing on Stellar.",
+														},
+														issuerDeclared: {
+															type: "integer",
+															description:
+																"Rows admitted because a tracked issuer's own toml declares them (sls-083).",
+														},
+														issuers: { type: "integer" },
+														matched: { type: "integer" },
+														returned: { type: "integer" },
+														measured: {
+															type: "integer",
+															description:
+																"Served rows that carry a `measured` reading from the six-hour lane.",
+														},
+														byLevel: {
+															type: "object",
+															additionalProperties: { type: "integer" },
+														},
+														byState: {
+															type: "object",
+															additionalProperties: { type: "integer" },
+														},
+													},
+												},
+												coverage: {
+													type: "object",
+													properties: {
+														basis: { type: "string" },
+														note: { type: "string" },
+													},
+												},
+												methodology: { type: "string" },
+											},
+										},
+										assets: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+														description:
+															"`CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity — a ticker alone identifies nothing.",
+													},
+													kind: {
+														type: "string",
+														enum: [...RWA_KINDS],
+													},
+													name: { type: "string" },
+													symbol: { type: "string" },
+													issuerEntity: { type: "string", nullable: true },
+													projectSlug: {
+														type: "string",
+														nullable: true,
+														description:
+															"Directory project this row joins onto (feeds its `products`); null = the issuer has no project row.",
+													},
+													code: { type: "string", nullable: true },
+													issuer: {
+														type: "string",
+														nullable: true,
+														description: "Mainnet issuer account (classic).",
+													},
+													contract: {
+														type: "string",
+														nullable: true,
+														description: "Contract id (Soroban).",
+													},
+													productKind: {
+														type: "string",
+														enum: [...RWA_PRODUCT_KINDS],
+													},
+													assetClass: {
+														type: "string",
+														nullable: true,
+														description:
+															"rwa.xyz asset class (US Treasury Debt, Real Estate, Commodities, ...).",
+													},
+													network: { type: "string", enum: ["mainnet"] },
+													state: {
+														type: "string",
+														enum: [...RWA_STATES],
+													},
+													launchedAt: {
+														type: "string",
+														nullable: true,
+														description:
+															"Contract creation date (Soroban). null for classic assets — Horizon does not date issuance.",
+													},
+													verifiedAt: { type: "string" },
+													evidenceUrl: {
+														type: "string",
+														description:
+															"Where to re-verify: the issuer's stellar.toml, or the asset/contract on stellar.expert.",
+													},
+													verificationLevel: {
+														type: "string",
+														enum: [...RWA_VERIFICATION_LEVELS],
+													},
+													basisNote: { type: "string", nullable: true },
+													decimals: { type: "integer", nullable: true },
+													totalSupply: {
+														type: "number",
+														nullable: true,
+														description:
+															"Read from the contract's total_supply() (Soroban); null where no such function. Classic supply is served by Horizon/stellar.expert, not here.",
+													},
+													horizonNote: { type: "string", nullable: true },
+													tomlStatus: {
+														type: "string",
+														nullable: true,
+														description:
+															"The issuer toml's own `status` for this asset (SEP-1: live | private | test …) on rows whose toml block was read; null = not read, never 'live'. `private` = the issuer calls it a restricted offering (SBRL: KYC-gated platform accounts, not publicly tradable) and the project row's product record carries that in `note`.",
+													},
+													rwaxyzListed: {
+														type: "boolean",
+														description:
+															"true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account — rwa.xyz figures are null on those rows (not provided, never zero).",
+													},
+													rwaxyzValueUsd: {
+														type: "number",
+														nullable: true,
+														description:
+															"rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders.",
+													},
+													rwaxyzHolders: { type: "integer", nullable: true },
+													pairedWith: {
+														type: "string",
+														nullable: true,
+														description:
+															"The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair.",
+													},
+													controls: {
+														type: "object",
+														nullable: true,
+														description:
+															"The issuer's on-chain flags, read from Horizon (classic assets only) — the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic.",
+														properties: {
+															authRequired: { type: "boolean" },
+															authRevocable: { type: "boolean" },
+															authImmutable: { type: "boolean" },
+															clawbackEnabled: { type: "boolean" },
+														},
+													},
+													controlsBasis: {
+														type: "string",
+														nullable: true,
+														enum: ["horizon-issuer-flags"],
+														description:
+															"Where controls came from; null when controls is null.",
+													},
+													measured: {
+														type: "object",
+														nullable: true,
+														description:
+															"What the six-hour refresh lane measured about this asset — supply, holders, activityCount — dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why).",
+														properties: {
+															supply: { type: "number", nullable: true },
+															holders: { type: "number", nullable: true },
+															activityCount: {
+																type: "number",
+																nullable: true,
+																description:
+																	"Classic: lifetime payment operations. Soroban: lifetime contract events. A count, not an amount; not comparable across kinds.",
+															},
+															measureBasis: {
+																type: "string",
+																enum: ["live", "unmeasured"],
+															},
+															measuredAt: { type: "string" },
+															note: { type: "string", nullable: true },
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description:
+							"Unknown query parameter, or an invalid state/level/kind value; the body names the valid values.",
+					},
+				},
+			},
+		},
 		"/api/stablecoins": {
 			get: {
 				operationId: "getStablecoins",
 				tags: ["Ecosystem"],
 				summary: "Stellar stablecoins ranked by USD market cap",
 				description:
-					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, issuer. Proxied live from the stablecoin snapshot service; null = not tracked, never zero.",
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					purpose:
 						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
@@ -2938,7 +8828,92 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									properties: {
-										meta: { $ref: "#/components/schemas/Meta" },
+										meta: {
+											allOf: [
+												{ $ref: "#/components/schemas/Meta" },
+												{
+													type: "object",
+													properties: {
+														multiIssuerTickers: {
+															type: "array",
+															description:
+																"Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity — attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class).",
+															items: {
+																type: "object",
+																properties: {
+																	ticker: { type: "string" },
+																	companies: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	note: { type: "string" },
+																},
+															},
+														},
+														dataAsOf: {
+															type: "string",
+															format: "date-time",
+															description:
+																"The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.",
+														},
+														counts: {
+															type: "object",
+															description:
+																"`total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement.",
+															properties: {
+																tracked: {
+																	type: "integer",
+																	minimum: 0,
+																	description:
+																		"Assets in the registry, before any filter.",
+																},
+																byBasis: {
+																	type: "object",
+																	description:
+																		"Counts of the RETURNED rows by how they were obtained.",
+																	properties: {
+																		live: { type: "integer", minimum: 0 },
+																		"curated-static": {
+																			type: "integer",
+																			minimum: 0,
+																		},
+																		unmeasured: { type: "integer", minimum: 0 },
+																	},
+																},
+																total: {
+																	type: "integer",
+																	minimum: 0,
+																	description:
+																		"Rows matching the filters, before the limit slice.",
+																},
+																returned: {
+																	type: "integer",
+																	minimum: 0,
+																	description: "Rows in this response.",
+																},
+															},
+														},
+														coverage: {
+															type: "object",
+															description:
+																"What this inventory IS and IS NOT. It is a hand-curated registry of verified (code, issuer) pairs, not a census of every Stellar stablecoin. Absence here means 'not tracked in this registry', never proof an asset is not issued on Stellar.",
+															properties: {
+																basis: {
+																	type: "string",
+																	enum: ["curated-registry"],
+																},
+																note: { type: "string" },
+															},
+														},
+														methodology: {
+															type: "string",
+															description:
+																"How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured.",
+														},
+													},
+												},
+											],
+										},
 										stablecoins: {
 											type: "array",
 											items: { $ref: "#/components/schemas/Stablecoin" },
@@ -2949,7 +8924,8 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": {
-						description: "Invalid sort or unknown query param",
+						description:
+							"Invalid sort, or an unknown query parameter (named with the supported set in hint); this registry rejects rather than ignores it.",
 						content: {
 							"application/json": {
 								schema: { $ref: "#/components/schemas/ErrorResponse" },
@@ -2991,13 +8967,84 @@ export const spec: OpenAPISpec = {
 			},
 		},
 		schemas: {
+			RetryableError: {
+				type: "object",
+				description:
+					"A failure the caller should retry: the read behind the answer failed (database, upstream, or this instance's rate window). Never a claim about the data; `advisory` says what the failure is NOT a claim about. Mirrors the Retry-After header in seconds.",
+				required: ["error", "retryAfterSeconds"],
+				properties: {
+					error: { type: "string", description: "What failed, in one line." },
+					advisory: {
+						type: "string",
+						description:
+							"What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look).",
+					},
+					retryAfterSeconds: {
+						type: "integer",
+						description:
+							"Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry.",
+					},
+				},
+			},
+			RequestError: {
+				type: "object",
+				description:
+					"The request itself was wrong (a 400): fix the call, do not retry it as is.",
+				required: ["error"],
+				properties: {
+					error: { type: "string" },
+					hint: { type: "string", description: "How to correct the call." },
+				},
+			},
 			Meta: {
 				type: "object",
 				description: "Standard meta block included on every list response",
 				properties: {
 					source: { type: "string", format: "uri" },
 					generatedAt: { type: "string", format: "date-time" },
-					filters: { type: "object", additionalProperties: true },
+					filters: {
+						type: "object",
+						additionalProperties: true,
+						description:
+							"Echo of the filter values this response was computed under (null = filter not applied). Read it to confirm the server saw the filters you sent.",
+					},
+					note: {
+						type: "string",
+						description:
+							"Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say.",
+					},
+					warnings: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							'Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400.',
+					},
+					partial: {
+						type: "boolean",
+						description:
+							"On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status.",
+					},
+					failedReads: {
+						type: "array",
+						description:
+							"Present wherever `partial` is: the reads that failed on this page, in order; an empty array when `partial` is false. Each names what was read and the failure class only (an error name, a timeout, or the stated reason), never a raw error message.",
+						items: {
+							type: "object",
+							required: ["read", "cause"],
+							properties: {
+								read: {
+									type: "string",
+									description:
+										'What was being read, e.g. "repos search" or "research source=sep".',
+								},
+								cause: {
+									type: "string",
+									description:
+										'The failure class, e.g. "timeout after 4000ms" or "MongoServerSelectionError".',
+								},
+							},
+						},
+					},
 					counts: {
 						type: "object",
 						properties: {
@@ -3009,14 +9056,20 @@ export const spec: OpenAPISpec = {
 							total: {
 								type: "integer",
 								minimum: 0,
+								nullable: true,
 								description:
-									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total.",
+									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred.",
+							},
+							totalBasis: {
+								type: "string",
+								description:
+									"Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field.",
 							},
 							semantic: {
 								type: "integer",
 								minimum: 0,
 								description:
-									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in returned/total). Lets a consumer separate keyword truth from similarity guesses.',
+									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset — it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference.',
 							},
 						},
 					},
@@ -3035,6 +9088,43 @@ export const spec: OpenAPISpec = {
 				description:
 					"One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero.",
 				properties: {
+					engagementId: {
+						type: "string",
+						nullable: true,
+						description:
+							"Relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent.",
+					},
+					reportVersion: {
+						type: "string",
+						nullable: true,
+						description:
+							"Version the report states about itself (e.g. 'V2'); null when the source states none.",
+					},
+					supersededByReportId: {
+						type: "integer",
+						nullable: true,
+						description:
+							"reportId of the report that supersedes this one; null = no supersession stated by the documents (never guessed).",
+					},
+					engagementStart: {
+						type: "string",
+						nullable: true,
+						description:
+							"Engagement window start as stated IN the report (YYYY-MM-DD).",
+					},
+					engagementEnd: {
+						type: "string",
+						nullable: true,
+						description:
+							"Engagement window end as stated IN the report (YYYY-MM-DD).",
+					},
+					findingsExtraction: {
+						type: "string",
+						nullable: true,
+						enum: ["extracted", "not-extracted", "partial"],
+						description:
+							"Completeness of the deterministic findings extraction — read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.",
+					},
 					reportId: {
 						type: "integer",
 						description: "stellarsecurityportal.com report id (natural key)",
@@ -3121,9 +9211,36 @@ export const spec: OpenAPISpec = {
 						description:
 							"Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks",
 					},
+					capStatus: {
+						type: "string",
+						nullable: true,
+						description:
+							"source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth — a Draft describes an intention, not the network.",
+					},
+					capProtocolVersion: {
+						type: "integer",
+						nullable: true,
+						description:
+							"source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD) — never guessed. The join key between protocol history and soroban-sdk versions.",
+					},
+					docKind: {
+						type: "string",
+						nullable: true,
+						enum: ["spec", "guide", "article", "data"],
+						description:
+							"Deterministic document class stamped at ingest: spec (canonical — old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.",
+					},
+					docVersionStatus: {
+						type: "string",
+						nullable: true,
+						enum: ["current", "supported", "deprecated"],
+						description:
+							"SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal — not a claim it is current.",
+					},
 					score: { type: ["number", "null"] },
 					confidence: {
 						type: "object",
+						additionalProperties: true,
 						description:
 							"0-1 trust signal: score, label (high/medium/low), relevance, freshness, authority, ageDays",
 					},
@@ -3138,18 +9255,7 @@ export const spec: OpenAPISpec = {
 					name: { type: "string" },
 					partnerType: {
 						type: "string",
-						enum: [
-							"anchor",
-							"on-off-ramp",
-							"infrastructure",
-							"tooling",
-							"protocol",
-							"wallet",
-							"audit-firm",
-							"legal",
-							"agency",
-							"other",
-						],
+						enum: [...PARTNER_TYPES],
 					},
 					pilot: {
 						type: "boolean",
@@ -3166,20 +9272,47 @@ export const spec: OpenAPISpec = {
 					regions: { type: "array", items: { type: "string" } },
 					assets: {
 						type: "array",
+						nullable: true,
 						items: { type: "string" },
 						description:
-							"Asset codes this partner issues/supports (from stellar.toml or curated).",
+							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES.",
 					},
 					seps: {
 						type: "array",
+						nullable: true,
 						items: { type: "string" },
 						description:
-							"SEP standards implemented (sep-6, sep-24, sep-31). Empty with non-empty rampTypes = the ramp is a proprietary API, not SEP-based.",
+							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none — so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
+					},
+					tomlSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only).",
+					},
+					tomlConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no toml was ever fetched.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
+					tomlFetchedAt: {
+						type: "string",
+						nullable: true,
+						description:
+							"ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot.",
 					},
 					rampTypes: {
 						type: "array",
+						nullable: true,
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
-						description: "Fiat ramps offered.",
+						description:
+							"Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps').",
 					},
 					country: { type: "string", nullable: true },
 					acceptingClients: { type: "boolean" },
@@ -3192,7 +9325,13 @@ export const spec: OpenAPISpec = {
 					contactEmail: { type: "string", nullable: true },
 					contactChannel: { type: "string", nullable: true },
 					responseSla: { type: "string", nullable: true },
-					caseStudies: { type: "array", items: { type: "object" } },
+					caseStudies: {
+						type: "array",
+						nullable: true,
+						items: { type: "object", additionalProperties: true },
+						description:
+							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet.",
+					},
 					verified: {
 						type: "object",
 						description:
@@ -3240,7 +9379,45 @@ export const spec: OpenAPISpec = {
 			PartnersResponse: {
 				type: "object",
 				properties: {
-					meta: { $ref: "#/components/schemas/Meta" },
+					meta: {
+						allOf: [
+							{ $ref: "#/components/schemas/Meta" },
+							{
+								type: "object",
+								properties: {
+									validTypes: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the type filter accepts (unknown values 400 with this list).",
+									},
+									validRamps: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the ramps filter accepts (unknown values 400 with this list).",
+									},
+									validRegions: {
+										type: "array",
+										items: { type: "string" },
+										description:
+											"Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions — they go in q.",
+									},
+									matchMode: {
+										type: "string",
+										enum: ["scored", "weak"],
+										description:
+											"Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.",
+									},
+									matchModeLabel: {
+										type: "string",
+										description:
+											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
+								},
+							},
+						],
+					},
 					partners: {
 						type: "array",
 						items: { $ref: "#/components/schemas/Partner" },
@@ -3251,7 +9428,7 @@ export const spec: OpenAPISpec = {
 				type: "object",
 				nullable: true,
 				description:
-					"sls-048: the population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed.",
+					"The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed.",
 				properties: {
 					id: {
 						type: "string",
@@ -3313,7 +9490,7 @@ export const spec: OpenAPISpec = {
 								populationId: {
 									type: "string",
 									description:
-										"Scope digest of what `count` counts (sls-048) — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
+										"Scope digest of what `count` counts — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
 								},
 								notes: { type: "string" },
 							},
@@ -3364,9 +9541,28 @@ export const spec: OpenAPISpec = {
 					shortDescription: { type: "string" },
 					status: {
 						type: "string",
-						enum: ["Draft", "Development", "Pre-Release", "Live", "Inactive"],
+						enum: [...PROJECT_STATUSES],
 						description:
-							"Lifecycle status. 'Inactive' = defunct/archived (e.g. product shut down) — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. Status describes the PROJECT/entity lifecycle, not proof that a specific product is deployed on Stellar mainnet — check statusAsOf/statusSourceUrl/statusBasis for the label's provenance, and supportedNetworks/description for deployment scope.",
+							"Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.",
+					},
+					deployment: {
+						type: "object",
+						description:
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is — read `products` for per-product state. Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+						properties: {
+							network: {
+								type: "string",
+								enum: [...DEPLOYMENT_NETWORKS],
+							},
+							basis: {
+								type: "string",
+								nullable: true,
+								description:
+									"Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | rwa-registry | human-verified. rwa-registry = a live product in the verified RWA registry (/api/rwa) proves mainnet deployment; sourceUrl is that product's own evidence (the issuer's stellar.toml, or the contract on stellar.expert). Null when network is unknown.",
+							},
+							sourceUrl: { type: "string", nullable: true },
+							asOf: { type: "string", nullable: true },
+						},
 					},
 					statusAsOf: {
 						type: "string",
@@ -3380,20 +9576,74 @@ export const spec: OpenAPISpec = {
 						description:
 							"Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows.",
 					},
+					statusConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for the lifecycle status fact: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
 					statusBasis: {
 						type: "string",
 						nullable: true,
 						// nullable carries the null case; a null literal in the enum crashes
 						// Spectral's JSONPath engine (see scfAmountStatus).
-						enum: [
-							"operator-announcement",
-							"site-liveness",
-							"onchain-activity",
-							"human-verified",
-							"source-inherited",
-						],
+						// The ONE list (src/lib/project-status.ts): sls-084 found this copy
+						// missing package-release while nine live rows served it.
+						enum: [...STATUS_BASES],
 						description:
-							"What kind of evidence backs the current status: 'operator-announcement' = the team/operator said so (can describe PLANS, not deployment — read statusAsOf + the description), 'site-liveness' = the product surface was checked, 'onchain-activity' = contract/network probe, 'human-verified' = owner-confirmed, 'source-inherited' = label carried from a seed source, unverified. Null = provenance not yet recorded.",
+							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
+					},
+					scfConfidence: {
+						type: "object",
+						nullable: true,
+						description:
+							"Deterministic trust score for the SCF award facts: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+						properties: {
+							score: { type: "number" },
+							label: { type: "string", enum: ["high", "medium", "low"] },
+							ageDays: { type: "integer", nullable: true },
+						},
+					},
+					feedbackSignal: {
+						type: "object",
+						nullable: true,
+						description:
+							"Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds.",
+						properties: {
+							votes: {
+								type: "integer",
+								nullable: true,
+								description:
+									"Community votes on the submission, or null — the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises.",
+							},
+							worked: { type: "integer" },
+							score: { type: "number", nullable: true },
+							asOf: { type: "string" },
+						},
+					},
+					scfBasis: {
+						type: "string",
+						nullable: true,
+						enum: ["official-record", "human-verified"],
+						description:
+							"Evidence class behind the SCF award facts: 'official-record' = parsed from the communityfund.stellar.org submission cards; 'human-verified' = curated correction where the official page is ambiguous. Null = provenance not yet stamped (legacy rows; populates as enrichment re-reaches them).",
+					},
+					scfAsOf: {
+						type: "string",
+						nullable: true,
+						description:
+							"ISO date the SCF award facts were last verified against the source. Pair with scfSourceUrl to re-verify a stored claim.",
+					},
+					scfSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"Official SCF project page the award facts were read from — the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD.",
 					},
 					builtBy: {
 						type: "object",
@@ -3422,7 +9672,109 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "integer" },
 						description:
-							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative; dollar TOTALS are in-house reconstructions (per-award amounts aren't published for all rounds) and can legitimately differ between aggregators — reconcile on rounds, not totals.",
+							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty — check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
+					},
+					products: {
+						type: "array",
+						nullable: true,
+						description:
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage` — declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+						items: {
+							type: "object",
+							properties: {
+								name: { type: "string" },
+								kind: { type: "string" },
+								network: { type: "string" },
+								status: { type: "string" },
+								contractId: { type: "string", nullable: true },
+								evidenceUrl: { type: "string" },
+								asOf: { type: "string" },
+								note: { type: "string", nullable: true },
+								issuer: {
+									type: "string",
+									nullable: true,
+									description:
+										"Issuing entity as the RWA registry attributes it; null on hand-curated rows.",
+								},
+								assetId: {
+									type: "string",
+									nullable: true,
+									description:
+										"CODE-GISSUER for a classic asset, the contract id for a Soroban token — the product's identity.",
+								},
+								verificationLevel: {
+									type: "string",
+									nullable: true,
+									description:
+										"How the registry verified this product (see getRwaAssets methodology); null on hand-curated rows.",
+								},
+								registryState: {
+									type: "string",
+									nullable: true,
+									description:
+										"The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'.",
+								},
+								tomlStatus: {
+									type: "string",
+									nullable: true,
+									description:
+										"The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering — minted and held, not a public market — and `note` says so. Hand-curated records: null.",
+								},
+								launchedAt: {
+									type: "string",
+									nullable: true,
+									description:
+										"Contract creation date (Soroban); null for classic assets, which Horizon does not date.",
+								},
+								controls: {
+									type: "object",
+									nullable: true,
+									description:
+										"Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows.",
+									properties: {
+										authRequired: { type: "boolean" },
+										authRevocable: { type: "boolean" },
+										authImmutable: { type: "boolean" },
+										clawbackEnabled: { type: "boolean" },
+									},
+								},
+							},
+						},
+					},
+					productsCoverage: {
+						type: "object",
+						nullable: true,
+						description:
+							"Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0 — a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records) — it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products) — null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml).",
+						properties: {
+							basis: {
+								type: "string",
+								enum: [...PRODUCTS_COVERAGE_BASES],
+								description:
+									"issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.",
+							},
+							asOf: { type: "string" },
+							issuers: { type: "integer" },
+							issuersUnreconciled: { type: "integer" },
+							declared: { type: "integer" },
+							tracked: { type: "integer" },
+							served: { type: "integer" },
+							complete: { type: "boolean" },
+						},
+					},
+					scfRoundAwards: {
+						type: "array",
+						description:
+							"The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate.",
+						items: {
+							type: "object",
+							properties: {
+								round: { type: "integer", nullable: true },
+								awardName: { type: "string", nullable: true },
+								amountUSD: { type: "number", nullable: true },
+								awardType: { type: "string", nullable: true },
+							},
+						},
 					},
 					coverage: {
 						type: "object",
@@ -3456,15 +9808,29 @@ export const spec: OpenAPISpec = {
 					},
 					supportedNetworks: {
 						type: "array",
+						nullable: true,
 						items: { type: "string" },
 						description:
-							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']), so a multichain wallet's omission of a chain isn't misread as a negative. Empty when unknown.",
+							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE — that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field.",
+					},
+					networksBasis: {
+						type: "string",
+						nullable: true,
+						enum: [
+							"curated",
+							"onchain-activity",
+							"defillama-tvl",
+							"anchor-coverage",
+							"scf-award",
+						],
+						description:
+							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive — other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
 					},
 					routes: {
 						type: "array",
 						nullable: true,
 						description:
-							"sls-032: curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time.",
+							"Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time.",
 						items: {
 							type: "object",
 							required: ["fromChain", "toChain"],
@@ -3527,13 +9893,13 @@ export const spec: OpenAPISpec = {
 							"wallet-integrated",
 						],
 						description:
-							"sls-035: role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
+							"Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
 					},
 					anchorProfile: {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS (sls-049): capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
@@ -3571,11 +9937,13 @@ export const spec: OpenAPISpec = {
 					audits: {
 						type: ["object", "null"],
 						description:
-							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. null = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
+							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim — read both. null rollup = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
 						properties: {
 							count: { type: "integer" },
 							auditors: { type: "array", items: { type: "string" } },
 							latestAt: { type: ["string", "null"] },
+							driftDays: { type: ["integer", "null"] },
+							codeChangedSinceAudit: { type: ["boolean", "null"] },
 						},
 					},
 					tvlUSD: {
@@ -3606,14 +9974,14 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"sls-039: the curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
+							"The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
 					},
 					tvlMethodUrl: {
 						type: "string",
 						nullable: true,
 						format: "uri",
 						description:
-							"sls-039: citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
+							"Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
 					},
 					canonicalSlug: {
 						type: "string",
@@ -3625,7 +9993,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Rename continuity (sls-050). Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it.",
+							"Rename continuity. Present when this project has former names: aliases resolve to this record in search, and this block carries the provenance. Cite the CURRENT name; mention the alias when the user asked by it.",
 						properties: {
 							currentName: { type: "string" },
 							aliases: { type: "array", items: { type: "string" } },
@@ -3706,7 +10074,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"sls-033/#519: curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim).",
+							"Curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim).",
 					},
 					availability: {
 						type: "array",
@@ -3722,7 +10090,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 						description:
-							"sls-033/#519: per-platform availability with as-of dates. null = not curated.",
+							"Per-platform availability with as-of dates. null = not curated.",
 					},
 					types: {
 						type: "array",
@@ -3769,10 +10137,56 @@ export const spec: OpenAPISpec = {
 											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.',
 									},
 									matchModeLabel: { type: "string" },
+									didYouMean: {
+										type: "object",
+										description:
+											"Present when the query as typed matched NOTHING and a fuzzy name lookup recovered exactly one project within a typo's distance — the results are for `to`, not for what was asked. Only fires for short (≤2 token) queries against names of 5+ characters, and only when a single candidate wins outright, so it never guesses between similar names and never touches 3–4 character asset tickers. Relay the correction to the user rather than presenting the rows as a match for the original spelling.",
+										properties: {
+											from: {
+												type: "string",
+												description: "The query as the caller typed it.",
+											},
+											to: {
+												type: "string",
+												description: "The project name actually searched.",
+											},
+											slug: { type: "string" },
+											note: { type: "string" },
+										},
+									},
+									advisory: {
+										type: "object",
+										description:
+											"Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions).",
+										properties: {
+											summary: { type: "string" },
+											suggestions: {
+												type: "array",
+												items: {
+													type: "object",
+													properties: {
+														action: { type: "string" },
+														url: { type: "string" },
+														why: { type: "string" },
+													},
+												},
+											},
+										},
+									},
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows (sls-049): empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+									},
+									scfCountBasis: {
+										type: "string",
+										description:
+											"Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups).",
+									},
+									semantic: {
+										type: "boolean",
+										description:
+											"True when the keyword pass was thin and vector-similarity rows filled the page (each such row tagged via:'semantic'). Distinct from matchMode='semantic', which means NO keyword tier matched at all.",
 									},
 								},
 							},
@@ -3799,6 +10213,13 @@ export const spec: OpenAPISpec = {
 							{
 								type: "object",
 								properties: {
+									matchMode: {
+										type: "string",
+										enum: ["all", "filtered"],
+										description:
+											"How rows matched q: filtered = rows contain the query terms literally; all = no text query (structured filters only).",
+									},
+									matchModeLabel: { type: "string" },
 									fallbackChannels: {
 										type: "object",
 										description:
@@ -3832,7 +10253,35 @@ export const spec: OpenAPISpec = {
 				type: "object",
 				properties: {
 					meta: { $ref: "#/components/schemas/Meta" },
-					hackathon: { type: "object" },
+					hackathon: {
+						type: "object",
+						additionalProperties: true,
+						properties: {
+							description: {
+								type: "string",
+								nullable: true,
+								description:
+									"The event page, markdown as the organizer published it (stored daily for DoraHacks events).",
+							},
+							rules: {
+								type: "object",
+								description:
+									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section).",
+								properties: {
+									repoRequired: { type: "boolean" },
+									videoRequired: { type: "boolean" },
+									submissionQuestions: {
+										type: "array",
+										items: { type: "string" },
+									},
+									requirements: { type: "string", nullable: true },
+									judgingCriteria: { type: "string", nullable: true },
+									readAt: { type: "string", format: "date-time" },
+								},
+							},
+							profile: EVENT_PROFILE_SCHEMA,
+						},
+					},
 					winners: {
 						type: "array",
 						description:
@@ -3840,10 +10289,51 @@ export const spec: OpenAPISpec = {
 						items: {
 							type: "object",
 							properties: {
+								id: {
+									type: "string",
+									description:
+										"Stable row id (dorahacks-buidl-{id} for live rows).",
+								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
 								placementRank: { type: "integer", nullable: true },
 								hackathonPrize: { type: "number", nullable: true },
+								description: {
+									type: "string",
+									nullable: true,
+									description:
+										"Project blurb from the submission (markdown stripped).",
+								},
+								track: { type: "string", nullable: true },
+								award: {
+									type: "string",
+									nullable: true,
+									description:
+										"Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`).",
+								},
+								prizeUsd: {
+									type: "number",
+									nullable: true,
+									description:
+										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing.",
+								},
+								isWinner: { type: "boolean" },
+								githubUrl: { type: "string", nullable: true },
+								demoUrl: { type: "string", nullable: true },
+								videoUrl: { type: "string", nullable: true },
+								url: {
+									type: "string",
+									description: "The submission's DoraHacks buidl page.",
+								},
+								voteCount: {
+									type: "integer",
+									description:
+										"Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'.",
+								},
+								source: {
+									type: "string",
+									description: "'dorahacks' for live rows.",
+								},
 							},
 						},
 					},
@@ -3853,8 +10343,14 @@ export const spec: OpenAPISpec = {
 						description:
 							"Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded.",
 					},
-					submissions: { type: "array", items: { type: "object" } },
-					tracks: { type: "array", items: { type: "object" } },
+					submissions: {
+						type: "array",
+						items: { type: "object", additionalProperties: true },
+					},
+					tracks: {
+						type: "array",
+						items: { type: "object", additionalProperties: true },
+					},
 				},
 			},
 			Repo: {
@@ -3863,6 +10359,31 @@ export const spec: OpenAPISpec = {
 					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
 				required: ["fullName", "repoScore"],
 				properties: {
+					successorRepo: {
+						type: "string",
+						nullable: true,
+						description:
+							"Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance.",
+					},
+					supersededBy: {
+						type: "string",
+						nullable: true,
+						description:
+							"Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'.",
+					},
+					deprecatedAt: {
+						type: "string",
+						nullable: true,
+						description:
+							"The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD) — GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it.",
+					},
+					supersessionKind: {
+						type: "string",
+						nullable: true,
+						enum: ["archived", "renamed", "deprecated", "superseded"],
+						description:
+							"archived = GitHub archived the repo; renamed = the path 301s to a new one; deprecated = the package or repo carries a deprecation notice; superseded = a newer generation exists and the repo says so.",
+					},
 					fullName: { type: "string", description: "owner/name" },
 					owner: { type: "string", nullable: true },
 					name: { type: "string", nullable: true },
@@ -3876,6 +10397,66 @@ export const spec: OpenAPISpec = {
 					homepageUrl: { type: "string", nullable: true },
 					isFork: { type: "boolean" },
 					isArchived: { type: "boolean" },
+					activityState: {
+						type: "string",
+						enum: ["active", "maintained", "dormant", "archived", "unknown"],
+						description:
+							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.",
+					},
+					...REPO_KIND_PROPS,
+					activitySignals: {
+						type: "object",
+						nullable: true,
+						description:
+							"Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here).",
+						properties: {
+							commits90d: { type: "integer", nullable: true },
+							lastReleaseAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+							releaseTag: { type: "string", nullable: true },
+							openPRs: { type: "integer", nullable: true },
+							asOf: { type: "string", format: "date-time", nullable: true },
+						},
+					},
+					ciPresent: {
+						type: ["boolean", "null"],
+						description:
+							"CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only — NOT a claim CI passes. null = not yet scanned for this fact.",
+					},
+					testsPresent: {
+						type: ["boolean", "null"],
+						description:
+							"Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only — NOT a coverage or quality claim. null = not yet scanned for this fact.",
+					},
+					codeInUse: {
+						type: ["object", "null"],
+						description:
+							"Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists — NOT zero activity). null object = no verified mainnet contract joined to this repo — absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE.",
+						properties: {
+							contracts: { type: "integer" },
+							events: { type: ["integer", "null"] },
+							eventsDelta: { type: ["integer", "null"] },
+							subinvocations: { type: ["integer", "null"] },
+							subinvocationsDelta: { type: ["integer", "null"] },
+							asOf: { type: "string" },
+						},
+					},
+					knowledgeNotes: {
+						type: "array",
+						description:
+							"Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record.",
+						items: {
+							type: "object",
+							properties: {
+								note: { type: "string" },
+								source: { type: "string" },
+								asOf: { type: "string", nullable: true },
+							},
+						},
+					},
 					project: {
 						type: "object",
 						nullable: true,
@@ -3898,6 +10479,32 @@ export const spec: OpenAPISpec = {
 							"Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
 					},
 					repoScoreLabel: { type: "string", nullable: true },
+					tierReason: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"WHY the tier is what it is — the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict.",
+					},
+					tierChangedAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When the tier last changed — the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.",
+					},
+					tier: {
+						type: "string",
+						enum: ["quality", "community", "archive"],
+						description:
+							"Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.",
+					},
+					source: {
+						type: "string",
+						enum: ["project-link", "ec-taxonomy"],
+						description:
+							"Discovery provenance: project-link = from the curated directory's github links; ec-taxonomy = from Electric Capital's public crypto-ecosystems list.",
+					},
 					score: {
 						type: "number",
 						description:
@@ -3917,7 +10524,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["code-verified", "sdf-org", "curated", "mentioned", "none"],
 						description:
-							"WHY this repo ranks as Stellar-relevant (sls-047) — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.",
+							"WHY this repo ranks as Stellar-relevant — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.",
 					},
 					codeVerified: {
 						type: "object",
@@ -3947,7 +10554,7 @@ export const spec: OpenAPISpec = {
 							isDeployableContract: {
 								type: "boolean",
 								description:
-									"This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product (sls-046).",
+									"This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product.",
 							},
 							sorobanSdkVersion: {
 								type: "string",
@@ -3962,17 +10569,66 @@ export const spec: OpenAPISpec = {
 								description:
 									"soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.",
 							},
+							codeConfidence: {
+								type: "object",
+								nullable: true,
+								description:
+									"Deterministic trust score for the code facts (basis code-scan \u00d7 freshness of scannedAt). Null when never scanned.",
+								properties: {
+									score: { type: "number" },
+									label: { type: "string", enum: ["high", "medium", "low"] },
+									ageDays: { type: "integer", nullable: true },
+								},
+							},
 							scannedAt: {
 								type: "string",
 								format: "date-time",
 								nullable: true,
 								description: "When the code was last scanned.",
 							},
+							scannedRef: {
+								type: "string",
+								nullable: true,
+								description:
+									"Commit SHA the facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
+							},
 							symbols: {
 								type: "array",
 								items: { type: "string" },
 								description:
 									"Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs.",
+							},
+							contractInterface: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
+							},
+							targetProtocol: {
+								type: "integer",
+								nullable: true,
+								description:
+									"Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities — 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed.",
+							},
+							protocolCaps: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										cap: { type: "integer" },
+										title: { type: "string" },
+										status: { type: "string", nullable: true },
+										url: { type: "string" },
+									},
+								},
+								description:
+									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
+							},
+							stellarDeps: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim — the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan.",
 							},
 							mainnetContractId: {
 								type: "string",
@@ -3984,7 +10640,13 @@ export const spec: OpenAPISpec = {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
+									"Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
+							},
+							codeDomains: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits — what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null).",
 							},
 						},
 					},
@@ -4011,6 +10673,17 @@ export const spec: OpenAPISpec = {
 										description:
 											"How to read the results (e.g. code references graded by repoScore 0-100).",
 									},
+									matchMode: {
+										type: "string",
+										enum: ["strict", "partial", "weak", "all", "none"],
+										description:
+											"How well this page matched the query. strict = every query term matched; partial = some did; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat weak/none rows as candidates requiring verification, never as findings.",
+									},
+									matchModeLabel: {
+										type: "string",
+										description:
+											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
 								},
 							},
 						],
@@ -4024,7 +10697,7 @@ export const spec: OpenAPISpec = {
 			Builder: {
 				type: "object",
 				description:
-					"A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance (sls-041). Nullable profile fields are null (or empty-string) when unset — never a negative claim.",
+					"A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset — never a negative claim.",
 				properties: {
 					githubUsername: {
 						type: "string",
@@ -4110,9 +10783,9 @@ export const spec: OpenAPISpec = {
 							},
 							basis: {
 								type: "string",
-								enum: ["profile-text", "repo-owner"],
+								enum: ["profile-text", "repo-owner", "code-language"],
 								description:
-									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name).",
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
 							},
 						},
 					},
@@ -4134,6 +10807,91 @@ export const spec: OpenAPISpec = {
 									nullable: true,
 								},
 								repoScore: { type: "number" },
+							},
+						},
+					},
+					onStellar: {
+						type: "object",
+						nullable: true,
+						description:
+							"What this person has actually shipped on Stellar, from the repos we index — QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos — a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged.",
+						properties: {
+							repoCount: { type: "integer" },
+							stars: { type: "integer" },
+							commits90d: {
+								type: "integer",
+								description:
+									"Commits in the last 90 days across repos this person OWNS.",
+							},
+							contributedCommits12m: {
+								type: "integer",
+								description:
+									"This person's own commits into repos they don't own, last 12 months (contributor pass).",
+							},
+							lastCommitAt: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+							},
+							languages: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Primary languages across their indexed repos, most common first.",
+							},
+							builds: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										slug: { type: "string" },
+										name: { type: "string" },
+									},
+								},
+							},
+							contributesTo: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										slug: { type: "string" },
+										name: { type: "string" },
+									},
+								},
+							},
+							topRepos: {
+								type: "array",
+								description:
+									"Up to 5 — owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone.",
+								items: {
+									type: "object",
+									properties: {
+										fullName: { type: "string" },
+										url: { type: "string" },
+										stars: { type: "integer" },
+										lastCommitAt: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+										},
+										commits90d: {
+											type: "integer",
+											description:
+												"The REPO's 90-day commits (everyone's work) — context, not this person's count.",
+										},
+										projectSlug: { type: "string", nullable: true },
+										via: {
+											type: "string",
+											enum: ["owner", "declared", "contributor"],
+										},
+										myCommits12m: {
+											type: "integer",
+											nullable: true,
+											description:
+												"This person's own commits into this repo, last 12 months; null for owned repos (their own repo — the whole history is theirs).",
+										},
+									},
+								},
 							},
 						},
 					},
@@ -4171,7 +10929,7 @@ export const spec: OpenAPISpec = {
 			Rfp: {
 				type: "object",
 				description:
-					"An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row (sls-045) — count/render briefs by filtering rowType === 'rfp'.",
+					"An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row — count/render briefs by filtering rowType === 'rfp'.",
 				properties: {
 					id: {
 						type: "string",
@@ -4214,7 +10972,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["open", "closed"],
 						description:
-							"'open' = fundable in the current SCF quarter; 'closed' = a prior round, surfaced for context.",
+							"'open' = the brief is still soliciting; not a claim that SCF submissions are open today (see meta.scfRound). 'closed' = a prior round, surfaced for context.",
 					},
 					url: {
 						type: "string",
@@ -4324,15 +11082,22 @@ export const spec: OpenAPISpec = {
 					source: {
 						type: "string",
 						enum: ["sdf", "stellarlight", "lumenloop", "external", "community"],
+						description:
+							"Who stands behind the entry. sdf = SDF authored (the registry's Included Stellar Skills section). community = community-built: listed on skills.stellar.org under its author's maintenance and not reviewed by SDF (registry present), or an approved submission to this directory (registry absent). stellarlight and lumenloop = curated by those teams; external = an SDK, CLI or tool we list.",
 					},
 					kind: {
 						type: "string",
 						enum: ["skill-md", "mcp-server", "sdk", "cli", "agent-kit", "tool"],
 					},
+					registry: {
+						type: "string",
+						description:
+							"'skills.stellar.org' when the entry is listed on SDF's registry (either section), including a curated entry the registry lists under another name. Absent for entries we curate or host that the registry does not list.",
+					},
 					install: {
 						type: "string",
 						description:
-							"Primary install command (e.g. 'npx skills add stellar/{slug}'). Absent when the entry has no one-line install.",
+							"Primary install command, e.g. 'npx skills add https://github.com/stellar/stellar-dev-skill' for the SDF set (the registry's own command) or 'npx skills add <that repository>' for a community-built entry. Absent when the entry has no one-line install.",
 					},
 					installAlt: {
 						type: "array",
@@ -4358,7 +11123,7 @@ export const spec: OpenAPISpec = {
 					rawUrl: {
 						type: "string",
 						description:
-							"Direct raw SKILL.md URL (SDF skills). Absent elsewhere.",
+							"Direct raw SKILL.md URL for entries listed on skills.stellar.org (SDF authored and community-built). Absent elsewhere.",
 					},
 					compatibility: {
 						type: "array",
@@ -4380,19 +11145,19 @@ export const spec: OpenAPISpec = {
 					userInvocable: {
 						type: "boolean",
 						description:
-							"SDF skills only — whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere.",
+							"Registry entries only (SDF authored and community-built): whether the skill is user-invocable in skills.stellar.org's sense. Absent elsewhere.",
 					},
 					argumentHint: {
 						type: "string",
 						description:
-							"SDF skills only — argument hint (e.g. '[payment task]'). Absent elsewhere.",
+							"Registry entries only: argument hint (e.g. '[payment task]'). Absent elsewhere.",
 					},
 				},
 			},
 			Cluster: {
 				type: "object",
 				description:
-					"One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count (sls-035): the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues.",
+					"One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues.",
 				properties: {
 					key: {
 						type: "string",
@@ -4450,7 +11215,7 @@ export const spec: OpenAPISpec = {
 			LeaderboardProject: {
 				type: "object",
 				description:
-					"One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS (sls-036).",
+					"One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS.",
 				properties: {
 					rank: {
 						type: "integer",
@@ -4518,6 +11283,19 @@ export const spec: OpenAPISpec = {
 								description:
 									"Sum of OPEN issues (EXCLUDES pull requests — will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking.",
 							},
+							commits90d: {
+								type: "integer",
+								nullable: true,
+								description:
+									"Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking — the directory is the instrument, not a subject.",
+							},
+							commits90dAsOf: {
+								type: "string",
+								format: "date-time",
+								nullable: true,
+								description:
+									"The newest activitySignals.asOf among the repos summed into commits90d — the date the count is good for. null when commits90d is null.",
+							},
 							lastActivityAt: {
 								type: "string",
 								format: "date-time",
@@ -4530,6 +11308,12 @@ export const spec: OpenAPISpec = {
 								description:
 									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
 							},
+							repos: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
+							},
 						},
 					},
 				},
@@ -4537,18 +11321,25 @@ export const spec: OpenAPISpec = {
 			Stablecoin: {
 				type: "object",
 				description:
-					"One Stellar stablecoin from /api/stablecoins, proxied from the stablecoin snapshot service. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not tracked, never 'zero'.",
+					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
 				properties: {
+					assetId: {
+						type: "string",
+						nullable: true,
+						description:
+							"`CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous.",
+					},
 					ticker: {
 						type: "string",
-						description: "Asset code (USDC, USDY, GYEN, …).",
+						description:
+							"Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId.",
 					},
 					name: { type: "string", nullable: true },
 					issuer: {
 						type: "string",
 						nullable: true,
 						description:
-							"Stellar issuer account (G…) — the universal join key.",
+							"Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity.",
 					},
 					issuerDomain: { type: "string", nullable: true },
 					company: { type: "string", nullable: true },
@@ -4560,22 +11351,36 @@ export const spec: OpenAPISpec = {
 							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
 					},
 					country: { type: "string", nullable: true },
+					assetType: {
+						type: "string",
+						nullable: true,
+						description:
+							"Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
+					},
 					supply: {
 						type: "number",
 						nullable: true,
 						description:
-							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not reported.",
+							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured.",
 					},
 					marketCapUSD: {
 						type: "number",
 						nullable: true,
 						description:
-							"Supply valued in USD (supply × USD price) — THE comparable ranking metric (default sort). Null = unpriced.",
+							"Supply valued in USD (supply × priceUSD) — THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation.",
 					},
 					priceUSD: {
 						type: "number",
 						nullable: true,
-						description: "USD price of one unit (≈1 for USD pegs).",
+						description:
+							"USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which — do not assume ≈1 on a USD row.",
+					},
+					priceBasis: {
+						type: "string",
+						nullable: true,
+						enum: [...PRICE_BASES],
+						description:
+							"How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg — Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.",
 					},
 					holders: {
 						type: "number",
@@ -4588,25 +11393,62 @@ export const spec: OpenAPISpec = {
 						description: "24h transfer volume in USD.",
 					},
 					supplyChange7d: {
+						type: "number",
+						nullable: true,
+						description:
+							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'.",
+					},
+					basis: {
 						type: "string",
 						nullable: true,
-						description: "7-day supply change (display string, e.g. '-5.80%').",
+						// NOT `null` in the enum — a null enum member crashes spectral
+						// ("Cannot read properties of null (reading 'enum')");
+						// `nullable: true` already carries it.
+						enum: ["live", "curated-static", "unmeasured"],
+						description:
+							"How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.",
 					},
-					verified: { type: "boolean" },
+					note: {
+						type: "string",
+						nullable: true,
+						description:
+							"Plain-words reason a row is curated-static or unmeasured. Null for live rows.",
+					},
+					logoUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag) — absence is not itself an error.",
+					},
+					logoSource: {
+						type: "string",
+						nullable: true,
+						// NOT `null` in the enum — a null enum member crashes spectral
+						// ("Cannot read properties of null (reading 'enum')");
+						// `nullable: true` already carries it.
+						enum: ["toml", "toml-org", "fallback", "country-flag", "none"],
+						description:
+							"Provenance of logoUrl. toml = the issuer's own per-currency image. toml-org = the same toml's org-level mark, used when no per-currency image exists but the org one resolves. fallback = a hand-curated override. country-flag = the peg's flag IS the intended mark, not a stand-in. none = nothing resolved, logoUrl is null.",
+					},
+					verified: {
+						type: "boolean",
+						description:
+							"True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal.",
+					},
 					updatedAt: {
 						type: "string",
 						format: "date-time",
 						nullable: true,
 						description:
-							"When this snapshot row was refreshed (dated-metrics rule).",
+							"When these figures were measured (dated-metrics rule). Always cite it.",
 					},
 				},
 			},
 			FeedbackRequest: {
 				type: "object",
-				required: ["kind", "message"],
+				required: ["kind"],
 				description:
-					"Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema).",
+					"Optional reporting context is NESTED under `context` (matches the live endpoint + the GET /api/feedback self-schema). Per-kind requiredness: report kinds (bug/missing-data/wrong-answer/suggestion/other) require `message` (≥10 chars); vote kinds (worked/did-not-work) require `target` and may omit `message`. Votes aggregate nightly into per-target feedbackSignal (distinct voters, floor-gated).",
 				properties: {
 					kind: {
 						type: "string",
@@ -4616,9 +11458,20 @@ export const spec: OpenAPISpec = {
 							"wrong-answer",
 							"suggestion",
 							"other",
+							"worked",
+							"did-not-work",
 						],
 					},
 					message: { type: "string", minLength: 10, maxLength: 4000 },
+					target: {
+						type: "object",
+						description:
+							"Required on vote kinds: what the vote is about. surface 'projects' targets a directory slug; 'repos' targets a repo fullName (owner/name).",
+						properties: {
+							surface: { type: "string", enum: ["projects", "repos"] },
+							slug: { type: "string", maxLength: 200 },
+						},
+					},
 					context: {
 						type: "object",
 						description: "Optional context about what triggered the feedback.",

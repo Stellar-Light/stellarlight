@@ -1,0 +1,58 @@
+name: weak-basis liveness
+
+# The softest claims in the directory: Live rows resting on site-liveness,
+# source-inherited or unverified whose every linked repo is over a year
+# silent. Repo staleness is never judged here — the PRODUCT is re-probed at
+# its own URL, through the same judgeStamp the packet guard uses.
+# workflow-health: signal-steps: ^Sweep$
+
+permissions: { contents: write }
+
+on:
+  schedule:
+    - cron: "17 8 * * 4"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "How many rows to probe (oldest evidence first)"
+        default: "60"
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Sweep
+        run: pnpm exec tsx scripts/check-weak-basis-liveness.ts --limit=${{ github.event.inputs.limit || 60 }}
+      # Only after the sweep actually ran. With `if: always()` a skipped sweep
+      # still reported a successful commit step, so the run looked half-green
+      # while nothing had been probed.
+      - name: Commit the artifact
+        if: success() || failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add improvements/audits/weak-basis-liveness-latest.json || true
+          git diff --cached --quiet || git commit -m "chore(audit): weak-basis liveness sweep [skip ci]"
+          # Push races and dirty trees both hit this step (2026-09-15): the
+          # gone-repos lane's dry run lost its artifact to `cannot lock ref
+          # 'refs/heads/main'` while another lane pushed, and its execute run to
+          # `cannot pull with rebase: You have unstaged changes` — so the probe's
+          # own record never persisted and every later run would have re-reported
+          # the same 147 findings as new. This is the retry shape lane-autonomy
+          # and packet-stamps already use: push first, and on rejection rebase
+          # keeping THIS run's measurement (`-X theirs` — in a rebase the sides
+          # are swapped, so `theirs` is the commit being replayed). --autostash
+          # covers a working tree the script dirtied after `git add`.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
+          git push

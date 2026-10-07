@@ -1,5 +1,5 @@
 {
-	"$comment": "Stellar Light golden-question retrieval eval. We're the data/index layer, so each question is graded (case-insensitive) over the TOP-K SURFACED CONTENT. `mode` routes to the endpoint: research → /api/research (content), projects → /api/projects/search (projects), repos → /api/repos/search (code references). `answerRegex` = patterns that must EACH surface (the right thing shows up). `forbiddenRegex` = patterns that must NOT surface — the correctness check: a wrong/stale fact in the top-k FAILS the case even when the topic matched. `liveSource: true` marks live-network facts the static corpus isn't meant to answer (reported N/A). `expectUrlIncludes` = a substring an expected doc URL should contain. `minTopScore` = the best result's score must clear it: for research it's the vector cosine; for repos it's the leading repo's repoScore (0-100) — a QUALITY FLOOR so junk can't be the #1 code reference for a tech query. Storing isn't enough; the right content has to surface, the wrong content must not, and the top reference has to be quality.",
+	"$comment": "Stellar Light golden-question retrieval eval. We're the data/index layer, so each question is graded (case-insensitive) over the TOP-K SURFACED CONTENT. `mode` routes to the endpoint: research \u2192 /api/research (content), projects \u2192 /api/projects/search (projects), repos \u2192 /api/repos/search (code references). `answerRegex` = patterns that must EACH surface (the right thing shows up). `forbiddenRegex` = patterns that must NOT surface \u2014 the correctness check: a wrong/stale fact in the top-k FAILS the case even when the topic matched. `liveSource: true` marks live-network facts the static corpus isn't meant to answer (reported N/A). `expectUrlIncludes` = a substring an expected doc URL should contain. `minTopScore` = the best result's score must clear it: for research it's the vector cosine; for repos it's the leading repo's repoScore (0-100) \u2014 a QUALITY FLOOR so junk can't be the #1 code reference for a tech query. Storing isn't enough; the right content has to surface, the wrong content must not, and the top reference has to be quality.",
 	"questions": [
 		{
 			"id": "agentic-payments-x402",
@@ -90,7 +90,7 @@
 			"id": "dossier-blend-safety",
 			"category": "project-dossier",
 			"mode": "research",
-			"question": "Tell me about the Blend protocol on Stellar — is it safe to build on?",
+			"question": "Tell me about the Blend protocol on Stellar \u2014 is it safe to build on?",
 			"expect": {
 				"liveSource": false,
 				"answerRegex": [
@@ -263,7 +263,7 @@
 			"question": "What is the current base reserve on Stellar mainnet?",
 			"expect": {
 				"liveSource": true,
-				"note": "Live network value — served by adapters/RPC, not the static research corpus."
+				"note": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
 			}
 		},
 		{
@@ -273,7 +273,7 @@
 			"question": "Which version of soroban-sdk should I pin today for a brand-new contract?",
 			"expect": {
 				"liveSource": true,
-				"note": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+				"note": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
 			}
 		},
 		{
@@ -373,7 +373,7 @@
 					"stellar\\.gitbook\\.io/scf-handbook",
 					"Welcome to the SCF Handbook"
 				],
-				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it. 2026-07-14: the URL regex was JSON-over-escaped (\\\\\\\\. parsed to a regex demanding a literal backslash, which no URL contains) — the lock could never match even though live serves https://stellar.gitbook.io/scf-handbook at rank 1. Expectation fixed, retrieval was already correct."
+				"note": "Emir's demo ask 2026-07-09: a known-item lookup for a SOURCE itself must return the source's root link top-K. Our lane answered rank-1 when probed directly; this guards it. 2026-07-14: the URL regex was JSON-over-escaped (\\\\\\\\. parsed to a regex demanding a literal backslash, which no URL contains) \u2014 the lock could never match even though live serves https://stellar.gitbook.io/scf-handbook at rank 1. Expectation fixed, retrieval was already correct."
 			}
 		},
 		{
@@ -440,7 +440,7 @@
 					"\\$61 ?m|61 million dollars"
 				],
 				"top1UrlIncludes": "blockaid.io",
-				"note": "sls-022 (upstream #513): the incident row served 'May 2026, attempted & contained, $61 million in XLM'. Truth (Blockaid 2026-05-20 + BlockSec 2026-02-26): COMPLETED drain on 2026-02-22 of 61,249,278 XLM + ~1,000,197 USDC (~$10.2M); ~48M XLM later quarantined — quarantine is not recovery. The corrected curated record (cited to Blockaid) must be the top result; the wrong dating/amount phrasing must not surface. Expected to fail until the next refresh-research-corpus incident run lands."
+				"note": "sls-022 (upstream #513): the incident row served 'May 2026, attempted & contained, $61 million in XLM'. Truth (Blockaid 2026-05-20 + BlockSec 2026-02-26): COMPLETED drain on 2026-02-22 of 61,249,278 XLM + ~1,000,197 USDC (~$10.2M); ~48M XLM later quarantined \u2014 quarantine is not recovery. The corrected curated record (cited to Blockaid) must be the top result; the wrong dating/amount phrasing must not surface. Expected to fail until the next refresh-research-corpus incident run lands."
 			}
 		},
 		{
@@ -453,7 +453,7 @@
 			"expect": {
 				"top1UrlIncludes": "cap-0038.md",
 				"uniqueUrls": true,
-				"note": "sls-019 (upstream #510): q=CAP-0038&source=cap ranked its own document 23rd — cross-referencing CAPs won the vector race. An exact canonical identifier is a retrieval KEY: the named doc must be rank 1, and no URL may fill two slots of the page."
+				"note": "sls-019 (upstream #510): q=CAP-0038&source=cap ranked its own document 23rd \u2014 cross-referencing CAPs won the vector race. An exact canonical identifier is a retrieval KEY: the named doc must be rank 1, and no URL may fill two slots of the page."
 			}
 		},
 		{
@@ -488,7 +488,7 @@
 			"expect": {
 				"top1UrlIncludes": "cap-0035.md",
 				"uniqueUrls": true,
-				"note": "sls-019 dedup lock: q=Asset+Clawback&source=cap served cap-0035.md nine times in one 25-slot page — the source-starved vector pool made the per-doc collapse refill with duplicates. With the widened filtered pool, every URL in the page must be unique while distinct CAP docs exist."
+				"note": "sls-019 dedup lock: q=Asset+Clawback&source=cap served cap-0035.md nine times in one 25-slot page \u2014 the source-starved vector pool made the per-doc collapse refill with duplicates. With the widened filtered pool, every URL in the page must be unique while distinct CAP docs exist."
 			}
 		},
 		{
@@ -504,7 +504,7 @@
 					"2026-05-07|7 may 2026|may 7,? 2026",
 					"openzeppelin"
 				],
-				"note": "sls-020 (Tyler's exact transition wording, expected top-3 → limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
+				"note": "sls-020 (Tyler's exact transition wording, expected top-3 \u2192 limit 3): the 2026-05-07 consolidation record must surface with the effective date, the single HackerOne program, the deprecated general Immunefi program, and the separate active OpenZeppelin-on-Stellar carve-out. Expected to fail until the first ingest-security-program run lands."
 			}
 		},
 		{
@@ -516,7 +516,7 @@
 			"expect": {
 				"answerRegex": ["self-funded", "pays taxes"],
 				"expectUrlIncludes": "foundation/mandate",
-				"note": "sls-055 q-org-sdf-structure-mandate (broad lane, no source filter — mirrors the consumer's own fan-out): the current Mandate page's self-funded/pays-taxes wording must surface top-3 (the Terms page carries the companion Delaware non-profit wording). Expected to fail until the first ingest-sdf-org run lands."
+				"note": "sls-055 q-org-sdf-structure-mandate (broad lane, no source filter \u2014 mirrors the consumer's own fan-out): the current Mandate page's self-funded/pays-taxes wording must surface top-3 (the Terms page carries the companion Delaware non-profit wording). Expected to fail until the first ingest-sdf-org run lands."
 			}
 		},
 		{
@@ -553,7 +553,7 @@
 				"liveSource": false,
 				"answerRegex": ["cobo|bitgo|dfns|mpcvault|fordefi"]
 			},
-			"$comment": "Mention-vs-identity (2026-07-19; key re-grounded 2026-07-21): 'staking' is deliberate noise — a custody-IDENTITY record must rank top-3 above records that merely mention custody mid-prose. Key = any custody-identity record in the directory (cobo was the lone one on 07-19; dfns/bitgo/mpcvault/fordefi are now equally correct — none carries 'staking', by design)."
+			"$comment": "Mention-vs-identity (2026-07-19; key re-grounded 2026-07-21): 'staking' is deliberate noise \u2014 a custody-IDENTITY record must rank top-3 above records that merely mention custody mid-prose. Key = any custody-identity record in the directory (cobo was the lone one on 07-19; dfns/bitgo/mpcvault/fordefi are now equally correct \u2014 none carries 'staking', by design)."
 		},
 		{
 			"id": "pg-award-recipients",
@@ -561,13 +561,56 @@
 			"mode": "projects",
 			"question": "which projects have received the SCF Public Goods Award",
 			"limit": 12,
-  "expect": {
+			"expect": {
 				"answerRegex": [
-					"opengrants",
 					"scaffold[ -]stellar",
-					"(php|java|python) sdk"
-				]
+					"(php|java|python)[ -]?(stellar[ -]?)?sdk"
+				],
+				"forbiddenRegex": ["\"slug\"\\s*:\\s*\"pg-atlas\""],
+				"note": "Enumeration question: the answer set is defined by the publicGoods.awardRounds field, not by prose. A row without an award must not rank among recipients (pg-atlas ranked 7th on name alone, 2026-08-25)."
 			}
+		},
+		{
+			"id": "soroban-hosterror-decode",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "What does HostError Budget LimitExceeded mean and how do I fix it?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["LimitExceeded", "diagnostic|instructions|resource"],
+				"expectUrlIncludes": "errors-and-debugging",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors stellar-raven eval battery q-sor-decode-hosterror-codes (their 6e1f979): our corpus must keep answering the topics their gauntlet grades"
+		},
+		{
+			"id": "soroban-storage-ttl-cap",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "What is the maximum TTL for persistent storage entries in Soroban and how does extend_ttl work?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": ["extend_ttl", "3,?110,?400|180 days|archiv"],
+				"expectUrlIncludes": "storage",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors q-sor-persistent-unbounded-collection-cap"
+		},
+		{
+			"id": "soroban-test-event-assertions",
+			"category": "soroban-dev",
+			"mode": "research",
+			"question": "How do I assert on events emitted by a Soroban contract in tests?",
+			"expect": {
+				"liveSource": false,
+				"answerRegex": [
+					"events\\(\\)\\.all\\(\\)",
+					"last contract invocation|filter_by_contract"
+				],
+				"expectUrlIncludes": "events",
+				"minTopScore": 0.65
+			},
+			"_note": "mirrors q-sor-test-event-assertion-ordering"
 		}
 	]
 }

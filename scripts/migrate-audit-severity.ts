@@ -14,11 +14,8 @@
  *   pnpm exec tsx scripts/migrate-audit-severity.ts          # dry run
  *   pnpm exec tsx scripts/migrate-audit-severity.ts --execute
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import type { AuditSeverity } from "../src/lib/research-ingest";
 import configPromise from "../src/payload.config";

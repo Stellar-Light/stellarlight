@@ -1,0 +1,67 @@
+name: Supersession freshness
+
+# P5: an archived curated-pool repo with no REPO_SUPERSESSIONS entry served
+# "archived" with no successor and no date until somebody re-read it. Weekly,
+# from the public repos API. A red here is the refresh queue, not a broken lane.
+#
+# The declaration must name the step that ACTUALLY carries the red. "Check" is
+# continue-on-error, so it can never fail the job — the job dies at the
+# propagate step below, which the old `^Check$` declaration did not match. So
+# workflow-health correctly read this lane as ALWAYS-RED/broken from the day it
+# was written, and it stayed that way (2026-09-08 → 2026-09-13) with a real
+# finding underneath: 6 archived curated-pool repos with no supersession entry.
+# workflow-health: signal-steps: ^(Check|Propagate the check's exit code)$
+
+on:
+  schedule:
+    - cron: "47 7 * * 2" # weekly, Tue 07:47 UTC — off the top of the hour
+  workflow_dispatch:
+
+permissions: { contents: write }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Check
+        id: check
+        continue-on-error: true
+        # The script is trinary — 1 = missing entries (a finding), 2 = the API
+        # did not answer (the run is BLIND). continue-on-error collapses both
+        # into `failure`, so carry the code forward and let the propagate step
+        # say which happened.
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/check-supersession-freshness.ts --json
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
+      - name: Commit the artifact if it changed
+        run: |
+          set -euo pipefail
+          git config user.name "stellarlight-bot"
+          git config user.email "bot@stellarlight.xyz"
+          git add improvements/audits/supersession-freshness-latest.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "data(quality): supersession freshness [skip ci]"
+          git pull --rebase origin main
+          git push
+      - name: Propagate the check's exit code
+        if: steps.check.outcome == 'failure'
+        run: |
+          if [ "${{ steps.check.outputs.code }}" = "2" ]; then
+            echo "BLIND: the repos API did not answer, so this run checked nothing."
+            echo "That is a could-not-check, NOT a finding — no claim is made about coverage."
+          else
+            echo "FINDING: archived curated-pool repos have no REPO_SUPERSESSIONS entry."
+            echo "A refresh queue, not a defect — see the Check step for the list."
+          fi
+          exit 1

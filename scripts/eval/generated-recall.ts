@@ -16,7 +16,10 @@
  *   P-KNOWN   projects known-item: exact name → top-3
  *   P-TYPE    type browse: for each type, ≥half of top-10 carries the type
  *   P-ATTR    attributes: coverage.countries / seps / supportedNetworks →
- *             the implying record in top-10
+ *             the implying record within a window that scales with how many
+ *             records actually matched (top-10 of 12 is recall; top-10 of 91
+ *             is a ranking preference). Probe construction + grading live in
+ *             src/lib/recall-probes.ts so they can be unit-tested.
  *   PA-CAP    partners: sector/rampType capability queries → record top-10
  *   B-USER    builders: githubUsername → record returned
  *   R-SYM     repos: a codeVerified symbol → carrier repo in top-5
@@ -26,6 +29,13 @@
  * when a bucket falls below its floor, so the weekly workflow goes red on
  * regression without gating PRs. Engine C later files issues from this.
  */
+
+import { DEGRADED_READ_PREFIX, isDegraded } from "../../src/lib/degraded-read";
+import {
+	ATTR_MAX_WINDOW,
+	gradeAttrProbe,
+	networkProbeQuery,
+} from "../../src/lib/recall-probes";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -43,22 +53,128 @@ interface Failure {
 }
 
 const failures: Failure[] = [];
-const buckets = new Map<string, { ok: number; total: number }>();
+// Could-not-check: the probe never got an answer (a 5xx after the retry, a
+// network error, a redirect, a page whose meta.warnings says a backend read
+// failed) — the trinary state the recall question cannot grade. It reaches
+// the board and the JSON as `unchecked`, never `failures`:
+// every fetch error used to be tallied as a miss with `expected:
+// "response"`, and the ledger keys rows by `expected`, so they all collapsed
+// into ONE row, engine-a-recall:response, open since 2026-07-22 and revived
+// by any single transient. Retrieval is graded on what was actually read.
+const unchecked: Failure[] = [];
+const buckets = new Map<
+	string,
+	{ ok: number; total: number; unchecked: number }
+>();
 
 function tally(bucket: string, ok: boolean, f?: Omit<Failure, "bucket">) {
-	const b = buckets.get(bucket) ?? { ok: 0, total: 0 };
+	const b = buckets.get(bucket) ?? { ok: 0, total: 0, unchecked: 0 };
 	b.total++;
 	if (ok) b.ok++;
 	else if (f) failures.push({ bucket, ...f });
 	buckets.set(bucket, b);
 }
 
-async function j(path: string): Promise<any> {
+function couldNotCheck(bucket: string, f: Omit<Failure, "bucket">) {
+	const b = buckets.get(bucket) ?? { ok: 0, total: 0, unchecked: 0 };
+	b.unchecked++;
+	unchecked.push({ bucket, ...f });
+	buckets.set(bucket, b);
+}
+
+/** meta.warnings of a page, or [] when it carries none. */
+function warningsOf(d: unknown): string[] {
+	const w = (d as { meta?: { warnings?: unknown } } | null)?.meta?.warnings;
+	return Array.isArray(w)
+		? w.filter((x): x is string => typeof x === "string")
+		: [];
+}
+
+/**
+ * A page that SAYS a backend read failed (a "backend read failed: …" line on
+ * meta.warnings — src/lib/degraded-read.ts, the serving side of the
+ * 2026-09-14 class) is could-not-check, never a miss: the API itself reports
+ * the rows as incomplete. Thrown, so each bucket's existing catch routes it
+ * through couldNotCheck with the warning as `observed`.
+ */
+function rejectDegraded<T>(d: T): T {
+	const w = warningsOf(d);
+	if (isDegraded(w))
+		throw new Error(
+			`degraded page: ${w.find((x) => x.startsWith(DEGRADED_READ_PREFIX))}`,
+		);
+	return d;
+}
+
+// Vercel preview deployments sit behind SSO deployment protection, so an
+// unauthenticated probe gets a 302 to vercel.com/sso-api and the eval measures
+// nothing. Vercel's "Protection Bypass for Automation" secret lifts that for
+// automated callers; without it set, this is inert and prod still works.
+const BYPASS = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+
+async function jOnce(path: string): Promise<any> {
 	const res = await fetch(`${BASE}${path}`, {
-		headers: { "User-Agent": "stellarlight-engine-a" },
+		redirect: "manual",
+		headers: {
+			"User-Agent": "stellarlight-engine-a",
+			...(BYPASS ? { "x-vercel-protection-bypass": BYPASS } : {}),
+		},
 	});
+	// A protection redirect is not a result — fail loudly rather than scoring a
+	// login page as a miss, which would silently report a catastrophic run.
+	if (res.status >= 300 && res.status < 400) {
+		const loc = res.headers.get("location") ?? "";
+		if (loc.includes("vercel.com/sso") || loc.includes("_vercel"))
+			throw new Error(
+				`deployment protection blocked ${path} — set VERCEL_AUTOMATION_BYPASS_SECRET (Vercel → Settings → Deployment Protection → Protection Bypass for Automation)`,
+			);
+		throw new Error(`unexpected redirect ${res.status} ${path} -> ${loc}`);
+	}
 	if (!res.ok) throw new Error(`${res.status} ${path}`);
 	return res.json();
+}
+
+/**
+ * One fetch, one retry on a 5xx — the same transient class as an empty page
+ * under write load (see reprobeIfEmpty). The 2026-09-14 15:31Z run filed
+ * three P-PHRASE misses whose `observed` was `Error: 500 …`; all three
+ * answered at strict #1 minutes later. Two 5xx in a row still count: an API
+ * that fails a real query twice is a finding, just not a retrieval one.
+ */
+async function j(path: string): Promise<any> {
+	try {
+		return await jOnce(path);
+	} catch (e) {
+		if (!/^5\d\d /.test(String((e as Error).message))) throw e;
+		await new Promise((r) => setTimeout(r, 2000));
+		return jOnce(path);
+	}
+}
+
+/**
+ * A name lookup that comes back EMPTY is re-probed once before it counts as
+ * a miss. Two runs in two days filed exact-name misses that hit at #1
+ * minutes later — 2 of 2,229 probes during a production deploy rollover
+ * (2026-09-13), 6 of 2,229 while the enrich pass was writing repo rows
+ * (2026-09-14, engine-c run 34807578293) — and each would have opened a
+ * ledger row for a week. An empty page under write load is a transient
+ * read, not retrieval; the re-probe separates the two. A non-empty wrong
+ * answer is never retried: that IS the finding.
+ */
+async function reprobeIfEmpty<T extends Record<string, unknown>>(
+	path: string,
+	first: T,
+	key: "projects" | "builders" | "repos" = "projects",
+): Promise<T> {
+	// A warned page is the same transient class as an empty one: re-probe
+	// once; a second warned page is could-not-check (rejectDegraded).
+	if (
+		!isDegraded(warningsOf(first)) &&
+		((first[key] as unknown[] | undefined) ?? []).length
+	)
+		return first;
+	await new Promise((r) => setTimeout(r, 2000));
+	return rejectDegraded(await j(path));
 }
 
 /** Small concurrency pool — be polite to prod. */
@@ -142,7 +258,8 @@ async function main() {
 	await pool(cap(projects), 4, async (p) => {
 		const q = encodeURIComponent(p.name);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=3`);
+			const path = `/api/projects/search?q=${q}&limit=3`;
+			const d = await reprobeIfEmpty(path, await j(path));
 			const ok = (d.projects ?? []).some((r: any) => r.slug === p.slug);
 			tally("P-KNOWN", ok, {
 				area: p.category ?? "?",
@@ -152,7 +269,7 @@ async function main() {
 					(d.projects ?? []).map((r: any) => r.slug).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-KNOWN", false, {
+			couldNotCheck("P-KNOWN", {
 				area: p.category ?? "?",
 				probe: `${BASE}/api/projects/search?q=${q}`,
 				expected: "response",
@@ -193,7 +310,7 @@ async function main() {
 		if (n < 2) continue; // too thin to grade dominance
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=10`);
+			const d = rejectDegraded(await j(`/api/projects/search?q=${q}&limit=10`));
 			const rows = d.projects ?? [];
 			const carrying = rows.filter((r: any) =>
 				(r.types ?? []).includes(type),
@@ -219,7 +336,7 @@ async function main() {
 				});
 			}
 		} catch (e) {
-			tally("P-TYPE", false, {
+			couldNotCheck("P-TYPE", {
 				area: type,
 				probe: phrase,
 				expected: "response",
@@ -241,7 +358,7 @@ async function main() {
 		if ((typeCounts.get(type) ?? 0) < 3) continue;
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=5`);
+			const d = rejectDegraded(await j(`/api/projects/search?q=${q}&limit=5`));
 			const rows = d.projects ?? [];
 			const top = rows[0];
 			tally("P-ORDER", !!top && (top.types ?? []).includes(type), {
@@ -253,7 +370,7 @@ async function main() {
 					: "empty",
 			});
 		} catch (e) {
-			tally("P-ORDER", false, {
+			couldNotCheck("P-ORDER", {
 				area: type,
 				probe: phrase,
 				expected: "response",
@@ -278,7 +395,8 @@ async function main() {
 		const phrase = TEMPLATES[hashIdx(p.slug)](p.name);
 		const q = encodeURIComponent(phrase);
 		try {
-			const d = await j(`/api/projects/search?q=${q}&limit=3`);
+			const path = `/api/projects/search?q=${q}&limit=3`;
+			const d = await reprobeIfEmpty(path, await j(path));
 			const ok = (d.projects ?? []).some((r: any) => r.slug === p.slug);
 			tally("P-PHRASE", ok, {
 				area: p.category ?? "?",
@@ -288,7 +406,7 @@ async function main() {
 					(d.projects ?? []).map((r: any) => r.slug).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-PHRASE", false, {
+			couldNotCheck("P-PHRASE", {
 				area: p.category ?? "?",
 				probe: phrase,
 				expected: "response",
@@ -298,8 +416,24 @@ async function main() {
 	});
 
 	// P-ATTR — records with structured attributes imply attribute queries.
+	// An INACTIVE record implies none: ranking down-ranks Inactive by design
+	// (defunct rows must not surface as active), so "its own coverage implies
+	// 'Argentina anchor'" manufactures a permanent miss the day the subject
+	// dies — ping went Inactive (human-verified, dead site) on 2026-08-28 and
+	// its P-ATTR probe fired nightly ever since. Same idiom as the lineage-
+	// shadow exclusion above: skip, count, say so. Name-identity probes
+	// (P-PHRASE) deliberately KEEP Inactive subjects — a name lookup must
+	// return the record regardless of status.
+	const inactiveAttrSkips = projects.filter(
+		(p) => p.status === "Inactive",
+	).length;
+	if (inactiveAttrSkips)
+		console.error(
+			`P-ATTR: ${inactiveAttrSkips} Inactive record(s) excluded from attribute-implication probes`,
+		);
 	const attrProbes: Array<{ p: any; q: string; area: string }> = [];
 	for (const p of projects) {
+		if (p.status === "Inactive") continue;
 		const c = p.coverage ?? {};
 		if (c.countries?.[0] && (p.types ?? []).includes("Anchor"))
 			attrProbes.push({
@@ -309,19 +443,18 @@ async function main() {
 			});
 		if (c.seps?.[0])
 			attrProbes.push({ p, q: c.seps[0], area: "coverage.seps" });
-		if ((p.supportedNetworks ?? []).find((n: string) => n !== "stellar"))
-			attrProbes.push({
-				p,
-				q: `${(p.supportedNetworks ?? []).find((n: string) => n !== "stellar")} ${(p.types?.[0] ?? "").toLowerCase()}`.trim(),
-				area: "supportedNetworks",
-			});
+		// The network probe needs its discriminator, or it degenerates into a
+		// query about the CHAIN rather than about this record — see
+		// networkProbeQuery + the class it fixes (recall-probes.ts).
+		const netQ = networkProbeQuery(p);
+		if (netQ) attrProbes.push({ p, q: netQ, area: "supportedNetworks" });
 	}
-	// Crowded-bucket fairness: when MANY records imply the same query (10+ EVM
-	// bridges), a per-record top-10 expectation over-demands — grade those at
-	// set level (≥3 impliers present) and keep strict per-record grading for
-	// niche attributes only.
-	const attrCrowd = new Map<string, number>();
-	for (const a of attrProbes) attrCrowd.set(a.q, (attrCrowd.get(a.q) ?? 0) + 1);
+	// Crowded-bucket fairness: when MANY records imply the same query (16 EVM
+	// bridges), a per-record top-10 expectation over-demands — those are graded
+	// at set level (≥3 impliers present). Records with a niche attribute keep
+	// strict per-record grading, but against a window that grows with the
+	// population that actually matched: "top-10 of 12" is recall, "top-10 of
+	// 91" is a ranking preference, and this is the recall bucket.
 	const attrSlugs = new Map<string, Set<string>>();
 	for (const a of attrProbes) {
 		const set = attrSlugs.get(a.q) ?? new Set();
@@ -331,26 +464,30 @@ async function main() {
 	await pool(cap(attrProbes), 4, async ({ p, q, area }) => {
 		const eq = encodeURIComponent(q);
 		try {
-			const d = await j(`/api/projects/search?q=${eq}&limit=10`);
-			const crowd = attrCrowd.get(q) ?? 1;
+			// Fetch the widest window the grader could ask for in one request, so
+			// scaling costs no extra round-trips.
+			const d = rejectDegraded(
+				await j(`/api/projects/search?q=${eq}&limit=${ATTR_MAX_WINDOW}`),
+			);
+			const returned: string[] = (d.projects ?? []).map((r: any) => r.slug);
 			const impliers = attrSlugs.get(q) ?? new Set([p.slug]);
-			const ok =
-				crowd > 4
-					? (d.projects ?? []).filter((r: any) => impliers.has(r.slug))
-							.length >= 3
-					: (d.projects ?? []).some((r: any) => r.slug === p.slug);
+			const { ok, window, mode } = gradeAttrProbe({
+				slug: p.slug,
+				impliers,
+				returned,
+				totalMatches: d.meta?.counts?.total ?? returned.length,
+			});
 			tally("P-ATTR", ok, {
 				area,
-				probe: `${BASE}/api/projects/search?q=${eq}&limit=10`,
-				expected: `${p.slug} in top-10 (its own ${area} implies '${q}')`,
-				observed:
-					(d.projects ?? [])
-						.slice(0, 5)
-						.map((r: any) => r.slug)
-						.join(", ") || "empty",
+				probe: `${BASE}/api/projects/search?q=${eq}&limit=${window}`,
+				expected:
+					mode === "set"
+						? `≥3 of the ${impliers.size} records implying '${q}' in top-${window}`
+						: `${p.slug} in top-${window} of ${d.meta?.counts?.total ?? "?"} matches (its own ${area} implies '${q}')`,
+				observed: returned.slice(0, 5).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("P-ATTR", false, {
+			couldNotCheck("P-ATTR", {
 				area,
 				probe: q,
 				expected: "response",
@@ -372,7 +509,7 @@ async function main() {
 	}
 	await pool(cap(paProbes), 4, async ({ pa, path, desc }) => {
 		try {
-			const d = await j(path);
+			const d = rejectDegraded(await j(path));
 			const ok = (d.partners ?? []).some((r: any) => r.slug === pa.slug);
 			tally("PA-CAP", ok, {
 				area: pa.partnerType ?? "?",
@@ -381,7 +518,7 @@ async function main() {
 				observed: `${(d.partners ?? []).length} rows, absent`,
 			});
 		} catch (e) {
-			tally("PA-CAP", false, {
+			couldNotCheck("PA-CAP", {
 				area: desc,
 				probe: path,
 				expected: "response",
@@ -396,7 +533,10 @@ async function main() {
 	await pool(cap(withUser), 4, async (b: any) => {
 		const q = encodeURIComponent(b.githubUsername);
 		try {
-			const d = await j(`/api/builders?q=${q}&limit=10`);
+			// 13 of 100 logins read "0 rows" during the 2026-09-14 16:06Z run and
+			// every one answered live minutes later — the same transient class.
+			const bpath = `/api/builders?q=${q}&limit=10`;
+			const d = await reprobeIfEmpty(bpath, await j(bpath), "builders");
 			const ok = (d.builders ?? []).some(
 				(r: any) => r.githubUsername === b.githubUsername,
 			);
@@ -407,7 +547,7 @@ async function main() {
 				observed: `${(d.builders ?? []).length} rows, absent`,
 			});
 		} catch (e) {
-			tally("B-USER", false, {
+			couldNotCheck("B-USER", {
 				area: "builders",
 				probe: String(b.githubUsername),
 				expected: "response",
@@ -422,11 +562,41 @@ async function main() {
 	const withSyms = repoSeed.filter(
 		(r: any) => (r.codeVerified?.symbols ?? []).length > 0,
 	);
+	// A known-item probe needs a symbol that IDENTIFIES the item. symbols[0]
+	// is almost always contract boilerplate (initialize, __constructor) shared
+	// by dozens of repos, so at most 5 of them can ever be "in top-5 for it" -
+	// those probes were structurally unwinnable, and grading them as recall
+	// misses was eval noise (4 of 9 R-SYM failures on 2026-08-28). Probe the
+	// most distinctive symbol instead: longest wins as the cheap proxy for
+	// rarest, boilerplate excluded outright.
+	const BOILERPLATE_SYMS = new Set([
+		"initialize",
+		"init",
+		"__constructor",
+		"constructor",
+		"new",
+		"default",
+		"upgrade",
+		"version",
+		"balance",
+		"transfer",
+		"approve",
+		"allowance",
+		"mint",
+		"burn",
+	]);
 	await pool(cap(withSyms).slice(0, 30), 4, async (r: any) => {
-		const sym = r.codeVerified.symbols[0];
+		const syms = (r.codeVerified.symbols as string[]).filter(
+			(x) => !BOILERPLATE_SYMS.has(x.toLowerCase()),
+		);
+		// A repo whose EVERY symbol is boilerplate has no discriminative handle;
+		// probing it proves nothing either way.
+		if (syms.length === 0) return;
+		const sym = syms.sort((a, b) => b.length - a.length)[0];
 		const q = encodeURIComponent(sym);
 		try {
-			const d = await j(`/api/repos/search?q=${q}&limit=5`);
+			const rpath = `/api/repos/search?q=${q}&limit=5`;
+			const d = await reprobeIfEmpty(rpath, await j(rpath), "repos");
 			const ok = (d.repos ?? []).some((x: any) => x.fullName === r.fullName);
 			tally("R-SYM", ok, {
 				area: "repos-symbols",
@@ -436,7 +606,7 @@ async function main() {
 					(d.repos ?? []).map((x: any) => x.fullName).join(", ") || "empty",
 			});
 		} catch (e) {
-			tally("R-SYM", false, {
+			couldNotCheck("R-SYM", {
 				area: "repos-symbols",
 				probe: sym,
 				expected: "response",
@@ -469,14 +639,37 @@ async function main() {
 			bucket: k,
 			ok: v.ok,
 			total: v.total,
+			unchecked: v.unchecked,
 			rate: Math.round(rate * 1000) / 10,
 			floor: floor * 100,
 			status,
 		};
 	});
+	// Not red, but not silent: a run that could not read a visible share of
+	// its probes is measuring the API, not retrieval — say so where the lane
+	// log and the artifact both carry it.
+	const probed = board.reduce((n, b) => n + b.total + b.unchecked, 0);
+	if (unchecked.length > probed * 0.02)
+		console.error(
+			`WARN: ${unchecked.length} of ${probed} probes could not be checked (5xx / network) — the API was unwell during this run`,
+		);
 
 	if (JSON_OUT) {
-		console.log(JSON.stringify({ base: BASE, board, failures }, null, 1));
+		console.log(
+			JSON.stringify(
+				// generatedAt travels IN the artifact: the guard derives freshness
+				// from it, and a stampless run previously rendered as ageless.
+				{
+					generatedAt: new Date().toISOString(),
+					base: BASE,
+					board,
+					failures,
+					unchecked,
+				},
+				null,
+				1,
+			),
+		);
 	} else {
 		console.log("\n── Engine A scoreboard ──");
 		for (const b of board)
@@ -490,6 +683,11 @@ async function main() {
 			);
 		if (failures.length > 60)
 			console.log(`  … +${failures.length - 60} more (use --json for all)`);
+		if (unchecked.length) {
+			console.log(`\n── could not check (${unchecked.length}) ──`);
+			for (const f of unchecked.slice(0, 20))
+				console.log(`  [${f.bucket}] ${f.observed}`);
+		}
 	}
 	process.exit(red ? 1 : 0);
 }

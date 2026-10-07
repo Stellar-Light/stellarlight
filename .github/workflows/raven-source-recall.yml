@@ -1,0 +1,28 @@
+name: Raven source recall (manual)
+# Read-only: asks our research API every golden card in Raven's public eval
+# corpus (stellar-experimental/stellar-raven, Apache-2.0) and reports where
+# the gold documents rank, which are in the corpus but ranked out, and which
+# a scoped probe cannot find (candidate ingestion gaps). GitHub + our public
+# API only; no secrets. Paced under the research route's 60/min limit.
+on:
+  workflow_dispatch:
+    inputs:
+      ref: { description: "Raven repo ref for the cards", type: string, default: main }
+permissions: { contents: read }
+jobs:
+  recall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - env:
+          REF: ${{ inputs.ref }}
+        run: pnpm exec tsx scripts/eval/raven-source-recall.ts --ref "$REF" --out raven-source-recall.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: raven-source-recall, path: raven-source-recall.jsonl, if-no-files-found: ignore }

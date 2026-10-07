@@ -1,0 +1,39 @@
+name: Regrade repos (manual)
+
+# Recomputes repoScore for every repo from fields already stored — no GitHub
+# calls, so no PAT budget. Exists because the grade is written by whichever
+# lane owns a row, and the lanes do not cover the same rows: a formula change
+# otherwise reaches only what they happen to touch next, and never reaches
+# hackathon rows at all (graded once at ingest, never again).
+# workflow-health: signal-steps: ^Regrade$
+
+permissions: { contents: read }
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: regrade-repos
+  cancel-in-progress: false
+
+jobs:
+  regrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Regrade
+        run: pnpm exec tsx scripts/regrade-repos.ts ${{ inputs.execute && '--execute' || '' }}

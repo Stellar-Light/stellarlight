@@ -2,10 +2,13 @@
 
 import { motion, useSpring } from "motion/react";
 import { useEffect } from "react";
+import { type SpringConfig, useChartConfig } from "../chart-config-context";
 import { chartCssVars } from "../chart-context";
-
-// Faster spring for crosshair - responsive to mouse movement
-const crosshairSpringConfig = { stiffness: 300, damping: 30 };
+import {
+	type IndicatorFadeEdges,
+	indicatorFadeGradientStops,
+	resolveVerticalFadeSides,
+} from "../indicator-fade";
 
 export type IndicatorWidth =
 	| number // Pixel width
@@ -37,10 +40,18 @@ export interface TooltipIndicatorProps {
 	colorEdge?: string;
 	/** Secondary color at center (50%) */
 	colorMid?: string;
-	/** Whether to fade to transparent at 0% and 100% */
-	fadeEdges?: boolean;
+	/** Vertical fade: both ends, top, bottom, or none (solid). */
+	fadeEdges?: IndicatorFadeEdges | boolean;
+	/** Fade zone size as a percentage of indicator height. Default: 10 */
+	fadeLength?: number;
+	/** Animate position with a spring. Default: true */
+	animate?: boolean;
 	/** Unique ID for the gradient */
 	gradientId?: string;
+	/** Per-chart override; falls back to `ChartConfigProvider.tooltipSpring`. */
+	springConfig?: SpringConfig;
+	/** SVG stroke dash pattern. When set, renders a dashed stroke instead of a solid fill. */
+	strokeDasharray?: string;
 }
 
 function resolveWidth(width: IndicatorWidth): number {
@@ -61,59 +72,136 @@ function resolveWidth(width: IndicatorWidth): number {
 	}
 }
 
-export function TooltipIndicator({
+// Inner-only-on-visible so `useSpring` initializes at the real cursor x
+// instead of 0 on first hover.
+export function TooltipIndicator(props: TooltipIndicatorProps) {
+	if (!props.visible) {
+		return null;
+	}
+	return <TooltipIndicatorInner {...props} />;
+}
+
+function TooltipIndicatorInner({
 	x,
-	height,
 	visible,
+	height,
 	width = "line",
 	span,
 	columnWidth,
 	colorEdge = chartCssVars.crosshair,
 	colorMid = chartCssVars.crosshair,
-	fadeEdges = true,
+	fadeEdges = "both",
+	fadeLength = 10,
+	animate = true,
 	gradientId = "tooltip-indicator-gradient",
+	springConfig,
+	strokeDasharray,
 }: TooltipIndicatorProps) {
+	const { tooltipSpring } = useChartConfig();
+	const effectiveSpring = springConfig ?? tooltipSpring;
+
 	const pixelWidth =
 		span !== undefined && columnWidth !== undefined
 			? span * columnWidth
 			: resolveWidth(width);
 
-	const animatedX = useSpring(x - pixelWidth / 2, crosshairSpringConfig);
+	const rectX = x - pixelWidth / 2;
+	const lineX = x;
+	const animatedX = useSpring(rectX, effectiveSpring);
+	const animatedLineX = useSpring(lineX, effectiveSpring);
 
-	useEffect(() => {
-		animatedX.set(x - pixelWidth / 2);
-	}, [x, animatedX, pixelWidth]);
-
-	if (!visible) {
-		return null;
+	if (animate) {
+		animatedX.set(rectX);
+		animatedLineX.set(lineX);
 	}
 
-	const edgeOpacity = fadeEdges ? 0 : 1;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: we need to jump the animatedX when the visible prop changes
+	useEffect(() => {
+		animatedX.set(rectX);
+		animatedLineX.set(lineX);
+	}, [animatedLineX, animatedX, lineX, rectX, visible]);
 
-	return (
-		<g>
-			<defs>
-				<linearGradient id={gradientId} x1="0%" x2="0%" y1="0%" y2="100%">
-					<stop
-						offset="0%"
-						style={{ stopColor: colorEdge, stopOpacity: edgeOpacity }}
-					/>
-					<stop offset="10%" style={{ stopColor: colorEdge, stopOpacity: 1 }} />
-					<stop offset="50%" style={{ stopColor: colorMid, stopOpacity: 1 }} />
-					<stop offset="90%" style={{ stopColor: colorEdge, stopOpacity: 1 }} />
-					<stop
-						offset="100%"
-						style={{ stopColor: colorEdge, stopOpacity: edgeOpacity }}
-					/>
-				</linearGradient>
-			</defs>
+	const indicatorFill = colorMid || colorEdge;
+	const fadeSides = resolveVerticalFadeSides(fadeEdges);
+	const dashed = Boolean(strokeDasharray);
+
+	if (dashed) {
+		const strokeWidth = Math.max(1, pixelWidth);
+		return animate ? (
+			<motion.line
+				stroke={indicatorFill}
+				strokeDasharray={strokeDasharray}
+				strokeWidth={strokeWidth}
+				x1={animatedLineX}
+				x2={animatedLineX}
+				y1={0}
+				y2={height}
+			/>
+		) : (
+			<line
+				stroke={indicatorFill}
+				strokeDasharray={strokeDasharray}
+				strokeWidth={strokeWidth}
+				x1={lineX}
+				x2={lineX}
+				y1={0}
+				y2={height}
+			/>
+		);
+	}
+
+	if (!fadeSides.any) {
+		return animate ? (
 			<motion.rect
-				fill={`url(#${gradientId})`}
+				fill={indicatorFill}
 				height={height}
 				width={pixelWidth}
 				x={animatedX}
 				y={0}
 			/>
+		) : (
+			<rect
+				fill={indicatorFill}
+				height={height}
+				width={pixelWidth}
+				x={rectX}
+				y={0}
+			/>
+		);
+	}
+
+	const fadeStops = indicatorFadeGradientStops(fadeSides, fadeLength);
+
+	return (
+		<g>
+			<defs>
+				<linearGradient id={gradientId} x1="0%" x2="0%" y1="0%" y2="100%">
+					{fadeStops.map((stop) => (
+						<stop
+							key={stop.offset}
+							offset={stop.offset}
+							style={{ stopColor: indicatorFill, stopOpacity: stop.opacity }}
+						/>
+					))}
+				</linearGradient>
+			</defs>
+			{animate ? (
+				<motion.rect
+					fill={`url(#${gradientId})`}
+					height={height}
+					width={pixelWidth}
+					x={animatedX}
+					y={0}
+				/>
+			) : (
+				<rect
+					fill={`url(#${gradientId})`}
+					height={height}
+					width={pixelWidth}
+					x={rectX}
+					y={0}
+				/>
+			)}
 		</g>
 	);
 }

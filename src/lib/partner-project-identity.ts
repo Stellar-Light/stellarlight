@@ -74,6 +74,12 @@ export const ALLOWED_DOMAIN_MISMATCHES: Record<
 	string,
 	{ partner: string; project: string; reason: string }
 > = {
+	"anchor-wallet-guru": {
+		partner: "mywalletguru.com",
+		project: "walletguru.com",
+		reason:
+			"Same company: mywalletguru.com 301-redirects to www.walletguru.com, title 'Wallet Guru: Streaming Payment Platform' on both (verified 2026-09-05; the self-audit had been red on this pair for five days)",
+	},
 	"franklin-templeton": {
 		partner: "franklintempleton.com",
 		project: "benjiinvestments.com",

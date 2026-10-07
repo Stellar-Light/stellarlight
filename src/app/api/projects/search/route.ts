@@ -12,29 +12,61 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	isDegraded,
+	REQUEST_READ_BUDGET_MS,
+	withPartial,
+	withReadDeadline,
+	withReadTimeout,
+} from "@/lib/degraded-read";
 import { embed } from "@/lib/embed";
+import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
+import { findNameMatch } from "@/lib/fuzzy-name";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { pickDeployment } from "@/lib/project-deployment";
 import {
 	anchorIdentityHit,
 	anchorTokens,
 	buildHaystack,
 	chainCorridorHit,
+	correctionMediated,
 	corridorMatch,
 	hitsAnyToken,
+	hitsWordToken,
 	intentTypesFor,
 	isRampIntent,
+	nameMatchScore,
 	scoreTokens,
+	shadowEarnedRank,
+	splitIdentityGroups,
+	statusAdmissionWhere,
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
 	tokenize,
 } from "@/lib/project-search-match";
+import {
+	HIDDEN_PROJECT_STATUSES,
+	RESOLVABLE_PROJECT_STATUSES,
+} from "@/lib/project-status";
+import { PROJECT_TYPES } from "@/lib/project-types";
 import { type RepoResult, searchRepos } from "@/lib/repo-search";
+import {
+	mergeProducts,
+	type ProductsCoverage,
+	productsCoverage,
+} from "@/lib/rwa-products";
+import { serverTiming } from "@/lib/server-timing";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -42,9 +74,10 @@ import { type RepoResult, searchRepos } from "@/lib/repo-search";
  * keyword→semantic rung: when a keyword search comes back thin, this finds
  * conceptually-related projects the literal `like` match misses (the
  * x402-class question: "charge AI agents per API call" → agentic-payments
- * projects, even with no literal term overlap). Returns [] and never throws
- * past the caller's try/catch if the index isn't READY yet or VOYAGE_API_KEY
- * is unset — so the route degrades gracefully to keyword-only.
+ * projects, even with no literal term overlap). Returns [] when
+ * VOYAGE_API_KEY is unset (the rung is off — config, not a failure); an
+ * index that isn't READY or a failed embed call throws to the caller's
+ * catch, which degrades to keyword-only and says so on meta.warnings.
  */
 async function semanticProjectRows(
 	// biome-ignore lint/suspicious/noExplicitAny: payload.db internals
@@ -57,6 +90,9 @@ async function semanticProjectRows(
 	// meta.semantic + the label tell the caller how the results were found.
 	floor = 0.68,
 ) {
+	// No key = the rung is OFF, not a backend failure: [] here, so the caller's
+	// degraded-read warning fires only when embed / $vectorSearch actually fail.
+	if (!process.env.VOYAGE_API_KEY) return [];
 	const queryEmbedding = await embed(q);
 	const db = payload.db?.connection?.db;
 	const collection = db?.collection("projects");
@@ -76,7 +112,7 @@ async function semanticProjectRows(
 		// stars to the top of a topic query.
 		{
 			$match: {
-				status: { $in: ["Development", "Pre-Release", "Live", "Inactive"] },
+				status: { $in: [...RESOLVABLE_PROJECT_STATUSES] },
 			},
 		},
 		{
@@ -87,6 +123,7 @@ async function semanticProjectRows(
 				category: 1,
 				shortDescription: 1,
 				status: 1,
+				deployment: 1,
 				statusAsOf: 1,
 				statusSourceUrl: 1,
 				statusBasis: 1,
@@ -151,19 +188,31 @@ async function semanticProjectRows(
 			statusAsOf: p.statusAsOf ?? null,
 			statusSourceUrl: p.statusSourceUrl ?? null,
 			statusBasis: p.statusBasis ?? null,
+			statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+			// sls-079: status answers "operating for users?"; THIS answers
+			// "deployed on which network?". Two facts, two fields. unknown is
+			// served explicitly - absence of evidence is never proof of disuse,
+			// and a consumer must see that we do not know rather than guess.
+			deployment: pickDeployment(p.deployment, p.slug),
 			canonicalSlug: p.canonicalSlug ?? null,
 			identity: pickIdentity(p),
 			lifecycle: pickLifecycle(p.lifecycle),
 			logoUrl,
 			scfAwarded: !!p.scf?.awarded,
+			feedbackSignal: pickFeedbackSignal(p.feedbackSignal),
+			scfBasis: p.scf?.basis ?? null,
+			scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
+			scfAsOf: p.scf?.asOf ?? null,
+			scfSourceUrl: p.scf?.sourceUrl ?? null,
 			scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 			scfAmountStatus: scfAmountStatus(!!p.scf?.awarded, p.scf?.totalAwarded),
 			scfAwardedRounds: p.scf?.awardedRounds ?? [],
+			scfRoundAwards: pickScfRoundAwards(p.scf),
+			products: mergeProducts(pickProducts(p.products), p.slug),
+			productsCoverage: productsCoverage(p.slug),
 			links: pickLinks(p.links),
 			coverage: pickCoverage(p.coverage),
-			supportedNetworks: Array.isArray(p.supportedNetworks)
-				? p.supportedNetworks
-				: [],
+			...deriveNetworks(p),
 			// F3 (audit): semantic rows serialized types=[] / prominence=null for
 			// records that HAVE both — the $project simply omitted the fields.
 			types: Array.isArray(p.types) ? p.types : [],
@@ -204,7 +253,59 @@ async function semanticProjectRows(
 	});
 }
 
+// Query-independent reads every search repeated (and each with a parallel
+// count): built once per instance per five minutes, shared by concurrent
+// requests, bounded by the caller's read timeout as before.
+const REFERENCE_TTL_MS = 300_000;
+const auditRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "audits",
+		limit: 500,
+		depth: 0,
+		overrideAccess: true,
+		pagination: false,
+		select: { projectSlug: true, auditor: true, publishedAt: true },
+	});
+});
+const entityRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "entities",
+		limit: 300,
+		depth: 0,
+		pagination: false,
+		select: { name: true, slug: true, projects: true },
+	});
+});
+const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
+	const payload = await getPayloadSafe();
+	if (!payload) throw new Error("no database handle");
+	return payload.find({
+		collection: "partner-accounts",
+		where: { partnerType: { equals: "anchor" } },
+		limit: 100,
+		depth: 0,
+		pagination: false,
+		select: {
+			name: true,
+			slug: true,
+			country: true,
+			regions: true,
+			assets: true,
+			seps: true,
+			rampTypes: true,
+			lastPartnerUpdateAt: true,
+		},
+	});
+});
+
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 60;
 
 // sls-002: disambiguate a null award amount. "undisclosed" = the award is
@@ -216,6 +317,59 @@ function scfAmountStatus(
 ): "disclosed" | "undisclosed" | null {
 	if (!awarded) return null;
 	return typeof totalAwarded === "number" ? "disclosed" : "undisclosed";
+}
+
+// sls-058 defect 2: per-awarded-round official submission record — the
+// reconciling basis for scfTotalAwardedUSD. Strips Payload array-row ids.
+// #742: per-product deployment records — id-stripped, provenance intact.
+// biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
+function pickProducts(rows: any): ProjectRow["products"] {
+	// Null, not [], when we hold no product records. [] is a POSITIVE claim
+	// that the project ships no products on Stellar — served on 1,008 of 1,010
+	// rows, including every wallet in the directory, which is plainly false.
+	// Same rule as supportedNetworks / routes / coverage / llamaSlugs: an
+	// unmodelled dimension is UNKNOWN, and the caller has to be able to see
+	// the difference between "nothing here" and "we never modelled it".
+	if (!Array.isArray(rows) || rows.length === 0) return null;
+	// biome-ignore lint/suspicious/noExplicitAny: Payload array-row shape
+	return rows.map((r: any) => ({
+		name: String(r.name ?? ""),
+		kind: String(r.kind ?? ""),
+		network: String(r.network ?? ""),
+		status: String(r.status ?? ""),
+		contractId: r.contractId ?? null,
+		evidenceUrl: String(r.evidenceUrl ?? ""),
+		asOf: String(r.asOf ?? ""),
+		note: r.note ?? null,
+	}));
+}
+
+function pickScfRoundAwards(
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	scf: any,
+): Array<{
+	round: number | null;
+	awardName: string | null;
+	amountUSD: number | null;
+	awardType: string | null;
+}> {
+	const rows = Array.isArray(scf?.roundAwards) ? scf.roundAwards : [];
+	return (
+		rows
+			// A row needs an identity — a number OR a name. The filter used to
+			// demand a numeric round, which silently dropped every award SCF
+			// does not number (Blend's "Liquidity Award - '24 Q1", $50,000,
+			// Awarded), leaving the money with nothing to explain it.
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			.filter((r: any) => typeof r?.round === "number" || !!r?.awardName)
+			// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+			.map((r: any) => ({
+				round: typeof r.round === "number" ? r.round : null,
+				awardName: typeof r.awardName === "string" ? r.awardName : null,
+				amountUSD: typeof r.amountUSD === "number" ? r.amountUSD : null,
+				awardType: typeof r.awardType === "string" ? r.awardType : null,
+			}))
+	);
 }
 
 interface ProjectRow {
@@ -235,11 +389,19 @@ interface ProjectRow {
 	category: string;
 	shortDescription: string | null;
 	status: string;
+	// sls-079: deployment is a SEPARATE fact from lifecycle status.
+	deployment?: {
+		network?: string | null;
+		basis?: string | null;
+		sourceUrl?: string | null;
+		asOf?: string | null;
+	} | null;
 	// sls-024: status provenance — when the label was asserted, the primary
 	// evidence URL, and what kind of evidence it is. Null on legacy rows.
 	statusAsOf?: string | null;
 	statusSourceUrl?: string | null;
 	statusBasis?: string | null;
+	statusConfidence?: FactConfidence | null;
 	tvlUSD?: number | null;
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
@@ -274,11 +436,43 @@ interface ProjectRow {
 	lifecycle: { wasLive: boolean; note: string | null } | null;
 	logoUrl: string | null;
 	scfAwarded: boolean;
+	feedbackSignal: {
+		votes: number;
+		worked: number;
+		score: number | null;
+		asOf: string;
+	} | null;
+	scfBasis: string | null;
+	scfConfidence: FactConfidence | null;
+	scfAsOf: string | null;
+	scfSourceUrl: string | null;
 	scfTotalAwardedUSD: number | null;
 	scfAmountStatus: "disclosed" | "undisclosed" | null;
 	// sls-011: round membership (e.g. [2, 17, 22]) so consumers can reconcile
 	// cross-source totals mechanically instead of guessing at counting bases.
 	scfAwardedRounds: number[];
+	// #742 (sls-023/sls-029): per-product, per-network deployment records —
+	// the dimension a project-level status label cannot carry. Null when we
+	// hold none; NEVER [] (see pickProducts).
+	products: Array<{
+		name: string;
+		kind: string;
+		network: string;
+		status: string;
+		contractId: string | null;
+		evidenceUrl: string;
+		asOf: string;
+		note: string | null;
+	}> | null;
+	// sls-083: is `products` COMPLETE for the issuers this project joins? Null
+	// = cannot be stated (no reconciled toml), never "complete".
+	productsCoverage: ProductsCoverage | null;
+	scfRoundAwards: Array<{
+		round: number | null;
+		awardName: string | null;
+		amountUSD: number | null;
+		awardType: string | null;
+	}>;
 	hackathon: { id: string; name: string; slug: string } | null;
 	hackathonPlacement: string | null;
 	hackathonPrize: number | null;
@@ -294,7 +488,10 @@ interface ProjectRow {
 		asOf: string | null;
 	} | null;
 	// sls-017 (durable): chains this project supports (e.g. ["stellar","xrpl"]).
-	supportedNetworks: string[];
+	// Null — never [] — when we hold neither curation nor evidence.
+	// NOT exhaustive unless networksBasis === "curated"; see deriveNetworks.
+	supportedNetworks: string[] | null;
+	networksBasis: NetworksBasis | null;
 	links?: Record<string, string>;
 	score: number;
 	url: string;
@@ -311,27 +508,6 @@ function pickIdentity(p: any): ProjectRow["identity"] {
 		renamedAt: p.renamedAt ?? null,
 		sourceUrl: p.renameSourceUrl ?? null,
 	};
-}
-
-// Name-lookup rank (sls-009): the standard directory-search contract — a
-// query that IS a project's name must return that project first, regardless
-// of how much authority (prominence/SCF/stars) other keyword matches carry.
-function nameMatchScore(
-	name: string,
-	slug: string,
-	q: string,
-	aliases?: string[] | null,
-): number {
-	const qq = q.trim().toLowerCase();
-	if (!qq) return 0;
-	const n = name.trim().toLowerCase();
-	if (n === qq || slug.toLowerCase() === qq) return 3;
-	// sls-050: an exact former-name hit IS an exact name hit — rename
-	// continuity served as data, not synonym patches.
-	if ((aliases ?? []).some((a) => a.trim().toLowerCase() === qq)) return 3;
-	if (n.startsWith(qq)) return 2;
-	const esc = qq.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	return new RegExp(`\\b${esc}\\b`).test(n) ? 1 : 0;
 }
 
 // A project's own indexed code repo (compact form, attached per project row).
@@ -437,6 +613,92 @@ function pickCoverage(
 	return { countries, currencies, seps, asOf };
 }
 
+// sls-017: chains this project supports — and, just as importantly, an honest
+// admission when we do not know.
+//
+// This used to serialize a missing value as `[]`, which is not the absence of
+// a claim but a POSITIVE claim of emptiness: 916 of 1,010 projects were
+// telling every caller they support no blockchain at all, Stellar included.
+// For a directory of Stellar projects that is not merely unhelpful, it is the
+// exact failure the field was added to prevent — "omission must not read as
+// negation" — inverted into the API contract.
+//
+// Null is the honest encoding, and it is the one `routes` and `coverage`
+// already use for the same situation: we hold no curation, so we say nothing
+// rather than assert nothing-is-supported. Search is unaffected — it reads the
+// stored doc, and chainCorridorHit already falls back to prose when the field
+// is unenriched rather than treating empty as proof of absence.
+function pickNetworks(v: unknown): string[] | null {
+	if (!Array.isArray(v)) return null;
+	const nets = v.filter(
+		(x): x is string => typeof x === "string" && !!x.trim(),
+	);
+	return nets.length ? nets : null;
+}
+
+/** What kind of evidence stands behind supportedNetworks. Not exported —
+ * a route module may export only handlers and segment config. */
+type NetworksBasis =
+	| "curated"
+	| "onchain-activity"
+	| "defillama-tvl"
+	| "anchor-coverage"
+	| "scf-award";
+
+/**
+ * sls-017: derive Stellar membership from evidence we already hold, so the
+ * field stops being null for half the directory.
+ *
+ * Curation only ever reached 94 of 1,010 projects, and the honest null we now
+ * serve for the rest is still an answer nobody can use. But four signals on
+ * the row are PROOF that a project operates on Stellar, not inference:
+ *
+ *   - onchain.contracts — contract records observed on Stellar
+ *   - tvlUSD            — DefiLlama tracks its Stellar TVL
+ *   - coverage          — SEP/corridor rails, which are Stellar rails
+ *   - scf.awarded       — the Stellar Community Fund only funds Stellar work
+ *
+ * Ordered strongest-first, and each reported by name so a caller can weigh a
+ * deployed contract differently from a grant.
+ *
+ * WHY THIS CANNOT REPEAT THE DTCC ERROR: DTCC sits at Development and
+ * announces Stellar availability for H1 2027, and it carries none of these
+ * four — no award, no TVL, no contracts. Announcing a future deployment
+ * leaves no evidence behind, which is exactly the property that makes these
+ * signals safe. Status is deliberately NOT a factor: an SCF award proves the
+ * project targets Stellar whether or not it runs today, which is what this
+ * field asks. Whether it currently RUNS is `status`.
+ *
+ * THE DERIVED LIST IS NOT EXHAUSTIVE, and `networksBasis` is what says so.
+ * Evidence of Stellar is not evidence about XRPL, so a derived ["stellar"]
+ * must never be read the way a curated ["stellar","xrpl"] can be. Without the
+ * basis field this would trade one false negative (null everywhere) for a
+ * worse one (every derived row implying Stellar-only).
+ */
+function deriveNetworks(
+	// biome-ignore lint/suspicious/noExplicitAny: payload project doc shape
+	p: any,
+): { supportedNetworks: string[] | null; networksBasis: NetworksBasis | null } {
+	const curated = pickNetworks(p?.supportedNetworks);
+	if (curated) return { supportedNetworks: curated, networksBasis: "curated" };
+
+	const cov = p?.coverage;
+	const basis: NetworksBasis | null = p?.onchain?.contracts?.length
+		? "onchain-activity"
+		: typeof p?.tvlUSD === "number" && p.tvlUSD > 0
+			? "defillama-tvl"
+			: cov &&
+					(cov.countries?.length || cov.currencies?.length || cov.seps?.length)
+				? "anchor-coverage"
+				: p?.scf?.awarded
+					? "scf-award"
+					: null;
+
+	return basis
+		? { supportedNetworks: ["stellar"], networksBasis: basis }
+		: { supportedNetworks: null, networksBasis: null };
+}
+
 // sls-032 (#516): a served route-level bridge fact. A Bridge-typed project
 // hit is DISCOVERY-level; these curated rows are the route-level evidence
 // (chain pair, direction, assets, destination representation, mechanism),
@@ -496,6 +758,18 @@ interface PlatformAvailability {
 
 // Only surfaced when curated availability rows exist — null means "not yet
 // curated" (unknown), never "not available". Strips Payload's internal row ids.
+/** Normalize a stored feedbackSignal group to the served shape (or null). */
+// biome-ignore lint/suspicious/noExplicitAny: Payload group shape
+function pickFeedbackSignal(v: any): ProjectRow["feedbackSignal"] {
+	if (!v?.asOf) return null;
+	return {
+		votes: typeof v.votes === "number" ? v.votes : 0,
+		worked: typeof v.worked === "number" ? v.worked : 0,
+		score: typeof v.score === "number" ? v.score : null,
+		asOf: String(v.asOf),
+	};
+}
+
 function pickAvailability(
 	// biome-ignore lint/suspicious/noExplicitAny: payload array field shape
 	rows: any,
@@ -597,7 +871,15 @@ function tvlMethodUrlFor(slugs: string[] | null): string | null {
 	return slugs?.length ? `https://defillama.com/protocol/${slugs[0]}` : null;
 }
 
-export async function GET(req: NextRequest) {
+/** Every bounded read in this request shares one budget, so a stalled
+ * database answers as a partial page or a 503 by about 6 s instead of
+ * holding the caller to its own deadline (2026-10-03). */
+export function GET(req: NextRequest) {
+	return withReadDeadline(REQUEST_READ_BUDGET_MS, () => handle(req));
+}
+
+async function handle(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
 	// frequently send the search term under `query` — the field name many other
@@ -640,13 +922,12 @@ export async function GET(req: NextRequest) {
 	// nothing filtered on status, and unknown params were silently ignored, so
 	// ?status=Inactive returned all-Live results "as if filtered".
 	const statusParam = sp.get("status")?.trim() || null;
-	const VALID_STATUSES = [
-		"Live",
-		"Inactive",
-		"Development",
-		"Pre-Release",
-		"Pre-Development",
-	] as const;
+	// The statuses a public reader can see (src/lib/project-status.ts). This
+	// list was hand-typed here and carried "Pre-Development", a status no row
+	// can hold, so ?status=Pre-Development passed validation and returned an
+	// empty page that read as filtered — the exact defect the check above was
+	// written for (found 2026-09-09 while closing the enum-drift class).
+	const VALID_STATUSES = RESOLVABLE_PROJECT_STATUSES;
 	if (
 		statusParam &&
 		!(VALID_STATUSES as readonly string[]).includes(statusParam)
@@ -666,29 +947,9 @@ export async function GET(req: NextRequest) {
 	// mirroring statusParam: DB where clause + semantic-source filter + post-fold
 	// enforcement + echo in meta.filters.
 	const typeParam = sp.get("type")?.trim() || null;
-	const VALID_TYPES = [
-		"Wallet",
-		"DEX",
-		"Lending",
-		"Bridge",
-		"Infrastructure",
-		"Payments",
-		"Anchor",
-		"SDK",
-		"Indexer",
-		"Explorer",
-		"Analytics",
-		"AI",
-		"Gaming",
-		"Education",
-		"Security",
-		"NFT",
-		"RWA",
-		"Stablecoin",
-		"Social Impact",
-		"RPC",
-		"Faucet",
-	] as const;
+	// One list (src/lib/project-types.ts) — the collection, the leaderboard and
+	// the spec spread the same array.
+	const VALID_TYPES = PROJECT_TYPES;
 	if (typeParam && !(VALID_TYPES as readonly string[]).includes(typeParam)) {
 		return NextResponse.json(
 			{
@@ -720,7 +981,10 @@ export async function GET(req: NextRequest) {
 	const unknownParams = [...new Set([...sp.keys()])].filter(
 		(k) => !KNOWN_PARAMS.has(k),
 	);
-	const warnings = unknownParams.length
+	// Also the channel for a backend read that failed or timed out
+	// (degraded-read.ts): each best-effort read below pushes one line here
+	// instead of falling through to a quiet empty or thinner page.
+	const warnings: string[] = unknownParams.length
 		? [
 				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
 			]
@@ -755,13 +1019,15 @@ export async function GET(req: NextRequest) {
 	if (!q && !category && !scfAwardedOnly && !statusParam && !typeParam) {
 		logApiHit({
 			req,
+			startedAt,
+			status: 200,
 			endpoint: "/api/projects/search",
 			query: "",
 			filters: { category, scfAwarded: scfAwardedOnly, limit },
 		});
 		return NextResponse.json(
 			{
-				meta: {
+				meta: withPartial({
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
 					...(warnings.length ? { warnings } : {}),
@@ -781,22 +1047,40 @@ export async function GET(req: NextRequest) {
 							},
 						],
 					},
-				},
+				}),
 				projects: [],
 				codeReferences: [],
 			},
 			{
 				headers: {
-					"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+					"Cache-Control": "no-store",
 				},
 			},
 		);
 	}
 
 	const payload = await getPayloadSafe();
+	if (!payload)
+		warnings.push(degradedWarning("projects search", "no database handle"));
 	let totalMatching = 0;
+	/** Lineage shadows dropped by the fold, counted over the FULL match set so
+	 * `total` is the same number at every `limit` (see the assignment site). */
+	let foldedFromTotal = 0;
 	let projects: ProjectRow[] = [];
-	let matchMode: "strict" | "loose-1" | "majority" | "semantic" | "all" = "all";
+	/**
+	 * Set when the query as typed matched nothing and a fuzzy name lookup
+	 * recovered a single project (see the recovery rung below). Declared out
+	 * here because the response meta and the token-count used for confidence
+	 * both need to know the search actually ran on a corrected spelling.
+	 */
+	let didYouMean: { from: string; to: string; slug: string } | null = null;
+	let matchMode:
+		| "strict"
+		| "loose-1"
+		| "majority"
+		| "corrected"
+		| "semantic"
+		| "all" = "all";
 	// Audit rollup (Raven cold-agent finding, 2026-07-20; hoisted 2026-07-21):
 	// populated ONCE before scoring (see the pre-scoring fetch) so the hay can
 	// carry audit vocabulary, and reused at response assembly. null/absent = no
@@ -808,41 +1092,36 @@ export async function GET(req: NextRequest) {
 
 	if (payload) {
 		try {
+			// Status + lineage admission (see statusAdmissionWhere): Inactive is
+			// included so a name lookup still finds it (the score() penalty keeps
+			// it out of the way on topic queries), browse mode excludes lineage
+			// shadows outright, and in query mode a shadow is a fold candidate at
+			// ANY status — including the Draft the dedup lane parks it at.
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = {
-				// Inactive included so a name lookup still finds it; the score()
-				// penalty keeps it out of the way on topic queries.
-				status: { in: ["Development", "Pre-Release", "Live", "Inactive"] },
-			};
+			const where: any = statusAdmissionWhere(!!q, statusParam);
 			if (category) {
 				where.category = { equals: category };
 			}
 			if (scfAwardedOnly) {
 				where["scf.awarded"] = { equals: true };
 			}
-			if (statusParam) {
-				// Explicit filter overrides the default status pool — this is what
-				// makes the Inactive corpus reachable (?status=Inactive).
-				where.status = { equals: statusParam };
-			}
 			if (typeParam) {
-				// sls-033: `types` is a hasMany select — `contains` is exact array
-				// membership, so ?type=Wallet enumerates only Wallet-typed records.
-				where.types = { contains: typeParam };
-			}
-			if (!q) {
-				// Browse mode (no query): lineage shadows are merged-away dupes, not
-				// real records — exclude them in the DB so counts.total and page
-				// sizes are exact (re-measure 2026-07-11: ?status=Inactive said
-				// total=82 but only 42 real rows survived the fold). Query mode
-				// keeps shadows as candidates: their NAMES must stay searchable so
-				// the fold can serve the canonical for alias lookups.
-				where.canonicalSlug = { equals: null };
+				// sls-033 + 2026-08-28 audit: `types` is a hasMany select and
+				// Payload `contains` is CASE-INSENSITIVE SUBSTRING against each
+				// element — type=DEX matched "In**dex**er", so the enumeration
+				// counted 61 (46 DEX + 15 Indexers), the belt removed the
+				// Indexers page-side, and agents got ghost pages and an
+				// inflated total. `in` is exact element membership — the rule
+				// the memory bank recorded and this file's comment already
+				// claimed while the operator below contradicted it.
+				where.types = { in: [typeParam] };
 			}
 
-			const tokens = tokenize(q);
-			const intentTypes = intentTypesFor(tokens);
-			const rampIntent = isRampIntent(tokens);
+			// `let`, not `const`: the fuzzy-recovery rung below may re-point these
+			// at a corrected spelling when the query as typed matched nothing.
+			let tokens = tokenize(q);
+			let intentTypes = intentTypesFor(tokens);
+			let rampIntent = isRampIntent(tokens);
 			// TVL-superlative intent (2026-07-11 audit, F1 class): "highest tvl"
 			// returned five tvl=null records while Blend ($139M) sat unfetched —
 			// the structured field the query literally asks about played no part.
@@ -875,6 +1154,13 @@ export async function GET(req: NextRequest) {
 			const baseOr = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
 					{ name: { like: v } },
+					// The slug IS identity vocabulary (buildHaystack says so) — but
+					// the haystack only scores rows the DB returned, and this clause
+					// never asked the DB for the slug. q="gatewayfm" (name
+					// "Gateway.fm") fetched nothing, fell to semantic neighbours and
+					// kept the daily truth battery red for three days (E:hv-status).
+					// Over-fetch is harmless: admission below decides membership.
+					{ slug: { like: v } },
 					{ aliases: { like: v } },
 					{ shortDescription: { like: v } },
 					{ category: { like: v } },
@@ -887,7 +1173,15 @@ export async function GET(req: NextRequest) {
 					{ "coverage.currencies": { like: v } },
 				]),
 			);
-			if (tokens.length) {
+			// A type enumeration is a CLOSED set and q only RANKS within it (the
+			// contract the typed+q branch below documents). The DB text clauses
+			// are membership machinery, so they must not run here: with them,
+			// type=Exchange&q=exchange dropped lusty, rails and sikadesk — three
+			// Exchange rows whose prose never says "exchange" — and the truth
+			// battery's G slice (2026-09-05) caught the set shrinking 18→15.
+			// The whole typed set is a few hundred rows at most; it is fetched
+			// and scored in memory.
+			if (tokens.length && !typeParam) {
 				where.or = [
 					...baseOr,
 					...structuredOr,
@@ -912,7 +1206,20 @@ export async function GET(req: NextRequest) {
 				payload.find({
 					collection: "projects",
 					where: w,
-					limit: 500,
+					// 0 = no cap. This was 500 with NO sort — an arbitrary window in
+					// whatever order Mongo returned. When a broad multi-token OR
+					// matched more than 500 rows, which candidates got scored was
+					// luck: #1000's 14 new CEX rows pushed Soroswap — the flagship
+					// Soroban AMM, scoring a perfect 4/4 for "AMM decentralized
+					// exchange Soroban" — clean out of its own category query, and
+					// the daily self-audit ran red for five days (issue #1003).
+					// vet-idea hit this exact class (sls-073) and its fix already
+					// carries the rule: a truncated window silently loses real
+					// matches. Admission must depend on the matcher, never on
+					// fetch order. (~1k projects, embedding excluded below — the
+					// heavy-field lesson that made this cap feel necessary is
+					// already handled by the select.)
+					limit: 0,
 					depth: 0,
 					// THE fix: exclude `embedding` from the candidate fetch. It's a json
 					// voyage-3 vector (~KBs/doc); pulling it for up to 500 matched
@@ -927,13 +1234,106 @@ export async function GET(req: NextRequest) {
 			// a query-shape surprise silently empty ALL search: on any find error,
 			// retry with the proven name/description/category candidate set. Worst
 			// case the endpoint degrades to its prior behavior, never to nothing.
-			let result: Awaited<ReturnType<typeof findCandidates>>;
-			try {
-				result = await findCandidates(where);
-			} catch {
-				result = await findCandidates(
-					tokens.length ? { ...where, or: baseOr } : where,
+			// Each attempt SAYS when it failed (degraded-read.ts → meta.warnings):
+			// a page served by the retry was computed from a THINNER candidate
+			// set (structured clauses dropped) — q="block explorer" carried 2 of
+			// 6 Explorer rows under the 2026-09-14 eval load — and a page both
+			// attempts failed has no keyword candidates at all.
+			const first = await degradedRead(
+				"projects candidate fetch",
+				() => findCandidates(where),
+				null,
+				DEFAULT_READ_TIMEOUT_MS,
+			);
+			let docs: Awaited<ReturnType<typeof findCandidates>>["docs"] =
+				first.value?.docs ?? [];
+			if (first.warning) {
+				warnings.push(first.warning);
+				const retry = await degradedRead(
+					"projects candidate fetch (retry without structured clauses)",
+					() =>
+						findCandidates(
+							tokens.length && !typeParam ? { ...where, or: baseOr } : where,
+						),
+					null,
+					DEFAULT_READ_TIMEOUT_MS,
 				);
+				if (retry.warning) warnings.push(retry.warning);
+				docs = retry.value?.docs ?? [];
+			}
+
+			// ── Fuzzy name recovery (#727) ──────────────────────────────────
+			//
+			// Zero candidate documents is the precise signal for "the words as
+			// typed appear nowhere". The keyword ladder below cannot rescue that
+			// — it only ever narrows this set — and neither can the vector rung,
+			// because the embedding of a MISSPELLED proper noun sits near
+			// arbitrary short tokens rather than near the project meant. Measured
+			// on prod: `blendd` returned TZS/BRZ, `soroswapp` returned Sorosan,
+			// `aquarious` returned gYEN. We hold all three and answer them
+			// perfectly when spelled right.
+			//
+			// So on an empty candidate set, ask the name registry whether one
+			// project is a typo's distance away. findNameMatch is deliberately
+			// refusal-heavy (no tickers, ≤2 tokens, unique winner required) and
+			// declines outright for entities we genuinely lack — `octoplace` and
+			// `kutana` must keep falling through to the semantic advisory rather
+			// than being silently rewritten into something unrelated.
+			//
+			// Cost is paid only on a miss: the registry fetch never touches the
+			// hot path, and the corrected re-fetch keeps every caller filter
+			// (?status, ?type, …) so a correction can't smuggle past them.
+			if (docs.length === 0 && tokens.length && offset === 0) {
+				try {
+					// limit: 0 + pagination: false = the WHOLE registry. This was
+					// limit: 1000 on a 1000+ collection — an arbitrary Mongo-order
+					// window, so whether a typo could be corrected depended on
+					// which side of the cutoff its project happened to land:
+					// blendd recovered, soroswapp and aquarious silently fell
+					// through to vector neighbours (wave-5 eval, 2026-08-29).
+					// The vet-idea 400-of-500 truncation class, in the rung that
+					// exists to rescue misspellings.
+					const registry = await withReadTimeout(
+						payload.find({
+							collection: "projects",
+							limit: 0,
+							depth: 0,
+							pagination: false,
+							select: { name: true, slug: true },
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
+					const match = findNameMatch(
+						q,
+						registry.docs as Array<{ name: string; slug: string }>,
+					);
+					if (match) {
+						const corrected = await withReadTimeout(
+							findCandidates({
+								...where,
+								or: [{ slug: { equals: match.slug } }],
+							}),
+							DEFAULT_READ_TIMEOUT_MS,
+						);
+						// Only adopt the correction if it actually resolves under the
+						// caller's filters. A ?status=Live search for a misspelled
+						// inactive project must stay empty, not quietly widen.
+						if (corrected.docs.length > 0) {
+							docs = corrected.docs;
+							didYouMean = { from: q, to: match.name, slug: match.slug };
+							// Re-derive everything downstream from the corrected name so
+							// the ladder scores against the words we actually searched.
+							tokens = tokenize(match.name);
+							intentTypes = intentTypesFor(tokens);
+							rampIntent = isRampIntent(tokens);
+						}
+					}
+				} catch (e) {
+					// Recovery is best-effort: a registry hiccup leaves the empty
+					// result exactly as it was, never fails the search — but says
+					// so: an unchecked spelling is an incomplete answer.
+					warnings.push(degradedWarning("projects spelling recovery", e));
+				}
 			}
 
 			// Audit rollup fetched BEFORE scoring (2026-07-21, closing the Raven
@@ -944,13 +1344,10 @@ export async function GET(req: NextRequest) {
 			// to semantic. The registry is tiny (~60 rows): one unfiltered fetch
 			// serves BOTH the hay injection below and the response attachment.
 			try {
-				const auditRows = await payload.find({
-					collection: "audits",
-					limit: 500,
-					depth: 0,
-					overrideAccess: true,
-					select: { projectSlug: true, auditor: true, publishedAt: true },
-				});
+				const auditRows = await withReadTimeout(
+					auditRowsMemo(),
+					DEFAULT_READ_TIMEOUT_MS,
+				);
 				// biome-ignore lint/suspicious/noExplicitAny: narrow select shape
 				for (const a of auditRows.docs as any[]) {
 					if (!a.projectSlug) continue;
@@ -969,12 +1366,13 @@ export async function GET(req: NextRequest) {
 					if (at && (!cur.latestAt || at > cur.latestAt)) cur.latestAt = at;
 					auditsBySlug.set(a.projectSlug, cur);
 				}
-			} catch {
+			} catch (e) {
 				// additive best-effort — rows score/serve without audit signal
+				warnings.push(degradedWarning("projects audits rollup", e));
 			}
 
 			projects = (
-				result.docs as Array<{
+				docs as Array<{
 					id: string;
 					name: string;
 					slug: string;
@@ -984,6 +1382,12 @@ export async function GET(req: NextRequest) {
 					statusAsOf?: string | null;
 					statusSourceUrl?: string | null;
 					statusBasis?: string | null;
+					deployment?: {
+						network?: string | null;
+						basis?: string | null;
+						sourceUrl?: string | null;
+						asOf?: string | null;
+					} | null;
 					tvlUSD?: number | null;
 					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 					onchain?: any;
@@ -1000,10 +1404,21 @@ export async function GET(req: NextRequest) {
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
+					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
+					products?: any[];
+					feedbackSignal?: {
+						votes?: number;
+						worked?: number;
+						score?: number | null;
+						asOf?: string;
+					} | null;
 					scf?: {
 						awarded?: boolean;
 						totalAwarded?: number;
 						awardedRounds?: number[];
+						basis?: string;
+						asOf?: string;
+						sourceUrl?: string;
 					};
 					hackathon?:
 						| { id: string; name: string; slug: string }
@@ -1085,6 +1500,10 @@ export async function GET(req: NextRequest) {
 					statusAsOf: p.statusAsOf ?? null,
 					statusSourceUrl: p.statusSourceUrl ?? null,
 					statusBasis: p.statusBasis ?? null,
+					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+					// sls-079: deployment rides EVERY row builder — the first fix
+					// landed on one of three builders and the served paths missed it.
+					deployment: pickDeployment(p.deployment, p.slug),
 					// F8: TVL facts ride the keyword rows too (the semantic mapper
 					// already carries them) — null = not tracked on DefiLlama.
 					onchain: pickOnchain(p.onchain),
@@ -1108,12 +1527,20 @@ export async function GET(req: NextRequest) {
 					lifecycle: pickLifecycle(p.lifecycle),
 					logoUrl,
 					scfAwarded: !!p.scf?.awarded,
+					feedbackSignal: pickFeedbackSignal(p.feedbackSignal),
+					scfBasis: p.scf?.basis ?? null,
+					scfConfidence: factConfidence(p.scf?.basis, p.scf?.asOf),
+					scfAsOf: p.scf?.asOf ?? null,
+					scfSourceUrl: p.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: p.scf?.totalAwarded ?? null,
 					scfAmountStatus: scfAmountStatus(
 						!!p.scf?.awarded,
 						p.scf?.totalAwarded,
 					),
 					scfAwardedRounds: p.scf?.awardedRounds ?? [],
+					scfRoundAwards: pickScfRoundAwards(p.scf),
+					products: mergeProducts(pickProducts(p.products), p.slug),
+					productsCoverage: productsCoverage(p.slug),
 					hackathon: hk,
 					hackathonPlacement: p.hackathonPlacement ?? null,
 					hackathonPrize: p.hackathonPrize ?? null,
@@ -1122,9 +1549,7 @@ export async function GET(req: NextRequest) {
 					verificationLevel: p.verificationLevel ?? null,
 					types: Array.isArray(p.types) ? p.types : [],
 					coverage: pickCoverage(p.coverage),
-					supportedNetworks: Array.isArray(p.supportedNetworks)
-						? p.supportedNetworks
-						: [],
+					...deriveNetworks(p),
 					links: pickLinks(p.links),
 					score,
 					url: `https://stellarlight.xyz/project/${p.slug}`,
@@ -1142,7 +1567,39 @@ export async function GET(req: NextRequest) {
 			//
 			// The .meta.matchMode field tells the caller which tier returned
 			// the results so they can convey relevance honestly to the user.
-			if (tokens.length) {
+			//
+			// sls-033 (count instability, root-caused 2026-08-28): an EXACT-TYPE
+			// enumeration must have limit-independent membership. With q+type,
+			// the tier ladder admitted a q-dependent subset and then the
+			// identity-underfill bypass re-admitted rows GATED ON `limit` — the
+			// same enumeration served 58 uniques at limit=10, 63 at limit=100,
+			// total said 65, and three rows were served twice across pages. The
+			// route already enforces "a count must not depend on how many rows
+			// you asked for" for folds; admission broke it one layer up. So:
+			// when ?type= is present, TYPE DEFINES MEMBERSHIP (the whole typed
+			// set, exactly the no-q pool) and q only RANKS within it — every
+			// tier, bypass, and pad below is membership machinery and is
+			// skipped. matchMode reports "all" with an explicit label, because
+			// "strict" would claim q gated the set.
+			if (tokens.length && typeParam) {
+				matchMode = "all";
+				// Membership = the typed CANONICAL set. The q-path deliberately
+				// keeps lineage shadows as candidates (their names must stay
+				// findable for name lookups), but in a type enumeration a shadow
+				// is a duplicate of a row already in the set — the page-side fold
+				// then SWAPPED lone shadows back to their canonicals on later
+				// pages, re-serving rows page 1 already had (the sls-033 ghost:
+				// total 65, page one 63, offset-63 serving three rows twice).
+				projects = projects.filter(
+					(p) => !p.canonicalSlug || p.canonicalSlug === p.slug,
+				);
+				projects.sort(
+					(a, b) =>
+						b.score - a.score ||
+						rankBoost(b) - rankBoost(a) ||
+						String(a.name ?? "").localeCompare(String(b.name ?? "")),
+				);
+			} else if (tokens.length) {
 				// Structured-signal admission (sls-018/019): a project that IS the
 				// queried category (its `types` match intent) or whose curated
 				// coverage serves a queried corridor is admitted ONE tier looser
@@ -1163,8 +1620,28 @@ export async function GET(req: NextRequest) {
 				// one anchor (non-generic) token; queries that are ALL generic
 				// keep today's behavior.
 				const anchors = anchorTokens(tokens);
+				// A camelCase word the tokenizer split (FlurboSwap -> flurbo+swap+
+				// flurboswap) is ONE identity: its lone fragments must not satisfy
+				// the anchor gate, or a fabricated name containing a real word
+				// returns that word's whole category confidently ("is FlurboSwap
+				// live" -> soroswap, sushi... at loose-1). A row keeps the anchor
+				// via a standalone anchor word, the joined form, or ALL fragments.
+				const idGroups = splitIdentityGroups(q);
+				const grouped = new Set(
+					idGroups.flatMap((g) => [g.joined, ...g.fragments]),
+				);
+				const standalone = anchors.filter((a) => !grouped.has(a));
 				const keepsAnchor = (p: ProjectRow) =>
-					anchors.length === 0 || !p.hay || hitsAnyToken(p.hay, anchors);
+					anchors.length === 0 ||
+					!p.hay ||
+					hitsAnyToken(p.hay, standalone) ||
+					idGroups.some(
+						(g) =>
+							hitsAnyToken(p.hay ?? "", [g.joined]) ||
+							// fragments are NAME evidence — word hits only, or "block"
+							// substring-hits "blockchain" and the gate excludes nothing
+							g.fragments.every((f) => hitsWordToken(p.hay ?? "", f)),
+					);
 				if (filtered.length === 0 && tokens.length >= 3) {
 					matchMode = "loose-1";
 					filtered = projects
@@ -1215,16 +1692,29 @@ export async function GET(req: NextRequest) {
 				// matchMode reports "majority" — the page now carries majority-
 				// admitted rows, and saying "strict" would be a lie.
 				//
-				// Gate fix (2026-07-21, golden capability-custody-identity): the
-				// original `filtered.length < limit` gate made admission depend on
-				// PAGE SIZE — at limit=3 a page full of prose-mentioners blocked
-				// the bypass while limit=50 fired it. What matters is whether the
-				// page already carries identity-grade rows, not whether it's full:
-				// fire while fewer than `limit` admitted rows anchor-hit identity.
-				const identityRows = filtered.filter(
-					(p) => p.anchorIdentity === true,
-				).length;
-				if (filtered.length > 0 && identityRows < limit && tokens.length >= 2) {
+				// PAGE SIZE MUST NOT DECIDE MEMBERSHIP. A first attempt at this
+				// (2026-07-21) replaced `filtered.length < limit` with
+				// `identityRows < limit` and recorded the dependence as fixed. It
+				// changed the numerator and kept `limit` as the threshold, so the
+				// same bug shipped for another five weeks behind a comment saying
+				// it was gone. Measured live before this edit:
+				//
+				//   is USDC Swap live         limit=3 -> total 6,  top1 soroswap
+				//   is USDC Swap live         limit=4 -> total 79, top1 usdc-swap
+				//   is Stellars Finance live  limit=6 -> total 6,  top1 redstone-finance
+				//   is Stellars Finance live  limit=7 -> total 59, top1 stellars-finance
+				//
+				// `total` is documented as the same number at every limit twice in
+				// this file, and an agent asking for three results got a different
+				// corpus than one asking for four.
+				//
+				// The threshold is gone rather than re-derived. Default limit is 20,
+				// so the bypass already fires for essentially every real call; the
+				// only callers it was ever withheld from are the small-limit ones
+				// that most needed it. Every substantive guard is untouched —
+				// anchorIdentity, chainCorridor, majorityAdmit still decide who gets
+				// in. Only the arbitrary count is gone.
+				if (filtered.length > 0 && tokens.length >= 2) {
 					const majorityAdmit = admit(Math.ceil(tokens.length / 2));
 					const have = new Set(filtered.map((p) => p.id));
 					let added = 0;
@@ -1275,7 +1765,7 @@ export async function GET(req: NextRequest) {
 				const nameRank = new Map(
 					filtered.map((p) => [
 						p.id,
-						nameMatchScore(p.name, p.slug, q, p.identity?.aliases),
+						nameMatchScore(p.name, p.slug, q, p.identity?.aliases, tokens),
 					]),
 				);
 				// Primary rank = keyword-match count. Tiebreak by composite
@@ -1320,9 +1810,21 @@ export async function GET(req: NextRequest) {
 						// (spacewalk = polkadot/kusama). Inert unless the query names
 						// an external chain — 2026-07-21 persona battery.
 						Number(b.chainCorridor ?? true) - Number(a.chainCorridor ?? true) ||
-						b.score - a.score ||
-						// Structured relevance (type-match OR corridor coverage-match)
-						// leads over pure prose matches at the same keyword score.
+						// Effective relevance = prose score + 1 if the row IS the
+						// queried category (type/corridor membership). This mirrors
+						// what admission already believes — admit() lets a typed row
+						// in one prose token below the bar, because structured truth
+						// is worth one description word. Ranking said otherwise:
+						// "lending protocol on Stellar" buried Live typed-Lending
+						// lantern/laina (score 1) beneath prose double-matches
+						// (lucent, xoxno, tezoro at score 2) — guard D, 2026-08-27.
+						// Same axis as sls-019: membership decides eligibility;
+						// HERE it is worth exactly one word, never dominance.
+						b.score +
+							Number(structuredHit(b, intentTypes, tokens, rampIntent)) -
+							(a.score +
+								Number(structuredHit(a, intentTypes, tokens, rampIntent))) ||
+						// …and at equal effective score, the typed row still leads.
 						Number(structuredHit(b, intentTypes, tokens, rampIntent)) -
 							Number(structuredHit(a, intentTypes, tokens, rampIntent)) ||
 						rankBoost(b) - rankBoost(a) ||
@@ -1374,7 +1876,39 @@ export async function GET(req: NextRequest) {
 				projects.sort((a, b) => rankBoost(b) - rankBoost(a));
 			}
 
+			// A lineage shadow lends the canonical its rank only when the query
+			// matched the shadow's NAME — the reason it is indexed at all
+			// (statusAdmissionWhere). Decided over the FULL ordered set, before
+			// counts and pages, so total and page size stay exact: q=education put
+			// stellar-passport #1 via its Draft shadow's stale types (2026-09-13,
+			// shadowEarnedRank).
+			if (q) {
+				const nameQ = didYouMean?.to ?? q;
+				const nameTokens = tokenize(nameQ);
+				projects = projects.filter((p) =>
+					shadowEarnedRank(p, nameQ, nameTokens),
+				);
+			}
 			totalMatching = projects.length;
+			// A count must not depend on how many rows you asked for. The
+			// shadow-fold below drops a lineage shadow whose canonical is ALSO in
+			// the results, but it runs on the page — so `total` was corrected by
+			// however many folds happened to land on THIS page: q=evm reported
+			// total 91 at limit=10 and total 86 at limit=100, same query, same
+			// data. 86 is the honest number (at limit=100 the whole set is one
+			// page, so every fold is visible).
+			//
+			// The drop condition is decidable here, over the FULL set, with no
+			// extra query: a shadow is dropped exactly when its canonical is
+			// already among the matches. (A shadow whose canonical is absent gets
+			// SWAPPED for it — still one row, so it does not change the count.)
+			const matchedSlugs = new Set(projects.map((p) => p.slug));
+			foldedFromTotal = projects.filter(
+				(p) =>
+					p.canonicalSlug &&
+					p.canonicalSlug !== p.slug &&
+					matchedSlugs.has(p.canonicalSlug),
+			).length;
 			projects = projects.slice(offset, offset + limit);
 
 			// Re-populate logo + hackathon for ONLY the returned page. The
@@ -1384,12 +1918,15 @@ export async function GET(req: NextRequest) {
 			if (projects.length) {
 				try {
 					const pageIds = projects.map((p) => p.id);
-					const pop = await payload.find({
-						collection: "projects",
-						where: { id: { in: pageIds } },
-						depth: 1,
-						limit: pageIds.length,
-					});
+					const pop = await withReadTimeout(
+						payload.find({
+							collection: "projects",
+							where: { id: { in: pageIds } },
+							depth: 1,
+							limit: pageIds.length,
+						}),
+						DEFAULT_READ_TIMEOUT_MS,
+					);
 					const byId = new Map(
 						(
 							pop.docs as Array<{
@@ -1417,12 +1954,17 @@ export async function GET(req: NextRequest) {
 							};
 						}
 					}
-				} catch {
+				} catch (e) {
 					// best-effort — ship the page without logo/hackathon populate
+					warnings.push(degradedWarning("projects page populate", e));
 				}
 			}
-		} catch {
-			// fall through
+		} catch (e) {
+			// The keyword stage threw past every wrapped read (a data-shape
+			// surprise in the ranking pass): the page is built without keyword
+			// candidates and the semantic rung may still fill it — the "wrong
+			// page" the 2026-09-14 eval saw. Say so.
+			warnings.push(degradedWarning("projects keyword search", e));
 		}
 	}
 
@@ -1432,7 +1974,10 @@ export async function GET(req: NextRequest) {
 	// F3 (audit: keyword confidence uniform 0.97): normalize relevance against
 	// the QUERY size, not just the page max — a row matching 2 of 3 tokens now
 	// reads lower than a full match instead of both saturating at 1.0.
-	const qTokenCount = tokenize(q).length;
+	// Count the tokens actually searched: after a spelling recovery the rows
+	// were scored against the corrected name, so grading their confidence
+	// against the typo's token count would understate a perfect match.
+	const qTokenCount = tokenize(didYouMean?.to ?? q).length;
 	const projMax = Math.max(
 		projects.reduce((m, p) => Math.max(m, p.score ?? 0), 0),
 		qTokenCount || 1,
@@ -1462,15 +2007,32 @@ export async function GET(req: NextRequest) {
 	// VOYAGE_API_KEY is unset, semanticProjectRows yields nothing / throws and
 	// we silently keep keyword-only.
 	let semanticAdds: Awaited<ReturnType<typeof semanticProjectRows>> = [];
-	if (q && offset === 0 && scored.length < limit && payload) {
+	// `!didYouMean`: a spelling recovery already resolved the query to ONE
+	// project the user actually meant. Padding that page with vector neighbours
+	// would bury the answer under the same noise the correction just escaped.
+	// !typeParam: an exact-type enumeration's membership is the typed set —
+	// padding it with vector neighbours would re-introduce off-set rows the
+	// belt then strips page-side, recreating the returned<limit ghost pages
+	// this fix removes (sls-033).
+	if (
+		q &&
+		!typeParam &&
+		offset === 0 &&
+		!didYouMean &&
+		scored.length < limit &&
+		payload
+	) {
 		try {
 			// F3: zero keyword hits = rescue mode (lower floor) — the audit's
 			// misspelling/slug-form probes died at total:0 with no fallback.
-			const sem = await semanticProjectRows(
-				payload,
-				q,
-				limit,
-				scored.length === 0 ? 0.6 : 0.68,
+			const sem = await withReadTimeout(
+				semanticProjectRows(
+					payload,
+					q,
+					limit,
+					scored.length === 0 ? 0.6 : 0.68,
+				),
+				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const have = new Set(scored.map((r) => r.id));
 			semanticAdds = sem
@@ -1488,8 +2050,10 @@ export async function GET(req: NextRequest) {
 						(Array.isArray(r.types) && r.types.includes(typeParam)),
 				)
 				.slice(0, limit - scored.length);
-		} catch {
-			// index not ready / no embedding key — degrade to keyword-only
+		} catch (e) {
+			// index not ready / embed call down — degrade to keyword-only, said
+			// (an unset key never reaches here: semanticProjectRows returns [])
+			warnings.push(degradedWarning("projects semantic fallback", e));
 		}
 	}
 	const usedSemantic = semanticAdds.length > 0;
@@ -1498,6 +2062,19 @@ export async function GET(req: NextRequest) {
 	// is a lie — no keyword tier matched anything. Say so, so an agent frames
 	// these as similarity guesses, not keyword-confirmed answers.
 	if (usedSemantic && scored.length === 0) matchMode = "semantic";
+	// sls-076: a keyword tier that only holds because a SPELLING CORRECTION
+	// expanded a token must not call itself a keyword match. q="Strupey"
+	// admitted Stroopy.AI at "strict"/"all keywords matched" (0.92) although
+	// neither name nor slug contains the token — two agent runs then used the
+	// row as identity evidence for an unverified name. The expansion is
+	// deliberate (it finds the right project); the MODE now says how.
+	if (
+		matchMode !== "semantic" &&
+		matchMode !== "all" &&
+		scored.length > 0 &&
+		scored.every((p) => correctionMediated(buildHaystack(p), tokenize(q)))
+	)
+		matchMode = "corrected";
 
 	// Code references: top graded repos matching the same query, surfaced INLINE
 	// so a consumer that only calls project search (e.g. an agent with a fixed
@@ -1511,14 +2088,23 @@ export async function GET(req: NextRequest) {
 	let codeReferences: RepoResult[] = [];
 	if (q && offset === 0 && payload) {
 		let timer: ReturnType<typeof setTimeout> | undefined;
-		const timeout = new Promise<RepoResult[]>((resolve) => {
-			timer = setTimeout(() => resolve([]), 700);
+		const timeout = new Promise<null>((resolve) => {
+			timer = setTimeout(() => resolve(null), 700);
 		});
 		try {
-			codeReferences = await Promise.race([
-				searchRepos(payload, q, { limit: 5 }).then((r) => r.repos),
+			const won = await Promise.race([
+				searchRepos(payload, q, { limit: 5 }),
 				timeout,
 			]);
+			// The 700 ms cut is this enrichment's contract, not a failure — not
+			// warned. A repo read that FAILED inside a search that did finish is
+			// (searchRepos says which).
+			if (won) {
+				warnings.push(...won.warnings);
+				// Quality surface: archive-tier repos never ride as inline code
+				// references (still reachable via /api/repos/search name lookups).
+				codeReferences = won.repos.filter((repo) => repo.tier !== "archive");
+			}
 		} finally {
 			clearTimeout(timer);
 		}
@@ -1559,12 +2145,15 @@ export async function GET(req: NextRequest) {
 			const want = [
 				...new Set(shadowRows.map((s) => s.canonicalSlug as string)),
 			];
-			const canRes = await payload.find({
-				collection: "projects",
-				where: { slug: { in: want } },
-				limit: want.length,
-				depth: 1,
-			});
+			const canRes = await withReadTimeout(
+				payload.find({
+					collection: "projects",
+					where: { slug: { in: want } },
+					limit: want.length,
+					depth: 1,
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
 			const canBySlug = new Map<string, any>(
 				// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
@@ -1593,6 +2182,9 @@ export async function GET(req: NextRequest) {
 					statusAsOf: c.statusAsOf ?? null,
 					statusSourceUrl: c.statusSourceUrl ?? null,
 					statusBasis: c.statusBasis ?? null,
+					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
+					// sls-079: from the canonical too, same rule as the fields above
+					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
@@ -1611,19 +2203,24 @@ export async function GET(req: NextRequest) {
 					lifecycle: pickLifecycle(c.lifecycle),
 					logoUrl,
 					scfAwarded: !!c.scf?.awarded,
+					scfBasis: c.scf?.basis ?? null,
+					scfConfidence: factConfidence(c.scf?.basis, c.scf?.asOf),
+					scfAsOf: c.scf?.asOf ?? null,
+					scfSourceUrl: c.scf?.sourceUrl ?? null,
 					scfTotalAwardedUSD: c.scf?.totalAwarded ?? null,
 					scfAmountStatus: scfAmountStatus(
 						!!c.scf?.awarded,
 						c.scf?.totalAwarded,
 					),
 					scfAwardedRounds: c.scf?.awardedRounds ?? [],
+					scfRoundAwards: pickScfRoundAwards(c.scf),
+					products: mergeProducts(pickProducts(c.products), c.slug),
+					productsCoverage: productsCoverage(c.slug),
 					prominence: typeof c.prominence === "number" ? c.prominence : 0,
 					verificationLevel: c.verificationLevel ?? null,
 					types: Array.isArray(c.types) ? c.types : [],
 					coverage: pickCoverage(c.coverage),
-					supportedNetworks: Array.isArray(c.supportedNetworks)
-						? c.supportedNetworks
-						: [],
+					...deriveNetworks(c),
 					links: pickLinks(c.links),
 					url: `https://stellarlight.xyz/project/${c.slug}`,
 				};
@@ -1664,10 +2261,20 @@ export async function GET(req: NextRequest) {
 				folded.push(effective);
 			}
 			baseProjects = folded;
-		} catch {
+		} catch (e) {
 			// fold is best-effort — serving the shadow beats erroring the search
+			warnings.push(degradedWarning("projects lineage fold", e));
 		}
 	}
+	// Belt on the shadow admission (2026-09-05): a Draft shadow is a candidate
+	// for the FOLD ONLY, never a served row — Draft is the hidden state and no
+	// public surface shows it. It reaches here only when the fold could not
+	// replace it (dangling canonicalSlug, or the fold threw), and then dropping
+	// the hit beats serving a hidden row. Draft is rejected as a ?status= value
+	// (400 above), so this can never fight a caller's filter.
+	baseProjects = baseProjects.filter(
+		(p) => !(HIDDEN_PROJECT_STATUSES as readonly string[]).includes(p.status),
+	);
 	// Belt-and-suspenders on the ?status= contract: keyword candidates are
 	// DB-filtered and semanticAdds are filtered at source, so this should be a
 	// no-op — but any row that still slips through must not be served. (Counts
@@ -1697,7 +2304,13 @@ export async function GET(req: NextRequest) {
 			slug: string;
 			identity?: ProjectRow["identity"];
 		}) =>
-			nameMatchScore(p.name ?? "", p.slug ?? "", q, p.identity?.aliases) === 3
+			nameMatchScore(
+				p.name ?? "",
+				p.slug ?? "",
+				q,
+				p.identity?.aliases,
+				tokenize(q),
+			) === 3
 				? 1
 				: 0;
 		const act = (p: { status: string }) => (p.status === "Inactive" ? 0 : 1);
@@ -1712,27 +2325,35 @@ export async function GET(req: NextRequest) {
 	if (payload && baseProjects.length) {
 		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
 		try {
-			const repoRes = await payload.find({
-				collection: "repos",
-				where: { projectSlug: { in: slugs } },
-				sort: "-repoScore",
-				limit: Math.min(slugs.length * 8, 500),
-				depth: 0,
-				// Only the fields ProjectRepoRef surfaces — NOT the README excerpt,
-				// which bloated this per-project fetch and timed the endpoint out.
-				select: {
-					fullName: true,
-					url: true,
-					primaryLanguage: true,
-					stars: true,
-					repoScore: true,
-					repoScoreLabel: true,
-					judgeScore: true,
-					hackathonWinner: true,
-					projectSlug: true,
-					lastCommitAt: true,
-				},
-			});
+			const repoRes = await withReadTimeout(
+				payload.find({
+					collection: "repos",
+					// Quality surface: archive-tier repos never ride inline on project
+					// rows (they stay reachable via /api/repos/search name lookups).
+					where: {
+						projectSlug: { in: slugs },
+						tier: { not_equals: "archive" },
+					},
+					sort: "-repoScore",
+					limit: Math.min(slugs.length * 8, 500),
+					depth: 0,
+					// Only the fields ProjectRepoRef surfaces — NOT the README excerpt,
+					// which bloated this per-project fetch and timed the endpoint out.
+					select: {
+						fullName: true,
+						url: true,
+						primaryLanguage: true,
+						stars: true,
+						repoScore: true,
+						repoScoreLabel: true,
+						judgeScore: true,
+						hackathonWinner: true,
+						projectSlug: true,
+						lastCommitAt: true,
+					},
+				}),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const bySlug = new Map<string, ProjectRepoRef[]>();
 			for (const r of repoRes.docs as unknown as Array<
 				Record<string, unknown>
@@ -1768,8 +2389,9 @@ export async function GET(req: NextRequest) {
 				);
 				return { ...p, repos, lastActivityAt };
 			});
-		} catch {
+		} catch (e) {
 			// best-effort — ship projects without per-project repos on any error
+			warnings.push(degradedWarning("projects per-project repos", e));
 		}
 	}
 
@@ -1781,12 +2403,10 @@ export async function GET(req: NextRequest) {
 	let builtByMap = new Map<string, { name: string; slug: string }>();
 	if (payload && projectsOut.length) {
 		try {
-			const entRes = await payload.find({
-				collection: "entities",
-				limit: 300,
-				depth: 0,
-				select: { name: true, slug: true, projects: true },
-			});
+			const entRes = await withReadTimeout(
+				entityRowsMemo(),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const m = new Map<string, { name: string; slug: string }>();
 			for (const e of entRes.docs as unknown as Array<
 				Record<string, unknown>
@@ -1804,8 +2424,9 @@ export async function GET(req: NextRequest) {
 				}
 			}
 			builtByMap = m;
-		} catch {
+		} catch (e) {
 			// best-effort — results ship without attribution on any error
+			warnings.push(degradedWarning("projects builtBy attribution", e));
 		}
 	}
 	// Anchor corridor data (sls-012): Anchor-typed project records described
@@ -1843,22 +2464,10 @@ export async function GET(req: NextRequest) {
 	const hasAnchorRows = projectsOut.some(isAnchorRow);
 	if (payload && hasAnchorRows) {
 		try {
-			const pRes = await payload.find({
-				collection: "partner-accounts",
-				where: { partnerType: { equals: "anchor" } },
-				limit: 100,
-				depth: 0,
-				select: {
-					name: true,
-					slug: true,
-					country: true,
-					regions: true,
-					assets: true,
-					seps: true,
-					rampTypes: true,
-					lastPartnerUpdateAt: true,
-				},
-			});
+			const pRes = await withReadTimeout(
+				anchorRowsMemo(),
+				DEFAULT_READ_TIMEOUT_MS,
+			);
 			const m = new Map<string, AnchorProfile>();
 			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>) {
 				const tags = (arr: unknown): string[] =>
@@ -1897,8 +2506,9 @@ export async function GET(req: NextRequest) {
 				});
 			}
 			anchorProfiles = m;
-		} catch {
+		} catch (e) {
 			// best-effort — rows ship without anchorProfile on any error
+			warnings.push(degradedWarning("projects anchor profiles", e));
 		}
 	}
 
@@ -1909,13 +2519,41 @@ export async function GET(req: NextRequest) {
 	// (hoisted 2026-07-21 so the hay carries audit vocabulary); attachment
 	// below just reads it.
 
+	// Audit-drift (code-truth): "audited" and "audited 14 months / 400 commits
+	// of churn ago" are different claims. driftDays = whole days since the
+	// latest report; codeChangedSinceAudit = any joined repo committed on a
+	// LATER day than the audit (day-granular; null when either side lacks a
+	// date — absence of evidence, not a freshness claim).
+	const withAuditDrift = (
+		roll: { count: number; auditors: string[]; latestAt: string | null } | null,
+		repos: Array<{ lastCommitAt?: string | null }> | undefined,
+	) => {
+		if (!roll) return null;
+		if (!roll.latestAt)
+			return { ...roll, driftDays: null, codeChangedSinceAudit: null };
+		const driftDays = Math.max(
+			0,
+			Math.floor((Date.now() - Date.parse(roll.latestAt)) / 86_400_000),
+		);
+		const commitDays = (repos ?? [])
+			.map((r) =>
+				typeof r.lastCommitAt === "string" ? r.lastCommitAt.slice(0, 10) : null,
+			)
+			.filter((d): d is string => !!d);
+		const latest = roll.latestAt;
+		const codeChangedSinceAudit = commitDays.length
+			? commitDays.some((d) => d > latest)
+			: null;
+		return { ...roll, driftDays, codeChangedSinceAudit };
+	};
+
 	const projectsWithOrg = projectsOut.map((p) => ({
 		...p,
 		builtBy: builtByMap.get(p.id) ?? null,
 		anchorProfile: isAnchorRow(p)
 			? (anchorProfiles.get(norm(p.name)) ?? null)
 			: null,
-		audits: auditsBySlug.get(p.slug as string) ?? null,
+		audits: withAuditDrift(auditsBySlug.get(p.slug as string) ?? null, p.repos),
 	}));
 
 	// sls-056: report counts from the FINAL served array. The page
@@ -1928,11 +2566,44 @@ export async function GET(req: NextRequest) {
 	// total >= returned (totalMatching >= projects.length is guaranteed — it is
 	// the pre-slice count set just before the offset/limit slice).
 	const returnedCount = projectsWithOrg.length;
-	const foldRemoved = projects.length + semanticAdds.length - returnedCount;
-	const totalCount = totalMatching + semanticAdds.length - foldRemoved;
+	// `returned` is the served array; `total` is the full match set minus the
+	// folds counted over that WHOLE set (foldedFromTotal, computed pre-slice) —
+	// not minus the folds that happened to land on this page, which made the
+	// same query report a different total at a different limit.
+	//
+	// SEMANTIC ROWS ARE NOT IN `total`. They used to be — and because the
+	// semantic top-up only runs at offset 0, the SAME query reported total 17
+	// on page one and 6 on page two (audit-proven live, 2026-08-31). A number
+	// documented as "lets paging consumers know when they've seen everything"
+	// that changes between pages is worse than no number. `total` is now the
+	// keyword match set, stable across limit AND offset; the page-one bonus
+	// rows are counted separately in `counts.semantic`, each tagged
+	// via:"semantic" — so `returned` can legitimately exceed `total` on page
+	// one, and the counts say exactly why.
+	const totalCount = totalMatching - foldedFromTotal;
+
+	// An empty page behind a failed read is an outage, not a checked-empty.
+	if (isDegraded(warnings) && projectsWithOrg.length === 0) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/projects/search",
+			query: q,
+		});
+		return apiError({
+			status: 503,
+			error: "project search read failed",
+			advisory: `${warnings.join("; ")}. This is an outage, NOT a claim that no project matches. Retry after a moment.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
+	}
 
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/projects/search",
 		query: q,
 		filters: {
@@ -1946,7 +2617,7 @@ export async function GET(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: {
+			meta: withPartial({
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				...(warnings.length ? { warnings } : {}),
@@ -1961,6 +2632,19 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				matchMode,
+				// A correction is never applied silently. The caller asked about a
+				// spelling we don't have; they're entitled to know we searched for
+				// a different one, and an agent relaying this should say so too.
+				...(didYouMean
+					? {
+							didYouMean: {
+								from: didYouMean.from,
+								to: didYouMean.to,
+								slug: didYouMean.slug,
+								note: `No project is spelled '${didYouMean.from}'. These results are for '${didYouMean.to}', the only project within a typo's distance of it — say so rather than presenting them as a match for what was asked.`,
+							},
+						}
+					: {}),
 				...(superlativeNote(q) ? { superlativeNote: superlativeNote(q) } : {}),
 				...(laneHints("projects", {
 					empty: projects.length === 0,
@@ -1989,10 +2673,18 @@ export async function GET(req: NextRequest) {
 					strict: "all keywords matched",
 					"loose-1": "all but one keyword matched",
 					majority: "majority of keywords matched (broader scope)",
+					corrected:
+						"matched via a known spelling correction — the query token does not occur in these rows; verify the identity before relying on it",
 					semantic:
 						"no keyword match — semantically similar results (verify relevance before relying on them)",
 					all: "no keyword filter",
 				}[matchMode],
+				...(typeParam && q
+					? {
+							matchModeLabel:
+								"type filter defines the result set (every typed row included); q ranks within it",
+						}
+					: {}),
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything. `semantic` counts
 				// the rows on THIS page served by the vector fallback (also part
@@ -2007,15 +2699,16 @@ export async function GET(req: NextRequest) {
 				// the page with vector-search matches the literal filter missed
 				// (each such row is tagged `via: "semantic"`).
 				semantic: usedSemantic,
-				// sls-011: the SCF fields on rows (scfTotalAwardedUSD, scfAwardedRounds,
-				// scfAmountStatus) carry their counting basis HERE, where the numbers
-				// appear — not only on /api/analyze. Totals are in-house reconstructions
-				// (SCF doesn't publish all per-award amounts; some are XLM/undisclosed —
-				// see scfAmountStatus), so they can legitimately disagree with SDF's own
-				// submission-based counters. scfAwardedRounds lists the rounds a project
-				// won; per-round amounts are unpublished. Full breakdown at /api/analyze?dimension=funding.
+				// sls-011 + sls-058: the SCF fields on rows carry their counting basis
+				// HERE, where the numbers appear — not only on /api/analyze. Corrected
+				// 2026-08-03 (sls-058 defect 2): scfTotalAwardedUSD is scraped from the
+				// project's own SCF page (SDF's figure), NOT an in-house sum, and
+				// per-round submission budgets ARE published — scfRoundAwards now
+				// carries them, so the total finally has a visible reconciling basis
+				// (it can exceed the sum of round budgets: top-ups / components SCF
+				// doesn't itemize per round).
 				scfCountBasis:
-					"scfTotalAwardedUSD is an in-house reconstruction (SCF doesn't publish all per-award amounts — some XLM-denominated/undisclosed, see scfAmountStatus); it can legitimately differ from SDF's submission-based counters. scfAwardedRounds = rounds this project won (per-round amounts unpublished). Full per-round breakdown: /api/analyze?dimension=funding.",
+					"scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure). scfRoundAwards is its reconciling basis: each awarded round's official submission record (published budget in USD + award type). The total can exceed the sum of round budgets — SCF applies top-ups/components it doesn't itemize per round; see scfAmountStatus for undisclosed cases. Full per-round breakdown: /api/analyze?dimension=funding.",
 				// sls-049: empty-field semantics for the anchorProfile join — only
 				// emitted when the page actually carries anchor rows.
 				...(projectsWithOrg.some((p) => p.anchorProfile)
@@ -2024,9 +2717,52 @@ export async function GET(req: NextRequest) {
 								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState) — NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
 						}
 					: {}),
+				// Semantic-only page: NOT a match, and it must not read like one.
+				//
+				// `matchMode: "semantic"` means zero keyword tiers matched and every
+				// row is an embedding neighbour. The mode + label already said so,
+				// but nothing structured did — and the empty-page advisory below
+				// can't fire here, because the page isn't empty. So an agent asking
+				// for `octoplace` got three confidently-named projects (Octarine,
+				// Ping, OrbitCDP) and no signal that none of them is the thing it
+				// asked for. Measured 2026-07-26 across the real-demand misses:
+				// named entities we don't hold land here at 0.43–0.58 confidence
+				// while genuine matches sit at 0.76–0.97.
+				//
+				// The rows still ship — vector neighbours occasionally ARE the
+				// answer for a conceptual query ("quantum resistant signatures" →
+				// Soundness, Blocknify), and deleting information to avoid
+				// misreading it is the wrong trade. What ships with them now is the
+				// truth about what they are.
+				...(matchMode === "semantic" && q
+					? {
+							advisory: {
+								summary: `No project matches '${q}' by name, description or category. The rows below are the closest entries by embedding similarity — NEIGHBOURS, not matches. Do not report them as '${q}' or as evidence that '${q}' exists on Stellar; if the question was whether we hold a project by that name, the answer is no.`,
+								suggestions: [
+									{
+										action: "repo-search",
+										url: `/api/repos/search?q=${encodeURIComponent(q)}&limit=5`,
+										why: "A named thing absent from the project directory may still exist as indexed code — repo search matches on GitHub org/repo names the directory doesn't carry.",
+									},
+									{
+										action: "research-corpus",
+										url: `/api/research?q=${encodeURIComponent(q)}&limit=5`,
+										why: "If the name appears in a SEP, audit, SCF record or blog post, the research corpus indexes prose the directory doesn't.",
+									},
+									{
+										action: "report-a-gap",
+										url: "https://stellarlight.xyz/submit",
+										why: "If it IS a live Stellar project, it's a genuine coverage gap — submitting it is what closes it.",
+									},
+								],
+							},
+						}
+					: {}),
 				// When BOTH keyword and semantic came back empty, point the agent
 				// at thesis-level retrieval. Project search can't answer "is x402
 				// possible on Stellar?" — /api/research can.
+				// (Mutually exclusive with the advisory above: that one requires
+				// semantic rows to exist, this one requires that none do.)
 				...(projects.length === 0 && semanticAdds.length === 0 && q
 					? {
 							advisory: {
@@ -2045,7 +2781,7 @@ export async function GET(req: NextRequest) {
 							},
 						}
 					: {}),
-			},
+			}),
 			// ?fields= projection runs LAST so every enrichment (builtBy,
 			// anchorProfile, repos, onchain) is present before filtering.
 			projects: projectsWithOrg.map((p) => pickFields(p, fieldsWanted)),
@@ -2056,7 +2792,18 @@ export async function GET(req: NextRequest) {
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				...serverTiming(startedAt),
+				// Never pin an EMPTY page in the edge cache. A transient find error or
+				// a cold index can produce zero rows for a query that normally has
+				// dozens; with s-maxage + stale-while-revalidate that zero was served
+				// to every caller for up to 5 minutes (observed 2026-08-17: q=lending
+				// -> total 0, x-vercel-cache STALE, while the origin had 78). Empty
+				// answers are cheap to recompute and expensive to be wrong about.
+				// A page a failed read thinned is the same class: never pinned.
+				"Cache-Control":
+					projectsWithOrg.length === 0 || isDegraded(warnings)
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);

@@ -19,12 +19,10 @@
  * planned change for review; --apply writes with per-row isolation.
  */
 
+import "./load-env";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
 import { decodeHtmlEntities } from "../src/lib/decode-entities";
-
-loadEnv({ path: ".env.local" });
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;

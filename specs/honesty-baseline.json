@@ -1,0 +1,21 @@
+{
+ "$comment": "QUALITY.md L1 \u2014 the honesty-layer conformance ratchet. Every GET operation that accepts q must declare, in its response contract, HOW it matched (a matchMode field), or appear here. exempt:true = permanently honest through a DIFFERENT declared mechanism (named in reason). exempt:false = grandfathered DEBT (NONE remain as of 2026-08-28 \u2014 keep it that way): check-honesty-layer.ts fails the build if a new op ships without a label, and when a debt op gains one it must be removed here in the same PR.",
+ "operations": {
+  "resolveProject": {
+   "exempt": true,
+   "reason": "honest via found + matchedOn enum \u2014 identity resolution, not tiered search"
+  },
+  "explainRepo": {
+   "exempt": true,
+   "reason": "honest via answered + answerSource \u2014 single-subject Q&A, not a result list"
+  },
+  "hackathonBrief": {
+   "exempt": true,
+   "reason": "composite; its embedded vet block carries matchMode (declared on vetIdea)"
+  },
+  "scfPitch": {
+   "exempt": true,
+   "reason": "composite; its embedded vet block carries matchMode (declared on vetIdea)"
+  }
+ }
+}

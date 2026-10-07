@@ -1,0 +1,229 @@
+{
+ "attempts": [
+  {
+   "rowId": "engine-a-recall:response",
+   "date": "2026-09-14",
+   "run": "34874008250",
+   "outcome": "already-passing",
+   "pr": null,
+   "costUsd": 1.2742027499999997,
+   "note": "engine-a-recall:response does not reproduce: all four probe URLs return HTTP 200 with the expected project at rank #1, and the fetch-error class that created the row was already routed out of `failures` into `unchecked` by scripts/eval/generated-recall.ts at HEAD."
+  },
+  {
+   "rowId": "nightly-completeness:scfroundawards-empty-lulpay",
+   "date": "2026-09-14",
+   "run": "34875749549",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 5.507265749999999,
+   "note": "pushed repair/nightly-completeness-scfroundawards-empty-lulpay-20260914-1737 but gh pr create returned no URL"
+  },
+  {
+   "rowId": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
+   "date": "2026-09-15",
+   "run": "34977806120",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-a-recall:3-of-top-10-carry-types-explorer-6-exist",
+   "date": "2026-09-16",
+   "run": "35103801534",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+   "date": "2026-09-17",
+   "run": "35229273116",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+   "date": "2026-09-18",
+   "run": "35348579844",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-passkey-kit-npm-passkey-kit",
+   "date": "2026-09-19",
+   "run": "35443578690",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-passkey-kit-npm-passkey-kit",
+   "date": "2026-09-20",
+   "run": "35512862777",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:contracterrorcodefromnumber",
+   "date": "2026-09-21",
+   "run": "35618194159",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:contracterrorcodefromnumber",
+   "date": "2026-09-22",
+   "run": "35734957797",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:defindex-tvl-exact-product-lineup",
+   "date": "2026-09-23",
+   "run": "35869972947",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:defindex-tvl-exact-product-lineup",
+   "date": "2026-09-24",
+   "run": "36008060508",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-horizontalsystems-stellar-web-sdk-npm",
+   "date": "2026-09-25",
+   "run": "36145652998",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-horizontalsystems-stellar-web-sdk-npm",
+   "date": "2026-09-26",
+   "run": "36244965867",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-allbridge-io-allbridge-core-js-sdk-np",
+   "date": "2026-09-27",
+   "run": "36325413368",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-allbridge-io-allbridge-core-js-sdk-np",
+   "date": "2026-09-28",
+   "run": "36455121700",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-noir-lang-noir-npm-noir-lang-noir-js",
+   "date": "2026-09-29",
+   "run": "36587463719",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-noir-lang-noir-npm-noir-lang-noir-js",
+   "date": "2026-09-30",
+   "run": "36735767896",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-dfns-dfns-sdk-python-pypi-dfns-sdk",
+   "date": "2026-10-01",
+   "run": "36886078595",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+   "date": "2026-10-02",
+   "run": "37023860634",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+   "date": "2026-10-03",
+   "run": "37127783156",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-passkey-kit-npm-passkey-kit",
+   "date": "2026-10-04",
+   "run": "37209004404",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-passkey-kit-npm-passkey-kit",
+   "date": "2026-10-05",
+   "run": "37348169738",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-dfns-dfns-sdk-python-pypi-dfns-sdk",
+   "date": "2026-10-06",
+   "run": "37487549381",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-ledger-data-indexer-d",
+   "date": "2026-10-07",
+   "run": "37646654085",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  }
+ ]
+}

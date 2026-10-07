@@ -1,0 +1,23 @@
+{
+ "slug": "didstellar",
+ "url": "https://api.github.com/repos/mavennet/stellar-did",
+ "finalUrl": "https://api.github.com/repos/mavennet/stellar-did",
+ "fetchedAt": "2026-09-06T00:15:03.714Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 00:15:03 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "github.com"
+ },
+ "bodyTextSha256": "4f50e254a719a6b1b06b529bdaa08980e4acf0878aad0090cba7771f6ebdf0b9",
+ "bodyTextChars": 118,
+ "markers": [
+  {
+   "marker": "Not Found",
+   "found": true,
+   "excerpt": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

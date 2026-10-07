@@ -23,14 +23,14 @@
  *   pnpm exec tsx scripts/data/enrich-onchain-projects.ts             # dry run
  *   pnpm exec tsx scripts/data/enrich-onchain-projects.ts --execute   # write
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
+import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
+import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
+import { domainOf, fetchText, parseStellarToml } from "../lib/stellar-toml";
 
 const execute = process.argv.includes("--execute");
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -38,19 +38,39 @@ const PAUSE_MS = 400; // be polite — unauthenticated, unpublished rate limits
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// 2026-09-28: every run since at least 09-08 ended with 22-26 HTTP 429s from
+// stellar.expert and the same number of silent "SKIP … fetch failure" lines
+// (the last seed and every stablecoin asset after it), while the lane
+// reported success. A 429 is "slow down", not "no data": back off and retry,
+// honouring Retry-After when the server sends one.
+const RETRY_DELAYS_MS = [5_000, 15_000, 45_000];
+
 async function fetchJson<T>(url: string): Promise<T | null> {
-	try {
-		const r = await fetch(url, {
-			headers: { "user-agent": "stellarlight-onchain-enrich" },
-		});
-		if (!r.ok) {
+	for (let attempt = 0; ; attempt++) {
+		try {
+			const r = await fetch(url, {
+				headers: { "user-agent": "stellarlight-onchain-enrich" },
+			});
+			if (r.ok) return (await r.json()) as T;
+			const retryable = r.status === 429 || r.status >= 500;
+			if (retryable && attempt < RETRY_DELAYS_MS.length) {
+				const header = Number(r.headers.get("retry-after"));
+				const wait =
+					Number.isFinite(header) && header > 0
+						? header * 1000
+						: RETRY_DELAYS_MS[attempt];
+				console.log(
+					`    … ${url} → HTTP ${r.status}, retry ${attempt + 1}/${RETRY_DELAYS_MS.length} in ${Math.round(wait / 1000)}s`,
+				);
+				await sleep(wait);
+				continue;
+			}
 			console.log(`    ✗ ${url} → HTTP ${r.status}`);
 			return null;
+		} catch (e) {
+			console.log(`    ✗ ${url} → ${(e as Error).message}`);
+			return null;
 		}
-		return (await r.json()) as T;
-	} catch (e) {
-		console.log(`    ✗ ${url} → ${(e as Error).message}`);
-		return null;
 	}
 }
 
@@ -104,7 +124,7 @@ async function run() {
 	const bySlug = new Map<
 		string,
 		{
-			contracts: Array<{ address: string; label: string }>;
+			contracts: Array<{ address: string; label: string; sourceRepo?: string }>;
 			asset?: { code: string; issuer: string };
 		}
 	>();
@@ -119,8 +139,44 @@ async function run() {
 		collection: "repos",
 		limit: 3000,
 		depth: 0,
-		select: { fullName: true, projectSlug: true, codeVerified: true },
+		select: {
+			fullName: true,
+			projectSlug: true,
+			codeVerified: true,
+			codeInUse: true,
+		},
 	});
+	// Case-insensitive repo index for the codeInUse write-back (identity
+	// lesson: never trust iteration-spelling equality on fullName).
+	const repoIndex = new Map<
+		string,
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		{ id: string | number; fullName: string; codeInUse?: any }
+	>();
+	for (const r of repos.docs as unknown as Array<{
+		id: string | number;
+		fullName: string;
+		// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+		codeInUse?: any;
+	}>) {
+		if (r.fullName)
+			repoIndex.set(r.fullName.toLowerCase(), {
+				id: r.id,
+				fullName: r.fullName,
+				codeInUse: r.codeInUse,
+			});
+	}
+	// Per-repo usage rollup accumulated across ALL projects this run.
+	const byRepo = new Map<
+		string,
+		{
+			contracts: number;
+			events: number;
+			eventsDelta: number | null;
+			subinvocations: number;
+			subinvocationsDelta: number | null;
+		}
+	>();
 	let repoDerived = 0;
 	for (const r of repos.docs as unknown as Array<{
 		fullName: string;
@@ -131,7 +187,11 @@ async function run() {
 		if (!id || !r.projectSlug) continue;
 		const entry = bySlug.get(r.projectSlug) ?? { contracts: [] };
 		if (!entry.contracts.some((c) => c.address === id)) {
-			entry.contracts.push({ address: id, label: `from ${r.fullName} README` });
+			entry.contracts.push({
+				address: id,
+				label: `from ${r.fullName} README`,
+				sourceRepo: r.fullName,
+			});
 			repoDerived += 1;
 		}
 		bySlug.set(r.projectSlug, entry);
@@ -176,12 +236,165 @@ async function run() {
 		console.log(`partner-asset join skipped: ${(e as Error).message}`);
 	}
 
+	// Stablecoin-registry auto-join (P4 evidence expansion, 2026-08-31): the
+	// registry's 29 hand-verified (code, issuer) identities carry the issuer's
+	// home domain. Joined to directory rows by registered-host equality against
+	// links.website — a registry asset joins ONLY when exactly one project
+	// matches its domain, and only fills an EMPTY asset slot (seeds, repo- and
+	// partner-derived keys outrank). Every join and every ambiguity is printed
+	// so the dry run shows the mapping before anything writes. This is what
+	// lets the basis upgrader see issuer-class rows: evidence first, label
+	// after, one weekly observation apart (deltas need two readings).
+	let registryDerived = 0;
+	{
+		const allProjects = await payload.find({
+			collection: "projects",
+			limit: 5000,
+			depth: 0,
+			select: { slug: true, links: true },
+		});
+		const host = (u?: string | null) => {
+			if (!u) return null;
+			try {
+				return new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+			} catch {
+				return null;
+			}
+		};
+		const byHost = new Map<string, string[]>();
+		for (const p of allProjects.docs as unknown as Array<{
+			slug?: string;
+			links?: { website?: string | null } | null;
+		}>) {
+			const h = host(p.links?.website);
+			if (!h || !p.slug) continue;
+			byHost.set(h, [...(byHost.get(h) ?? []), p.slug]);
+		}
+		for (const a of STABLECOIN_REGISTRY) {
+			const dom = a.domain.toLowerCase().replace(/^www\./, "");
+			// exact host, or the project site living on a subdomain of it
+			const slugs = new Set<string>();
+			for (const [h, ss] of byHost)
+				if (h === dom || h.endsWith(`.${dom}`))
+					for (const s of ss) slugs.add(s);
+			if (slugs.size === 0) {
+				console.log(`  registry ${a.code} (${dom}): no directory row — skip`);
+				continue;
+			}
+			// Multi-asset issuers keep per-asset directory rows on ONE domain
+			// (vnx.li → veur + vchf; stablecoin.z.com → gyen + zusd; circle.com
+			// → usdc + eurc + …). The first dry run skipped every one of these
+			// as AMBIGUOUS while the disambiguator was in the row itself: the
+			// asset-code-named row IS the asset's row. Exact canon(code) ==
+			// canon(slug) wins within the domain set; with no code-named row a
+			// single domain match joins as before; anything else stays an
+			// honest skip.
+			let slug: string;
+			if (slugs.size === 1) {
+				slug = [...slugs][0];
+			} else {
+				const codeCanon = a.code.toLowerCase().replace(/[^a-z0-9]/g, "");
+				const codeMatches = [...slugs].filter(
+					(s) => s.toLowerCase().replace(/[^a-z0-9]/g, "") === codeCanon,
+				);
+				if (codeMatches.length !== 1) {
+					console.log(
+						`  registry ${a.code} (${dom}): AMBIGUOUS → ${[...slugs].join(", ")} — skip`,
+					);
+					continue;
+				}
+				slug = codeMatches[0];
+			}
+			const entry = bySlug.get(slug) ?? { contracts: [] };
+			if (entry.asset) {
+				console.log(
+					`  registry ${a.code} (${dom}): ${slug} already keyed (${entry.asset.code}) — skip`,
+				);
+				continue;
+			}
+			entry.asset = { code: a.code, issuer: a.issuer };
+			bySlug.set(slug, entry);
+			registryDerived += 1;
+			console.log(`  registry ${a.code} (${dom}) → ${slug}`);
+		}
+	}
+
+	// stellar.toml auto-join (P4 evidence expansion, lane 2b — pays three gap-
+	// matrix rows at once: onchain evidence → strongBasis upgrades → deployment
+	// evidence): anchor/stablecoin-class rows publish their issuer accounts in
+	// their OWN domain's /.well-known/stellar.toml, so the join is precise by
+	// construction — the operator's own machine record names the asset. Only
+	// fills an EMPTY asset slot (every other source outranks); a currency block
+	// without a well-formed G-address contributes nothing; an unreachable or
+	// HTML soft-404 toml is a skip, never a guess. First (code, issuer) pair is
+	// taken as the canonical asset; the rest are logged so the dry run shows
+	// what a multi-asset issuer holds. The stellar.expert fetch downstream
+	// validates the issuer exists before anything is written.
+	let tomlDerived = 0;
+	{
+		const candidates = await payload.find({
+			collection: "projects",
+			where: {
+				or: [
+					{ types: { contains: "Anchor" } },
+					{ types: { contains: "Stablecoin" } },
+				],
+			},
+			limit: 2000,
+			depth: 0,
+			select: { slug: true, links: true, name: true, canonicalSlug: true },
+		});
+		const rows = candidates.docs as unknown as Array<{
+			slug?: string;
+			name?: string;
+			canonicalSlug?: string | null;
+			links?: { website?: string | null } | null;
+		}>;
+		console.log(`  toml join: ${rows.length} anchor/stablecoin-class rows`);
+		for (const p of rows) {
+			if (!p.slug) continue;
+			// A hidden duplicate (Draft + canonicalSlug) shares its canonical's
+			// domain; keying it would fetch and write the same asset twice.
+			if (p.canonicalSlug) continue;
+			const existing = bySlug.get(p.slug);
+			if (existing?.asset) continue; // a stronger source already keyed it
+			const dom = p.links?.website ? domainOf(p.links.website) : null;
+			if (!dom) continue;
+			const text = await fetchText(`https://${dom}/.well-known/stellar.toml`);
+			await sleep(150); // be polite across many small operators
+			if (!text) continue;
+			const toml = parseStellarToml(text);
+			// SEP-1 status: an asset the operator marks dead, test or private is
+			// not the row's on-chain evidence, whatever its trustline count
+			// (normalfinance.io marks all ten of its currencies dead, 2026-09-28).
+			const usable = toml.currencies.filter(
+				(c) => !c.status || c.status === "live",
+			);
+			if (!usable.length) {
+				if (toml.currencies.length)
+					console.log(
+						`  toml ${dom} → ${p.slug}: ${toml.currencies.length} currencies, none live (${toml.currencies.map((c) => `${c.code}:${c.status}`).join(", ")}) — skip`,
+					);
+				continue;
+			}
+			const [primary, ...rest] = usable;
+			const entry = existing ?? { contracts: [] };
+			entry.asset = { code: primary.code, issuer: primary.issuer };
+			bySlug.set(p.slug, entry);
+			tomlDerived += 1;
+			console.log(
+				`  toml ${dom} → ${p.slug}: ${primary.code}-${primary.issuer.slice(0, 6)}…${rest.length ? ` (+${rest.length} more: ${rest.map((c) => c.code).join(", ")})` : ""}`,
+			);
+		}
+	}
+
 	console.log(
-		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset → ${bySlug.size} projects\n`,
+		`Join keys: ${ONCHAIN_SEEDS.length} seeded + ${repoDerived} repo-derived + ${partnerDerived} partner-asset + ${registryDerived} registry + ${tomlDerived} toml → ${bySlug.size} projects\n`,
 	);
 
 	let updated = 0;
 	let skipped = 0;
+	let fetchSkipped = 0; // projects left stale because stellar.expert did not answer
 	for (const [slug, keys] of bySlug) {
 		const proj = await payload.find({
 			collection: "projects",
@@ -271,6 +484,7 @@ async function run() {
 		if (failed) {
 			console.log(`SKIP ${slug}: fetch failure — existing data left untouched`);
 			skipped += 1;
+			fetchSkipped += 1;
 			continue;
 		}
 
@@ -316,6 +530,41 @@ async function run() {
 				? assetPayments - prior.assetPayments
 				: null;
 
+		// codeInUse attribution: a contract rolls up to its repo when we know
+		// the repo either from the scanner join (sourceRepo) or stellar.expert
+		// wasm validation (verifiedRepo). Unattributed contracts roll to none.
+		const addrRepo = new Map(
+			keys.contracts.map((c) => [c.address, c.sourceRepo ?? null]),
+		);
+		for (const c of contracts) {
+			const viaValidation =
+				typeof c.verifiedRepo === "string"
+					? (c.verifiedRepo.match(
+							/github\.com\/([^/]+\/[^/.][^/]*?)(?:\.git)?(?:\/|$)/,
+						)?.[1] ?? null)
+					: null;
+			const full = addrRepo.get(c.address as string) ?? viaValidation;
+			if (!full) continue;
+			const k = full.toLowerCase();
+			const cur = byRepo.get(k) ?? {
+				contracts: 0,
+				events: 0,
+				eventsDelta: null,
+				subinvocations: 0,
+				subinvocationsDelta: null,
+			};
+			cur.contracts += 1;
+			if (typeof c.events === "number") cur.events += c.events;
+			if (typeof c.subinvocations === "number")
+				cur.subinvocations += c.subinvocations;
+			if (typeof c.eventsDelta === "number")
+				cur.eventsDelta = (cur.eventsDelta ?? 0) + c.eventsDelta;
+			if (typeof c.subinvocationsDelta === "number")
+				cur.subinvocationsDelta =
+					(cur.subinvocationsDelta ?? 0) + c.subinvocationsDelta;
+			byRepo.set(k, cur);
+		}
+
 		const summary = [
 			contracts.length ? `${contracts.length} contracts` : null,
 			keys.asset
@@ -359,14 +608,95 @@ async function run() {
 		}
 	}
 
+	// codeInUse write-back: static depth says "serious code"; this says the
+	// deployed contract is LIVE with real activity. Only-changed, read-back
+	// verified; unmatched repos reported, never guessed.
+	let repoWrites = 0;
+	let repoUnchanged = 0;
+	let repoUnknown = 0;
+	let repoFailed = 0;
+	for (const [k, agg] of byRepo) {
+		const hit = repoIndex.get(k);
+		if (!hit) {
+			console.log(`  ? codeInUse: no indexed repo matches ${k}`);
+			repoUnknown += 1;
+			continue;
+		}
+		const sent = {
+			contracts: agg.contracts,
+			events: agg.events,
+			eventsDelta: agg.eventsDelta,
+			subinvocations: agg.subinvocations,
+			subinvocationsDelta: agg.subinvocationsDelta,
+			asOf,
+		};
+		const cur = hit.codeInUse ?? {};
+		if (
+			cur.contracts === sent.contracts &&
+			cur.events === sent.events &&
+			(cur.eventsDelta ?? null) === sent.eventsDelta &&
+			cur.subinvocations === sent.subinvocations &&
+			(cur.subinvocationsDelta ?? null) === sent.subinvocationsDelta
+		) {
+			repoUnchanged += 1;
+			continue;
+		}
+		console.log(
+			`${execute ? "WRITE" : "would write"} codeInUse ${hit.fullName}: contracts=${sent.contracts} events=${sent.events} (Δ${sent.eventsDelta ?? "–"}) subinv=${sent.subinvocations} (Δ${sent.subinvocationsDelta ?? "–"})`,
+		);
+		if (execute) {
+			await payload.update({
+				collection: "repos",
+				id: hit.id,
+				data: { codeInUse: sent },
+			});
+			const back = await payload.findByID({
+				collection: "repos",
+				id: hit.id,
+				depth: 0,
+			});
+			const mm = diffWritten(
+				hit.fullName,
+				sent as unknown as Record<string, unknown>,
+				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+				(back as any).codeInUse,
+				[
+					"contracts",
+					"events",
+					"eventsDelta",
+					"subinvocations",
+					"subinvocationsDelta",
+					"asOf",
+				],
+			);
+			if (mm.length) {
+				console.error(formatMismatches(mm));
+				repoFailed += 1;
+				continue;
+			}
+		}
+		repoWrites += 1;
+	}
 	console.log(
-		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped}`,
+		`codeInUse: ${repoWrites} ${execute ? "written" : "would write"} · ${repoUnchanged} unchanged · ${repoUnknown} unmatched-repo · ${repoFailed} read-back failures`,
 	);
+	if (repoFailed) process.exitCode = 1;
+
+	console.log(
+		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by fetch failure)`,
+	);
+	if (fetchSkipped) {
+		// A stale row is a silent failure; the run says so with its exit code.
+		console.error(
+			`RED: ${fetchSkipped} project(s) kept stale on-chain data because stellar.expert did not answer after retries.`,
+		);
+		process.exitCode = 1;
+	}
 	if (!execute) console.log("Dry run. --execute to write.");
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

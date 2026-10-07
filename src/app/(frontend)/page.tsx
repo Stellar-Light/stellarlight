@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import BaseFeeDisplay from "@/components/base-fee-display";
 import BlogHighlights, {
@@ -22,6 +23,13 @@ import TrendingProjectsSection, {
 } from "@/components/trending-projects-section";
 import TVLStats from "@/components/tvl-stats";
 import { getPayloadSafe } from "@/lib/payload-client";
+
+// Canonical lives here rather than in layout.tsx: metadata inherits, so a
+// canonical on the root layout would point every page that does not set its
+// own at "/".
+export const metadata: Metadata = {
+	alternates: { canonical: "/" },
+};
 
 // Force dynamic rendering to prevent build-time MongoDB connection errors
 export const dynamic = "force-dynamic";
@@ -57,7 +65,7 @@ export default async function HomePage() {
 				<div className="mb-20 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[600px] relative">
 					<div className="flex-1 text-left relative z-20 space-y-8">
 						<div className="space-y-6">
-							<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+							<h1 className="reveal-wipe text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
 								<div className="text-foreground mb-2">Explore</div>
 								<Typewriter
 									text={[

@@ -19,7 +19,22 @@ import { askDeepWiki } from "@/lib/deepwiki";
 import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { canonicalFor, contentTokens, searchRepos } from "@/lib/repo-search";
+import {
+	type RepoKind,
+	type RepoKindBasis,
+	repoKindOf,
+} from "@/lib/repo-grade";
+import {
+	findDirectAnswerNote,
+	findRepoByTrigger,
+	REPO_KNOWLEDGE_NOTES,
+} from "@/lib/repo-knowledge";
+import {
+	canonicalFor,
+	contentTokens,
+	explicitRepoName,
+	searchRepos,
+} from "@/lib/repo-search";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -44,13 +59,31 @@ export async function GET(req: NextRequest) {
 
 	// Route to the authoritative repo: curated canonical map first (concept →
 	// SDF repo), then the graded index as a fallback for non-canonical topics.
-	let routedVia: "explicit" | "canonical" | "search" = "explicit";
+	let routedVia: "explicit" | "canonical" | "knowledge-trigger" | "search" =
+		"explicit";
 	let nearMisses: string[] = [];
 	const canon = canonicalFor(q);
 	if (!repo) {
+		// A bare owner/name IS the routing — the same as passing ?repo=. Before
+		// the concept map: "stellar/stellar-etl" wordy-split into "etl" and
+		// went to stellar-ledger-data-indexer (2026-09-01).
+		const named = explicitRepoName(q);
+		if (named) {
+			repo = named;
+		}
+	}
+	if (!repo) {
+		const viaTrigger = canon.length ? null : findRepoByTrigger(q);
 		if (canon.length) {
 			repo = canon[0];
 			routedVia = "canonical";
+		} else if (viaTrigger) {
+			// A curated trigger phrase names the repo that holds the dated fact —
+			// before the lexical index votes ("soroban cli renamed" went to
+			// tupui/soroban-cli-python by name while the rename note lived on
+			// stellar/stellar-cli, 2026-09-01).
+			repo = viaTrigger;
+			routedVia = "knowledge-trigger";
 		} else {
 			const payload = await getPayloadSafe();
 			const { repos } = await searchRepos(payload, q, { limit: 1 });
@@ -99,6 +132,11 @@ export async function GET(req: NextRequest) {
 			alternateRepos: nearMisses,
 			answer: null,
 			answered: false,
+			// Explicit nulls, not omitted keys: `answerAsOf === null` is the
+			// documented "age unknown" check, and an absent key is undefined — a
+			// client's null-check would silently never fire on this envelope.
+			answerSource: null,
+			answerAsOf: null,
 			sources: {
 				repoUrl: null,
 				deepWikiUrl: null,
@@ -116,6 +154,8 @@ export async function GET(req: NextRequest) {
 		stars: number | null;
 		isArchived: boolean;
 		repoScoreLabel: string | null;
+		kind: RepoKind;
+		kindBasis: RepoKindBasis;
 	} | null = null;
 	// Code-verified truth from analyzing the routed repo's ACTUAL source — leads
 	// the answer so an agent knows whether it's real, current, deployable Soroban
@@ -127,23 +167,42 @@ export async function GET(req: NextRequest) {
 		sorobanSdkVersion: string | null;
 		versionStatus: string | null;
 		scannedAt: string | null;
+		scannedRef: string | null;
+		successorRepo: string | null;
 		symbols: string[];
 		mainnetContractId: string | null;
 		sdkCapabilities: string[];
+		codeDomains: string[];
+		contractInterface: string[];
+		stellarDeps: string[];
+		codeInUse: Record<string, unknown> | null;
 	} | null = null;
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
+			// Registry keys and `q`-typed names arrive lowercase; rows keep
+			// GitHub's casing and Mongo `equals` is case-sensitive, so a
+			// knowledge-trigger or explicit route to "creit-tech/…" found no row
+			// and served repoMeta/codeVerified as null. `like` is case-insensitive;
+			// the exact-name filter keeps a sibling from matching.
 			const found = await payload.find({
 				collection: "repos",
-				where: { fullName: { equals: repo } },
-				limit: 1,
+				where: { fullName: { like: repo } },
+				// substring match — a short name (stellar/go) also matches its
+				// forks and siblings; leave room so the exact row is on the page
+				limit: 50,
 				depth: 0,
 				select: {
+					// the exact-name filter below reads fullName — it must be selected
+					fullName: true,
 					lastCommitAt: true,
 					stars: true,
 					isArchived: true,
 					repoScoreLabel: true,
+					// kind's inputs — a select that omits one silently yields undefined
+					isFork: true,
+					judgedHackathon: true,
+					projectSlug: true,
 					stellarProof: true,
 					codeDepth: true,
 					isDeployableContract: true,
@@ -154,16 +213,20 @@ export async function GET(req: NextRequest) {
 					codeSymbols: true,
 					mainnetContractId: true,
 					sdkCapabilities: true,
+					codeDomains: true,
+					contractInterface: true,
+					stellarDeps: true,
+					codeInUse: true,
+					scannedRef: true,
+					successorRepo: true,
 				},
 			});
-			const d = found.docs[0] as unknown as Record<string, unknown> | undefined;
+			const d = found.docs.find(
+				(x) =>
+					String((x as { fullName?: string }).fullName ?? "").toLowerCase() ===
+					repo.toLowerCase(),
+			) as unknown as Record<string, unknown> | undefined;
 			if (d) {
-				repoMeta = {
-					lastCommitAt: (d.lastCommitAt as string) ?? null,
-					stars: (d.stars as number) ?? null,
-					isArchived: !!d.isArchived,
-					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
-				};
 				if (d.codeScanState === "scanned" && d.stellarProof) {
 					codeVerified = {
 						stellarProof: d.stellarProof as string,
@@ -180,6 +243,9 @@ export async function GET(req: NextRequest) {
 						sorobanSdkVersion: (d.sorobanSdkVersion as string) ?? null,
 						versionStatus: (d.versionStatus as string) ?? null,
 						scannedAt: (d.codeScannedAt as string) ?? null,
+						scannedRef: typeof d.scannedRef === "string" ? d.scannedRef : null,
+						successorRepo:
+							typeof d.successorRepo === "string" ? d.successorRepo : null,
 						symbols: Array.isArray(d.codeSymbols)
 							? (d.codeSymbols as unknown[])
 									.filter((s): s is string => typeof s === "string")
@@ -191,8 +257,44 @@ export async function GET(req: NextRequest) {
 									(s): s is string => typeof s === "string",
 								)
 							: [],
+						codeDomains: Array.isArray(d.codeDomains)
+							? (d.codeDomains as unknown[]).filter(
+									(s): s is string => typeof s === "string",
+								)
+							: [],
+						contractInterface: Array.isArray(d.contractInterface)
+							? (d.contractInterface as unknown[])
+									.filter((s): s is string => typeof s === "string")
+									.slice(0, 60)
+							: [],
+						stellarDeps: Array.isArray(d.stellarDeps)
+							? (d.stellarDeps as unknown[]).filter(
+									(s): s is string => typeof s === "string",
+								)
+							: [],
+						codeInUse:
+							d.codeInUse && typeof d.codeInUse === "object"
+								? (d.codeInUse as Record<string, unknown>)
+								: null,
 					};
 				}
+				repoMeta = {
+					lastCommitAt: (d.lastCommitAt as string) ?? null,
+					stars: (d.stars as number) ?? null,
+					isArchived: !!d.isArchived,
+					repoScoreLabel: (d.repoScoreLabel as string) ?? null,
+					// the same signals the search row serves; contract only when
+					// the SERVED codeVerified flag says so (infra pin applied,
+					// unscanned = not a contract)
+					...repoKindOf({
+						isArchived: !!d.isArchived,
+						isFork: !!d.isFork,
+						judgedHackathon: (d.judgedHackathon as string) ?? null,
+						name: repo,
+						isDeployableContract: codeVerified?.isDeployableContract,
+						projectSlug: (d.projectSlug as string) ?? null,
+					}),
+				};
 			}
 		}
 	} catch {
@@ -232,6 +334,8 @@ export async function GET(req: NextRequest) {
 			);
 		if (cv.sdkCapabilities.length)
 			bits.push(`SDK capabilities: ${cv.sdkCapabilities.join(", ")}.`);
+		if (cv.codeDomains.length)
+			bits.push(`Code-evidenced domains: ${cv.codeDomains.join(", ")}.`);
 		if (cv.mainnetContractId)
 			bits.push(`Deployed on mainnet as \`${cv.mainnetContractId}\`.`);
 		bits.push(
@@ -239,7 +343,28 @@ export async function GET(req: NextRequest) {
 		);
 		scanAnswer = bits.join(" ");
 	}
-	const finalAnswer = dwAnswer ?? scanAnswer;
+	// sls-080 (the consumer's roadmap blocker): DeepWiki's index can contradict
+	// the scanned source on the exact constant asked about — it answered 22–25
+	// for a value stellar/stellar-horizon defines as 28 at our own scannedRef.
+	// When a CURATED, DATED, source-cited note directly answers the question
+	// (tight identifier match — see findDirectAnswerNote), the note LEADS and
+	// carries the dating; the DeepWiki walkthrough stays underneath, labeled as
+	// possibly lagging. A dated fact we verified beats an undated index we
+	// didn't.
+	const curatedNotes = REPO_KNOWLEDGE_NOTES[repo.toLowerCase()] ?? [];
+	const directNote = findDirectAnswerNote(q, curatedNotes);
+	// Audit N2: the walkthrough is NOT concatenated into the dated answer —
+	// #1168 existed because a naive parser reads the wrong number out of
+	// mixed text, and gluing DeepWiki's lagging 22–25 under a note dated
+	// answerAsOf rebuilt exactly that trap inside one field. The dated answer
+	// carries only the dated fact; the walkthrough stays reachable at
+	// sources.deepWikiUrl and is named, not embedded.
+	const noteAnswer = directNote
+		? dwAnswer
+			? `${directNote.note}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl — an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
+			: directNote.note
+		: null;
+	const finalAnswer = noteAnswer ?? dwAnswer ?? scanAnswer;
 
 	return NextResponse.json(
 		{
@@ -247,7 +372,23 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
-				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical.",
+				// Say it in `warnings` too, not only in the field. An absent
+				// `answerAsOf` is easy to skim past; a warning naming the three
+				// fields that do NOT date the answer is not.
+				...(noteAnswer
+					? {
+							warnings: [
+								"The answer IS a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. The DeepWiki walkthrough is deliberately NOT embedded in this dated answer — it is an undated index that can lag or contradict the dated fact; reach it via sources.deepWikiUrl, and where they disagree, the dated fact wins.",
+							],
+						}
+					: dwAnswer
+						? {
+								warnings: [
+									"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer — a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+								],
+							}
+						: {}),
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer — read them even when answerSource is 'deepwiki'.",
 			},
 			q,
 			repo,
@@ -261,16 +402,62 @@ export async function GET(req: NextRequest) {
 			alternateRepos: canon.filter(
 				(r) => r.toLowerCase() !== repo.toLowerCase(),
 			),
+			// Every public dated fact we hold for this repo, whether or not one
+			// of them led the answer — a DeepWiki walkthrough never says that a
+			// package is deprecated or a path was renamed. Internal notes never
+			// leave; triggers are routing hints, not content.
+			knowledgeNotes: curatedNotes
+				.filter((n) => n.visibility !== "internal")
+				.map(({ note, source, asOf }) => ({ note, source, asOf })),
 			answer: finalAnswer,
 			answered: !!finalAnswer,
 			// Provenance, always explicit: a DeepWiki mechanism walkthrough vs our
 			// own source scan. They answer different depths — never let a consumer
 			// mistake scan-derived facts for a code walkthrough (or vice versa).
-			answerSource: dwAnswer
-				? "deepwiki"
-				: scanAnswer
-					? "stellarlight-code-scan"
-					: null,
+			answerSource: noteAnswer
+				? "knowledge-note"
+				: dwAnswer
+					? "deepwiki"
+					: scanAnswer
+						? "stellarlight-code-scan"
+						: null,
+			// WHEN THE ANSWER WAS TRUE — which is not when we fetched it, and not
+			// when we scanned the code.
+			//
+			// Raven filed this (issue #1134) with three independent reproductions:
+			// `explainRepo` on stellar/stellar-horizon returned
+			// `MaxSupportedProtocolVersion = 25` while the source at our own
+			// `codeVerified.scannedRef` (82660510) defines 28. Verified again here
+			// against raw.githubusercontent at that ref and at 2abda012 — both say
+			// 28. DeepWiki's index is simply behind.
+			//
+			// The stale number is DeepWiki's to fix. Ours is that the response
+			// carried three dates — meta.generatedAt, codeVerified.scannedAt,
+			// repoMeta.lastCommitAt — every one of them describing the code scan,
+			// and none of them dating the ANSWER. A consumer reading
+			// "scannedAt: 2026-08-14" beside "answerSource: deepwiki" reasonably
+			// concludes the answer reflects the code as of that scan. It does not.
+			//
+			// DeepWikiAnswer carries { repo, answer, searchUrl } and the MCP
+			// envelope exposes no index date, so for the deepwiki path this is
+			// NULL — an admission, not a guess. Inventing a timestamp here would
+			// be worse than the original defect: it would make the unknown look
+			// measured. The scan-derived path CAN be dated, because there the
+			// answer IS the scan.
+			answerAsOf: noteAnswer
+				? // Audit C6: notes date to the DAY of verification; the contract
+					// declares date-time, so a bare date is serialized as that day's
+					// start in UTC — conservative, and stated in the spec.
+					directNote?.asOf
+					? directNote.asOf.length === 10
+						? `${directNote.asOf}T00:00:00Z`
+						: directNote.asOf
+					: null
+				: dwAnswer
+					? null
+					: scanAnswer
+						? (codeVerified?.scannedAt ?? null)
+						: null,
 			sources: {
 				repoUrl: `https://github.com/${repo}`,
 				deepWikiUrl: `https://deepwiki.com/${repo}`,

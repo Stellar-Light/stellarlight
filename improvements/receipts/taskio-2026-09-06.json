@@ -1,0 +1,30 @@
+{
+ "slug": "taskio",
+ "url": "https://task.io/",
+ "finalUrl": "https://www.atom.com/name/Task.io",
+ "fetchedAt": "2026-09-06T04:15:15.812Z",
+ "httpStatus": 403,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 04:15:15 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "ae0b26c68939e8214056c2517af3b5091f1c674c8aef5f1e1fbab7804a78829b",
+ "bodyTextChars": 58,
+ "markers": [
+  {
+   "marker": "for sale",
+   "found": false,
+   "where": null,
+   "excerpt": null
+  },
+  {
+   "marker": "atom.com",
+   "found": true,
+   "where": "markup",
+   "excerpt": "j5k.QKzkv7s_yj_AIjwttkugS.DE9OkxU-1788668115-1.0.1.1-NnVPJV_3OxP64.6gR88nmM1U0V3W_eeFDxAk_B0Dfwc\",cvId: '3',cZone: 'www.atom.com',fa:\"/name/Task.io?__cf_chl_f_tk=w5V4SLS9LIj5k.QKzkv7s_yj_AIjwttkugS.DE9OkxU-1788668115-1.0.1.1-NnVPJV_3OxP64.6gR88nmM1U0V3W_eeFDxAk_B0Dfwc\",md: '.ia5fhHhlpyHz7WTm5MD3Jj2S"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

@@ -1,5 +1,7 @@
 # Lessons: the sls-020..050 wave (2026-07-11)
 
+Guard: none — process lessons (enumerate the whole list, reproduce before fixing, fix the class, report fixed/in-progress/blocked as a table); a guard would fail any run whose enumeration was capped (head -N, limit=) without printing how many rows it dropped
+
 **1. Check the whole list before scoping.** The improvements dir was listed with `head -40` and we planned around 21 items when 31 existed — caught by the owner, not the process. Silent caps are already our own engine rule (`log()` what was dropped); apply it to EVERY enumeration, including ls/gh output.
 
 **2. Consumer items are near-perfectly reliable — but verify anyway.** 20/21 reproduced. The one PARTIAL (octoplace already Draft) and the one root-elsewhere (022: OUR record was right; the wrong facts were in a lumenloop article we ingest) both changed the fix. Reproduce-before-fix stays mandatory even at a 95% confirm rate.

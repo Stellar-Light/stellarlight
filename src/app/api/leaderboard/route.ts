@@ -14,9 +14,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
 import { logApiHit } from "@/lib/api-usage";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, unknownParamWarning } from "@/lib/http-params";
+import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { PROJECT_TYPES } from "@/lib/project-types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -52,7 +54,14 @@ interface ProjectRow {
 		totalStars: number;
 		openIssuesTotal: number;
 		lastActivityAt: string | null;
+		/** Default-branch commits over the trailing 90 days summed across indexed
+		 *  repos (activitySignals); null = no repo carries a count (index gap). */
+		commits90d: number | null;
+		/** Newest activitySignals.asOf among the summed repos; null with commits90d. */
+		commits90dAsOf: string | null;
 		repoCount: number;
+		/** The exact repos the stats aggregate over — repoCount === repos.length. */
+		repos: string[];
 	};
 }
 
@@ -74,6 +83,7 @@ function toCsv(rows: ProjectRow[]): string {
 		"stars",
 		"open_issues",
 		"repo_count",
+		"repos",
 		"last_activity_at",
 		"tvl_usd",
 		"asset_code",
@@ -92,6 +102,7 @@ function toCsv(rows: ProjectRow[]): string {
 			r.github.totalStars,
 			r.github.openIssuesTotal,
 			r.github.repoCount,
+			r.github.repos.join(";"),
 			r.github.lastActivityAt ?? "",
 			r.tvlUSD ?? "",
 			r.assetCode ?? "",
@@ -107,6 +118,18 @@ function toCsv(rows: ProjectRow[]): string {
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		["sort", "category", "range", "format", "limit"],
+		{
+			advertise: ["sort", "category", "range", "format", "limit"],
+			hint: "Ranking is chosen with `sort`; see meta.metricDefinitions for what each metric means.",
+		},
+	);
+	const INSTRUMENT_SLUGS = new Set(["stellar-light"]);
 	const sort = (sp.get("sort") || "activity").toLowerCase();
 	const range = (sp.get("range") || "all").toLowerCase();
 	const category = sp.get("category");
@@ -162,29 +185,8 @@ export async function GET(req: NextRequest) {
 	// category. Values validate against the same `types` select options the
 	// projects directory uses (src/collections/Projects.ts — mirrors the
 	// /api/projects/search type param); unknown values 400 with the valid list.
-	const VALID_TYPES = [
-		"Wallet",
-		"DEX",
-		"Lending",
-		"Bridge",
-		"Infrastructure",
-		"Payments",
-		"Anchor",
-		"SDK",
-		"Indexer",
-		"Explorer",
-		"Analytics",
-		"AI",
-		"Gaming",
-		"Education",
-		"Security",
-		"NFT",
-		"RWA",
-		"Stablecoin",
-		"Social Impact",
-		"RPC",
-		"Faucet",
-	] as const;
+	// One list (src/lib/project-types.ts); see the search route.
+	const VALID_TYPES = PROJECT_TYPES;
 	const typeList = sp
 		.getAll("type")
 		.flatMap((v) => v.split(","))
@@ -209,6 +211,10 @@ export async function GET(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
+	// Rows matching the filters BEFORE `limit` is applied — the honest `total`
+	// for meta.counts. Stays 0 if the try block below throws, which matches the
+	// empty `rows` it falls through with.
+	let matchedBeforeLimit = 0;
 	// sls-036 residual: the repository-index rollup timestamp — when the repo
 	// rows this response aggregates were last refreshed (max updatedAt across
 	// the fetched index rows). Distinct from meta.generatedAt (serialization
@@ -271,9 +277,15 @@ export async function GET(req: NextRequest) {
 			const reposByProjectSlug = new Map<
 				string,
 				Array<{
+					fullName?: string;
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
+					activitySignals?: {
+						commits90d?: number | null;
+						asOf?: string | null;
+					} | null;
+					stellarProof?: string | null;
 				}>
 			>();
 			if (projectSlugs.length > 0) {
@@ -287,18 +299,35 @@ export async function GET(req: NextRequest) {
 					// collection grew past 2,000 docs.
 					select: {
 						projectSlug: true,
+						// sls-036 residual (#742): the repo IDENTITIES, not just their
+						// count — without them "activity" can't be reconciled against
+						// a known set. fullName is ~30 bytes; the README excerpt was
+						// the field that bloated this fetch, and it stays excluded.
+						fullName: true,
 						stars: true,
 						openIssues: true,
 						lastCommitAt: true,
+						// 2026-09-05: velocity, not just recency — the enrich pass stamps
+						// activitySignals.commits90d on 2,268 of 2,321 project-linked repos.
+						activitySignals: true,
+						// Only repos with Stellar code evidence count toward volume: a
+						// company's unrelated repositories were leading the board.
+						stellarProof: true,
 						// sls-036: index-refresh timestamp feeds meta.dataAsOf
 						updatedAt: true,
 					},
 				});
 				for (const r of reposResult.docs as Array<{
 					projectSlug?: string;
+					fullName?: string;
 					stars?: number;
 					openIssues?: number;
 					lastCommitAt?: string | null;
+					activitySignals?: {
+						commits90d?: number | null;
+						asOf?: string | null;
+					} | null;
+					stellarProof?: string | null;
 					updatedAt?: string | null;
 				}>) {
 					// ISO-8601 strings compare correctly lexicographically.
@@ -346,6 +375,24 @@ export async function GET(req: NextRequest) {
 						lastActivityAt = r.lastCommitAt as string;
 					}
 				}
+				// Commit VOLUME over the trailing 90 days, summed across the
+				// project's indexed repos. null = no repo carries a count (an index
+				// gap, never zero activity). Before 2026-09-05 sort=activity was
+				// last-commit recency alone, so any row with a commit today outranked
+				// Blend — and this service's own row sat at #1.
+				let commits90d: number | null = null;
+				let commits90dAsOf: string | null = null;
+				for (const r of repos) {
+					// Volume counts only repos the scanner proved use Stellar (a
+					// stellarProof other than "none"): Gateway.fm and Rumble Fish led
+					// the first volume board on company-wide, non-Stellar commits.
+					if (!r.stellarProof || r.stellarProof === "none") continue;
+					const c = r.activitySignals?.commits90d;
+					if (typeof c !== "number") continue;
+					commits90d = (commits90d ?? 0) + c;
+					const a = r.activitySignals?.asOf ?? null;
+					if (a && (!commits90dAsOf || a > commits90dAsOf)) commits90dAsOf = a;
+				}
 				return {
 					rank: 0,
 					id: String(project.id),
@@ -373,7 +420,17 @@ export async function GET(req: NextRequest) {
 						totalStars,
 						openIssuesTotal,
 						lastActivityAt,
+						commits90d,
+						commits90dAsOf,
 						repoCount: repos.length,
+						// The exact universe the numbers above are computed over —
+						// sorted so the list is stable across runs. A consumer can now
+						// reconcile "activity" against a known set instead of trusting
+						// an opaque count (raven #742 residual 3 / sls-036).
+						repos: repos
+							.map((r) => r.fullName)
+							.filter((x): x is string => !!x)
+							.sort(),
 					},
 				};
 			});
@@ -388,6 +445,11 @@ export async function GET(req: NextRequest) {
 			}
 
 			// Time-range filter
+			// The directory is the instrument, not a subject: this service's own
+			// rows are never ranked (owner call, 2026-09-05 — "we're not really
+			// doing on-chain stuff like protocols"). Named in metricDefinitions.
+			rows = rows.filter((r) => !INSTRUMENT_SLUGS.has(r.slug));
+
 			if (range !== "all") {
 				const cutoff = new Date();
 				if (range === "7d") cutoff.setDate(cutoff.getDate() - 7);
@@ -403,7 +465,16 @@ export async function GET(req: NextRequest) {
 
 			// Sort
 			if (sort === "activity") {
+				// Volume first (rows with no count sort LAST, never as zero), recency
+				// breaks ties — see the rollup comment above.
 				rows.sort((a, b) => {
+					const ac = a.github.commits90d;
+					const bc = b.github.commits90d;
+					if (ac !== bc) {
+						if (ac === null || ac === undefined) return 1;
+						if (bc === null || bc === undefined) return -1;
+						return bc - ac;
+					}
 					const ad = a.github.lastActivityAt
 						? new Date(a.github.lastActivityAt).getTime()
 						: 0;
@@ -441,6 +512,7 @@ export async function GET(req: NextRequest) {
 				});
 			}
 
+			matchedBeforeLimit = rows.length;
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
 		} catch {
 			// fall through with empty rows
@@ -472,13 +544,19 @@ export async function GET(req: NextRequest) {
 	};
 
 	return NextResponse.json(
-		{
+		jsonSafe({
 			meta: {
 				source: "https://stellarlight.xyz/leaderboard",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				// sls-036 residual: the real rollup timestamp of the repo index this
 				// response aggregated — the as-of for stars/issues/lastActivityAt.
 				dataAsOf,
+				// The documented list-endpoint contract (`returned` this page,
+				// `total` pre-slice). This endpoint served NO counts at all, so a
+				// consumer could not tell a complete read from a `limit`-truncated
+				// one — absence of counts reads as "you have everything".
+				counts: { returned: rows.length, total: matchedBeforeLimit },
 				// #524: echo the APPLIED project-type scope so a consumer can confirm
 				// the filter took (null = no type filter; an array = the exact types
 				// kept, EITHER-membership). Was silently absent while the filter was
@@ -499,7 +577,7 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.lastActivityAt — the most recent default-branch commit timestamp (falling back to last push) across the project's indexed repos. A recency signal, NOT commit volume/velocity; per-project commit counts are not served.",
+						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none) — a company's unrelated repositories do not count — read github.repos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:
@@ -528,7 +606,7 @@ export async function GET(req: NextRequest) {
 				oneTimeDevs: ec.tenure.oneTime,
 			},
 			projects: rows,
-		},
+		}),
 		{
 			headers: {
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",

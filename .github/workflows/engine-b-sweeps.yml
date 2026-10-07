@@ -24,4 +24,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run Engine B
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: pnpm exec tsx scripts/eval/engine-b-sweeps.ts | tee $GITHUB_STEP_SUMMARY

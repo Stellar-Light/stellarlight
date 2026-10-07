@@ -15,7 +15,7 @@
  */
 
 import { isProtected, type ProtectionSignals } from "./repo-allowlist";
-import { type VersionStatus, versionStatusOf } from "./soroban-versions";
+import { combinedVersionStatus, type VersionStatus } from "./soroban-versions";
 
 // ── Inputs ───────────────────────────────────────────────────────────────────
 
@@ -68,6 +68,8 @@ export interface CodeFacts {
 	isDeployableContract: boolean; // Cargo [lib] crate-type includes cdylib
 	usesNoStd: boolean; // #![no_std]
 	stellarJsDep: string | null; // matched @stellar/* dep name@version
+	ciPresent: boolean; // CI config in-tree (.github/workflows, circleci, gitlab)
+	testsPresent: boolean; // test dirs/files in-tree (tree-level heuristic)
 }
 
 export interface CodeSignals {
@@ -142,6 +144,52 @@ const LANG_SDK_MARKERS: {
 		file: (n) => n === "cargo.toml",
 		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
 	},
+	// AssemblyScript Soroban contracts. Verified against the real manifests in
+	// Soneso/as-soroban-examples: each contract's package.json depends on
+	// `as-soroban-sdk` and its asconfig.json extends `as-soroban-sdk/sdkasconfig`.
+	// We key off package.json because that is what the fetcher pulls.
+	//
+	// Why this matters beyond one repo: an AssemblyScript contract imports
+	// neither Rust `soroban-sdk` nor JS `@stellar/stellar-sdk`, so it read as
+	// proof=none — "confidently not Stellar" — and `none` is a key in the
+	// two-key archive rule. The 2026-08-30 tier dry run duly proposed archiving
+	// Soneso/as-soroban-examples, AssemblyScript examples from a Stellar SDK
+	// vendor, on `none+farm:1`. A silence the engine cannot break is not
+	// evidence of absence.
+	{
+		lang: "assemblyscript",
+		file: (n) => n === "package.json",
+		re: /"as-soroban-sdk"\s*:/,
+	},
+	// PHP. 29 of 31 scanned PHP repos (94%) read as proof=none, and we curate
+	// Argo-Navis-Dev/php-anchor-sdk as canonical — whose composer.json requires
+	// `soneso/stellar-php-sdk`. composer.json was ALSO absent from the
+	// fetcher's manifest list, so there was nothing to match even with a
+	// marker; both halves are fixed together.
+	// Java / Maven. pom.xml was never fetched, so every Maven project read
+	// none regardless of its dependencies. Matches dependency COORDINATES
+	// (groupId), never a project's own artifactId — openMF/stellar-connector
+	// is named "stellar-connector" and does not depend on a Stellar SDK, so a
+	// name match would have been a false positive.
+	{
+		lang: "java-maven",
+		file: (n) => n === "pom.xml",
+		re: /<groupId>\s*(org\.stellar|network\.lightsail|com\.soneso)[^<]*<\/groupId>/i,
+	},
+	{
+		lang: "php",
+		file: (n) => n === "composer.json",
+		re: /"(soneso\/stellar-php-sdk|zulucrypto\/stellar-api|argonavis\/[a-z0-9_-]*stellar[a-z0-9_-]*)"/i,
+	},
+	// Dart / Flutter. pubspec.yaml was ALREADY being fetched and then thrown
+	// away — no marker consumed it — while 39% of Dart repos read none.
+	// Matches both the SDK itself (`name: stellar_flutter_sdk`) and anything
+	// depending on it.
+	{
+		lang: "dart",
+		file: (n) => n === "pubspec.yaml",
+		re: /^\s*(name|stellar_flutter_sdk|stellar_sdk)\s*:\s*.*stellar|^\s*stellar_(flutter_)?sdk\s*:/im,
+	},
 	{
 		lang: "swift",
 		file: (n) => n === "package.swift",
@@ -154,7 +202,16 @@ const LANG_SDK_MARKERS: {
 	},
 	{
 		lang: "kotlin",
-		file: (n) => n === "build.gradle" || n === "build.gradle.kts",
+		// libs.versions.toml: Gradle VERSION CATALOGS put the coordinate in a
+		// separate file, so a build.gradle.kts reads `api(libs.java.stellar.sdk)`
+		// and contains no Stellar string at all. stellar/kotlin-wallet-sdk —
+		// SDF's own — read proof=none for exactly this reason. The existing
+		// regex already matches `network.lightsail:stellar`; it simply never
+		// saw the file holding it.
+		file: (n) =>
+			n === "build.gradle" ||
+			n === "build.gradle.kts" ||
+			n === "libs.versions.toml",
 		re: /network\.lightsail:stellar|[\w.]+:(kotlin|java)-stellar-sdk|["'][\w.]+:stellar-sdk:/i,
 	},
 	{
@@ -212,6 +269,8 @@ const EMPTY_FACTS: CodeFacts = {
 	isDeployableContract: false,
 	usesNoStd: false,
 	stellarJsDep: null,
+	ciPresent: false,
+	testsPresent: false,
 };
 
 /**
@@ -228,6 +287,27 @@ const EMPTY_FACTS: CodeFacts = {
  */
 export function detectStellarProof(input: ScanInput): ProofResult {
 	const facts: CodeFacts = { ...EMPTY_FACTS };
+	// Tree-level engineering-practice facts (cheap, no extra fetches). These
+	// are presence facts only — "has a CI config", "has test files" — never a
+	// claim the CI passes or the tests are good.
+	for (const e of input.tree) {
+		if (e.type !== "blob") continue;
+		const path = e.path;
+		if (
+			/^\.github\/workflows\/[^/]+\.ya?ml$/i.test(path) ||
+			/^\.circleci\/config\.ya?ml$/i.test(path) ||
+			/^\.gitlab-ci\.ya?ml$/i.test(path)
+		)
+			facts.ciPresent = true;
+		if (
+			/(^|\/)(tests?|__tests__|spec|e2e|cypress)\//i.test(path) ||
+			/\.(test|spec)\.[cm]?[jt]sx?$/i.test(path) ||
+			/_test\.(go|rs|py|ts|js)$/i.test(path) ||
+			/(^|\/)conftest\.py$/.test(path)
+		)
+			facts.testsPresent = true;
+		if (facts.ciPresent && facts.testsPresent) break;
+	}
 
 	// Guard P1: unreadable proof file ⇒ do not conclude. Retry later.
 	const proofPaths = (p: string) => {
@@ -348,7 +428,8 @@ function scanFiles(
 	facts.contractMacroCount = macroCount;
 	if (cargoBlobs.some((b) => RE_CDYLIB.test(b.text as string)))
 		facts.isDeployableContract = true;
-	facts.versionStatus = versionStatusOf(facts.sorobanSdkVersion);
+	// versionStatus is assigned AFTER the JS block below — it needs
+	// facts.stellarJsDep, which does not exist yet at this point in the scan.
 
 	// ---- JS / TS Stellar SDK ----
 	let jsDep: string | null = null;
@@ -398,6 +479,17 @@ function scanFiles(
 		}
 	}
 	if (langDep && !facts.stellarJsDep) facts.stellarJsDep = langDep;
+
+	// Now that BOTH SDK facts are gathered, classify support status from
+	// whichever we hold. This used to read the Rust crate alone, and ran before
+	// the JS block above had populated stellarJsDep — so every repo without a
+	// Cargo.toml was stamped "unknown". 5,356 of 10,876 scanned repos, 1,598 of
+	// which pin a readable @stellar/stellar-sdk major and 681 of which depend on
+	// a package npm itself marks deprecated.
+	facts.versionStatus = combinedVersionStatus(
+		facts.sorobanSdkVersion,
+		facts.stellarJsDep,
+	);
 
 	// ---- stellar.toml (SEP-1) ----
 	const hasStellarToml = tomlBlobs.some((b) =>

@@ -1,0 +1,92 @@
+name: Ingest SCF proposals (research corpus)
+# workflow-health: signal-steps: ^(Idempotence)$
+#
+# Fills the research source "scf-proposal": one document per SCF submission
+# (communityfund.stellar.org/submissions/<id>) with the proposal's own
+# sections and the facts the page states (project, round, status, award
+# type, requested budget). Runs weekly on the schedule (executes: SCF rounds
+# open, close and change status over weeks, not hours); a manual dispatch is
+# a dry run unless execute=true.
+#
+#   dispatch, execute=false (default): fetch, chunk, plan, write nothing.
+#   schedule, or execute=true: embed + write, then the Idempotence re-plan
+#                 must print `replan: writes=0` (QUALITY.md, second condition).
+
+on:
+  schedule:
+    - cron: "20 4 * * 1" # Mondays 04:20 UTC
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Embed and write to the corpus. Unchecked = dry run (fetch, chunk, plan)."
+        required: false
+        type: boolean
+        default: false
+      limit:
+        description: "Optional: only the first N projects from the SCF list (smoke test)."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+  DATABASE_URI: ${{ secrets.DATABASE_URI }}
+  PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    # About 1,500 page fetches per full run (531 project pages plus roughly
+    # 950 submission pages at 4 in flight), then the embed pass, then the
+    # re-plan: well inside this.
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Ensure Atlas Vector Search index exists
+        if: github.event_name == 'schedule' || inputs.execute == true
+        run: pnpm exec tsx scripts/create-vector-index.ts --execute
+
+      - name: Ingest SCF proposals (dry run unless scheduled or execute=true)
+        shell: bash
+        env:
+          IN_EXECUTE: ${{ github.event_name == 'schedule' || inputs.execute }}
+          IN_LIMIT: ${{ inputs.limit }}
+        run: |
+          args=()
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          if [ -n "$IN_LIMIT" ]; then args+=("--limit=$IN_LIMIT"); fi
+          pnpm exec tsx scripts/ingest-scf-proposals.ts "${args[@]}"
+
+      # Same fetch, same DB diff, no embed, no write: right after an execute
+      # pass the plan must be empty, or the ingester is not idempotent (a
+      # chunk that re-counts as new on every run re-embeds forever).
+      - name: Idempotence
+        if: github.event_name == 'schedule' || inputs.execute == true
+        shell: bash
+        env:
+          IN_LIMIT: ${{ inputs.limit }}
+        run: |
+          set -o pipefail
+          args=(--replan)
+          if [ -n "$IN_LIMIT" ]; then args+=("--limit=$IN_LIMIT"); fi
+          pnpm exec tsx scripts/ingest-scf-proposals.ts "${args[@]}" | tee replan.log
+          n=$(grep -oE '^replan: writes=[0-9]+' replan.log | cut -d= -f2 | awk '{ t += $1 } END { print t + 0 }')
+          echo "replan writes: $n"
+          if [ "$n" != "0" ]; then
+            echo "::error::scf-proposal ingest is not idempotent: the re-plan right after execute still wants $n write(s)"
+            exit 1
+          fi

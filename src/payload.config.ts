@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { fileURLToPath } from "url";
 import { ApiUsage } from "./collections/ApiUsage";
 import { Audits } from "./collections/Audits";
+import { AwardBallots } from "./collections/AwardBallots";
 import { AwardNominees } from "./collections/AwardNominees";
 import { AwardRounds } from "./collections/AwardRounds";
 import { AwardVoters } from "./collections/AwardVoters";
@@ -18,6 +19,8 @@ import { Carousel } from "./collections/Carousel";
 import { CommunitySkills } from "./collections/CommunitySkills";
 import { Entities } from "./collections/Entities";
 import { FundingSnapshots } from "./collections/FundingSnapshots";
+import { HackathonBuilds } from "./collections/HackathonBuilds";
+import { HackathonEvents } from "./collections/HackathonEvents";
 import { Hackathons } from "./collections/Hackathons";
 import { IdeaSubmissions } from "./collections/IdeaSubmissions";
 import { LinkChecks } from "./collections/LinkChecks";
@@ -28,8 +31,11 @@ import { Projects } from "./collections/Projects";
 import { Repos } from "./collections/Repos";
 import { ResearchDocs } from "./collections/ResearchDocs";
 import { RSSFeeds } from "./collections/RSSFeeds";
+import { RwaAssets } from "./collections/RwaAssets";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
+import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
+import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
 import { Users } from "./collections/Users";
 import { Banner } from "./globals/Banner";
@@ -83,9 +89,15 @@ export default buildConfig({
 		Projects,
 		Repos,
 		Audits,
+		Stablecoins,
+		StablecoinSnapshots,
+		RwaAssets,
+		HackathonBuilds,
+		HackathonEvents,
 		AwardRounds,
 		AwardNominees,
 		AwardVoters,
+		AwardBallots,
 		Blog,
 		Builders,
 		RSSFeeds,
@@ -166,6 +178,35 @@ export default buildConfig({
 			// MongoDB Atlas recommended options
 			retryWrites: true,
 			w: "majority",
+			// A dropped Atlas node used to hold a request for the driver's default
+			// 30 s server selection (a partner measured research calls open past
+			// 10 s while every other route answered). Fail fast instead: the
+			// routes turn it into a 503 with Retry-After, the client retries.
+			serverSelectionTimeoutMS: 5_000,
+			connectTimeoutMS: 5_000,
+			// ...and a node that stops answering mid-query is abandoned too.
+			socketTimeoutMS: 10_000,
+			// A request that finds no free connection waits here. Unbounded, it
+			// waits as long as the socket timeout and every route on the instance
+			// stalls together behind one stuck node (the 30 s cross-endpoint stall
+			// a partner measured on 2026-09-29). The same timer covers opening a
+			// connection on an instance whose idle sockets were closed, so it
+			// must leave room for TCP, TLS and SCRAM: 5 s bounds the stall well
+			// inside the caller's 10 s deadline without failing a cold path.
+			waitQueueTimeoutMS: 5_000,
+			// Serverless: every warm Vercel instance is its own client, and the
+			// driver's default pool (100) plus one monitor socket per replica-set
+			// node means a burst of cold starts can hold hundreds of Atlas
+			// connections between them. A shared tier caps the whole cluster at
+			// 500 and drops the TLS handshake past it, which is what "tlsv1 alert
+			// internal error" and the 503s under a 48-request burst were
+			// (2026-09-26). An instance serves a handful of requests at once at
+			// most; keep its pool small and let idle sockets go.
+			maxPoolSize: 5,
+			// One connection stays warm per instance so a request after an idle
+			// spell does not pay the handshake inside the checkout timer.
+			minPoolSize: 1,
+			maxIdleTimeMS: 15_000,
 		},
 		// Disable file storage in MongoDB - files stored on disk in /media directory
 		// On Vercel (read-only filesystem), uploads will fail but admin panel works

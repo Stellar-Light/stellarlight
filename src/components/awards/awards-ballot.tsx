@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * i³ Awards — the voting experience.
+ * i³ Awards, the voting experience.
  *
  * Design: monochrome + prediction-market layout (Polymarket / godly.website),
  * built on Stellar Light's WARM layered dark (bg #171717, raised cards, solid
- * #2f2f2f borders — never flat black or white hairlines) and animated with
+ * #2f2f2f borders, never flat black or white hairlines) and animated with
  * framer-motion for the stellar-markets fluidity (scroll fade-up + stagger,
  * spring tap/hover, crossfading ballot values, spring selection checks).
  *
@@ -20,15 +20,18 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
 	ArrowUpRight,
 	Check,
+	ChevronDown,
 	ChevronRight,
+	Copy,
 	Eye,
 	Info,
 	Loader2,
+	LogOut,
 	Trophy,
 	Wallet,
 	X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useIsPresent } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -74,6 +77,8 @@ export interface AwardsRoundData {
 		title: string;
 		status: "draft" | "open" | "closed";
 		ballotMode: string;
+		/** Nominees a voter may pick per category. 1 = pick the winner. */
+		picksPerCategory?: number | null;
 		categories: Category[];
 		opensAt: string | null;
 		closesAt: string | null;
@@ -83,10 +88,60 @@ export interface AwardsRoundData {
 }
 
 interface Eligibility {
+	round: string;
 	whitelisted: boolean;
-	funded: boolean | null;
-	votes: Record<string, string> | null;
-	friendbot?: string;
+	voting: { open: boolean; reason: string | null };
+	/**
+	 * Client-side only. The server never says whether an address has voted
+	 * (the ballot is anonymous); the page learns it from a submit that
+	 * answers already_voted, or from a receipt it stored itself.
+	 */
+	hasVoted?: boolean;
+	votes?: Record<string, string[]> | null;
+}
+
+/**
+ * The routes send a machine `error` code AND a human `message`. Show the
+ * sentence, a toast reading "already_voted" is the code leaking into the UI.
+ */
+interface StoredReceipt {
+	ballotId: string | null;
+	hash: string;
+	selections: Record<string, string[]>;
+}
+const receiptKey = (address: string, round: string) =>
+	`i3:receipt:${round}:${address}`;
+function rememberReceipt(address: string, round: string, r: StoredReceipt) {
+	try {
+		localStorage.setItem(receiptKey(address, round), JSON.stringify(r));
+	} catch {
+		// storage blocked: the receipt is still on screen for this session
+	}
+}
+function readReceipt(address: string, round: string): StoredReceipt | null {
+	try {
+		const raw = localStorage.getItem(receiptKey(address, round));
+		return raw ? (JSON.parse(raw) as StoredReceipt) : null;
+	} catch {
+		return null;
+	}
+}
+
+function apiErrorMessage(body: unknown, fallback: string): string {
+	const b = body as {
+		message?: unknown;
+		error?: unknown;
+		details?: unknown;
+	} | null;
+	// A refusal's `details` carry the actual reason ("innovation needs 4
+	// picks, got 3"); without them the toast read as a bare code.
+	const details = Array.isArray(b?.details)
+		? b.details.filter((d): d is string => typeof d === "string" && !!d)
+		: [];
+	if (details.length) return details.join(" · ");
+	if (typeof b?.message === "string" && b.message) return b.message;
+	if (typeof b?.error === "string" && b.error) return b.error;
+	return fallback;
 }
 
 interface ResultsData {
@@ -106,11 +161,19 @@ type Phase =
 	| "requesting"
 	| "signing"
 	| "submitting"
+	| "confirmed"
 	| "submitted";
 
 // stellar-markets' signature ease.
 const EASE = [0.25, 0.46, 0.45, 0.94] as const;
 const SPRING = { type: "spring", stiffness: 380, damping: 30 } as const;
+
+// Votes are TESTNET transactions; every proof link points at stellar.expert's
+// testnet explorer. Kept in one place so the tx and account links can't drift.
+const EXPLORER = "https://stellar.expert/explorer/testnet";
+const explorerTxUrl = (hash: string) => `${EXPLORER}/tx/${hash}`;
+const explorerAccountUrl = (address: string) =>
+	`${EXPLORER}/account/${address}`;
 
 function shortAddress(address: string): string {
 	return `${address.slice(0, 4)}…${address.slice(-4)}`;
@@ -118,9 +181,17 @@ function shortAddress(address: string): string {
 
 // ── Root component ─────────────────────────────────────────────────────────
 
-export function AwardsBallot({ data }: { data: AwardsRoundData | null }) {
+export function AwardsBallot({
+	data,
+	unavailable = false,
+}: {
+	data: AwardsRoundData | null;
+	/** The round could not be read (database blip): say so, do not say "not live yet". */
+	unavailable?: boolean;
+}) {
+	if (unavailable) return <UnavailableState />;
 	if (!data || data.round.status === "draft") {
-		return <EmptyState />;
+		return <EmptyState picks={data?.round.picksPerCategory ?? 1} />;
 	}
 	if (data.round.status === "closed") {
 		return <ClosedRound data={data} />;
@@ -138,6 +209,7 @@ function I3Mark({ className = "" }: { className?: string }) {
 			aria-hidden="true"
 			role="img"
 		>
+			<title>i³</title>
 			<circle
 				cx="48"
 				cy="48"
@@ -161,19 +233,19 @@ function I3Mark({ className = "" }: { className?: string }) {
 				y="66"
 				textAnchor="middle"
 				fontFamily="var(--font-sans), Inter, sans-serif"
+				fontSize="46"
 				fontWeight="600"
-				fontSize="52"
 				fill="currentColor"
 			>
 				i
 			</text>
 			<text
-				x="60"
-				y="46"
+				x="62"
+				y="44"
 				textAnchor="middle"
 				fontFamily="var(--font-sans), Inter, sans-serif"
-				fontWeight="600"
 				fontSize="26"
+				fontWeight="600"
 				fill="currentColor"
 			>
 				3
@@ -184,6 +256,149 @@ function I3Mark({ className = "" }: { className?: string }) {
 
 // ── Top bar (persistent) ───────────────────────────────────────────────────
 
+/**
+ * Connected-wallet control: the address pill opens a small menu (full address,
+ * copy, verify-on-chain, disconnect). Previously a bare click on the pill
+ * disconnected instantly with no affordance, easy to trigger by accident and
+ * with no way to see or copy the full key. This is the RainbowKit pattern:
+ * the pill is a disclosure, the destructive action lives one step in.
+ */
+function ConnectedWallet({
+	address,
+	walletId,
+	onDisconnect,
+}: {
+	address: string;
+	walletId: AwardsWalletId | null;
+	onDisconnect: () => void;
+}) {
+	const wallet = AWARDS_WALLETS.find((w) => w.id === walletId) ?? null;
+	const [open, setOpen] = useState(false);
+	const [copied, setCopied] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		const onDown = (e: MouseEvent) => {
+			if (ref.current && !ref.current.contains(e.target as Node))
+				setOpen(false);
+		};
+		const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+		document.addEventListener("mousedown", onDown);
+		document.addEventListener("keydown", onKey);
+		return () => {
+			document.removeEventListener("mousedown", onDown);
+			document.removeEventListener("keydown", onKey);
+		};
+	}, [open]);
+
+	const copy = useCallback(async () => {
+		try {
+			await navigator.clipboard.writeText(address);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 1600);
+		} catch {
+			// clipboard blocked, the address is visible to select by hand.
+		}
+	}, [address]);
+
+	return (
+		<div ref={ref} className="relative">
+			<button
+				type="button"
+				onClick={() => setOpen((v) => !v)}
+				aria-haspopup="menu"
+				aria-expanded={open}
+				className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-2.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
+			>
+				{wallet ? (
+					<Image
+						src={wallet.icon}
+						alt=""
+						width={20}
+						height={20}
+						className="h-5 w-5 flex-shrink-0 rounded-full ring-1 ring-[#3a3a3a]"
+					/>
+				) : (
+					<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+				)}
+				{shortAddress(address)}
+				<ChevronDown
+					className={`h-3.5 w-3.5 text-neutral-400 transition-transform ${
+						open ? "rotate-180" : ""
+					}`}
+				/>
+			</button>
+			<AnimatePresence>
+				{open && (
+					<motion.div
+						initial={{ opacity: 0, y: -6, scale: 0.97 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{
+							opacity: [1, 1, 0],
+							y: [0, 0, -6],
+							scale: [1, 1, 0.97],
+							transition: { duration: 0.3, times: [0, 0.62, 1], ease: EASE },
+						}}
+						transition={{ duration: 0.16, ease: EASE }}
+						role="menu"
+						className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] z-50"
+					>
+						<div className="flex items-center gap-3 px-2.5 pb-2.5 pt-2">
+							<Stroopy size={44} badge={wallet?.icon} />
+							<div className="min-w-0">
+								<p className="text-sm font-medium text-neutral-100">
+									{wallet?.name ?? "Connected wallet"}
+								</p>
+								<p className="truncate font-mono text-xs text-neutral-400">
+									{shortAddress(address)}
+								</p>
+							</div>
+						</div>
+						<div className="h-px bg-[#2a2a2a] my-1" />
+						<button
+							type="button"
+							role="menuitem"
+							onClick={copy}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-200 hover:bg-[#242424] transition-colors"
+						>
+							{copied ? (
+								<Check className="h-4 w-4 text-emerald-400" />
+							) : (
+								<Copy className="h-4 w-4 text-neutral-400" />
+							)}
+							{copied ? "Copied" : "Copy address"}
+						</button>
+						<a
+							role="menuitem"
+							href={explorerAccountUrl(address)}
+							target="_blank"
+							rel="noopener noreferrer"
+							onClick={() => setOpen(false)}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-200 hover:bg-[#242424] transition-colors"
+						>
+							<ArrowUpRight className="h-4 w-4 text-neutral-400" />
+							View on explorer
+						</a>
+						<button
+							type="button"
+							role="menuitem"
+							onClick={() => {
+								setOpen(false);
+								onDisconnect();
+							}}
+							className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-neutral-300 hover:bg-[#242424] hover:text-neutral-100 transition-colors"
+						>
+							<LogOut className="h-4 w-4 text-neutral-400" />
+							Disconnect
+						</button>
+					</motion.div>
+				)}
+			</AnimatePresence>
+		</div>
+	);
+}
+
 function TopBar({
 	onHowItWorks,
 	wallet,
@@ -191,6 +406,7 @@ function TopBar({
 	onHowItWorks: () => void;
 	wallet?: {
 		address: string | null;
+		walletId: AwardsWalletId | null;
 		busy: boolean;
 		onConnect: () => void;
 		onDisconnect: () => void;
@@ -200,7 +416,13 @@ function TopBar({
 		<div className="sticky top-0 z-40 border-b border-[#2a2a2a] bg-[#171717]/80 backdrop-blur-xl">
 			<div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5 min-w-0">
-					<I3Mark className="h-6 w-6 text-neutral-200 flex-shrink-0" />
+					{/* The cube, not the flat medallion, the same mark the hero rolls.
+					    It takes its size from the font-size, so the wrapper carries one:
+					    the cube's edge and its half-depth are both in em off this, and
+					    22px lands it on the 24px the medallion occupied. */}
+					<span className="flex-shrink-0 text-[22px] leading-none">
+						<CubeMark />
+					</span>
 					<span className="text-sm font-semibold tracking-tight text-neutral-100 truncate">
 						i³ Awards
 					</span>
@@ -216,14 +438,11 @@ function TopBar({
 					</button>
 					{wallet &&
 						(wallet.address ? (
-							<button
-								type="button"
-								onClick={wallet.onDisconnect}
-								className="inline-flex items-center gap-2 h-9 rounded-full border border-[#2f2f2f] pl-3 pr-3.5 text-sm font-medium text-neutral-100 hover:border-[#454545] transition-colors"
-							>
-								<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-								{shortAddress(wallet.address)}
-							</button>
+							<ConnectedWallet
+								address={wallet.address}
+								walletId={wallet.walletId}
+								onDisconnect={wallet.onDisconnect}
+							/>
 						) : (
 							<motion.button
 								type="button"
@@ -248,31 +467,416 @@ function TopBar({
 
 // ── How-it-works modal ─────────────────────────────────────────────────────
 
-const HIW_STEPS = [
-	{
-		t: "Connect a Pilot wallet",
-		d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot — anyone else can browse read-only.",
-	},
-	{
-		t: "Pick one per category",
-		d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
-	},
-	{
-		t: "Sign one transaction",
-		d: "Your whole ballot is written to your own Stellar testnet account in a single signature. No real funds — ever.",
-	},
-	{
-		t: "Change your mind anytime",
-		d: "Re-pick and re-sign before voting closes; the new ballot overwrites the old. The tally is read straight from chain, publicly verifiable.",
-	},
-];
+function hiwSteps(picks: number) {
+	return [
+		{
+			t: "Connect a Pilot wallet",
+			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot. Anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
+		},
+		picks > 1
+			? {
+					t: `Nominate ${picks} per category`,
+					d: `Put forward ${picks} projects in each of Impact, Innovation and Interoperability. The most-nominated four in each become the shortlist for the final vote.`,
+				}
+			: {
+					t: "Pick one finalist per category",
+					d: "Each category has four finalists, the projects the Pilots nominated most. Choose the one you think best defined the year in Impact, Innovation and Interoperability.",
+				},
+		{
+			t: "Sign one transaction",
+			d: "One signature authorizes your whole ballot. Our relay writes it to Stellar testnet under a random id, so nothing on chain links it to your address. No real funds, ever.",
+		},
+		{
+			t: "Your first ballot is final",
+			d:
+				picks > 1
+					? "One ballot per voter. The first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable."
+					: "A new ballot, separate from your nominations. The first one you cast is the one that counts and can't be replaced. Results are published in aggregate when voting closes, and anyone can verify them.",
+		},
+	];
+}
 
-// Step-through modal: one step at a time, ‹ dots › navigation, "Got it" on
-// the last. Centered on desktop, bottom sheet on mobile.
-function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
+/**
+ * Explainer art. Four steps, four different mechanisms, and each shows a REAL
+ * control from this product doing what the step describes: the Connect button
+ * changing state, a nominee card being chosen, the wallet sheet confirming,
+ * the receipt's Stellar stamp pressing down on the finished ballot.
+ * Decorative, so aria-hidden; the copy carries the meaning. Motion lives in
+ * awards.css.
+ */
+function BallotArt({ step }: { step: number }) {
+	return (
+		<div className="sm-art" key={step} aria-hidden="true">
+			{step === 0 && (
+				<div className="sm-connect">
+					<span className="sm-conn-a">Connect wallet</span>
+					<span className="sm-conn-b">
+						<i />
+						GDNP…HWOE
+					</span>
+					<span className="sm-clickring" />
+					<span className="sm-cursor">
+						<i>
+							<svg viewBox="-2 -2 19 25" role="presentation">
+								<path
+									d="M0 0 0 15.96 3.75 12.18 6.75 21 9.9 18.9 7.05 10.5 11.7 10.08Z"
+									fill="#fafafa"
+									stroke="#171327"
+									strokeWidth="2.6"
+									strokeLinejoin="round"
+									paintOrder="stroke"
+								/>
+							</svg>
+						</i>
+					</span>
+				</div>
+			)}
+			{step === 1 && (
+				<div className="sm-pickrow">
+					<i className="sm-nom" />
+					<i className="sm-nom">
+						<span className="sm-check" />
+					</i>
+					<i className="sm-nom" />
+				</div>
+			)}
+			{step === 2 && (
+				<div className="sm-sign">
+					<div className="sm-sign-sheet">
+						<b />
+						<b />
+						<b />
+						<div className="sm-sign-go" />
+					</div>
+					<div className="sm-sign-hash" />
+				</div>
+			)}
+			{step === 3 && (
+				<div className="sm-seal">
+					<div className="sm-seal-sheet">
+						<b />
+						<b />
+						<b />
+						<b />
+						<b />
+					</div>
+					<div className="sm-seal-stamp" />
+				</div>
+			)}
+		</div>
+	);
+}
+
+/**
+ * The house curtain. Covers the page on load and parts to reveal the round, * the one big theatrical moment, and the reason this page reads as an awards
+ * show rather than a form. Fixed, pointer-events:none, and it unmounts itself
+ * when the animation ends so it can never sit in front of the ballot. Hidden
+ * outright under prefers-reduced-motion (see awards.css).
+ */
+function StageReveal() {
+	const [done, setDone] = useState(false);
+	useEffect(() => {
+		const t = setTimeout(() => setDone(true), 1800);
+		return () => clearTimeout(t);
+	}, []);
+	if (done) return null;
+	const panels = [0, 1, 2, 3, 4, 5];
+	return (
+		<div className="sm-reveal" aria-hidden="true">
+			<div className="sm-reveal-half l">
+				{panels.map((n) => (
+					<i key={n} />
+				))}
+			</div>
+			<div className="sm-reveal-half r">
+				{panels.map((n) => (
+					<i key={n} />
+				))}
+			</div>
+		</div>
+	);
+}
+
+/** The same path the stroke draws and the nib rides, one source of truth. */
+const SIGNATURE_PATH =
+	"M6 44 C 16 14, 28 10, 32 26 C 36 42, 24 54, 20 45 C 16 36, 32 22, 48 27 C 64 32, 58 50, 69 45 C 80 40, 77 19, 90 22 C 103 25, 98 48, 110 43 C 121 38, 122 23, 134 30 C 145 36, 140 46, 152 41 L 184 38";
+
+/**
+ * The i³, as a cube. The intro tumbles 3 → i → i³ on two different axes, then
+ * hands control to hover: pointing at it sends the cube to a random face, and
+ * leaving brings it home to the mark. The intro is a keyframe animation and
+ * hover is a transition, so the animation has to be REMOVED once it ends, * a filled animation keeps winning over an inline transform forever.
+ */
+const CUBE_ORIENTATIONS = [
+	{ rx: -90, ry: -90 }, // "3"
+	{ rx: 0, ry: -90 }, // "i"
+	{ rx: 0, ry: 180 }, // back
+	{ rx: 0, ry: 90 }, // left
+] as const;
+
+function CubeMark() {
+	const [live, setLive] = useState(false);
+	const [at, setAt] = useState<{ rx: number; ry: number } | null>(null);
+	const spin = useCallback(() => {
+		const pick =
+			CUBE_ORIENTATIONS[Math.floor(Math.random() * CUBE_ORIENTATIONS.length)];
+		setAt(pick);
+	}, []);
+	return (
+		<span
+			className="sm-cube"
+			onMouseEnter={live ? spin : undefined}
+			onMouseLeave={live ? () => setAt(null) : undefined}
+			aria-hidden="true"
+		>
+			<span
+				className={`sm-cube-box${live ? " is-live" : ""}`}
+				onAnimationEnd={() => setLive(true)}
+				style={
+					live
+						? {
+								transform: `rotateX(${at?.rx ?? 0}deg) rotateY(${at?.ry ?? 0}deg)`,
+							}
+						: undefined
+				}
+			>
+				<span className="sm-cube-face sm-cube-s">
+					<b>3</b>
+				</span>
+				<span className="sm-cube-face sm-cube-r">
+					<b>i</b>
+				</span>
+				<span className="sm-cube-face sm-cube-back">
+					<b>i³</b>
+				</span>
+				<span className="sm-cube-face sm-cube-left">
+					<b>3</b>
+				</span>
+				<span className="sm-cube-face sm-cube-f">
+					<b>i³</b>
+				</span>
+			</span>
+		</span>
+	);
+}
+
+/**
+ * Waiting on the network. The hourglass from yui540/css-animations (MIT),
+ * monochrome, the sand drains and then the glass turns over, which says
+ * "this takes a moment" in a way a spinner never does.
+ */
+function Hourglass() {
+	return (
+		<svg className="sm-hourglass" viewBox="0 0 24 24" aria-hidden="true">
+			<defs>
+				<mask id="sm-hg-m1">
+					<path
+						fill="#fff"
+						d="M6.16174 16.1526L11.9824 12.1111L17.9304 16.1526L17.2949 20.855H6.74632L6.16174 16.1526Z"
+					/>
+				</mask>
+				<mask id="sm-hg-m2">
+					<path
+						fill="#fff"
+						d="M17.9303 8.06956L12.1096 12.1111L6.16169 8.06956L6.79715 3.36718L17.3457 3.36719L17.9303 8.06956Z"
+					/>
+				</mask>
+			</defs>
+			<g className="sm-hg-spin">
+				<g mask="url(#sm-hg-m1)">
+					<rect
+						className="sm-hg-sand1"
+						x="6.16"
+						y="12.11"
+						width="11.77"
+						height="8.74"
+					/>
+				</g>
+				<g mask="url(#sm-hg-m2)">
+					<g className="sm-hg-sand2">
+						<rect
+							x="17.93"
+							y="12.11"
+							width="11.77"
+							height="8.74"
+							transform="rotate(-180 17.93 12.11)"
+						/>
+					</g>
+					<g className="sm-hg-stream">
+						<rect
+							x="12.84"
+							y="12.11"
+							width="1.5"
+							height="8.74"
+							transform="rotate(-180 12.84 12.11)"
+						/>
+					</g>
+				</g>
+				<path
+					className="sm-hg-frame"
+					fillRule="evenodd"
+					clipRule="evenodd"
+					d="M19 5.38028V6.50704C19 7.7277 18.475 8.76056 17.5125 9.32394L13.6632 11.9526L14.0877 12.232L14.0825 12.2398L17.5125 14.5822C18.475 15.2394 19 16.2723 19 17.493V18.6197C19 20.4977 17.6 22 15.85 22H8.15C6.4 22 5 20.4977 5 18.6197V17.493C5 16.2723 5.525 15.1455 6.4875 14.5822L10.3403 12.016L9.39854 11.396C9.3312 11.3708 9.26465 11.3374 9.2 11.2958L6.4875 9.41784C5.525 8.76056 5 7.7277 5 6.50704V5.38028C5 3.50235 6.4 2 8.15 2H15.85C17.6 2 19 3.50235 19 5.38028ZM10.3606 9.77859C10.3054 9.71327 10.2393 9.65511 10.1625 9.60563L7.45 7.7277C7.0125 7.53991 6.75 7.07042 6.75 6.50704V5.38028C6.75 4.53521 7.3625 3.87793 8.15 3.87793H15.85C16.6375 3.87793 17.25 4.53521 17.25 5.38028V6.50704C17.25 7.07042 16.9875 7.53991 16.55 7.8216L12.0356 10.8812L10.3606 9.77859ZM11.9786 13.0944L7.45 16.1784C7.0125 16.4601 6.75 16.9296 6.75 17.493V18.6197C6.75 19.4648 7.3625 20.1221 8.15 20.1221H15.85C16.6375 20.1221 17.25 19.4648 17.25 18.6197V17.493C17.25 16.9296 16.9875 16.4601 16.55 16.1784L13.0561 13.799L13.054 13.8023L11.9786 13.0944Z"
+				/>
+			</g>
+		</svg>
+	);
+}
+
+/**
+ * The signing moment. While the wallet popup is open the page held nothing but
+ * a busy button; now it holds a signature writing itself. Covers the three
+ * in-flight phases with the copy that actually tells you what to do.
+ */
+function SigningOverlay({
+	phase,
+	picks,
+	onContinue,
+}: {
+	phase: Phase;
+	picks: number;
+	onContinue?: () => void;
+}) {
+	const active =
+		phase === "requesting" ||
+		phase === "signing" ||
+		phase === "submitting" ||
+		phase === "confirmed";
+	const title =
+		phase === "requesting"
+			? "Preparing your ballot"
+			: phase === "signing"
+				? "Approve in your wallet"
+				: phase === "confirmed"
+					? "Vote confirmed"
+					: "Recording on Stellar";
+	const sub =
+		phase === "requesting"
+			? "Building the transaction from your picks."
+			: phase === "signing"
+				? "One signature covers every category. No real funds."
+				: phase === "confirmed"
+					? `${picks > 1 ? "Your nominations are" : "Your vote is"} in and on-chain. Taking you to your receipt.`
+					: "Sending your signed ballot to testnet.";
+	return (
+		<AnimatePresence>
+			{active && (
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.2 }}
+					className="sm-signing"
+					role="status"
+					aria-live="polite"
+				>
+					<motion.div
+						initial={{ opacity: 0, y: 14, scale: 0.98 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 10, scale: 0.98 }}
+						transition={{ duration: 0.28, ease: EASE }}
+						className="sm-signing-card"
+					>
+						{phase === "confirmed" ? (
+							<div
+								className="mb-5 mt-1 inline-flex h-14 w-14 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10"
+								aria-hidden="true"
+							>
+								<Check className="h-7 w-7 text-emerald-400" />
+							</div>
+						) : phase === "submitting" ? (
+							// in flight: the sand drains and the glass turns over
+							<div className="mb-5 mt-1" aria-hidden="true">
+								<Hourglass />
+							</div>
+						) : (
+							<>
+								<div className="sm-sig" aria-hidden="true">
+									<svg viewBox="0 0 190 62" role="presentation">
+										<path d={SIGNATURE_PATH} />
+									</svg>
+									<span className="sm-nib" />
+								</div>
+								<div className="sm-sig-rule" aria-hidden="true" />
+							</>
+						)}
+						<h2 className="mb-2 text-lg font-semibold tracking-tight text-neutral-50">
+							{title}
+						</h2>
+						<p className="text-sm leading-relaxed text-neutral-400">{sub}</p>
+						{phase === "confirmed" && onContinue && (
+							<button
+								type="button"
+								onClick={onContinue}
+								className="mt-5 inline-flex h-10 items-center justify-center rounded-full bg-neutral-100 px-5 text-sm font-semibold text-neutral-900"
+							>
+								See my receipt
+							</button>
+						)}
+					</motion.div>
+				</motion.div>
+			)}
+		</AnimatePresence>
+	);
+}
+
+/**
+ * Your ballot prints. The printer belongs HERE rather than in the explainer, * this is a receipt actually being issued, one row per category, stamped.
+ */
+function VoteReceipt() {
+	return (
+		<div className="sm-receipt" aria-hidden="true">
+			<div className="sm-receipt-sheet">
+				{[0, 1, 2].map((r) => (
+					<span key={r} style={{ ["--sm-i" as string]: r }} />
+				))}
+			</div>
+			<div className="sm-receipt-stamp" />
+			<div className="sm-receipt-body" />
+		</div>
+	);
+}
+
+/**
+ * The closed stage. Panels drop into place on load, then breathe; they never
+ * part, because the round is not open yet, that IS the empty state's message.
+ */
+function StageCurtain() {
+	const panels = [0, 1, 2, 3, 4];
+	return (
+		<div className="sm-stage" aria-hidden="true">
+			<div className="sm-stage-glow" />
+			<div className="sm-curtain sm-curtain--l">
+				{panels.map((i) => (
+					<i key={i} style={{ ["--sm-i" as string]: i }} />
+				))}
+			</div>
+			<div className="sm-curtain sm-curtain--r">
+				{panels.map((i) => (
+					<i key={i} style={{ ["--sm-i" as string]: i }} />
+				))}
+			</div>
+			<div className="sm-stage-seam" />
+			<div className="sm-stage-valance" />
+		</div>
+	);
+}
+
+// Step-through explainer. One step at a time, its own art above the copy,
+// dots and a primary action below, the help-card shape, not a slideshow.
+function HowItWorks({
+	open,
+	onClose,
+	picks = 1,
+}: {
+	open: boolean;
+	onClose: () => void;
+	picks?: number;
+}) {
 	const [i, setI] = useState(0);
 	const [dir, setDir] = useState(1);
-	const last = HIW_STEPS.length - 1;
+	const steps = useMemo(() => hiwSteps(picks), [picks]);
+	const last = steps.length - 1;
 
 	// Reset to step 1 each time it opens.
 	useEffect(() => {
@@ -301,13 +905,13 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 		return () => document.removeEventListener("keydown", onKey);
 	}, [open, onClose, i, last, go]);
 
-	const step = HIW_STEPS[i];
+	const step = steps[i];
 
 	return (
 		<AnimatePresence>
 			{open && (
 				<div
-					className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+					className="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4"
 					role="dialog"
 					aria-modal="true"
 					aria-label="How voting works"
@@ -327,23 +931,20 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: 16, scale: 0.98 }}
 						transition={{ duration: 0.28, ease: EASE }}
-						className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+						className="relative w-full rounded-t-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:max-w-md sm:rounded-2xl sm:p-6"
 					>
-						<div className="flex items-center justify-between gap-4 mb-6">
-							<span className="text-sm font-medium text-neutral-300">
-								How voting works
-							</span>
-							<button
-								type="button"
-								onClick={onClose}
-								className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2f2f2f] text-neutral-400 hover:text-neutral-100 hover:border-[#454545] transition-colors flex-shrink-0"
-							>
-								<X className="h-4 w-4" />
-							</button>
-						</div>
+						<button
+							type="button"
+							onClick={onClose}
+							aria-label="Close"
+							className="absolute right-8 top-8 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#3a3a3a] bg-[#1c1c1c]/85 text-neutral-400 backdrop-blur-sm transition-colors hover:border-[#555] hover:text-neutral-100"
+						>
+							<X className="h-4 w-4" />
+						</button>
 
-						{/* one step, slide-swapped */}
-						<div className="relative min-h-[132px] overflow-hidden">
+						<BallotArt step={i} />
+
+						<div className="relative min-h-[128px] overflow-hidden">
 							<AnimatePresence mode="wait" initial={false}>
 								<motion.div
 									key={i}
@@ -352,54 +953,52 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 									exit={{ opacity: 0, x: dir * -28 }}
 									transition={{ duration: 0.26, ease: EASE }}
 								>
-									<h2 className="text-2xl font-semibold tracking-tight text-neutral-50 mb-2.5">
+									<h2 className="mb-2.5 text-[22px] font-semibold tracking-tight text-neutral-50">
 										{step.t}
 									</h2>
-									<p className="text-sm text-neutral-400 leading-relaxed">
+									<p className="text-sm leading-relaxed text-neutral-400">
 										{step.d}
 									</p>
 								</motion.div>
 							</AnimatePresence>
 						</div>
 
-						{/* footer: dots + back / next */}
-						<div className="mt-7 flex items-center justify-between gap-3">
-							<div className="flex items-center gap-1.5">
-								{HIW_STEPS.map((s, idx) => (
-									<button
-										key={s.t}
-										type="button"
-										aria-label={`Step ${idx + 1}`}
-										onClick={() => go(idx)}
-										className="h-1.5 rounded-full transition-all duration-200"
-										style={{
-											width: idx === i ? 20 : 6,
-											background:
-												idx === i ? "#fafafa" : "rgba(255,255,255,0.25)",
-										}}
-									/>
-								))}
-							</div>
-							<div className="flex items-center gap-2">
-								{i > 0 && (
-									<button
-										type="button"
-										onClick={() => go(i - 1)}
-										className="inline-flex items-center h-9 rounded-full border border-[#2f2f2f] px-4 text-sm font-medium text-neutral-300 hover:text-neutral-100 hover:border-[#454545] transition-colors"
-									>
-										Back
-									</button>
-								)}
-								<motion.button
+						<div className="mt-5 flex items-center justify-center gap-1.5">
+							{steps.map((s, idx) => (
+								<button
+									key={s.t}
 									type="button"
-									whileTap={{ scale: 0.97 }}
-									onClick={() => (i < last ? go(i + 1) : onClose())}
-									className="inline-flex items-center gap-1.5 h-9 rounded-full bg-neutral-100 px-4 text-sm font-semibold text-black hover:bg-white transition-colors"
+									aria-label={`Step ${idx + 1}`}
+									onClick={() => go(idx)}
+									className="h-1.5 rounded-full transition-all duration-200"
+									style={{
+										width: idx === i ? 20 : 6,
+										background:
+											idx === i ? "#fafafa" : "rgba(255,255,255,0.25)",
+									}}
+								/>
+							))}
+						</div>
+
+						<div className="mt-5 flex items-center gap-2.5">
+							{i > 0 && (
+								<button
+									type="button"
+									onClick={() => go(i - 1)}
+									className="inline-flex h-11 items-center rounded-full border border-[#2f2f2f] px-5 text-sm font-medium text-neutral-300 transition-colors hover:border-[#454545] hover:text-neutral-100"
 								>
-									{i < last ? "Next" : "Got it"}
-									{i < last && <ChevronRight className="h-4 w-4" />}
-								</motion.button>
-							</div>
+									Back
+								</button>
+							)}
+							<motion.button
+								type="button"
+								whileTap={{ scale: 0.98 }}
+								onClick={() => (i < last ? go(i + 1) : onClose())}
+								className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-neutral-100 text-sm font-semibold text-black transition-colors hover:bg-white"
+							>
+								{i < last ? "Next" : "Got it"}
+								{i < last && <ChevronRight className="h-4 w-4" />}
+							</motion.button>
 						</div>
 					</motion.div>
 				</div>
@@ -410,7 +1009,26 @@ function HowItWorks({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 // ── Empty / draft state ────────────────────────────────────────────────────
 
-function EmptyState() {
+/** The database did not answer. Nothing about the round is known, so nothing
+ *  about it is claimed; a reload is the whole remedy. */
+function UnavailableState() {
+	return (
+		<>
+			<TopBar onHowItWorks={() => {}} />
+			<div className="mx-auto max-w-xl px-4 pt-32 text-center sm:px-6">
+				<h1 className="text-3xl font-semibold tracking-tight text-neutral-50">
+					One moment
+				</h1>
+				<p className="mt-3 text-neutral-400">
+					The awards page could not load the round just now. Reload in a few
+					seconds; nothing you did was lost.
+				</p>
+			</div>
+		</>
+	);
+}
+
+function EmptyState({ picks = 1 }: { picks?: number }) {
 	const [howOpen, setHowOpen] = useState(false);
 	return (
 		<>
@@ -421,15 +1039,20 @@ function EmptyState() {
 				transition={{ duration: 0.5, ease: EASE }}
 				className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-32 text-center"
 			>
-				<I3Mark className="mx-auto mb-8 h-16 w-16 text-neutral-600" />
-				<h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-100 mb-3">
+				<I3Mark className="mx-auto mb-8 h-12 w-12 text-neutral-600" />
+				<StageCurtain />
+				<h1 className="mt-10 text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-100 mb-3">
 					The stage is being set
 				</h1>
 				<p className="text-neutral-400 leading-relaxed">
 					The i³ Awards ballot isn't live yet. Check back soon.
 				</p>
 			</motion.div>
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={picks}
+			/>
 		</>
 	);
 }
@@ -440,15 +1063,41 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	const { round, nominees, voting } = data;
 	const categories = round.categories;
 
-	const [selections, setSelections] = useState<Record<string, string>>({});
+	const [selections, setSelections] = useState<Record<string, string[]>>({});
+	// 1 = the radio ballot (final round). >1 = approval ballot (shortlist round).
+	const picksPerCategory = Math.max(1, Math.floor(round.picksPerCategory ?? 1));
 	const [address, setAddress] = useState<string | null>(null);
+	const [walletId, setWalletId] = useState<AwardsWalletId | null>(null);
 	const [eligibility, setEligibility] = useState<Eligibility | null>(null);
 	const [phase, setPhase] = useState<Phase>("idle");
 	const [walletOpen, setWalletOpen] = useState(false);
 	const [howOpen, setHowOpen] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [txHash, setTxHash] = useState<string | null>(null);
-	const [funding, setFunding] = useState(false);
+	const confirmRef = useRef<HTMLDivElement>(null);
+	// Bring the confirmation to the voter. The receipt renders at the top of
+	// the page while the submit control sits at the bottom, and a smooth
+	// window scroll was not reliably landing: pilots reported no success
+	// message and scrolled up to find it. Scroll the receipt itself into view
+	// once it has mounted, and move focus to it for screen readers.
+	// The confirmed step holds for a moment, then hands off to the receipt.
+	useEffect(() => {
+		if (phase !== "confirmed") return;
+		const t = window.setTimeout(() => setPhase("submitted"), 2200);
+		return () => window.clearTimeout(t);
+	}, [phase]);
+	useEffect(() => {
+		if (phase !== "submitted") return;
+		const t = window.setTimeout(() => {
+			confirmRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+			confirmRef.current?.focus({ preventScroll: true });
+		}, 120);
+		return () => window.clearTimeout(t);
+	}, [phase]);
+	const [ballotId, setBallotId] = useState<string | null>(null);
 	const prefilled = useRef(false);
 	const [ballotPage, setBallotPage] = useState(0);
 	const [highlightNominee, setHighlightNominee] = useState<Nominee | null>(
@@ -475,9 +1124,49 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		[nomineesByCategory],
 	);
 
-	const selectedCount = Object.keys(selections).length;
-	const readOnly = eligibility !== null && !eligibility.whitelisted;
-	const votedBefore = Boolean(eligibility?.votes);
+	// A category counts as done when its SLATE is full, picksPerCategory
+	// picks, or every nominee it has if fewer. The nominations phase asks for
+	// four per category so four can be shortlisted; the final phase asks for
+	// one. Same rule as the relay's requiredPicks, mirrored here so the page
+	// never lets someone sign a ballot the relay will refuse.
+	const requiredFor = useCallback(
+		(categoryKey: string) =>
+			Math.min(
+				picksPerCategory,
+				(nomineesByCategory.get(categoryKey) ?? []).length,
+			),
+		[picksPerCategory, nomineesByCategory],
+	);
+	const selectedCount = categories.filter((c) => {
+		const need = requiredFor(c.key);
+		return need > 0 && (selections[c.key] ?? []).length >= need;
+	}).length;
+	// The denominator is the categories that CAN be voted, the relay skips a
+	// category with no nominees, so requiring it here would keep the button
+	// disabled for everyone on a round opened before one category's list
+	// landed, with nothing on screen saying why.
+	const requiredCount = categories.filter((c) => requiredFor(c.key) > 0).length;
+	const notWhitelisted = eligibility !== null && !eligibility.whitelisted;
+	// One ballot per voter: the first one counts. `hasVoted` is chain OR
+	// mirror, so it stays true after a testnet reset has cleared `votes`, // the ballot still exists in our record, and a new one would not count.
+	const votedBefore = Boolean(eligibility?.hasVoted ?? eligibility?.votes);
+	// No ballot can be cast from here, no wallet is connected, or this address
+	// isn't on the list, or it has already voted and that ballot is final. All
+	// three mean the picks stop being editable and the CTA goes away, rather
+	// than leaving a live form behind a button that will refuse.
+	//
+	// Disconnected counts. Letting a visitor build a whole ballot first reads
+	// as progress and is not: connect, and the picks are either overwritten by
+	// whatever the record already holds, or thrown away because the address
+	// isn't a Pilot or has already voted. The ask is one click and it comes
+	// first.
+	const readOnly = !address || notWhitelisted || votedBefore;
+	// The ballot surfaces (rail, mobile deck, CTA) stay up while a ballot is
+	// still POSSIBLE, which includes "no wallet yet", whose call to action is
+	// the connect button itself. Gating those on readOnly would have hidden the
+	// one control a disconnected visitor needs. They come down only when this
+	// address can never cast one: not a Pilot, or already voted.
+	const ballotOpen = voting.open && !notWhitelisted && !votedBefore;
 	const busy =
 		phase === "connecting" ||
 		phase === "requesting" ||
@@ -491,23 +1180,68 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			setError(null);
 			setSelections((prev) => {
 				const next = { ...prev };
-				if (next[category] === slug) delete next[category];
-				else next[category] = slug;
+				const picked = next[category] ?? [];
+				if (picked.includes(slug)) {
+					// Tapping a pick again removes it.
+					const rest = picked.filter((s) => s !== slug);
+					if (rest.length === 0) delete next[category];
+					else next[category] = rest;
+					return next;
+				}
+				if (picksPerCategory === 1) {
+					// Radio behaviour: the new pick replaces the old one.
+					next[category] = [slug];
+					return next;
+				}
+				// Approval behaviour: fill up to the cap, then ignore extra taps
+				// (the card is rendered disabled at that point).
+				if (picked.length >= picksPerCategory) return prev;
+				next[category] = [...picked, slug];
 				return next;
 			});
 		},
-		[readOnly, busy],
+		[readOnly, busy, picksPerCategory],
 	);
 
 	// ── eligibility ──
+	// A receipt stored by this browser is the only way a returning voter sees
+	// their ballot: the server never says who voted. On a new device the page
+	// learns it from a submit that answers already_voted, and locks then.
+	useEffect(() => {
+		if (!address) return;
+		const r = readReceipt(address, round.slug);
+		if (!r) return;
+		setTxHash(r.hash);
+		setBallotId(r.ballotId);
+		setEligibility((prev) =>
+			prev ? { ...prev, hasVoted: true, votes: r.selections } : prev,
+		);
+	}, [address, round.slug]);
+
 	const refreshEligibility = useCallback(
 		async (addr: string) => {
 			const res = await fetch(
 				`/api/awards/eligibility?address=${encodeURIComponent(addr)}&round=${encodeURIComponent(round.slug)}`,
 			);
 			if (!res.ok) throw new Error("could not check eligibility");
-			const body = (await res.json()) as Eligibility;
+			const raw = (await res.json()) as Eligibility;
+			// The receipt this browser stored when the ballot was cast is the
+			// only record that this address voted: the server never says. Merge
+			// it here, not only in the mount effect, or a reconnect that resolves
+			// after that effect ran would replace it with the bare server answer.
+			const receipt = readReceipt(addr, round.slug);
+			const body: Eligibility = receipt
+				? { ...raw, hasVoted: true, votes: receipt.selections }
+				: raw;
 			setEligibility(body);
+			// Not a Pilot address → the ballot goes read-only. Clear any picks
+			// they made while browsing disconnected: leaving them selected under
+			// a now-disabled "Sign & submit" reads as a castable vote that isn't.
+			if (!body.whitelisted) {
+				prefilled.current = false;
+				setSelections({});
+				return body;
+			}
 			// Returning voter: surface their current on-chain ballot, once, and
 			// only if they haven't started picking already.
 			if (body.votes && !prefilled.current) {
@@ -522,6 +1256,44 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	);
 
 	// ── connect ──
+	// A browser with no receipt for this address asks the server, behind the
+	// owner's signature, whether it already voted: connecting a wallet only
+	// hands the page an address, which anyone could type in, so the wallet
+	// signs a short status check (no transaction, nothing on chain) and the
+	// server answers the owner alone. A declined signature just means a fresh
+	// ballot; submit still answers already_voted if it was.
+	const checkBallotStatus = useCallback(
+		async (addr: string) => {
+			const ask = async (body: Record<string, string>) => {
+				const res = await fetch("/api/awards/ballot-status", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ ...body, round: round.slug }),
+				});
+				return res.ok ? await res.json() : null;
+			};
+			const unsigned = await ask({ address: addr });
+			if (!unsigned?.xdr) return;
+			const signedXdr = await signAwardsBallot(unsigned.xdr, addr);
+			const status = await ask({ signedXdr });
+			if (!status?.voted) return;
+			const receipt: StoredReceipt = {
+				ballotId: status.ballotId ?? null,
+				hash: status.txHash ?? "",
+				selections: status.selections ?? {},
+			};
+			rememberReceipt(addr, round.slug, receipt);
+			setTxHash(receipt.hash || null);
+			setBallotId(receipt.ballotId);
+			prefilled.current = true;
+			setSelections({ ...receipt.selections });
+			setEligibility((prev) =>
+				prev ? { ...prev, hasVoted: true, votes: receipt.selections } : prev,
+			);
+		},
+		[round.slug],
+	);
+
 	const handleConnect = useCallback(
 		async (walletId: AwardsWalletId) => {
 			setError(null);
@@ -529,49 +1301,55 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			try {
 				const addr = await connectAwardsWallet(walletId);
 				setAddress(addr);
+				setWalletId(walletId);
 				setWalletOpen(false);
-				await refreshEligibility(addr);
+				const body = await refreshEligibility(addr);
+				if (body.whitelisted && !readReceipt(addr, round.slug)) {
+					try {
+						await checkBallotStatus(addr);
+					} catch {
+						// the wallet declined or the check failed: a fresh ballot
+					}
+				}
 			} catch (err) {
 				setError(walletErrorMessage(err));
 			} finally {
 				setPhase("idle");
 			}
 		},
-		[refreshEligibility],
+		[refreshEligibility, checkBallotStatus, round.slug],
 	);
 
 	const handleDisconnect = useCallback(async () => {
 		await disconnectAwardsWallet();
 		setAddress(null);
+		setWalletId(null);
 		setEligibility(null);
 		setTxHash(null);
 		setPhase("idle");
 		prefilled.current = false;
-	}, []);
-
-	// ── friendbot (test mode only — the whole feature is testnet) ──
-	const handleFund = useCallback(async () => {
-		if (!address || !eligibility?.friendbot) return;
-		setFunding(true);
+		// Pilot feedback: disconnect must clear the BALLOT too, not just the
+		// session. Pilots vote from shared laptops at the venue, voter #2 was
+		// seeing voter #1's picks and success banner still on screen.
+		setSelections({});
 		setError(null);
-		try {
-			const res = await fetch(eligibility.friendbot);
-			if (!res.ok) throw new Error(`friendbot responded ${res.status}`);
-			await refreshEligibility(address);
-		} catch {
-			// CORS or friendbot hiccup — hand the voter the link instead.
-			window.open(eligibility.friendbot, "_blank", "noopener");
-			setError(
-				"Opened friendbot in a new tab — fund the account there, then retry.",
-			);
-		} finally {
-			setFunding(false);
+		setBallotPage(0);
+		// ...and the stored receipt: it names the ballot id and the picks, and
+		// on that shared laptop the next person could read it back.
+		if (address) {
+			try {
+				localStorage.removeItem(receiptKey(address, round.slug));
+			} catch {
+				/* storage unavailable */
+			}
 		}
-	}, [address, eligibility, refreshEligibility]);
+	}, [address, round.slug]);
 
-	// ── sign & submit ──
 	const handleSubmit = useCallback(async () => {
-		if (!address || selectedCount === 0) return;
+		// Pilot feedback: the round is one pick in EACH category. Signing a
+		// partial ballot burns a wallet signature on an incomplete vote, so the
+		// submit path refuses until every category has a pick.
+		if (!address || selectedCount !== requiredCount) return;
 		setError(null);
 		try {
 			setPhase("requesting");
@@ -581,20 +1359,17 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				body: JSON.stringify({ address, selections, round: round.slug }),
 			});
 			const xdrBody = await xdrRes.json();
-			if (xdrRes.status === 409 && xdrBody?.error === "account_unfunded") {
-				setEligibility((prev) =>
-					prev
-						? { ...prev, funded: false, friendbot: xdrBody.friendbot }
-						: prev,
-				);
+			if (xdrRes.status === 409 && xdrBody?.error === "already_voted") {
+				// Not a failure to report, the server is telling us this address
+				// already has a ballot. Record it, and the page locks and shows
+				// the receipt the way it does for any returning voter.
+				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
 				setPhase("idle");
 				return;
 			}
 			if (!xdrRes.ok) {
 				throw new Error(
-					typeof xdrBody?.error === "string"
-						? xdrBody.error
-						: "could not prepare the ballot",
+					apiErrorMessage(xdrBody, "could not prepare the ballot"),
 				);
 			}
 
@@ -602,34 +1377,81 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			const signedXdr = await signAwardsBallot(xdrBody.xdr, address);
 
 			setPhase("submitting");
-			const submitRes = await fetch("/api/awards/submit", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ signedXdr, round: round.slug }),
-			});
-			const submitBody = await submitRes.json();
+			// The relay serialises every voter through one sequence number; a
+			// collision answers relay_busy with nothing recorded. The signed
+			// authorization is good for ten minutes, so resubmit it instead of
+			// asking the wallet to sign again.
+			let submitRes: Response | null = null;
+			// biome-ignore lint/suspicious/noExplicitAny: route envelope
+			let submitBody: any = null;
+			for (let attempt = 1; attempt <= 4; attempt++) {
+				submitRes = await fetch("/api/awards/submit", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					// the picks travel alongside; the signature's memo commits to them
+					body: JSON.stringify({
+						signedXdr,
+						round: round.slug,
+						selections,
+						nonce: xdrBody.nonce,
+					}),
+				});
+				submitBody = await submitRes.json();
+				const busy =
+					submitRes.status === 409 && submitBody?.error === "relay_busy";
+				if (!busy || attempt === 4) break;
+				await new Promise((r) => setTimeout(r, 4000 * attempt));
+			}
+			if (!submitRes) throw new Error("the vote could not be submitted");
+			if (submitRes.status === 409 && submitBody?.error === "already_voted") {
+				setEligibility((prev) => (prev ? { ...prev, hasVoted: true } : prev));
+				setPhase("idle");
+				return;
+			}
 			if (!submitRes.ok) {
 				throw new Error(
-					typeof submitBody?.error === "string"
-						? submitBody.error
-						: "the vote could not be submitted",
+					apiErrorMessage(submitBody, "the vote could not be submitted"),
 				);
 			}
 			setTxHash(submitBody.hash);
+			setBallotId(submitBody.ballotId ?? null);
+			rememberReceipt(address, round.slug, {
+				ballotId: submitBody.ballotId ?? null,
+				hash: submitBody.hash,
+				selections,
+			});
+			// hasVoted too, not just votes: it is what locks the ballot, and
+			// leaving it stale left a live "Sign & submit" under a cast vote.
 			setEligibility((prev) =>
-				prev ? { ...prev, votes: { ...selections } } : prev,
+				prev ? { ...prev, votes: { ...selections }, hasVoted: true } : prev,
 			);
-			setPhase("submitted");
-			window.scrollTo({ top: 0, behavior: "smooth" });
+			setPhase("confirmed");
 		} catch (err) {
 			setError(walletErrorMessage(err));
 			setPhase("idle");
 		}
-	}, [address, selections, selectedCount, round.slug]);
+	}, [address, selections, selectedCount, requiredCount, round.slug]);
 
-	const closesLabel = round.closesAt
-		? format(new Date(round.closesAt), "MMMM d, yyyy 'at' h:mm a")
-		: null;
+	// React #418 (text-content mismatch) on every load came from HERE, not the
+	// countdown: date-fns `format` uses the runtime's timezone, so the server
+	// pass rendered UTC and the browser rendered the visitor's local time. The
+	// two HTML strings disagreed and React threw on hydrate.
+	//
+	// Fixed by rendering the deadline only AFTER mount, server HTML and the
+	// first client render now both omit it, so there is nothing to mismatch, and
+	// the local-time string appears a tick later. Both labels derive from the
+	// same gate so they can never disagree with each other.
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => setMounted(true), []);
+	const closesLabel =
+		mounted && round.closesAt
+			? format(new Date(round.closesAt), "MMMM d, yyyy 'at' h:mm a")
+			: null;
+	/** Short form for helper lines, a full timestamp there is noise. */
+	const closesShort =
+		mounted && round.closesAt
+			? format(new Date(round.closesAt), "MMM d")
+			: null;
 
 	// ── primary action (shared by rail + mobile bar) ──
 	type Primary = {
@@ -645,28 +1467,23 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				disabled: false,
 				loading: phase === "connecting",
 			}
-		: eligibility?.funded === false
-			? {
-					label: funding ? "Funding…" : "Fund on testnet",
-					onClick: handleFund,
-					disabled: funding,
-					loading: funding,
-				}
-			: {
-					label:
-						phase === "requesting"
-							? "Preparing…"
-							: phase === "signing"
-								? "Waiting for wallet…"
-								: phase === "submitting"
-									? "Submitting…"
-									: votedBefore
-										? "Update vote"
-										: "Sign & submit",
-					onClick: handleSubmit,
-					disabled: selectedCount === 0 || busy,
-					loading: busy,
-				};
+		: {
+				label:
+					phase === "requesting"
+						? "Preparing…"
+						: phase === "signing"
+							? "Waiting for wallet…"
+							: phase === "submitting"
+								? "Submitting…"
+								: selectedCount < requiredCount
+									? picksPerCategory > 1
+										? `Pick ${picksPerCategory} in each category first`
+										: `Pick all ${requiredCount} first`
+									: "Sign & submit",
+				onClick: handleSubmit,
+				disabled: selectedCount < requiredCount || busy || votedBefore,
+				loading: busy,
+			};
 
 	function PrimaryButton({ full = false }: { full?: boolean }) {
 		return (
@@ -689,12 +1506,58 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 		);
 	}
 
+	/** The confirmation where the voter is looking: the submit control's slot. */
+	function SubmittedNotice({ compact = false }: { compact?: boolean }) {
+		if (!txHash) return null;
+		return (
+			<div
+				aria-live="polite"
+				className={`rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] text-left ${compact ? "px-4 py-3" : "p-4"}`}
+			>
+				<p className="flex items-center gap-2 text-sm font-semibold text-neutral-100">
+					<Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+					Thanks for voting! Your vote is on-chain.
+				</p>
+				<div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+					<a
+						href={explorerTxUrl(txHash)}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex items-center gap-1 text-neutral-300 underline-offset-4 hover:underline"
+					>
+						View transaction{" "}
+						<ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+					</a>
+					<button
+						type="button"
+						onClick={() =>
+							confirmRef.current?.scrollIntoView({
+								behavior: "smooth",
+								block: "start",
+							})
+						}
+						className="text-neutral-400 hover:text-neutral-200"
+					>
+						Show my receipt
+					</button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<>
+			<StageReveal />
+			<SigningOverlay
+				phase={phase}
+				picks={picksPerCategory}
+				onContinue={() => setPhase("submitted")}
+			/>
 			<TopBar
 				onHowItWorks={() => setHowOpen(true)}
 				wallet={{
 					address,
+					walletId,
 					busy: phase === "connecting",
 					onConnect: () => setWalletOpen(true),
 					onDisconnect: handleDisconnect,
@@ -703,18 +1566,33 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 			{/* ── Hero ── */}
 			<motion.header
-				initial={{ opacity: 0, y: 18 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.55, ease: EASE }}
-				className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-10 text-center"
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.45, ease: EASE }}
+				className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 sm:pt-16 pb-10 text-center"
 			>
-				<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05] mb-5">
-					{round.title}
+				{/* Whose awards these are, said before the headline says which ones.
+				    The mark is black artwork, so it needs the same light ground the
+				    receipt stamp gives it, bare, it disappears into the page. */}
+				<span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-[#2f2f2f] px-2.5 py-1 text-xs font-medium text-neutral-400">
+					<Image
+						src="/stellar-xlm-logo.png"
+						alt=""
+						width={14}
+						height={14}
+						className="h-3.5 w-3.5 rounded-full bg-neutral-100 p-0.5"
+					/>
+					SCF
+				</span>
+				<h1 className="mb-5 text-4xl font-semibold leading-[1.05] tracking-tight text-neutral-50 sm:text-6xl">
+					<CubeMark />
+					<span className="sr-only">{round.title}</span>
+					<span aria-hidden="true">{round.title.replace(/^i³\s*/, "")}</span>
 				</h1>
 				<p className="text-neutral-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-					Three categories. One pick in each. SCF Pilots choose the projects
-					that defined the year — for their impact, innovation and
-					interoperability.
+					{picksPerCategory > 1
+						? `Three categories. Nominate ${picksPerCategory} in each. SCF Pilots put forward the projects that defined the year for their impact, innovation and interoperability; the four most nominated in each become the shortlist.`
+						: "Three categories. One pick in each. SCF Pilots choose the projects that defined the year for their impact, innovation and interoperability."}
 				</p>
 				<div className="mt-6 flex items-center justify-center gap-3 text-sm">
 					{round.closesAt && voting.open ? (
@@ -730,7 +1608,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 					{!voting.open && (
 						<span className="text-neutral-400 rounded-full border border-[#2f2f2f] px-3 py-1">
 							Voting is not open right now
-							{voting.reason ? ` — ${voting.reason}` : ""}
+							{voting.reason ? `: ${voting.reason}` : ""}
 						</span>
 					)}
 				</div>
@@ -740,6 +1618,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<AnimatePresence>
 				{phase === "submitted" && txHash && (
 					<motion.div
+						ref={confirmRef}
+						tabIndex={-1}
+						aria-live="polite"
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0 }}
@@ -762,30 +1643,33 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									/>
 								))}
 							</span>
-							<motion.span
-								initial={{ scale: 0 }}
-								animate={{ scale: 1 }}
-								transition={{ ...SPRING, delay: 0.1 }}
-								className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100"
-							>
-								<Check className="h-6 w-6 text-black" strokeWidth={3} />
-							</motion.span>
+							<VoteReceipt />
 							<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-100 mb-2">
 								Your vote is on-chain
 							</h2>
-							<p className="text-sm text-neutral-400 leading-relaxed mb-4">
-								Recorded as a Stellar testnet transaction.
+							<p className="text-sm text-neutral-300 leading-relaxed mb-4">
+								Recorded on Stellar testnet, anonymously: the relay wrote it
+								{ballotId ? (
+									<>
+										{" "}
+										under ballot id{" "}
+										<span className="font-mono text-neutral-100">
+											{ballotId}
+										</span>
+									</>
+								) : null}
+								, and nothing on chain links it to your address. The first
+								ballot cast is the one that counts, so it won't be replaced.
 								{closesLabel && (
 									<>
 										{" "}
-										You can change it until{" "}
-										<span className="text-neutral-200">{closesLabel}</span> —
-										pick again and resubmit.
+										Results are published after voting closes on{" "}
+										<span className="text-neutral-100">{closesLabel}</span>.
 									</>
 								)}
 							</p>
 							<a
-								href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+								href={explorerTxUrl(txHash)}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 hover:text-neutral-100 transition-colors"
@@ -798,42 +1682,134 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				)}
 			</AnimatePresence>
 
+			{/* ── Already-voted notice (returning voter, this session hasn't
+			    resubmitted). Same card and same printed ballot as the moment
+			    they submitted: the receipt they were handed doesn't disappear
+			    because they came back later. ── */}
+			{votedBefore &&
+				phase !== "submitted" &&
+				phase !== "confirmed" &&
+				address && (
+					<motion.div
+						initial={{ opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.4, ease: EASE }}
+						className="max-w-2xl mx-auto px-4 sm:px-6 mb-8"
+					>
+						<div className="rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 text-center sm:p-7">
+							<VoteReceipt />
+							<h2 className="mb-2 text-xl font-semibold tracking-tight text-neutral-100 sm:text-2xl">
+								{picksPerCategory > 1
+									? "Your nominations are in"
+									: "You've already voted"}
+							</h2>
+							<p className="mb-4 text-sm leading-relaxed text-neutral-300">
+								{picksPerCategory > 1 ? (
+									<>
+										Your picks are marked on the ballot below. This ballot is
+										final; the first one cast is the one that counts.
+										{voting.open && closesLabel && (
+											<>
+												{" "}
+												Nominations close{" "}
+												<span className="text-neutral-100">{closesLabel}</span>.
+											</>
+										)}
+									</>
+								) : (
+									<>
+										Your picks are marked on the ballot below. This ballot is
+										final; the first one cast is the one that counts.
+										{voting.open && closesLabel && (
+											<>
+												{" "}
+												Voting closes{" "}
+												<span className="text-neutral-100">{closesLabel}</span>.
+											</>
+										)}{" "}
+										Results are published when voting closes.
+									</>
+								)}
+							</p>
+							{picksPerCategory > 1 && (
+								<p className="mb-4 text-sm leading-relaxed text-neutral-300">
+									<span className="text-neutral-100">What happens next:</span>{" "}
+									when nominations close, the four most nominated projects in
+									each category become the finalists. Phase 2 is the final vote,
+									one pick per category, and every Pilot votes again then.
+								</p>
+							)}
+							{/* The ballot lives on the relay under its id, not on the voter's
+						    account; only the receipt knows the transaction. */}
+							{txHash && (
+								<a
+									href={explorerTxUrl(txHash)}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-100"
+								>
+									Verify your ballot on-chain
+									{ballotId && (
+										<span className="text-neutral-500">
+											· ballot {ballotId}
+										</span>
+									)}
+									<ArrowUpRight className="h-4 w-4" />
+								</a>
+							)}
+						</div>
+					</motion.div>
+				)}
+
 			{/* ── Read-only notice ── */}
-			{readOnly && (
+			{!address && voting.open && (
+				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
+					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
+						<Eye className="h-5 w-5 mt-0.5 text-neutral-500 flex-shrink-0" />
+						<p className="text-sm text-neutral-400 leading-relaxed">
+							<span className="text-neutral-100 font-medium">
+								Connect a Pilot wallet to pick.
+							</span>{" "}
+							Browse the nominees and their highlights freely. Choosing comes
+							after connecting, so a ballot is never built against the wrong
+							address.
+						</p>
+					</div>
+				</div>
+			)}
+
+			{notWhitelisted && (
 				<div className="max-w-2xl mx-auto px-4 sm:px-6 mb-8">
 					<div className="rounded-xl border border-[#2f2f2f] bg-[#1c1c1c] p-4 flex items-start gap-3">
 						<Eye className="h-5 w-5 mt-0.5 text-neutral-500 flex-shrink-0" />
 						<p className="text-sm text-neutral-400 leading-relaxed">
 							<span className="text-neutral-100 font-medium">Read-only.</span>{" "}
 							{address ? shortAddress(address) : "This address"} isn't on the
-							Pilot voter list — the nominees are still worth a look.
+							Pilot voter list, but the nominees are still worth a look.
 						</p>
 					</div>
 				</div>
 			)}
 
 			{/* ── Two-column: grid + ballot rail ── */}
-			{/* When the mobile ballot deck is shown it's `fixed` (~230px tall) and
-			    would overlap the last nominees (the Interoperability tail —
-			    rubic/usdc-swap). Reserve room below the grid so they clear it;
-			    fall back to normal padding when the deck is absent (read-only /
-			    voting closed) so there's no dead space. */}
-			<div
-				className={`max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 lg:pb-20 ${
-					voting.open && !readOnly ? "pb-[17rem]" : "pb-32"
-				}`}
-			>
+			<div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-8 pb-14 lg:pb-20">
 				{/* nominee grid */}
 				<div className="lg:col-span-8 space-y-14">
 					{categories.map((category) => (
 						<section key={category.key} aria-label={category.name}>
 							<div className="mb-5">
 								<h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
-									{category.name}
+									<span className="sm-lift">
+										<span>{category.name}</span>
+									</span>
 								</h2>
 								{category.tagline && (
 									<p className="mt-0.5 text-sm text-neutral-500">
-										{category.tagline}
+										<span className="sm-lift">
+											<span style={{ ["--sm-d" as string]: "110ms" }}>
+												{category.tagline}
+											</span>
+										</span>
 									</p>
 								)}
 							</div>
@@ -851,8 +1827,22 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 									<NomineeCard
 										key={nominee.slug}
 										nominee={nominee}
-										selected={selections[category.key] === nominee.slug}
-										disabled={readOnly || !voting.open}
+										needsConnect={!address}
+										selected={(selections[category.key] ?? []).includes(
+											nominee.slug,
+										)}
+										disabled={
+											readOnly ||
+											!voting.open ||
+											// Cap reached: unpicked cards go inert so the limit is
+											// visible rather than a tap that silently does nothing.
+											(picksPerCategory > 1 &&
+												(selections[category.key] ?? []).length >=
+													picksPerCategory &&
+												!(selections[category.key] ?? []).includes(
+													nominee.slug,
+												))
+										}
 										onToggle={() => toggleNominee(category.key, nominee.slug)}
 										onHighlights={() => setHighlightNominee(nominee)}
 									/>
@@ -870,12 +1860,48 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your ballot
 							</h3>
 							<span className="text-xs tabular-nums text-neutral-500">
-								{selectedCount}/{categories.length}
+								{selectedCount}/{requiredCount}
 							</span>
 						</div>
 						<ul className="space-y-3 mb-5">
 							{categories.map((c) => {
-								const picked = nomineeName(c.key, selections[c.key]);
+								const pickedSlugs = selections[c.key] ?? [];
+								const picked = pickedSlugs.length
+									? pickedSlugs.map((sl) => nomineeName(c.key, sl)).join(", ")
+									: "";
+								// One pick sits on the label's line. A slate of four does
+								// not: it goes underneath as pills that wrap, so the label
+								// and its n/4 never get squeezed out of the row.
+								if (picksPerCategory > 1) {
+									return (
+										<li key={c.key}>
+											<div className="flex items-center justify-between gap-3">
+												<span className="text-xs text-neutral-500 truncate">
+													{c.name}
+												</span>
+												<span className="text-xs tabular-nums text-neutral-600 flex-shrink-0">
+													{pickedSlugs.length}/{requiredFor(c.key)}
+												</span>
+											</div>
+											{pickedSlugs.length ? (
+												<div className="mt-1.5 flex flex-wrap gap-1.5">
+													{pickedSlugs.map((sl) => (
+														<span
+															key={sl}
+															className="rounded-md border border-[#2f2f2f] bg-[#242424] px-2 py-0.5 text-xs font-medium text-neutral-100"
+														>
+															{nomineeName(c.key, sl)}
+														</span>
+													))}
+												</div>
+											) : (
+												<p className="mt-1 text-sm font-medium text-neutral-600">
+													Not picked
+												</p>
+											)}
+										</li>
+									);
+								}
 								return (
 									<li
 										key={c.key}
@@ -887,7 +1913,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 										<div className="min-w-0 flex-shrink-0 text-right overflow-hidden">
 											<AnimatePresence mode="popLayout" initial={false}>
 												<motion.span
-													key={picked ?? "empty"}
+													key={picked || "empty"}
 													initial={{ opacity: 0, y: 6 }}
 													animate={{ opacity: 1, y: 0 }}
 													exit={{ opacity: 0, y: -6 }}
@@ -896,7 +1922,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 														picked ? "text-neutral-100" : "text-neutral-600"
 													}`}
 												>
-													{picked ?? "—"}
+													{picked || "Not picked"}
 												</motion.span>
 											</AnimatePresence>
 										</div>
@@ -904,18 +1930,31 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								);
 							})}
 						</ul>
-						{voting.open && !readOnly && <PrimaryButton full />}
-						{closesLabel && voting.open && (
-							<p className="mt-3 text-[11px] text-neutral-600 text-center leading-relaxed">
-								One signature. Change it anytime before {closesLabel}.
+						{phase === "submitted" && txHash ? (
+							<SubmittedNotice />
+						) : (
+							ballotOpen && <PrimaryButton full />
+						)}
+						{closesShort && voting.open && (
+							<p className="mt-3 text-xs text-neutral-400 text-center leading-relaxed">
+								One signature, and it's final. Voting closes{" "}
+								<span className="text-neutral-200">{closesShort}</span>.
 							</p>
 						)}
 					</div>
 				</aside>
 			</div>
 
+			{/* ── Last year, as history ── */}
+			{/* The clearance rides the LAST block on the page: when the mobile
+			    ballot deck is shown it's `fixed` (~230px tall) and would cover
+			    whatever ends the page, which is now the 2025 source link rather
+			    than the Interoperability nominees. Normal padding when the deck is
+			    absent (not a Pilot / already voted) so there's no dead space. */}
+			<PastWinners className={ballotOpen ? "pb-[17rem]" : "pb-32"} />
+
 			{/* ── Mobile ballot deck (whole-card swipe, stacked like a deck) ── */}
-			{voting.open && !readOnly && (
+			{ballotOpen && (
 				<motion.div
 					initial={{ y: 24, opacity: 0 }}
 					animate={{ y: 0, opacity: 1 }}
@@ -929,7 +1968,7 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								Your ballot
 							</span>
 							<span className="text-xs tabular-nums text-neutral-500">
-								{selectedCount}/{categories.length}
+								{selectedCount}/{requiredCount}
 							</span>
 						</div>
 
@@ -939,12 +1978,18 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 								const depth =
 									(idx - ballotPage + categories.length) % categories.length;
 								const isTop = depth === 0;
-								const pickedSlug = selections[category.key];
-								const pickedNominee = pickedSlug
-									? ((nomineesByCategory.get(category.key) ?? []).find(
-											(n) => n.slug === pickedSlug,
-										) ?? null)
-									: null;
+								const pool = nomineesByCategory.get(category.key) ?? [];
+								const pickedNominees = (selections[category.key] ?? []).flatMap(
+									(sl) => {
+										const n = pool.find((x) => x.slug === sl);
+										return n ? [n] : [];
+									},
+								);
+								const need = requiredFor(category.key);
+								// a card is done when its SLATE is full, on a one-pick round
+								// that is the one pick; on nominations it is all N
+								const full = need > 0 && pickedNominees.length >= need;
+								const pickedNominee = pickedNominees[0] ?? null;
 								return (
 									<motion.div
 										key={category.key}
@@ -983,14 +2028,19 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 											<span className="text-xs font-medium text-neutral-400">
 												{category.name}
 											</span>
-											{pickedNominee && (
+											{picksPerCategory > 1 && (
+												<span className="ml-auto text-xs tabular-nums text-neutral-500">
+													{pickedNominees.length}/{need}
+												</span>
+											)}
+											{full && (
 												<Check
-													className="ml-auto h-3.5 w-3.5 text-neutral-300"
+													className={`${picksPerCategory > 1 ? "" : "ml-auto "}h-3.5 w-3.5 text-neutral-300`}
 													strokeWidth={3}
 												/>
 											)}
 										</div>
-										{pickedNominee ? (
+										{pickedNominee && picksPerCategory === 1 ? (
 											<div className="flex items-center gap-2.5">
 												<Image
 													src={pickedNominee.logoUrl || "/logo.png"}
@@ -1003,9 +2053,33 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 													{pickedNominee.name}
 												</span>
 											</div>
+										) : pickedNominee ? (
+											// nominations: the whole slate so far, logos overlap,
+											// names truncate, the count above says how many remain
+											<div className="flex min-w-0 items-center gap-2.5">
+												<div className="flex flex-shrink-0 -space-x-1.5">
+													{pickedNominees.map((n) => (
+														<Image
+															key={n.slug}
+															src={n.logoUrl || "/logo.png"}
+															alt=""
+															width={26}
+															height={26}
+															className="h-[26px] w-[26px] rounded-md border border-[#2f2f2f] bg-[#111] object-cover"
+														/>
+													))}
+												</div>
+												<span className="truncate text-sm font-medium text-neutral-100">
+													{pickedNominees.map((n) => n.name).join(", ")}
+												</span>
+											</div>
 										) : (
 											<span className="text-sm text-neutral-500">
-												Not picked yet — tap a nominee above
+												{address
+													? picksPerCategory > 1
+														? `Not picked yet. Tap ${need} nominees above.`
+														: "Not picked yet. Tap a nominee above."
+													: "Connect a wallet to pick"}
 											</span>
 										)}
 									</motion.div>
@@ -1015,25 +2089,37 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 
 						{/* dots: tappable, reflect pick state per category */}
 						<div className="flex items-center justify-center gap-1.5 mb-3">
-							{categories.map((category, idx) => (
-								<button
-									key={category.key}
-									type="button"
-									aria-label={category.name}
-									onClick={() => setBallotPage(idx)}
-									className="h-1.5 rounded-full transition-all duration-200"
-									style={{
-										width: idx === ballotPage ? 16 : 6,
-										background: selections[category.key]
-											? "#fafafa"
-											: idx === ballotPage
-												? "#6a6a6a"
-												: "rgba(255,255,255,0.2)",
-									}}
-								/>
-							))}
+							{categories.map((category, idx) => {
+								const got = (selections[category.key] ?? []).length;
+								const need = requiredFor(category.key);
+								return (
+									<button
+										key={category.key}
+										type="button"
+										aria-label={category.name}
+										onClick={() => setBallotPage(idx)}
+										className="h-1.5 rounded-full transition-all duration-200"
+										style={{
+											width: idx === ballotPage ? 16 : 6,
+											// white = slate full, grey = started, dim = untouched
+											background:
+												need > 0 && got >= need
+													? "#fafafa"
+													: got > 0
+														? "#9a9a9a"
+														: idx === ballotPage
+															? "#6a6a6a"
+															: "rgba(255,255,255,0.2)",
+										}}
+									/>
+								);
+							})}
 						</div>
-						<PrimaryButton full />
+						{phase === "submitted" && txHash ? (
+							<SubmittedNotice compact />
+						) : (
+							<PrimaryButton full />
+						)}
 					</div>
 				</motion.div>
 			)}
@@ -1047,21 +2133,42 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				onPick={handleConnect}
 			/>
 
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={data.round.picksPerCategory ?? 1}
+			/>
 
 			<NomineeHighlightsModal
 				nominee={highlightNominee}
 				isSelected={
 					highlightNominee
-						? selections[highlightNominee.category] === highlightNominee.slug
+						? (selections[highlightNominee.category] ?? []).includes(
+								highlightNominee.slug,
+							)
 						: false
 				}
 				onClose={() => setHighlightNominee(null)}
+				canPick={!readOnly && voting.open}
+				onConnect={
+					!address && voting.open
+						? () => {
+								setHighlightNominee(null);
+								setWalletOpen(true);
+							}
+						: null
+				}
 				onVote={(slug) => {
 					if (highlightNominee && !readOnly && voting.open) {
 						const cat = highlightNominee.category;
 						setError(null);
-						setSelections((prev) => ({ ...prev, [cat]: slug }));
+						setSelections((prev) => {
+							const picked = prev[cat] ?? [];
+							if (picked.includes(slug)) return prev;
+							if (picksPerCategory === 1) return { ...prev, [cat]: [slug] };
+							if (picked.length >= picksPerCategory) return prev;
+							return { ...prev, [cat]: [...picked, slug] };
+						});
 					}
 					setHighlightNominee(null);
 				}}
@@ -1070,14 +2177,14 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			<AwardsToast
 				message={error}
 				onDismiss={() => setError(null)}
-				raised={voting.open && !readOnly}
+				raised={ballotOpen}
 			/>
 		</>
 	);
 }
 
 // ── Error toast (Family.co-style) ──────────────────────────────────────────
-// One surface for every ballot message — connect, funding, sign, submit all
+// One surface for every ballot message, connect, sign, submit all
 // route here. A dark pill that springs up, auto-dismisses (~6.5s), and clears
 // on tap; on mobile it floats ABOVE the fixed ballot deck so it never covers
 // the picks. Replaces the inline red-text that used to sit in three places.
@@ -1088,7 +2195,7 @@ function AwardsToast({
 }: {
 	message: string | null;
 	onDismiss: () => void;
-	/** true while the mobile ballot deck is on screen — lift clear of it. */
+	/** true while the mobile ballot deck is on screen, lift clear of it. */
 	raised: boolean;
 }) {
 	useEffect(() => {
@@ -1129,7 +2236,137 @@ function AwardsToast({
 	);
 }
 
-// ── Wallet picker (RainbowKit pattern: modal on desktop, drawer on mobile) ──
+/**
+ * Stroopy, drawn in vector so he can move. An interpretation in the Stellar
+ * mascot's spirit, visor face, pixel eyes, antenna, not the official art.
+ * Sized by the caller; the badge is the connected wallet's own mark.
+ */
+export function Stroopy({ size, badge }: { size: number; badge?: string }) {
+	// He lives inside the menu's AnimatePresence: while it is leaving this goes
+	// false, and the shutters swing back closed over him.
+	const present = useIsPresent();
+	return (
+		<span
+			className={`sm-stroopy${present ? "" : " is-shut"}`}
+			style={{ width: size, height: size }}
+			aria-hidden="true"
+		>
+			{[0, 1, 2, 3].map((n) => (
+				<span
+					key={n}
+					className="sm-spark"
+					style={{
+						["--sr-rot" as string]: `${n * 78 - 40}deg`,
+						["--sr-d" as string]: `${n * 70}ms`,
+					}}
+				/>
+			))}
+			<span className="sm-sr-window">
+				<svg className="sm-sr-rise" viewBox="0 0 64 64" role="presentation">
+					<g className="sm-sr-bob">
+						{/* shoulders first, so the head sits over them */}
+						<path
+							d="M13 64v-13a19 13 0 0 1 38 0v13z"
+							fill="#F5C518"
+							stroke="#2A2140"
+							strokeWidth="2"
+						/>
+						<g className="sm-sr-ant">
+							<path
+								d="M32 15V9"
+								stroke="#2A2140"
+								strokeWidth="2.6"
+								strokeLinecap="round"
+							/>
+							<circle
+								cx="32"
+								cy="5.8"
+								r="4"
+								fill="#F5C518"
+								stroke="#2A2140"
+								strokeWidth="1.8"
+							/>
+						</g>
+						{/* head, with a lighter cap over the crown */}
+						<rect
+							x="10"
+							y="13"
+							width="44"
+							height="39"
+							rx="19"
+							fill="#C6B6F0"
+							stroke="#2A2140"
+							strokeWidth="2"
+						/>
+						<path
+							d="M13.5 26a18.5 12 0 0 1 37 0z"
+							fill="#E6DEFA"
+							stroke="#2A2140"
+							strokeWidth="1.6"
+						/>
+						{/* the visor, wider than the head the way the real one is */}
+						<rect x="7" y="25" width="50" height="22" rx="11" fill="#15111F" />
+						<rect
+							className="sm-sr-eye"
+							x="19"
+							y="29.5"
+							width="7.6"
+							height="8.8"
+							rx="3.5"
+							fill="#F5C518"
+						/>
+						<rect
+							className="sm-sr-eye"
+							x="37.4"
+							y="29.5"
+							width="7.6"
+							height="8.8"
+							rx="3.5"
+							fill="#F5C518"
+						/>
+						{/* a glint in each eye, and pixel blush on the cheeks */}
+						<circle cx="21.5" cy="32.1" r="1.4" fill="#FFF6D6" />
+						<circle cx="39.9" cy="32.1" r="1.4" fill="#FFF6D6" />
+						<rect
+							x="14.4"
+							y="39.4"
+							width="5.6"
+							height="3.4"
+							rx="1.7"
+							fill="#FF8FB4"
+							opacity="0.85"
+						/>
+						<rect
+							x="44"
+							y="39.4"
+							width="5.6"
+							height="3.4"
+							rx="1.7"
+							fill="#FF8FB4"
+							opacity="0.85"
+						/>
+						{/* pixel smile */}
+						<rect x="27" y="40.6" width="3.3" height="3.3" fill="#F5C518" />
+						<rect x="30.35" y="42.4" width="3.3" height="3.3" fill="#F5C518" />
+						<rect x="33.7" y="40.6" width="3.3" height="3.3" fill="#F5C518" />
+					</g>
+				</svg>
+				<span className="sm-sr-gloss" />
+				<span className="sm-sr-shutter sm-sr-shutter-l" />
+				<span className="sm-sr-shutter sm-sr-shutter-r" />
+			</span>
+			{badge && (
+				<Image
+					src={badge}
+					alt=""
+					width={Math.round(size * 0.42)}
+					height={Math.round(size * 0.42)}
+					className="sm-stroopy-badge"
+				/>
+			)}
+		</span>
+	);
+}
 
 function WalletList({
 	connecting,
@@ -1210,11 +2447,11 @@ function WalletPicker({
 							Connect a wallet
 						</DrawerTitle>
 						<DrawerDescription className="text-balance">
-							You'll sign a Stellar <strong>testnet</strong> transaction — no
+							You'll sign a Stellar <strong>testnet</strong> transaction. No
 							real funds are involved.
 						</DrawerDescription>
 					</DrawerHeader>
-					{/* mt-5 lets the description breathe above the list — without it
+					{/* mt-5 lets the description breathe above the list, without it
 					    the drawer's flex-col butts the copy against the first wallet
 					    button (the "clamped" look). No eyebrow label; the buttons
 					    speak for themselves. */}
@@ -1258,7 +2495,7 @@ function WalletPicker({
 									Connect a wallet
 								</h2>
 								<p className="mt-1.5 text-sm leading-relaxed text-neutral-400">
-									You'll sign a Stellar testnet transaction — no real funds.
+									You'll sign a Stellar testnet transaction. No real funds.
 								</p>
 							</div>
 							<button
@@ -1282,12 +2519,16 @@ function WalletPicker({
 function NomineeCard({
 	nominee,
 	selected,
+	needsConnect,
 	disabled,
 	onToggle,
 	onHighlights,
 }: {
 	nominee: Nominee;
 	selected: boolean;
+	// A card is inert for several reasons, but only one of them has something
+	// the visitor can do about it, so only that one gets its own hint.
+	needsConnect: boolean;
 	disabled: boolean;
 	onToggle: () => void;
 	onHighlights: () => void;
@@ -1381,7 +2622,11 @@ function NomineeCard({
 						selected ? "text-neutral-100" : "text-neutral-500"
 					}`}
 				>
-					{selected ? "Selected" : "Tap to select"}
+					{selected
+						? "Selected"
+						: needsConnect
+							? "Connect to pick"
+							: "Tap to select"}
 				</span>
 				<button
 					type="button"
@@ -1399,10 +2644,191 @@ function NomineeCard({
 	);
 }
 
+// ── Last year's winners ────────────────────────────────────────────────────
+
+/**
+ * The 2025 result, from stellar.org's own recap of the round (linked from the
+ * section). Facts as published and nothing else: no descriptions, numbers or
+ * quotes of our own, because this is a record rather than a write-up.
+ */
+const WINNERS_2025 = [
+	{
+		category: "Impact",
+		name: "Decaf",
+		slug: "decaf",
+		logo: "/awards/winners-2025/decaf.jpg",
+		line: "Stablecoins you can actually use.",
+		blurb:
+			"Non-custodial app to send, receive, invest and spend stablecoins; cash-out in 180+ countries via MoneyGram.",
+		finalists: "Beans App, Blend, Meru",
+	},
+	{
+		category: "Innovation",
+		name: "Etherfuse",
+		slug: "etherfuse",
+		logo: "/awards/winners-2025/etherfuse.jpg",
+		line: "RWAs as usable rails.",
+		blurb:
+			"Brings Stablebonds (tokenized government treasuries) natively to Stellar, plus MXNe, a peso-denominated stable value backed by CETES.",
+		finalists: "Almanax, Soroswap Finance, Dogstar",
+	},
+	{
+		category: "Interoperability",
+		name: "DeFindex",
+		slug: "defindex",
+		logo: "/awards/winners-2025/defindex.png",
+		line: "One integration, many protocols.",
+		blurb:
+			"Wallets integrate one API and launch vaults that turn complex DeFi strategies into simple savings accounts.",
+		finalists: "Hana Wallet, Reflector, Stellarcarbon",
+	},
+] as const;
+
+/**
+ * Last year, at the bottom of the page as context for this year's vote.
+ *
+ * Each winner is a small stage. The card sits behind a closed curtain until
+ * it scrolls into view, then the curtain parts on the winner's name and a
+ * burst of confetti goes up behind it, the same two mechanisms the page
+ * already uses for the opening reveal and the vote receipt, at card size, so
+ * "and the winner is" reads the way it does on the night rather than as a
+ * grey footnote. It plays once per card, on the reader's scroll, never on
+ * page load out of view.
+ *
+ * Several of these names are nominated again this year; that is left to
+ * speak for itself.
+ */
+function WinnerCard({
+	winner,
+	index,
+}: {
+	winner: (typeof WINNERS_2025)[number];
+	index: number;
+}) {
+	const [open, setOpen] = useState(false);
+	const panels = [0, 1, 2, 3, 4, 5];
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: 16 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, amount: 0.45 }}
+			onViewportEnter={() => setOpen(true)}
+			transition={{ duration: 0.5, ease: EASE, delay: index * 0.1 }}
+			className={`sm-win relative overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 sm:p-6 ${
+				open ? "is-open" : ""
+			}`}
+			style={{ ["--sm-d" as string]: `${index * 0.16}s` }}
+		>
+			<div className="flex items-center justify-between gap-3">
+				<span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">
+					{winner.category}
+				</span>
+				<Image
+					src={winner.logo}
+					alt=""
+					width={40}
+					height={40}
+					className="h-10 w-10 flex-shrink-0 rounded-lg border border-[#2f2f2f] bg-[#111] object-cover"
+				/>
+			</div>
+			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+				{/* a new tab, so a pilot mid-ballot keeps their picks */}
+				<a
+					href={`/project/${winner.slug}`}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="rounded-sm underline-offset-4 hover:underline focus-visible:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
+				>
+					{winner.name}
+				</a>
+				{/* the burst goes up behind the name, as the curtain clears it */}
+				{open && (
+					<span className="sm-confetti" aria-hidden="true">
+						{Array.from({ length: 14 }, (_, i) => (
+							<i
+								// biome-ignore lint/suspicious/noArrayIndexKey: static burst
+								key={i}
+								style={{
+									["--sm-i" as string]: i,
+									["--sm-x" as string]: `${(i % 2 ? 1 : -1) * (12 + ((i * 37) % 90))}px`,
+									["--sm-y" as string]: `${-(50 + ((i * 53) % 90))}px`,
+									["--sm-r" as string]: `${140 + ((i * 97) % 320)}deg`,
+									["--sm-c" as string]: i % 2 === 0 ? "#ffffff" : "#8a8a8a",
+								}}
+							/>
+						))}
+					</span>
+				)}
+			</p>
+			<p className="mt-1 text-sm font-medium text-neutral-200">{winner.line}</p>
+			<p className="mt-3 text-sm leading-relaxed text-neutral-300">
+				{winner.blurb}
+			</p>
+			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
+				Nominees: {winner.finalists}
+			</p>
+			{/* the curtain, closed until the card is in view */}
+			<span className="sm-win-curtain" aria-hidden="true">
+				<span className="sm-win-half l">
+					{panels.map((n) => (
+						<i key={n} />
+					))}
+				</span>
+				<span className="sm-win-half r">
+					{panels.map((n) => (
+						<i key={n} />
+					))}
+				</span>
+			</span>
+		</motion.div>
+	);
+}
+
+function PastWinners({ className = "" }: { className?: string }) {
+	return (
+		<section
+			aria-label="2025 winners"
+			className={`max-w-6xl mx-auto px-4 sm:px-6 ${className}`}
+		>
+			<div className="border-t border-[#2f2f2f] pt-12">
+				<div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+					<h2 className="text-2xl font-semibold tracking-tight text-neutral-50">
+						2025 winners
+					</h2>
+					<a
+						href="https://stellar.org/blog/ecosystem/stellar-i-awards-2025"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center gap-1 text-sm font-medium text-neutral-300 transition-colors hover:text-neutral-50"
+					>
+						The 2025 recap on stellar.org
+						<ArrowUpRight className="h-4 w-4" />
+					</a>
+				</div>
+				<p className="mb-7 max-w-2xl text-sm leading-relaxed text-neutral-300">
+					The 2025 round ran at Stellar Meridian: 70+ applications, 98 SCF
+					voters shortlisting 12 finalists, and 9 judges.
+				</p>
+				<div className="grid gap-4 sm:grid-cols-3">
+					{WINNERS_2025.map((winner, i) => (
+						<WinnerCard key={winner.category} winner={winner} index={i} />
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
 // ── Closed round: results reveal ───────────────────────────────────────────
+
+/** How many per category go through from the nominations round. */
+const SHORTLIST_SIZE = 4;
 
 function ClosedRound({ data }: { data: AwardsRoundData }) {
 	const { round } = data;
+	// A nominations round has no winner: the top four per category are the
+	// shortlist, and a tie at the cut is shown, not silently broken by name.
+	const shortlist = Math.max(1, Math.floor(round.picksPerCategory ?? 1)) > 1;
 	const [howOpen, setHowOpen] = useState(false);
 	const [results, setResults] = useState<ResultsData | null>(null);
 	const [failed, setFailed] = useState(false);
@@ -1433,7 +2859,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					className="text-center mb-14"
 				>
 					<p className="text-sm font-medium text-neutral-400 mb-3">
-						Voting closed
+						{shortlist ? "Nominations closed" : "Voting closed"}
 					</p>
 					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
 						{round.title}
@@ -1441,7 +2867,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					{results && (
 						<p className="mt-4 text-sm text-neutral-500">
 							{results.turnout.voted} of {results.turnout.whitelisted} Pilots
-							voted
+							{shortlist ? " nominated" : " voted"}
 						</p>
 					)}
 				</motion.header>
@@ -1454,16 +2880,48 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 				)}
 				{failed && (
 					<p className="text-center text-neutral-500">
-						The tally isn't available right now — try again shortly.
+						The tally isn't available right now. Try again shortly.
 					</p>
 				)}
 
 				{results && (
 					<div className="space-y-10">
 						{results.categories.map((category) => {
-							const [winner, ...rest] = category.results;
+							// final round: one winner card, then the rest
+							// nominations: every nominee in one list, top four badged
+							const winner = shortlist ? null : (category.results[0] ?? null);
+							const rest = shortlist
+								? category.results
+								: category.results.slice(1);
+							const ballots = Math.max(1, results.turnout.voted);
 							const total = Math.max(1, category.totalVotes);
-							const pct = (v: number) => Math.round((v / total) * 100);
+							// approval counts are "how many ballots named it", so the
+							// share is of ballots, not of the category's vote total
+							const pct = (v: number) =>
+								shortlist
+									? Math.min(100, Math.round((v / ballots) * 100))
+									: Math.round((v / total) * 100);
+							const label = (v: number) =>
+								shortlist
+									? `${v} of ${results.turnout.voted}`
+									: `${v} · ${pct(v)}%`;
+							const cut = shortlist
+								? (category.results[SHORTLIST_SIZE - 1]?.votes ?? 0)
+								: 0;
+							const badgeFor = (votes: number, rank: number) =>
+								!shortlist
+									? null
+									: rank < SHORTLIST_SIZE
+										? "Shortlist"
+										: votes > 0 && votes === cut
+											? "Tied at the cut"
+											: null;
+							const tied = shortlist
+								? category.results.filter(
+										(r, i) =>
+											i >= SHORTLIST_SIZE && r.votes > 0 && r.votes === cut,
+									).length
+								: 0;
 							return (
 								<section key={category.key}>
 									<h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-50 mb-4 flex items-center gap-2.5">
@@ -1488,7 +2946,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 													</p>
 												</div>
 												<span className="text-sm font-semibold tabular-nums text-neutral-300 flex-shrink-0">
-													{winner.votes} · {pct(winner.votes)}%
+													{label(winner.votes)}
 												</span>
 											</div>
 											<div className="sm-bar-track">
@@ -1515,14 +2973,31 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 													ease: EASE,
 													delay: (i + 1) * 0.05,
 												}}
-												className="rounded-xl border border-[#2f2f2f] bg-[#1e1e1e] px-4 py-3"
+												className={`rounded-xl border px-4 py-3 ${
+													badgeFor(r.votes, i) === "Shortlist"
+														? "border-neutral-500/40 bg-[#242424]"
+														: "border-[#2f2f2f] bg-[#1e1e1e]"
+												}`}
 											>
 												<div className="flex items-center justify-between gap-3 mb-2">
-													<span className="text-sm font-medium text-neutral-100 truncate">
-														{r.name}
+													<span className="flex items-center gap-2 min-w-0">
+														{badgeFor(r.votes, i) && (
+															<span
+																className={`inline-flex flex-shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+																	badgeFor(r.votes, i) === "Shortlist"
+																		? "bg-neutral-100 text-black"
+																		: "border border-neutral-500 text-neutral-300"
+																}`}
+															>
+																{badgeFor(r.votes, i)}
+															</span>
+														)}
+														<span className="text-sm font-medium text-neutral-100 truncate">
+															{r.name}
+														</span>
 													</span>
 													<span className="text-[11px] font-medium tabular-nums text-neutral-500 flex-shrink-0">
-														{r.votes} · {pct(r.votes)}%
+														{label(r.votes)}
 													</span>
 												</div>
 												<div className="sm-bar-track" style={{ height: 6 }}>
@@ -1532,23 +3007,40 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 														whileInView={{ width: `${pct(r.votes)}%` }}
 														viewport={{ once: true }}
 														transition={{ duration: 0.6, ease: EASE }}
-														style={{ background: "rgba(255,255,255,0.28)" }}
+														style={{
+															background:
+																badgeFor(r.votes, i) === "Shortlist"
+																	? "#fafafa"
+																	: "rgba(255,255,255,0.28)",
+														}}
 													/>
 												</div>
 											</motion.li>
 										))}
 									</ul>
+									{tied > 0 && (
+										<p className="mt-3 text-xs text-neutral-500">
+											{tied} more {tied === 1 ? "project ties" : "projects tie"}{" "}
+											with the last shortlist spot. The tie is shown, not broken
+											here.
+										</p>
+									)}
 								</section>
 							);
 						})}
 						<p className="text-center text-xs text-neutral-600 pt-4 leading-relaxed">
-							Tallied directly from Stellar testnet — every vote is a public,
-							verifiable transaction.
+							Tallied from ballots a relay wrote to Stellar testnet under random
+							ids, so no ballot links back to a Pilot. The record behind this
+							tally is digested and anchored on Tansu.
 						</p>
 					</div>
 				)}
 			</div>
-			<HowItWorks open={howOpen} onClose={() => setHowOpen(false)} />
+			<HowItWorks
+				open={howOpen}
+				onClose={() => setHowOpen(false)}
+				picks={data.round.picksPerCategory ?? 1}
+			/>
 		</>
 	);
 }

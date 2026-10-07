@@ -20,6 +20,38 @@ export interface EntityStats {
 	/** Projects currently marked Live. */
 	liveCount: number;
 	topCategory: string | null;
+	/** Names of the linked projects, most prominent first (for summaries). */
+	projectNames: string[];
+	/** Slugs of the linked projects (to join the repos index). */
+	projectSlugs: string[];
+	/** Most recent commit across the org's indexed repos, ISO; filled by the caller. */
+	lastCommitAt: string | null;
+	/** Commits in the last 90 days across the org's indexed repos; filled by the caller. */
+	commits90d: number;
+}
+
+/**
+ * A one-line summary rolled up from what the org has shipped, for the 45 of
+ * 46 entities that never wrote a description. Says where it came from, so a
+ * reader never mistakes it for the org's own words.
+ */
+export function entitySummary(name: string, s: EntityStats): string | null {
+	if (s.projectCount === 0) return null;
+	const list =
+		s.projectNames.slice(0, 3).join(", ") +
+		(s.projectNames.length > 3 ? ` and ${s.projectNames.length - 3} more` : "");
+	const focus = s.categories.slice(0, 2).join(" and ");
+	const scf =
+		s.totalScfUSD > 0
+			? `, ${s.fundedCount} funded by SCF (${formatScf(s.totalScfUSD)}${s.scfRoundCount ? ` across ${s.scfRoundCount} round${s.scfRoundCount === 1 ? "" : "s"}` : ""})`
+			: "";
+	return `${name} builds ${s.projectCount} project${s.projectCount === 1 ? "" : "s"} on Stellar${focus ? ` in ${focus}` : ""}: ${list}${scf}. Summary from its projects; the team has not written its own yet.`;
+}
+
+function formatScf(n: number) {
+	if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+	if (n >= 1_000) return `$${Math.round(n / 1_000)}k`;
+	return `$${Math.round(n)}`;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: populated Payload project docs
@@ -55,7 +87,16 @@ export function aggregateEntity(entity: any): EntityStats {
 		.sort((a, b) => b[1] - a[1])
 		.map(([c]) => c);
 
+	const byProminence = [...projects].sort(
+		(a, b) =>
+			Number(b.prominence ?? 0) - Number(a.prominence ?? 0) ||
+			String(a.name).localeCompare(String(b.name)),
+	);
 	return {
+		projectNames: byProminence.map((p) => String(p.name)).filter(Boolean),
+		projectSlugs: projects.map((p) => String(p.slug)).filter(Boolean),
+		lastCommitAt: null,
+		commits90d: 0,
 		projectCount: projects.length,
 		fundedCount,
 		totalScfUSD,

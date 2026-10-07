@@ -11,14 +11,22 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
+import { eventProfile } from "@/lib/hackathon-analytics";
 import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "@/lib/hackathon-builds";
+import {
+	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import type { HackathonEvent } from "@/payload-types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -204,10 +212,18 @@ export async function GET(
 	req: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
+	const startedAt = Date.now();
 	const { slug } = await params;
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json({ error: "payload unavailable" }, { status: 503 });
+		return apiError({
+			status: 503,
+			error: "hackathon store unavailable",
+			advisory:
+				"The hackathon store did not answer. This is an outage, not a statement that the hackathon is unknown. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	try {
@@ -263,10 +279,44 @@ export async function GET(
 				(s, w) => s + (w.hackathonPrize ?? 0),
 				0,
 			);
-			// Pull the live submission roster from DoraHacks (read-through; degrades
-			// to [] if the feed is unavailable). Populates submissions/winners/tracks
-			// for events that aren't curated in our DB.
-			const liveSubmissions = await fetchHackathonSubmissions(dora.uname);
+			// The stored copy first: the same submissions search and analyze read,
+			// refreshed daily, and the event's own stored page. A live DoraHacks
+			// read only when the store holds none of this event's submissions
+			// (degrades to [] if the feed is unavailable).
+			const [index, storedEvent] = await Promise.all([
+				getHackathonBuildsIndex().catch(() => [] as IndexedBuild[]),
+				payload
+					.find({
+						collection: "hackathon-events",
+						where: { slug: { equals: slug } },
+						limit: 1,
+						depth: 0,
+					})
+					.then((r) => r.docs[0] as HackathonEvent | undefined)
+					.catch(() => undefined),
+			]);
+			const stored = index.filter((b) => b.hackathon.slug === slug);
+			const fromStore = stored.length > 0;
+			// Served in the submission shape this endpoint has always served:
+			// the stored row's other facts live on search, detail and analyze.
+			const liveSubmissions: DoraHacksSubmission[] = fromStore
+				? stored.map((b) => ({
+						id: b.id,
+						name: b.name,
+						description: b.description,
+						githubUrl: b.githubUrl,
+						demoUrl: b.demoUrl,
+						videoUrl: b.videoUrl,
+						track: b.track,
+						hackathonPlacement: b.hackathonPlacement,
+						award: b.award,
+						isWinner: b.isWinner,
+						voteCount: b.voteCount,
+						url: b.url,
+						source: "dorahacks" as const,
+					}))
+				: await fetchHackathonSubmissions(dora);
+			const page = storedEvent?.description ?? dora.description ?? null;
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 			const winners = liveWinners.length
 				? rankAndSort(liveWinners)
@@ -292,25 +342,27 @@ export async function GET(
 			return NextResponse.json(
 				{
 					meta: {
-						source: getHackathonUrl(dora.uname),
+						source: getHackathonUrl(dora),
 						generatedAt: new Date().toISOString(),
-						note: liveSubmissions.length
-							? "DoraHacks-sourced — submissions, winners, and tracks below are pulled live from DoraHacks."
-							: curatedWinners.length
-								? "DoraHacks-sourced — live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
-								: "DoraHacks-sourced — live submission feed unavailable; visit externalUrl for full detail.",
+						note: fromStore
+							? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
+							: liveSubmissions.length
+								? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
+								: curatedWinners.length
+									? "DoraHacks-sourced: live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
+									: "DoraHacks-sourced: live submission feed unavailable; visit externalUrl for full detail.",
 					},
 					hackathon: {
 						id: `dorahacks-${dora.id}`,
 						name: dora.title,
 						slug: dora.uname,
-						description: dora.description ?? null,
+						description: page,
 						startDate: new Date(dora.start_time * 1000)
 							.toISOString()
 							.slice(0, 10),
 						endDate: new Date(dora.end_time * 1000).toISOString().slice(0, 10),
 						status,
-						externalUrl: getHackathonUrl(dora.uname),
+						externalUrl: getHackathonUrl(dora),
 						organizer: dora.organization
 							? {
 									id: `dorahacks-org-${dora.organization.id}`,
@@ -323,14 +375,53 @@ export async function GET(
 						prizePoolUSD: dora.bonus_price || null,
 						// sls-016: structured per-place split parsed from the description
 						// prose (rank → amountUSD → asset); [] when not itemized.
-						prizeTiers: parsePrizeTiers(dora.description),
+						prizeTiers: parsePrizeTiers(page),
+						// What the organizer published about submitting and judging.
+						// Absent = the event page was not read; a null section = the
+						// page has none (most Stellar event pages have no judging
+						// section: 14 of 20 on 2026-10-05).
+						...(storedEvent?.detailReadAt
+							? {
+									rules: {
+										repoRequired: !!storedEvent.repoRequired,
+										videoRequired: !!storedEvent.videoRequired,
+										submissionQuestions: storedEvent.submissionQuestions ?? [],
+										requirements: storedEvent.requirementsSection ?? null,
+										judgingCriteria: storedEvent.judgingSection ?? null,
+										readAt: storedEvent.detailReadAt,
+									},
+								}
+							: {}),
+						// The engine's profile of the stored submissions: categories,
+						// libraries, activity after the event, and what they became.
+						...(fromStore ? { profile: eventProfile(stored) } : {}),
 						hackersCount: dora.hackers_count || null,
-						source: "dorahacks",
+						source: dora.source === "curated" ? "curated" : "dorahacks",
 						stats: {
-							totalSubmissions: liveSubmissions.length,
+							// An empty submission roster is not a count of zero. The
+							// code-curated events ride this branch too (the São Paulo
+							// Builder Summit is an in-person sprint with no roster
+							// anywhere), and counting its zero rows published
+							// `totalSubmissions: 0` beside twelve winners.
+							totalSubmissions: liveSubmissions.length || null,
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
 							winners: winners.length,
-							outcomes: { built: 0, inProgress: 0, abandoned: 0, unknown: 0 },
+							// Every bucket was hardcoded 0, including `unknown` — so a
+							// hackathon with 300 submissions reported none built,
+							// none abandoned and none unknown, which reads as "we
+							// checked and nothing survived" rather than "we never
+							// classified these". Zero is a measurement; absence of
+							// one is not. Nothing classifies these yet, so all 300
+							// are unknown, and the buckets sum to the submissions
+							// they describe.
+							outcomes: liveSubmissions.length
+								? {
+										built: 0,
+										inProgress: 0,
+										abandoned: 0,
+										unknown: liveSubmissions.length,
+									}
+								: null,
 						},
 						tracks: liveTracks,
 					},
@@ -475,10 +566,17 @@ export async function GET(
 					externalUrl: hackathon.externalUrl ?? null,
 					organizer: org,
 					stats: {
-						totalSubmissions: submissions.length,
+						// Zero is a measurement; absence of one is not. A curated
+						// in-person event (the São Paulo Builder Summit) has no
+						// submission list anywhere, so counting its zero rows served
+						// `totalSubmissions: 0` beside twelve winners — a hackathon
+						// nobody entered and twelve people won. With no submission
+						// records we hold no submission count, and the outcome funnel
+						// over an unknown denominator means nothing either.
+						totalSubmissions: submissions.length || null,
 						totalPrizeUSD,
 						winners: winners.length,
-						outcomes,
+						outcomes: submissions.length ? outcomes : null,
 					},
 					tracks,
 				},

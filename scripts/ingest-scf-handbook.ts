@@ -9,11 +9,8 @@
  *   npx tsx scripts/ingest-scf-handbook.ts             # dry run
  *   npx tsx scripts/ingest-scf-handbook.ts --execute   # write to Payload
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,
@@ -26,6 +23,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 
 const BASE = "https://stellar.gitbook.io/scf-handbook";
 const SITEMAP = `${BASE}/sitemap.xml`;
@@ -58,7 +58,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: ${BASE}\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "scf-handbook")
 		: new Map();
@@ -125,7 +126,7 @@ async function run() {
 	console.log(`  to embed: ${stats.toEmbed}`);
 	console.log(`  page errors: ${pageErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run complete. Pass --execute to embed + write.");
 		return;
 	}
@@ -135,6 +136,7 @@ async function run() {
 		source: "scf-handbook",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

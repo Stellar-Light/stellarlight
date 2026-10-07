@@ -22,37 +22,59 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
 	applyWaves,
+	countByKind,
 	type Finding,
 	findingId,
+	isKindMapped,
 	isSyntheticQuery,
+	kindOf,
 	type Severity,
+	SURFACES,
 	type Surface,
 	summarizeLedger,
 	upsertFindings,
 	type WaveManifest,
 } from "../src/lib/improvement-ledger";
+import { isFabricatedProbe } from "./eval/battery-banks";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const WEEKLY = join(ROOT, "improvements/engine/weekly");
 const ENGINE = join(ROOT, "improvements/engine");
+const AUDITS = join(ROOT, "improvements/audits");
 const LEDGER_FILE = join(ROOT, "improvements/ledger/findings.json");
 const SUMMARY_FILE = join(WEEKLY, "improvement-ledger-latest.json");
 // Wave manifests — the deliberate detect→verified transitions (slice 3).
 const WAVES_DIR = join(ROOT, "improvements/waves/ledger");
+const NIGHTLY = join(ROOT, "improvements/engine/nightly");
 
 // biome-ignore lint/suspicious/noExplicitAny: detector artifacts are heterogeneous JSON
 type Row = any;
 
 interface ArraySpec {
 	key: string;
-	surface: Surface;
-	mode: string;
-	severity: Severity;
+	/**
+	 * Surface and severity may be a function of the row: one detector can raise
+	 * findings that belong to different kinds of work. Engine D is the case that
+	 * forced this — "we ranked badly" and "we don't hold this record" both arrive
+	 * in `misses`, but one is a retrieval bug and the other is curation, and
+	 * filing them identically means the backlog can never distinguish a fire
+	 * from a shopping list.
+	 */
+	surface: Surface | ((r: Row) => Surface);
+	mode: string | ((r: Row) => string);
+	severity: Severity | ((r: Row) => Severity);
 	/** keep only rows that are genuine findings (some arrays mix ok+fail) */
 	keep?: (r: Row) => boolean;
 	/** pull a stable, human probe string from a row */
 	probe: (r: Row) => string | undefined;
+	/** When the finding cannot be acted on from this repo — an upstream
+	 *  consumer's stale catalog or its scorer — name the blocker. The board
+	 *  counts these apart from the defect backlog; they are never dropped. */
+	blockedOn?: (r: Row) => string | undefined;
 }
+
+const resolve = <T>(v: T | ((r: Row) => T), r: Row): T =>
+	typeof v === "function" ? (v as (r: Row) => T)(r) : v;
 
 interface SourceSpec {
 	source: string;
@@ -74,7 +96,137 @@ const opField = (r: Row, key: string): string | undefined => {
 };
 
 // Each detector's finding-arrays, tagged with the surface they belong to.
+// Supersession freshness (P5): an archived curated-pool repo with no entry in
+// REPO_SUPERSESSIONS. The weekly check reads the public repos API, so a miss
+// is a curation refresh queued for a human/agent read of the archive banner.
+/** Weak-basis liveness (check-weak-basis-liveness, weekly). A Live row on a
+ *  weak basis whose product URL now contradicts the claim is OUR error — the
+ *  directory asserts something the product itself denies — so it files as a
+ *  real defect, not a maintenance refresh. Rows the probe could not read never
+ *  reach the artifact's contradicted list. */
+const WEAK_BASIS_LIVENESS_SPEC: SourceSpec = {
+	source: "weak-basis-liveness",
+	file: "weak-basis-liveness-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "directory",
+			mode: "status-contradicted",
+			severity: "medium",
+			keep: (r) => str(r?.verdict) === "CONTRADICTED",
+			probe: (r) => str(r?.slug),
+		},
+	],
+};
+
+const SUPERSESSION_FRESHNESS_SPEC: SourceSpec = {
+	source: "supersession-freshness",
+	file: "supersession-freshness-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "missing",
+			surface: "code",
+			mode: "supersession-unrecorded",
+			severity: "low",
+			probe: (r) => str(r?.fullName),
+		},
+	],
+};
+
+/** Proven-broken external URLs (check-links, daily). A dead citation is a
+ *  curation refresh — relink the record or retire it — not a served bug, so it
+ *  files under a maintenance mode and is counted in the refresh queue rather
+ *  than the "ours, still reproducing" backlog. The probe is trinary upstream:
+ *  only PROVEN-broken URLs reach the artifact, so a bot wall never files. */
+const LINK_HEALTH_SPEC: SourceSpec = {
+	source: "link-health",
+	file: "link-health-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "broken",
+			surface: "directory",
+			mode: "broken-link",
+			severity: "medium",
+			probe: (r) => str(r?.url),
+		},
+	],
+};
+
+/** Repo-ranking answer key (check-repo-ranking, daily). A written ordering
+ *  claim that the LIVE index contradicts. This is a served defect, not a
+ *  refresh: an agent asking for the reference implementation is handed the
+ *  wrong repo. Pairs the guard could not read never reach `INVERTED`. */
+const REPO_RANKING_SPEC: SourceSpec = {
+	source: "repo-ranking",
+	file: "repo-ranking-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "retrieval",
+			mode: "ranking-inverted",
+			severity: "high",
+			keep: (r) => str(r?.verdict) === "INVERTED",
+			probe: (r) => {
+				const h = str(r?.higher);
+				const l = str(r?.lower);
+				return h && l ? `${h} > ${l}` : (h ?? l);
+			},
+		},
+	],
+};
+
+/** Endpoint agreement (check-endpoint-agreement, daily). A resolution fact —
+ *  is this alive, what replaced it — served on one agent-reachable path and
+ *  withheld on another. A defect: the answer an agent gets depends on which
+ *  door it came through. */
+const ENDPOINT_AGREEMENT_SPEC: SourceSpec = {
+	source: "endpoint-agreement",
+	file: "endpoint-agreement-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "contract",
+			mode: "endpoint-disagreement",
+			severity: "medium",
+			keep: (r) => str(r?.verdict) === "missing",
+			probe: (r) => str(r?.repo),
+		},
+	],
+};
+
+/** Gone repos (check-gone-repos, daily). A row we SERVE whose repository
+ *  GitHub 404s — three of them ranked first for their own name on 2026-09-14.
+ *  That is ours and served, not a maintenance refresh, so it files as a real
+ *  defect. Only rows the probe got a 404 status for reach `rows` with
+ *  verdict "gone"; unchecked rows carry their own verdict and never file. */
+const GONE_REPOS_SPEC: SourceSpec = {
+	source: "gone-repos",
+	file: "gone-repos-latest.json",
+	dir: join(ROOT, "improvements/audits"),
+	arrays: [
+		{
+			key: "rows",
+			surface: "code",
+			mode: "repo-gone",
+			severity: "high",
+			keep: (r) => str(r?.verdict) === "gone" && str(r?.was) !== "gone",
+			probe: (r) => str(r?.fullName),
+		},
+	],
+};
+
 const SPECS: SourceSpec[] = [
+	GONE_REPOS_SPEC,
+	REPO_RANKING_SPEC,
+	ENDPOINT_AGREEMENT_SPEC,
+	WEAK_BASIS_LIVENESS_SPEC,
+	SUPERSESSION_FRESHNESS_SPEC,
+	LINK_HEALTH_SPEC,
 	{
 		source: "golden-eval",
 		file: "golden-eval-latest.json",
@@ -95,15 +247,34 @@ const SPECS: SourceSpec[] = [
 		arrays: [
 			{
 				key: "misses",
-				surface: "retrieval",
-				mode: "demand-miss",
-				severity: "high",
+				// A demand miss is one of two different jobs and they were being
+				// filed as one. "We ranked badly for a thing we HOLD" is a
+				// retrieval bug — code. "We hold no record of the thing asked
+				// for" is a coverage gap — curation. Engine D emits GAP for the
+				// latter (a semantic page whose advisory states plainly that no
+				// project matches the name, since openapi@1.8.27), so route it to
+				// the directory surface at medium.
+				//
+				// This is not softening the number. It is refusing to let a
+				// shopping list sit at the top of the fire list where no
+				// retrieval fix can ever close it — the only way to "fix"
+				// `octoplace` as a retrieval finding is to invent a project.
+				surface: (r) => (str(r?.class) === "GAP" ? "directory" : "retrieval"),
+				mode: (r) => (str(r?.class) === "GAP" ? "coverage-gap" : "demand-miss"),
+				severity: (r) => (str(r?.class) === "GAP" ? "medium" : "high"),
 				// Drop synthetic/test noise — a `zzzznonexistent…` smoke query or a
 				// fat-finger `test` returning 0 is CORRECT, not a demand gap. Mining
 				// it as a HIGH fire manufactures a finding on our own probe traffic.
 				keep: (r) => {
 					const q = str(r?.query) ?? str(r?.q) ?? str(r?.question);
-					return !!q && !isSyntheticQuery(q);
+					// Also drop our OWN fabricated canaries. isSyntheticQuery cannot
+					// see them: it matches literal-nonsense shapes, and the absent-
+					// banks are built to read as real Stellar projects. The battery
+					// fires them through Raven, whose adapter sends no User-Agent, so
+					// engine-d counts them as genuine Raven demand. Six such rows sat
+					// open on the board — findings whose only possible fix was to
+					// invent a fake project.
+					return !!q && !isSyntheticQuery(q) && !isFabricatedProbe(q);
 				},
 				probe: (r) => str(r?.query) ?? str(r?.q) ?? str(r?.question),
 			},
@@ -253,6 +424,116 @@ const SPECS: SourceSpec[] = [
 	},
 ];
 
+// ── Nightly detectors (lessons/2026-08-12: this layer used to file an issue
+// and vanish — the sdkCapabilities hole had no ledger row because nothing
+// nightly fed the spine). nightly-health.yml writes these via
+// scripts/nightly-findings.ts and commits them; an artifact with an empty
+// failures array is the auto-clear signal, so specs read committed files
+// exactly like the weeklies. All share the artifact shape
+// { generatedAt, detector, failures: [{probe, note?, surface?, known?}] }.
+const NIGHTLY_SPECS: SourceSpec[] = [
+	{
+		source: "nightly-note-freshness",
+		file: "note-freshness-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "code",
+				mode: "note-stale",
+				// Low: the note was true on its asOf date; the registry moved since.
+				// Closes when the note is re-verified (asOf advanced) or removed.
+				severity: "low",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-drift",
+		file: "api-drift-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "contract",
+				mode: "api-drift",
+				// High: drift means the spec/docs LIE about live behaviour.
+				severity: "high",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-field-population",
+		file: "field-population-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				// The detector stamps the surface from the probed path
+				// (repos→code, research→corpus, partners→anchors, else directory);
+				// validate against the closed set so a typo can't mint a surface.
+				surface: (r) =>
+					SURFACES.includes(str(r?.surface) as Surface)
+						? (str(r?.surface) as Surface)
+						: "directory",
+				mode: "population-miss",
+				// knownFailing-marked probes are acknowledged open work (low);
+				// an unmarked pinned probe going empty is a fire (high).
+				severity: (r) => (r?.known ? "low" : "high"),
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-claims",
+		file: "verify-claims-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "contract",
+				mode: "claim-blocker",
+				severity: "high",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-battery",
+		file: "battery-coverage-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "corpus",
+				mode: "battery-coverage-weak",
+				// Low: the external referee's question set is a backlog COMPASS,
+				// not a fire — weak cases rank the ingest/curation queue.
+				severity: "low",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+	{
+		source: "nightly-completeness",
+		file: "record-completeness-latest.json",
+		dir: NIGHTLY,
+		arrays: [
+			{
+				key: "failures",
+				surface: "directory",
+				mode: "completeness-residual",
+				// Medium: residual lists are work-down inventory, not fires —
+				// same reasoning as engine-a's long tail. Outage rows ride along;
+				// the workflow's red issue is the fire path for those.
+				severity: "medium",
+				probe: (r) => str(r?.probe),
+			},
+		],
+	},
+];
+
 // The through-Raven feeder (scripts/raven-loop.ts) — golden questions graded via
 // the REAL gateway. Its misses are consumer-path failures our direct-API evals
 // can't see. Lives in improvements/engine/ (local-run, committed as evidence).
@@ -312,6 +593,24 @@ const RAVEN_ROUTING_SPEC: SourceSpec = {
 			// awaiting re-baseline. Work it down, not on fire.
 			severity: "medium",
 			probe: (r) => str(r?.query),
+			// The detector classifies every miss with evidence (missClass). Two of
+			// the classes are not ours to fix: Raven has not re-read our text
+			// (catalog-lag), or its scorer decides the outcome regardless of our
+			// text (stopword scoring, id-noun exclusion, bare names with no field
+			// to carry them). 2026-09-05: 16 of 17 open routing misses were these,
+			// and the board called all 17 "still reproducing" as if they were ours.
+			blockedOn: (r) => {
+				const c = str(r?.missClass);
+				if (c === "catalog-lag") return "raven-catalog-lag";
+				if (
+					c === "outscored" ||
+					c === "id-noun-exclusion" ||
+					c === "no-scout-op" ||
+					c === "named-entity"
+				)
+					return "raven-scorer";
+				return undefined;
+			},
 		},
 		{
 			key: "demandMisses",
@@ -323,6 +622,37 @@ const RAVEN_ROUTING_SPEC: SourceSpec = {
 			// age/severity; the probe carries the query so waves can target them.
 			severity: "medium",
 			probe: (r) => str(r?.query),
+		},
+	],
+};
+
+// The weekly packet-stamp re-check (scripts/check-packet-stamps.ts), whose
+// artifact lives in improvements/audits/ with the other check-* guards. Only
+// the two decided verdicts become findings: a COULD-NOT-CHECK row is a page we
+// failed to read, and filing it would put our own instrument's blindness on
+// the backlog as if it were a broken stamp.
+const PACKET_STAMPS_SPEC: SourceSpec = {
+	source: "packet-recheck",
+	file: "packet-stamps-latest.json",
+	dir: AUDITS,
+	arrays: [
+		{
+			key: "rows",
+			surface: "directory",
+			// A stamp whose own deciding page no longer supports it — the
+			// orbitcdp/skyhitz class — is a false claim served on a project row.
+			mode: (r) =>
+				str(r?.verdict) === "REVIVED" ? "stamp-revived" : "stamp-contradicted",
+			// A revival is a project we called dead that is answering again: worth
+			// a human re-grade, but nobody is being told something false today.
+			severity: (r) => (str(r?.verdict) === "REVIVED" ? "medium" : "high"),
+			keep: (r) =>
+				str(r?.verdict) === "CONTRADICTED" || str(r?.verdict) === "REVIVED",
+			probe: (r) => {
+				const slug = str(r?.slug);
+				const reason = str(r?.reason);
+				return slug && reason ? `${slug} — ${reason}` : slug;
+			},
 		},
 	],
 };
@@ -344,12 +674,35 @@ function readJson(path: string): Row | null {
 	}
 }
 
+/**
+ * When did the run behind this artifact actually happen?
+ *
+ * NOT when we read the file. The orchestrator can run daily against an
+ * artifact whose detector last ran a week ago — and did: on 2026-07-26 every
+ * open high-severity finding traced to an engine-d artifact 5 days past its
+ * weekly refresh, ranked top of the backlog because ranking rewarded age.
+ * Only the artifact's own stamp can tell those apart, so an unstamped
+ * artifact returns undefined and its findings count as UNCONFIRMED rather
+ * than being credited with a run they can't evidence.
+ */
+function evidenceStamp(data: Row): string | undefined {
+	const raw = data?.generatedAt ?? data?.ranAt ?? data?.meta?.generatedAt;
+	const s = typeof raw === "string" ? raw.trim() : "";
+	return s && !Number.isNaN(Date.parse(s)) ? s : undefined;
+}
+
 function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	const nowIso = new Date().toISOString();
 	const detected: Finding[] = [];
 	const sources: string[] = [];
 
-	for (const spec of [...SPECS, RAVEN_LOOP_SPEC, RAVEN_ROUTING_SPEC]) {
+	for (const spec of [
+		...SPECS,
+		...NIGHTLY_SPECS,
+		RAVEN_LOOP_SPEC,
+		RAVEN_ROUTING_SPEC,
+		PACKET_STAMPS_SPEC,
+	]) {
 		const path = join(spec.dir ?? WEEKLY, spec.file);
 		const data = readJson(path);
 		if (!data) {
@@ -357,6 +710,7 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 			continue;
 		}
 		sources.push(spec.source);
+		const evidenceAt = evidenceStamp(data);
 		let n = 0;
 		for (const a of spec.arrays) {
 			const arr = data[a.key];
@@ -368,18 +722,23 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 				detected.push({
 					id: findingId(spec.source, probe),
 					source: spec.source,
-					surface: a.surface,
+					surface: resolve(a.surface, row),
 					probe,
-					failureMode: a.mode,
-					severity: a.severity,
+					failureMode: resolve(a.mode, row),
+					...(a.blockedOn?.(row) ? { blockedOn: a.blockedOn(row) } : {}),
+					severity: resolve(a.severity, row),
 					firstSeen: nowIso,
 					lastSeen: nowIso,
 					status: "open",
+					evidenceAt,
 				});
 				n++;
 			}
 		}
-		console.log(`  · ${spec.source}: ${n} finding(s)`);
+		const age = evidenceAt
+			? `evidence ${new Date(evidenceAt).toISOString().slice(0, 10)}`
+			: "UNSTAMPED — findings count as unconfirmed";
+		console.log(`  · ${spec.source}: ${n} finding(s) · ${age}`);
 	}
 
 	// raven-drift (consumer surface): only ops MISSING beyond grace are findings;
@@ -443,10 +802,28 @@ function main() {
 	const detectedIds = new Set(detected.map((f) => f.id));
 	const waves = readWaveManifests();
 	const {
-		findings: merged,
+		findings: overlaid,
 		unmatched,
 		suspectVerified,
 	} = applyWaves(upserted, waves, detectedIds, nowIso);
+	// Kind is re-derived from (source, failureMode) on EVERY fold — like
+	// blockedOn, a table change must move rows on the next run, never leave a
+	// stale stamp behind. An unmapped pair defaults to instrument (our gap, not
+	// the product's) and is named here rather than absorbed.
+	const unmappedKinds = new Set(
+		overlaid
+			.filter((f) => !isKindMapped(f.source, f.failureMode))
+			.map((f) => `${f.source}|${f.failureMode}`),
+	);
+	if (unmappedKinds.size) {
+		console.warn(
+			`  ⚠ ${unmappedKinds.size} (source, failureMode) pair(s) have no kind mapping — counted as instrument; extend KIND_OF in src/lib/improvement-ledger.ts: ${[...unmappedKinds].join(", ")}`,
+		);
+	}
+	const merged: Finding[] = overlaid.map((f) => ({
+		...f,
+		kind: kindOf(f.source, f.failureMode),
+	}));
 	if (waves.length) {
 		console.log(
 			`  · waves: applied ${waves.length} manifest(s) referencing ${waves.reduce((n, w) => n + w.findings.length, 0)} finding-id(s)`,
@@ -465,12 +842,16 @@ function main() {
 	const summary = summarizeLedger(merged, Date.now());
 
 	console.log(
-		`\n  ledger: ${summary.total} total · ${summary.open} open · ${summary.closingRate * 100}% closed · oldest open ${summary.oldestOpenDays}d`,
+		`\n  ledger: ${summary.total} total · ${summary.open} open · ${Math.round(summary.closingRate * 100)}% closed ON EVIDENCE (+${Math.round(summary.silenceShare * 100)}% closed on silence, the re-probe backlog) · oldest open ${summary.oldestOpenDays}d`,
 	);
 	console.log(
 		`  by surface: ${summary.bySurface
 			.map((s) => `${s.surface} ${s.open}/${s.total}`)
 			.join(" · ")}`,
+	);
+	const kinds = countByKind(merged);
+	console.log(
+		`  by kind: world ${kinds.world.open} open / ${kinds.world.total} (caught in the world — the product working) · instrument ${kinds.instrument.open} open / ${kinds.instrument.total} (our measurement or serving broke)`,
 	);
 	if (summary.topOpen.length) {
 		console.log("  top backlog:");
@@ -485,7 +866,9 @@ function main() {
 		console.log("\n(--dry: no files written)");
 		return;
 	}
-	writeFileSync(LEDGER_FILE, `${JSON.stringify(merged, null, "\t")}\n`);
+	// 1-space, matching clear-stale-findings (the other writer). With the two
+	// disagreeing, every day rewrote the whole file's whitespace twice.
+	writeFileSync(LEDGER_FILE, `${JSON.stringify(merged, null, 1)}\n`);
 	writeFileSync(SUMMARY_FILE, `${JSON.stringify(summary, null, "\t")}\n`);
 	console.log(
 		`\n  wrote ${merged.length} findings → improvements/ledger/findings.json`,

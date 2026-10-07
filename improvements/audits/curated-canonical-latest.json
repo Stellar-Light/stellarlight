@@ -1,0 +1,9 @@
+{
+  "asOf": "2026-08-31T04:19:38.008Z",
+  "source": "scripts/check-curated-canonical.ts",
+  "curatedTotal": 44,
+  "scanned": 44,
+  "absent": [],
+  "unscanned": [],
+  "findings": 0
+}

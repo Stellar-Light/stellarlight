@@ -1,0 +1,23 @@
+{
+ "slug": "muwp",
+ "url": "https://muwpay.com/",
+ "finalUrl": "https://muwpay.com/",
+ "fetchedAt": "2026-09-06T00:15:03.092Z",
+ "httpStatus": 451,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 00:15:03 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "Vercel"
+ },
+ "bodyTextSha256": "8655d26cf5f8b4a0cb7664f929bc857c0f69cbc55d8f5f85570a6aa0f823718c",
+ "bodyTextChars": 106,
+ "markers": [
+  {
+   "marker": "DEPLOYMENT_DISABLED",
+   "found": true,
+   "excerpt": "This content has been blocked for legal reasons DEPLOYMENT_DISABLED yul1::f59bq-1788653703073-e28ffbd66930"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

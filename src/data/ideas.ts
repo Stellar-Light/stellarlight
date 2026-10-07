@@ -26,11 +26,12 @@ export const CATEGORY_LABELS: Record<(typeof CATEGORIES)[number], string> = {
 
 export type Category = (typeof CATEGORIES)[number];
 
-export const QUARTERS = ["q1-2026", "q2-2026"] as const;
+export const QUARTERS = ["q1-2026", "q2-2026", "q3-2026"] as const;
 export type Quarter = (typeof QUARTERS)[number];
 export const QUARTER_LABELS: Record<Quarter, string> = {
 	"q1-2026": "Q1 2026",
 	"q2-2026": "Q2 2026",
+	"q3-2026": "Q3 2026",
 };
 
 /**
@@ -39,7 +40,7 @@ export const QUARTER_LABELS: Record<Quarter, string> = {
  * quarters are closed (already funded or moved on). Bump this when a
  * new SCF round opens.
  */
-export const ACTIVE_QUARTER: Quarter = "q2-2026";
+export const ACTIVE_QUARTER: Quarter = "q3-2026";
 
 /** Status of an RFP relative to ACTIVE_QUARTER. */
 export type RfpStatus = "open" | "closed";
@@ -212,5 +213,27 @@ export const IDEAS: Idea[] = [
 		category: "developer-tooling",
 		authorName: "Ishan",
 		quarter: "q2-2026",
+	},
+	{
+		id: "layerzero-dvn",
+		title: "Stellar-compatible LayerZero DVN",
+		description:
+			"LayerZero V2's Stellar implementation is built on Soroban and in security audits, but only one reference DVN (LzDVN, secp256k1 multisig) verifies its messages. For Stellar to be a credible omnichain destination — with issuers like USDT0, Paxos, BitGo, Solv, and Ethena preparing to launch via LayerZero — applications need a meaningful choice of independent Decentralized Verifier Networks to compose into their X-of-Y-of-N Security Stack. This RFP funds teams ALREADY operating production DVNs on LayerZero V2 to extend their service to Stellar; greenfield DVN proposals are out of scope.",
+		technicalRequirements:
+			"Hard Prerequisite: A production DVN live on at least one LayerZero V2 mainnet pathway, with attestation history verifiable on LayerZero Scan — the Stellar deployment is an extension of an existing service, not a new entity.\n\nStellar DVN Contract: A Soroban contract conforming to the LayerZero V2 DVN interface and the Stellar implementation's Abstract Account pattern (custom __check_auth — Soroban prohibits reentrancy), submitting attestations to Stellar's ULN302 message library. Testnet first, then an audited mainnet deployment; each team arranges and funds its own audit.\n\nOff-chain Verifier: The team's existing verification service (ZK, TEE, K-of-N, light client, or other) extended to listen to Stellar RPC for PacketSent events and attest in both directions, keeping the security guarantee consistent across pathways.\n\nStellar Constraints: Correct bytes32-to-Stellar address conversion, TTL-aware storage with the hybrid extension strategy, and attestation flows within Soroban's per-transaction limits (200 reads, instruction/memory/write-entry caps).\n\nPathway Coverage: At minimum Stellar to Ethereum, Arbitrum, Base, Optimism, Polygon, Avalanche, Solana, and BNB Chain.\n\nOperations: 24-month maintenance commitment with at least 2 nodes, public operational telemetry (verifications served, error rate, latency), and listing on LayerZero's official DVN provider directory as a hard deliverable.",
+		category: "infrastructure",
+		authorName: "SCF Delegates",
+		quarter: "q3-2026",
+	},
+	{
+		id: "x402-facilitator-bazaar",
+		title: "x402 Facilitator with Bazaar Discovery",
+		description:
+			"x402 turns HTTP 402 into a machine-native payment flow, and Stellar suits it well: settlement costs about 0.0023 XLM, which is what makes per-request agent micropayments viable. Exact settlement already works (the Apache-2.0 @x402/stellar package and the free Built on Stellar facilitator), but Stellar has no native Bazaar — the discovery layer that lets an agent find, price, and pay for x402-protected services without a pre-existing integration. Today a Stellar-denominated service is only as discoverable as whichever multi-chain facilitator happens to carry it. This RFP funds a production facilitator on both networks plus a Stellar-native Bazaar, with discovery as the highest-value share of the budget.",
+		technicalRequirements:
+			"Facilitator: verify, settle, and supported on BOTH stellar:testnet and stellar:pubnet, built on @x402/stellar rather than reimplementing settlement. Strict Soroban auth-entry validation (exact call, asset, amount, recipient; no replay; ledger-based expiration), classic keypairs and custom __check_auth accounts, any SEP-41 token with USDC default and correct 7-decimal handling, sponsored network fees advertised via extra.areFeesSponsored, and strictly non-custodial.\n\nBazaar Discovery (the core new capability): GET /discovery/resources with the spec's filters and GET /discovery/search with REAL natural-language ranking — search quality is a graded deliverable. Automatic cataloging from the discovery extension with no separate registration step, HTTP endpoints and MCP tools as first-class resource types, catalog-integrity enforcement against forged listings including routeTemplate validation, and a commitment to track the moving x402 discovery conventions through the grant period.\n\nMCP Server: search and paid-call tools so an agent can discover and pay from inside a runtime, with machine-readable error codes on every rejection.\n\nupto Scheme Upstream: author scheme_upto_stellar.md and its implementation, contributed through the x402 Technical Steering Committee (SDF's Foundation board seat is available to unblock review).\n\nLicense and Conformance: a permissive OSI-approved license with no AGPL in the dependency path (the OpenZeppelin Relayer x402 plugin is AGPL and excluded as a base). Acceptance is wire-level: an unmodified canonical client completing payment end-to-end on both networks, a passing run of the x402 repo's e2e suite, and a published settled transaction hash per network per scheme.\n\nAudit: a third-party review via the Audit Bank covering the settlement path, auth-entry validation, and the discovery trust boundary before the mainnet production tag.",
+		category: "payments",
+		authorName: "SCF Delegates",
+		quarter: "q3-2026",
 	},
 ];

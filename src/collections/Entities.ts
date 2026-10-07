@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
+import { adminOnly } from "./access";
 
 export const Entities: CollectionConfig = {
 	slug: "entities",
@@ -8,14 +9,9 @@ export const Entities: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
-		create: ({ req }) => {
-			// Allow admin creation from backend
-			return !!req.user;
-		},
-		update: ({ req }) => {
-			// Only admins can update
-			return !!req.user;
-		},
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{
@@ -87,6 +83,9 @@ export const Entities: CollectionConfig = {
 			type: "relationship",
 			relationTo: "projects",
 			hasMany: true,
+			// The projects.relatedEntities join filters on this field for every
+			// project row read with joins on.
+			index: true,
 		},
 	],
 	// Unique index on slug is handled by unique: true on the field

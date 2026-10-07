@@ -1,0 +1,23 @@
+{
+ "slug": "zenex",
+ "url": "https://docs.zenex.trade/deployments/contract-addresses",
+ "finalUrl": "https://docs.zenex.trade/deployments/contract-addresses",
+ "fetchedAt": "2026-08-28T00:38:32.634Z",
+ "httpStatus": 200,
+ "headers": {
+  "date": "Fri, 28 Aug 2026 00:38:32 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "cloudflare"
+ },
+ "bodyTextSha256": "496a58f17150642267feaa931bdb179a9a4efedf668200c3140168cf3c83324d",
+ "bodyTextChars": 4567,
+ "markers": [
+  {
+   "marker": "TBD",
+   "found": true,
+   "excerpt": "owing contracts are deployed on Stellar testnet ( https://soroban-testnet.stellar.org ). Contract Address Notes Factory TBD Canonical deployment registry Trading TBD Deployed via factory Strategy Vault TBD Deployed via factory (paired with trading) Price Verifier TBD Pyth Lazer oracle verification T"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

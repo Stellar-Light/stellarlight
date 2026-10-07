@@ -14,9 +14,10 @@ import { getPayloadSafe } from "@/lib/payload-client";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-	title: "Usage & Analytics | Stellar Light",
+	title: "Stellar Ecosystem Analytics",
 	description:
-		"Live, public usage and ecosystem analytics for the StellarLight data layer — API consumption over time, by endpoint and by consumer type, plus the maintained dataset's key figures.",
+		"Usage and coverage analytics for the Stellar ecosystem index: what agents ask for, what is served, and where the data thins out.",
+	alternates: { canonical: "/analytics" },
 };
 
 const BUCKET_LABELS: Record<string, string> = {

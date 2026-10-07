@@ -1,8 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const BASE_URL = "http://localhost:3000";
-const PAYLOAD_SECRET =
-	process.env.PAYLOAD_SECRET || "fd84c413aaba141bcc9f31c8";
+const PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || "fd84c413aaba141bcc9f31c8";
 
 // The TEST draft blog post has a socialEmbed block with an X/Twitter URL
 const TEST_SLUG = "test";
@@ -11,7 +10,7 @@ test.describe("Social Embed Block (Blog Rich Text)", () => {
 	test.beforeEach(async ({ page }) => {
 		// Enable draft mode and navigate to the TEST blog post
 		const response = await page.goto(
-			`${BASE_URL}/api/preview?secret=${PAYLOAD_SECRET}&slug=${TEST_SLUG}`
+			`${BASE_URL}/api/preview?secret=${PAYLOAD_SECRET}&slug=${TEST_SLUG}`,
 		);
 		// Should redirect to /blog/test
 		await page.waitForURL(`${BASE_URL}/blog/${TEST_SLUG}`);
@@ -39,19 +38,18 @@ test.describe("Social Embed Block (Blog Rich Text)", () => {
 		await expect(twitterBlockquote).toBeVisible({ timeout: 5000 });
 
 		// Verify our CSS fix: .twitter-tweet should NOT have the yellow border
-		const borderLeftColor = await twitterBlockquote.evaluate((el) =>
-			window.getComputedStyle(el).borderLeftColor
+		const borderLeftColor = await twitterBlockquote.evaluate(
+			(el) => window.getComputedStyle(el).borderLeftColor,
 		);
-		const borderLeftWidth = await twitterBlockquote.evaluate((el) =>
-			window.getComputedStyle(el).borderLeftWidth
+		const borderLeftWidth = await twitterBlockquote.evaluate(
+			(el) => window.getComputedStyle(el).borderLeftWidth,
 		);
 
 		// #FDDA24 = rgb(253, 218, 36) — should NOT be applied to twitter-tweet
 		expect(borderLeftColor).not.toBe("rgb(253, 218, 36)");
 		// Border width should be 0 (or transparent) since we excluded .twitter-tweet
 		const hasBoldBorder =
-			parseInt(borderLeftWidth) >= 4 &&
-			borderLeftColor === "rgb(253, 218, 36)";
+			parseInt(borderLeftWidth) >= 4 && borderLeftColor === "rgb(253, 218, 36)";
 		expect(hasBoldBorder).toBe(false);
 	});
 
@@ -79,10 +77,10 @@ test.describe("Social Embed Block (Blog Rich Text)", () => {
 		try {
 			await page.waitForSelector(
 				'iframe[src*="twitter.com"], iframe[id*="twitter"]',
-				{ timeout: 15000 }
+				{ timeout: 15000 },
 			);
 			const iframe = page.locator(
-				'iframe[src*="twitter.com"], iframe[id*="twitter"]'
+				'iframe[src*="twitter.com"], iframe[id*="twitter"]',
 			);
 			await expect(iframe).toBeVisible();
 			console.log("✓ Twitter iframe loaded successfully");
@@ -91,7 +89,7 @@ test.describe("Social Embed Block (Blog Rich Text)", () => {
 			// The test still passes if the blockquote structure is correct
 			console.warn(
 				"⚠ Twitter widget iframe did not load — likely a network/CSP issue in the test environment. " +
-					"The blockquote structure is correct; the embed will work in production."
+					"The blockquote structure is correct; the embed will work in production.",
 			);
 		}
 	});
@@ -105,7 +103,7 @@ test.describe("Social Embed Block (Blog Rich Text)", () => {
 		// If the socialEmbed converter WASN'T called, the URL would appear as a
 		// plain <p><a> link styled yellow by the prose classes. Verify that's NOT the case.
 		const proseParagraphLink = content.locator(
-			"p > a[href*='x.com'], p > a[href*='twitter.com']"
+			"p > a[href*='x.com'], p > a[href*='twitter.com']",
 		);
 		await expect(proseParagraphLink).not.toBeVisible();
 

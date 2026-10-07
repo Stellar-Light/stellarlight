@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "./access";
 
 const Builders: CollectionConfig = {
 	slug: "builders",
@@ -15,9 +16,9 @@ const Builders: CollectionConfig = {
 	},
 	access: {
 		read: () => true,
-		create: ({ req: { user } }) => !!user,
-		update: ({ req: { user } }) => !!user,
-		delete: ({ req: { user } }) => !!user,
+		create: adminOnly,
+		update: adminOnly,
+		delete: adminOnly,
 	},
 	fields: [
 		{
@@ -267,6 +268,31 @@ const Builders: CollectionConfig = {
 			type: "date",
 			admin: {
 				description: "Last sync from Stellar Passport API",
+			},
+		},
+		// GitHub contributor pass (scripts/enrich-builder-contributions.ts): repos in
+		// OUR index this person committed to in the last 12 months, from GitHub's
+		// public contributionsCollection. Fills the gap between "repos they own"
+		// and "repos they actually work in" (org repos they never declared).
+		{
+			name: "contributions",
+			type: "array",
+			admin: {
+				description:
+					"Indexed Stellar repos this person committed to in the last 12 months (GitHub contributor pass)",
+			},
+			fields: [
+				{ name: "fullName", type: "text", required: true },
+				{ name: "commits12m", type: "number" },
+				{ name: "projectSlug", type: "text" },
+			],
+		},
+		{
+			name: "contributions_synced_at",
+			type: "date",
+			admin: {
+				description:
+					"When the GitHub contributor pass last ran for this profile",
 			},
 		},
 	],

@@ -224,6 +224,74 @@ export function identifierTargets(query: string | undefined): string[] {
 	return out;
 }
 
+// ── sls-071: an exact FINDING identifier is a lookup key, not a hint ──
+// Audit findings are cited as V-SOR-VUL-002 — an identifier that lives INSIDE
+// a chunk rather than naming a document, so the CAP/SEP url-pin above cannot
+// see it. Vector search never goes empty, so a query for an identifier we do
+// NOT hold returns the report's section-classification boilerplate instead,
+// and on 2026-08-19 it did so at HIGHER confidence (0.85) than a real
+// identifier scored (0.73): asking about a finding that does not exist looked
+// more certain than asking about one that does. The identifier is either
+// present verbatim or it is a miss; there is no nearest-neighbour version of
+// a finding id.
+//
+// Two hyphen-separated groups minimum, so CAP-0038 / SEP-0010 (single group,
+// handled above) never match here.
+const FINDING_ID_RE = /\b[A-Z][A-Z0-9]{0,4}(?:-[A-Z]{2,6}){1,3}-\d{1,4}\b/g;
+
+/** Finding-style identifiers named by the query, deduped, upper-cased. */
+export function findingIdentifierTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.toUpperCase().matchAll(FINDING_ID_RE)) {
+		if (!out.includes(m[0])) out.push(m[0]);
+	}
+	return out;
+}
+
+// ── Release tags are lookup keys too ──
+// "stellar-core v28.0.0" is a request for THAT release. The tag tokenizes to
+// "v28" (".0.0" splits away), every older stellar-core release shares the
+// other two tokens, and the 0.15 title-match weight cannot beat their
+// cosine: on 2026-08-21 the v28.0.0 notes — 8 days old, in the pool at #8 —
+// sat under v27.1.0, v25.2.0 and v25.1.3 for their own tag, and the
+// self-audit read that as a stalled ingest. Same rule as CAP/SEP ids: the
+// named document is pinned above vector order. Matched on the TITLE (release
+// titles carry the tag verbatim), never on content, so a release that merely
+// mentions the next version is not the next version.
+const VERSION_TAG_RE = /\bv?(\d+\.\d+\.\d+(?:-[0-9a-z.]+)?)\b/gi;
+
+/** Semver-style tags named by the query, normalized to a leading "v". */
+export function versionTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.matchAll(VERSION_TAG_RE)) {
+		const tag = `v${m[1].toLowerCase()}`;
+		if (!out.includes(tag)) out.push(tag);
+	}
+	return out;
+}
+
+/** Does this chunk's title carry one of the named release tags? */
+export function matchesVersionTarget(
+	title: string | null | undefined,
+	targets: string[],
+): boolean {
+	const t = (title ?? "").toLowerCase();
+	return targets.some(
+		(tag) => t.includes(tag) || t.includes(` ${tag.slice(1)}`),
+	);
+}
+
+/** Does any served text contain the identifier verbatim? */
+export function identifierIsPresent(
+	id: string,
+	texts: Array<string | null | undefined>,
+): boolean {
+	const needle = id.toUpperCase();
+	return texts.some((t) => (t ?? "").toUpperCase().includes(needle));
+}
+
 /** Does this chunk belong to one of the identifier-named documents? */
 function matchesTarget(url: string, targets: string[]): boolean {
 	return targets.some((id) =>
@@ -241,8 +309,13 @@ function matchesTarget(url: string, targets: string[]): boolean {
 // re-sort with DATED freshness (short half-life, evergreen NOT exempt:
 // undated → 0.35) blended with confidence — structured truth (publishedAt)
 // must drive ranking for the query that asks for it.
+// "current"/"currently" are NOT here: they qualify present STATE ("in the
+// current version", "the currently indexed audits"), not news. As an intent
+// they floated 9-day-old weekly roundups (conf 0.45) above undated audit
+// reports (0.80) and the Java SDK README (0.86) — Raven battery
+// q-tool-soroban-auth-audit-live / q-ti-java-sdk-wallet-feebump, 2026-09-13.
 const RECENCY_INTENT_RE =
-	/\b(latest|newest|most recent|recent(ly)?|current(ly)?|this (year|month|week)|today|new in|202[5-9])\b/i;
+	/\b(latest|newest|most recent|recent(ly)?|this (year|month|week)|today|new in|202[5-9])\b/i;
 const RECENCY_HALF_LIFE_DAYS = 120;
 
 export function recencyIntent(query: string | undefined): boolean {
@@ -467,7 +540,8 @@ export const RESEARCH_ANCHORS: Array<{
 		// privacy actually exists) never entered the page. Anchor it for
 		// anonymity-vocabulary intent so the honest answer is guaranteed in.
 		id: "privacy-anonymity",
-		intent: /\banonym(?:ous|ity|ised|ized)?\b|\bmixer\b|\buntraceable\b|\bshielded\b/i,
+		intent:
+			/\banonym(?:ous|ity|ised|ized)?\b|\bmixer\b|\buntraceable\b|\bshielded\b/i,
 		context:
 			/\bstellar\b|\bledger\b|\btransactions?\b|\bpayments?\b|\btransfers?\b|\baccounts?\b|\btokens?\b/i,
 		urls: [
@@ -530,6 +604,26 @@ export const RESEARCH_ANCHORS: Array<{
 			"https://stellarsecurityportal.com/report/4",
 		],
 	},
+	{
+		// USDT0 launch (2026-09-02): "is USDT on Stellar" / "usdt0 contract
+		// address" asks land on generic stablecoin pages — the launch page
+		// (asset, SAC + OFT contract IDs) and the announcement never carry the
+		// asker's vocabulary ("tether", "usdt"). Pin them for USDT-vocabulary
+		// intent with Stellar/contract context.
+		id: "usdt0-launch",
+		intent: /\busdt0?\b|\btether\b/i,
+		context:
+			/\bstellar\b|\bsoroban\b|\blive\b|\blaunch(?:ed)?\b|\bcontracts?\b|\bissuer\b|\blayerzero\b|\boft\b|\bsac\b/i,
+		urls: [
+			// Verified in-corpus 2026-09-01 (dev-docs page).
+			"https://developers.stellar.org/docs/tokens/usdt0-layerzero",
+			// Not in the dev-docs sitemap — ingest-developers-docs.ts EXTRA_PAGES
+			// carries it (2026-09-02). The announcement lands with the next
+			// 06:00Z blog refresh (sitemap position 128 of 568, under the cap).
+			"https://developers.stellar.org/launch/usdt0",
+			"https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+		],
+	},
 ];
 
 /** Anchor-doc URLs for a query — empty unless an intent class fires. */
@@ -541,6 +635,48 @@ export function anchorDocUrls(query: string | undefined): string[] {
 			for (const u of a.urls) if (!out.includes(u)) out.push(u);
 	}
 	return out;
+}
+
+/**
+ * The order rankResearchChunks gives one source's rows, as a comparator, so
+ * rows from several sources merge by the same rule (2026-10-03). A
+ * multi-source call used to return them grouped in request order, so a
+ * reader that keeps the first rows saw whichever sources were named first:
+ * on Raven's 386 golden cards with a gold document in our corpus, that put
+ * the gold document in the top 5 for 14% of them; this rule puts it there
+ * for 71% (first for 45%, against 8%).
+ *
+ * Identifier-named documents first (an exact CAP/SEP/release lookup is a
+ * lookup, not a search). Then confidence, or under recency intent ("latest",
+ * "recent") confidence blended with dated freshness: confidence keeps 60% so
+ * a fresh but irrelevant chunk cannot hijack the page, and freshness is
+ * source-aware (a lastmod-dated source cannot spend its edit date as
+ * publication evidence; meeting recaps' URL-derived dates still count).
+ * Confidence rounds to 2dp, so raw retrieval score breaks the near-ties.
+ */
+export function researchOrder(
+	query: string | undefined,
+	now: number = Date.now(),
+): (
+	a: RankableChunk & { confidence: { score: number } },
+	b: RankableChunk & { confidence: { score: number } },
+) => number {
+	const targets = identifierTargets(query);
+	const vTargets = versionTargets(query);
+	const pinned = (c: RankableChunk) =>
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const recent = recencyIntent(query);
+	const key = (c: RankableChunk & { confidence: { score: number } }) =>
+		recent
+			? 0.6 * c.confidence.score +
+				0.4 * datedFreshness(c.publishedAt, now, meetingReclass(c).source)
+			: c.confidence.score;
+	return (a, b) =>
+		Number(pinned(b)) - Number(pinned(a)) ||
+		key(b) - key(a) ||
+		b.confidence.score - a.confidence.score ||
+		(b.score ?? 0) - (a.score ?? 0);
 }
 
 export function rankResearchChunks<T extends RankableChunk>(
@@ -569,8 +705,10 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// Exact CAP/SEP identifier pin (sls-019): the named document must rank
 	// ahead of vector order — an exact-ID query is a lookup, not a search.
 	const targets = identifierTargets(opts.query);
+	const vTargets = versionTargets(opts.query);
 	const pinned = (c: RankableChunk) =>
-		targets.length > 0 && matchesTarget(c.url, targets);
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
 
 	// Curated vertical anchors (see RESEARCH_ANCHORS): relevance floor, not a
 	// hard pin — identifier lookups and genuinely-stronger matches stay ahead.
@@ -631,30 +769,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 				}),
 			};
 		})
-		// Identifier-named docs first; then confidence order; raw retrieval
-		// score breaks ties (confidence rounds to 2dp, so near-equals happen).
-		.sort(
-			(a, b) =>
-				Number(pinned(b)) - Number(pinned(a)) ||
-				b.confidence.score - a.confidence.score ||
-				(b.score ?? 0) - (a.score ?? 0),
-		);
-
-	// Recency-intent re-sort (see RECENCY_INTENT_RE above): blend confidence
-	// with dated freshness so provably-current chunks top "latest/recent"
-	// queries. Confidence still carries 60% — a fresh-but-irrelevant chunk
-	// can't hijack the page. Identifier pins still take precedence. Dated
-	// freshness is source-aware: a lastmod-dated source (dev-docs) can't
-	// spend its edit date as publication evidence, while meeting recaps'
-	// URL-derived dates (reclassified above) still count.
-	if (recencyIntent(opts.query)) {
-		const key = (c: (typeof scored)[number]) =>
-			0.6 * c.confidence.score +
-			0.4 * datedFreshness(c.publishedAt, now, meetingReclass(c).source);
-		scored.sort(
-			(a, b) => Number(pinned(b)) - Number(pinned(a)) || key(b) - key(a),
-		);
-	}
+		.sort(researchOrder(opts.query, now));
 
 	// Best chunk per document first — also collapsing exact-duplicate content
 	// served under different URLs (index-page mirrors of the same recap).

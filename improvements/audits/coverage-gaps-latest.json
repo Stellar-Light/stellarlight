@@ -1,0 +1,213 @@
+{
+  "asOf": "2026-10-01T14:54:03.019Z",
+  "source": "scripts/report-coverage-gaps.ts",
+  "scf": {
+    "total": 531,
+    "absent": 10,
+    "served": 521,
+    "absentAwarded": 3,
+    "absentSubmittedOnly": 7,
+    "sample": [
+      {
+        "scfSlug": "open-rwa-vault-infrastructure-nis",
+        "rounds": [
+          "45"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/open-rwa-vault-infrastructure-nis"
+      },
+      {
+        "scfSlug": "canary-protocol-y4l",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/canary-protocol-y4l"
+      },
+      {
+        "scfSlug": "pods-dxl",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/pods-dxl"
+      },
+      {
+        "scfSlug": "pollar-nqe",
+        "rounds": [],
+        "notAwardedRounds": [
+          "42"
+        ],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/pollar-nqe"
+      },
+      {
+        "scfSlug": "cara7-yyx",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/cara7-yyx"
+      },
+      {
+        "scfSlug": "astrolabe-bzg",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/astrolabe-bzg"
+      },
+      {
+        "scfSlug": "nila-fwc",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/nila-fwc"
+      },
+      {
+        "scfSlug": "fermah-pay-w3c",
+        "rounds": [],
+        "notAwardedRounds": [],
+        "awarded": false,
+        "url": "https://communityfund.stellar.org/project/fermah-pay-w3c"
+      },
+      {
+        "scfSlug": "principal-vzt",
+        "rounds": [
+          "45"
+        ],
+        "notAwardedRounds": [
+          "44"
+        ],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/principal-vzt"
+      },
+      {
+        "scfSlug": "zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib",
+        "rounds": [
+          "45"
+        ],
+        "notAwardedRounds": [],
+        "awarded": true,
+        "url": "https://communityfund.stellar.org/project/zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib"
+      }
+    ]
+  },
+  "defillama": {
+    "stellarListed": 42,
+    "matched": 32,
+    "missing": 1,
+    "belowFloor": 1
+  },
+  "corroboratedAbsent": [],
+  "domainMatched": [
+    {
+      "scf": "lul-serving-the-unbanked-ckz",
+      "slug": "lulpay",
+      "domain": "lulpay.com"
+    },
+    {
+      "scf": "a-real-estate-tokenization-platform-ss1",
+      "slug": "verseprop",
+      "domain": "verseprop.com"
+    },
+    {
+      "scf": "anticipatory-aid-on-soroban-f7j",
+      "slug": "coala-pay",
+      "domain": "coalapay.org"
+    },
+    {
+      "scf": "ctxcom-evm",
+      "slug": "ctx",
+      "domain": "ctx.com"
+    },
+    {
+      "scf": "soroban-contract-source-verification-service-bax",
+      "slug": "stellar-expert",
+      "domain": "human-review: stellar-expert/soroban-build-workflow (the reproducible-buil"
+    },
+    {
+      "scf": "soroban-disassembler-working-title-ply",
+      "slug": "inference",
+      "domain": "inferara.com"
+    },
+    {
+      "scf": "prices-api-rfp-ctx-1vo",
+      "slug": "ctx",
+      "domain": "ctx.com"
+    },
+    {
+      "scf": "rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh",
+      "slug": "soroban-decompiler",
+      "domain": "human-review: same author (salaheldinsoliman); the row exists and is scann"
+    },
+    {
+      "scf": "advanced-debugging-for-soroban-contracts-5sr",
+      "slug": "runtime-verification",
+      "domain": "runtimeverification.com"
+    },
+    {
+      "scf": "stellar-women-bootcamp-r5v",
+      "slug": "womenbiz",
+      "domain": "hiwomenbiz.com"
+    },
+    {
+      "scf": "social-podcast-ini",
+      "slug": "roberto-sanz-criptomonedas",
+      "domain": "youtube.com/@robertosanzcriptomonedas"
+    },
+    {
+      "scf": "embedded-collective-investment-via-soroban-syi",
+      "slug": "escala",
+      "domain": "escalahq.com"
+    },
+    {
+      "scf": "seasonal-workers-payroll-lru",
+      "slug": "tucambio",
+      "domain": "tucambio.app"
+    },
+    {
+      "scf": "institutional-liquidity-infrastructure-for-stellar-k5c",
+      "slug": "lobster",
+      "domain": "lobster-protocol.com"
+    },
+    {
+      "scf": "smart-account-onboarding-8yr",
+      "slug": "the-aha-company",
+      "domain": "theaha.co"
+    },
+    {
+      "scf": "the-merchant-settlement-rail-for-africa-bzf",
+      "slug": "slimepay",
+      "domain": "slimepay.com"
+    },
+    {
+      "scf": "regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu",
+      "slug": "lifi",
+      "domain": "li.fi"
+    },
+    {
+      "scf": "post-quantum-secure-wallets-for-stellar-97o",
+      "slug": "soundness",
+      "domain": "soundness.xyz"
+    },
+    {
+      "scf": "institutional-treasury-xlm-wyu",
+      "slug": "arrel",
+      "domain": "arreltech.com"
+    },
+    {
+      "scf": "meta-contracts-in-stellar-p4c",
+      "slug": "stellar-router-sdk",
+      "domain": "jsr.io/@creit-tech/stellar-router-sdk"
+    }
+  ],
+  "reviewedAbsent": [],
+  "unreviewedAbsent": 10,
+  "summary": {
+    "missingDefillama": 1,
+    "missingScf": 10,
+    "missingScfAwarded": 3,
+    "partnerDocsWithoutOwnContent": 3,
+    "staleCollections": 0,
+    "staleOrEmptyResearchSources": 1,
+    "refreshUnmeasurableSources": 3
+  }
+}

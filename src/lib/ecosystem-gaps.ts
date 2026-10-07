@@ -23,6 +23,17 @@ export interface GapProject {
 	hackathonPlacement?: string | null;
 }
 
+/** The project fields computeEcosystemGaps reads, for a Payload `select`. A
+ * caller that selects fewer gets zeros, not an error: vet-idea left out
+ * hackathonPlacement and reported 0 hackathon winners in every vertical
+ * while analyze?dimension=gaps counted them. */
+export const GAP_PROJECT_SELECT = {
+	types: true,
+	status: true,
+	scf: true,
+	hackathonPlacement: true,
+} as const;
+
 export interface TypeCoverage {
 	type: string;
 	total: number;
@@ -57,6 +68,40 @@ const WINNER_PLACEMENTS = new Set([
 
 /** total ≤ this counts a vertical as underbuilt. Absolute (not a quantile) so
  *  the signal is stable and re-derivable, not a moving relative bar. */
+// Buildable product verticals — the universe the `gaps` dimension measures
+// coverage against, so a canonical vertical with ZERO active projects surfaces
+// as whitespace rather than being invisible. EVERY entry MUST be a real value
+// of the projects `types` select (this list is a subset of it); a label that
+// isn't a `types` value can never appear in any project's types[] and would
+// report a permanent FALSE `absent`. "Oracle" is NOT here yet, but not for the
+// reason this comment used to give: as of 2026-09-09 "Oracle" IS a `types`
+// value (src/lib/project-types.ts) and ten live rows carry it — Reflector,
+// DIA, Band, Lightecho, RedStone, Pyth among them. Whether oracle coverage
+// belongs on the gaps axis is a product call not yet made; when it is, add
+// the value here and nothing else needs to change.
+// The broad catch-alls (Infrastructure / SDK / Analytics) are excluded because
+// they're not verticals; a caveat in the response says so.
+export const GAP_VERTICALS = [
+	"Wallet",
+	"DEX",
+	"Lending",
+	"Bridge",
+	"Payments",
+	"Anchor",
+	"Indexer",
+	"Explorer",
+	"AI",
+	"Gaming",
+	"Education",
+	"Security",
+	"NFT",
+	"RWA",
+	"Stablecoin",
+	"Social Impact",
+	"RPC",
+	"Faucet",
+] as const;
+
 export const UNDERBUILT_MAX = 3;
 
 /**
@@ -105,7 +150,8 @@ export function computeEcosystemGaps(
 	}
 
 	const byType = [...tally.values()].sort(
-		(a, b) => a.total - b.total || a.live - b.live || a.type.localeCompare(b.type),
+		(a, b) =>
+			a.total - b.total || a.live - b.live || a.type.localeCompare(b.type),
 	);
 
 	// Signals restrict to the canonical verticals — a project's stray/legacy

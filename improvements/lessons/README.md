@@ -42,6 +42,29 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 | 28 | **Single-affix extraction assumptions** — cleanup code assuming one brand-affix ordering ("Title \| Brand") destroys the mirrored ordering ("Brand \| Title"), and the damage hides in plain sight as a plausible value | 2026-07-19: stellar.org foundation-news og:titles are brand-PREFIX ordered; the suffix-only strip left ~50 posts titled just "Stellar" — the Protocol 27 "Zipper" upgrade guide was invisible to retrieval while a mainnet vote happened | handle both orderings (#593); golden eval counts BAD-TITLE docs; design rule: test extraction against every template family the source serves, not the first sample |
 | 29 | **Hardcoded-count assertions rot into pipeline blockers** — an exact-N check on a growing set fails exactly when the system improves, and if it gates a pipeline the improvement is what gets blocked | 2026-07-19: the publish smoke test asserted "tools/list returns 15 tools"; the server (correctly) reached 20 and the stale assertion blocked BOTH pending npm releases (1.1.11, 1.1.12) | derive expected counts from the source of truth (registerTool count, #599) + invariants (name uniqueness) instead of literals; design rule: a count literal in a test is a rot timer |
 | 30 | **New-endpoint checklist omissions recur in pairs** — the step that isn't mechanically enforced gets skipped by EVERY author, human or agent, in the same week | 2026-07-19: /api/audits shipped without its next.config publicApi entry (no CORS/X-API-Version); hours later the improvement-loop agent's /api/people missed the exact same entry | the extended drift check flags missing headers per endpoint (#594 caught both); design rule: when review catches a checklist miss, ask "what guard makes this class impossible" the same day — the second instance is already in flight |
+| 32 | **Unverifiable read as absent** — a detector treats "I couldn't see it" as "it isn't there", so an upstream outage becomes our finding | 2026-07-23: self-audit called `api-client@1.5.0`/`@1.5.1` uninstallable on a transient npm **504** (both served 200 seconds later, and `1.4.0` passed in the same loop); the same run found report-liveness counting 5xx, timeouts, `EAI_AGAIN` and invalid TLS certs as positive evidence a project was **dead**, on the report that feeds demotion decisions | `src/lib/probe-external.ts` — one classifier for every third-party probe: **only** 404/410 or a host that doesn't resolve/refuses is `absent` (a finding); 5xx/timeout/bot-wall/bad-cert is `unverifiable`, retried once and reported in its own non-gating column. Unit-pinned in `probe-external.test.ts`. The third verdict only works if it ESCALATES — otherwise a permanently sick origin rests at "unverifiable" forever and leaves the dashboard: `check-links` therefore keeps two independent streaks (`consecutiveFailures` for proven-broken, `consecutiveUnverifiable` for no-verdict) and flips `needsReview` after 3 consecutive unverifiable runs (`link-history.ts`, unit-pinned). Design rule: a detector needs three verdicts, not two — and the third needs a clock, or it becomes a place findings go to die |
+| 33 | **Provenance that doesn't cover the value** — a value sits beside timestamps describing something ELSE, so a consumer dates it wrongly. Nearby provenance is worse than none: no date makes a reader cautious, a neighbour's date makes them confidently wrong and hands them a citation | [#1134](https://github.com/Stellar-Light/stellarlight/issues/1134) — `explainRepo` served a DeepWiki answer saying `MaxSupportedProtocolVersion = 25` while the source at our own `scannedRef` defined 28, beside three dates (`meta.generatedAt`, `codeVerified.scannedAt`, `repoMeta.lastCommitAt`) that all described the code scan and none the answer | `answerAsOf` (null for DeepWiki — an admission, since it exposes no index date; populated from `scannedAt` on the scan path) + `meta.warnings` naming the three fields that don't date the answer; `scripts/check-answer-dating.ts` ratchets the class at 40/55 on the contract gate, `/quality` row `answer-dating` (see [2026-08-31](./2026-08-31-provenance-that-does-not-cover-the-value.md)) |
+| 34 | **"Some op present" is not a hit, and a fix the consumer never read is not a fix** — a routing battery that passes on any scout op overcounts (32/32 "reachable") while "top hit" undercounts (12/32); three routing fixes were re-measured against a consumer catalog that predated all of them | [2026-09-05](./2026-09-05-routing-on-the-intended-op.md): intended-op re-grade 16/28 persona probes, 48/65 whole bank; Raven's manifest (09-03) carried none of the 09-02/09-03 x-routing words | `scripts/raven-routing.ts` grades the intended operation id with `rank` + per-persona rates; every miss carries a `missClass` with evidence from `scripts/eval/raven-scorer-replica.ts` (Raven's own scoring math over our text AND the text it indexes); `catalog-lag` is a class, so an un-absorbed fix reads "not yet absorbed", never "still broken"; x-routing widenings are pre-flighted for sibling capture (the `soroban` trial: 8/14 Soroban questions shifted → declined) |
+
+## Guard lines — a lesson only counts when it became a check
+
+Every dated lesson file carries one or more `Guard:` lines naming the check that
+goes red when its class comes back — a unit test, a `scripts/check-*.ts` guard,
+or a workflow. Prose does not fail a build; the line makes the claim checkable:
+
+```
+Guard: src/lib/__tests__/research-rank.test.ts — best-chunk-per-doc collapse and confidence ordering pinned
+Guard: none — <what a guard would check, so the next person can write it>
+```
+
+`scripts/check-lessons-guarded.ts` (contract gate, every PR) reads every dated
+file, verifies each named path exists, and prints lesson · guard · status:
+**guarded** (every line resolves), **unguarded** (no line, or any line says
+`none` — the file itself admits one of its lessons has no check), **guard
+missing** (a named path does not exist: a claim of coverage nothing backs). It
+exits 1 on anything but guarded. `/quality` shows the same counts. Name the
+guard for a class only when the check exists and would fail on the class — a
+production function is not a guard; its test is.
 
 ## Detail files
 
@@ -51,11 +74,16 @@ Sources: sls board (`kalepail/stellar-raven/improvements/stellar-light-scout`, 1
 - [2026-07-09 — stale-but-close outranks current (Starbridge / research-rank)](./2026-07-09-research-rank-starbridge.md)
 - [2026-07-09 — the corridor-matrix day: batch writes, identity, instance-calibration](./2026-07-09-curation-writes-and-identity.md)
 - [2026-07-19 — the improvement day: retrieval scope, extraction affixes, count rot, paired omissions](./2026-07-19-improvement-day.md)
+- [2026-08-08 — zero-work green runs, and shape ≠ population](./2026-08-08-zero-work-green-and-population-truth.md)
+- [2026-08-12 — advertised but never persisted (sdkCapabilities) + npm OIDC + dispatch truths + tee/pipefail + the read-back that cried wolf](./2026-08-12-advertised-but-never-persisted.md)
+- [SYNTHESIS 2026-08-12 — the month since: watcher integrity, identity discipline, and the institutional trajectory](./SYNTHESIS-2026-08-12.md)
+- [2026-08-14 — three calibrations to one honest signal + instrument-first triage](./2026-08-14-advisory-calibration-and-battery-fidelity.md)
+- [2026-09-05 — routing on the intended op; the consumer that had not read our fixes](./2026-09-05-routing-on-the-intended-op.md)
 
 ## The loop
 
 1. An incident lands (sls item, tracker issue, demo feedback, our own audit).
 2. Fix it **and** identify the class. New class → new row + guard; existing class → ask why the guard missed it and strengthen it.
 3. Close the incident with reproducible probes; the guard keeps it fixed.
-4. **Project the class forward**: ask "which OTHER surfaces have this same shape and haven't broken yet?" — file each projection as an entry in [/ideas/](../../ideas/) tagged `Projects from: class N`. This is the self-improving half of the loop: mistakes generate the improvement backlog before the next incident does.
+4. **Project the class forward**: ask "which OTHER surfaces have this same shape and haven't broken yet?" — file each projection as an entry in [improvements/ideas/](../ideas/) tagged `Projects from: class N`. This is the self-improving half of the loop: mistakes generate the improvement backlog before the next incident does.
 5. Before shipping anything new, walk the table — the checklist is the "ahead of the curve" part.

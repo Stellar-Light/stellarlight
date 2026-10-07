@@ -1,6 +1,6 @@
 import { ArrowRight, Clock, DollarSign, Users } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { HackathonCover } from "@/components/hackathon-cover";
 import { Badge } from "@/components/ui/badge";
 import {
 	type DoraHacksHackathon,
@@ -27,11 +27,11 @@ export default async function HackathonsSection() {
 		<section className="mb-16">
 			<div className="flex items-center justify-between mb-10">
 				<div>
-					<h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">
+					<h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2 text-foreground">
 						Hackathons
 					</h2>
 					<p className="text-muted-foreground">
-						Build and compete in the Stellar ecosystem
+						Open now and announced: DoraHacks, Rise In, HackMeridian
 					</p>
 				</div>
 				<Link
@@ -80,28 +80,30 @@ export default async function HackathonsSection() {
 
 function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 	const days = getDaysRemaining(h.end_time);
+	const upcoming = h.start_time * 1000 > Date.now();
+	const starts = new Date(h.start_time * 1000).toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+	});
 
 	return (
 		<a
-			href={getHackathonUrl(h.uname)}
+			href={getHackathonUrl(h)}
 			target="_blank"
 			rel="noopener noreferrer"
-			className="group block rounded-xl border border-primary/30 bg-card overflow-hidden hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full"
+			className="group block rounded-xl border border-white/15 bg-card overflow-hidden hover:border-white/30 transition-colors duration-200 h-full"
 		>
-			{h.image_url && (
-				<div className="relative w-full aspect-[3/1] overflow-hidden">
-					<Image
-						src={h.image_url}
-						alt={h.title}
-						fill
-						className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-					<Badge className="absolute top-3 right-3 bg-green-500 text-white border-0 shadow-md">
-						OPEN
-					</Badge>
-				</div>
-			)}
+			<HackathonCover
+				src={h.image_url}
+				title={h.title}
+				organization={h.organization?.name}
+				aspect="aspect-[3/1]"
+				sizes="(max-width: 768px) 100vw, 50vw"
+			>
+				<Badge className="absolute top-3 right-3 bg-neutral-100 text-black border-0 shadow-md">
+					{upcoming ? "Upcoming" : "Open"}
+				</Badge>
+			</HackathonCover>
 			<div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
 				<div className="flex-1 min-w-0">
 					<h3 className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
@@ -115,18 +117,24 @@ function HackathonCard({ h }: { h: DoraHacksHackathon }) {
 				</div>
 				<div className="flex items-center gap-4 text-sm text-muted-foreground whitespace-nowrap flex-shrink-0">
 					<span className="flex items-center gap-1">
-						<DollarSign className="w-3.5 h-3.5 text-[#FDDA24]" />
+						<DollarSign className="w-3.5 h-3.5 text-neutral-400" />
 						<span className="font-semibold text-foreground">
-							{formatPrize(h.bonus_price)}
+							{h.bonus_price > 0 ? formatPrize(h.bonus_price) : "TBA"}
 						</span>
 					</span>
-					<span className="flex items-center gap-1">
-						<Users className="w-3.5 h-3.5" />
-						{h.hackers_count}
-					</span>
+					{h.hackers_count > 0 && (
+						<span className="flex items-center gap-1">
+							<Users className="w-3.5 h-3.5" />
+							{h.hackers_count}
+						</span>
+					)}
 					<span className="flex items-center gap-1">
 						<Clock className="w-3.5 h-3.5" />
-						{days > 0 ? `${days}d left` : "Ending soon"}
+						{upcoming
+							? `Starts ${starts}`
+							: days > 0
+								? `${days}d left`
+								: "Ending soon"}
 					</span>
 				</div>
 			</div>

@@ -1,46 +1,61 @@
 /**
- * Stellar stablecoin registry — ranked by USD market cap.
+ * Stellar stablecoin registry: ranked by USD market cap.
  *
  *   GET /api/stablecoins                     → all issuers, biggest USD mcap first
  *   GET /api/stablecoins?peg=USD             → only USD-pegged
  *   GET /api/stablecoins?sort=holders        → by trustline holders
  *   GET /api/stablecoins?limit=5             → top N
  *
- * Proxies the authoritative snapshot (stablecoin.stellarlight.xyz — our own
- * live service, refreshed continuously) and normalizes its display values into
- * raw numbers so agents can compare and cite them.
+ * Served from OUR OWN `stablecoins` collection (measured every 6h by
+ * scripts/refresh-stablecoins.ts from Horizon, Stellar Expert, and live peg
+ * FX). Until 2026-08-19 this proxied a Replit-hosted sibling service; that
+ * host is being retired. Owning the measurement is the point: the proxy
+ * silently dropped Circle USDC for hours while the asset was live on-chain,
+ * and a missing row reads to an agent as "this asset does not exist on
+ * Stellar" (stellar-raven sls-066). Our writer now emits an `unmeasured` row
+ * instead of no row, so a failed fetch can never masquerade as a delisting.
  *
  * WHY it ranks by USD market cap, not raw supply (boxy review 2026-07-21):
  * circulating supply is denominated in each asset's OWN peg, so it is NOT
- * comparable across rows — GYEN's 100.87M is YEN (~$676K), ARST's 243M is
+ * comparable across rows: GYEN's 100.87M is YEN (~$676K), ARST's 243M is
  * Argentine pesos (~$243K). Only marketCapUSD (supply × USD price) is
  * comparable; that is the default order, and every row carries its `peg` so
  * denomination is never ambiguous. `supply` is served too but is meaningful
- * only within a single peg. Absence/null = not tracked at our source, never
- * "zero".
+ * only within a single peg. Null on any metric = not measured, never "zero".
  *
  * Unknown query params are rejected with 400 (never silently ignored).
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
+import { serverTiming } from "@/lib/server-timing";
 import {
-	normalizeSnapshotRow,
 	rankStablecoins,
-	type SnapshotRow,
-	STABLECOIN_SNAPSHOT_URL,
 	STABLECOIN_SORTS,
 	type StablecoinSort,
+	type StoreRow,
+	storeRowToApi,
 } from "@/lib/stablecoins";
 
 export const dynamic = "force-dynamic";
+// The caller gives up at 10 s; a request still working past 20 s is a
+// stall, and finishing it helps nobody.
+export const maxDuration = 20;
 export const revalidate = 300;
 
 const KNOWN_PARAMS = new Set(["peg", "sort", "limit"]);
 
+const CORS = {
+	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, OPTIONS",
+};
+
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 
 	// Reject unknown params (an agent that sends country= must learn it's not
@@ -50,6 +65,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: `Unknown query param '${unknown}'.`,
+				hint: `Supported: ${[...KNOWN_PARAMS].join(", ")}. Unknown parameters are rejected here, never ignored, so a registry list that looks filtered is never returned.`,
 				validParams: [...KNOWN_PARAMS],
 			},
 			{ status: 400 },
@@ -66,74 +82,140 @@ export async function GET(req: NextRequest) {
 	const pegFilter = sp.get("peg");
 	const limit = clampLimit(sp.get("limit"), 50, 100);
 
-	// Proxy the sibling snapshot service. Bounded timeout + graceful failure:
-	// a proxy outage returns an HONEST empty set with an advisory, never a 500
-	// that reads as "no stablecoins exist".
-	let snapshot: SnapshotRow[] = [];
-	let upstreamOk = true;
-	try {
-		const controller = new AbortController();
-		const timer = setTimeout(() => controller.abort(), 8000);
-		const res = await fetch(STABLECOIN_SNAPSHOT_URL, {
-			signal: controller.signal,
-			headers: { accept: "application/json" },
-			next: { revalidate: 300 },
+	// A store outage must NEVER render as an empty 200: that is precisely the
+	// shape an agent reads as "Stellar has no stablecoins". Fail loudly.
+	const payload = await getPayloadSafe();
+	if (!payload) {
+		return apiError({
+			status: 503,
+			error: "stablecoin store unavailable",
+			advisory:
+				"The datastore was unreachable. This is an outage, NOT a claim that Stellar has no stablecoins, and NOT a claim that any asset was delisted. Retry shortly.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: CORS,
 		});
-		clearTimeout(timer);
-		if (!res.ok) throw new Error(`upstream ${res.status}`);
-		const body = await res.json();
-		snapshot = Array.isArray(body) ? body : [];
-	} catch {
-		upstreamOk = false;
 	}
 
-	let rows = snapshot.map(normalizeSnapshotRow).filter((r) => r.ticker);
-	const total = rows.length;
+	// The registry is ~23 rows: fetch all and filter/rank in JS.
+	const found = await payload
+		.find({
+			collection: "stablecoins",
+			limit: 200,
+			depth: 0,
+		})
+		.catch(() => null);
+	if (!found) {
+		logApiHit({
+			req,
+			startedAt,
+			status: 503,
+			endpoint: "/api/stablecoins",
+		});
+		return NextResponse.json(
+			{
+				error: "stablecoin store read failed",
+				advisory:
+					"The datastore read failed. This is an outage, NOT a claim that Stellar has no stablecoins. Retry after a moment.",
+				retryAfterSeconds: 2,
+			},
+			{
+				status: 503,
+				headers: { ...serverTiming(startedAt), ...CORS, "Retry-After": "2" },
+			},
+		);
+	}
+
+	let rows = (found.docs as StoreRow[])
+		// A retired row is one we stopped tracking; it is not part of the
+		// current inventory (and is still not a claim the issuer stopped).
+		.filter((d) => !d.retiredAt)
+		.map(storeRowToApi)
+		.filter((r) => r.ticker);
+
+	// sls-066: `total` used to be taken BEFORE the peg filter, so peg=USD
+	// returned 7 rows under counts.total 22: while every other endpoint's
+	// contract defines counts.total as the filtered count before slicing.
+	// `tracked` keeps the whole-inventory number, `total` means what the
+	// contract says.
+	const tracked = rows.length;
+	// Computed over the WHOLE inventory before peg-filter and limit: a limit
+	// boundary splitting an EURC pair must not make the disambiguation vanish.
+	const multiIssuerTickers = (() => {
+		const byTicker = new Map<string, Set<string>>();
+		for (const r of rows) {
+			const t = String(r.ticker ?? "").toUpperCase();
+			if (!t) continue;
+			if (!byTicker.has(t)) byTicker.set(t, new Set());
+			if (r.company) byTicker.get(t)?.add(String(r.company));
+		}
+		return [...byTicker.entries()]
+			.filter(([, cs]) => cs.size > 1)
+			.map(([t, cs]) => ({
+				ticker: t,
+				companies: [...cs].sort(),
+				note: `${t} is issued on Stellar by ${cs.size} distinct companies: attribute by issuer account, never by ticker alone.`,
+			}));
+	})();
 	if (pegFilter) {
 		const want = pegFilter.toUpperCase();
 		rows = rows.filter((r) => (r.peg ?? "").toUpperCase() === want);
 	}
+	const total = rows.length;
 	rows = rankStablecoins(rows, sort as StablecoinSort).slice(0, limit);
 
-	// dataAsOf = the freshest snapshot row timestamp we served.
+	// dataAsOf = the freshest measurement among the rows we served.
 	let dataAsOf: string | null = null;
 	for (const r of rows)
 		if (r.updatedAt && (!dataAsOf || r.updatedAt > dataAsOf))
 			dataAsOf = r.updatedAt;
 
+	// Say how many served rows are actual live measurements. A caller that
+	// averages across rows needs to know if some are hand-checked estimates.
+	const byBasis = { live: 0, "curated-static": 0, unmeasured: 0 };
+	for (const r of rows) if (r.basis && r.basis in byBasis) byBasis[r.basis]++;
+
 	logApiHit({
 		req,
+		startedAt,
+		status: 200,
 		endpoint: "/api/stablecoins",
 		filters: { peg: pegFilter, sort, limit },
 		resultCount: rows.length,
 	});
 
-	const advisory = upstreamOk
-		? undefined
-		: {
-				summary:
-					"The stablecoin snapshot service was unreachable; this response is empty but that is a source outage, NOT a claim that Stellar has no stablecoins. Retry shortly.",
-			};
-
 	return NextResponse.json(
 		{
 			meta: {
 				source: "https://stellarlight.xyz/api/stablecoins",
-				upstream: "https://stablecoin.stellarlight.xyz",
 				generatedAt: new Date().toISOString(),
 				dataAsOf,
+				// Issuer-relation disambiguation (sls-066 class; the miss that
+				// motivated it attributed MyKobo's EURC to Circle because a prose
+				// source said "Circle issues USDC and EURC"): when one ticker is
+				// issued by MULTIPLE distinct companies, ticker alone is not an
+				// identity: say so where the numbers are, so a caller projecting
+				// {ticker, marketCap} can't silently drop the issuer axis.
+				multiIssuerTickers,
 				filters: { peg: pegFilter ?? null, sort, limit },
-				counts: { total, returned: rows.length },
+				counts: { tracked, total, returned: rows.length, byBasis },
+				// sls-066: say what this inventory IS. It is a curated registry of
+				// hand-verified issuers: not a census of every Stellar stablecoin.
+				// A ticker absent here is "not in our registry", never "does not
+				// exist on Stellar".
+				coverage: {
+					basis: "curated-registry",
+					note: "Rows are a hand-curated registry of verified (code, issuer) pairs, measured every 6h. Absence from this list means the asset is not tracked here: NOT proof it is not issued on Stellar; verify against Horizon before asserting non-existence. Asset identity is (code, issuer): two assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on ticker alone.",
+				},
 				methodology:
-					"marketCapUSD = circulating supply × USD price (the sibling snapshot's computed value). It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not tracked at our source, never 'zero'. dataAsOf dates the served rows.",
-				...(advisory ? { advisory } : {}),
+					"marketCapUSD = circulating supply × priceUSD. It is the ONLY cross-row-comparable size metric; `supply` is raw units in each asset's own `peg` and comparable only within a peg. Default sort=marketcap. null on any metric = not measured, never 'zero'. Every row carries `basis`: live = measured this cycle; curated-static = hand-checked figures for an asset no public API reports reliably; unmeasured = the fetch failed and the row is retained so its absence is never read as a delisting. `updatedAt` dates the figures (when they were measured, internally `measuredAt`): cite it. `logoUrl` is the issuer's own mark when one resolves, null otherwise; `logoSource` says where it came from. `priceBasis` says how each unit was priced: assumed-peg = the peg's live FX rate and peg deviation is NOT measured; measured-market = the unit's own market price, used where the unit is not 1:1 with its peg (USDY accrues, USDM1 is a bond above par).",
 			},
 			stablecoins: rows,
 		},
 		{
 			headers: {
-				"Access-Control-Allow-Origin": "*",
-				"Access-Control-Allow-Methods": "GET, OPTIONS",
+				...serverTiming(startedAt),
+				...CORS,
 				"Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
 			},
 		},
@@ -143,8 +225,7 @@ export async function GET(req: NextRequest) {
 export function OPTIONS() {
 	return new NextResponse(null, {
 		headers: {
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			...CORS,
 			"Access-Control-Allow-Headers": "Content-Type",
 		},
 	});

@@ -1,0 +1,978 @@
+{
+ "generatedAt": "2026-10-07T14:42:11.326Z",
+ "source": "QUALITY.md",
+ "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
+ "phases": [
+  {
+   "id": "P0",
+   "title": "Name the classes, lock the first invariant",
+   "state": "done",
+   "evidence": "check-schema-opacity.ts (the 47 baselined open maps were paid down to ZERO in #1092; the ratchet now holds the floor at 0), QUALITY.md itself.",
+   "shippedSoFar": null,
+   "remaining": null
+  },
+  {
+   "id": "P1",
+   "title": "Honesty layer, eval integrity, the dashboard",
+   "state": "done",
+   "evidence": "specs/honesty-baseline.json (debt 0), scripts/eval/eval-baselines.json, improvements/quality/*.json.",
+   "shippedSoFar": null,
+   "remaining": null
+  },
+  {
+   "id": "P2",
+   "title": "Entity truth: issuers, receipts, enumerations, dedupe",
+   "state": "done",
+   "evidence": "battery slice G (enumeration integrity), slice H (verify grades itself), improvements/receipts/, improvements/quality/entities.json (repos.duplicateRows = 0), scripts/data/check-repo-dupes.ts in enrich-repos.yml + dedupe-repos.yml.",
+   "shippedSoFar": null,
+   "remaining": null
+  },
+  {
+   "id": "P3",
+   "title": "Earned autonomy",
+   "state": "in-progress",
+   "evidence": null,
+   "shippedSoFar": "the daily pipeline now rebuilds its own quality artifacts and commits them, and the stale-finding sweep re-probes the ledger instead of letting counts drift. 2026-08-28: the FIRST bounded agent lane is live — the deployment-evidence gap (sls-079) is worked mechanically by the weekly curation pass via the operator-toml chain (the project's own stellar.toml -> declared code+issuer -> confirmed on Horizon mainnet; full chain or abstain, basis labeled \"operator-toml\" so a machine stamp never impersonates a human one). The lane reproduces the 2026-08-28 hand-worked queue's mechanical half; judgment cases (operator docs, bundles) stay human. 2026-08-29: the closure rule's METRIC exists — repeat-class rate is computed from the ledger and published on /quality (first measurement: 30-day rate 100%, 168/168 new findings in already-seen classes; lifetime 98.7% across 6 classes + meta-eval. The treadmill, now with a number).",
+   "remaining": "five lanes at Stage 2 (enrich-tvl, scan-repo-code, refresh-research-corpus on 2026-09-13; enrich-repo-activity and refresh-stablecoins on 2026-09-14, each on an end-state claim proven twice in its own log), 7 eligible at 4+ clean weeks. Detection is autonomous; repair has a lane (repair-lane.yml, one open ledger row per day) and the four hand-run tracks have one (task-lane.yml: notes Tue, claims Wed, packets Thu, gap Fri) — both PR-only, headless agent, no production secrets, protected or allowed paths enforced by a diff-guard, the attempt log on main as the end-state claim. First-day proof: the repair lane found and fixed a real defect (lulpay's SCF record, #1568); the task lane delivered a 40-row packet (#1574); PR creation needs the repo to allow Actions to open PRs. Stage 3 stays closed until the lanes have weeks."
+  },
+  {
+   "id": "P4",
+   "title": "Basis strength at scale",
+   "state": "in-progress",
+   "evidence": null,
+   "shippedSoFar": "2026-08-31→09-01 — the basis-upgrade lanes exist and have run against the population: evidence A (asset movement deltas between two dated stellar.expert readings), B (DeFiLlama TVL ≤14d) and C (Horizon, same day — issuer payments asset-matched over 20 records, XLM-pair trade fallback), every probe trinary (hit / checked-empty / could-not-check reaches the summary and the exit code). 35 rows now rest on onchain-activity; a two-auditor pass (agent + Grok) reverted 4 uncorrected-probe upgrades, one of which re-earned its upgrade the same run under the corrected rule. Asset keys joined from the stablecoin registry (12) and operators' own stellar.toml (7) so deltas compound weekly. Death receipts: 42 stamped, 8 retracted after audit (a live-200 page cannot stand as \"observed dead\"), 2 re-stamped once their domains went hard-dead. Untyped 59→2 (both honest residuals). Weak share: read strongBasisSplit and strongByBasis in improvements/quality/entities.json — the number is no longer hand-printed here, because on 2026-09-05 this file said 84%, the board 62.7% and knownLimitations 62% for one SLO. The 2026-09-04 drop (794→617 weak) was 173 rows on two NEW evidence tiers (repo-activity, product-integration) plus 4 within the pre-existing onchain-activity tier: real evidence, and a change in what counts — reported as two numbers from now on, never as the ratchet falling.",
+   "remaining": "done bar is weak bases under 50% of Live rows; 453 of 830 (54.6%) on 2026-09-13 — read strongBasisSplit for today's figure. The machine levers are measured out (onchain-eligible 5, repo-activity 0); the ~39 rows that must move are the owner triage table (relink / Inactive / leave), human work."
+  },
+  {
+   "id": "P5",
+   "title": "The knowledge layer consumers keep asking for",
+   "state": "in-progress",
+   "evidence": null,
+   "shippedSoFar": "2026-09-01 — the curated knowledgeNotes registry grew 16→~29 repos, every note dated and source-cited, including the supersession facts consumers actually ask for as prose (stellar/go → go-stellar-sdk, the Horizon monorepo split, the js-sdk deprecation chain, protocol ceilings). explainRepo now answers from a dated note ahead of an undated DeepWiki walkthrough (answerSource: \"knowledge-note\", answerAsOf RFC 3339), matched by exact identifier or by hand-authored trigger phrases; the matcher was hijack-hardened (citation URLs and bare domains can no longer route a note). sls-080 closed on the consumer's own probe and independently re-verified by Raven on 2026-09-01. 2026-09-04/05 — the product-level knowledge sls-023 asked for (which product is actually issued on Stellar, by whom, with what controls) exists as a verified RWA registry: 97 tokens re-verified from the issuer's own stellar.toml or the Soroban contract itself, feeding products, deployment and on-chain controls on project rows, pinned hourly on production (#1298–#1306). 2026-09-05 — supersededBy / deprecatedAt / supersessionKind are FIELDS on repo rows: 50 notes carried the prose, 34 became a curated dated map keyed by the superseded repo, successorRepo is derived from it, and a test holds prose and fields together (spec 1.9.36, #1307).",
+   "remaining": "every curated-pool row (repoScore ≥ 50) carries a public note or a triage verdict as of 2026-09-14 (waves 4–6: 345 → 394 public-noted repos on the detector; the DB floor follows the daily backfill). Still open: contracts as first-class joined entities (11 of the 308 expected-tier repos)."
+  }
+ ],
+ "phaseMeters": {
+  "P3": {
+   "bar": "every lane that writes to production has earned the intervention-free threshold",
+   "origin": 0,
+   "current": 12,
+   "target": 79,
+   "unit": "lanes",
+   "pct": 0.21518987341772153,
+   "note": "Weeks measure the absence of correction, not effect — the second condition (a lane asserts its own end state) is not yet counted here because most lanes do not report one."
+  },
+  "P4": {
+   "bar": "weak bases under 50% of Live rows",
+   "origin": 86,
+   "current": 54.7,
+   "target": 50,
+   "unit": "% of Live rows on a weak basis",
+   "pct": 0.8704578250032794,
+   "note": "Origin is the share when the phase opened (842/979). The ratchet may only fall."
+  },
+  "P5": {
+   "bar": "the curated-pool note floor, examined or noted",
+   "origin": 0,
+   "current": 376,
+   "target": 384,
+   "unit": "curated-pool repos",
+   "pct": 0.9791666666666666,
+   "note": "Counts a repo examined and recorded as yielding no durable public fact — a judged repo is not a gap."
+  }
+ },
+ "library": {
+  "lessons": [
+   {
+    "file": "improvements/lessons/2026-09-05-routing-on-the-intended-op.md",
+    "date": "2026-09-05",
+    "title": "Routing on the intended op, and the consumer that had not read our fixes (2026-09-05)",
+    "lessonCount": 4,
+    "bytes": 7640
+   },
+   {
+    "file": "improvements/lessons/2026-09-05-night-shift.md",
+    "date": "2026-09-05",
+    "title": "Lessons: the 2026-09-05 night shift (agents in parallel, executes read back, two audits)",
+    "lessonCount": null,
+    "bytes": 6676
+   },
+   {
+    "file": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
+    "date": "2026-08-31",
+    "title": "A value wearing provenance that does not cover it (2026-08-31)",
+    "lessonCount": null,
+    "bytes": 5246
+   },
+   {
+    "file": "improvements/lessons/2026-08-31-consumer-view-and-two-auditor-day.md",
+    "date": "2026-08-31",
+    "title": "The consumer's view, and the two-auditor loop (2026-08-31)",
+    "lessonCount": 5,
+    "bytes": 4942
+   },
+   {
+    "file": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
+    "date": "2026-08-28",
+    "title": "Lessons: 2026-08-28: the deployment queue pass and the fake-issuer farm",
+    "lessonCount": 3,
+    "bytes": 3270
+   },
+   {
+    "file": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
+    "date": "2026-08-27",
+    "title": "Lesson: the truth battery's first two runs (2026-08-27)",
+    "lessonCount": 11,
+    "bytes": 7724
+   },
+   {
+    "file": "improvements/lessons/2026-08-14-advisory-calibration-and-battery-fidelity.md",
+    "date": "2026-08-14",
+    "title": "2026-08-14: Three calibrations to one honest signal (+ the battery's four probe lessons)",
+    "lessonCount": null,
+    "bytes": 4837
+   },
+   {
+    "file": "improvements/lessons/2026-08-12-advertised-but-never-persisted.md",
+    "date": "2026-08-12",
+    "title": "2026-08-12: Advertised but never persisted: the sdkCapabilities hole",
+    "lessonCount": null,
+    "bytes": 10499
+   },
+   {
+    "file": "improvements/lessons/2026-08-08-zero-work-green-and-population-truth.md",
+    "date": "2026-08-08",
+    "title": "2026-08-08: Zero-work green runs, and shape ≠ population",
+    "lessonCount": null,
+    "bytes": 4369
+   },
+   {
+    "file": "improvements/lessons/2026-07-19-improvement-day.md",
+    "date": "2026-07-19",
+    "title": "2026-07-19: the improvement day (classes 27–30)",
+    "lessonCount": null,
+    "bytes": 3849
+   },
+   {
+    "file": "improvements/lessons/2026-07-16-slice-truth-floors-and-windows.md",
+    "date": "2026-07-16",
+    "title": "2026-07-16: slice truth, gated floors, windowed guards (quality-week lessons)",
+    "lessonCount": 4,
+    "bytes": 4653
+   },
+   {
+    "file": "improvements/lessons/2026-07-11-sls-wave-and-parallel-agents.md",
+    "date": "2026-07-11",
+    "title": "Lessons: the sls-020..050 wave (2026-07-11)",
+    "lessonCount": null,
+    "bytes": 2129
+   },
+   {
+    "file": "improvements/lessons/2026-07-11-ops-polling-payload-contract.md",
+    "date": "2026-07-11",
+    "title": "Ops: polling loops, Payload API shapes, contract gates (2026-07-11)",
+    "lessonCount": null,
+    "bytes": 1626
+   },
+   {
+    "file": "improvements/lessons/2026-07-11-intent-classes-and-eval-blindspots.md",
+    "date": "2026-07-11",
+    "title": "Intent classes need a mechanism AND a standing eval (2026-07-11)",
+    "lessonCount": null,
+    "bytes": 1841
+   },
+   {
+    "file": "improvements/lessons/2026-07-09-research-rank-starbridge.md",
+    "date": "2026-07-09",
+    "title": "2026-07-09: stale-but-close outranks current (Starbridge)",
+    "lessonCount": null,
+    "bytes": 2688
+   },
+   {
+    "file": "improvements/lessons/2026-07-09-curation-writes-and-identity.md",
+    "date": "2026-07-09",
+    "title": "2026-07-09: the corridor-matrix day: three write-path classes + one process class",
+    "lessonCount": null,
+    "bytes": 4925
+   },
+   {
+    "file": "improvements/lessons/2026-07-08-verify-before-advertise-npm.md",
+    "date": "2026-07-08",
+    "title": "2026-07-08: The changelog advertised a package version that didn't exist",
+    "lessonCount": null,
+    "bytes": 1585
+   },
+   {
+    "file": "improvements/lessons/2026-07-08-structured-recall-etherfuse-sushi.md",
+    "date": "2026-07-08",
+    "title": "2026-07-08: Structured truth must drive INCLUSION, not just ranking",
+    "lessonCount": null,
+    "bytes": 2613
+   },
+   {
+    "file": "improvements/lessons/2026-07-08-schema-drift-contract-as-code.md",
+    "date": "2026-07-08",
+    "title": "2026-07-08: Schema drift: the spec lied about the live API",
+    "lessonCount": null,
+    "bytes": 2990
+   }
+  ],
+  "audits": [
+   {
+    "file": "improvements/audits/review-2026-07-08-findings.md",
+    "name": "review-2026-07-08-findings"
+   },
+   {
+    "file": "improvements/audits/grok-day-audit-2026-09-05.md",
+    "name": "grok-day-audit-2026-09-05"
+   },
+   {
+    "file": "improvements/audits/audit-2026-07-09-full-surface.md",
+    "name": "audit-2026-07-09-full-surface"
+   }
+  ],
+  "receipts": [
+   {
+    "file": "improvements/receipts/zkcross-2026-09-06.json",
+    "slug": "zkcross",
+    "url": "https://zkcross-network-1.gitbook.io/learn.zkcross.network/ecosystem-validation/production-validation.md",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "zkCrossDEX served as the main proving ground for this phase"
+    ]
+   },
+   {
+    "file": "improvements/receipts/zenex-2026-10-03.json",
+    "slug": "zenex",
+    "url": "https://docs.zenex.trade/deployments/contract-addresses",
+    "fetchedAt": "2026-10-03",
+    "markers": [
+     "live Zenex deployment on Stellar mainnet",
+     "ledger 64,737,253",
+     "CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ",
+     "CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB",
+     "NOT TBD"
+    ]
+   },
+   {
+    "file": "improvements/receipts/zenex-2026-08-28.json",
+    "slug": "zenex",
+    "url": "https://docs.zenex.trade/deployments/contract-addresses",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "TBD (\"…owing contracts are deployed on Stellar testnet ( https://so…\")"
+    ]
+   },
+   {
+    "file": "improvements/receipts/xbull-2026-08-29.json",
+    "slug": "xbull",
+    "url": "https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "xBull Wallet",
+     "Updated"
+    ]
+   },
+   {
+    "file": "improvements/receipts/wagelink-2026-09-06.json",
+    "slug": "wagelink",
+    "url": "https://itunes.apple.com/lookup?id=6461461372&country=us",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "\"resultCount\":0"
+    ]
+   },
+   {
+    "file": "improvements/receipts/vanna-finance-2026-09-06.json",
+    "slug": "vanna-finance",
+    "url": "https://docs.vanna.finance/developers/deployed-contracts.md",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "All contracts are deployed on **Stellar Testnet**",
+     "Mainnet addresses will be published at launch"
+    ]
+   },
+   {
+    "file": "improvements/receipts/usdt0-2026-08-29.json",
+    "slug": "usdt0",
+    "url": "https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "USDT0",
+     "GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q"
+    ]
+   },
+   {
+    "file": "improvements/receipts/triiyo-2026-09-07.json",
+    "slug": "triiyo",
+    "url": "https://triiyo.com/",
+    "fetchedAt": "2026-09-07",
+    "markers": [
+     "for sale"
+    ]
+   },
+   {
+    "file": "improvements/receipts/transfermole-2026-09-06.json",
+    "slug": "transfermole",
+    "url": "https://api.github.com/repos/ivandzen/transfermole",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
+    ]
+   },
+   {
+    "file": "improvements/receipts/the-give-hub-2026-09-06.json",
+    "slug": "the-give-hub",
+    "url": "https://app.thegivehub.com/api.php/campaigns",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "[] (\"…[]…\")"
+    ]
+   },
+   {
+    "file": "improvements/receipts/taskio-2026-09-06.json",
+    "slug": "taskio",
+    "url": "https://task.io/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "NOT for sale",
+     "atom.com"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stronghold-deployment-2026-08-28.json",
+    "slug": "stronghold",
+    "url": "https://stronghold.co/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellarterm-deployment-2026-08-28.json",
+    "slug": "stellarterm",
+    "url": "https://stellarterm.com/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "product class"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellarsight-2026-08-29.json",
+    "slug": "stellarsight",
+    "url": "https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "x402Version",
+     "stellar:testnet"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellars-finance-2026-08-28.json",
+    "slug": "stellars-finance",
+    "url": "https://stellars.finance/assets/index-3HEaNhUX.js",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "testnet vault contract",
+     "mainnet empty addresses"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellar-token-launchpad-2026-09-06.json",
+    "slug": "stellar-token-launchpad",
+    "url": "https://tokenlaunchpad.eu/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Cryptix"
+    ]
+   },
+   {
+    "file": "improvements/receipts/stellar-tip-2026-09-07.json",
+    "slug": "stellar-tip",
+    "url": "https://chromewebstore.google.com/detail/stellar-tip/nofpjgocmncmlacjfnniilnckjbhmgdh",
+    "fetchedAt": "2026-09-07",
+    "markers": [
+     "NOT not available"
+    ]
+   },
+   {
+    "file": "improvements/receipts/soundness-2026-09-05.json",
+    "slug": "soundness",
+    "url": "https://soundness.xyz/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "winding down",
+     "no longer being developed",
+     "services are now offline"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorosplits-2026-09-06.json",
+    "slug": "sorosplits",
+    "url": "https://sorosplits.xyz/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorosan-2026-09-06.json",
+    "slug": "sorosan",
+    "url": "https://sorosan-dapp.vercel.app/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Create Next App"
+    ]
+   },
+   {
+    "file": "improvements/receipts/sorodrop-2026-09-06.json",
+    "slug": "sorodrop",
+    "url": "https://sorodrop.xyz/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/soroban-pulse-2026-09-06.json",
+    "slug": "soroban-pulse",
+    "url": "https://sorobanpulse.app/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/skyhitz-2026-09-05.json",
+    "slug": "skyhitz",
+    "url": "https://skyhitz.io/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "Total Mass 0.00",
+     "Event Horizon 0.0000",
+     "Balance —"
+    ]
+   },
+   {
+    "file": "improvements/receipts/redstone-finance-2026-08-29.json",
+    "slug": "redstone-finance",
+    "url": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "Stellar mainnet",
+     "price feeds"
+    ]
+   },
+   {
+    "file": "improvements/receipts/ramm-2026-09-06.json",
+    "slug": "ramm",
+    "url": "https://ramm.ai/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Popupz"
+    ]
+   },
+   {
+    "file": "improvements/receipts/quasar-2026-09-06.json",
+    "slug": "quasar",
+    "url": "https://eiger.co/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Eiger and Equilibrium Labs unite"
+    ]
+   },
+   {
+    "file": "improvements/receipts/qolaq-2026-09-06.json",
+    "slug": "qolaq",
+    "url": "https://qolaq.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "lander"
+    ]
+   },
+   {
+    "file": "improvements/receipts/polaris-lend-2026-09-06.json",
+    "slug": "polaris-lend",
+    "url": "https://jetprotocol.io/lander",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "parking-lander",
+     "ap:\"parking\""
+    ]
+   },
+   {
+    "file": "improvements/receipts/pluto-loans-2026-08-28.json",
+    "slug": "pluto-loans",
+    "url": "https://plutoloans.com/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "NOT domain resolves",
+     "NOT recent repository activity"
+    ]
+   },
+   {
+    "file": "improvements/receipts/ping-2026-08-28.json",
+    "slug": "ping",
+    "url": "https://letsping.com/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "Site Not Found",
+     "NOT app.letsping.com resolves"
+    ]
+   },
+   {
+    "file": "improvements/receipts/orbitcdp-2026-09-05.json",
+    "slug": "orbitcdp",
+    "url": "https://orbitcdp.finance/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "oUSD Minted —",
+     "Collateral Locked —",
+     "Borrow APY —"
+    ]
+   },
+   {
+    "file": "improvements/receipts/ondo-deployment-2026-08-28.json",
+    "slug": "ondo",
+    "url": "https://ondo.finance/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/noether-2026-08-28.json",
+    "slug": "noether",
+    "url": "https://noether.exchange/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "funds are not real",
+     "testnet",
+     "waitlist"
+    ]
+   },
+   {
+    "file": "improvements/receipts/neovestor-2026-09-06.json",
+    "slug": "neovestor",
+    "url": "https://neovestor.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "waitlist",
+     "Early access",
+     "0.0 (\"…t works Licensed custody Gasless From $10 Regulated T-Bills…\")"
+    ]
+   },
+   {
+    "file": "improvements/receipts/mystic-2026-09-06.json",
+    "slug": "mystic",
+    "url": "https://raw.githubusercontent.com/mystic-finance/Stellar-RFQ/main/docs/MILESTONE_1.md",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Pre-Launch",
+     "testnet"
+    ]
+   },
+   {
+    "file": "improvements/receipts/muwp-2026-09-06.json",
+    "slug": "muwp",
+    "url": "https://muwpay.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "DEPLOYMENT_DISABLED"
+    ]
+   },
+   {
+    "file": "improvements/receipts/lobstr-2026-08-29.json",
+    "slug": "lobstr",
+    "url": "https://lobstr.co/",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "LOBSTR for iOS",
+     "Stellar"
+    ]
+   },
+   {
+    "file": "improvements/receipts/laina-2026-08-28.json",
+    "slug": "laina",
+    "url": "https://raw.githubusercontent.com/laina-defi/laina/main/src/lib/horizon.ts",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "horizon-testnet",
+     "Networks.TESTNET"
+    ]
+   },
+   {
+    "file": "improvements/receipts/kunst21-2026-09-07.json",
+    "slug": "kunst21",
+    "url": "https://kunst21.com/",
+    "fetchedAt": "2026-09-07",
+    "markers": [
+     "365 (\"…365英国上市公司(集团)官方网站-Official Website 365英国上市公司(集团)官方网站-Officia…\")"
+    ]
+   },
+   {
+    "file": "improvements/receipts/hoops-2026-08-28.json",
+    "slug": "hoops",
+    "url": "https://hoops.finance/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "TESTNET",
+     "JOIN THE WAITLIST"
+    ]
+   },
+   {
+    "file": "improvements/receipts/grantpicks-2026-09-06.json",
+    "slug": "grantpicks",
+    "url": "https://app.grantpicks.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "DEPLOYMENT_DISABLED",
+     "Payment required"
+    ]
+   },
+   {
+    "file": "improvements/receipts/glo-dollar-deployment-2026-08-28.json",
+    "slug": "glo-dollar",
+    "url": "https://horizon.stellar.org/accounts/GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "issuer home_domain (reverse chain)",
+     "horizon asset"
+    ]
+   },
+   {
+    "file": "improvements/receipts/flipside-2026-08-28.json",
+    "slug": "flipside",
+    "url": "https://flipsidecrypto.xyz/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "xyz redirects to edisyl",
+     "com redirects too"
+    ]
+   },
+   {
+    "file": "improvements/receipts/every-finance-2026-09-06.json",
+    "slug": "every-finance",
+    "url": "https://every.finance/lander",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "is for sale"
+    ]
+   },
+   {
+    "file": "improvements/receipts/equitx-2026-09-06.json",
+    "slug": "equitx",
+    "url": "https://api.github.com/repos/EquitXCompany/equitx-project",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
+    ]
+   },
+   {
+    "file": "improvements/receipts/didstellar-2026-09-06.json",
+    "slug": "didstellar",
+    "url": "https://api.github.com/repos/mavennet/stellar-did",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "Not Found"
+    ]
+   },
+   {
+    "file": "improvements/receipts/dia-2026-08-29.json",
+    "slug": "dia",
+    "url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "DIA (\"…UASBVEJNE5C2MCFWVIXL4Z7DMD7PJJMF Testnet To learn more about…\")",
+     "testnet"
+    ]
+   },
+   {
+    "file": "improvements/receipts/code4rena-2026-09-05.json",
+    "slug": "code4rena",
+    "url": "https://code4rena.com/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "winding down",
+     "closing its doors"
+    ]
+   },
+   {
+    "file": "improvements/receipts/circle-cctp-cross-chain-transfer-protocol-deployment-2026-08-28.json",
+    "slug": "circle-cctp-cross-chain-transfer-protocol",
+    "url": "https://developers.circle.com/cctp/references/stellar-contracts",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator mainnet reference",
+     "stellar.expert public contracts"
+    ]
+   },
+   {
+    "file": "improvements/receipts/circle-2026-08-29.json",
+    "slug": "circle",
+    "url": "https://developers.circle.com/cctp/references/stellar-contracts",
+    "fetchedAt": "2026-08-29",
+    "markers": [
+     "Stellar",
+     "Mainnet"
+    ]
+   },
+   {
+    "file": "improvements/receipts/chainsatlas-2026-09-05.json",
+    "slug": "chainsatlas",
+    "url": "https://chainsatlas.com/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "ConnectYourDomain Error"
+    ]
+   },
+   {
+    "file": "improvements/receipts/brale-deployment-2026-08-28.json",
+    "slug": "brale",
+    "url": "https://brale.xyz/.well-known/stellar.toml",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator toml",
+     "horizon asset (declared issuer)"
+    ]
+   },
+   {
+    "file": "improvements/receipts/bigger-2026-09-06.json",
+    "slug": "bigger",
+    "url": "http://biggertech.co/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "is unavailable"
+    ]
+   },
+   {
+    "file": "improvements/receipts/bes-metaverse-2026-09-06.json",
+    "slug": "bes-metaverse",
+    "url": "https://besmetaverse.com/",
+    "fetchedAt": "2026-09-06",
+    "markers": [
+     "is for sale",
+     "This domain is for sale"
+    ]
+   },
+   {
+    "file": "improvements/receipts/basement-2026-09-05.json",
+    "slug": "basement",
+    "url": "https://basement.dev/",
+    "fetchedAt": "2026-09-05",
+    "markers": [
+     "Site Not Found",
+     "no site configured"
+    ]
+   },
+   {
+    "file": "improvements/receipts/axelar-deployment-2026-08-28.json",
+    "slug": "axelar",
+    "url": "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
+    "fetchedAt": "2026-08-28",
+    "markers": [
+     "operator mainnet reference",
+     "stellar.expert public contract"
+    ]
+   },
+   {
+    "file": "improvements/receipts/assetdesk-2026-09-07.json",
+    "slug": "assetdesk",
+    "url": "http://assetdesk.xyz/",
+    "fetchedAt": "2026-09-07",
+    "markers": [
+     "Domain registration has expired"
+    ]
+   }
+  ]
+ },
+ "lessonGuards": {
+  "rows": [
+   {
+    "lesson": "improvements/lessons/2026-07-08-schema-drift-contract-as-code.md",
+    "guards": [
+     ".github/workflows/contract-gate.yml",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-08-structured-recall-etherfuse-sushi.md",
+    "guards": [
+     "src/lib/__tests__/project-search-match.test.ts",
+     "scripts/self-audit.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-08-verify-before-advertise-npm.md",
+    "guards": [
+     "scripts/self-audit.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-09-curation-writes-and-identity.md",
+    "guards": [
+     "scripts/check-writer-conformance.ts",
+     "scripts/data/check-partner-project-identity.ts",
+     "scripts/self-audit.ts",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-09-research-rank-starbridge.md",
+    "guards": [
+     "src/lib/__tests__/research-rank.test.ts",
+     "scripts/eval/golden-questions.json"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-intent-classes-and-eval-blindspots.md",
+    "guards": [
+     "scripts/eval/golden-questions.json",
+     ".github/workflows/engine-c-health.yml"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-ops-polling-payload-contract.md",
+    "guards": [
+     ".github/workflows/contract-gate.yml"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-11-sls-wave-and-parallel-agents.md",
+    "guards": [
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-16-slice-truth-floors-and-windows.md",
+    "guards": [
+     "src/lib/__tests__/research-rank.test.ts",
+     "scripts/eval/golden-questions.json",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-07-19-improvement-day.md",
+    "guards": [
+     "src/lib/__tests__/title-quality.test.ts",
+     "scout-mcp/test/smoke.mjs",
+     "scripts/check-api-drift.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-08-zero-work-green-and-population-truth.md",
+    "guards": [
+     "scripts/check-field-population.ts",
+     "scripts/check-writer-conformance.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-12-advertised-but-never-persisted.md",
+    "guards": [
+     "scripts/check-writer-conformance.ts",
+     "src/lib/__tests__/scan-write-shape.test.ts",
+     "scripts/check-field-population.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-14-advisory-calibration-and-battery-fidelity.md",
+    "guards": [
+     "scripts/eval/battery-coverage.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-27-truth-battery-day-one.md",
+    "guards": [
+     "scripts/eval/raven-truth-battery.ts",
+     "src/lib/__tests__/identity-groups.test.ts",
+     "src/lib/__tests__/packet-stamps-verdict.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-28-deployment-queue-and-fake-issuer-farm.md",
+    "guards": [
+     "scripts/data/reconcile-rwa-issuers.ts",
+     "src/lib/__tests__/rwa-registry.test.ts",
+     "none"
+    ],
+    "missing": [],
+    "status": "unguarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-31-consumer-view-and-two-auditor-day.md",
+    "guards": [
+     "scripts/raven-routing.ts",
+     "src/lib/__tests__/scf-verdict-parser.test.ts",
+     "src/lib/__tests__/project-search-match.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-08-31-provenance-that-does-not-cover-the-value.md",
+    "guards": [
+     "scripts/check-answer-dating.ts",
+     "src/lib/__tests__/explain-answer-dating.test.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-09-05-night-shift.md",
+    "guards": [
+     "scripts/check-lane-autonomy.ts",
+     "src/lib/__tests__/curated-ownership.test.ts",
+     "src/lib/__tests__/basis-artifact-tier.test.ts",
+     "scripts/check-api-drift.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   },
+   {
+    "lesson": "improvements/lessons/2026-09-05-routing-on-the-intended-op.md",
+    "guards": [
+     "scripts/raven-routing.ts",
+     "scripts/eval/raven-scorer-replica.ts"
+    ],
+    "missing": [],
+    "status": "guarded"
+   }
+  ],
+  "total": 19,
+  "guarded": 14,
+  "unguarded": 5,
+  "guardMissing": 0
+ }
+}

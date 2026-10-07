@@ -9,6 +9,10 @@
 # Gate (exit nonzero) ONLY on: golden REGRESSION vs the pinned baseline, or
 # Engine E silentParams>0. Sampled recall is informational (small samples make
 # floor breaches noisy — the full weekly run owns those floors).
+#
+# A red at the Gate step is the eval reporting a regression to the tracker
+# issue, not the lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Gate$
 name: post-deploy-eval
 on:
   push:

@@ -5,6 +5,8 @@ import ProjectCardSkeleton from "@/components/project-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rankedProjectSearch } from "@/lib/search/ranked-project-search";
+import { graph, itemListNode } from "@/lib/structured-data";
+import { getAppUrl } from "@/lib/utils/app-url";
 
 interface DirectoryProjectsGridProps {
 	searchQuery?: string;
@@ -13,6 +15,13 @@ interface DirectoryProjectsGridProps {
 	sortOption?: string;
 	page: number;
 	limit: number;
+	/** Where pagination links point. /directory by default; a category page
+	 *  passes its own path so page 2 stays on that URL instead of bouncing the
+	 *  reader (and the crawler) back to the unfiltered list. */
+	basePath?: string;
+	/** ItemList name for this render — the category heading on a category
+	 *  page, so the markup names the same slice the h1 does. */
+	listName?: string;
 }
 
 /** Map sort option to Payload sort string */
@@ -78,6 +87,8 @@ export default async function DirectoryProjectsGrid({
 	sortOption = "featured",
 	page,
 	limit,
+	basePath = "/directory",
+	listName = "Stellar Projects Directory",
 }: DirectoryProjectsGridProps) {
 	const payload = await getPayloadSafe();
 
@@ -118,6 +129,12 @@ export default async function DirectoryProjectsGrid({
 					page,
 					sort: getPayloadSort(sortOption),
 					depth: 1,
+					// Excluded: a 1024-dim vector per row, ~12.7KB each. It has no use in
+					// the browser and Next serialises whatever a server component holds
+					// into the RSC payload — 17 of them were 211KB of the homepage's 566KB.
+					// Exclusion rather than an allowlist so no field a card renders can go
+					// missing. Same shape trending-projects-section.tsx already uses.
+					select: { embedding: false } as never,
 				});
 			}
 		} catch (error) {
@@ -140,6 +157,31 @@ export default async function DirectoryProjectsGrid({
 
 	return (
 		<>
+			{/* ItemList for the rows THIS render actually shows. Emitted here
+			    rather than on the page because the page hands the query to a
+			    Suspense child and never holds the docs itself. numberOfItems
+			    therefore matches the cards below it — a list claiming the whole
+			    collection while showing a page of 24 is a mismatch a crawler
+			    can check against the markup. JSON.stringify output, no
+			    user-controlled string in the body. */}
+			<script
+				type="application/ld+json"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify output — see comment above
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(
+						graph([
+							itemListNode(getAppUrl(), {
+								path: basePath,
+								name: listName,
+								items: result.docs.map((p: any) => ({
+									name: String(p.name ?? p.slug),
+									url: `/project/${p.slug}`,
+								})),
+							}),
+						]),
+					),
+				}}
+			/>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
 				{result.docs.map((project: any) => (
 					<ProjectCard
@@ -161,7 +203,7 @@ export default async function DirectoryProjectsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}
+								href={`${basePath}?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page - 1 })}`}
 							>
 								<ChevronLeft className="h-3.5 w-3.5" />
 								Previous
@@ -191,7 +233,7 @@ export default async function DirectoryProjectsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/directory?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}
+								href={`${basePath}?${buildPaginationParams({ searchQuery, typeFilter, scfFilter, sortOption, page: page + 1 })}`}
 							>
 								Next
 								<ChevronRight className="h-3.5 w-3.5" />

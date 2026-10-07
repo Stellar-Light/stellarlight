@@ -1,0 +1,23 @@
+{
+ "slug": "transfermole",
+ "url": "https://api.github.com/repos/ivandzen/transfermole",
+ "finalUrl": "https://api.github.com/repos/ivandzen/transfermole",
+ "fetchedAt": "2026-09-06T00:15:04.279Z",
+ "httpStatus": 404,
+ "headers": {
+  "date": "Sun, 06 Sep 2026 00:15:04 GMT",
+  "etag": null,
+  "lastModified": null,
+  "server": "github.com"
+ },
+ "bodyTextSha256": "3a32eab6ffbfd1cf2684b1a409bf40db46e46c5eaff44de656e499df05d92730",
+ "bodyTextChars": 89,
+ "markers": [
+  {
+   "marker": "Not Found",
+   "found": true,
+   "excerpt": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest\",\"status\":\"404\"}"
+  }
+ ],
+ "note": "Captured by scripts/data/capture-receipt.ts — markers are the evidence the correction rests on; re-run to diff what the page says now against this record."
+}

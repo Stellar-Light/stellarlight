@@ -1,0 +1,58 @@
+name: award reconcile mirror
+# i³ Awards — reconcile the award-ballots record against the relay.
+#
+# Every ballot is written by the relay account under a random ballot id; the
+# record (award-ballots) is the only place an id meets an address, and it is
+# what the tally counts. This lane diffs the two: rows whose ballot the relay
+# holds (ok / differs), rows whose ballot it does not (chain-empty — every
+# row, after a testnet reset), reservations the relay never confirmed
+# (confirmed from the relay, or released once abandoned), ballots on the
+# relay no row names (orphan), and pre-relay rows (legacy). Its only writes
+# are confirm/release of reservations; nothing is ever backfilled or deleted.
+# Runs DAILY in execute mode on the current round (open, else most recently
+# updated); a manual dispatch is dry-run by default. Exits non-zero on
+# differs or orphans so someone reads it; counts only in the log — this repo
+# is public.
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+    inputs:
+      round:
+        description: "Round slug (e.g. i3-2026-test). Empty = current round."
+        required: false
+        default: ""
+      execute:
+        description: "Actually write. Unchecked = dry run."
+        type: boolean
+        required: false
+        default: false
+concurrency:
+  group: award-reconcile
+  cancel-in-progress: false
+permissions: { contents: read }
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      AWARDS_RELAY_SECRET: ${{ secrets.AWARDS_RELAY_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # Inputs reach the shell through the environment, never by interpolation
+      # into the command: this job holds secrets.
+      - name: Reconcile (scheduled = execute; dispatch = dry-run unless execute=true)
+        env:
+          IN_ROUND: ${{ inputs.round }}
+          IN_EXECUTE: ${{ github.event_name == 'schedule' || inputs.execute }}
+        run: |
+          args=(--round="${IN_ROUND:-current}")
+          if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
+          pnpm exec tsx scripts/data/award-reconcile.ts "${args[@]}"

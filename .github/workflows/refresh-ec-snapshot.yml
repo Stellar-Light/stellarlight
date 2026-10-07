@@ -82,6 +82,9 @@ jobs:
           # literal block are fragile (a blank line at lower indent ends
           # the block). Workflow run URL lives in the Actions log.
           git commit -m "data: refresh EC snapshot (asOf ${AS_OF_NEW})"
+          # Another lane's bot commit can land between checkout and push
+          # (2026-09-05: rejected non-fast-forward). Rebase onto main first.
+          git pull --rebase origin main
           git push
           echo "committed=1" >> "$GITHUB_OUTPUT"
         id: commit

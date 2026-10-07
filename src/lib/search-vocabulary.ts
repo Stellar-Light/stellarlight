@@ -64,6 +64,35 @@ export const BUILDER_CORE_VERTICALS = [
  */
 /** zk proof-system vocabulary, shared by every family entry point (see the
  * `zk`/`snark`/`zk-snark`/… keys below). One list so the members stay in sync. */
+// EVM-standard families — every entry point (bare + hyphenated) maps to the
+// same set, the zk-family pattern: a query FOR any member expands to all.
+const ERC20_FAMILY: string[] = [
+	"erc20",
+	"erc-20",
+	"sep-41",
+	"sep41",
+	"token",
+	"fungible",
+];
+const ERC_NFT_FAMILY: string[] = [
+	"erc721",
+	"erc-721",
+	"erc1155",
+	"erc-1155",
+	"nft",
+	"collectible",
+];
+const ERC3643_FAMILY: string[] = [
+	"erc3643",
+	"erc-3643",
+	"sep-57",
+	"sep57",
+	"rwa",
+	"real world asset",
+	"regulated",
+	"compliance",
+	"kyc",
+];
 const ZK_FAMILY: string[] = [
 	"zk",
 	"zero-knowledge",
@@ -83,6 +112,11 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	pool: ["pool", "liquidity", "amm", "dex", "swap"],
 	liquidity: ["liquidity", "pool", "amm", "dex", "swap"],
 	lending: ["lending", "lend", "borrow", "loan", "money market"],
+	// Raven #39: card-issuance vocabulary; "card issuing" is the types value.
+	card: ["card", "cards", "card issuing"],
+	cards: ["card", "cards", "card issuing"],
+	debit: ["debit", "card", "cards", "card issuing"],
+	cex: ["cex", "centralized exchange", "exchange"],
 	// Q5 cold-agent run (2026-07-20): "escrow" queries must reach milestone/
 	// conditional-payment vocabulary — the canonical audited escrow platform's
 	// repo name doesn't contain the word.
@@ -99,6 +133,9 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	// (dev-docs Fees + Glossary hold the grounded content).
 	stroopy: ["stroopy", "stroop"],
 	strupey: ["strupey", "stroopy", "stroop"],
+	// ^ "strupey" is also a SPELLING CORRECTION (see below): it may still find
+	// the Stroopy.AI project row, but the response must say the match went
+	// through a correction, never "all keywords matched" (sls-076).
 	oracle: [
 		"oracle",
 		"price feed",
@@ -140,6 +177,30 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
 	groth16: [...ZK_FAMILY],
 	zksnark: ["zksnark", ...ZK_FAMILY],
 	"zk-snark": ["zk-snark", "zksnark", ...ZK_FAMILY],
+	// ── EVM porter vocabulary (Raven codegen-correctness note, 2026-08-15) ──
+	// Porters phrase in EVM terms (the Ascend ERC-3643 port report; Raven
+	// measured same-concept-different-phrasing returning materially different
+	// results). Each EVM entry point expands to the Stellar-native vocabulary
+	// the corpus actually holds — ERC-3643 → SEP-57 comes from Raven's golden
+	// q-sor-evm-to-soroban-porting. Values stay substring-safe on the project
+	// surface (no bare "auth" — it substring-matches "author").
+	erc20: [...ERC20_FAMILY],
+	"erc-20": [...ERC20_FAMILY],
+	erc721: [...ERC_NFT_FAMILY],
+	"erc-721": [...ERC_NFT_FAMILY],
+	erc1155: [...ERC_NFT_FAMILY],
+	"erc-1155": [...ERC_NFT_FAMILY],
+	erc3643: [...ERC3643_FAMILY],
+	"erc-3643": [...ERC3643_FAMILY],
+	solidity: ["solidity", "soroban", "rust", "smart contract"],
+	"msg.sender": ["msg.sender", "require_auth", "authorization", "invoker"],
+	nonreentrant: ["nonreentrant", "reentrancy", "reentrant"],
+	reentrancy: ["reentrancy", "reentrant", "nonreentrant"],
+	// "indexed" (Solidity event modifier) → Soroban event topics; the
+	// "indexer" vertical is a different key and unaffected.
+	indexed: ["indexed", "topics", "events"],
+	hardhat: ["hardhat", "stellar-cli", "cli", "toolchain"],
+	foundry: ["foundry", "stellar-cli", "cli", "toolchain"],
 	// Privacy vertical (2026-07-21 privacy battery): street vocabulary
 	// ("anonymous", "mixer", "monero-style") never appears in privacy
 	// records — they say privacy/confidential ("privacy-preserving token
@@ -235,6 +296,10 @@ export const CORE_SYNONYMS: Record<string, string[]> = {
  * repo search so the identity rule means the same thing on both surfaces.
  */
 export const GENERIC_QUERY_TOKENS = new Set([
+	// "is X still live/maintained/building" — pure question scaffolding in any
+	// query; content in none. Added when the mention-vs-identity leftover rule
+	// found it blocking "does <name> still build" (2026-08-31).
+	"still",
 	"buy",
 	"sell",
 	"get",
@@ -263,6 +328,34 @@ export const GENERIC_QUERY_TOKENS = new Set([
 	"projects",
 	"way",
 	"sol", // ambiguous: Solana's ticker vs spanish "sol" — never a lone anchor
+	// Liveness/status words describe a STATE, never an identity. "is X live" is
+	// the most natural way to ask about a project, and it was the single worst
+	// query shape we had: "live" counted as an anchor noun, nearly every
+	// project's text says "live", so the F2 anchor rule admitted every row —
+	// at matchMode=majority with HIGH confidence, while the actual named
+	// project was often absent entirely. Every honesty guard is gated on
+	// matchMode==="semantic", so these queries bypassed all of them and
+	// returned confidently-wrong answers instead of an honest refusal.
+	// Making them generic lets the EXISTING anchor rule work: the only anchor
+	// left is the project name, nothing matches it, and the query correctly
+	// falls through to semantic where the confidence cap and the
+	// "neighbours, not matches" advisory fire.
+	"live",
+	"alive",
+	"active",
+	"inactive",
+	"running",
+	"working",
+	"status",
+	"dead",
+	"defunct",
+	"launched",
+	"shipped",
+	"available",
+	"online",
+	"offline",
+	"maintained",
+	"abandoned",
 ]);
 
 /** The intent-bearing (non-generic, non-trivial) tokens of a query. */
@@ -279,10 +372,36 @@ export function mergeVocabulary(
 	core: Record<string, string[]>,
 	overlay: Record<string, string[]>,
 ): Record<string, string[]> {
-	const out: Record<string, string[]> = {};
+	// Null prototype, because these maps are keyed by USER QUERY TOKENS. On a
+	// plain object, SYNONYMS["constructor"] returns Object.prototype.constructor
+	// (a function, so `?? []` never fires) and the caller's for..of throws —
+	// q=constructor was a live 500 on BOTH search surfaces (Engine A R-SYM,
+	// 2026-08-28). The tokenizer lowercases, so `constructor` is the one
+	// reachable prototype key; killing the prototype kills the class for every
+	// surface that merges its vocabulary here.
+	const out: Record<string, string[]> = Object.create(null);
 	for (const [k, vs] of Object.entries(core)) out[k] = [...vs];
 	for (const [k, vs] of Object.entries(overlay)) {
 		out[k] = [...new Set([...(out[k] ?? []), ...vs])];
 	}
 	return out;
 }
+
+/** Query tokens that are known MISSPELLINGS, mapped to the terms the synonym
+ * expansion injects for them. A row admitted ONLY through these terms is a
+ * spelling-corrected match, not a keyword match — sls-076: q="Strupey"
+ * returned Stroopy.AI at matchMode=strict / "all keywords matched" although
+ * neither name nor slug contains "strupey", and two independent agent runs
+ * then promoted the row into identity evidence for an unverified name. The
+ * expansion is deliberate (it finds the right thing); the LABEL was the lie.
+ * Domain synonyms (cex → centralized exchange) are NOT corrections — a row
+ * matching the expanded domain term genuinely answers the query. */
+// Null prototype for the same reason as mergeVocabulary: keyed by raw query
+// tokens, and SPELLING_CORRECTIONS["constructor"] must be undefined, not a
+// function that then gets treated as a correction string.
+export const SPELLING_CORRECTIONS: Record<string, string> = Object.assign(
+	Object.create(null),
+	{
+		strupey: "stroopy",
+	},
+);

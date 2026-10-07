@@ -63,4 +63,12 @@ jobs:
             exit 0
           fi
           git commit -m "chore(consumers): $(date -u +%Y-%m-%d) ${{ github.event.inputs.consumer || 'raven' }} workload quality report [skip ci]"
+          # Push-first retry (#1596). A bare push dies non-fast-forward
+          # the moment main moves during the run, which on a repo this busy
+          # is routine; -X theirs keeps OUR freshly measured artifact, since
+          # the file is a snapshot of this run rather than something to merge.
+          for i in 1 2 3; do
+            git push && exit 0
+            git pull --rebase --autostash -X theirs origin main || git rebase --abort
+          done
           git push

@@ -1,16 +1,36 @@
 name: Curate projects (manual)
+# workflow-health: signal-steps: ^Idempotence$
 on:
   workflow_dispatch:
     inputs:
       execute: { description: "Write? Leave false for a dry run.", type: boolean, default: false }
+  # QUALITY.md P3: the first bounded agent lane runs WITHOUT a human pressing
+  # the button. Scheduled runs always execute (mirroring enrich-repos) — the
+  # pass is evidence-only by construction (curated maps + the operator-toml
+  # chain, full-chain-or-abstain), every write is read back, and the census
+  # artifacts record the movement for review. Auto-merge stays closed; this
+  # is data curation within the lane's bounds, not code.
+  schedule:
+    - cron: "30 7 * * 2" # weekly, Tuesday 07:30 UTC
 permissions: { contents: read }
 jobs:
   curate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    # 25, not 8 (2026-09-06): the Idempotence replan re-runs the whole pass, so
+    # the job now needs roughly double the single-pass ~7 min. At 8 the replan
+    # was cancelled mid-flight and the run reported "cancelled" with all 35
+    # writes already applied — a guard that cannot finish gives no verdict,
+    # which reads the same as a clean one.
+    timeout-minutes: 25
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # media uploads (LOGO_SET) go to R2 like every other logo; without these
+      # a logo would land on the runner's disk and vanish with the job
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -20,4 +40,26 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Targeted, owner-reviewed project-record edits (DESCRIPTION_FIXES in the
       # script). Dry-run by default; only the listed slugs are touched.
-      - run: pnpm exec tsx scripts/data/curate-projects.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/data/curate-projects.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+      # sls-079: deployment facts ride the same pass — evidence-derived
+      # (mainnet joins, onchain activity, DEPLOYMENT_VERIFIED curation),
+      # everything else stays explicitly unknown.
+      - run: pnpm exec tsx scripts/data/backfill-deployment.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}
+      # Idempotence gate (2026-09-06): an execute must leave nothing planned.
+      # A write still planned right after it was applied is a lane fight (two
+      # maps, or this lane and enrich-scf, on one field) or a writer that does
+      # not read back — the class that flipped tucambio, coala-pay, aquarius
+      # and six linkage rows on every run for weeks. The writes above already
+      # landed; this step only reports, loudly.
+      - name: Idempotence
+        if: ${{ github.event_name == 'schedule' || inputs.execute }}
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm exec tsx scripts/data/curate-projects.ts 2>&1 | tee replan.log || true
+          n=$(grep -oE '^[0-9]+ write\(s\) planned' replan.log | grep -oE '^[0-9]+' || echo unknown)
+          if [ "$n" != "0" ]; then
+            echo "::error::$n write(s) still planned after execute — a lane fight or a non-idempotent writer; see the plan above"
+            exit 1
+          fi
+          echo "0 writes planned after execute — every map is in sync"

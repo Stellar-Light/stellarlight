@@ -1,0 +1,58 @@
+name: Backfill knowledge notes
+
+# The backfill asserts its own end state (QUALITY.md §3): every registry key
+# must resolve to a row, and every write must read back. A non-zero exit here
+# is that assertion failing, which is the lane working — so the step is
+# declared as its signal rather than treated as a broken lane.
+# workflow-health: signal-steps: ^Backfill
+
+# Full-corpus triage tagging from STORED signals (zero GitHub API calls —
+# safe to run any time without touching the scan budget). Covers the
+# EC-taxonomy rows the project-scoped enrich loop never reaches. Dry-run
+# default; inspect the tag distribution, then execute.
+
+on:
+  schedule:
+    # Daily 03:00 UTC (2026-09-02). Dispatch-only meant the registry and the
+    # repo rows drifted apart: batches 3–6 grew src/lib/repo-knowledge.ts
+    # 29 → 176 repos on 2026-09-01 while this lane last ran at 02:21Z that
+    # morning, so the board's notes-pool metric (which reads the ROWS) sat at
+    # 47/208 with ~80 stamped-in-code rows uncounted. Scheduled runs execute:
+    # the pass is registry → rows, zero GitHub calls, every write read back.
+    - cron: "23 3 * * *" # off the top of the hour, see check-links.yml (2026-09-02)
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+
+concurrency:
+  group: backfill-knowledge-notes
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      # inputs.* are EMPTY on schedule events (scan-repo-code finding 18) —
+      # the nightly gets its own hardcoded execute step.
+
+      # 2026-09-05: this step carried `if: github.event_name == 'workflow_dispatch'`,
+      # so every SCHEDULED run skipped its only step and reported green — the 3
+      # scheduled runs since the cron was added (2026-09-02) moved no data while the board and the
+      # program text said notes reach rows nightly. The expression below already
+      # writes on schedule and dry-runs on a manual dispatch unless execute=true.
+      - name: Backfill (schedule = execute; dispatch = dry run unless execute)
+        run: pnpm exec tsx scripts/backfill-knowledge-notes.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

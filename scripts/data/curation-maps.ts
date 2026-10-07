@@ -7,13 +7,15 @@
  * evidence without importing a script whose module body runs main().
  * No data changed in the move; edit rows HERE and both consumers see them.
  */
+const ASOF_SEED = "2026-08-31";
 
-export type StatusBasis =
-	| "operator-announcement"
-	| "site-liveness"
-	| "onchain-activity"
-	| "human-verified"
-	| "source-inherited";
+// Re-exported from the ONE vocabulary (src/lib/project-status.ts) rather than
+// re-listed. This file had its own copy and it went stale the moment
+// package-release landed: every curated entry using the new tier failed to
+// typecheck against a union that predated it. That is the sixth copy of this
+// list found on 2026-09-08 — the type as well as the value.
+import type { StatusBasis } from "../../src/lib/project-status";
+export type { StatusBasis };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
  * launching while allbridge has launched"). Each row is grounded in the
@@ -35,8 +37,1870 @@ export const STATUS_FIX: Record<
 		asOf?: string;
 		sourceUrl?: string;
 		basis?: StatusBasis;
+		/** A deliberate retraction of a wrong strong stamp: lets a weak basis
+		 *  overwrite a strong one when the status is unchanged (the precedence
+		 *  rule otherwise keeps the stored strong provenance). */
+		withdraw?: boolean;
 	}
 > = {
+	// 2026-09-23: seeded as a new record from the i³ intake before noticing the
+	// directory already held it as fastbuka (site choppaddi.com, "FKA FastBuka",
+	// alias). A duplicate is hidden, never dead: Draft + canonicalSlug →
+	// fastbuka (CANONICAL_SET), so a lookup of either name folds to one row.
+	choppaddi: {
+		from: "Live",
+		to: "Draft",
+		asOf: "2026-09-23",
+		basis: "human-verified",
+		note: "Duplicate of fastbuka, created 2026-09-23 by a nominee seed that misread a hit under the old name as an absence.",
+	},
+	"smart-treasury": {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-09-04",
+		sourceUrl: "https://registry.npmjs.org/sta-sdk",
+		note: "sta-sdk@0.1.1 on npm, published 2026-09-04 (4d before the 2026-09-08 sweep). The registry names Smart-Treasury-Account-STA/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
+	acta: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-22",
+		sourceUrl: "https://registry.npmjs.org/@acta-team/credentials",
+		note: "@acta-team/credentials@1.1.10 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names ACTA-Team/acta-credentials as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
+	fundable: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-07-26",
+		sourceUrl: "https://registry.npmjs.org/@fundable/sdk",
+		note: "@fundable/sdk@0.1.0 on npm, published 2026-07-26 (44d before the 2026-09-08 sweep). The registry names Fundable-Protocol/fundable-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered. Held back on the 2026-09-08 dry run by a pre-launch scan that fired on the word TESTNET in the SDK's own usage example — a false positive; that scan no longer reads registry documents.",
+	},
+	// -- P4 lever, 2026-09-08: registry-verified package releases --
+	// Basis only; every status stays Live. These rows sat on site-liveness,
+	// which means only that a page answered — a parked domain and a dead
+	// product's marketing site both pass it.
+	//
+	// The evidence is a versioned artifact on a public registry whose OWN
+	// metadata names this project's repo as the source (npm repository.url,
+	// jsr.io githubRepository). That backlink cannot be produced without
+	// controlling both the repo and the namespace, which is what makes it
+	// harder to fake than a page that returns 200.
+	//
+	// Recency-gated, and the gate did real work: of 16 weak-basis Live rows
+	// whose repo publishes a verified package, SIX last published more than a
+	// year ago — solar-wallet's in 2021, 1,907 days — and a 2021 artifact is
+	// not evidence a product is live now. Those six are deliberately absent.
+	//
+	// SEVEN absent. The curate guard REFUSED moonlight on the first dry run:
+	// jsr.io/@moonlight/moonlight-sdk carries the pre-launch marker "testnet",
+	// and a 200 is not a business. A testnet-only product holding a Live status
+	// is a question for the owner, not something to stamp around — left for a
+	// human read rather than dropped quietly.
+	//
+	// sourceUrl is the registry API, never the human page: www.npmjs.com returns
+	// 403 to the guard's fetch (nine "could not verify" WARNs on that same dry
+	// run) while registry.npmjs.org returns the JSON that actually carries
+	// `repository.url`. The backlink IS the evidence, so the evidence URL should
+	// be the thing a reader — or a guard — can fetch and check.
+	//
+	// And switching to the API did more than make the fetch succeed. The 403 had
+	// been MASKING the guard: nine silent "could not verify" WARNs became six
+	// passes and THREE refusals, each on the package's own README —
+	//   smart-treasury  sta-sdk                 "TESTNET"
+	//   acta            @acta-team/credentials  "testnet only"
+	//   fundable        @fundable/sdk           "testnet"
+	// all three held back, same as moonlight. A row whose own artifact says
+	// testnet while the row says Live is a question for the owner, not a basis
+	// to upgrade. Six entries remain; the four held rows keep the status and
+	// basis they already had — nothing was downgraded here.
+	"unstoppable-wallet": {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-09-07",
+		sourceUrl: "https://registry.npmjs.org/stellar-web-sdk",
+		note: "stellar-web-sdk@0.2.0 on npm, published 2026-09-07 (1d before the 2026-09-08 sweep). The registry names horizontalsystems/stellar-web-sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	blockaid: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-25",
+		sourceUrl: "https://registry.npmjs.org/@blockaid/client",
+		note: "@blockaid/client@1.8.0 on npm, published 2026-08-25 (14d before the 2026-09-08 sweep). The registry names blockaid-official/blockaid-client-node as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	defarm: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-08-22",
+		sourceUrl: "https://registry.npmjs.org/@defarm/mcp",
+		note: "@defarm/mcp@0.1.0 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names defarm-repo/defarm-mcp as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	axis: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-06-21",
+		sourceUrl: "https://registry.npmjs.org/@axis-markets/json-storage",
+		note: "@axis-markets/json-storage@0.2.0 on npm, published 2026-06-21 (79d before the 2026-09-08 sweep). The registry names axis-markets/json-storage as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	cypher: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-04-28",
+		sourceUrl: "https://registry.npmjs.org/@cypherhq/agent-pay",
+		note: "@cypherhq/agent-pay@0.1.0-beta.15 on npm, published 2026-04-28 (133d before the 2026-09-08 sweep). The registry names CypherD-IO/agent-pay as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+	drips: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2025-11-17",
+		sourceUrl: "https://registry.npmjs.org/@drips-network/sdk",
+		note: "@drips-network/sdk@0.1.0-alpha.15 on npm, published 2025-11-17 (295d before the 2026-09-08 sweep). The registry names drips-network/sdk as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+	},
+
+	// -- Next-100 packets 2026-09-06 (three agents, chunks a/b/c; drafts improvements/drafts/
+	// 2026-09-06-verification-packets-next100-*.md): the Live rows whose product state the
+	// coordinator re-probed with its own instrument the same night (iTunes lookups, Play
+	// pages rendered, APIs, rendered apps). Held for the owner: cartwey and fastbuka (the
+	// shipped app names no Stellar), horizon-as-a-service / hot-protocol / k3-labs (docs-only
+	// evidence the agent itself flagged low). Status moves are presented, not applied.
+	// Owner-directed removal 2026-09-06: "RAMM is not related to stellar".
+	// Recorded rather than erased, because the row was not empty: SCF #22
+	// awarded $38,500 to "RAMM: Global Retail Commerce" (SCF #36 prescreen
+	// failed), and jamiels/ramm.ai does carry Soroban contracts
+	// (soroban/factory, soroban/pool) with a @stellar/stellar-sdk UI. All of it
+	// targets FUTURENET, the last commit is 2024-04-16, and ramm.ai today sells
+	// Popupz.ai, an AI marketspace with no Stellar anywhere. A funded prototype
+	// that never left a test network, from a company now doing something else,
+	// is not a Stellar project for directory purposes — the owner's call.
+	ramm: {
+		from: "Live",
+		to: "Draft",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://ramm.ai/",
+		note: "owner-directed removal 2026-09-06: not a Stellar project. SCF #22 awarded $38,500 and the repo holds Futurenet-only Soroban contracts last touched 2024-04-16; ramm.ai now sells an unrelated AI marketspace (Popupz.ai, waitlist). Evidence kept on the row; the directory entry is withdrawn.",
+	},
+	// Found by the product-integration lane's own PARKED branch (2026-09-07):
+	// it probes for a Stellar integration and reports a domain that answers but
+	// is not a product. Verified in a browser before proposing.
+	triiyo: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "https://triiyo.com/",
+		note: 'Weak-basis sweep 2026-09-07: triiyo.com redirects to HugeDomains — "Triiyo.com … This domain is for sale: $10,795", rendered read plus a receipt matching "for sale" in the served text. SCF #22, $50,303 — the award stands, the product does not.',
+	},
+	// -- Weak-basis dormant sweep, tranche 2 (2026-09-06): rows re-probed at
+	// their own surfaces after the first tranche. A default page TITLE is not a
+	// verdict — zilt's title is the unedited "Create Next App" while the page
+	// itself sells USDC over M-Pesa on Stellar, and reading the title alone
+	// would have retired a live product.
+	"stellar-token-launchpad": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://tokenlaunchpad.eu/",
+		note: "Weak-basis sweep 2026-09-06: tokenlaunchpad.eu (and www) now redirect to cryptix.ag, the parent company's venture-building site, which carries no launchpad product — the product has no state of its own left to read. Newest linked repo commit is over a year old. SCF #24, $40,000 — the award stands, the product does not.",
+	},
+	paychant: {
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		sourceUrl: "https://paychant.com/",
+		note: 'Weak-basis sweep 2026-09-06: probed alive at its own site ("Fiat On and Off Ramp Solution for Stablecoins"). Basis was source-inherited — a claim we had never checked; now it is one we have. Not stronger than site-liveness: the site loading is all the evidence this product offers.',
+	},
+	zilt: {
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		sourceUrl: "https://zilt.vercel.app/",
+		note: 'Weak-basis sweep 2026-09-06: the page title is the unedited Next.js default ("Create Next App"), but the page sells the product — buy and sell USDC with M-Pesa and Eco-cash, on Stellar. Rendered read. Basis was unverified; a lazy title is not a dead product.',
+	},
+	// ── Store evidence 2026-09-07 (P4). A weak "the site loaded" basis is
+	// replaced by the product's OWN dated artifact: a store listing the
+	// operator publishes on their own site, carrying a build shipped inside 90
+	// days. Basis operator-announcement — the operator is the one saying this,
+	// via a listing they published and a build they shipped. Deliberately NOT
+	// human-verified: no human read these, and a machine chain must never
+	// impersonate one. Deliberately NOT product-integration: a fresh build
+	// proves the product ships, not that it touches Stellar.
+
+	akuna: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-31",
+		sourceUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://akunawallet.com/) links ios listing "Akuna Wallet" v3.1.0, released 2026-08-31 (Apple lookup API by id).',
+	},
+	bousol: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-26",
+		sourceUrl:
+			"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://bousolapp.com/) links ios listing "Bousol Wallet - Paon Bleu Inc." v4.2.0, released 2026-08-26 (Apple lookup API by id).',
+	},
+	dollarize: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-10",
+		sourceUrl:
+			"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://dollarize.me/) links ios listing "Dollarize: USD Account" v1.1.41, released 2026-08-10 (Apple lookup API by id).',
+	},
+	ebioro: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://ebioro.com/) links ios listing "ebioro" v8.9.4, released 2026-09-06 (Apple lookup API by id).',
+	},
+	fastbuka: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-03",
+		sourceUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://choppaddi.com/) links ios listing \"Choppaddi\" v1.0, released 2026-08-03 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	fewticket: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-02",
+		sourceUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://fewticket.com/) links ios listing "Fewticket" v1.0.6, released 2026-09-02 (Apple lookup API by id).',
+	},
+	"freedom-pay-wallet": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-07-16",
+		sourceUrl:
+			"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://freedompaywallet.com/) links ios listing "Freedom Pay Wallet" v2.4, released 2026-07-16 (Apple lookup API by id).',
+	},
+	meru: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://getmeru.com/) links ios listing "Meru | Cuenta en dólares" v4.29.3, released 2026-09-06 (Apple lookup API by id).',
+	},
+	"providencia-onchain": {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-31",
+		sourceUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://viio.me/) links ios listing \"VIIO\" v3.2.27, released 2026-08-31 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	scopex: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-28",
+		sourceUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://scopex.money/) links ios listing "Scopex" v4.1.3, released 2026-08-28 (Apple lookup API by id).',
+	},
+	seevcash: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://seevcash.com/) links ios listing "Seevcash: Send Money Anywhere" v11.5, released 2026-09-06 (Apple lookup API by id).',
+	},
+	utoken: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-08-19",
+		sourceUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
+		note: "Store evidence 2026-09-07: the project's own site (https://upesa.app/) links ios listing \"Upesa\" v1.3.0, released 2026-08-19 (Apple lookup API by id). The app ships under a different product name; the link is on the operator's own site, which is what ties them.",
+	},
+	yolat: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-09-04",
+		sourceUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
+		note: 'Store evidence 2026-09-07: the project\'s own site (https://yolat.com/) links ios listing "Yolat" v1.0.57, released 2026-09-04 (Apple lookup API by id).',
+	},
+	// Found 2026-09-07 by teaching the packet guard to read a Chrome Web Store
+	// title: the row was Live on the strength of a listing that no longer
+	// exists, and the guard had reported could-not-check on it every week
+	// because the store renders client-side.
+	"stellar-tip": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl:
+			"https://chromewebstore.google.com/detail/stellar-tip/nofpjgocmncmlacjfnniilnckjbhmgdh",
+		note: 'Retired 2026-09-07: the Chrome Web Store listing is gone — it renders "This item is not available" and its server-rendered title is the bare "Chrome Web Store" with no extension name. Checked against a control the same minute: Freighter\'s listing renders in full and titles itself "Freighter - Chrome Web Store", so this is about the item, not a sign-in wall. The only linked repo (MichaelxhJiang/stellar-tip) last committed 2020-05-07. SCF #4 — the award stands, the product does not.',
+	},
+	// ── The two the broken-link split surfaced 2026-09-07. Both were Live with
+	// a dead site, which is the case the old model buried: a broken link on a
+	// LIVE row is either our wrong citation or an undetected death, and these
+	// are the second kind.
+	assetdesk: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "http://assetdesk.xyz/",
+		note: 'Retired 2026-09-07: assetdesk.xyz serves Namecheap\'s "Domain registration has expired" notice over http and refuses https entirely; the domain lapsed. The GitHub org github.com/assetdesk still exists with 3 repos, last touched 2023-09-08. SCF #19, $77,000 — the award stands, the product does not. Found because a broken link on a LIVE row is a defect, not corroboration.',
+	},
+	kunst21: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-07",
+		sourceUrl: "https://kunst21.com/",
+		note: "Retired 2026-09-07: kunst21.com resolves and answers 200, but the domain has been taken over — it now serves a Chinese corporate/betting site (\"365英国上市公司(集团)官方网站\"), nothing to do with the SCF #9 art project. The row's Live status rested on site-liveness earned FROM that hijacked page, which is why a page answering is a weak basis. Same class as the-blue-marble's casino redirect.",
+	},
+	// -- Weak-basis dormant sweep 2026-09-06 (draft improvements/drafts/
+	// 2026-09-06-weak-basis-dormant.md): Live rows resting on site-liveness or
+	// source-inherited whose newest linked repo commit is over a year old. Each
+	// was re-probed at the product's OWN surfaces. Only affirmative deaths are
+	// below — a domain for sale, a domain that no longer resolves, a 404. Rows
+	// that merely could not be read are NOT here; eleven more that a first pass
+	// called dead were false deaths from a probe that did not follow 308
+	// redirects (eiger.co, hatom.com, wombat.exchange among them).
+	sorosplits: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorosplits.xyz/",
+		note: 'Weak-basis sweep 2026-09-06: sorosplits.xyz now renders GoDaddy\'s "is for sale" page ($399); a plain fetch sees only the client-side redirect to /lander, so this was read in a browser. Own repos (findolor) last pushed 2024. SCF #19 + #23, $153,700 — the award stands, the product does not.',
+	},
+	sorodrop: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorodrop.xyz/",
+		note: 'Weak-basis sweep 2026-09-06: sorodrop.xyz renders GoDaddy\'s "is for sale" page ($599, or lease-to-own); the raw markup carries only the /lander redirect. Rendered read confirmed the sale page.',
+	},
+	"soroban-pulse": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://sorobanpulse.app/",
+		note: 'Weak-basis sweep 2026-09-06: sorobanpulse.app "has expired and is parked free, courtesy of GoDaddy.com" — the domain lapsed. Rendered read; the raw markup carries only the /lander redirect.',
+	},
+	qolaq: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://qolaq.com/",
+		note: "Weak-basis sweep 2026-09-06: qolaq.org and www.qolaq.org both 404, and qolaq.com serves a two-line document that redirects to a parked /lander. The GitHub org survives with one repo and still links the dead qolaq.org. SCF #13, $150,000 — the award stands, the product does not.",
+	},
+	stellarpay: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellarpay.io/",
+		note: "Weak-basis sweep 2026-09-06: stellarpay.io no longer resolves (NXDOMAIN, checked from two paths). Newest linked repo commit 2019-10-07. Not to be confused with our own private stellar-pay work.",
+	},
+	"0xauth": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://0xauth.co/",
+		note: "Weak-basis sweep 2026-09-06: 0xauth.co no longer resolves (NXDOMAIN).",
+	},
+	digicus: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://digicus.dev/",
+		note: "Weak-basis sweep 2026-09-06: digicus.dev returns HTTP 404 after following redirects. Newest linked repo commit 2021-11-23.",
+	},
+	"soroban-optimistic-oracle": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://github.com/stackman27/soroban-opt-oracle",
+		note: "Weak-basis sweep 2026-09-06: the row's only URL is its GitHub repo, and that repo returns 404 — deleted or made private. Nothing else to probe.",
+	},
+	axal: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-03",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6752484843&country=us",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (high): App Store 'Axal: High Yield Savings' v3.28 released 2026-09-03; Play com.axal.android updated 2026-09-02; own repo getaxal/verified-signer pushed 2026-08-31. Stellar not visible on the listing (USDC by Circle). Add both store ids to availability.",
+	},
+	cobo: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://manuals.cobo.com/en/portal/supported-tokens-and-chains",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (high): Cobo Portal manual lists Stellar in the supported-chains table (and XLM in transfers/fee-model pages), observed 2026-09-06; Cobo Guard iOS v2.1.8 released 2026-07-08; CoboGlobal SDK repos pushed 2026-09-02 (org repos).",
+	},
+	clixpesa: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-06-23",
+		sourceUrl: "https://play.google.com/store/apps/details?id=com.clixpesa.app",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (medium): Play 'Clixpesa' updated 2026-06-23 (75 d), 100+ downloads; no iOS app; app.clixpesa.com NXDOMAIN; Stellar not named on the site or listing; org clixpesa/mint-contracts pushed 2026-04-07 (org repo). Add Play id to availability.",
+	},
+	artizen: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://artizen.fund/",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (medium): artizen.fund renders Season 7 fund drive #15 with live metrics (TOTAL RAISED $1,155,561, endowment $28,160,854, ends 2026-09-10) in a browser; curl sees a 7-char shell. Org repos idle since 2024-06-18; chain plumbing in the bundle is EVM; no Stellar surface visible.",
+	},
+	blaze: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.blaze.money/overview.md",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (medium): product docs list 'USDC on Stellar, Ethereum, and Polygon' (observed 2026-09-06); status.blaze.money 'All services are online' 2026-09-06; iOS 'Blaze - Global payments' v2.0 released 2026-01-26 (outside 90 d); app.blaze.money NXDOMAIN; org blaze-xyz pushes 2026-08-28 (org repos).",
+	},
+	chainpatrol: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://chainpatrol.com/docs/external-api/overview",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (medium): product API docs (9,751 chars) observed 2026-09-06; blog posts dated 2026-09-05/04; dashboard app.chainpatrol.io behind sign-in; org chainpatrol/docs pushed 2026-09-03 (org repo). Stellar appears only as an SDF testimonial plus SCF #40.",
+	},
+	mercuryo: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://api.mercuryo.io/v1.6/public/convert?from=USD&to=XLM&type=buy&amount=100&network=STELLAR",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (medium) \u2014 Mercuryo's own quote API prices XLM on network STELLAR (535.93 XLM per $100); iOS build 2026-05-07 and own repo outside 90 d",
+	},
+	palremit: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-04",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6502370740&country=ng",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 iOS v20 released 2026-09-04; Play com.fintech.palremit updated Sep 4, 2026 (NG storefront)",
+	},
+	payrit: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-07-19",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6463464675&country=ng",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 iOS v3.0.136 released 2026-07-19; Play com.payrit.app updated Jul 12, 2026; rendered page names Stellar among 7 networks",
+	},
+	pretium: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-25",
+		sourceUrl:
+			"https://play.google.com/store/apps/details?id=app.pretium.finance",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 Play updated Aug 25, 2026 (10K+); own repo derrickbundi/pretium-mcp pushed 2026-08-13 lists Stellar",
+	},
+	quarkslab: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl: "https://blog.quarkslab.com/",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (medium) \u2014 firm operating: blog post 2026-09-01, org repos pushed 2026-09-03; Stellar-specific artefact is a 2024-08-27 audit post",
+	},
+	rahat: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://github.com/rahataid/rahat-project-aa",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 own Stellar Soroban repo pushed 2026-09-05; docs.rahat.io AA module documents Stellar as primary chain",
+	},
+	rosen: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6444627514&country=ng",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (medium) \u2014 iOS ROSEN v2.4.7 released 2026-09-06 (NG storefront); rosen-stellar repo 2026-03-17 outside 90 d",
+	},
+	rubic: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://api-v2.rubic.exchange/api/info/chains",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 aggregator's own chain list serves STELLAR; Cryptorubic/rubic-app pushed 2026-09-04",
+	},
+	skopa: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-05",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6446782114&country=us",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 iOS v2.10.21 released 2026-08-05; Play com.skopa.app updated Aug 5, 2026 (50K+)",
+	},
+	"soroban-governor": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl:
+			"https://mainnet.governance.script3.io/CANSYFVMIP7JVYEZQ463Y2I2VLEVNLDJJ4QNZTDBGLOOGKURPTW4A6FQ/proposals/",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (medium) \u2014 mainnet YieldBlox DAO proposal executed with 157.35k votes, ended ~2026-09-01; UI/backend repos 2026-05-17 outside 90 d",
+	},
+	"stellar-defi-dune-dashboards": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-21",
+		sourceUrl: "https://dune.com/paltalabs",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (medium) \u2014 15 dashboards / 287 queries; DeFindex dashboard and Soroswap queries updated ~2026-08-21; 'Soroban AMMs on Stellar' dashboard 2 years stale",
+	},
+	swiftex: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-24",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6759080930&country=us",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: verification packet 2026-09-06 (high) \u2014 iOS v1.0.8 released 2026-08-24; Play updated Aug 17, 2026; SwiftExWallet/SwiftEx pushed 2026-08-31 (Stellar DEX)",
+	},
+	codelnpay: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-24",
+		sourceUrl:
+			"https://play.google.com/store/apps/details?id=com.codeln.codelnpay",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: Play Store CodeLnPay 'Updated on Aug 24, 2026', 1K+ downloads; own repo CodelnGhana/codelnpay-project pushed 2026-08-10; pay.codeln.com renders a payroll marketing page in a browser (raw fetch is a shell); no iOS app (high).",
+	},
+	coindisco: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6445888906&country=us",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: App Store Coindisco v0.3.98 currentVersionReleaseDate 2026-09-05; Play updated 2026-09-04 (5K+); coindisco.com lists Stellar among DEX-purchase networks; linked repo coindisco/galaxy-ramp is 404 and the org has no public repos (high).",
+	},
+	coinspect: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-05",
+		sourceUrl: "https://www.coinspect.com/blog",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: own blog post 'Ill Bloom' dated 2026-08-05; own repo coinspect/wallet-security-ranking pushed 2026-09-04. No Stellar surface on the site, blog or repos \u2014 relevance, not liveness, is the open question (medium).",
+	},
+	comunitaria: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://api.stellar.expert/explorer/public/asset/ILLA-GCHNDY2LTV5VZYE3FRTRFN2GMENYBUNNP3IUY6TQKOIJSO2YLKCH5END/stats-history",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: ILLA social currency (issuer GCHNDY2L\u2026H5END, created 2025-11-12, 116 trustlines) shows payments on 2026-09-05, 09-01, 08-12, 08-07\u2026; own repos comunitaria-stellar-wallet / -dashboard pushed 2026-06-24; site blog post 2026-08-28 (high).",
+	},
+	crossmint: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.crossmint.com/introduction/supported-chains",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: docs Supported Chains lists Stellar (stellar / stellar-testnet) with wallets + checkout ticks, observed 2026-09-06; own repo Crossmint/crossmint-stellar-wallets-demo pushed 2026-08-31 (reference Stellar wallet app on staging) (high).",
+	},
+	extractor: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.extractor.live/supported-networks",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: Extractor docs Supported Networks lists Stellar under Non-EVM (observed 2026-09-06); own docs repo haas-labs/ext-mintlify pushed 2026-08-25; extractor.live names Stellar among monitored chains; product is login-gated. Linked repo haas-labs/extractor idle since 2024-05 (high).",
+	},
+	goldsky: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.goldsky.com/chains/supported-networks",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: docs state 'Stellar datasets are no longer available through Mirror. Use Turbo pipelines for Stellar data' and list Stellar under Turbo's non-EVM sources (observed 2026-09-06); own docs repo goldsky-io/mintlify-docs pushed 2026-09-04; org pushes daily. Linked repo indexed-xyz/docs is the older property (2025-04) (high).",
+	},
+	irl: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://www.irl.energy/api/locations",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: the app's own API returns live locations with points values (observed 2026-09-06); own repo hurley87/refraction pushed 2026-09-03 (README: Stellar/Soroban contracts, mainnet in production, addresses via env); www.irl.energy renders the city-guide app. Stellar usage not externally visible (high).",
+	},
+	jetpad: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-27",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6748644408&country=ng",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: App Store 'JetPad: Buy & Sell Crypto' v1.0.6 currentVersionReleaseDate 2026-08-27; Play com.jetpadwallet.app updated 2026-09-03, listing names Stellar 10\u00d7; linked repo jetpad-digital-limited/jetpad-wallet is 404 (high).",
+	},
+	komunitin: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://komunitin.org/groups",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet next100-b 2026-09-06: the app lists 15+ live exchange communities (El Poblet, Ecoxarxa del Bages, Greencoin, TimeInWest \u2026) in a browser (observed 2026-09-06; raw fetch is a shell); docs carry a 'Stellar model' accounting page; own repo community-exchange-network/komunitin pushed 2026-09-03 (high).",
+	},
+	// ── Deep verification 2026-09-06 downgrades, owner-approved.
+	mystic: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl:
+			"https://github.com/mystic-finance/Stellar-RFQ/blob/main/docs/MILESTONE_1.md",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: Stellar product is a testnet MVP \u2014 the repo's SCF Build tranche form says 'Pre-Launch #1 \u2014 MVP', 'Done on testnet: 20+ Order fills'; deployments/testnet.json deployedAt 2026-08-27, testnet contract CDB75DJB\u2026 has 40 events; docs/Circle directory show no Stellar. The company's live vaults ($22.03M) are Morpho on Flare, a different product. Row scf says no award but the repo is an SCF Build tranche \u2014 enrich-scf gap. Receipt improvements/receipts/mystic-2026-09-06.json (markers: Pre-Launch, testnet).",
+	},
+	// ── Deep verification 2026-09-06: rows the packet tiers could not decide, re-verified
+	// by two agents under the product-state rule and hand-checked by the coordinator.
+	getblock: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.getblock.io/api-reference/stellar-xlm",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: GetBlock's own Stellar (XLM) API reference (getHealth/getLatestLedger/getEvents\u2026 with endpoint template) and nodes catalog (Stellar Mainnet, shared+dedicated) observed today; SDF RPC providers page lists GetBlock; status page company-wide with no Stellar component. Medium: no keyed call made.",
+	},
+	// ── Owner verdicts 2026-09-06 ("tellus is live, litemint is live"): the two medium-tier
+	// Live rows held back on 09-05 (a 111-day-old store build; a blog as the product). The
+	// owner knows both products; the packet evidence is kept in the note for the record.
+	litemint: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://play.google.com/store/apps/details?id=com.litemint.cyberbrawl",
+		note: "Owner verdict 2026-09-06: live. Packet evidence: Re-graded 2026-09-05 under the product-state rule: Google Play lists Cyber Brawl 'Updated on May 17, 2026' (111 days \u2014 outside the 90-day window; weakest Live in the tier); own repo litemint/litemint pushed 2026-01-25; s",
+	},
+	"tellus-cooperative": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://blog.telluscoop.com/p/hackers-usan-ia-para-explotar-defi",
+		note: "Owner verdict 2026-09-06: live. Packet evidence: Re-graded 2026-09-05 under the product-state rule: the blog is the product; latest post datePublished 2026-07-21, front page 9,160 chars with newsletter and course banner. No row repo.",
+	},
+	// ── Owner approval 2026-09-06 ("apply the medium development ones too"), with one
+	// override: the owner says Stellar Passport is live, so the packet's Development
+	// re-grade for it is NOT applied — it is stamped Live on the owner's verdict instead.
+	neovestor: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://neovestor.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: page says 'Join waitlist \u00b7 2026 Early access' with 'Yield 0.0 % est.'; app.neovestor.com is a Privy sign-in shell. Waitlist product, nothing live. Receipt improvements/receipts/neovestor-2026-09-06.json (markers: waitlist, Early access, 0.0).",
+	},
+	"stellar-passport": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellarpassport.xyz/",
+		note: "Owner verdict 2026-09-06: Stellar Passport is live. The 2026-09-05 medium-tier re-grade read the demo app's 'Beta · Testnet' label as a product state and proposed Development; the owner overrode it. SCF R40; events with live countdowns and passkey sign-in on the app.",
+	},
+	// ── Owner approval 2026-09-05 ("apply the medium inactive ones too"): the medium tier's
+	// five Inactive re-grades under the product-state rule (#1361), each a parked / for-sale
+	// / disabled-deployment page or a removed sole repository, each receipted in
+	// improvements/receipts/<slug>-2026-09-06.json (captured after the UTC rollover)
+	// and hand-checked before this write.
+	"polaris-lend": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://jetprotocol.io/lander",
+		note: "Re-graded 2026-09-05 under the product-state rule: jetprotocol.io redirects to a GoDaddy parking lander rendering 'jetprotocol.io is parked free, courtesy of GoDaddy.com'; own repo jet-lab/polaris 404. Parked page marker is client-rendered \u2014 see receipt caveat. Rendered 2026-09-05 in a browser: 'jetprotocol.io is parked free, courtesy of GoDaddy.com' \u2014 the raw HTML is GoDaddy's parking-lander shell with no text nodes, so the receipt (improvements/receipts/polaris-lend-2026-09-06.json) cites the markup markers ap:\"parking\" and /parking-lander/ — where: markup.",
+	},
+	"every-finance": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://every.finance/lander",
+		note: "Re-graded 2026-09-05 under the product-state rule: every.finance redirects to forsale.godaddy.com ('The domain name every.finance is for sale!'); own repo Frihat-dev/every_finance idle since 2024-08-29. Org repos EveryFinance/smart-contracts-Stellar (2026-07-13) and onchain-manager-dapp (2026-05-15) are not row repos \u2014 owner may prefer Development plus a repo fix.",
+	},
+	muwp: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://muwpay.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: muwpay.com answers 451 DEPLOYMENT_DISABLED ('This deployment is unavailable') and muwp.xyz 402 'Deployment Paused'; own repo muwpay-uniswapper/muwp-stellar 404. Org repo Muwpay-uniswapper/MUWP pushed 2026-08-18 is not a row repo \u2014 owner may prefer Development.",
+	},
+	didstellar: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://api.github.com/repos/mavennet/stellar-did",
+		note: "Re-graded 2026-09-05 under the product-state rule: the product's only page, repo mavennet/stellar-did, is removed (GitHub 'Not Found'); the row website mavennet.com is the vendor's corporate site with no DID:STELLAR mention.",
+	},
+	transfermole: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://api.github.com/repos/ivandzen/transfermole",
+		note: "Re-graded 2026-09-05 under the product-state rule: no website in row; the only artefact, repo ivandzen/transfermole, is removed (GitHub 'Not Found'); the user's live repos are unrelated.",
+	},
+	// ── Owner approval 2026-09-05 ("apply the low tier that are live") of the low tier
+	// re-graded under the product-state rule (#1369): 12 Live rows, each re-probed the same
+	// evening with its own instrument (getHealth at the live ledger for the RPCs, the three
+	// Public Node archives within a minute of the network ledger, iTunes lookups for the five
+	// store apps, rendered pages for WalletConnect / RedSwan / QuickNode status). Held for
+	// the owner: getblock, kotani-pay, plutope (the tier's flagged weakest) and mystic (live
+	// on Flare; its Stellar side is a four-day-old repo). from-guarded; status unchanged.
+	"lightsail-network-quasar": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rpc.lightsail.network/",
+		note: "Re-graded 2026-09-05 under the product-state rule: rpc.lightsail.network getHealth answers status healthy, latestLedger 64291981 (closed 2026-09-05); quasar.lightsail.network 1,052 chars listing the endpoints. No row repo.",
+	},
+	ankr: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rpc.ankr.com/stellar_soroban",
+		note: "Re-graded 2026-09-05 under the product-state rule: rpc.ankr.com/stellar_soroban getHealth answers status healthy, latestLedger 64291981 without a key; /stellar_horizon said 'No nodes available' at fetch time. Chainlist page is JS (168 chars in curl). No row repo.",
+	},
+	alchemy: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://stellar-mainnet.g.alchemy.com/v2/docs-demo",
+		note: "Re-graded 2026-09-05 under the product-state rule: stellar-mainnet.g.alchemy.com/v2/docs-demo getHealth (with Origin https://www.alchemy.com) answers healthy, latestLedger 64292013; status.alchemy.com lists Stellar Operational; changelog 2026-08-06 'Stellar Mainnet: stellar-rpc 27.1.1-198'. No row repo.",
+	},
+	quicknode: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://status.quicknode.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: status.quicknode.com lists 'Stellar \u2014 Operational' for Mainnet REST API and Mainnet JSON-RPC API with a resolved Aug 21 Stellar Mainnet JSON-RPC incident; docs page 3,853 chars. No public endpoint (keyed). No row repo.",
+	},
+	walletconnect: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://walletconnect.network/",
+		note: "Re-graded 2026-09-05 under the product-state rule: the page renders 'Daily Network Volume $1,184,573,698' in a dynamic ticker (same daily figure on two fetches 40 min apart); 2,126 chars. Stellar not named on the page. No row repo.",
+	},
+	"public-node": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://bootes-history.publicnode.org/.well-known/stellar-history.json",
+		note: "Re-graded 2026-09-05 under the product-state rule: the three validators in publicnode.org's stellar.toml (Bo\u00f6tes, Hercules, Lyra) publish history archives at currentLedger 64292031, the live ledger at fetch; the website's newest content is 2024-10-01. Org publicnode has 0 public repos.",
+	},
+	afriex: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/afriex-money-transfer/id1492022568",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Afriex - Money transfer v11.111.54 released 2026-09-02 (iTunes lookup); site 9,171 chars. No row repo; Stellar not visible on the page.",
+	},
+	wave: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/wave-mobile-money/id1523884528",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Wave - Mobile Money v26.8.26 released 2026-08-26 \u2014 the app id wave.com links; site 808 chars. No row repo.",
+	},
+	"wirex-pay": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/wirex-one/id6762381032",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Wirex One v8.0 released 2026-08-10 (Wirex: All-In-One Trading App v4.11.75 2026-01-23); site 5,592 chars. Wirex Pay (the SCF R35 chain) not visible on the page. No row repo.",
+	},
+	"felix-pago": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/f%C3%A9lix-pago-env%C3%ADos-de-dinero/id6756128226",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists F\u00e9lix Pago - Env\u00edos de dinero v1.1 released 2026-08-24 (Felix Technologies Inc.); site 20,593 chars with the send-money calculator. No row repo.",
+	},
+	lemon: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/ar/app/lemon-billetera-virtual/id1499421511",
+		note: "Re-graded 2026-09-05 under the product-state rule: Argentina App Store lists Lemon - Billetera virtual v3.0.15 released 2026-09-01 (Lemon Cash Inc); site 7,714 chars, its '+4M usuarios' claims ignored as chrome. No row repo.",
+	},
+	redswan: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://app.redswan.io/",
+		note: "Re-graded 2026-09-05 under the product-state rule: app.redswan.io renders the Properties marketplace with 8+ offerings carrying target IRR / cash yield / minimum invest (LDV at Maidstone 8.0% / 5.7% / $25,000 \u2026); redswan.io itself answers HTTP 500 with a full 7,305-char body \u2014 consider pointing the row at the app. No row repo.",
+	},
+	// ── Owner approval 2026-09-05 ("apply the medium packets that are live") of the
+	// medium tier re-graded under the product-state rule (#1361): the 8 Live rows whose
+	// deciding URL was independently re-probed the same evening (App Store lookup for
+	// Chipper, rendered pages for alterscope / one-click / Fonbnk, page metrics for the
+	// rest). litemint (111-day-old store build) and tellus-cooperative (a blog as the
+	// product) were held back for the owner. from-guarded; status unchanged on all 8.
+	kale: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://api.stellar.expert/explorer/public/asset/KALE-GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE/stats-history",
+		note: "Re-graded 2026-09-05 under the product-state rule: KALE asset shows 532,475 payments on 2026-09-05 (stellar.expert stats-history), kalefarm.xyz renders the farm app, own repo kalepail/KALE-sc pushed 2026-03-06.",
+	},
+	ichi: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://ichi.org/",
+		note: "Re-graded 2026-09-05 under the product-state rule: page renders TOTAL VALUE LOCKED $18.21m, 897 vaults, 45 AMMs; DefiLlama reports $7.75M TVL dated 2026-09-05; app.ichi.org loads the vault app. No Stellar surface visible; no row repo.",
+	},
+	alterscope: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://app.alterscope.org/",
+		note: "Re-graded 2026-09-05 under the product-state rule: app.alterscope.org serves a live market-signals feed timestamped '2m ago' (overview tiles are sign-in gated dashes, not counted); landing 6,808 chars. No row repo.",
+	},
+	"one-click": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://stellar.oneclick.fi/",
+		note: "Re-graded 2026-09-05 under the product-state rule: stellar.oneclick.fi lists 276 Stellar DeFi pools with live TVL/APY (XLM/SHX aqua $8,297,766.60); the row's website www.oneclick.fi is a 305-char studio page \u2014 consider pointing the row at the app.",
+	},
+	chipper: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://apps.apple.com/us/app/chipper-cash/id1353631552",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists Chipper Cash v1.158.0 released 2026-08-28 (iTunes lookup); site 6,443 chars. No row repo; Stellar usage not visible on the page.",
+	},
+	"boss-revolution": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://apps.apple.com/us/app/boss-money-transfer-send-fast/id1169518032",
+		note: "Re-graded 2026-09-05 under the product-state rule: App Store lists BOSS Money Transfer v26.8.1 released 2026-08-18 (IDT); bossmoney.com 15,255 chars with live promo. No row repo.",
+	},
+	fonbnk: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://pay.fonbnk.com/",
+		note: "Re-graded 2026-09-05 under the product-state rule: pay.fonbnk.com renders the working Buy/Sell USDT widget (NGN bank transfer, fee, next step) before any login; dashboard.fonbnk.com is the merchant login; site 4,022 chars. No row repo.",
+	},
+	findtruman: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://iris.findtruman.io/ai/",
+		note: "Re-graded 2026-09-05 under the product-state rule: Launch App opens iris.findtruman.io/ai/ with a Discover feed of ~50 items carrying view counts (233.6k, 158.8k, 11.2k), Leaderboard and Create; landing renders (packet's 'empty shell' was a curl artefact). Own repo TrumanStellar/Story-Creation idle since 2024-07-12 \u2014 product pivoted to AI app-creation.",
+	},
+	// ── Owner approval 2026-09-05 ("apply the high confidence packets") of the
+	// high-confidence tier (38 rows) of improvements/drafts/2026-09-05-verification-
+	// packets-top100.md: two independent live signals inside 90 days, or a parked /
+	// retired / removed-site page. 34 rows keep their status and gain evidence
+	// (basis human-verified, dated, sourced); 4 Live rows retire on a receipted
+	// dead page (improvements/receipts/<slug>-2026-09-05.json); orbitcdp returns to
+	// Live (site "Live on Stellar", org pushed 2026-08-27). from-guarded.
+	allbridge: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://allbridge.io/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Cross Chain Bridge Crypto - Transfer Coins Between"; repo allbridge-io/allbridge-core-js-sdk pushed 2026-09-04 (high confidence).',
+	},
+	dia: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://www.diadata.org/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "DIA | Price Any Asset. Verify Every Feed."; repo diadata-org/decentral-data-feeder pushed 2026-09-04 (high confidence).',
+	},
+	spacewalk: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://www.pendulumchain.org/spacewalk",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Spacewalk"; repo pendulum-chain/vortex pushed 2026-09-02 (high confidence).',
+	},
+	orbitcdp: {
+		// Owner verdict 2026-09-05: dead. The packet took the page's marketing
+		// banner "Live on Stellar" as evidence while the protocol stats on the
+		// same page are empty dashes (oUSD Minted —, Collateral Locked —,
+		// Borrow APY —); receipt improvements/receipts/orbitcdp-2026-09-05.json.
+		// A banner is not a product state. Reverts the packet write of #1345.
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://orbitcdp.finance/",
+		note: "Owner verdict 2026-09-05: dead — the page's protocol stats are empty (oUSD Minted —, Collateral Locked —, Borrow APY —); the 'Live on Stellar' banner is marketing copy, not a product state. Corrects the 2026-09-05 packet.",
+	},
+	katagames: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://kata.games/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Kata.Games - Revolutionary Gaming Platform"; repo pyved-solution/pyved-engine pushed 2026-06-08 (high confidence).',
+	},
+	"hot-wallet": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-07-09",
+		sourceUrl:
+			"https://chromewebstore.google.com/detail/hot-wallet/mpeengabcnhhjjgleiodimegnkpcenbk",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Chrome Web Store HOT Wallet v1.0.142 updated 2026-07-09, listing names Stellar transfers/swaps/gas-free txs; iOS v1.0.3 2026-01-15 (Soroswap notes); Play updated 2025-06-15; hot-dao/omni-sdk (Stellar) pushed 2026-04-30. Medium: one in-window release.",
+	},
+	flutterwave: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://flutterwave.com/us/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Endless possibilities for every business - Flutterwave"; repo Flutterwave/Woocommerce-v2 pushed 2026-09-03 (high confidence).',
+	},
+	onekey: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://onekey.so/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "OneKey: Hardware Wallet & Crypto DeFi Wallet |"; repo OneKeyHQ/hardware-js-sdk pushed 2026-09-05 (high confidence).',
+	},
+	zebec: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://horizon.stellar.org/transactions/5797fe8a7bd572efbcf19ca80f1ff402aa59c5426adbe2acdd3757a5806cbcaf",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Stellar mainnet payroll contract CBGU4YF7RZR2JRYQ6YXYJCROX47FJ3GFRWQSJJEEF5NAWU2OO3NUSZIW (the `mainnet` address in @zebec-network/stellar-payroll-sdk 3.2.4, published 2026-08-17) invoked 2026-09-05 08:53 UTC, 1,725 events since 2026-06-25; docs list Stellar mainnet; SuperApp iOS v0.08.26 released 2026-08-28, Play updated 2026-08-27 (high).",
+	},
+	ripio: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://www.ripio.com/es",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Liderando cripto en LATAM desde 2013 | Crypto"; repo ripio/agents-toolkit pushed 2026-08-24 (high confidence).',
+	},
+	tala: {
+		// Stamp WITHDRAWN 2026-09-05 evening (cross-vendor audit + the packet's own text): the second signal is inventure/docker-play-seeder, not this product.
+		// human-verified needs the product's own state; status stays Live on the
+		// page that answered. No sourceUrl here on purpose: the row keeps the
+		// packet's page URL and the pre-launch scan does not re-run.
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-05",
+		note: "Verification packet 2026-09-05: human-verified stamp withdrawn the same evening — the second signal is inventure/docker-play-seeder, not this product. Status unchanged; owner verdict pending.",
+	},
+	rozo: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rozo.ai/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "ROZO - Visa Layer for Stablecoins. Spend crypto,"; repo RozoAI/intent-pay pushed 2026-09-05 (high confidence).',
+	},
+	normal: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-02",
+		sourceUrl:
+			"https://horizon.stellar.org/transactions/46e4f3075bea41c472302556831e6317dec8661fa69109ff96035a9b0fe809e3",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Normal's own USDC savings vault nUSDC (DeFindex-Vault-NormalUSDC) CAWM7NKSYG2ITJW2MYYJWJ5ULGCJLDB6MXZIWPL3VPRG5TDVLJ66IMWR invoked by users \u2014 withdraw 2026-09-02 11:39 UTC, 10,050 USDC withdraw 2026-09-01, 130,345 USDC deposit 2026-08-26 (stellar.expert contract activity); interface repo normalfinance/normal-v1-interface pushed 2026-09-02. Site savings page is a wallet sign-in gate; $24M TVL claim unverified (high).",
+	},
+	abroad: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://abroad.finance/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Abroad | Real time payments infrastructure for Wallets"; repo abroad-finance/abroad pushed 2026-08-13 (high confidence).',
+	},
+	alternun: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://alternun.io/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Alternun | ReDeFining the future"; repo alternun-development/alternun pushed 2026-09-04 (high confidence).',
+	},
+	basement: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://basement.dev/",
+		note: 'Verification packet 2026-09-05, owner-approved: Framer "Site Not Found" \u2014 no site configured (high confidence).',
+	},
+	blindpay: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://blindpay.com/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "BlindPay | Stablecoin API for global payments"; repo blindpaylabs/skills pushed 2026-09-04 (high confidence).',
+	},
+	boundless: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://boundless.network/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Boundless \u2014 The inference partner for AI-native startups"; repo boundless-xyz/steel pushed 2026-08-31 (high confidence).',
+	},
+	chainsatlas: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://chainsatlas.com/",
+		note: 'Verification packet 2026-09-05, owner-approved: Wix "ConnectYourDomain Error" \u2014 site removed (high confidence).',
+	},
+	code4rena: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://code4rena.com/",
+		note: "Verification packet 2026-09-05, owner-approved: Audit contest platform, page announces closing (high confidence).",
+	},
+	fairblock: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl:
+			"https://communityfund.stellar.org/project/confidential-transfers-and-balances-hdt",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: SCF #40 Build $150K 'Private & Compliant Payments On Stellar' (own submission: confidential stablecoins, primary focus on Stellar) observed today; only shipped artifact Fairblock/stabletrust-sdk (pushed 2026-09-03) is an ethers.js SDK with EVM testnet addresses; docs and org have no Stellar/Soroban code; landing page renders marketing only, no app or metrics.",
+	},
+	giveth: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://giveth.io/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Giveth: Future of Giving with Zero-Fee Crypto Donation"; repo Giveth/impact-graph pushed 2026-09-04 (high confidence).',
+	},
+	inference: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-07-27",
+		sourceUrl: "https://github.com/Inferara/inference/releases/tag/v0.0.5",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: compiler release v0.0.5 with binaries 2026-07-27, VS Code extension 0.0.5 same day, inference-lang.org renders 'v0.0.5 is available' + install.sh; own repo Inferara/inference pushed 2026-09-05. 'Coming soon / waitlist' is Inference Studio, a separate product. Book calls the language pre-stable \u2014 Development if the owner holds a pre-1.0 line (medium).",
+	},
+	keystone: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://keyst.one/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Keystone Wallet | Secure Open Source Crypto Solution"; repo KeystoneHQ/k-cms pushed 2026-08-28 (high confidence).',
+	},
+	ottersec: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://osec.io/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "OtterSec"; repo otter-sec/anchor pushed 2026-09-05 (high confidence).',
+	},
+	rango: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rango.exchange/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Rango Exchange | Swap Anything Anywhere"; repo rango-exchange/rango-client pushed 2026-09-05 (high confidence).',
+	},
+	rarible: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://rarible.com/all",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Rarible \u2013 fastest multichain NFT Marketplace with Rewards"; repo rarible/protocol-contracts pushed 2026-08-27 (high confidence).',
+	},
+	"runtime-verification": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://runtimeverification.com/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Runtime Verification - Software Assurance for the AI"; repo runtimeverification/stellar-debugger pushed 2026-09-04 (high confidence).',
+	},
+	skyhitz: {
+		// Owner verdict 2026-09-05: dead. The packet read the page title
+		// "Skyhitz - Gravity. Mainnet" and a same-day repo push as a live
+		// product; the page's own stats are zero (Total Mass 0.00 HITZ,
+		// Event Horizon 0.0000, Balance —); receipt
+		// improvements/receipts/skyhitz-2026-09-05.json. Corrects #1345.
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://skyhitz.io/",
+		note: "Owner verdict 2026-09-05: dead — the page's protocol stats are zero (Total Mass 0.00 HITZ, Event Horizon 0.0000, Balance —); a title and a repo push are not a product state. Corrects the 2026-09-05 packet.",
+	},
+	soundness: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://soundness.xyz/",
+		note: "Verification packet 2026-09-05, owner-approved: Post-quantum project notice: winding down, services offline (high confidence).",
+	},
+	splito: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://app.splito.io/",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: app renders a no-account request builder settling in USDC/XLM on Stellar ('No account needed \u2014 fill this in and you get a link to send'); backend server.splito.io/api answers 401 Missing session (deployed, session-enforced); repo Splitoio/web-app pushed 2026-08-28. Form not submitted, so no request link minted (medium).",
+	},
+	spydra: {
+		from: "Live",
+		to: "Live",
+		basis: "site-liveness",
+		asOf: "2026-09-06",
+		withdraw: true,
+		note: 'Owner-approved 2026-09-06 ("apply the downgrades") from the deep verification (#1384/#1385): Deep verify 2026-09-06: human-verified stamp WITHDRAWN \u2014 the 09-05 stamp cited a Microsoft Presidio fork as the repo; console is an Auth0 login (api/health OK); docs have no Stellar/Soroban page (public chain = Polygon Amoy testnet); linked repo erc3643 404; SCF Stellar award 2025-03-11 with no visible deliverable. Status unchanged; cannot tell from the web.',
+	},
+	"the-give-hub": {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://app.thegivehub.com/api.php/campaigns",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: the app's own API returns [] for campaigns, active campaigns, the featured campaign id and donations; app shell 'Unable to Load Content'; documented api.thegivehub.com has no DNS; app repo thegivehub/app pushed 2026-06-03 (the packet's www repo is the marketing site). Empty metrics veto Live; no parked/retired page (high). Receipt improvements/receipts/the-give-hub-2026-09-06.json.",
+	},
+	"token-tails": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://tokentails.com/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Token Tails | A family of feline care"; repo zbagdzevicius/tokentails pushed 2026-07-24 (high confidence).',
+	},
+	untangled: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://stellar.untangled.finance/",
+		note: "Deep verification 2026-09-06 (product-state rule, two agents + coordinator hand-check): Deep verify 2026-09-06: Stellar app renders 4 vaults with TVL (USDyc II $151.5K at 10.76%, AGUSD, DENT1, AGXLM); USDyc II vault CDDDLSQAR6EVIBFU6KMHA6WLIZJ5PDPXKJCEADD6YJ3HJ3S775XHVEE4 (mainnet, created 2026-01-09) instance last modified 2026-08-18; own Soroban repos pushed 2026-09-01. Row contract CBLC4N\u2026 is the older USDyc I (0 events in 7 days) \u2014 attach USDyc II.",
+	},
+	usher: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://www.usher.so/",
+		note: 'Verification packet 2026-09-05, owner-approved: site 200 "Usher Labs - Trace, Prove, and Mobilise Capital"; repo usherlabs/cex-broker pushed 2026-09-05 (high confidence).',
+	},
+	"vanna-finance": {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://docs.vanna.finance/developers/deployed-contracts.md",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: docs state 'All contracts are deployed on Stellar Testnet. Mainnet addresses will be published at launch.'; Launch App \u2192 test.stellar.vanna.finance (testnet AMM API); app.vanna.finance has no DNS; linked repo protocol_v1_soroban 404; org backend Vercel 402 disabled (high). Receipt improvements/receipts/vanna-finance-2026-09-06.json.",
+	},
+	wagelink: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-06",
+		sourceUrl: "https://itunes.apple.com/lookup?id=6461461372&country=us",
+		note: "Owner-approved 2026-09-06 (\"apply the downgrades\") from the deep verification (#1384/#1385): Deep verify 2026-09-06: wagelink.io's own bundle links App Store id 6461461372 and the page's setup step 1 is 'Download the WageLink App from the Apple App Store'; that listing 404s and the iTunes lookup returns resultCount 0 in 10 storefronts; no Android app, no API host, no app subdomain, no WageLink repo; Zebec site/docs do not mention it. Receipt improvements/receipts/wagelink-2026-09-06.json. Medium: marketing page still 200. Receipt improvements/receipts/wagelink-2026-09-06.json.",
+	},
+	// ── Owner approval 2026-09-02 ("all 27") of verification packet
+	// improvements/quality/verification-packets-2026-09-02.md: app-only weak
+	// rows whose evidence bundle (site 200 naming the product + a commit,
+	// release or dated corpus mention inside the window) the owner confirmed.
+	// from === to: the status does not move; the EVIDENCE does — basis becomes
+	// human-verified with the site as source and the packet reason as note.
+	// Idempotent (from-guarded on Live; a later manual change is never
+	// clobbered).
+	moneygram: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'moneygram'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://moneygram.com/",
+		basis: "human-verified",
+	},
+	hubble: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'hubble'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://developers.stellar.org/docs/data/analytics/hubble",
+		basis: "human-verified",
+	},
+	idos: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'idos'; commit 44d ago, release 314d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://idos.network/",
+		basis: "human-verified",
+	},
+	"python-stellar-sdk": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'python'; commit 1d ago, release 6d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://github.com/stellarcn/py-stellar-base",
+		basis: "human-verified",
+	},
+	bitso: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'bitso'; corpus mention 84d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://bitso.com/",
+		basis: "human-verified",
+	},
+	"validation-cloud": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'validation cloud'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://validationcloud.io/stellar",
+		basis: "human-verified",
+	},
+	chaincerts: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'chaincerts'; commit 92d ago, release 92d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://chaincerts.co/",
+		basis: "human-verified",
+	},
+	nodies: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'nodies'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://nodies.app/",
+		basis: "human-verified",
+	},
+	albedo: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'albedo'; commit 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://albedo.link/",
+		basis: "human-verified",
+	},
+	dfns: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'dfns'; commit 6d ago, release 19d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://dfns.co/",
+		basis: "human-verified",
+	},
+	obsrvr: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'obsrvr'; commit 9d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://withobsrvr.com/",
+		basis: "human-verified",
+	},
+	rabet: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'rabet'; release 253d ago, corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://rabet.io/",
+		basis: "human-verified",
+	},
+	"stellar-quickstart": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'quickstart'; commit 1d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://github.com/stellar/quickstart",
+		basis: "human-verified",
+	},
+	nownodes: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'nownodes'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://nownodes.io/",
+		basis: "human-verified",
+	},
+	"java-stellar-sdk": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'java stellar sdk'; commit 1d ago, release 1d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://github.com/lightsail-network/java-stellar-sdk",
+		basis: "human-verified",
+	},
+	gatewayfm: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'gateway.fm'; commit 1d ago, release 6d ago, corpus mention 81d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://gateway.fm/",
+		basis: "human-verified",
+	},
+	stellarbroker: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'stellarbroker'; commit 38d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://stellar.broker/",
+		basis: "human-verified",
+	},
+	"stellar-disbursement-platform-sdp": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'disbursement'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://stellar.org/products-and-tools/disbursement-platform",
+		basis: "human-verified",
+	},
+	streamingfast: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'streamingfast'; commit 5d ago, release 5d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://streamingfast.io/",
+		basis: "human-verified",
+	},
+	beans: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'beans'; commit 1d ago, release 1d ago, corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://beansapp.com/",
+		basis: "human-verified",
+	},
+	"typescript-wallet-sdk": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'typescript wallet sdk'; commit 13d ago, release 13d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://github.com/stellar/typescript-wallet-sdk",
+		basis: "human-verified",
+	},
+	ledger: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'ledger'; commit 2d ago, release 9d ago, corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://ledger.com/",
+		basis: "human-verified",
+	},
+	onfinality: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'onfinality'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://onfinality.io/en/networks/stellar",
+		basis: "human-verified",
+	},
+	trezor: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'trezor'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://trezor.io/",
+		basis: "human-verified",
+	},
+	"bitget-wallet": {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'bitget wallet'; corpus mention 174d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://web3.bitget.com/",
+		basis: "human-verified",
+	},
+	fordefi: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'fordefi'; corpus mention 92d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://fordefi.com/",
+		basis: "human-verified",
+	},
+	klever: {
+		from: "Live",
+		to: "Live",
+		note: "Verification packet 2026-09-02, owner-approved: site 200 names 'klever'; corpus mention 2d ago.",
+		asOf: "2026-09-02",
+		sourceUrl: "https://klever.io/",
+		basis: "human-verified",
+	},
+	// ── Owner call 2026-09-02 ("fix those"): dead-domain and takeover rows.
+	// Flipped only with TWO independent signals (a dead or taken-over domain
+	// PLUS no linked code or code dead for 18+ months) and never for an
+	// SCF-funded project (bebop, haciendo-stellar, onboarding-club and
+	// trustedplastic are funded — their dead links are removed above, status
+	// left for a human). Live rows with a dead domain but ACTIVE code
+	// (clickpesa-debt-fund, freelii, keizai, stellar-ai-agent-kit, transfuse)
+	// keep their status: the product may have moved. from-guarded, retires
+	// once applied.
+	aurapay: {
+		from: "Live",
+		to: "Inactive",
+		note: "somosaurapay.com is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	lettuce: {
+		from: "Live",
+		to: "Inactive",
+		note: "lettucepay.io is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	nicetrade: {
+		from: "Live",
+		to: "Inactive",
+		note: "nicetrade.co is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	prophe: {
+		from: "Live",
+		to: "Inactive",
+		note: "prophe.xyz is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	"sgf-solutions": {
+		from: "Live",
+		to: "Inactive",
+		note: "sgfsolutions.io is NXDOMAIN on two public resolvers and the row links no code at all (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	sorobix: {
+		from: "Live",
+		to: "Inactive",
+		note: "sorobix.xyz is NXDOMAIN on two public resolvers and the last commit across its 5 repos is 2023-11-28 (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	techfiesta: {
+		from: "Live",
+		to: "Inactive",
+		note: "techfiesta.dev is NXDOMAIN on two public resolvers and the last commit across its 5 repos is 2024-03-13 (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	"stellar-battle": {
+		from: "Live",
+		to: "Inactive",
+		note: "stellarbattle.com redirects to a HugeDomains sale page; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl:
+			"https://www.hugedomains.com/domain_profile.cfm?d=stellarbattle.com",
+		basis: "human-verified",
+	},
+	"stocken-capital": {
+		from: "Live",
+		to: "Inactive",
+		note: "stockencapital.com now serves gambling spam ('Login Bandar Togel'); the product is gone (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	stellarauth: {
+		from: "Live",
+		to: "Inactive",
+		note: "stellarauth.com is a parked domain page; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		basis: "human-verified",
+	},
+	soracle: {
+		from: "Live",
+		to: "Inactive",
+		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl: "https://posted.app/",
+		basis: "human-verified",
+	},
+	sora: {
+		from: "Live",
+		to: "Inactive",
+		note: "its recorded site posted.app is listed for sale at Porkbun; no linked code (checked 2026-09-02).",
+		asOf: "2026-09-02",
+		sourceUrl: "https://posted.app/",
+		basis: "human-verified",
+	},
+	// Owner call 2026-08-29 ("remove this? why is this even added?"): a
+	// name-only husk from the March lumenloop bulk seed — NO links, empty
+	// description, category/types incoherent, serving Live on an unverified
+	// seed label. The only row of its shape among all 152 source-inherited
+	// Live rows (probed in-session). Draft = out of the served population,
+	// reversible, and sync no longer reverts curation (#730).
+	// ── 2026-08-31 SCF absence review: two REAL projects sitting as hidden
+	// Draft rows, blocking their own seeds ("exists, skip" while the public
+	// API serves neither — the diagnostic added the same day proved the
+	// status). Both were verified in the review; un-drafting is what the
+	// approved "create" verdict means for a row that already exists.
+	// Third instance of the hidden-Draft trap in one day: the communidao seed
+	// skipped on an existing Draft row, exactly like fxdao and enerdao before
+	// it. Un-draft to the seed's own verdict — Inactive with history.
+	communidao: {
+		from: "Draft",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+		note: "Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023. Served as an Inactive row so the funded history is answerable.",
+	},
+	// 2026-08-31 this entry un-hid the row (Draft → Live on site-liveness: the
+	// review had called it "genuinely absent" when it was merely hidden).
+	// 2026-09-05 owner verdict: FxDAO is a dead protocol — the contracts repo
+	// (FxDAO/fxdao-sc) last pushed 2025-06-16 and fxdao.io answers 200 with a
+	// generic page titled "connected world", not the protocol app. Inactive
+	// drops it from the live lists and down-ranks it in search; the SCF award
+	// stays on the row so the funded history is answerable.
+	fxdao: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-09-05",
+		sourceUrl: "https://github.com/FxDAO/fxdao-sc",
+		note: "Owner verdict 2026-09-05: dead protocol — contracts repo last pushed 2025-06-16, site serves a generic page.",
+	},
+	enerdao: {
+		from: "Draft",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-08-31",
+		sourceUrl: "https://communityfund.stellar.org/project/enerdao-r84",
+		note: "Tokenized renewable-energy debt on Soroban; site 200 but repo silent — the review's own verdict was shaky, so Development, not Live.",
+	},
+	"free-voting-platform": {
+		from: "Live",
+		to: "Draft",
+		basis: "human-verified",
+		asOf: "2026-08-29",
+		note: "owner-directed removal: contentless seed husk, nothing to verify",
+	},
+	// Weakest-queue triage 2026-08-28: chainsatlas.com serves 404 (probed
+	// in-session); the Inactive verdict was already right, it just had no
+	// recorded evidence.
+	chainatlas: {
+		from: "Inactive",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://chainsatlas.com/",
+		note: "site 404s on root; Inactive stands, provenance filled",
+	},
+	// ── Sourced-queue pass 2026-08-28: the prominent source-inherited Live
+	// rows get real provenance (from==to entries move nothing; they fix the
+	// evidence, the zenex precedent). Each probed in-session; flipside is the
+	// one genuine status event found.
+	benji: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://benjiinvestments.com/",
+		note: "FT digital-assets platform live (BENJI); the page's 'coming soon' is a portfolio footer, not a product gate",
+	},
+	friendbot: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://friendbot.stellar.org/",
+		note: "service operating: responds with structured 400 asking for ?addr= — an API answering correctly, not a dead page",
+	},
+	warmancer: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://www.warmancer.com/",
+		note: "game live at warmancer.com (the .io in the row 404s — WEBSITE_FIXES moves it)",
+	},
+	wisdomtree: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://wisdomtreeprime.com/",
+		note: "WisdomTree Prime app live ('Get the app', funded-account promo). Status only — deployment stays unknown per the 2026-08-28 fake-issuer finding",
+	},
+	"stellar-laboratory": {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://laboratory.stellar.org/",
+		note: "SDF's Stellar Lab serving normally",
+	},
+	hana: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://www.hana.money/",
+		note: "live wallet app; hanawallet.io 308s to hana.money (WEBSITE_FIXES moves the row)",
+	},
+	liquify: {
+		from: "Live",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://liquify.com/",
+		note: "infrastructure provider site serving normally",
+	},
+	// The one genuine status event in the queue: BOTH flipsidecrypto.xyz and
+	// flipsidecrypto.com redirect to edisyl.com ("the knowledge layer for
+	// enterprise AI") — the crypto-analytics product this row exists for is
+	// gone; the company pivoted. Receipt:
+	// improvements/receipts/flipside-2026-08-28.json.
+	flipside: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://flipsidecrypto.xyz/",
+		note: "company pivoted to edisyl (enterprise AI); both flipside domains redirect there — the analytics product is gone",
+	},
+	// sls-079 (2026-08-28): Live rested on site-liveness while the operator's
+	// own bundle shows a testnet-only deployment (mainnet config empty). By the
+	// hoops precedent, a testnet-only product is Pre-Release. Evidence receipt:
+	// improvements/receipts/stellars-finance-2026-08-28.json.
+	"stellars-finance": {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-08-28",
+		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
+		note: "testnet contracts populated; mainnet addresses empty in the operator bundle",
+	},
+	// sls-073 (2026-08-25): Zenex's STATUS is already right (Pre-Release) — this
+	// entry does not move it. What it fixes is the PROVENANCE: it was resting on
+	// `site-liveness`, so the next sweep could have churned it off a mere 200.
+	// Verified today at docs.zenex.trade/deployments/contract-addresses — the
+	// page still lists contract addresses as TBD, i.e. nothing is deployed for
+	// users yet. from === to, so the from-guard makes this a no-op on status
+	// and writes only the dated evidence.
+	// User report 2026-08-27 ("laina is not live, testnet"): confirmed against
+	// the code itself — src/lib/horizon.ts hardcodes horizon-testnet.stellar.org
+	// and Networks.TESTNET; the only other branch is localhost. No mainnet path
+	// exists. The row's Live rested on site-liveness (a 200 from laina-de.fi's
+	// Astro landing page — a page is not a protocol). Repo laina-defi/laina
+	// last pushed 2026-08-11, so the project is alive as a PROJECT, just not
+	// launched: Pre-Release, not Inactive.
+	// User report 2026-08-29 ("hoops is not live, testnet") — and a lesson
+	// re-learned the same week it was written: the previous entry here
+	// stamped Live evidence off a 200 WITHOUT reading the page. The page
+	// itself says it: products are labelled TESTNET ("Incentivized liquidity
+	// pools ... TESTNET", "Hoops Vaults ... TESTNET") and the hero says
+	// "JOIN THE WAITLIST". Testnet products + waitlist = the noether class:
+	// a real, active project that has NOT launched. Pre-Release, not Live,
+	// not Inactive.
+	// User report 2026-08-29 ("pluto loans is dead"), verified: plutoloans.com
+	// does not resolve at all (connection failure, zero bytes — not a 404 page,
+	// not a parked page) and the plutodao org's newest repository push is
+	// 2023-07-20 with governance last touched 2022. Domain gone plus two years
+	// of silence is the Inactive bar; status was resting on source-inherited,
+	// the weakest basis we serve.
+	"pluto-loans": {
+		from: "Live",
+		to: "Inactive",
+		note: "Lending protocol on Stellar; site plutoloans.com no longer resolves and the plutodao repositories have been silent since July 2023.",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/plutodao/loans-sdk",
+		basis: "human-verified",
+	},
+	// receipt: improvements/receipts/ping-2026-08-28.json
+	// User report 2026-08-28 ("i think they shutdown"), verified same day:
+	// letsping.com and www serve Framer's "Site Not Found" unpublished-site
+	// page (HTTP 404, ~6.9KB shell) and app.letsping.com does not resolve at
+	// all (HTTP 000, zero bytes). Every product surface is gone. YC's company
+	// directory still reads "Active", but that status is founder-reported and
+	// lags; it does not outweigh the product's own hosts. Status rested on
+	// source-inherited, the weakest basis we serve.
+	ping: {
+		from: "Live",
+		to: "Inactive",
+		note: "Neo-bank for Latin American freelancers (letsping.com); the site is unpublished (Framer 'Site Not Found') and the app host no longer resolves.",
+		asOf: "2026-08-28",
+		sourceUrl: "https://letsping.com/",
+		basis: "human-verified",
+	},
+	// receipt: improvements/receipts/hoops-2026-08-28.json
+	hoops: {
+		from: "Live",
+		to: "Pre-Release",
+		note: "DeFi savings/pools platform for Stellar; site is live but its products are labelled TESTNET and the hero is a waitlist — pre-launch.",
+		asOf: "2026-08-29",
+		sourceUrl: "https://hoops.finance/",
+		basis: "human-verified",
+	},
+	// receipt: improvements/receipts/laina-2026-08-28.json
+	laina: {
+		from: "Live",
+		to: "Pre-Release",
+		note: "Single-token lending pools on Soroban; app targets TESTNET only (horizon.ts pins horizon-testnet + Networks.TESTNET; no mainnet branch).",
+		asOf: "2026-08-27",
+		sourceUrl:
+			"https://github.com/laina-defi/laina/blob/main/src/lib/horizon.ts",
+		basis: "human-verified",
+	},
+	// receipt: improvements/receipts/zenex-2026-08-28.json (pre-launch, every
+	// address TBD). Launched since: owner report 2026-10-03 "zenex is live on
+	// mainnet", verified the same day. The deployments page now lists "the
+	// live Zenex deployment on Stellar mainnet", written from the chain at
+	// ledger 64,737,253 (2026-10-02): factory CDFEZPO7…, an active XLM-USD
+	// market CAOZCITW…. On the public network the market contract was created
+	// 2026-09-29 and shows 317 invocations (stellar.expert). receipt:
+	// improvements/receipts/zenex-2026-10-03.json
+	zenex: {
+		from: "Pre-Release",
+		to: "Live",
+		note: "Perpetual (leveraged) trading exchange on Stellar/Soroban, formerly Hermes. Live on Stellar mainnet since 2026-09-29: its deployments page lists the mainnet factory and an active XLM-USD market, and the market contract shows 317 invocations on the public network.",
+		asOf: "2026-10-03",
+		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
+		basis: "human-verified",
+	},
+	// sls-073 (2026-08-25): Noether was Live on `site-liveness` — the weakest
+	// basis we have, and the same "a 200 is not a business" class as kulipa
+	// below. Its own site says the opposite of Live: "funds are not real",
+	// "Trade on testnet -> Join the mainnet waitlist", and "Noether's mainnet
+	// contracts are being audited. Mainnet opens when the audit completes."
+	// Repo shape agrees — NoetherDEX/noether is 3 stars, last commit
+	// 2026-07-11, alongside a Discord webhook and a scratch repo. SCF-funded
+	// and genuinely being built, so this is Pre-Release, NOT Inactive: the
+	// product is coming, it just is not tradeable with real funds yet.
+	// Flip back to Live when the mainnet contracts are published.
+	// receipt: improvements/receipts/noether-2026-08-28.json
+	noether: {
+		from: "Live",
+		to: "Pre-Release",
+		note: "Perpetual futures DEX on Stellar/Soroban, running on PUBLIC TESTNET only — its own site states funds are not real and mainnet opens after the in-progress audit.",
+		asOf: "2026-08-25",
+		sourceUrl: "https://noether.exchange/",
+		basis: "human-verified",
+	},
+	// Raven #39 (elizabethli-sdf, 2026-08-21): Raven recommended Kulipa FIRST
+	// for "what card services can I integrate on Stellar". Kulipa shut down on
+	// 2026-07-29 (insolvency) — ~20 wallet partners lost card service and
+	// ~120,000 cards were disabled overnight. Six independent reports
+	// (coinalertnews 07-31, btctiming 08-02, bydfi, guavy, startupfortune,
+	// bleap). kulipa.xyz still answers 200 with a "Kulipa is changing home /
+	// join our waitlist" placeholder, which is why site-liveness kept it Live:
+	// a 200 is not a business. SCF-funded; the record stays, the label moves.
+	kulipa: {
+		from: "Live",
+		to: "Inactive",
+		note: "Stablecoin card-issuing infrastructure (settlement on Stellar) that shut down on 2026-07-29 citing insolvency; ~20 wallet partners and ~120,000 cards went dark. The domain serves a 'changing home' placeholder.",
+		asOf: "2026-08-21",
+		sourceUrl:
+			"https://coinalertnews.com/news/2026/07/31/kulipa-shuts-down-after-funding",
+		basis: "human-verified",
+	},
+	// Raven #39: GetBlockCard was Ternio's BlockCard, which became Unbanked
+	// (ternio.io 301s → unbanked.com; Republic: "Unbanked, formerly Ternio
+	// BlockCard"). Unbanked wound down in 2023 (Cointelegraph: "exhausted all
+	// options", citing the US regulatory environment). The recorded domain
+	// getblockcard.com has since lapsed and now serves an Indonesian lottery-
+	// spam page — which answers HTTP 200, so site-liveness called it Live. The
+	// boss-pay class (lapsed apex re-registered by strangers), except here the
+	// product is gone too, so this is Inactive rather than a website fix.
+	getblockcard: {
+		from: "Live",
+		to: "Inactive",
+		note: "Ternio's BlockCard crypto card platform, rebranded Unbanked, which wound down in 2023. The recorded domain getblockcard.com has lapsed and now serves unrelated lottery-spam content.",
+		asOf: "2026-08-21",
+		sourceUrl:
+			"https://cointelegraph.com/news/unbanked-to-wind-down-citing-regulatory-enviroment",
+		basis: "human-verified",
+	},
 	// Provenance REFRESH (Live → Live), not a flip: the Raven cold-agent runs
 	// (2026-07-20) flagged blend serving statusAsOf 2025-12-17
 	// source-inherited while its TVL refreshed same-day — status freshness
@@ -90,9 +1954,10 @@ export const STATUS_FIX: Record<
 	vesseo: {
 		from: "Live",
 		to: "Live",
-		asOf: "2026-07-20",
-		sourceUrl: "https://vesseoapp.com/",
-		basis: "site-liveness",
+		basis: "human-verified",
+		asOf: "2026-09-02",
+		sourceUrl: "https://itunes.apple.com/lookup?id=1514223107&country=us",
+		note: "Next-100 packet 2026-09-06 (product-state rule), coordinator re-probed: Packet 2026-09-06 (high): App Store 'Vesseo: Your Global Wallet' v113.0 released 2026-09-02 (Sunship, Inc); Play io.sunship.app updated 2026-09-01, 1M+ downloads. Store text names USDC, not Stellar. Add Play id to availability.",
 	},
 	// boxy 2026-07-20 (evidence reviewed, approved flip): up-but-abandoned.
 	// eascrow.xyz serves 200 but the bundle froze 2025-03-06 (Last-Modified);
@@ -216,9 +2081,17 @@ export const STATUS_FIX: Record<
 	// sls-028: domains REPURPOSED to unrelated gambling content (dual-lane
 	// verified 2026-07-10) — a Live row pointing there is unsafe navigation.
 	"the-blue-marble": {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). The retracted https://thebluemarble.io/ is
+		// deliberately not the source: it is the hijacked casino redirect.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Domain repurposed to unrelated content (verified 2026-07-10) — the recorded NFT product is gone; do not follow the historical link.",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://rdap.identitydigital.services/rdap/domain/thebluemarble.io",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: thebluemarble.io 301s to diviandecor.com and on to sexygames666.com (a betting site); the .io registry's RDAP record shows the domain re-registered 2026-04-28 via Sav.com, LLC, so Taskdotio Ltd (GitHub org 'The Blue Marble (Taskdotio Ltd)', last push 2024-01-12) no longer holds it. Last Wayback capture of the product 2025-03-04 ('Craft a community of brand superfans'). Do not follow the historical link.",
 	},
 	octoplace: {
 		from: "Live",
@@ -228,14 +2101,28 @@ export const STATUS_FIX: Record<
 	// sls-030: standalone venue stale; implementation lives on embedded as
 	// Blend's 80/20 BLND:USDC backstop pool. Historical funded project.
 	comet: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10; rewritten from==to as a source
+		// fill (gap-matrix sourced pool 2026-08-29) — apply matches on current
+		// status, so the old `from: Live` skipped forever.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Standalone Comet venue is no longer maintained; its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/CometDEX/comet-contracts-v1",
+		basis: "human-verified",
+		note: "Standalone Comet venue is no longer maintained (only org repo last pushed 2024-05-02); its weighted-pool implementation runs embedded as Blend's 80/20 BLND:USDC backstop (verified on mainnet 2026-07-10).",
 	},
+	// venalabs history: July 2026 flip to Inactive was a human-verified PIVOT
+	// verdict ("no Stellar/Soroban/course content remains"). Re-verified
+	// 2026-09-01 during the retracted-receipts triage: the live page now
+	// carries Stellar again ("networks with a strong identity such as
+	// Stellar or XRPL … dedicated courses", 21 mentions) — the pivot verdict
+	// no longer describes the site, and the owner called the flip back.
 	venalabs: {
-		from: "Live",
-		to: "Inactive",
-		note: "Pivoted away from Stellar education to an airdrop-farming platform (site verified 2026-07-11 — no Stellar/Soroban/course content remains).",
+		from: "Inactive",
+		to: "Live",
+		basis: "human-verified",
+		asOf: "2026-09-01",
+		sourceUrl: "https://venalabs.com/en/landing",
 	},
 	helix: { from: "Live", to: "Development" },
 	warpdrive: { from: "Live", to: "Development" },
@@ -291,9 +2178,17 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): canfy.net NXDOMAIN with no Wayback snapshot, no GitHub org, zero product mentions via search \u2014 entire footprint gone.",
 	},
 	chaincred: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). Two facts in the July note were wrong: the
+		// landing page 200s at its real (mixed-case) path and the author still
+		// has the repos. The verdict stands on the repos' dates instead.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded landing page prince29chouhan.github.io/chaincred_landing 404s, author has no chaincred repo left, and search found no footprint at all \u2014 hackathon-grade project.",
+		asOf: "2026-09-14",
+		sourceUrl: "https://github.com/Prince29chouhan/ChainCred",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: the author's ChainCred, ChainCred_landing, ChainCredLanding and ChaiCredLandingPage repos were all last pushed 2024-07-23/24 (one hackathon weekend) and nothing since; prince29chouhan.github.io/ChainCred_landing serves a JS shell titled 'ChainCred' (the July 404 was the lowercased path). Hackathon-grade project with no later footprint.",
 	},
 	cosmiclink: {
 		from: "Live",
@@ -356,9 +2251,16 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): openx.solar NXDOMAIN, YaleOpenLab repos untouched since Jan 2023, Yale OpenLab's own page frames the effort as concluded/absorbed into Open Earth Foundation \u2014 the Stellar crowdfunding platform no l\u2026",
 	},
 	pactta: {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). https://pactta.com/ is retracted (and now a
+		// stranger's parking stub), so the registry record is the source.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): pactta.com fully unregistered (no NS/A records) and searches found no footprint newer than the 2023 Techstars class announcement.",
+		asOf: "2026-09-14",
+		sourceUrl: "https://rdap.verisign.com/com/v1/domain/pactta.com",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: pactta.com is no longer unregistered — Verisign RDAP shows it re-registered 2026-08-11 through West263 International Limited (hkdns.hk) on Afternic parking nameservers, serving a 'Loading...' stub with a Chinese ICP-filing link; the last Wayback capture before the lapse (2024-08-30) was already a Sedo parking page. The operator's domain lapsed and was drop-caught; no product.",
 	},
 	"paygo-crypto": {
 		from: "Live",
@@ -376,9 +2278,17 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): rigel.link has no DNS record; only footprint is the ~2019 SCF #5 listing/forum thread; recent 'Rigel' hits are an unrelated affiliate tool.",
 	},
 	"scam-flagging-system": {
-		from: "Live",
+		// Flip Live→Inactive applied 2026-07-10 (wasLive is on the row);
+		// rewritten from==to as a source fill (gap-matrix sourced pool
+		// 2026-09-14, see comet). The July 404 was a case-mangled sheet id
+		// (retracted); the real sheet IS the product, so it is the source.
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): Recorded website (a Google Sheet) returns 404 and searches for 'Stellar Scam Flagging System' surface nothing beyond the SCF listing at https://communityfund.stellar.org/projects/scam-flagging-syst\u2026",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://docs.google.com/spreadsheets/d/1JCkWZ3X1h6kJKM6ZCZThDshK_whhNiTyGTV8R24Anho/edit",
+		basis: "human-verified",
+		note: "Re-read 2026-09-14: the product is a public Google Sheet, 'Very extensive list of very questionable token domains' (2,700 rows), still served. Its own 'Date last modified' column ends 2023-12-22 and its 'Date first entered' column has a single entry after 2024-01-14 (2025-02-05); no repo, no other footprint beyond the SCF #11 listing ($10k Legacy v3.0 award). Unmaintained for 19 months.",
 	},
 	skeeper: {
 		from: "Live",
@@ -431,9 +2341,13 @@ export const STATUS_FIX: Record<
 		note: "Confirmed defunct 2026-07-10 (liveness triage): typiqo.it has no DNS record, typiqo.com redirects to a domain-for-sale listing (brandbucket), newest footprint is 2021 press.",
 	},
 	vitreous: {
-		from: "Live",
+		// Flip applied 2026-07-10; from==to source fill 2026-08-29 (see comet).
+		from: "Inactive",
 		to: "Inactive",
-		note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (no NS/A records); only footprint is a years-old SCF profile piece on stellar.org/blog with nothing newer anywhere.",
+		asOf: "2026-08-29",
+		sourceUrl: "http://web.archive.org/web/20240511015520/https://vitreous.co/",
+		basis: "human-verified",
+		note: "Confirmed defunct 2026-07-10 (liveness triage): vitreous.co unregistered (NXDOMAIN re-confirmed 2026-08-29; last live Wayback capture 2024-05-11); only footprint is a years-old SCF profile piece on stellar.org/blog.",
 	},
 	whalestack: {
 		from: "Live",
@@ -451,15 +2365,414 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Confirmed inactive 2026-07-13 (sls-024 recheck): the centaurus-project repos have had no activity since January 2022 (centaurus last push 2022-01-05; centaurus-ban-extension 2020-05-18), the recorded website is the GitHub org itself (no product surface exists), and no current deployment evidence was located. The previous Live label was source-inherited, never verified.",
 	},
+	// Keybase: owner-confirmed 2026-08-17 ("shouldn't be there, not really
+	// active"). Acquired by Zoom in 2020; the Stellar wallet integration is
+	// legacy and unmaintained while keybase/client itself still gets chat-client
+	// commits and holds 9k+ stars, which is exactly how it rode to #1 on the
+	// homepage Top Repositories. It was on mark-inactive-projects.ts's curated
+	// list (marked Jul 2 + Jul 5) but that script writes status without
+	// registering ownership here, so the nightly lumenloop sync flipped it back
+	// to Live every time. This row makes `status` curated-owned for the slug.
+	keybase: {
+		from: "Live",
+		to: "Inactive",
+		asOf: "2026-08-17",
+		sourceUrl: "https://github.com/keybase/client",
+		basis: "human-verified",
+		note: "Keybase was a Stellar wallet integration (2018-2020). Zoom acquired Keybase in May 2020; the Stellar features are legacy and unmaintained. The keybase/client repo remains active for the chat client only. Marked Inactive on owner review 2026-08-17.",
+	},
+	// ── 2026-08-29 gap-matrix pass: strongBasis pool, 6 of the 8 top-prominence
+	// examples upgraded from site-liveness with a dated operator artifact each
+	// (from==to = provenance fill, the zenex pattern). Honest skips: xbull
+	// (site is an unreadable JS shell, wallet repo last commit 2025-08-13 —
+	// no current-operation artifact located) and moneygram (homepage evidences
+	// MoneyGram the company, not the Stellar Ramps product; the ramps page is
+	// an unreadable JS shell). Never stamp human-verified off an unread page.
+	"soroban-rust-sdk": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/rs-soroban-sdk/releases",
+		basis: "human-verified",
+		note: "v27.0.6 released 2026-08-13 — actively shipped by stellar org.",
+	},
+	"javascript-stellar-sdk": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/js-stellar-sdk/releases",
+		basis: "human-verified",
+		note: "v17.0.1 released 2026-08-25 — actively shipped by stellar org.",
+	},
+	"stellar-cli": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/stellar-cli/releases",
+		basis: "human-verified",
+		note: "v28.0.0 released 2026-08-26 — actively shipped by stellar org.",
+	},
+	freighter: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/stellar/freighter/releases",
+		basis: "human-verified",
+		note: "5.46.0 released 2026-08-26 — the extension ships continuously.",
+	},
+	lobstr: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://lobstr.co/",
+		basis: "human-verified",
+		note: "Operator page verified 2026-08-29: shipping iOS + Android wallet apps (receipt improvements/receipts/lobstr-2026-08-29.json).",
+	},
+	// Owner correction 2026-08-29: "xbull is not stale." My earlier skip keyed
+	// on ONE dormant repo (xBull-Wallet, last commit 2025-08) and an
+	// unreadable Framer shell — the wrong signals. The operator (Creit-Tech)
+	// is actively shipping: Stellar-Wallets-Kit pushed 2026-08-28, three more
+	// Stellar SDKs pushed this month; the Chrome Web Store listing is live
+	// (receipt improvements/receipts/xbull-2026-08-29.json). A working wallet
+	// needs no repo churn — judge the operator, not one repo.
+	xbull: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/Creit-Tech",
+		basis: "human-verified",
+		note: "Owner-affirmed live; operator Creit-Tech actively shipping (Stellar-Wallets-Kit pushed 2026-08-28); Chrome Web Store listing live (receipt xbull-2026-08-29.json).",
+	},
+	circle: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl:
+			"https://developers.circle.com/cctp/references/stellar-contracts",
+		basis: "human-verified",
+		note: "Circle's own reference lists live Stellar MAINNET CCTP contracts (receipt improvements/receipts/circle-2026-08-29.json); USDC issuance on Stellar is Circle-operated.",
+	},
+	// ── 2026-08-29 gap-matrix pass: sourced pool (12 example rows — statuses
+	// with no re-checkable source). Research chain per row ran read-only
+	// against operator artifacts (repos/releases/npm/own blogs); every claim
+	// below carries its dated artifact. comet + vitreous rewritten in place
+	// above (same pass).
+	cards402: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/CTX-com/Cards402",
+		basis: "human-verified",
+		note: "Operator repo (pushed 2026-07-26): Rust contract + backend watcher, fulfillment engine private — working codebase, not an operating product.",
+	},
+	asgcard: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://www.npmjs.com/package/@asgcard/cli",
+		basis: "human-verified",
+		note: "Published CLI (0.7.8, 2026-04-08) + asgcard.dev product site; no repo/npm activity since ~2026-04-09 — watch for drift.",
+	},
+	talos: {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/enliven17/talos-stellar",
+		basis: "human-verified",
+		note: "Operator README (repo pushed 2026-08-28): registry contract and agent flows 'all on Stellar testnet' — explicitly testnet-stage.",
+	},
+	"ai-net": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/Epta-Node/ai-net",
+		basis: "human-verified",
+		note: "Operator repo (pushed 2026-08-29): testnet-only deploy tooling and prerequisites — actively developed, testnet-stage.",
+	},
+	"pulsar-mcp": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/benelabs/pulsar",
+		basis: "human-verified",
+		note: "Repo pushed 2026-05-03; README says npx works 'once the package is published' — unpublished dev tool, ~4 months quiet, watch for drift.",
+	},
+	"stellar-agent-wallet-skill": {
+		from: "Development",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl:
+			"https://github.com/mpprouter/stellar-agent-wallet-skill/releases/tag/v1.8.2",
+		basis: "human-verified",
+		note: "v1.8.2 released 2026-08-11, ClawHub-listed with mainnet support — a shipped tool, but code-published ≠ product-operating, so Development stands.",
+	},
+	"lusty-finance": {
+		// The pool's one real correction: stored Live, operator says testnet.
+		from: "Live",
+		to: "Development",
+		asOf: "2026-08-29",
+		sourceUrl: "https://github.com/utkurock/Lusty",
+		basis: "human-verified",
+		note: "Operator README (repo pushed 2026-08-29) states 'Network: Stellar Testnet'; positions settled end-to-end on testnet; LUSD distributor backs the testnet faucet only. A testnet venue is not Live. Development, not Inactive — work is current.",
+	},
+	mydatacoin: {
+		// Keep the label, admit the basis: no artifact evidences the described
+		// Stellar product. mydatacoin.io is a dead Azure 404 with broken TLS;
+		// the org's active repos are the EVM Atria RWA suite (zero
+		// stellar/soroban refs); Stellar-era repos last pushed 2023–2024-11.
+		// Candidate for a human Inactive-on-Stellar review — no operator
+		// statement exists, so never-accuse holds the label.
+		// Source filled 2026-09-14 (gap-matrix sourced pool): the org's repo
+		// list, whose pushed_at dates are the whole claim above.
+		from: "Development",
+		to: "Development",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://api.github.com/orgs/MyDataCoin/repos?sort=pushed&per_page=100",
+		basis: "unverified",
+		note: "Re-read 2026-09-14: mydatacoin.io answers HTTP 404 'Site Not Found' (Azure), last Wayback 200 2025-12-05; the org's five atria-* repos (Solidity/C#/JS, EVM) were pushed 2026-09-03..07 while go-mydatacoin, the newest Stellar-era repo, was last pushed 2024-11-23. No artifact evidences the described Stellar ZK-lending/KYC product; basis stays unverified, flagged for human review.",
+	},
+	// ── 2026-09-14 gap-matrix pass: sourced pool (the last row without a
+	// re-checkable source; the other five are rewritten in place above).
+	// Same shape as mydatacoin: keep the label, admit the basis. A Live row
+	// on source-inherited whose site does not answer cannot earn
+	// site-liveness, and a timeout is no verdict either way — so the basis
+	// drops to unverified and the source is the newest dated thing actually
+	// observed (a Wayback capture), never the label's own claim.
+	"stellar-pulse": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-09-14",
+		sourceUrl:
+			"https://web.archive.org/web/20251013160228/https://stellarpulse.app/",
+		basis: "unverified",
+		note: "Downgrade 2026-09-14: stellarpulse.app resolves (143.198.244.116) but ports 80/443 do not answer (connect timeout), so liveness could not be observed; the newest Wayback 200 is 2025-10-13 (a client-rendered shell titled 'StellarPulse — Offers clarity on the open source Stellar'); the domain is still held by its registrant (RDAP: registered 2023-02-04, expires 2027-02-04); no repo or package matches the product. Basis source-inherited → unverified; a human should decide whether the label is still Live.",
+	},
+	feeprime: {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://feeprime.com/marketplace/en?module=news",
+		basis: "human-verified",
+		note: "Operating SME platform: tenant news posts dated through 2026-08-20, named paying tenants. Caveat recorded: Live verified for the business; the Stellar integration from the SCF pitch is not visible on-site, and app.feeprime.com is NXDOMAIN.",
+	},
+	"webacy-inc": {
+		from: "Live",
+		to: "Live",
+		asOf: "2026-08-29",
+		sourceUrl: "https://www.webacy.com/blog/webacy-is-now-soc-2",
+		basis: "human-verified",
+		note: "Operator announcement 2026-08-17 (SOC 2) + operating product app; dd.xyz now redirects to dapp.webacy.com (product consolidation).",
+	},
+	// ── Row-facts pass 2026-09-05 (quality residuals: served rows carrying a
+	// status with no statusSourceUrl). from === to again: the status does not
+	// move, the EVIDENCE does — every URL below was fetched 2026-09-05 and
+	// supports the CURRENT value. Machine bases only (an agent does not
+	// self-assign human-verified); the curator gate scans each Live source
+	// for pre-launch markers at apply time.
+	mbrl: {
+		from: "Live",
+		to: "Live",
+		note: "Row-facts 2026-09-05: MBRL is live on the public network — issuer GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z carries home_domain mbrl.com.br (Horizon), which 301s to www.mercadobitcoin.com.br/mbrl (the operator page itself is Cloudflare-gated to non-browsers); stellar.expert: created 2022-10-27, 19 trustlines, 2.05M supply, 24,935 trades; issuer operations as recent as 2026-05-31.",
+		asOf: "2026-09-05",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/MBRL-GDLS4RCNECY46KKA4OGU2MMJILUK3I372CUFISWM4HKCV7265RY2NJ4Z",
+		basis: "onchain-activity",
+	},
+	"raum-network": {
+		from: "Development",
+		to: "Development",
+		note: "Row-facts 2026-09-05: RaumFi V3 (CLMM DEX for Soroban) is in active development — Raum-Network/raum-raumfi-v3 ('CLMM implementation of RaumFi DEX') pushed 2026-05-30, and raum.network names 'RaumFi V3 for Stellar Soroban concentrated liquidity' as current product work; the recorded dex.raum.network has no DNS record (link removed 2026-09-02).",
+		asOf: "2026-05-30", // the repo's last push — the evidence date, not the day we looked,
+		sourceUrl: "https://github.com/Raum-Network/raum-raumfi-v3",
+		basis: "repo-activity",
+	},
+	// The .md variant of Dune's page is cited on purpose: the HTML variant's
+	// chain sidebar lists "Monad Testnet", which the curator gate's word-match
+	// reads as a pre-launch marker and refuses; the content is identical
+	// (Mintlify serves both). Gate false-positive class noted in the PR.
+	dune: {
+		from: "Live",
+		to: "Live",
+		note: "Row-facts 2026-09-05: Dune's own data catalog serves Stellar mainnet tables (accounts, contract_data, trust_lines, liquidity_pools, ttl, history_ledgers/operations/trades/transactions/effects/contract_events) — 'Stellar blockchain data on Dune'.",
+		asOf: "2026-09-05",
+		sourceUrl: "https://docs.dune.com/data-catalog/stellar/overview.md",
+		basis: "site-liveness",
+	},
+	// Owner 2026-09-26: "spectra is now live". Row-facts: Spectra's own product
+	// API serves seven Stellar Principal Token markets
+	// (app.spectra.finance/api/v1/stellar/pools, chainId 1500000000): PTs on
+	// Blend-wrapped USDC and EURC, earnUSDC, earnXLM and Centrifuge deJTRSY,
+	// $750k TVL across the three deJTRSY maturities; DefiLlama lists Stellar
+	// among Spectra V2's chains with the same $750k slice; stellar.expert shows
+	// the first PT contracts created 2026-08-03/05 and the deJTRSY PTs
+	// 2026-09-16, all by deployer GCNC7GXV…, the EVM<->Stellar bridge and
+	// messenger created 2026-05-27. Launch coverage 2026-08-30 (Blockonomi).
+	"spectra-finance": {
+		from: "Development",
+		to: "Live",
+		asOf: "2026-08-03", // first Stellar PT market contract created (stellar.expert), the evidence date
+		sourceUrl: "https://app.spectra.finance/api/v1/stellar/pools",
+		basis: "onchain-activity",
+		note: "Live on Stellar mainnet: seven PT markets served by the operator's own API with on-chain contracts and $750k TVL; the row's earlier text said the Stellar bridge was in development.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
  * PRODUCT is verifiably alive but the recorded URL is dead (lapsed apex,
  * rebrand, or move). Overwrites links.website; equality no-ops keep reruns
  * clean. Status stays Live — these were false positives on the death list. */
+// ── Moved from scripts/data/curate-projects.ts (2026-10-03) ─────────────
+// As local maps these OWNED nothing: curatedFieldsFor could not see them,
+// so the daily feed sync wrote tricorn's old name and stellar-registry's old
+// GitHub link back the morning after every weekly curate run.
+
+/** links.github corrections — equality-guarded overwrites for records whose
+ * repo link points at the WRONG place (org renames, project splits). */
+export const GITHUB_LINK_FIX: Record<string, string> = {
+	// org renamed AquaToken→AquariusDeFi (old page is an empty shell)
+	aquarius: "https://github.com/AquariusDeFi",
+	// registry split out of scaffold-stellar into its own org 2026-05-19;
+	// the old link now literally shows a different product's code
+	"stellar-registry": "https://github.com/stellar-registry/contracts",
+	// Row-facts 2026-09-05: SCF-seeded row (SCF #44 Build) with no links. The
+	// SCF project page links the author (github.com/NibrasD); the author's
+	// Stellar-VRF repo (BLS12-381 VRF + drand for Soroban, pushed 2026-08-21)
+	// is the row's own subject ("ECVRF plus Drand verifiable randomness for
+	// Soroban contracts"). The SCF-linked frontend
+	// (soroban-vrf-frontend.onrender.com) answers 503 "Service Suspended".
+	"vrf-soroban": "https://github.com/NibrasD/Stellar-VRF",
+	// check-links 2026-09-07: normalfinance/normal-v1 404s. Of seven fuzzy
+	// name matches across the dead-link queue this was the only one with
+	// corroborating evidence — the successor repo's homepage IS the project's
+	// own site (normalfinance.io). The other six were rejected: a docs repo, an
+	// org placeholder, a widget, all name-similar and evidence-free.
+	normal: "https://github.com/normalfinance/normal-index-v1",
+};
+
+/** Rebrands — name, website, and description move together so both the old
+ * and new brand stay searchable. Equality no-ops keep reruns clean. */
+export const REBRANDS: Record<
+	string,
+	{ name: string; website: string; description: string }
+> = {
+	// boxy 2026-07-09: "tricorn is live (as) utexo" — human-confirmed live.
+	// tricorn.network 301s → bridge.utexo.com → mint.utexo.com. Coinspect
+	// audited the Stellar/Soroban integration (stellarsecurityportal.com/report/31).
+	tricorn: {
+		name: "Utexo",
+		website: "https://mint.utexo.com",
+		description:
+			"Utexo (formerly Tricorn) is a live cross-chain bridge supporting EVM and non-EVM chains, moving assets to and from Stellar. Its Stellar/Soroban bridge integration was audited by Coinspect. Rebranded from tricorn.network to utexo.com.",
+	},
+};
+
+/** Name corrections. The lumenloop mapper writes `name`, so a rename that is
+ * not registered here is reverted by the next nightly sync — the class that
+ * silently undid curation for weeks (#730). Equality no-ops keep reruns clean.
+ * Pair with IDENTITY_FIX (curate-projects.ts) so the old name stays an alias. */
+export const NAME_FIXES: Record<string, string> = {
+	liqvidxyz: "Liqvid",
+	// i³ 2026 intake (2026-09-23): the row's own site is choppaddi.com and its
+	// description says "Choppaddi (FKA FastBuka)"; fastbuka.com answers 503.
+	// The product is Choppaddi now; the former name stays as an alias.
+	fastbuka: "Choppaddi",
+	// Raven #39: the Stellar Playbook lists "Wirex" (wirexapp.com). Our row
+	// was named for the Wirex Pay product; wirexpaychain.com now 301s to
+	// wirexapp.com. The company is the entity; Wirex Pay stays as an alias.
+	"wirex-pay": "Wirex",
+};
+
+/** Editorial search-ranking boost (Projects.prominence, 0–100; 90 = the
+ * canonical pick for its category, 70 = established, 50 = notable, 0 =
+ * default). Exact-sync per slug. Not mapped by the feed sync, so no
+ * ownership entry is needed. Each row names the fact behind the number. */
+export const PROMINENCE_SET: Record<string, number> = {
+	// Playbook battery 2026-08-21: 14 exchanges seeded the same day tied on
+	// score, so CEX.IO and Coinone led "which exchanges list XLM" while
+	// Binance and Coinbase came last. Tiered by CoinGecko 24h XLM volume
+	// read 2026-08-21 (Binance $47.8M, Upbit $36.2M, Coinbase $32.9M,
+	// Bithumb $13.7M, WhiteBIT $11.6M, Kraken $8.3M, Bybit $8.0M, KuCoin
+	// $7.1M, Gate $4.9M, Bitstamp $2.5M, Coinone $1.6M, HTX $0.7M,
+	// Crypto.com $0.6M, CEX.IO $19k).
+	binance: 70,
+	coinbase: 70,
+	upbit: 60,
+	kraken: 60,
+	bithumb: 50,
+	whitebit: 50,
+	bybit: 50,
+	kucoin: 50,
+	"gate-io": 40,
+	bitstamp: 40,
+	coinone: 30,
+	htx: 30,
+	"crypto-com": 30,
+	"cex-io": 20,
+};
+
 export const WEBSITE_FIXES: Record<string, string> = {
+	// ── 2026-09-15, from the new MOVED OR GONE bucket in
+	// mark-inactive-projects.ts. Both rows still point at a domain that now
+	// redirects somewhere else; both destinations were opened and read.
+	//
+	// jumpa — jumpa.xyz 301s to usejumpa.com, which answers 200 titled "Jumpa".
+	// Same product, new domain.
+	jumpa: "https://usejumpa.com/",
+	// quasar — the row stored its PARENT's site, eiger.co, which now redirects
+	// to equilibrium.co ("Equilibrium - Equilibrium Labs"). Eiger renamed; the
+	// relationship is unchanged, so the parent's live domain is the value.
+	//
+	// NOT equilibrium.co/quasar, which looks like the obvious product page and
+	// is a SOFT 404: it returns HTTP 200 with a body reading "404: This page
+	// could not be found", and so does /zzz-not-a-page. A 200 is not a page —
+	// control for the catch-all before trusting a deep link.
+	quasar: "https://equilibrium.co",
+
+	// 2026-09-15. Seeded from the SCF page as
+	// https://www.micro-be.com/en/entreprise.htm, which answers 200 — but
+	// Payload strips `www.` on write (curate-projects.ts line ~2643 already
+	// compensates for this when COMPARING), and micro-be.com without the www
+	// serves nothing under /en: the whole English tree 404s there while the
+	// apex root 200s. So the stored value was a 404 the moment it was written,
+	// and check-links caught it the same day.
+	//
+	// The root is the value that survives the strip. Worth remembering when
+	// seeding any row: store a URL that works WITHOUT www, because that is what
+	// will actually be stored.
+	"micro-be": "https://micro-be.com/",
+
+	// check-links 2026-09-07: the cited blog post 404s but the operator's site
+	// is alive — and its own menu now reads "Descontinuação tokens BRL", the
+	// operator saying the BRL tokens are discontinued. Relinked to the site;
+	// the discontinuation is a status question for a human, not a link fix.
+	brl: "https://ntokens.com/",
+
+	// Case-mangled at seed (audit C2): github.io paths are case-sensitive;
+	// the stored all-lowercase path 404s while the real page serves.
+	chaincred: "https://prince29chouhan.github.io/ChainCred_landing/",
+	// Gap-matrix sourced pass 2026-08-29: row had no website; asgcard.dev is
+	// the operator's live product site (full landing, no pre-launch markers).
+	asgcard: "https://asgcard.dev",
+	// Liveness sweep 2026-08-21: sorobansecurity.com 301s to
+	// stellarsecurityportal.com (the host move the research corpus was
+	// migrated to in sls-003); the project row still pointed at the old host.
+	"stellar-security-portal": "https://stellarsecurityportal.com/",
+	// Raven #39: the recorded rain.com is "Rain — a licensed crypto exchange in
+	// Bahrain" (its own <title>), a different company. The Stellar card-program
+	// provider is rain.xyz ("Stablecoin payments platform for enterprise |
+	// Rain"), which is the URL the Stellar Playbook debit-cards page links.
+	// NOT the lapsed-domain class: rain.com is alive, it is simply not Rain.
+	rain: "https://www.rain.xyz/",
 	// Afriex operates today at afriex.com (200; afriexapp.com www even redirects there) with active App Store/Google Play listings; only the recorded afriexapp.com…
 	afriex: "https://www.afriex.com/",
+	// Sourced-queue pass 2026-08-28: warmancer.io 404s on root and www while
+	// warmancer.com serves the game ("Warmancer" <title>) — the project moved
+	// domains and the row kept the dead one.
+	warmancer: "https://www.warmancer.com/",
+	// hanawallet.io 308s to hana.money (the operator's own redirect); the row
+	// should carry the destination, not the alias.
+	hana: "https://www.hana.money/",
 	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
 	arst: "https://www.arst.finance/en",
 	// boss-pay's recorded bossmoney.africa lapsed and was re-registered by
@@ -469,8 +2782,17 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	// PARTNER side was corrected in curate-partners URL_CORRECTIONS on 07-06;
 	// this fixes the PROJECT row that kept serving the hijacked domain.
 	"boss-pay": "https://www.bossmoney.com/",
-	// Product site live at https://www.bravepay.net/ (wallet/POS/payments content), help.bravepay.net 200; only the recorded apex bravepay.net DNS record is broken.
-	bravepay: "https://www.bravepay.net/",
+	// WITHDRAWN 2026-09-07. This fix was added when www.bravepay.net served
+	// wallet/POS content; it now returns Cloudflare's "Suspected Phishing"
+	// interstitial (403), while the apex bravepay.net is NXDOMAIN on both
+	// 1.1.1.1 and 8.8.8.8. Linking a row at a host flagged for phishing is
+	// worse than serving no link, so the row keeps neither: bravepay is in
+	// WEBSITE_REMOVE_DEAD and this entry is gone. Found because the two maps
+	// fought — one nulling the apex, one setting the www — and the idempotence
+	// gate reported a write that replanned on every run.
+	// Still alive and unflagged: help.bravepay.net serves "Brave HelpCenter"
+	// (200, read 2026-09-07). A help centre is not the product site, so it is
+	// recorded here rather than published as one — a human can decide.
 	// BRZ stablecoin actively offered by issuer Transfero, live at transfero.com featuring BRZ; recorded brztoken.io returns 404.
 	brz: "https://www.transfero.com/",
 	// Old domain depayapp.com serves the rebranded live site depay.us (200, 'infraestructura de pagos cross-border', same org per hreflang); old domain's TLS cert …
@@ -492,11 +2814,218 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	stellarbeat: "https://radar.withobsrvr.com/",
 	// xycLoans WebApp live at https://main.xycloans.app/ with docs.xycloans.app live and the xycloo GitHub org pushing as recently as 2026-07; only the recorded ap…
 	xycloans: "https://main.xycloans.app/",
+	// No-check triage 2026-09-01 (basis lane, 171 weak rows with no successful
+	// check): each row's recorded host 301s to a NEW host, so the checker
+	// stops at the offsite hop and the row never earns a success. Every target
+	// below was fetched the same day — HTTP 200 and a page title naming the
+	// brand (quoted). Same-org moves only: takeover / parked / dead targets
+	// stay OUT of this map and wait for an owner verdict.
+	// agnostic.dev → agnostic.tech ("Agnostic — Data & AI Infrastructure")
+	agnostic: "https://agnostic.tech/",
+	// 57blocks.io → 57blocks.com ("Home · 57Blocks"); three rows share it
+	autoaction: "https://57blocks.com/",
+	"soroban-resource-usage-reporter": "https://57blocks.com/",
+	"soroban-timelock-contract": "https://57blocks.com/",
+	// ax.al → axal.com ("Axal: High Yield Savings")
+	axal: "https://axal.com/",
+	// useblaze.app → blaze.money ("Blaze | Money Without Borders")
+	blaze: "https://blaze.money/",
+	// cantina.xyz → cantina.security ("Cantina | Agentic Security Platform")
+	cantina: "https://www.cantina.security/",
+	// centiiv.com → centiiv.io ("Centiiv", h1 "Global payments")
+	centiiv: "https://www.centiiv.io/",
+	// dfslab.net → dfs.vc/lab.html ("DFS — Lab")
+	"dfs-labs": "https://www.dfs.vc/lab.html",
+	// encode.club → encodeclub.com ("Encode Club")
+	"encode-club": "https://www.encodeclub.com/",
+	// pagcrypto.finance → pag.finance ("PagFinance")
+	pagcrypto: "https://pag.finance/",
+	// plutope.io → plutope.com (200, untitled SPA shell)
+	plutope: "https://plutope.com/",
+	// tagocash.com → tago.cash ("TagoCash")
+	"tago-cash": "https://tago.cash/",
+	// apex 301s to the blog ("Tellus Cooperative")
+	"tellus-cooperative": "https://blog.telluscoop.com/",
+	// traceeapp.com → traceegroup.com ("tracee | Digital assets and AI
+	// consulting")
+	tracee: "https://traceegroup.com/",
+	// thisisvank.com → vank.co ("Cuenta multimoneda para empresas — VANK")
+	vank: "https://vank.co/",
+	// mywalletguru.com → walletguru.com ("Wallet Guru: Streaming Payment
+	// Platform")
+	"wallet-guru": "https://www.walletguru.com/",
+	// discord.gg short link → canonical invite URL ("WEB3DEV")
+	web3dev: "https://discord.com/invite/web3dev",
+	// wirexpaychain.com → wirexapp.com ("Wirex | Crypto Wallet, Cards &
+	// Payments")
+	"wirex-pay": "https://www.wirexapp.com/",
+	// zig3.io → zig3.org ("Zig3V2")
+	zig3v2: "https://zig3.org/",
+	// saw.galois.com → Galois docs ("SAW: The Software Analysis Workbench")
+	saw: "https://tools.galois.com/saw",
+	// apex → stellar.rgstry.xyz ("Stellar Registry")
+	"stellar-registry": "https://stellar.rgstry.xyz/",
+	// mowblox.com → devtrak.build ("Devtrak" — the slug's own brand)
+	devtrak: "https://devtrak.build/",
+	// thexbank.io → txbfi.com ("TXBFI | Your money, your control")
+	thexbank: "https://txbfi.com/",
+	// dd.xyz → dapp.webacy.com (dd.xyz is Webacy's product; "Webacy / Home")
+	dd: "https://dapp.webacy.com/",
+	// /protocol path 404s; the root serves "Home | Normal"
+	normal: "https://www.normalfinance.io/",
+	// ── Row-facts pass 2026-09-05 (every target fetched that day):
+	// autowhale.io 301s to renesis.fi — the same company (raw HTML footer
+	// "© 2025 Autowhale Labs GmbH"; github.com/autowhale's profile blog is
+	// renesis.fi). The offsite hop is why the row never earned a liveness
+	// success. Title "Crypto Portfolio Management & Execution System |
+	// Renesis". Name/alias stays an owner call (NAME_FIXES/ALIAS_ADD).
+	autowhale: "https://renesis.fi/",
+	// The recorded sheet id was lowercased at seed (the chaincred case-
+	// mangling class, audit C2) and 404s; the SCF page carries the real id,
+	// which serves 200 ("Very extensive list of very questionable token
+	// domains"). The Inactive verdict rested on that 404 — owner re-triage.
+	"scam-flagging-system":
+		"https://docs.google.com/spreadsheets/d/1JCkWZ3X1h6kJKM6ZCZThDshK_whhNiTyGTV8R24Anho/edit?usp=sharing",
+	// SCF-seeded program row with no link: the SCF project page's Website
+	// field is discord.gg/web3dev (the WEB3DEV community that ran the study
+	// group); the invite resolves 200 ("WEB3DEV", 9,692 members) — same
+	// canonical invite form as the web3dev row above.
+	"study-stellar-sdk-soroban": "https://discord.com/invite/web3dev",
 };
 
 /** Curated seeds — create-if-missing directory entries with human-verified
  * provenance. Never updates an existing row (slug match = skip), so a seed
  * can't clobber later edits. Keep this list SHORT and evidence-quoted. */
+/** Additive type tags for EXISTING rows (truth battery guard D, 2026-08-27):
+ * the Oracle vertical had no enum member, so every oracle provider carried
+ * types:[] and the whole category was invisible to type browse. Each row's
+ * evidence is its own already-sourced description (identity, not liveness —
+ * status/provenance untouched). ADD-only: never removes or replaces types.
+ * Excluded on mention-vs-identity grounds: stellar-oracle-shield (oracle
+ * MONITORING tool), mpcvault (wallet whose prose mentions oracles). */
+/** Additive rename-continuity aliases (sls-050 machinery as DATA): a former
+ * or alternate name a row must stay findable by. ADD-only, never replaces.
+ * zenex: the project launched as Hermes (its own description says
+ * "formerly Hermes"); wave-5 found "what happened to Hermes exchange"
+ * missing zenex entirely because the alias existed only as prose. */
+/** Replace a project's logo from a URL the owner named. The lane downloads
+ *  it, rasterises an SVG to a padded 512px PNG (next/image serves no SVG),
+ *  uploads it to the media collection and points `logo` at it. The media
+ *  doc's alt carries the source URL, which is how a re-run knows to skip. */
+export const LOGO_SET: Record<
+	string,
+	// `url` is downloaded by the lane; `file` is read from the checkout (for a
+	// mark that had to be converted by hand, e.g. from an .ico). One of the two.
+	{ url?: string; file?: string; note: string }
+> = {
+	// i³ 2026 nominees, owner-named 2026-09-23. The stored Abroad logo was a
+	// GitHub identicon; the stored Tansu logo was another project's mark.
+	abroad: {
+		url: "https://abroad.finance/assets/abroad-favicon.png",
+		note: "the teal chevron mark the owner sent; the site's own favicon",
+	},
+	tansu: {
+		url: "https://tansu.dev/img/logo.svg",
+		note: "tansu.dev's own logo, owner-named",
+	},
+	// The other six the owner flagged as missing on the ballot (2026-09-23):
+	// stored as an .ico saved as .png, a 404, or a GitHub identicon.
+	bousol: {
+		url: "https://www.bousolapp.com/icon.png",
+		note: "site's 512px app icon; the stored 'png' was an .ico",
+	},
+	rahat: {
+		url: "https://rahat.io/RahatSymbol.png",
+		note: "site's own symbol; the stored logo was a GitHub identicon",
+	},
+	tucambio: {
+		url: "https://www.tucambio.app/logo.svg",
+		note: "site's logo (og:image); the stored logo was a GitHub identicon",
+	},
+	liqvid: {
+		url: "https://static.tildacdn.com/tild6332-3164-4961-a264-663836636439/Liqvid-logo-primary.svg",
+		note: "the logo the site itself loads (Tilda CDN); the stored file 404s",
+	},
+	swiftex: {
+		url: "https://swiftexchange.io/images/logo.png",
+		note: "site's logo (og:image); the stored logo was a GitHub identicon",
+	},
+	"rivool-finance": {
+		url: "https://unavatar.io/x/rivool_finance",
+		note: "the blue flag mark the owner sent (2026-09-23); the project's X avatar, the site itself only serves a 60px favicon and a wordmark",
+	},
+	"trustless-work": {
+		url: "https://unavatar.io/x/trustlesswork",
+		note: "the blue TW hexagon on a black disc the owner sent (2026-09-24); the project's X avatar, the GitHub org avatar is the same mark without the disc",
+	},
+	"stellar-security-portal": {
+		file: "public/awards/logos/stellar-security-portal.png",
+		note: "the site only serves an .ico (logo.ico); converted to PNG by hand, committed with the awards overrides; the stored file 404s",
+	},
+};
+
+/** Shadow → canonical: rows that are a duplicate or former name of another
+ *  project. Sets `canonicalSlug` (never deletes; pair with STATUS_FIX → Draft
+ *  to hide the duplicate from listings while search still folds to it). */
+export const CANONICAL_SET: Record<string, string> = {
+	choppaddi: "fastbuka", // 2026-09-23 duplicate seed; see STATUS_FIX
+};
+
+export const ALIAS_ADD: Record<string, string[]> = {
+	// The SCF project is "Enable"; the company and website are Humanity Link,
+	// so a reader who knows either name finds the row (packet 2026-09-14).
+	enable: ["Humanity Link"],
+	zenex: ["Hermes"],
+	// ── 2026-08-31 SCF absence review (docs/SCF-SEED-REVIEW-2026-08-31.md):
+	// product names their SCF submissions use, verified by website-domain
+	// equality between the SCF page and the row. Only PRODUCT names — the
+	// descriptive submission titles ("a real estate tokenization platform")
+	// are not identities and are not aliased.
+	fastbuka: ["Fastbuka"], // renamed to Choppaddi (NAME_FIXES); the former name still finds the row
+	obsrvr: ["Flow"], // OBSRVR's pipeline product; SCF site = withobsrvr.com
+	untangled: ["OctoPos"], // Untangled's vault infra submission (stellar.untangled.finance)
+	"dfs-labs": ["Stellar Surge"], // row desc literally describes Surge; dfslab.net
+	ichi: ["Solo Labs"], // SCF desc: "through the ICHI Automated Liquidity Manager"
+	"bp-ventures": ["StellarMesh", "BPV"], // BPV = BP Ventures; bpventures.us
+	"stellar-router-sdk": ["Meta Contracts"], // exact jsr.io/@creit-tech/stellar-router-sdk match
+	reclaim: ["zkFetch"], // row desc already names its zkFetch SDK
+	inferera: ["Inferara"], // our slug spells it differently than inferara.com
+};
+
+export const TYPE_ADD: Record<string, string[]> = {
+	reflector: ["Oracle"], // "decentralized price oracle and data-feed network for Stellar"
+	dia: ["Oracle"], // "cross-chain oracle provider live on Stellar/Soroban"
+	band: ["Oracle"], // "cross-chain data oracle live on Stellar/Soroban"
+	lightecho: ["Oracle"], // "price oracle for Stellar Soroban smart contracts"
+	"redstone-finance": ["Oracle"], // "Modular price oracle live on Stellar/Soroban mainnet"
+	pyth: ["Oracle"], // "decentralized oracle that delivers real-time price feeds"
+	quasar: ["Oracle"], // "price feed oracle grid for Stellar DeFi" (keeps SDK)
+	nebula: ["Oracle"], // same grid family, Inactive — type is identity, not liveness
+	orally: ["Oracle"], // "On-chain oracles with cross-chain capabilities"
+	"soroban-optimistic-oracle": ["Oracle"], // optimistic/arbitration oracle (keeps Infrastructure)
+	// Battery F-row rotation 2026-08-29: prominent row with types:[] — it is
+	// the Go SDK for Stellar (stellar/go-stellar-sdk, repo verified live).
+	"go-stellar-sdk": ["SDK"],
+	// ── 2026-08-29 gap-matrix pass: the typed pool's 12 example rows (highest-
+	// prominence untyped). Evidence = each row's own stored description.
+	hubble: ["Analytics", "Indexer"], // SDF's BigQuery data warehouse: full historical ledger record for analytics
+	"stellar-quickstart": ["Infrastructure"], // official Docker image bundling Core+Horizon+RPC for local dev
+	getblock: ["RPC", "Infrastructure"], // node-as-a-service: managed Stellar RPC endpoints
+	// "DeFi" is NOT an enum value (the GAP_VERTICALS trap again — execute run
+	// failed validation): use the real verticals.
+	vaquita: ["Lending"], // save-to-earn savings protocol on Soroban (deposit-yield = the Lending vertical)
+	// Summit SP 26 winner rows (seeded 2026-08-29 with types deliberately
+	// empty; typing them IS the human lane, done here):
+	quietbook: ["RWA"], // enterprise compliance + RWA build
+	"energypay-tesouro-yield": ["Payments", "RWA"], // Brazilian treasury-yield (tesouro) energy payments
+	"truway-yield": ["Payments", "RWA"], // tesouro.pix: tokenized Brazilian sovereign debt (Etherfuse TESOURO) sold at PIX payment time
+	"stellar-confidential-token-sdk": ["SDK"], // SDK for confidential tokens
+	"openzeppelin-stellar-privacy-wallet": ["Wallet"], // confidential-token private-payment wallet
+	teji: ["AI"], // CLI plugin for Stellar agents
+	"stellar-memory": ["AI"], // memory CLI plugin for Stellar agents
+	"sextant-agent": ["AI", "Payments"], // agentic payments over x402/MPP
+};
+
 export const SEEDS: Array<{
 	slug: string;
 	name: string;
@@ -519,6 +3048,499 @@ export const SEEDS: Array<{
 		| "human-verified"
 		| "source-inherited";
 }> = [
+	// ── SCF absences, 2026-09-14 packet, owner-approved 2026-09-15 ──────────
+	// Nine projects the Stellar Community Fund awarded that the directory did
+	// not serve. Evidence per row is in improvements/quality/
+	// scf-absence-packet-2026-09-14.md: the fund's own submission record
+	// (round, budget, and the page's awarded/lastAwardedRound/totalAwarded
+	// summary, read via scripts/eval/scf-official.ts rather than from a round
+	// badge), plus an HTTP 200 whose page title names the product.
+	//
+	// Every one was checked absent TWICE — by name and by registrable domain
+	// against /api/projects — on 2026-09-14 and again on 2026-09-15 before
+	// this block was written. All nine slugs were free.
+	//
+	// status: "Development" throughout, and the packet argues why: these are
+	// SCF #45 awards still disbursing, and no Stellar deployment, contract,
+	// issued asset or Stellar-facing repo was found for any of them. The
+	// company website being live is not the Stellar product being live — the
+	// same distinction backfill-deployment.ts draws between operating for
+	// users and deployed on mainnet. statusSourceUrl cites the SCF page; the
+	// basis records that a human reviewed the packet on the asOf date.
+
+	{
+		slug: "balance",
+		name: "Balance",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Balance will add institutional-grade custody and payment infrastructure for Stellar assets. The project will enable regulated financial institutions, fintechs, funds, and enterprises to securely hold XLM and Stellar-issued assets, create and manage wallets, enforce transaction policies, and move assets through Balance’s API and institutional interface.",
+		links: { website: "https://balance.ca/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/balance-institutional-custody-and-payments-for-stellar-syw",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "micro-be",
+		name: "Micro Be",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["RWA", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Problem French marinas use clonable RFID cards to distribute water and electricity to boaters, causing ~€385K in annual losses across our 11 contracted marinas. Credit purchases also depend on marina office opening hours: ~25% of high-season arrivals occur outside these hours, limiting access to utilities and representing ~€1.2M in potential annual revenue.",
+		links: { website: "https://www.micro-be.com/en/entreprise.htm" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/micro-be-k9o",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "catlog",
+		name: "Catlog",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Catlog is a commerce operating system for Africa's social sellers. 2,000+ merchants across Nigeria, Ghana, Kenya, and South Africa use us to take orders, manage inventory, and collect payments from their phones. Payments remain their hardest problem. Millions of consumers in our markets hold crypto but must off-ramp to fiat before spending with local merchants.",
+		links: { website: "https://catlog.shop" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/catlog-ygy",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "urbanflip",
+		name: "UrbanFlip",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Urbanflip is a live real estate co-investment platform with over $90M invested through it in the last 12 months. Each operation sits in a Spanish SPV holding legal title to one asset; verified professional investors participate as creditors via private placements.",
+		links: { website: "https://urbanflip.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/urbanflip-compliant-on-chain-real-estate-co-investment-p6d",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "lunar-finance",
+		name: "Lunar Finance",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["DEX", "Bridge"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Lunar Finance is building the execution layer for on-chain transactions: a unified meta-aggregation platform that abstracts the complexity of fragmented liquidity across blockchains and delivers optimal trade and bridging outcomes. Our vision is to become the default infrastructure for value movement across Web3. As liquidity fragments across chains, bridges, and DEXs, inefficiencies increase.",
+		links: { website: "https://lunarfinance.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/lunar-finance-oir",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "haven",
+		name: "Haven",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Wallet", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Haven - privacy-first crypto neobank ------------------------------------------- Everyday banking on public blockchains, without exposing the user's financial life on a public ledger. problem Every on-chain payment exposes the payer. Anyone can look up a wallet and see salary, balances, and purchase history. solution Haven packages private, compliant payments into a product people already know how to use, a neobank.",
+		links: { website: "https://haven.hn" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/haven-privacy-first-crypto-neobank-rol",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "enable",
+		name: "Enable",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments", "Social Impact"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Here’s a tightened version under 1100 characters: Humanity Link is building Enable, a financial infrastructure layer designed to improve how aid and value move globally. Over the past several years, we have worked with organizations such as the Red Cross and Norwegian Refugee Council, supporting more than $70 million in aid delivery through digital communication and cash assistance systems.",
+		links: { website: "https://www.humanity.link/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/enable-duq",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "minisend",
+		name: "Minisend",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Stablecoin"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Minisend is a cross-chain stablecoin settlement infrastructure for Africa. Users and businesses send USDC or USDT to a single address and settle to M-Pesa, Airtel Money, or a bank account in Kenya, Nigeria, or Ghana in seconds, with an onramp in the other direction. Minisend is live today across 26 EVM chains and solana , serving traders, freelancers, and businesses that receive cross-border payments.",
+		links: { website: "https://minisend.xyz/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl: "https://communityfund.stellar.org/project/minisend-7tt",
+		statusBasis: "human-verified",
+	},
+	{
+		slug: "bwb",
+		name: "BWB Digital Assets",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"BWB Digital Assets is a real estate private equity investment platform that uses tokenization to optimize performance and enhance transparency, financial returns, and user experience. The investments are public offerings compliant with CVM (SEC equivalent).",
+		links: { website: "https://www.bwbi.com.br/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-09-15",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/bwb-brazilian-real-estate-yields-on-stellar-zab",
+		statusBasis: "human-verified",
+	},
+
+	{
+		// Consumer-demand gap (raven gateway, 4 real queries, engine-d 2026-08-28):
+		// verified 2026-08-31 — site live (www.hypertron.space 200), presented as
+		// an official guest at the SDF developer meeting 2026-07-23 ("Hypertron —
+		// Private Payments and Operations for Businesses", 18 mentions on the
+		// meeting page). NOT SCF-funded: its SCF #44 submission ("B2B Payments &
+		// Agentic Operations") reads "Panel Review Failed" on the round page
+		// (communityfund.stellar.org/awards/rec4FnYypcsKpBRB4) — do NOT attach an
+		// award from that page; the $113K figure there belongs to a DIFFERENT
+		// submission on the same round listing.
+		slug: "hypertron",
+		name: "Hypertron",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Hypertron is a private-payments and operations layer for businesses on Stellar: B2B payments, treasury and compliance workflows with opt-in privacy (shielded amounts, selective disclosure for auditors) built on Protocol 25 (X-Ray) primitives (BLS12-381, Poseidon). Presented at the official Stellar developer meeting (2026-07-23); in development on testnet.",
+		links: { website: "https://www.hypertron.space" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-31",
+		statusSourceUrl: "https://developers.stellar.org/meetings/2026/07/23",
+		statusBasis: "human-verified",
+	},
+	{
+		// Owner-flagged 2026-08-29, probed live same day: the facilitator-side
+		// x402 Bazaar for Stellar (discovery/search + auto-cataloging), running
+		// end-to-end on TESTNET with real settled x402 payments (95, self-
+		// labeled "none of it organic demand" — their honesty, kept here).
+		// Builder = pedro-pelicioni (also sextant-agent, Builder Summit SP 26
+		// x402-track 2nd place). Development, not Live: testnet-only, listing
+		// is write-token gated, repo 20 days old. NOT a stellarlight lookalike
+		// despite the name — a real, Apache-2.0, working product.
+		// Owner-flagged 2026-08-29: Tether's omnichain USDT live on Stellar.
+		// Horizon-verified same day: asset USDT0 by GATISXX6…HN6Q, 5,434
+		// authorized trustlines, ~52,140 issued; operator page publishes the
+		// issuer (usdt0.to/ecosystem/stellar); LayerZero burn-and-mint, no
+		// wrapped token. Issuer carries no home_domain — the operator page is
+		// the anchor. Registry row added in src/data/stablecoin-registry.ts.
+		slug: "usdt0",
+		name: "USDT0",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Stablecoin", "Bridge"],
+		supportedNetworks: ["stellar", "evm"],
+		shortDescription:
+			"USDT0 is Tether's omnichain USDT, live on Stellar: a unified, 1:1-backed USDT that moves across chains via LayerZero burn-and-mint (no wrapped tokens, no external bridges, 0 bps protocol fee). Stellar issuance verified on Horizon (issuer GATISXX6…HN6Q).",
+		links: { website: "https://usdt0.to/ecosystem/stellar" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-29",
+		statusSourceUrl:
+			"https://horizon.stellar.org/assets?asset_code=USDT0&asset_issuer=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "stellarsight",
+		name: "StellarSight",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Infrastructure", "AI"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Facilitator-side x402 Bazaar discovery layer for Stellar: a hosted public index where agents advertise paid APIs, search them in plain language, and settle in one HTTP round trip. Live on testnet (x402 v2, spec-conformant discovery/search API) with real settled testnet payments; by Sextant's builder (Builder Summit SP 26).",
+		links: {
+			website: "https://stellarsight.xyz/",
+			github: "https://github.com/pedro-pelicioni/stellarsight",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-29",
+		// The homepage is a JS shell; the discovery API is the server-rendered
+		// evidence (x402Version 2 + stellar:testnet in the response body).
+		statusSourceUrl:
+			"https://stellarsight.xyz/discovery/search?query=fx%20rate&limit=2",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 8 live XLM market(s), last trade <24h, 24h volume ≈ $47,848,168.
+		slug: "binance",
+		name: "Binance",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Binance is a centralized exchange that lists XLM — 8 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $47,848,168). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.binance.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $32,904,928.
+		slug: "coinbase",
+		name: "Coinbase",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Coinbase is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $32,904,928). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.coinbase.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $8,339,968.
+		slug: "kraken",
+		name: "Kraken",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Kraken is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $8,339,968). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.kraken.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 3 live XLM market(s), last trade <24h, 24h volume ≈ $36,178,325.
+		slug: "upbit",
+		name: "Upbit",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Upbit is a centralized exchange that lists XLM — 3 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $36,178,325). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://upbit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $13,709,333.
+		slug: "bithumb",
+		name: "Bithumb",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bithumb is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $13,709,333). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bithumb.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 3 live XLM market(s), last trade <24h, 24h volume ≈ $8,020,043.
+		slug: "bybit",
+		name: "Bybit",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bybit is a centralized exchange that lists XLM — 3 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $8,020,043). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bybit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $7,089,229.
+		slug: "kucoin",
+		name: "KuCoin",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"KuCoin is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $7,089,229). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.kucoin.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $4,900,173.
+		slug: "gate-io",
+		name: "Gate",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Gate is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $4,900,173). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.gate.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $2,471,901.
+		slug: "bitstamp",
+		name: "Bitstamp",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Bitstamp is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $2,471,901). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.bitstamp.net/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $710,606.
+		slug: "htx",
+		name: "HTX (Huobi)",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"HTX (Huobi) is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $710,606). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://www.htx.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 7 live XLM market(s), last trade <24h, 24h volume ≈ $11,625,624.
+		slug: "whitebit",
+		name: "WhiteBIT",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"WhiteBIT is a centralized exchange that lists XLM — 7 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $11,625,624). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://whitebit.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 2 live XLM market(s), last trade <24h, 24h volume ≈ $614,865.
+		slug: "crypto-com",
+		name: "Crypto.com",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Crypto.com is a centralized exchange that lists XLM — 2 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $614,865). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://crypto.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 1 live XLM market(s), last trade <24h, 24h volume ≈ $1,600,934.
+		slug: "coinone",
+		name: "Coinone",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Coinone is a centralized exchange that lists XLM — 1 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $1,600,934). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://coinone.co.kr/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook CEX directory + CoinGecko XLM tickers read 2026-08-21:
+		// 4 live XLM market(s), last trade <24h, 24h volume ≈ $19,169.
+		slug: "cex-io",
+		name: "CEX.IO",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Exchange"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"CEX.IO is a centralized exchange that lists XLM — 4 live XLM market(s) on CoinGecko as of 2026-08-21 (24h volume ≈ $19,169). Listed on the Stellar Playbook's centralized-exchanges directory.",
+		links: { website: "https://cex.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.coingecko.com/en/coins/stellar#markets",
+		statusBasis: "human-verified",
+	},
+	{
+		// Playbook ramps directory; the ONE of 20 missing ramps with first-party
+		// Stellar evidence on 2026-08-21: moonpay.com/stellar (dedicated XLM page).
+		// The other 19 showed no stellar.toml and no Stellar mention on any
+		// docs/assets page — not imported; listed-in-the-Playbook is not evidence.
+		slug: "moonpay",
+		name: "MoonPay",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MoonPay is a fiat on/off-ramp (card, bank transfer, Apple/Google Pay) with a dedicated Stellar page for buying XLM. Listed on the Stellar Playbook's ramps directory.",
+		links: { website: "https://www.moonpay.com/stellar" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-21",
+		statusSourceUrl: "https://www.moonpay.com/stellar",
+		statusBasis: "human-verified",
+	},
 	// PG-award recon 2026-07-20: Soneso's BASE Flutter SDK is a CSV-confirmed
 	// Public Goods Award recipient (Q4'25+Q1'26) with NO directory record —
 	// only the sibling stellar_wallet_flutter_sdk was indexed
@@ -1247,4 +4269,1771 @@ export const SEEDS: Array<{
 		statusSourceUrl: "https://defillama.com/protocol/defa-by-invoicemate",
 		statusBasis: "onchain-activity",
 	},
+	// 2026-07-31 (boxy): Colibri — fazzatti's TypeScript toolkit for Stellar/
+	// Soroban apps. Verified same day: repo pushed 2026-07-30, published on JSR
+	// (@colibri/core), docs live at fifo-docs.gitbook.io/colibri, MIT, CI +
+	// coverage badges green. Personal-account SDK with no directory record —
+	// same precedent as passkey-kit above. fazzatti has 39 public repos (over
+	// the small-org sweep threshold), so the two Stellar repos are attached
+	// explicitly via GITHUB_REPOS_ADD rather than an org sweep.
+	{
+		slug: "colibri",
+		name: "Colibri",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"TypeScript-first toolkit for building Stellar and Soroban applications — deterministic error handling, composable workflows, and an extensible plugin architecture. Published on JSR as @colibri, with a companion examples repo. By fazzatti (Fabricius Zatti / Fifo).",
+		links: {
+			website: "https://fifo-docs.gitbook.io/colibri",
+			github: "https://github.com/fazzatti/colibri",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-07-31",
+		statusSourceUrl: "https://jsr.io/@colibri/core",
+		statusBasis: "site-liveness",
+	},
+	// 2026-08-01 (boxy): Stellar Indexer — earrietadev's (Creit-Tech / xBull)
+	// indexing service, raised in the SDF Discord (kalepail + Raph thread on
+	// making Raven discover its per-protocol extensions). Verified same day:
+	// SDK repo pushed 2026-07-31, published on JSR, protocol extensions live
+	// for Blend / Reflector / Axis Markets with more coming (Zenex). Service
+	// is token-gated beta → Pre-Release, not Live. Creit-Tech's 20 public
+	// repos are already swept in (small-org rule); the explicit attach below
+	// links the SDK repo to THIS project rather than the org-sweep path.
+	{
+		slug: "stellar-indexer",
+		name: "Stellar Indexer",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Indexer"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Indexing service for Stellar smart-contract data — live contract state through a single endpoint, with per-protocol extensions (Blend, Reflector, Axis Markets; more in progress). TypeScript SDK for Node, Deno and Bun published on JSR as @stellar-indexer/stellar-indexer-sdk. In token-gated beta. By earrietadev (Creit-Tech, the xBull team).",
+		links: {
+			website: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
+			github: "https://github.com/Creit-Tech/Stellar-Indexer-SDK",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-08-01",
+		statusSourceUrl: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
+		statusBasis: "site-liveness",
+	},
+	// 2026-08-08 (boxy): agent-economy batch from trionlabs/awesome-stellar-ai
+	// (community-curated list; we're on it ourselves). 15 projects verified
+	// MISSING against all 918 directory rows by GitHub-URL + normalized-name
+	// diff. Statuses follow the list's own evidence standard: 🟢 mainnet proof
+	// → Live (statusBasis onchain-activity, statusSourceUrl = the proof),
+	// 🟢 testnet → Pre-Release, unmarked/no deployment claim → Development.
+	// Skipped: RouteDock (exists), Prism (name-collides with our metadata-less
+	// `prism` row — needs human disambiguation before seeding).
+	{
+		slug: "stellar-mpp-sdk",
+		name: "Stellar MPP SDK",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Official SDK implementing the Stellar payment method for MPP (Machine Payments Protocol) charge payments and off-chain payment channels with on-chain settlement. The reference building block for agent payment flows on Stellar.",
+		links: {
+			website: "https://developers.stellar.org/docs/build/agentic-payments",
+			github: "https://github.com/stellar/stellar-mpp-sdk",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://github.com/stellar/stellar-mpp-sdk",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "stellar-8004",
+		name: "Stellar 8004",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Mainnet Soroban implementation of ERC-8004 identity, reputation, and validation registries for AI agents, with a TypeScript SDK, an indexer, and an explorer. By Trion Labs (maintainers of the awesome-stellar-ai list).",
+		links: {
+			website: "https://github.com/trionlabs/stellar-8004",
+			github: "https://github.com/trionlabs/stellar-8004",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/contract/CBGPDCJIHQ32G42BE7F2CIT3YW6XRN5ED6GQJHCRZSNAYH6TGMCL6X35",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "x402",
+		name: "x402",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Open HTTP payment protocol (402 Payment Required) with native Stellar support through the @x402/stellar package — the standard used by most Stellar agent-payment projects for per-call USDC payments.",
+		links: {
+			website: "https://www.x402.org",
+			github: "https://github.com/x402-foundation/x402",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://www.npmjs.com/package/@x402/stellar",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "stellar-agent-search",
+		name: "Stellar Agent Search",
+		category: "Tooling",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Read-only MCP server and CLI for discovering, ranking, and vetting AI agents registered with Stellar 8004. Local package released on npm; hosted transport pending.",
+		links: {
+			website: "https://www.npmjs.com/package/stellar-agent-search",
+			github: "https://github.com/berkingurcan/stellar-agent-search",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl: "https://registry.npmjs.org/stellar-agent-search/latest",
+		statusBasis: "site-liveness",
+	},
+	{
+		slug: "mpp-router",
+		name: "MPP Router",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Open-source router by Rozo for reaching paid MPP services from Stellar-funded clients through a stable API, live on mainnet.",
+		links: {
+			website: "https://apiserver.mpprouter.dev/health",
+			github: "https://github.com/mpprouter/rozo-mpprouter",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/account/GDK3AVW3YE6UL3J4WLNKBMP65KSY32YPUKIOC6PXW65XJ3LEG3YIDXXB",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "tollpay",
+		name: "TollPay",
+		category: "Tooling",
+		status: "Live",
+		types: ["Payments", "SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Middleware and SDKs for monetizing MCP tools with per-call USDC payments on Stellar mainnet. Winner at the Stellar Hacks: Agents hackathon (x402/MPP).",
+		links: {
+			github: "https://github.com/rajkaria/toll",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/tx/015ef6bacf0520d567fa3cac44a7135ff4152fda79ee72d2e49a1f8670081099",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "x402-mcp-stellar-template",
+		name: "x402 MCP Stellar Template",
+		category: "Tooling",
+		status: "Live",
+		types: ["SDK", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Node.js, Python, and Go templates for building paid MCP servers with x402 on Stellar — wallet provisioning, spending limits, mainnet-proven. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/ffarinas/x402-mcp-stellar-template",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/tx/af4d17dd8a5c33004365ae4d5c66c82d25cadbabe6af5a63c2450c0fd64fe58a",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "stellar-agent-wallet-skill",
+		name: "Stellar Agent Wallet Skill",
+		category: "Tooling",
+		status: "Development",
+		types: ["Wallet", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Agent skill for Stellar USDC balances, transfers, swaps, trustlines, and payments to x402 or MPP-gated services. By the MPP Router (Rozo) team.",
+		links: {
+			github: "https://github.com/mpprouter/stellar-agent-wallet-skill",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "pulsar-mcp",
+		name: "Pulsar",
+		category: "Tooling",
+		status: "Development",
+		types: ["Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"MCP server for Stellar and Soroban development: account queries, transaction simulation, contract deployment, and transaction submission from agent workflows.",
+		links: {
+			github: "https://github.com/benelabs/pulsar",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "ai-net",
+		name: "AI-Net",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Experimental coordination network where specialized AI agents discover one another, delegate work, and settle payments on Stellar.",
+		links: {
+			github: "https://github.com/Epta-Node/ai-net",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "clevercon",
+		name: "CleverCon",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Service marketplace and orchestrator that decomposes tasks, hires specialist agents, and pays them through x402 or MPP — on Stellar testnet. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/clevercon-protocol/clevercon",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/testnet/contract/CDFLEJ2HFPK3WKFTWB4CKP2JHEYNAUWKXGEJRYW4YMMGDSQSQ7D4LRTE",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "talos",
+		name: "Talos",
+		category: "Infrastructure",
+		status: "Development",
+		types: ["Payments", "Infrastructure"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Framework for autonomous agent corporations that register services and earn USDC through x402 payments on Stellar.",
+		links: {
+			github: "https://github.com/enliven17/talos-stellar",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "asgcard",
+		name: "ASGCard",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Virtual Mastercard integration for AI agents funded with USDC through x402 on Stellar.",
+		links: {
+			github: "https://github.com/ASGCompute/asgcard-public",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "cards402",
+		name: "Cards402",
+		category: "Tooling",
+		status: "Development",
+		types: ["Payments", "SDK"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"SDK, CLI, and MCP server for issuing virtual Visa cards to AI agents after payment in USDC or XLM. Winner at the Stellar Hacks: Agents hackathon (x402/MPP).",
+		links: {
+			github: "https://github.com/CTX-com/Cards402",
+		},
+		provenance: { source: "AdminEdit" },
+	},
+	{
+		slug: "nulucre-agents",
+		name: "Nulucre Agents",
+		category: "User-Facing App",
+		status: "Pre-Release",
+		types: ["Analytics", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Wallet reputation and DeFi fact-verification agents that accept x402 micropayments on Stellar and Base.",
+		links: {
+			github: "https://github.com/vjshaw/nulucre-agents",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/public/account/GCRUBFDANV52JP3URUJ7EZGPZKFEESBTW7T3FV2SJXZZGB6HDNRBWV24",
+		statusBasis: "onchain-activity",
+	},
+	{
+		slug: "rendergate",
+		name: "RenderGate",
+		category: "Infrastructure",
+		status: "Pre-Release",
+		types: ["Infrastructure", "Payments"],
+		supportedNetworks: ["stellar"],
+		shortDescription:
+			"Pay-per-render browser service for AI agents with a live endpoint and x402 payments on Stellar testnet. Winner at the Stellar Hacks: Agents hackathon.",
+		links: {
+			github: "https://github.com/tantk/rendergate",
+		},
+		provenance: { source: "AdminEdit" },
+		statusSourceUrl:
+			"https://stellar.expert/explorer/testnet/tx/5c898eb489265c142baee086d502e25b87a5536e4386e5ccdf69edc2515c0ef6",
+		statusBasis: "onchain-activity",
+	},
+
+	// ── 2026-08-31: the 19 human-approved creates from the SCF absence review
+	// (docs/SCF-SEED-REVIEW-2026-08-31.md — every row researched: SCF page
+	// fetched, dupe-probed against the live API, site/repo liveness checked;
+	// approved by the operator before this commit). Rounds/awarded are stamped
+	// by SCF_SUBMISSION_LINKS in curate-projects.ts in the same run; amounts
+	// stay unset for the crosscheck lanes — no invented dollars.
+	{
+		slug: "loop",
+		name: "Loop",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Cashback and discounted gift-card payments app settling on Stellar.",
+		links: { website: "https://loopfinance.io/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://loopfinance.io/",
+	},
+	{
+		slug: "crediolabs-ai",
+		name: "CredioLabs.AI",
+		category: "Tooling",
+		status: "Live",
+		types: ["AI", "Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"OpenZeppelin Accounts policy builder — an MCP server and Claude skill for composing smart-account policies (by the Untangled team; distinct product).",
+		links: { website: "https://crediolabs.ai/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://crediolabs.ai/",
+	},
+	{
+		slug: "policywright",
+		name: "Policywright",
+		category: "Tooling",
+		status: "Development",
+		types: ["AI", "Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"AI least-privilege policy synthesizer for OpenZeppelin smart accounts on Stellar.",
+		links: { github: "https://github.com/kunaldrall29/policywright" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/kunaldrall29/policywright",
+	},
+	{
+		slug: "vrf-soroban",
+		name: "VRF-Soroban",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"ECVRF plus Drand verifiable randomness for Soroban contracts.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/vrf-soroban-8yl",
+	},
+	{
+		slug: "komet",
+		name: "Komet",
+		category: "Tooling",
+		status: "Live",
+		types: ["Security"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Runtime Verification's formal-verification tool for Soroban smart contracts (K framework).",
+		links: { github: "https://github.com/runtimeverification/komet" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/runtimeverification/komet",
+	},
+	{
+		slug: "roberto-sanz-criptomonedas",
+		name: "Roberto Sanz Criptomonedas",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Education"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Spanish-language YouTube and podcast education channel covering Stellar (26.5k subscribers).",
+		links: { website: "https://www.youtube.com/@RobertoSanzCriptomonedas" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.youtube.com/@RobertoSanzCriptomonedas",
+	},
+	{
+		slug: "janus",
+		name: "Janus",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Freight-forwarder B2B payments platform (Hamburg) settling on Stellar.",
+		links: { website: "https://janus.solutions/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://janus.solutions/",
+	},
+	{
+		slug: "kutana",
+		name: "Kutana",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"StashPay cross-border payments for Ghana (GHS corridors) on Stellar; five SCF award rounds.",
+		links: { website: "https://www.kutanapay.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.kutanapay.com/",
+	},
+	{
+		slug: "sorted",
+		name: "Sorted",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Fintech digital-asset app on Stellar.",
+		links: { website: "https://sorted.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://sorted.io",
+	},
+	{
+		slug: "sendana",
+		name: "Sendana",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Stablecoin banking for Global-South freelancers on Stellar.",
+		links: { website: "http://www.usesendana.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "http://www.usesendana.com",
+	},
+	{
+		slug: "account-demolisher",
+		name: "Account Demolisher",
+		category: "Tooling",
+		status: "Live",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Reclaims stranded XLM reserves from stale accounts.",
+		links: { github: "https://github.com/bytemaster333/account-demolisher" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://github.com/bytemaster333/account-demolisher",
+	},
+	{
+		slug: "etesia",
+		name: "Etesia",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["RWA"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Risk-parity, all-weather-style crypto portfolio product on Stellar.",
+		links: { website: "https://www.etesiar.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.etesiar.com/",
+	},
+	{
+		slug: "nouns-builder-protocol",
+		name: "Nouns Builder Protocol",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Infrastructure", "NFT"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Builder DAO port of the on-chain Nouns DAO and auction protocol to Stellar.",
+		links: { website: "https://nouns.build" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/nouns-builder-protocol-ae7",
+	},
+	{
+		slug: "yolat",
+		name: "Yolat",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"African remittance rails on Stellar, by the ex-Venture Garden Group team.",
+		links: { website: "https://www.yolat.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://www.yolat.com",
+	},
+	{
+		slug: "crebit",
+		name: "Crebit",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Payments", "Lending"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Rate-lock financial protocol on Stellar.",
+		links: { website: "https://crebitpay.com" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://crebitpay.com",
+	},
+	{
+		slug: "pagcrypto",
+		name: "PagCrypto",
+		category: "Asset",
+		status: "Live",
+		types: ["Stablecoin", "Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Regulated BRL settlement token (BRLP) for FX and institutional payments on Stellar.",
+		links: { website: "https://pagcrypto.finance/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://pagcrypto.finance/",
+	},
+	{
+		slug: "upesa",
+		name: "Upesa",
+		category: "Anchor",
+		status: "Live",
+		types: ["Anchor", "Payments"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Liquid by Upesa: anchor-based cross-border liquidity and payouts for African SMEs.",
+		links: { website: "https://upesa.app/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "site-liveness",
+		statusSourceUrl: "https://upesa.app/",
+	},
+	{
+		slug: "enerdao",
+		name: "EnerDAO",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["RWA"],
+		supportedNetworks: ["Stellar"],
+		shortDescription: "Tokenized renewable-energy project debt on Soroban.",
+		links: { website: "https://www.enerdao.org/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/enerdao-r84",
+	},
+	{
+		slug: "fxdao",
+		name: "FxDAO",
+		category: "Protocol/Contract",
+		status: "Live",
+		types: ["Stablecoin", "Lending"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"Soroban-native decentralized stablecoin protocol (USDx and currency vaults).",
+		links: { website: "https://fxdao.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://fxdao.io",
+	},
+	// ── 2026-08-31 wound-down pair from the SCF absence review. The packet's
+	// own rule: a dead funded project becomes a ROW with a dated non-Live
+	// status — absence hides the history, an Inactive row serves it.
+	{
+		slug: "docking-zone",
+		name: "Docking Zone",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Gaming"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"SCF-funded gaming project (round 18 era). Wound down: docking.zone DNS is dead; last Wayback capture 2025-11-09.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://web.archive.org/web/2025*/docking.zone",
+	},
+	{
+		slug: "communidao",
+		name: "CommuniDAO",
+		category: "Protocol/Contract",
+		status: "Inactive",
+		types: ["Infrastructure"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"SCF-funded DAO tooling. Wound down: site 502 everywhere, GitHub org has zero public repos, last award 2023.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl: "https://communityfund.stellar.org/project/communidao-9pm",
+	},
+	// ── 2026-08-31: two COMPLETED education programs from the SCF absence
+	// review's "unclear" pile, identified by parsing their submission pages.
+	// One-time funded cohorts, finished — served as Inactive rows so an agent
+	// asking about them gets the history instead of a hole.
+	{
+		slug: "west-african-ambassadors",
+		name: "West African Ambassadors",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education", "Social Impact"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"SCF-funded ambassador program empowering West African builders through blockchain education, collaboration and adoption. Completed cohort program (also known as WAA).",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/west-african-ambassadors-waa-syb",
+	},
+	{
+		slug: "study-stellar-sdk-soroban",
+		name: "Study Stellar SDK & Soroban",
+		category: "User-Facing App",
+		status: "Inactive",
+		types: ["Education"],
+		supportedNetworks: ["Stellar"],
+		shortDescription:
+			"SCF-funded study-group program: six Stellar SDK and Soroban sessions teaching Spanish-speaking students. Completed cohort.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: ASOF_SEED,
+		statusBasis: "human-verified",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
+	},
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Moved verbatim from curate-projects.ts (2026-07-26, lessons class 32). These
+// registries own fields that scripts/sync-lumenloop.ts also writes, so the sync
+// has to be able to import them to know what NOT to overwrite — and it cannot
+// import curate-projects.ts, whose module body runs main(). Same reason
+// STATUS_FIX/WEBSITE_FIXES/SEEDS live here. No rows changed in the move.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const DESCRIPTION_FIXES: Record<string, string> = {
+	// Raven #39: Bridge is on the Stellar Playbook's debit-cards page, yet no
+	// card query ever fetched it — the row said stablecoin infra and MGUSD,
+	// never cards. bridge.xyz leads with "Stablecoin-backed cards are now
+	// integrated with Stripe Issuing" and lists Cards as a product line
+	// (read 2026-08-21). Kept the existing verified facts verbatim.
+	bridge:
+		"Bridge is a stablecoin infrastructure company (co-founded 2022 by Zach Abrams and Sean Yu), acquired by Stripe for ~$1.1B (announced October 2024, closed February 4, 2025). Its card-issuing product lets a platform issue stablecoin-backed Visa cards to users, integrated with Stripe Issuing — the card-program provider the Stellar Playbook lists for debit cards. On Stellar, Bridge issues MGUSD, MoneyGram's U.S.-dollar-backed stablecoin native to the Stellar blockchain, with tokens minted/burned via M0's smart-contract infrastructure.",
+	// Raven #39: the row still carried the 2023 SCF pitch ("the team would
+	// like to support Stellar too") eight months after Wirex and Stellar went
+	// LIVE with dual-stablecoin Visa settlement in USDC and EURC for 7M+
+	// users (PR Newswire, 2025-11-18, via lumenloop.com/news). wirexpaychain
+	// .com now 301s to wirexapp.com — the entity the Playbook lists.
+	"wirex-pay":
+		"Wirex is a crypto wallet and payments platform (7M+ users) whose Visa card programme settles in USDC and EURC on Stellar — live since November 2025, when Wirex and the Stellar Development Foundation announced dual-stablecoin Visa settlement. Wirex Pay, its self-custodial card and account product built on smart accounts, is the programme's on-chain layer. SCF-funded (Wirex–Vottun Stellar SDK).",
+	// gyen had NO description. The issuer's own stellar.toml
+	// (stablecoin.z.com/.well-known/stellar.toml, read 2026-07-20) states
+	// issuance is wound down with a 1:1 redemption window through Nov 11
+	// 2026 — material lifecycle truth an agent must see on the row.
+	gyen: "GYEN is a regulated Japanese-yen stablecoin (with sister USD token ZUSD) issued on Stellar by GMO-Z.com Trust Company. Per the issuer's own stellar.toml (July 2026), new issuance is wound down; 1:1 redemption remains open through November 11, 2026.",
+	// 2026-07-16: SDF announced MoneyGram, Figure and Range as new Tier 1
+	// validator organizations (Tier 1 set: 7 → 10 orgs). Source: stellar.org/
+	// press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-
+	// network-by-joining-as-tier-1-validators. The fact is recorded on each
+	// record (dated) since /press pages are not in the research corpus.
+	moneygram:
+		"MoneyGram Access (MoneyGram Ramps) is a fiat on- and off-ramp anchor on Stellar. Via the SEP-24 standard, users deposit and withdraw cash to and from USDC at ~500K retail locations across 170+ cash-out countries, with no bank account required. In June 2026 MoneyGram launched MGUSD, a self-custodial USD stablecoin issued by Bridge on Stellar. In July 2026 MoneyGram joined Stellar's Tier 1 validator set — the core organizations whose quorum secures network consensus.",
+	figure:
+		"Figure is America's #1 non-bank HELOC lender, building the future of capital markets on blockchain. Built on Provenance Blockchain, Figure also issues YLDS — a yield-bearing stablecoin deployed on Stellar — enabling compliance-first real-world asset access for a global audience. In July 2026 Figure (Figure Markets) joined Stellar's Tier 1 validator set, bringing a regulated capital-markets operator into network consensus.",
+	// range's old description was raw SCF-proposal prose ("This proposal seeks
+	// to build a Steller Bridge Explorer…", typo included) — rewritten to
+	// describe the product.
+	range:
+		"Range is a cross-chain security and intelligence platform: real-time transaction monitoring, forensic tracing (Range Trail), and a cross-chain explorer covering Stellar among other ecosystems, including Stellar bridge-explorer integration. In July 2026 Range joined Stellar's Tier 1 validator set as a blockchain-security validator organization.",
+	// sls-030: represent the funded-historical + embedded-implementation truth.
+	comet:
+		"Comet was a Balancer-style weighted-pool AMM on Soroban, SCF-funded in rounds 13 and 18 ($291K). The standalone venue is no longer maintained; its weighted-pool implementation lives on embedded as Blend's 80/20 BLND:USDC backstop pool on mainnet.",
+	// S1 prose⇄structure divergence (2026-07-11 engine run): these two
+	// descriptions asserted chains the records' CURATED supportedNetworks
+	// (verified from primary sources 2026-07-09) do not carry. The prose was
+	// the overclaiming side — fixed here rather than adding unverified
+	// networks (precision over recall).
+	helix:
+		"Institutional staking infrastructure by Helix Labs. The protocol is currently live only on Canton — Stellar integration is on the roadmap, not launched. Helix Labs separately operates validator infrastructure across major L1 ecosystems.",
+	"templar-protocol":
+		"Templar is a decentralized 'cypher lending' protocol that lets Stellar users borrow USDC against XLM collateral directly from their Stellar wallets, without bridges or wrapped tokens. It uses NEAR's multi-party-computation (MPC) network and Chain Signatures to custody deposits and settle cross-chain. On Stellar the collateral asset is XLM; Bitcoin-collateral and Ethereum/NEAR markets exist on its other deployments. The Stellar integration was announced November 2025.",
+	// boxy 2026-07-09: CCTP entry read like a bridge product; it's the RAIL.
+	// An agent answering "how do I bridge USDC to Stellar" should name CCTP
+	// as the mechanism and a bridge built on it as the actionable route.
+	"circle-cctp-cross-chain-transfer-protocol":
+		"Circle's Cross-Chain Transfer Protocol (CCTP), live on Stellar since May 2026. Moves native USDC between Stellar and 23+ chains (Ethereum, Solana, Base, Arbitrum, Optimism) via a 1:1 burn-and-mint model rather than wrapped or locked assets, settling in seconds. CCTP is bridging INFRASTRUCTURE, not a user-facing bridge: there is no Circle-hosted bridge app — builders integrate it (and pass execution metadata via Hooks), and end-users move USDC through bridges built on it, e.g. Rozo's Intent Bridge on Stellar.",
+	// sls-017: lobstr.co self-describes as a "Stellar & XRPL Wallet" (by Ultra
+	// Stellar); the record previously said "Stellar wallet" only.
+	lobstr:
+		"LOBSTR is a widely used non-custodial wallet for the Stellar and XRP Ledger (XRPL) networks, by Ultra Stellar, on iOS, Android, web and a browser extension. Users hold, send, receive, buy and swap XLM, USDC, XRP and network assets, make peer-to-peer payments, trade on the DEX/SDEX, use fiat on/off-ramps, and claim a federation address (username*lobstr.co). LOBSTR Vault adds multisig.",
+	// raven#8 / sls-018 (data half): the record described only the flagship
+	// Stablebonds product; Etherfuse FX — their Mexico USDC↔MXN on/off-ramp
+	// API (etherfuse/ramp-api-example; wholesale bps-level pricing per their
+	// public docs) — was invisible prose-wise. Multi-product companies get
+	// BOTH products named so neither is hidden behind the dominant one.
+	etherfuse:
+		"Etherfuse is a multi-product company on Stellar: it issues Stablebonds — tokenized government treasury bonds (Mexican CETES, US Treasuries and others) that give yield-bearing onchain exposure to sovereign debt and underpin treasury-management apps such as Bando — and operates Etherfuse FX, a Mexico fiat on/off-ramp API for programmatic USDC↔MXN conversion at wholesale bps-level pricing, built for wallets and apps to integrate.",
+	// raven#18 (mmazco, 2026-07-09): Alchemy's Stellar Data API is now LIVE
+	// but the record predated it (RPC-only prose). Grounded in Alchemy's own
+	// docs (alchemy.com/docs/reference/stellar-api-quickstart + stellar-data-
+	// api-overview) and SDF's indexers-page language (stellar-docs PR #2573).
+	// Tier-1 validator: boxy-confirmed 2026-07-10 + Alchemy's own blog
+	// ("Alchemy expands support on Stellar with Data APIs and Tier-1
+	// validation … Alchemy is now a tier-1 validator on Stellar", announced
+	// x.com/Alchemy/status/2074907730129883195, 2026-07-08) + listed on the
+	// official tier-1-orgs docs page and the node explorer (boxy-verified —
+	// an earlier note here claimed the docs page lacked them; that was a
+	// false negative from a text-strip curl of a data-rendered page).
+	alchemy:
+		"Alchemy is an enterprise-grade Web3 developer platform live on Stellar and a tier-1 validator on the network (per Alchemy's own announcement, mid-2026). Two products for builders: managed Stellar/Soroban JSON-RPC (mainnet + testnet endpoints, Horizon access, dedicated nodes; listed on the official developers.stellar.org RPC providers page) and the Stellar Data API — indexed transfer history, account balances, and NFT holdings across native, Stellar Classic, and Soroban assets, so builders can query portfolio-style data without running their own indexer.",
+	// sls-024 recurrence (#533 batch): the record claimed "iOS and Android
+	// mobile apps" while neither store lists the app — the Play listing for
+	// app.xbull.mobile (the applicationId in Creit-Tech/xBull-Wallet's own
+	// capacitor.config.ts / android build.gradle) returns 404 and an App
+	// Store bundleId lookup returns 0 results (both checked 2026-07-13).
+	// The product IS live: xbull.app (web wallet, HTTP 200) and the Chrome
+	// Web Store extension (HTTP 200), both verified 2026-07-13 — so the
+	// stale platform claim is removed instead of the status.
+	xbull:
+		"xBull is an open-source, non-custodial Stellar wallet by Creit Tech, available as a browser extension and web app. Users hold, send, receive, and swap XLM and Stellar assets, manage multiple accounts, and sign Stellar and Soroban dApp transactions. Widely integrated as a wallet-connect option across Stellar dApps. Its formerly listed iOS and Android store apps are no longer available on either app store (store listings checked 2026-07-13).",
+	// 2026-09-26: the stored text still said the Stellar bridge was "in
+	// development" and "Not yet launched on Stellar". Facts from the operator's
+	// own API and repos (see STATUS_FIX): seven Stellar PT markets live, on
+	// Blend-wrapped USDC/EURC, earnUSDC, earnXLM and Centrifuge deJTRSY;
+	// bridge + core + oracle contracts audited by Certora in May 2026
+	// (perspectivefi/spectra-core-stellar-public, -stellar-bridge-public,
+	// -oracles-stellar-public). No em dashes (copy rule).
+	"spectra-finance":
+		"Spectra (by Perspective, spectra.finance) is a permissionless interest-rate derivatives protocol: a yield-bearing asset is split into a Principal Token (fixed rate) and a Yield Token (variable yield). Live on Stellar/Soroban since August 2026 with Principal Token markets on Blend-wrapped USDC and EURC, earnUSDC, earnXLM and the Centrifuge tokenized treasury fund deJTRSY, next to its EVM deployments, plus an EVM to Stellar bridge for Spectra PTs. The Soroban core, bridge and oracle contracts were audited by Certora in May 2026.",
+};
+
+// Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
+// "should the data layer ingest partner docs?": NO — provider reference
+// docs are agent-readable at SOURCE (Alchemy ships llms.txt) and a corpus
+// copy would go stale (the class-19 hazard) while duplicating what the
+// provider already serves agents. Our differentiated role is the STRUCTURED
+// record (who provides what, freshness, confidence) + a first-class pointer
+// so consumers hop straight to the living source.
+export const DOCS_LINKS: Record<string, string> = {
+	alchemy: "https://www.alchemy.com/docs/reference/stellar-api-quickstart",
+	// 2026-09-02, owner-requested: SDF's developer launch page for USDT0 —
+	// asset + issuer, SAC and OFT contract IDs, LayerZero endpoint ID.
+	usdt0: "https://developers.stellar.org/launch/usdt0",
+	"spectra-finance": "https://docs.spectra.finance/", // 2026-09-26, the site's own Docs nav link
+};
+
+// sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
+// links.github points at a BIG org — enrich-repos keyword-gates large orgs
+// (only repo names matching "stellar" survive), so a Stellar-relevant repo
+// with a non-stellar name is invisible to discovery even though its org is
+// linked. Merges missing pairs, never removes; enrich-repos indexes them on
+// its next sweep. Each row is hand-verified against the repo's own README.
+export const GITHUB_REPOS_ADD: Record<
+	string,
+	Array<{ owner: string; name: string }>
+> = {
+	// ── 2026-09-07. Found by reading each row's OWN SITE for the github.com
+	// links it publishes, then requiring the repo to tie back to the row —
+	// never a name search. Of 74 library-typed weak rows with no linked repo,
+	// 48 publish no GitHub link at all, 9 have no website and 8 would not load;
+	// only these survived the check.
+	//
+	// Rejected on purpose, and worth naming because a looser rule would have
+	// taken them: js-capacitor-passkey-kit's site (argo-navis.dev) links
+	// Soneso/as-soroban-sdk, which is Soneso's AssemblyScript SDK and nothing
+	// to do with a Capacitor passkey kit — a page linking a dependency is not
+	// the page naming its own repo. orion → daccred and xlmsh →
+	// lightsail-network name an org with no tie to the row's domain; uniblock
+	// and zettablock match by name and have zero public repos.
+	"ios-mac-stellar-sdk": [{ owner: "Soneso", name: "stellar-ios-mac-sdk" }],
+	"scaffold-stellar": [{ owner: "stellar-scaffold", name: "cli" }],
+	// Colibri's two repos, attached explicitly (see the seed's rationale —
+	// fazzatti's 39-repo personal account is over the org-sweep threshold, and
+	// the examples repo carries no topics so relevance filters would miss it).
+	colibri: [
+		{ owner: "fazzatti", name: "colibri" },
+		{ owner: "fazzatti", name: "colibri-examples" },
+	],
+	"stellar-indexer": [{ owner: "Creit-Tech", name: "Stellar-Indexer-SDK" }],
+	// GT-18 x402 probe list names relayer-plugin-x402-facilitator; the repo's
+	// README (verified 2026-07-13) is Stellar-first: "x402 facilitator API
+	// implemented as a Relayer plugin (Stellar support today)", networks
+	// stellar:testnet, type "stellar" (current support). The openzeppelin
+	// record links github.com/openzeppelin (org, >>20 repos → keyword gate),
+	// and the repo name lacks "stellar" — hence the recall zero.
+	openzeppelin: [
+		{ owner: "OpenZeppelin", name: "relayer-plugin-x402-facilitator" },
+	],
+	// Q2 cold-agent run (2026-07-20): aquarius had NO repo commit data, so it
+	// never entered activity leaderboards. Cause: the org renamed
+	// AquaToken→AquariusDeFi (old link is an empty shell; repo API 301s).
+	// These four are Aquarius-owned and active this month (dao web app,
+	// voting tracker, governance, bribes). The audited AMM contracts repo
+	// (AquaToken/soroban-amm) went private/deleted — cannot be linked.
+	aquarius: [
+		{ owner: "AquariusDeFi", name: "dao-aquarius-soroban" },
+		{ owner: "AquariusDeFi", name: "aqua-voting-tracker" },
+		{ owner: "AquariusDeFi", name: "aqua-governance" },
+		{ owner: "AquariusDeFi", name: "aqua-bribes" },
+	],
+	// PG recon 2026-07-20: the registry split out of theahaco/scaffold-stellar
+	// into its own org ~2026-05-19 (proof chain: proposal PR #65 →
+	// scaffold-stellar docs → cargo install --git stellar-registry/cli;
+	// oz-combined-wasms homepage = rgstry.xyz closes the loop).
+	"stellar-registry": [
+		{ owner: "stellar-registry", name: "contracts" },
+		{ owner: "stellar-registry", name: "cli" },
+	],
+	// Row-facts 2026-09-05: the row links the 2024 core-v1 repo only; the
+	// same org's raum-raumfi-v3 ("CLMM implementation of RaumFi DEX", pushed
+	// 2026-05-30) is the repo the Development status now rests on (see
+	// STATUS_FIX) — attach it so enrich-repos indexes it.
+	"raum-network": [{ owner: "Raum-Network", name: "raum-raumfi-v3" }],
+	// 2026-09-26: the row links github.com/perspectivefi (from the site's own
+	// GitHub nav link); these are that org's Stellar/Soroban repos, each
+	// describing itself as Spectra's Stellar core, PT bridge, or PT oracle.
+	"spectra-finance": [
+		{ owner: "perspectivefi", name: "spectra-core-stellar-public" },
+		{ owner: "perspectivefi", name: "spectra-stellar-bridge-public" },
+		{ owner: "perspectivefi", name: "spectra-oracles-stellar-public" },
+	],
+};
+
+export const TYPES_ADD: Record<string, string[]> = {
+	// ── Yield cohort (2026-08-31): the enum member the P4 census forced into
+	// existence (spec 1.9.13) applied to the rows that stayed honestly untyped
+	// rather than be force-fitted (the four already-typed vault products get
+	// Yield appended on their own entries below).
+	"arka-fund": ["Yield"], // on-chain asset-management/fund protocol (site title confirms)
+	cushion: ["Yield"], // SEP-56 structured-product / capital-protection quant vaults
+	meria: ["Yield"], // multi-chain staking/yield aggregator + portfolio monitor
+
+	// ── P4 untyped-to-zero batch (2026-08-31): the 58 rows the typed-
+	// reachability census flagged, each researched (desc first, site/repo
+	// where thin) with the reason inline. Five rows stayed honestly
+	// untyped: the yield/asset-management vertical has NO enum value yet
+	// (arka-fund, cushion, meria + class) — that's a taxonomy gap, not a
+	// tagging gap, tracked for its own contract change.
+	"stellarpay-x402": ["Payments", "AI"], // agentic-payments Builder Summit build (x402/MPP) for AI-agent payment flows
+	"smart-treasury": ["Payments", "Wallet"], // policy-driven programmable treasury account automating org payments/approvals
+	sikadesk: ["Exchange", "Stablecoin"], // OTC desk / stablecoin liquidity platform for high-volume access in Africa
+	paycashless: ["Payments"], // payments + financial management platform for Nigerian SMEs
+	"pathpulse-ai": ["AI"], // on-device-AI road intelligence from crowdsourced driver cameras
+	"offer-hub": ["Payments"], // freelance marketplace whose on-chain core is crypto payments/escrow
+	muney: ["Payments", "Stablecoin"], // B2B stablecoin payment infrastructure converting USDC to local value
+	lusty: ["Exchange"], // options venue (covered calls/puts), server-settled today
+	"for-yield": ["Stablecoin", "Lending", "Yield"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
+	chainless: ["Wallet"], // self-custody MPC wallet investment app (Web3Auth, Pix on-ramp)
+	amulets: ["Wallet", "Card Issuing", "Stablecoin"], // stablecoin banking app: dollar account, swaps, Visa card spend
+	"stellar-defi-hub": ["Lending", "Yield"], // deposit surface for incentivized Sentora vaults (Blend-based lending strategies, site)
+	wellspring: ["Payments", "Stablecoin"], // institutional treasury + fiat/stablecoin payments platform with yield
+	refractor: ["Infrastructure"], // shared multisig transaction storage / signature-coordination service
+	"providencia-onchain": ["Social Impact", "Payments"], // conservation-funding transparency via the Stellar Disbursement Platform
+	investar: ["Payments", "Stablecoin"], // remittance-to-investment rails over cross-border USDC transfers
+	fundable: ["Payments"], // automated payouts, payment streaming, crypto-to-fiat offramping
+	blockroll: ["Payments", "Stablecoin", "Card Issuing"], // USDC payments + DeFindex yield + Visa card funded from Stellar USDC
+	"stellarx-ph": ["Education"], // developer education/community program (Soroban workshops, roadshows)
+	acta: ["Security"], // decentralized identity / verifiable credentials — the directory's Security typing for identity (idOS, Chaincerts precedent)
+	xccy: ["DEX"], // decentralized fixed-income markets via on-chain interest-rate swaps
+	"squid-router": ["Bridge"], // cross-chain swap/bridge aggregator on Axelar routing assets to Stellar
+	zenex: ["DEX"], // decentralized perpetuals exchange on Soroban (pool model + oracle pricing)
+	volta: ["Wallet"], // non-custodial smart-contract multisig wallet / enterprise asset control panel
+	turbolong: ["Lending"], // leveraged longs built as atomic recursive Blend lending loops
+	soropg: ["SDK"], // browser IDE/playground for Soroban contracts (Okashi SDK-typing precedent)
+	"scaffold-stellar": ["SDK"], // developer boilerplate/framework + CLI plugins for Stellar dApps
+	sava: ["Stablecoin"], // TRY-in/TRY-out consumer savings app earning yield via USDC (site)
+	"rumble-fish": ["Explorer", "Infrastructure"], // dev agency whose Stellar footprint is a Soroban-first block explorer + network Prices API
+	rehive: ["Infrastructure", "Wallet"], // white-label fintech/wallet app platform (modular ledger) on Stellar
+	rails: ["Exchange"], // crypto perpetuals trading platform with regulated vaults (site)
+	pyth: ["Oracle"], // decentralized real-time price-feed oracle serving Stellar
+	privy: ["Wallet", "Infrastructure"], // embedded-wallet APIs (onboarding/auth) with Stellar support
+	"pluto-loans": ["Lending"], // self-repaying loans against future yield
+	"piggy-wallet": ["Wallet", "Education"], // family finance/wallet app teaching kids money via gamified chores
+	paywit: ["Payments", "Stablecoin"], // merchant stablecoin-payment layer: hosted checkout + drop-in SDKs
+	pagfinance: ["Stablecoin", "Payments"], // BRLP regulated BRL settlement token for institutional FX/payments
+	novatti: ["Stablecoin", "Payments"], // payments company whose Stellar footprint is issuing the AUDD stablecoin
+	"normal-finance": ["Stablecoin", "Lending", "Yield"], // pivoted to self-custody USDC savings powered by DeFindex + Blend (site)
+	noir: ["SDK"], // ZK-circuit language + developer toolchain used for Soroban privacy verification
+	noether: ["DEX"], // Soroban-native decentralized perpetual futures exchange (10x leverage)
+	"nectar-network": ["Infrastructure"], // keeper/automation layer executing liquidations, compounding, oracle updates
+	microvault: ["Lending", "Social Impact"], // USSD microlending to East-African smallholder farmers via SEP-56 vaults
+	merkl: ["Infrastructure"], // onchain yield/rewards distribution infrastructure (Circle, PayPal, Coinbase)
+	"k2-lend": ["Lending"], // lending protocol: pooled, isolated, gated markets
+	ibis: ["Wallet", "Payments", "Stablecoin"], // stablecoin neobank: self-custody wallet + USDC-to-bolivar payout API
+	huma: ["Payments", "Lending"], // PayFi network: liquidity/financing for global payments
+	"hatom-protocol": ["Lending"], // over-collateralized supply/borrow lending liquidity hub
+	cryptomate: ["Payments", "Infrastructure"], // embeddable web3/fintech APIs; LatAm crypto payment rails (site)
+	coinme: ["Exchange", "Payments"], // licensed cash on/off-ramp kiosk exchange powering USDC P2P payments
+	backyard: ["Stablecoin", "Lending", "Yield"], // user-built stablecoin yield strategies allocating across Blend/Spiko vaults
+	"automated-finance": ["Payments"], // visual workflow automation for on-chain payments/DeFi/treasury (site)
+	"the-aha-company": ["SDK"], // open-source reference implementation/standard for smart-account onboarding
+	xlmsh: ["Infrastructure"], // gateway serving decentralized .xlm-domain websites from Stellar/IPFS
+	"stellar-razor-and-blazor-suite": ["SDK"], // .NET Razor/Blazor UI component library (identity, MFA, keypair abstraction)
+	"stellar-development-foundation": ["Infrastructure"], // network steward org building/maintaining core Stellar infrastructure
+	sorosorcerer: ["SDK"], // Soroban smart-contract development tool with vetted code templates
+	ledgerstax: ["Analytics"], // Stellar transaction-history export/reporting for taxes
+	// Raven #39 (2026-08-21): the Stellar Playbook's debit-cards page lists
+	// Bridge, Kulipa, Rain and Wirex as card ISSUERS a builder integrates.
+	// "Card Issuing" is that category — card-program infrastructure, not a
+	// consumer app that happens to have a card (Figo, COCA, Chipper, Peer are
+	// deliberately NOT typed). Inactive rows keep the type: what they WERE is
+	// still true; status carries whether they still are.
+	bridge: ["Card Issuing"], // bridge.xyz: stablecoin-backed cards via Stripe Issuing (read 2026-08-21)
+	rain: ["Card Issuing"], // rain.xyz + playbook; row description: "Enables companies on Stellar… to launch branded cards"
+	"wirex-pay": ["Card Issuing"], // PR Newswire 2025-11-18: Visa settlement in USDC/EURC on Stellar
+	kulipa: ["Card Issuing"], // was a stablecoin card issuer (settlement on Stellar); Inactive since 2026-07-29
+	getblockcard: ["Card Issuing"], // was Ternio BlockCard; Inactive (Unbanked wound down 2023)
+	cards402: ["Card Issuing"], // own description: SDK/CLI/MCP for issuing virtual Visa cards to AI agents; Development
+	// Stablecoin appended per boxy triage 2026-07-20 (issued-asset + sectors
+	// axes both fired — domain-matched stellar.expert issuance).
+	etherfuse: ["Anchor", "Stablecoin"],
+	// boxy 2026-07-09: Rozo's Intent Bridge is a LAUNCHED product ("USDC and
+	// USDT across Base, Stellar, Solana, Ethereum, BNB" — rozo.ai homepage,
+	// linked not coming-soon; Hacken audit of ROZO Intents in our corpus).
+	// Typed Payments-only, so every bridge/EVM query missed it — the same
+	// multi-product secondary-capability class as etherfuse (sls-018).
+	rozo: ["Bridge"],
+	// boxy 2026-07-09: CCTP is bridging INFRA (burn-and-mint rail bridge
+	// builders integrate), not a user-facing bridge app. Keep Bridge so
+	// corridor queries still learn it exists; add the taxonomy truth.
+	"circle-cctp-cross-chain-transfer-protocol": ["Infrastructure"],
+	// raven#18: the Stellar Data API is a portfolio/indexer product (SDF's own
+	// indexers page classifies it there) — RPC-only typing hid it from every
+	// indexer/portfolio-API query. Same multi-product class as etherfuse.
+	alchemy: ["Indexer"],
+	// boxy triage 2026-07-20 of the capability-mismatch sweep's first report
+	// (25 candidates): the anchor axis batch, approved "all except benji"
+	// (FT's benji is a tokenized fund; the anchor is FT-the-company — held).
+	// Each partner here is an operating anchor in the anchors directory whose
+	// project row never carried the type — the exact Etherfuse class.
+	gyen: ["Anchor"],
+	brl: ["Anchor"],
+	audd: ["Anchor"],
+	blox: ["Anchor"],
+	coca: ["Anchor"],
+	elroy: ["Anchor"],
+	ripe: ["Anchor"],
+	alfred: ["Anchor"],
+	trace: ["Anchor"],
+	// boxy triage 2026-07-20, issued-asset axis: domain-matched on-chain
+	// issuance (stellar.expert, issuer domain == partner domain). etherfuse
+	// fired on TWO independent axes (sectors + issuance); anclap issues
+	// ARS/PEN anchored tokens. Payments-on-wallets (hana/xbull/lobstr) was
+	// explicitly DECLINED — wallets stay wallets; the sweep keeps reporting.
+	// (etherfuse Anchor already added above; this appends Stablecoin.)
+	anclap: ["Stablecoin"],
+	// ── Row-facts pass 2026-09-05: the typed residuals (types:[]).
+	// boundlessfi.xyz (fetched 2026-09-05): "Launch ideas, join hackathons,
+	// earn from bounties, apply for grants and raise community funding" with
+	// "Funds held in escrow until milestones clear" (TrustlessWork, USDC) —
+	// the offer-hub precedent: the on-chain core is payments/escrow.
+	"boundless-bounties": ["Payments"],
+	// galactictalk.org/d/2532 (the team's 2020 launch thread): "Stellar's
+	// payment network will allow us to charge a lower commission on each
+	// ride" + a DEB asset on stellar.expert — ride payments over Stellar are
+	// the product's Stellar function. Type is identity, not liveness: the
+	// demo (demo.drivedeb.com) times out and drivedeb.com serves a bare
+	// directory index (owner note in the 2026-09-05 row-facts PR).
+	deb: ["Payments"],
+	"spectra-finance": ["Yield"], // 2026-09-26: fixed-rate yield / PT-YT markets live on Stellar (keeps Bridge)
+};
+
+export const TYPES_SET: Record<string, string[]> = {
+	// ── Canonical-row corrections (2026-08-31): the Yield census typed the
+	// FOLD-SIBLING copies (meria/arka-fund/normal-finance carry canonicalSlug
+	// → these rows), while the canonical, search-served rows sat mislabeled
+	// as DEX — none of the three is a DEX. Exact-sync so the wrong label
+	// actually leaves.
+	"meria-defi": ["Yield", "Analytics"], // staking/yield aggregator + portfolio monitor (meria.com); DEX label was wrong
+	arkafund: ["Yield"], // on-chain asset-management/fund protocol (arka.fund); DEX label was wrong
+	normal: ["Stablecoin", "Yield"], // self-custody USDC savings via DeFindex + Blend (normalfinance.io); DEX label was wrong
+
+	// #414 bridge-corridor failure: 9 of 12 Bridge-typed/empty-network records
+	// were MIS-TYPED (verified against each's own site/docs/GitHub 2026-07-11;
+	// evidence per row). Bridge removed; remaining types verified.
+	orally: ["Infrastructure", "AI", "SDK", "Security", "Oracle"], // orally.network: oracle service (data feeds/automation), not an asset bridge; Oracle carried here since 2026-09-05 (exact-sync runs last)
+	tezoro: ["Lending"], // tezoro.io: yield aggregator over Ethereum lending protocols
+	"soroban-optimistic-oracle": ["Infrastructure", "Oracle"], // github stackman27/soo: optimistic-oracle/dispute engine — serves bridges, isn't one; Oracle carried here since 2026-09-05 (exact-sync runs last)
+	"unstoppable-wallet": ["Wallet"], // unstoppable.money: multichain wallet; swaps via DEXes, no own bridge
+	sorobanhooks: ["Infrastructure", "Analytics", "SDK"], // sorobanhooks.xyz: webhook/notification tooling; moves no assets
+	range: ["Security", "Analytics"], // range.org: risk/compliance monitoring — monitors bridges, doesn't move assets
+	perun: ["Infrastructure", "SDK"], // polycry.pt: state-channel framework (go-perun + perun-stellar-backend)
+	"peridot-finance": ["Lending"], // peridot.finance: cross-chain lending platform — product is lending
+	// batch 2 (self-audit re-run surfaced 8 more, mostly 07-10 seeds):
+	"volta-circuit": ["Security", "Wallet"], // voltacircuit.com: multi-sig wallet security/controls product
+	upwealth: ["AI", "Analytics"], // upwealth.io: AI investment/advisory platform for wealth managers
+	swiftex: ["Wallet", "DEX"], // SwiftExWallet README: multichain wallet; bridging via third-party Allbridge
+	"stellar-metamask": ["Wallet", "SDK"], // MetaMask Snaps listing: Stellar wallet snap + dapp API
+	cyvers: ["Security", "AI"], // cyvers.ai: real-time threat detection platform
+	cobo: ["Infrastructure", "Wallet"], // cobo.com: institutional omni-custody / wallet-as-a-service platform — custody, not a bridge
+	// sls-035 DEX-taxonomy wave (2026-07-11): the types=DEX cluster mixed real
+	// trading venues with aggregators/routers/analytics platforms that run no
+	// venue of their own — polluting DEX browses and venue ground-truth checks
+	// (the amm→rango class). Each row below is re-typed from the project's OWN
+	// primary source (quoted); actual venues and SDEX trading clients were left
+	// untouched. Cross-chain swap aggregators keep/carry Bridge — the
+	// user-meaningful corridor capability (the rubic #414 precedent) —
+	// Stellar-only routers/services go Infrastructure.
+	stellarbroker: ["Infrastructure", "SDK"], // stellar.broker: Stellar-only multi-source liquidity swap ROUTER/aggregator — best routing across AMMs + Stellar DEX, runs no venue (so NOT a DEX venue; the verifier's DEX call was wrong), and it's integrable by other apps/wallets (boxy 2026-07-15) → +SDK.
+	wowmax: ["Bridge"], // wowmax.exchange: "combines a powerful DEX aggregator with an on-chain copy-trading protocol… trade crypto at the best possible prices across multiple decentralized exchanges" — aggregator, not a venue
+	rango: ["Bridge"], // rango.exchange: "a new layer on top of all Bridges and DEXs, working as a Bridge Aggregator and DEX Aggregator at the same time" — router, not a venue
+	houdiniswap: ["Bridge"], // houdiniswap.com: "non-custodial liquidity aggregator… sources swap routes from vetted, compliant exchange partners"; explicitly does not pool assets
+	rubic: ["Bridge"], // rubic.exchange: "an aggregator of Bridges, Dexs, Intent Protocols, & Private Solutions" (340+ integrations) — routing layer, no own pools
+	"dex-tools": ["Analytics"], // dextools.io + info.dextools.io: DeFi charting/pair-explorer/portfolio "data hub"; connects existing wallets, holds no liquidity
+	"mobula-labs": ["Analytics", "AI", "SDK"], // mobula.io: "Stream-based, modular & blazing fast APIs powering the best onchain products" — data/API provider, not a venue
+	spinach: ["Infrastructure"], // spinach.fi: "Liquidity Competitions — projects earn daily rewards for integrating and growing liquidity" — incentive-campaign platform, not a venue
+	// sls-033 (#519) wallet product-kind wave (2026-07-13): the record's own
+	// description already says WalletConnect "is not a wallet itself" but an
+	// "open connection protocol … a natively supported Stellar Wallets Kit
+	// module" — yet types was EMPTY, so the connectivity-protocol-vs-wallet
+	// distinction #519 demands existed only in prose (the prose-only-facts bug
+	// class) and the record was invisible to every type filter. Typed to the
+	// taxonomy truth we have today; the richer per-record productKind enum is
+	// a batch-D field.
+	walletconnect: ["Infrastructure"], // walletconnect.network: wallet↔dApp connectivity protocol/network — not a wallet product
+	// Bridge-cluster mistags (boxy 2026-07-15: "templar is a lending protocol, why
+	// is it a bridge"). #414 wave left non-bridge records Bridge-typed. Re-typed
+	// from each record's OWN primary source; deliberate aggregators (rubic/rango/
+	// houdiniswap/wowmax — routing layers whose corridor capability IS the point)
+	// stay Bridge. Frontend /directory reads the same projects.types as the API,
+	// so this fixes both surfaces at once.
+	"templar-protocol": ["Lending"], // templarfi.org: "the first cypher lending protocol — borrow dollars against Bitcoin"; BTC-collateralized lending, bridgeless (NEAR chain sigs). NOT a bridge.
+	pyth: ["Oracle"], // pyth.network: decentralized price-feed ORACLE. The old "oracle convention types=[]" predates the Oracle enum member (guard D, 2026-08-27); exact-sync runs last so the tag must live here.
+	nethermind: ["Infrastructure", "Security"], // nethermind.io: research/engineering firm + Nethermind Security (audits, formal verification, ZK); Stellar work = RISC Zero zkVM verifier + private-payments. Verifier-confirmed 2026-07-15.
+	"vanna-finance": ["Lending"], // vanna.finance: "composable credit infrastructure — borrow up to 10x undercollateralized credit"; a lending/margin protocol (routes into Soroswap/Aquarius/Blend). NOT a bridge.
+	warpdrive: ["Infrastructure"], // warp-drive.xyz: "off-chain execution of bots, oracles, and automation for Stellar/Soroban" — an infra/execution framework (Eigenlayer-backed). NOT a bridge.
+	// Directory-quality engine — verifier-confirmed re-tags (2026-07-15). Each
+	// agent-verified from the product's own live site (evidence in the
+	// directory-quality-verify run). Auto-apply tier (high confidence).
+	"cactus-link": ["Wallet"], // mycactus.com + Chrome Web Store: institutional browser-extension wallet (Cactus Custody). A wallet's security is a property, not its category.
+	"hito-wallet": ["Wallet"], // hito.xyz: NFC thin hardware crypto wallet (for sale). Hardware wallet = Wallet, not Security.
+	keystone: ["Wallet"], // keyst.one: hardware wallet.
+	mxlet: ["Wallet"], // xlet.io: open Stellar hardware wallet.
+	decaf: ["Wallet", "Payments"], // decaf.so: non-custodial wallet for cross-border money movement — Wallet + Payments, not Payments alone.
+	reclaim: ["Security", "SDK"], // reclaimprotocol.org: zkTLS credential/proof-of-personhood protocol + zkFetch SDK (Soroban example). Security + the developer SDK.
+	trustline: ["Security", "SDK", "Infrastructure"], // trustline.id: security SDK + smart-contract insurance. Adds the SDK it ships.
+	trustful: ["Infrastructure"], // trustful-stellar.vercel.app: reputation/attestation system (badges + on-chain data) — infra primitive, not security tooling.
+	paychant: ["Anchor", "Payments"], // paychant.com: fiat on/off-ramp gateway — an anchor + payments, not payments alone.
+	"yellow-card": ["Anchor", "Payments"], // yellowcard.io: licensed African stablecoin on/off-ramp anchor + payments.
+	defindex: ["Infrastructure", "SDK", "Yield"], // defindex.io (PaltaLabs): yield infrastructure — non-custodial tokenized vaults + SDK for wallets/neobanks (Yield added with spec 1.9.13).
+	xoxno: ["Lending"], // xoxno.com: "enterprise-grade decentralized lending protocol on Soroban" — Lending, not RWA.
+	// 2026-09-05: TYPES_SET is exact-sync and runs LAST in curate, so an Oracle tag appended by TYPE_ADD was stripped on every execute and the self-audit stayed red five days. The exact set must carry the whole truth itself.
+	nebula: ["SDK", "Oracle"], // eigerco/nebula: Soroban Rust contract library + code-gen wizard = SDK, and the row describes a "price feed oracle grid" = Oracle. Drops the unsupported Indexer tag. (Also defunct — see STATUS_FIX.)
+	// Held-queue resolutions after a closer look (boxy 2026-07-15).
+	elsa: ["Wallet", "Payments"], // elsa.care: "a wallet for Filipinos to receive, spend and earn from remittances" — the verifier wrongly dropped Wallet; it IS a remittance wallet + payments.
+	legasi: ["Lending", "RWA"], // legasi.io: "on-chain Lombard LENDING infrastructure — collateralized borrowing against tokenized RWA" — Lending against RWA, not RWA alone.
+	indentura: ["Lending", "RWA"], // thawdigital.com: "on-chain CREDIT infrastructure — trade credit and receivables financing" — credit/lending against RWA receivables.
+	// sls-033 (2026-07-15): mis-typed as Wallet — web-verified NOT wallets, so an
+	// exact type=Wallet enumeration wrongly returned them (the StellarTerm-in-the-
+	// wallet-list class the finding names). Drop Wallet; keep their real types.
+	pakananet: ["Payments", "AI", "RWA", "Security"], // pakana.net: private ZK payments/compliance infrastructure, not a wallet (multisig-escrow is one feature)
+	stellarfolio: ["Analytics"], // stellarfolio.app: read-only portfolio viewer — enter ANY public address to view its assets; holds no keys
+	equilibre: ["Analytics"], // equilibre.io: portfolio rebalancer / DEX trading tool, wallet-independent (also already defunct — see STATUS_FIX)
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Curated-field ownership (lessons class 32)
+// ─────────────────────────────────────────────────────────────────────────────
+/** Project fields that a curation registry owns for a given slug.
+ *
+ * Why this exists: `scripts/sync-lumenloop.ts` re-updates LumenloopSeed /
+ * Unverified records daily with a whole-record spread from the upstream feed.
+ * Every field the feed maps was therefore overwritten within 24h of any curate
+ * run — 13 verified TYPES_SET rows from #414 (2026-07-11) sat reverted for two
+ * weeks while both jobs logged success (see improvements/lessons class 32).
+ *
+ * Ownership is DERIVED from the registries rather than stored on the record, so
+ * that adding a row here protects the field immediately, retroactively, and
+ * without a backfill or a marker field that can itself drift.
+ *
+ * Only fields the lumenloop mapper actually writes need to appear here — the
+ * sync cannot clobber what it does not map. Keep this in sync with
+ * `mapLumenloopEntry` (src/lib/utils/lumenloop-mapper.ts): today that is
+ * name, shortDescription, category, types, status, verificationLevel,
+ * provenance, links, github, onchain.
+ */
+export function curatedFieldsFor(slug: string): Set<string> {
+	const owned = new Set<string>();
+	if (slug in DESCRIPTION_FIXES) owned.add("shortDescription");
+	if (slug in TYPES_SET || slug in TYPES_ADD) owned.add("types");
+	if (slug in STATUS_FIX) owned.add("status");
+	if (slug in NAME_FIXES) owned.add("name");
+	if (slug in WEBSITE_FIXES) owned.add("links.website");
+	// A removed (hijacked/parked) website is a curated fact about links.website
+	// too: without ownership, sync-lumenloop re-wrote the-blue-marble's hijacked
+	// casino link back from the feed every night (found 2026-09-05).
+	if (slug in WEBSITE_REMOVE) owned.add("links.website");
+	// Same fact, second map. Registered 2026-09-07 after the sync re-wrote 44
+	// dead websites and 37 dead GitHub links that curate had removed hours
+	// earlier: the removal maps were new, ownership is granted map-by-map by
+	// hand, and nobody granted it. The identical incident is described three
+	// lines above for WEBSITE_REMOVE — a solved problem, repeated because the
+	// solution had to be remembered rather than enforced. `ownershipCoverage`
+	// below now enumerates it, and a test walks it.
+	if (slug in WEBSITE_REMOVE_DEAD) owned.add("links.website");
+	if (slug in GITHUB_LINK_REMOVE) owned.add("links.github");
+	if (slug in DOCS_LINKS) owned.add("links.docs");
+	if (slug in GITHUB_REPOS_ADD) owned.add("github");
+	// Curate's own correction lists (moved here 2026-10-03). A rebrand moves
+	// the name, the description and the website together.
+	if (slug in GITHUB_LINK_FIX) owned.add("links.github");
+	if (slug in REBRANDS) {
+		owned.add("name");
+		owned.add("shortDescription");
+		owned.add("links.website");
+	}
+	return owned;
+}
+
+/** Every slug any ownership-bearing registry names — lets a detector enumerate
+ * what to read back off the live API without re-deriving the union each time. */
+export function curatedSlugs(): string[] {
+	return [
+		...new Set([
+			...Object.keys(DESCRIPTION_FIXES),
+			...Object.keys(TYPES_SET),
+			...Object.keys(TYPES_ADD),
+			...Object.keys(STATUS_FIX),
+			...Object.keys(NAME_FIXES),
+			...Object.keys(WEBSITE_FIXES),
+			...Object.keys(DOCS_LINKS),
+			...Object.keys(GITHUB_REPOS_ADD),
+			...Object.keys(WEBSITE_REMOVE),
+			...Object.keys(WEBSITE_REMOVE_DEAD),
+			...Object.keys(GITHUB_LINK_REMOVE),
+			...Object.keys(GITHUB_LINK_FIX),
+			...Object.keys(REBRANDS),
+		]),
+	].sort();
+}
+
+// ── sls-064 analog B: builtBy — RESOLVED WITHOUT A CURATED MAP ─────────────
+// A BUILT_BY_FIXES lane briefly lived here (2026-08-14). Post-execute
+// read-back exposed it as a write-to-nowhere: `builtBy` is NOT a field on
+// the Projects collection, so payload.update() silently dropped it while
+// reporting success (the #615/C1 class), and every curate run re-"fixed"
+// it forever. The truth: served builtBy derives from the ENTITIES
+// collection at query time (entity name/slug per linked project) and is
+// contract-correct — builtBy.slug resolves at /entities/{slug}. Fix
+// builtBy data by fixing the entity record/links; the nightly S0 lane
+// asserts every served builtBy slug resolves in the entity namespace.
+
+/** sls-079: verified DEPLOYMENT facts, separate from lifecycle status.
+ * Only entries a human (or a cited operator artifact) actually evidences.
+ * network "testnet" here means the operator's OWN configuration shows no
+ * mainnet deployment — the strongest honest reading available. */
+export const DEPLOYMENT_VERIFIED: Record<
+	string,
+	{ network: "mainnet" | "testnet"; sourceUrl: string; note: string }
+> = {
+	// sls-079 (2026-08-28, verified in-session byte-for-byte): the operator
+	// bundle defines {local, testnet, mainnet} network configs; testnet holds
+	// four real contract addresses, mainnet holds four EMPTY ones
+	// (address "", startLedger 0). A reachable site is not a mainnet
+	// deployment.
+	// ── 2026-08-28 queue pass: the 13 prominent Live on-chain-product rows.
+	// Verification chain per entry is in improvements/receipts/<slug>-2026-08-28.json.
+	// Six rows stay UNKNOWN deliberately: dia + redstone-finance (support docs
+	// exist, no citable mainnet artifact), wisdomtree + spiko (every on-chain
+	// issuance of their codes is a fake-issuer farm - see the 2026-08-28
+	// lesson), redswan (no toml, no on-chain asset), spacewalk (only a 2023
+	// roadmap graphic). Absence of evidence stays visible.
+	ondo: {
+		network: "mainnet",
+		sourceUrl: "https://ondo.finance/.well-known/stellar.toml",
+		note: "toml declares USDY issuer GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6; Horizon shows 461M supply, 2733 holders",
+	},
+	stronghold: {
+		network: "mainnet",
+		sourceUrl: "https://stronghold.co/.well-known/stellar.toml",
+		note: "toml declares SHX issuer GDSTRSHX…; Horizon shows 35.5B supply, 91,389 holders",
+	},
+	brale: {
+		network: "mainnet",
+		sourceUrl: "https://brale.xyz/.well-known/stellar.toml",
+		note: "toml declares SBC issuer GCQCNWT2…; asset live on Horizon (small but real: 21 holders)",
+	},
+	"glo-dollar": {
+		network: "mainnet",
+		sourceUrl:
+			"https://stellar.expert/explorer/public/asset/USDGLO-GBBS25EGYQPGEZCGCFBKG4OAGFXU6DSOQBGTHELLJT3HZXZJ34HWS6XV",
+		note: "issuer account's own home_domain = app.glodollar.org (reverse-verified); 624 holders",
+	},
+	axelar: {
+		network: "mainnet",
+		sourceUrl: "https://docs.axelar.dev/resources/contract-addresses/mainnet/",
+		note: "Axelar's mainnet reference lists Stellar gateway CD6VSKXB4HY2DWU7EP2PUIYTBJBJ36LDJXEZN4NSXFYF5YP37DDFX6NF; contract live on public since 2025-03",
+	},
+	"circle-cctp-cross-chain-transfer-protocol": {
+		network: "mainnet",
+		sourceUrl:
+			"https://developers.circle.com/cctp/references/stellar-contracts",
+		note: "Circle's own reference lists Stellar MAINNET TokenMessengerMinter CAE2G5Z7… + MessageTransmitter CACMENFF…; both live on public since 2026-04-16 (the quickstart page's ids are testnet - do not cite those)",
+	},
+	stellarterm: {
+		network: "mainnet",
+		sourceUrl: "https://stellarterm.com/",
+		note: "self-custodial client of the native Stellar DEX on the PUBLIC network - it deploys no contracts; 'mainnet' here means the product operates against mainnet, which is its entire function",
+	},
+	"stellars-finance": {
+		network: "testnet",
+		sourceUrl: "https://stellars.finance/assets/index-3HEaNhUX.js",
+		note: 'mainnet config present but empty (4x address:""); testnet fully populated',
+	},
+	// ── 2026-08-29 gap-matrix pass: the 6-row deployment pool. Two evidenced,
+	// four stay honestly unknown (receipts improvements/receipts/<slug>-2026-08-29.json):
+	// wisdomtree/spiko/redswan — NO real-operator Stellar issuance exists
+	// (stellar.expert by their real domains returns only lookalike-farm squats:
+	// wisdomtree.co.com, lumenvaultx.org, stellarxlm.online — never cite those);
+	// spacewalk — bridge operates from Pendulum; no Stellar-side artifact located.
+	dia: {
+		network: "testnet",
+		sourceUrl:
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
+		note: "Stellar's own oracle-providers reference lists DIA with a TESTNET contract only (CAEDPEZD…); no mainnet address documented anywhere",
+	},
+	"redstone-finance": {
+		network: "mainnet",
+		sourceUrl:
+			"https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+		note: "operator announcement 2026-03-04: 'bringing institutional-grade oracle infrastructure to the Stellar mainnet', 10 feeds live; their monorepo chain-configs declares stellar-mainnet (isMainnet:true, mainnet RPCs); SEP-40 feeds in production for Centrifuge RWAs",
+	},
+	// 2026-09-02, owner-requested: SDF's developer launch page publishes the
+	// mainnet asset (USDT0:GATISXX6…), the SAC (CBSJZEIO…) and the OFT
+	// contract (CBOWOLFS…). Horizon already showed the asset live
+	// (onchain-activity) — the two artifacts agree; the page is the citable one.
+	usdt0: {
+		network: "mainnet",
+		sourceUrl: "https://developers.stellar.org/launch/usdt0",
+		note: "SDF developer launch page 2026-09-02: USDT0 issued by GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q; SAC CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF; OFT CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6 (LayerZero OFT standard, operated by Everdawn Labs). Announcement: https://stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar",
+	},
+	// 2026-10-03: launched on mainnet 2026-09-29 (see the STATUS_FIX entry and
+	// improvements/receipts/zenex-2026-10-03.json).
+	zenex: {
+		network: "mainnet",
+		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
+		note: "operator page written from the chain lists mainnet factory CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ and XLM-USD market CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB; market created on public 2026-09-29, 317 invocations (stellar.expert)",
+	},
+};
+
+/**
+ * statusSourceUrl backfill for human-verified Inactive rows (gap-matrix
+ * 'sourced', 2026-09-01): the verdicts were made by observing these sites
+ * dead/parked/repurposed — the observed URL IS the re-checkable source a
+ * caller can visit (statusAsOf already dates the verdict). Fill-only-if-
+ * empty; never touches status/basis/asOf; Live rows are deliberately NOT
+ * here (their source is the site-liveness lane's own evidence).
+ */
+/**
+ * NOTE (2026-09-07): two rows used to appear here AND in STATUS_SOURCE_RETRACT
+ * with the SAME url — pactta (https://pactta.com/) and mimoto
+ * (github.com/nkoorty/mimoto). Both maps are value-keyed, so this backfill set
+ * the url and the retract nulled it on the same run, every run: 46 writes
+ * applied and 1 still planned afterwards, forever. The idempotence gate caught
+ * it. Both urls are dead (unreachable / 404), so the retract is right and the
+ * entries were dropped from here — one field, one writer.
+ *
+ * Six other slugs appear in both maps and are FINE: they carry DIFFERENT urls,
+ * so the retract removes a bad citation and this map sets a good one. Overlap
+ * by slug is not a conflict; overlap by value is.
+ */
+export const STATUS_SOURCE_BACKFILL: Record<string, string> = {
+	// Re-triage 2026-09-01 (the two retracted rows whose death has since
+	// become directly observable): both domains now fail to connect at all —
+	// an unreachable origin IS the observed-dead evidence the July zombie-200
+	// pages could not provide. whalestack cites the successor brand's own
+	// domain, not the coinqvest redirect that confused the first receipt.
+	whalestack: "https://whalestack.com/",
+	aerochain: "https://aerochain.wingleet.com/redoc",
+	apay: "https://apay.io/",
+	arcturus: "https://arcturus-gpt.com/",
+	benkiko: "https://benkiko.xyz/",
+	blip: "https://blip.watch/",
+	borderdollar: "https://borderdollar.co/",
+	brl: "https://ntokens.com/blog/brl-anchor-stellar",
+	canfy: "https://canfy.net/",
+	cosmiclink: "https://cosmic.link/",
+	cosmicvote: "https://cosmic.vote/",
+	cryptocannoneer: "https://blockshangerous.com/cryptocannoneer",
+	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi",
+	equilibre: "https://equilibre.io/",
+	forge: "https://forgerpc.com/",
+	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
+	lumenaut: "https://pool.lumenaut.net/",
+	"lumens-for-charity": "https://lumensforcharity.tech/",
+	mxlet: "https://xlet.io/",
+	opensolar: "https://openx.solar/",
+	"paygo-crypto": "https://paygocrypto.io/",
+	quidroo: "https://quidroo.com/",
+	rigel: "https://rigel.link/",
+	skeeper: "https://skeeper.xyz/",
+	snnac: "https://snnac.me/",
+	"soroban-assistant": "https://soroban-assistant.herokuapp.com/",
+	sorobanide: "https://sorobanide.com/",
+	sorobuilder: "https://sorobuilder.com/",
+	sorosorcerer: "https://sorosorcerer.com/",
+	sorscan: "https://sorscan.org/",
+	"stellar-update": "https://stellarupdate.com/",
+	stellarstrides: "https://stellarstrides.xyz/",
+	swplug: "https://swplug.com/",
+	typiqo: "https://typiqo.it/",
+	// ── Re-triage 2026-09-05 of two audit-C2 retractions (row-facts pass):
+	// b4b.app now answers a 200 empty shell (title only), so it cannot stand;
+	// the brand domain b4b.world serves its own for-sale listing ("b4b.world
+	// for sale | Spaceship.com") — the parked observation the July verdict
+	// itself cited, re-observed 2026-09-05.
+	b4b: "https://b4b.world/",
+	// The builder's own closing announcement (2024-05-05: "we have resolved
+	// to dissolve the UrbanChange Foundation … the UrbanChange Mobile App
+	// will close" on May 8) — the operator statement the verdict cites.
+	// Medium serves the article only to browsers (403 otherwise); read
+	// 2026-09-05 through the publication's feed (medium.com/feed/urbanchange),
+	// which carries the full text.
+	localcoin:
+		"https://medium.com/urbanchange/important-announcement-urbanchange-foundation-and-app-closing-30e4e56fa709",
+};
+
+/**
+ * RETRACTED receipts (audit C2 + HEAD sweep 2026-09-01): these stamped
+ * statusSourceUrl values must be NULLED, not kept — six of the URLs answer
+ * HTTP 200 today (a live page cannot stand as 'observed dead' evidence,
+ * even where the Inactive verdict itself still holds: zombie landing pages
+ * and a redirect-to-successor among them), chaincred's URL was
+ * case-mangled (the real ChainCred_landing page 200s), and the
+ * scam-flagging-system sheets id was case-normalized into a URL nobody
+ * ever observed. The verdicts stay; the evidence slots reopen for real
+ * receipts at re-triage. Keyed to the exact mangled value so the retract
+ * can never clobber a later, legitimate source.
+ */
+export const STATUS_SOURCE_RETRACT: Record<string, string> = {
+	b4b: "https://b4b.app/",
+	chaincred: "https://prince29chouhan.github.io/chaincred_landing",
+	localcoin: "https://localcoin.us/",
+	pactta: "https://pactta.com/",
+	"scam-flagging-system":
+		"https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
+	"the-blue-marble": "https://thebluemarble.io/",
+	venalabs: "https://venalabs.com/",
+	whalestack: "https://coinqvest.com/",
+};
+
+/**
+ * Hijacked-domain link removal (owner call 2026-09-01): the recorded domain
+ * was taken over after the project shut down and now serves unrelated (and
+ * unsafe-to-recommend) content — the July STATUS_FIX note already said "do
+ * not follow the historical link"; this removes it. Keyed to the exact
+ * hijacked value so a later legitimate relink can never be clobbered.
+ */
+/**
+ * links.github values that are dead citations, value-keyed to the EXACT
+ * stored URL so a later legitimate relink is never clobbered (same discipline
+ * as WEBSITE_REMOVE).
+ *
+ * Two classes, both found by check-links (2026-09-07), which had been proving
+ * these broken daily with nothing consuming the result:
+ *
+ *  - NOT A GITHUB PATH: the stored value is another host with
+ *    "https://github.com/" prefixed onto it — gitlab.com project pages, a
+ *    Google Doc, an API endpoint. The entity page renders links.github under a
+ *    GitHub icon labelled "GitHub", so a GitLab URL there is a lie about where
+ *    the code lives, and the mangled form 404s anyway. The real URL is kept in
+ *    the comment beside each entry so nothing is lost when a generic
+ *    source-repo field exists to hold it.
+ *  - GONE: the repo 404s and the owner has no repository that survives an
+ *    intersection check. A fuzzy name match found 7 candidates and only ONE
+ *    (normal) had corroborating evidence — its repo homepage is the project
+ *    site — so it is a GITHUB_LINK_FIX above and the other six were rejected.
+ *    A name is a hypothesis; a link is evidence.
+ */
+export const GITHUB_LINK_REMOVE: Record<string, string> = {
+	// ── not a GitHub path (real URL noted; the stored value 404s) ──
+	// real: https://gitlab.com/b4b-world
+	b4b: "https://github.com/gitlab.com/b4b-world",
+	// real: https://gitlab.com/dolphinze/disbursements
+	dolphinze: "https://github.com/gitlab.com/dolphinze/disbursements",
+	// real: a Google Doc, not a repo
+	payrit:
+		"https://github.com/docs.google.com/document/d/1rs5mjjzkl2kzmqpvuzrrnjnhdx0gajosaff6wibgtz0/edit?usp=sharing",
+	// real: https://gitlab.com/rivool-finance/stellar-contracts
+	"rivool-finance":
+		"https://github.com/gitlab.com/rivool-finance/stellar-contracts",
+	// real: https://dev-api-new.skopadev.com/api (an API endpoint, not a repo)
+	skopa: "https://github.com/dev-api-new.skopadev.com/api#",
+	// real: https://gitlab.com/soroban-explorer
+	"soroban-explorer": "https://github.com/gitlab.com/soroban-explorer",
+	// real: https://gitlab.com/tales
+	"source-of-tales": "https://github.com/gitlab.com/tales",
+	// ── repo gone; owner has nothing that passes an intersection check ──
+	"6a2a4efab6c85e93c7be0090": "https://github.com/gustavo-f0ntz", // owner account gone
+	"ai-transparency-token": "https://github.com/falparis/aitt", // closest of 3 repos
+	bingtellar: "https://github.com/bingtellar/bingtellar-serverside", // owner has 2 repos, none close
+	cartwey: "https://github.com/Cartwey001/cartwey-app", // closest of 1 repos
+	cede: "https://github.com/cedelabs/sdk-examples", // owner has 5 repos, none close
+	centiiv: "https://github.com/centiiv/protocol-node", // owner has 1 repos, none close
+	coinsender: "https://github.com/megadev-ou/cs-payments", // owner has 9 repos, none close
+	didstellar: "https://github.com/mavennet/stellar-did", // owner has 30 repos, none close
+	elsa: "https://github.com/elsa-care", // owner account gone
+	forestio: "https://github.com/forest-io/ForestConsumerWeb", // owner has 3 repos, none close
+	// Stored form is the capitalised one; GitHub is case-insensitive so both
+	// 404 identically, and the value guard has to match what the row holds.
+	"gecko-fuzz": "https://github.com/jjjutla/GeckoFuzz", // owner has 5 repos, none close
+	interlinked: "https://github.com/antontat27/interlinked-backend", // closest of 7 repos
+	jetpad: "https://github.com/jetpad-digital-limited/jetpad-wallet", // owner has no public repos
+	"js-capacitor-passkey-kit":
+		"https://github.com/argo-navis-dev/js-capacitor-passkey-kit", // closest of 6 repos
+	lettuce: "https://github.com/stellar-merchants", // owner account gone
+	metafyed: "https://github.com/nasdex-marketplace/md-stellar_wallet_service", // owner has no public repos
+	mimoto: "https://github.com/nkoorty/mimoto", // owner has 14 repos, none close
+	minah: "https://github.com/gakpe/minah_blockchain_v0.2", // owner has 14 repos, none close
+	muwp: "https://github.com/muwpay-uniswapper/muwp-stellar", // owner has 1 repos, none close
+	nemorixpay: "https://github.com/nemorixpay", // owner account gone
+	nobak: "https://github.com/nobak-net/nobak-mobile", // owner has 4 repos, none close
+	paystreme: "https://github.com/walletgurullc/paystreme", // owner has 10 repos, none close
+	plutope: "https://github.com/plutopein/plutope-merchant-stellar", // owner has no public repos
+	"polaris-lend": "https://github.com/jet-lab/polaris", // owner has 17 repos, none close
+	proofbridge: "https://github.com/explore-beyond-innovations/proofbridge", // closest of 19 repos
+	prophe: "https://github.com/seunsanyaa/prophe", // owner has 39 repos, none close
+	satellite: "https://github.com/spaceboatdvlp/hello-soroban", // owner has 10 repos, none close
+	scalps: "https://github.com/imobi/scalps-core-api", // owner has 16 repos, none close
+	sollpay: "https://github.com/mercury-labs-dev/stellar-sollpay", // owner has 3 repos, none close
+	"soroban-optimistic-oracle":
+		"https://github.com/stackman27/soroban-opt-oracle", // owner has 37 repos, none close
+	"soroban-polygon-interop":
+		"https://github.com/wanchain/message-bridge-contracts", // owner has 13 repos, none close
+	sorobuilder: "https://github.com/luisao8/sorobuilder", // owner has 17 repos, none close
+	sorosorcerer: "https://github.com/nossicasystems/soroban_extend", // owner has 9 repos, none close
+	talwex: "https://github.com/talwex-inc/stellar-vault", // owner has 1 repos, none close
+	tauvlo: "https://github.com/tauvlo", // owner account gone
+	teken: "https://github.com/moonbite-gmbh/multisig-ui", // owner has 1 repos, none close
+	tracee: "https://github.com/Tracee1910/tracee-app", // owner has no public repos
+	transfermole: "https://github.com/ivandzen/transfermole", // closest of 35 repos
+	tumbl: "https://github.com/cordilleradev", // owner account gone
+	utoken: "https://github.com/utokens", // owner account gone
+	"vanna-finance": "https://github.com/vannafinance/protocol_v1_soroban", // owner has 5 repos, none close
+	"wallet-guru": "https://github.com/WalletGuruLLC/paystreme", // owner has 10 repos, none close
+	walletban: "https://github.com/darthbenro008/walletban", // owner has 100 repos, none close
+	warmancer: "https://github.com/towa-hi/solid-parakeet", // owner has 4 repos, none close
+};
+
+/**
+ * Dead website citations, value-keyed to the EXACT stored URL (same discipline
+ * as the entries above). Found by check-links and re-probed 2026-09-07 with
+ * redirects followed, 5xx treated as no verdict, and DNS failure separated
+ * from transport failure; every "domain does not resolve" below was confirmed
+ * against two public resolvers, not one local lookup.
+ *
+ * A dead link is a dead CITATION and never a status change on its own — the
+ * rule the 2026-09-02 batch above already states.
+ *
+ * One correction worth keeping: stellarupdate.com answers 200 with a default
+ * nginx welcome page. A probe that only counts readable characters called it
+ * alive; it is an unconfigured server, not a product.
+ */
+/**
+ * Entity-level link corrections, keyed by ENTITY slug.
+ *
+ * WHY THIS HAD TO EXIST. Entity links are INHERITED from the entity's linked
+ * projects and the merge is fill-if-empty (`currentLinks.website ||
+ * newLinks.website` in scripts/enrich-entities.ts), so a value inherited once
+ * is never re-inherited. When the source project moves, the entity keeps the
+ * dead URL forever — check-links proves it broken every day and no repair map
+ * reaches it, because WEBSITE_FIXES and friends are all keyed by PROJECT slug.
+ *
+ * It also covers the case inheritance CANNOT reach: an organisation whose own
+ * site is not any linked project's site. stellar-expert links `albedo`
+ * (albedo.link) and `reflector` (reflector.network); the org's own site,
+ * stellar.expert, appears on neither, so no amount of re-inheriting produces
+ * it.
+ *
+ * Applied BEFORE the inherit merge, so an explicit fix beats both the stale
+ * stored value and whatever a project would have supplied. Only add a value
+ * you have actually opened — the entries below cite what the page title says.
+ */
+export const ENTITY_LINK_FIXES: Record<
+	string,
+	{
+		/** A string sets the field. `null` CLEARS it — for a link with no live
+		 *  replacement, where the honest state is no link rather than a dead
+		 *  one. A key left out means "leave this field alone", so the three
+		 *  cases stay distinguishable. */
+		website?: string | null;
+		github?: string | null;
+		twitter?: string | null;
+	}
+> = {
+	// 2026-09-15. Stored website was https://reflector.world/ — NXDOMAIN, and
+	// inherited from the `reflector` project before that project moved to
+	// reflector.network. The entity is the ORG behind albedo and reflector, and
+	// its own site answers 200 titled "StellarExpert | Stellar XLM block
+	// explorer and analytics platform". The github org is confirmed by albedo's
+	// own repo link, github.com/stellar-expert/albedo.
+	// 2026-09-15. Stored website https://slender.fi/ — NXDOMAIN. Inherited from
+	// the `slender` project, whose own website field is already null. EQ Lab's
+	// own site answers 200 titled "EQ LAB – Web3 & blockchain development |
+	// outsource | digital consulting". The entity's github, eq-lab/slender, is
+	// alive (200, "Lending protocol in Soroban") and is left alone.
+	"eq-lab": { website: "https://eqlab.io" },
+	// 2026-09-15. Stored website https://clickpesadebtfund.com/ — NXDOMAIN; the
+	// debt-fund subdomain went away, the company did not. clickpesa.com answers
+	// 200 titled "Payment Solutions for Microfinance & SMEs | Payment Gateway -
+	// Tanzania".
+	clickpesa: { website: "https://clickpesa.com" },
+	// 2026-09-15. Stored website https://stex.xycloo.com/ — NXDOMAIN, and there
+	// is no replacement to point at: xycloo.com resolves (172.234.102.247) but
+	// serves nothing for that name — HTTPS fails TLSV1_UNRECOGNIZED_NAME and
+	// HTTP returns 404 — and xycloo.dev does not resolve. So the field is
+	// CLEARED rather than redirected: no link is true, a dead link is not.
+	// Their GitHub org github.com/xycloo is alive ("Xycloo Labs") and the
+	// entity's existing github link (xycloo/documents-marketplace-devenv, 200)
+	// still works, so neither is touched here.
+	xycloo: { website: null },
+	"stellar-expert": {
+		website: "https://stellar.expert",
+		github: "https://github.com/stellar-expert",
+	},
+};
+
+export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
+	// ── 2026-09-15, from improvements/quality/broken-links-packet-2026-09-15.md
+	// The two LIVE project rows check-links has proved dead every day since
+	// 2026-09-06. Each candidate replacement was opened, not guessed:
+	//
+	// gameduk — gameduk.com, www.gameduk.com, gameduk.io and gameduk.xyz all
+	// NXDOMAIN. Nothing to point at.
+	//   NOTE for the owner: this row is Live on a `site-liveness` basis dated
+	//   2026-08-17, and the site it was based on no longer resolves. Removing
+	//   the link removes that evidence. Whether the PROJECT is inactive is a
+	//   status call (mark-inactive-projects.yml), deliberately not made here.
+	gameduk: "https://gameduk.com/",
+	// deb — the stored demo.drivedeb.com is NXDOMAIN. drivedeb.com itself is
+	// NOT a replacement: https times out, http 200s to www.drivedeb.com, and
+	// that page is titled "Welcome to drivedeb.com" with the same string as its
+	// description and no mention of Stellar. That is a parked default page, and
+	// a default page is not proof of life — the same rule page-verdict.ts
+	// applies. So: removal, not a redirect to a placeholder.
+	deb: "https://demo.drivedeb.com/",
+
+	// ── 2026-09-07, second pass: four rows store a GitHub url in
+	// links.website. Same free-text-in-a-typed-field shape as orgLogin,
+	// github.repos[] and links.github before it — fourth field. Each repo
+	// also 404s, so the value is wrong twice over.
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"gecko-fuzz": "https://github.com/jjjutla/geckofuzz",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	teken: "https://github.com/moonbite-gmbh/multisig-ui",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	mimoto: "https://github.com/nkoorty/mimoto",
+	// a GitHub url in the WEBSITE field, and that repo 404s
+	"soroban-optimistic-oracle":
+		"https://github.com/stackman27/soroban-opt-oracle",
+	"0xauth": "https://0xauth.co", // domain does not resolve
+	adamik: "https://adamik.io", // HTTP 404
+	aerochain: "https://aerochain.wingleet.com/redoc", // domain does not resolve
+	apay: "https://apay.io", // HTTP 404
+	arcturus: "https://arcturus-gpt.com", // domain does not resolve
+	basement: "https://basement.dev", // HTTP 404
+	benkiko: "https://benkiko.xyz", // domain does not resolve
+	bigger: "https://biggertech.co", // "registered with gandi"
+	borderdollar: "https://borderdollar.co", // HTTP 404
+	bravepay: "https://bravepay.net", // domain does not resolve
+	canfy: "https://canfy.net", // domain does not resolve
+	chainsatlas: "https://chainsatlas.com", // HTTP 404
+	cosmiclink: "https://cosmic.link", // domain does not resolve
+	cosmicvote: "https://cosmic.vote", // domain does not resolve
+	cryptocannoneer: "https://blockshangerous.com/cryptocannoneer", // domain does not resolve
+	digicus: "https://digicus.dev", // HTTP 404
+	"ea-kazi": "https://biotlabs.africa/projects/ea-kazi", // domain does not resolve
+	equilibre: "https://equilibre.io", // domain does not resolve
+	forge: "https://forgerpc.com", // domain does not resolve
+	getpaid: "https://getpaid.africa", // domain does not resolve
+	lumenaut: "https://pool.lumenaut.net", // domain does not resolve
+	"lumens-for-charity": "https://lumensforcharity.tech", // domain does not resolve
+	mxlet: "https://xlet.io", // domain does not resolve
+	opensolar: "https://openx.solar", // domain does not resolve
+	"paygo-crypto": "https://paygocrypto.io", // domain does not resolve
+	ping: "https://letsping.com", // HTTP 404
+	qolaq: "https://qolaq.org", // HTTP 404
+	rigel: "https://rigel.link", // domain does not resolve
+	skeeper: "https://skeeper.xyz", // domain does not resolve
+	slender: "https://slender.fi", // domain does not resolve
+	snnac: "https://snnac.me", // domain does not resolve
+	"soroban-assistant": "https://soroban-assistant.herokuapp.com", // HTTP 404
+	"soroban-learn": "https://sorobanlearn.com", // domain does not resolve
+	sorobanide: "https://sorobanide.com", // domain does not resolve
+	sorosorcerer: "https://sorosorcerer.com", // domain does not resolve
+	sorscan: "https://sorscan.org", // domain does not resolve
+	"stellar-global": "https://stellarglobal.community", // domain does not resolve
+	"stellar-update": "https://stellarupdate.com", // default nginx welcome page — an unconfigured server, not a pro
+	stellarpay: "https://stellarpay.io", // domain does not resolve
+	stellarstrides: "https://stellarstrides.xyz", // domain does not resolve
+	stex: "https://stex.xycloo.com", // domain does not resolve
+	stride: "https://stride.social", // HTTP 404
+	tribal: "https://tribal.credit", // "registered with gandi"
+	vitreous: "https://vitreous.co", // domain does not resolve
+	"websoroban-ide": "https://websoroban.vercel.app", // HTTP 404
+};
+
+export const WEBSITE_REMOVE: Record<string, string> = {
+	// Taken over 2026-09-07: kunst21.com now serves a Chinese corporate/betting
+	// site, not the SCF #9 art project. A hijacked domain must not be linked
+	// from a directory row, and its 200 must never again be read as liveness.
+	kunst21: "https://kunst21.com/",
+
+	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
+	"the-blue-marble": "https://thebluemarble.io/",
+	// Same hijacked domain on a second row (slug "blue-marble", Inactive): the
+	// 2026-09-01 owner call covers the domain, not the slug. Both rows point
+	// at diviandecor.com / casino spam now; neither should link out.
+	"blue-marble": "https://thebluemarble.io/",
+	// ── Owner call 2026-09-02 ("fix those") on the no-check triage lists. Each
+	// link below is dead or no longer the project's: value-keyed to the exact
+	// stored URL so a later legitimate relink is never clobbered. Status is
+	// handled separately in STATUS_FIX and only where a second, independent
+	// signal exists; a dead link alone never flips a status.
+	// NXDOMAIN on both 1.1.1.1 and 8.8.8.8 (2026-09-02):
+	aurapay: "https://somosaurapay.com/",
+	"aura-pay": "https://somosaurapay.com/",
+	"clickpesa-debt-fund": "https://clickpesadebtfund.com/",
+	"elio-dao": "https://elio-dao.org/",
+	freelii: "https://freelii.app/",
+	"haciendo-stellar": "https://haciendostellar.com/",
+	instantdao: "https://instantdao.io/",
+	keizai: "https://keizai.dev/",
+	lettuce: "https://lettucepay.io/",
+	multiclique: "https://multiclique.org/",
+	nicetrade: "https://nicetrade.co/",
+	"onboarding-club": "https://onboarding.club/",
+	prophe: "https://prophe.xyz/",
+	"sgf-solutions": "https://sgfsolutions.io/",
+	sorobix: "https://sorobix.xyz/",
+	"stellar-ai-agent-kit": "https://stellarsandbox.dev/",
+	techfiesta: "https://techfiesta.dev/",
+	transfuse: "https://transfuse.network/",
+	trustedplastic: "https://recyclable.credit/",
+	// Registered but serving no address on either resolver (2026-09-02):
+	"raum-network": "https://dex.raum.network/",
+	sorobuild: "https://adapptable.dev/",
+	sorostarter: "https://sorostarter.com/",
+	spatium: "https://spatium.net/",
+	teachmedefi: "https://teachmedefi.de/",
+	transfermole: "https://transfermole.com/",
+	wirecash: "https://wirecash.com/",
+	// Domain taken over, for sale, or dead (fetched 2026-09-01/02):
+	// redirects to expireddomains.com
+	bebop: "https://bebop.cash/",
+	// redirects to a HugeDomains sale page
+	"stellar-battle": "https://stellarbattle.com/",
+	// redirects to zero-gpt.io
+	"planet-pay": "https://planetpay.io/",
+	// redirects to zynta.com
+	globachain: "https://globachain.com/",
+	// redirects to persadaposnews.id
+	grip: "https://trygrip.co/",
+	// redirects to diariodelagro.cl
+	uils: "https://uils.la/",
+	// redirects to modnalasta.com
+	blocknify: "https://blocknify.com/",
+	// redirects to geo.ai
+	synced: "https://synced.to/",
+	// Wix 'ConnectYourDomain' error page
+	"art-club": "https://artclubcard.com/",
+	// 404 on GitHub Pages
+	derisk: "https://derisk.carmine.finance/",
+	// redirects into a GitBook editor URL
+	icanproveit: "https://tims-personal-organization.gitbook.io/icanproveit",
+	// serves gambling spam ('Login Bandar Togel')
+	"stocken-capital": "https://stockencapital.com/",
+	// posted.app is listed for sale at Porkbun
+	soracle: "https://posted.app/",
+	// posted.app is listed for sale at Porkbun
+	sora: "https://posted.app/",
+	// parked domain page
+	stellarauth: "https://stellarauth.com/",
+};
+
+/**
+ * Which registry owns which field. The list `curatedFieldsFor` applies, stated
+ * once so a test can walk it instead of trusting that whoever adds the next map
+ * also remembers to grant ownership — which is precisely what went wrong twice:
+ * the-blue-marble's hijacked link came back nightly (2026-09-05), and 81 dead
+ * links came back the same day they were removed (2026-09-07).
+ *
+ * A registry that WRITES a field and is absent here is a lane fight waiting to
+ * happen: curate writes it, the feed sync overwrites it, and no single run's
+ * idempotence check can see it because the two lanes run hours apart.
+ */
+export const OWNERSHIP_COVERAGE: Array<{
+	map: Record<string, unknown>;
+	name: string;
+	field: string;
+}> = [
+	{
+		map: DESCRIPTION_FIXES,
+		name: "DESCRIPTION_FIXES",
+		field: "shortDescription",
+	},
+	{ map: TYPES_SET, name: "TYPES_SET", field: "types" },
+	{ map: TYPES_ADD, name: "TYPES_ADD", field: "types" },
+	{ map: STATUS_FIX, name: "STATUS_FIX", field: "status" },
+	{ map: NAME_FIXES, name: "NAME_FIXES", field: "name" },
+	{ map: WEBSITE_FIXES, name: "WEBSITE_FIXES", field: "links.website" },
+	{ map: WEBSITE_REMOVE, name: "WEBSITE_REMOVE", field: "links.website" },
+	{
+		map: WEBSITE_REMOVE_DEAD,
+		name: "WEBSITE_REMOVE_DEAD",
+		field: "links.website",
+	},
+	{
+		map: GITHUB_LINK_REMOVE,
+		name: "GITHUB_LINK_REMOVE",
+		field: "links.github",
+	},
+	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
+	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
+	{ map: GITHUB_LINK_FIX, name: "GITHUB_LINK_FIX", field: "links.github" },
+	{ map: REBRANDS, name: "REBRANDS", field: "name" },
+	{ map: REBRANDS, name: "REBRANDS", field: "shortDescription" },
+	{ map: REBRANDS, name: "REBRANDS", field: "links.website" },
 ];

@@ -21,6 +21,7 @@
  */
 import { computeCodeDepth } from "../../src/lib/code-depth";
 import { computeJsDepth } from "../../src/lib/js-depth";
+import { computeLangDepth } from "../../src/lib/lang-depth";
 import {
 	DEEP,
 	DEEP_FRONTIER,
@@ -29,6 +30,9 @@ import {
 	JS_DEEP_FRONTIER,
 	JS_GATE,
 	JS_SHALLOW,
+	LANG_DEEP,
+	LANG_SHALLOW,
+	type LabeledRepo,
 	SHALLOW,
 	SHALLOW_FRONTIER,
 } from "./depth-labels";
@@ -104,13 +108,13 @@ interface Row {
 
 async function scoreBand(
 	band: "DEEP" | "SHALLOW",
-	list: { fullName: string; why: string }[],
+	list: LabeledRepo[],
 ): Promise<{ rows: Row[]; failed: string[] }> {
 	const rows: Row[] = [];
 	const failed: string[] = [];
-	for (const { fullName, why } of list) {
+	for (const { fullName, why, ref } of list) {
 		try {
-			const r = await fetchRepoCode(gh, fullName);
+			const r = await fetchRepoCode(gh, fullName, { ref });
 			if (!r) {
 				failed.push(fullName);
 				continue;
@@ -236,15 +240,12 @@ async function main() {
 		console.log(
 			`\n── JS gate: DEEP ≥ ${JS_GATE.deepMin} · SHALLOW ≤ ${JS_GATE.shallowMax} · margin ≥ ${JS_GATE.marginMin} ──`,
 		);
-		const scoreJs = async (
-			band: "DEEP" | "SHALLOW",
-			list: { fullName: string; why: string }[],
-		) => {
+		const scoreJs = async (band: "DEEP" | "SHALLOW", list: LabeledRepo[]) => {
 			const rows: Row[] = [];
 			const failed: string[] = [];
-			for (const { fullName, why } of list) {
+			for (const { fullName, why, ref } of list) {
 				try {
-					const r = await fetchRepoCode(gh, fullName);
+					const r = await fetchRepoCode(gh, fullName, { ref });
 					if (!r) {
 						failed.push(fullName);
 						continue;
@@ -296,6 +297,61 @@ async function main() {
 					`${band} coverage ${got}/${want} below ${JS_GATE.minCoverage * 100}% (unfetched: ${misses.join(", ")})`,
 				);
 		}
+		// ── Language-frontier lane (code-truth 4B): deep-floor gate. Shallow
+		// labels are intentionally empty until hand-verified — the floor stops
+		// a regression from sinking the verified flagships back toward 0.3.
+		const scoreLang = async (band: string, list: typeof LANG_DEEP) => {
+			const rows: Array<{
+				fullName: string;
+				band: string;
+				depth: number;
+				why: string;
+			}> = [];
+			const failed: string[] = [];
+			for (const { fullName, why, ref } of list) {
+				try {
+					const r = await fetchRepoCode(gh, fullName, { ref });
+					if (!r) {
+						failed.push(fullName);
+						continue;
+					}
+					const d = computeLangDepth({
+						fullName,
+						blobs: r.depthInput.blobs,
+						scalars: {
+							isFork: r.meta.isFork,
+							tagCount: r.meta.tagCount,
+							readmeText: r.depthInput.scalars.readmeText,
+							topics: r.depthInput.scalars.topics ?? [],
+							nameLooksTemplate: r.meta.nameLooksTemplate,
+						},
+					});
+					rows.push({ fullName, band, depth: d.langDepth, why });
+				} catch (e) {
+					if (e instanceof RateLimitError) throw e;
+					console.error(`  ! ${fullName}: ${(e as Error).message}`);
+					failed.push(fullName);
+				}
+			}
+			return { rows, failed };
+		};
+		const LANG_GATE = { deepMin: 0.5, shallowMax: 0.45 };
+		const ld = await scoreLang("DEEP", cap(LANG_DEEP));
+		const ls = await scoreLang("SHALLOW", cap(LANG_SHALLOW));
+		for (const r of [...ld.rows, ...ls.rows]) {
+			const ok =
+				r.band === "DEEP"
+					? r.depth >= LANG_GATE.deepMin
+					: r.depth <= LANG_GATE.shallowMax;
+			if (!ok)
+				violations.push(
+					`LANG ${r.band} ${r.fullName} scored ${r.depth.toFixed(3)} (${r.why})`,
+				);
+			console.log(
+				`LANG ${r.band.padEnd(8)} ${r.depth.toFixed(3)}  ${ok ? "✓ " : "✗ "} ${r.fullName}`,
+			);
+		}
+
 		if (JS_DEEP_FRONTIER.length) {
 			console.log(
 				`── JS frontier (non-gating): ${JS_DEEP_FRONTIER.length} scorer blind spots ──`,

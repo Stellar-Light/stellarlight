@@ -8,12 +8,15 @@ interface BlogPostsGridProps {
 	page?: number;
 	category?: string;
 	tag?: string;
+	/** "own" = written here; "ecosystem" = syndicated from stellar.org and partner feeds */
+	source?: string;
 }
 
 export default async function BlogPostsGrid({
 	page = 1,
 	category,
 	tag,
+	source,
 }: BlogPostsGridProps) {
 	const payload = await getPayloadSafe();
 	const limit = 12;
@@ -47,13 +50,18 @@ export default async function BlogPostsGrid({
 					in: [tag],
 				};
 			}
+			if (source === "own") where.isRSSExternal = { not_equals: true };
+			if (source === "ecosystem") where.isRSSExternal = { equals: true };
 
 			result = await payload.find({
 				collection: "blog",
 				where,
 				limit,
 				page,
-				sort: "-publishedAt",
+				// Our own writing first, then syndicated posts; newest first within
+				// each. Syndicated feeds outnumber and out-date our posts, so a plain
+				// -publishedAt made page 1 twelve links that leave the site.
+				sort: source ? "-publishedAt" : ["isRSSExternal", "-publishedAt"],
 				depth: 2,
 			});
 
@@ -99,7 +107,7 @@ export default async function BlogPostsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}
+								href={`/blog?page=${page - 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}${source ? `&source=${source}` : ""}`}
 							>
 								Previous
 							</Link>
@@ -127,7 +135,7 @@ export default async function BlogPostsGrid({
 							className="rounded-lg bg-[#262626] border border-[#2F2F2F] hover:bg-white/5 hover:border-white/20 hover:text-foreground transition-all duration-150"
 						>
 							<Link
-								href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}`}
+								href={`/blog?page=${page + 1}${category ? `&category=${category}` : ""}${tag ? `&tag=${tag}` : ""}${source ? `&source=${source}` : ""}`}
 							>
 								Next
 							</Link>

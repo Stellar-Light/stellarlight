@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { projectLogo } from "@/data/project-logos";
 
 interface CommunityPickCardProps {
 	project: {
@@ -23,8 +24,9 @@ interface CommunityPickCardProps {
 export default function CommunityPickCard({ project }: CommunityPickCardProps) {
 	const [logoError, setLogoError] = useState(false);
 
-	// Get logo URL - handle both string ID and populated object
-	let logoUrl = "/logo.png"; // Default fallback
+	// Get logo URL - handle both string ID and populated object. A static
+	// owner-supplied mark (PROJECT_LOGOS) stands in for rows with no media row.
+	let logoUrl = projectLogo(project.name) ?? "/logo.png"; // Default fallback
 	if (project.logo && !logoError) {
 		if (typeof project.logo === "string") {
 			logoUrl = "/logo.png";

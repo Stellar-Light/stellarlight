@@ -6,6 +6,10 @@ name: Self-audit (data-quality guard)
 # an Issue with the reproducible output so the regression is actionable. It
 # never runs adversarial "find the worst" judging (that manufactures problems).
 # Complements api-drift.yml (API ⇄ spec ⇄ docs consistency).
+#
+# A red at this step is the audit reporting a finding into its issue, not the
+# lane breaking (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Fail the job so the regression is visible$
 
 on:
   schedule:
@@ -29,6 +33,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run self-audit
         id: audit
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: |
           set +e
           pnpm exec tsx scripts/self-audit.ts | tee audit.log

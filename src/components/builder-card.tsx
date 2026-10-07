@@ -27,7 +27,7 @@ export function BuilderCard({ builder }: BuilderCardProps) {
 									className="rounded-full"
 								/>
 							) : (
-								<div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+								<div className="w-16 h-16 bg-white/[0.06] border border-border rounded-full flex items-center justify-center text-white text-2xl font-bold">
 									{builder.display_name.charAt(0).toUpperCase()}
 								</div>
 							)}

@@ -15,6 +15,10 @@ on:
         description: "Write to the DB? Leave false for a dry run."
         type: boolean
         default: false
+      remove:
+        description: "Remove ONE post by slug instead of seeding (retraction path)."
+        type: string
+        default: ""
 
 permissions: { contents: read }
 
@@ -32,4 +36,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/seed-blog-posts.ts ${{ inputs.execute && '--execute' || '' }}
+      - run: pnpm exec tsx scripts/seed-blog-posts.ts ${{ inputs.execute && '--execute' || '' }} ${{ inputs.remove != '' && format('--remove={0}', inputs.remove) || '' }}

@@ -21,35 +21,44 @@
  * content; DELETE only removes exact-duplicate aggregation rows.
  */
 
+import "./load-env";
 import config from "@payload-config";
-import { config as loadEnv } from "dotenv";
 import { getPayload } from "payload";
-
-loadEnv({ path: ".env.local" });
 
 const APPLY = process.argv.includes("--apply");
 const PAGE = 500;
 
+// Net must stay >= the golden eval's JUNK_TITLE (run-golden.ts): the eval flags
+// `posts tagged` (no leading count) and `^on this page$`; an earlier narrower
+// copy here missed both, leaving ~7 real-content chunks under a nav title.
 function isJunkyDocTitle(t: string): boolean {
 	const s = t.trim();
 	return (
 		s.length < 3 ||
 		/^\d{4}-\d{2}-\d{2}$/.test(s) ||
-		/^\d+\s+posts?\s+tagged/i.test(s) ||
-		/^meeting notes$/i.test(s)
+		/posts?\s+tagged/i.test(s) ||
+		/^meeting notes$/i.test(s) ||
+		/^on this page$/i.test(s)
 	);
 }
 
-function firstHeading(body: string): string | null {
-	const m = body.match(/^#{1,6}\s+(.+)$/m);
-	if (!m) return null;
-	return m[1].trim().replace(/​/g, "").trim() || null;
+// The first content heading that isn't itself junky. Chunks are built as
+// `# {page.title}\n\n{body}` (ingest-developers-docs.ts), so a junk-titled
+// page's first heading IS the junk title — skip past it to a real section.
+function firstGoodHeading(body: string): string | null {
+	for (const m of body.matchAll(/^#{1,6}\s+(.+)$/gm)) {
+		const h = m[1].trim().replace(/​/g, "").trim();
+		if (h && !isJunkyDocTitle(h)) return h;
+	}
+	return null;
 }
 
 function selfCheck() {
 	const junky = [
 		"2026-04-16",
 		"58 posts tagged developer",
+		"posts tagged developer", // no leading count — the drift the old regex missed
+		"On this page",
 		"Meeting Notes",
 		"",
 	];
@@ -58,6 +67,14 @@ function selfCheck() {
 		"SEP-24: Hosted Deposit and Withdrawal",
 		"Agentic Payments",
 	];
+	// firstGoodHeading skips the junk H1 and returns the first real section.
+	const salvaged = firstGoodHeading(
+		"# On this page\n\n## Charging AI agents\n\ntext",
+	);
+	if (salvaged !== "Charging AI agents") {
+		console.error("SELF-CHECK FAILED — salvage:", salvaged);
+		process.exit(1);
+	}
 	const badJunky = junky.filter((t) => !isJunkyDocTitle(t));
 	const badOk = ok.filter((t) => isJunkyDocTitle(t));
 	if (badJunky.length || badOk.length) {
@@ -109,7 +126,7 @@ async function main() {
 				const candidate =
 					section && !isJunkyDocTitle(section)
 						? section
-						: firstHeading(String(d.content ?? ""));
+						: firstGoodHeading(String(d.content ?? ""));
 				// Only retitle to a genuinely descriptive title — never swap one
 				// junk title (generic) for another (a bare date).
 				if (candidate && candidate !== title && !isJunkyDocTitle(candidate)) {

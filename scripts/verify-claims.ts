@@ -36,6 +36,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { CURATED_SKILLS } from "../src/lib/integrations/curated-skills";
+import { writeNightlyFindings } from "./nightly-findings";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PROD = "https://stellarlight.xyz";
@@ -103,7 +104,11 @@ const warn = (claim: string, detail: string) =>
 const BROWSER_UA =
 	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36";
 
-async function fetchStatus(url: string, ua?: string): Promise<number> {
+async function fetchStatus(
+	url: string,
+	ua?: string,
+	attempt = 1,
+): Promise<number> {
 	try {
 		const res = await fetch(url, {
 			method: "GET",
@@ -115,6 +120,14 @@ async function fetchStatus(url: string, ua?: string): Promise<number> {
 		await res.arrayBuffer().catch(() => {});
 		return res.status;
 	} catch {
+		// A thrown fetch is a TRANSPORT failure (reset, timeout, DNS blip), not
+		// an answer. One retry after a beat before reporting 0: on 2026-09-01
+		// #1195's run went red on "SKILL.md (HTTP 0)" for a file the same run
+		// had just reported in sync — the rerun was green.
+		if (attempt < 2) {
+			await new Promise((r) => setTimeout(r, 1_500));
+			return fetchStatus(url, ua, attempt + 1);
+		}
 		return 0; // network error / timeout / DNS
 	}
 }
@@ -122,8 +135,17 @@ async function fetchStatus(url: string, ua?: string): Promise<number> {
 /**
  * 2xx/3xx ok; 403/405 retried with a browser UA and downgraded to warn if
  * persistent (bot-walls return both; a real browser usually loads the page).
- * 0/404/410/5xx = blocker.
+ * 404/410/5xx = blocker.
+ *
+ * 0 (DNS / TLS / timeout — fetchStatus cannot tell them apart) is a
+ * COULD-NOT-CHECK, and on the PR gate it is a warn, not a blocker. On
+ * 2026-09-13 docs.mercurydata.app went unreachable and every PR touching
+ * api-client/** went red on a third-party outage the PR could not have
+ * caused or fixed — a production monitor is not a PR gate. The scheduled
+ * Monday sweep still blocks on 0, because persistence across runs is what
+ * turns "could not reach" into "dead", and that sweep is where it is read.
  */
+const PR_GATE = process.env.GITHUB_EVENT_NAME === "pull_request";
 // Hosts that bot-wall ALL datacenter traffic with inconsistent statuses
 // (x.com answers 200 to a residential IP and 400 to CI on the same minute) —
 // a CI probe can NEVER verify them, so an unreachable result is a warn, not a
@@ -149,6 +171,13 @@ async function checkUrl(url: string, source: string) {
 			warn(
 				url,
 				`HTTP ${status} even with browser UA (likely bot-blocking) — verify manually [${source}]`,
+			);
+			return;
+		}
+		if (status === 0 && PR_GATE) {
+			warn(
+				url,
+				`network-error from CI even on retry (DNS/TLS/timeout) — could not check, which is not a verdict; the Monday sweep re-checks [${source}]`,
 			);
 			return;
 		}
@@ -239,6 +268,9 @@ async function checkInstallCommand(cmd: string, source: string) {
 			`https://raw.githubusercontent.com/${repo}/main/.claude-plugin/marketplace.json`,
 		);
 		if (manifest === 200) return;
+		// Both probes failed to CONNECT: we could not check — say nothing, don't
+		// accuse (the same rule githubRepoExists applies to its null).
+		if (rootSkill === 0 && manifest === 0) return;
 		blocker(
 			cmd,
 			`${repo} exists but has neither a root SKILL.md (HTTP ${rootSkill}) nor a skills manifest (HTTP ${manifest}) [${source}]`,
@@ -499,6 +531,10 @@ async function main() {
 	for (const f of warnings)
 		console.log(`  ⚠ warn     ${f.claim}\n             ${f.detail}`);
 
+	writeNightlyFindings(
+		"verify-claims",
+		blockers.map((f) => ({ probe: f.claim, note: f.detail })),
+	);
 	if (blockers.length > 0 || (STRICT && warnings.length > 0)) process.exit(1);
 	console.log("all advertised artifacts verified ✓");
 }

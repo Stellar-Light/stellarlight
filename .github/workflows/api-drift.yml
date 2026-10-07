@@ -1,6 +1,15 @@
 # Drift guard — asserts the live API, the OpenAPI spec, and the skill docs
 # still agree. Created after a downstream consumer (2026-06-20) found the three
 # had silently diverged as endpoints/params were added. Runs daily + on demand.
+#
+# A red at this step is the drift detector reporting a finding, not the lane
+# breaking. This lane runs WITHOUT an install — every script it calls reaches
+# the live API with fetch and nothing else. A step needing a package belongs in
+# nightly-health, which installs: the RWA issuer reconcile sat here from
+# 2026-09-09 and failed ERR_MODULE_NOT_FOUND on @stellar/stellar-sdk on every
+# single run, reddening a lane whose own checks were all green. Deliberately NOT declared: the field-population and skill-reference
+# steps — a red there flags the lane (read by scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
 name: API drift guard
 
 on:
@@ -30,7 +39,16 @@ jobs:
         continue-on-error: true
         env:
           SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
+        # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
+        # masked this step's exit code (2026-08-12 lesson).
+        shell: bash
         run: npx -y tsx scripts/check-api-drift.ts 2>&1 | tee drift.log
+      - name: Field-population guard (values arrive, not just shape)
+        if: always()
+        run: npx -y tsx scripts/check-field-population.ts
+      - name: Skill-reference coverage (sk-009 — served skill must not lag the contract)
+        if: always()
+        run: npx -y tsx scripts/check-skill-reference.ts
       - name: Track the signal (rolling issue)
         uses: ./.github/actions/rolling-issue
         with:

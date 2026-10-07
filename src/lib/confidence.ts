@@ -238,7 +238,6 @@ const PROJECT_STATUS_FRESHNESS: Record<string, number> = {
 	Live: 1,
 	"Pre-Release": 0.85,
 	Development: 0.7,
-	"Pre-Development": 0.55,
 };
 
 // A row whose anchor tokens hit only mid-prose ("mentions custody") may not

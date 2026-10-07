@@ -25,6 +25,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
@@ -147,6 +148,17 @@ function buildClusters(
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;
+	// Say when a param was dropped (the projects/search treatment, 2026-07-11
+	// audit): a filter we never read returns an unfiltered list the caller
+	// reads as filtered. Warned, not 400'd — the contract is additive-only.
+	const paramWarning = unknownParamWarning(
+		sp,
+		["dimension", "category", "type", "q", "key", "minSize"],
+		{
+			advertise: ["dimension", "category", "type", "q", "key", "minSize"],
+			hint: "Clusters group the directory along `dimension` — narrow with category/type/q rather than a new filter name.",
+		},
+	);
 	const rawDimension = sp.get("dimension")?.trim() ?? "";
 	const minSize = Math.max(1, Number(sp.get("minSize") || "1") || 1);
 
@@ -259,12 +271,18 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
+				...(paramWarning ? { warnings: [paramWarning] } : {}),
 				filters: {
 					dimension: valueFilter ? matchedDimension : dimension,
 					minSize,
 					...(valueFilter ? { valueFilter, matchedDimension } : {}),
 				},
-				counts: { returned: clusters.length },
+				// No `limit` param: every cluster matching the filters is returned, so
+				// total == returned. Stated rather than omitted so a consumer can
+				// verify the read is complete instead of inferring it (see
+				// `population.truncated` for whether the underlying rows were a
+				// sample — that is a separate claim from this page being complete).
+				counts: { returned: clusters.length, total: clusters.length },
 				// sls-042/048: the population this clustering aggregated. Compare
 				// `population.id` with other quantitative endpoints before merging
 				// numbers; `truncated: true` would mean the clusters are a sample,

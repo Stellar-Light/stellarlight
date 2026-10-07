@@ -8,11 +8,8 @@
  *   npx tsx scripts/ingest-developers-docs.ts --execute   # write to Payload
  *   npx tsx scripts/ingest-developers-docs.ts --limit=20  # cap pages
  */
-import { config as loadEnv } from "dotenv";
 
-loadEnv({ path: ".env.local" });
-loadEnv({ path: ".env" });
-
+import "./load-env";
 import { getPayload } from "payload";
 import {
 	chunkMarkdown,
@@ -26,6 +23,9 @@ import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
 const execute = args.includes("--execute");
+// --replan: dry + the DB diff, writes nothing — the refresh lane's
+// Idempotence step (must plan 0 right after the execute pass).
+const replan = args.includes("--replan");
 const limitArg = args.find((a) => a.startsWith("--limit="));
 const limit = limitArg ? Number(limitArg.split("=")[1]) : 1200;
 
@@ -56,11 +56,14 @@ interface PageData {
  */
 function isJunkyDocTitle(t: string): boolean {
 	const s = t.trim();
+	// Keep in lockstep with the golden eval's JUNK_TITLE net (run-golden.ts):
+	// `posts tagged` needs no leading count, and `on this page` is junk too.
 	return (
 		s.length < 3 ||
 		/^\d{4}-\d{2}-\d{2}$/.test(s) ||
-		/^\d+\s+posts?\s+tagged/i.test(s) ||
-		/^meeting notes$/i.test(s)
+		/posts?\s+tagged/i.test(s) ||
+		/^meeting notes$/i.test(s) ||
+		/^on this page$/i.test(s)
 	);
 }
 
@@ -128,7 +131,8 @@ async function run() {
 	console.log(execute ? "EXECUTE MODE" : "DRY RUN MODE");
 	console.log(`source: ${BASE}\n`);
 
-	const payload = execute ? await getPayload({ config: configPromise }) : null;
+	const payload =
+		execute || replan ? await getPayload({ config: configPromise }) : null;
 	const existing = payload
 		? await loadExistingChunks(payload, "dev-docs")
 		: new Map();
@@ -138,7 +142,14 @@ async function run() {
 	}
 
 	console.log("Listing sitemap…");
-	const allUrls = await fetchSitemapUrls(SITEMAP, BASE);
+	// Pages the sitemap omits but the corpus must hold. /launch/* (asset
+	// launch pages: asset, issuer, contract IDs) is absent from the sitemap
+	// and has no index page (checked 2026-09-02) — listed explicitly and
+	// sorted first so a cap never drops them.
+	const EXTRA_PAGES = ["https://developers.stellar.org/launch/usdt0"];
+	const allUrls = [
+		...new Set([...EXTRA_PAGES, ...(await fetchSitemapUrls(SITEMAP, BASE))]),
+	];
 	// F5a (audit root #5): junk URLs (author archives, pagination, tag indexes)
 	// were burning the page cap AND ingesting as dupe/nav chunks; and the blind
 	// slice cut ~400 real /docs pages (tokens, validators, learn) — vector
@@ -150,7 +161,8 @@ async function run() {
 	// shared pattern (never crawled elsewhere) — kept as a local extra.
 	const JUNK_URL = /\/search(\?|$)/i;
 	const kept = allUrls.filter((u) => !JUNK_URL.test(u) && !JUNK_URL_RE.test(u));
-	const prio = (u: string) => (u.includes("/docs/") ? 0 : 1);
+	const prio = (u: string) =>
+		EXTRA_PAGES.includes(u) ? -1 : u.includes("/docs/") ? 0 : 1;
 	kept.sort((a, b) => prio(a) - prio(b) || a.localeCompare(b));
 	const urls = kept.slice(0, limit);
 	console.log(
@@ -215,7 +227,7 @@ async function run() {
 	);
 	console.log(`  to embed: ${stats.toEmbed} | page errors: ${pageErrors}`);
 
-	if (!execute || !payload) {
+	if ((!execute && !replan) || !payload) {
 		console.log("\nDry run. --execute to embed + write.");
 		return;
 	}
@@ -225,6 +237,7 @@ async function run() {
 		source: "dev-docs",
 		chunks: allChunks,
 		existing,
+		dryRun: replan,
 	});
 	console.log(
 		`\nDone in ${((Date.now() - startedAt) / 1000).toFixed(1)}s — errors: ${r.errors}`,

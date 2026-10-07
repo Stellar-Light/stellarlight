@@ -159,3 +159,46 @@ describe("detectSdkCapabilities", () => {
 		expect(hay).toContain("ed25519 sign");
 	});
 });
+
+describe("language-frontier capabilities (py/go/jvm)", () => {
+	it("python stellar_sdk idioms fire the shared tags", () => {
+		const tags = detectSdkCapabilities([
+			{
+				path: "stellar_sdk/transaction_builder.py",
+				text: "from stellar_sdk import Keypair\nclass TransactionBuilder:\n  def sign(self): kp = Keypair.from_secret(s)\n  def go(self): server.submit_transaction(tx)",
+			},
+		]);
+		expect(tags).toContain("tx-building");
+		expect(tags).toContain("signing");
+		expect(tags).toContain("horizon");
+	});
+	it("go txnbuild/horizonclient idioms fire", () => {
+		const tags = detectSdkCapabilities([
+			{
+				path: "clients/horizonclient/main.go",
+				text: 'import "github.com/stellar/go/txnbuild"\ntx := txnbuild.NewTransaction(p)\nc := horizonclient.DefaultPublicNetClient\nresp := c.SubmitTransaction(tx)',
+			},
+		]);
+		expect(tags).toContain("tx-building");
+		expect(tags).toContain("horizon");
+	});
+	it("kotlin/java sep-24 anchor idioms fire behind the org.stellar gate", () => {
+		const tags = detectSdkCapabilities([
+			{
+				path: "platform/src/main/kotlin/Sep24Service.kt",
+				text: "import org.stellar.anchor.sep24.Sep24Service\nclass Sep24Service { fun interactiveDeposit() {} }\nval c = Sep10Challenge.newChallenge()",
+			},
+		]);
+		expect(tags).toContain("sep24-ramp");
+		expect(tags).toContain("sep10-auth");
+	});
+	it("stellar-context gate blocks cross-fire from other-chain SDKs", () => {
+		const tags = detectSdkCapabilities([
+			{
+				path: "src/main/java/OtherChain.java",
+				text: "import com.otherchain.sdk.TransactionBuilder;\nTransactionBuilder b = new TransactionBuilder();",
+			},
+		]);
+		expect(tags).toEqual([]);
+	});
+});
