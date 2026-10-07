@@ -479,8 +479,8 @@ function hiwSteps(picks: number) {
 					d: `Put forward ${picks} projects in each of Impact, Innovation and Interoperability. The most-nominated four in each become the shortlist for the final vote.`,
 				}
 			: {
-					t: "Pick one per category",
-					d: "Choose the project you think best defined the year for Impact, Innovation and Interoperability.",
+					t: "Pick one finalist per category",
+					d: "Each category has four finalists, the projects the Pilots nominated most. Choose the one you think best defined the year in Impact, Innovation and Interoperability.",
 				},
 		{
 			t: "Sign one transaction",
@@ -488,7 +488,10 @@ function hiwSteps(picks: number) {
 		},
 		{
 			t: "Your first ballot is final",
-			d: "One ballot per voter. The first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable.",
+			d:
+				picks > 1
+					? "One ballot per voter. The first one you cast is the one that counts, and it can't be replaced. The tally is published in aggregate and is publicly verifiable."
+					: "A new ballot, separate from your nominations. The first one you cast is the one that counts and can't be replaced. Results are published in aggregate when voting closes, and anyone can verify them.",
 		},
 	];
 }
@@ -727,9 +730,11 @@ function Hourglass() {
  */
 function SigningOverlay({
 	phase,
+	picks,
 	onContinue,
 }: {
 	phase: Phase;
+	picks: number;
 	onContinue?: () => void;
 }) {
 	const active =
@@ -751,7 +756,7 @@ function SigningOverlay({
 			: phase === "signing"
 				? "One signature covers every category. No real funds."
 				: phase === "confirmed"
-					? "Your nominations are in and on-chain. Taking you to your receipt."
+					? `${picks > 1 ? "Your nominations are" : "Your vote is"} in and on-chain. Taking you to your receipt.`
 					: "Sending your signed ballot to testnet.";
 	return (
 		<AnimatePresence>
@@ -1543,7 +1548,11 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 	return (
 		<>
 			<StageReveal />
-			<SigningOverlay phase={phase} onContinue={() => setPhase("submitted")} />
+			<SigningOverlay
+				phase={phase}
+				picks={picksPerCategory}
+				onContinue={() => setPhase("submitted")}
+			/>
 			<TopBar
 				onHowItWorks={() => setHowOpen(true)}
 				wallet={{
