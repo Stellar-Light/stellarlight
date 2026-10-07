@@ -1,9 +1,10 @@
 {
-	"generatedAt": "2026-10-06T12:26:33.264Z",
-	"specVersion": "1.9.68",
+	"generatedAt": "2026-10-07T12:19:51.335Z",
+	"specVersion": "1.9.71",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
+		"analyzeHackathonSubmissions",
 		"compareHackathons",
 		"explainRepo",
 		"getBuilders",
@@ -30,6 +31,7 @@
 		"listSkills",
 		"matchPartners",
 		"resolveProject",
+		"reviewSubmission",
 		"scfPitch",
 		"searchHackathonBuilds",
 		"searchProjects",
@@ -80,9 +82,19 @@
 	],
 	"laggingInCatalog": [
 		{
+			"op": "analyzeHackathonSubmissions",
+			"addedAt": "2026-10-05",
+			"ageDays": 2
+		},
+		{
 			"op": "getHackathonSubmission",
 			"addedAt": "2026-10-05",
-			"ageDays": 1
+			"ageDays": 2
+		},
+		{
+			"op": "reviewSubmission",
+			"addedAt": "2026-10-05",
+			"ageDays": 2
 		}
 	],
 	"extraInCatalog": [],
