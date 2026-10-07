@@ -33,6 +33,10 @@ on:
         description: "Optional closesAt (ISO 8601), for create or a status flip"
         required: false
         default: ""
+      opens:
+        description: "Optional opensAt (ISO 8601), for create or a status flip. An open round refuses ballots until this time, so a round can be opened ahead of its start."
+        required: false
+        default: ""
       status:
         description: "New status"
         type: choice
@@ -71,6 +75,7 @@ jobs:
           IN_TITLE: ${{ inputs.title }}
           IN_PICKS: ${{ inputs.picks }}
           IN_CLOSES: ${{ inputs.closes }}
+          IN_OPENS: ${{ inputs.opens }}
           IN_STATUS: ${{ inputs.status }}
           IN_CREATE: ${{ inputs.create }}
           IN_EXECUTE: ${{ inputs.execute }}
@@ -86,6 +91,7 @@ jobs:
             if [ -n "$IN_PICKS" ]; then args+=(--picks="$IN_PICKS"); fi
             if [ -n "$IN_TITLE" ]; then args+=(--title="$IN_TITLE"); fi
           fi
+          if [ -n "$IN_OPENS" ]; then args+=(--opens="$IN_OPENS"); fi
           if [ -n "$IN_CLOSES" ]; then args+=(--closes="$IN_CLOSES"); fi
           if [ "$IN_EXECUTE" = "true" ]; then args+=(--execute); fi
           pnpm exec tsx scripts/data/award-round.ts "${args[@]}"
