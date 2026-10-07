@@ -1,0 +1,216 @@
+{
+	"round": "i3-2026-nominations",
+	"title": "i³ Awards 2026: Nominations",
+	"status": "closed",
+	"picksPerCategory": 4,
+	"opensAt": null,
+	"closesAt": "2026-10-07T03:59:00.000Z",
+	"source": "mirror",
+	"ballotsDigest": "04b9aa673bdb030ca67268068e27e812d4b7fed0d81be1936726c981b2c5733a",
+	"turnout": {
+		"voted": 24,
+		"whitelisted": 76
+	},
+	"relayOnly": 0,
+	"excluded": [
+		{
+			"ballotId": "322fee99",
+			"reason": "Organizer test ballot from a wallet labelled 'test', cast on 2026-10-02 before the round was announced, to check the live round end to end. Not a pilot's vote."
+		}
+	],
+	"categories": [
+		{
+			"key": "impact",
+			"name": "Impact",
+			"totalVotes": 96,
+			"results": [
+				{
+					"slug": "stellar-passport",
+					"name": "Stellar Passport",
+					"votes": 16
+				},
+				{
+					"slug": "abroad",
+					"name": "Abroad",
+					"votes": 13
+				},
+				{
+					"slug": "stellar-security-portal",
+					"name": "Stellar Security Portal",
+					"votes": 12
+				},
+				{
+					"slug": "public-node",
+					"name": "Public Node",
+					"votes": 10
+				},
+				{
+					"slug": "coala-pay",
+					"name": "Coala Pay",
+					"votes": 7
+				},
+				{
+					"slug": "giveth",
+					"name": "Giveth",
+					"votes": 7
+				},
+				{
+					"slug": "bousol",
+					"name": "Bousol",
+					"votes": 5
+				},
+				{
+					"slug": "freedom-pay-wallet",
+					"name": "Freedom Pay Wallet",
+					"votes": 5
+				},
+				{
+					"slug": "domipago",
+					"name": "DomiPago",
+					"votes": 4
+				},
+				{
+					"slug": "fastbuka",
+					"name": "Choppaddi",
+					"votes": 3
+				},
+				{
+					"slug": "rahat",
+					"name": "Rahat",
+					"votes": 3
+				},
+				{
+					"slug": "agtrail",
+					"name": "AgTrail",
+					"votes": 2
+				},
+				{
+					"slug": "codelnpay",
+					"name": "CodeLnPay",
+					"votes": 2
+				},
+				{
+					"slug": "findtruman",
+					"name": "FindTruman",
+					"votes": 2
+				},
+				{
+					"slug": "jetpad",
+					"name": "JetPad",
+					"votes": 2
+				},
+				{
+					"slug": "token-terminal",
+					"name": "Token Terminal",
+					"votes": 2
+				},
+				{
+					"slug": "liqvidxyz",
+					"name": "Liqvid",
+					"votes": 1
+				},
+				{
+					"slug": "tucambio",
+					"name": "TuCambio",
+					"votes": 0
+				}
+			]
+		},
+		{
+			"key": "innovation",
+			"name": "Innovation",
+			"totalVotes": 96,
+			"results": [
+				{
+					"slug": "tansu",
+					"name": "Tansu",
+					"votes": 21
+				},
+				{
+					"slug": "inference",
+					"name": "Inference",
+					"votes": 11
+				},
+				{
+					"slug": "trustless-work",
+					"name": "Trustless Work",
+					"votes": 11
+				},
+				{
+					"slug": "stellarchain",
+					"name": "Stellarchain",
+					"votes": 10
+				},
+				{
+					"slug": "irl",
+					"name": "IRL",
+					"votes": 8
+				},
+				{
+					"slug": "rivool-finance",
+					"name": "Rivool Finance",
+					"votes": 8
+				},
+				{
+					"slug": "soroban-resource-usage-reporter",
+					"name": "Soroban Resource Usage Reporter",
+					"votes": 8
+				},
+				{
+					"slug": "eara",
+					"name": "Eara",
+					"votes": 6
+				},
+				{
+					"slug": "webacy-inc",
+					"name": "Webacy Inc.",
+					"votes": 6
+				},
+				{
+					"slug": "centiiv",
+					"name": "Centiiv",
+					"votes": 4
+				},
+				{
+					"slug": "volta-circuit",
+					"name": "Volta Circuit",
+					"votes": 3
+				}
+			]
+		},
+		{
+			"key": "interoperability",
+			"name": "Interoperability",
+			"totalVotes": 96,
+			"results": [
+				{
+					"slug": "reflector",
+					"name": "Reflector",
+					"votes": 24
+				},
+				{
+					"slug": "rozo",
+					"name": "Rozo",
+					"votes": 23
+				},
+				{
+					"slug": "blux",
+					"name": "Blux",
+					"votes": 19
+				},
+				{
+					"slug": "seevcash",
+					"name": "Seevcash",
+					"votes": 18
+				},
+				{
+					"slug": "swiftex",
+					"name": "SwiftEx",
+					"votes": 12
+				}
+			]
+		}
+	],
+	"generatedAt": "2026-10-07T04:07:23.110Z",
+	"note": "Aggregate only. One ballot per voter: the FIRST one cast counts, and a later ballot does not replace it. Ballots are manageData entries on Stellar TESTNET; because an overwrite destroys the value it replaces, the award-ballots mirror, not the chain, is what preserves the first ballot, and it is also the durable record across testnet resets. ballotsDigest is sha256 of that first-ballot record (recipe: see ballotsDigest in src/lib/awards/publish.ts), publishing the hash pins the record without disclosing any address→choice, so the record cannot be changed after the fact. This file's git commit is anchored on Tansu (testnet). Ballots listed in excluded are left out of the counts, the turnout and ballotsDigest, each with its reason. See /api/awards/anchor?round=i3-2026-nominations"
+}
