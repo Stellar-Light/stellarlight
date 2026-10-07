@@ -723,6 +723,19 @@
 			"pr": null,
 			"costUsd": 0,
 			"note": "agent run failed: "
+		},
+		{
+			"task": "claims",
+			"unit": "aggregate-feedback",
+			"items": [
+				"aggregate-feedback"
+			],
+			"date": "2026-10-07",
+			"run": "37651960169",
+			"outcome": "error",
+			"pr": null,
+			"costUsd": 0,
+			"note": "agent run failed: "
 		}
 	]
 }
