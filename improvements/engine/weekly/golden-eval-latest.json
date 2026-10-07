@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8109575510025024,
+      "topScore": 0.8108398914337158,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -171,7 +171,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8371278047561646,
+      "topScore": 0.8368697166442871,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -485,7 +485,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "NethermindEth/stellar-private-payments"
+      "sample": "stellar-experimental/who-ate-gerald"
     },
     {
       "id": "repos-x402",
@@ -495,7 +495,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 64,
+      "topScore": 73,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -549,7 +549,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 83,
+      "topScore": 84,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -747,7 +747,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7336766719818115,
+      "topScore": 0.7343152761459351,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
+      "topScore": 0.8225382566452026,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-05T12:42:31Z"
+  "generatedAt": "2026-10-07T12:03:06Z"
 }

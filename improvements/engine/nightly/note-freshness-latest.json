@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-05T12:53:49.416Z",
+	"generatedAt": "2026-10-07T12:13:20.990Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -68,6 +68,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-05 (published 2026-10-05)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
 			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.35.1 (published 2026-09-15)",
 			"surface": "code"
@@ -89,7 +94,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-02 (published 2026-10-02)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-05 (published 2026-10-05)",
 			"surface": "code"
 		},
 		{
@@ -134,7 +139,7 @@
 		},
 		{
 			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
-			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.7.0 (published 2026-10-02)",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.8.2 (published 2026-10-05)",
 			"surface": "code"
 		},
 		{
@@ -154,12 +159,12 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.12 (published 2026-10-01)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.15 (published 2026-10-06)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:winsznx/routedock:npm:@routedock/routedock",
-			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.2.0 (published 2026-10-02)",
+			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.3.0 (published 2026-10-05)",
 			"surface": "code"
 		},
 		{
@@ -220,6 +225,11 @@
 		{
 			"probe": "note-repo-gone:axis-markets/stellarexpert-data-source",
 			"note": "public note asOf 2026-09-14; github.com/axis-markets/stellarexpert-data-source is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:axis-markets/demo-server",
+			"note": "public note asOf 2026-09-14; github.com/axis-markets/demo-server is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		}
 	]
