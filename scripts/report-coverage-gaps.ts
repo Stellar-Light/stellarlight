@@ -346,10 +346,7 @@ const RESEARCH_SOURCES = [
 /** Collections whose zero/blank state is a documented serving choice, not a
  * gap - flagging them as EMPTY every month would train readers to ignore
  * the flag. */
-const KNOWN_EMPTY_OK: Record<string, string> = {
-	hackathons:
-		"curated DB sub-count; /api/hackathons serves live DoraHacks-sourced events",
-};
+const KNOWN_EMPTY_OK: Record<string, string> = {};
 
 async function laneFreshness() {
 	const now = Date.now();
