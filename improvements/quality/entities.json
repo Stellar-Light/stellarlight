@@ -1,10 +1,10 @@
 {
- "generatedAt": "2026-10-07T14:42:10.711Z",
+ "generatedAt": "2026-10-08T14:49:28.729Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 8,
+   "openFindings": 28,
    "clearedFindings": 33,
    "verifiedFindings": 0
   },
@@ -18,8 +18,8 @@
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 1,
-   "clearedFindings": 204,
+   "openFindings": 2,
+   "clearedFindings": 205,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 773,
-  "open": 12,
-  "refreshQueue": 69,
+  "total": 796,
+  "open": 33,
+  "refreshQueue": 70,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 77,
+   "oldestDays": 78,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 668,
+  "cleared": 669,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 78,
-    "total": 297
+    "open": 100,
+    "total": 320
    },
    "instrument": {
     "open": 20,
@@ -107,7 +107,7 @@
     "open": 0,
     "refresh": 19,
     "blocked": 0,
-    "cleared": 114,
+    "cleared": 115,
     "verified": 0,
     "surface": "directory"
    },
@@ -130,6 +130,15 @@
     "surface": "retrieval"
    },
    {
+    "mode": "repo-gone",
+    "open": 28,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 21,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
     "mode": "completeness-residual",
     "open": 0,
     "refresh": 0,
@@ -137,15 +146,6 @@
     "cleared": 29,
     "verified": 0,
     "surface": "directory"
-   },
-   {
-    "mode": "repo-gone",
-    "open": 8,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 21,
-    "verified": 0,
-    "surface": "code"
    },
    {
     "mode": "api-drift",
@@ -195,7 +195,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 45,
+    "refresh": 46,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -265,6 +265,15 @@
     "surface": "directory"
    },
    {
+    "mode": "stamp-revived",
+    "open": 1,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "directory"
+   },
+   {
     "mode": "supersession-unrecorded",
     "open": 0,
     "refresh": 5,
@@ -277,11 +286,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 11
+    "count": 25
    },
    {
     "bucket": "8–30d",
-    "count": 1
+    "count": 8
    },
    {
     "bucket": "31–60d",
@@ -293,6 +302,12 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "https://pathpulse.ai",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-08"
+   },
    {
     "probe": "https://expand.network",
     "surface": "directory",
@@ -334,26 +349,20 @@
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-10-05"
-   },
-   {
-    "probe": "https://x.com/createplayearn",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-05"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 122,
-     "recurred": 94,
-     "ratePct": 77
+     "newFindings": 145,
+     "recurred": 116,
+     "ratePct": 80
     },
     "lifetime": {
-     "newFindings": 773,
-     "recurred": 236,
-     "ratePct": 30.5
+     "newFindings": 796,
+     "recurred": 258,
+     "ratePct": 32.4
     }
    },
    "reopened": {
@@ -365,13 +374,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 122,
-     "repeats": 121,
-     "ratePct": 99.2
+     "newFindings": 145,
+     "repeats": 144,
+     "ratePct": 99.3
     },
     "lifetime": {
-     "newFindings": 773,
-     "repeats": 766,
+     "newFindings": 796,
+     "repeats": 789,
      "ratePct": 99.1
     },
     "byClass": [
@@ -383,8 +392,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 201,
-      "open": 64,
+      "total": 203,
+      "open": 65,
       "firstSeen": "2026-07-22"
      },
      {
@@ -394,16 +403,16 @@
       "firstSeen": "2026-07-22"
      },
      {
+      "class": "unclassified",
+      "total": 56,
+      "open": 35,
+      "firstSeen": "2026-09-17"
+     },
+     {
       "class": "evidence-population",
       "total": 40,
       "open": 0,
       "firstSeen": "2026-07-22"
-     },
-     {
-      "class": "unclassified",
-      "total": 35,
-      "open": 14,
-      "firstSeen": "2026-09-17"
      },
      {
       "class": "contract-completeness",
@@ -9523,15 +9532,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1363
+     "count": 1367
     },
     {
      "label": "slowing",
-     "count": 1059
+     "count": 1060
     },
     {
      "label": "active",
-     "count": 976
+     "count": 971
     },
     {
      "label": "unknown",
@@ -10667,7 +10676,7 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 133
+    "value": 134
    },
    {
     "id": "s:engine-d-demand",
@@ -10679,7 +10688,13 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 52
+    "value": 53
+   },
+   {
+    "id": "s:gone-repos",
+    "label": "gone-repos",
+    "column": 0,
+    "value": 49
    },
    {
     "id": "s:raven-routing",
@@ -10690,12 +10705,6 @@
    {
     "id": "s:nightly-completeness",
     "label": "nightly-completeness",
-    "column": 0,
-    "value": 29
-   },
-   {
-    "id": "s:gone-repos",
-    "label": "gone-repos",
     "column": 0,
     "value": 29
    },
@@ -10760,6 +10769,12 @@
     "value": 1
    },
    {
+    "id": "s:packet-recheck",
+    "label": "packet-recheck",
+    "column": 0,
+    "value": 1
+   },
+   {
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
@@ -10769,13 +10784,13 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 205
+    "value": 207
    },
    {
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 41
+    "value": 61
    },
    {
     "id": "f:contract",
@@ -10805,13 +10820,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 668
+    "value": 669
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 98
+    "value": 120
    },
    {
     "id": "o:verified",
@@ -10823,213 +10838,220 @@
   "links": [
    {
     "source": 12,
-    "target": 17,
+    "target": 18,
     "sourceId": "s:golden-eval",
     "targetId": "f:retrieval",
     "value": 4
    },
    {
-    "source": 17,
-    "target": 24,
+    "source": 18,
+    "target": 25,
     "sourceId": "f:retrieval",
     "targetId": "o:cleared",
     "value": 342
    },
    {
     "source": 2,
-    "target": 17,
+    "target": 18,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
     "value": 49
    },
    {
     "source": 0,
-    "target": 17,
+    "target": 18,
     "sourceId": "s:engine-a-recall",
     "targetId": "f:retrieval",
     "value": 289
    },
    {
     "source": 9,
-    "target": 23,
+    "target": 24,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
     "value": 16
    },
    {
-    "source": 23,
-    "target": 24,
+    "source": 24,
+    "target": 25,
     "sourceId": "f:scf",
     "targetId": "o:cleared",
     "value": 16
    },
    {
     "source": 10,
-    "target": 20,
+    "target": 21,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
     "value": 8
    },
    {
-    "source": 20,
-    "target": 26,
+    "source": 21,
+    "target": 27,
     "sourceId": "f:contract",
     "targetId": "o:verified",
     "value": 7
    },
    {
-    "source": 20,
-    "target": 24,
+    "source": 21,
+    "target": 25,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
     "value": 30
    },
    {
-    "source": 4,
-    "target": 22,
+    "source": 5,
+    "target": 23,
     "sourceId": "s:raven-routing",
     "targetId": "f:consumer",
     "value": 36
    },
    {
-    "source": 22,
-    "target": 24,
+    "source": 23,
+    "target": 25,
     "sourceId": "f:consumer",
     "targetId": "o:cleared",
     "value": 19
    },
    {
-    "source": 22,
-    "target": 25,
+    "source": 23,
+    "target": 26,
     "sourceId": "f:consumer",
     "targetId": "o:open",
     "value": 17
    },
    {
     "source": 15,
-    "target": 19,
+    "target": 20,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
     "value": 1
    },
    {
-    "source": 19,
-    "target": 24,
+    "source": 20,
+    "target": 25,
     "sourceId": "f:code",
     "targetId": "o:cleared",
     "value": 33
    },
    {
     "source": 2,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:directory",
     "value": 61
    },
    {
-    "source": 18,
-    "target": 24,
+    "source": 19,
+    "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 204
+    "value": 205
    },
    {
     "source": 7,
-    "target": 20,
+    "target": 21,
     "sourceId": "s:nightly-drift",
     "targetId": "f:contract",
     "value": 28
    },
    {
     "source": 8,
-    "target": 21,
+    "target": 22,
     "sourceId": "s:nightly-battery",
     "targetId": "f:corpus",
     "value": 24
    },
    {
-    "source": 21,
-    "target": 24,
+    "source": 22,
+    "target": 25,
     "sourceId": "f:corpus",
     "targetId": "o:cleared",
     "value": 24
    },
    {
     "source": 13,
-    "target": 19,
+    "target": 20,
     "sourceId": "s:nightly-field-population",
     "targetId": "f:code",
     "value": 4
    },
    {
-    "source": 5,
-    "target": 18,
+    "source": 6,
+    "target": 19,
     "sourceId": "s:nightly-completeness",
     "targetId": "f:directory",
     "value": 29
    },
    {
     "source": 14,
-    "target": 20,
+    "target": 21,
     "sourceId": "s:nightly-claims",
     "targetId": "f:contract",
     "value": 4
    },
    {
     "source": 3,
-    "target": 19,
+    "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 52
+    "value": 53
    },
    {
-    "source": 19,
-    "target": 25,
+    "source": 20,
+    "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 58
+    "value": 79
    },
    {
     "source": 1,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 133
+    "value": 134
    },
    {
-    "source": 18,
-    "target": 25,
+    "source": 19,
+    "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 20
+    "value": 21
    },
    {
-    "source": 6,
-    "target": 19,
+    "source": 4,
+    "target": 20,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 29
+    "value": 49
    },
    {
     "source": 11,
-    "target": 19,
+    "target": 20,
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
     "value": 5
    },
    {
     "source": 16,
-    "target": 18,
+    "target": 19,
     "sourceId": "s:weak-basis-liveness",
     "targetId": "f:directory",
     "value": 1
    },
    {
-    "source": 20,
-    "target": 25,
+    "source": 21,
+    "target": 26,
     "sourceId": "f:contract",
     "targetId": "o:open",
     "value": 3
+   },
+   {
+    "source": 17,
+    "target": 19,
+    "sourceId": "s:packet-recheck",
+    "targetId": "f:directory",
+    "value": 1
    }
   ]
  },
