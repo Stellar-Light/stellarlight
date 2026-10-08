@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-10-07T08:52:51.627Z",
- "asOf": "2026-10-07T08:52:51.627Z",
+ "generatedAt": "2026-10-08T09:12:55.396Z",
+ "asOf": "2026-10-08T09:12:55.396Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2653,
+ "checked": 2659,
  "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
   {
@@ -86,6 +86,17 @@
    ]
   },
   {
+   "url": "https://github.com/techgob",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "builders/6abdf6ed7b8540e3957a6f1b.github_username"
+   ],
+   "citedByStatus": [
+    "6abdf6ed7b8540e3957a6f1b: n/a"
+   ]
+  },
+  {
    "url": "https://github.com/WalletGuruLLC/paystreme",
    "httpStatus": 404,
    "reason": "Not Found",
@@ -165,17 +176,6 @@
    ]
   },
   {
-   "url": "https://pathpulse.ai",
-   "httpStatus": null,
-   "reason": "fetch failed",
-   "targets": [
-    "projects/pathpulse-ai.links.website"
-   ],
-   "citedByStatus": [
-    "pathpulse-ai: Live"
-   ]
-  },
-  {
    "url": "https://spacemeet.co",
    "httpStatus": null,
    "reason": "fetch failed",
@@ -230,6 +230,17 @@
    ],
    "citedByStatus": [
     "chainatlas: Inactive"
+   ]
+  },
+  {
+   "url": "https://communidao.cc",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/communidao.links.website"
+   ],
+   "citedByStatus": [
+    "communidao: Inactive"
    ]
   },
   {
