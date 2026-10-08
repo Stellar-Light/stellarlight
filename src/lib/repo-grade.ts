@@ -10,6 +10,8 @@
  * references first, not a flagship org's peripheral plumbing.
  */
 
+import { isKnownInfraNotDeployable } from "./known-infra";
+
 export interface RepoGradeInput {
 	lastCommitAt?: string | Date | null;
 	stargazerCount?: number | null;
@@ -233,6 +235,7 @@ export function activityStateOf(
 export type RepoKind =
 	| "archived"
 	| "fork"
+	| "platform"
 	| "hackathon"
 	| "template-or-tutorial"
 	| "contract"
@@ -243,6 +246,7 @@ export type RepoKind =
 export const REPO_KINDS: readonly RepoKind[] = [
 	"archived",
 	"fork",
+	"platform",
 	"template-or-tutorial",
 	"contract",
 	"application",
@@ -288,6 +292,7 @@ export const NOT_GONE = { codeScanState: { not_equals: "gone" } } as const;
 export type RepoKindBasis =
 	| "isArchived"
 	| "isFork"
+	| "knownPlatform"
 	| "judgedHackathon"
 	| "nameLooksTemplate"
 	| "isDeployableContract"
@@ -322,6 +327,12 @@ export function repoKindOf(input: RepoKindInput): {
 } {
 	if (input.isArchived) return { kind: "archived", kindBasis: "isArchived" };
 	if (input.isFork) return { kind: "fork", kindBasis: "isFork" };
+	// Stellar platform software (protocol, network services, SDKs, CLI) from
+	// the curated registry: not a deployable contract and not an end-user
+	// application (sls-088), and ahead of the name heuristic, which read
+	// stellar/quickstart as a template.
+	if (input.name?.includes("/") && isKnownInfraNotDeployable(input.name))
+		return { kind: "platform", kindBasis: "knownPlatform" };
 	if (nameLooksTemplate(input.name))
 		return { kind: "template-or-tutorial", kindBasis: "nameLooksTemplate" };
 	if (input.isDeployableContract)

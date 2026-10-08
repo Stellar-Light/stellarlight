@@ -107,6 +107,12 @@ const RE_EVENTS =
 	/\benv\s*\.\s*events\s*\(\s*\)\s*\.\s*publish\b|\bevents\(\)\.publish\b/;
 const RE_NOSTD = /#!\s*\[\s*no_std\s*\]/;
 const RE_CDYLIB = /crate[-_]type\s*=\s*\[[^\]]*["']cdylib["']/i;
+/** Manifests under these dirs hold fixtures, examples, tests or templates,
+ * never the repo's product, so a cdylib there does not make the repo a
+ * deployable contract (sls-088: Horizon's internal/integration/contracts
+ * fixtures marked an API server deployable). */
+const NON_PRODUCT_MANIFEST_DIR =
+	/(^|\/)(examples?|tests?|testdata|testing|fixtures?|benches?|integration|templates?|test[-_](wasms|contracts|data))(\/|$)/i;
 
 // JS/TS Stellar SDKs (dep name → the package that proves Stellar use).
 const JS_SDK_DEPS = [
@@ -426,7 +432,13 @@ function scanFiles(
 		if (!facts.usesNoStd && RE_NOSTD.test(t)) facts.usesNoStd = true;
 	}
 	facts.contractMacroCount = macroCount;
-	if (cargoBlobs.some((b) => RE_CDYLIB.test(b.text as string)))
+	if (
+		cargoBlobs.some(
+			(b) =>
+				!NON_PRODUCT_MANIFEST_DIR.test(b.path) &&
+				RE_CDYLIB.test(b.text as string),
+		)
+	)
 		facts.isDeployableContract = true;
 	// versionStatus is assigned AFTER the JS block below — it needs
 	// facts.stellarJsDep, which does not exist yet at this point in the scan.

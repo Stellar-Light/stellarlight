@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-08",
+		surfaces: ["api"],
+		version: "spec@1.9.72",
+		type: "fixed",
+		summary:
+			"Repo `kind` gains `platform` (kindBasis `knownPlatform`) for Stellar platform software from the curated registry: protocol, network services such as Horizon and RPC, SDKs and the CLI. `codeVerified.isDeployableContract` no longer counts contract crates under fixture, test, example, integration or template folders.",
+		detail:
+			"sls-088: stellar/stellar-horizon read `isDeployableContract: true` and `kind: contract` because its integration-test fixture contracts declare cdylib crates, and the registry that pins platform repos still listed stellar/go but not the repos Horizon, Galexie, Friendbot and the Go SDK split into. Fixing the flag alone would have relabelled Horizon `application`, which is wrong too, so platform repos get their own kind, decided before the name heuristic (stellar/quickstart no longer reads as a template).",
+	},
+	{
 		date: "2026-10-05",
 		surfaces: ["api"],
 		version: "spec@1.9.71",

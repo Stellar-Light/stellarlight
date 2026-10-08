@@ -96,10 +96,28 @@ describe("repoKindOf precedence (first match wins)", () => {
 		).toBe("code");
 	});
 
+	it("a curated platform repo is platform, not contract, application or template (sls-088)", () => {
+		expect(
+			repoKindOf({
+				name: "stellar/stellar-horizon",
+				isDeployableContract: true,
+				projectSlug: "horizon",
+			}),
+		).toEqual({ kind: "platform", kindBasis: "knownPlatform" });
+		expect(repoKindOf({ name: "stellar/quickstart" }).kind).toBe("platform");
+		// archived still outranks platform
+		expect(repoKindOf({ name: "stellar/go", isArchived: true }).kind).toBe(
+			"archived",
+		);
+		// a short name never matches the registry
+		expect(repoKindOf({ name: "stellar-horizon" }).kind).toBe("code");
+	});
+
 	it("REPO_KINDS is the closed set the spec enumerates, in precedence order", () => {
 		expect(REPO_KINDS).toEqual([
 			"archived",
 			"fork",
+			"platform",
 			"template-or-tutorial",
 			"contract",
 			"application",
