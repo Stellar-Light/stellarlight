@@ -32,6 +32,11 @@ const INFRA_NOT_DEPLOYABLE = new Set<string>(
 		"stellar/rs-stellar-xdr",
 		// horizon / rpc / platform services
 		"stellar/go",
+		// split out of stellar/go (sls-088: the split left Horizon off this list)
+		"stellar/stellar-horizon",
+		"stellar/stellar-galexie",
+		"stellar/friendbot",
+		"stellar/go-stellar-sdk",
 		"stellar/stellar-rpc",
 		"stellar/soroban-rpc",
 		"stellar/anchor-platform",

@@ -145,12 +145,12 @@ const REPO_KIND_PROPS = {
 		type: "string",
 		enum: [...REPO_KINDS],
 		description:
-			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
+			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
 	},
 	kindBasis: {
 		type: "string",
 		description:
-			"The signal that decided kind, so the label can be weighed: isArchived | isFork | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
+			"The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
 	},
 };
 

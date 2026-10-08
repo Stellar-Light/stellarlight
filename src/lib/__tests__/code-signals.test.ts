@@ -174,6 +174,26 @@ describe("stellarProof — keep genuine Stellar/multichain, drop junk", () => {
 		expect(r.facts.hasAuthPatterns).toBe(true);
 	});
 
+	it("a cdylib under a fixture or integration dir is not the product (sls-088)", () => {
+		const fixture = scanOf({
+			"internal/integration/contracts/Cargo.toml": CARGO_SDK,
+			"internal/integration/contracts/src/lib.rs": LIB_RS,
+		});
+		expect(detectStellarProof(fixture).facts.isDeployableContract).toBe(false);
+		const example = scanOf({
+			"examples/token/Cargo.toml": CARGO_SDK,
+			"examples/token/src/lib.rs": LIB_RS,
+		});
+		expect(detectStellarProof(example).facts.isDeployableContract).toBe(false);
+		// a product crate beside fixtures still counts
+		const product = scanOf({
+			"contracts/token/Cargo.toml": CARGO_SDK,
+			"contracts/token/src/lib.rs": LIB_RS,
+			"tests/fixtures/Cargo.toml": CARGO_SDK,
+		});
+		expect(detectStellarProof(product).facts.isDeployableContract).toBe(true);
+	});
+
 	it("FIXTURE #3: contract entry not named lib.rs (contract.rs) still detected", () => {
 		const s = scanOf({ "src/contract.rs": LIB_RS });
 		expect(detectStellarProof(s).proof).toBe("contract-macros");
