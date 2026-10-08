@@ -4954,6 +4954,15 @@ export const SEEDS: Array<{
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// Raven sls-086: the row said "AQUA locks into ICE for on-chain DAO
+	// governance votes directing rewards". Aquarius's docs separate two vote
+	// tokens: ICE only tracks locked AQUA and sets the upvoteICE and governICE
+	// balances; upvoteICE votes for markets (aqua.network/vote) and so directs
+	// AQUA rewards; governICE votes on governance proposals, which carry no
+	// rewards (docs.aqua.network/aqua-and-ice/ice-tokens-locking-aqua-and-
+	// getting-benefits.md, read 2026-10-08). The rest of the row is unchanged.
+	aquarius:
+		"Aquarius (AQUA) is a DeFi liquidity layer and AMM on Stellar/Soroban running stable and volatile AMM liquidity pools with multihop swaps where liquidity providers earn fees plus AQUA reward yield, and incentivizes market-making on the native Stellar DEX. Locking AQUA mints ICE; upvoteICE votes direct AQUA rewards to markets, and governICE votes on governance proposals without rewards.",
 	// Raven #39: Bridge is on the Stellar Playbook's debit-cards page, yet no
 	// card query ever fetched it — the row said stablecoin infra and MGUSD,
 	// never cards. bridge.xyz leads with "Stablecoin-backed cards are now

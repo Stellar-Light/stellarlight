@@ -232,20 +232,20 @@ describe("findDirectAnswerNote trigger phrases", () => {
 				"Which Horizon ingestion constant pins the highest supported protocol version, and what is its value?",
 				real,
 			)?.note,
-		).toContain("= 28");
+		).toContain("= 29");
 	});
 
 	it("natural max/maximum phrasings reach the note", () => {
 		expect(
 			findDirectAnswerNote("what is the max supported protocol version", real)
 				?.note,
-		).toContain("= 28");
+		).toContain("= 29");
 		expect(
 			findDirectAnswerNote(
 				"maximum supported protocol version of horizon?",
 				real,
 			)?.note,
-		).toContain("= 28");
+		).toContain("= 29");
 	});
 
 	it("vague or partial phrasings still fall through to DeepWiki", () => {
