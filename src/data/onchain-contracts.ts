@@ -76,16 +76,24 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 			"https://github.com/blend-capital/blend-utils/blob/main/mainnet.contracts.json",
 	},
 	{
-		// soroswap/core mainnet contracts manifest (verified 2026-07-20; router
-		// confirmed active on stellar.expert with 200k+ subinvocations)
+		// Roles from the owner's own deployment manifests (Raven sls-085,
+		// re-verified 2026-10-08): soroswap/core lists the AMM router under
+		// ids.router, soroswap/aggregator lists the aggregator under
+		// ids.aggregator. The router was labelled "aggregator router" from a
+		// product description; a label comes from the manifest key, never prose.
 		slug: "soroswap",
 		contracts: [
 			{
 				address: "CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH",
-				label: "aggregator router",
+				label: "amm router",
+			},
+			{
+				address: "CAYP3UWLJM7ZPTUKL6R6BFGTRWLZ46LRKOXTERI2K6BIJAWGYY62TXTO",
+				label: "aggregator",
 			},
 		],
-		source: "https://github.com/soroswap/core (mainnet.contracts.json)",
+		source:
+			"https://github.com/soroswap/core/blob/42483fc4c1fc65d1a64b4b460383a3d937cf45e7/public/mainnet.contracts.json + https://github.com/soroswap/aggregator/blob/82c15fd2483ed9a7ba7132fb2499147650a5286b/public/mainnet.contracts.json",
 	},
 	{
 		// reflector-network/reflector-contract README (verified 2026-07-20)

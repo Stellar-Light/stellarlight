@@ -3203,21 +3203,23 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-01",
 		},
 	],
-	// Verified 2026-09-01 from source at BOTH master and the scanned ref
-	// (raw.githubusercontent.com, internal/ingest/main.go:38) — the constant
+	// Re-verified 2026-10-08 (Raven sls-087): Protocol 29 support landed
+	// 2026-09-23 in 430a28e, so the 2026-09-01 value (28) went stale while
+	// the note kept leading. Link pinned to that commit, not a branch, so the
+	// note and its evidence cannot drift apart again. The constant is the one
 	// the #1 consumer's sls-080 probe reads. Horizon SPLIT out of stellar/go;
 	// the monorepo's frozen copy answers with pre-split values (DeepWiki said
 	// 22–25), which is exactly why this dated fact must lead the answer.
 	"stellar/stellar-horizon": [
 		{
-			note: "Horizon's protocol ceiling: MaxSupportedProtocolVersion = 28 (a uint32 constant defined in internal/ingest/main.go) (verified 2026-09-01 at master AND at scanned ref 82660510 — https://github.com/stellar/stellar-horizon/blob/master/internal/ingest/main.go). Horizon split out of the stellar/go monorepo; the monorepo's frozen copy still carries pre-split values, so cite THIS repo for current Horizon constants.",
+			note: "Horizon's protocol ceiling: MaxSupportedProtocolVersion = 29 (a uint32 constant defined in internal/ingest/main.go), since the Protocol 29 support commit of 2026-09-23 (verified 2026-10-08 at that commit: https://github.com/stellar/stellar-horizon/blob/430a28e79b3b43c213840e45523519ca11251c0a/internal/ingest/main.go#L38). Horizon split out of the stellar/go monorepo; the monorepo's frozen copy still carries pre-split values, so cite THIS repo for current Horizon constants.",
 			triggers: [
 				"max supported protocol version",
 				"maximum supported protocol version",
 				"highest supported protocol version",
 			],
 			source: "curated",
-			asOf: "2026-09-01",
+			asOf: "2026-10-08",
 		},
 	],
 	// Verified 2026-08-31 against the GitHub Advisory Database (gh api
