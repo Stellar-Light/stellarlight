@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-08T12:28:50.974Z",
+	"generatedAt": "2026-10-09T12:17:48.700Z",
 	"source": "scripts/check-endpoint-agreement.ts",
 	"rule": "Resolution facts — is this alive, what replaced it — must be served on every agent-reachable path to an entity, not only the curated one.",
 	"tally": {

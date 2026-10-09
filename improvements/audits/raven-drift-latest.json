@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-10-08T12:29:14.833Z",
-	"specVersion": "1.9.71",
+	"generatedAt": "2026-10-09T12:18:15.434Z",
+	"specVersion": "1.9.72",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -84,17 +84,17 @@
 		{
 			"op": "analyzeHackathonSubmissions",
 			"addedAt": "2026-10-05",
-			"ageDays": 3
+			"ageDays": 4
 		},
 		{
 			"op": "getHackathonSubmission",
 			"addedAt": "2026-10-05",
-			"ageDays": 3
+			"ageDays": 4
 		},
 		{
 			"op": "reviewSubmission",
 			"addedAt": "2026-10-05",
-			"ageDays": 3
+			"ageDays": 4
 		}
 	],
 	"extraInCatalog": [],
