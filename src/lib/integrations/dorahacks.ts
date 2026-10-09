@@ -11,6 +11,7 @@ export interface DoraHacksOrganization {
 }
 
 import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import { eventPageMarkdown } from "@/lib/hackathon-events";
 
 export interface DoraHacksHackathon {
 	id: number;
@@ -505,7 +506,17 @@ export async function fetchHackathonDetail(
 		form = [];
 	}
 	return {
-		description: text(d?.description),
+		// The page plus its custom tabs: some organizers publish their judging
+		// criteria or submission requirements only in a tab.
+		description: eventPageMarkdown(
+			text(d?.description),
+			(Array.isArray(d?.tabs) ? d.tabs : []).map(
+				(t: { name?: unknown; description?: unknown }) => ({
+					name: text(t?.name),
+					body: text(t?.description),
+				}),
+			),
+		),
 		summary: text(d?.summary),
 		tracks: (Array.isArray(d?.tracks) ? d.tracks : [])
 			.map((t: { name?: unknown; title?: unknown }) =>
