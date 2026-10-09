@@ -233,6 +233,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-noir-lang-noir-npm-noir-lang-noir-was",
+   "date": "2026-10-09",
+   "run": "37952655252",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
