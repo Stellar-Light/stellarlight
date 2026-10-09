@@ -28,7 +28,7 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
-import { clampLimit } from "@/lib/http-params";
+import { clampLimit, clampOffset } from "@/lib/http-params";
 import { parsePlacement } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -37,7 +37,7 @@ import { serverTiming } from "@/lib/server-timing";
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
-const SUPPORTED_PARAMS = [...BUILD_FILTER_PARAMS, "limit"] as const;
+const SUPPORTED_PARAMS = [...BUILD_FILTER_PARAMS, "limit", "offset"] as const;
 
 // Index shape + builder live in src/lib/hackathon-builds.ts (shared with the
 // builder profile pages); the hour-long cache is unstable_cache, not per instance.
@@ -67,6 +67,8 @@ export async function GET(req: NextRequest) {
 	const f = parsed.filters;
 	const q = f.q || undefined;
 	const limit = clampLimit(sp.get("limit"), 20, 100);
+	// Pages share one ranking: offset skips that many matched builds.
+	const offset = clampOffset(sp.get("offset"));
 
 	let indexed: IndexedBuild[];
 	try {
@@ -95,42 +97,44 @@ export async function GET(req: NextRequest) {
 	// read the same set the same way.
 	const { scored, served: mode, warnings } = await queryBuilds(indexed, f);
 
-	const builds = scored.slice(0, limit).map(({ b, matched, similarity }) => ({
-		// Opens the full submission in getHackathonBuild.
-		id: b.id,
-		name: b.name,
-		description: b.description,
-		hackathon: b.hackathon.title,
-		hackathonSlug: b.hackathon.slug,
-		endedAt: b.hackathon.endedAt,
-		track: b.track,
-		placement: b.hackathonPlacement,
-		award: b.award,
-		// What this project actually won, parsed from its own placement string.
-		// `award` is the CATEGORY title and is shared by every placement inside
-		// it: DoraHacks nests prizes under an award_list entry, so all five
-		// winners of Stellar Hacks: Real-World ZK carry award "$10,000 XLM
-		// Prize" while placing 1st ($5,000) through 5th ($750) — the five sum
-		// to that pool. Reading `award` as one winner's prize overstates 3rd
-		// place by 8x and makes the winners sum to 5x the pot.
-		prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
-		isWinner: b.isWinner,
-		votes: b.voteCount,
-		url: b.url,
-		githubUrl: b.githubUrl,
-		demoUrl: b.demoUrl,
-		// Present only when the link was checked: the directory project that
-		// lists this build's exact repo, or null when none does.
-		...(b.project !== undefined ? { project: b.project } : {}),
-		// Present only when the repo was read: absent is unknown.
-		...(b.stack ? { stack: b.stack } : {}),
-		// Present only when categorized: best first.
-		...(b.categories ? { categories: b.categories.map((c) => c.type) } : {}),
-		...(matched.length ? { matchedTerms: matched } : {}),
-		...(similarity !== undefined
-			? { similarity: Math.round(similarity * 1000) / 1000 }
-			: {}),
-	}));
+	const builds = scored
+		.slice(offset, offset + limit)
+		.map(({ b, matched, similarity }) => ({
+			// Opens the full submission in getHackathonBuild.
+			id: b.id,
+			name: b.name,
+			description: b.description,
+			hackathon: b.hackathon.title,
+			hackathonSlug: b.hackathon.slug,
+			endedAt: b.hackathon.endedAt,
+			track: b.track,
+			placement: b.hackathonPlacement,
+			award: b.award,
+			// What this project actually won, parsed from its own placement string.
+			// `award` is the CATEGORY title and is shared by every placement inside
+			// it: DoraHacks nests prizes under an award_list entry, so all five
+			// winners of Stellar Hacks: Real-World ZK carry award "$10,000 XLM
+			// Prize" while placing 1st ($5,000) through 5th ($750) — the five sum
+			// to that pool. Reading `award` as one winner's prize overstates 3rd
+			// place by 8x and makes the winners sum to 5x the pot.
+			prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
+			isWinner: b.isWinner,
+			votes: b.voteCount,
+			url: b.url,
+			githubUrl: b.githubUrl,
+			demoUrl: b.demoUrl,
+			// Present only when the link was checked: the directory project that
+			// lists this build's exact repo, or null when none does.
+			...(b.project !== undefined ? { project: b.project } : {}),
+			// Present only when the repo was read: absent is unknown.
+			...(b.stack ? { stack: b.stack } : {}),
+			// Present only when categorized: best first.
+			...(b.categories ? { categories: b.categories.map((c) => c.type) } : {}),
+			...(matched.length ? { matchedTerms: matched } : {}),
+			...(similarity !== undefined
+				? { similarity: Math.round(similarity * 1000) / 1000 }
+				: {}),
+		}));
 
 	try {
 		logApiHit({
@@ -167,6 +171,7 @@ export async function GET(req: NextRequest) {
 					category: f.category ?? null,
 					package: f.package ?? null,
 					limit,
+					offset,
 					mode: f.mode,
 				},
 				counts: {

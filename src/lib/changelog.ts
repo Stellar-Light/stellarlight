@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-09",
+		surfaces: ["api"],
+		version: "spec@1.9.73",
+		type: "added",
+		summary:
+			"searchHackathonBuilds takes `offset`, so every match can be read: page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched. The filters echo includes it.",
+		detail:
+			"The operation capped a page at 100 rows with no way past it, so the two largest events (319 and 248 submissions) could not be listed through it. Pages share one ranking.",
+	},
+	{
 		date: "2026-10-08",
 		surfaces: ["api"],
 		version: "spec@1.9.72",
