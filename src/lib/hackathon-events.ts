@@ -5,8 +5,32 @@
  * Only sections the organizer wrote are served, under their own heading. On
  * 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6
  * a judging section; a missing section is reported as not published, never
- * filled in.
+ * filled in. Since 2026-10-09 the page includes the event's custom tabs:
+ * three events (Build on Stellar, Stellar Hacks: Blend, Stellar Hacks:
+ * PaltaLabs) publish their judging criteria only in a tab, which the
+ * description-only page reported as not published.
  */
+
+/** The event page as the organizer published it: the description, then each
+ * custom tab. A tab that opens with its own heading keeps it; otherwise its
+ * name becomes one, so a "Judging Criteria" tab is found by its heading. */
+export function eventPageMarkdown(
+	description: string | null | undefined,
+	tabs: ReadonlyArray<{ name?: string | null; body?: string | null }> = [],
+): string | null {
+	const parts = [description?.trim() || null];
+	for (const t of tabs) {
+		const body = t.body?.trim();
+		if (!body) continue;
+		parts.push(
+			/^#{1,6}\s/.test(body)
+				? body
+				: `## ${t.name?.trim() || "More"}\n\n${body}`,
+		);
+	}
+	const page = parts.filter(Boolean).join("\n\n");
+	return page || null;
+}
 
 /** The text under the first heading matching `heading`, up to the next
  * heading of the same or a higher level; null when there is none. */
