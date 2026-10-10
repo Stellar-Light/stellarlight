@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-09T14:33:10.665Z",
+ "generatedAt": "2026-10-10T13:57:38.479Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 78,
+   "oldestDays": 79,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -355,9 +355,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 140,
-     "recurred": 111,
-     "ratePct": 79.3
+     "newFindings": 137,
+     "recurred": 108,
+     "ratePct": 78.8
     },
     "lifetime": {
      "newFindings": 796,
@@ -374,8 +374,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 140,
-     "repeats": 139,
+     "newFindings": 137,
+     "repeats": 136,
      "ratePct": 99.3
     },
     "lifetime": {
@@ -8553,7 +8553,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 383
+    "count": 384
    },
    {
     "basis": "human-verified",
@@ -8565,7 +8565,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 77
+    "count": 76
    },
    {
     "basis": "product-integration",
@@ -9536,11 +9536,11 @@
     },
     {
      "label": "slowing",
-     "count": 1061
+     "count": 1063
     },
     {
      "label": "active",
-     "count": 969
+     "count": 967
     },
     {
      "label": "unknown",
