@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-10-10T11:11:59.877Z",
+	"generatedAt": "2026-10-11T11:25:24.395Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-10-10",
+	"latestSnapshot": "2026-10-11",
 	"historyStart": "2026-10-02",
-	"snapshots": 9,
+	"snapshots": 10,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -17,7 +17,7 @@
 			"launched": 941,
 			"markedLive": 847,
 			"liveOnStrongEvidence": 397,
-			"observedActive": 310,
+			"observedActive": 309,
 			"noActivityData": 411
 		},
 		"scf": {
@@ -25,7 +25,7 @@
 			"launched": 580,
 			"markedLive": 553,
 			"liveOnStrongEvidence": 237,
-			"observedActive": 205,
+			"observedActive": 204,
 			"noActivityData": 207
 		},
 		"nonScf": {
@@ -63,7 +63,7 @@
 				"launched": 260,
 				"markedLive": 256,
 				"liveOnStrongEvidence": 106,
-				"observedActive": 111,
+				"observedActive": 110,
 				"noActivityData": 105
 			},
 			{
