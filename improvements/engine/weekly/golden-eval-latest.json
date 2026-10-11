@@ -117,7 +117,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.822693943977356,
+      "topScore": 0.8225675225257874,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -369,7 +369,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8104548454284668,
+      "topScore": 0.8104491233825684,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
+      "sample": "Stellar Weekly Roundup: Week of Oct 2, 2026"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -747,7 +747,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7343152761459351,
+      "topScore": 0.7336766719818115,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -765,7 +765,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.670104444026947,
+      "topScore": 0.6715497970581055,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
+      "topScore": 0.8221846222877502,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-08T12:16:30Z"
+  "generatedAt": "2026-10-11T11:38:23Z"
 }

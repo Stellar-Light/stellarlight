@@ -1,5 +1,11 @@
 {
-	"generatedAt": "2026-10-08T12:26:26.274Z",
+	"generatedAt": "2026-10-11T11:48:19.432Z",
 	"detector": "battery-coverage",
-	"failures": []
+	"failures": [
+		{
+			"probe": "battery:q-agent-identity-erc8004-stellar",
+			"note": "top 0.59 < 0.6 via research/confidence for \"What does ERC-8004 provide for AI-agent identity and reputation, and what can a \" (compliance-rwa-payments); best: https://stellar.org/blog/developers/practical-confidential-stablecoins-an-issuer-controlled-architecture",
+			"surface": "corpus"
+		}
+	]
 }
