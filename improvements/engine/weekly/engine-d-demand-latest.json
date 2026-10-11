@@ -1,13 +1,26 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 100000,
-    "realHits": 54326,
-    "distinctQueries": 6958,
-    "replayed": 250
+    "loggedHits": 63807,
+    "realHits": 22213,
+    "distinctQueries": 6400,
+    "replayed": 233
   },
   "okRate": 100,
-  "misses": [],
-  "generatedAt": "2026-10-04T14:50:58Z",
+  "misses": [
+    {
+      "endpoint": "/api/research",
+      "query": "test",
+      "hits": 40,
+      "lastSeen": "2026-10-11T11:38:39.028Z",
+      "days": 14,
+      "buckets": [
+        "other"
+      ],
+      "class": "WEAK",
+      "evidence": "top confidence 0.4"
+    }
+  ],
+  "generatedAt": "2026-10-11T15:32:14Z",
   "evalKey": "engine-d-demand"
 }

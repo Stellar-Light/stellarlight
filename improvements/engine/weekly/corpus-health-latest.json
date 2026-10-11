@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 16847,
-    "docs": 3151
+    "chunks": 16918,
+    "docs": 3161
   },
   "s5_junk_urls": {
     "count": 0,
@@ -14,16 +14,23 @@
   },
   "s7_coverage": {
     "lumenloop-research": {
-      "chunks": 531,
+      "chunks": 540,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
     "release": {
-      "chunks": 219,
+      "chunks": 221,
       "datedPct": 100,
-      "newestAgeDays": 3,
+      "newestAgeDays": 4,
+      "undated": false,
+      "stalled": false
+    },
+    "dev-docs": {
+      "chunks": 4279,
+      "datedPct": 75,
+      "newestAgeDays": 5,
       "undated": false,
       "stalled": false
     },
@@ -34,24 +41,17 @@
       "undated": true,
       "stalled": false
     },
-    "dev-docs": {
-      "chunks": 4219,
-      "datedPct": 76,
-      "newestAgeDays": 3,
-      "undated": false,
-      "stalled": false
-    },
     "audit": {
       "chunks": 1157,
       "datedPct": 100,
-      "newestAgeDays": 64,
+      "newestAgeDays": 72,
       "undated": false,
       "stalled": false
     },
     "sdf-blog": {
       "chunks": 2443,
       "datedPct": 100,
-      "newestAgeDays": 7,
+      "newestAgeDays": 14,
       "undated": false,
       "stalled": false
     },
@@ -67,7 +67,7 @@
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1373,
+      "newestAgeDays": 1380,
       "undated": false,
       "stalled": false
     },
@@ -83,49 +83,49 @@
     "cap": {
       "chunks": 936,
       "datedPct": 98,
-      "newestAgeDays": 45,
+      "newestAgeDays": 52,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 196,
+      "newestAgeDays": 203,
       "undated": false,
       "stalled": false
     },
     "sep": {
       "chunks": 657,
       "datedPct": 98,
-      "newestAgeDays": 27,
+      "newestAgeDays": 34,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 151,
+      "newestAgeDays": 158,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 138,
+      "newestAgeDays": 145,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 113,
+      "newestAgeDays": 120,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3875,
+      "newestAgeDays": 3882,
       "undated": false,
       "stalled": false
     }
@@ -140,6 +140,6 @@
       "boilerplateOverlap": 151
     }
   },
-  "generatedAt": "2026-10-04T14:50:58Z",
+  "generatedAt": "2026-10-11T15:32:14Z",
   "evalKey": "corpus-health"
 }
