@@ -260,6 +260,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-e-contract:get-api-hackathons-builds-mode",
+   "date": "2026-10-12",
+   "run": "38289364092",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
