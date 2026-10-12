@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-11T11:48:58.808Z",
+	"generatedAt": "2026-10-12T13:45:07.990Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -63,6 +63,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:raceeyxo/use-stellar:npm:use-stellar",
+			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.1 (published 2026-10-11)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:blend-capital/blend-sdk-js:npm:@blend-capital/blend-sdk",
 			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 3.3.1 (published 2026-09-16)",
 			"surface": "code"
@@ -74,7 +79,7 @@
 		},
 		{
 			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
-			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.35.1 (published 2026-09-15)",
+			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.36.0 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
@@ -164,7 +169,7 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.20 (published 2026-10-10)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.21 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
