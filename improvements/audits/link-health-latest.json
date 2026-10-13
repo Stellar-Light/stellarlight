@@ -1,9 +1,9 @@
 {
- "generatedAt": "2026-10-12T09:26:22.039Z",
- "asOf": "2026-10-12T09:26:22.039Z",
+ "generatedAt": "2026-10-13T09:37:04.328Z",
+ "asOf": "2026-10-13T09:37:04.328Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
- "checked": 2690,
+ "checked": 2701,
  "brokenSplit": "broken = cited by at least one row that is not already retired, so somebody has to look. brokenOnRetired = every citing row is already Inactive or Draft: the dead link agrees with the verdict we already published, so it is corroboration, not a defect. Only `broken` reaches the improvement ledger.",
  "broken": [
   {
@@ -48,6 +48,19 @@
    ],
    "citedByStatus": [
     "chipper: Live"
+   ]
+  },
+  {
+   "url": "https://expand.network",
+   "httpStatus": null,
+   "reason": "fetch failed",
+   "targets": [
+    "projects/expand.links.website",
+    "projects/expand-network.links.website"
+   ],
+   "citedByStatus": [
+    "expand: Draft",
+    "expand-network: Live"
    ]
   },
   {
