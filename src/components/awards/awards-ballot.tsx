@@ -2698,11 +2698,23 @@ const WINNERS_2025 = [
  * Several of these names are nominated again this year; that is left to
  * speak for itself.
  */
+/** What a winner card shows: last year's curated winners and this year's
+ * results both fit it. */
+interface WinnerCardData {
+	category: string;
+	name: string;
+	slug: string;
+	logo: string;
+	line?: string | null;
+	blurb: string | null;
+	finalists: string;
+}
+
 function WinnerCard({
 	winner,
 	index,
 }: {
-	winner: (typeof WINNERS_2025)[number];
+	winner: WinnerCardData;
 	index: number;
 }) {
 	const [open, setOpen] = useState(false);
@@ -2760,10 +2772,16 @@ function WinnerCard({
 					</span>
 				)}
 			</p>
-			<p className="mt-1 text-sm font-medium text-neutral-200">{winner.line}</p>
-			<p className="mt-3 text-sm leading-relaxed text-neutral-300">
-				{winner.blurb}
-			</p>
+			{winner.line && (
+				<p className="mt-1 text-sm font-medium text-neutral-200">
+					{winner.line}
+				</p>
+			)}
+			{winner.blurb && (
+				<p className="mt-3 text-sm leading-relaxed text-neutral-300">
+					{winner.blurb}
+				</p>
+			)}
 			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
 				Nominees: {winner.finalists}
 			</p>
@@ -2884,7 +2902,60 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					</p>
 				)}
 
-				{results && (
+				{results && !shortlist && (
+					<div className="space-y-10">
+						{/* The final round shows its winners the way last year's are
+						    shown: a card each, the curtain parting on the name. No
+						    per-project counts; the other finalists are listed
+						    alphabetically so the order implies no ranking. A tie at
+						    the top shows every joint winner. */}
+						<div className="grid gap-4 sm:grid-cols-3">
+							{results.categories
+								.flatMap((category) => {
+									const top = Math.max(
+										0,
+										...category.results.map((r) => r.votes),
+									);
+									const winners =
+										top > 0
+											? category.results.filter((r) => r.votes === top)
+											: [];
+									const nominees = data.nominees.filter(
+										(n) => n.category === category.key,
+									);
+									const finalists = nominees
+										.filter((n) => !winners.some((w) => w.slug === n.slug))
+										.map((n) => n.name)
+										.sort((a, b) => a.localeCompare(b))
+										.join(", ");
+									return winners.map((w) => {
+										const n = nominees.find((x) => x.slug === w.slug);
+										return {
+											category: category.name,
+											name: w.name,
+											slug: w.slug,
+											logo: n?.logoUrl || "/logo.png",
+											blurb: n?.blurb ?? null,
+											finalists,
+										};
+									});
+								})
+								.map((winner, i) => (
+									<WinnerCard
+										key={`${winner.category}-${winner.slug}`}
+										winner={winner}
+										index={i}
+									/>
+								))}
+						</div>
+						<p className="text-center text-xs text-neutral-600 pt-4 leading-relaxed">
+							Chosen by SCF Pilots, from ballots a relay wrote to Stellar
+							testnet under random ids, so no ballot links back to a Pilot. The
+							record behind the result is digested and anchored on Tansu.
+						</p>
+					</div>
+				)}
+				{results && shortlist && (
 					<div className="space-y-10">
 						{results.categories.map((category) => {
 							// final round: one winner card, then the rest
