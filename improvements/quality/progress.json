@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-12T16:56:48.892Z",
+ "generatedAt": "2026-10-13T15:15:40.085Z",
  "source": "QUALITY.md",
  "note": "Phase state is derived from QUALITY.md's own phase list, a phase cannot be marked done here without being done there. 'In progress' and 'not started' render as plainly as 'done'.",
  "phases": [
@@ -56,10 +56,10 @@
   "P3": {
    "bar": "every lane that writes to production has earned the intervention-free threshold",
    "origin": 0,
-   "current": 12,
+   "current": 14,
    "target": 79,
    "unit": "lanes",
-   "pct": 0.21518987341772153,
+   "pct": 0.24050632911392406,
    "note": "Weeks measure the absence of correction, not effect — the second condition (a lane asserts its own end state) is not yet counted here because most lanes do not report one."
   },
   "P4": {
@@ -74,10 +74,10 @@
   "P5": {
    "bar": "the curated-pool note floor, examined or noted",
    "origin": 0,
-   "current": 376,
-   "target": 384,
+   "current": 381,
+   "target": 394,
    "unit": "curated-pool repos",
-   "pct": 0.9791666666666666,
+   "pct": 0.9670050761421319,
    "note": "Counts a repo examined and recorded as yielding no durable public fact — a judged repo is not a gap."
   }
  },
