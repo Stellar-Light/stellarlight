@@ -2882,12 +2882,6 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
 						{round.title}
 					</h1>
-					{results && (
-						<p className="mt-4 text-sm text-neutral-500">
-							{results.turnout.voted} of {results.turnout.whitelisted} Pilots
-							{shortlist ? " nominated" : " voted"}
-						</p>
-					)}
 				</motion.header>
 
 				{!results && !failed && (
