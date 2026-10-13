@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-10-12T13:45:45.162Z",
+	"generatedAt": "2026-10-13T13:11:39.151Z",
 	"total": 817,
 	"open": 40,
-	"refreshQueue": 77,
+	"refreshQueue": 78,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 81,
+		"oldestDays": 82,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 81
+				"days": 82
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 81
+				"days": 82
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 45
+				"days": 46
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 37
+				"days": 38
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 37
+				"days": 38
 			}
 		]
 	},
@@ -59,15 +59,15 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 683,
+	"closed": 682,
 	"verified": 7,
-	"cleared": 676,
+	"cleared": 675,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 460,
+	"clearedOnSilence": 459,
 	"closingRate": 0.27,
 	"silenceShare": 0.56,
 	"recurrence": {
-		"reopened": 13,
+		"reopened": 14,
 		"reopenedShareOfClosures": 0.02,
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
@@ -83,7 +83,7 @@
 			}
 		}
 	},
-	"oldestOpenDays": 15,
+	"oldestOpenDays": 16,
 	"inWave": 0,
 	"highOpen": 32,
 	"staleHighOpen": 0,
@@ -129,7 +129,7 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 28
+			"days": 29
 		}
 	],
 	"topOpen": [

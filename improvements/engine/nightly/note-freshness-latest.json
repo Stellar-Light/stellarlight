@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-12T13:45:07.990Z",
+	"generatedAt": "2026-10-13T13:10:46.574Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -74,7 +74,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-09 (published 2026-10-09)",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-12 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
@@ -99,7 +99,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-05 (published 2026-10-05)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-12 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
@@ -114,7 +114,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
-			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-22 (published 2026-09-22)",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-10-13 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
@@ -169,7 +169,7 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.21 (published 2026-10-12)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.22 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
