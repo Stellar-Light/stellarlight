@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-14",
+		surfaces: ["api"],
+		version: "spec@1.9.73",
+		type: "fixed",
+		summary:
+			"A hackathon submission entered in several events is stored once per event, with that event's own placement. getHackathonSubmission adds `entries`; event pages, builds, compare and analyze count each event's own submissions and winners.",
+		detail:
+			"sls-092: DoraHacks lets one submission enter more than one event, and the store kept only the first event that listed it. 26 of 1,400 submissions entered more than one event, and three lost a placement that way. One was Blend Pool Creator, the Stellar Hacks: Blend first place: it was filed under PaltaLabs, unplaced, so Blend served 2 winners and 35 of its 39 submissions. Rows are now keyed by submission and event. Under a `hackathon` filter each row is that event's own; across events a submission is one result, its best-ranked entry; analyze counts a submission once in each event it entered. The detail's top-level event fields are its best entry, a placed one first.",
+	},
+	{
 		date: "2026-10-08",
 		surfaces: ["api"],
 		version: "spec@1.9.72",

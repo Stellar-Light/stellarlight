@@ -277,7 +277,8 @@ export async function buildHackathonReview(
 				{ hiddenUpstream: { not_equals: true } },
 			],
 		},
-		limit: 1,
+		// One row per event the submission entered (sls-092).
+		limit: 10,
 		depth: 0,
 		select: { embedding: false, embeddingTextHash: false },
 	});
@@ -286,7 +287,7 @@ export async function buildHackathonReview(
 	const facts = doc.projectSlug
 		? (await readProjectFacts(payload, [doc.projectSlug]))?.get(doc.projectSlug)
 		: undefined;
-	const submission = buildDetailFromStored(doc, facts);
+	const submission = buildDetailFromStored(res.docs as HackathonBuild[], facts);
 	const idea = reviewIdea(submission);
 	const [similar, pitch] = await Promise.all([
 		similarToBuild(subject.buildId, { limit: 10 }),

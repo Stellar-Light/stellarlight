@@ -538,7 +538,7 @@ export default async function BuilderProfilePage({
 							</CardHeader>
 							<CardContent className="space-y-2">
 								{hackBuilds.slice(0, 8).map((b) => (
-									<div key={b.id} className="text-sm">
+									<div key={`${b.hackathon.slug}:${b.id}`} className="text-sm">
 										<a
 											href={b.url}
 											target="_blank"

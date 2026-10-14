@@ -27,14 +27,24 @@ export const HackathonBuilds: CollectionConfig = {
 	},
 	fields: [
 		{
+			// Not unique and no index declared here (sls-092): a submission
+			// entered in two events is two rows. The sync lane owns the plain
+			// buildId_1 index, so an app boot never fights the old unique one.
 			name: "buildId",
 			type: "text",
 			required: true,
-			unique: true,
-			index: true,
 			admin: {
 				description:
 					"dorahacks-buidl-<id>, the id the builds API has always served",
+			},
+		},
+		{
+			name: "entryKey",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"<buildId>@<hackathonSlug>: one row per submission and event, the key the sync lane writes by",
 			},
 		},
 		{ name: "name", type: "text", required: true },

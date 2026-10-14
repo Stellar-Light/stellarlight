@@ -57,7 +57,7 @@ export async function GET(
 			retryAfterSeconds: 2,
 			startedAt,
 		});
-	let doc: HackathonBuild | undefined;
+	let docs: HackathonBuild[] = [];
 	try {
 		const res = await withReadTimeout(
 			payload.find({
@@ -68,14 +68,15 @@ export async function GET(
 						{ hiddenUpstream: { not_equals: true } },
 					],
 				},
-				limit: 1,
+				// One row per event the submission entered (sls-092).
+				limit: 10,
 				depth: 0,
 				// The 1,024-number vector is never served; do not read it.
 				select: { embedding: false, embeddingTextHash: false },
 			}),
 			DEFAULT_READ_TIMEOUT_MS,
 		);
-		doc = res.docs[0] as HackathonBuild | undefined;
+		docs = res.docs as HackathonBuild[];
 	} catch {
 		return apiError({
 			status: 503,
@@ -85,6 +86,7 @@ export async function GET(
 			startedAt,
 		});
 	}
+	const doc = docs[0];
 	if (!doc)
 		return apiError({
 			status: 404,
@@ -115,7 +117,7 @@ export async function GET(
 				generatedAt: new Date().toISOString(),
 				note: "One stored submission in full. writeUp is the team's own text as published (markdown): a claim about what they built, not evidence that it shipped. Check the repo, the demo and `project`.",
 			},
-			build: buildDetailFromStored(doc, facts),
+			build: buildDetailFromStored(docs, facts),
 		},
 		{ headers: serverTiming(startedAt) },
 	);

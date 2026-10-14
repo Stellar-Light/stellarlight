@@ -79,6 +79,7 @@ const detail = (over: Partial<BuildDetail> = {}): BuildDetail => ({
 	award: null,
 	prizeUsd: null,
 	isWinner: true,
+	entries: [],
 	links: {
 		dorahacks: "https://dorahacks.io/buidl/42585",
 		github: "https://github.com/rajkaria/toll",
