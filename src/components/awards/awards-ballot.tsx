@@ -2786,10 +2786,20 @@ function WinnerCard({
 				</p>
 			)}
 			{winner.blurb && (
-				<p className="mt-4 mb-8 text-sm leading-7 text-neutral-300">
+				<p className="mt-4 text-sm leading-7 text-neutral-300">
 					{winner.blurb}
 				</p>
 			)}
+			{/* a new tab, so a pilot mid-ballot keeps their picks */}
+			<a
+				href={`/project/${winner.slug}`}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="mt-6 mb-8 inline-flex w-fit items-center gap-1.5 rounded-full border border-[#2f2f2f] px-4 py-2 text-sm font-medium text-neutral-200 transition-colors hover:border-[#454545] hover:text-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
+			>
+				View project
+				<ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+			</a>
 			<p className="mt-auto border-t border-[#2f2f2f] pt-4 text-xs leading-relaxed text-neutral-500">
 				Nominees: {winner.finalists}
 			</p>
