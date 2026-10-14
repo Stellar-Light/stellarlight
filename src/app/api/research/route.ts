@@ -19,11 +19,18 @@
 
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import type { Where } from "payload";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
-import { degradedWarning, withPartial } from "@/lib/degraded-read";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	scopedWarning,
+	withPartial,
+} from "@/lib/degraded-read";
 import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
 import {
 	clampLimit,
@@ -47,11 +54,13 @@ import {
 	vectorIndexFilterPaths,
 } from "@/lib/research-pipeline";
 import {
+	advisoryIdentifierTargets,
 	anchorDocUrls,
 	findingIdentifierTargets,
 	hasFullLexicalCoverage,
 	identifierIsPresent,
 	identifierTargets,
+	isReleaseTitle,
 	matchesVersionTarget,
 	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
@@ -59,6 +68,7 @@ import {
 	rankResearchChunks,
 	recencyContentTokens,
 	recencyIntent,
+	releaseTagTargets,
 	researchOrder,
 	selectRecencySupplement,
 	versionTargets,
@@ -894,36 +904,66 @@ async function research(
 		}
 	}
 
-	// Release-tag lookup (versionTargets in research-rank.ts): the pinned
-	// document must be IN the pool to be pinned. Fetch by title when the
-	// vector pool missed it — same fetch-not-rank root as the CAP/SEP path.
-	const vTargets = versionTargets(q);
-	if (
-		vTargets.length &&
-		!chunks.some((c) => matchesVersionTarget(c.title, vTargets))
-	) {
-		try {
-			const direct = await payload.find({
-				collection: "research-docs",
-				where: {
-					and: [
-						{ or: vTargets.map((t) => ({ title: { like: t } })) },
-						...(effectiveSource
-							? [{ source: { equals: effectiveSource } }]
-							: []),
-					],
-				},
-				limit: 10,
-				depth: 0,
-				pagination: false,
-				select: { embedding: false },
-			});
-			const have = new Set(chunks.map((c) => c.id));
-			for (const d of direct.docs as unknown as RawResearchDoc[]) {
-				if (!have.has(String(d.id))) chunks.push(toRow(d));
-			}
-		} catch {
-			// best-effort — the pool result still serves
+	// Exact lookup keys (exactPin in research-rank.ts): release tags, and
+	// finding or advisory ids. The pinned document must be IN the pool to be
+	// pinned, so fetch each key the vector pool missed from the whole scope,
+	// same fetch-not-rank root as the CAP/SEP path. sls-090: because the
+	// lookup covers the scope, a key still unserved is a real miss, and a
+	// failed lookup is a failed read (unchecked), never an absence.
+	const releaseTags = releaseTagTargets(q);
+	const looseTags = versionTargets(q).filter(
+		(t) => !releaseTags.some((r) => r.tag === t),
+	);
+	const exactIds = [
+		...findingIdentifierTargets(q),
+		...advisoryIdentifierTargets(q),
+	];
+	const exactNeedles: Where[] = [
+		...looseTags
+			.filter((t) => !chunks.some((c) => matchesVersionTarget(c.title, [t])))
+			.map((t) => ({ title: { like: t } })),
+		...releaseTags
+			.filter((r) => !chunks.some((c) => isReleaseTitle(c.title, r)))
+			.map((r) => ({ title: { contains: `${r.repo} ${r.tag}` } })),
+		...exactIds
+			.filter(
+				(id) =>
+					!chunks.some((c) =>
+						identifierIsPresent(id, [c.title, c.content, c.url]),
+					),
+			)
+			.flatMap((id): Where[] => [
+				{ title: { contains: id } },
+				{ content: { contains: id } },
+			]),
+	];
+	let exactLookupWarning: string | null = null;
+	if (exactNeedles.length) {
+		const direct = await degradedRead(
+			"research exact-identifier lookup",
+			() =>
+				payload.find({
+					collection: "research-docs",
+					where: {
+						and: [
+							{ or: exactNeedles },
+							...(effectiveSource
+								? [{ source: { equals: effectiveSource } }]
+								: []),
+						],
+					},
+					limit: 25,
+					depth: 0,
+					pagination: false,
+					select: { embedding: false },
+				}),
+			{ docs: [] },
+			DEFAULT_READ_TIMEOUT_MS,
+		);
+		exactLookupWarning = direct.warning;
+		const have = new Set(chunks.map((c) => c.id));
+		for (const d of direct.value.docs as unknown as RawResearchDoc[]) {
+			if (!have.has(String(d.id))) chunks.push(toRow(d));
 		}
 	}
 
@@ -1076,26 +1116,34 @@ async function research(
 		matchMode: mode,
 	});
 
-	// sls-071: a finding identifier is present verbatim or it is a miss. Vector
-	// search never goes empty, so without this an absent id returns the
-	// report's boilerplate — and scored HIGHER than a real id did. Say so
-	// rather than let a nearest neighbour read as the finding.
-	const findingIds = findingIdentifierTargets(q);
-	const missedIds = findingIds.filter(
-		(id) =>
-			!identifierIsPresent(
-				id,
-				results.flatMap((r) => [
-					(r as { content?: string }).content,
-					(r as { title?: string }).title,
-				]),
-			),
-	);
+	// sls-071, sls-090: a finding id, an advisory id or a repo-qualified
+	// release tag is present verbatim or it is a miss. Vector search never
+	// goes empty, so without this an absent id returns its nearest
+	// neighbours, scored as though they matched. Say so.
+	const served = results.flatMap((r) => {
+		const row = r as { content?: string; title?: string; url?: string };
+		return [row.content, row.title, row.url];
+	});
+	const missedIds = [
+		...exactIds.filter((id) => !identifierIsPresent(id, served)),
+		...releaseTags
+			.filter(
+				(t) =>
+					!results.some((r) =>
+						isReleaseTitle((r as { title?: string }).title, t),
+					),
+			)
+			.map((t) => `${t.repo} ${t.tag}`),
+	];
+	const these =
+		missedIds.length === 1 ? "this identifier" : "these identifiers";
 	const exactMiss =
 		missedIds.length > 0
 			? {
 					identifiers: missedIds,
-					note: `The indexed corpus contains no chunk carrying ${missedIds.length === 1 ? "this identifier" : "these identifiers"} verbatim. The rows below are the nearest SEMANTIC neighbours of the query — they are not that finding, and their confidence scores rank similarity, not a match. Do not report ${missedIds.join(", ")} as found, and do not infer its content from these rows.`,
+					note: exactLookupWarning
+						? `No row on this page carries ${these} verbatim, and the exact lookup over the searched scope failed (see failedReads), so whether the corpus holds it is unknown. The rows below are the nearest semantic neighbours of the query, not that record. Retry before reporting it as found or absent.`
+						: `No document in the searched scope carries ${these} verbatim: the exact lookup checked every document in scope, not only this page. The rows below are the nearest semantic neighbours of the query, not that record, and their confidence scores rank similarity, not a match. Do not report it as found or infer its content from these rows. Absence from this corpus is not proof the record does not exist; its primary source decides that.`,
 				}
 			: null;
 
@@ -1113,13 +1161,18 @@ async function research(
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning || limitNote || vectorNote || sourceEmptyNote
+				...(paramWarning ||
+				limitNote ||
+				vectorNote ||
+				sourceEmptyNote ||
+				exactLookupWarning
 					? {
 							warnings: [
 								paramWarning,
 								limitNote,
 								vectorNote,
 								sourceEmptyNote,
+								exactLookupWarning,
 							].filter(Boolean),
 						}
 					: {}),
@@ -1378,8 +1431,9 @@ async function researchMany(
 		...(paramWarning ? [paramWarning] : []),
 		...(perNote ? [perNote] : []),
 		...ok.flatMap((a) =>
-			((a.body.meta.warnings ?? []) as string[]).map(
-				(w) => `source=${a.source}: ${w}`,
+			// A source's failed read must still count on the merged page.
+			((a.body.meta.warnings ?? []) as string[]).map((w) =>
+				scopedWarning(`source=${a.source}`, w),
 			),
 		),
 		...failed.map((a) =>

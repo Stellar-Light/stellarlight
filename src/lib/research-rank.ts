@@ -249,6 +249,75 @@ export function findingIdentifierTargets(query: string | undefined): string[] {
 	return out;
 }
 
+// ── sls-090: SDK advisory ids are lookup keys too ──
+// CVE-2026-24889 and GHSA-96xm-fv9w-pf3f each returned ten adjacent documents
+// carrying neither id (2026-10-09). Same rule as a finding id: the id is
+// present verbatim or it is a miss. GHSA bodies are lowercase on GitHub.
+const ADVISORY_ID_RE = /\b(?:CVE-\d{4}-\d{4,7}|GHSA(?:-[0-9a-z]{4}){3})\b/gi;
+
+/** CVE and GHSA ids named by the query, deduped, in GitHub's casing. */
+export function advisoryIdentifierTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.matchAll(ADVISORY_ID_RE)) {
+		const raw = m[0];
+		const id = /^cve/i.test(raw)
+			? raw.toUpperCase()
+			: `GHSA${raw.slice(4).toLowerCase()}`;
+		if (!out.includes(id)) out.push(id);
+	}
+	return out;
+}
+
+/** The repos the `release` source ingests (scripts/ingest-protocol-releases.ts).
+ * Each release document's title starts with `${repo} ${tag}`. */
+export const RELEASE_REPOS = [
+	"stellar-core",
+	"stellar-cli",
+	"js-stellar-sdk",
+	"rs-soroban-sdk",
+];
+// "soroban-sdk" is the crate rs-soroban-sdk publishes; people name the crate.
+const RELEASE_TAG_RE = new RegExp(
+	`\\b(${RELEASE_REPOS.join("|")}|soroban-sdk)[\\s@]+v?(\\d+\\.\\d+\\.\\d+(?:-[0-9a-z.]+)?)\\b`,
+	"gi",
+);
+
+export interface ReleaseTagTarget {
+	repo: string;
+	tag: string;
+}
+
+/** Repo-qualified release tags ("rs-soroban-sdk v25.0.2"). stellar-core and
+ * rs-soroban-sdk share version numbers, so a named repo pins only its own
+ * release, and a tag the corpus lacks is an exact miss (sls-090). */
+export function releaseTagTargets(
+	query: string | undefined,
+): ReleaseTagTarget[] {
+	if (!query) return [];
+	const out: ReleaseTagTarget[] = [];
+	for (const m of query.matchAll(RELEASE_TAG_RE)) {
+		const name = m[1].toLowerCase();
+		const repo = name === "soroban-sdk" ? "rs-soroban-sdk" : name;
+		const tag = `v${m[2].toLowerCase()}`;
+		if (!out.some((r) => r.repo === repo && r.tag === tag))
+			out.push({ repo, tag });
+	}
+	return out;
+}
+
+/** Is this the title of that repo's release? Exact tag: v25.2.2 is not
+ * v25.2.2-external. */
+export function isReleaseTitle(
+	title: string | null | undefined,
+	{ repo, tag }: ReleaseTagTarget,
+): boolean {
+	const t = (title ?? "").toLowerCase();
+	return [`${repo} ${tag}`, `${repo} ${tag.slice(1)}`].some(
+		(head) => t === head || t.startsWith(`${head} `),
+	);
+}
+
 // ── Release tags are lookup keys too ──
 // "stellar-core v28.0.0" is a request for THAT release. The tag tokenizes to
 // "v28" (".0.0" splits away), every older stellar-core release shares the
@@ -297,6 +366,28 @@ function matchesTarget(url: string, targets: string[]): boolean {
 	return targets.some((id) =>
 		new RegExp(`/${id}\\.md(?:$|[#?])`, "i").test(url),
 	);
+}
+
+/** The exact-lookup pin both orderings share: the named CAP/SEP document,
+ * the named release, or a chunk carrying a named finding or advisory id
+ * verbatim. An exact-id query is a lookup, not a search. */
+export function exactPin(
+	query: string | undefined,
+): (c: { url: string; title?: string | null; content?: string }) => boolean {
+	const targets = identifierTargets(query);
+	const tags = releaseTagTargets(query);
+	const vTargets = versionTargets(query).filter(
+		(t) => !tags.some((r) => r.tag === t),
+	);
+	const ids = [
+		...findingIdentifierTargets(query),
+		...advisoryIdentifierTargets(query),
+	];
+	return (c) =>
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets)) ||
+		tags.some((r) => isReleaseTitle(c.title, r)) ||
+		ids.some((id) => identifierIsPresent(id, [c.title, c.content, c.url]));
 }
 
 // Recency INTENT — the query literally asks for what's newest ("latest
@@ -661,11 +752,7 @@ export function researchOrder(
 	a: RankableChunk & { confidence: { score: number } },
 	b: RankableChunk & { confidence: { score: number } },
 ) => number {
-	const targets = identifierTargets(query);
-	const vTargets = versionTargets(query);
-	const pinned = (c: RankableChunk) =>
-		(targets.length > 0 && matchesTarget(c.url, targets)) ||
-		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const pinned = exactPin(query);
 	const recent = recencyIntent(query);
 	const key = (c: RankableChunk & { confidence: { score: number } }) =>
 		recent
@@ -702,13 +789,9 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// page max, as before — the pool is the honest denominator).
 	const maxScore = filtered.reduce((m, c) => Math.max(m, c.score ?? 0), 0);
 
-	// Exact CAP/SEP identifier pin (sls-019): the named document must rank
+	// Exact identifier pin (sls-019, sls-090): the named document must rank
 	// ahead of vector order — an exact-ID query is a lookup, not a search.
-	const targets = identifierTargets(opts.query);
-	const vTargets = versionTargets(opts.query);
-	const pinned = (c: RankableChunk) =>
-		(targets.length > 0 && matchesTarget(c.url, targets)) ||
-		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const pinned = exactPin(opts.query);
 
 	// Curated vertical anchors (see RESEARCH_ANCHORS): relevance floor, not a
 	// hard pin — identifier lookups and genuinely-stronger matches stay ahead.

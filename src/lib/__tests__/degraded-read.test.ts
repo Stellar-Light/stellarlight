@@ -8,6 +8,7 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	scopedWarning,
 	withPartial,
 	withReadDeadline,
 	withReadTimeout,
@@ -193,5 +194,46 @@ describe("withPartial", () => {
 				cause: "503 index read failed; its rows are missing from this page",
 			},
 		]);
+	});
+
+	// A merged multi-source page prefixed each source's lines with
+	// "source=X: ", which hid that source's failed reads from this parser.
+	it("a scoped failed read still counts on a merged page", () => {
+		const m = withPartial({
+			warnings: [
+				scopedWarning(
+					"source=release",
+					degradedWarning("research exact-identifier lookup", "timeout"),
+				),
+				scopedWarning("source=cap", "limit 40 was clamped to 25"),
+			],
+		});
+		expect(m.partial).toBe(true);
+		expect(m.failedReads).toEqual([
+			{
+				read: "source=release research exact-identifier lookup",
+				cause: "timeout",
+			},
+		]);
+		expect(m.warnings[1]).toBe("source=cap: limit 40 was clamped to 25");
+	});
+
+	it("a partial page cannot state its total (sls-089)", () => {
+		const lost = withPartial({
+			warnings: [degradedWarning("projects candidate fetch", "timeout")],
+			counts: { returned: 0, total: 0 },
+		});
+		expect(lost.counts).toEqual({
+			returned: 0,
+			total: null,
+			totalBasis: "partial-read",
+		});
+		// The controls: a complete empty search keeps its confirmed zero, and an
+		// unread-parameter warning is not a failed read.
+		for (const warnings of [[], ["Unknown query parameter(s) ignored: foo"]]) {
+			expect(
+				withPartial({ warnings, counts: { returned: 0, total: 0 } }).counts,
+			).toEqual({ returned: 0, total: 0 });
+		}
 	});
 });

@@ -2150,7 +2150,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														"Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report\u0027s section boilerplate, scored as though it were a match. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match.",
+														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. If that lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
 													properties: {
 														identifiers: {
 															type: "array",
@@ -9022,7 +9022,7 @@ export const spec: OpenAPISpec = {
 					partial: {
 						type: "boolean",
 						description:
-							"On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status.",
+							'On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When true, counts.total is null with totalBasis "partial-read": a page that lost a read cannot count its matches.',
 					},
 					failedReads: {
 						type: "array",
@@ -9058,12 +9058,12 @@ export const spec: OpenAPISpec = {
 								minimum: 0,
 								nullable: true,
 								description:
-									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred.",
+									"Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means no honest total exists, never zero and never omitted, and `totalBasis` names why: 'unbounded-similarity-ranking' (searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count) or 'partial-read' (`partial` is true: a backend read failed, so the matching set could not be counted). Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred.",
 							},
 							totalBasis: {
 								type: "string",
 								description:
-									"Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field.",
+									"Present only when `total` is null: names why no total exists, 'unbounded-similarity-ranking' or 'partial-read'. Disambiguates the null so it is never read as zero or as a missing field.",
 							},
 							semantic: {
 								type: "integer",
@@ -10675,9 +10675,16 @@ export const spec: OpenAPISpec = {
 									},
 									matchMode: {
 										type: "string",
-										enum: ["strict", "partial", "weak", "all", "none"],
+										enum: [
+											"strict",
+											"partial",
+											"corrected",
+											"weak",
+											"all",
+											"none",
+										],
 										description:
-											"How well this page matched the query. strict = every query term matched; partial = some did; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat weak/none rows as candidates requiring verification, never as findings.",
+											"How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical repos); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey \u2192 stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.",
 									},
 									matchModeLabel: {
 										type: "string",

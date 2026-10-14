@@ -137,6 +137,10 @@ jobs:
       - name: Ingest protocol/tooling releases (GitHub)
         if: inputs.source == '' || inputs.source == 'release'
         continue-on-error: true
+        env:
+          # 8 GitHub API reads a run (releases + security advisories);
+          # unauthenticated reads share the runner IP's 60/hour.
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-protocol-releases.ts --execute
       - name: Ingest Soroban audit reports (sorobansecurity.com)
         if: inputs.source == '' || inputs.source == 'audit'

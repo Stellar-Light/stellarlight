@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-14",
+		surfaces: ["api"],
+		version: "spec@1.9.73",
+		type: "fixed",
+		summary:
+			"Search honesty: repo search reports matchMode `corrected` for a spelling-corrected match, research recovers CVE ids, GHSA ids and repo-qualified release tags exactly (and says `exactMiss` when the corpus lacks them), and a partial page serves counts.total null with totalBasis `partial-read`.",
+		detail:
+			'sls-093: q=strupey on repo search served the Stroopy rows at `strict`, "every query term matched", though no row carries the token; the strupey \u2192 stroopy correction now labels the page `corrected` as project search has since sls-076, and the strict label says it describes the best row on the page. sls-090: CVE-2026-24889, GHSA-96xm-fv9w-pf3f and rs-soroban-sdk v25.0.2 returned adjacent documents with no exactMiss. The corpus never held the v25.0.2 patch release (it aged out of the newest 15 before the release source existed) or any advisory record; the release ingest now keeps every release whose notes link an advisory and adds each repo\u0027s published GitHub security advisories. A query naming a finding id, an advisory id or a repo-qualified tag looks it up across the whole source scope and pins the document carrying it; a repo-qualified tag pins only that repo\u0027s release, since stellar-core and rs-soroban-sdk share version numbers. A failed lookup is a failed read, so the miss is unchecked rather than absent. sls-089: a page that lost a backend read served a confirmed counts.total (once 0 for a populated category); on searchProjects, searchRepos, getBuilders, listSkills and getHackathons it is now null whenever `partial` is true. On a multi-source research call a source\u0027s failed read now counts toward `partial` too.',
+	},
+	{
 		date: "2026-10-08",
 		surfaces: ["api"],
 		version: "spec@1.9.72",
