@@ -1576,6 +1576,49 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { shortDescription: desc } });
 	}
 
+	// ── sls-091 sweep (REPORT-ONLY): description vs sourced deployment network ──
+	// Zenex served "Currently on testnet, with mainnet pending" beside a
+	// sourced deployment.network of mainnet. Flags any row whose description
+	// contradicts its deployment network, reading the description this run
+	// leaves behind (a DESCRIPTION_FIXES entry counts as already applied).
+	// Prints for review; a confirmed row gets a DESCRIPTION_FIXES entry.
+	console.log("\n── Network contradiction sweep (report-only, no writes) ──");
+	{
+		const TESTNET_TEXT =
+			/\b(currently|only|still|live|running|deployed) (on|in) testnet\b|\btestnet[- ]only\b|\bmainnet (is )?(pending|coming|soon|planned|launch(ing)? soon)\b|\bnot yet (live )?on mainnet\b|\bupcoming mainnet\b/i;
+		const MAINNET_TEXT =
+			/\b(live|launched|deployed|running) on (stellar )?mainnet\b/i;
+		const rows = await payload.find({
+			collection: "projects",
+			where: { "deployment.network": { exists: true } },
+			pagination: false,
+			depth: 0,
+			select: { slug: true, shortDescription: true, deployment: true },
+			overrideAccess: true,
+		});
+		let flagged = 0;
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const p of rows.docs as any[]) {
+			const net = p.deployment?.network;
+			const text: string =
+				DESCRIPTION_FIXES[p.slug] ?? p.shortDescription ?? "";
+			const hit =
+				net === "mainnet"
+					? text.match(TESTNET_TEXT)
+					: net === "testnet"
+						? text.match(MAINNET_TEXT)
+						: null;
+			if (!hit) continue;
+			flagged++;
+			console.log(
+				`  ${p.slug}: deployment says ${net}, description says "${hit[0]}"`,
+			);
+		}
+		console.log(
+			`  ${flagged} contradiction(s) among ${rows.docs.length} rows with a deployment network`,
+		);
+	}
+
 	// ── sls-012: structured anchor coverage, synced from the partner record ──
 	// The partner directory already carries structured seps / currencies /
 	// country; project rows (searchProjects category=Anchor) only had prose.

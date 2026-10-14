@@ -4954,6 +4954,13 @@ export const SEEDS: Array<{
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// Raven sls-091: the row still said "Currently on testnet, with mainnet
+	// pending" beside a sourced mainnet deployment. Zenex's deployments page
+	// (docs.zenex.trade/deployments/contract-addresses, checked by the
+	// operator on 6 October 2026) lists the live mainnet factory and an
+	// XLM-USD market. Only that sentence changes.
+	zenex:
+		"Zenex (formerly Hermes) is a decentralized perpetual (leveraged) trading exchange on Stellar/Soroban, using a liquidity-pool model with oracle pricing for deep liquidity and low slippage. Live on Stellar mainnet: its deployments page lists the mainnet factory and an XLM-USD market. Supports passkey login and asset bridging via Rozo, with Circle CCTP support coming soon.",
 	// Raven sls-086: the row said "AQUA locks into ICE for on-chain DAO
 	// governance votes directing rewards". Aquarius's docs separate two vote
 	// tokens: ICE only tracks locked AQUA and sets the upvoteICE and governICE
