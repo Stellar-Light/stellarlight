@@ -2698,6 +2698,14 @@ const WINNERS_2025 = [
  * Several of these names are nominated again this year; that is left to
  * speak for itself.
  */
+/** A blurb's first sentence: a winner card carries one line, not the
+ * nominee's whole pitch. */
+function firstSentence(text: string | null | undefined): string | null {
+	const t = text?.trim();
+	if (!t) return null;
+	return t.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? t;
+}
+
 /** What a winner card shows: last year's curated winners and this year's
  * results both fit it. */
 interface WinnerCardData {
@@ -2726,7 +2734,7 @@ function WinnerCard({
 			viewport={{ once: true, amount: 0.45 }}
 			onViewportEnter={() => setOpen(true)}
 			transition={{ duration: 0.5, ease: EASE, delay: index * 0.1 }}
-			className={`sm-win relative overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 sm:p-6 ${
+			className={`sm-win relative flex flex-col overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-8 ${
 				open ? "is-open" : ""
 			}`}
 			style={{ ["--sm-d" as string]: `${index * 0.16}s` }}
@@ -2743,7 +2751,7 @@ function WinnerCard({
 					className="h-10 w-10 flex-shrink-0 rounded-lg border border-[#2f2f2f] bg-[#111] object-cover"
 				/>
 			</div>
-			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+			<p className="relative mt-8 text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
 				{/* a new tab, so a pilot mid-ballot keeps their picks */}
 				<a
 					href={`/project/${winner.slug}`}
@@ -2773,16 +2781,16 @@ function WinnerCard({
 				)}
 			</p>
 			{winner.line && (
-				<p className="mt-1 text-sm font-medium text-neutral-200">
+				<p className="mt-2 text-sm font-medium text-neutral-200">
 					{winner.line}
 				</p>
 			)}
 			{winner.blurb && (
-				<p className="mt-3 text-sm leading-relaxed text-neutral-300">
+				<p className="mt-4 mb-8 text-sm leading-7 text-neutral-300">
 					{winner.blurb}
 				</p>
 			)}
-			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
+			<p className="mt-auto border-t border-[#2f2f2f] pt-4 text-xs leading-relaxed text-neutral-500">
 				Nominees: {winner.finalists}
 			</p>
 			{/* the curtain, closed until the card is in view */}
@@ -2869,7 +2877,9 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 	return (
 		<>
 			<TopBar onHowItWorks={() => setHowOpen(true)} />
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32">
+			<div
+				className={`${shortlist ? "max-w-3xl" : "max-w-6xl"} mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32`}
+			>
 				<motion.header
 					initial={{ opacity: 0, y: 18 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -2903,7 +2913,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 						    per-project counts; the other finalists are listed
 						    alphabetically so the order implies no ranking. A tie at
 						    the top shows every joint winner. */}
-						<div className="grid gap-4 sm:grid-cols-3">
+						<div className="grid gap-6 md:grid-cols-3">
 							{results.categories
 								.flatMap((category) => {
 									const top = Math.max(
@@ -2929,7 +2939,7 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 											name: w.name,
 											slug: w.slug,
 											logo: n?.logoUrl || "/logo.png",
-											blurb: n?.blurb ?? null,
+											blurb: firstSentence(n?.blurb),
 											finalists,
 										};
 									});
