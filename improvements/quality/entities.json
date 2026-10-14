@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-13T15:15:39.474Z",
+ "generatedAt": "2026-10-14T13:01:40.047Z",
  "surfaces": [
   {
    "surface": "code",
@@ -19,7 +19,7 @@
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 2,
-   "clearedFindings": 211,
+   "clearedFindings": 212,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 817,
+  "total": 823,
   "open": 40,
-  "refreshQueue": 78,
+  "refreshQueue": 83,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 675,
+  "cleared": 676,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 109,
-    "total": 335
+    "open": 114,
+    "total": 341
    },
    "instrument": {
     "open": 26,
@@ -105,9 +105,9 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 24,
+    "refresh": 23,
     "blocked": 0,
-    "cleared": 121,
+    "cleared": 122,
     "verified": 0,
     "surface": "directory"
    },
@@ -195,7 +195,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 49,
+    "refresh": 51,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -285,7 +285,7 @@
    {
     "mode": "supersession-unrecorded",
     "open": 0,
-    "refresh": 5,
+    "refresh": 9,
     "blocked": 0,
     "cleared": 0,
     "verified": 0,
@@ -295,11 +295,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 30
+    "count": 28
    },
    {
     "bucket": "8–30d",
-    "count": 10
+    "count": 12
    },
    {
     "bucket": "31–60d",
@@ -311,6 +311,12 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "https://chippercash.com",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-10-14"
+   },
    {
     "probe": "https://x.com/boundless_xyz",
     "surface": "directory",
@@ -352,25 +358,19 @@
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-10-12"
-   },
-   {
-    "probe": "https://x.com/nectar_xlm",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-12"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 158,
-     "recurred": 124,
-     "ratePct": 78.5
+     "newFindings": 160,
+     "recurred": 122,
+     "ratePct": 76.3
     },
     "lifetime": {
-     "newFindings": 817,
-     "recurred": 274,
+     "newFindings": 823,
+     "recurred": 276,
      "ratePct": 33.5
     }
    },
@@ -383,13 +383,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 158,
-     "repeats": 157,
+     "newFindings": 160,
+     "repeats": 159,
      "ratePct": 99.4
     },
     "lifetime": {
-     "newFindings": 817,
-     "repeats": 810,
+     "newFindings": 823,
+     "repeats": 816,
      "ratePct": 99.1
     },
     "byClass": [
@@ -401,8 +401,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 217,
-      "open": 73,
+      "total": 219,
+      "open": 74,
       "firstSeen": "2026-07-22"
      },
      {
@@ -413,8 +413,8 @@
      },
      {
       "class": "unclassified",
-      "total": 62,
-      "open": 41,
+      "total": 66,
+      "open": 45,
       "firstSeen": "2026-09-17"
      },
      {
@@ -441,7 +441,7 @@
  },
  "projects": {
   "read": 1004,
-  "population": 1133,
+  "population": 1134,
   "servedPopulation": 1004,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -461,10 +461,8 @@
    {
     "slug": "stellar-vrf",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -479,10 +477,8 @@
    {
     "slug": "rail402",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -1214,10 +1210,8 @@
    {
     "slug": "lusty",
     "prominence": 0,
-    "factsPresent": 4,
-    "missing": [
-     "strongBasis"
-    ],
+    "factsPresent": 5,
+    "missing": [],
     "status": "Live"
    },
    {
@@ -8542,25 +8536,25 @@
   "strongByBasis": {
    "human-verified": 281,
    "onchain-activity": 50,
-   "product-integration": 67,
-   "repo-activity": 117,
+   "product-integration": 68,
+   "repo-activity": 119,
    "package-release": 9
   },
   "strongBasisSplit": {
    "population": 1004,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
    "livePopulation": 847,
-   "weakLiveOnly": 463,
-   "weakLiveRows": 480,
-   "onchainEligible": 7,
-   "appOnly": 473,
+   "weakLiveOnly": 460,
+   "weakLiveRows": 477,
+   "onchainEligible": 6,
+   "appOnly": 471,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 385
+    "count": 382
    },
    {
     "basis": "human-verified",
@@ -8568,7 +8562,7 @@
    },
    {
     "basis": "repo-activity",
-    "count": 117
+    "count": 119
    },
    {
     "basis": "source-inherited",
@@ -8576,7 +8570,7 @@
    },
    {
     "basis": "product-integration",
-    "count": 67
+    "count": 68
    },
    {
     "basis": "onchain-activity",
@@ -8596,7 +8590,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 508,
+  "weakestTotal": 505,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -9433,7 +9427,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 480
+    "count": 477
    },
    {
     "field": "dated",
@@ -9465,8 +9459,8 @@
    "curatedIndex": {
     "repos": 3655,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3338,
-    "depthPct": 91
+    "withCodeDepth": 3374,
+    "depthPct": 92
    },
    "tail": {
     "repos": 10018,
@@ -9496,7 +9490,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5822,
+    "pool": 5840,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 132
    }
@@ -9548,19 +9542,19 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1369
+     "count": 1374
     },
     {
      "label": "slowing",
-     "count": 1055
+     "count": 1060
     },
     {
      "label": "active",
-     "count": 984
+     "count": 1012
     },
     {
      "label": "unknown",
-     "count": 198
+     "count": 160
     },
     {
      "label": "archived",
@@ -9570,19 +9564,19 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1267
+     "count": 1287
     },
     {
      "label": "unknown",
-     "count": 621
+     "count": 589
     },
     {
      "label": "Rust",
-     "count": 530
+     "count": 535
     },
     {
      "label": "JavaScript",
-     "count": 394
+     "count": 397
     },
     {
      "label": "Python",
@@ -9598,11 +9592,11 @@
     },
     {
      "label": "HTML",
-     "count": 101
+     "count": 102
     },
     {
      "label": "Shell",
-     "count": 42
+     "count": 44
     },
     {
      "label": "CSS",
@@ -9611,7 +9605,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11288,
+  "withCodeDepth": 11324,
   "withNotes": 1063,
   "withMainnet": 132,
   "top": [
@@ -10142,11 +10136,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 57,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10155,12 +10149,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "slowing",
+    "language": "JavaScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 72,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10168,12 +10162,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 63,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10181,11 +10175,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "active",
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10194,11 +10188,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 73,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10220,12 +10214,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 76,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10233,11 +10227,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 0,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10428,12 +10422,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 69,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10441,11 +10435,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 76,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10467,12 +10461,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "dormant",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 51,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10480,12 +10474,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 77,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10493,12 +10487,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 75,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10519,11 +10513,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 84,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10532,11 +10526,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 88,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10558,11 +10552,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 100,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10575,7 +10569,7 @@
     "language": null,
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 96,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10584,12 +10578,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 67,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10597,7 +10591,7 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
+    "activity": "slowing",
     "language": null,
     "projectSlug": null,
     "notes": 0,
@@ -10610,12 +10604,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "Rust",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 76,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10636,12 +10630,12 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
-    "deployable": false,
+    "codeDepth": 65,
+    "deployable": true,
     "mainnetJoined": false
    },
    {
@@ -10649,11 +10643,11 @@
     "repoScore": 0,
     "tier": "community",
     "source": "builder-owned",
-    "activity": null,
-    "language": null,
+    "activity": "active",
+    "language": "TypeScript",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": null,
+    "codeDepth": 82,
     "deployable": false,
     "mainnetJoined": false
    }
@@ -10663,7 +10657,7 @@
   {
    "area": "project status",
    "limit": "46% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "460 of 1004 rows (census)",
+   "measurement": "457 of 1004 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
@@ -10704,7 +10698,7 @@
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 56
+    "value": 58
    },
    {
     "id": "s:gone-repos",
@@ -10752,7 +10746,7 @@
     "id": "s:supersession-freshness",
     "label": "supersession-freshness",
     "column": 0,
-    "value": 5
+    "value": 9
    },
    {
     "id": "s:golden-eval",
@@ -10800,7 +10794,7 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 213
+    "value": 214
    },
    {
     "id": "f:code",
@@ -10836,13 +10830,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 675
+    "value": 676
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 135
+    "value": 140
    },
    {
     "id": "o:verified",
@@ -10962,7 +10956,7 @@
     "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 211
+    "value": 212
    },
    {
     "source": 7,
@@ -11011,14 +11005,14 @@
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 56
+    "value": 58
    },
    {
     "source": 20,
     "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 83
+    "value": 89
    },
    {
     "source": 1,
@@ -11032,7 +11026,7 @@
     "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 26
+    "value": 25
    },
    {
     "source": 4,
@@ -11046,7 +11040,7 @@
     "target": 20,
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
-    "value": 5
+    "value": 9
    },
    {
     "source": 16,
@@ -11087,7 +11081,7 @@
     "missing": 361,
     "of": 383,
     "share": 94.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5439 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5457 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 361,
@@ -11156,10 +11150,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 480,
+    "missing": 477,
     "of": 1004,
-    "share": 47.8,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 7 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 473 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "share": 47.5,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 471 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -11175,28 +11169,28 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2385,
+    "missing": 2349,
     "of": 13673,
-    "share": 17.4,
+    "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2385,
+    "examplePoolSize": 2349,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
-     "Obiajulu-gif/afripuente",
-     "nickthelegend/stellar-white-belt-paydapp",
-     "Gabrululu/Soroban-Quest",
-     "Gabrululu/Stellar-Sessions",
-     "CristobalWeb3/day91",
      "Wesley534/microvault",
-     "paul-motron/zitian",
-     "kauevictor30/stellar-link-hub",
      "fazaziishola-coder/contractatlas-core",
      "fazaziishola-coder/contractatlas-studio",
      "fazaziishola-coder/anchortrace-sdk",
-     "fazaziishola-coder/anchortrace-studio"
+     "fazaziishola-coder/anchortrace-studio",
+     "fazaziishola-coder/eventparity-engine",
+     "fazaziishola-coder/eventparity-studio",
+     "fazaziishola-coder/raillab-engine",
+     "fazaziishola-coder/raillab-workbench",
+     "fazaziishola-coder/authmatrix-core",
+     "fazaziishola-coder/authmatrix-inspector",
+     "fazaziishola-coder/chargeguard-runner"
     ]
    },
    {
