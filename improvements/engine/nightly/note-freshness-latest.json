@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-13T13:10:46.574Z",
+	"generatedAt": "2026-10-14T10:50:47.714Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -24,7 +24,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
-			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.15.0 (published 2026-09-27)",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.16.0 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
@@ -58,6 +58,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar-scaffold/cli:crates:stellar-scaffold-cli",
+			"note": "note (asOf 2026-09-02) cites 0.0.27; registry latest is 0.0.28 (published 2026-10-14)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:lightsail-network/strledger:pypi:strledger",
 			"note": "note (asOf 2026-09-02) cites 0.10.1; registry latest is 0.11.0 (published 2026-09-29)",
 			"surface": "code"
@@ -74,7 +79,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-12 (published 2026-10-12)",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-13 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
@@ -210,6 +215,11 @@
 		{
 			"probe": "note-repo-gone:comzzy-comzzy/datavend",
 			"note": "public note asOf 2026-04-11; github.com/comzzy-comzzy/datavend is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:nice-bills/stipend",
+			"note": "public note asOf 2026-04-12; github.com/nice-bills/stipend is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
