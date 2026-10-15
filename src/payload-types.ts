@@ -1400,6 +1400,10 @@ export interface HackathonBuild {
 	 * dorahacks-buidl-<id>, the id the builds API has always served
 	 */
 	buildId: string;
+	/**
+	 * <buildId>@<hackathonSlug>: one row per submission and event, the key the sync lane writes by
+	 */
+	entryKey?: string | null;
 	name: string;
 	/**
 	 * DoraHacks' one-line summary (about 256 characters at most upstream). Served as `description`.

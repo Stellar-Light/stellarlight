@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { indexProjectRepos, repoFullNameOf } from "@/lib/hackathon-build-links";
 import {
+	dedupeBuilds,
 	type IndexedBuild,
 	indexedFromStored,
+	onePerSubmission,
 	searchHackathonBuilds,
 } from "@/lib/hackathon-builds";
 import {
@@ -338,7 +340,7 @@ describe("one submission in full", () => {
 
 	it("serves the write-up, the parsed prize and an unchecked link as absent", async () => {
 		const { buildDetailFromStored } = await import("@/lib/hackathon-builds");
-		const d = buildDetailFromStored({
+		const blend = {
 			id: "x",
 			buildId: "dorahacks-buidl-27438",
 			name: "Blend Pool Creator",
@@ -358,11 +360,39 @@ describe("one submission in full", () => {
 			detailReadAt: "2026-10-05T10:20:00.000Z",
 			updatedAt: "2026-10-05T10:20:00.000Z",
 			createdAt: "2026-10-05T10:20:00.000Z",
-		});
+		};
+		const d = buildDetailFromStored([blend]);
 		expect(d.writeUp).toBe("## Blend Pool Creator\nFull write-up.");
 		expect(d.prizeUsd).toBe(3000);
 		expect(d.hackathon.slug).toBe("stellar-hacks-blend");
 		expect("project" in d).toBe(false);
+
+		// sls-092: the same submission also entered a later event, unplaced.
+		// Its placed entry leads; both events are listed.
+		const palta = {
+			...blend,
+			id: "y",
+			hackathonSlug: "stellar-hacks-paltalabs",
+			hackathonTitle: "Stellar Hacks: PaltaLabs",
+			endedAt: "2025-08-07",
+			placement: null,
+			isWinner: false,
+		};
+		const both = buildDetailFromStored([palta, blend]);
+		expect(both.hackathon.slug).toBe("stellar-hacks-blend");
+		expect(both.placement).toBe("1st Place - $3,000 in XLM");
+		expect(
+			both.entries.map((e) => [e.hackathon.slug, e.isWinner, e.prizeUsd]),
+		).toEqual([
+			["stellar-hacks-blend", true, 3000],
+			["stellar-hacks-paltalabs", false, null],
+		]);
+		// A restored entry is a new row; the submission is not new.
+		const restored = { ...blend, firstSeenAt: "2026-10-15T09:00:00.000Z" };
+		const old = { ...palta, lastSeenAt: "2026-10-15T09:00:00.000Z" };
+		const dated = buildDetailFromStored([old, restored]);
+		expect(dated.firstSeenAt).toBe("2026-10-05T10:20:00.000Z");
+		expect(dated.lastSeenAt).toBe("2026-10-15T09:00:00.000Z");
 	});
 });
 
@@ -445,9 +475,9 @@ describe("what a build's repo declares", () => {
 			indexedFromStored(stored({ stackReadAt: "2026-10-05T00:00:00.000Z" }))
 				.stack,
 		).toEqual([]);
-		const d = buildDetailFromStored(
+		const d = buildDetailFromStored([
 			stored({ repoMissingAt: "2026-10-05T00:00:00.000Z" }),
-		);
+		]);
 		expect("stack" in d).toBe(false);
 		expect(d.stackReadAt).toBeNull();
 		expect(d.repoMissingAt).toBe("2026-10-05T00:00:00.000Z");
@@ -568,5 +598,69 @@ describe("project facts on a link", () => {
 			name: "TollPay",
 			basis: "repo",
 		});
+	});
+});
+
+// sls-092: Blend Pool Creator entered Stellar Hacks: Blend (1st place) and
+// then PaltaLabs. The index dropped every row after a submission's first,
+// so Blend served no first place and 35 of its 39 submissions.
+describe("a submission entered in two events", () => {
+	const inEvent = (slug: string, isWinner: boolean): IndexedBuild => ({
+		...build(
+			"Blend Pool Creator",
+			"Launch custom lending pools.",
+			isWinner,
+			"dorahacks-buidl-27438",
+		),
+		hackathon: { title: slug, slug, endedAt: null },
+	});
+	const rows = [
+		inEvent("stellar-hacks-paltalabs", false),
+		inEvent("stellar-hacks-blend", true),
+	];
+
+	it("keeps one row per event, each with its own placement", () => {
+		expect(
+			dedupeBuilds(rows).map((b) => [b.hackathon.slug, b.isWinner]),
+		).toEqual([
+			["stellar-hacks-paltalabs", false],
+			["stellar-hacks-blend", true],
+		]);
+		// The same event listing it twice is still one row.
+		expect(dedupeBuilds([...rows, rows[1]])).toHaveLength(2);
+	});
+
+	it("an event filter serves that event's own row", () => {
+		const hit = searchHackathonBuilds(rows, "", {
+			hackathons: ["stellar-hacks-blend"],
+		});
+		expect(hit.map((s) => [s.b.hackathon.slug, s.b.isWinner])).toEqual([
+			["stellar-hacks-blend", true],
+		]);
+	});
+
+	it("across events it is one result, its placed entry", () => {
+		for (const q of ["", "lending pools"]) {
+			const hit = searchHackathonBuilds(rows, q, { perSubmission: true });
+			expect(hit.map((s) => s.b.hackathon.slug)).toEqual([
+				"stellar-hacks-blend",
+			]);
+		}
+	});
+
+	it("counting keeps every event entry (analyze counts once per event)", () => {
+		expect(searchHackathonBuilds(rows, "")).toHaveLength(2);
+	});
+
+	it("an unplaced submission's best entry is its latest event", () => {
+		const at = (slug: string, endedAt: string): IndexedBuild => ({
+			...inEvent(slug, false),
+			hackathon: { title: slug, slug, endedAt },
+		});
+		const pick = onePerSubmission([
+			at("older", "2025-07-07"),
+			at("newer", "2025-08-07"),
+		]);
+		expect(pick.map((b) => b.hackathon.slug)).toEqual(["newer"]);
 	});
 });

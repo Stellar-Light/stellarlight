@@ -299,7 +299,7 @@ export interface paths {
         };
         /**
          * Trends and counts across Stellar hackathon submissions, with lift
-         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.
+         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. A submission entered in several events counts once in each. For the builds themselves → use searchHackathonBuilds.
          */
         get: operations["analyzeHackathonSubmissions"];
         put?: never;
@@ -3490,7 +3490,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3552,7 +3552,7 @@ export interface operations {
                             };
                             /** @description returned vs total — how much the filters narrowed. */
                             counts?: {
-                                /** @description Total builds in the index. */
+                                /** @description Submissions in the index. A submission entered in several events counts once. */
                                 indexedBuilds?: number;
                                 matched?: number;
                                 returned?: number;
@@ -3665,6 +3665,7 @@ export interface operations {
                             writeUp?: string | null;
                             /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
                             selfTags?: string[];
+                            /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's. */
                             hackathon?: {
                                 title?: string;
                                 slug?: string;
@@ -3675,6 +3676,19 @@ export interface operations {
                             award?: string | null;
                             prizeUsd?: number | null;
                             isWinner?: boolean;
+                            /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
+                            entries?: {
+                                hackathon?: {
+                                    title?: string;
+                                    slug?: string;
+                                    endedAt?: string | null;
+                                };
+                                track?: string | null;
+                                placement?: string | null;
+                                award?: string | null;
+                                prizeUsd?: number | null;
+                                isWinner?: boolean;
+                            }[];
                             links?: {
                                 dorahacks?: string;
                                 github?: string | null;
@@ -3787,7 +3801,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3858,6 +3872,7 @@ export interface operations {
                             by?: "event" | "year" | "placement" | "track" | null;
                             value?: string | null;
                             counts?: {
+                                /** @description Event entries in the index. A submission entered in several events counts once per event. */
                                 indexedBuilds?: number;
                             };
                             note?: string;
@@ -3977,6 +3992,7 @@ export interface operations {
                                 writeUp?: string | null;
                                 /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
                                 selfTags?: string[];
+                                /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's. */
                                 hackathon?: {
                                     title?: string;
                                     slug?: string;
@@ -3987,6 +4003,19 @@ export interface operations {
                                 award?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
+                                /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
+                                entries?: {
+                                    hackathon?: {
+                                        title?: string;
+                                        slug?: string;
+                                        endedAt?: string | null;
+                                    };
+                                    track?: string | null;
+                                    placement?: string | null;
+                                    award?: string | null;
+                                    prizeUsd?: number | null;
+                                    isWinner?: boolean;
+                                }[];
                                 links?: {
                                     dorahacks?: string;
                                     github?: string | null;

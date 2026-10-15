@@ -153,6 +153,40 @@ async function main() {
 		);
 	}
 
+	// ── 2c. Every ranked prize tier has its winner (sls-092) ─────────────────
+	// Stellar Hacks: Blend served a First Place tier and no rank-1 winner: the
+	// winning submission had also entered a later event, which kept it. An
+	// event whose winners carry ranks must have a winner at every ranked tier.
+	console.log("◆ Ranked prize tiers each have a winner");
+	const events: Array<{ slug?: string }> =
+		(await getJson("/api/hackathons")).body?.hackathons ?? [];
+	const holes: string[] = [];
+	let ranked = 0;
+	for (const ev of events) {
+		if (!ev.slug) continue;
+		const d = (await getJson(`/api/hackathons/${ev.slug}`)).body;
+		const got = new Set(
+			(d?.winners ?? [])
+				.map((w: { placementRank?: unknown }) => w.placementRank)
+				.filter((r: unknown) => typeof r === "number"),
+		);
+		const tiers: Array<{ rank?: unknown }> = d?.hackathon?.prizeTiers ?? [];
+		// Unranked winners or no tiers: nothing this rule can check.
+		if (!got.size || !tiers.length) continue;
+		ranked++;
+		const missing = tiers
+			.map((t) => t.rank)
+			.filter((r) => typeof r === "number" && !got.has(r));
+		if (missing.length) holes.push(`${ev.slug} (rank ${missing.join(", ")})`);
+	}
+	check(
+		`every ranked prize tier has a winner at its rank (${ranked} events with ranked winners)`,
+		ranked > 0 && holes.length === 0,
+		ranked
+			? `no winner at: ${holes.join("; ")}`
+			: "no event with ranked winners was read, so the rule checked nothing",
+	);
+
 	// ── 3. Filters actually filter (not silently ignored) ───────────────────
 	console.log("◆ Filters apply (no silent no-op)");
 	const baseTotal = (await getJson("/api/projects/search?q=wallet&limit=1"))

@@ -247,7 +247,7 @@ const buildFilterParams = (qDescription: string) => [
 		in: "query",
 		required: false,
 		description:
-			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
 		schema: { type: "string" },
 	},
 	{
@@ -515,6 +515,8 @@ const BUILD_DETAIL_SCHEMA = {
 		},
 		hackathon: {
 			type: "object",
+			description:
+				"The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's.",
 			properties: {
 				title: { type: "string" },
 				slug: { type: "string" },
@@ -526,6 +528,29 @@ const BUILD_DETAIL_SCHEMA = {
 		award: { type: "string", nullable: true },
 		prizeUsd: { type: "number", nullable: true },
 		isWinner: { type: "boolean" },
+		entries: {
+			type: "array",
+			description:
+				"Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them.",
+			items: {
+				type: "object",
+				properties: {
+					hackathon: {
+						type: "object",
+						properties: {
+							title: { type: "string" },
+							slug: { type: "string" },
+							endedAt: { type: "string", nullable: true },
+						},
+					},
+					track: { type: "string", nullable: true },
+					placement: { type: "string", nullable: true },
+					award: { type: "string", nullable: true },
+					prizeUsd: { type: "number", nullable: true },
+					isWinner: { type: "boolean" },
+				},
+			},
+		},
 		links: {
 			type: "object",
 			properties: {
@@ -3424,7 +3449,8 @@ export const spec: OpenAPISpec = {
 													properties: {
 														indexedBuilds: {
 															type: "integer",
-															description: "Total builds in the index.",
+															description:
+																"Submissions in the index. A submission entered in several events counts once.",
 														},
 														matched: { type: "integer" },
 														returned: { type: "integer" },
@@ -3625,7 +3651,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Trends and counts across Stellar hackathon submissions, with lift",
 				description:
-					"Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. For the builds themselves → use searchHackathonBuilds.",
+					"Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. A submission entered in several events counts once in each. For the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					purpose:
 						"Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
@@ -3789,7 +3815,11 @@ export const spec: OpenAPISpec = {
 												counts: {
 													type: "object",
 													properties: {
-														indexedBuilds: { type: "integer" },
+														indexedBuilds: {
+															type: "integer",
+															description:
+																"Event entries in the index. A submission entered in several events counts once per event.",
+														},
 													},
 												},
 												note: { type: "string" },

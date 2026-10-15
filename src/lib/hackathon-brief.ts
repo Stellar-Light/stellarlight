@@ -168,13 +168,18 @@ export interface HackathonBrief {
  * exact phrase; a winner matching one word of three is not prior art.
  */
 export function pickBriefBuilds(index: IndexedBuild[], q: string) {
-	const winners = searchHackathonBuilds(index, q, { winnersOnly: true })
+	const winners = searchHackathonBuilds(index, q, {
+		winnersOnly: true,
+		perSubmission: true,
+	})
 		.filter((s) => s.share >= 0.5)
 		.slice(0, 2);
 	const seen = new Set(winners.map((s) => s.b.id));
 	return [
 		...winners,
-		...searchHackathonBuilds(index, q).filter((s) => !seen.has(s.b.id)),
+		...searchHackathonBuilds(index, q, { perSubmission: true }).filter(
+			(s) => !seen.has(s.b.id),
+		),
 	].slice(0, 5);
 }
 

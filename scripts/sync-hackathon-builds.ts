@@ -11,7 +11,9 @@
  * hackathon-builds collection, which /api/hackathons/builds serves first.
  *
  * Per run:
- *   1. every ended Stellar event on DoraHacks, then each one's full roster
+ *   1. every ended Stellar event on DoraHacks, then each one's full roster,
+ *      one row per submission and event (a submission entered in two events
+ *      is two rows, each with its own placement)
  *   2. each submission's own page (the team's full write-up and self-reported
  *      tags) when it has not been read in the last 30 days
  *   3. the project link: the one directory project that lists the exact repo
@@ -165,12 +167,61 @@ async function ensureVectorIndex(): Promise<boolean> {
 	}
 }
 
+/** sls-092: one submission can enter several events (26 of 1,400 did), so a
+ * build is one row per submission and event, keyed by entryKey, and buildId
+ * is no longer unique. The old unique index refused a submission's second
+ * event: Blend's first place was dropped because PaltaLabs had claimed the
+ * submission. On --execute it becomes a plain index of the same name. The
+ * collection config declares no buildId index, so app boots never fight it.
+ * Returns false when the check itself failed. */
+async function ensureBuildIdIndex(): Promise<boolean> {
+	const uri = process.env.DATABASE_URI || process.env.MONGODB_URI;
+	if (!uri) {
+		console.error("\n✗ no DATABASE_URI: buildId index not checked");
+		return false;
+	}
+	const client = new MongoClient(uri);
+	try {
+		await client.connect();
+		const coll = client.db().collection("hackathon-builds");
+		const idx = (
+			(await coll.indexes()) as Array<{ name: string; unique?: boolean }>
+		).find((i) => i.name === "buildId_1");
+		if (idx && !idx.unique) {
+			console.log("\nbuildId index: plain (one row per submission and event)");
+			return true;
+		}
+		if (!EXECUTE) {
+			console.log(
+				`\nbuildId index: ${idx ? "unique" : "missing"}; --execute makes it a plain index so a submission can hold one row per event`,
+			);
+			return true;
+		}
+		if (idx) await coll.dropIndex("buildId_1");
+		await coll.createIndex({ buildId: 1 }, { name: "buildId_1" });
+		console.log(
+			`\nbuildId index: ${idx ? "unique index replaced by a plain one" : "plain index created"}`,
+		);
+		return true;
+	} catch (e) {
+		console.error(`\n✗ buildId index check failed: ${(e as Error).message}`);
+		return false;
+	} finally {
+		await client.close();
+	}
+}
+
+const entryKeyOf = (buildId: string, hackathonSlug: string) =>
+	`${buildId}@${hackathonSlug}`;
+
 type Row = Partial<Omit<HackathonBuild, "id" | "updatedAt" | "createdAt">> & {
 	buildId: string;
+	entryKey: string;
 };
 
 /** Fields whose change is worth reporting (bookkeeping dates are not). */
 const FIELDS = [
+	"entryKey",
 	"name",
 	"vision",
 	"description",
@@ -350,7 +401,8 @@ async function main() {
 		pagination: false,
 		depth: 0,
 	});
-	for (const d of prev.docs as HackathonBuild[]) stored.set(d.buildId, d);
+	for (const d of prev.docs as HackathonBuild[])
+		stored.set(d.entryKey ?? entryKeyOf(d.buildId, d.hackathonSlug), d);
 	console.log(`${stored.size} builds already stored`);
 
 	// ── 1. events and their rosters ──────────────────────────────────────
@@ -388,9 +440,11 @@ async function main() {
 		if (!subs.length) emptyRosters++;
 		const ev = doraEventRef(h);
 		for (const s of subs) {
-			if (rows.has(s.id)) continue;
-			rows.set(s.id, {
+			const entryKey = entryKeyOf(s.id, ev.slug);
+			if (rows.has(entryKey)) continue;
+			rows.set(entryKey, {
 				buildId: s.id,
+				entryKey,
 				name: s.name,
 				vision: s.description,
 				hackathonSlug: ev.slug,
@@ -421,13 +475,16 @@ async function main() {
 	}
 
 	// ── 2. submission pages ──────────────────────────────────────────────
-	const due = [...rows.values()].filter((r) => {
-		const at = stored.get(r.buildId)?.detailReadAt;
-		return !at || Date.now() - Date.parse(at) > DETAIL_MAX_AGE_MS;
-	});
+	// One page per submission, shared by every event row it holds.
+	const due = new Map<string, Row[]>();
+	for (const r of rows.values()) {
+		const at = stored.get(r.entryKey)?.detailReadAt;
+		if (!at || Date.now() - Date.parse(at) > DETAIL_MAX_AGE_MS)
+			due.set(r.buildId, [...(due.get(r.buildId) ?? []), r]);
+	}
 	const detail = { read: 0, notFound: 0, failed: 0 };
-	await pool(due, 3, async (r) => {
-		const id = Number(r.buildId.replace(/^dorahacks-buidl-/, ""));
+	await pool([...due.values()], 3, async (group) => {
+		const id = Number(group[0].buildId.replace(/^dorahacks-buidl-/, ""));
 		try {
 			const d = Number.isFinite(id) ? await fetchBuidlDetail(id) : null;
 			if (!d) {
@@ -435,10 +492,12 @@ async function main() {
 				return;
 			}
 			// Only what the page holds: an empty field never blanks a stored one.
-			if (d.description) r.description = d.description;
-			if (d.selfTags.length) r.selfTags = d.selfTags;
-			r.hiddenUpstream = d.hidden;
-			r.detailReadAt = now;
+			for (const r of group) {
+				if (d.description) r.description = d.description;
+				if (d.selfTags.length) r.selfTags = d.selfTags;
+				r.hiddenUpstream = d.hidden;
+				r.detailReadAt = now;
+			}
 			detail.read++;
 		} catch {
 			detail.failed++;
@@ -447,7 +506,7 @@ async function main() {
 		}
 	});
 	console.log(
-		`\nsubmission pages: ${due.length} due, ${detail.read} read, ${detail.notFound} not found, ${detail.failed} could not be read (stored values kept)`,
+		`\nsubmission pages: ${due.size} due, ${detail.read} read, ${detail.notFound} not found, ${detail.failed} could not be read (stored values kept)`,
 	);
 
 	// ── 3. project links ─────────────────────────────────────────────────
@@ -500,7 +559,7 @@ async function main() {
 	// stored.
 	const toEmbed: Array<{ r: Row; text: string; hash: string }> = [];
 	for (const r of rows.values()) {
-		const old = stored.get(r.buildId);
+		const old = stored.get(r.entryKey);
 		const text = buildEmbeddingText({
 			name: r.name ?? "",
 			vision: r.vision,
@@ -565,7 +624,7 @@ async function main() {
 			(b.endedAt ?? "").localeCompare(a.endedAt ?? ""),
 	);
 	for (const r of byPriority) {
-		const old = stored.get(r.buildId);
+		const old = stored.get(r.entryKey);
 		if (!r.repoFullName || fresh(old?.stackReadAt) || fresh(old?.repoMissingAt))
 			continue;
 		stackDue.set(r.repoFullName, [...(stackDue.get(r.repoFullName) ?? []), r]);
@@ -713,7 +772,7 @@ async function main() {
 			let linkedChecked = 0;
 			const sample: string[] = [];
 			for (const r of byPriority) {
-				const old = stored.get(r.buildId);
+				const old = stored.get(r.entryKey);
 				const vec = unit(r.embedding ?? old?.embedding);
 				if (!vec) continue;
 				const cats = assignTypes(
@@ -771,7 +830,7 @@ async function main() {
 	const updates: { id: string; data: Row; changed: string[] }[] = [];
 	const fieldChanges = new Map<string, number>();
 	for (const r of rows.values()) {
-		const old = stored.get(r.buildId);
+		const old = stored.get(r.entryKey);
 		if (!old) {
 			creates.push({ ...r, firstSeenAt: now });
 			continue;
@@ -801,8 +860,18 @@ async function main() {
 		);
 
 	if (!EXECUTE) {
+		await ensureBuildIdIndex();
 		await ensureVectorIndex();
 		console.log("\ndry run: nothing written. Re-run with --execute to upsert.");
+		return;
+	}
+
+	// Before any write: a submission's second event row needs buildId plain.
+	// If that cannot be confirmed, write nothing: the creates would only fail
+	// as duplicates, and a half-written run is worse than a skipped one.
+	if (!(await ensureBuildIdIndex())) {
+		console.error("✗ buildId index not confirmed plain: nothing written.");
+		process.exitCode = 2;
 		return;
 	}
 
@@ -828,11 +897,11 @@ async function main() {
 					data: data as Omit<HackathonBuild, "id" | "updatedAt" | "createdAt">,
 					context: { internal: true },
 				});
-			sent.set(data.buildId, data);
+			sent.set(data.entryKey, data);
 		} catch (e) {
 			failed++;
 			console.error(
-				`  ✗ ${data.buildId}: write failed: ${String((e as Error).message).slice(0, 120)}`,
+				`  ✗ ${data.entryKey}: write failed: ${String((e as Error).message).slice(0, 120)}`,
 			);
 		}
 	});
@@ -850,11 +919,11 @@ async function main() {
 				docs(
 					await payload.find({
 						collection: "hackathon-builds",
-						where: { buildId: { in: keys } },
+						where: { entryKey: { in: keys } },
 						limit: keys.length,
 						depth: 0,
 					}),
-				).map((d) => [String(d.buildId), d]),
+				).map((d) => [String(d.entryKey), d]),
 			),
 		fields,
 		200,
@@ -862,7 +931,7 @@ async function main() {
 			docs(
 				await payload.find({
 					collection: "hackathon-builds",
-					where: { buildId: { equals: key } },
+					where: { entryKey: { equals: key } },
 					limit: 1,
 					depth: 0,
 				}),
@@ -919,9 +988,9 @@ async function main() {
 		);
 		process.exitCode = 2;
 	}
-	if (due.length >= 20 && detail.failed > due.length / 2 && !process.exitCode) {
+	if (due.size >= 20 && detail.failed > due.size / 2 && !process.exitCode) {
 		console.error(
-			`✗ ${detail.failed} of ${due.length} submission pages could not be read. Rosters were written; the pages need a re-run.`,
+			`✗ ${detail.failed} of ${due.size} submission pages could not be read. Rosters were written; the pages need a re-run.`,
 		);
 		process.exitCode = 2;
 	}

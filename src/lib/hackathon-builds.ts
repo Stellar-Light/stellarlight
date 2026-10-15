@@ -257,18 +257,51 @@ export interface BuildDetail {
 	firstSeenAt: string;
 	lastSeenAt: string;
 	writeUpReadAt: string | null;
+	/** Every event this submission entered, best first, each with its own
+	 * track, placement and award. The top-level event fields are entries[0]. */
+	entries: BuildEntry[];
 }
 
-export function buildDetailFromStored(
-	d: HackathonBuild,
-	facts?: ProjectFacts,
-): BuildDetail {
+/** One event a submission entered (sls-092). */
+export interface BuildEntry {
+	hackathon: { title: string; slug: string; endedAt: string | null };
+	track: string | null;
+	placement: string | null;
+	award: string | null;
+	prizeUsd: number | null;
+	isWinner: boolean;
+}
+
+/** A submission's event entries, best first: a placed one, then the latest
+ * event. The detail's top level, search across events and review all show
+ * this entry, so they never disagree about which event a submission is in. */
+function entryOrder(
+	a: { isWinner?: boolean | null; endedAt?: string | null },
+	b: { isWinner?: boolean | null; endedAt?: string | null },
+): number {
+	return (
+		Number(!!b.isWinner) - Number(!!a.isWinner) ||
+		(b.endedAt ?? "").localeCompare(a.endedAt ?? "")
+	);
+}
+
+/** One row per submission, its best entry, in index order (sls-092: the
+ * index holds a row per submission and event). */
+export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
+	const key = (b: IndexedBuild) => ({
+		isWinner: b.isWinner,
+		endedAt: b.hackathon.endedAt,
+	});
+	const best = new Map<string, IndexedBuild>();
+	for (const b of builds) {
+		const cur = best.get(b.id);
+		if (!cur || entryOrder(key(b), key(cur)) < 0) best.set(b.id, b);
+	}
+	return builds.filter((b) => best.get(b.id) === b);
+}
+
+function entryOf(d: HackathonBuild): BuildEntry {
 	return {
-		id: d.buildId,
-		name: d.name,
-		summary: d.vision ?? null,
-		writeUp: d.description ?? null,
-		selfTags: d.selfTags ?? [],
 		hackathon: {
 			title: d.hackathonTitle,
 			slug: d.hackathonSlug,
@@ -279,6 +312,30 @@ export function buildDetailFromStored(
 		award: d.award ?? null,
 		prizeUsd: parsePlacement(d.placement ?? null).prizeUsd || null,
 		isWinner: !!d.isWinner,
+	};
+}
+
+/** One submission from its stored rows, one per event it entered (sls-092:
+ * a submission entered in two events is two rows). The top-level event
+ * fields are its best entry: a placed one first, then the latest event. */
+export function buildDetailFromStored(
+	rows: HackathonBuild[],
+	facts?: ProjectFacts,
+): BuildDetail {
+	const sorted = [...rows].sort(entryOrder);
+	const d = sorted[0];
+	// Submission-level dates span every row: an entry restored later must not
+	// make the submission look new.
+	const first = rows.map((r) => r.firstSeenAt).sort();
+	const last = rows.map((r) => r.lastSeenAt).sort();
+	return {
+		id: d.buildId,
+		name: d.name,
+		summary: d.vision ?? null,
+		writeUp: d.description ?? null,
+		selfTags: d.selfTags ?? [],
+		...entryOf(d),
+		entries: sorted.map(entryOf),
 		links: {
 			dorahacks: d.url,
 			github: d.githubUrl ?? null,
@@ -304,8 +361,8 @@ export function buildDetailFromStored(
 				}
 			: {}),
 		activityCheckedAt: d.activityCheckedAt ?? null,
-		firstSeenAt: d.firstSeenAt,
-		lastSeenAt: d.lastSeenAt,
+		firstSeenAt: first[0],
+		lastSeenAt: last[last.length - 1],
 		writeUpReadAt: d.detailReadAt ?? null,
 	};
 }
@@ -355,16 +412,19 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 	}
 }
 
-/** Dedupe by buidl id AND by event+name (DoraHacks repeats submissions across
- * pages; a resubmission gets a new id with the same name in the same event). */
-function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
+/** Dedupe by event+buidl id AND by event+name (DoraHacks repeats submissions
+ * across pages; a resubmission gets a new id with the same name in the same
+ * event). A submission entered in two events keeps both rows, each with its
+ * own placement (sls-092: keying on the id alone dropped Blend's 1st place). */
+export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 	const seenId = new Set<string>();
 	const seenKey = new Set<string>();
 	const flat: IndexedBuild[] = [];
 	for (const b of rows) {
+		const id = `${b.hackathon.slug}::${b.id}`;
 		const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
-		if (seenId.has(b.id) || seenKey.has(key)) continue;
-		seenId.add(b.id);
+		if (seenId.has(id) || seenKey.has(key)) continue;
+		seenId.add(id);
 		seenKey.add(key);
 		flat.push(b);
 	}
@@ -486,6 +546,9 @@ export function searchHackathonBuilds(
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
 		semantic?: Map<string, number>;
+		/** One result per submission across events, its best entry
+		 * (sls-092). Off for counting: analyze counts every event entry. */
+		perSubmission?: boolean;
 	} = {},
 ): ScoredBuild[] {
 	let pool = indexed;
@@ -508,6 +571,9 @@ export function searchHackathonBuilds(
 			b.categories?.some((x) => x.type.toLowerCase() === c),
 		);
 	}
+	// Inside an event filter every row is that event's own entry.
+	if (opts.perSubmission && !opts.hackathons?.length)
+		pool = onePerSubmission(pool);
 	const query = q.trim().toLowerCase();
 	if (!query) {
 		return pool

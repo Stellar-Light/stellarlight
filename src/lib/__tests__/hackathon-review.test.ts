@@ -57,6 +57,26 @@ describe("which submission a link names", () => {
 			});
 	});
 
+	// sls-092: one submission entered in two events is two index rows, not
+	// another submission of the same repo.
+	it("does not count a submission's other event as another submission", () => {
+		const twice = [
+			row("dorahacks-buidl-9", {
+				githubUrl: "https://github.com/raj/pool",
+				isWinner: true,
+			}),
+			row("dorahacks-buidl-9", {
+				githubUrl: "https://github.com/raj/pool",
+				hackathon: { title: "Later", slug: "later", endedAt: "2025-09-01" },
+			}),
+		];
+		expect(resolveReviewLink("raj/pool", twice)).toEqual({
+			buildId: "dorahacks-buidl-9",
+			resolvedBy: "repo",
+			others: 0,
+		});
+	});
+
 	it("names nothing for an unknown link", () => {
 		expect(resolveReviewLink("github.com/someone/else", index)).toBeNull();
 		expect(resolveReviewLink("an idea about payments", index)).toBeNull();
@@ -79,6 +99,7 @@ const detail = (over: Partial<BuildDetail> = {}): BuildDetail => ({
 	award: null,
 	prizeUsd: null,
 	isWinner: true,
+	entries: [],
 	links: {
 		dorahacks: "https://dorahacks.io/buidl/42585",
 		github: "https://github.com/rajkaria/toll",

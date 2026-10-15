@@ -6,8 +6,8 @@ import { isAdmin } from "./access";
  * prior-art layer no longer depends on DoraHacks keeping it listed (its
  * 2026-08 API change emptied every DoraHacks-backed surface for a day).
  *
- * One row per DoraHacks buidl, upserted by scripts/sync-hackathon-builds.ts
- * and never deleted. A failed read never blanks a stored value. A submission
+ * One row per DoraHacks buidl and event it entered (entryKey), upserted by
+ * scripts/sync-hackathon-builds.ts and never deleted. A failed read never blanks a stored value. A submission
  * the team deleted or made private stays stored with hiddenUpstream and is
  * not served.
  */
@@ -27,14 +27,27 @@ export const HackathonBuilds: CollectionConfig = {
 	},
 	fields: [
 		{
+			// Not unique (sls-092): a submission entered in two events is two
+			// rows. mongoose never drops an index, so the old unique buildId_1
+			// stays until the sync lane replaces it with a plain one; until then
+			// the app's attempt to build the plain index fails quietly (its init
+			// errors are caught) and the unique one keeps serving lookups.
 			name: "buildId",
 			type: "text",
 			required: true,
-			unique: true,
 			index: true,
 			admin: {
 				description:
 					"dorahacks-buidl-<id>, the id the builds API has always served",
+			},
+		},
+		{
+			name: "entryKey",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"<buildId>@<hackathonSlug>: one row per submission and event, the key the sync lane writes by",
 			},
 		},
 		{ name: "name", type: "text", required: true },
