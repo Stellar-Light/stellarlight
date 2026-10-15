@@ -233,6 +233,60 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-noir-lang-noir-npm-noir-lang-noir-was",
+   "date": "2026-10-09",
+   "run": "37952655252",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-horizontalsystems-stellar-web-sdk-npm",
+   "date": "2026-10-10",
+   "run": "38060800606",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-horizontalsystems-stellar-web-sdk-npm",
+   "date": "2026-10-11",
+   "run": "38149790807",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-e-contract:get-api-hackathons-builds-mode",
+   "date": "2026-10-12",
+   "run": "38289364092",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-e-contract:get-api-hackathons-builds-mode",
+   "date": "2026-10-13",
+   "run": "38430544007",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-e-contract:get-api-hackathons-analyze-facet",
+   "date": "2026-10-14",
+   "run": "38576987226",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }

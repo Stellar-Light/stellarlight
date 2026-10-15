@@ -10270,7 +10270,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								nullable: true,
 								description:
-									"The event page, markdown as the organizer published it (stored daily for DoraHacks events).",
+									"The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events.",
 							},
 							rules: {
 								type: "object",

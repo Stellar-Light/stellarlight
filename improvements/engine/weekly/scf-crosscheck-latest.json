@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T14:50:58Z",
+  "generatedAt": "2026-10-11T15:32:14Z",
   "frame": {
     "scf": 531,
     "directory": 1004,
@@ -95,16 +95,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "minisend",
-      "name": "Minisend",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/minisend-7tt",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
       "slug": "swiftex",
       "name": "SwiftEx",
       "ourRounds": [
@@ -124,6 +114,16 @@
         "45"
       ],
       "url": "https://communityfund.stellar.org/project/neko-j49",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
+      "slug": "minisend",
+      "name": "Minisend",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/minisend-7tt",
       "officialAwardedRounds": [],
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },

@@ -2698,11 +2698,31 @@ const WINNERS_2025 = [
  * Several of these names are nominated again this year; that is left to
  * speak for itself.
  */
+/** A blurb's first sentence: a winner card carries one line, not the
+ * nominee's whole pitch. */
+function firstSentence(text: string | null | undefined): string | null {
+	const t = text?.trim();
+	if (!t) return null;
+	return t.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? t;
+}
+
+/** What a winner card shows: last year's curated winners and this year's
+ * results both fit it. */
+interface WinnerCardData {
+	category: string;
+	name: string;
+	slug: string;
+	logo: string;
+	line?: string | null;
+	blurb: string | null;
+	finalists: string;
+}
+
 function WinnerCard({
 	winner,
 	index,
 }: {
-	winner: (typeof WINNERS_2025)[number];
+	winner: WinnerCardData;
 	index: number;
 }) {
 	const [open, setOpen] = useState(false);
@@ -2714,7 +2734,7 @@ function WinnerCard({
 			viewport={{ once: true, amount: 0.45 }}
 			onViewportEnter={() => setOpen(true)}
 			transition={{ duration: 0.5, ease: EASE, delay: index * 0.1 }}
-			className={`sm-win relative overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-5 sm:p-6 ${
+			className={`sm-win relative flex flex-col overflow-hidden rounded-2xl border border-[#2f2f2f] bg-[#1c1c1c] p-6 sm:p-8 ${
 				open ? "is-open" : ""
 			}`}
 			style={{ ["--sm-d" as string]: `${index * 0.16}s` }}
@@ -2731,7 +2751,7 @@ function WinnerCard({
 					className="h-10 w-10 flex-shrink-0 rounded-lg border border-[#2f2f2f] bg-[#111] object-cover"
 				/>
 			</div>
-			<p className="relative mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+			<p className="relative mt-8 text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-50">
 				{/* a new tab, so a pilot mid-ballot keeps their picks */}
 				<a
 					href={`/project/${winner.slug}`}
@@ -2760,11 +2780,27 @@ function WinnerCard({
 					</span>
 				)}
 			</p>
-			<p className="mt-1 text-sm font-medium text-neutral-200">{winner.line}</p>
-			<p className="mt-3 text-sm leading-relaxed text-neutral-300">
-				{winner.blurb}
-			</p>
-			<p className="mt-4 border-t border-[#2f2f2f] pt-3 text-xs leading-relaxed text-neutral-400">
+			{winner.line && (
+				<p className="mt-2 text-sm font-medium text-neutral-200">
+					{winner.line}
+				</p>
+			)}
+			{winner.blurb && (
+				<p className="mt-4 text-sm leading-7 text-neutral-300">
+					{winner.blurb}
+				</p>
+			)}
+			{/* a new tab, so a pilot mid-ballot keeps their picks */}
+			<a
+				href={`/project/${winner.slug}`}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="mt-6 mb-8 inline-flex w-fit items-center gap-1.5 rounded-full border border-[#2f2f2f] px-4 py-2 text-sm font-medium text-neutral-200 transition-colors hover:border-[#454545] hover:text-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400"
+			>
+				View project
+				<ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+			</a>
+			<p className="mt-auto border-t border-[#2f2f2f] pt-4 text-xs leading-relaxed text-neutral-500">
 				Nominees: {winner.finalists}
 			</p>
 			{/* the curtain, closed until the card is in view */}
@@ -2851,7 +2887,9 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 	return (
 		<>
 			<TopBar onHowItWorks={() => setHowOpen(true)} />
-			<div className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32">
+			<div
+				className={`${shortlist ? "max-w-3xl" : "max-w-6xl"} mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-32`}
+			>
 				<motion.header
 					initial={{ opacity: 0, y: 18 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -2864,12 +2902,6 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					<h1 className="text-4xl sm:text-6xl font-semibold tracking-tight text-neutral-50 leading-[1.05]">
 						{round.title}
 					</h1>
-					{results && (
-						<p className="mt-4 text-sm text-neutral-500">
-							{results.turnout.voted} of {results.turnout.whitelisted} Pilots
-							{shortlist ? " nominated" : " voted"}
-						</p>
-					)}
 				</motion.header>
 
 				{!results && !failed && (
@@ -2884,7 +2916,60 @@ function ClosedRound({ data }: { data: AwardsRoundData }) {
 					</p>
 				)}
 
-				{results && (
+				{results && !shortlist && (
+					<div className="space-y-10">
+						{/* The final round shows its winners the way last year's are
+						    shown: a card each, the curtain parting on the name. No
+						    per-project counts; the other finalists are listed
+						    alphabetically so the order implies no ranking. A tie at
+						    the top shows every joint winner. */}
+						<div className="grid gap-6 md:grid-cols-3">
+							{results.categories
+								.flatMap((category) => {
+									const top = Math.max(
+										0,
+										...category.results.map((r) => r.votes),
+									);
+									const winners =
+										top > 0
+											? category.results.filter((r) => r.votes === top)
+											: [];
+									const nominees = data.nominees.filter(
+										(n) => n.category === category.key,
+									);
+									const finalists = nominees
+										.filter((n) => !winners.some((w) => w.slug === n.slug))
+										.map((n) => n.name)
+										.sort((a, b) => a.localeCompare(b))
+										.join(", ");
+									return winners.map((w) => {
+										const n = nominees.find((x) => x.slug === w.slug);
+										return {
+											category: category.name,
+											name: w.name,
+											slug: w.slug,
+											logo: n?.logoUrl || "/logo.png",
+											blurb: firstSentence(n?.blurb),
+											finalists,
+										};
+									});
+								})
+								.map((winner, i) => (
+									<WinnerCard
+										key={`${winner.category}-${winner.slug}`}
+										winner={winner}
+										index={i}
+									/>
+								))}
+						</div>
+						<p className="text-center text-xs text-neutral-600 pt-4 leading-relaxed">
+							Chosen by SCF Pilots, from ballots a relay wrote to Stellar
+							testnet under random ids, so no ballot links back to a Pilot. The
+							record behind the result is digested and anchored on Tansu.
+						</p>
+					</div>
+				)}
+				{results && shortlist && (
 					<div className="space-y-10">
 						{results.categories.map((category) => {
 							// final round: one winner card, then the rest

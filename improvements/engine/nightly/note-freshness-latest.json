@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-08T12:27:10.083Z",
+	"generatedAt": "2026-10-14T10:50:47.714Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -24,7 +24,7 @@
 		},
 		{
 			"probe": "note-stale:soneso/stellar-php-sdk:packagist:soneso/stellar-php-sdk",
-			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.15.0 (published 2026-09-27)",
+			"note": "note (asOf 2026-09-02) cites 1.13.0; registry latest is 1.16.0 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
@@ -58,8 +58,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar-scaffold/cli:crates:stellar-scaffold-cli",
+			"note": "note (asOf 2026-09-02) cites 0.0.27; registry latest is 0.0.28 (published 2026-10-14)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:lightsail-network/strledger:pypi:strledger",
 			"note": "note (asOf 2026-09-02) cites 0.10.1; registry latest is 0.11.0 (published 2026-09-29)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:raceeyxo/use-stellar:npm:use-stellar",
+			"note": "note (asOf 2026-09-02) cites 0.1.5; registry latest is 0.2.1 (published 2026-10-11)",
 			"surface": "code"
 		},
 		{
@@ -69,12 +79,12 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-05 (published 2026-10-05)",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-13 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:allbridge-io/allbridge-core-js-sdk:npm:@allbridge/bridge-core-sdk",
-			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.35.1 (published 2026-09-15)",
+			"note": "note (asOf 2026-09-13) cites 3.35.0; registry latest is 3.36.0 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
@@ -89,12 +99,12 @@
 		},
 		{
 			"probe": "note-stale:stellar/rs-stellar-xdr:crates:stellar-xdr",
-			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 28.0.1 (published 2026-09-29)",
+			"note": "note (asOf 2026-09-01) cites 28.0.0; registry latest is 30.0.0 (published 2026-10-08)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:stellar/stellar-disbursement-platform-frontend:docker:stellar/stellar-disbursement-platform-frontend",
-			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-05 (published 2026-10-05)",
+			"note": "note (asOf 2026-09-04) cites 2026-09-04; registry latest is 2026-10-12 (published 2026-10-12)",
 			"surface": "code"
 		},
 		{
@@ -109,7 +119,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-rpc:docker:stellar/stellar-rpc",
-			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-09-22 (published 2026-09-22)",
+			"note": "note (asOf 2026-09-01) cites 2026-08-27; registry latest is 2026-10-13 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
@@ -138,6 +148,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar/rs-stellar-strkey:crates:stellar-strkey",
+			"note": "note (asOf 2026-09-14) cites 0.0.18; registry latest is 1.0.0 (published 2026-10-08)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
 			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.8.2 (published 2026-10-05)",
 			"surface": "code"
@@ -159,12 +174,12 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.15 (published 2026-10-06)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.22 (published 2026-10-13)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:winsznx/routedock:npm:@routedock/routedock",
-			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.3.0 (published 2026-10-05)",
+			"note": "note (asOf 2026-09-14) cites 0.1.2; registry latest is 0.3.1 (published 2026-10-08)",
 			"surface": "code"
 		},
 		{
@@ -203,8 +218,18 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:nice-bills/stipend",
+			"note": "public note asOf 2026-04-12; github.com/nice-bills/stipend is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-repo-gone:soomtochukwu/tradeflow",
 			"note": "public note asOf 2026-05-15; github.com/soomtochukwu/tradeflow is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:MetaMask/snap-stellar-wallet",
+			"note": "public note asOf 2026-09-14; repo archived 2026-10-09 — the note describes a live repo",
 			"surface": "code"
 		},
 		{

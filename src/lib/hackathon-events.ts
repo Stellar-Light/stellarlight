@@ -5,8 +5,39 @@
  * Only sections the organizer wrote are served, under their own heading. On
  * 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6
  * a judging section; a missing section is reported as not published, never
- * filled in.
+ * filled in. Since 2026-10-09 the page includes the event's custom tabs:
+ * three events (Build on Stellar, Stellar Hacks: Blend, Stellar Hacks:
+ * PaltaLabs) publish their judging criteria only in a tab, which the
+ * description-only page reported as not published.
  */
+
+/** The event page as the organizer published it: the description, then each
+ * custom tab under its name as a top-level heading, with the tab's own
+ * headings one level down. A section read from the page then ends where its
+ * tab ends: a "Project Submission Requirements" tab is one section, its
+ * sub-headings included, and a description's own judging section stops at
+ * the next tab instead of running into it. */
+export function eventPageMarkdown(
+	description: string | null | undefined,
+	tabs: ReadonlyArray<{ name?: string | null; body?: string | null }> = [],
+): string | null {
+	const parts = [description?.trim() || null];
+	for (const t of tabs) {
+		const body = t.body?.trim();
+		if (!body) continue;
+		let fenced = false;
+		const nested = body
+			.split("\n")
+			.map((l) => {
+				if (/^\s*(```|~~~)/.test(l)) fenced = !fenced;
+				return !fenced && /^#{1,5}\s/.test(l) ? `#${l}` : l;
+			})
+			.join("\n");
+		parts.push(`# ${t.name?.trim() || "More"}\n\n${nested}`);
+	}
+	const page = parts.filter(Boolean).join("\n\n");
+	return page || null;
+}
 
 /** The text under the first heading matching `heading`, up to the next
  * heading of the same or a higher level; null when there is none. */
