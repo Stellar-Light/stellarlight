@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-15",
+		surfaces: ["api"],
+		version: "spec@1.9.73",
+		type: "fixed",
+		summary:
+			"Hackathon event pages include the organizer's custom DoraHacks tabs, so judging criteria and submission requirements published only in a tab are found. Each tab is read as one whole section.",
+		detail:
+			"Build on Stellar, Stellar Hacks: Blend and Stellar Hacks: PaltaLabs publish their judging criteria only in a tab, which the description-only page reported as not published. Each tab now follows the description under its name as a heading, with its own headings one level down, so a section ends where its tab ends: Build on Stellar's requirements tab is read whole, through its English-only rule, and a description's judging section no longer runs into the next tab. 9 of 20 Stellar events on DoraHacks now publish judging criteria and 9 publish requirements.",
+	},
+	{
 		date: "2026-10-08",
 		surfaces: ["api"],
 		version: "spec@1.9.72",
