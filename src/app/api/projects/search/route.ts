@@ -20,8 +20,8 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	partialFor,
 	REQUEST_READ_BUDGET_MS,
-	withPartial,
 	withReadDeadline,
 	withReadTimeout,
 } from "@/lib/degraded-read";
@@ -46,6 +46,7 @@ import {
 	intentTypesFor,
 	isRampIntent,
 	nameMatchScore,
+	type ProjectMatchMode,
 	scoreTokens,
 	shadowEarnedRank,
 	splitIdentityGroups,
@@ -301,6 +302,14 @@ const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 		},
 	});
 });
+
+// sls-089: reads that only decorate served rows. Their failure leaves the
+// page partial but its total known; any other failed read nulls the total.
+const ROW_DECORATION_READ =
+	/^projects (audits rollup|page populate|semantic fallback|per-project repos|builtBy attribution|anchor profiles)/;
+const withProjectsPartial = partialFor(
+	(read) => !ROW_DECORATION_READ.test(read),
+);
 
 export const dynamic = "force-dynamic";
 // The caller gives up at 10 s; a request still working past 20 s is a
@@ -1027,7 +1036,7 @@ async function handle(req: NextRequest) {
 		});
 		return NextResponse.json(
 			{
-				meta: withPartial({
+				meta: withProjectsPartial({
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
 					...(warnings.length ? { warnings } : {}),
@@ -1074,13 +1083,7 @@ async function handle(req: NextRequest) {
 	 * both need to know the search actually ran on a corrected spelling.
 	 */
 	let didYouMean: { from: string; to: string; slug: string } | null = null;
-	let matchMode:
-		| "strict"
-		| "loose-1"
-		| "majority"
-		| "corrected"
-		| "semantic"
-		| "all" = "all";
+	let matchMode: ProjectMatchMode = "all";
 	// Audit rollup (Raven cold-agent finding, 2026-07-20; hoisted 2026-07-21):
 	// populated ONCE before scoring (see the pre-scoring fetch) so the hay can
 	// carry audit vocabulary, and reused at response assembly. null/absent = no
@@ -2617,7 +2620,7 @@ async function handle(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: withPartial({
+			meta: withProjectsPartial({
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
 				...(warnings.length ? { warnings } : {}),

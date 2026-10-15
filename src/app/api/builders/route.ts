@@ -40,8 +40,8 @@ import {
 	degradedRead,
 	degradedWarning,
 	isDegraded,
+	partialFor,
 	REQUEST_READ_BUDGET_MS,
-	withPartial,
 	withReadDeadline,
 	withReadTimeout,
 } from "@/lib/degraded-read";
@@ -52,6 +52,14 @@ import { getPayloadSafe } from "@/lib/payload-client";
 import { NOT_GONE } from "@/lib/repo-grade";
 import { findPeopleByName } from "@/lib/sdf-people";
 import { serverTiming } from "@/lib/server-timing";
+
+// sls-089: reads that only decorate served rows. Their failure leaves the
+// page partial but its total known; any other failed read nulls the total.
+const ROW_DECORATION_READ =
+	/^builders (code evidence|on-Stellar activity|collection count)/;
+const withBuildersPartial = partialFor(
+	(read) => !ROW_DECORATION_READ.test(read),
+);
 
 export const dynamic = "force-dynamic";
 // The caller gives up at 10 s; a request still working past 20 s is a
@@ -892,7 +900,7 @@ async function handle(req: NextRequest) {
 
 	return NextResponse.json(
 		{
-			meta: withPartial({
+			meta: withBuildersPartial({
 				...matchModeMeta(q ? "expanded" : "all"),
 				source: "https://stellarlight.xyz/builders",
 				generatedAt: new Date().toISOString(),

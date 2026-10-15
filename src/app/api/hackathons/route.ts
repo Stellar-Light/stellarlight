@@ -334,8 +334,15 @@ export async function GET(req: NextRequest) {
 					// fetch, so `dora.length` reported all 26 as dorahacks while
 					// `curated.length` (the Payload collection, empty) reported 0 —
 					// beside six served rows whose own source said "curated".
-					curated: matchedRows.filter((h) => h.source === "curated").length,
-					dorahacks: matchedRows.filter((h) => h.source === "dorahacks").length,
+					// null when a read failed (sls-089): code-curated events arrive
+					// through the DoraHacks fetch too, so either failure leaves both
+					// counts unknown, not zero.
+					curated: readWarnings.length
+						? null
+						: matchedRows.filter((h) => h.source === "curated").length,
+					dorahacks: readWarnings.length
+						? null
+						: matchedRows.filter((h) => h.source === "dorahacks").length,
 					returned: hackathons.length,
 					total: matchedBeforeLimit,
 				},

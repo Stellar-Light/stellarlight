@@ -247,12 +247,20 @@ export async function GET(req: NextRequest) {
 					// below counts the WHOLE catalog, pre-filter — a different
 					// denominator, which is exactly why total is stated explicitly.
 					total: filtered.length,
+					// null when that source's read failed (sls-089): the SDF set
+					// then comes from a fallback list and community entries are
+					// missing, so their counts are unknown, not what was read.
 					bySource: {
-						sdf: all.filter((s) => s.source === "sdf").length,
+						sdf: catalog.live
+							? all.filter((s) => s.source === "sdf").length
+							: null,
 						stellarlight: all.filter((s) => s.source === "stellarlight").length,
 						lumenloop: all.filter((s) => s.source === "lumenloop").length,
 						external: all.filter((s) => s.source === "external").length,
-						community: all.filter((s) => s.source === "community").length,
+						community:
+							communityFailed || !catalog.live
+								? null
+								: all.filter((s) => s.source === "community").length,
 					},
 				},
 				validSources: VALID_SOURCES,
