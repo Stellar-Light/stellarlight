@@ -31,12 +31,12 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
-		date: "2026-10-09",
-		surfaces: ["api"],
+		date: "2026-10-15",
+		surfaces: ["api", "mcp"],
 		version: "spec@1.9.73",
 		type: "added",
 		summary:
-			"searchHackathonBuilds takes `offset`, so every match can be read: page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched. The filters echo includes it.",
+			"searchHackathonBuilds takes `offset`, so every match can be read through the API: page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched. The filters echo includes it. The MCP tool search_hackathon_builds takes `offset` from its next release.",
 		detail:
 			"The operation capped a page at 100 rows with no way past it, so the two largest events (319 and 248 submissions) could not be listed through it. Pages share one ranking.",
 	},
