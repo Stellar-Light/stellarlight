@@ -194,6 +194,41 @@ async function main() {
 			: "no event with ranked winners was read, so the rule checked nothing",
 	);
 
+	// ── 2d. Raven findings stay fixed (sls-090, sls-093) ───────────────────
+	// Live regression checks for two findings closed on 2026-10-15: research
+	// finds a named advisory exactly and says exactMiss for an absent one;
+	// repo search labels a spelling-corrected match `corrected`.
+	console.log("◆ Raven findings stay fixed");
+	const ghsa = (await getJson("/api/research?q=GHSA-96xm-fv9w-pf3f&limit=3"))
+		.body;
+	const absent = (await getJson("/api/research?q=CVE-2099-00001&limit=3")).body;
+	const strupey = (await getJson("/api/repos/search?q=strupey&limit=5")).body;
+	const stroopy = (await getJson("/api/repos/search?q=stroopy&limit=5")).body;
+	if ([ghsa, absent, strupey, stroopy].some((b) => b?.meta?.partial === true))
+		couldNotCheck(
+			"Raven sls-090 / sls-093 regressions",
+			"a page was partial (a backend read failed)",
+		);
+	else {
+		check(
+			"sls-090: a named GHSA advisory is found first, with no exactMiss",
+			/GHSA-96xm-fv9w-pf3f/i.test(String(ghsa?.results?.[0]?.title ?? "")) &&
+				!ghsa?.meta?.exactMiss,
+			`top row "${ghsa?.results?.[0]?.title}", exactMiss ${JSON.stringify(ghsa?.meta?.exactMiss?.identifiers ?? null)}`,
+		);
+		check(
+			"sls-090: an absent CVE id is an exactMiss, not a neighbour",
+			(absent?.meta?.exactMiss?.identifiers ?? []).includes("CVE-2099-00001"),
+			`exactMiss ${JSON.stringify(absent?.meta?.exactMiss ?? null)}`,
+		);
+		check(
+			"sls-093: repo search labels a spelling-corrected match `corrected`",
+			strupey?.meta?.matchMode === "corrected" &&
+				stroopy?.meta?.matchMode === "strict",
+			`strupey ${strupey?.meta?.matchMode}, stroopy ${stroopy?.meta?.matchMode}`,
+		);
+	}
+
 	// ── 3. Filters actually filter (not silently ignored) ───────────────────
 	console.log("◆ Filters apply (no silent no-op)");
 	const baseMeta = (await getJson("/api/projects/search?q=wallet&limit=1")).body

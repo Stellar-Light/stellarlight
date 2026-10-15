@@ -132,7 +132,9 @@ jobs:
           # The battery's THIRD counter. Dropping it made a run whose slices
           # crashed record as "N pass, 0 fail" — a perfect green day built out
           # of code that never executed.
-          BE=$(grep -oE '[0-9]+ error' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
+          # The battery prints "N slice errors"; '[0-9]+ error' never matched
+          # it, so batteryErrors was null on every recorded day.
+          BE=$(grep -oE '[0-9]+ slice errors?' /tmp/battery.out | grep -oE '[0-9]+' | head -1 || true)
           PP=$(grep -oE '[0-9]+ pass both' /tmp/parity.out 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)
           pnpm exec tsx scripts/quality/record-quality-snapshot.ts \
             ${BP:+--battery-pass $BP} ${BF:+--battery-fail $BF} \
