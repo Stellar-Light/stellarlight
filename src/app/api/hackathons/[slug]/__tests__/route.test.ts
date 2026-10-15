@@ -17,13 +17,27 @@ const storedEvent = {
 	firstSeenAt: "2026-10-05T18:00:00.000Z",
 	lastSeenAt: "2026-10-05T18:00:00.000Z",
 };
+// Winning rows their teams hid on DoraHacks (sls-092); an Error fails the read.
+let hiddenRows: Array<{ placement: string | null }> | Error = [];
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
-		find: vi.fn(async ({ collection }: { collection: string }) => ({
-			docs: collection === "hackathon-events" ? [storedEvent] : [],
-		})),
+		find: vi.fn(async ({ collection }: { collection: string }) => {
+			if (collection === "hackathon-builds") {
+				if (hiddenRows instanceof Error) throw hiddenRows;
+				return { docs: hiddenRows };
+			}
+			return { docs: collection === "hackathon-events" ? [storedEvent] : [] };
+		}),
 	})),
 }));
+const getEvent = async () => {
+	const { GET } = await import("../route");
+	const res = await GET(
+		new NextRequest("https://x.test/api/hackathons/stellar-hacks-zk"),
+		{ params: Promise.resolve({ slug: "stellar-hacks-zk" }) },
+	);
+	return res.json();
+};
 const live = vi.fn(async () => []);
 vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
@@ -106,5 +120,42 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		});
 		expect(body.hackathon.profile.package.known).toBe(2);
 		expect(body.meta.note).toMatch(/stored copy/);
+		expect(body.hackathon.stats).toMatchObject({
+			hiddenWinners: [],
+			winnersNote: null,
+		});
+	});
+
+	it("names a winner its team hid upstream instead of leaving a gap", async () => {
+		hiddenRows = [{ placement: "2nd Place" }];
+		const body = await getEvent();
+		hiddenRows = [];
+		expect(body.hackathon.stats.hiddenWinners).toEqual([
+			{ placement: "2nd Place", placementRank: 2 },
+		]);
+		expect(body.hackathon.stats.winnersNote).toMatch(
+			/^One winning submission is not served here: .*\(placement: 2nd Place\)\.$/,
+		);
+	});
+
+	it("with no stored roster the record cannot say none are hidden", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		const body = await getEvent();
+		expect(body.hackathon.stats).toMatchObject({
+			hiddenWinners: null,
+			winnersNote: null,
+		});
+	});
+
+	it("a failed hidden-winner read says nothing, not none", async () => {
+		hiddenRows = new Error("db down");
+		const body = await getEvent();
+		hiddenRows = [];
+		expect(body.hackathon.stats).toMatchObject({
+			hiddenWinners: null,
+			winnersNote: null,
+		});
+		expect(body.submissions).toHaveLength(2);
 	});
 });

@@ -2178,7 +2178,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
+														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Each result\u0027s `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
 													properties: {
 														identifiers: {
 															type: "array",
@@ -9269,6 +9269,12 @@ export const spec: OpenAPISpec = {
 				description:
 					"One ranked research chunk from /api/research (best chunk per document).",
 				properties: {
+					exactKeys: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row is a semantic neighbour, not the named record. Absent = the query named no exact key.",
+					},
 					id: { type: "string" },
 					source: { type: "string" },
 					title: { type: "string" },
@@ -10369,6 +10375,25 @@ export const spec: OpenAPISpec = {
 										nullable: true,
 										description:
 											"DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read.",
+									},
+									hiddenWinners: {
+										type: "array",
+										nullable: true,
+										description:
+											"Winning submissions stored for this event but not served, because their teams hid or deleted them on DoraHacks, with each placement. [] = none; null = no stored DoraHacks roster backs this event, or the read failed.",
+										items: {
+											type: "object",
+											properties: {
+												placement: { type: "string", nullable: true },
+												placementRank: { type: "integer", nullable: true },
+											},
+										},
+									},
+									winnersNote: {
+										type: "string",
+										nullable: true,
+										description:
+											"Present when hiddenWinners is non-empty: says how many winning submissions are not served and why, naming their placements, so a missing winner is explained rather than silent.",
 									},
 									coverageNote: {
 										type: "string",

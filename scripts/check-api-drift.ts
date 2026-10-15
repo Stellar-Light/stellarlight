@@ -168,6 +168,7 @@ async function main() {
 	const events: Array<{ slug?: string }> =
 		(await getJson("/api/hackathons")).body?.hackathons ?? [];
 	const holes: string[] = [];
+	const explained: string[] = [];
 	let ranked = 0;
 	for (const ev of events) {
 		if (!ev.slug) continue;
@@ -181,13 +182,26 @@ async function main() {
 		// Unranked winners or no tiers: nothing this rule can check.
 		if (!got.size || !tiers.length) continue;
 		ranked++;
+		// A rank held by a winner its team hid on DoraHacks is explained by
+		// the record (stats.hiddenWinners and winnersNote), not a hole.
+		const hiddenRanks = new Set(
+			(d?.hackathon?.stats?.hiddenWinners ?? [])
+				.map((h: { placementRank?: unknown }) => h.placementRank)
+				.filter((r: unknown) => typeof r === "number"),
+		);
 		const missing = tiers
 			.map((t) => t.rank)
 			.filter((r) => typeof r === "number" && !got.has(r));
-		if (missing.length) holes.push(`${ev.slug} (rank ${missing.join(", ")})`);
+		const unexplained = missing.filter((r) => !hiddenRanks.has(r));
+		if (unexplained.length)
+			holes.push(`${ev.slug} (rank ${unexplained.join(", ")})`);
+		else if (missing.length)
+			explained.push(
+				`${ev.slug} (rank ${missing.join(", ")}: a hidden submission)`,
+			);
 	}
 	check(
-		`every ranked prize tier has a winner at its rank (${ranked} events with ranked winners)`,
+		`every ranked prize tier has a winner at its rank, or the record says why (${ranked} events with ranked winners${explained.length ? `; explained: ${explained.join("; ")}` : ""})`,
 		ranked > 0 && holes.length === 0,
 		ranked
 			? `no winner at: ${holes.join("; ")}`

@@ -415,6 +415,30 @@ export function exactKeyReport(args: {
 	};
 }
 
+/** sls-090: the exact keys the query named that this row carries (ids
+ * verbatim in title, content or url; release tags by title). null when the
+ * query named none, so the field stays absent; [] marks a semantic
+ * neighbour, not the record. */
+export function exactKeysOf(
+	query: string | undefined,
+	row: KeyedRow,
+): string[] | null {
+	const ids = [
+		...findingIdentifierTargets(query),
+		...advisoryIdentifierTargets(query),
+	];
+	const tags = releaseTagTargets(query);
+	if (!ids.length && !tags.length) return null;
+	return [
+		...ids.filter((id) =>
+			identifierIsPresent(id, [row.title, row.content, row.url]),
+		),
+		...tags
+			.filter((t) => isReleaseTitle(row.title, t))
+			.map((t) => `${t.repo} ${t.tag}`),
+	];
+}
+
 /** The exactMiss note for these keys. `unchecked`: the lookup over the
  * scope failed, so the corpus may still hold them. A release tag is a title
  * lookup, so its miss says only that no release document carries it. */

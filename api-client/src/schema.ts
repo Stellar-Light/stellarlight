@@ -921,6 +921,8 @@ export interface components {
         };
         /** @description One ranked research chunk from /api/research (best chunk per document). */
         ResearchResult: {
+            /** @description Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row is a semantic neighbour, not the named record. Absent = the query named no exact key. */
+            exactKeys?: string[];
             id?: string;
             source?: string;
             title?: string;
@@ -1588,6 +1590,13 @@ export interface components {
                     totalSubmissions?: number | null;
                     /** @description DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read. */
                     upstreamSubmissions?: number | null;
+                    /** @description Winning submissions stored for this event but not served, because their teams hid or deleted them on DoraHacks, with each placement. [] = none; null = no stored DoraHacks roster backs this event, or the read failed. */
+                    hiddenWinners?: {
+                        placement?: string | null;
+                        placementRank?: number | null;
+                    }[] | null;
+                    /** @description Present when hiddenWinners is non-empty: says how many winning submissions are not served and why, naming their placements, so a missing winner is explained rather than silent. */
+                    winnersNote?: string | null;
                     /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. */
                     coverageNote?: string | null;
                 };
@@ -2916,7 +2925,7 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             } | null;
-                            /** @description Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo's release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist. */
+                            /** @description Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo's release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Each result's `exactKeys` says which named keys that row carries. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist. */
                             exactMiss?: {
                                 /** @description The identifiers the query named that the corpus does not contain. */
                                 identifiers?: string[];

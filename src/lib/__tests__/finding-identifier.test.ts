@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	advisoryIdentifierTargets,
 	exactKeyReport,
+	exactKeysOf,
 	exactMissNote,
 	exactPin,
 	findingIdentifierTargets,
@@ -159,6 +160,15 @@ describe("exact-key report", () => {
 		});
 		expect(r.exactMiss?.note).toMatch(/unknown/);
 		expect(r.exactMiss?.note).not.toMatch(/No document in the searched scope/);
+	});
+
+	it("each row names the exact keys it carries; [] is a neighbour", () => {
+		const q = "CVE-2026-24889 rs-soroban-sdk v25.0.2";
+		expect(exactKeysOf(q, advisory)).toEqual(["CVE-2026-24889"]);
+		expect(exactKeysOf(q, release)).toEqual(["rs-soroban-sdk v25.0.2"]);
+		expect(exactKeysOf("CVE-2026-2488", advisory)).toEqual([]);
+		// No exact key in the query: the field stays absent.
+		expect(exactKeysOf("soroban bytes overflow", advisory)).toBeNull();
 	});
 
 	it("a release-tag miss says only that no release document carries it", () => {
