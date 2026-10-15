@@ -12,7 +12,9 @@
  *                                or an issued asset (stellar.expert-enriched)
  *   3. mainnet-contract-join   — a repo attributed to the project carries a
  *                                verified mainnetContractId
- *   4. onchain-activity basis  — statusBasis itself is onchain-activity
+ *   4. onchain-activity basis  — statusBasis itself is onchain-activity;
+ *                                its evidence link decides the network (a
+ *                                testnet explorer link is testnet)
  *   5. operator-toml           — QUALITY.md P3's first BOUNDED AGENT LANE:
  *                                for gap-pool rows (Live, on-chain product
  *                                types, deployment unknown) the pass runs
@@ -35,6 +37,7 @@
  */
 import "../load-env";
 import { getPayload } from "payload";
+import { isTestnetEvidence } from "../../src/lib/project-deployment";
 import configPromise from "../../src/payload.config";
 import { DEPLOYMENT_VERIFIED } from "./curation-maps";
 
@@ -165,6 +168,7 @@ async function main() {
 				slug: true,
 				status: true,
 				statusBasis: true,
+				statusSourceUrl: true,
 				types: true,
 				links: true,
 				deployment: true,
@@ -201,7 +205,10 @@ async function main() {
 			basis = "mainnet-contract-join";
 			sourceUrl = `https://github.com/${joinSlugs.get(p.slug)}`;
 		} else if (p.statusBasis === "onchain-activity") {
-			network = "mainnet";
+			// The status evidence names its network. rendergate and clevercon
+			// were stamped mainnet off stellar.expert TESTNET links (their own
+			// descriptions said testnet; the curate sweep caught it).
+			network = isTestnetEvidence(p.statusSourceUrl) ? "testnet" : "mainnet";
 			basis = "onchain-activity";
 		} else if (
 			p.status === "Live" &&

@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { spec } from "../openapi-spec";
-import { DEPLOYMENT_NETWORKS, pickDeployment } from "../project-deployment";
+import {
+	DEPLOYMENT_NETWORKS,
+	isTestnetEvidence,
+	pickDeployment,
+} from "../project-deployment";
 
 /** sls-079: deployment is a separate, evidence-backed fact beside status.
  * These tests pin the semantics the field's honesty depends on. */
@@ -97,5 +101,24 @@ describe("deployment contract parity", () => {
 		// block in the route would be the drift class reopening.
 		expect(shared.length).toBe(builders.length);
 		expect(route).not.toMatch(/deployment: \{\s*\n\s*network:/);
+	});
+});
+
+// rendergate and clevercon were stamped mainnet off testnet explorer links.
+describe("isTestnetEvidence", () => {
+	it("reads the network an explorer or endpoint link names", () => {
+		for (const u of [
+			"https://stellar.expert/explorer/testnet/tx/5c898eb489265c142baee086d502e25b87a5536e4386e5ccdf69edc2515c0ef6",
+			"https://stellar.expert/explorer/testnet/contract/CDFLEJ2HFPK3WKFTWB4CKP2JHEYNAUWKXGEJRYW4YMMGDSQSQ7D4LRTE",
+			"https://horizon-testnet.stellar.org/transactions/abc",
+		])
+			expect(isTestnetEvidence(u), u).toBe(true);
+		for (const u of [
+			"https://stellar.expert/explorer/public/contract/CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH",
+			"https://defillama.com/protocol/spiko",
+			"https://developers.stellar.org/docs/data/oracles/oracle-providers",
+			null,
+		])
+			expect(isTestnetEvidence(u), String(u)).toBe(false);
 	});
 });

@@ -15,6 +15,16 @@ import { RWA_REGISTRY } from "@/data/rwa-registry";
 export const DEPLOYMENT_NETWORKS = ["mainnet", "testnet", "unknown"] as const;
 export type DeploymentNetwork = (typeof DEPLOYMENT_NETWORKS)[number];
 
+/** Does this evidence link point at Stellar testnet (or futurenet)? On-chain
+ * activity read from a testnet explorer page or endpoint is testnet activity,
+ * not a mainnet deployment: rendergate and clevercon were stamped mainnet off
+ * stellar.expert testnet links while their own descriptions said testnet. */
+export function isTestnetEvidence(url: string | null | undefined): boolean {
+	return /stellar\.expert\/explorer\/(?:testnet|futurenet)\/|horizon-(?:testnet|futurenet)\.stellar\.org|soroban-(?:testnet|futurenet)\.stellar\.org|friendbot/i.test(
+		url ?? "",
+	);
+}
+
 export interface DeploymentFact {
 	network: DeploymentNetwork;
 	basis: string | null;
