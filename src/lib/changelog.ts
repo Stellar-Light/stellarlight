@@ -32,6 +32,14 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-15",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.7.0",
+		type: "added",
+		summary:
+			"scout-mcp 1.7.0: search_hackathon_builds takes `offset`, so an MCP client can read every match past the first 100 rows (page until offset + meta.counts.returned reaches meta.counts.matched). 27 tools.",
+	},
+	{
+		date: "2026-10-15",
 		surfaces: ["api"],
 		version: "spec@1.9.76",
 		type: "fixed",
