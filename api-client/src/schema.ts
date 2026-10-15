@@ -3478,6 +3478,8 @@ export interface operations {
                 package?: string;
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
+                /** @description Skip this many matched builds (default 0). To read every match, page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched; pages share one ranking. */
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -3522,6 +3524,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
@@ -3811,6 +3814,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
