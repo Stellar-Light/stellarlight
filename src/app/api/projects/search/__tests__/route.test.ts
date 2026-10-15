@@ -107,11 +107,13 @@ describe("GET /api/projects/search when a read fails (sls-089)", () => {
 		]);
 	});
 
-	it("a complete page says so: partial false, total counted", async () => {
-		const { status, body } = await search("q=soroswap");
+	it("a search that finds nothing is a confirmed empty page, not partial", async () => {
+		read = () => [];
+		const { status, body } = await search("q=zzqxv");
 		expect(status).toBe(200);
+		expect(body.projects).toEqual([]);
 		expect(body.meta).toMatchObject({ partial: false, failedReads: [] });
-		expect(body.meta.counts.total).toBe(1);
+		expect(body.meta.counts.total).toBe(0);
 	});
 
 	it("an ignored param is a warning, not a failed read", async () => {
