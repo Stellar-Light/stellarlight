@@ -867,7 +867,13 @@ async function main() {
 	}
 
 	// Before any write: a submission's second event row needs buildId plain.
-	if (!(await ensureBuildIdIndex())) process.exitCode = 1;
+	// If that cannot be confirmed, write nothing: the creates would only fail
+	// as duplicates, and a half-written run is worse than a skipped one.
+	if (!(await ensureBuildIdIndex())) {
+		console.error("✗ buildId index not confirmed plain: nothing written.");
+		process.exitCode = 2;
+		return;
+	}
 
 	// ── write, then read back ────────────────────────────────────────────
 	let failed = 0;

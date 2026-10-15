@@ -24,6 +24,7 @@ import {
 	type BuildDetail,
 	buildDetailFromStored,
 	type IndexedBuild,
+	onePerSubmission,
 	readProjectFacts,
 } from "@/lib/hackathon-builds";
 import { buildScfPitch, type ScfPitchReport } from "@/lib/scf-pitch";
@@ -74,8 +75,14 @@ export function resolveReviewLink(
 				Number(b.isWinner) - Number(a.isWinner) ||
 				(b.hackathon.endedAt ?? "").localeCompare(a.hackathon.endedAt ?? ""),
 		);
+	// A submission entered in several events is a row per event, not
+	// another submission of the repo (sls-092).
 	return hits.length
-		? { buildId: hits[0].id, resolvedBy: "repo", others: hits.length - 1 }
+		? {
+				buildId: hits[0].id,
+				resolvedBy: "repo",
+				others: new Set(hits.map((h) => h.id)).size - 1,
+			}
 		: null;
 }
 
@@ -293,7 +300,8 @@ export async function buildHackathonReview(
 		similarToBuild(subject.buildId, { limit: 10 }),
 		buildScfPitch(payload, idea),
 	]);
-	const byId = new Map(index.map((b) => [b.id, b]));
+	// Each similar submission as its best entry, as getHackathonSubmission shows it.
+	const byId = new Map(onePerSubmission(index).map((b) => [b.id, b]));
 	const top = submission.categories?.[0]?.type;
 	const cat = top ? distribution(index, "category", { value: top }) : null;
 	return {

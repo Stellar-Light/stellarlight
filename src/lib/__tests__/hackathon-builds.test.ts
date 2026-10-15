@@ -4,6 +4,7 @@ import {
 	dedupeBuilds,
 	type IndexedBuild,
 	indexedFromStored,
+	onePerSubmission,
 	searchHackathonBuilds,
 } from "@/lib/hackathon-builds";
 import {
@@ -386,6 +387,12 @@ describe("one submission in full", () => {
 			["stellar-hacks-blend", true, 3000],
 			["stellar-hacks-paltalabs", false, null],
 		]);
+		// A restored entry is a new row; the submission is not new.
+		const restored = { ...blend, firstSeenAt: "2026-10-15T09:00:00.000Z" };
+		const old = { ...palta, lastSeenAt: "2026-10-15T09:00:00.000Z" };
+		const dated = buildDetailFromStored([old, restored]);
+		expect(dated.firstSeenAt).toBe("2026-10-05T10:20:00.000Z");
+		expect(dated.lastSeenAt).toBe("2026-10-15T09:00:00.000Z");
 	});
 });
 
@@ -634,10 +641,26 @@ describe("a submission entered in two events", () => {
 
 	it("across events it is one result, its placed entry", () => {
 		for (const q of ["", "lending pools"]) {
-			const hit = searchHackathonBuilds(rows, q);
+			const hit = searchHackathonBuilds(rows, q, { perSubmission: true });
 			expect(hit.map((s) => s.b.hackathon.slug)).toEqual([
 				"stellar-hacks-blend",
 			]);
 		}
+	});
+
+	it("counting keeps every event entry (analyze counts once per event)", () => {
+		expect(searchHackathonBuilds(rows, "")).toHaveLength(2);
+	});
+
+	it("an unplaced submission's best entry is its latest event", () => {
+		const at = (slug: string, endedAt: string): IndexedBuild => ({
+			...inEvent(slug, false),
+			hackathon: { title: slug, slug, endedAt },
+		});
+		const pick = onePerSubmission([
+			at("older", "2025-07-07"),
+			at("newer", "2025-08-07"),
+		]);
+		expect(pick.map((b) => b.hackathon.slug)).toEqual(["newer"]);
 	});
 });

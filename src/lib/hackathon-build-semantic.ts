@@ -65,7 +65,9 @@ export async function vectorBuildScores(
 								2_000,
 								Math.max(300, (opts.limit ?? 50) * 4),
 							),
-							limit: (opts.limit ?? 50) + (opts.excludeId ? 1 : 0),
+							// Slack for the excluded submission, which has a row per
+							// event it entered (sls-092).
+							limit: (opts.limit ?? 50) + (opts.excludeId ? 5 : 0),
 							filter: {
 								hiddenUpstream: { $ne: true },
 								...(opts.winnersOnly ? { isWinner: true } : {}),
@@ -83,15 +85,15 @@ export async function vectorBuildScores(
 				.toArray(),
 			4_000,
 		)) as Array<{ buildId: string; score: number }>;
-		return new Map(
-			raw
-				.filter(
-					(r) =>
-						(r.score ?? 0) >= BUILD_SEMANTIC_FLOOR &&
-						r.buildId !== opts.excludeId,
-				)
-				.map((r) => [r.buildId, r.score]),
-		);
+		// Rows arrive best first; a submission entered in several events has a
+		// row per event and keeps its best score (sls-092).
+		const scores = new Map<string, number>();
+		for (const r of raw) {
+			if ((r.score ?? 0) < BUILD_SEMANTIC_FLOOR || r.buildId === opts.excludeId)
+				continue;
+			if (!scores.has(r.buildId)) scores.set(r.buildId, r.score);
+		}
+		return new Map([...scores].slice(0, opts.limit ?? 50));
 	} catch {
 		return null;
 	}

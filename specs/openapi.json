@@ -4102,7 +4102,7 @@
 													"properties": {
 														"indexedBuilds": {
 															"type": "integer",
-															"description": "Total builds in the index."
+															"description": "Submissions in the index. A submission entered in several events counts once."
 														},
 														"matched": {
 															"type": "integer"
@@ -5059,7 +5059,8 @@
 													"type": "object",
 													"properties": {
 														"indexedBuilds": {
-															"type": "integer"
+															"type": "integer",
+															"description": "Event entries in the index. A submission entered in several events counts once per event."
 														}
 													}
 												},

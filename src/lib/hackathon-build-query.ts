@@ -123,6 +123,9 @@ export interface BuildQuery {
 export async function queryBuilds(
 	indexed: IndexedBuild[],
 	f: BuildFilters,
+	/** searchHackathonBuilds: one result per submission. analyze leaves it
+	 * off and counts every event entry (sls-092). */
+	opts: { perSubmission?: boolean } = {},
 ): Promise<BuildQuery> {
 	const structural = {
 		winnersOnly: f.winnersOnly,
@@ -130,6 +133,7 @@ export async function queryBuilds(
 		package: f.package,
 		hackathons: f.hackathons,
 		category: f.category,
+		perSubmission: opts.perSubmission,
 	};
 	const browse = searchHackathonBuilds(indexed, "", structural);
 	const field = browse.map((s) => s.b);

@@ -272,6 +272,34 @@ export interface BuildEntry {
 	isWinner: boolean;
 }
 
+/** A submission's event entries, best first: a placed one, then the latest
+ * event. The detail's top level, search across events and review all show
+ * this entry, so they never disagree about which event a submission is in. */
+function entryOrder(
+	a: { isWinner?: boolean | null; endedAt?: string | null },
+	b: { isWinner?: boolean | null; endedAt?: string | null },
+): number {
+	return (
+		Number(!!b.isWinner) - Number(!!a.isWinner) ||
+		(b.endedAt ?? "").localeCompare(a.endedAt ?? "")
+	);
+}
+
+/** One row per submission, its best entry, in index order (sls-092: the
+ * index holds a row per submission and event). */
+export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
+	const key = (b: IndexedBuild) => ({
+		isWinner: b.isWinner,
+		endedAt: b.hackathon.endedAt,
+	});
+	const best = new Map<string, IndexedBuild>();
+	for (const b of builds) {
+		const cur = best.get(b.id);
+		if (!cur || entryOrder(key(b), key(cur)) < 0) best.set(b.id, b);
+	}
+	return builds.filter((b) => best.get(b.id) === b);
+}
+
 function entryOf(d: HackathonBuild): BuildEntry {
 	return {
 		hackathon: {
@@ -294,12 +322,12 @@ export function buildDetailFromStored(
 	rows: HackathonBuild[],
 	facts?: ProjectFacts,
 ): BuildDetail {
-	const sorted = [...rows].sort(
-		(a, b) =>
-			Number(!!b.isWinner) - Number(!!a.isWinner) ||
-			(b.endedAt ?? "").localeCompare(a.endedAt ?? ""),
-	);
+	const sorted = [...rows].sort(entryOrder);
 	const d = sorted[0];
+	// Submission-level dates span every row: an entry restored later must not
+	// make the submission look new.
+	const first = rows.map((r) => r.firstSeenAt).sort();
+	const last = rows.map((r) => r.lastSeenAt).sort();
 	return {
 		id: d.buildId,
 		name: d.name,
@@ -333,8 +361,8 @@ export function buildDetailFromStored(
 				}
 			: {}),
 		activityCheckedAt: d.activityCheckedAt ?? null,
-		firstSeenAt: d.firstSeenAt,
-		lastSeenAt: d.lastSeenAt,
+		firstSeenAt: first[0],
+		lastSeenAt: last[last.length - 1],
 		writeUpReadAt: d.detailReadAt ?? null,
 	};
 }
@@ -518,20 +546,11 @@ export function searchHackathonBuilds(
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
 		semantic?: Map<string, number>;
+		/** One result per submission across events, its best entry
+		 * (sls-092). Off for counting: analyze counts every event entry. */
+		perSubmission?: boolean;
 	} = {},
 ): ScoredBuild[] {
-	// sls-092: the index holds one row per submission and event. Inside an
-	// event filter each row is that event's own; across events a submission
-	// is one result, its best-ranked event row.
-	const once = (ranked: ScoredBuild[]): ScoredBuild[] => {
-		if (opts.hackathons?.length) return ranked;
-		const seen = new Set<string>();
-		return ranked.filter((s) => {
-			if (seen.has(s.b.id)) return false;
-			seen.add(s.b.id);
-			return true;
-		});
-	};
 	let pool = indexed;
 	if (opts.winnersOnly) pool = pool.filter((b) => b.isWinner);
 	if (opts.track) {
@@ -552,19 +571,20 @@ export function searchHackathonBuilds(
 			b.categories?.some((x) => x.type.toLowerCase() === c),
 		);
 	}
+	// Inside an event filter every row is that event's own entry.
+	if (opts.perSubmission && !opts.hackathons?.length)
+		pool = onePerSubmission(pool);
 	const query = q.trim().toLowerCase();
 	if (!query) {
-		return once(
-			pool
-				.map((b) => ({
-					b,
-					score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount ?? 0, 100),
-					matched: [] as string[],
-					coverage: 0,
-					share: 0,
-				}))
-				.sort((a, b) => b.score - a.score),
-		);
+		return pool
+			.map((b) => ({
+				b,
+				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount ?? 0, 100),
+				matched: [] as string[],
+				coverage: 0,
+				share: 0,
+			}))
+			.sort((a, b) => b.score - a.score);
 	}
 	const raw = [
 		...new Set(
@@ -641,7 +661,7 @@ export function searchHackathonBuilds(
 		const rank = (s: ScoredBuild) =>
 			s.coverage * (s.b.isWinner ? WINNER_EDGE : 1);
 		scored.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
-		return once(scored);
+		return scored;
 	}
 	// Meaning and hybrid: builds close in meaning join the keyword matches,
 	// within the same winners/track filters. Similarity is scaled 0 to 1
@@ -671,5 +691,5 @@ export function searchHackathonBuilds(
 	const out =
 		mode === "meaning" ? scored.filter((s) => sem.has(s.b.id)) : scored;
 	out.sort((a, b) => blend(b) - blend(a) || b.score - a.score);
-	return once(out);
+	return out;
 }

@@ -3408,7 +3408,8 @@ export const spec: OpenAPISpec = {
 													properties: {
 														indexedBuilds: {
 															type: "integer",
-															description: "Total builds in the index.",
+															description:
+																"Submissions in the index. A submission entered in several events counts once.",
 														},
 														matched: { type: "integer" },
 														returned: { type: "integer" },
@@ -3773,7 +3774,11 @@ export const spec: OpenAPISpec = {
 												counts: {
 													type: "object",
 													properties: {
-														indexedBuilds: { type: "integer" },
+														indexedBuilds: {
+															type: "integer",
+															description:
+																"Event entries in the index. A submission entered in several events counts once per event.",
+														},
 													},
 												},
 												note: { type: "string" },

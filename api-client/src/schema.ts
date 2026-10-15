@@ -3527,7 +3527,7 @@ export interface operations {
                             };
                             /** @description returned vs total — how much the filters narrowed. */
                             counts?: {
-                                /** @description Total builds in the index. */
+                                /** @description Submissions in the index. A submission entered in several events counts once. */
                                 indexedBuilds?: number;
                                 matched?: number;
                                 returned?: number;
@@ -3846,6 +3846,7 @@ export interface operations {
                             by?: "event" | "year" | "placement" | "track" | null;
                             value?: string | null;
                             counts?: {
+                                /** @description Event entries in the index. A submission entered in several events counts once per event. */
                                 indexedBuilds?: number;
                             };
                             note?: string;

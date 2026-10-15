@@ -88,12 +88,20 @@ export async function GET(req: NextRequest) {
 			},
 		);
 	}
-	const indexedTotal = indexed.length;
+	// Submissions, not event entries: a submission entered in several events
+	// is one result here (sls-092).
+	const indexedTotal = new Set(indexed.map((b) => b.id)).size;
 
 	// Filters, scoring and the meaning fallback live in
 	// src/lib/hackathon-build-query.ts, shared with analyze, so the operations
 	// read the same set the same way.
-	const { scored, served: mode, warnings } = await queryBuilds(indexed, f);
+	const {
+		scored,
+		served: mode,
+		warnings,
+	} = await queryBuilds(indexed, f, {
+		perSubmission: true,
+	});
 
 	const builds = scored.slice(0, limit).map(({ b, matched, similarity }) => ({
 		// Opens the full submission in getHackathonBuild.
