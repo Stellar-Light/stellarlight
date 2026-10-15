@@ -1553,6 +1553,10 @@ export interface HackathonEvent {
 	endDate?: string | null;
 	prizePoolUsd?: number | null;
 	hackersCount?: number | null;
+	/**
+	 * DoraHacks' own count of the event's submissions (buidls_count), read with the event page
+	 */
+	upstreamSubmissions?: number | null;
 	summary?: string | null;
 	/**
 	 * The event page, markdown as the organizer published it (brief, resources, prizes, rules).
@@ -3715,6 +3719,7 @@ export interface HackathonEventsSelect<T extends boolean = true> {
 	endDate?: T;
 	prizePoolUsd?: T;
 	hackersCount?: T;
+	upstreamSubmissions?: T;
 	summary?: T;
 	description?: T;
 	tracks?: T;

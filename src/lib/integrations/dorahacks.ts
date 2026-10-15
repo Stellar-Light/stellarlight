@@ -478,6 +478,9 @@ export interface DoraHacksEventDetail {
 	videoRequired: boolean;
 	/** The submission form's own questions, as asked. */
 	submissionQuestions: string[];
+	/** DoraHacks' own count of the event's submissions (buidls_count). null
+	 * when the page does not carry one. */
+	buidlsCount: number | null;
 }
 
 /** An event's page from /hackathons/{uname}. null = not found (404); throws
@@ -525,6 +528,7 @@ export async function fetchHackathonDetail(
 			.filter(
 				(t: string | null): t is string => !!t && t !== "[DEFAULT_TRACK]",
 			),
+		buidlsCount: typeof d?.buidls_count === "number" ? d.buidls_count : null,
 		repoRequired: !!d?.mandatory_git_repo_link,
 		videoRequired: !!d?.mandatory_video_link,
 		// "Did you make sure...?$mode:single$option:Yes": the question is the

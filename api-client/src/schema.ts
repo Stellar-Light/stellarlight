@@ -1583,6 +1583,14 @@ export interface components {
                         }[];
                     };
                 };
+                /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list). */
+                stats?: {
+                    totalSubmissions?: number | null;
+                    /** @description DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read. */
+                    upstreamSubmissions?: number | null;
+                    /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. */
+                    coverageNote?: string | null;
+                };
             } & {
                 [key: string]: unknown;
             };

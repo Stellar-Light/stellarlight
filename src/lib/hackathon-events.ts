@@ -62,5 +62,23 @@ export function markdownSection(
 	return text ? text.slice(0, 4_000) : null;
 }
 
+/** sls-092: what a reader should know when the submissions served here
+ * differ from DoraHacks' own count for the event. null when they agree or
+ * either count is unknown. */
+export function submissionCoverageNote(
+	upstream: number | null | undefined,
+	served: number | null | undefined,
+): string | null {
+	if (
+		typeof upstream !== "number" ||
+		typeof served !== "number" ||
+		upstream === served
+	)
+		return null;
+	return upstream > served
+		? `DoraHacks counts ${upstream} submissions for this event; ${served} are served here. The other ${upstream - served} are not: submissions their teams hid or deleted, or a resubmission counted once under its first entry.`
+		: `DoraHacks counts ${upstream} submissions for this event; ${served} are served here, including ${served - upstream} DoraHacks no longer lists (a stored submission is kept).`;
+}
+
 export const JUDGING_HEADING = /judg|criteri|evaluat|scoring/i;
 export const REQUIREMENTS_HEADING = /requirement|rules|eligib|how to submit/i;
