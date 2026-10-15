@@ -85,5 +85,24 @@ export function submissionCoverageNote(
 		: `DoraHacks counts ${upstream} submissions for this event; ${served} are served here, including ${gap} DoraHacks no longer lists (a stored submission is kept).`;
 }
 
+/** sls-092: a winning submission its team hid or deleted on DoraHacks is
+ * stored but not served; the record names it instead of leaving a gap
+ * (Build on Stellar Chile served 14 of its 15 winners). null when there is
+ * none, or when the read could not say. */
+export function hiddenWinnersNote(
+	hidden: ReadonlyArray<{
+		placement: string | null;
+		award?: string | null;
+	}> | null,
+): string | null {
+	if (!hidden?.length) return null;
+	const places = hidden
+		.map((h) => [h.placement || "Winner", h.award].filter(Boolean).join(", "))
+		.join("; ");
+	return hidden.length === 1
+		? `One winning submission is not served here: its team hid or deleted it on DoraHacks (${places}).`
+		: `${hidden.length} winning submissions are not served here: their teams hid or deleted them on DoraHacks (${places}).`;
+}
+
 export const JUDGING_HEADING = /judg|criteri|evaluat|scoring/i;
 export const REQUIREMENTS_HEADING = /requirement|rules|eligib|how to submit/i;

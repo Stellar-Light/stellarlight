@@ -58,6 +58,7 @@ import {
 	advisoryIdentifierTargets,
 	anchorDocUrls,
 	exactKeyReport,
+	exactKeysOf,
 	exactMissNote,
 	findingIdentifierTargets,
 	hasFullLexicalCoverage,
@@ -1151,6 +1152,12 @@ async function research(
 		exactLookupWarning,
 		heldNote,
 	].filter((w): w is string => !!w);
+	// sls-090: when the query named exact keys, each row says which it
+	// carries; [] = none of them.
+	const rows = results.map((r) => {
+		const exactKeys = exactKeysOf(q, r);
+		return exactKeys ? { ...r, exactKeys } : r;
+	});
 
 	return NextResponse.json(
 		{
@@ -1176,7 +1183,7 @@ async function research(
 				// Hash of `results` alone: generatedAt changes every call, the
 				// evidence does not; a consumer comparing two reads hashes this.
 				resultsHash: createHash("sha256")
-					.update(JSON.stringify(results))
+					.update(JSON.stringify(rows))
 					.digest("hex"),
 				filters: {
 					source: sourceFilter,
@@ -1206,7 +1213,7 @@ async function research(
 					note: "confidence.score = 0.65·relevance + 0.15·freshness + 0.20·authority (relevance-floored). Results are returned in confidence order, best chunk per document; a document the query names by canonical identifier (CAP-NNNN / SEP-NNNN, any variant form) ranks first with relevance floored at 0.9. Recency-intent queries (latest/newest/recent/current/this-year…) re-rank by publication-dated freshness blended with confidence — maintenance/lastmod dates don't count — and the pool is supplemented with the corpus's newest publication-dated docs sharing the query's topic terms, scored by their real embedding similarity. Curated vertical-anchor docs (e.g. the canonical cross-chain asset-transfer how-to for consumer bridge intent) carry relevance floored at 0.85. A chunk containing EVERY query token verbatim (brand/lookup queries, e.g. a partner product name) carries relevance floored at 0.8 and is fetched into the pool even when cosine retrieval missed it — applied only while coverage is discriminating (at most 5 chunks in the pool carry it; widely-covered tokens are generic vocabulary, not a lookup key).",
 				},
 			}),
-			results: results.map((r) => pickFields(r, fieldsWanted)),
+			results: rows.map((r) => pickFields(r, fieldsWanted)),
 		},
 		{
 			headers: {

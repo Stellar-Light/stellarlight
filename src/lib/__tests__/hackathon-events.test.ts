@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	eventPageMarkdown,
+	hiddenWinnersNote,
 	JUDGING_HEADING,
 	markdownSection,
 	REQUIREMENTS_HEADING,
@@ -132,5 +133,27 @@ describe("submissionCoverageNote", () => {
 		expect(submissionCoverageNote(27, 26)).toMatch(
 			/The other one is not: a submission its team hid or deleted/,
 		);
+	});
+});
+
+// sls-092: Build on Stellar Chile served 14 of 15 winners with no word why.
+describe("hiddenWinnersNote", () => {
+	it("names each hidden winner's placement and award, singular and plural", () => {
+		expect(hiddenWinnersNote([{ placement: "2nd Place" }])).toBe(
+			"One winning submission is not served here: its team hid or deleted it on DoraHacks (2nd Place).",
+		);
+		expect(
+			hiddenWinnersNote([
+				{ placement: "Winners", award: "Best Video Pitch" },
+				{ placement: null },
+			]),
+		).toBe(
+			"2 winning submissions are not served here: their teams hid or deleted them on DoraHacks (Winners, Best Video Pitch; Winner).",
+		);
+	});
+
+	it("says nothing when none is hidden or the read failed", () => {
+		expect(hiddenWinnersNote([])).toBeNull();
+		expect(hiddenWinnersNote(null)).toBeNull();
 	});
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	advisoryIdentifierTargets,
 	exactKeyReport,
+	exactKeysOf,
 	exactMissNote,
 	exactPin,
 	findingIdentifierTargets,
@@ -159,6 +160,34 @@ describe("exact-key report", () => {
 		});
 		expect(r.exactMiss?.note).toMatch(/unknown/);
 		expect(r.exactMiss?.note).not.toMatch(/No document in the searched scope/);
+	});
+
+	it("each row names the exact keys it carries; [] is a neighbour", () => {
+		const q = "CVE-2026-24889 rs-soroban-sdk v25.0.2";
+		expect(exactKeysOf(q, advisory)).toEqual(["CVE-2026-24889"]);
+		expect(exactKeysOf(q, release)).toEqual(["rs-soroban-sdk v25.0.2"]);
+		expect(exactKeysOf("CVE-2026-2488", advisory)).toEqual([]);
+		// A finding id usually sits in the chunk text, not the title.
+		const report = {
+			url: "https://example.com/audits/soroban-report",
+			title: "Soroban SDK audit report",
+			content: "V-SOR-VUL-002: missing authorization check in transfer.",
+		};
+		expect(exactKeysOf("V-SOR-VUL-002", report)).toEqual(["V-SOR-VUL-002"]);
+		// No exact key in the query: the field stays absent.
+		expect(exactKeysOf("soroban bytes overflow", advisory)).toBeNull();
+	});
+
+	it("a GHSA id is one key, never also a finding id", () => {
+		// GHSA-c9fg-jmpq-2345 holds C9FG-JMPQ-2345, which reads as a finding id.
+		expect(findingIdentifierTargets("GHSA-c9fg-jmpq-2345")).toEqual([]);
+		const r = exactKeyReport({
+			query: "GHSA-c9fg-jmpq-2345",
+			scope: [],
+			served: [],
+			lookupFailed: false,
+		});
+		expect(r.exactMiss?.identifiers).toEqual(["GHSA-c9fg-jmpq-2345"]);
 	});
 
 	it("a release-tag miss says only that no release document carries it", () => {

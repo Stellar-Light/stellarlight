@@ -18,7 +18,10 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
-import { submissionCoverageNote } from "@/lib/hackathon-events";
+import {
+	hiddenWinnersNote,
+	submissionCoverageNote,
+} from "@/lib/hackathon-events";
 import {
 	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
@@ -284,7 +287,7 @@ export async function GET(
 			// refreshed daily, and the event's own stored page. A live DoraHacks
 			// read only when the store holds none of this event's submissions
 			// (degrades to [] if the feed is unavailable).
-			const [index, storedEvent] = await Promise.all([
+			const [index, storedEvent, hiddenWinners] = await Promise.all([
 				getHackathonBuildsIndex().catch(() => [] as IndexedBuild[]),
 				payload
 					.find({
@@ -295,6 +298,34 @@ export async function GET(
 					})
 					.then((r) => r.docs[0] as HackathonEvent | undefined)
 					.catch(() => undefined),
+				// sls-092: winning submissions their teams hid on DoraHacks are
+				// stored but not served; the record names their placements and
+				// awards, never the submissions. null = the read failed, so the
+				// record says nothing rather than "none".
+				payload
+					.find({
+						collection: "hackathon-builds",
+						where: {
+							and: [
+								{ hackathonSlug: { equals: slug } },
+								{ isWinner: { equals: true } },
+								{ hiddenUpstream: { equals: true } },
+							],
+						},
+						pagination: false,
+						depth: 0,
+						overrideAccess: true,
+						select: { buildId: true, placement: true, award: true },
+					})
+					.then(
+						(r) =>
+							r.docs as Array<{
+								buildId: string;
+								placement?: string | null;
+								award?: string | null;
+							}>,
+					)
+					.catch(() => null),
 			]);
 			const stored = index.filter((b) => b.hackathon.slug === slug);
 			const fromStore = stored.length > 0;
@@ -317,6 +348,23 @@ export async function GET(
 						source: "dorahacks" as const,
 					}))
 				: await fetchHackathonSubmissions(dora);
+			// Hidden winners this page does not serve. The index is cached for
+			// an hour and its live fallback still lists hidden submissions, so
+			// a row flagged hidden can be on this page. [] claims a stored
+			// roster with none missing, so only a stored DoraHacks roster can
+			// say it.
+			const served = new Set(liveSubmissions.map((s) => s.id));
+			const hidden =
+				fromStore && dora.source !== "curated" && hiddenWinners
+					? hiddenWinners
+							.filter((h) => !served.has(h.buildId))
+							.map((h) => ({
+								placement: h.placement ?? null,
+								award: h.award ?? null,
+								placementRank:
+									placementRank(h.placement) ?? placementRank(h.award),
+							}))
+					: null;
 			const page = storedEvent?.description ?? dora.description ?? null;
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 			const winners = liveWinners.length
@@ -412,6 +460,8 @@ export async function GET(
 								storedEvent?.upstreamSubmissions,
 								liveSubmissions.length || null,
 							),
+							hiddenWinners: hidden,
+							winnersNote: hiddenWinnersNote(hidden),
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
 							winners: winners.length,
 							// Every bucket was hardcoded 0, including `unknown` — so a
@@ -585,6 +635,8 @@ export async function GET(
 						// No DoraHacks roster behind a curated event.
 						upstreamSubmissions: null,
 						coverageNote: null,
+						hiddenWinners: null,
+						winnersNote: null,
 						totalPrizeUSD,
 						winners: winners.length,
 						outcomes: submissions.length ? outcomes : null,
