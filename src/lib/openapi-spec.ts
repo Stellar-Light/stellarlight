@@ -292,6 +292,7 @@ const BUILD_FILTERS_ECHO_SCHEMA = {
 		category: { type: "string", nullable: true },
 		package: { type: "string", nullable: true },
 		limit: { type: "integer" },
+		offset: { type: "integer" },
 		mode: { type: "string", enum: [...BUILD_SEARCH_MODES] },
 	},
 };
@@ -3357,6 +3358,14 @@ export const spec: OpenAPISpec = {
 						required: false,
 						description: "Max builds (default 20, max 100).",
 						schema: { type: "integer", default: 20, maximum: 100 },
+					},
+					{
+						name: "offset",
+						in: "query",
+						required: false,
+						description:
+							"Skip this many matched builds (default 0). To read every match, page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched; pages share one ranking.",
+						schema: { type: "integer", default: 0, minimum: 0 },
 					},
 				],
 				responses: {
@@ -10300,7 +10309,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								nullable: true,
 								description:
-									"The event page, markdown as the organizer published it (stored daily for DoraHacks events).",
+									"The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events.",
 							},
 							rules: {
 								type: "object",

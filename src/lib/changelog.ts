@@ -33,12 +33,32 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-15",
 		surfaces: ["api"],
-		version: "spec@1.9.73",
+		version: "spec@1.9.75",
 		type: "fixed",
 		summary:
 			"Search honesty: repo search reports matchMode `corrected` for a spelling-corrected match; research recovers CVE ids, GHSA ids and repo-qualified release tags exactly and says `exactMiss` only for what the corpus lacks; a partial page serves counts.total null when a read that feeds the count failed. The searchProjects matchMode enum now lists `corrected`, which it has served since sls-076.",
 		detail:
 			"sls-093: q=strupey on repo search served the Stroopy rows at `strict`, \"every query term matched\", though no row carries the token; the strupey \u2192 stroopy correction now labels the page `corrected`, and strict says it describes the best row on the page. sls-090: CVE-2026-24889, GHSA-96xm-fv9w-pf3f and rs-soroban-sdk v25.0.2 returned adjacent documents with no exactMiss. The corpus never held the v25.0.2 patch release or any advisory record: the release ingest now also keeps every release in a repo's newest 100 that links an advisory, and adds each repo's published GitHub security advisories. A query naming a finding id, an advisory id or a repo-qualified tag looks it up across the source scope and pins the document carrying it, matching ids as whole tokens (CVE-2026-2488 is not CVE-2026-24889). A key the scope holds but the page leaves out (a limit or an audit filter) is named in meta.warnings, never called absent; a failed lookup is a failed read, so its miss is unchecked; a release-tag miss says only that no release document carries it. sls-089: counts.total is null with totalBasis `partial-read` when a read that feeds the count failed; a failed read that only decorates rows leaves a known total, and getHackathons' curated and dorahacks counts and listSkills' bySource counts are null when their own read failed. searchProjects, searchRepos and getBuilders declare their 503. Research pages a failed read thinned are no longer edge-cached, a source's failed read counts toward `partial` on a multi-source call, and a multi-source call with `fields` no longer answers 500. Both search matchMode enums are now spread from the code's lists; searchProjects' drops loose-2 and loose-3, which no code path serves.",
+	},
+	{
+		date: "2026-10-15",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.74",
+		type: "added",
+		summary:
+			"searchHackathonBuilds takes `offset`, so every match can be read through the API: page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched. The filters echo includes it. The MCP tool search_hackathon_builds takes `offset` from its next release.",
+		detail:
+			"The operation capped a page at 100 rows with no way past it, so the two largest events (319 and 248 submissions) could not be listed through it. Pages share one ranking.",
+	},
+	{
+		date: "2026-10-15",
+		surfaces: ["api"],
+		version: "spec@1.9.73",
+		type: "fixed",
+		summary:
+			"Hackathon event pages include the organizer's custom DoraHacks tabs, so judging criteria and submission requirements published only in a tab are found. Each tab is read as one whole section.",
+		detail:
+			"Build on Stellar, Stellar Hacks: Blend and Stellar Hacks: PaltaLabs publish their judging criteria only in a tab, which the description-only page reported as not published. Each tab now follows the description under its name as a heading, with its own headings one level down, so a section ends where its tab ends: Build on Stellar's requirements tab is read whole, through its English-only rule, and a description's judging section no longer runs into the next tab. 9 of 20 Stellar events on DoraHacks now publish judging criteria and 9 publish requirements.",
 	},
 	{
 		date: "2026-10-08",

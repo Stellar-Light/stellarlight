@@ -1576,6 +1576,59 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { shortDescription: desc } });
 	}
 
+	// ── sls-091 sweep (REPORT-ONLY): description vs deployment network ──
+	// Zenex served "Currently on testnet, with mainnet pending" beside an
+	// evidenced deployment.network of mainnet. Flags any row whose description
+	// contradicts its mainnet or testnet deployment (every basis is evidence:
+	// contract joins, on-chain activity, operator artifacts), reading the
+	// description this run leaves behind (a DESCRIPTION_FIXES entry counts as
+	// already applied). Prints for review; a confirmed row gets a
+	// DESCRIPTION_FIXES entry. A failed read is said and skipped: a report must
+	// never stop the lane's writes.
+	console.log("\n── Network contradiction sweep (report-only, no writes) ──");
+	try {
+		// Says the product runs on testnet, or is not on mainnet yet.
+		const TESTNET_TEXT =
+			/\b(?:currently|only|still|live|running|deployed|launched|available) (?:on|in|to) (?:the )?(?:stellar )?testnet\b|\bon (?:the )?stellar testnet\b|\btestnet[- ](?:only|beta)\b|\bmainnet (?:is |launch(?:ing)? )?(?:pending|coming|soon|planned|upcoming|in q[1-4])\b|\b(?:coming|launching) (?:soon )?to (?:stellar )?mainnet\b|\bnot (?:yet )?(?:live |deployed |launched )?on (?:stellar )?mainnet\b|\bupcoming mainnet\b/i;
+		// Says it is live on mainnet; "not live", "will be live" and "isn't
+		// live" are the opposite claim.
+		const MAINNET_TEXT =
+			/(?<!\b(?:not|never|be|yet)\s|n't\s)\b(?:live|launched|deployed|running) on (?:the )?(?:stellar )?mainnet\b/i;
+		const rows = await payload.find({
+			collection: "projects",
+			where: { "deployment.network": { in: ["mainnet", "testnet"] } },
+			pagination: false,
+			depth: 0,
+			select: { slug: true, shortDescription: true, deployment: true },
+			overrideAccess: true,
+		});
+		let flagged = 0;
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		for (const p of rows.docs as any[]) {
+			const net = p.deployment?.network;
+			const text: string =
+				DESCRIPTION_FIXES[p.slug] ?? p.shortDescription ?? "";
+			const hit =
+				net === "mainnet"
+					? text.match(TESTNET_TEXT)
+					: net === "testnet"
+						? text.match(MAINNET_TEXT)
+						: null;
+			if (!hit) continue;
+			flagged++;
+			console.log(
+				`  ${p.slug}: deployment says ${net}, description says "${hit[0]}"`,
+			);
+		}
+		console.log(
+			`  ${flagged} contradiction(s) among ${rows.docs.length} rows with a mainnet or testnet deployment`,
+		);
+	} catch (e) {
+		console.error(
+			`  ✗ sweep could not run (${(e as Error).message}); nothing checked, writes unaffected`,
+		);
+	}
+
 	// ── sls-012: structured anchor coverage, synced from the partner record ──
 	// The partner directory already carries structured seps / currencies /
 	// country; project rows (searchProjects category=Anchor) only had prose.

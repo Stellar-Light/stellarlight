@@ -356,11 +356,20 @@ server.registerTool(
 				.max(100)
 				.optional()
 				.describe("Max builds (default 20)."),
+			offset: z
+				.number()
+				.int()
+				.min(0)
+				.optional()
+				.describe(
+					"Builds to skip, for reading past the first page: page until offset + meta.counts.returned reaches meta.counts.matched (default 0).",
+				),
 		},
 	},
-	async ({ limit, ...filters }) => {
+	async ({ limit, offset, ...filters }) => {
 		const params = buildFilterParams(filters);
 		if (limit !== undefined) params.set("limit", String(limit));
+		if (offset !== undefined) params.set("offset", String(offset));
 		const qs = params.toString();
 		const result = await callScout(
 			`/api/hackathons/builds${qs ? `?${qs}` : ""}`,

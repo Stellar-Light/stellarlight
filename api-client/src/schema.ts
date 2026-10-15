@@ -1453,7 +1453,7 @@ export interface components {
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
             hackathon?: {
-                /** @description The event page, markdown as the organizer published it (stored daily for DoraHacks events). */
+                /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
                 /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). */
                 rules?: {
@@ -3500,6 +3500,8 @@ export interface operations {
                 package?: string;
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
+                /** @description Skip this many matched builds (default 0). To read every match, page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched; pages share one ranking. */
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -3544,6 +3546,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
@@ -3833,6 +3836,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
