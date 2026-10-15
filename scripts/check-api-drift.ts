@@ -18,6 +18,7 @@ import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 let failures = 0;
 let passes = 0;
+let unchecked = 0;
 const failRows: NightlyFailure[] = [];
 function ok(name: string) {
 	passes++;
@@ -30,6 +31,12 @@ function bad(name: string, detail: string) {
 }
 function check(name: string, cond: boolean, detail = "") {
 	cond ? ok(name) : bad(name, detail);
+}
+/** The API answered without the fact the check compares (a partial page):
+ * neither a pass nor drift, so it is counted apart from both. */
+function couldNotCheck(name: string, detail: string) {
+	unchecked++;
+	console.log(`  ? ${name}\n      could not check: ${detail}`);
 }
 
 // stellarlight-* UA → uaBucket "probe": keeps this daily guard out of
@@ -189,16 +196,31 @@ async function main() {
 
 	// ── 3. Filters actually filter (not silently ignored) ───────────────────
 	console.log("◆ Filters apply (no silent no-op)");
-	const baseTotal = (await getJson("/api/projects/search?q=wallet&limit=1"))
-		.body?.meta?.counts?.total;
-	const scfTrue = (
+	const baseMeta = (await getJson("/api/projects/search?q=wallet&limit=1")).body
+		?.meta;
+	const scfMeta = (
 		await getJson("/api/projects/search?q=wallet&scfAwarded=true&limit=1")
-	).body?.meta?.counts?.total;
-	check(
-		"projects/search scfAwarded=true filters (boolean form honored)",
-		typeof scfTrue === "number" && scfTrue < baseTotal,
-		`scfAwarded=true total ${scfTrue} == unfiltered ${baseTotal} (filter ignored)`,
-	);
+	).body?.meta;
+	const baseTotal = baseMeta?.counts?.total;
+	const scfTrue = scfMeta?.counts?.total;
+	// A partial page (a backend read failed) serves total null, and null < n
+	// reads as "filter ignored". No count to compare is could-not-check.
+	if (
+		baseMeta?.partial === true ||
+		scfMeta?.partial === true ||
+		baseTotal == null ||
+		scfTrue == null
+	)
+		couldNotCheck(
+			"projects/search scfAwarded=true filters (boolean form honored)",
+			`unfiltered total ${baseTotal} (partial ${baseMeta?.partial}), scfAwarded=true total ${scfTrue} (partial ${scfMeta?.partial})`,
+		);
+	else
+		check(
+			"projects/search scfAwarded=true filters (boolean form honored)",
+			typeof scfTrue === "number" && scfTrue < baseTotal,
+			`scfAwarded=true total ${scfTrue} == unfiltered ${baseTotal} (filter ignored)`,
+		);
 
 	// ── 4. Invalid filter values reject with 400 + validX ───────────────────
 	console.log("◆ Invalid values rejected (400 + validX)");
@@ -617,7 +639,9 @@ async function main() {
 
 	// ── summary ─────────────────────────────────────────────────────────────
 	writeNightlyFindings("api-drift", failRows);
-	console.log(`\n${passes} passed · ${failures} failed`);
+	console.log(
+		`\n${passes} passed · ${failures} failed · ${unchecked} could not check`,
+	);
 	if (failures > 0) process.exit(1);
 }
 
