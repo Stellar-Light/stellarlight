@@ -652,10 +652,17 @@ export async function fetchSitemapUrls(
  * step was red five days out of seven on exactly this), and every page
  * carried a random teaser for an unrelated article as its own content.
  * Cut at the teaser header; everything after it is the teaser.
+ *
+ * Its news pages (all 214 the ingest reads, 2026-10-15) end instead with a
+ * "Related articles" list, then "Mentioned projects". The list is recomputed
+ * as new related news is published, so a few pages changed between the
+ * lane's execute and its re-plan most days (1 to 6 writes, the Idempotence
+ * step red again). Cut there too, only where a list follows, so prose that
+ * mentions related articles is kept.
  */
 export function stripTrailingTeaser(body: string): string {
 	const m = body.match(
-		/(?:-\s*)?View\s*→\s*More from (?:research|news)|More from (?:research|news)(?=\s*(?:\d+[dhm] ago|today|yesterday))/i,
+		/(?:-\s*)?View\s*→\s*More from (?:research|news)|More from (?:research|news)(?=\s*(?:\d+[dhm] ago|today|yesterday))|Related articles(?=\s*\n\s*- )/i,
 	);
 	if (!m || m.index === undefined) return body;
 	return body

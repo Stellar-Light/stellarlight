@@ -31,5 +31,19 @@ describe("stripTrailingTeaser", () => {
 	it("leaves a body without a teaser alone, including the phrase in prose", () => {
 		const prose = "We expect more from research teams next year.";
 		expect(stripTrailingTeaser(prose)).toBe(prose);
+		const related = "See the related articles below for context.";
+		expect(stripTrailingTeaser(related)).toBe(related);
+	});
+
+	// News pages end with a related list that changes as news is published.
+	it("cuts a news page's Related articles list and what follows it", () => {
+		const news =
+			"Stellar launched an interactive anchor coverage map.\n\nOriginal articleRead on stellar.orgstellar.org/blog/developers/introducing-anchor-network-interac…Open ↗";
+		const tailA =
+			"Related articles\n- Stellar | MoneyGram International Case Studystellar.org · Aug 1\n- Anchors: connecting the real-world to Stellarstellar.org · Jul 9\n\nMentioned projects1 project";
+		const tailB =
+			"Related articles\n- Introducing Stellar Ramps: Access On and Off Ramps with a Single Integrationstellar.org · Aug 4\n\nMentioned projects1 project";
+		expect(stripTrailingTeaser(news + tailA)).toBe(news);
+		expect(stripTrailingTeaser(news + tailB)).toBe(news);
 	});
 });
