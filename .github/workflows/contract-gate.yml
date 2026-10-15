@@ -39,7 +39,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
-      - name: Contract artifacts fresh (snapshot + generated client types)
+      # contract:check also runs the routing-surface check (sls-051: operation
+      # descriptions at most 600 chars, no docs-question capture), so the
+      # command a contributor runs locally covers what this job enforces. It
+      # was a separate step, and a green local contract:check went red here
+      # three times (#670, #1768, #1816).
+      - name: Contract artifacts fresh + routing surface terse (snapshot, generated client types, sls-051)
         run: pnpm contract:check
 
       - name: Writer conformance (read-back, pipefail, exit-stomps, probe coverage)
@@ -53,8 +58,6 @@ jobs:
       - name: Every lesson names its guard
         continue-on-error: true
         run: pnpm exec tsx scripts/check-lessons-guarded.ts
-      - name: Routing surface stays terse (sls-051 — descriptions ≤600 chars, no docs-question capture)
-        run: pnpm exec tsx scripts/eval/routing-surface-check.ts
 
       # Every served value must be datable, or say it is not. Raven #1134: a
       # DeepWiki answer sat beside three dates that all described the code scan
