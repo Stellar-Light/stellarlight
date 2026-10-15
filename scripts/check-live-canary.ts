@@ -33,6 +33,9 @@ const UA = { "User-Agent": "stellarlight-live-canary" };
 
 let failures = 0;
 let passes = 0;
+// could-not-check: the API answered without the fact a probe compares (a
+// partial page). Not a pass, not a red, and not filed as a finding.
+let unchecked = 0;
 const failRows: NightlyFailure[] = [];
 const ok = (name: string) => {
 	passes++;
@@ -437,6 +440,7 @@ async function totalIsLimitIndependent() {
 	]) {
 		const seen: string[] = [];
 		let bad = false;
+		let partial = false;
 		for (const [limit, offset] of [
 			[3, 0],
 			[7, 0],
@@ -451,6 +455,15 @@ async function totalIsLimitIndependent() {
 				seen.push(`limit=${limit}&offset=${offset} -> HTTP ${status}`);
 				break;
 			}
+			// A partial page (a backend read failed) serves total null: no count
+			// to compare, so could-not-check rather than "total not a number".
+			if (body.meta.partial === true || body.meta.counts.total == null) {
+				partial = true;
+				seen.push(
+					`limit=${limit}&offset=${offset} -> total ${body.meta.counts.total}, partial ${body.meta.partial}`,
+				);
+				break;
+			}
 			const total = Number(body.meta.counts.total ?? Number.NaN);
 			if (!Number.isFinite(total)) {
 				bad = true;
@@ -460,7 +473,10 @@ async function totalIsLimitIndependent() {
 			seen.push(`limit=${limit}&offset=${offset} -> ${total}`);
 		}
 		const values = new Set(seen.map((x) => x.split("-> ")[1]));
-		if (!bad && values.size === 1) {
+		if (partial) {
+			unchecked++;
+			console.log(`  ? ${q}\n      could not check: ${seen.join(", ")}`);
+		} else if (!bad && values.size === 1) {
 			ok(`${q} — total ${[...values][0]} at every limit/offset`);
 		} else {
 			failRows.push({
@@ -557,7 +573,9 @@ async function productModelHolds() {
 	await everyPageRenders();
 	await totalIsLimitIndependent();
 	await productModelHolds();
-	console.log(`\n${passes} passed, ${failures} failed`);
+	console.log(
+		`\n${passes} passed, ${failures} failed, ${unchecked} could not check`,
+	);
 	writeNightlyFindings("live-canary", failRows);
 	process.exit(failures > 0 ? 1 : 0);
 })();

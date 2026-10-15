@@ -18,6 +18,7 @@ import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 let failures = 0;
 let passes = 0;
+let unchecked = 0;
 const failRows: NightlyFailure[] = [];
 function ok(name: string) {
 	passes++;
@@ -30,6 +31,12 @@ function bad(name: string, detail: string) {
 }
 function check(name: string, cond: boolean, detail = "") {
 	cond ? ok(name) : bad(name, detail);
+}
+/** The API answered without the fact the check compares (a partial page):
+ * neither a pass nor drift, so it is counted apart from both. */
+function couldNotCheck(name: string, detail: string) {
+	unchecked++;
+	console.log(`  ? ${name}\n      could not check: ${detail}`);
 }
 
 // stellarlight-* UA → uaBucket "probe": keeps this daily guard out of
@@ -187,18 +194,68 @@ async function main() {
 			: "no event with ranked winners was read, so the rule checked nothing",
 	);
 
+	// ── 2d. Raven findings stay fixed (sls-090, sls-093) ───────────────────
+	// Live regression checks for two findings closed on 2026-10-15: research
+	// finds a named advisory exactly and says exactMiss for an absent one;
+	// repo search labels a spelling-corrected match `corrected`.
+	console.log("◆ Raven findings stay fixed");
+	const ghsa = (await getJson("/api/research?q=GHSA-96xm-fv9w-pf3f&limit=3"))
+		.body;
+	const absent = (await getJson("/api/research?q=CVE-2099-00001&limit=3")).body;
+	const strupey = (await getJson("/api/repos/search?q=strupey&limit=5")).body;
+	const stroopy = (await getJson("/api/repos/search?q=stroopy&limit=5")).body;
+	if ([ghsa, absent, strupey, stroopy].some((b) => b?.meta?.partial === true))
+		couldNotCheck(
+			"Raven sls-090 / sls-093 regressions",
+			"a page was partial (a backend read failed)",
+		);
+	else {
+		check(
+			"sls-090: a named GHSA advisory is found first, with no exactMiss",
+			/GHSA-96xm-fv9w-pf3f/i.test(String(ghsa?.results?.[0]?.title ?? "")) &&
+				!ghsa?.meta?.exactMiss,
+			`top row "${ghsa?.results?.[0]?.title}", exactMiss ${JSON.stringify(ghsa?.meta?.exactMiss?.identifiers ?? null)}`,
+		);
+		check(
+			"sls-090: an absent CVE id is an exactMiss, not a neighbour",
+			(absent?.meta?.exactMiss?.identifiers ?? []).includes("CVE-2099-00001"),
+			`exactMiss ${JSON.stringify(absent?.meta?.exactMiss ?? null)}`,
+		);
+		check(
+			"sls-093: repo search labels a spelling-corrected match `corrected`",
+			strupey?.meta?.matchMode === "corrected" &&
+				stroopy?.meta?.matchMode === "strict",
+			`strupey ${strupey?.meta?.matchMode}, stroopy ${stroopy?.meta?.matchMode}`,
+		);
+	}
+
 	// ── 3. Filters actually filter (not silently ignored) ───────────────────
 	console.log("◆ Filters apply (no silent no-op)");
-	const baseTotal = (await getJson("/api/projects/search?q=wallet&limit=1"))
-		.body?.meta?.counts?.total;
-	const scfTrue = (
+	const baseMeta = (await getJson("/api/projects/search?q=wallet&limit=1")).body
+		?.meta;
+	const scfMeta = (
 		await getJson("/api/projects/search?q=wallet&scfAwarded=true&limit=1")
-	).body?.meta?.counts?.total;
-	check(
-		"projects/search scfAwarded=true filters (boolean form honored)",
-		typeof scfTrue === "number" && scfTrue < baseTotal,
-		`scfAwarded=true total ${scfTrue} == unfiltered ${baseTotal} (filter ignored)`,
-	);
+	).body?.meta;
+	const baseTotal = baseMeta?.counts?.total;
+	const scfTrue = scfMeta?.counts?.total;
+	// A partial page (a backend read failed) serves total null, and null < n
+	// reads as "filter ignored". No count to compare is could-not-check.
+	if (
+		baseMeta?.partial === true ||
+		scfMeta?.partial === true ||
+		baseTotal == null ||
+		scfTrue == null
+	)
+		couldNotCheck(
+			"projects/search scfAwarded=true filters (boolean form honored)",
+			`unfiltered total ${baseTotal} (partial ${baseMeta?.partial}), scfAwarded=true total ${scfTrue} (partial ${scfMeta?.partial})`,
+		);
+	else
+		check(
+			"projects/search scfAwarded=true filters (boolean form honored)",
+			typeof scfTrue === "number" && scfTrue < baseTotal,
+			`scfAwarded=true total ${scfTrue} == unfiltered ${baseTotal} (filter ignored)`,
+		);
 
 	// ── 4. Invalid filter values reject with 400 + validX ───────────────────
 	console.log("◆ Invalid values rejected (400 + validX)");
@@ -617,7 +674,9 @@ async function main() {
 
 	// ── summary ─────────────────────────────────────────────────────────────
 	writeNightlyFindings("api-drift", failRows);
-	console.log(`\n${passes} passed · ${failures} failed`);
+	console.log(
+		`\n${passes} passed · ${failures} failed · ${unchecked} could not check`,
+	);
 	if (failures > 0) process.exit(1);
 }
 

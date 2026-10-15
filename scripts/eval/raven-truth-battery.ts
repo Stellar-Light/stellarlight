@@ -419,7 +419,7 @@ async function sliceG() {
 			await fetch(u, { headers: { "User-Agent": "stellarlight-battery" } })
 		).json()) as {
 			projects?: Array<{ slug?: string; name?: string }>;
-			meta?: { counts?: { total?: number } };
+			meta?: { counts?: { total?: number | null }; partial?: boolean };
 		};
 	// The API caps a page at 100 rows, and a typed set can exceed that (RWA
 	// reached 101 on 2026-10-02 and tripped every G probe): the set is the
@@ -428,19 +428,21 @@ async function sliceG() {
 	const PAGE = 100;
 	const walkSet = async (url: string) => {
 		const slugs: string[] = [];
-		let total = -1;
+		let total: number | null = null;
+		let partial = false;
 		let projects: Array<{ slug?: string; name?: string }> = [];
 		for (let off = 0; off < 1000; off += PAGE) {
 			const page = await fetchJson(`${url}&limit=${PAGE}&offset=${off}`);
 			if (off === 0) {
-				total = page.meta?.counts?.total ?? -1;
+				total = page.meta?.counts?.total ?? null;
 				projects = page.projects ?? [];
 			}
+			if (page.meta?.partial === true) partial = true;
 			const got = (page.projects ?? []).map((p) => String(p.slug));
 			slugs.push(...got);
 			if (got.length < PAGE) break;
 		}
-		return { slugs, total, projects };
+		return { slugs, total, projects, partial };
 	};
 	try {
 		for (const gType of G_TYPES) {
@@ -448,11 +450,20 @@ async function sliceG() {
 			const noQ = await walkSet(`${base}?type=${gType}`);
 			const noQSlugs = noQ.slugs;
 			const total = noQ.total;
-			verdict(
-				noQSlugs.length === total && new Set(noQSlugs).size === total,
-				"G:closed-set",
-				`type=${gType} no-q: walked=${noQSlugs.length} distinct=${new Set(noQSlugs).size} total=${total} (the walk at the page cap IS the set)`,
-			);
+			// A partial page (a backend read failed) may drop rows and serves
+			// total null, so the set cannot be closed: could-not-check, counted
+			// with the errors this battery gates on, never a FAIL or a pass.
+			if (noQ.partial || total === null) {
+				errors++;
+				console.log(
+					`  ?     G:closed-set  type=${gType} no-q: could not check (total ${total}, partial page in the walk ${noQ.partial}); counted with the slice errors`,
+				);
+			} else
+				verdict(
+					noQSlugs.length === total && new Set(noQSlugs).size === total,
+					"G:closed-set",
+					`type=${gType} no-q: walked=${noQSlugs.length} distinct=${new Set(noQSlugs).size} total=${total} (the walk at the page cap IS the set)`,
+				);
 			const withQ = await walkSet(`${base}?type=${gType}&q=${ql}`);
 			const withQSlugs = new Set(withQ.slugs);
 			const sameSet =

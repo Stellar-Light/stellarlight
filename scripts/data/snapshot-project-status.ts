@@ -68,18 +68,24 @@ async function servedProjects(): Promise<{
 		const got: any[] = [];
 		let offset = 0;
 		let total = Number.POSITIVE_INFINITY;
+		let partial = false;
 		while (offset < total) {
 			const d = await getJson(
 				`${API}?status=${encodeURIComponent(status)}&limit=100&offset=${offset}&fields=${FIELDS}`,
 			);
 			const page = d.projects ?? d.results ?? [];
 			total = d.meta?.counts?.total ?? 0;
+			if (d.meta?.partial === true) partial = true;
 			got.push(...page);
 			if (!page.length) break;
 			offset += page.length;
 		}
 		if (got.length !== total)
-			throw new Error(`${status}: read ${got.length} of ${total}`);
+			throw new Error(
+				partial
+					? `${status}: read ${got.length} rows, but a page was partial (a backend read failed), so the set is uncounted or incomplete`
+					: `${status}: read ${got.length} of ${total}`,
+			);
 		byStatus[status] = got.length;
 		for (const p of got) {
 			rows.push({

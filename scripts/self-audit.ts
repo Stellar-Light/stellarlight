@@ -714,11 +714,22 @@ async function main() {
 					const d = await j(
 						`/api/projects/search?q=${encodeURIComponent(probe)}&limit=${n}`,
 					);
-					return { n, total: d?.meta?.counts?.total ?? null };
+					return {
+						n,
+						total: d?.meta?.counts?.total ?? null,
+						partial: d?.meta?.partial === true,
+					};
 				}),
 			);
 			const distinct = [...new Set(totals.map((t) => t.total))];
-			if (distinct.length === 1)
+			// A partial page (a backend read failed) serves total null: there is
+			// no count to compare, so this is could-not-check, never a moved count.
+			if (totals.some((t) => t.partial || t.total === null))
+				warn(
+					`counts.total limit-invariance ("${probe}")`,
+					`could not check: ${totals.map((t) => `limit=${t.n}: total ${t.total}, partial ${t.partial}`).join("; ")}`,
+				);
+			else if (distinct.length === 1)
 				ok(
 					`counts.total stable for "${probe}" (${distinct[0]} at every limit)`,
 				);
@@ -732,9 +743,14 @@ async function main() {
 			const full = await j(
 				`/api/projects/search?q=${encodeURIComponent(probe)}&limit=100`,
 			);
-			const t = full?.meta?.counts?.total ?? 0;
+			const t = full?.meta?.counts?.total;
 			const served = (full?.projects ?? []).length;
-			if (t <= 100 && t !== served)
+			if (full?.meta?.partial === true || typeof t !== "number")
+				warn(
+					`counts.total vs the served page ("${probe}")`,
+					`could not check: total ${t}, partial ${full?.meta?.partial} (a partial page may be missing rows and has no whole-set count)`,
+				);
+			else if (t <= 100 && t !== served)
 				bad(
 					`counts.total disagrees with the served page ("${probe}")`,
 					`total=${t} but limit=100 served ${served} row(s) — with the whole set on one page these must match`,

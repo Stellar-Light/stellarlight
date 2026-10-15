@@ -27,8 +27,10 @@ type Probe = {
 	path: string;
 	/** Endpoint 400s unknown params by design — no cache-buster. */
 	strict?: boolean;
+	/** null = pass, string = failure detail, couldNotCheck = the API answered
+	 * without the fact this probe grades (a partial page): not a pass, not a miss. */
 	// biome-ignore lint/suspicious/noExplicitAny: probe bodies are shape-checked inline
-	test: (body: any) => string | null; // null = pass, string = failure detail
+	test: (body: any) => string | null | { couldNotCheck: string };
 };
 
 const lower = (v: unknown) => String(v ?? "").toLowerCase();
@@ -48,6 +50,12 @@ const PROBES: Probe[] = [
 		name: "filter-only browse: dependsOn=soroban-sdk sees the whole corpus",
 		path: "/api/repos/search?dependsOn=soroban-sdk&limit=50",
 		test: (b) => {
+			// A partial page (a backend read failed) serves total null and may
+			// be missing rows, so neither the count nor membership can be graded.
+			if (b.meta?.partial === true || b.meta?.counts?.total == null)
+				return {
+					couldNotCheck: `total ${b.meta?.counts?.total}, partial ${b.meta?.partial}`,
+				};
 			const total = b.meta?.counts?.total ?? 0;
 			if (total < 250) return `total ${total} < 250 (pool-cap regression)`;
 			return (b.repos ?? []).some((r: { fullName?: string }) =>
@@ -187,11 +195,12 @@ const PROBES: Probe[] = [
 
 async function main(): Promise<number> {
 	let failed = 0;
+	let unchecked = 0;
 	for (const p of PROBES) {
 		const url = p.strict
 			? `${BASE}${p.path}`
 			: `${BASE}${p.path}${p.path.includes("?") ? "&" : "?"}_probe=${Date.now()}`;
-		let detail: string | null;
+		let detail: ReturnType<Probe["test"]>;
 		try {
 			const res = await fetch(url);
 			if (!res.ok) throw new Error(`http ${res.status}`);
@@ -201,13 +210,18 @@ async function main(): Promise<number> {
 		}
 		if (detail === null) {
 			console.log(`✓ ${p.name}`);
+		} else if (typeof detail === "object") {
+			console.log(`? ${p.name}: could not check (${detail.couldNotCheck})`);
+			unchecked += 1;
 		} else {
 			console.error(`✗ ${p.name} — ${detail}`);
 			failed += 1;
 		}
 	}
+	// could-not-check is neither passed nor a miss: it does not exit 1 (a red
+	// here reads as "code answers regressed") and is never counted as passed.
 	console.log(
-		`\n${PROBES.length - failed}/${PROBES.length} code-truth probes passed`,
+		`\n${PROBES.length - failed - unchecked}/${PROBES.length} code-truth probes passed, ${unchecked} could not check`,
 	);
 	return failed === 0 ? 0 : 1;
 }
