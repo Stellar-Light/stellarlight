@@ -259,7 +259,7 @@ export interface paths {
         };
         /**
          * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
-         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. A submission entered in several events is one row per event under a `hackathon` filter, and one result (its best-ranked event) across events; getHackathonSubmission lists every event in `entries`. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
+         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
          */
         get: operations["searchHackathonBuilds"];
         put?: never;
@@ -3490,7 +3490,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3801,7 +3801,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). */
+                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;

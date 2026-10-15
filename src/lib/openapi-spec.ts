@@ -247,7 +247,7 @@ const buildFilterParams = (qDescription: string) => [
 		in: "query",
 		required: false,
 		description:
-			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists).",
+			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
 		schema: { type: "string" },
 	},
 	{
@@ -3332,7 +3332,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
 				description:
-					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. A submission entered in several events is one row per event under a `hackathon` filter, and one result (its best-ranked event) across events; getHackathonSubmission lists every event in `entries`. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
+					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
