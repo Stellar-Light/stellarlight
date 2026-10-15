@@ -298,6 +298,10 @@ async function syncEvents(
 			if (d) {
 				Object.assign(row, {
 					summary: d.summary,
+					// DoraHacks' own submission count, served beside ours.
+					...(d.buidlsCount !== null
+						? { upstreamSubmissions: d.buidlsCount }
+						: {}),
 					description: d.description,
 					tracks: d.tracks,
 					repoRequired: d.repoRequired,

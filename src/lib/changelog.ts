@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-15",
+		surfaces: ["api"],
+		version: "spec@1.9.77",
+		type: "added",
+		summary:
+			"getHackathon stats serve DoraHacks' own submission count (`upstreamSubmissions`) beside the count served here, with a `coverageNote` when they differ.",
+		detail:
+			"sls-092 asked that a stored count differing from the organizer's be said, not left for the reader to discover. On 2026-10-15, 10 of 20 Stellar events on DoraHacks differed, by 1 to 26 (Real-World ZK serves 319 of DoraHacks' 345): submissions their teams hid or deleted are not served, and a same-name resubmission counts once. The count is read daily with the stored event page; curated events have no DoraHacks roster and serve null.",
+	},
+	{
+		date: "2026-10-15",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.7.0",
 		type: "added",

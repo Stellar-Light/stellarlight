@@ -10358,6 +10358,26 @@ export const spec: OpenAPISpec = {
 								},
 							},
 							profile: EVENT_PROFILE_SCHEMA,
+							stats: {
+								type: "object",
+								description:
+									"Counts for the event. totalSubmissions counts the submissions served here (null = no submission list).",
+								properties: {
+									totalSubmissions: { type: "integer", nullable: true },
+									upstreamSubmissions: {
+										type: "integer",
+										nullable: true,
+										description:
+											"DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read.",
+									},
+									coverageNote: {
+										type: "string",
+										nullable: true,
+										description:
+											"Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept.",
+									},
+								},
+							},
 						},
 					},
 					winners: {

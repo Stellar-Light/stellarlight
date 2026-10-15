@@ -4,6 +4,7 @@ import {
 	JUDGING_HEADING,
 	markdownSection,
 	REQUIREMENTS_HEADING,
+	submissionCoverageNote,
 } from "@/lib/hackathon-events";
 
 const PAGE = `# Stellar Hacks: Real-World ZK
@@ -108,5 +109,24 @@ describe("eventPageMarkdown", () => {
 	it("is null when nothing was published", () => {
 		expect(eventPageMarkdown(null, [])).toBeNull();
 		expect(eventPageMarkdown("  ", [{ name: "x", body: "" }])).toBeNull();
+	});
+});
+
+// sls-092: say when the submissions served differ from DoraHacks' own count.
+describe("submissionCoverageNote", () => {
+	it("is null when the counts agree or one is unknown", () => {
+		expect(submissionCoverageNote(39, 39)).toBeNull();
+		expect(submissionCoverageNote(null, 39)).toBeNull();
+		expect(submissionCoverageNote(345, null)).toBeNull();
+	});
+
+	it("names the gap and why, in both directions", () => {
+		const fewer = submissionCoverageNote(345, 319) ?? "";
+		expect(fewer).toMatch(/DoraHacks counts 345 submissions/);
+		expect(fewer).toMatch(/The other 26 are not/);
+		expect(fewer).toMatch(/hid or deleted/);
+		expect(submissionCoverageNote(40, 41)).toMatch(
+			/including 1 DoraHacks no longer lists/,
+		);
 	});
 });

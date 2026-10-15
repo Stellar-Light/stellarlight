@@ -18,6 +18,7 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
+import { submissionCoverageNote } from "@/lib/hackathon-events";
 import {
 	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
@@ -404,6 +405,13 @@ export async function GET(
 							// anywhere), and counting its zero rows published
 							// `totalSubmissions: 0` beside twelve winners.
 							totalSubmissions: liveSubmissions.length || null,
+							// DoraHacks' own count beside ours, and why they differ
+							// (sls-092: Real-World ZK serves 319 of DoraHacks' 345).
+							upstreamSubmissions: storedEvent?.upstreamSubmissions ?? null,
+							coverageNote: submissionCoverageNote(
+								storedEvent?.upstreamSubmissions,
+								liveSubmissions.length || null,
+							),
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
 							winners: winners.length,
 							// Every bucket was hardcoded 0, including `unknown` — so a
@@ -574,6 +582,9 @@ export async function GET(
 						// records we hold no submission count, and the outcome funnel
 						// over an unknown denominator means nothing either.
 						totalSubmissions: submissions.length || null,
+						// No DoraHacks roster behind a curated event.
+						upstreamSubmissions: null,
+						coverageNote: null,
 						totalPrizeUSD,
 						winners: winners.length,
 						outcomes: submissions.length ? outcomes : null,

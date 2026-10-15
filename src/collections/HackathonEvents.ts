@@ -43,6 +43,14 @@ export const HackathonEvents: CollectionConfig = {
 		{ name: "endDate", type: "text", admin: { description: "YYYY-MM-DD" } },
 		{ name: "prizePoolUsd", type: "number" },
 		{ name: "hackersCount", type: "number" },
+		{
+			name: "upstreamSubmissions",
+			type: "number",
+			admin: {
+				description:
+					"DoraHacks' own count of the event's submissions (buidls_count), read with the event page",
+			},
+		},
 		{ name: "summary", type: "textarea" },
 		{
 			name: "description",
