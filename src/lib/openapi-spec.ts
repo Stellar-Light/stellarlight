@@ -9273,7 +9273,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "string" },
 						description:
-							"Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row is a semantic neighbour, not the named record. Absent = the query named no exact key.",
+							"Present only when the query named an exact key (an audit finding id, a CVE or GHSA id, or a repo-qualified release tag): the named keys this row carries verbatim (a release tag by its release title). [] = this row carries none of them: for those keys it is a semantic neighbour, not the record. Absent = the query named no such key, or `fields` left it out.",
 					},
 					id: { type: "string" },
 					source: { type: "string" },
@@ -10380,11 +10380,12 @@ export const spec: OpenAPISpec = {
 										type: "array",
 										nullable: true,
 										description:
-											"Winning submissions stored for this event but not served, because their teams hid or deleted them on DoraHacks, with each placement. [] = none; null = no stored DoraHacks roster backs this event, or the read failed.",
+											"Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement and award, never the submission itself. placementRank is parsed as served winners' is (placement, else award), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed.",
 										items: {
 											type: "object",
 											properties: {
 												placement: { type: "string", nullable: true },
+												award: { type: "string", nullable: true },
 												placementRank: { type: "integer", nullable: true },
 											},
 										},
@@ -10393,7 +10394,7 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										nullable: true,
 										description:
-											"Present when hiddenWinners is non-empty: says how many winning submissions are not served and why, naming their placements, so a missing winner is explained rather than silent.",
+											"Non-null when hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award, so a missing winner is explained rather than silent.",
 									},
 									coverageNote: {
 										type: "string",

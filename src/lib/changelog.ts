@@ -36,9 +36,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.78",
 		type: "added",
 		summary:
-			"searchResearch rows carry `exactKeys` when the query names an exact key, and getHackathon stats name winners their teams hid on DoraHacks (`hiddenWinners`, `winnersNote`).",
+			"searchResearch rows carry `exactKeys` when the query names an exact key, and getHackathon stats name the placements of winners their teams hid on DoraHacks (`hiddenWinners`, `winnersNote`).",
 		detail:
-			"sls-090: each row lists the named keys (finding, CVE or GHSA ids, repo-qualified release tags) it carries verbatim; [] marks a semantic neighbour, not the record. sls-092: Build on Stellar Chile served 14 of DoraHacks' 15 winners with no word why; the record now names each hidden winner's placement (never the hidden submission) and says why it is not served. [] = none hidden; null = the read failed or no stored DoraHacks roster backs the event.",
+			"sls-090: each row lists the named keys (finding, CVE or GHSA ids, repo-qualified release tags) it carries verbatim; [] marks a semantic neighbour, not the record. sls-092: Build on Stellar Chile served 14 of DoraHacks' 15 winners with no word why; the record now names each hidden winner's placement and award (never the hidden submission) and says why it is not served; its placementRank is parsed as served winners' is, so a missing ranked tier joins to it. [] = none hidden; null = the read failed or no stored DoraHacks roster backs the event.",
 	},
 	{
 		date: "2026-10-15",

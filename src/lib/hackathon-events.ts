@@ -90,13 +90,18 @@ export function submissionCoverageNote(
  * (Build on Stellar Chile served 14 of its 15 winners). null when there is
  * none, or when the read could not say. */
 export function hiddenWinnersNote(
-	hidden: ReadonlyArray<{ placement: string | null }> | null,
+	hidden: ReadonlyArray<{
+		placement: string | null;
+		award?: string | null;
+	}> | null,
 ): string | null {
 	if (!hidden?.length) return null;
-	const places = hidden.map((h) => h.placement || "Winner").join(", ");
+	const places = hidden
+		.map((h) => [h.placement || "Winner", h.award].filter(Boolean).join(", "))
+		.join("; ");
 	return hidden.length === 1
-		? `One winning submission is not served here: its team hid or deleted it on DoraHacks (placement: ${places}).`
-		: `${hidden.length} winning submissions are not served here: their teams hid or deleted them on DoraHacks (placements: ${places}).`;
+		? `One winning submission is not served here: its team hid or deleted it on DoraHacks (${places}).`
+		: `${hidden.length} winning submissions are not served here: their teams hid or deleted them on DoraHacks (${places}).`;
 }
 
 export const JUDGING_HEADING = /judg|criteri|evaluat|scoring/i;

@@ -9,7 +9,11 @@ vi.mock("@/lib/repo-search", async (orig) => ({
 	searchRepos: vi.fn(async () => ({ repos: [], warnings: [] })),
 }));
 
-type FindArgs = { collection: string; limit?: number };
+type FindArgs = {
+	collection: string;
+	limit?: number;
+	select?: { embedding?: boolean };
+};
 /** What each read returns in the current test: rows, an Error to throw, or
  * "hang" for a read that never settles. */
 let read: (args: FindArgs, call: number) => unknown[] | Error | "hang";
@@ -17,8 +21,7 @@ let candidateCalls = 0;
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
 		find: vi.fn(async (args: FindArgs) => {
-			const isCandidate = args.collection === "projects" && args.limit === 0;
-			const out = read(args, isCandidate ? ++candidateCalls : 0);
+			const out = read(args, isCandidate(args) ? ++candidateCalls : 0);
 			if (out === "hang") return new Promise(() => {});
 			if (out instanceof Error) throw out;
 			return { docs: out, totalDocs: out.length };
@@ -35,19 +38,30 @@ const soroswap = {
 	status: "Live",
 	types: [],
 };
+// The candidate fetch (and its retry): the whole match set, embedding left out.
 const isCandidate = (a: FindArgs) =>
-	a.collection === "projects" && a.limit === 0;
+	a.collection === "projects" && a.limit === 0 && a.select?.embedding === false;
 
 async function search(qs: string) {
 	vi.resetModules();
 	const { GET } = await import("../route");
+	const t0 = Date.now();
+	let ms = 0;
 	const pending = GET(
 		new NextRequest(`https://x.test/api/projects/search?${qs}`),
-	);
+	).then((r) => {
+		ms = Date.now() - t0;
+		return r;
+	});
 	// Fake clock: every bounded read gets its full timeout at once.
 	await vi.advanceTimersByTimeAsync(10_000);
 	const res = await pending;
-	return { status: res.status, headers: res.headers, body: await res.json() };
+	return {
+		status: res.status,
+		headers: res.headers,
+		body: await res.json(),
+		ms,
+	};
 }
 
 describe("GET /api/projects/search when a read fails (sls-089)", () => {
@@ -83,8 +97,10 @@ describe("GET /api/projects/search when a read fails (sls-089)", () => {
 
 	it("both candidate fetches timed out: a 503 to retry, not an empty page", async () => {
 		read = (a) => (isCandidate(a) ? "hang" : []);
-		const { status, headers, body } = await search("q=soroswap");
+		const { status, headers, body, ms } = await search("q=soroswap");
 		expect(status).toBe(503);
+		// 4 s for the first read, the 2 s left of the 6 s budget for the retry.
+		expect(ms).toBe(6_000);
 		expect(body.retryAfterSeconds).toBe(2);
 		expect(headers.get("Retry-After")).toBe("2");
 		expect(body.advisory).toMatch(/NOT a claim that no project matches/);

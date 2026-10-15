@@ -196,12 +196,14 @@ async function main() {
 		if (unexplained.length)
 			holes.push(`${ev.slug} (rank ${unexplained.join(", ")})`);
 		else if (missing.length)
-			explained.push(
-				`${ev.slug} (rank ${missing.join(", ")}: a hidden submission)`,
-			);
+			explained.push(`${ev.slug} (rank ${missing.join(", ")})`);
 	}
+	if (explained.length)
+		console.log(
+			`  held by a winner its team hid on DoraHacks: ${explained.join("; ")}`,
+		);
 	check(
-		`every ranked prize tier has a winner at its rank, or the record says why (${ranked} events with ranked winners${explained.length ? `; explained: ${explained.join("; ")}` : ""})`,
+		`every ranked prize tier has a winner at its rank (${ranked} events with ranked winners)`,
 		ranked > 0 && holes.length === 0,
 		ranked
 			? `no winner at: ${holes.join("; ")}`
@@ -210,13 +212,19 @@ async function main() {
 
 	// ── 2d. Raven findings stay fixed (sls-090, sls-093) ───────────────────
 	// Live regression checks for two findings closed on 2026-10-15: research
-	// finds a named advisory exactly and says exactMiss for an absent one;
+	// finds a named advisory exactly and says exactMiss for an absent one,
+	// and each row's exactKeys says whether it is the record or a neighbour;
 	// repo search labels a spelling-corrected match `corrected`.
 	console.log("◆ Raven findings stay fixed");
 	const ghsa = (await getJson("/api/research?q=GHSA-96xm-fv9w-pf3f&limit=3"))
 		.body;
 	const absent = (await getJson("/api/research?q=CVE-2099-00001&limit=3")).body;
 	const strupey = (await getJson("/api/repos/search?q=strupey&limit=5")).body;
+	// sls-092: Build on Stellar Chile has 15 winners on DoraHacks; one team
+	// hid its submission. Served plus hidden stays 15 whether or not it is
+	// hidden again, and drops to 14 if the record stops naming it.
+	const chile = (await getJson("/api/hackathons/buildonstellarchile")).body
+		?.hackathon?.stats;
 	const stroopy = (await getJson("/api/repos/search?q=stroopy&limit=5")).body;
 	if ([ghsa, absent, strupey, stroopy].some((b) => b?.meta?.partial === true))
 		couldNotCheck(
@@ -224,17 +232,36 @@ async function main() {
 			"a page was partial (a backend read failed)",
 		);
 	else {
+		const neighbours: Array<{ exactKeys?: unknown }> = absent?.results ?? [];
 		check(
-			"sls-090: a named GHSA advisory is found first, with no exactMiss",
+			"sls-090: a named GHSA advisory is found first, its row carries the id in exactKeys, with no exactMiss",
 			/GHSA-96xm-fv9w-pf3f/i.test(String(ghsa?.results?.[0]?.title ?? "")) &&
+				(ghsa?.results?.[0]?.exactKeys ?? []).includes("GHSA-96xm-fv9w-pf3f") &&
 				!ghsa?.meta?.exactMiss,
-			`top row "${ghsa?.results?.[0]?.title}", exactMiss ${JSON.stringify(ghsa?.meta?.exactMiss?.identifiers ?? null)}`,
+			`top row "${ghsa?.results?.[0]?.title}", exactKeys ${JSON.stringify(ghsa?.results?.[0]?.exactKeys ?? null)}, exactMiss ${JSON.stringify(ghsa?.meta?.exactMiss?.identifiers ?? null)}`,
 		);
 		check(
-			"sls-090: an absent CVE id is an exactMiss, not a neighbour",
-			(absent?.meta?.exactMiss?.identifiers ?? []).includes("CVE-2099-00001"),
-			`exactMiss ${JSON.stringify(absent?.meta?.exactMiss ?? null)}`,
+			"sls-090: an absent CVE id is an exactMiss, and every row is marked a neighbour (exactKeys [])",
+			(absent?.meta?.exactMiss?.identifiers ?? []).includes("CVE-2099-00001") &&
+				neighbours.length > 0 &&
+				neighbours.every(
+					(r) => Array.isArray(r.exactKeys) && r.exactKeys.length === 0,
+				),
+			`exactMiss ${JSON.stringify(absent?.meta?.exactMiss ?? null)}, rows ${neighbours.length}, exactKeys ${JSON.stringify(neighbours.map((r) => r.exactKeys ?? null))}`,
 		);
+		if (chile?.hiddenWinners === null)
+			couldNotCheck(
+				"sls-092: Build on Stellar Chile serves or names all 15 winners",
+				"its hidden-winner read failed",
+			);
+		else
+			check(
+				"sls-092: Build on Stellar Chile serves or names all 15 winners",
+				Array.isArray(chile?.hiddenWinners) &&
+					chile.winners + chile.hiddenWinners.length === 15 &&
+					(chile.hiddenWinners.length === 0) === (chile.winnersNote === null),
+				`winners ${chile?.winners}, hiddenWinners ${JSON.stringify(chile?.hiddenWinners)}, winnersNote ${JSON.stringify(chile?.winnersNote)}`,
+			);
 		check(
 			"sls-093: repo search labels a spelling-corrected match `corrected`",
 			strupey?.meta?.matchMode === "corrected" &&

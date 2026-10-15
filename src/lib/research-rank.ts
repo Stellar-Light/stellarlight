@@ -243,7 +243,10 @@ const FINDING_ID_RE = /\b[A-Z][A-Z0-9]{0,4}(?:-[A-Z]{2,6}){1,3}-\d{1,4}\b/g;
 export function findingIdentifierTargets(query: string | undefined): string[] {
 	if (!query) return [];
 	const out: string[] = [];
-	for (const m of query.toUpperCase().matchAll(FINDING_ID_RE)) {
+	// GHSA-c9fg-jmpq-2345 holds C9FG-JMPQ-2345, which reads as a finding id;
+	// advisory ids are taken out first.
+	const text = query.toUpperCase().replace(ADVISORY_ID_RE, " ");
+	for (const m of text.matchAll(FINDING_ID_RE)) {
 		if (!out.includes(m[0])) out.push(m[0]);
 	}
 	return out;
@@ -386,23 +389,11 @@ export function exactKeyReport(args: {
 	exactMiss: { identifiers: string[]; note: string } | null;
 	heldNotServed: string[];
 } {
-	const carries = (rows: ReadonlyArray<KeyedRow>, id: string) =>
-		rows.some((r) => identifierIsPresent(id, [r.title, r.content, r.url]));
-	const titled = (rows: ReadonlyArray<KeyedRow>, t: ReleaseTagTarget) =>
-		rows.some((r) => isReleaseTitle(r.title, t));
 	const missed: string[] = [];
 	const heldNotServed: string[] = [];
-	for (const id of [
-		...findingIdentifierTargets(args.query),
-		...advisoryIdentifierTargets(args.query),
-	]) {
-		if (carries(args.served, id)) continue;
-		(carries(args.scope, id) ? heldNotServed : missed).push(id);
-	}
-	for (const t of releaseTagTargets(args.query)) {
-		if (titled(args.served, t)) continue;
-		const key = `${t.repo} ${t.tag}`;
-		(titled(args.scope, t) ? heldNotServed : missed).push(key);
+	for (const { key, carriedBy } of namedKeys(args.query)) {
+		if (args.served.some(carriedBy)) continue;
+		(args.scope.some(carriedBy) ? heldNotServed : missed).push(key);
 	}
 	return {
 		exactMiss: missed.length
@@ -415,28 +406,38 @@ export function exactKeyReport(args: {
 	};
 }
 
-/** sls-090: the exact keys the query named that this row carries (ids
- * verbatim in title, content or url; release tags by title). null when the
- * query named none, so the field stays absent; [] marks a semantic
- * neighbour, not the record. */
+/** The exact keys a query names, each with its test for a row carrying it:
+ * finding, CVE and GHSA ids verbatim (whole token) in title, content or url,
+ * then repo-qualified release tags by release title. */
+function namedKeys(
+	query: string | undefined,
+): Array<{ key: string; carriedBy: (row: KeyedRow) => boolean }> {
+	return [
+		...[
+			...findingIdentifierTargets(query),
+			...advisoryIdentifierTargets(query),
+		].map((id) => ({
+			key: id,
+			carriedBy: (r: KeyedRow) =>
+				identifierIsPresent(id, [r.title, r.content, r.url]),
+		})),
+		...releaseTagTargets(query).map((t) => ({
+			key: `${t.repo} ${t.tag}`,
+			carriedBy: (r: KeyedRow) => isReleaseTitle(r.title, t),
+		})),
+	];
+}
+
+/** sls-090: the named keys this row carries. null when the query named
+ * none, so the field stays absent; [] = the row carries none of them. */
 export function exactKeysOf(
 	query: string | undefined,
 	row: KeyedRow,
 ): string[] | null {
-	const ids = [
-		...findingIdentifierTargets(query),
-		...advisoryIdentifierTargets(query),
-	];
-	const tags = releaseTagTargets(query);
-	if (!ids.length && !tags.length) return null;
-	return [
-		...ids.filter((id) =>
-			identifierIsPresent(id, [row.title, row.content, row.url]),
-		),
-		...tags
-			.filter((t) => isReleaseTitle(row.title, t))
-			.map((t) => `${t.repo} ${t.tag}`),
-	];
+	const keys = namedKeys(query);
+	return keys.length
+		? keys.filter((k) => k.carriedBy(row)).map((k) => k.key)
+		: null;
 }
 
 /** The exactMiss note for these keys. `unchecked`: the lookup over the

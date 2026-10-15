@@ -138,14 +138,17 @@ describe("submissionCoverageNote", () => {
 
 // sls-092: Build on Stellar Chile served 14 of 15 winners with no word why.
 describe("hiddenWinnersNote", () => {
-	it("names each hidden winner's placement, singular and plural", () => {
+	it("names each hidden winner's placement and award, singular and plural", () => {
 		expect(hiddenWinnersNote([{ placement: "2nd Place" }])).toBe(
-			"One winning submission is not served here: its team hid or deleted it on DoraHacks (placement: 2nd Place).",
+			"One winning submission is not served here: its team hid or deleted it on DoraHacks (2nd Place).",
 		);
 		expect(
-			hiddenWinnersNote([{ placement: "1st Place" }, { placement: null }]),
+			hiddenWinnersNote([
+				{ placement: "Winners", award: "Best Video Pitch" },
+				{ placement: null },
+			]),
 		).toBe(
-			"2 winning submissions are not served here: their teams hid or deleted them on DoraHacks (placements: 1st Place, Winner).",
+			"2 winning submissions are not served here: their teams hid or deleted them on DoraHacks (Winners, Best Video Pitch; Winner).",
 		);
 	});
 

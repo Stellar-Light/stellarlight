@@ -299,9 +299,9 @@ export async function GET(
 					.then((r) => r.docs[0] as HackathonEvent | undefined)
 					.catch(() => undefined),
 				// sls-092: winning submissions their teams hid on DoraHacks are
-				// stored but not served; the record names their placements, never
-				// the submissions. null = the read failed, so the record says
-				// nothing rather than "none".
+				// stored but not served; the record names their placements and
+				// awards, never the submissions. null = the read failed, so the
+				// record says nothing rather than "none".
 				payload
 					.find({
 						collection: "hackathon-builds",
@@ -315,22 +315,20 @@ export async function GET(
 						pagination: false,
 						depth: 0,
 						overrideAccess: true,
-						select: { placement: true },
+						select: { buildId: true, placement: true, award: true },
 					})
-					.then((r) =>
-						(r.docs as Array<{ placement?: string | null }>).map((d) => ({
-							placement: d.placement ?? null,
-							placementRank: placementRank(d.placement),
-						})),
+					.then(
+						(r) =>
+							r.docs as Array<{
+								buildId: string;
+								placement?: string | null;
+								award?: string | null;
+							}>,
 					)
 					.catch(() => null),
 			]);
 			const stored = index.filter((b) => b.hackathon.slug === slug);
 			const fromStore = stored.length > 0;
-			// [] claims a stored roster with no hidden winner, so only an event
-			// whose stored DoraHacks roster backs this page can say it.
-			const hidden =
-				fromStore && dora.source !== "curated" ? hiddenWinners : null;
 			// Served in the submission shape this endpoint has always served:
 			// the stored row's other facts live on search, detail and analyze.
 			const liveSubmissions: DoraHacksSubmission[] = fromStore
@@ -350,6 +348,23 @@ export async function GET(
 						source: "dorahacks" as const,
 					}))
 				: await fetchHackathonSubmissions(dora);
+			// Hidden winners this page does not serve. The index is cached for
+			// an hour and its live fallback still lists hidden submissions, so
+			// a row flagged hidden can be on this page. [] claims a stored
+			// roster with none missing, so only a stored DoraHacks roster can
+			// say it.
+			const served = new Set(liveSubmissions.map((s) => s.id));
+			const hidden =
+				fromStore && dora.source !== "curated" && hiddenWinners
+					? hiddenWinners
+							.filter((h) => !served.has(h.buildId))
+							.map((h) => ({
+								placement: h.placement ?? null,
+								award: h.award ?? null,
+								placementRank:
+									placementRank(h.placement) ?? placementRank(h.award),
+							}))
+					: null;
 			const page = storedEvent?.description ?? dora.description ?? null;
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 			const winners = liveWinners.length
