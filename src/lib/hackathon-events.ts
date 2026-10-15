@@ -75,9 +75,14 @@ export function submissionCoverageNote(
 		upstream === served
 	)
 		return null;
+	const gap = Math.abs(upstream - served);
 	return upstream > served
-		? `DoraHacks counts ${upstream} submissions for this event; ${served} are served here. The other ${upstream - served} are not: submissions their teams hid or deleted, or a resubmission counted once under its first entry.`
-		: `DoraHacks counts ${upstream} submissions for this event; ${served} are served here, including ${served - upstream} DoraHacks no longer lists (a stored submission is kept).`;
+		? `DoraHacks counts ${upstream} submissions for this event; ${served} are served here. ${
+				gap === 1
+					? "The other one is not: a submission its team hid or deleted, or a resubmission counted once under its first entry."
+					: `The other ${gap} are not: submissions their teams hid or deleted, or resubmissions counted once under their first entry.`
+			}`
+		: `DoraHacks counts ${upstream} submissions for this event; ${served} are served here, including ${gap} DoraHacks no longer lists (a stored submission is kept).`;
 }
 
 export const JUDGING_HEADING = /judg|criteri|evaluat|scoring/i;

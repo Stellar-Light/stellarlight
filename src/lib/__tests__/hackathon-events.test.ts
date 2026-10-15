@@ -128,5 +128,9 @@ describe("submissionCoverageNote", () => {
 		expect(submissionCoverageNote(40, 41)).toMatch(
 			/including 1 DoraHacks no longer lists/,
 		);
+		// One missing submission reads as one, not "1 are".
+		expect(submissionCoverageNote(27, 26)).toMatch(
+			/The other one is not: a submission its team hid or deleted/,
+		);
 	});
 });
