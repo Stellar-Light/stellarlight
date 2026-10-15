@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       source:
-        description: "Optional: only run one source (sep|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report|release). Leave empty to run all."
+        description: "Optional: only run one source (sep|cap|repo-docs|lumenloop|lumenloop-research|scf-handbook|sdf-blog|dev-docs|paper|audit|incident|security-program|sdf-org|ec-developer-report|release). Leave empty to run all."
         required: false
         default: ""
       prune_execute:
@@ -88,7 +88,16 @@ jobs:
           # the unauthenticated core/ listing intermittently 4xx'd.
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-caps.ts --execute
+      # Same shape as every other source (2026-10-15): it had no source
+      # filter, no continue-on-error and no token, so a source=release
+      # dispatch ran it anyway, its unauthenticated tree reads hit 403, and
+      # every later step (the release ingest included) was skipped.
       - name: Ingest in-repo docs (canonical repos)
+        if: inputs.source == '' || inputs.source == 'repo-docs'
+        continue-on-error: true
+        env:
+          # the tree reads go through the GitHub API; raw files do not
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm exec tsx scripts/ingest-repo-docs.ts --execute
 
       - name: Ingest lumenloop (awesome-stellar-community-fund)
