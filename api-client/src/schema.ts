@@ -847,7 +847,7 @@ export interface components {
             note?: string;
             /** @description Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400. */
             warnings?: string[];
-            /** @description On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. */
+            /** @description On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When a read that feeds the count failed, counts.total is null with totalBasis "partial-read": that page cannot count its matches. A failed read that only decorates served rows (logos, attributions, code evidence) leaves a known total in place. */
             partial?: boolean;
             /** @description Present wherever `partial` is: the reads that failed on this page, in order; an empty array when `partial` is false. Each names what was read and the failure class only (an error name, a timeout, or the stated reason), never a raw error message. */
             failedReads?: {
@@ -859,9 +859,9 @@ export interface components {
             counts?: {
                 /** @description Rows in this page (post limit/offset slice) */
                 returned?: number;
-                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means the total is unknowable by construction, not zero and not omitted — searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count; `totalBasis` names why. Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred. */
+                /** @description Rows matching the filter before slicing (paginated endpoints). Page until offset + returned >= total. NULL means no honest total exists, never zero and never omitted, and `totalBasis` names why: 'unbounded-similarity-ranking' (searchResearch ranks a bounded candidate pool by similarity, so there is no crisp matching set to count) or 'partial-read' (`partial` is true: a backend read failed, so the matching set could not be counted). Never read a null total as 'no more rows'. Where an endpoint applies no limit, total equals returned and is stated explicitly so a complete read is verifiable rather than inferred. */
                 total?: number | null;
-                /** @description Present only when `total` is null: names why no total exists (e.g. 'unbounded-similarity-ranking'). Disambiguates the null so it is never read as zero or as a missing field. */
+                /** @description Present only when `total` is null: names why no total exists, 'unbounded-similarity-ranking' or 'partial-read'. Disambiguates the null so it is never read as zero or as a missing field. */
                 totalBasis?: string;
                 /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset — it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference. */
                 semantic?: number;
@@ -1395,10 +1395,10 @@ export interface components {
         ProjectSearchResponse: {
             meta: components["schemas"]["Meta"] & {
                 /**
-                 * @description Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.
+                 * @description Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them. `corrected` means the rows matched only through a known spelling correction (e.g. strupey to stroopy): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.
                  * @enum {string}
                  */
-                matchMode?: "strict" | "loose-1" | "loose-2" | "loose-3" | "majority" | "semantic" | "all";
+                matchMode?: "strict" | "loose-1" | "majority" | "corrected" | "semantic" | "all";
                 matchModeLabel?: string;
                 /** @description Present when the query as typed matched NOTHING and a fuzzy name lookup recovered exactly one project within a typo's distance — the results are for `to`, not for what was asked. Only fires for short (≤2 token) queries against names of 5+ characters, and only when a single candidate wins outright, so it never guesses between similar names and never touches 3–4 character asset tickers. Relay the correction to the user rather than presenting the rows as a match for the original spelling. */
                 didYouMean?: {
@@ -1453,7 +1453,7 @@ export interface components {
         HackathonDetailResponse: {
             meta?: components["schemas"]["Meta"];
             hackathon?: {
-                /** @description The event page, markdown as the organizer published it (stored daily for DoraHacks events). */
+                /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
                 /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). */
                 rules?: {
@@ -1794,10 +1794,10 @@ export interface components {
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
                 /**
-                 * @description How well this page matched the query. strict = every query term matched; partial = some did; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat weak/none rows as candidates requiring verification, never as findings.
+                 * @description How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical and flagship repos and exact owner or name matches); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey → stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.
                  * @enum {string}
                  */
-                matchMode?: "strict" | "partial" | "weak" | "all" | "none";
+                matchMode?: "strict" | "partial" | "corrected" | "weak" | "all" | "none";
                 /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
                 matchModeLabel?: string;
             };
@@ -2908,7 +2908,7 @@ export interface operations {
                                 corpusWideTopScore?: number;
                                 corpusWideTopSource?: string | null;
                             } | null;
-                            /** @description Present ONLY when the query named an exact FINDING identifier (e.g. V-SOR-VUL-002) that no indexed chunk carries verbatim. Vector search never goes empty, so without this an absent identifier returns the report's section boilerplate, scored as though it were a match. An identifier is present or it is a miss; there is no nearest-neighbour version of one. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. */
+                            /** @description Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo's release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist. */
                             exactMiss?: {
                                 /** @description The identifiers the query named that the corpus does not contain. */
                                 identifiers?: string[];
@@ -3046,6 +3046,17 @@ export interface operations {
                     "application/json": components["schemas"]["ProjectSearchResponse"];
                 };
             };
+            /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     searchRepos: {
@@ -3079,6 +3090,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RepoSearchResponse"];
+                };
+            };
+            /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -3478,6 +3500,8 @@ export interface operations {
                 package?: string;
                 /** @description Max builds (default 20, max 100). */
                 limit?: number;
+                /** @description Skip this many matched builds (default 0). To read every match, page with limit and offset until offset + meta.counts.returned reaches meta.counts.matched; pages share one ranking. */
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -3522,6 +3546,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
@@ -3825,6 +3850,7 @@ export interface operations {
                                 category?: string | null;
                                 package?: string | null;
                                 limit?: number;
+                                offset?: number;
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
@@ -4265,6 +4291,17 @@ export interface operations {
                         };
                         builders?: components["schemas"]["Builder"][];
                     };
+                };
+            };
+            /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MATCH_MODE_LABEL, type RepoMatchMode } from "../repo-search";
+import { MATCH_MODE_LABEL, REPO_MATCH_MODES } from "../repo-search";
 
 /**
  * Guard B, pinned as a unit test.
@@ -12,8 +12,7 @@ import { MATCH_MODE_LABEL, type RepoMatchMode } from "../repo-search";
  */
 describe("honest absence — repo search match modes", () => {
 	it("every mode has a label", () => {
-		const modes: RepoMatchMode[] = ["strict", "partial", "weak", "all", "none"];
-		for (const m of modes) {
+		for (const m of REPO_MATCH_MODES) {
 			expect(MATCH_MODE_LABEL[m], m).toBeTruthy();
 		}
 	});

@@ -5,11 +5,15 @@
  * document saying so; the snapshot-shaped sources only carried the pre-vote
  * guide). One doc per GitHub release: tag, date, and the release notes.
  *
- * Sources (GitHub releases API, unauthenticated — 4 requests/run):
+ * Sources (GitHub releases + security-advisories APIs — 8 requests/run):
  *   stellar/stellar-core     — protocol + validator releases
  *   stellar/stellar-cli      — developer CLI
  *   stellar/js-stellar-sdk   — JS SDK
  *   stellar/rs-soroban-sdk   — Soroban Rust SDK
+ *
+ * Each repo's published security advisories ride the same source, one doc
+ * per advisory titled with its GHSA and CVE ids (sls-090: CVE-2026-24889
+ * had no document anywhere in the corpus).
  *
  * Usage:
  *   pnpm exec tsx scripts/ingest-protocol-releases.ts             # dry run
@@ -24,6 +28,7 @@ import {
 	type ResearchChunk,
 	upsertChunks,
 } from "../src/lib/research-ingest";
+import { RELEASE_REPOS } from "../src/lib/research-rank";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
@@ -32,13 +37,13 @@ const execute = args.includes("--execute");
 // Idempotence step (must plan 0 right after the execute pass).
 const replan = args.includes("--replan");
 
-const REPOS = [
-	"stellar/stellar-core",
-	"stellar/stellar-cli",
-	"stellar/js-stellar-sdk",
-	"stellar/rs-soroban-sdk",
-];
+const REPOS = RELEASE_REPOS.map((r) => `stellar/${r}`);
 const PER_REPO = 15; // newest releases per repo — history beyond that is noise
+// ...except a security release. sls-090: v25.0.2, the patch for
+// GHSA-96xm-fv9w-pf3f, had aged out of the newest 15 before this source
+// existed, so release notes that link an advisory are kept at any age
+// within the newest 100.
+const ADVISORY_LINK_RE = /GHSA(?:-[0-9a-z]{4}){3}/i;
 
 interface GhRelease {
 	tag_name: string;
@@ -50,21 +55,32 @@ interface GhRelease {
 	draft: boolean;
 }
 
-async function fetchReleases(repo: string): Promise<GhRelease[]> {
-	const r = await fetch(
-		`https://api.github.com/repos/${repo}/releases?per_page=${PER_REPO}`,
-		{
-			headers: {
-				Accept: "application/vnd.github+json",
-				"User-Agent": "stellarlight-scout-ingest",
-				...(process.env.GITHUB_TOKEN
-					? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
-					: {}),
-			},
+interface GhAdvisory {
+	ghsa_id: string;
+	cve_id: string | null;
+	html_url: string;
+	summary: string;
+	description: string | null;
+	severity: string | null;
+	published_at: string;
+	vulnerabilities: Array<{
+		vulnerable_version_range: string | null;
+		patched_versions: string | null;
+	}> | null;
+}
+
+async function gh<T>(path: string): Promise<T> {
+	const r = await fetch(`https://api.github.com/repos/${path}`, {
+		headers: {
+			Accept: "application/vnd.github+json",
+			"User-Agent": "stellarlight-scout-ingest",
+			...(process.env.GITHUB_TOKEN
+				? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+				: {}),
 		},
-	);
-	if (!r.ok) throw new Error(`fetch ${repo} releases: ${r.status}`);
-	return (await r.json()) as GhRelease[];
+	});
+	if (!r.ok) throw new Error(`fetch ${path}: ${r.status}`);
+	return (await r.json()) as T;
 }
 
 async function run() {
@@ -75,12 +91,17 @@ async function run() {
 
 	const allChunks: ResearchChunk[] = [];
 	for (const repo of REPOS) {
-		const releases = (await fetchReleases(repo)).filter(
-			(r) => !r.draft && !r.prerelease,
+		const shortRepo = repo.split("/")[1];
+		const releases = (
+			await gh<GhRelease[]>(`${repo}/releases?per_page=100`)
+		).filter(
+			(r, i) =>
+				!r.draft &&
+				!r.prerelease &&
+				(i < PER_REPO || ADVISORY_LINK_RE.test(r.body ?? "")),
 		);
 		console.log(`${repo}: ${releases.length} stable releases`);
 		for (const rel of releases) {
-			const shortRepo = repo.split("/")[1];
 			const title = `${shortRepo} ${rel.tag_name}${
 				rel.name && rel.name !== rel.tag_name ? ` — ${rel.name}` : ""
 			}`;
@@ -93,6 +114,49 @@ async function run() {
 				url: rel.html_url,
 				tags: ["release", shortRepo, rel.tag_name.toLowerCase()],
 				publishedAt: rel.published_at,
+			});
+			for (const c of chunks) c.observedAt = observedAtIso;
+			allChunks.push(...chunks);
+		}
+
+		// One repo's failed advisories read must not drop every release this
+		// run fetched. Stored advisories stay (upsertChunks never deletes);
+		// the run exits 1 so the failure shows on the lane.
+		let advisories: GhAdvisory[] = [];
+		try {
+			advisories = await gh<GhAdvisory[]>(
+				`${repo}/security-advisories?state=published&per_page=100`,
+			);
+			console.log(`${repo}: ${advisories.length} published advisories`);
+		} catch (e) {
+			process.exitCode = 1;
+			console.error(
+				`✗ ${repo}: advisories could not be read (${(e as Error).message}); stored advisories kept`,
+			);
+		}
+		for (const a of advisories) {
+			const title = `${shortRepo} ${a.ghsa_id}${a.cve_id ? ` (${a.cve_id})` : ""}: ${a.summary}`;
+			const vulns = a.vulnerabilities ?? [];
+			const affected = vulns
+				.map((v) => v.vulnerable_version_range)
+				.filter(Boolean)
+				.join("; ");
+			const patched = vulns
+				.map((v) => v.patched_versions)
+				.filter(Boolean)
+				.join(", ");
+			const chunks = chunkMarkdown({
+				md: `# ${title}\n\nPublished ${a.published_at.slice(0, 10)}. Severity: ${a.severity ?? "not rated"}. Affected versions: ${affected || "not listed"}. Patched versions: ${patched || "not listed"}.\n\n${(a.description ?? "").trim() || a.summary}`,
+				parentDocId: `advisory-${shortRepo}-${a.ghsa_id}`,
+				title,
+				url: a.html_url,
+				tags: [
+					"advisory",
+					shortRepo,
+					a.ghsa_id.toLowerCase(),
+					...(a.cve_id ? [a.cve_id.toLowerCase()] : []),
+				],
+				publishedAt: a.published_at,
 			});
 			for (const c of chunks) c.observedAt = observedAtIso;
 			allChunks.push(...chunks);
@@ -123,7 +187,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

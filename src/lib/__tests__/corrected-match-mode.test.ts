@@ -15,6 +15,7 @@ import {
 	correctionMediated,
 	tokenize,
 } from "../project-search-match";
+import { searchRepos } from "../repo-search";
 import { SPELLING_CORRECTIONS } from "../search-vocabulary";
 
 const stroopy = buildHaystack({
@@ -56,5 +57,47 @@ describe("spelling corrections are labelled, not laundered", () => {
 			shortDescription: "hypothetical row that really carries the token",
 		} as never);
 		expect(correctionMediated(hay, tokenize("Strupey"))).toBe(false);
+	});
+});
+
+// sls-093: the repo-search port. q=strupey served the same rows as q=stroopy
+// at matchMode strict, "every query term matched", with the token in none.
+describe("repo search labels a spelling-corrected match", () => {
+	const repo = (fullName: string, description: string) => ({
+		fullName,
+		description,
+		primaryLanguage: "TypeScript",
+		readmeExcerpt: "",
+		topics: [],
+		lastCommitAt: "2026-07-01T00:00:00Z",
+		repoScore: 50,
+		stars: 10,
+		codeSymbols: [],
+	});
+	const docs = [
+		repo("StroopyOrg/Stroopy", "Stroopy, an AI wallet companion for Stellar"),
+		repo("someone/wallet-kit", "A wallet kit for Stellar apps"),
+	];
+	// biome-ignore lint/suspicious/noExplicitAny: mock payload
+	const payload: any = { find: async () => ({ docs, totalDocs: docs.length }) };
+	const mode = async (q: string) =>
+		(await searchRepos(payload, q, { limit: 5 })).matchMode;
+
+	it("q=strupey is corrected, not strict", async () => {
+		expect(await mode("strupey")).toBe("corrected");
+	});
+
+	it("q=stroopy stays strict (the control)", async () => {
+		expect(await mode("stroopy")).toBe("strict");
+	});
+
+	it("q=strupey wallet: the best row holds its tier only via the correction", async () => {
+		expect(await mode("strupey wallet")).toBe("corrected");
+	});
+
+	it("a row that really carries the token stays strict", async () => {
+		docs.push(repo("strupey/strupey", "A repo that is named strupey"));
+		expect(await mode("strupey")).toBe("strict");
+		docs.pop();
 	});
 });

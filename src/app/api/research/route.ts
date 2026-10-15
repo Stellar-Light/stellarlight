@@ -19,11 +19,19 @@
 
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import type { Where } from "payload";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
-import { degradedWarning, withPartial } from "@/lib/degraded-read";
+import {
+	DEFAULT_READ_TIMEOUT_MS,
+	degradedRead,
+	degradedWarning,
+	isDegraded,
+	scopedWarning,
+	withPartial,
+} from "@/lib/degraded-read";
 import { EMBED_TIMEOUT_MS, EMBEDDING_MODEL, embed } from "@/lib/embed";
 import {
 	clampLimit,
@@ -47,11 +55,15 @@ import {
 	vectorIndexFilterPaths,
 } from "@/lib/research-pipeline";
 import {
+	advisoryIdentifierTargets,
 	anchorDocUrls,
+	exactKeyReport,
+	exactMissNote,
 	findingIdentifierTargets,
 	hasFullLexicalCoverage,
 	identifierIsPresent,
 	identifierTargets,
+	isReleaseTitle,
 	matchesVersionTarget,
 	queryLexTokens,
 	RECENCY_SUPPLEMENT_SOURCES,
@@ -59,6 +71,7 @@ import {
 	rankResearchChunks,
 	recencyContentTokens,
 	recencyIntent,
+	releaseTagTargets,
 	researchOrder,
 	selectRecencySupplement,
 	versionTargets,
@@ -894,36 +907,66 @@ async function research(
 		}
 	}
 
-	// Release-tag lookup (versionTargets in research-rank.ts): the pinned
-	// document must be IN the pool to be pinned. Fetch by title when the
-	// vector pool missed it — same fetch-not-rank root as the CAP/SEP path.
-	const vTargets = versionTargets(q);
-	if (
-		vTargets.length &&
-		!chunks.some((c) => matchesVersionTarget(c.title, vTargets))
-	) {
-		try {
-			const direct = await payload.find({
-				collection: "research-docs",
-				where: {
-					and: [
-						{ or: vTargets.map((t) => ({ title: { like: t } })) },
-						...(effectiveSource
-							? [{ source: { equals: effectiveSource } }]
-							: []),
-					],
-				},
-				limit: 10,
-				depth: 0,
-				pagination: false,
-				select: { embedding: false },
-			});
-			const have = new Set(chunks.map((c) => c.id));
-			for (const d of direct.docs as unknown as RawResearchDoc[]) {
-				if (!have.has(String(d.id))) chunks.push(toRow(d));
-			}
-		} catch {
-			// best-effort — the pool result still serves
+	// Exact lookup keys (exactPin in research-rank.ts): release tags, and
+	// finding or advisory ids. The pinned document must be IN the pool to be
+	// pinned, so fetch each key the vector pool missed from the whole scope,
+	// same fetch-not-rank root as the CAP/SEP path. sls-090: because the
+	// lookup covers the scope, a key still unserved is a real miss, and a
+	// failed lookup is a failed read (unchecked), never an absence.
+	const releaseTags = releaseTagTargets(q);
+	const looseTags = versionTargets(q).filter(
+		(t) => !releaseTags.some((r) => r.tag === t),
+	);
+	const exactIds = [
+		...findingIdentifierTargets(q),
+		...advisoryIdentifierTargets(q),
+	];
+	const exactNeedles: Where[] = [
+		...looseTags
+			.filter((t) => !chunks.some((c) => matchesVersionTarget(c.title, [t])))
+			.map((t) => ({ title: { like: t } })),
+		...releaseTags
+			.filter((r) => !chunks.some((c) => isReleaseTitle(c.title, r)))
+			.map((r) => ({ title: { contains: `${r.repo} ${r.tag}` } })),
+		...exactIds
+			.filter(
+				(id) =>
+					!chunks.some((c) =>
+						identifierIsPresent(id, [c.title, c.content, c.url]),
+					),
+			)
+			.flatMap((id): Where[] => [
+				{ title: { contains: id } },
+				{ content: { contains: id } },
+			]),
+	];
+	let exactLookupWarning: string | null = null;
+	if (exactNeedles.length) {
+		const direct = await degradedRead(
+			"research exact-identifier lookup",
+			() =>
+				payload.find({
+					collection: "research-docs",
+					where: {
+						and: [
+							{ or: exactNeedles },
+							...(effectiveSource
+								? [{ source: { equals: effectiveSource } }]
+								: []),
+						],
+					},
+					limit: 25,
+					depth: 0,
+					pagination: false,
+					select: { embedding: false },
+				}),
+			{ docs: [] },
+			DEFAULT_READ_TIMEOUT_MS,
+		);
+		exactLookupWarning = direct.warning;
+		const have = new Set(chunks.map((c) => c.id));
+		for (const d of direct.value.docs as unknown as RawResearchDoc[]) {
+			if (!have.has(String(d.id))) chunks.push(toRow(d));
 		}
 	}
 
@@ -956,6 +999,11 @@ async function research(
 			// anchor fetch is best-effort — the pool result still serves
 		}
 	}
+
+	// Every candidate the scope holds for this request, before the audit
+	// filters and the page limit: what the exact-key report tells apart
+	// from what the page shows.
+	const exactScope = chunks;
 
 	// Audit-metadata post-filters (normalization-aware exact match for
 	// auditor, substring for protocol, exact for severity). Non-audit chunks
@@ -1076,33 +1124,33 @@ async function research(
 		matchMode: mode,
 	});
 
-	// sls-071: a finding identifier is present verbatim or it is a miss. Vector
-	// search never goes empty, so without this an absent id returns the
-	// report's boilerplate — and scored HIGHER than a real id did. Say so
-	// rather than let a nearest neighbour read as the finding.
-	const findingIds = findingIdentifierTargets(q);
-	const missedIds = findingIds.filter(
-		(id) =>
-			!identifierIsPresent(
-				id,
-				results.flatMap((r) => [
-					(r as { content?: string }).content,
-					(r as { title?: string }).title,
-				]),
-			),
-	);
-	const exactMiss =
-		missedIds.length > 0
-			? {
-					identifiers: missedIds,
-					note: `The indexed corpus contains no chunk carrying ${missedIds.length === 1 ? "this identifier" : "these identifiers"} verbatim. The rows below are the nearest SEMANTIC neighbours of the query — they are not that finding, and their confidence scores rank similarity, not a match. Do not report ${missedIds.join(", ")} as found, and do not infer its content from these rows.`,
-				}
-			: null;
+	// sls-071, sls-090: a finding id, an advisory id or a repo-qualified
+	// release tag is on the page, held but left off it, or a miss. Vector
+	// search never goes empty, so without this an absent id returns its
+	// nearest neighbours, scored as though they matched.
+	const { exactMiss, heldNotServed } = exactKeyReport({
+		query: q,
+		scope: exactScope,
+		served: results,
+		lookupFailed: !!exactLookupWarning,
+	});
+	const heldNote = heldNotServed.length
+		? `${heldNotServed.join(", ")}: held in the searched scope but not on this page (a filter or the page limit left ${heldNotServed.length === 1 ? "it" : "them"} out). Raise limit or drop the filter to read ${heldNotServed.length === 1 ? "it" : "them"}.`
+		: null;
 
 	// Empty source or a miss: only an empty source gets the empty-source note.
 	const sourceEmptyNote = sourceKnownEmpty
 		? `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`
 		: null;
+
+	const warnings = [
+		paramWarning,
+		limitNote,
+		vectorNote,
+		sourceEmptyNote,
+		exactLookupWarning,
+		heldNote,
+	].filter((w): w is string => !!w);
 
 	return NextResponse.json(
 		{
@@ -1113,16 +1161,7 @@ async function research(
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning || limitNote || vectorNote || sourceEmptyNote
-					? {
-							warnings: [
-								paramWarning,
-								limitNote,
-								vectorNote,
-								sourceEmptyNote,
-							].filter(Boolean),
-						}
-					: {}),
+				...(warnings.length ? { warnings } : {}),
 				...(sourceEmptyNote ? { sourceEmpty: true } : {}),
 				// How many documents the scoped source holds, so a consumer can
 				// skip a source below its per-source take before sending.
@@ -1180,8 +1219,11 @@ async function research(
 					`rank;dur=${Date.now() - phaseStart}`,
 					`total;dur=${Date.now() - startedAt}`,
 				].join(", "),
-				// Don't aggressively cache — query strings vary by user
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				// Don't aggressively cache — query strings vary by user. A page a
+				// failed read thinned is never cached: its retry must be a retry.
+				"Cache-Control": isDegraded(warnings)
+					? "no-store"
+					: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);
@@ -1310,7 +1352,10 @@ async function researchMany(
 	// stray parameter is reported once (below), not once per source.
 	const base = new URL(req.nextUrl.pathname, req.nextUrl.origin);
 	if (q) base.searchParams.set("q", q);
-	for (const k of ["auditor", "protocol", "severity", "fields"]) {
+	// `fields` is applied to the merged page, not per source: the merge sorts
+	// on confidence, which a field list can leave out (sources=a,b&fields=title
+	// answered 500).
+	for (const k of ["auditor", "protocol", "severity"]) {
 		const v = sp.get(k);
 		if (v !== null) base.searchParams.set(k, v);
 	}
@@ -1367,7 +1412,8 @@ async function researchMany(
 	// biome-ignore lint/suspicious/noExplicitAny: rows are our own result rows
 	const results: any[] = ok
 		.flatMap((a) => a.body.results ?? [])
-		.sort(researchOrder(q));
+		.sort(researchOrder(q))
+		.map((r) => pickFields(r, parseFields(sp.get("fields"))));
 	const mode: "vector" | "keyword" = ok.every(
 		(a) => a.body.meta.mode === "vector",
 	)
@@ -1378,8 +1424,9 @@ async function researchMany(
 		...(paramWarning ? [paramWarning] : []),
 		...(perNote ? [perNote] : []),
 		...ok.flatMap((a) =>
-			((a.body.meta.warnings ?? []) as string[]).map(
-				(w) => `source=${a.source}: ${w}`,
+			// A source's failed read must still count on the merged page.
+			((a.body.meta.warnings ?? []) as string[]).map((w) =>
+				scopedWarning(`source=${a.source}`, w),
 			),
 		),
 		...failed.map((a) =>
@@ -1394,7 +1441,9 @@ async function researchMany(
 		(a) => (a.body.meta.exactMiss?.identifiers ?? []) as string[],
 	);
 	const missed = missLists.reduce((acc, l) => acc.filter((x) => l.includes(x)));
-	const missNote = ok.find((a) => a.body.meta.exactMiss)?.body.meta.exactMiss;
+	// A source that failed, or whose own lookup failed, may hold the key: the
+	// merged miss is then unchecked, whatever the first source's note said.
+	const unchecked = failed.length > 0 || isDegraded(warnings);
 	const empty = results.length === 0;
 	logApiHit({
 		req,
@@ -1423,8 +1472,13 @@ async function researchMany(
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
 				...(warnings.length ? { warnings } : {}),
-				...(missed.length && missNote
-					? { exactMiss: { ...missNote, identifiers: missed } }
+				...(missed.length
+					? {
+							exactMiss: {
+								identifiers: missed,
+								note: exactMissNote(missed, unchecked),
+							},
+						}
 					: {}),
 				query: q,
 				mode,
@@ -1477,9 +1531,10 @@ async function researchMany(
 				...rateLimitHeaders(limit),
 				"X-Scout-Match-Mode": mode,
 				...serverTiming(startedAt),
-				"Cache-Control": failed.length
-					? "no-store"
-					: "public, s-maxage=60, stale-while-revalidate=300",
+				"Cache-Control":
+					failed.length || isDegraded(warnings)
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);

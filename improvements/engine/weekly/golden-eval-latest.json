@@ -9,7 +9,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7598240375518799,
+      "topScore": 0.7596278190612793,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -99,7 +99,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.79096519947052,
+      "topScore": 0.7906394004821777,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8496243953704834,
+      "topScore": 0.849909782409668,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -387,7 +387,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8091201782226562,
+      "topScore": 0.8093904852867126,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Weekly Roundup: Week of Oct 2, 2026"
+      "sample": "Stellar Zipper, Protocol 27 Upgrade Guide"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -855,7 +855,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8228741884231567,
+      "topScore": 0.8224020004272461,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -909,7 +909,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7419469356536865,
+      "topScore": 0.7425699234008789,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -945,7 +945,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8496288657188416,
+      "topScore": 0.8501693606376648,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -956,5 +956,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-13T12:59:31Z"
+  "generatedAt": "2026-10-14T10:39:29Z"
 }

@@ -92,6 +92,15 @@ export function degradedWarning(op: string, cause: unknown): string {
 	return `${DEGRADED_READ_PREFIX}: ${op} — results may be incomplete (${cls})`;
 }
 
+/** `w` attributed to `scope` (e.g. "source=cap"). A failed-read line keeps
+ * its prefix, so failedReadsOf still counts it on a merged page. */
+export function scopedWarning(scope: string, w: string): string {
+	const head = `${DEGRADED_READ_PREFIX}: `;
+	return w.startsWith(head)
+		? `${head}${scope} ${w.slice(head.length)}`
+		: `${scope}: ${w}`;
+}
+
 /** True when any line in `warnings` came from a failed read. */
 export function isDegraded(warnings: readonly string[]): boolean {
 	return warnings.some((w) => w.startsWith(DEGRADED_READ_PREFIX));
@@ -124,13 +133,41 @@ export function failedReadsOf(warnings: readonly unknown[]): FailedRead[] {
  * read from an applied limit by reading a sentence. Derived from the lines
  * this module wrote, so every path that warns is also named here, and a
  * complete page says so outright: `partial: false`, `failedReads: []`.
+ *
+ * sls-089: a page that lost a read cannot state its total. A timed-out
+ * candidate fetch served counts.total 0 for a category holding 167 projects,
+ * so on a partial page `counts.total` is null with totalBasis "partial-read":
+ * unknown, never a confirmed count.
  */
 export function withPartial<M extends { warnings?: readonly unknown[] }>(
 	meta: M,
+	/** Does a failure of this read leave the total unknown? A read that only
+	 * decorates served rows (logos, attributions, code evidence) does not, and
+	 * nulling a correct total for it would turn a known count into an unknown
+	 * one. Default: every failed read, so a new read is safe until judged. */
+	feedsTotal: (read: string) => boolean = () => true,
 ): M & { partial: boolean; failedReads: FailedRead[] } {
 	const failedReads = failedReadsOf(meta.warnings ?? []);
-	return { ...meta, partial: failedReads.length > 0, failedReads };
+	const counts = (meta as { counts?: Record<string, unknown> }).counts;
+	// A total that is already null keeps its own basis (research's ranking).
+	const lost =
+		typeof counts?.total === "number" &&
+		failedReads.some((f) => feedsTotal(f.read));
+	return {
+		...meta,
+		...(lost
+			? { counts: { ...counts, total: null, totalBasis: "partial-read" } }
+			: {}),
+		partial: failedReads.length > 0,
+		failedReads,
+	};
 }
+
+/** withPartial with a route's own rule for which reads feed its total. */
+export const partialFor =
+	(feedsTotal: (read: string) => boolean) =>
+	<M extends { warnings?: readonly unknown[] }>(meta: M) =>
+		withPartial(meta, feedsTotal);
 
 /**
  * `read`, or a rejection after `ms` (class "timeout after Nms"). For a read

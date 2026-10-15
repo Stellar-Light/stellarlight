@@ -32,6 +32,7 @@ import {
 	anchorTokens,
 	CORE_SYNONYMS,
 	mergeVocabulary,
+	SPELLING_CORRECTIONS,
 } from "./search-vocabulary";
 import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
 
@@ -105,11 +106,23 @@ interface RepoDoc {
 }
 
 /** How well the returned page actually matched the query (honest-absence). */
-export type RepoMatchMode = "strict" | "partial" | "weak" | "all" | "none";
+export const REPO_MATCH_MODES = [
+	"strict",
+	"partial",
+	"corrected",
+	"weak",
+	"all",
+	"none",
+] as const;
+export type RepoMatchMode = (typeof REPO_MATCH_MODES)[number];
 
 export const MATCH_MODE_LABEL: Record<RepoMatchMode, string> = {
-	strict: "every query term matched",
+	strict: "every query term matched in the best row on this page",
 	partial: "some query terms matched — rows may be adjacent to the intent",
+	// sls-093, the repo port of sls-076: strupey reached Stroopy rows through
+	// the correction table and was labelled "every query term matched".
+	corrected:
+		"matched via a known spelling correction: the query token does not occur in these rows, so verify the identity before relying on them",
 	// The one that matters: rows exist but nothing the caller asked for hit.
 	weak: "no query term matched — these are ranked neighbours, NOT matches (verify relevance before relying on them; an empty result would have been the honest answer if none are right)",
 	all: "no query supplied — ranked by repo quality",
@@ -1528,6 +1541,9 @@ export async function searchRepos(
 				: 0;
 			let score = 0;
 			let matched = 0;
+			// sls-093: a token earned only through SPELLING_CORRECTIONS (mirror
+			// of project search's correctionMediated).
+			let viaCorrection = false;
 			if (tokens.length) {
 				for (const t of tokens) {
 					const vs = termsForToken(t);
@@ -1552,6 +1568,17 @@ export async function searchRepos(
 					if (best > 0) {
 						score += best;
 						matched += 1;
+						const fix = SPELLING_CORRECTIONS[t];
+						const literal = fix
+							? vs.filter((v) => !v.includes(fix) && !fix.includes(v))
+							: vs;
+						if (
+							fix &&
+							![name, tops, syms, desc, ownerHay, notes, deps, readme].some(
+								(z) => termHits(literal, z),
+							)
+						)
+							viaCorrection = true;
 					}
 				}
 				if (matched > 1) score *= 1 + (matched - 1) * 0.3;
@@ -1632,6 +1659,7 @@ export async function searchRepos(
 				topics,
 				score,
 				matched,
+				viaCorrection,
 				alias,
 				sdf,
 				alive,
@@ -1850,16 +1878,24 @@ export async function searchRepos(
 		// matchModeLabel; searchRepos returned the same kind of guess unlabelled,
 		// so an agent reported "zzqqxx nonexistent protocol" results as findings.
 		// Report the quality of the page we are actually serving.
-		const bestMatched = filtered
-			.slice(offset, offset + limit)
-			.reduce((m, x) => Math.max(m, x.matched ?? 0), 0);
-		const matchMode: RepoMatchMode = !tokens.length
+		const page = filtered.slice(offset, offset + limit);
+		const bestMatched = page.reduce((m, x) => Math.max(m, x.matched ?? 0), 0);
+		let matchMode: RepoMatchMode = !tokens.length
 			? "all"
 			: bestMatched === 0
 				? "weak"
 				: bestMatched === tokens.length
 					? "strict"
 					: "partial";
+		// sls-093: the mode describes the best rows; when every one of them
+		// holds its tier only through a spelling correction, say so.
+		if (
+			(matchMode === "strict" || matchMode === "partial") &&
+			page
+				.filter((x) => x.matched === bestMatched)
+				.every((x) => x.viaCorrection)
+		)
+			matchMode = "corrected";
 		return {
 			repos,
 			total,

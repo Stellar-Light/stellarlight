@@ -249,6 +249,75 @@ export function findingIdentifierTargets(query: string | undefined): string[] {
 	return out;
 }
 
+// ── sls-090: SDK advisory ids are lookup keys too ──
+// CVE-2026-24889 and GHSA-96xm-fv9w-pf3f each returned ten adjacent documents
+// carrying neither id (2026-10-09). Same rule as a finding id: the id is
+// present verbatim or it is a miss. GHSA bodies are lowercase on GitHub.
+const ADVISORY_ID_RE = /\b(?:CVE-\d{4}-\d{4,7}|GHSA(?:-[0-9a-z]{4}){3})\b/gi;
+
+/** CVE and GHSA ids named by the query, deduped, in GitHub's casing. */
+export function advisoryIdentifierTargets(query: string | undefined): string[] {
+	if (!query) return [];
+	const out: string[] = [];
+	for (const m of query.matchAll(ADVISORY_ID_RE)) {
+		const raw = m[0];
+		const id = /^cve/i.test(raw)
+			? raw.toUpperCase()
+			: `GHSA${raw.slice(4).toLowerCase()}`;
+		if (!out.includes(id)) out.push(id);
+	}
+	return out;
+}
+
+/** The repos the `release` source ingests (scripts/ingest-protocol-releases.ts).
+ * Each release document's title starts with `${repo} ${tag}`. */
+export const RELEASE_REPOS = [
+	"stellar-core",
+	"stellar-cli",
+	"js-stellar-sdk",
+	"rs-soroban-sdk",
+];
+// "soroban-sdk" is the crate rs-soroban-sdk publishes; people name the crate.
+const RELEASE_TAG_RE = new RegExp(
+	`\\b(${RELEASE_REPOS.join("|")}|soroban-sdk)[\\s@]+v?(\\d+\\.\\d+\\.\\d+(?:-[0-9a-z.]+)?)\\b`,
+	"gi",
+);
+
+export interface ReleaseTagTarget {
+	repo: string;
+	tag: string;
+}
+
+/** Repo-qualified release tags ("rs-soroban-sdk v25.0.2"). stellar-core and
+ * rs-soroban-sdk share version numbers, so a named repo pins only its own
+ * release, and a tag the corpus lacks is an exact miss (sls-090). */
+export function releaseTagTargets(
+	query: string | undefined,
+): ReleaseTagTarget[] {
+	if (!query) return [];
+	const out: ReleaseTagTarget[] = [];
+	for (const m of query.matchAll(RELEASE_TAG_RE)) {
+		const name = m[1].toLowerCase();
+		const repo = name === "soroban-sdk" ? "rs-soroban-sdk" : name;
+		const tag = `v${m[2].toLowerCase()}`;
+		if (!out.some((r) => r.repo === repo && r.tag === tag))
+			out.push({ repo, tag });
+	}
+	return out;
+}
+
+/** Is this the title of that repo's release? Exact tag: v25.2.2 is not
+ * v25.2.2-external. */
+export function isReleaseTitle(
+	title: string | null | undefined,
+	{ repo, tag }: ReleaseTagTarget,
+): boolean {
+	const t = (title ?? "").toLowerCase();
+	return [`${repo} ${tag}`, `${repo} ${tag.slice(1)}`].some(
+		(head) => t === head || t.startsWith(`${head} `),
+	);
+}
+
 // ── Release tags are lookup keys too ──
 // "stellar-core v28.0.0" is a request for THAT release. The tag tokenizes to
 // "v28" (".0.0" splits away), every older stellar-core release shares the
@@ -283,13 +352,91 @@ export function matchesVersionTarget(
 	);
 }
 
-/** Does any served text contain the identifier verbatim? */
+/** Does any text carry the identifier verbatim, as a whole token? A bare
+ * substring test read CVE-2026-2488 as present inside CVE-2026-24889, which
+ * pinned the wrong advisory and hid the miss. */
 export function identifierIsPresent(
 	id: string,
 	texts: Array<string | null | undefined>,
 ): boolean {
-	const needle = id.toUpperCase();
-	return texts.some((t) => (t ?? "").toUpperCase().includes(needle));
+	const esc = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const re = new RegExp(`(?<![0-9a-z])${esc}(?![0-9a-z])`, "i");
+	return texts.some((t) => re.test(t ?? ""));
+}
+
+type KeyedRow = {
+	url?: string | null;
+	title?: string | null;
+	content?: string | null;
+};
+
+/** sls-090: what a page can honestly say about each exact key its query
+ * named (a finding id, a CVE or GHSA id, a repo-qualified release tag).
+ * `scope` is every candidate the request held after the exact lookup, before
+ * the audit post-filters and the page limit; `served` is the page. A key on
+ * the page is found. One held but not served was left out by a filter or the
+ * limit, and is said so, never called absent. One in neither is a miss,
+ * checked only when the lookup ran clean. */
+export function exactKeyReport(args: {
+	query: string | undefined;
+	scope: ReadonlyArray<KeyedRow>;
+	served: ReadonlyArray<KeyedRow>;
+	lookupFailed: boolean;
+}): {
+	exactMiss: { identifiers: string[]; note: string } | null;
+	heldNotServed: string[];
+} {
+	const carries = (rows: ReadonlyArray<KeyedRow>, id: string) =>
+		rows.some((r) => identifierIsPresent(id, [r.title, r.content, r.url]));
+	const titled = (rows: ReadonlyArray<KeyedRow>, t: ReleaseTagTarget) =>
+		rows.some((r) => isReleaseTitle(r.title, t));
+	const missed: string[] = [];
+	const heldNotServed: string[] = [];
+	for (const id of [
+		...findingIdentifierTargets(args.query),
+		...advisoryIdentifierTargets(args.query),
+	]) {
+		if (carries(args.served, id)) continue;
+		(carries(args.scope, id) ? heldNotServed : missed).push(id);
+	}
+	for (const t of releaseTagTargets(args.query)) {
+		if (titled(args.served, t)) continue;
+		const key = `${t.repo} ${t.tag}`;
+		(titled(args.scope, t) ? heldNotServed : missed).push(key);
+	}
+	return {
+		exactMiss: missed.length
+			? {
+					identifiers: missed,
+					note: exactMissNote(missed, args.lookupFailed),
+				}
+			: null,
+		heldNotServed,
+	};
+}
+
+/** The exactMiss note for these keys. `unchecked`: the lookup over the
+ * scope failed, so the corpus may still hold them. A release tag is a title
+ * lookup, so its miss says only that no release document carries it. */
+export function exactMissNote(
+	identifiers: string[],
+	unchecked: boolean,
+): string {
+	const one = identifiers.length === 1;
+	if (unchecked)
+		return `No row on this page carries ${one ? "this identifier" : "these identifiers"} verbatim, and the exact lookup over the searched scope failed (see failedReads), so whether the corpus holds ${one ? "it" : "them"} is unknown. The rows below are the nearest semantic neighbours of the query, not that record. Retry before reporting ${one ? "it" : "them"} as found or absent.`;
+	const tags = identifiers.filter((i) => releaseTagTargets(i).length > 0);
+	const ids = identifiers.filter((i) => !tags.includes(i));
+	const parts: string[] = [];
+	if (ids.length)
+		parts.push(
+			`No document in the searched scope carries ${ids.join(", ")} verbatim: the exact lookup checked every document in scope, not only this page. The rows below are the nearest semantic neighbours of the query, not that record, and their confidence scores rank similarity, not a match. Do not report ${ids.length === 1 ? "it" : "them"} as found or infer content from these rows. Absence from this corpus is not proof a record does not exist; its primary source decides that.`,
+		);
+	if (tags.length)
+		parts.push(
+			`No release document titled ${tags.join(", ")} is in the searched scope. The release source holds stellar-core, stellar-cli, js-stellar-sdk and rs-soroban-sdk releases: each repo's newest 15, plus any in its newest 100 that links a security advisory. Other rows can still discuss that version, but they are not its release notes.`,
+		);
+	return parts.join(" ");
 }
 
 /** Does this chunk belong to one of the identifier-named documents? */
@@ -297,6 +444,28 @@ function matchesTarget(url: string, targets: string[]): boolean {
 	return targets.some((id) =>
 		new RegExp(`/${id}\\.md(?:$|[#?])`, "i").test(url),
 	);
+}
+
+/** The exact-lookup pin both orderings share: the named CAP/SEP document,
+ * the named release, or a chunk carrying a named finding or advisory id
+ * verbatim. An exact-id query is a lookup, not a search. */
+export function exactPin(
+	query: string | undefined,
+): (c: { url: string; title?: string | null; content?: string }) => boolean {
+	const targets = identifierTargets(query);
+	const tags = releaseTagTargets(query);
+	const vTargets = versionTargets(query).filter(
+		(t) => !tags.some((r) => r.tag === t),
+	);
+	const ids = [
+		...findingIdentifierTargets(query),
+		...advisoryIdentifierTargets(query),
+	];
+	return (c) =>
+		(targets.length > 0 && matchesTarget(c.url, targets)) ||
+		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets)) ||
+		tags.some((r) => isReleaseTitle(c.title, r)) ||
+		ids.some((id) => identifierIsPresent(id, [c.title, c.content, c.url]));
 }
 
 // Recency INTENT — the query literally asks for what's newest ("latest
@@ -661,11 +830,7 @@ export function researchOrder(
 	a: RankableChunk & { confidence: { score: number } },
 	b: RankableChunk & { confidence: { score: number } },
 ) => number {
-	const targets = identifierTargets(query);
-	const vTargets = versionTargets(query);
-	const pinned = (c: RankableChunk) =>
-		(targets.length > 0 && matchesTarget(c.url, targets)) ||
-		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const pinned = exactPin(query);
 	const recent = recencyIntent(query);
 	const key = (c: RankableChunk & { confidence: { score: number } }) =>
 		recent
@@ -702,13 +867,9 @@ export function rankResearchChunks<T extends RankableChunk>(
 	// page max, as before — the pool is the honest denominator).
 	const maxScore = filtered.reduce((m, c) => Math.max(m, c.score ?? 0), 0);
 
-	// Exact CAP/SEP identifier pin (sls-019): the named document must rank
+	// Exact identifier pin (sls-019, sls-090): the named document must rank
 	// ahead of vector order — an exact-ID query is a lookup, not a search.
-	const targets = identifierTargets(opts.query);
-	const vTargets = versionTargets(opts.query);
-	const pinned = (c: RankableChunk) =>
-		(targets.length > 0 && matchesTarget(c.url, targets)) ||
-		(vTargets.length > 0 && matchesVersionTarget(c.title, vTargets));
+	const pinned = exactPin(opts.query);
 
 	// Curated vertical anchors (see RESEARCH_ANCHORS): relevance floor, not a
 	// hard pin — identifier lookups and genuinely-stronger matches stay ahead.
