@@ -12,8 +12,11 @@
  */
 
 /** The event page as the organizer published it: the description, then each
- * custom tab. A tab that opens with its own heading keeps it; otherwise its
- * name becomes one, so a "Judging Criteria" tab is found by its heading. */
+ * custom tab under its name as a top-level heading, with the tab's own
+ * headings one level down. A section read from the page then ends where its
+ * tab ends: a "Project Submission Requirements" tab is one section, its
+ * sub-headings included, and a description's own judging section stops at
+ * the next tab instead of running into it. */
 export function eventPageMarkdown(
 	description: string | null | undefined,
 	tabs: ReadonlyArray<{ name?: string | null; body?: string | null }> = [],
@@ -22,11 +25,15 @@ export function eventPageMarkdown(
 	for (const t of tabs) {
 		const body = t.body?.trim();
 		if (!body) continue;
-		parts.push(
-			/^#{1,6}\s/.test(body)
-				? body
-				: `## ${t.name?.trim() || "More"}\n\n${body}`,
-		);
+		let fenced = false;
+		const nested = body
+			.split("\n")
+			.map((l) => {
+				if (/^\s*(```|~~~)/.test(l)) fenced = !fenced;
+				return !fenced && /^#{1,5}\s/.test(l) ? `#${l}` : l;
+			})
+			.join("\n");
+		parts.push(`# ${t.name?.trim() || "More"}\n\n${nested}`);
 	}
 	const page = parts.filter(Boolean).join("\n\n");
 	return page || null;
