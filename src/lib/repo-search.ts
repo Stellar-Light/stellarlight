@@ -106,13 +106,15 @@ interface RepoDoc {
 }
 
 /** How well the returned page actually matched the query (honest-absence). */
-export type RepoMatchMode =
-	| "strict"
-	| "partial"
-	| "corrected"
-	| "weak"
-	| "all"
-	| "none";
+export const REPO_MATCH_MODES = [
+	"strict",
+	"partial",
+	"corrected",
+	"weak",
+	"all",
+	"none",
+] as const;
+export type RepoMatchMode = (typeof REPO_MATCH_MODES)[number];
 
 export const MATCH_MODE_LABEL: Record<RepoMatchMode, string> = {
 	strict: "every query term matched in the best row on this page",

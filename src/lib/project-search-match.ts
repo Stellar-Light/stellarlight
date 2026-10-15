@@ -154,6 +154,19 @@ export const SYNONYMS: Record<string, string[]> = mergeVocabulary(
 	PROJECT_SYNONYM_OVERLAY,
 );
 
+/** Every matchMode project search can serve, in ladder order. The spec
+ * spreads this list, so the two cannot drift (sls-082/084: an enum the code
+ * served was missing from the spec's hand-copied one, as `corrected` was). */
+export const PROJECT_MATCH_MODES = [
+	"strict",
+	"loose-1",
+	"majority",
+	"corrected",
+	"semantic",
+	"all",
+] as const;
+export type ProjectMatchMode = (typeof PROJECT_MATCH_MODES)[number];
+
 /** sls-076: does this row's admission DEPEND on a spelling correction?
  * True when at least one query token is a known misspelling whose literal
  * form (and ordinary stemming) misses the haystack while its corrected

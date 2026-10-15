@@ -141,19 +141,33 @@ export function failedReadsOf(warnings: readonly unknown[]): FailedRead[] {
  */
 export function withPartial<M extends { warnings?: readonly unknown[] }>(
 	meta: M,
+	/** Does a failure of this read leave the total unknown? A read that only
+	 * decorates served rows (logos, attributions, code evidence) does not, and
+	 * nulling a correct total for it would turn a known count into an unknown
+	 * one. Default: every failed read, so a new read is safe until judged. */
+	feedsTotal: (read: string) => boolean = () => true,
 ): M & { partial: boolean; failedReads: FailedRead[] } {
 	const failedReads = failedReadsOf(meta.warnings ?? []);
-	const partial = failedReads.length > 0;
 	const counts = (meta as { counts?: Record<string, unknown> }).counts;
+	// A total that is already null keeps its own basis (research's ranking).
+	const lost =
+		typeof counts?.total === "number" &&
+		failedReads.some((f) => feedsTotal(f.read));
 	return {
 		...meta,
-		...(partial && counts && "total" in counts
+		...(lost
 			? { counts: { ...counts, total: null, totalBasis: "partial-read" } }
 			: {}),
-		partial,
+		partial: failedReads.length > 0,
 		failedReads,
 	};
 }
+
+/** withPartial with a route's own rule for which reads feed its total. */
+export const partialFor =
+	(feedsTotal: (read: string) => boolean) =>
+	<M extends { warnings?: readonly unknown[] }>(meta: M) =>
+		withPartial(meta, feedsTotal);
 
 /**
  * `read`, or a rejection after `ms` (class "timeout after Nms"). For a read

@@ -236,4 +236,35 @@ describe("withPartial", () => {
 			).toEqual({ returned: 0, total: 0 });
 		}
 	});
+
+	it("only a read that feeds the count nulls it", () => {
+		const page = (read: string) => ({
+			warnings: [degradedWarning(read, "timeout")],
+			counts: { returned: 20, total: 303 },
+		});
+		const rowsOnly = (read: string) => !/anchor profiles/.test(read);
+		// An enrichment read failed: the page is partial, its total still known.
+		const decorated = withPartial(page("projects anchor profiles"), rowsOnly);
+		expect(decorated.partial).toBe(true);
+		expect(decorated.counts).toEqual({ returned: 20, total: 303 });
+		// The candidate read failed: the total is unknown.
+		expect(
+			withPartial(page("projects candidate fetch"), rowsOnly).counts,
+		).toEqual({ returned: 20, total: null, totalBasis: "partial-read" });
+		// A total that is already null keeps its own basis.
+		expect(
+			withPartial({
+				warnings: [degradedWarning("research exact-identifier lookup", "x")],
+				counts: {
+					returned: 5,
+					total: null,
+					totalBasis: "unbounded-similarity-ranking",
+				},
+			}).counts,
+		).toEqual({
+			returned: 5,
+			total: null,
+			totalBasis: "unbounded-similarity-ranking",
+		});
+	});
 });

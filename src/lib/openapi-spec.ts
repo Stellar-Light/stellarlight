@@ -29,6 +29,7 @@ import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
 import { DEPLOYMENT_NETWORKS } from "./project-deployment";
+import { PROJECT_MATCH_MODES } from "./project-search-match";
 import {
 	PROJECT_STATUSES,
 	RESOLVABLE_PROJECT_STATUSES,
@@ -37,6 +38,7 @@ import {
 import { PROJECT_TYPES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
+import { REPO_MATCH_MODES } from "./repo-search";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
@@ -2150,7 +2152,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. If that lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
+														'Present ONLY when the query named an exact identifier that no served row carries verbatim: an audit finding id (V-SOR-VUL-002), a CVE id (CVE-2026-24889), a GHSA id (GHSA-96xm-fv9w-pf3f), or a repo-qualified release tag (rs-soroban-sdk v25.0.2, matched on that repo\u0027s release title). Before answering, the route looks each one up across every document in the requested source scope and pins any document carrying it, so a listed identifier is one the scope does not hold. One the scope holds but this page leaves out (a limit, or an auditor/protocol/severity filter) is not listed here; meta.warnings names it. A release tag is matched on release titles, so its miss means no release document carries it. If the lookup itself failed, `partial` is true, `failedReads` names "research exact-identifier lookup", and the miss is unchecked rather than absent. Vector search never goes empty, so without this an absent identifier returns its nearest neighbours, scored as though they matched. When this is present, do NOT report the identifier as found and do NOT infer its content from the returned rows: they rank similarity, not a match. A miss means this corpus lacks the record, not that the record does not exist.',
 													properties: {
 														identifiers: {
 															type: "array",
@@ -2519,6 +2521,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
+					"503": {
+						description:
+							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Project search results",
 						content: {
@@ -2637,6 +2654,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
+					"503": {
+						description:
+							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Repo search results graded by repoScore",
 						content: {
@@ -4087,6 +4119,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/fields" },
 				],
 				responses: {
+					"503": {
+						description:
+							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Builder list",
 						content: {
@@ -9022,7 +9069,7 @@ export const spec: OpenAPISpec = {
 					partial: {
 						type: "boolean",
 						description:
-							'On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When true, counts.total is null with totalBasis "partial-read": a page that lost a read cannot count its matches.',
+							'On searchProjects, searchRepos, getBuilders, searchResearch, listSkills and getHackathons, always present: true when at least one backend read failed or timed out and the page went out anyway, so rows may be missing; false when every read completed. A limit or a filter never sets it. Count real loss on this field, not on the 200 status. When a read that feeds the count failed, counts.total is null with totalBasis "partial-read": that page cannot count its matches. A failed read that only decorates served rows (logos, attributions, code evidence) leaves a known total in place.',
 					},
 					failedReads: {
 						type: "array",
@@ -10124,17 +10171,9 @@ export const spec: OpenAPISpec = {
 								properties: {
 									matchMode: {
 										type: "string",
-										enum: [
-											"strict",
-											"loose-1",
-											"loose-2",
-											"loose-3",
-											"majority",
-											"semantic",
-											"all",
-										],
+										enum: [...PROJECT_MATCH_MODES],
 										description:
-											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them.',
+											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them. `corrected` means the rows matched only through a known spelling correction (e.g. strupey to stroopy): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.',
 									},
 									matchModeLabel: { type: "string" },
 									didYouMean: {
@@ -10675,16 +10714,9 @@ export const spec: OpenAPISpec = {
 									},
 									matchMode: {
 										type: "string",
-										enum: [
-											"strict",
-											"partial",
-											"corrected",
-											"weak",
-											"all",
-											"none",
-										],
+										enum: [...REPO_MATCH_MODES],
 										description:
-											"How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical repos); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey \u2192 stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.",
+											"How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical and flagship repos and exact owner or name matches); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey \u2192 stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.",
 									},
 									matchModeLabel: {
 										type: "string",

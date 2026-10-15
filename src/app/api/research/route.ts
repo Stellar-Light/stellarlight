@@ -28,6 +28,7 @@ import {
 	DEFAULT_READ_TIMEOUT_MS,
 	degradedRead,
 	degradedWarning,
+	isDegraded,
 	scopedWarning,
 	withPartial,
 } from "@/lib/degraded-read";
@@ -56,6 +57,8 @@ import {
 import {
 	advisoryIdentifierTargets,
 	anchorDocUrls,
+	exactKeyReport,
+	exactMissNote,
 	findingIdentifierTargets,
 	hasFullLexicalCoverage,
 	identifierIsPresent,
@@ -997,6 +1000,11 @@ async function research(
 		}
 	}
 
+	// Every candidate the scope holds for this request, before the audit
+	// filters and the page limit: what the exact-key report tells apart
+	// from what the page shows.
+	const exactScope = chunks;
+
 	// Audit-metadata post-filters (normalization-aware exact match for
 	// auditor, substring for protocol, exact for severity). Non-audit chunks
 	// carry null metadata and thus drop out whenever a filter is present.
@@ -1117,40 +1125,32 @@ async function research(
 	});
 
 	// sls-071, sls-090: a finding id, an advisory id or a repo-qualified
-	// release tag is present verbatim or it is a miss. Vector search never
-	// goes empty, so without this an absent id returns its nearest
-	// neighbours, scored as though they matched. Say so.
-	const served = results.flatMap((r) => {
-		const row = r as { content?: string; title?: string; url?: string };
-		return [row.content, row.title, row.url];
+	// release tag is on the page, held but left off it, or a miss. Vector
+	// search never goes empty, so without this an absent id returns its
+	// nearest neighbours, scored as though they matched.
+	const { exactMiss, heldNotServed } = exactKeyReport({
+		query: q,
+		scope: exactScope,
+		served: results,
+		lookupFailed: !!exactLookupWarning,
 	});
-	const missedIds = [
-		...exactIds.filter((id) => !identifierIsPresent(id, served)),
-		...releaseTags
-			.filter(
-				(t) =>
-					!results.some((r) =>
-						isReleaseTitle((r as { title?: string }).title, t),
-					),
-			)
-			.map((t) => `${t.repo} ${t.tag}`),
-	];
-	const these =
-		missedIds.length === 1 ? "this identifier" : "these identifiers";
-	const exactMiss =
-		missedIds.length > 0
-			? {
-					identifiers: missedIds,
-					note: exactLookupWarning
-						? `No row on this page carries ${these} verbatim, and the exact lookup over the searched scope failed (see failedReads), so whether the corpus holds it is unknown. The rows below are the nearest semantic neighbours of the query, not that record. Retry before reporting it as found or absent.`
-						: `No document in the searched scope carries ${these} verbatim: the exact lookup checked every document in scope, not only this page. The rows below are the nearest semantic neighbours of the query, not that record, and their confidence scores rank similarity, not a match. Do not report it as found or infer its content from these rows. Absence from this corpus is not proof the record does not exist; its primary source decides that.`,
-				}
-			: null;
+	const heldNote = heldNotServed.length
+		? `${heldNotServed.join(", ")}: held in the searched scope but not on this page (a filter or the page limit left ${heldNotServed.length === 1 ? "it" : "them"} out). Raise limit or drop the filter to read ${heldNotServed.length === 1 ? "it" : "them"}.`
+		: null;
 
 	// Empty source or a miss: only an empty source gets the empty-source note.
 	const sourceEmptyNote = sourceKnownEmpty
 		? `source "${effectiveSource}" holds no documents in the corpus yet: this is an empty source, not a miss. Drop the source filter, try source=scf-handbook, or use /api/projects/search?scfAwarded=true for funding questions.`
 		: null;
+
+	const warnings = [
+		paramWarning,
+		limitNote,
+		vectorNote,
+		sourceEmptyNote,
+		exactLookupWarning,
+		heldNote,
+	].filter((w): w is string => !!w);
 
 	return NextResponse.json(
 		{
@@ -1161,21 +1161,7 @@ async function research(
 					: {}),
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ||
-				limitNote ||
-				vectorNote ||
-				sourceEmptyNote ||
-				exactLookupWarning
-					? {
-							warnings: [
-								paramWarning,
-								limitNote,
-								vectorNote,
-								sourceEmptyNote,
-								exactLookupWarning,
-							].filter(Boolean),
-						}
-					: {}),
+				...(warnings.length ? { warnings } : {}),
 				...(sourceEmptyNote ? { sourceEmpty: true } : {}),
 				// How many documents the scoped source holds, so a consumer can
 				// skip a source below its per-source take before sending.
@@ -1233,8 +1219,11 @@ async function research(
 					`rank;dur=${Date.now() - phaseStart}`,
 					`total;dur=${Date.now() - startedAt}`,
 				].join(", "),
-				// Don't aggressively cache — query strings vary by user
-				"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+				// Don't aggressively cache — query strings vary by user. A page a
+				// failed read thinned is never cached: its retry must be a retry.
+				"Cache-Control": isDegraded(warnings)
+					? "no-store"
+					: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);
@@ -1363,7 +1352,10 @@ async function researchMany(
 	// stray parameter is reported once (below), not once per source.
 	const base = new URL(req.nextUrl.pathname, req.nextUrl.origin);
 	if (q) base.searchParams.set("q", q);
-	for (const k of ["auditor", "protocol", "severity", "fields"]) {
+	// `fields` is applied to the merged page, not per source: the merge sorts
+	// on confidence, which a field list can leave out (sources=a,b&fields=title
+	// answered 500).
+	for (const k of ["auditor", "protocol", "severity"]) {
 		const v = sp.get(k);
 		if (v !== null) base.searchParams.set(k, v);
 	}
@@ -1420,7 +1412,8 @@ async function researchMany(
 	// biome-ignore lint/suspicious/noExplicitAny: rows are our own result rows
 	const results: any[] = ok
 		.flatMap((a) => a.body.results ?? [])
-		.sort(researchOrder(q));
+		.sort(researchOrder(q))
+		.map((r) => pickFields(r, parseFields(sp.get("fields"))));
 	const mode: "vector" | "keyword" = ok.every(
 		(a) => a.body.meta.mode === "vector",
 	)
@@ -1448,7 +1441,9 @@ async function researchMany(
 		(a) => (a.body.meta.exactMiss?.identifiers ?? []) as string[],
 	);
 	const missed = missLists.reduce((acc, l) => acc.filter((x) => l.includes(x)));
-	const missNote = ok.find((a) => a.body.meta.exactMiss)?.body.meta.exactMiss;
+	// A source that failed, or whose own lookup failed, may hold the key: the
+	// merged miss is then unchecked, whatever the first source's note said.
+	const unchecked = failed.length > 0 || isDegraded(warnings);
 	const empty = results.length === 0;
 	logApiHit({
 		req,
@@ -1477,8 +1472,13 @@ async function researchMany(
 				source: "https://stellarlight.xyz/api/research",
 				generatedAt: new Date().toISOString(),
 				...(warnings.length ? { warnings } : {}),
-				...(missed.length && missNote
-					? { exactMiss: { ...missNote, identifiers: missed } }
+				...(missed.length
+					? {
+							exactMiss: {
+								identifiers: missed,
+								note: exactMissNote(missed, unchecked),
+							},
+						}
 					: {}),
 				query: q,
 				mode,
@@ -1531,9 +1531,10 @@ async function researchMany(
 				...rateLimitHeaders(limit),
 				"X-Scout-Match-Mode": mode,
 				...serverTiming(startedAt),
-				"Cache-Control": failed.length
-					? "no-store"
-					: "public, s-maxage=60, stale-while-revalidate=300",
+				"Cache-Control":
+					failed.length || isDegraded(warnings)
+						? "no-store"
+						: "public, s-maxage=60, stale-while-revalidate=300",
 			},
 		},
 	);

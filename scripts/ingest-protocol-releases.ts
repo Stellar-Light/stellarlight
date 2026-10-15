@@ -119,10 +119,21 @@ async function run() {
 			allChunks.push(...chunks);
 		}
 
-		const advisories = await gh<GhAdvisory[]>(
-			`${repo}/security-advisories?state=published&per_page=100`,
-		);
-		console.log(`${repo}: ${advisories.length} published advisories`);
+		// One repo's failed advisories read must not drop every release this
+		// run fetched. Stored advisories stay (upsertChunks never deletes);
+		// the run exits 1 so the failure shows on the lane.
+		let advisories: GhAdvisory[] = [];
+		try {
+			advisories = await gh<GhAdvisory[]>(
+				`${repo}/security-advisories?state=published&per_page=100`,
+			);
+			console.log(`${repo}: ${advisories.length} published advisories`);
+		} catch (e) {
+			process.exitCode = 1;
+			console.error(
+				`✗ ${repo}: advisories could not be read (${(e as Error).message}); stored advisories kept`,
+			);
+		}
 		for (const a of advisories) {
 			const title = `${shortRepo} ${a.ghsa_id}${a.cve_id ? ` (${a.cve_id})` : ""}: ${a.summary}`;
 			const vulns = a.vulnerabilities ?? [];
@@ -176,7 +187,7 @@ async function run() {
 }
 
 run()
-	.then(() => process.exit(0))
+	.then(() => process.exit(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("FATAL:", e);
 		process.exit(1);

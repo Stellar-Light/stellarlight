@@ -13,6 +13,7 @@ import { RESEARCH_MODES } from "../match-mode";
 import { spec } from "../openapi-spec";
 import { PARTNER_TYPES } from "../partner-match";
 import { DEPLOYMENT_NETWORKS } from "../project-deployment";
+import { PROJECT_MATCH_MODES } from "../project-search-match";
 import {
 	PROJECT_STATUSES,
 	RESOLVABLE_PROJECT_STATUSES,
@@ -21,6 +22,7 @@ import {
 import { PROJECT_TYPES } from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
+import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
 import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
@@ -428,5 +430,23 @@ describe("hackathon submission vocabularies are their constants (spec 1.9.69)", 
 				sorted(BUILD_MATCH_MODES),
 			);
 		}
+	});
+});
+
+// Project search served `corrected` (sls-076) for months while the spec's
+// hand-copied matchMode enum lacked it; repo search gained it in sls-093.
+describe("search matchMode enums are the code's lists", () => {
+	const metaMode = (schema: string) =>
+		S.components.schemas[schema].properties.meta.allOf[1].properties.matchMode
+			.enum;
+	it("searchProjects", () => {
+		expect(sorted(metaMode("ProjectSearchResponse"))).toEqual(
+			sorted(PROJECT_MATCH_MODES),
+		);
+	});
+	it("searchRepos", () => {
+		expect(sorted(metaMode("RepoSearchResponse"))).toEqual(
+			sorted(REPO_MATCH_MODES),
+		);
 	});
 });
