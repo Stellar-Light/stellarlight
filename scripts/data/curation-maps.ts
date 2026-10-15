@@ -4958,9 +4958,12 @@ export const DESCRIPTION_FIXES: Record<string, string> = {
 	// pending" beside a sourced mainnet deployment. Zenex's deployments page
 	// (docs.zenex.trade/deployments/contract-addresses, checked by the
 	// operator on 6 October 2026) lists the live mainnet factory and an
-	// XLM-USD market. Only that sentence changes.
+	// XLM-USD market. The bridging clause went too: Rozo bridging and "Circle
+	// CCTP support coming soon" appear nowhere in Zenex's own docs, and this
+	// entry freezes the text, so an undated pending claim would go stale the
+	// same way. Passkey login is in the docs and stays.
 	zenex:
-		"Zenex (formerly Hermes) is a decentralized perpetual (leveraged) trading exchange on Stellar/Soroban, using a liquidity-pool model with oracle pricing for deep liquidity and low slippage. Live on Stellar mainnet: its deployments page lists the mainnet factory and an XLM-USD market. Supports passkey login and asset bridging via Rozo, with Circle CCTP support coming soon.",
+		"Zenex (formerly Hermes) is a decentralized perpetual (leveraged) trading exchange on Stellar/Soroban, using a liquidity-pool model with oracle pricing for deep liquidity and low slippage. Live on Stellar mainnet: its deployments page lists the mainnet factory and an XLM-USD market. Supports passkey login.",
 	// Raven sls-086: the row said "AQUA locks into ICE for on-chain DAO
 	// governance votes directing rewards". Aquarius's docs separate two vote
 	// tokens: ICE only tracks locked AQUA and sets the upvoteICE and governICE

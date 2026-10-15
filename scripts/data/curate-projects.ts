@@ -1576,21 +1576,27 @@ async function main() {
 		writes.push({ id: d.id, slug, data: { shortDescription: desc } });
 	}
 
-	// ── sls-091 sweep (REPORT-ONLY): description vs sourced deployment network ──
-	// Zenex served "Currently on testnet, with mainnet pending" beside a
-	// sourced deployment.network of mainnet. Flags any row whose description
-	// contradicts its deployment network, reading the description this run
-	// leaves behind (a DESCRIPTION_FIXES entry counts as already applied).
-	// Prints for review; a confirmed row gets a DESCRIPTION_FIXES entry.
+	// ── sls-091 sweep (REPORT-ONLY): description vs deployment network ──
+	// Zenex served "Currently on testnet, with mainnet pending" beside an
+	// evidenced deployment.network of mainnet. Flags any row whose description
+	// contradicts its mainnet or testnet deployment (every basis is evidence:
+	// contract joins, on-chain activity, operator artifacts), reading the
+	// description this run leaves behind (a DESCRIPTION_FIXES entry counts as
+	// already applied). Prints for review; a confirmed row gets a
+	// DESCRIPTION_FIXES entry. A failed read is said and skipped: a report must
+	// never stop the lane's writes.
 	console.log("\n── Network contradiction sweep (report-only, no writes) ──");
-	{
+	try {
+		// Says the product runs on testnet, or is not on mainnet yet.
 		const TESTNET_TEXT =
-			/\b(currently|only|still|live|running|deployed) (on|in) testnet\b|\btestnet[- ]only\b|\bmainnet (is )?(pending|coming|soon|planned|launch(ing)? soon)\b|\bnot yet (live )?on mainnet\b|\bupcoming mainnet\b/i;
+			/\b(?:currently|only|still|live|running|deployed|launched|available) (?:on|in|to) (?:the )?(?:stellar )?testnet\b|\bon (?:the )?stellar testnet\b|\btestnet[- ](?:only|beta)\b|\bmainnet (?:is |launch(?:ing)? )?(?:pending|coming|soon|planned|upcoming|in q[1-4])\b|\b(?:coming|launching) (?:soon )?to (?:stellar )?mainnet\b|\bnot (?:yet )?(?:live |deployed |launched )?on (?:stellar )?mainnet\b|\bupcoming mainnet\b/i;
+		// Says it is live on mainnet; "not live", "will be live" and "isn't
+		// live" are the opposite claim.
 		const MAINNET_TEXT =
-			/\b(live|launched|deployed|running) on (stellar )?mainnet\b/i;
+			/(?<!\b(?:not|never|be|yet)\s|n't\s)\b(?:live|launched|deployed|running) on (?:the )?(?:stellar )?mainnet\b/i;
 		const rows = await payload.find({
 			collection: "projects",
-			where: { "deployment.network": { exists: true } },
+			where: { "deployment.network": { in: ["mainnet", "testnet"] } },
 			pagination: false,
 			depth: 0,
 			select: { slug: true, shortDescription: true, deployment: true },
@@ -1615,7 +1621,11 @@ async function main() {
 			);
 		}
 		console.log(
-			`  ${flagged} contradiction(s) among ${rows.docs.length} rows with a deployment network`,
+			`  ${flagged} contradiction(s) among ${rows.docs.length} rows with a mainnet or testnet deployment`,
+		);
+	} catch (e) {
+		console.error(
+			`  ✗ sweep could not run (${(e as Error).message}); nothing checked, writes unaffected`,
 		);
 	}
 
