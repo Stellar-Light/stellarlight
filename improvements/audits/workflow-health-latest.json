@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-10-16T00:38:41.716Z",
+	"asOf": "2026-10-16T01:07:23.774Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 110,
-	"healthy": 103,
+	"healthy": 102,
 	"broken": [
 		{
 			"file": "enrich-repos.yml",
@@ -13,6 +13,11 @@
 			"file": "gone-repos.yml",
 			"state": "standing-signal",
 			"why": "33 run(s) red at its declared signal step since its last green 30d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
+		},
+		{
+			"file": "pg-atlas.yml",
+			"state": "failing",
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run SCF-Public-Goods-Maintenance/pg-atlas-sbom-action@bca8911b12604b102c41dab217b20c0a005fb126\""
 		},
 		{
 			"file": "post-deploy-eval.yml",
@@ -37,7 +42,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "40 failed run(s) since its last green 30d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "41 failed run(s) since its last green 30d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -157,10 +162,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-09-04T01:01:29Z",
-			"ageDays": 41,
+			"ageDays": 42,
 			"graceDays": 45,
 			"runs": 2,
-			"why": "last green 41d ago (manual tool — age not judged)"
+			"why": "last green 42d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-knowledge-notes.yml",
@@ -332,10 +337,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-16T00:35:53Z",
+			"lastSuccessAt": "2026-10-16T01:04:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 11,
+			"runs": 13,
 			"why": "last green 0d ago"
 		},
 		{
@@ -837,12 +842,12 @@
 			"file": "pg-atlas.yml",
 			"name": "PG Atlas data upload",
 			"cron": null,
-			"state": "ok",
+			"state": "failing",
 			"lastSuccessAt": "2026-10-16T00:35:53Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 22,
-			"why": "last green 0d ago"
+			"runs": 23,
+			"why": "1 failed run(s) since its last green 0d ago — it is trying and losing, not idle; dies at \"Run SCF-Public-Goods-Maintenance/pg-atlas-sbom-action@bca8911b12604b102c41dab217b20c0a005fb126\""
 		},
 		{
 			"file": "post-deploy-eval.yml",
@@ -1157,7 +1162,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-16T00:35:53Z",
+			"lastSuccessAt": "2026-10-16T01:04:33Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1248,8 +1253,8 @@
 			"lastSuccessAt": "2026-09-15T18:11:12Z",
 			"ageDays": 30,
 			"graceDays": 21,
-			"runs": 89,
-			"why": "40 failed run(s) since its last green 30d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"runs": 90,
+			"why": "41 failed run(s) since its last green 30d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
