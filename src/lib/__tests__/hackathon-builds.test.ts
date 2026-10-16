@@ -496,6 +496,133 @@ describe("package filter", () => {
 	});
 });
 
+describe("links by owner and name", () => {
+	const owners = async () => {
+		const { indexProjectOwners } = await import("@/lib/hackathon-build-links");
+		return indexProjectOwners([
+			{
+				slug: "neko",
+				name: "Neko",
+				links: { github: "https://github.com/Neko-Protocol" },
+			},
+			{
+				slug: "sextant-agent",
+				name: "Sextant Agent",
+				github: { repos: [{ owner: "pedro-pelicioni", name: "sextant" }] },
+			},
+			{
+				slug: "freighter",
+				name: "Freighter",
+				links: { github: "https://github.com/stellar/freighter" },
+			},
+			{
+				slug: "sorobanhooks",
+				name: "Sorobanhooks",
+				links: { github: "https://github.com/sorobanhooks" },
+			},
+			{
+				slug: "vaquita",
+				name: "Vaquita",
+				links: { github: "https://github.com/vaquita-fi" },
+			},
+			{
+				slug: "vaquita-pools",
+				name: "Vaquita Pools",
+				links: { github: "https://github.com/vaquita-fi/pools" },
+			},
+			{
+				slug: "ion",
+				name: "Ion",
+				links: { github: "https://github.com/ion-labs" },
+			},
+		]);
+	};
+
+	it("links a submission under the project's owner that carries its name", async () => {
+		const { ownerAndNameLink } = await import("@/lib/hackathon-build-links");
+		const o = await owners();
+		expect(
+			ownerAndNameLink(
+				"https://github.com/Neko-Protocol/neko-dex",
+				"Neko Protocol",
+				o,
+			),
+		).toEqual({
+			slug: "neko",
+			name: "Neko",
+			basis: "owner-and-name",
+		});
+		expect(
+			ownerAndNameLink("https://github.com/sorobanhooks", "Sorobanhooks", o)
+				?.slug,
+		).toBe("sorobanhooks");
+	});
+
+	it("never takes a builder's other product, the examples repo or a team-named entry", async () => {
+		const { ownerAndNameLink } = await import("@/lib/hackathon-build-links");
+		const o = await owners();
+		// The 2026-10-05 audit's two cases: same owner, other names.
+		expect(
+			ownerAndNameLink(
+				"https://github.com/pedro-pelicioni/gift-pool-zk",
+				"Gift Pool ZK",
+				o,
+			),
+		).toBeNull();
+		expect(
+			ownerAndNameLink(
+				"https://github.com/stellar/soroban-examples",
+				"Qué es Stellar?",
+				o,
+			),
+		).toBeNull();
+		// Named for its team, not as the team's project.
+		expect(
+			ownerAndNameLink(
+				"sorobanhooks/freighter",
+				"x402 Smart Wallet - By Sorobanhooks",
+				o,
+			),
+		).toBeNull();
+	});
+
+	it("refuses a name two projects under one owner both fit, and names too short", async () => {
+		const { ownerAndNameLink, nameKeyOf } = await import(
+			"@/lib/hackathon-build-links"
+		);
+		const o = await owners();
+		expect(
+			ownerAndNameLink(
+				"https://github.com/vaquita-fi/pools-v2",
+				"Vaquita Pools v2",
+				o,
+			),
+		).toBeNull();
+		expect(
+			ownerAndNameLink(
+				"https://github.com/vaquita-fi/boost",
+				"Vaquita Boost",
+				o,
+			)?.slug,
+		).toBe("vaquita");
+		expect(
+			ownerAndNameLink("https://github.com/ion-labs/ion", "Ion", o),
+		).toBeNull();
+		expect(nameKeyOf("Ion")).toBeNull();
+		expect(nameKeyOf("Neko Protocol")).toBe("nekoprotocol");
+	});
+
+	it("reads the owner from an organization link too", async () => {
+		const { githubOwnerOf } = await import("@/lib/hackathon-build-links");
+		expect(githubOwnerOf("https://github.com/orgs/Orion-LB/repositories")).toBe(
+			"orion-lb",
+		);
+		expect(githubOwnerOf("https://github.com/mpprouter")).toBe("mpprouter");
+		expect(githubOwnerOf("https://github.com/a/b/tree/main")).toBe("a");
+		expect(githubOwnerOf("https://gitlab.com/a/b")).toBeNull();
+	});
+});
+
 describe("links by website", () => {
 	it("compares hosts without www. or app., and never a shared platform", async () => {
 		const { siteKeyOf } = await import("@/lib/hackathon-build-links");

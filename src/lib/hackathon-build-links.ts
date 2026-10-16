@@ -16,7 +16,15 @@
  * keep the product and move the code, so the site is the stronger trace of
  * what the submission became. Shared platforms (GitHub, YouTube, DoraHacks,
  * link pages) never count, and a host two projects claim links neither.
- * Every link says which rule made it (`basis`).
+ *
+ * A third rule, for a submission neither rule links: its repo sits under a
+ * project's GitHub owner AND its name is that project's name (or starts with
+ * it, as "Neko Protocol" does "Neko"). Owner alone stays refused, for the
+ * two reasons above; the name answers both, since the examples repo and a
+ * builder's other product carry other names. A submission named for its team
+ * ("x402 Wallet by Sorobanhooks") does not start with the team's project
+ * name, so it is not taken for that project. Every link says which rule made
+ * it (`basis`).
  */
 
 /** owner/name of a GitHub repository URL, lowercased. null for an account or
@@ -45,7 +53,7 @@ export interface LinkedProject {
 	factsReadAt?: string;
 }
 
-export const LINK_BASES = ["repo", "website"] as const;
+export const LINK_BASES = ["repo", "website", "owner-and-name"] as const;
 /** reviewSubmission: how the link was resolved, and its check ids.
  * Here (pure) so the spec can spread them. */
 export const REVIEW_RESOLVED_BY = ["submission", "repo"] as const;
@@ -169,6 +177,62 @@ export function indexProjectSites(
 		else if (out.get(key)?.slug !== slug) out.set(key, null);
 	}
 	return out;
+}
+
+/** A name compared as letters and digits only, lowercased; null under four
+ * characters, too short to identify anything. */
+export function nameKeyOf(name: string | null | undefined): string | null {
+	const key = (name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+	return key.length >= 4 ? key : null;
+}
+
+/** GitHub owner -> the projects whose repos or GitHub link sit under it. */
+export function indexProjectOwners(
+	rows: ProjectRepoRow[],
+): Map<string, LinkedProject[]> {
+	const names = new Map(rows.map((r) => [r.slug, r.name]));
+	const out = new Map<string, LinkedProject[]>();
+	for (const r of rows) {
+		const slug = r.canonicalSlug || (r.status === "Draft" ? null : r.slug);
+		if (!slug) continue;
+		const owners = new Set<string>();
+		for (const x of r.github?.repos ?? [])
+			if (x?.owner) owners.add(x.owner.toLowerCase());
+		const linkOwner = githubOwnerOf(r.links?.github);
+		if (linkOwner) owners.add(linkOwner);
+		for (const owner of owners) {
+			const list = out.get(owner) ?? [];
+			if (!list.some((p) => p.slug === slug))
+				list.push({ slug, name: names.get(slug) ?? r.name });
+			out.set(owner, list);
+		}
+	}
+	return out;
+}
+
+/** The GitHub owner a submission's link names: a repo's owner, or the
+ * account or organization itself (github.com/orgs/<name> included). */
+export function githubOwnerOf(url: string | null | undefined): string | null {
+	const m = /github\.com\/(?:orgs\/)?([^/#?\s]+)/i.exec(url ?? "");
+	return m ? m[1].toLowerCase() : null;
+}
+
+/** The one project under the submission's GitHub owner whose name the
+ * submission carries (equal, or the submission's name starts with it); null
+ * when none or more than one does. */
+export function ownerAndNameLink(
+	githubUrl: string | null | undefined,
+	buildName: string | null | undefined,
+	owners: Map<string, LinkedProject[]>,
+): LinkedProject | null {
+	const owner = githubOwnerOf(githubUrl);
+	const key = nameKeyOf(buildName);
+	if (!owner || !key) return null;
+	const hits = (owners.get(owner) ?? []).filter((p) => {
+		const pk = nameKeyOf(p.name);
+		return !!pk && (key === pk || key.startsWith(pk));
+	});
+	return hits.length === 1 ? { ...hits[0], basis: "owner-and-name" } : null;
 }
 
 /** A submission's stored id from what an agent is likely to hold: the `id`

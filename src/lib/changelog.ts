@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-16",
 		surfaces: ["api"],
+		version: "spec@1.9.80",
+		type: "added",
+		summary:
+			"A hackathon submission now also links to a directory project when its repo sits under the project's GitHub owner and it carries the project's name (`project.basis: owner-and-name`).",
+		detail:
+			"Until now a submission linked only when the project listed its exact repo or its demo site was the project's website, which left the same product unlinked across events (Neko Protocol entered three). Owner alone still never counts: a builder's other product and the official examples repo carry other names, and a submission named for its team (\"x402 Wallet by Sorobanhooks\") does not start with the team's project name.",
+	},
+	{
+		date: "2026-10-16",
+		surfaces: ["api"],
 		version: "spec@1.9.79",
 		type: "fixed",
 		summary:

@@ -177,7 +177,7 @@ const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 	properties: {
 		slug: { type: "string" },
 		name: { type: "string" },
@@ -185,7 +185,7 @@ const BUILD_PROJECT_SCHEMA = {
 			type: "string",
 			enum: [...LINK_BASES],
 			description:
-				"repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).",
+				"repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).",
 		},
 		status: {
 			type: "string",
