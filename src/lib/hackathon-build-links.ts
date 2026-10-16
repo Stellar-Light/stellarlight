@@ -198,8 +198,8 @@ export function indexProjectOwners(
 		const owners = new Set<string>();
 		for (const x of r.github?.repos ?? [])
 			if (x?.owner) owners.add(x.owner.toLowerCase());
-		const m = /github\.com\/([^/#?\s]+)/i.exec(r.links?.github ?? "");
-		if (m) owners.add(m[1].toLowerCase());
+		const linkOwner = githubOwnerOf(r.links?.github);
+		if (linkOwner) owners.add(linkOwner);
 		for (const owner of owners) {
 			const list = out.get(owner) ?? [];
 			if (!list.some((p) => p.slug === slug))
@@ -210,15 +210,22 @@ export function indexProjectOwners(
 	return out;
 }
 
-/** The one project under the submission repo's owner whose name the
+/** The GitHub owner a submission's link names: a repo's owner, or the
+ * account or organization itself (github.com/orgs/<name> included). */
+export function githubOwnerOf(url: string | null | undefined): string | null {
+	const m = /github\.com\/(?:orgs\/)?([^/#?\s]+)/i.exec(url ?? "");
+	return m ? m[1].toLowerCase() : null;
+}
+
+/** The one project under the submission's GitHub owner whose name the
  * submission carries (equal, or the submission's name starts with it); null
  * when none or more than one does. */
 export function ownerAndNameLink(
-	repoFullName: string | null | undefined,
+	githubUrl: string | null | undefined,
 	buildName: string | null | undefined,
 	owners: Map<string, LinkedProject[]>,
 ): LinkedProject | null {
-	const owner = repoFullName?.split("/")[0];
+	const owner = githubOwnerOf(githubUrl);
 	const key = nameKeyOf(buildName);
 	if (!owner || !key) return null;
 	const hits = (owners.get(owner) ?? []).filter((p) => {

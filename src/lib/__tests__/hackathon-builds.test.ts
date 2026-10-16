@@ -542,14 +542,19 @@ describe("links by owner and name", () => {
 		const { ownerAndNameLink } = await import("@/lib/hackathon-build-links");
 		const o = await owners();
 		expect(
-			ownerAndNameLink("neko-protocol/neko-dex", "Neko Protocol", o),
+			ownerAndNameLink(
+				"https://github.com/Neko-Protocol/neko-dex",
+				"Neko Protocol",
+				o,
+			),
 		).toEqual({
 			slug: "neko",
 			name: "Neko",
 			basis: "owner-and-name",
 		});
 		expect(
-			ownerAndNameLink("sorobanhooks/hooks", "Sorobanhooks", o)?.slug,
+			ownerAndNameLink("https://github.com/sorobanhooks", "Sorobanhooks", o)
+				?.slug,
 		).toBe("sorobanhooks");
 	});
 
@@ -558,10 +563,18 @@ describe("links by owner and name", () => {
 		const o = await owners();
 		// The 2026-10-05 audit's two cases: same owner, other names.
 		expect(
-			ownerAndNameLink("pedro-pelicioni/gift-pool-zk", "Gift Pool ZK", o),
+			ownerAndNameLink(
+				"https://github.com/pedro-pelicioni/gift-pool-zk",
+				"Gift Pool ZK",
+				o,
+			),
 		).toBeNull();
 		expect(
-			ownerAndNameLink("stellar/soroban-examples", "Qué es Stellar?", o),
+			ownerAndNameLink(
+				"https://github.com/stellar/soroban-examples",
+				"Qué es Stellar?",
+				o,
+			),
 		).toBeNull();
 		// Named for its team, not as the team's project.
 		expect(
@@ -579,14 +592,34 @@ describe("links by owner and name", () => {
 		);
 		const o = await owners();
 		expect(
-			ownerAndNameLink("vaquita-fi/pools-v2", "Vaquita Pools v2", o),
+			ownerAndNameLink(
+				"https://github.com/vaquita-fi/pools-v2",
+				"Vaquita Pools v2",
+				o,
+			),
 		).toBeNull();
-		expect(ownerAndNameLink("vaquita-fi/boost", "Vaquita Boost", o)?.slug).toBe(
-			"vaquita",
-		);
-		expect(ownerAndNameLink("ion-labs/ion", "Ion", o)).toBeNull();
+		expect(
+			ownerAndNameLink(
+				"https://github.com/vaquita-fi/boost",
+				"Vaquita Boost",
+				o,
+			)?.slug,
+		).toBe("vaquita");
+		expect(
+			ownerAndNameLink("https://github.com/ion-labs/ion", "Ion", o),
+		).toBeNull();
 		expect(nameKeyOf("Ion")).toBeNull();
 		expect(nameKeyOf("Neko Protocol")).toBe("nekoprotocol");
+	});
+
+	it("reads the owner from an organization link too", async () => {
+		const { githubOwnerOf } = await import("@/lib/hackathon-build-links");
+		expect(githubOwnerOf("https://github.com/orgs/Orion-LB/repositories")).toBe(
+			"orion-lb",
+		);
+		expect(githubOwnerOf("https://github.com/mpprouter")).toBe("mpprouter");
+		expect(githubOwnerOf("https://github.com/a/b/tree/main")).toBe("a");
+		expect(githubOwnerOf("https://gitlab.com/a/b")).toBeNull();
 	});
 });
 

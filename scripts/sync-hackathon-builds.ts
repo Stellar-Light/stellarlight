@@ -556,7 +556,7 @@ async function main() {
 			// Neither: the project's own GitHub owner and its name, together.
 			const o =
 				p === undefined && s === undefined && owners
-					? ownerAndNameLink(r.repoFullName, r.name, owners)
+					? ownerAndNameLink(r.githubUrl, r.name, owners)
 					: null;
 			const linked = p ?? s ?? o ?? null;
 			r.projectSlug = linked?.slug ?? null;
@@ -881,7 +881,7 @@ async function main() {
 	);
 	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.repoFullName}` : r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.githubUrl}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {
