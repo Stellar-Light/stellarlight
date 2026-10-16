@@ -60,9 +60,11 @@ import {
 	embeddingTextHash,
 } from "../src/lib/hackathon-build-embedding";
 import {
+	indexProjectOwners,
 	indexProjectRepos,
 	indexProjectSites,
 	type LinkedProject,
+	ownerAndNameLink,
 	type ProjectRepoRow,
 	repoFullNameOf,
 	siteKeyOf,
@@ -516,6 +518,7 @@ async function main() {
 	// ── 3. project links ─────────────────────────────────────────────────
 	let links: Map<string, LinkedProject | null> | null = null;
 	let sites: Map<string, LinkedProject | null> | null = null;
+	let owners: Map<string, LinkedProject[]> | null = null;
 	try {
 		const projects = await payload.find({
 			collection: "projects",
@@ -532,6 +535,7 @@ async function main() {
 		});
 		links = indexProjectRepos(projects.docs as unknown as ProjectRepoRow[]);
 		sites = indexProjectSites(projects.docs as unknown as ProjectRepoRow[]);
+		owners = indexProjectOwners(projects.docs as unknown as ProjectRepoRow[]);
 		console.log(
 			`\n${projects.docs.length} directory projects read; ${links.size} repos listed by a project`,
 		);
@@ -549,10 +553,21 @@ async function main() {
 			// own website. An ambiguous repo stays unlinked either way.
 			const key = siteKeyOf(r.demoUrl);
 			const s = p === undefined && key ? sites?.get(key) : undefined;
-			const linked = p ?? s ?? null;
+			// Neither: the project's own GitHub owner and its name, together.
+			const o =
+				p === undefined && s === undefined && owners
+					? ownerAndNameLink(r.repoFullName, r.name, owners)
+					: null;
+			const linked = p ?? s ?? o ?? null;
 			r.projectSlug = linked?.slug ?? null;
 			r.projectName = linked?.name ?? null;
-			r.projectLinkBasis = p ? "repo" : s ? "website" : null;
+			r.projectLinkBasis = p
+				? "repo"
+				: s
+					? "website"
+					: o
+						? "owner-and-name"
+						: null;
 			r.linkCheckedAt = now;
 		}
 	}
@@ -856,11 +871,17 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+	);
+	// Owner-and-name links first: the newest rule is the one to read.
+	linked.sort(
+		(a, b) =>
+			Number(b.projectLinkBasis === "owner-and-name") -
+			Number(a.projectLinkBasis === "owner-and-name"),
 	);
 	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.repoFullName}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {

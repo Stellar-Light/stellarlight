@@ -3612,15 +3612,15 @@ export interface operations {
                             prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website";
+                                basis?: "repo" | "website" | "owner-and-name";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -3715,15 +3715,15 @@ export interface operations {
                             };
                             /** @description owner/name from the GitHub link; null for an account or org link. */
                             repo?: string | null;
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website";
+                                basis?: "repo" | "website" | "owner-and-name";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -4042,15 +4042,15 @@ export interface operations {
                                 };
                                 /** @description owner/name from the GitHub link; null for an account or org link. */
                                 repo?: string | null;
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website";
+                                    basis?: "repo" | "website" | "owner-and-name";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}
@@ -4122,15 +4122,15 @@ export interface operations {
                                     isWinner?: boolean;
                                     placement?: string | null;
                                     similarity?: number;
-                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                     project?: {
                                         slug: string;
                                         name: string;
                                         /**
-                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
                                          * @enum {string}
                                          */
-                                        basis?: "repo" | "website";
+                                        basis?: "repo" | "website" | "owner-and-name";
                                         /**
                                          * @description The project's directory status today. Absent when it could not be read (unknown).
                                          * @enum {string|null}
@@ -5164,15 +5164,15 @@ export interface operations {
                                 placement?: string | null;
                                 githubUrl?: string | null;
                                 url?: string | null;
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo, or, when none does, when the build's demo site is a project's own website (`basis` says which). A shared GitHub owner or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website";
+                                    basis?: "repo" | "website" | "owner-and-name";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}

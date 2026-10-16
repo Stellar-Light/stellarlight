@@ -138,7 +138,7 @@ export const HackathonBuilds: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).",
+					"Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), or owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name).",
 			},
 		},
 		{
