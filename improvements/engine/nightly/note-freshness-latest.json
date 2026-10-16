@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-14T10:50:47.714Z",
+	"generatedAt": "2026-10-16T10:19:30.932Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -39,12 +39,12 @@
 		},
 		{
 			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_js",
-			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.5 (published 2026-10-15)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:noir-lang/noir:npm:@noir-lang/noir_wasm",
-			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.3 (published 2026-09-18)",
+			"note": "note (asOf 2026-09-13) cites 1.0.0-rc.1; registry latest is 1.0.0-rc.5 (published 2026-10-15)",
 			"surface": "code"
 		},
 		{
@@ -59,7 +59,7 @@
 		},
 		{
 			"probe": "note-stale:stellar-scaffold/cli:crates:stellar-scaffold-cli",
-			"note": "note (asOf 2026-09-02) cites 0.0.27; registry latest is 0.0.28 (published 2026-10-14)",
+			"note": "note (asOf 2026-09-02) cites 0.0.27; registry latest is 0.0.30 (published 2026-10-15)",
 			"surface": "code"
 		},
 		{
@@ -79,7 +79,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/stellar-ledger-data-indexer:docker:stellar/stellar-ledger-data-indexer",
-			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-13 (published 2026-10-13)",
+			"note": "note (asOf 2026-09-13) cites 2026-09-08; registry latest is 2026-10-14 (published 2026-10-14)",
 			"surface": "code"
 		},
 		{
@@ -89,12 +89,12 @@
 		},
 		{
 			"probe": "note-stale:soneso/kmp-stellar-sdk:maven:com.soneso.stellar:stellar-sdk",
-			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.14.0 (published 2026-09-28)",
+			"note": "note (asOf 2026-09-01) cites 1.12.0; registry latest is 1.15.0 (published 2026-10-15)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:soneso/stellar_flutter_sdk:pub:stellar_flutter_sdk",
-			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.8.0 (published 2026-09-28)",
+			"note": "note (asOf 2026-09-01) cites 3.6.0; registry latest is 3.9.0 (published 2026-10-16)",
 			"surface": "code"
 		},
 		{
@@ -143,6 +143,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:Scopuly/x402-stellar-guard:npm:@scopuly/x402-stellar-guard",
+			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.2.0 (published 2026-10-15)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:Fundable-Protocol/fundable-sdk:npm:@fundable/sdk",
 			"note": "note (asOf 2026-09-14) cites 0.2.3; registry latest is 0.3.0 (published 2026-09-24)",
 			"surface": "code"
@@ -154,7 +159,7 @@
 		},
 		{
 			"probe": "note-stale:axis-markets/js-client:npm:@axis-markets/client",
-			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.8.2 (published 2026-10-05)",
+			"note": "note (asOf 2026-09-14) cites 0.5.0; registry latest is 0.8.3 (published 2026-10-14)",
 			"surface": "code"
 		},
 		{

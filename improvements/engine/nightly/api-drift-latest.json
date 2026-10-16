@@ -1,18 +1,5 @@
 {
-	"generatedAt": "2026-10-14T10:38:54.578Z",
+	"generatedAt": "2026-10-16T10:08:25.519Z",
 	"detector": "api-drift",
-	"failures": [
-		{
-			"probe": "status.endpoints lists /api/hackathons/builds/{id}",
-			"note": "OpenAPI documents /api/hackathons/builds/{id} but /api/status.endpoints[] omits it"
-		},
-		{
-			"probe": "status.endpoints lists /api/hackathons/analyze",
-			"note": "OpenAPI documents /api/hackathons/analyze but /api/status.endpoints[] omits it"
-		},
-		{
-			"probe": "status.endpoints lists /api/hackathons/review",
-			"note": "OpenAPI documents /api/hackathons/review but /api/status.endpoints[] omits it"
-		}
-	]
+	"failures": []
 }
