@@ -30,6 +30,11 @@ permissions:
 jobs:
   drift:
     runs-on: ubuntu-latest
+    # Every detector reads SCOUT_BASE. Only the drift step used to get it (found
+    # 2026-10-15), so a dispatch against another base checked drift there and
+    # field-population and skill-reference against production.
+    env:
+      SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,8 +43,6 @@ jobs:
       - name: Run API drift guard
         id: drift
         continue-on-error: true
-        env:
-          SCOUT_BASE: ${{ github.event.inputs.base || 'https://stellarlight.xyz' }}
         # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
         # masked this step's exit code (2026-08-12 lesson).
         shell: bash
@@ -77,8 +80,10 @@ jobs:
             fi
           done
           echo "outcome=$([ -s red.log ] && echo failure || echo success)" >> "$GITHUB_OUTPUT"
+      # The rolling issue tracks production. A dispatch against any other base
+      # still reds the run below, but must not open or close that issue.
       - name: Track the signal (rolling issue)
-        if: always()
+        if: always() && env.SCOUT_BASE == 'https://stellarlight.xyz'
         uses: ./.github/actions/rolling-issue
         with:
           title-prefix: "API drift guard red"
