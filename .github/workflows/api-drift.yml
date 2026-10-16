@@ -7,8 +7,9 @@
 # the live API with fetch and nothing else. A step needing a package belongs in
 # nightly-health, which installs: the RWA issuer reconcile sat here from
 # 2026-09-09 and failed ERR_MODULE_NOT_FOUND on @stellar/stellar-sdk on every
-# single run, reddening a lane whose own checks were all green. Deliberately NOT declared: the field-population and skill-reference
-# steps — a red there flags the lane (read by scripts/check-workflow-health.ts):
+# single run, reddening a lane whose own checks were all green. All three
+# detectors continue on error and red the lane at one declared step, after the
+# rolling issue has recorded them (read by scripts/check-workflow-health.ts):
 # workflow-health: signal-steps: ^Propagate the red$
 name: API drift guard
 
@@ -44,17 +45,45 @@ jobs:
         shell: bash
         run: npx -y tsx scripts/check-api-drift.ts 2>&1 | tee drift.log
       - name: Field-population guard (values arrive, not just shape)
+        id: fields
         if: always()
-        run: npx -y tsx scripts/check-field-population.ts
+        continue-on-error: true
+        shell: bash
+        run: npx -y tsx scripts/check-field-population.ts 2>&1 | tee fields.log
       - name: Skill-reference coverage (sk-009 — served skill must not lag the contract)
+        id: skillref
         if: always()
-        run: npx -y tsx scripts/check-skill-reference.ts
+        continue-on-error: true
+        shell: bash
+        run: npx -y tsx scripts/check-skill-reference.ts 2>&1 | tee skillref.log
+      # One verdict for all three detectors. Track used to read the drift step
+      # alone and, with no always(), was skipped whenever field-population or
+      # skill-reference failed: nine red runs from 2026-10-06 to 10-14 opened no
+      # issue, the drift guard's own 3 failures included. Anything short of
+      # three greens is red here, so a skipped or cancelled detector can never
+      # close the issue as green.
+      - name: Collect the red
+        id: red
+        if: always()
+        shell: bash
+        env:
+          OUTCOMES: drift=${{ steps.drift.outcome }} fields=${{ steps.fields.outcome }} skillref=${{ steps.skillref.outcome }}
+        run: |
+          : > red.log
+          for pair in $OUTCOMES; do
+            name=${pair%=*} outcome=${pair#*=}
+            if [ "$outcome" != success ]; then
+              { echo "=== $name: $outcome"; cat "$name.log" 2>/dev/null || true; echo; } >> red.log
+            fi
+          done
+          echo "outcome=$([ -s red.log ] && echo failure || echo success)" >> "$GITHUB_OUTPUT"
       - name: Track the signal (rolling issue)
+        if: always()
         uses: ./.github/actions/rolling-issue
         with:
           title-prefix: "API drift guard red"
-          outcome: ${{ steps.drift.outcome }}
-          body-file: drift.log
+          outcome: ${{ steps.red.outputs.outcome }}
+          body-file: red.log
       - name: Propagate the red
-        if: steps.drift.outcome == 'failure'
+        if: steps.red.outputs.outcome == 'failure'
         run: exit 1
