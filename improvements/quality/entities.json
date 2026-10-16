@@ -1,25 +1,25 @@
 {
- "generatedAt": "2026-10-15T12:48:45.011Z",
+ "generatedAt": "2026-10-16T12:40:39.001Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 29,
+   "openFindings": 48,
    "clearedFindings": 33,
    "verifiedFindings": 0
   },
   {
    "surface": "contract",
    "means": "the OpenAPI contract and its generated artifacts",
-   "openFindings": 8,
-   "clearedFindings": 30,
+   "openFindings": 5,
+   "clearedFindings": 33,
    "verifiedFindings": 7
   },
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
    "openFindings": 2,
-   "clearedFindings": 212,
+   "clearedFindings": 213,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 823,
-  "open": 40,
-  "refreshQueue": 83,
+  "total": 844,
+  "open": 56,
+  "refreshQueue": 84,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 84,
+   "oldestDays": 85,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -79,16 +79,16 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 676,
+  "cleared": 680,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 114,
-    "total": 341
+    "open": 134,
+    "total": 362
    },
    "instrument": {
-    "open": 26,
+    "open": 23,
     "total": 482
    }
   },
@@ -112,6 +112,15 @@
     "surface": "directory"
    },
    {
+    "mode": "repo-gone",
+    "open": 48,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 21,
+    "verified": 0,
+    "surface": "code"
+   },
+   {
     "mode": "coverage-gap",
     "open": 0,
     "refresh": 0,
@@ -119,15 +128,6 @@
     "cleared": 61,
     "verified": 0,
     "surface": "directory"
-   },
-   {
-    "mode": "repo-gone",
-    "open": 29,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 21,
-    "verified": 0,
-    "surface": "code"
    },
    {
     "mode": "demand-miss",
@@ -149,10 +149,10 @@
    },
    {
     "mode": "api-drift",
-    "open": 3,
+    "open": 0,
     "refresh": 0,
     "blocked": 0,
-    "cleared": 25,
+    "cleared": 28,
     "verified": 0,
     "surface": "contract"
    },
@@ -195,7 +195,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 51,
+    "refresh": 52,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -247,6 +247,15 @@
     "surface": "contract"
    },
    {
+    "mode": "stamp-revived",
+    "open": 1,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 1,
+    "verified": 0,
+    "surface": "directory"
+   },
+   {
     "mode": "ambiguous-contract",
     "open": 0,
     "refresh": 0,
@@ -274,15 +283,6 @@
     "surface": "directory"
    },
    {
-    "mode": "stamp-revived",
-    "open": 1,
-    "refresh": 0,
-    "blocked": 0,
-    "cleared": 0,
-    "verified": 0,
-    "surface": "directory"
-   },
-   {
     "mode": "supersession-unrecorded",
     "open": 0,
     "refresh": 9,
@@ -295,11 +295,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 7
+    "count": 27
    },
    {
     "bucket": "8–30d",
-    "count": 33
+    "count": 29
    },
    {
     "bucket": "31–60d",
@@ -311,6 +311,30 @@
    }
   ],
   "recentlyCleared": [
+   {
+    "probe": "status.endpoints lists /api/hackathons/builds/{id}",
+    "surface": "contract",
+    "failureMode": "api-drift",
+    "clearedAt": "2026-10-16"
+   },
+   {
+    "probe": "status.endpoints lists /api/hackathons/analyze",
+    "surface": "contract",
+    "failureMode": "api-drift",
+    "clearedAt": "2026-10-16"
+   },
+   {
+    "probe": "status.endpoints lists /api/hackathons/review",
+    "surface": "contract",
+    "failureMode": "api-drift",
+    "clearedAt": "2026-10-16"
+   },
+   {
+    "probe": "basement — serves 200 with 5566 chars and no wind-down marker — re-grade by hand",
+    "surface": "directory",
+    "failureMode": "stamp-revived",
+    "clearedAt": "2026-10-16"
+   },
    {
     "probe": "https://chippercash.com",
     "surface": "directory",
@@ -334,44 +358,20 @@
     "surface": "directory",
     "failureMode": "broken-link",
     "clearedAt": "2026-10-12"
-   },
-   {
-    "probe": "https://x.com/copperxhq",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-12"
-   },
-   {
-    "probe": "https://x.com/createplayearn",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-12"
-   },
-   {
-    "probe": "https://x.com/decentriolabs",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-12"
-   },
-   {
-    "probe": "https://x.com/myshopcatlog",
-    "surface": "directory",
-    "failureMode": "broken-link",
-    "clearedAt": "2026-10-12"
    }
   ],
   "closure": {
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 157,
-     "recurred": 119,
-     "ratePct": 75.8
+     "newFindings": 178,
+     "recurred": 139,
+     "ratePct": 78.1
     },
     "lifetime": {
-     "newFindings": 823,
-     "recurred": 276,
-     "ratePct": 33.5
+     "newFindings": 844,
+     "recurred": 296,
+     "ratePct": 35.1
     }
    },
    "reopened": {
@@ -383,14 +383,14 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 157,
-     "repeats": 156,
+     "newFindings": 178,
+     "repeats": 177,
      "ratePct": 99.4
     },
     "lifetime": {
-     "newFindings": 823,
-     "repeats": 816,
-     "ratePct": 99.1
+     "newFindings": 844,
+     "repeats": 837,
+     "ratePct": 99.2
     },
     "byClass": [
      {
@@ -401,8 +401,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 219,
-      "open": 74,
+      "total": 220,
+      "open": 75,
       "firstSeen": "2026-07-22"
      },
      {
@@ -413,8 +413,8 @@
      },
      {
       "class": "unclassified",
-      "total": 66,
-      "open": 45,
+      "total": 86,
+      "open": 64,
       "firstSeen": "2026-09-17"
      },
      {
@@ -426,7 +426,7 @@
      {
       "class": "contract-completeness",
       "total": 33,
-      "open": 3,
+      "open": 0,
       "firstSeen": "2026-07-22"
      },
      {
@@ -9550,15 +9550,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1378
+     "count": 1379
     },
     {
      "label": "slowing",
-     "count": 1060
+     "count": 1062
     },
     {
      "label": "active",
-     "count": 1008
+     "count": 1005
     },
     {
      "label": "unknown",
@@ -10703,16 +10703,16 @@
     "value": 110
    },
    {
-    "id": "s:nightly-note-freshness",
-    "label": "nightly-note-freshness",
-    "column": 0,
-    "value": 58
-   },
-   {
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 50
+    "value": 69
+   },
+   {
+    "id": "s:nightly-note-freshness",
+    "label": "nightly-note-freshness",
+    "column": 0,
+    "value": 59
    },
    {
     "id": "s:raven-routing",
@@ -10775,6 +10775,12 @@
     "value": 4
    },
    {
+    "id": "s:packet-recheck",
+    "label": "packet-recheck",
+    "column": 0,
+    "value": 2
+   },
+   {
     "id": "s:raven-loop",
     "label": "raven-loop",
     "column": 0,
@@ -10783,12 +10789,6 @@
    {
     "id": "s:weak-basis-liveness",
     "label": "weak-basis-liveness",
-    "column": 0,
-    "value": 1
-   },
-   {
-    "id": "s:packet-recheck",
-    "label": "packet-recheck",
     "column": 0,
     "value": 1
    },
@@ -10802,13 +10802,13 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 214
+    "value": 215
    },
    {
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 62
+    "value": 81
    },
    {
     "id": "f:contract",
@@ -10838,13 +10838,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 676
+    "value": 680
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 140
+    "value": 157
    },
    {
     "id": "o:verified",
@@ -10915,7 +10915,7 @@
     "target": 25,
     "sourceId": "f:contract",
     "targetId": "o:cleared",
-    "value": 30
+    "value": 33
    },
    {
     "source": 5,
@@ -10939,7 +10939,7 @@
     "value": 17
    },
    {
-    "source": 15,
+    "source": 16,
     "target": 20,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
@@ -10964,7 +10964,7 @@
     "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 212
+    "value": 213
    },
    {
     "source": 7,
@@ -11009,18 +11009,18 @@
     "value": 4
    },
    {
-    "source": 3,
+    "source": 4,
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 58
+    "value": 59
    },
    {
     "source": 20,
     "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 89
+    "value": 109
    },
    {
     "source": 1,
@@ -11037,11 +11037,11 @@
     "value": 25
    },
    {
-    "source": 4,
+    "source": 3,
     "target": 20,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 50
+    "value": 69
    },
    {
     "source": 11,
@@ -11051,25 +11051,18 @@
     "value": 9
    },
    {
-    "source": 16,
+    "source": 17,
     "target": 19,
     "sourceId": "s:weak-basis-liveness",
     "targetId": "f:directory",
     "value": 1
    },
    {
-    "source": 21,
-    "target": 26,
-    "sourceId": "f:contract",
-    "targetId": "o:open",
-    "value": 8
-   },
-   {
-    "source": 17,
+    "source": 15,
     "target": 19,
     "sourceId": "s:packet-recheck",
     "targetId": "f:directory",
-    "value": 1
+    "value": 2
    },
    {
     "source": 22,
@@ -11077,6 +11070,13 @@
     "sourceId": "f:corpus",
     "targetId": "o:open",
     "value": 1
+   },
+   {
+    "source": 21,
+    "target": 26,
+    "sourceId": "f:contract",
+    "targetId": "o:open",
+    "value": 5
    }
   ]
  },
