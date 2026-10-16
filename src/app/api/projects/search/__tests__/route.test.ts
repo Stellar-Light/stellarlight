@@ -12,7 +12,8 @@ vi.mock("@/lib/repo-search", async (orig) => ({
 type FindArgs = {
 	collection: string;
 	limit?: number;
-	select?: { embedding?: boolean };
+	where?: unknown;
+	select?: { embedding?: boolean; name?: boolean };
 };
 /** What each read returns in the current test: rows, an Error to throw, or
  * "hang" for a read that never settles. */
@@ -139,5 +140,62 @@ describe("GET /api/projects/search when a read fails (sls-089)", () => {
 		);
 		expect(body.meta).toMatchObject({ partial: false, failedReads: [] });
 		expect(body.meta.counts.total).toBe(1);
+	});
+});
+
+// sls-094: a typo-distance name recovery served its rows at "strict" while
+// meta.didYouMean said no project has the spelling asked for.
+describe("GET /api/projects/search after a typo recovery (sls-094)", () => {
+	const freighter = {
+		id: "p2",
+		name: "Freighter",
+		slug: "freighter",
+		category: "User-Facing App",
+		shortDescription: "Browser extension wallet for Stellar.",
+		status: "Live",
+		types: ["Wallet"],
+	};
+	beforeEach(() => {
+		vi.useFakeTimers();
+		vi.stubEnv("VOYAGE_API_KEY", "");
+		candidateCalls = 0;
+		// The name registry holds Freighter; a candidate fetch finds it only
+		// when its clauses name it (the typed spelling matches nothing).
+		read = (a) => {
+			if (a.collection === "projects" && a.select?.name)
+				return [
+					{ name: "Freighter", slug: "freighter" },
+					{ name: "Soroswap", slug: "soroswap" },
+				];
+			if (isCandidate(a))
+				return JSON.stringify(a.where).includes('"freighter"')
+					? [freighter]
+					: [];
+			return [];
+		};
+	});
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllEnvs();
+	});
+
+	it("labels the recovered page corrected and names the project", async () => {
+		const { status, body } = await search("q=frieghter");
+		expect(status).toBe(200);
+		expect(body.projects.map((p: { slug: string }) => p.slug)).toEqual([
+			"freighter",
+		]);
+		expect(body.meta.didYouMean).toMatchObject({
+			from: "frieghter",
+			to: "Freighter",
+		});
+		expect(body.meta.matchMode).toBe("corrected");
+		expect(body.meta.matchModeLabel).toMatch(/'frieghter'.*'Freighter'/);
+	});
+
+	it("the right spelling stays strict, with no correction", async () => {
+		const { body } = await search("q=freighter");
+		expect(body.meta.didYouMean).toBeUndefined();
+		expect(body.meta.matchMode).toBe("strict");
 	});
 });

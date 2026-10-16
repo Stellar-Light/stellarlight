@@ -226,9 +226,18 @@ async function main() {
 	const chile = (await getJson("/api/hackathons/buildonstellarchile")).body
 		?.hackathon?.stats;
 	const stroopy = (await getJson("/api/repos/search?q=stroopy&limit=5")).body;
-	if ([ghsa, absent, strupey, stroopy].some((b) => b?.meta?.partial === true))
+	// sls-094: a typo-distance name recovery reads `corrected`, not strict.
+	const frieghter = (await getJson("/api/projects/search?q=frieghter&limit=5"))
+		.body;
+	const freighter = (await getJson("/api/projects/search?q=freighter&limit=5"))
+		.body;
+	if (
+		[ghsa, absent, strupey, stroopy, frieghter, freighter].some(
+			(b) => b?.meta?.partial === true,
+		)
+	)
 		couldNotCheck(
-			"Raven sls-090 / sls-093 regressions",
+			"Raven sls-090 / sls-093 / sls-094 regressions",
 			"a page was partial (a backend read failed)",
 		);
 	else {
@@ -267,6 +276,14 @@ async function main() {
 			strupey?.meta?.matchMode === "corrected" &&
 				stroopy?.meta?.matchMode === "strict",
 			`strupey ${strupey?.meta?.matchMode}, stroopy ${stroopy?.meta?.matchMode}`,
+		);
+		check(
+			"sls-094: project search labels a typo-distance name recovery `corrected`",
+			frieghter?.meta?.matchMode === "corrected" &&
+				frieghter?.meta?.didYouMean?.to === "Freighter" &&
+				freighter?.meta?.matchMode === "strict" &&
+				!freighter?.meta?.didYouMean,
+			`frieghter ${frieghter?.meta?.matchMode} (didYouMean ${frieghter?.meta?.didYouMean?.to ?? null}), freighter ${freighter?.meta?.matchMode}`,
 		);
 	}
 

@@ -10218,13 +10218,13 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										enum: [...PROJECT_MATCH_MODES],
 										description:
-											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched — every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium): verify relevance before relying on them. `corrected` means the rows matched only through a known spelling correction (e.g. strupey to stroopy): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.',
+											'Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched: every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium), so verify relevance before relying on them. `corrected` means the rows matched only through a spelling correction, either a known one (e.g. strupey to stroopy) or a typo-distance name recovery reported in `didYouMean` (e.g. frieghter to Freighter): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.',
 									},
 									matchModeLabel: { type: "string" },
 									didYouMean: {
 										type: "object",
 										description:
-											"Present when the query as typed matched NOTHING and a fuzzy name lookup recovered exactly one project within a typo's distance — the results are for `to`, not for what was asked. Only fires for short (≤2 token) queries against names of 5+ characters, and only when a single candidate wins outright, so it never guesses between similar names and never touches 3–4 character asset tickers. Relay the correction to the user rather than presenting the rows as a match for the original spelling.",
+											"Present when the query as typed matched NOTHING and a fuzzy name lookup recovered exactly one project within a typo's distance: the results are for `to`, not for what was asked, and `matchMode` is `corrected`. Only fires for short (≤2 token) queries against names of 5+ characters, and only when a single candidate wins outright, so it never guesses between similar names and never touches 3 to 4 character asset tickers. Relay the correction to the user rather than presenting the rows as a match for the original spelling.",
 										properties: {
 											from: {
 												type: "string",

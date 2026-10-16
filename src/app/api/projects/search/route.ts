@@ -2071,11 +2071,15 @@ async function handle(req: NextRequest) {
 	// neither name nor slug contains the token — two agent runs then used the
 	// row as identity evidence for an unverified name. The expansion is
 	// deliberate (it finds the right project); the MODE now says how.
+	// sls-094: a typo-distance name recovery (didYouMean) is the same case by
+	// another road. q="frieghter" served Freighter at "strict" while
+	// meta.didYouMean said no project has that spelling.
 	if (
 		matchMode !== "semantic" &&
 		matchMode !== "all" &&
 		scored.length > 0 &&
-		scored.every((p) => correctionMediated(buildHaystack(p), tokenize(q)))
+		(didYouMean ||
+			scored.every((p) => correctionMediated(buildHaystack(p), tokenize(q))))
 	)
 		matchMode = "corrected";
 
@@ -2676,8 +2680,9 @@ async function handle(req: NextRequest) {
 					strict: "all keywords matched",
 					"loose-1": "all but one keyword matched",
 					majority: "majority of keywords matched (broader scope)",
-					corrected:
-						"matched via a known spelling correction — the query token does not occur in these rows; verify the identity before relying on it",
+					corrected: didYouMean
+						? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
+						: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
 					semantic:
 						"no keyword match — semantically similar results (verify relevance before relying on them)",
 					all: "no keyword filter",
