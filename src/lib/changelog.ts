@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-16",
+		surfaces: ["api"],
+		version: "spec@1.9.79",
+		type: "fixed",
+		summary:
+			"searchProjects labels a typo-distance name recovery `corrected`, not `strict`: when `meta.didYouMean` is present, no row carries the query token.",
+		detail:
+			'sls-094: q=frieghter served Freighter at `strict`, "all keywords matched", while meta.didYouMean said no project has that spelling. The page now reads `corrected` with a label naming the recovered project, the same mode a known spelling correction already gets. q=freighter stays `strict`.',
+	},
+	{
 		date: "2026-10-15",
 		surfaces: ["api"],
 		version: "spec@1.9.78",
