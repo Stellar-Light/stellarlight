@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-16T12:40:39.001Z",
+ "generatedAt": "2026-10-17T11:44:58.628Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 85,
+   "oldestDays": 86,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -364,9 +364,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 178,
-     "recurred": 139,
-     "ratePct": 78.1
+     "newFindings": 161,
+     "recurred": 135,
+     "ratePct": 83.9
     },
     "lifetime": {
      "newFindings": 844,
@@ -383,9 +383,9 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 178,
-     "repeats": 177,
-     "ratePct": 99.4
+     "newFindings": 161,
+     "repeats": 161,
+     "ratePct": 100
     },
     "lifetime": {
      "newFindings": 844,
@@ -441,7 +441,7 @@
  },
  "projects": {
   "read": 1005,
-  "population": 1135,
+  "population": 1136,
   "servedPopulation": 1005,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9498,7 +9498,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5841,
+    "pool": 5835,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 132
    }
@@ -9550,15 +9550,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1379
+     "count": 1380
     },
     {
      "label": "slowing",
-     "count": 1062
+     "count": 1064
     },
     {
      "label": "active",
-     "count": 1005
+     "count": 1002
     },
     {
      "label": "unknown",
@@ -11089,7 +11089,7 @@
     "missing": 361,
     "of": 383,
     "share": 94.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5458 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5452 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 361,
