@@ -314,6 +314,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-e-contract:get-api-hackathons-analyze-winnersonly",
+   "date": "2026-10-18",
+   "run": "39128740019",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
