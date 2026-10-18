@@ -1,26 +1,50 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 63807,
-    "realHits": 22213,
-    "distinctQueries": 6400,
-    "replayed": 233
+    "loggedHits": 45544,
+    "realHits": 8093,
+    "distinctQueries": 3961,
+    "replayed": 250
   },
-  "okRate": 100,
+  "okRate": 99,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 40,
-      "lastSeen": "2026-10-11T11:38:39.028Z",
+      "hits": 38,
+      "lastSeen": "2026-10-18T09:56:28.929Z",
       "days": 14,
       "buckets": [
         "other"
       ],
       "class": "WEAK",
       "evidence": "top confidence 0.4"
+    },
+    {
+      "endpoint": "/api/repos/search",
+      "query": "flurbomatic quantifold widgetron on stellar",
+      "hits": 15,
+      "lastSeen": "2026-10-18T12:10:32.784Z",
+      "days": 15,
+      "buckets": [
+        "other"
+      ],
+      "class": "EMPTY",
+      "evidence": "0 results"
+    },
+    {
+      "endpoint": "/api/repos/search",
+      "query": "frieghter",
+      "hits": 5,
+      "lastSeen": "2026-10-15T18:06:10.837Z",
+      "days": 2,
+      "buckets": [
+        "other"
+      ],
+      "class": "EMPTY",
+      "evidence": "0 results"
     }
   ],
-  "generatedAt": "2026-10-11T15:32:14Z",
+  "generatedAt": "2026-10-18T13:09:39Z",
   "evalKey": "engine-d-demand"
 }

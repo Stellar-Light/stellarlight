@@ -156,15 +156,15 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "99% (202/204)",
-      "types": "100% (204/204)",
-      "supportedNetworks": "55% (113/204)",
-      "logoUrl": "77% (157/204)"
+      "shortDescription": "99% (202/205)",
+      "types": "100% (204/205)",
+      "supportedNetworks": "55% (113/205)",
+      "logoUrl": "77% (157/205)"
     },
     "Tooling": {
-      "shortDescription": "97% (178/184)",
-      "types": "99% (182/184)",
-      "logoUrl": "82% (151/184)"
+      "shortDescription": "97% (178/183)",
+      "types": "100% (183/183)",
+      "logoUrl": "82% (150/183)"
     },
     "User-Facing App": {
       "shortDescription": "99% (401/407)",
@@ -179,11 +179,11 @@
       "logoUrl": "81% (29/36)"
     },
     "Protocol/Contract": {
-      "shortDescription": "99% (156/157)",
-      "types": "99% (156/157)",
-      "supportedNetworks": "77% (121/157)",
-      "logoUrl": "80% (126/157)",
-      "tvlUSD": "10% (15/157)"
+      "shortDescription": "100% (158/158)",
+      "types": "99% (157/158)",
+      "supportedNetworks": "77% (122/158)",
+      "logoUrl": "80% (127/158)",
+      "tvlUSD": "9% (15/158)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -363,20 +363,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 382,
-    "liveStale365": 131,
+    "liveNoDatedSignal": 383,
+    "liveStale365": 132,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 587,
+        "ageDays": 594,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 955,
+        "ageDays": 962,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -418,7 +418,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 398,
+        "ageDays": 405,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -508,6 +508,6 @@
       }
     ]
   },
-  "generatedAt": "2026-10-11T15:32:14Z",
+  "generatedAt": "2026-10-18T13:09:39Z",
   "evalKey": "engine-b-sweeps"
 }

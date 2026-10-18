@@ -1,11 +1,11 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-10-11T15:32:14Z",
-  "specVersion": "1.9.72",
+  "generatedAt": "2026-10-18T13:09:39Z",
+  "specVersion": "1.9.80",
   "frame": {
     "ops": 41,
     "paramsProbed": 35,
-    "fieldsChecked": 971,
+    "fieldsChecked": 973,
     "postChecked": 5,
     "skipped": [
       "GET /api/hackathons/builds/{id} (no sample for path params)",
@@ -65,13 +65,13 @@
     },
     {
       "op": "GET /api/hackathons/analyze",
-      "param": "facet",
-      "evidence": "all 11 valid value(s) [category, package, library, activity, project, projectStatus, scf, placement, track, event, year] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
+      "param": "mode",
+      "evidence": "all 3 valid value(s) [keyword, meaning, hybrid] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
     },
     {
       "op": "GET /api/hackathons/analyze",
-      "param": "mode",
-      "evidence": "all 3 valid value(s) [keyword, meaning, hybrid] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
+      "param": "facet",
+      "evidence": "all 11 valid value(s) [category, package, library, activity, project, projectStatus, scf, placement, track, event, year] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
     },
     {
       "op": "GET /api/hackathons/analyze",
@@ -402,6 +402,11 @@
       "op": "GET /api/research",
       "field": "meta.sourceAdvisory",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/research",
+      "field": "results[].exactKeys",
+      "evidence": "documented optional item property absent from all 25 sampled rows (https://stellarlight.xyz/api/research?q=stellar anchors&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/skills",

@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 16918,
-    "docs": 3161
+    "chunks": 17032,
+    "docs": 3183
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,24 +13,38 @@
     "sample": []
   },
   "s7_coverage": {
-    "lumenloop-research": {
-      "chunks": 540,
+    "release": {
+      "chunks": 245,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
-    "release": {
-      "chunks": 221,
-      "datedPct": 100,
-      "newestAgeDays": 4,
+    "dev-docs": {
+      "chunks": 4326,
+      "datedPct": 75,
+      "newestAgeDays": 3,
       "undated": false,
       "stalled": false
     },
-    "dev-docs": {
-      "chunks": 4279,
-      "datedPct": 75,
+    "lumenloop-research": {
+      "chunks": 549,
+      "datedPct": 100,
+      "newestAgeDays": 2,
+      "undated": false,
+      "stalled": false
+    },
+    "sdf-blog": {
+      "chunks": 2444,
+      "datedPct": 100,
       "newestAgeDays": 5,
+      "undated": false,
+      "stalled": false
+    },
+    "sep": {
+      "chunks": 690,
+      "datedPct": 99,
+      "newestAgeDays": 19,
       "undated": false,
       "stalled": false
     },
@@ -44,14 +58,7 @@
     "audit": {
       "chunks": 1157,
       "datedPct": 100,
-      "newestAgeDays": 72,
-      "undated": false,
-      "stalled": false
-    },
-    "sdf-blog": {
-      "chunks": 2443,
-      "datedPct": 100,
-      "newestAgeDays": 14,
+      "newestAgeDays": 78,
       "undated": false,
       "stalled": false
     },
@@ -67,7 +74,7 @@
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1380,
+      "newestAgeDays": 1387,
       "undated": false,
       "stalled": false
     },
@@ -83,49 +90,42 @@
     "cap": {
       "chunks": 936,
       "datedPct": 98,
-      "newestAgeDays": 52,
+      "newestAgeDays": 59,
       "undated": false,
       "stalled": false
     },
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 203,
-      "undated": false,
-      "stalled": false
-    },
-    "sep": {
-      "chunks": 657,
-      "datedPct": 98,
-      "newestAgeDays": 34,
+      "newestAgeDays": 210,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 158,
+      "newestAgeDays": 165,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 145,
+      "newestAgeDays": 152,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 120,
+      "newestAgeDays": 127,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3882,
+      "newestAgeDays": 3889,
       "undated": false,
       "stalled": false
     }
@@ -140,6 +140,6 @@
       "boilerplateOverlap": 151
     }
   },
-  "generatedAt": "2026-10-11T15:32:14Z",
+  "generatedAt": "2026-10-18T13:09:39Z",
   "evalKey": "corpus-health"
 }

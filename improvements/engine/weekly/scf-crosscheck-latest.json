@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-11T15:32:14Z",
+  "generatedAt": "2026-10-18T13:09:39Z",
   "frame": {
     "scf": 531,
-    "directory": 1004,
+    "directory": 1005,
     "matched": 340,
     "roundsChecked": 338
   },
@@ -85,16 +85,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "micro-be",
-      "name": "Micro Be",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/micro-be-k9o",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
       "slug": "swiftex",
       "name": "SwiftEx",
       "ourRounds": [
@@ -106,16 +96,6 @@
         "45"
       ],
       "reason": "no submission verdict found for round(s) #35"
-    },
-    {
-      "slug": "neko",
-      "name": "Neko",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/neko-j49",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "minisend",
@@ -151,19 +131,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "lobster",
-      "name": "Lobster",
-      "ourRounds": [
-        "36",
-        "42"
-      ],
-      "url": "https://communityfund.stellar.org/project/lobster-vzw",
-      "officialAwardedRounds": [
-        "36"
-      ],
-      "reason": "no submission verdict found for round(s) #42"
-    },
-    {
       "slug": "untangled",
       "name": "Untangled",
       "ourRounds": [
@@ -175,6 +142,19 @@
         "31"
       ],
       "reason": "no submission verdict found for round(s) #41"
+    },
+    {
+      "slug": "lobster",
+      "name": "Lobster",
+      "ourRounds": [
+        "36",
+        "42"
+      ],
+      "url": "https://communityfund.stellar.org/project/lobster-vzw",
+      "officialAwardedRounds": [
+        "36"
+      ],
+      "reason": "no submission verdict found for round(s) #42"
     }
   ],
   "evalKey": "scf-crosscheck"
