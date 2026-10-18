@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-17T11:44:58.628Z",
+ "generatedAt": "2026-10-18T12:11:20.294Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 86,
+   "oldestDays": 87,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -295,11 +295,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 27
+    "count": 25
    },
    {
     "bucket": "8–30d",
-    "count": 29
+    "count": 31
    },
    {
     "bucket": "31–60d",
@@ -364,9 +364,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 161,
-     "recurred": 135,
-     "ratePct": 83.9
+     "newFindings": 158,
+     "recurred": 132,
+     "ratePct": 83.5
     },
     "lifetime": {
      "newFindings": 844,
@@ -383,8 +383,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 161,
-     "repeats": 161,
+     "newFindings": 158,
+     "repeats": 158,
      "ratePct": 100
     },
     "lifetime": {
@@ -8539,8 +8539,8 @@
   ],
   "deploymentSplit": {
    "unknown": 912,
-   "applicableUnknown": 200,
-   "notApplicable": 712,
+   "applicableUnknown": 199,
+   "notApplicable": 713,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
@@ -9498,9 +9498,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5835,
+    "pool": 5830,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 132
+    "joined": 131
    }
   },
   "curatedShape": {
@@ -9554,11 +9554,11 @@
     },
     {
      "label": "slowing",
-     "count": 1064
+     "count": 1067
     },
     {
      "label": "active",
-     "count": 1002
+     "count": 998
     },
     {
      "label": "unknown",
@@ -9566,7 +9566,7 @@
     },
     {
      "label": "archived",
-     "count": 49
+     "count": 50
     }
    ],
    "languageMix": [
@@ -9615,7 +9615,7 @@
   },
   "withCodeDepth": 11324,
   "withNotes": 1063,
-  "withMainnet": 132,
+  "withMainnet": 131,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
@@ -11089,7 +11089,7 @@
     "missing": 361,
     "of": 383,
     "share": 94.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5452 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5447 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 361,
@@ -11143,7 +11143,7 @@
     "missing": 912,
     "of": 1005,
     "share": 90.7,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 912 unknown rows, 200 are on-chain product types where the question applies and an agent will ask it; the other 712 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 912 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 713 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
