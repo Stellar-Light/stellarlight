@@ -22,6 +22,7 @@ import {
 	hiddenWinnersNote,
 	submissionCoverageNote,
 } from "@/lib/hackathon-events";
+import { heldSecurity } from "@/lib/held-repos";
 import {
 	type DoraHacksSubmission,
 	fetchAllDoraHacksHackathons,
@@ -337,6 +338,7 @@ export async function GET(
 						name: b.name,
 						description: b.description,
 						githubUrl: b.githubUrl,
+						...heldSecurity(b),
 						demoUrl: b.demoUrl,
 						videoUrl: b.videoUrl,
 						track: b.track,

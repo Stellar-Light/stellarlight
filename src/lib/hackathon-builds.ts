@@ -17,6 +17,7 @@ import {
 	type LinkedProject,
 } from "@/lib/hackathon-build-links";
 import { BUILD_SEMANTIC_FLOOR } from "@/lib/hackathon-build-semantic";
+import { heldSecurity } from "@/lib/held-repos";
 import {
 	type DoraHacksSubmission,
 	doraEventRef,
@@ -184,6 +185,7 @@ export function indexedFromStored(
 		name: d.name,
 		description,
 		githubUrl: d.githubUrl ?? null,
+		...heldSecurity(d),
 		demoUrl: d.demoUrl ?? null,
 		videoUrl: d.videoUrl ?? null,
 		track: d.track ?? null,
@@ -222,6 +224,9 @@ export function indexedFromStored(
 export interface BuildDetail {
 	id: string;
 	name: string;
+	/** Present only when the repo is held for malware: links.github and repo
+	 * are then withheld (null) and this says why. */
+	security?: { held: true; note: string };
 	/** DoraHacks' one-line summary. */
 	summary: string | null;
 	/** The team's own write-up, markdown as published. A claim, not proof. */
@@ -343,6 +348,7 @@ export function buildDetailFromStored(
 			video: d.videoUrl ?? null,
 		},
 		repo: d.repoFullName ?? null,
+		...heldSecurity(rows.find((r) => heldSecurity(r).security) ?? d),
 		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		stackReadAt: d.stackReadAt ?? null,

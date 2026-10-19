@@ -28,6 +28,7 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
+import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
 import { parsePlacement } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
@@ -130,6 +131,7 @@ export async function GET(req: NextRequest) {
 			votes: b.voteCount,
 			url: b.url,
 			githubUrl: b.githubUrl,
+			...heldSecurity(b),
 			demoUrl: b.demoUrl,
 			// Present only when the link was checked: the directory project that
 			// lists this build's exact repo, or null when none does.

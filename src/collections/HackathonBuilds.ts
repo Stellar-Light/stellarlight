@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { heldRepoNames, withholdHeldRepo } from "../lib/held-repos";
 import { isAdmin } from "./access";
 
 /**
@@ -24,6 +25,30 @@ export const HackathonBuilds: CollectionConfig = {
 		create: ({ req }) => isAdmin(req.user),
 		update: ({ req }) => isAdmin(req.user),
 		delete: ({ req }) => isAdmin(req.user),
+	},
+	hooks: {
+		// A build whose repo is held for malware (src/lib/repo-security.ts)
+		// stays served, so hackathon counts do not move, but its GitHub link
+		// and repo name are withheld on every read path, with a warning in
+		// their place. Reads that need the real link pass
+		// context.includeSecurityHeld: the sync lane, which diffs and reads
+		// back githubUrl, and the repo-security sweep.
+		afterRead: [
+			async ({ doc, req }) => {
+				if (
+					!(doc?.githubUrl || doc?.repoFullName) ||
+					isAdmin(req?.user) ||
+					req?.context?.includeSecurityHeld === true
+				)
+					return doc;
+				// An unreadable list withholds only the rows marked held; the
+				// next read asks again.
+				const held = await heldRepoNames(req.payload).catch(
+					() => new Set<string>(),
+				);
+				return withholdHeldRepo(doc, held);
+			},
+		],
 	},
 	fields: [
 		{
@@ -256,6 +281,30 @@ export const HackathonBuilds: CollectionConfig = {
 			admin: {
 				description:
 					"When the lane last read the repo's activity, ISO. Empty = never read.",
+			},
+		},
+		{
+			name: "securityHeld",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				position: "sidebar",
+				// One writer: the repo-security lane, which marks every build
+				// linking a held repo, in the repo index or not.
+				readOnly: true,
+				description:
+					"The repo this build links carried malware when last checked: its link is withheld from every read. Set and cleared by the repo-security lane.",
+			},
+		},
+		{
+			name: "securityHold",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				readOnly: true,
+				description:
+					"The indicators found, when the repo was first held and when it was last checked",
 			},
 		},
 		{ name: "firstSeenAt", type: "text", required: true },
