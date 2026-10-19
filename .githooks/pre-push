@@ -65,9 +65,11 @@ if [ -n "$FILES" ]; then
 	# and then the gate protects nothing.
 	say "biome format…"
 	# shellcheck disable=SC2086
-	OUT=$(npx biome check --linter-enabled=false $FILES 2>&1) || { printf '%s\n' "$OUT" | tail -15; fail "formatting (npx biome check --write <files>)"; }
+	# --no-errors-on-unmatched: a push whose only JSON is a file biome's
+	# config ignores (a lane's artifact) has nothing to format, not a failure.
+	OUT=$(npx biome check --linter-enabled=false --no-errors-on-unmatched $FILES 2>&1) || { printf '%s\n' "$OUT" | tail -15; fail "formatting (npx biome check --write <files>)"; }
 	# shellcheck disable=SC2086
-	LINT=$(npx biome lint $FILES 2>&1) || printf '  ! biome lint has findings (advisory, not blocking):\n%s\n' "$(printf '%s\n' "$LINT" | grep -E 'lint/' | head -5)"
+	LINT=$(npx biome lint --no-errors-on-unmatched $FILES 2>&1) || printf '  ! biome lint has findings (advisory, not blocking):\n%s\n' "$(printf '%s\n' "$LINT" | grep -E 'lint/' | head -5)"
 fi
 
 # 4. Unit tests for the library the grading/serving logic lives in.

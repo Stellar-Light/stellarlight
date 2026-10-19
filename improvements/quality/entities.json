@@ -1,10 +1,10 @@
 {
- "generatedAt": "2026-10-18T12:11:20.294Z",
+ "generatedAt": "2026-10-19T13:17:38.950Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 48,
+   "openFindings": 50,
    "clearedFindings": 33,
    "verifiedFindings": 0
   },
@@ -23,17 +23,17 @@
    "verifiedFindings": 0
   },
   {
+   "surface": "retrieval",
+   "means": "search and ranking across projects, repos, research",
+   "openFindings": 1,
+   "clearedFindings": 342,
+   "verifiedFindings": 0
+  },
+  {
    "surface": "corpus",
    "means": "indexed research/audit documents and their chunking",
    "openFindings": 1,
    "clearedFindings": 24,
-   "verifiedFindings": 0
-  },
-  {
-   "surface": "retrieval",
-   "means": "search and ranking across projects, repos, research",
-   "openFindings": 0,
-   "clearedFindings": 342,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 844,
-  "open": 56,
-  "refreshQueue": 84,
+  "total": 850,
+  "open": 59,
+  "refreshQueue": 87,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 87,
+   "oldestDays": 88,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -84,12 +84,12 @@
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 134,
-    "total": 362
+    "open": 139,
+    "total": 367
    },
    "instrument": {
-    "open": 23,
-    "total": 482
+    "open": 24,
+    "total": 483
    }
   },
   "byFailureMode": [
@@ -105,7 +105,7 @@
    {
     "mode": "broken-link",
     "open": 0,
-    "refresh": 23,
+    "refresh": 24,
     "blocked": 0,
     "cleared": 122,
     "verified": 0,
@@ -113,7 +113,7 @@
    },
    {
     "mode": "repo-gone",
-    "open": 48,
+    "open": 50,
     "refresh": 0,
     "blocked": 0,
     "cleared": 21,
@@ -131,7 +131,7 @@
    },
    {
     "mode": "demand-miss",
-    "open": 0,
+    "open": 1,
     "refresh": 0,
     "blocked": 0,
     "cleared": 49,
@@ -195,7 +195,7 @@
    {
     "mode": "note-stale",
     "open": 0,
-    "refresh": 52,
+    "refresh": 54,
     "blocked": 0,
     "cleared": 7,
     "verified": 0,
@@ -295,7 +295,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 25
+    "count": 28
    },
    {
     "bucket": "8–30d",
@@ -364,14 +364,14 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 158,
-     "recurred": 132,
-     "ratePct": 83.5
+     "newFindings": 161,
+     "recurred": 135,
+     "ratePct": 83.9
     },
     "lifetime": {
-     "newFindings": 844,
-     "recurred": 296,
-     "ratePct": 35.1
+     "newFindings": 850,
+     "recurred": 302,
+     "ratePct": 35.5
     }
    },
    "reopened": {
@@ -383,13 +383,13 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 158,
-     "repeats": 158,
+     "newFindings": 161,
+     "repeats": 161,
      "ratePct": 100
     },
     "lifetime": {
-     "newFindings": 844,
-     "repeats": 837,
+     "newFindings": 850,
+     "repeats": 843,
      "ratePct": 99.2
     },
     "byClass": [
@@ -401,20 +401,20 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 220,
-      "open": 75,
+      "total": 223,
+      "open": 78,
       "firstSeen": "2026-07-22"
      },
      {
       "class": "taxonomy-coverage",
-      "total": 110,
-      "open": 0,
+      "total": 111,
+      "open": 1,
       "firstSeen": "2026-07-22"
      },
      {
       "class": "unclassified",
-      "total": 86,
-      "open": 64,
+      "total": 88,
+      "open": 66,
       "firstSeen": "2026-09-17"
      },
      {
@@ -9456,24 +9456,24 @@
   ]
  },
  "repos": {
-  "read": 13673,
-  "population": 13673,
+  "read": 13663,
+  "population": 13663,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13673,
+  "sampled": 13663,
   "coverage": {
    "curatedIndex": {
-    "repos": 3655,
+    "repos": 3653,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3374,
+    "withCodeDepth": 3372,
     "depthPct": 92
    },
    "tail": {
-    "repos": 10018,
+    "repos": 10010,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7950
+    "withCodeDepth": 7943
    },
    "knowledgeNotes": {
     "pool": 394,
@@ -9498,17 +9498,17 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5830,
+    "pool": 5827,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 131
    }
   },
   "curatedShape": {
-   "repos": 3655,
+   "repos": 3653,
    "scoreHistogram": [
     {
      "bucket": "0–9",
-     "count": 889
+     "count": 888
     },
     {
      "bucket": "10–19",
@@ -9516,7 +9516,7 @@
     },
     {
      "bucket": "20–29",
-     "count": 722
+     "count": 721
     },
     {
      "bucket": "30–39",
@@ -9554,11 +9554,11 @@
     },
     {
      "label": "slowing",
-     "count": 1067
+     "count": 1069
     },
     {
      "label": "active",
-     "count": 998
+     "count": 994
     },
     {
      "label": "unknown",
@@ -9572,11 +9572,11 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1287
+     "count": 1286
     },
     {
      "label": "unknown",
-     "count": 589
+     "count": 588
     },
     {
      "label": "Rust",
@@ -9613,8 +9613,8 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11324,
-  "withNotes": 1063,
+  "withCodeDepth": 11315,
+  "withNotes": 1062,
   "withMainnet": 131,
   "top": [
    {
@@ -10634,19 +10634,6 @@
     "mainnetJoined": false
    },
    {
-    "fullName": "benjaminnkem/due",
-    "repoScore": 0,
-    "tier": "community",
-    "source": "builder-owned",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": null,
-    "notes": 0,
-    "codeDepth": 65,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
     "fullName": "diegoortizcpn-svg/deraiz",
     "repoScore": 0,
     "tier": "community",
@@ -10656,6 +10643,19 @@
     "projectSlug": null,
     "notes": 0,
     "codeDepth": 82,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "JUICEWRLD998/Quitrax",
+    "repoScore": 0,
+    "tier": "community",
+    "source": "builder-owned",
+    "activity": "slowing",
+    "language": "Circom",
+    "projectSlug": null,
+    "notes": 0,
+    "codeDepth": 19,
     "deployable": false,
     "mainnetJoined": false
    }
@@ -10694,25 +10694,25 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 145
+    "value": 146
    },
    {
     "id": "s:engine-d-demand",
     "label": "engine-d-demand",
     "column": 0,
-    "value": 110
+    "value": 111
    },
    {
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 69
+    "value": 71
    },
    {
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 59
+    "value": 61
    },
    {
     "id": "s:raven-routing",
@@ -10796,7 +10796,7 @@
     "id": "f:retrieval",
     "label": "retrieval",
     "column": 1,
-    "value": 342
+    "value": 343
    },
    {
     "id": "f:directory",
@@ -10808,7 +10808,7 @@
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 81
+    "value": 83
    },
    {
     "id": "f:contract",
@@ -10844,7 +10844,7 @@
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 157
+    "value": 163
    },
    {
     "id": "o:verified",
@@ -10873,7 +10873,7 @@
     "target": 18,
     "sourceId": "s:engine-d-demand",
     "targetId": "f:retrieval",
-    "value": 49
+    "value": 50
    },
    {
     "source": 0,
@@ -11013,35 +11013,35 @@
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 59
+    "value": 61
    },
    {
     "source": 20,
     "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 109
+    "value": 113
    },
    {
     "source": 1,
     "target": 19,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 145
+    "value": 146
    },
    {
     "source": 19,
     "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 25
+    "value": 26
    },
    {
     "source": 3,
     "target": 20,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 69
+    "value": 71
    },
    {
     "source": 11,
@@ -11077,6 +11077,13 @@
     "sourceId": "f:contract",
     "targetId": "o:open",
     "value": 5
+   },
+   {
+    "source": 18,
+    "target": 26,
+    "sourceId": "f:retrieval",
+    "targetId": "o:open",
+    "value": 1
    }
   ]
  },
@@ -11089,7 +11096,7 @@
     "missing": 361,
     "of": 383,
     "share": 94.3,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5447 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5444 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 361,
@@ -11113,8 +11120,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12610,
-    "of": 13673,
+    "missing": 12601,
+    "of": 13663,
     "share": 92.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11177,13 +11184,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2349,
-    "of": 13673,
+    "missing": 2348,
+    "of": 13663,
     "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2349,
+    "examplePoolSize": 2348,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
