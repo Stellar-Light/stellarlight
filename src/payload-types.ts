@@ -1144,6 +1144,22 @@ export interface Repo {
 	 * Scan run that set the signals — rollback key
 	 */
 	tierRunId?: string | null;
+	/**
+	 * Held: the default branch carried malware indicators. Kept out of every read but trust and explain, which serve it with a warning.
+	 */
+	securityHeld?: boolean | null;
+	/**
+	 * The indicators found, when the repo was first held and when it was last checked
+	 */
+	securityHold?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	priorUnverified?: boolean | null;
 	unverifiedRunId?: string | null;
 	updatedAt: string;
@@ -3558,6 +3574,8 @@ export interface ReposSelect<T extends boolean = true> {
 	tierReason?: T;
 	tierChangedAt?: T;
 	tierRunId?: T;
+	securityHeld?: T;
+	securityHold?: T;
 	priorUnverified?: T;
 	unverifiedRunId?: T;
 	updatedAt?: T;

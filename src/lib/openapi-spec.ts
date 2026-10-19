@@ -10,6 +10,7 @@
  * same PR, run `pnpm contract:write`, and add a changelog entry — CI fails
  * otherwise.
  */
+
 import {
 	RWA_KINDS,
 	RWA_PRODUCT_KINDS,
@@ -39,6 +40,7 @@ import { PROJECT_TYPES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { REPO_MATCH_MODES } from "./repo-search";
+import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
@@ -173,6 +175,42 @@ const TYPE_COVERAGE_PROPS = {
 /** What a hackathon build became: shared by searchHackathonBuilds and
  * hackathonBrief. Optional on purpose: absent means the link was not checked
  * (the build was read live from DoraHacks), which is not "no project". */
+/** A malware hold on a repo (src/lib/repo-security.ts), served by the two
+ * operations that name a repo; every other read leaves a held repo out. */
+const SECURITY_HOLD_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe.",
+	properties: {
+		held: { type: "boolean" },
+		indicators: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					kind: { type: "string", enum: [...INDICATOR_KINDS] },
+					path: { type: "string" },
+					detail: { type: "string" },
+				},
+			},
+		},
+		heldAt: {
+			type: "string",
+			description: "When the repo was first held for these indicators.",
+		},
+		checkedAt: {
+			type: "string",
+			description: "When the check that found them last ran.",
+		},
+		note: {
+			type: "string",
+			description:
+				"The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`).",
+		},
+	},
+};
+
 const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
@@ -2829,6 +2867,7 @@ export const spec: OpenAPISpec = {
 												...REPO_KIND_PROPS,
 											},
 										},
+										security: SECURITY_HOLD_SCHEMA,
 										codeVerified: {
 											type: "object",
 											nullable: true,
@@ -6235,6 +6274,7 @@ export const spec: OpenAPISpec = {
 														daysOfDrift: { type: "integer" },
 													},
 												},
+												security: SECURITY_HOLD_SCHEMA,
 												succession: {
 													type: "object",
 													properties: {

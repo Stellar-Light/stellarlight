@@ -35,6 +35,7 @@ import {
 	explicitRepoName,
 	searchRepos,
 } from "@/lib/repo-search";
+import { securityOf } from "@/lib/repo-security";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -177,6 +178,8 @@ export async function GET(req: NextRequest) {
 		stellarDeps: string[];
 		codeInUse: Record<string, unknown> | null;
 	} | null = null;
+	// A malware hold, served with the repo it names (repo-security.ts).
+	let security: ReturnType<typeof securityOf> = null;
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
@@ -219,7 +222,12 @@ export async function GET(req: NextRequest) {
 					codeInUse: true,
 					scannedRef: true,
 					successorRepo: true,
+					securityHeld: true,
+					securityHold: true,
 				},
+				// Held repos are hidden from every other read; this one names the
+				// repo, so it is served with its warning.
+				context: { includeSecurityHeld: true },
 			});
 			const d = found.docs.find(
 				(x) =>
@@ -227,6 +235,7 @@ export async function GET(req: NextRequest) {
 					repo.toLowerCase(),
 			) as unknown as Record<string, unknown> | undefined;
 			if (d) {
+				security = securityOf(d);
 				if (d.codeScanState === "scanned" && d.stellarProof) {
 					codeVerified = {
 						stellarProof: d.stellarProof as string,
@@ -394,6 +403,9 @@ export async function GET(req: NextRequest) {
 			repo,
 			routedVia,
 			repoMeta,
+			// Before anything else about the code: a malware hold, if one is on
+			// record (null otherwise, which is no claim the repo is safe).
+			security,
 			// Code-verified truth (from analyzing the repo's source, not stars):
 			// leads so the agent can qualify the answer — "real deployable contract
 			// on a supported soroban-sdk" vs "tooling that merely uses Stellar".

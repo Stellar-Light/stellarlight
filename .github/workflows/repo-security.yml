@@ -1,0 +1,48 @@
+name: Repo security holds
+
+# Holds every indexed repo whose default branch carries a known malware
+# payload (a task or script that runs a font file, or a fake font beside a
+# folder-open task or install hook) and releases the hold once a check finds
+# it gone. A held repo is left out of every read of the repo index but the
+# two operations that name it, which carry the warning. Files are read as
+# text and bytes, never run (scripts/check-repo-security.ts).
+#
+# A failed read never releases a hold. More than a tenth unreadable, or more
+# than a quarter not found on GitHub, exits 2. Manual dispatch is a dry run
+# unless execute=true; the schedule always writes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write holds and releases? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "29 */6 * * *" # every six hours; off the hour, crons at :00 get dropped
+
+concurrency:
+  group: repo-security
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Root files for 50 repos per GraphQL query (about 280 points a run)
+      # and trees only for the few repos stage 1 flags (about 150 calls).
+      # The token's hourly limits are per repository and shared with the
+      # other lanes, so a run that hits them reads as could-not-check.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/check-repo-security.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

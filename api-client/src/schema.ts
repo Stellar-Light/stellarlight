@@ -3173,6 +3173,22 @@ export interface operations {
                             /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
                             kindBasis?: string;
                         } | null;
+                        /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
+                        security?: {
+                            held?: boolean;
+                            indicators?: {
+                                /** @enum {string} */
+                                kind?: "runs-font" | "fake-font" | "autorun-task" | "install-hook" | "auto-tasks-enabled";
+                                path?: string;
+                                detail?: string;
+                            }[];
+                            /** @description When the repo was first held for these indicators. */
+                            heldAt?: string;
+                            /** @description When the check that found them last ran. */
+                            checkedAt?: string;
+                            /** @description The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`). */
+                            note?: string;
+                        } | null;
                         /** @description Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
                         codeVerified?: {
                             stellarProof?: string;
@@ -5512,6 +5528,22 @@ export interface operations {
                                 latestAuditAt?: string;
                                 lastCommitAt?: string;
                                 daysOfDrift?: number;
+                            } | null;
+                            /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
+                            security?: {
+                                held?: boolean;
+                                indicators?: {
+                                    /** @enum {string} */
+                                    kind?: "runs-font" | "fake-font" | "autorun-task" | "install-hook" | "auto-tasks-enabled";
+                                    path?: string;
+                                    detail?: string;
+                                }[];
+                                /** @description When the repo was first held for these indicators. */
+                                heldAt?: string;
+                                /** @description When the check that found them last ran. */
+                                checkedAt?: string;
+                                /** @description The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`). */
+                                note?: string;
                             } | null;
                             succession?: {
                                 successorRepo?: string | null;

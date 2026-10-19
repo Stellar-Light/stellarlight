@@ -512,6 +512,9 @@ async function main() {
 					where: { fullName: { equals: key } },
 					limit: 1,
 					depth: 0,
+					// Held repos too: a lookup that misses one creates a second,
+					// unheld row for it.
+					context: { includeSecurityHeld: true },
 				})
 			).docs[0] as Doc | undefined;
 			if (exact) return exact;
@@ -520,6 +523,7 @@ async function main() {
 				where: { fullName: { like: key } },
 				limit: 5,
 				depth: 0,
+				context: { includeSecurityHeld: true },
 			});
 			return (near.docs as Doc[]).find(
 				(d) =>

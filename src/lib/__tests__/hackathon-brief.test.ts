@@ -101,6 +101,7 @@ const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 		predecessors: ["blend-capital/blend-contracts"],
 	},
 	signals: ["scanned", "deep-code", "audited", "code-changed-since-audit"],
+	security: null,
 	...over,
 });
 

@@ -66,7 +66,8 @@ async function main() {
 	let lifted = 0,
 		created = 0,
 		unchanged = 0,
-		failed = 0;
+		failed = 0,
+		refused = 0;
 	for (const rec of recs) {
 		const full = rec.fullName;
 		const [owner, name] = full.split("/");
@@ -79,6 +80,9 @@ async function main() {
 				where: { fullName: { equals: full } },
 				limit: 1,
 				depth: 0,
+				// Held repos too: a lookup that misses one creates a second,
+				// unheld row for it.
+				context: { includeSecurityHeld: true },
 			})
 		).docs[0] as Record<string, any> | undefined;
 
@@ -139,37 +143,51 @@ async function main() {
 			`  create ${full.padEnd(44)} score=${grade.score}  judge=${rec.judgeScore} ★${info.stargazerCount}`,
 		);
 		if (EXECUTE) {
-			await payload.create({
-				collection: "repos",
-				data: {
-					fullName: full,
-					owner,
-					name: name.replace(/\.git$/, ""),
-					url: info.url ?? rec.url,
-					description: info.description ?? null,
-					topics: info.topics ?? [],
-					primaryLanguage: info.primaryLanguage ?? null,
-					stars: info.stargazerCount ?? 0,
-					openIssues: info.openIssues ?? 0,
-					lastCommitAt: info.lastCommitAt ?? null,
-					homepageUrl: info.homepageUrl ?? null,
-					isFork: !!info.isFork,
-					isArchived: !!info.isArchived,
-					readmeExcerpt: info.readme ?? null,
-					hackathonWinner: rec.prevWinner,
-					judgeScore: rec.judgeScore,
-					judgedHackathon: rec.hackathon,
-					repoScore: grade.score,
-					repoScoreLabel: grade.label,
-					lastEnrichedAt: new Date().toISOString(),
-				},
-			});
+			// A held repo refuses a second row (Repos beforeChange): skip it,
+			// do not end the run.
+			const ok = await payload
+				.create({
+					collection: "repos",
+					data: {
+						fullName: full,
+						owner,
+						name: name.replace(/\.git$/, ""),
+						url: info.url ?? rec.url,
+						description: info.description ?? null,
+						topics: info.topics ?? [],
+						primaryLanguage: info.primaryLanguage ?? null,
+						stars: info.stargazerCount ?? 0,
+						openIssues: info.openIssues ?? 0,
+						lastCommitAt: info.lastCommitAt ?? null,
+						homepageUrl: info.homepageUrl ?? null,
+						isFork: !!info.isFork,
+						isArchived: !!info.isArchived,
+						readmeExcerpt: info.readme ?? null,
+						hackathonWinner: rec.prevWinner,
+						judgeScore: rec.judgeScore,
+						judgedHackathon: rec.hackathon,
+						repoScore: grade.score,
+						repoScoreLabel: grade.label,
+						lastEnrichedAt: new Date().toISOString(),
+					},
+				})
+				.then(
+					() => true,
+					(e: Error) => {
+						console.error(`  ✗ ${full}: ${e.message}`);
+						return false;
+					},
+				);
+			if (!ok) {
+				refused++;
+				continue;
+			}
 		}
 		created++;
 	}
 
 	console.log(
-		`\n${EXECUTE ? "DONE" : "DRY RUN"}: ${created} created, ${lifted} lifted, ${unchanged} unchanged, ${failed} fetch-failed.`,
+		`\n${EXECUTE ? "DONE" : "DRY RUN"}: ${created} created, ${lifted} lifted, ${unchanged} unchanged, ${failed} fetch-failed, ${refused} refused.`,
 	);
 	process.exit(0);
 }

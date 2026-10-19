@@ -24,12 +24,61 @@ export const Repos: CollectionConfig = {
 		],
 	},
 	access: {
-		read: () => true,
+		// Held repos stay out of REST and GraphQL reads, by ID included; the
+		// beforeOperation hook below covers the Local API, which skips access.
+		read: ({ req }) =>
+			isAdmin(req?.user) || { securityHeld: { not_equals: true } },
 		create: adminOnly,
 		update: adminOnly,
 		delete: adminOnly,
 	},
 	hooks: {
+		// A repo held for malware indicators (src/lib/repo-security.ts) leaves
+		// by no read path but an admin's or one that asks for it: every find,
+		// count and distinct gets "not held" added, so search, code references,
+		// project pages, builders and leaderboards all skip it. The trust and
+		// explain routes pass context.includeSecurityHeld to serve it with its
+		// warning; the security sweep passes it to re-check every hold. A
+		// Local API findByID takes no where and would skip this, so read repos
+		// by fullName.
+		beforeOperation: [
+			({ args, operation, req }) => {
+				if (!["read", "count", "readDistinct"].includes(operation)) return args;
+				if (isAdmin(req?.user) || req?.context?.includeSecurityHeld === true)
+					return args;
+				const notHeld = { securityHeld: { not_equals: true } };
+				return {
+					...args,
+					where: args?.where ? { and: [args.where, notHeld] } : notHeld,
+				};
+			},
+		],
+		// Backstop for a writer whose lookup left out includeSecurityHeld: it
+		// finds no row for a held repo, and creating one would serve the repo
+		// again under a fresh, unheld row. Refuse, loudly.
+		// ponytail: matches by name only; a held repo renamed on GitHub can
+		// come back under its new name until the next sweep holds it (6h at
+		// most). Match on GitHub's repo id if that window matters.
+		beforeChange: [
+			async ({ data, operation, req }) => {
+				if (operation !== "create" || !data?.fullName) return data;
+				const name = String(data.fullName).toLowerCase();
+				const held = await req.payload.find({
+					collection: "repos",
+					where: { securityHeld: { equals: true } },
+					select: { fullName: true },
+					pagination: false,
+					depth: 0,
+					// No req: Payload would merge this context into the writer's own.
+					context: { includeSecurityHeld: true },
+				});
+				if (held.docs.some((d) => String(d.fullName).toLowerCase() === name))
+					throw new Error(
+						`${data.fullName} is held for malware indicators; not creating a second row for it`,
+					);
+				return data;
+			},
+		],
 		// Internal knowledge notes are triage memory (why a long-tail repo
 		// isn't worth surfacing/deep-indexing) and must never leave the DB
 		// through ANY read path — including Payload's auto-exposed
@@ -588,6 +637,31 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description: "Scan run that set the signals — rollback key",
+			},
+		},
+		{
+			name: "securityHeld",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				position: "sidebar",
+				// One writer: the repo-security lane sets and clears it. A hold
+				// set by hand would be released by the next sweep, so the
+				// admin panel shows it read-only.
+				readOnly: true,
+				description:
+					"Held: the default branch carried malware. Kept out of every read but trust and explain, which serve it with a warning. Set and cleared by the repo-security lane.",
+			},
+		},
+		{
+			name: "securityHold",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				readOnly: true,
+				description:
+					"The indicators found, when the repo was first held and when it was last checked",
 			},
 		},
 		{
