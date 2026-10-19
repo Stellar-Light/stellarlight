@@ -58,7 +58,7 @@ const NOT_FOUND = "not found on GitHub under this name";
 const BAD_NAME = "not a GitHub owner/name";
 const NO_SUCH_REPO = new Set([NOT_FOUND, BAD_NAME]);
 
-type File = { path: string; text?: string; bytes?: Uint8Array };
+type File = { path: string; text?: string; bytes?: Uint8Array; size?: number };
 type Root = { files: File[]; gaps: string[] };
 type Read = { ok: true; text?: string; bytes?: Uint8Array } | { ok: false };
 type Blob = { text?: string | null; isTruncated?: boolean } | null;
@@ -171,7 +171,9 @@ async function raw(full: string, path: string, binary = false): Promise<Read> {
 
 /** The default branch's file paths, through the REST API (which follows a
  * renamed repo). null = could not read all of them. */
-async function tree(full: string): Promise<string[] | null> {
+async function tree(
+	full: string,
+): Promise<Array<{ path: string; size?: number }> | null> {
 	const res = await fetch(
 		`https://api.github.com/repos/${full}/git/trees/HEAD?recursive=1`,
 		{
@@ -184,11 +186,13 @@ async function tree(full: string): Promise<string[] | null> {
 	).catch(() => null);
 	if (!res?.ok) return null;
 	const body = (await res.json().catch(() => null)) as {
-		tree?: Array<{ path: string; type: string }>;
+		tree?: Array<{ path: string; type: string; size?: number }>;
 		truncated?: boolean;
 	} | null;
 	if (!body?.tree || body.truncated) return null;
-	return body.tree.filter((t) => t.type === "blob").map((t) => t.path);
+	return body.tree
+		.filter((t) => t.type === "blob")
+		.map((t) => ({ path: t.path, size: t.size }));
 }
 
 type Outcome =
@@ -211,28 +215,31 @@ async function check(
 		files.some((f) => f.path === ROOT_FILES.tasks) ||
 		detectIndicators(files).length > 0;
 	if (deep) {
-		const paths = await tree(full);
+		const entries = await tree(full);
 		// The tree read re-reads whatever stage 1 could not, with its own gaps.
-		if (paths) gaps = [];
+		if (entries) gaps = [];
 		else gaps.push("could not read the tree");
-		const todo = (paths ?? [])
+		const todo = (entries ?? [])
 			.filter(
-				(p) =>
-					isSecurityRelevant(p) &&
-					!/(^|\/)node_modules\//.test(p) &&
-					!files.some((f) => f.path === p),
+				(e) =>
+					isSecurityRelevant(e.path) &&
+					!/(^|\/)node_modules\//.test(e.path) &&
+					!files.some((f) => f.path === e.path),
 			)
 			// The payload first, so the cap never cuts a fake font.
-			.sort((a, b) => Number(!FONT_EXT.test(a)) - Number(!FONT_EXT.test(b)));
+			.sort(
+				(a, b) =>
+					Number(!FONT_EXT.test(a.path)) - Number(!FONT_EXT.test(b.path)),
+			);
 		if (todo.length > MAX_FILES)
 			gaps.push(`${todo.length} files to read, more than ${MAX_FILES}`);
-		for (const p of todo.slice(0, MAX_FILES)) {
-			const r = await raw(full, p, FONT_EXT.test(p));
+		for (const e of todo.slice(0, MAX_FILES)) {
+			const r = await raw(full, e.path, FONT_EXT.test(e.path));
 			if (!r.ok) {
-				gaps.push(`could not read ${p}`);
+				gaps.push(`could not read ${e.path}`);
 				continue;
 			}
-			files.push({ path: p, text: r.text, bytes: r.bytes });
+			files.push({ path: e.path, text: r.text, bytes: r.bytes, size: e.size });
 		}
 	}
 	const indicators = detectIndicators(files);
@@ -240,6 +247,15 @@ async function check(
 		return { repo: full, state: "could-not-check", why: gaps[0] };
 	return { repo: full, state: "checked", indicators };
 }
+
+/** One repo's check, never the sweep's end: a repo whose files trip a
+ * bug is could-not-check, and every repo after it is still checked. */
+const safeCheck = (full: string, held: boolean, root: Root): Promise<Outcome> =>
+	check(full, held, root).catch((e) => ({
+		repo: full,
+		state: "could-not-check" as const,
+		why: `the check failed: ${(e as Error).message}`,
+	}));
 
 async function pool<T, R>(
 	items: T[],
@@ -285,7 +301,7 @@ async function main() {
 	if (ONLY) {
 		const roots = await rootFiles(ONLY);
 		for (const o of await pool(ONLY, 4, (r) =>
-			check(r, false, roots.get(r) as Root),
+			safeCheck(r, false, roots.get(r) as Root),
 		))
 			console.log(
 				o.state === "checked"
@@ -387,7 +403,7 @@ async function main() {
 		}
 	};
 	const outcomes = await pool(names, 6, async (n) => {
-		const o = await check(
+		const o = await safeCheck(
 			n,
 			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
 			roots.get(n) as Root,
@@ -418,6 +434,14 @@ async function main() {
 	if (failedReads > outcomes.length / 10) {
 		console.error(
 			`✗ ${failedReads} of ${outcomes.length} repos could not be read`,
+		);
+		process.exitCode = 2;
+	}
+	// About 6% of the index is gone from GitHub. Far more than that is a
+	// token or an outage answering for every repo, not the data.
+	if (notFound.length > outcomes.length / 4) {
+		console.error(
+			`✗ ${notFound.length} of ${outcomes.length} repos read as not on GitHub`,
 		);
 		process.exitCode = 2;
 	}

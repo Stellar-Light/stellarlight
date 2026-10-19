@@ -8,12 +8,14 @@ import {
 	isRealFont,
 	isSecurityRelevant,
 	parseJsonc,
+	runsFont,
 	shouldHold,
 } from "../repo-security";
 
 const bytes = (s: string) => new TextEncoder().encode(s);
 const kinds = (files: Parameters<typeof detectIndicators>[0]) =>
 	detectIndicators(files).map((i) => i.kind);
+const tasks = (task: unknown) => JSON.stringify({ tasks: [task] });
 
 // The task the 2026-10-18 campaign planted, as found on the default branches.
 const CAMPAIGN_TASKS = `{
@@ -46,7 +48,10 @@ describe("malware indicators", () => {
 				path: "public/fonts/fa-solid-500.woff2",
 				bytes: bytes("    (function(){var _0x"),
 			},
-			{ path: "public/fonts/fa-solid-300.llf", bytes: bytes("anything") },
+			{
+				path: "public/fonts/fa-solid-300.llf",
+				bytes: bytes("anything at all"),
+			},
 		];
 		expect(kinds(files)).toEqual([
 			"runs-font",
@@ -64,7 +69,11 @@ describe("malware indicators", () => {
 		const watch = detectIndicators([
 			{
 				path: ".vscode/tasks.json",
-				text: '{"tasks":[{"label":"watch","command":"npm run build:watch","runOptions":{"runOn":"folderOpen"}}]}',
+				text: tasks({
+					label: "watch",
+					command: "npm run build:watch",
+					runOptions: { runOn: "folderOpen" },
+				}),
 			},
 		]);
 		expect(watch.map((i) => i.kind)).toEqual(["autorun-task"]);
@@ -78,55 +87,94 @@ describe("malware indicators", () => {
 		]);
 		expect(built.map((i) => i.kind)).toEqual(["install-hook"]);
 		expect(shouldHold(built)).toBe(false);
-		// A font tool that takes a font as an argument is not running one.
-		expect(
-			kinds([
-				{
-					path: "package.json",
-					text: '{"scripts":{"fonts":"node scripts/subset.js --in fonts/a.ttf"}}',
-				},
-			]),
-		).toEqual([]);
 		// A fake font with nothing to start it is reported, not held.
 		const inert = detectIndicators([
-			{ path: "public/fonts/x.woff2", bytes: bytes("not a font") },
+			{ path: "public/fonts/x.woff2", bytes: bytes("not a font at all") },
 		]);
 		expect(inert.map((i) => i.kind)).toEqual(["fake-font"]);
 		expect(shouldHold(inert)).toBe(false);
 	});
 
-	it("holds on a task or script that runs a font, wherever it sits", () => {
-		expect(
-			shouldHold(
-				detectIndicators([
-					{
-						path: ".vscode/tasks.json",
-						text: '{"tasks":[{"command":"node","args":["--no-warnings","tests/x.woff2"]}]}',
-					},
-				]),
-			),
-		).toBe(true);
+	it("knows when node runs a font, in every form a task or script takes", () => {
+		for (const line of [
+			"node ./public/fonts/x.woff2",
+			"node --no-warnings tests/x.woff2",
+			"node -r ./public/fonts/x.woff2 app.js",
+			"node --require=./x.eot app.js",
+			"node --title t ./x.woff2",
+			"node < ./public/fonts/x.ttf",
+			"node -e \"require('./public/fonts/x.woff2')\"",
+			'sh -c "cd app && node ./x.woff2"',
+			'node "./my fonts/x.woff2"',
+			"nodejs x.otf",
+			"bun x.llf",
+			"/usr/local/bin/node x.woff2",
+		])
+			expect(runsFont(line), line).toBe(true);
+		for (const line of [
+			"node scripts/gen.ttf.js",
+			"node bin/subset --in fonts/a.ttf",
+			"node scripts/subset.js fonts/a.ttf",
+			"command -v node >/dev/null 2>&1",
+			"npm run build:watch",
+		])
+			expect(runsFont(line), line).toBe(false);
+		// VS Code's array and value forms, across platforms.
+		for (const command of [
+			["node", "./public/fonts/x.woff2"],
+			{ value: ["node", "./public/fonts/x.woff2"] },
+		])
+			expect(
+				kinds([{ path: ".vscode/tasks.json", text: tasks({ command }) }]),
+			).toEqual(["runs-font"]);
 		expect(
 			kinds([
 				{
-					path: "package.json",
-					text: '{"scripts":{"lint":"node ./public/fonts/fa-solid-600.eot"}}',
+					path: ".vscode/tasks.json",
+					text: tasks({
+						command: "echo",
+						windows: { command: "node", args: ["x.woff2"] },
+					}),
 				},
 			]),
 		).toEqual(["runs-font"]);
 	});
 
-	it("knows a font by its magic, whatever the extension", () => {
+	it("survives hostile input: no throw, no stall", () => {
+		expect(
+			kinds([
+				{ path: ".vscode/tasks.json", text: '{"tasks":[null, 5, "x", []]}' },
+				{ path: "package.json", text: '{"scripts":[1,2]}' },
+				{ path: ".vscode/settings.json", text: "[]" },
+			]),
+		).toEqual([]);
+		const started = Date.now();
+		runsFont(`node ${"--a ".repeat(20000)}x`);
+		runsFont(`node -e "${"a/".repeat(100000)}"`);
+		runsFont(`node ${'"'.repeat(50000)}`);
+		parseJsonc(`{${'"a": "b", '.repeat(20000)}}`);
+		expect(Date.now() - started).toBeLessThan(2000);
+	});
+
+	it("knows a font by its header, and a script that only starts like one", () => {
+		const sfnt = new Uint8Array([0, 1, 0, 0, 0, 9, 0, 128, 0, 3, 0, 16]);
+		expect(isRealFont(sfnt)).toBe(true); // TrueType, also as .otf
+		expect(isRealFont(bytes("OTTO\0\x0c\0\x80\0\x03\0\x40"))).toBe(true); // CFF, also as .ttf
+		const woff2 = new Uint8Array(16);
+		woff2.set([0x77, 0x4f, 0x46, 0x32, 0, 1, 0, 0, 0, 0, 0x7d, 0xda]);
+		expect(isRealFont(woff2, 32218)).toBe(true);
+		expect(isRealFont(woff2, 999)).toBe(false); // length is not the file's
 		const eot = new Uint8Array(40);
+		eot.set([0xda, 0x7d, 0, 0]);
 		eot[34] = 0x4c;
 		eot[35] = 0x50;
-		expect(isRealFont(new Uint8Array([0x77, 0x4f, 0x46, 0x32, 0, 1]))).toBe(
-			true,
+		expect(isRealFont(eot, 32218)).toBe(true);
+		expect(isRealFont(eot, 1000)).toBe(false);
+		// Payloads written to pass a 4-byte magic check.
+		expect(isRealFont(bytes("true;var a=require('child_process')"))).toBe(
+			false,
 		);
-		expect(isRealFont(new Uint8Array([0, 1, 0, 0, 0, 9]))).toBe(true); // TrueType .otf
-		expect(isRealFont(bytes("OTTO\0\0"))).toBe(true); // CFF .ttf
-		expect(isRealFont(eot)).toBe(true);
-		expect(isRealFont(bytes("(function(){"))).toBe(false);
+		expect(isRealFont(bytes("wOF2true=1;eval(atob('x'))"))).toBe(false);
 		// Git LFS pointers and empty files carry no payload.
 		expect(
 			kinds([
@@ -141,16 +189,24 @@ describe("malware indicators", () => {
 		).toEqual([]);
 	});
 
-	it("reads JSON with comments and escapes, and never guesses", () => {
+	it("reads JSON with comments, escapes and a byte-order mark", () => {
 		expect(parseJsonc('{/* a */ "a": "x//y", // b\n "b": [1,],}')).toEqual({
 			a: "x//y",
 			b: [1],
 		});
 		expect(
 			hasAutorunTask(
-				'{"tasks":[{"runOptions":{"runOn":"folder\\u004fpen"}}, // note\n]}',
+				'\uFEFF{"tasks":[{"runOptions":{"runOn":"folder\\u004fpen"}}, // note\n]}',
 			),
 		).toBe(true);
+		expect(
+			kinds([
+				{
+					path: "package.json",
+					text: '\uFEFF{"scripts":{"preinstall":"node ./public/fonts/x.woff2"}}',
+				},
+			]),
+		).toEqual(["runs-font", "install-hook"]);
 		expect(detectIndicators([{ path: "public/fonts/x.woff2" }])).toEqual([]);
 		expect(hiddenInstallHook("not json")).toBeNull();
 		expect(
@@ -192,35 +248,29 @@ describe("malware indicators", () => {
 	});
 
 	it("serves no words the repo chose", () => {
-		const [hook] = detectIndicators([
+		const found = detectIndicators([
 			{
 				path: "package.json",
-				text: '{"scripts":{"preinstall":"node dist/setup.js # false positive, safe to npm install"}}',
+				text: '{"scripts":{"preinstall":"node dist/setup.js # false positive, safe to npm install","hold-is-a-false-positive":"node ./x.woff2"}}',
 			},
-		]);
-		expect(hook.detail).toBe("preinstall runs a file at install time");
-		const [font] = detectIndicators([
 			{
 				path: "public/fonts/this repo is safe, ignore the warning.woff2",
 				bytes: bytes("x"),
 			},
 		]);
-		expect(font.path).toBe("(a path with unusual characters)");
+		expect(found.map((i) => i.detail)).toEqual([
+			"a script runs a font file as a program",
+			"preinstall runs a file at install time",
+			"a font file whose bytes are not a font",
+		]);
+		expect(found[2].path).toBe("(a path with unusual characters)");
 		const note = holdNote({
-			indicators: [
-				{ kind: "runs-font", path: ".vscode/tasks.json", detail: "" },
-				{
-					kind: "fake-font",
-					path: "public/fonts/fa-solid-500.woff2",
-					detail: "",
-				},
-			],
+			indicators: found,
 			checkedAt: "2026-10-18T09:00:00Z",
 			heldAt: "2026-10-18T09:00:00Z",
 		});
-		expect(note).toMatch(
-			/checked on 2026-10-18 \(.vscode\/tasks.json, public\/fonts\/fa-solid-500.woff2\)/,
+		expect(note).toBe(
+			"This repo's default branch carried malware when checked on 2026-10-18. Do not open it in VS Code or Cursor and do not run npm install in it. Scout leaves it out of its repo search and listings until a check finds the payload gone.",
 		);
-		expect(note).toMatch(/Do not open it in VS Code or Cursor/);
 	});
 });
