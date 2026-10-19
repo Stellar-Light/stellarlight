@@ -1,5 +1,5 @@
 {
-	"asOf": "2026-10-19T13:24:49.710Z",
+	"asOf": "2026-10-19T13:59:02.318Z",
 	"source": "scripts/check-workflow-health.ts",
 	"checked": 112,
 	"healthy": 104,
@@ -12,12 +12,12 @@
 		{
 			"file": "gone-repos.yml",
 			"state": "standing-signal",
-			"why": "36 run(s) red at its declared signal step since its last green 34d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
+			"why": "37 run(s) red at its declared signal step since its last green 34d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
 		},
 		{
 			"file": "post-deploy-eval.yml",
 			"state": "standing-signal",
-			"why": "15 run(s) red at its declared signal step since its last green 14d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Gate\")"
+			"why": "16 run(s) red at its declared signal step since its last green 14d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Gate\")"
 		},
 		{
 			"file": "refresh-research-corpus.yml",
@@ -32,17 +32,17 @@
 		{
 			"file": "task-lane.yml",
 			"state": "standing-signal",
-			"why": "16 run(s) red at its declared signal step since its last green 30d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
+			"why": "16 run(s) red at its declared signal step since its last green 31d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
 		},
 		{
 			"file": "weak-basis-liveness.yml",
 			"state": "standing-signal",
-			"why": "3 run(s) red at its declared signal step since its last green 24d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Sweep\")"
+			"why": "3 run(s) red at its declared signal step since its last green 25d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Sweep\")"
 		},
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "43 failed run(s) since its last green 33d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "44 failed run(s) since its last green 33d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -151,10 +151,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-10-02T13:56:54Z",
-			"ageDays": 16,
+			"ageDays": 17,
 			"graceDays": 45,
 			"runs": 6,
-			"why": "last green 16d ago (manual tool — age not judged)"
+			"why": "last green 17d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-code-domains.yml",
@@ -326,10 +326,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:18:59Z",
+			"lastSuccessAt": "2026-10-19T13:41:10Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 98,
+			"runs": 100,
 			"why": "last green 0d ago"
 		},
 		{
@@ -348,10 +348,10 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:21:54Z",
+			"lastSuccessAt": "2026-10-19T13:30:31Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 29,
+			"runs": 31,
 			"why": "last green 0d ago"
 		},
 		{
@@ -480,11 +480,11 @@
 			"name": "Enrich builder profiles (GitHub)",
 			"cron": "30 6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-18T11:28:56Z",
-			"ageDays": 1,
+			"lastSuccessAt": "2026-10-19T13:44:53Z",
+			"ageDays": 0,
 			"graceDays": 4,
-			"runs": 65,
-			"why": "last green 1d ago"
+			"runs": 66,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "enrich-entities.yml",
@@ -637,8 +637,8 @@
 			"lastSuccessAt": "2026-09-15T02:16:41Z",
 			"ageDays": 34,
 			"graceDays": 4,
-			"runs": 37,
-			"why": "36 run(s) red at its declared signal step since its last green 34d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
+			"runs": 38,
+			"why": "37 run(s) red at its declared signal step since its last green 34d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Probe\")"
 		},
 		{
 			"file": "import-replit-stablecoin-history.yml",
@@ -788,18 +788,18 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:03:15Z",
+			"lastSuccessAt": "2026-10-19T13:21:54Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 94,
-			"why": "last green 0d ago (nothing under src/**, next.config.*, package.json, pnpm-lock.yaml, tsconfig.json, .github/workflows/next-build-gate.yml has changed since — nothing to do, not stale)"
+			"runs": 95,
+			"why": "last green 0d ago"
 		},
 		{
 			"file": "openapi-lint.yml",
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:21:54Z",
+			"lastSuccessAt": "2026-10-19T13:28:43Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -843,10 +843,10 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:21:44Z",
+			"lastSuccessAt": "2026-10-19T13:28:43Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 27,
+			"runs": 28,
 			"why": "last green 0d ago"
 		},
 		{
@@ -857,8 +857,8 @@
 			"lastSuccessAt": "2026-10-05T11:19:05Z",
 			"ageDays": 14,
 			"graceDays": 45,
-			"runs": 87,
-			"why": "15 run(s) red at its declared signal step since its last green 14d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Gate\")"
+			"runs": 88,
+			"why": "16 run(s) red at its declared signal step since its last green 14d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Gate\")"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -953,7 +953,7 @@
 			"name": "Refresh RWA measurements",
 			"cron": "37 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T05:13:49Z",
+			"lastSuccessAt": "2026-10-19T13:52:12Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -964,7 +964,7 @@
 			"name": "Refresh stablecoins",
 			"cron": "25 */6 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T04:52:22Z",
+			"lastSuccessAt": "2026-10-19T13:35:31Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -997,7 +997,7 @@
 			"name": "Scan repo code (signals-only)",
 			"cron": "17 */2 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T04:51:22Z",
+			"lastSuccessAt": "2026-10-19T13:32:56Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -1174,17 +1174,17 @@
 			"cron": "17 9 * * 2",
 			"state": "standing-signal",
 			"lastSuccessAt": "2026-09-18T13:36:58Z",
-			"ageDays": 30,
+			"ageDays": 31,
 			"graceDays": 21,
 			"runs": 21,
-			"why": "16 run(s) red at its declared signal step since its last green 30d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
+			"why": "16 run(s) red at its declared signal step since its last green 31d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Verify the end state\")"
 		},
 		{
 			"file": "tests.yml",
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-19T13:21:54Z",
+			"lastSuccessAt": "2026-10-19T13:30:31Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1262,10 +1262,10 @@
 			"cron": "17 8 * * 4",
 			"state": "standing-signal",
 			"lastSuccessAt": "2026-09-24T13:32:33Z",
-			"ageDays": 24,
+			"ageDays": 25,
 			"graceDays": 21,
 			"runs": 5,
-			"why": "3 run(s) red at its declared signal step since its last green 24d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Sweep\")"
+			"why": "3 run(s) red at its declared signal step since its last green 25d ago — the lane works; what it measures has failed every run and nobody has acted (step \"Sweep\")"
 		},
 		{
 			"file": "workflow-health.yml",
@@ -1276,7 +1276,7 @@
 			"ageDays": 33,
 			"graceDays": 21,
 			"runs": 90,
-			"why": "43 failed run(s) since its last green 33d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "44 failed run(s) since its last green 33d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
