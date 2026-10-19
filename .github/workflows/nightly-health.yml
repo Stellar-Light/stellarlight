@@ -139,6 +139,11 @@ jobs:
         continue-on-error: true
         run: |
           pnpm exec tsx scripts/improvement-ledger.ts
+          # The /quality headline reads the same ledger. Rebuilt in the same
+          # commit, or main reads two answers to "open findings" until the
+          # quality lane runs (hours later when its schedule slips), and the
+          # artifact-agreement guard reds every PR in between (2026-10-19).
+          pnpm exec tsx scripts/quality/build-quality-artifact.ts
           git config user.name "stellarlight-bot"
           git config user.email "bot@stellarlight.xyz"
           git add -A improvements/
