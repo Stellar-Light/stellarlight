@@ -1,0 +1,45 @@
+name: Repo security holds
+
+# Holds every indexed repo whose default branch carries malware indicators
+# (a VS Code task that runs on folder open, an install hook running a hidden
+# script, a font file that is not a font) and releases the hold once a check
+# finds them gone. A held repo is left out of everything Scout serves but the
+# two operations that name it, which carry the warning. Files are read as
+# text and bytes, never run.
+#
+# A failed read never releases a hold; more than a tenth unreadable exits 2.
+# Manual dispatch is dry-run unless execute=true; the schedule always writes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write holds and releases? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "29 */6 * * *" # every six hours; off the hour, crons at :00 get dropped
+
+concurrency:
+  group: repo-security
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Trees only for the few repos stage 1 flags; files come from
+      # raw.githubusercontent.com, so the Actions token is enough.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/check-repo-security.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }}

@@ -10,6 +10,7 @@
  * same PR, run `pnpm contract:write`, and add a changelog entry — CI fails
  * otherwise.
  */
+
 import {
 	RWA_KINDS,
 	RWA_PRODUCT_KINDS,
@@ -39,6 +40,7 @@ import { PROJECT_TYPES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { REPO_MATCH_MODES } from "./repo-search";
+import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import { PRICE_BASES } from "./stablecoins";
@@ -173,6 +175,41 @@ const TYPE_COVERAGE_PROPS = {
 /** What a hackathon build became: shared by searchHackathonBuilds and
  * hackathonBrief. Optional on purpose: absent means the link was not checked
  * (the build was read live from DoraHacks), which is not "no project". */
+/** A malware hold on a repo (src/lib/repo-security.ts), served by the two
+ * operations that name a repo; every other read leaves a held repo out. */
+const SECURITY_HOLD_SCHEMA = {
+	type: "object",
+	nullable: true,
+	description:
+		"A malware hold: this repo's default branch carried indicators of a known campaign (a VS Code task that runs when the folder opens, the setting that runs it unasked, an install script that runs a hidden file, a font file that is not a font). A held repo is left out of every search, code reference and suggestion; only a request naming it returns it, with this block. Do not open it in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe.",
+	properties: {
+		held: { type: "boolean" },
+		indicators: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					kind: { type: "string", enum: [...INDICATOR_KINDS] },
+					path: { type: "string" },
+					detail: { type: "string" },
+				},
+			},
+		},
+		heldAt: {
+			type: "string",
+			description: "When the repo was first held for these indicators.",
+		},
+		checkedAt: {
+			type: "string",
+			description: "When the check that found them last ran.",
+		},
+		note: {
+			type: "string",
+			description: "The warning to relay, naming the files and what not to do.",
+		},
+	},
+};
+
 const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
@@ -2829,6 +2866,7 @@ export const spec: OpenAPISpec = {
 												...REPO_KIND_PROPS,
 											},
 										},
+										security: SECURITY_HOLD_SCHEMA,
 										codeVerified: {
 											type: "object",
 											nullable: true,
@@ -6235,6 +6273,7 @@ export const spec: OpenAPISpec = {
 														daysOfDrift: { type: "integer" },
 													},
 												},
+												security: SECURITY_HOLD_SCHEMA,
 												succession: {
 													type: "object",
 													properties: {

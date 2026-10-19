@@ -24,12 +24,35 @@ export const Repos: CollectionConfig = {
 		],
 	},
 	access: {
-		read: () => true,
+		// Held repos stay out of REST and GraphQL reads, by ID included; the
+		// beforeOperation hook below covers the Local API, which skips access.
+		read: ({ req }) =>
+			isAdmin(req?.user) || { securityHeld: { not_equals: true } },
 		create: adminOnly,
 		update: adminOnly,
 		delete: adminOnly,
 	},
 	hooks: {
+		// A repo held for malware indicators (src/lib/repo-security.ts) leaves
+		// by no read path but an admin's or one that asks for it: every find,
+		// count and distinct gets "not held" added, so search, code references,
+		// project pages, builders and leaderboards all skip it. The trust and
+		// explain routes pass context.includeSecurityHeld to serve it with its
+		// warning; the security sweep passes it to re-check every hold. A
+		// Local API findByID takes no where and would skip this, so read repos
+		// by fullName.
+		beforeOperation: [
+			({ args, operation, req }) => {
+				if (!["read", "count", "readDistinct"].includes(operation)) return args;
+				if (isAdmin(req?.user) || req?.context?.includeSecurityHeld === true)
+					return args;
+				const notHeld = { securityHeld: { not_equals: true } };
+				return {
+					...args,
+					where: args?.where ? { and: [args.where, notHeld] } : notHeld,
+				};
+			},
+		],
 		// Internal knowledge notes are triage memory (why a long-tail repo
 		// isn't worth surfacing/deep-indexing) and must never leave the DB
 		// through ANY read path — including Payload's auto-exposed
@@ -588,6 +611,26 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description: "Scan run that set the signals — rollback key",
+			},
+		},
+		{
+			name: "securityHeld",
+			type: "checkbox",
+			defaultValue: false,
+			index: true,
+			admin: {
+				position: "sidebar",
+				description:
+					"Held: the default branch carried malware indicators. Kept out of every read but trust and explain, which serve it with a warning.",
+			},
+		},
+		{
+			name: "securityHold",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"The indicators found, when the repo was first held and when it was last checked",
 			},
 		},
 		{

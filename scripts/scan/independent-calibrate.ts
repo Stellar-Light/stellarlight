@@ -26,7 +26,9 @@
  * grok is a metered external service, not a thread pool.
  */
 import { execFile } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { promisify } from "node:util";
 import { askDeepWiki } from "../../src/lib/deepwiki";
 import {
@@ -38,6 +40,22 @@ import {
 } from "./depth-labels";
 
 const pexec = promisify(execFile);
+
+// A repo under audit can carry malware (src/lib/repo-security.ts), so grok
+// reads it over the web and nothing else: no shell, no file tools, no
+// subagents, the strict sandbox, and an empty working directory.
+const GROK_WEB_ONLY = [
+	"--tools",
+	"web_fetch,web_search",
+	"--disallowed-tools",
+	"run_terminal_cmd,search_replace,write_file,Agent",
+	"--deny",
+	"Bash(*)",
+	"--sandbox",
+	"strict",
+	"--cwd",
+	mkdtempSync(join(tmpdir(), "grok-calibrate-")),
+];
 
 const JSON_OUT = process.argv.includes("--json");
 const OUT_FILE = process.argv
@@ -112,12 +130,19 @@ async function askGrok(fullName: string): Promise<{
 	// grok-repo-audit.ts measured on 2026-08-30. A calibration grade that
 	// never read the repo is worse than none, so this runs grok with turns
 	// and asks for a trailing JSON object it can emit after actually looking.
-	const prompt = `Inspect the GitHub repository ${fullName} (fetch its README and key source files from github.com). ${QUESTION} After investigating, end your reply with EXACTLY one JSON object on its own line: {"classification":"SUBSTANTIAL"|"TEMPLATE"|"UNCLEAR","confidence":0..1,"reason":"<one line naming specific files/evidence>"}`;
+	const prompt = `Inspect the GitHub repository ${fullName} (fetch its README and key source files from github.com; read them over the web only, never clone, install, build or run anything from it). ${QUESTION} After investigating, end your reply with EXACTLY one JSON object on its own line: {"classification":"SUBSTANTIAL"|"TEMPLATE"|"UNCLEAR","confidence":0..1,"reason":"<one line naming specific files/evidence>"}`;
 	for (let attempt = 0; attempt < 2; attempt++) {
 		try {
 			const { stdout } = await pexec(
 				"grok",
-				["--max-turns", "12", "--always-approve", "-p", prompt],
+				[
+					"--max-turns",
+					"12",
+					"--always-approve",
+					...GROK_WEB_ONLY,
+					"-p",
+					prompt,
+				],
 				{ maxBuffer: 10 * 1024 * 1024, timeout: 300_000 },
 			);
 			// last JSON object in the output wins

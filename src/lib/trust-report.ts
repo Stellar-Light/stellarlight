@@ -19,6 +19,7 @@
 
 import type { Payload } from "payload";
 import { activityStateOf } from "./repo-grade";
+import { securityOf } from "./repo-security";
 
 export const TRUST_SIGNALS = [
 	"scanned",
@@ -87,6 +88,9 @@ export interface TrustReport {
 	} | null;
 	succession: { successorRepo: string | null; predecessors: string[] };
 	signals: TrustSignal[];
+	/** A malware hold on the repo, with what was found and what not to do;
+	 * null when none is on record, which is not a claim the repo is safe. */
+	security: ReturnType<typeof securityOf>;
 }
 
 export async function buildTrustReport(
@@ -99,6 +103,9 @@ export async function buildTrustReport(
 		limit: 1,
 		depth: 0,
 		select: { readmeExcerpt: false },
+		// A held repo is hidden from every other read; asked for by name, it is
+		// served with its warning (repo-security.ts).
+		context: { includeSecurityHeld: true },
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 	const d = res.docs[0] as any;
@@ -238,6 +245,7 @@ export async function buildTrustReport(
 			successorRepo: d.successorRepo ? String(d.successorRepo) : null,
 			predecessors,
 		},
+		security: securityOf(d),
 		signals,
 	};
 }

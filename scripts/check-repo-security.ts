@@ -1,0 +1,348 @@
+/**
+ * Hold every indexed repo whose default branch carries malware indicators,
+ * and release a hold once a check finds them gone.
+ *
+ *   pnpm exec tsx scripts/check-repo-security.ts            # dry run, writes nothing
+ *   pnpm exec tsx scripts/check-repo-security.ts --execute  # hold and release
+ *   pnpm exec tsx scripts/check-repo-security.ts --repos=a/b,c/d  # just these, no database
+ *
+ * Files are read as text and bytes, never run (src/lib/repo-security.ts).
+ * A held repo is left out of every read but trust and explain, which serve
+ * it with a warning (the Repos collection's access and beforeOperation hook).
+ *
+ * Two stages, so a sweep spends almost no API quota:
+ * 1. every repo: .vscode/tasks.json, .vscode/settings.json and the root
+ *    package.json from raw.githubusercontent.com (not the REST API);
+ * 2. repos stage 1 flags, that have a .vscode/ file, or that are held: the
+ *    full tree through the API, then every package.json and font in it
+ *    (fonts first, and only their first 64 bytes).
+ * ponytail: a nested install hook with no .vscode file beside it is not
+ * seen; read every repo's tree when the scan PAT has room.
+ *
+ * What was read is evidence enough to hold a repo. Clearing one needs every
+ * read to succeed, so a failed read never releases a hold: that repo is
+ * could-not-check and keeps its state.
+ */
+
+import "./load-env";
+import { getPayload } from "payload";
+import {
+	checkVerdict,
+	detectIndicators,
+	FONT_EXT,
+	type Indicator,
+	isSecurityRelevant,
+	type SecurityHold,
+	shouldHold,
+} from "../src/lib/repo-security";
+import configPromise from "../src/payload.config";
+
+const EXECUTE = process.argv.includes("--execute");
+const TOKEN = process.env.GITHUB_TOKEN;
+const CONTEXT = { internal: true, includeSecurityHeld: true };
+/** Files read per repo in stage 2; a repo with more is could-not-check
+ * unless what was read already holds it. */
+const MAX_FILES = 200;
+
+type Read = { ok: true; text?: string; bytes?: Uint8Array } | { ok: false };
+
+/** One raw file at the default branch: absent (404) reads as no file. A
+ * font's magic number sits in its first bytes, so binary reads stop at 64. */
+async function raw(
+	full: string,
+	path: string,
+	binary = false,
+): Promise<Read | null> {
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			const res = await fetch(
+				`https://raw.githubusercontent.com/${full}/HEAD/${path}`,
+				{
+					headers: binary ? { Range: "bytes=0-63" } : undefined,
+					signal: AbortSignal.timeout(20_000),
+				},
+			);
+			if (res.status === 404) return null;
+			// A range past the end: the file is empty.
+			if (binary && res.status === 416)
+				return { ok: true, bytes: new Uint8Array(0) };
+			if (res.ok) {
+				if (binary)
+					return { ok: true, bytes: new Uint8Array(await res.arrayBuffer()) };
+				return { ok: true, text: await res.text() };
+			}
+			if (res.status !== 429 && res.status < 500) return { ok: false };
+		} catch {}
+		await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+	}
+	return { ok: false };
+}
+
+/** The default branch's file paths, through the REST API (which follows a
+ * renamed repo). null = could not read all of them. */
+async function tree(full: string): Promise<string[] | null> {
+	const res = await fetch(
+		`https://api.github.com/repos/${full}/git/trees/HEAD?recursive=1`,
+		{
+			headers: {
+				Accept: "application/vnd.github+json",
+				...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+			},
+			signal: AbortSignal.timeout(30_000),
+		},
+	).catch(() => null);
+	if (!res?.ok) return null;
+	const body = (await res.json().catch(() => null)) as {
+		tree?: Array<{ path: string; type: string }>;
+		truncated?: boolean;
+	} | null;
+	if (!body?.tree || body.truncated) return null;
+	return body.tree.filter((t) => t.type === "blob").map((t) => t.path);
+}
+
+type Outcome =
+	| { repo: string; state: "checked"; indicators: Indicator[] }
+	| { repo: string; state: "could-not-check"; why: string };
+
+/** `held`: the repo is held now, so it gets the full read a release needs. */
+async function check(full: string, held: boolean): Promise<Outcome> {
+	const files: Array<{ path: string; text?: string; bytes?: Uint8Array }> = [];
+	const gaps: string[] = [];
+	let deep = held;
+	for (const path of [
+		".vscode/tasks.json",
+		".vscode/settings.json",
+		"package.json",
+	]) {
+		const r = await raw(full, path);
+		if (r === null) continue;
+		if (!r.ok) {
+			gaps.push(`could not read ${path}`);
+			continue;
+		}
+		files.push({ path, text: r.text });
+		if (path.startsWith(".vscode/")) deep = true;
+	}
+	if (deep || gaps.length || detectIndicators(files).length) {
+		const paths = await tree(full);
+		if (!paths) gaps.push("could not read the tree");
+		const todo = (paths ?? [])
+			.filter(
+				(p) =>
+					isSecurityRelevant(p) &&
+					!/(^|\/)node_modules\//.test(p) &&
+					!files.some((f) => f.path === p),
+			)
+			// The payload first, so the cap never cuts a fake font.
+			.sort((a, b) => Number(!FONT_EXT.test(a)) - Number(!FONT_EXT.test(b)));
+		if (todo.length > MAX_FILES)
+			gaps.push(`${todo.length} files to read, more than ${MAX_FILES}`);
+		for (const p of todo.slice(0, MAX_FILES)) {
+			const r = await raw(full, p, FONT_EXT.test(p));
+			if (r === null) continue;
+			if (!r.ok) {
+				gaps.push(`could not read ${p}`);
+				continue;
+			}
+			files.push({ path: p, text: r.text, bytes: r.bytes });
+		}
+	}
+	const indicators = detectIndicators(files);
+	if (checkVerdict(indicators, gaps) === "could-not-check")
+		return { repo: full, state: "could-not-check", why: gaps[0] };
+	return { repo: full, state: "checked", indicators };
+}
+
+async function pool<T, R>(
+	items: T[],
+	n: number,
+	fn: (x: T) => Promise<R>,
+): Promise<R[]> {
+	const out: R[] = new Array(items.length);
+	let i = 0;
+	await Promise.all(
+		Array.from({ length: n }, async () => {
+			while (i < items.length) {
+				const k = i++;
+				out[k] = await fn(items[k]);
+			}
+		}),
+	);
+	return out;
+}
+
+const list = (ind: Indicator[]) =>
+	ind.map((i) => `${i.kind} ${i.path}`).join("; ");
+
+/** --repos=a/b,c/d: check just these, print, touch no database. */
+const ONLY = process.argv
+	.find((a) => a.startsWith("--repos="))
+	?.slice("--repos=".length)
+	.split(",")
+	.filter(Boolean);
+
+type Repo = {
+	id: string;
+	fullName?: string;
+	securityHeld?: boolean;
+	securityHold?: SecurityHold | null;
+};
+
+async function main() {
+	if (ONLY) {
+		for (const o of await pool(ONLY, 4, (r) => check(r, false)))
+			console.log(
+				o.state === "checked"
+					? `${o.repo}: ${o.indicators.length ? `${shouldHold(o.indicators) ? "HOLD" : "report only"}: ${list(o.indicators)}` : "no indicators"}`
+					: `${o.repo}: could not check (${o.why})`,
+			);
+		return;
+	}
+	const payload = await getPayload({ config: await configPromise });
+	console.log(
+		`check-repo-security: ${EXECUTE ? "EXECUTE, holds and releases are written" : "dry run, writes nothing"}`,
+	);
+	const res = await payload.find({
+		collection: "repos",
+		pagination: false,
+		depth: 0,
+		select: { fullName: true, securityHeld: true, securityHold: true },
+		context: CONTEXT,
+	});
+	// One check per repo, written to every row that names it: rows that
+	// differ only in case are the same repo on GitHub, and each is served.
+	const groups = new Map<string, Repo[]>();
+	for (const r of res.docs as Repo[]) {
+		if (!r.fullName) continue;
+		const k = r.fullName.toLowerCase();
+		groups.set(k, [...(groups.get(k) ?? []), r]);
+	}
+	const names = [...groups.values()].map((rows) => String(rows[0].fullName));
+	if (!names.length) {
+		console.error("✗ read no indexed repos; nothing was checked");
+		process.exitCode = 1;
+		return;
+	}
+	console.log(`${names.length} indexed repos to check`);
+
+	const outcomes = await pool(names, 6, (n) =>
+		check(
+			n,
+			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
+		),
+	);
+	const now = new Date().toISOString();
+	const unchecked = outcomes.filter((o) => o.state === "could-not-check");
+	const writes: Array<{
+		id: string;
+		repo: string;
+		data: { securityHeld: boolean; securityHold: Record<string, unknown> };
+		change: "HOLD" | "still held" | "RELEASE";
+	}> = [];
+	for (const o of outcomes) {
+		if (o.state !== "checked") continue;
+		for (const r of groups.get(o.repo.toLowerCase()) ?? []) {
+			const repo = String(r.fullName);
+			if (shouldHold(o.indicators)) {
+				const heldAt =
+					r.securityHeld && r.securityHold?.heldAt
+						? r.securityHold.heldAt
+						: now;
+				writes.push({
+					id: r.id,
+					repo,
+					data: {
+						securityHeld: true,
+						securityHold: { indicators: o.indicators, checkedAt: now, heldAt },
+					},
+					change: r.securityHeld ? "still held" : "HOLD",
+				});
+			} else if (r.securityHeld) {
+				writes.push({
+					id: r.id,
+					repo,
+					data: {
+						securityHeld: false,
+						securityHold: {
+							indicators: [],
+							checkedAt: now,
+							releasedAt: now,
+							heldAt: r.securityHold?.heldAt ?? null,
+						},
+					},
+					change: "RELEASE",
+				});
+			}
+		}
+	}
+	for (const w of writes) {
+		const ind = w.data.securityHold.indicators as Indicator[];
+		console.log(
+			`  ${w.change.padEnd(10)} ${w.repo}${ind.length ? `: ${list(ind)}` : ""}`,
+		);
+	}
+	const count = (c: string) => writes.filter((w) => w.change === c).length;
+	console.log(
+		`\nchecked ${outcomes.length - unchecked.length}, held ${count("HOLD") + count("still held")} (${count("HOLD")} new), released ${count("RELEASE")}, could not check ${unchecked.length}`,
+	);
+	for (const u of unchecked.slice(0, 20))
+		console.log(`  could not check ${u.repo}: ${u.why}`);
+	// More than a tenth unreadable is an instrument failure, not a clean
+	// sweep, in a dry run too. The holds found still get written.
+	if (unchecked.length > outcomes.length / 10) {
+		console.error(
+			`✗ ${unchecked.length} of ${outcomes.length} repos could not be checked`,
+		);
+		process.exitCode = 2;
+	}
+
+	if (!EXECUTE) {
+		console.log(
+			"dry run: nothing written. Re-run with --execute to hold and release.",
+		);
+		return;
+	}
+	let failed = 0;
+	for (const w of writes) {
+		try {
+			await payload.update({
+				collection: "repos",
+				id: w.id,
+				data: w.data,
+				context: CONTEXT,
+			});
+		} catch (e) {
+			failed++;
+			console.error(`  ✗ ${w.repo}: ${(e as Error).message}`);
+		}
+	}
+	// Read back: a hold that did not persist leaves a malicious repo served.
+	const back = await payload.find({
+		collection: "repos",
+		where: { securityHeld: { equals: true } },
+		pagination: false,
+		depth: 0,
+		select: { fullName: true },
+		context: CONTEXT,
+	});
+	const stored = new Set(back.docs.map((d) => String(d.id)));
+	const missing = writes.filter(
+		(w) => w.data.securityHeld && !stored.has(String(w.id)),
+	);
+	if (failed || missing.length) {
+		console.error(
+			`✗ ${failed} write(s) failed; ${missing.length} hold(s) did not persist: ${missing.map((m) => m.repo).join(", ")}`,
+		);
+		process.exitCode = 1;
+	} else
+		console.log(
+			`${writes.length} write(s); ${stored.size} repo row(s) held now`,
+		);
+}
+
+main()
+	.then(() => process.exit(process.exitCode ?? 0))
+	.catch((e) => {
+		console.error("Fatal:", e);
+		process.exit(1);
+	});

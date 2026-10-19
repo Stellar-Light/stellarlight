@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-18",
+		surfaces: ["api"],
+		version: "spec@1.9.81",
+		type: "added",
+		summary:
+			"A repo whose default branch carries malware indicators is now held: it drops out of every read of the repo index, and explainRepo and getRepoTrust serve it with a `security` warning.",
+		detail:
+			"The indicators are the ones a campaign planted in several Stellar Wave repos: a VS Code task that runs when the folder opens, an install hook that runs a hidden script, and a font file that is really JavaScript. Files are read as text and bytes, never run. A check every six hours holds a repo when it finds one and releases it once they are gone, and a read that fails changes nothing. `security: null` means no hold on record, which is not a claim that the repo is safe.",
+	},
+	{
 		date: "2026-10-16",
 		surfaces: ["api"],
 		version: "spec@1.9.80",
