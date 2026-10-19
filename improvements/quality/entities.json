@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-19T13:29:40.055Z",
+ "generatedAt": "2026-10-19T14:54:51.759Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 88,
+   "oldestDays": 89,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -295,11 +295,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 28
+    "count": 23
    },
    {
     "bucket": "8–30d",
-    "count": 31
+    "count": 36
    },
    {
     "bucket": "31–60d",
@@ -9450,18 +9450,18 @@
   ]
  },
  "repos": {
-  "read": 13663,
-  "population": 13663,
+  "read": 13662,
+  "population": 13662,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13663,
+  "sampled": 13662,
   "coverage": {
    "curatedIndex": {
-    "repos": 3653,
+    "repos": 3652,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3372,
+    "withCodeDepth": 3371,
     "depthPct": 92
    },
    "tail": {
@@ -9492,13 +9492,13 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5827,
+    "pool": 5826,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 131
    }
   },
   "curatedShape": {
-   "repos": 3653,
+   "repos": 3652,
    "scoreHistogram": [
     {
      "bucket": "0–9",
@@ -9510,7 +9510,7 @@
     },
     {
      "bucket": "20–29",
-     "count": 721
+     "count": 720
     },
     {
      "bucket": "30–39",
@@ -9552,7 +9552,7 @@
     },
     {
      "label": "active",
-     "count": 994
+     "count": 993
     },
     {
      "label": "unknown",
@@ -9607,7 +9607,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11315,
+  "withCodeDepth": 11314,
   "withNotes": 1062,
   "withMainnet": 131,
   "top": [
@@ -11087,13 +11087,13 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 361,
-    "of": 383,
-    "share": 94.3,
+    "missing": 360,
+    "of": 382,
+    "share": 94.2,
     "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5444 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 361,
+    "examplePoolSize": 360,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
@@ -11114,8 +11114,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12601,
-    "of": 13663,
+    "missing": 12600,
+    "of": 13662,
     "share": 92.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11179,7 +11179,7 @@
     "entity": "repo",
     "field": "code depth reading",
     "missing": 2348,
-    "of": 13663,
+    "of": 13662,
     "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
