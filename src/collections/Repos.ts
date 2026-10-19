@@ -56,6 +56,9 @@ export const Repos: CollectionConfig = {
 		// Backstop for a writer whose lookup left out includeSecurityHeld: it
 		// finds no row for a held repo, and creating one would serve the repo
 		// again under a fresh, unheld row. Refuse, loudly.
+		// ponytail: matches by name only; a held repo renamed on GitHub can
+		// come back under its new name until the next sweep holds it (6h at
+		// most). Match on GitHub's repo id if that window matters.
 		beforeChange: [
 			async ({ data, operation, req }) => {
 				if (operation !== "create" || !data?.fullName) return data;
@@ -643,8 +646,11 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
+				// One writer: the repo-security lane sets and clears it, so a
+				// hand-set hold is not silently released by the next sweep.
+				readOnly: true,
 				description:
-					"Held: the default branch carried malware indicators. Kept out of every read but trust and explain, which serve it with a warning.",
+					"Held: the default branch carried malware. Kept out of every read but trust and explain, which serve it with a warning. Set and cleared by the repo-security lane.",
 			},
 		},
 		{
@@ -652,6 +658,7 @@ export const Repos: CollectionConfig = {
 			type: "json",
 			admin: {
 				position: "sidebar",
+				readOnly: true,
 				description:
 					"The indicators found, when the repo was first held and when it was last checked",
 			},

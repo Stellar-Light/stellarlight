@@ -32,9 +32,10 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-      # Root files for 50 repos per GraphQL query (about 280 points a run),
-      # trees only for the few repos stage 1 flags: the Actions token's
-      # 1,000 an hour covers both.
+      # Root files for 50 repos per GraphQL query (about 280 points a run)
+      # and trees only for the few repos stage 1 flags (about 150 calls).
+      # The token's hourly limits are per repository and shared with the
+      # other lanes, so a run that hits them reads as could-not-check.
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4

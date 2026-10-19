@@ -52,6 +52,11 @@ const ROOT_FILES = {
 	pkg: "package.json",
 } as const;
 const REPO_NAME = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+/** No repo to read under this name: deleted, private, or a stored name
+ * GitHub does not know. Could-not-check, but not an instrument failure. */
+const NOT_FOUND = "not found on GitHub under this name";
+const BAD_NAME = "not a GitHub owner/name";
+const NO_SUCH_REPO = new Set([NOT_FOUND, BAD_NAME]);
 
 type File = { path: string; text?: string; bytes?: Uint8Array };
 type Root = { files: File[]; gaps: string[] };
@@ -91,7 +96,7 @@ async function rootFiles(names: string[]): Promise<Map<string, Root>> {
 	const out = new Map<string, Root>();
 	const valid = names.filter((n) => {
 		if (REPO_NAME.test(n)) return true;
-		out.set(n, { files: [], gaps: ["not a GitHub owner/name"] });
+		out.set(n, { files: [], gaps: [BAD_NAME] });
 		return false;
 	});
 	const fields = Object.entries(ROOT_FILES)
@@ -111,44 +116,44 @@ async function rootFiles(names: string[]): Promise<Map<string, Root>> {
 		const body = await graphql(query);
 		batch.forEach((n, k) => {
 			const root: Root = { files: [], gaps: [] };
-			const err = body?.errors?.find((e) => e.path?.[0] === `r${k}`);
+			const errors = body?.errors?.filter((e) => e.path?.[0] === `r${k}`) ?? [];
+			const repo = body?.data?.[`r${k}`];
 			if (!body) root.gaps.push("could not read the root files");
-			// NOT_FOUND: no such repo (deleted or private), so no files.
-			else if (err && err.type !== "NOT_FOUND")
+			else if (errors.some((e) => e.type === "NOT_FOUND"))
+				root.gaps.push(NOT_FOUND);
+			// Any other error, or no data and no error: not read, never clean.
+			else if (errors.length || !repo)
 				root.gaps.push(
-					`could not read the root files (${err.type ?? "error"})`,
+					`could not read the root files (${errors[0]?.type ?? "no data"})`,
 				);
-			for (const [alias, path] of Object.entries(ROOT_FILES)) {
-				const blob = body?.data?.[`r${k}`]?.[alias];
-				if (!blob) continue;
-				if (blob.isTruncated || typeof blob.text !== "string")
-					root.gaps.push(`could not read ${path}`);
-				else root.files.push({ path, text: blob.text });
-			}
+			else
+				for (const [alias, path] of Object.entries(ROOT_FILES)) {
+					const blob = repo[alias];
+					if (!blob) continue;
+					if (blob.isTruncated || typeof blob.text !== "string")
+						root.gaps.push(`could not read ${path}`);
+					else root.files.push({ path, text: blob.text });
+				}
 			out.set(n, root);
 		});
 	}
 	return out;
 }
 
-/** One raw file at the default branch (stage 2): absent (404) reads as no
- * file. A font's magic number sits in its first bytes, so binary reads stop
- * at 64. */
-async function raw(
-	full: string,
-	path: string,
-	binary = false,
-): Promise<Read | null> {
+/** One raw file at the default branch, for a path the tree listed (stage
+ * 2), so a 404 is a failed read, not an absence. A font's magic number sits
+ * in its first bytes, so binary reads stop at 64. */
+async function raw(full: string, path: string, binary = false): Promise<Read> {
+	const url = `https://raw.githubusercontent.com/${full}/HEAD/${path
+		.split("/")
+		.map(encodeURIComponent)
+		.join("/")}`;
 	for (let attempt = 0; attempt < 3; attempt++) {
 		try {
-			const res = await fetch(
-				`https://raw.githubusercontent.com/${full}/HEAD/${path}`,
-				{
-					headers: binary ? { Range: "bytes=0-63" } : undefined,
-					signal: AbortSignal.timeout(20_000),
-				},
-			);
-			if (res.status === 404) return null;
+			const res = await fetch(url, {
+				headers: binary ? { Range: "bytes=0-63" } : undefined,
+				signal: AbortSignal.timeout(20_000),
+			});
 			// A range past the end: the file is empty.
 			if (binary && res.status === 416)
 				return { ok: true, bytes: new Uint8Array(0) };
@@ -199,9 +204,10 @@ async function check(
 ): Promise<Outcome> {
 	const files = [...root.files];
 	let gaps = [...root.gaps];
+	const noRepo = gaps.some((g) => NO_SUCH_REPO.has(g));
 	const deep =
 		held ||
-		gaps.length > 0 ||
+		(gaps.length > 0 && !noRepo) ||
 		files.some((f) => f.path === ROOT_FILES.tasks) ||
 		detectIndicators(files).length > 0;
 	if (deep) {
@@ -222,7 +228,6 @@ async function check(
 			gaps.push(`${todo.length} files to read, more than ${MAX_FILES}`);
 		for (const p of todo.slice(0, MAX_FILES)) {
 			const r = await raw(full, p, FONT_EXT.test(p));
-			if (r === null) continue;
 			if (!r.ok) {
 				gaps.push(`could not read ${p}`);
 				continue;
@@ -320,31 +325,28 @@ async function main() {
 	console.log(
 		`stage 1: root files of ${roots.size} repos, ${[...roots.values()].filter((r) => r.gaps.length).length} not read`,
 	);
-	const outcomes = await pool(names, 6, (n) =>
-		check(
-			n,
-			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
-			roots.get(n) as Root,
-		),
-	);
 	const now = new Date().toISOString();
-	const unchecked = outcomes.filter((o) => o.state === "could-not-check");
-	const writes: Array<{
+	type Write = {
 		id: string;
 		repo: string;
 		data: { securityHeld: boolean; securityHold: Record<string, unknown> };
 		change: "HOLD" | "still held" | "RELEASE";
-	}> = [];
-	for (const o of outcomes) {
-		if (o.state !== "checked") continue;
+	};
+	const writes: Write[] = [];
+	let failed = 0;
+	/** The writes one outcome calls for, applied as soon as it is known, so
+	 * a run that dies later keeps the holds it found. */
+	const settle = async (o: Outcome) => {
+		if (o.state !== "checked") return;
 		for (const r of groups.get(o.repo.toLowerCase()) ?? []) {
 			const repo = String(r.fullName);
+			let w: Write | null = null;
 			if (shouldHold(o.indicators)) {
 				const heldAt =
 					r.securityHeld && r.securityHold?.heldAt
 						? r.securityHold.heldAt
 						: now;
-				writes.push({
+				w = {
 					id: r.id,
 					repo,
 					data: {
@@ -352,9 +354,9 @@ async function main() {
 						securityHold: { indicators: o.indicators, checkedAt: now, heldAt },
 					},
 					change: r.securityHeld ? "still held" : "HOLD",
-				});
-			} else if (r.securityHeld) {
-				writes.push({
+				};
+			} else if (r.securityHeld)
+				w = {
 					id: r.id,
 					repo,
 					data: {
@@ -367,10 +369,34 @@ async function main() {
 						},
 					},
 					change: "RELEASE",
+				};
+			if (!w) continue;
+			writes.push(w);
+			if (!EXECUTE) continue;
+			try {
+				await payload.update({
+					collection: "repos",
+					id: w.id,
+					data: w.data,
+					context: CONTEXT,
 				});
+			} catch (e) {
+				failed++;
+				console.error(`  ✗ ${w.repo}: ${(e as Error).message}`);
 			}
 		}
-	}
+	};
+	const outcomes = await pool(names, 6, async (n) => {
+		const o = await check(
+			n,
+			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
+			roots.get(n) as Root,
+		);
+		await settle(o);
+		return o;
+	});
+	const unchecked = outcomes.filter((o) => o.state === "could-not-check");
+	const notFound = unchecked.filter((o) => NO_SUCH_REPO.has(o.why));
 	for (const w of writes) {
 		const ind = w.data.securityHold.indicators as Indicator[];
 		console.log(
@@ -379,15 +405,19 @@ async function main() {
 	}
 	const count = (c: string) => writes.filter((w) => w.change === c).length;
 	console.log(
-		`\nchecked ${outcomes.length - unchecked.length}, held ${count("HOLD") + count("still held")} (${count("HOLD")} new), released ${count("RELEASE")}, could not check ${unchecked.length}`,
+		`\nchecked ${outcomes.length - unchecked.length}, held ${count("HOLD") + count("still held")} (${count("HOLD")} new), released ${count("RELEASE")}, could not check ${unchecked.length} (${notFound.length} not on GitHub under that name)`,
 	);
-	for (const u of unchecked.slice(0, 20))
+	for (const u of unchecked
+		.filter((o) => !NO_SUCH_REPO.has(o.why))
+		.slice(0, 20))
 		console.log(`  could not check ${u.repo}: ${u.why}`);
 	// More than a tenth unreadable is an instrument failure, not a clean
-	// sweep, in a dry run too. The holds found still get written.
-	if (unchecked.length > outcomes.length / 10) {
+	// sweep, in a dry run too. Repos GitHub has no record of are the data,
+	// not the instrument. The holds found are written all the same.
+	const failedReads = unchecked.length - notFound.length;
+	if (failedReads > outcomes.length / 10) {
 		console.error(
-			`✗ ${unchecked.length} of ${outcomes.length} repos could not be checked`,
+			`✗ ${failedReads} of ${outcomes.length} repos could not be read`,
 		);
 		process.exitCode = 2;
 	}
@@ -397,20 +427,6 @@ async function main() {
 			"dry run: nothing written. Re-run with --execute to hold and release.",
 		);
 		return;
-	}
-	let failed = 0;
-	for (const w of writes) {
-		try {
-			await payload.update({
-				collection: "repos",
-				id: w.id,
-				data: w.data,
-				context: CONTEXT,
-			});
-		} catch (e) {
-			failed++;
-			console.error(`  ✗ ${w.repo}: ${(e as Error).message}`);
-		}
 	}
 	// Read back: a hold that did not persist leaves a malicious repo served.
 	const back = await payload.find({

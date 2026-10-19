@@ -38,7 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"A repo whose default branch carries malware indicators is now held: it drops out of every read of the repo index, and explainRepo and getRepoTrust serve it with a `security` warning.",
 		detail:
-			"The indicators are the ones a campaign planted in several Stellar Wave repos: a VS Code task that runs when the folder opens, an install hook that runs a hidden script, and a font file that is really JavaScript. Files are read as text and bytes, never run. A check every six hours holds a repo when it finds one and releases it once they are gone, and a read that fails changes nothing. `security: null` means no hold on record, which is not a claim that the repo is safe.",
+			"A campaign planted a VS Code task that runs when the folder opens, an install hook that runs a hidden script, and a font file that is really JavaScript in several Stellar Wave repos. A repo is held on that payload: a task or script that runs a font file, or a fake font beside a folder-open task or install hook. Either of those alone is common in honest repos and never holds one. Files are read as text and bytes, never run. A check every six hours holds and releases, and a read that fails never releases a hold. `security: null` means no hold on record, which is not a claim that the repo is safe. Hackathon builds and project links are not checked yet.",
 	},
 	{
 		date: "2026-10-16",
