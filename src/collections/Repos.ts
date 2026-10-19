@@ -646,8 +646,9 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
-				// One writer: the repo-security lane sets and clears it, so a
-				// hand-set hold is not silently released by the next sweep.
+				// One writer: the repo-security lane sets and clears it. A hold
+				// set by hand would be released by the next sweep, so the
+				// admin panel shows it read-only.
 				readOnly: true,
 				description:
 					"Held: the default branch carried malware. Kept out of every read but trust and explain, which serve it with a warning. Set and cleared by the repo-security lane.",

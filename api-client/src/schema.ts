@@ -3186,7 +3186,7 @@ export interface operations {
                             heldAt?: string;
                             /** @description When the check that found them last ran. */
                             checkedAt?: string;
-                            /** @description The warning to relay, naming the files and what not to do. */
+                            /** @description The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`). */
                             note?: string;
                         } | null;
                         /** @description Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
@@ -5542,7 +5542,7 @@ export interface operations {
                                 heldAt?: string;
                                 /** @description When the check that found them last ran. */
                                 checkedAt?: string;
-                                /** @description The warning to relay, naming the files and what not to do. */
+                                /** @description The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`). */
                                 note?: string;
                             } | null;
                             succession?: {

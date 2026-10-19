@@ -205,7 +205,8 @@ const SECURITY_HOLD_SCHEMA = {
 		},
 		note: {
 			type: "string",
-			description: "The warning to relay, naming the files and what not to do.",
+			description:
+				"The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`).",
 		},
 	},
 };
