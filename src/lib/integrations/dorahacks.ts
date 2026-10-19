@@ -258,6 +258,9 @@ export interface DoraHacksSubmission {
 	name: string;
 	description: string | null;
 	githubUrl: string | null;
+	/** Present only when the repo is held for malware: githubUrl is then
+	 * withheld (null) and this says why (src/lib/held-repos.ts). */
+	security?: { held: true; note: string };
 	demoUrl: string | null;
 	videoUrl: string | null;
 	track: string | null;

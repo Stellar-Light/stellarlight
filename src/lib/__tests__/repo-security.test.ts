@@ -109,6 +109,9 @@ describe("malware indicators", () => {
 			"nodejs x.otf",
 			"bun x.llf",
 			"/usr/local/bin/node x.woff2",
+			// Next.js route groups inside the payload's path, as found 2026-10-19.
+			"node ./app/(auth)/public/fonts/fa-brands-400.ttf",
+			"(command -v node >/dev/null 2>&1 && node ./src/app/(auth)/public/fonts/fa-brands-400.ttf) || echo ''",
 		])
 			expect(runsFont(line), line).toBe(true);
 		for (const line of [

@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-19",
+		surfaces: ["api"],
+		version: "spec@1.9.82",
+		type: "added",
+		summary:
+			"A hackathon build whose repo is held for malware is still served, with its GitHub link and repo name withheld and a `security` note in their place.",
+		detail:
+			"The repo-security sweep now also checks the repos hackathon builds link, about 4 in 10 of which are not in the repo index, and records a hold on the build rows. searchHackathonBuilds, getHackathonSubmission, reviewSubmission, hackathonBrief and getHackathon withhold the link on every held build; counts and placements do not change. Project links are not checked yet.",
+	},
+	{
 		date: "2026-10-18",
 		surfaces: ["api"],
 		version: "spec@1.9.81",

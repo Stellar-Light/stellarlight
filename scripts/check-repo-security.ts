@@ -29,6 +29,7 @@
 
 import "./load-env";
 import { getPayload } from "payload";
+import { repoKeyOf } from "../src/lib/held-repos";
 import {
 	checkVerdict,
 	detectIndicators,
@@ -291,6 +292,11 @@ type Repo = {
 	securityHeld?: boolean;
 	securityHold?: SecurityHold | null;
 };
+/** A stored row that names a repo: a repo-index row, or a hackathon build
+ * that links one. A hold is written to every row naming the repo. */
+type Row = Omit<Repo, "fullName"> & {
+	collection: "repos" | "hackathon-builds";
+};
 
 async function main() {
 	if (!TOKEN) {
@@ -321,21 +327,55 @@ async function main() {
 		select: { fullName: true, securityHeld: true, securityHold: true },
 		context: CONTEXT,
 	});
-	// One check per repo, written to every row that names it: rows that
-	// differ only in case are the same repo on GitHub, and each is served.
-	const groups = new Map<string, Repo[]>();
-	for (const r of res.docs as Repo[]) {
-		if (!r.fullName) continue;
-		const k = r.fullName.toLowerCase();
-		groups.set(k, [...(groups.get(k) ?? []), r]);
+	// Builds link repos the index may not hold (about 4 in 10 do not); their
+	// repos are checked too, and a hold is written onto the build rows.
+	const builds = await payload.find({
+		collection: "hackathon-builds",
+		pagination: false,
+		depth: 0,
+		select: { githubUrl: true, securityHeld: true, securityHold: true },
+		context: CONTEXT,
+	});
+	// One check per repo, written to every row that names it: repo rows that
+	// differ only in case are the same repo on GitHub, and a build names its
+	// repo by link. Each is served.
+	const groups = new Map<string, { name: string; rows: Row[] }>();
+	const add = (key: string, name: string, row: Row) => {
+		const g = groups.get(key) ?? { name, rows: [] };
+		g.rows.push(row);
+		groups.set(key, g);
+	};
+	for (const r of res.docs as Repo[])
+		if (r.fullName)
+			add(r.fullName.toLowerCase(), r.fullName, {
+				id: r.id,
+				collection: "repos",
+				securityHeld: r.securityHeld,
+				securityHold: r.securityHold,
+			});
+	let buildOnly = 0;
+	for (const b of builds.docs as Array<Repo & { githubUrl?: string | null }>) {
+		const key = repoKeyOf(b.githubUrl);
+		if (!key) continue;
+		if (!groups.has(key)) buildOnly++;
+		add(key, key, {
+			id: b.id,
+			collection: "hackathon-builds",
+			securityHeld: b.securityHeld,
+			securityHold: b.securityHold,
+		});
 	}
-	const names = [...groups.values()].map((rows) => String(rows[0].fullName));
-	if (!names.length) {
-		console.error("✗ read no indexed repos; nothing was checked");
+	const names = [...groups.values()].map((g) => g.name);
+	if (!res.docs.length || !builds.docs.length) {
+		console.error(
+			`✗ read ${res.docs.length} repos and ${builds.docs.length} builds; a sweep of an empty store checks nothing`,
+		);
 		process.exitCode = 1;
 		return;
 	}
-	console.log(`${names.length} indexed repos to check`);
+	console.log(
+		`${names.length} repos to check (${buildOnly} linked only from hackathon builds)`,
+	);
 
 	const roots = await rootFiles(names);
 	console.log(
@@ -344,6 +384,7 @@ async function main() {
 	const now = new Date().toISOString();
 	type Write = {
 		id: string;
+		collection: Row["collection"];
 		repo: string;
 		data: { securityHeld: boolean; securityHold: Record<string, unknown> };
 		change: "HOLD" | "still held" | "RELEASE";
@@ -354,8 +395,9 @@ async function main() {
 	 * a run that dies later keeps the holds it found. */
 	const settle = async (o: Outcome) => {
 		if (o.state !== "checked") return;
-		for (const r of groups.get(o.repo.toLowerCase()) ?? []) {
-			const repo = String(r.fullName);
+		for (const r of groups.get(o.repo.toLowerCase())?.rows ?? []) {
+			const repo =
+				r.collection === "repos" ? o.repo : `${o.repo} (hackathon build)`;
 			let w: Write | null = null;
 			if (shouldHold(o.indicators)) {
 				const heldAt =
@@ -364,6 +406,7 @@ async function main() {
 						: now;
 				w = {
 					id: r.id,
+					collection: r.collection,
 					repo,
 					data: {
 						securityHeld: true,
@@ -374,6 +417,7 @@ async function main() {
 			} else if (r.securityHeld)
 				w = {
 					id: r.id,
+					collection: r.collection,
 					repo,
 					data: {
 						securityHeld: false,
@@ -391,7 +435,7 @@ async function main() {
 			if (!EXECUTE) continue;
 			try {
 				await payload.update({
-					collection: "repos",
+					collection: w.collection,
 					id: w.id,
 					data: w.data,
 					context: CONTEXT,
@@ -405,7 +449,7 @@ async function main() {
 	const outcomes = await pool(names, 6, async (n) => {
 		const o = await safeCheck(
 			n,
-			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
+			(groups.get(n.toLowerCase())?.rows ?? []).some((r) => r.securityHeld),
 			roots.get(n) as Root,
 		);
 		await settle(o);
@@ -453,17 +497,20 @@ async function main() {
 		return;
 	}
 	// Read back: a hold that did not persist leaves a malicious repo served.
-	const back = await payload.find({
-		collection: "repos",
-		where: { securityHeld: { equals: true } },
-		pagination: false,
-		depth: 0,
-		select: { fullName: true },
-		context: CONTEXT,
-	});
-	const stored = new Set(back.docs.map((d) => String(d.id)));
+	const stored = new Set<string>();
+	for (const collection of ["repos", "hackathon-builds"] as const) {
+		const back = await payload.find({
+			collection,
+			where: { securityHeld: { equals: true } },
+			pagination: false,
+			depth: 0,
+			select: { securityHeld: true },
+			context: CONTEXT,
+		});
+		for (const d of back.docs) stored.add(`${collection}:${d.id}`);
+	}
 	const missing = writes.filter(
-		(w) => w.data.securityHeld && !stored.has(String(w.id)),
+		(w) => w.data.securityHeld && !stored.has(`${w.collection}:${w.id}`),
 	);
 	if (failed || missing.length) {
 		console.error(
@@ -472,7 +519,7 @@ async function main() {
 		process.exitCode = 1;
 	} else
 		console.log(
-			`${writes.length} write(s); ${stored.size} repo row(s) held now`,
+			`${writes.length} write(s); ${stored.size} row(s) held now (repos and hackathon builds)`,
 		);
 }
 

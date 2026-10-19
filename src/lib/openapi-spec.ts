@@ -177,11 +177,23 @@ const TYPE_COVERAGE_PROPS = {
  * (the build was read live from DoraHacks), which is not "no project". */
 /** A malware hold on a repo (src/lib/repo-security.ts), served by the two
  * operations that name a repo; every other read leaves a held repo out. */
+/** A hackathon build whose repo is held for malware (src/lib/held-repos.ts):
+ * the build is still served, its link withheld. */
+const BUILD_HOLD_SCHEMA = {
+	type: "object",
+	description:
+		"Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe.",
+	properties: {
+		held: { type: "boolean" },
+		note: { type: "string" },
+	},
+};
+
 const SECURITY_HOLD_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe.",
+		"A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. A hackathon build linking it is still served with the link withheld (its own `security`); project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe.",
 	properties: {
 		held: { type: "boolean" },
 		indicators: {
@@ -602,8 +614,9 @@ const BUILD_DETAIL_SCHEMA = {
 			type: "string",
 			nullable: true,
 			description:
-				"owner/name from the GitHub link; null for an account or org link.",
+				"owner/name from the GitHub link; null for an account or org link, or when the repo is held (see `security`).",
 		},
+		security: BUILD_HOLD_SCHEMA,
 		project: BUILD_PROJECT_SCHEMA,
 		stack: {
 			type: "array",
@@ -3539,6 +3552,7 @@ export const spec: OpenAPISpec = {
 													url: { type: "string", nullable: true },
 													demoUrl: { type: "string", nullable: true },
 													githubUrl: { type: "string", nullable: true },
+													security: BUILD_HOLD_SCHEMA,
 													hackathon: { type: "string" },
 													hackathonSlug: {
 														type: "string",
@@ -5753,6 +5767,7 @@ export const spec: OpenAPISpec = {
 															isWinner: { type: "boolean" },
 															placement: { type: "string", nullable: true },
 															githubUrl: { type: "string", nullable: true },
+															security: BUILD_HOLD_SCHEMA,
 															url: { type: "string", nullable: true },
 															project: BUILD_PROJECT_SCHEMA,
 														},

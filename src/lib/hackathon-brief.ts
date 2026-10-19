@@ -22,6 +22,7 @@ import {
 	type IndexedBuild,
 	searchHackathonBuilds,
 } from "./hackathon-builds";
+import { heldSecurity } from "./held-repos";
 import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
 import { buildTrustReport, type TrustReport } from "./trust-report";
 
@@ -123,6 +124,8 @@ export interface HackathonBrief {
 		isWinner: boolean;
 		placement: string | null;
 		githubUrl: string | null;
+		/** Present only when the repo is held for malware; githubUrl is null. */
+		security?: { held: true; note: string };
 		url: string | null;
 		/** Present only when checked: the directory project listing this build's exact repo, or null. */
 		project?: { slug: string; name: string } | null;
@@ -262,6 +265,7 @@ export async function buildHackathonBrief(
 		isWinner: b.isWinner,
 		placement: b.hackathonPlacement ?? null,
 		githubUrl: b.githubUrl ?? null,
+		...heldSecurity(b),
 		url: b.url ?? null,
 		...(b.project !== undefined ? { project: b.project } : {}),
 	}));

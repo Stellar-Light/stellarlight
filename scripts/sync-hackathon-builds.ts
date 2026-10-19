@@ -406,6 +406,9 @@ async function main() {
 		collection: "hackathon-builds",
 		pagination: false,
 		depth: 0,
+		// The real githubUrl, held repo or not: the diff and the read-back
+		// compare it (HackathonBuilds afterRead withholds it otherwise).
+		context: { includeSecurityHeld: true },
 	});
 	for (const d of prev.docs as HackathonBuild[])
 		stored.set(d.entryKey ?? entryKeyOf(d.buildId, d.hackathonSlug), d);
@@ -947,6 +950,7 @@ async function main() {
 						where: { entryKey: { in: keys } },
 						limit: keys.length,
 						depth: 0,
+						context: { includeSecurityHeld: true },
 					}),
 				).map((d) => [String(d.entryKey), d]),
 			),
@@ -959,6 +963,7 @@ async function main() {
 					where: { entryKey: { equals: key } },
 					limit: 1,
 					depth: 0,
+					context: { includeSecurityHeld: true },
 				}),
 			)[0] ?? null,
 	);

@@ -3173,7 +3173,7 @@ export interface operations {
                             /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
                             kindBasis?: string;
                         } | null;
-                        /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
+                        /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. A hackathon build linking it is still served with the link withheld (its own `security`); project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
                         security?: {
                             held?: boolean;
                             indicators?: {
@@ -3614,6 +3614,11 @@ export interface operations {
                             url?: string | null;
                             demoUrl?: string | null;
                             githubUrl?: string | null;
+                            /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
+                            security?: {
+                                held?: boolean;
+                                note?: string;
+                            };
                             hackathon?: string;
                             /** @description The event's slug, the one getHackathons lists and getHackathon opens. */
                             hackathonSlug?: string;
@@ -3729,8 +3734,13 @@ export interface operations {
                                 demo?: string | null;
                                 video?: string | null;
                             };
-                            /** @description owner/name from the GitHub link; null for an account or org link. */
+                            /** @description owner/name from the GitHub link; null for an account or org link, or when the repo is held (see `security`). */
                             repo?: string | null;
+                            /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
+                            security?: {
+                                held?: boolean;
+                                note?: string;
+                            };
                             /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
@@ -4056,8 +4066,13 @@ export interface operations {
                                     demo?: string | null;
                                     video?: string | null;
                                 };
-                                /** @description owner/name from the GitHub link; null for an account or org link. */
+                                /** @description owner/name from the GitHub link; null for an account or org link, or when the repo is held (see `security`). */
                                 repo?: string | null;
+                                /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
+                                security?: {
+                                    held?: boolean;
+                                    note?: string;
+                                };
                                 /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
@@ -5179,6 +5194,11 @@ export interface operations {
                                 isWinner?: boolean;
                                 placement?: string | null;
                                 githubUrl?: string | null;
+                                /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
+                                security?: {
+                                    held?: boolean;
+                                    note?: string;
+                                };
                                 url?: string | null;
                                 /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
@@ -5529,7 +5549,7 @@ export interface operations {
                                 lastCommitAt?: string;
                                 daysOfDrift?: number;
                             } | null;
-                            /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. Hackathon builds and project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
+                            /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. A hackathon build linking it is still served with the link withheld (its own `security`); project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
                             security?: {
                                 held?: boolean;
                                 indicators?: {

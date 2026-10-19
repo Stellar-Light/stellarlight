@@ -140,14 +140,21 @@ function segments(line: string): string[] {
 	const out: string[] = [];
 	let cur = "";
 	let quote = "";
-	for (const c of line) {
+	for (let i = 0; i < line.length; i++) {
+		const c = line[i];
 		if (quote) {
 			cur += c;
 			if (c === quote) quote = "";
 		} else if (c === '"' || c === "'") {
 			quote = c;
 			cur += c;
-		} else if (";|&()\n".includes(c)) {
+		} else if (
+			";|&\n".includes(c) ||
+			// A subshell's parentheses, not a path's: Next.js route groups put
+			// "(auth)" inside the paths the payload hides in.
+			(c === "(" && (i === 0 || /[\s;&|(]/.test(line[i - 1]))) ||
+			(c === ")" && (i === line.length - 1 || /[\s;&|)]/.test(line[i + 1])))
+		) {
 			out.push(cur);
 			cur = "";
 		} else cur += c;

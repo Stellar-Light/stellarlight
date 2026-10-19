@@ -1538,6 +1538,22 @@ export interface HackathonBuild {
 	 * When the lane last read the repo's activity, ISO. Empty = never read.
 	 */
 	activityCheckedAt?: string | null;
+	/**
+	 * The repo this build links carried malware when last checked: its link is withheld from every read. Set and cleared by the repo-security lane.
+	 */
+	securityHeld?: boolean | null;
+	/**
+	 * The indicators found, when the repo was first held and when it was last checked
+	 */
+	securityHold?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	firstSeenAt: string;
 	/**
 	 * Last time the event's DoraHacks roster listed this build, ISO
@@ -3721,6 +3737,8 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	repoLastCommitAt?: T;
 	repoArchived?: T;
 	activityCheckedAt?: T;
+	securityHeld?: T;
+	securityHold?: T;
 	firstSeenAt?: T;
 	lastSeenAt?: T;
 	updatedAt?: T;
